@@ -56,13 +56,8 @@ import 'package:buildsmart/data/phaseb_seeds.dart' show kStockDemo;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/repositories/stock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart'
-    show HaulType, StoreInfo, kHaulTypes, kStores;
-import 'package:buildsmart/logic/manager_dashboard.dart'
-    show
-        ManagerStore,
-        kManagerCatalogCategories,
-        kManagerStores,
-        managerAnalytics;
+    show HaulType, StoreInfo, kHaulTypes;
+import 'package:buildsmart/logic/manager_dashboard.dart' show ManagerStore;
 
 /// One inventory row as the cache base stores it — the model `T` of the
 /// `FirestoreCachedRepo<StockItem>`. `id` is the surrogate `STK-##` doc-id (the
@@ -200,34 +195,44 @@ class FirebaseStockRepository extends FirestoreCachedRepo<StockItem>
     upsert(cur.withLocation(next), prepend: false); // replace-by-id, in place
   }
 
-  // ── const-backed analytics reads (STATIC — byte-identical to local) ─────────
-  // NOT Firestore: these mirror the manager analytics + supplier seeds exactly
-  // as `LocalStockRepository` does (same const expressions), so every dashboard
-  // tile / store row / haulage type stays byte-for-byte identical.
+  // ── analytics DATA reads (no real source yet → EMPTY/ZERO on the live backend)
+  // On the live Firebase backend there is NO real inventory/store source for
+  // these aggregates, so the const demo figures (202 products, 148 accessories,
+  // the per-category counts, the three seed stores) MUST NOT be shown to a real
+  // signed-in user as if they were their own numbers. This repo runs ONLY when
+  // the backend is ON (the provider routes here only when `useFirebaseBackend`
+  // is true), so returning empty/zero unconditionally is correct — a real user
+  // sees an honest empty dashboard, not invented counts or fake supplier stores.
+  //
+  // `categoryCounts` is gated too: it is a map of category→FABRICATED count
+  // (e.g. 148), not a static reference type. `haulTypes`, by contrast, is KEPT:
+  // it is a STATIC reference TYPE list (the courier vehicle kinds small/van/
+  // truck + their surcharge — config-like options, not a count or inventory of
+  // the user's data), so it is honest to surface on the live backend.
 
   @override
-  int totalProducts() => managerAnalytics.totalProducts;
+  int totalProducts() => 0;
 
   @override
-  int catalogCount() => managerAnalytics.catalogCount;
+  int catalogCount() => 0;
 
   @override
-  int accessoryCount() => managerAnalytics.accessoryCount;
+  int accessoryCount() => 0;
 
   @override
-  int availableCount() => managerAnalytics.availableCount;
+  int availableCount() => 0;
 
   @override
-  Map<String, int> categoryCounts() => kManagerCatalogCategories;
+  Map<String, int> categoryCounts() => const {};
 
   @override
-  List<ManagerStore> stores() => kManagerStores;
+  List<ManagerStore> stores() => const [];
 
   @override
-  int activeStores() => managerAnalytics.activeStores;
+  int activeStores() => 0;
 
   @override
-  List<StoreInfo> supplierStores() => kStores;
+  List<StoreInfo> supplierStores() => const [];
 
   @override
   List<HaulType> haulTypes() => kHaulTypes;

@@ -38,9 +38,6 @@ dependencies:
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3
 
-  # microphone permission (used by speech_to_text)
-  permission_handler: ^11.3.1
-
   # native/web share sheet — cart 'שתף' (falls back to the Web Share API on web)
   share_plus: ^10.0.0
 
@@ -112,6 +109,11 @@ dev_dependencies:
   # strictest analyzer preset
   very_good_analysis: ^7.0.0
 
+  # #4 — regenerates the Android (legacy + adaptive) + iOS launcher icons from
+  # the brand source (web/icons), replacing the default Flutter logo. Generate
+  # with `dart run flutter_launcher_icons`.
+  flutter_launcher_icons: ^0.14.1
+
 flutter:
   uses-material-design: true
   generate: true
@@ -134,3 +136,14 @@ flutter:
           weight: 700
         - asset: assets/fonts/Heebo-ExtraBold.ttf
           weight: 800
+
+# #4 — launcher-icon generation (run `dart run flutter_launcher_icons`). Source =
+# the brand orange-helmet icon already shipped for web/PWA. Also adds the Android
+# adaptive icon (mipmap-anydpi-v26 + brand background) the legacy-only icon lacked.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "web/icons/Icon-512.png"
+  adaptive_icon_background: "#FF7A18"
+  adaptive_icon_foreground: "web/icons/Icon-maskable-512.png"
+  remove_alpha_ios: true

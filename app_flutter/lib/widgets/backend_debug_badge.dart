@@ -187,7 +187,13 @@ class _BackendDebugBadgeState extends State<BackendDebugBadge> {
     // STEP 4 — orders CREATE dry-run: a REAL own order at the flow head, then
     // cleaned up. A rules denial surfaces here as permission-denied — the smoking
     // gun when a contractor's placed order never reaches Firestore.
-    final probeId = 'BS-diag-$uid';
+    // ⚠️ UNIQUE id per run (millisecond timestamp): so the `set` is ALWAYS a
+    // fresh CREATE, never an UPDATE. A fixed `BS-diag-$uid` re-ran on a 2nd+ probe
+    // hit an already-existing doc ⇒ the op became an UPDATE ⇒ the orders UPDATE
+    // rule demands a role ⇒ a role-less contractor got a FALSE permission-denied
+    // (a diagnostic artifact — orders genuinely create fine; the cleanup delete
+    // below is best-effort, so a stale doc never makes the next run an update).
+    final probeId = 'BS-diag-$uid-${DateTime.now().millisecondsSinceEpoch}';
     steps.add(await _runStep('4 יצירת הזמנה (בדיקה)', () async {
       final ref = db.collection('orders').doc(probeId);
       await ref.set({

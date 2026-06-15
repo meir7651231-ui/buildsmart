@@ -18,7 +18,10 @@
 // throws `unavailable` → "שירות ההתחברות אינו זמין כרגע" (the entry row is
 // hidden in that case anyway — see profile_screen).
 
+import 'dart:async';
+
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +37,12 @@ String hebrewAuthError(String code) => switch (code) {
       'session-expired' =>
         'תוקף הקוד פג — שלח קוד חדש',
       'too-many-requests' => 'יותר מדי ניסיונות — נסה שוב מאוחר יותר',
-      'user-not-found' => 'לא נמצא חשבון עם פרטים אלה',
+      // P2 — account-enumeration: user-not-found is folded into the SAME generic
+      // credential error as a wrong password, so the sign-in form can't be used
+      // to probe which emails are registered. (The full server-side fix is the
+      // Firebase console "Email Enumeration Protection" toggle — owner action;
+      // this is client defense-in-depth that helps even without it.)
+      'user-not-found' ||
       'wrong-password' ||
       'invalid-credential' =>
         'אימייל או סיסמה שגויים',
@@ -104,6 +112,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   final TextEditingController _code = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  // P2 — optional full name captured on the "צור חשבון" path (mirrored to the
+  // local profile → users/{uid}.displayName by the welcome flow's post-auth step).
+  final TextEditingController _name = TextEditingController();
 
   _LoginStep _step = _LoginStep.phone;
   bool _busy = false;
@@ -112,6 +123,18 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   /// the default — today's "כניסה עם אימייל") and CREATE-account (true, the new
   /// "צור חשבון" → `createUserWithEmailPassword`). Ephemeral UI state.
   bool _emailCreateMode = false;
+  // #3 — true while a "צור חשבון" is in flight, so the auth-stream listener shows
+  // the email-verification notice (a verification mail was sent best-effort by
+  // createUserWithEmailPassword) instead of the generic sign-in toast.
+  bool _justCreated = false;
+  // P2 — show/hide the password (the eye toggle in the email pane). Ephemeral.
+  bool _showPassword = false;
+  // P2 — when the current SMS code was sent, for the resend cooldown + the
+  // code-validity (expiry) pre-check. Timestamp-driven (no Timer) so the OTP
+  // widget tests' pumpAndSettle keep settling.
+  DateTime? _otpSentAt;
+  static const int _kResendCooldownSecs = 30;
+  static const int _kCodeValiditySecs = 120;
 
   /// The verificationId [AuthGateway.sendOtp] resolved with — consumed by the
   /// code step. Null until a code was sent.
@@ -126,6 +149,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     _code.dispose();
     _email.dispose();
     _password.dispose();
+    _name.dispose();
     super.dispose();
   }
 
@@ -145,6 +169,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         _verificationId = id;
         _sentTo = phone;
         _step = _LoginStep.code;
+        _otpSentAt = DateTime.now(); // P2 — start the resend cooldown / expiry
         _busy = false;
       });
       showToast(
@@ -158,11 +183,35 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     }
   }
 
+  /// P2 — resend the SMS code, but enforce a [_kResendCooldownSecs] cooldown so
+  /// a user can't hammer the (rate-limited, billable) send. Within the window it
+  /// toasts the precise remaining seconds instead of re-sending.
+  void _onResendTapped() {
+    final sentAt = _otpSentAt;
+    if (sentAt != null) {
+      final remaining =
+          _kResendCooldownSecs - DateTime.now().difference(sentAt).inSeconds;
+      if (remaining > 0) {
+        showToast(context, 'אפשר לשלוח קוד חדש בעוד $remaining שניות');
+        return;
+      }
+    }
+    unawaited(_sendOtp(resend: true));
+  }
+
   Future<void> _confirmCode() async {
     final code = _code.text.trim();
     final verificationId = _verificationId;
     if (code.length < 6 || verificationId == null) {
       showToast(context, 'הזן את הקוד בן 6 הספרות שקיבלת ב-SMS');
+      return;
+    }
+    // P2 — expiry pre-check: skip the round-trip if the code is already past its
+    // validity window (the server also returns session-expired as a backstop).
+    final sentAt = _otpSentAt;
+    if (sentAt != null &&
+        DateTime.now().difference(sentAt).inSeconds > _kCodeValiditySecs) {
+      showToast(context, 'תוקף הקוד פג — שלחו קוד חדש');
       return;
     }
     setState(() => _busy = true);
@@ -210,17 +259,66 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       showToast(context, 'הזן אימייל וסיסמה');
       return;
     }
-    setState(() => _busy = true);
+    // P2 — client-side length pre-check (Firebase's floor is 6) so the user gets
+    // instant feedback without a round-trip; the server weak-password error is
+    // still mapped as a backstop.
+    if (password.length < 6) {
+      showToast(context, 'הסיסמה חייבת לפחות 6 תווים');
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _justCreated = true; // #3 — show the verification notice on success
+    });
     try {
       await ref
           .read(authStateProvider.notifier)
           .createUserWithEmailPassword(email, password);
+      // P2 — capture the optional name into the local profile so the app knows
+      // the user; the welcome flow's post-auth step mirrors it to
+      // users/{uid}.displayName (read by computeCredit / the push sender name).
+      final name = _name.text.trim();
+      if (name.isNotEmpty) {
+        ref.read(userProfileProvider.notifier).register(
+              name: name,
+              contact: ref.read(userProfileProvider).contact,
+            );
+      }
       if (mounted) setState(() => _busy = false);
     } on AuthGatewayException catch (e) {
+      _justCreated = false;
       _fail(hebrewAuthError(e.code));
     } on Object catch (_) {
+      _justCreated = false;
       _fail(hebrewAuthError('unknown'));
     }
+  }
+
+  /// "שכחתי סיסמה" — send a reset email. The SAME neutral success toast shows
+  /// whether or not the email is registered (no account enumeration — a
+  /// `user-not-found` is folded into success); only real failures
+  /// (invalid-email / network / too-many) surface in Hebrew. Needs an email.
+  Future<void> _resetPassword() async {
+    final email = _email.text.trim();
+    if (email.isEmpty) {
+      showToast(context, 'הזן אימייל לאיפוס הסיסמה');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await ref.read(authStateProvider.notifier).resetPassword(email);
+    } on AuthGatewayException catch (e) {
+      if (e.code != 'user-not-found') {
+        _fail(hebrewAuthError(e.code));
+        return;
+      }
+    } on Object catch (_) {
+      _fail(hebrewAuthError('unknown'));
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    showToast(context, 'אם קיים חשבון — נשלח אליו מייל לאיפוס הסיסמה');
   }
 
   void _fail(String message) {
@@ -238,7 +336,15 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     // ScaffoldMessenger is resolved from a still-mounted context.
     ref.listen<AuthSnapshot>(authStateProvider, (prev, next) {
       if (next.user != null && prev?.user == null) {
-        showToast(context, 'התחברת בהצלחה ✓');
+        // #3 — a fresh account was just sent a verification email (best-effort,
+        // by createUserWithEmailPassword); prompt the user to confirm it rather
+        // than the generic sign-in toast.
+        showToast(
+          context,
+          _justCreated
+              ? '✓ החשבון נוצר — שלחנו מייל אימות לכתובת, אַשרו אותו'
+              : 'התחברת בהצלחה ✓',
+        );
         Navigator.of(context).maybePop();
       }
     });
@@ -278,7 +384,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             Text(
               switch (_step) {
                 _LoginStep.phone => 'נשלח לך קוד אימות חד-פעמי ב-SMS',
-                _LoginStep.code => 'הקוד נשלח אל $_sentTo',
+                _LoginStep.code => 'הקוד נשלח אל $_sentTo · תקף לכ-2 דקות',
                 _LoginStep.email => _emailCreateMode
                     ? 'יצירת חשבון חדש עם אימייל וסיסמה'
                     : 'כניסה עם אימייל וסיסמה',
@@ -336,7 +442,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextButton(
-              onPressed: _busy ? null : () => _sendOtp(resend: true),
+              onPressed: _busy ? null : _onResendTapped,
               child: const Text(
                 'שליחת קוד חדש',
                 style: TextStyle(
@@ -365,6 +471,15 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       ];
 
   List<Widget> _emailPane() => [
+        // P2 — on the create path, capture an optional full name up front.
+        if (_emailCreateMode) ...[
+          _field(
+            controller: _name,
+            hint: 'שם מלא (לא חובה)',
+            icon: Icons.person_outline,
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
         _field(
           controller: _email,
           hint: 'אימייל',
@@ -376,7 +491,18 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           controller: _password,
           hint: _emailCreateMode ? 'סיסמה (6+ תווים)' : 'סיסמה',
           icon: Icons.lock_outline,
-          obscure: true,
+          obscure: !_showPassword,
+          // P2 — show/hide eye toggle.
+          suffix: IconButton(
+            onPressed:
+                _busy ? null : () => setState(() => _showPassword = !_showPassword),
+            icon: Icon(
+              _showPassword ? Icons.visibility_off : Icons.visibility,
+              color: const Color(0xFFBBBBBB),
+              size: 20,
+            ),
+            tooltip: _showPassword ? 'הסתר סיסמה' : 'הצג סיסמה',
+          ),
         ),
         const SizedBox(height: BsTokens.space3),
         // server-gate-auth — the primary action follows the mode: sign-in
@@ -401,6 +527,20 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             ),
           ),
         ),
+        // "שכחתי סיסמה" — only in sign-in mode (a create flow has no password to
+        // reset yet). Sends a reset email via _resetPassword (no enumeration).
+        if (!_emailCreateMode)
+          TextButton(
+            onPressed: _busy ? null : _resetPassword,
+            child: const Text(
+              'שכחתי סיסמה',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
         TextButton(
           onPressed: _busy
               ? null
@@ -456,6 +596,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     TextInputType? keyboardType,
     int? maxLength,
     bool obscure = false,
+    Widget? suffix,
   }) {
     return TextField(
       controller: controller,
@@ -473,6 +614,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         filled: true,
         fillColor: const Color(0xFFF5F5F7),
         prefixIcon: Icon(icon, color: const Color(0xFFBBBBBB), size: 20),
+        suffixIcon: suffix,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,

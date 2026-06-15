@@ -23,8 +23,11 @@
 //   • an optimistic credit-affecting write is visible SYNCHRONOUSLY + writes through;
 //   • a write FAILURE corrupts neither cache nor throws;
 //   • first-empty seeds the remote from the seed;
-//   • sort is spend-desc; byName/creditLimit behave;
-//   • the provider resolves to the LOCAL impl when Firebase is uninitialised.
+//   • sort is spend-desc; byName behaves; creditLimit returns ZERO on the live
+//     backend — V1/P2: the fabricated hash ceiling is not shown to a real
+//     signed-in user (the real path is computeCredit, unchanged);
+//   • the provider resolves to the LOCAL impl when Firebase is uninitialised
+//     (where creditLimit keeps its real deterministic local value).
 
 import 'dart:async';
 
@@ -182,7 +185,7 @@ void main() {
       expect(r.all().map((c) => c.name).toList(), ['דוד לוי']); // bad skipped
     });
 
-    test('byName + creditLimit behave (creditLimit is the deterministic ceiling)',
+    test('byName behaves; creditLimit is ZERO on the backend (no fake ceiling)',
         () {
       final src = _FakeSource();
       final r = repo(src);
@@ -192,9 +195,13 @@ void main() {
       final top = r.all().first;
       expect(r.byName(top.name)?.name, top.name);
       expect(r.byName('לא-קיים'), isNull);
-      // creditLimit() delegates to the pure contractorCredit — identical to local.
-      expect(r.creditLimit('יוסי כהן'), contractorCredit('יוסי כהן'));
-      expect(r.creditLimit('יוסי כהן'), greaterThanOrEqualTo(30000));
+      // V1/P2: the sync creditLimit() ceiling is a FABRICATED hash, so on the
+      // live backend it returns 0 — a real signed-in user is not shown an
+      // invented credit line. (The REAL path is computeCredit, left unchanged;
+      // contractorCredit stays its fallback there — referenced below so the
+      // import remains exercised.)
+      expect(r.creditLimit('יוסי כהן'), 0);
+      expect(contractorCredit('יוסי כהן'), greaterThanOrEqualTo(30000));
     });
   });
 

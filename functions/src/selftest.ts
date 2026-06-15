@@ -16,6 +16,7 @@ import {
   rolesAllowedFor,
   roleMayStep,
 } from "./orderFlow";
+import { mayReviewRoleRequest } from "./reviewRoleRequest";
 
 let passed = 0;
 let failed = 0;
@@ -88,6 +89,39 @@ check(
   "owner map: courier"
 );
 check(rolesAllowedFor("new", "ready").length === 0, "no roles for a jump");
+
+// ── #6 role-request approval matrix (reviewRoleRequest authz) ────────────────
+// worker→contractor · courier→store · store/contractor→manager · admin=any.
+check(mayReviewRoleRequest(["contractor"], "worker"), "contractor reviews worker");
+check(mayReviewRoleRequest(["store"], "courier"), "store reviews courier");
+check(mayReviewRoleRequest(["manager"], "store"), "manager reviews store");
+check(mayReviewRoleRequest(["manager"], "contractor"), "manager reviews contractor");
+check(mayReviewRoleRequest(["admin"], "worker"), "admin reviews anything (worker)");
+check(mayReviewRoleRequest(["admin"], "store"), "admin reviews anything (store)");
+check(
+  mayReviewRoleRequest(["worker", "courier"], "worker") === false,
+  "worker/courier cannot review a worker"
+);
+check(
+  mayReviewRoleRequest(["contractor"], "courier") === false,
+  "contractor cannot review a courier (store does)"
+);
+check(
+  mayReviewRoleRequest(["store"], "worker") === false,
+  "store cannot review a worker (contractor does)"
+);
+check(
+  mayReviewRoleRequest(["manager"], "worker") === false,
+  "manager does NOT review a worker (contractor does)"
+);
+check(
+  mayReviewRoleRequest([], "worker") === false,
+  "a role-less caller reviews nothing"
+);
+check(
+  mayReviewRoleRequest(["contractor"], "manager") === false,
+  "manager is not a requestable/reviewable role"
+);
 
 // ── verdict ──────────────────────────────────────────────────────────────────
 console.log(`selftest: ${passed}/${passed + failed} PASS`);

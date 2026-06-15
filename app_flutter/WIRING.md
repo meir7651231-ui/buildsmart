@@ -8,6 +8,89 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth #6 inc.3 (approval inbox) — #6 COMPLETE:** the profile screen shows
+> "📋 בקשות תפקיד" when the caller's CLAIM roles approve a tier (`approvableRolesForClaims`:
+> contractor↞worker, store↞courier, manager↞store+contractor, admin=all). The inbox streams
+> `roleRequests` SCOPED to that tier (`pendingRoleRequestsProvider` — matches the rules'
+> `canReview`, so it never issues a query the rule would deny) and approve/deny calls the
+> `reviewRoleRequest` callable via the `RoleReviewer` seam (a typedef'd function — testable, no
+> AuthGateway churn). A decision flips the doc out of the pending query, self-emptying the list.
+> Full #6 = inc.1 (server matrix) + inc.2 (request) + inc.3 (inbox).
+
+> **2026-06-15 — auth #6 inc.2 (role-request UI):** the profile screen (signed-in) gains a
+> "🪪 בקשת תפקיד" row → a bottom sheet listing the four requestable operational roles (each
+> stating WHO approves it per the matrix). Picking one writes `roleRequests/{uid}`
+> (status:pending, displayName/phone from the local profile) via the `roleRequestWriterProvider`
+> seam (null Firebase-free → submit is a safe no-op). The server `reviewRoleRequest` (inc.1)
+> approves/denies; the approver inbox is inc.3. `role_request_test` +2.
+
+> **2026-06-15 — auth P2 (displayName on create):** the email "צור חשבון" pane now has an
+> optional "שם מלא" field; on success it `register`s the name into the local profile, which the
+> welcome flow's post-auth step (`_finishAfterAuth`) already mirrors to `users/{uid}.displayName`
+> (read by `computeCredit` + the push sender name). Client-only — no gateway/interface change,
+> no fake churn. `login_sheet_test` +1.
+
+> **2026-06-15 — auth P2 (OTP resend cooldown + expiry):** the phone code step now
+> enforces a 30s resend cooldown — re-tapping "שליחת קוד חדש" inside the window toasts the
+> remaining seconds instead of re-hitting the rate-limited/billable send — and pre-checks the
+> ~2-min code validity before the round-trip (the server session-expired stays the backstop);
+> the code subtitle states the validity window. Timestamp-driven (no Timer) so the OTP widget
+> tests' pumpAndSettle keep settling. `login_sheet_test` +1 (cooldown blocks the second send).
+
+> **2026-06-15 — auth P2 (login polish):** account-enumeration closed on the
+> sign-in path — `hebrewAuthError` folds `user-not-found` into the SAME generic
+> "אימייל או סיסמה שגויים" as a wrong password (was a distinct "לא נמצא חשבון",
+> which let the form probe which emails are registered; the full server-side fix
+> is the Firebase console "Email Enumeration Protection" toggle — owner). Plus a
+> show/hide-password eye toggle on the email pane and a client-side ≥6-char
+> pre-check on "צור חשבון" (instant feedback; the server weak-password error is
+> still mapped as a backstop). `login_sheet_test` +2 (enumeration unit + length).
+
+> **2026-06-15 — auth #4 (account-deletion server cleanup, gen2 callable):** the
+> client `deleteAccount()` used Firebase Auth `user.delete()` which removes ONLY the
+> Auth record — the user's `users/{uid}` profile (name/phone/email/fcmToken) +
+> `diag/{uid}` probe were left orphaned in Firestore (GDPR right-to-erasure / Apple
+> gap). Now `FirebaseAuthGateway.deleteAccount` calls the server `deleteAccount`
+> CALLABLE (functions/deleteAccount.ts), which purges those uid-keyed personal docs
+> AND deletes the Auth record via the Admin SDK (no recent-login needed), writes an
+> `auditLog` entry, then the client signs out locally. **Callable, not an Auth
+> onDelete trigger:** Auth has no gen2 deletion hook and a v1/gen1 trigger needs an
+> App Engine instance this project lacks — it 403s and ABORTS `firebase deploy
+> --only functions`, blocking the (live) gen2 functions too; a callable stays gen2.
+> SCOPE: only uid-keyed (single-owner) docs; multi-party records
+> (orders/chat/customers/projects/tasks) are RETAINED — anonymizing the uid out of
+> shared docs is a heavier follow-up (functions/README TODO).
+
+> **2026-06-15 — auth #3 (email-verification notice):** the "צור חשבון" success path
+> now toasts that a verification email was sent ("✓ החשבון נוצר — שלחנו מייל אימות…")
+> instead of the generic sign-in toast — `sendEmailVerification` is no longer
+> silent. (Hard `emailVerified` enforcement deferred — a backend-ON-only product
+> decision; the store ships demo.)
+
+> **2026-06-15 — auth #1 (auth-gate on the real backend):** `OnboardingGate` now
+> routes a signed-OUT user to the welcome/login flow when `useFirebaseBackend` is
+> ON (otherwise their writes are silently rules-denied — the orders/chat-sync
+> class of bug); sign-in rebuilds to HomeShell, logout re-gates (the gate watches
+> `authStateProvider`). DEMO build (flag OFF) + the whole test suite byte-identical.
+
+> **2026-06-15 — auth #2 (forgot-password):** the login sheet gains a "שכחתי סיסמה"
+> link (sign-in mode only) → `AuthStateNotifier.resetPassword` →
+> `FirebaseAuth.sendPasswordResetEmail`. A neutral success toast shows regardless
+> of whether the email is registered (no account enumeration) — the recovery path
+> email users previously had none of.
+
+> **2026-06-15 — chat-sync (A14 last-mile, orders analog):** `ensureParticipantUids`
+> now ALWAYS stamps the sender's own uid (the `contractorUid==auth.uid` guarantee)
+> even with no users-directory; the `chatThreads` listen is scoped
+> `where('participantUids', arrayContains: uid)` (gated by `kUidScopedQueries`, like
+> orders); the index + the update rule (empty→self bootstrap) align on
+> `participantUids`. Chats now sync 2-way like orders. Flag OFF = byte-identical.
+
+> **2026-06-15 — launch B1+#6:** data-safety/privacy declarations updated to honestly list
+> Firebase Crashlytics/Analytics collection (B1, `LAUNCH_PACKAGE/`). The manager dashboard's
+> "🔬 בדיקות רגרסיה" section is now `if(kDebugMode)`-gated — **DEV-ONLY**, not reachable by an
+> end user in a shipped release (#6); the panel + `test_harness` stay in code (reversible).
+
 > **v6.13 → v6.16 wiring audits:** see `knowledge/WIRING_AUDIT.md` — six rounds (three fix passes + a deep
 > correctness/perf/a11y pass with adversarial validation). v6.16 corrected the manager express-fee display,
 > aligned contractor stage labels to the canonical map, made the manager customer/order detail sheets read

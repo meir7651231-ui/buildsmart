@@ -2,16 +2,18 @@
 
 Region **`me-west1`** (ת"א — כמו ה-Firestore) לכל הפונקציות; חייב להתאים
 ל-`kAuthFunctionsRegion` באפליקציה. Node 20 · TypeScript strict ·
-firebase-functions **v2**.
+firebase-functions **v2/gen2** (כל הפונקציות — Cloud Run/Eventarc).
 
 | function | סוג | תפקיד |
 |---|---|---|
 | `setRole` | callable | S1.9 — הקצאת תפקיד כ-custom-claim (admin בלבד). **ללא שינוי מה-skeleton.** |
+| `reviewRoleRequest` | callable | #6 — אישור/דחיית בקשת-תפקיד לפי **מטריצה היררכית** (worker→contractor · courier→store · store/contractor→manager · admin=any). באישור כותב claim של התפקיד התפעולי (Admin SDK) ומסמן `roleRequests/{uid}` approved + auditLog. המטריצה (`mayReviewRoleRequest`) טהורה + נבדקת ב-selftest. |
 | `advanceOrderStage` | callable | S8.1 — קידום הזמנה **צעד אחד** ב-`ORDER_FLOW`, עם אכיפת-תפקיד מה-claims. נתיב-הכתיבה המוסמך. |
 | `revertIllegalOrderStageWrite` | trigger (orders/{id} updated) | S8.1 — defense-in-depth: כתיבה ישירה של stage שאינה צעד-קדימה-בודד **מוחזרת לאחור** + auditLog. |
 | `computeCredit` | callable | S8.2 — אשראי-קבלן מחושב-שרת (port מדויק של `contractorCredit`) + used/balance/pct מההזמנות החיות. |
 | `onOrderStageChanged` | trigger (orders/{id} updated) | S8.3/S6.3 — FCM בעברית על מעבר-stage חוקי, לפי `users/{uid}.fcmToken`. |
 | `onChatMessageCreated` | trigger (chatMessages/{id} created) | S8.3/S6.3 — FCM בעברית על הודעת-צ׳אט חדשה למשתתפי-ה-thread. |
+| `deleteAccount` | callable | S1.8 — מחיקת-חשבון: מוחק את המסמכים האישיים מפתח-ה-uid (`users/{uid}` + `diag/{uid}`) **וגם** את רשומת-ה-Auth (Admin SDK) + auditLog. callable (gen2) ולא trigger — ל-Auth אין trigger-מחיקה ב-gen2, ו-gen1 דורש App Engine שלא קיים (deploy 403). |
 | `getUploadUrl` | callable | S7.2 — presigned-PUT URL ל-R2 (aws-sdk v3). creds ב-Secret Manager/env בלבד. |
 | (`auditLog`) | collection | S8.4 — כל הנתיבים הרגישים לעיל כותבים רשומות append-only. |
 
@@ -72,7 +74,8 @@ firebase-functions **v2**.
   שאין להם doc ב-`users` מדולגים בשקט) **פחות המקדם** (`stageBy` כשה-callable
   חתם). payload: `עדכון הזמנה` / `הזמנה BS-1042 · מוכן לאיסוף` — תוויות-stage
   verbatim מ-`kOrderStageLabel` (`supplier_data.dart`).
-- **chat:** משתתפי `chatThreads/{threadId}` פחות השולח. כותרת
+- **chat:** ה-uid-ים ב-`chatThreads/{threadId}.participantUids` (ה-auth-truth של
+  A14 — לא `participants` שמחזיק שמות-תפקיד) פחות השולח. כותרת
   `הודעה חדשה מ־{displayName|תואר-פרסונה}` + preview (80 תווים).
 - tokens מ-`users/{uid}.fcmToken` (S6.1); token מת
   (`registration-token-not-registered`) נמחק מה-doc.
@@ -125,9 +128,9 @@ firebase functions:secrets:set R2_SECRET_ACCESS_KEY
 cd functions
 npm install
 npx tsc --noEmit     # typecheck (חובה ירוק)
-npm run selftest     # build + node lib/selftest.js — 53/53 PASS
+npm run selftest     # build + node lib/selftest.js — 65/65 PASS
                      # (לוגיקה טהורה: hash/credit מול probe של Dart VM,
-                     #  שרשרת-stages, מטריצת-תפקידים)
+                     #  שרשרת-stages, מטריצת-תפקידים, מטריצת-אישור #6)
 ```
 
 `src/` מודולרי: `index.ts` (entrypoint — setRole + re-exports) · `common.ts`
@@ -181,8 +184,35 @@ getAuth().setCustomUserClaims(process.argv[2], { admin: true })
 - העלאת-תמונה: `httpsCallable('getUploadUrl')({kind, contentType, fileName?})`
   → `PUT` של ה-bytes ל-`url` עם ה-`Content-Type` שאושר.
 
+## S1.8 — מחיקת-חשבון צד-שרת (`deleteAccount` — callable)
+
+GDPR right-to-erasure + דרישת-Apple למחיקת-חשבון בתוך-האפליקציה. הקליינט
+(`auth_state.dart`, `FirebaseAuthGateway.deleteAccount()`) קורא ל-callable הזה
+ואז מבצע `signOut` מקומי. ה-callable מאמת את הקורא (מוחק **רק** את
+`request.auth.uid` — אין ארגומנט-uid), מנקה את המסמכים **ממופתחי-ה-uid**, ואז
+מוחק את **רשומת-ה-Auth עצמה** דרך ה-Admin SDK (`getAuth().deleteUser` — ללא
+דרישת recent-login, בניגוד ל-`user.delete()` של הקליינט):
+
+- `users/{uid}` — הפרופיל (displayName / טלפון / מייל / fcmToken)
+- `diag/{uid}` — בדיקת ה-FS_DIAG
+
+מחיקה best-effort לכל doc (מסמך חסר/כושל לא עוצר את השאר) + רשומת `auditLog`
+(`action: "account.delete"`).
+
+> **למה callable ולא Auth-onDelete-trigger:** ל-Firebase Auth **אין** trigger-מחיקה
+> ב-gen2, וכל ה-codebase כאן gen2. trigger v1/gen1 (`auth.user().onDelete`) דורש
+> נתיב-deploy gen1 (App Engine + ה-API `v1/generateUploadUrl`) שלא קיים בפרויקט —
+> הוא מחזיר 403 **ועוצר את כל** `firebase deploy --only functions` (כולל ה-gen2).
+> callable נשאר gen2, נפרס נקי לצד השאר, ומחזיר תוצאה מאומתת לקליינט.
+
+**טווח מכוון:** רק מסמכים ממופתחי-uid (אישיים, בעלים-יחיד) נמחקים. רשומות
+רב-צדדיות (`orders`, `chatThreads`/`chatMessages`, `customers`, `projects`,
+`tasks`) **נשמרות** — כל אחת שייכת לעסקה/שיחה שמשתמשים אחרים עדיין רואים, ומחיקתה
+תשבש את נתוני-הצד-השני. אנונימיזציה של ה-uid ממסמכים משותפים = משימה נפרדת וכבדה
+(follow-up — ראה `app_flutter/WIRING.md`), לא בגל הזה.
+
 ## TODO (לא בגל הזה)
 
-- מחיקת מסמכי-משתמש ב-Firestore עם מחיקת-חשבון (S1.8) — wipe-צד-שרת לפני launch.
 - אכיפת App Check (`enforceAppCheck: true`) על ה-callables אחרי ש-S0.5 יציב.
 - רישום אודיט גם ל-`setRole` (לא נגעתי — ה-skeleton קפוא בהוראה).
+- אנונימיזציה של uid ממסמכים רב-צדדיים במחיקת-חשבון (מעבר ל-`users`/`diag`).

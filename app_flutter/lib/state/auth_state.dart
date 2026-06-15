@@ -151,6 +151,12 @@ abstract class AuthGateway {
   /// server-side, e.g. right after `setRole`).
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false});
 
+  /// S1 — send a password-reset email (the "forgot password" recovery path).
+  /// Recent Firebase SDKs are a no-throw for an unknown email; older ones throw
+  /// `user-not-found` — the caller treats both as success (no account
+  /// enumeration).
+  Future<void> resetPassword(String email);
+
   /// S1.7 — sign out.
   Future<void> signOut();
 
@@ -286,11 +292,24 @@ class FirebaseAuthGateway implements AuthGateway {
       );
 
   @override
+  Future<void> resetPassword(String email) =>
+      _guard(() => _auth.sendPasswordResetEmail(email: email));
+
+  @override
   Future<void> createUserWithEmailPassword(String email, String password) =>
-      _guard(
-        () =>
-            _auth.createUserWithEmailAndPassword(email: email, password: password),
-      );
+      _guard(() async {
+        final cred = await _auth.createUserWithEmailAndPassword(
+            email: email, password: password);
+        // P4 — fire a verification email right after sign-up so the address is
+        // confirmable. Best-effort: a send failure must NOT fail account
+        // creation (the user already exists + is signed in). The phone/SMS
+        // verification path is separate and untouched.
+        try {
+          await cred.user?.sendEmailVerification();
+        } on Object catch (e) {
+          debugPrint('sendEmailVerification failed (non-fatal): $e');
+        }
+      });
 
   @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) =>
@@ -310,7 +329,13 @@ class FirebaseAuthGateway implements AuthGateway {
         if (user == null) {
           throw const AuthGatewayException('no-current-user');
         }
-        await user.delete();
+        // S1.8 — server-side erasure: the `deleteAccount` callable purges the
+        // caller's Firestore docs (users/{uid} + diag/{uid}) AND deletes the
+        // Auth record itself via the Admin SDK (no recent-login required, unlike
+        // a client `user.delete()` which also left Firestore orphaned). We then
+        // clear the local session so the app re-gates to the login flow.
+        await _functions.httpsCallable('deleteAccount').call<dynamic>();
+        await _auth.signOut();
       });
 
   @override
@@ -473,6 +498,11 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   Future<void> createUserWithEmailPassword(String email, String password) async =>
       _required().createUserWithEmailPassword(email, password);
 
+  /// S1 — forgot-password recovery: send a reset email (delegates to the
+  /// gateway; throws [AuthGatewayException] the login sheet maps to Hebrew).
+  Future<void> resetPassword(String email) async =>
+      _required().resetPassword(email);
+
   /// S1.7 — sign out + local cache clear. The LOCAL sign-out is optimistic and
   /// unconditional (clean exit even when the network call fails — same
   /// guarded-write spirit as the S2 cache base); the remote failure is logged,
@@ -488,11 +518,12 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     }
   }
 
-  /// S1.8 — in-app account deletion (`user.delete()` — Apple requirement) +
-  /// local user-data wipe. Unlike [signOut] the remote delete THROWS on
-  /// failure (e.g. `requires-recent-login`) and the local wipe does NOT run —
-  /// the account still exists, so the data must too. Server-side document
-  /// wipe-out is a Functions/S5 concern (see functions/README.md).
+  /// S1.8 — in-app account deletion (Apple requirement): the gateway calls the
+  /// server `deleteAccount` callable (purges the user's Firestore docs + deletes
+  /// the Auth record, Admin SDK — see functions/deleteAccount.ts) then clears
+  /// the local session. Unlike [signOut] this THROWS on failure and the local
+  /// wipe does NOT run — if the remote erasure didn't happen, the local
+  /// identity-coupled state stays put.
   Future<void> deleteAccount() async {
     await _required().deleteAccount();
     _gen++;

@@ -108,20 +108,38 @@ service cloud.firestore {
     // read/write ONLY for a uid member (`participantUids` — the auth-truth; A9.
     // `participants` carries the display ROLES, not auth). create requires the
     // author to put themself in the NEW doc's participantUids; update FREEZES
-    // participantUids (a participant may refresh the lastMsg/ts denorm — the
-    // repo's full-doc upsert rewrites the same array, which passes — but may not
-    // eject the peer or recruit others; membership changes are a server/Functions
-    // concern). Pre-migration docs (empty participantUids) match no auth.uid —
-    // forward-ready until per-user threads are populated (see the migration header).
+    // participantUids for an EXISTING participant (a participant may refresh the
+    // lastMsg/ts denorm — the repo's full-doc upsert rewrites the same array,
+    // which passes — but may not eject the peer or recruit others; membership
+    // changes are a server/Functions concern), with ONE A14 exception: a thread
+    // whose participantUids is still EMPTY may be stamped by a signed-in user
+    // that includes THEMSELF (the uid-migration last mile — see the update rule),
+    // after which the freeze applies. Pre-migration docs (empty participantUids)
+    // match no auth.uid for read/create — forward-ready until A14 stamps them.
     match /chatThreads/{threadId} {
       allow read: if isSignedIn()
           && request.auth.uid in resource.data.get('participantUids', []);
       allow create: if isSignedIn()
           && request.auth.uid in request.resource.data.get('participantUids', []);
+      // Two shapes are allowed:
+      //  (a) an EXISTING participant refreshing the denorm (lastMsg/ts) — the
+      //      repo's full-doc upsert rewrites the SAME participantUids array, which
+      //      passes the freeze; it may NOT eject the peer or recruit others
+      //      (membership changes are a server/Functions concern).
+      //  (b) A14 uid-migration LAST MILE — a thread whose participantUids is still
+      //      EMPTY (a forward-ready seed) is otherwise LOCKED: no auth.uid is a
+      //      member, so branch (a) can never fire and the thread can never be
+      //      stamped. So a signed-in user may set the array on a previously-EMPTY
+      //      thread provided they include THEMSELF (no spoofing in someone else's
+      //      name). The freeze still applies once participantUids is non-empty —
+      //      branch (b)'s `size() == 0` guard makes (b) unreachable thereafter.
       allow update: if isSignedIn()
-          && request.auth.uid in resource.data.get('participantUids', [])
-          && request.resource.data.get('participantUids', [])
-              == resource.data.get('participantUids', []);
+          && ((request.auth.uid in resource.data.get('participantUids', [])
+                  && request.resource.data.get('participantUids', [])
+                      == resource.data.get('participantUids', []))
+              || (resource.data.get('participantUids', []).size() == 0
+                  && request.auth.uid
+                      in request.resource.data.get('participantUids', [])));
       allow delete: if isSignedIn()
           && request.auth.uid in resource.data.get('participantUids', []);
     }
@@ -443,6 +461,42 @@ service cloud.firestore {
     // another's probe. REMOVE this rule together with the badge after go-live.
     match /diag/{uid} {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
+    //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
+    // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
+    // status starts 'pending', no reviewer fields). They read/cancel their own.
+    // The designated approver (the matrix) may READ the tier they sign off:
+    //   worker→contractor · courier→store · store/contractor→manager · admin=any.
+    // The approve/deny (status flip + the role CLAIM) is server-only via
+    // reviewRoleRequest (Admin SDK) — clients NEVER write status (update: false).
+    match /roleRequests/{uid} {
+      // The role a caller must hold to review a request for `reqRole`.
+      function approverRoleFor(reqRole) {
+        return reqRole == 'worker' ? 'contractor'
+             : reqRole == 'courier' ? 'store'
+             : (reqRole == 'store' || reqRole == 'contractor') ? 'manager'
+             : '';
+      }
+      function canReview(reqRole) {
+        return isAdmin()
+            || (approverRoleFor(reqRole) != '' && hasRole(approverRoleFor(reqRole)));
+      }
+      allow read: if isSignedIn()
+          && (request.auth.uid == uid || canReview(resource.data.requestedRole));
+      allow create: if isSignedIn()
+          && request.auth.uid == uid
+          && request.resource.data.status == 'pending'
+          && request.resource.data.requestedRole
+              in ['worker', 'courier', 'store', 'contractor']
+          && !request.resource.data.keys()
+              .hasAny(['reviewedBy', 'reviewedByRole', 'reviewedAt']);
+      // The requester may cancel their OWN pending request (delete); admin too.
+      allow delete: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // status/claim changes are server-only (reviewRoleRequest, Admin SDK);
+      // a re-request is delete + create.
+      allow update: if false;
     }
 
     // ── default — S5 deny-by-default ─────────────────────────────────────────

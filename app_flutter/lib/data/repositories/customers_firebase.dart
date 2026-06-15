@@ -176,13 +176,17 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
     return null;
   }
 
-  /// The contractor's credit ceiling — a deterministic per-name value in the
-  /// 30,000–120,000 ₪ band. Verbatim port of `LocalCustomersRepository.creditLimit`:
-  /// it delegates to the pure `contractorCredit(name)` (`logic/manager_dashboard.dart`),
-  /// NOT a Firestore read — the ceiling is a deterministic hash, identical on
-  /// every path, so the local and remote impls return byte-for-byte the same value.
+  /// The contractor's credit ceiling. On the live Firebase backend there is NO
+  /// real credit source for this synchronous read, and the local `contractorCredit`
+  /// ceiling is a FABRICATED deterministic hash (a per-name number in the
+  /// 30,000–120,000 ₪ band) — it MUST NOT be shown to a real signed-in user as if
+  /// it were their actual approved credit. This repo runs ONLY when the backend
+  /// is ON (the provider routes here only when `useFirebaseBackend` is true), so
+  /// returning 0 unconditionally is correct. The REAL credit path is
+  /// [computeCredit], which (with the callable gateway bound) returns the
+  /// server-canonical aggregate; it is intentionally left unchanged.
   @override
-  int creditLimit(String name) => contractorCredit(name);
+  int creditLimit(String name) => 0;
 
   /// A13 — the server-canonical credit aggregate. Same gate + graceful fallback
   /// as `LocalCustomersRepository.computeCredit`: OFF / no gateway → the local

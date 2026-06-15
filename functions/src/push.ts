@@ -151,11 +151,15 @@ export const onChatMessageCreated = onDocumentCreated(
     const text = asString(snap.get("text")) ?? "";
 
     const thread = await db().collection("chatThreads").doc(threadId).get();
-    const raw: unknown = thread.get("participants");
-    const participants = Array.isArray(raw)
+    // Address the uid members: `participantUids` is the AUTH-TRUTH the A14
+    // chat-sync stamps and the rules scope on. `participants` carries display
+    // ROLE NAMES (not uids), so FCM-by-participants never matched a
+    // users/{uid}.fcmToken — no chat push was delivered. Minus the sender.
+    const raw: unknown = thread.get("participantUids");
+    const participantUids = Array.isArray(raw)
       ? raw.filter((p): p is string => typeof p === "string" && p.length > 0)
       : [];
-    const recipients = participants.filter((p) => p !== fromUid);
+    const recipients = participantUids.filter((p) => p !== fromUid);
     if (recipients.length === 0) return;
 
     // Sender display: users/{fromUid}.displayName → persona Hebrew title.

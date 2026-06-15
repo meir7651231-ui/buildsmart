@@ -4,6 +4,103 @@
 
 ---
 
+## 2026-06-15 — auth #6 inc.3: inbox אישור בקשות-תפקיד (#6 הושלם)
+
+**שינוי (UI, lib/screens + lib/state):** `role_requests_inbox_screen.dart` (חדש) + שורת "📋 בקשות תפקיד"
+בפרופיל — מוצגת רק כש-claim-roles של הקורא מאשרות tier (`approvableRolesForClaims`). ה-inbox מזרים
+`roleRequests` scoped ל-tier (`pendingRoleRequestsProvider` — תואם ל-`canReview` ברולס, לעולם לא query
+שייחסם), אישור/דחייה קוראים ל-callable `reviewRoleRequest` דרך seam-פונקציה `RoleReviewer`. החלטה מוציאה
+את הכרטיס מ-query-ה-pending → הרשימה מתרוקנת מעצמה. **אימות:** `analyze` 0 (שלי) · `role_request_test`
+4/4 (מטריצה + inbox-approve). #6 שלם: inc.1 שרת + inc.2 בקשה + inc.3 inbox.
+
+---
+
+## 2026-06-15 — auth #6 inc.2: UI בקשת-תפקיד
+
+**שינוי (UI, lib/screens + lib/state):** `role_request_sheet.dart` (חדש) + שורת "🪪 בקשת תפקיד"
+ב-`profile_screen` (signed-in). הגיליון מציג 4 תפקידים תפעוליים (worker/courier/store/contractor)
+עם "מי מאשר" לכל אחד (לפי המטריצה); בחירה כותבת `roleRequests/{uid}` (status:pending,
+displayName/phone מהפרופיל-המקומי) דרך `roleRequestWriterProvider` (null ללא backend → no-op).
+ה-`reviewRoleRequest` בשרת (inc.1) מאשר/דוחה; ה-inbox = inc.3. **אימות:** `analyze` 0 ·
+`role_request_test` 2/2 (כתיבת pending + gate ה-null).
+
+---
+
+## 2026-06-15 — auth P2: displayName ביצירת-חשבון-מייל
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — פיין-"צור חשבון" מקבל שדה "שם מלא (לא חובה)" מעל המייל;
+בהצלחה `register` שומר את השם בפרופיל-המקומי, וצעד-ה-post-auth של welcome (`_finishAfterAuth`) כבר ממראה
+אותו ל-`users/{uid}.displayName` (נקרא ע"י `computeCredit` + שם-השולח ב-push). client-only, ללא שינוי
+gateway/interface, ללא churn ב-fakes. **אימות:** `analyze` 0 · `login_sheet_test` 23/23 (נוסף טסט: שם→profile.name).
+
+---
+
+## 2026-06-15 — auth P2: OTP resend cooldown + תוקף-קוד
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — צעד-הקוד אוכף cooldown של 30ש׳ ל"שליחת קוד חדש"
+(re-tap בתוך החלון → טוסט "אפשר לשלוח קוד חדש בעוד N שניות", בלי send חוזר), pre-check לתוקף ~2 דק׳
+לפני round-trip (ה-session-expired של השרת = backstop), וכותרת-המשנה של צעד-הקוד מציינת את חלון-התוקף
+("תקף לכ-2 דקות"). מבוסס-timestamp (**ללא Timer**) כדי ש-pumpAndSettle של טסטי-ה-OTP ימשיכו ל-settle.
+**אימות:** `analyze` 0 · `login_sheet_test` 22/22 (נוסף טסט-cooldown; כותרת-המשנה → `textContaining`).
+
+---
+
+## 2026-06-15 — auth P2: ליטוש כניסה (אנונימיות, הצג-סיסמה, אורך-סיסמה)
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — (1) **anti-enumeration:** `hebrewAuthError('user-not-found')`
+מקופל לאותה הודעה גנרית "אימייל או סיסמה שגויים" כמו סיסמה-שגויה (היה "לא נמצא חשבון" נפרד שאיפשר probing של
+מיילים רשומים); (2) **eye toggle** להצגת/הסתרת הסיסמה בפיין-המייל; (3) **בדיקת-אורך ≥6 בצד-לקוח** ב"צור חשבון"
+(פידבק מיידי לפני round-trip; ה-weak-password של השרת עדיין ממופה כ-backstop). **אימות:** `analyze` 0 ·
+`login_sheet_test` 21/21 ירוקים (נוספו unit-אנונימיות + widget-אורך; טסט-ה-create עם ה-eye עדיין עובר).
+
+---
+
+## 2026-06-15 — auth #3: הודעת מייל-אימות במסלול "צור חשבון"
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — דגל `_justCreated` + ה-auth-listener מציג במסלול-יצירה
+"✓ החשבון נוצר — שלחנו מייל אימות…" במקום הטוסט הגנרי (ה-`sendEmailVerification` כבר לא שקט). **אימות:**
+`analyze` 0 · `login_sheet_test` +20 ירוקים (טסט-ה-create עודכן לטוסט החדש; טסטי-הטלפון נשמרו). אכיפת
+`emailVerified` נדחתה (backend-ON בלבד, החלטת-מוצר; החנות נשלחת דמו).
+
+---
+
+## 2026-06-15 — auth #1: auth-gate ב-OnboardingGate (backend-ON בלבד)
+
+**שינוי (UI, lib/screens):** `onboarding_screen.dart` — `OnboardingGate` מנתב משתמש לא-מחובר ל-`_OpeningFlow`
+(welcome/login) כש-`useFirebaseBackend` ON ו-auth נטען (`auth.loaded && auth.user==null`); כניסה → HomeShell,
+logout → re-gate (ה-widget צופה ב-`authStateProvider`). **בילד-דמו (flag OFF) byte-identical** — וכך גם הסוויטה
+(הדגל const, false בטסטים). **אימות:** `analyze` 0 · welcome_auth_gate+widget+onboarding +24 ירוקים.
+
+---
+
+## 2026-06-15 — auth #2: קישור "שכחתי סיסמה" בלשונית-הכניסה
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — קישור "שכחתי סיסמה" בפאנל-האימייל (מצב כניסה בלבד,
+`if(!_emailCreateMode)`) → `resetPassword` → `sendPasswordResetEmail`. טוסט-הצלחה ניטרלי ("אם קיים חשבון —
+נשלח אליו מייל") בלי לחשוף אילו אימיילים רשומים (אנטי-enumeration). **אימות:** `analyze` 0 · טסטי-auth +102
+ירוקים (6 fakes עודכנו ל-interface). אין שינוי-זרימה אחר; הקישור מוסתר במצב "צור חשבון".
+
+---
+
+## 2026-06-15 — chat-sync: FS_DIAG step-4 probe (אין שינוי-UI נראה)
+
+**שינוי (lib/widgets):** `backend_debug_badge.dart` — שלב-4 (orders-create probe) משתמש ב-id ייחודי
+(`BS-diag-$uid-${ms}`) במקום קבוע → תמיד CREATE (היה UPDATE בריצה-שנייה → role=— → ❌ כוזב). **אין שינוי
+ויזואלי** בתג — רק לוגיקת-הבדיקה-הפנימית. **אימות:** `fsDiagStepResult` tests ירוקים, `analyze` 0.
+(שאר תיקון-הצ'אט — sys_chat/chat_repository/firestore rules+index — לוגי/שרת, לא-UI.)
+
+---
+
+## 2026-06-15 — launch #6: פאנל-רגרסיה מגודר ל-debug (לוח-מנהל)
+
+**שינוי (UI):** `manager_dashboard_screen.dart` — סעיף "🔬 בדיקות רגרסיה" נעטף ב-`if(kDebugMode) ...[]`.
+ב-**release** הסעיף לא מוצג (משתמש שבוחר persona מנהל לא רואה כלי-פיתוח פנימי); ב-**debug** ללא שינוי
+(הדגל `true`). מראה כמו ה-`BackendDebugBadge` שכבר מגודר באותו דפוס.
+**אימות:** `flutter test` — `manager_dashboard_screen_test` + `manager_dashboard_test` ירוקים (+42);
+`kDebugMode`=true תחת flutter test → הסעיף עדיין נבדק (אפס רגרסיה); `analyze` 0 errors. הקוד נשאר (reversible).
+
+---
+
 ## v6.20 — חיווט קבלן↔עובד · גל DEBUNDLE (פירוק לוח-הקבלן — אימות חי בכרום)
 
 **שינוי (UI ב-5 מסכים):** `tasks_screen.dart` (הוסרו טוגל מנהל↔עובד + `_workerView` + `_RolePicker` + 4 כפתורי-כלים כפולים → לוח-קבלן ממוקד: יצירה+אישורים+הצעות) · `site_hub_screen.dart` (אריחי גאנט/ליקויים/נוכחות → גיליונות חיים `showTasksGanttSheet`/`showDefectsSheet`/`showContractorAttendanceSheet`; אריח חדש 👷 חופשות; נמחקו 3 מסכי-דמו `_SiteGantt`/`_SiteSnagging`/`_SiteAttendance`; הוחזר אריח **focused** 📋 משימות צוות → openTasks) · `manager_dashboard_screen.dart` (בדיקת-גבולות ל-`kWorkers[task.worker]`) · `worker_app_screen.dart` (`_SubmitButton` ≥48px tap-target + `EdgeInsetsDirectional` ל-5 כפתורים) · `tasks_gantt_sheet.dart` (scope לפי צופה: עובד→tasks שלו · קבלן→employerId==demo||ריק).

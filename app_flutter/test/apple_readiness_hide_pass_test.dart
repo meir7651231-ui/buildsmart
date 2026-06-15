@@ -203,10 +203,12 @@ void main() {
       'lib/screens/persona_portal.dart': ['נתוני הדגמה'],
       'lib/screens/courier_portal_tab.dart': ['זמינות להדגמה'],
       'lib/screens/persona_picking_sheet.dart': ['ביטול ההזמנה כולה — בקרוב'],
-      // The worker-report "תמונה צורפה (הדגמה)" fake was FILLED — it now routes
-      // through the real pickTaskPhoto capture (no faked success). The file's
-      // remaining flag-gated placeholder is the manager-board demo disclaimer.
-      'lib/screens/tasks_screen.dart': ['(בהדגמה —'],
+      // The contractor↔worker de-bundle FILLED the worker picker (workers are
+      // now real accounts, not a demo dropdown), so tasks_screen.dart's old
+      // "(בהדגמה — …)" picker disclaimer is gone — a fill, not a re-exposed
+      // placeholder. The remaining flag-gated placeholder is the legacy photo
+      // "demo" box, hidden by taskPhotoWidget in worker_task_detail_sheet.dart.
+      'lib/screens/worker_task_detail_sheet.dart': ['(הדגמה)'],
       'lib/screens/store_screen.dart': ['🚧 בבנייה'],
       'lib/screens/home_shell.dart': ['שירותים'],
     };

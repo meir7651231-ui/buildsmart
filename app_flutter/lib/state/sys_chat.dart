@@ -548,9 +548,16 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// Returns the resolve future so callers/tests can await settling.
   Future<void> ensureParticipantUids(String threadId) async {
     if (!uidScoped) return; // gated — OFF is today, exactly
-    final lk = lookup;
-    if (lk == null) return; // no directory (Firebase-free) → nothing to resolve
     if (_uidResolveInFlight.contains(threadId)) return; // resolve already kicked
+
+    // A14 — SELF-STAMP FIRST (mirrors orders' `contractorUid == auth.uid`
+    // always-present guarantee). The sender's own uid is the ONE entry we can
+    // always supply; resolve it BEFORE anything that can fail (the directory
+    // lookup, a denied users-query) so a participantUids the rules can satisfy
+    // is stamped even when peer resolution comes back empty/throws. No identity
+    // (signed-out / uid races to null) ⇒ nothing to stamp ⇒ bail.
+    final me = currentUid?.call();
+    if (me == null || me.isEmpty) return;
 
     // Find the thread (local state mirrors the remote when bound) and skip when
     // it is unknown or already populated (resolve once, then it is the cache).
@@ -561,23 +568,31 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
 
     _uidResolveInFlight.add(threadId);
     try {
+      // The union ALWAYS contains the sender (so they can read the thread they
+      // stamped); a LinkedHashSet keeps it de-duplicated and deterministically
+      // ordered (self first, then roles in seed order, uids in doc order).
+      final union = <String>{me};
       // ⋃ over the thread's participant roles of their real uids (bot skipped —
-      // it has no users doc). A LinkedHashSet keeps the union de-duplicated and
-      // deterministically ordered (roles in seed order, uids in doc order).
-      final union = <String>{};
-      for (final role in roles) {
-        if (role == BsRole.bot) continue;
-        union.addAll(await lk.uidsByRole(role.name));
+      // it has no users doc). BEST-EFFORT: a null directory (Firebase-free) or a
+      // failing/denied users-query must NOT prevent the self-stamp above, so the
+      // peer resolution is wrapped — on any failure we fall through with just
+      // {me} (the rule-satisfying minimum) instead of bailing empty.
+      final lk = lookup;
+      if (lk != null) {
+        try {
+          for (final role in roles) {
+            if (role == BsRole.bot) continue;
+            union.addAll(await lk.uidsByRole(role.name));
+          }
+        } on Object catch (_) {
+          // Peer resolution failed (denied/offline) — keep {me}; a later send
+          // retries the full union. The self-stamp still unlocks the thread.
+        }
       }
-      // Fold in the sender's own uid so they can read the thread they stamped.
-      final me = currentUid?.call();
-      if (me != null && me.isNotEmpty) union.add(me);
 
       if (!mounted) return; // disposed mid-resolve (test teardown / rebuild)
-      // Nothing resolved (no backend users yet) → leave it empty so the thread
-      // stays visible rather than locking everyone out; a later send retries.
-      if (union.isEmpty) return;
-
+      // `union` is now always ⊇ {me} (non-empty), so the thread is always
+      // stamped with at least the sender — the write the rules can satisfy.
       final uids = List<String>.unmodifiable(union);
       // Bound to Firestore: stamp through the repo so the head doc persists the
       // uids (its toDoc already writes participantUids when non-empty) and the

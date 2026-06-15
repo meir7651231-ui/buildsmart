@@ -6,6 +6,7 @@ import 'package:buildsmart/firebase_options.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
@@ -238,6 +239,79 @@ List<Widget> debugOverlayChildren({
 }) =>
     (isDebug || fsDiag) ? const [BackendDebugBadge()] : const [];
 
+/// P3 — auto-logout after pointer inactivity (`sessionTimeout`). GATED to the
+/// real backend: when [useFirebaseBackend] is OFF (the demo build AND the whole
+/// Firebase-free test suite) this is a PURE pass-through — no [Listener], no
+/// [Timer] — so behavior is byte-identical and every widget test is unaffected.
+/// On the backend it signs the user out after [timeout] of inactivity so an
+/// unattended session on a shared device falls back to the login gate. The timer
+/// is cancelled on dispose and re-armed on every interaction.
+class _AutoLogout extends ConsumerStatefulWidget {
+  const _AutoLogout({required this.timeout, required this.child});
+
+  final BsSessionTimeout timeout;
+  final Widget child;
+
+  @override
+  ConsumerState<_AutoLogout> createState() => _AutoLogoutState();
+}
+
+class _AutoLogoutState extends ConsumerState<_AutoLogout> {
+  Timer? _timer;
+
+  Duration get _idleLimit => switch (widget.timeout) {
+        BsSessionTimeout.m5 => const Duration(minutes: 5),
+        BsSessionTimeout.m15 => const Duration(minutes: 15),
+        BsSessionTimeout.m30 => const Duration(minutes: 30),
+        BsSessionTimeout.m60 => const Duration(minutes: 60),
+      };
+
+  @override
+  void initState() {
+    super.initState();
+    _arm();
+  }
+
+  @override
+  void didUpdateWidget(_AutoLogout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.timeout != widget.timeout) _arm();
+  }
+
+  /// (Re)start the idle countdown. Inert off the backend (demo/tests).
+  void _arm() {
+    _timer?.cancel();
+    if (!useFirebaseBackend) return;
+    _timer = Timer(_idleLimit, _expire);
+  }
+
+  void _bump(PointerEvent _) => _arm();
+
+  Future<void> _expire() async {
+    if (!mounted) return;
+    // signOut is optimistic and a harmless no-op when already signed out.
+    await ref.read(authStateProvider.notifier).signOut();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!useFirebaseBackend) return widget.child; // pure pass-through
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _bump,
+      onPointerMove: _bump,
+      onPointerSignal: _bump,
+      child: widget.child,
+    );
+  }
+}
+
 class BuildSmartApp extends ConsumerWidget {
   const BuildSmartApp({super.key});
 
@@ -287,18 +361,32 @@ class BuildSmartApp extends ConsumerWidget {
         final osScale = mq.textScaler.scale(100) / 100;
         final combined = (textScale * osScale).clamp(0.85, 1.35).toDouble();
         return MediaQuery(
-          data: mq.copyWith(textScaler: TextScaler.linear(combined)),
+          data: mq.copyWith(
+            textScaler: TextScaler.linear(combined),
+            // P3 — reduce-motion, app-wide: when on, Flutter shortens/removes
+            // implicit animations everywhere (page transitions, switches,
+            // AnimatedFoo) — the standard a11y signal. (The catalog flip already
+            // honors reducedMotion separately; this generalises it.)
+            disableAnimations: catalogSettings.reducedMotion,
+          ),
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: Stack(
-              children: [
-                child ?? const SizedBox(),
-                // OWNER POLICY: the launch-diagnostic badge is dev-only — gated
-                // by kDebugMode so a release/web build shows NOTHING (see
-                // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
-                // (release self-test for the cross-device-sync investigation).
-                ...debugOverlayChildren(isDebug: kDebugMode),
-              ],
+            // P3 — auto-logout after inactivity (sessionTimeout). Inert off the
+            // backend (demo + tests) — see _AutoLogout — so this is byte-identical
+            // there; on the real backend it returns an idle session to the login
+            // gate.
+            child: _AutoLogout(
+              timeout: settings.sessionTimeout,
+              child: Stack(
+                children: [
+                  child ?? const SizedBox(),
+                  // OWNER POLICY: the launch-diagnostic badge is dev-only — gated
+                  // by kDebugMode so a release/web build shows NOTHING (see
+                  // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
+                  // (release self-test for the cross-device-sync investigation).
+                  ...debugOverlayChildren(isDebug: kDebugMode),
+                ],
+              ),
             ),
           ),
         );

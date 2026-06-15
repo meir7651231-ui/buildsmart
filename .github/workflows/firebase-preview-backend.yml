@@ -34,9 +34,23 @@ jobs:
       - name: Generate version.g.dart (gitignored)
         run: bash scripts/gen_version.sh
 
-      - name: Build Flutter web (REAL backend flag ON)
+      # Match the phone test build (android-test-build.yml) EXACTLY: the orders
+      # read rule is per-document (ownsOrder / storeUid==uid / pool), so a
+      # contractor's whole-collection listen (UID_SCOPED_QUERIES OFF) is denied
+      # by Firestore — the synced order would never appear. UID_SCOPED_QUERIES=true
+      # makes the query `contractorUid == uid`, which the rules prove → sync shows.
+      # SERVER_CALLABLES=true keeps parity with the phone (stage-advance/setRole).
+      # FS_DIAG=true mounts the on-screen backend badge (🟢 server/🔴 demo + uid +
+      # a 4-step Firestore self-test) so a tester can SEE both devices are on the
+      # same server + same uid — the thing that must match for cross-device sync.
+      - name: Build Flutter web (REAL backend + uid-scoped queries + callables + diag)
         working-directory: app_flutter
-        run: flutter build web --release --dart-define=USE_FIREBASE_BACKEND=true
+        run: >-
+          flutter build web --release
+          --dart-define=USE_FIREBASE_BACKEND=true
+          --dart-define=UID_SCOPED_QUERIES=true
+          --dart-define=SERVER_CALLABLES=true
+          --dart-define=FS_DIAG=true
 
       - name: Deploy to Hosting preview channel
         uses: FirebaseExtended/action-hosting-deploy@v0

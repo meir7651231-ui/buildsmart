@@ -28,6 +28,9 @@
 
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/chat_firebase.dart';
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
+    show FirestoreCollectionSource;
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,7 +78,25 @@ abstract class ChatRepository implements Listenable {
 /// would only add a dead delegation layer.)
 final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
   if (!useFirebaseBackend) return null;
-  final repo = FirebaseChatRepository()..attach();
+  // A14 — UID-SCOPED `chatThreads` listen (behind `kUidScopedQueries`, default
+  // OFF), mirroring `ordersRepositoryProvider`. The whole-collection chatThreads
+  // listen is DENIED doc-by-doc by the participant-scoped rule (RULES ARE NOT
+  // FILTERS), which silently blanks live threads. With the flag ON *and* a uid
+  // known, scope the listen to threads the signed-in user belongs to —
+  // `where('participantUids', arrayContains: uid)`, the exact field the rules
+  // (chatThreads read/write) and the now-flipped composite index use. Flag OFF /
+  // no-uid / Firebase-free ⇒ scope == null ⇒ the source stays UNSCOPED, the
+  // whole-collection listen BYTE-IDENTICAL to today (the zero-regression
+  // invariant). chatMessages already pins `threadId` per-stream (S4.2) and its
+  // rule get()s the parent thread, so the messages source is left unscoped.
+  final uid = ref.watch(currentUidProvider);
+  final threadsSource = (kUidScopedQueries && uid != null && uid.isNotEmpty)
+      ? FirestoreCollectionSource(
+          'chatThreads',
+          scope: (c) => c.where('participantUids', arrayContains: uid),
+        )
+      : null;
+  final repo = FirebaseChatRepository(threadsSource: threadsSource)..attach();
   ref.onDispose(repo.dispose);
   return repo;
 });

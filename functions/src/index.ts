@@ -102,9 +102,17 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 //   S7.2  getUploadUrl                 — callable; R2 presigned PUT (no creds
 //                                        in code — Secret Manager / env)
 //   S8.4  auditLog                     — append-only writes from all the above
+//   S1.8  deleteAccount                — gen2 callable; purges the caller's
+//                                        uid-keyed personal docs + deletes their
+//                                        Auth record (Admin SDK)
+//   #6    reviewRoleRequest            — gen2 callable; the matrix-authorized
+//                                        approver grants an operational role
+//                                        (writes the claim) or denies a request
 // ─────────────────────────────────────────────────────────────────────────────
 
+export { deleteAccount } from "./deleteAccount";
 export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";
 export { computeCredit } from "./credit";
 export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";
+export { reviewRoleRequest } from "./reviewRoleRequest";

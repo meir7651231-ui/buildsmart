@@ -17,6 +17,20 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## chat-sync — self-stamp participantUids (A14 last-mile) — 2026-06-15
+
+- **קובץ:** `test/chat_uid_a14_populate_test.dart` (קייס חדש: `lookup: null` → self-stamp).
+- תקלה שהוזרקה: `sys_chat.dart` `ensureParticipantUids` — `final union = <String>{me}` → `<String>{}` (לא לכלול את השולח).
+- תוצאה: **אדומה ✅** — "NULL lookup ... SENDER's own uid STILL stamped" נכשל (participantUids ריק במקום `[uid-c]`; `+6 -1`). שחזור → ירוק ✅ (`+7`).
+- מסקנה: הבדיקה חזקה — נועלת את ערובת ה-self-stamp (אנלוג ל-orders `contractorUid==auth.uid`): גם בלי users-directory (מצב-המכשיר שבו ה-lookup נכשל/null), ה-uid של השולח תמיד ב-participantUids → write/read של צ'אט אינם נדחים. לצד זה: `chat_repository` scope ל-`participantUids` (arrayContains, gated), ו-index+rules יושרו על אותו שדה.
+
+## compatibleProductsCount/For — אינדקס-SKU O(1) (#2) — 2026-06-15
+
+- **קובץ:** `test/compat_index_test.dart` (חדש — נועל את האופטימיזציה).
+- תקלה שהוזרקה: getter `_skuIndex` (`related_info.dart`) → `<String,LipskeyCatalogProduct>{}` (אינדקס ריק) במקום `{for p in kCatalogProducts: p.sku: p}`.
+- תוצאה: **אדומה ✅** — "compatibleProductsFor resolves real mates" נכשל (mates ריק; `+1 -1`). שחזור → ירוק ✅ (`+2`).
+- מסקנה: הבדיקה חזקה — נועלת ש-`compatibleProductsCount`/`compatibleProductsFor` פותרים mates דרך אינדקס-ה-SKU המאוחד. השינוי (#2): החלפת ה-scan ה-O(catalog) (`kCatalogProducts.where((x)=>x.sku==key).first`) ב-`_skuIndex[key]` ה-O(1) — מאיץ את `cardReadinessScore` (מסך-הקטלוג קורא לו לכל כרטיס) מ-O(M×N) ל-O(M). זהה-בייט: SKUs ייחודיים (שער 86) → `_skuIndex[key]` == `.where(...).first`.
+
 ## de-bundle לוח-קבלן + tasks_screen.approve (גל DEBUNDLE, via /swarm) — 2026-06-14
 
 - **קובץ:** `test/worker_approval_engine_test.dart` (טסט-ליבה: עובד מגיש → קבלן מאשר → `done` חי).

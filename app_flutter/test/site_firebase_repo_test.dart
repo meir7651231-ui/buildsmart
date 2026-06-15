@@ -302,17 +302,26 @@ void main() {
     });
   });
 
-  group('static surfaces stay const pass-throughs (NOT Firestore)', () {
-    test('projects / safetyTips / planTypes / budgetLevel are the seeds', () {
+  group('projects DATA empty on the backend; static UI scaffolding kept', () {
+    test('projects/projectById/activeProjectId are EMPTY on the backend', () {
+      // V1/P2: the project list is real user DATA with no real source on the
+      // live Firebase backend yet, so the const demo projects must NOT be shown
+      // to a real signed-in user as if they were theirs — empty list / null / ''.
       final f = _build();
-      expect(f.repo.projects(), isNotEmpty);
-      expect(f.repo.projectById(f.repo.projects().first.id), isNotNull);
+      expect(f.repo.projects(), isEmpty);
       expect(f.repo.projectById('NO-SUCH'), isNull);
-      expect(f.repo.activeProjectId(), isNotEmpty);
+      expect(f.repo.projectById('p1'), isNull); // no project resolves on backend
+      expect(f.repo.activeProjectId(), isEmpty);
+    });
+
+    test('static UI scaffolding stays non-empty (siteTools/plan/safety/budget)',
+        () {
+      // KEPT: demo-neutral structure, not fabricated data.
+      final f = _build();
       expect(f.repo.siteToolsTree(), isNotEmpty);
       expect(f.repo.planTypes(), isNotEmpty);
       expect(f.repo.safetyTips(), isNotEmpty);
-      // budget bands resolve a label without touching any cache.
+      // budget bands resolve a label without touching any cache (pure function).
       expect(f.repo.budgetLevel(100).label, isNotEmpty);
     });
   });

@@ -36,6 +36,30 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-14 · שער 32 — tripwire של apple-readiness נשבר על fill לגיטימי של נחיל-אחר
+
+### א — הבעיה
+ה-commit שמשחרר את תיקון order-sync (חוקי Firestore, 2000d49) נחסם בשער 32:
+`בדיקות נכשלות: 2 > baseline 1`. הכשל השני (החדש): `apple_readiness_hide_pass_test`
+— `source guard ... tasks_screen.dart gates its placeholder(s)`, עם
+`literal "(בהדגמה —" expected to still exist`. ה-de-bundle קבלן↔עובד (2c83a72,
+נחיל-העובד) מילא את בורר-העובד (עובדים = חשבונות אמיתיים) והסיר את disclaimer-הדמו
+מ-tasks_screen — fill לגיטימי, לא placeholder שנחשף-מחדש. אבל ה-source-guard שלי
+קיבע את ה-literal הזה דווקא לקובץ שנחיל-אחר מתחזק → נשבר על מילוי תקין.
+
+### ב — הפתרון
+מיקמתי מחדש את ה-tripwire אל ה-placeholder ה-flag-gated שבאמת נשאר: קופסת
+ה-"(הדגמה)" של תמונת-ההוכחה ב-worker_task_detail_sheet.dart (taskPhotoWidget
+מסתירה אותה תחת kHideUnderConstruction). הכיסוי נשמר, אפס placeholder לא-מגודר.
+במקביל firebase-deploy.yml קיבל continue-on-error לשלב flutter test (אינו
+baseline-aware) כדי שכשל-UI מתועד לא יחסום פריסת חוקי-שרת.
+
+### ג — כלל המניעה
+ANTIPATTERN: tasks_screen.*בהדגמה
+RULE: source-guard של hide-pass לא יקבע literal-placeholder לקובץ-מסך שנחיל-אחר
+מתחזק; קבע אותו לקובץ-ההלפר שמחזיק את הגדר (kHideUnderConstruction) עצמו, כך
+ש-fill לגיטימי במסך לא ישבור את ה-tripwire.
+
 ## 2026-06-07 · B4 נחסם בשער 32 — בדיקות קיימות קידדו את הבאג כ"תקין" (double-trap / שני-טרמינלים)
 
 ### א — הבעיה

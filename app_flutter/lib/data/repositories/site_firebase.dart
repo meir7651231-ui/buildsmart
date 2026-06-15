@@ -59,8 +59,7 @@ import 'package:buildsmart/data/contractor_seeds.dart'
     show PlanType, kPlanTypes, kSafetyTips;
 import 'package:buildsmart/data/persona_data.dart'
     show PersonaTask, kPersonaTasks;
-import 'package:buildsmart/data/projects.dart'
-    show Project, kActiveProjectId, kProjects;
+import 'package:buildsmart/data/projects.dart' show Project;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/repositories/orders_repository.dart';
 import 'package:buildsmart/data/repositories/site_local.dart'
@@ -253,21 +252,24 @@ class FirebaseSiteRepository implements SiteRepository {
     _stage.dispose();
   }
 
-  // ── projects (STATIC — const pass-through, NOT Firestore) ───────────────────
+  // ── projects DATA (no real source yet → EMPTY on the live backend) ──────────
+  // The project list is real user DATA, but there is NO real source for it on
+  // the live Firebase backend yet — so the const demo projects MUST NOT be shown
+  // to a real signed-in user as if they were their own. This repo runs ONLY when
+  // the backend is ON (the provider routes here only when `useFirebaseBackend`
+  // is true), so returning an empty list / null / '' unconditionally is correct
+  // — a real user sees an honest empty board, not three fabricated projects.
+  // (The static UI scaffolding below — siteToolsTree / planTypes / safetyTips /
+  // budgetLevel — is KEPT: it is demo-neutral structure, not fabricated data.)
 
   @override
-  List<Project> projects() => kProjects;
+  List<Project> projects() => const [];
 
   @override
-  Project? projectById(String id) {
-    for (final p in kProjects) {
-      if (p.id == id) return p;
-    }
-    return null;
-  }
+  Project? projectById(String id) => null;
 
   @override
-  String activeProjectId() => kActiveProjectId;
+  String activeProjectId() => '';
 
   // ── site-tool trees / plan-scan / safety / budget (STATIC) ──────────────────
 

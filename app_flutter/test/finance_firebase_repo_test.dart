@@ -16,8 +16,11 @@
 //     and writes through (verbatim notifier semantics: status flip · PEN-####);
 //   • a write FAILURE corrupts neither cache nor throws;
 //   • setPaymentTerm upserts the single `active` doc;
-//   • the const budget reads + activeRevenue stay byte-identical (never pushed);
-//   • the accessor + provider resolve to the LOCAL impl with no Firebase.
+//   • the budget DATA reads (total/spent/categories/pct/revenue) return
+//     EMPTY/ZERO on the live backend — V1/P2: no fabricated demo money is shown
+//     to a real signed-in user (the pure budgetLevel + static financeHub stay);
+//   • the accessor + provider resolve to the LOCAL impl with no Firebase
+//     (where the budget surface keeps its real local/seed values).
 
 import 'dart:async';
 
@@ -231,17 +234,23 @@ void main() {
       );
     });
 
-    test('DERIVED reads stay byte-identical (budget consts never pushed)',
+    test('budget DATA reads are EMPTY/ZERO on the backend (no fabricated money)',
         () async {
+      // V1/P2: on the live Firebase backend there is no real accounting source,
+      // so the const demo figures (15000/9840/categories/66) must NOT be shown
+      // to a real signed-in user as if they were theirs — they return 0/empty.
       final f = _build();
-      // Const budget surface = exactly the local/seed values.
-      expect(f.repo.budgetTotal(), 15000);
-      expect(f.repo.budgetSpent(), 9840);
-      expect(f.repo.budgetPct(), 66); // round(9840/15000*100)
-      expect(f.repo.budgetCategories(), isNotEmpty);
+      expect(f.repo.budgetTotal(), 0);
+      expect(f.repo.budgetSpent(), 0);
+      expect(f.repo.budgetPct(), 0);
+      expect(f.repo.budgetCategories(), isEmpty);
+      expect(f.repo.activeRevenue(), 0);
+      // KEPT: the pure budgetLevel band function + the static financeHub section
+      // list (UI scaffolding, not fabricated data) still resolve.
+      expect(f.repo.budgetLevel(100).label, isNotEmpty);
       expect(f.repo.financeHub(), isNotEmpty);
 
-      // None of the derived reads pushed anything to ANY persisted collection.
+      // None of these reads pushed anything to ANY persisted collection.
       await Future<void>.delayed(Duration.zero);
       expect(f.approvals.sets, isEmpty);
       expect(f.penalties.sets, isEmpty);

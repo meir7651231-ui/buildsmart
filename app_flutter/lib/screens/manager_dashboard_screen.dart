@@ -32,6 +32,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -2223,20 +2224,26 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         ),
         const SizedBox(height: BsTokens.space3),
 
-        // 5. 🔬 בדיקות רגרסיה — routes to the existing RegressionPanelScreen.
-        _ManageSection(
-          sectionKey: 'regression',
-          emoji: '🔬',
-          title: 'בדיקות רגרסיה',
-          sub: 'הרצת חבילת הבדיקות המלאה של האפליקציה',
-          open: _open == 'regression',
-          onTap: () => _toggle('regression'),
-          child: _RegressionBody(
-            onOpen: () =>
-                Navigator.of(context).push(RegressionPanelScreen.route()),
+        // 5. 🔬 בדיקות רגרסיה — DEV-ONLY internal tooling (#6). Gated to debug
+        // builds so the test_harness runner never reaches an end user who selects
+        // the manager persona in a shipped release (mirrors BackendDebugBadge's
+        // kDebugMode gate). The screen + runner stay in code (reversible); a
+        // release build tree-shakes the unreachable panel out.
+        if (kDebugMode) ...[
+          _ManageSection(
+            sectionKey: 'regression',
+            emoji: '🔬',
+            title: 'בדיקות רגרסיה',
+            sub: 'הרצת חבילת הבדיקות המלאה של האפליקציה',
+            open: _open == 'regression',
+            onTap: () => _toggle('regression'),
+            child: _RegressionBody(
+              onOpen: () =>
+                  Navigator.of(context).push(RegressionPanelScreen.route()),
+            ),
           ),
-        ),
-        const SizedBox(height: BsTokens.space3),
+          const SizedBox(height: BsTokens.space3),
+        ],
 
         // 6. 🔑 שיוך תפקידים (A12 — launch Phase A) — the manager assigns a role
         // to a user via the `setRole` callable seam. SELF-CONTAINED in
