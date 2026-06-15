@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-06-15 — auth #1: auth-gate ב-OnboardingGate (backend-ON בלבד)
+
+**שינוי (UI, lib/screens):** `onboarding_screen.dart` — `OnboardingGate` מנתב משתמש לא-מחובר ל-`_OpeningFlow`
+(welcome/login) כש-`useFirebaseBackend` ON ו-auth נטען (`auth.loaded && auth.user==null`); כניסה → HomeShell,
+logout → re-gate (ה-widget צופה ב-`authStateProvider`). **בילד-דמו (flag OFF) byte-identical** — וכך גם הסוויטה
+(הדגל const, false בטסטים). **אימות:** `analyze` 0 · welcome_auth_gate+widget+onboarding +24 ירוקים.
+
+---
+
 ## 2026-06-15 — auth #2: קישור "שכחתי סיסמה" בלשונית-הכניסה
 
 **שינוי (UI, lib/screens):** `login_sheet.dart` — קישור "שכחתי סיסמה" בפאנל-האימייל (מצב כניסה בלבד,

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/profession_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
@@ -56,6 +58,18 @@ class OnboardingGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final seen = ref.watch(welcomeSeenProvider);
+    // #1 — auth gate: on the REAL backend a signed-OUT user is NOT let into the
+    // app (their writes would be silently denied by the Security Rules — the
+    // same class of gap as the orders/chat sync bugs). Once auth has LOADED, a
+    // null user is routed to the welcome/login flow; on sign-in this rebuilds
+    // straight to HomeShell, and logout re-gates for free (we watch
+    // authStateProvider). The DEMO build (useFirebaseBackend OFF) is
+    // byte-identical — guest/local access is the product there — as is the whole
+    // Firebase-free test suite (the flag is a compile-time const, false in tests).
+    if (useFirebaseBackend) {
+      final auth = ref.watch(authStateProvider);
+      if (auth.loaded && auth.user == null) return const _OpeningFlow();
+    }
     return seen ? const HomeShell() : const _OpeningFlow();
   }
 }
