@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-15 — fleet RE-SCAN fixes (כניסה/הרשמה)
+
+**שינוי (lib/screens + lib/state):** ה-re-scan (4 עדשות) חזר נקי על אבטחה+lifecycle (0 ממצאים), אישר
+שהתיקונים מחזיקים, והעלה MEDIUM חדש + פער-עקביות LOW — נסגרו: (1) `submitRoleRequest` כבר לא בולע את
+ה-`delete` שלפני הכתיבה → re-request אחרי דחייה מתחיל מ-CREATE נקי (לא `merge:true` על שדות-reviewer ישנים),
+bail ל-false אם ה-delete נכשל. (2) ל-welcome `_field` נוסף `onSubmitted`→`_register` (מקש "סיום" שולח, כמו
+login). (3) טקסט-ההסכמה הוכהה ל-`mutedLight` (ניגודיות AA). **אימות:** `analyze` 0 (שלי) · role_request 5/5 +
+welcome_auth_gate 6/6. LOW שנותרו (מקובל, נימוק): Semantics לקישורים, textAlign בשדות-ltr (תואם idiom),
+בורר-מקצוע חד-אופציה (owner/UX).
+
+---
+
 ## 2026-06-15 — fleet-review MEDIUM+LOW batch (כניסה/הרשמה)
 
 **שינוי (UI, lib/screens + lib/state):** מקלדת+נגישות+תקינות בשדות הכניסה/הרשמה: `autofillHints` +

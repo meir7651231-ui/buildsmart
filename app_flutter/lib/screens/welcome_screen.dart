@@ -576,7 +576,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           ltr: true,
                           keyboardType: TextInputType.emailAddress,
                           autofillHints: const [AutofillHints.email],
-                          textInputAction: TextInputAction.next,
+                          textInputAction: needsPassword
+                              ? TextInputAction.next
+                              : TextInputAction.done,
+                          onSubmitted:
+                              needsPassword ? null : (valid ? _register : null),
                           errorText: _contact.text.trim().isEmpty || contactOk
                               ? null
                               : 'מספר נייד או אימייל לא תקינים',
@@ -600,6 +604,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             ltr: true,
                             autofillHints: const [AutofillHints.newPassword],
                             textInputAction: TextInputAction.done,
+                            onSubmitted: valid ? _register : null,
                             errorText: _password.text.isEmpty ||
                                     _password.text.length >= 6
                                 ? null
@@ -646,7 +651,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           const Text(
                             'בהרשמה אתה מאשר את ',
                             style: TextStyle(
-                              color: Color(0xFFB3B3B3),
+                              color: BsTokens.mutedLight,
                               fontSize: 12,
                             ),
                           ),
@@ -667,7 +672,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           const Text(
                             ' ואת ',
                             style: TextStyle(
-                              color: Color(0xFFB3B3B3),
+                              color: BsTokens.mutedLight,
                               fontSize: 12,
                             ),
                           ),
@@ -786,6 +791,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     bool ltr = false,
     Iterable<String>? autofillHints,
     TextInputAction? textInputAction,
+    VoidCallback? onSubmitted,
   }) {
     final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
@@ -794,6 +800,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       obscureText: obscure,
       autofillHints: autofillHints,
       textInputAction: textInputAction,
+      onSubmitted: onSubmitted == null ? null : (_) => onSubmitted(),
       textAlign: TextAlign.right,
       textDirection: ltr ? TextDirection.ltr : null,
       decoration: InputDecoration(

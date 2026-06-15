@@ -49,7 +49,13 @@ Future<bool> submitRoleRequest(WidgetRef ref, String role) async {
   }
   final p = ref.read(userProfileProvider);
   try {
-    await writer.delete(uid).catchError((Object _) {});
+    // Clear any prior request FIRST so a re-request after a denial starts from a
+    // fresh CREATE — NOT a merge:true write onto stale reviewer fields (which the
+    // create rule would then reject). NOT swallowed: if the delete fails
+    // (offline/denied) we bail to false, since the follow-up set would be a
+    // denied update anyway. A delete on a non-existent doc is a no-op (first
+    // request is unaffected).
+    await writer.delete(uid);
     await writer.set(uid, <String, dynamic>{
       'requestedRole': role,
       'status': 'pending',

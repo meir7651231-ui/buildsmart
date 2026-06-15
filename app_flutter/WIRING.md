@@ -8,6 +8,15 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — fleet RE-SCAN fixes:** the re-scan (4 lenses) came back clean on security +
+> lifecycle (0 findings) and confirmed the prior fixes hold; it surfaced one new MEDIUM + a LOW
+> consistency gap, now closed: (1) `submitRoleRequest` no longer swallows the pre-write delete —
+> a re-request after a denial starts from a fresh CREATE (no `merge:true` onto stale reviewer
+> fields), bailing to false if the delete fails. (2) welcome `_field` gained `onSubmitted` wired
+> to `_register` (the keyboard "done" submits, matching login_sheet). (3) consent-sentence text
+> darkened to `mutedLight` (AA contrast). Accepted-LOW (noted): legal-link Semantics (minor),
+> ltr-field textAlign (matches the login idiom), profession single-option (owner/UX call).
+
 > **2026-06-15 — fleet-review MEDIUM+LOW batch (login/registration):** swept the rest of the
 > review. login_sheet + welcome `_field` gained `autofillHints` + `textInputAction` (OS autofill
 > + keyboard next/go; login_sheet's single-field panes also wire `onSubmitted` to their action)
