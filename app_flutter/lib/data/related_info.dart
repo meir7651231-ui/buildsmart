@@ -173,11 +173,12 @@ int compatibleProductsCount(LipskeyCatalogProduct p) {
   var n = 0;
   for (final entry in kVerifiedSpecs.entries) {
     if (entry.key == p.sku) continue;
-    // Polyroll bridge — search across the unified catalog (Lipskey + Polyroll)
-    // so PPR products can mate with each other after `registerPolyrollSpecs`.
-    final q = kCatalogProducts.where((x) => x.sku == entry.key);
-    if (q.isEmpty) continue;
-    if (_reallyMates(p, mySpec, q.first, entry.value)) n++;
+    // O(1) unified-catalog (Lipskey + Polyroll) lookup via the memoised
+    // `_skuIndex` — PPR products still mate after `registerPolyrollSpecs`, without
+    // the old O(catalog) rescan per spec that made this sweep O(n²).
+    final q = _skuIndex[entry.key];
+    if (q == null) continue;
+    if (_reallyMates(p, mySpec, q, entry.value)) n++;
   }
   return n;
 }
@@ -198,12 +199,12 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
   final out = <LipskeyCatalogProduct>[];
   for (final entry in kVerifiedSpecs.entries) {
     if (entry.key == p.sku) continue;
-    // Polyroll bridge — search across the unified catalog (Lipskey + Polyroll)
-    // so PPR products can mate with each other after `registerPolyrollSpecs`.
-    final q = kCatalogProducts.where((x) => x.sku == entry.key);
-    if (q.isEmpty) continue;
-    if (!_reallyMates(p, mySpec, q.first, entry.value)) continue;
-    out.add(q.first);
+    // O(1) unified-catalog lookup via the memoised `_skuIndex` (was an
+    // O(catalog) rescan per spec).
+    final q = _skuIndex[entry.key];
+    if (q == null) continue;
+    if (!_reallyMates(p, mySpec, q, entry.value)) continue;
+    out.add(q);
   }
 
   int rank(LipskeyCatalogProduct q) {
