@@ -341,7 +341,12 @@ void main() {
       await t.tap(find.text('צור חשבון'));
       await t.pumpAndSettle();
       expect(gw.emailCreations, ['new@b.co']);
-      expect(find.text('התחברת בהצלחה ✓'), findsOneWidget);
+      // #3 — the create path now shows the email-verification notice (not the
+      // generic sign-in toast); a verification mail was sent best-effort.
+      expect(
+        find.text('✓ החשבון נוצר — שלחנו מייל אימות לכתובת, אַשרו אותו'),
+        findsOneWidget,
+      );
       expect(find.text('🔐 התחברות לחשבון'), findsNothing); // sheet closed
       await drainToast(t);
     });

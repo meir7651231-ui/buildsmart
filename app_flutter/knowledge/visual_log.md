@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-06-15 — auth #3: הודעת מייל-אימות במסלול "צור חשבון"
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — דגל `_justCreated` + ה-auth-listener מציג במסלול-יצירה
+"✓ החשבון נוצר — שלחנו מייל אימות…" במקום הטוסט הגנרי (ה-`sendEmailVerification` כבר לא שקט). **אימות:**
+`analyze` 0 · `login_sheet_test` +20 ירוקים (טסט-ה-create עודכן לטוסט החדש; טסטי-הטלפון נשמרו). אכיפת
+`emailVerified` נדחתה (backend-ON בלבד, החלטת-מוצר; החנות נשלחת דמו).
+
+---
+
 ## 2026-06-15 — auth #1: auth-gate ב-OnboardingGate (backend-ON בלבד)
 
 **שינוי (UI, lib/screens):** `onboarding_screen.dart` — `OnboardingGate` מנתב משתמש לא-מחובר ל-`_OpeningFlow`

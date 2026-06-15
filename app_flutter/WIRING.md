@@ -8,6 +8,12 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth #3 (email-verification notice):** the "צור חשבון" success path
+> now toasts that a verification email was sent ("✓ החשבון נוצר — שלחנו מייל אימות…")
+> instead of the generic sign-in toast — `sendEmailVerification` is no longer
+> silent. (Hard `emailVerified` enforcement deferred — a backend-ON-only product
+> decision; the store ships demo.)
+
 > **2026-06-15 — auth #1 (auth-gate on the real backend):** `OnboardingGate` now
 > routes a signed-OUT user to the welcome/login flow when `useFirebaseBackend` is
 > ON (otherwise their writes are silently rules-denied — the orders/chat-sync

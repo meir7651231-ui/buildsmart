@@ -112,6 +112,10 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   /// the default — today's "כניסה עם אימייל") and CREATE-account (true, the new
   /// "צור חשבון" → `createUserWithEmailPassword`). Ephemeral UI state.
   bool _emailCreateMode = false;
+  // #3 — true while a "צור חשבון" is in flight, so the auth-stream listener shows
+  // the email-verification notice (a verification mail was sent best-effort by
+  // createUserWithEmailPassword) instead of the generic sign-in toast.
+  bool _justCreated = false;
 
   /// The verificationId [AuthGateway.sendOtp] resolved with — consumed by the
   /// code step. Null until a code was sent.
@@ -210,15 +214,20 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       showToast(context, 'הזן אימייל וסיסמה');
       return;
     }
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _justCreated = true; // #3 — show the verification notice on success
+    });
     try {
       await ref
           .read(authStateProvider.notifier)
           .createUserWithEmailPassword(email, password);
       if (mounted) setState(() => _busy = false);
     } on AuthGatewayException catch (e) {
+      _justCreated = false;
       _fail(hebrewAuthError(e.code));
     } on Object catch (_) {
+      _justCreated = false;
       _fail(hebrewAuthError('unknown'));
     }
   }
@@ -265,7 +274,15 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     // ScaffoldMessenger is resolved from a still-mounted context.
     ref.listen<AuthSnapshot>(authStateProvider, (prev, next) {
       if (next.user != null && prev?.user == null) {
-        showToast(context, 'התחברת בהצלחה ✓');
+        // #3 — a fresh account was just sent a verification email (best-effort,
+        // by createUserWithEmailPassword); prompt the user to confirm it rather
+        // than the generic sign-in toast.
+        showToast(
+          context,
+          _justCreated
+              ? '✓ החשבון נוצר — שלחנו מייל אימות לכתובת, אַשרו אותו'
+              : 'התחברת בהצלחה ✓',
+        );
         Navigator.of(context).maybePop();
       }
     });
