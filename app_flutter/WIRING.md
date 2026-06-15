@@ -8,6 +8,20 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — button-by-button fleet pass (4 surface traces) + fixes:** dispatched 4 read-only
+> agents tracing EVERY control + flow across login / registration / accounts / mechanism. Verdict:
+> every control wired correctly + every flow correct end-to-end; client↔server callable contracts
+> (setRole / deleteAccount / reviewRoleRequest) + the approval matrix verified **3-way consistent**
+> (client `approvableRolesForClaims` = server `APPROVER_FOR` inverse = rules `canReview`); flag-OFF
+> zero-regression confirmed. Fixed: (MED) the welcome email-create `users/{uid}` mirror wrote the
+> EMAIL into the `phone` field — now a phone→`phone`, an email→`email` (validIsraeliMobile/validEmail),
+> keeping the field `users_lookup.uidByPhone` queries clean. (cosmetic) profile delete doc-comment
+> updated (`user.delete` → `deleteAccount` callable); the OTP-expiry pre-check toast unified with the
+> server-mapped string. ACCEPTED (noted): the admin-only role-request inbox is UI-unreachable
+> (`rolesFromClaims` doesn't surface the `admin` bool) — but every requestable role already has an
+> operational reviewer (worker→contractor · courier→store · store/contractor→manager) and admin has
+> `setRole`, so no request is unreviewable; surfacing admin to the inbox is a deferred enhancement.
+
 > **2026-06-15 — fleet VERIFICATION-scan fixes (3rd pass, final):** the 3rd fleet pass (over the
 > final code) was clean on security (0) + most of lifecycle/gating; it caught 1 HIGH + 3 MEDIUM,
 > now closed: (HIGH) `_registerViaAuth` no longer gates on the not-yet-propagated `signedIn`

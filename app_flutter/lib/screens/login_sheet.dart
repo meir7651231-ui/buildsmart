@@ -215,7 +215,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     final sentAt = _otpSentAt;
     if (sentAt != null &&
         DateTime.now().difference(sentAt).inSeconds > _kCodeValiditySecs) {
-      showToast(context, 'תוקף הקוד פג — שלחו קוד חדש');
+      showToast(context, 'תוקף הקוד פג — שלח קוד חדש');
       return;
     }
     setState(() => _busy = true);

@@ -258,11 +258,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final writer = ref.read(usersProfileWriterProvider);
     if (uid != null && writer != null) {
       final p = ref.read(userProfileProvider);
-      // Best-effort identity mirror (merge); never blocks entry.
+      // Best-effort identity mirror (merge); never blocks entry. The contact is
+      // EITHER a phone OR an email (the email-create flow stores the email in
+      // `contact`), so route it to the matching field — never write an email
+      // into `phone` (the field users_lookup.uidByPhone queries).
       unawaited(
         writer.set(uid, {
           if (p.name.isNotEmpty) 'displayName': p.name,
-          if (p.contact.isNotEmpty) 'phone': p.contact,
+          if (validIsraeliMobile(p.contact)) 'phone': p.contact,
+          if (validEmail(p.contact)) 'email': p.contact,
         }).catchError((Object _) {}),
       );
     }
