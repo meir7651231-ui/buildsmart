@@ -8,6 +8,13 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth #6 inc.2 (role-request UI):** the profile screen (signed-in) gains a
+> "🪪 בקשת תפקיד" row → a bottom sheet listing the four requestable operational roles (each
+> stating WHO approves it per the matrix). Picking one writes `roleRequests/{uid}`
+> (status:pending, displayName/phone from the local profile) via the `roleRequestWriterProvider`
+> seam (null Firebase-free → submit is a safe no-op). The server `reviewRoleRequest` (inc.1)
+> approves/denies; the approver inbox is inc.3. `role_request_test` +2.
+
 > **2026-06-15 — auth P2 (displayName on create):** the email "צור חשבון" pane now has an
 > optional "שם מלא" field; on success it `register`s the name into the local profile, which the
 > welcome flow's post-auth step (`_finishAfterAuth`) already mirrors to `users/{uid}.displayName`

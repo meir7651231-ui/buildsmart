@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-06-15 — auth #6 inc.2: UI בקשת-תפקיד
+
+**שינוי (UI, lib/screens + lib/state):** `role_request_sheet.dart` (חדש) + שורת "🪪 בקשת תפקיד"
+ב-`profile_screen` (signed-in). הגיליון מציג 4 תפקידים תפעוליים (worker/courier/store/contractor)
+עם "מי מאשר" לכל אחד (לפי המטריצה); בחירה כותבת `roleRequests/{uid}` (status:pending,
+displayName/phone מהפרופיל-המקומי) דרך `roleRequestWriterProvider` (null ללא backend → no-op).
+ה-`reviewRoleRequest` בשרת (inc.1) מאשר/דוחה; ה-inbox = inc.3. **אימות:** `analyze` 0 ·
+`role_request_test` 2/2 (כתיבת pending + gate ה-null).
+
+---
+
 ## 2026-06-15 — auth P2: displayName ביצירת-חשבון-מייל
 
 **שינוי (UI, lib/screens):** `login_sheet.dart` — פיין-"צור חשבון" מקבל שדה "שם מלא (לא חובה)" מעל המייל;

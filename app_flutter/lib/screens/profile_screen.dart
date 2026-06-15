@@ -2,6 +2,7 @@ import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
+import 'package:buildsmart/screens/role_request_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -295,6 +296,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const _SectionLabel('חשבון'),
               const SizedBox(height: BsTokens.space3),
               _LinkRow(label: '🚪 התנתקות', onTap: _signOut),
+              const SizedBox(height: BsTokens.space2),
+              // #6 — ask for an operational role; the matrix approver signs off.
+              _LinkRow(
+                label: '🪪 בקשת תפקיד',
+                onTap: () => showRoleRequestSheet(context),
+              ),
               const SizedBox(height: BsTokens.space2),
               _LinkRow(
                 label: '🗑️ מחיקת חשבון',
