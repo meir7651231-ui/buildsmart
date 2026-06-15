@@ -1468,3 +1468,12 @@ RULE: כשרשומת-עובד נשמטת מ-view ממוקד-מעסיק בודק�
 ### ג — כלל המניעה
 ANTIPATTERN: scope של רשומת-עובד-פר-משתמש על session.uid במקום session.username בנתיב מקומי או seed שבו uid ריק לכל עובד
 RULE: רשומת-עובד-פר-משתמש מסוננת תמיד לפי session.username; session.uid ריק לכל עובד seed או demo כל עוד kUidScopedQueries כבוי, אז משתמשים בו רק כשדה additive מוכן-לשרת ולא כמפתח-סינון
+
+## 2026-06-15 — id מבוסס-timestamp בלי _seq: התנגשות → מחיקה פוגעת בשתיהן (4 stores)
+### א — הבעיה
+4 stores מקומיים מינטו id מ-timestamp בלבד בלי סיומת מונוטונית: WorkerCert (`cert-${micros}`), SickNote (`sick-${micros}`), CartList (`${millis}`), SavedProject (`${micros}`). על web ה-DateTime מדויק רק ל-1ms בערך, אז שתי יצירות באותה מילישנייה מינטו id זהה. כל ה-remove/delete/rename בקבצים האלה שומרים כל שורה ש-id שלה איננו היעד, אז מחיקת רשומה אחת מחקה בשקט את שתיהן (וגם rename שינתה את שתיהן). המנועים האחים (vacation/material/trainings/notifs/stock) כבר משתמשים ב-_seq בדיוק בגלל זה.
+### ב — הפתרון
+לכל אחד מ-4 ה-notifiers נוסף שדה `int _seq = 0;` וה-id מינט עם הסיומת `-${_seq++}`, בדיוק כמו worker_trainings ו-worker_notifs. ה-id נשאר String אטום (toJson/fromJson לא נוגעים בפורמט) ולכן אפס שינוי-סכמה. טסט: שני adds לכל store → ה-ids נבדלים והסגמנט-האחרון הוא seq עוקב.
+### ג — כלל המניעה
+ANTIPATTERN: id שנמכר מ-DateTime.now timestamp בלבד בלי סיומת _seq מונוטונית בקובץ-store שיש בו מחיקה לפי id
+RULE: כל id שנמכר מ-timestamp בקובץ עם מחיקה-לפי-id חייב סיומת מונוטונית _seq כמו worker_trainings ו-worker_notifs; web DateTime מדויק ל-1ms בערך אז timestamp לבדו מתנגש ומחיקה פוגעת בכל המתנגשים

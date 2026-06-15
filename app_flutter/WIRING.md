@@ -2074,3 +2074,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון (תבנית-האחים VacationRequest/AttendanceDay/WorkerCert שכבר מסננים לפי username):** `MaterialRequest` קיבל שדה-scope `username` (submit חותם אותו, requestsForWorker מסנן לפיו); `workerUid` נשמר כ-id additive מוכן-לשרת (username==uid בנתיב Firebase → אפס רגרסיה). `worker_employer_stock_sheet` מעביר `session.username` בקריאה ובהגשה.
 - **gate:** analyze 0 · caller יחיד (הגיליון) עודכן · mutation §mutation_log (RED `+7 -1` בהחזרת הפילטר→workerUid · GREEN `+8` משוחזר) · ANTIPATTERN+RULE §stuck_log · stuck_regression מסונכרן.
 - **קבצים נגועים:** `lib/state/material_requests_engine.dart` · `lib/screens/worker_employer_stock_sheet.dart` · `test/material_requests_test.dart` (+טסט-בידוד seed-session). **לא נגעתי:** orders / auth / firebase / manager-board / worker-board. נמצא ע"י ביקורת-הלילה האוטונומית של הצי.
+
+### #R2-seq-guard — מגן _seq ל-id מבוסס-timestamp ב-4 stores (דליפת-מחיקה) — 2026-06-15
+- **הבאג (ביקורת-לילה סבב-2 · medium/low):** WorkerCert/SickNote/CartList/SavedProject מינטו id מ-timestamp בלבד; על web (~1ms) שתי יצירות באותה מילישנייה → id זהה → remove/delete/rename מחקו או שינו את שתיהן.
+- **התיקון:** `int _seq = 0;` + סיומת `-${_seq++}` ל-id בכל 4 ה-notifiers (תבנית worker_trainings/worker_notifs). id נשאר String אטום → אפס שינוי-persist.
+- **gate:** analyze 0 · טסט `id_seq_collision_test` (4 חנויות) · mutation §mutation_log (RED `+3 -1` הסרת _seq מ-worker_certs · GREEN `+4`) · ANTIPATTERN+RULE §stuck_log · stuck_regression מסונכרן.
+- **קבצים:** `lib/state/worker_certs.dart` · `worker_forms.dart` · `cart_lists_state.dart` · `saved_projects.dart` · `test/id_seq_collision_test.dart`. **לא נגעתי** ב-UI / orders / auth / manager-board.
