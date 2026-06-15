@@ -1190,3 +1190,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #A3-pod-signature — persona_pod_sheet: toast לא-משקר אחרי await (לוגיקה-בלבד)
 **אין screenshot — למה:** השינוי בקובץ-המסך הוא ב-onPressed של כפתור-החתימה הקיים: `final ok = await fn.captureSignature(...)` ואז `showToast(ok ? 'נשמרה ✍️' : 'לא נשמרה — נסה שוב')`. אפס שינוי פריסה/widget — אותו כפתור, אותו עיצוב. ההשפעה הנראית: בכשל-אחסון מופיע "לא נשמרה — נסה שוב" במקום "נשמרה" שקרית. מאומת ב-persona_fulfillment_test (engine-level, mutation RED→GREEN §mutation_log). analyze 0.
+
+## 2026-06-15 — #A4-dst-day-idiom — worker/courier reports: dayIdx+weekStart דרך עוזר DST-safe (לוגיקה-בלבד)
+**אין screenshot — למה:** השינוי בשני קבצי-המסך הוא 3 שורות בכל אחד — שורת ה-import של calendar_days, `weekStart = startOfWeekSunday(today)` (במקום subtract Duration), ו-`dayIdx = daysBetweenDst(weekStart, c/d)` (במקום DateTime difference inDays). אפס שינוי פריסה/widget/צבע — אותה היסטוגרמת-שבוע, אותו עיצוב. ההשפעה הנראית מופיעה רק על גבול-DST (שבוע ה-spring-forward/fall-back): הדלי-יומי נכון במקום נסחף-ביום. מאומת ב-calendar_days_test (pure, mutation RED→GREEN §mutation_log, TZ=Israel). analyze 0.

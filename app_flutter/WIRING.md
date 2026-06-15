@@ -2181,3 +2181,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** captureSignature → Future<bool> (await _persist plus rollback, חיקוי capturePod); הכפתור מריע "נשמרה ✍️" רק על true, אחרת "לא נשמרה — נסה שוב". server-ready: החתימה רוכבת על ה-side-car הראשי podSig ושורדת restart (bindRemote יזרים חי).
 - **gate:** analyze 0 · persona_fulfillment_test +23 · mutation §mutation_log (return ok→false → A3 reload-test RED +22 -1 · GREEN +23).
 - **קבצים:** `lib/state/persona_fulfillment.dart` · `lib/screens/persona_pod_sheet.dart` · `test/persona_fulfillment_test.dart`.
+
+### #A4-dst-day-idiom — offset-יום DST-safe אחיד (גאנט + 2 דוחות) — 2026-06-15
+- **הבאג (החלטת-בעלים A4):** offset-יום ב-local-midnight difference inDays (גאנט startDay · worker/courier reports dayIdx) מתקצר ביום על גבול spring-forward; weekStart ב-subtract Duration נסחף גם.
+- **התיקון:** עוזר טהור משותף `lib/logic/calendar_days.dart` — `daysBetweenDst` (DateTime.utc, ימי-24h) plus `startOfWeekSunday` (DateTime y m d-k חשבון-לוח). 3 אתרי-offset plus 2 weekStart עוברים דרכו. idiom אחיד.
+- **gate:** analyze 0 · calendar_days_test +6 (TZ=Israel, spring-forward 27/3/2026) · contractor_task_gantt_test +21 ירוק · mutation §mutation_log (DateTime.utc→DateTime → 3 טסטי-DST RED +3 -3 · GREEN +6).
+- **קבצים:** `lib/logic/calendar_days.dart` (חדש) · `lib/logic/tasks_gantt.dart` · `lib/screens/worker_reports_tab.dart` · `lib/screens/courier_reports_tab.dart` · `test/calendar_days_test.dart` (חדש).

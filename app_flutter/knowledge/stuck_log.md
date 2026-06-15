@@ -1528,3 +1528,12 @@ captureSignature → Future<bool> בחיקוי capturePod: super.state=next (ס�
 ### ג — כלל המניעה
 ANTIPATTERN: toast הצלחה אחרי כתיבה מתמשכת שעברה דרך set-state עם persist לא-מוּמתן בלי לבדוק שה-write נחת
 RULE: כל מתודת-כתיבה שיש לה side-effect חזותי של הצלחה חייבת להחזיר Future bool מ-await של ה-persist ולגלגל-אחור את ה-state בכשל, וה-UI מריע הצלחה רק על true כמו capturePod
+
+## 2026-06-15 — offset-יום חוצה גבול-DST: local-midnight difference inDays מתקצר ביום
+### א — הבעיה
+גאנט (startDay) plus שתי לשוניות-הדוחות (dayIdx בהיסטוגרמת-השבוע) חישבו offset-יום עם DateTime מקומי difference inDays על midnight-ים מקומיים. בלילה של spring-forward (ישראל: שישי לפני יום-ראשון האחרון של מרץ) היום הוא 23h, אז ההפרש בין שני midnight-ים מקומיים סמוכים = 23h ו-inDays מתקצר ל-0 — בָּר-גאנט נופל ביום שגוי, משלוח/השלמה נופלים בדלי-שבוע שגוי. בנוסף weekStart חושב ב-subtract Duration days (חיסור span קבוע של שעות) שנסחף ב-DST.
+### ב — הפתרון
+עוזר טהור משותף lib/logic/calendar_days.dart: daysBetweenDst מצמצם את שני הקצוות ל-DateTime.utc (ימי-24h, בלי DST → פער-לוחי מדויק בכל TZ); startOfWeekSunday בונה את עוגן-השבוע ב-DateTime y m d-k (חשבון-לוח, לא חיסור-שעות). שלושת אתרי-ה-offset ושתי בנְיות-weekStart עוברים דרכם. ה-streak כבר היה חשבון-לוח (DateTime y m d-streak plus contains) — נשאר.
+### ג — כלל המניעה
+ANTIPATTERN: offset-יום או מספר-ימים מחושב ב-DateTime מקומי עם difference inDays או ב-subtract Duration days על תאריך מקומי
+RULE: כל חשבון של מספר-ימים-לוחיים חייב לצמצם את שני הקצוות ל-DateTime.utc ולחסר שם ימי-24h, ועוגן-תאריך נבנה ב-DateTime y m d-k ולא ב-subtract Duration days — שניהם נסחפים על גבול-DST

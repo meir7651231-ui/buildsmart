@@ -1101,3 +1101,10 @@
 - מוטציה: `return ok;` → `return false;`. תוצאה: הטסט "captureSignature awaits persist (true) and survives a reload (A3)" **אדום `+22 -1`** ✅ (ה-isTrue על n1 נכשל). שאר 22 ירוקים.
 - שחזור → **+23 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: החתימה רוכבת על ה-side-car הראשי (`'podSig'` ב-toJson), אז await יחיד של `_persist` הוא כל הכתיבה (בלי `_mirrorPodPhoto` שהוא לתמונה בלבד). הקוד הישן עשה `_put`→`set state`→`_persist()` fire-and-forget — כשל-quota השאיר state בזיכרון אבל לא בדיסק, וה-UI הריע "נשמרה" שקרית; ב-reload החתימה נעלמה. עכשיו: rollback ל-state הקודם plus `false`, וה-UI כן. analyze 0. server-ready (החתימה שורדת restart; bindRemote יזרים חי).
+
+## A4-dst-day-idiom — off-by-one ב-offset יום חוצה גבול-DST (גאנט + 2 דוחות) — 2026-06-15
+- **קבצים:** חדש `lib/logic/calendar_days.dart` (`daysBetweenDst` מבוסס-`DateTime.utc` plus `startOfWeekSunday` חשבון-לוח). `tasks_gantt.dart` (startDay offset), `worker_reports_tab.dart` plus `courier_reports_tab.dart` (weekStart plus dayIdx של היסטוגרמת-השבוע) עוברים דרכם. טסט חדש `calendar_days_test.dart` (+6).
+- **load-bearing:** `daysBetweenDst` — `DateTime.utc(...)` (×2). מוטציה: `DateTime.utc(` → `DateTime(` (local).
+- תוצאה (TZ=Israel Standard Time, ה-spring-forward 2026 ב-27/3): 3 הטסטים התלויי-DST של daysBetweenDst **אדומים `+3 -3`** ✅ (adjacent dates, multi-day span, time-of-day ignored). טסטי startOfWeekSunday נשארו ירוקים (לא משתמשים ב-.utc).
+- שחזור → **+6 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: `DateTime(y,m,d)` מקומי הוא midnight מקומי; הפרש בין שני midnight-ים מקומיים חוצה spring-forward = 23h → `.inDays` מתקצר ל-0 (יום פחות) → בָּר נופל ביום שגוי / משלוח בדלי-שבוע שגוי. UTC (ימי-24h, בלי DST) נותן את הפער הלוחי המדויק בכל TZ. בנוסף: `weekStart` חושב ב-subtract Duration days (חיסור-שעות שנסחף ב-DST) → הוחלף ב-DateTime y m d-k (חשבון-לוח). הגאנט הוא pure (VM-safe) וכך גם calendar_days. ה-streak כבר היה חשבון-לוח — לא נגעתי. analyze 0.
