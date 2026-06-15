@@ -2193,3 +2193,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** כל קבוצה = Set-של-statuses; proposed קופל ל-⏳ בתור (לא קבוצה נפרדת). חולצה `groupByStatus` טהורה. כל status ממופה לקבוצה אחת → counts sum to total.
 - **gate:** analyze 0 · worker_task_board_group_test +1 · mutation §mutation_log (הסרת proposed מסט-בתור → RED +0 -1 · GREEN).
 - **קבצים:** `lib/screens/worker_task_board_screen.dart` · `test/worker_task_board_group_test.dart`.
+
+### #52-order-notif-to-orders-world — התראות הזמנה/משלוח בעולם-ההזמנות — 2026-06-15
+- **המהלך (החלטת-בעלים #52, מאושר):** 2 ההתראות הקשורות-הזמנה typeOrders/typeShipments עברו ממסך-ההגדרות אל עולם-ההזמנות — 🔔 בכותרת טאב 📦 הזמנות (store_screen) → גיליון OrderNotifSheet. שאר ההתראות נשארו בהגדרות › התראות.
+- **חיווט:** הגיליון קושר את אותו `notifSettingsProvider` — מקור-אמת יחיד, אין עותק. שורות-ה-UI ב-notif_settings_screen הוסרו (השדות/copyWith במודל נשארו — engine-tests לא הושפעו).
+- **gate:** analyze 0 · order_notif_sheet_test +1 (widget: tap → provider flips) · mutation §mutation_log (RED +0 -1 · GREEN) · de-risk: notif_settings_wiring/edge_cases/robustness/settings_honesty ירוקים.
+- **קבצים:** `lib/screens/order_notif_sheet.dart` (חדש) · `lib/screens/store_screen.dart` · `lib/screens/notif_settings_screen.dart` · `test/order_notif_sheet_test.dart`.

@@ -1115,3 +1115,10 @@
 - תוצאה: `worker_task_board_group_test` **אדום `+0 -1`** ✅ — המשימה המוצעת (id 1) לא נכנסה לאף קבוצה → containsAll[1,2] נכשל plus הסכום 3≠4.
 - שחזור → **ירוק** · RESTORED-IDENTICAL.
 - מסקנה: המנוע מחזיק status `'proposed'` (worker proposeTask → ממתין ל-approveProposal של הקבלן), אבל `_groups` כיסה רק active/rejected/pending/review/done → משימה מוצעת נפלה בין-הכיסאות (לא הוצגה כלל, וה-invariant counts-sum-to-total נשבר בשקט). A5 (החלטת-בעלים): לא קבוצה חדשה — לקפל proposed לתוך בתור. עכשיו כל status ממופה לקבוצה אחת בדיוק. analyze 0.
+
+## #52-order-notif-to-orders-world — התראות הזמנה/משלוח מההגדרות → עולם-ההזמנות — 2026-06-15
+- **קבצים:** חדש `order_notif_sheet.dart` (OrderNotifSheet plus showOrderNotifSheet — 2 toggles הקשורים ל-notifSettingsProvider: typeOrders/typeShipments). `store_screen.dart` — 🔔 ב-_SectionChipsRow כשהמקטע=📦 הזמנות → פותח את הגיליון. `notif_settings_screen.dart` — הוסרו 2 השורות הזמנות/משלוחים ממקטע 🔔 (שאר ה-types נשארו). טסט חדש `order_notif_sheet_test.dart` (+1).
+- **load-bearing:** ה-toggle `onChanged: v => n.update(x => x.copyWith(typeOrders: v))` — כותב את ה-provider המשותף. מוטציה: `copyWith(typeOrders: v)` → `copyWith(typeOrders: x.typeOrders)` (מתעלם מ-v).
+- תוצאה: `order_notif_sheet_test` **אדום `+0 -1`** ✅ — אחרי tap, typeOrders נשאר true (הציפייה false נכשלה) → ה-tap לא כתב את ה-provider.
+- שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: ההתראות הקשורות-הזמנה הועברו למקום שבו הקונה עוקב אחרי הזמנות (🔔 בטאב 📦 הזמנות), כשהן קושרות את אותו notifSettingsProvider (מקור-אמת יחיד, לא עותק) — שאר ההתראות נשארו בהגדרות › התראות. שני הטסטים שנוגעים ב-typeOrders/typeShipments הם engine-level (notifMutedSections/copyWith) → לא הושפעו. שני טסטים שמרנדרים NotifSettingsScreen (robustness, settings_honesty) ירוקים. analyze 0. אין שער-format.

@@ -1196,3 +1196,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #A5-board-proposed-fold — worker_task_board: proposed מופיע תחת בתור (שינוי-נראות)
 **שינוי נראה (בלי screenshot — pure-verified):** משימה ב-status proposed שהייתה קודם בלתי-נראית בלוח מופיעה כעת תחת קבוצת "⏳ בתור" (יחד עם pending). אין שינוי בעיצוב/פריסת ה-_StatusGroup עצמו — אותו widget, אותו סגנון; רק תוכן-הדלי השתנה (כיסוי מלא של ה-statuses). מאומת ב-groupByStatus הטהורה (worker_task_board_group_test, mutation RED→GREEN §mutation_log) — הסכום-על-הקבוצות שווה ל-total. analyze 0.
+
+## 2026-06-15 — #52-order-notif-to-orders-world — 🔔 בטאב הזמנות + הסרה מהגדרות
+**שינוי נראה (בלי screenshot — widget-verified):** בטאב 📦 הזמנות (store_screen) נוסף כפתור 🔔 בכותרת המקטע — גלוי רק כשהמקטע=הזמנות — שפותח גיליון תחתון "🔔 התראות הזמנות ומשלוחים" עם 2 toggles. במסך ההגדרות › התראות, שורות "הזמנות" plus "משלוחים" הוסרו ממקטע 🔔 (שאר ה-types נשארו). אין שינוי-עיצוב לרכיבים קיימים — 🔔 הוא IconButton סטנדרטי, הגיליון SwitchListTile-ים סטנדרטיים. מאומת ב-order_notif_sheet_test (mutation RED→GREEN §mutation_log) plus 2 טסטי-מסך קיימים ירוקים. analyze 0.
