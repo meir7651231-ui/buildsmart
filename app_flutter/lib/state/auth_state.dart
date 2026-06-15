@@ -266,7 +266,13 @@ class FirebaseAuthGateway implements AuthGateway {
         },
       ),
     );
-    return completer.future;
+    // Backstop: if NONE of the callbacks ever fire (a rare SDK edge), don't hang
+    // the caller forever — surface `unavailable` after a window well past the
+    // SDK's own auto-retrieval timeout.
+    return completer.future.timeout(
+      const Duration(seconds: 120),
+      onTimeout: () => throw const AuthGatewayException('unavailable'),
+    );
   }
 
   @override

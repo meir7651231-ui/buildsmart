@@ -20,6 +20,7 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -127,6 +128,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   // the email-verification notice (a verification mail was sent best-effort by
   // createUserWithEmailPassword) instead of the generic sign-in toast.
   bool _justCreated = false;
+  // Latches the one-time success toast+pop in the auth listener, so a later
+  // user→null→user transition on the same sheet can't re-toast / double-pop.
+  bool _popped = false;
   // P2 — show/hide the password (the eye toggle in the email pane). Ephemeral.
   bool _showPassword = false;
   // P2 — when the current SMS code was sent, for the resend cooldown + the
@@ -202,7 +206,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   Future<void> _confirmCode() async {
     final code = _code.text.trim();
     final verificationId = _verificationId;
-    if (code.length < 6 || verificationId == null) {
+    if (verificationId == null || !RegExp(r'^\d{6}$').hasMatch(code)) {
       showToast(context, 'הזן את הקוד בן 6 הספרות שקיבלת ב-SMS');
       return;
     }
@@ -235,6 +239,10 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       showToast(context, 'הזן אימייל וסיסמה');
       return;
     }
+    if (!validEmail(email)) {
+      showToast(context, 'כתובת האימייל אינה תקינה');
+      return;
+    }
     setState(() => _busy = true);
     try {
       await ref
@@ -257,6 +265,10 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     final password = _password.text;
     if (email.isEmpty || password.isEmpty) {
       showToast(context, 'הזן אימייל וסיסמה');
+      return;
+    }
+    if (!validEmail(email)) {
+      showToast(context, 'כתובת האימייל אינה תקינה');
       return;
     }
     // P2 — client-side length pre-check (Firebase's floor is 6) so the user gets
@@ -304,6 +316,10 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       showToast(context, 'הזן אימייל לאיפוס הסיסמה');
       return;
     }
+    if (!validEmail(email)) {
+      showToast(context, 'כתובת האימייל אינה תקינה');
+      return;
+    }
     setState(() => _busy = true);
     try {
       await ref.read(authStateProvider.notifier).resetPassword(email);
@@ -335,7 +351,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     // auto-verification) → toast + pop. Toast BEFORE pop so the root
     // ScaffoldMessenger is resolved from a still-mounted context.
     ref.listen<AuthSnapshot>(authStateProvider, (prev, next) {
-      if (next.user != null && prev?.user == null) {
+      if (next.user != null && prev?.user == null && !_popped) {
+        _popped = true; // one-shot — never re-toast / double-pop this sheet
         // #3 — a fresh account was just sent a verification email (best-effort,
         // by createUserWithEmailPassword); prompt the user to confirm it rather
         // than the generic sign-in toast.
@@ -345,6 +362,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
               ? '✓ החשבון נוצר — שלחנו מייל אימות לכתובת, אַשרו אותו'
               : 'התחברת בהצלחה ✓',
         );
+        _justCreated = false;
         Navigator.of(context).maybePop();
       }
     });
@@ -409,6 +427,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           hint: 'מספר טלפון נייד',
           icon: Icons.phone_iphone,
           keyboardType: TextInputType.phone,
+          autofillHints: const [AutofillHints.telephoneNumber],
+          textInputAction: TextInputAction.done,
+          onSubmitted: _sendOtp,
         ),
         const SizedBox(height: BsTokens.space3),
         _primaryButton(label: 'שלח קוד אימות', onPressed: _sendOtp),
@@ -434,6 +455,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           icon: Icons.sms_outlined,
           keyboardType: TextInputType.number,
           maxLength: 6,
+          autofillHints: const [AutofillHints.oneTimeCode],
+          textInputAction: TextInputAction.done,
+          onSubmitted: _confirmCode,
         ),
         const SizedBox(height: BsTokens.space3),
         _primaryButton(label: 'אימות וכניסה', onPressed: _confirmCode),
@@ -477,6 +501,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             controller: _name,
             hint: 'שם מלא (לא חובה)',
             icon: Icons.person_outline,
+            ltr: false, // a Hebrew name stays RTL
+            autofillHints: const [AutofillHints.name],
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: BsTokens.space3),
         ],
@@ -485,6 +512,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           hint: 'אימייל',
           icon: Icons.alternate_email,
           keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: BsTokens.space3),
         _field(
@@ -492,6 +521,11 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           hint: _emailCreateMode ? 'סיסמה (6+ תווים)' : 'סיסמה',
           icon: Icons.lock_outline,
           obscure: !_showPassword,
+          autofillHints: _emailCreateMode
+              ? const [AutofillHints.newPassword]
+              : const [AutofillHints.password],
+          textInputAction: TextInputAction.done,
+          onSubmitted: () => _emailCreateMode ? _emailCreate() : _emailLogin(),
           // P2 — show/hide eye toggle.
           suffix: IconButton(
             onPressed:
@@ -597,6 +631,13 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     int? maxLength,
     bool obscure = false,
     Widget? suffix,
+    // LTR by default (digits/email/latin); pass false for a Hebrew NAME field so
+    // it stays RTL. autofillHints/textInputAction/onSubmitted wire OS autofill +
+    // the keyboard's next/go action to the pane's primary action.
+    bool ltr = true,
+    Iterable<String>? autofillHints,
+    TextInputAction? textInputAction,
+    VoidCallback? onSubmitted,
   }) {
     return TextField(
       controller: controller,
@@ -605,7 +646,10 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       maxLength: maxLength,
       obscureText: obscure,
       textAlign: TextAlign.right,
-      textDirection: TextDirection.ltr,
+      textDirection: ltr ? TextDirection.ltr : null,
+      autofillHints: autofillHints,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted == null ? null : (_) => onSubmitted(),
       style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
       decoration: InputDecoration(
         hintText: hint,

@@ -299,7 +299,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           title: 'שם משתמש',
           body: 'שם המשתמש שהוגדר לך בלוח — באנגלית, בלי הבדל בין אותיות '
               'גדולות לקטנות.',
-          child: _field(_name, 'שם משתמש', Icons.person_outline),
+          child: _field(
+            _name,
+            'שם משתמש',
+            Icons.person_outline,
+            autofillHints: const [AutofillHints.username],
+            textInputAction: TextInputAction.next,
+          ),
         ),
         const SizedBox(height: BsTokens.space3),
         HelpTarget(
@@ -312,6 +318,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             Icons.key_outlined,
             keyboardType: TextInputType.number,
             ltr: true,
+            textInputAction: TextInputAction.done,
             errorText: _codeRejected
                 ? 'שם משתמש או קוד לא נכונים'
                 : _contact.text.trim().isEmpty || codeFormatOk
@@ -549,7 +556,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         body: 'השם שיוצג בפרופיל ובהזמנות. שדה זה פחות קריטי — '
                             'הזיהוי בפועל הוא לפי טלפון/מייל.',
                         child:
-                            _field(_name, 'שם מלא', Icons.person_outline),
+                            _field(
+                              _name,
+                              'שם מלא',
+                              Icons.person_outline,
+                              autofillHints: const [AutofillHints.name],
+                              textInputAction: TextInputAction.next,
+                            ),
                       ),
                       const SizedBox(height: BsTokens.space3),
                       HelpTarget(
@@ -561,6 +574,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           'טלפון או אימייל',
                           Icons.alternate_email,
                           ltr: true,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          textInputAction: TextInputAction.next,
                           errorText: _contact.text.trim().isEmpty || contactOk
                               ? null
                               : 'מספר נייד או אימייל לא תקינים',
@@ -582,6 +598,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             Icons.lock_outline,
                             obscure: true,
                             ltr: true,
+                            autofillHints: const [AutofillHints.newPassword],
+                            textInputAction: TextInputAction.done,
                             errorText: _password.text.isEmpty ||
                                     _password.text.length >= 6
                                 ? null
@@ -766,12 +784,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // inherited) keeps a Hebrew NAME field right-to-left. Mirrors login_sheet's
     // _field, which forces ltr on its (all-latin) inputs.
     bool ltr = false,
+    Iterable<String>? autofillHints,
+    TextInputAction? textInputAction,
   }) {
     final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
       controller: c,
       keyboardType: keyboardType,
       obscureText: obscure,
+      autofillHints: autofillHints,
+      textInputAction: textInputAction,
       textAlign: TextAlign.right,
       textDirection: ltr ? TextDirection.ltr : null,
       decoration: InputDecoration(

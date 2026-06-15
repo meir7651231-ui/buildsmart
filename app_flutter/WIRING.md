@@ -8,6 +8,19 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — fleet-review MEDIUM+LOW batch (login/registration):** swept the rest of the
+> review. login_sheet + welcome `_field` gained `autofillHints` + `textInputAction` (OS autofill
+> + keyboard next/go; login_sheet's single-field panes also wire `onSubmitted` to their action)
+> and a selective `ltr` (Hebrew NAME stays RTL — fixing login_sheet's name field too; digits/
+> email/code/password go LTR); welcome's contact field got `keyboardType: emailAddress`.
+> login_sheet: email-shape pre-validation on sign-in/create/reset; `_confirmCode` now requires
+> EXACTLY 6 digits; a `_popped` latch + `_justCreated` reset in the auth listener (no stale
+> "account created" toast / double-pop). auth_state: a 120s backstop timeout on the OTP completer
+> (no infinite hang if no callback fires). role_request: clear busy before the pop; chevron
+> `ExcludeSemantics`. Deferred w/ rationale: emoji-in-titles (app-wide style; canvaskit tofu is
+> web-only, launch is mobile) + the web `_webConfirmations` micro-leak (web OTP-map risk > benefit).
+> 59/59 affected tests green.
+
 > **2026-06-15 — fleet-review HIGH fixes (login/registration, 2):** (1) `submitRoleRequest`
 > (role_requests.dart) now wraps its Firestore write in try/catch → returns false on a
 > network/permission failure instead of throwing past the sheet (which left it stuck

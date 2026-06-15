@@ -53,6 +53,8 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
     final ok = await submitRoleRequest(ref, role);
     if (!mounted) return;
     if (ok) {
+      // Clear busy BEFORE the pop so a vetoed/blocked pop leaves a usable sheet.
+      setState(() => _busy = false);
       showToast(context, '✓ בקשתך נשלחה — ממתינה לאישור');
       await Navigator.of(context).maybePop();
     } else {
@@ -195,7 +197,9 @@ class _RoleRequestRow extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_left, color: Color(0xFFBBBBBB)),
+                const ExcludeSemantics(
+                  child: Icon(Icons.chevron_left, color: Color(0xFFBBBBBB)),
+                ),
               ],
             ),
           ),

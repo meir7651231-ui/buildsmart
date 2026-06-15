@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-06-15 — fleet-review MEDIUM+LOW batch (כניסה/הרשמה)
+
+**שינוי (UI, lib/screens + lib/state):** מקלדת+נגישות+תקינות בשדות הכניסה/הרשמה: `autofillHints` +
+`textInputAction` (autofill + מקש הבא/שלח; ב-login גם `onSubmitted` בפיינים חד-שדה), `ltr` סלקטיבי
+(שם עברי RTL — תיקון גם לשדה-השם ב-login; ספרות/מייל/קוד/סיסמה LTR), ו-`keyboardType: emailAddress`
+לשדה-הקשר בהרשמה. login_sheet: ולידציית-מייל לפני round-trip, OTP בדיוק-6-ספרות, latch `_popped` +
+איפוס `_justCreated` (אין טוסט-שגוי / pop-כפול). auth_state: timeout-גיבוי 120ש׳ ל-completer של ה-OTP.
+role_request: ניקוי busy לפני ה-pop + `ExcludeSemantics` לאייקון. **אימות:** `analyze` 0 (שלי) ·
+login_sheet+role_request+auth_state 59/59. **דחוי (נימוק):** אמוji-בכותרות (סגנון אפליקציה-רוחבי;
+canvaskit-tofu הוא web-only וה-launch mobile) + micro-leak של מפת web-OTP (סיכון > תועלת).
+
+---
+
 ## 2026-06-15 — fleet-review HIGH fixes (כניסה/הרשמה)
 
 **שינוי (UI, lib/screens + lib/state):** (1) `role_requests.dart` — `submitRoleRequest` עוטף את
