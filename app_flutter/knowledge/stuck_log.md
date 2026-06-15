@@ -1459,3 +1459,12 @@ RULE: אף פעם לא מציגים toast שטוען שתמונה צורפה א�
 ### ג — כלל המניעה
 ANTIPATTERN: ריפוד פילטר ממוקד-מעסיק ב-OR-employerId-isEmpty כדי לתקן רשומה-נשמטת כשטסט קיים מאשר שרשומת-מחרוזת-ריקה מורחקת-בכוונה
 RULE: כשרשומת-עובד נשמטת מ-view ממוקד-מעסיק בודקים תחילה אם ה-scoping הקשיח מכוון (קיים טסט שמאשר הרחקת-ריק); אם כן מתקנים במקור על-ידי חיתום ה-employerId על חשבון-ה-seed או ה-session ולא מרפדים את הפילטר; מריצים את הטסטים-המאשרים-הרחקה לפני שינוי-המקור ואחריו
+
+## 2026-06-15 — בקשות-חומר: scope על session.uid דלף בין עובדי-seed (uid ריק לכולם)
+### א — הבעיה
+מנוע בקשות-החומר מיקד את "הבקשות שלי" של העובד ואת חותם-ההגשה על session.uid (requestsForWorker סינן workerUid). אבל session.uid מאוכלס רק בנתיב Firebase-Auth (kUidScopedQueries כבוי כברירת-מחדל); בנתיב seed או demo החי, login ו-enterDemo לא מאתחלים uid, אז כל עובד נושא uid ריק. לכן workerUid היה '' לכולם ו-requestsForWorker('') החזיר את בקשות-החומר הפרטיות של כל עובד לכל עובד אחר — הפרת אינווריאנט #66 (כל עובד רואה רק את שלו). מנועי-האחים (חופשה, נוכחות, תעודות) כבר מסננים לפי username דווקא בגלל זה; בקשות-החומר היה החריג.
+### ב — הפתרון
+הוספת שדה username ל-MaterialRequest (מפתח-ה-scope, כמו VacationRequest.username), submit מקבל וחותם אותו, requestsForWorker מסנן לפי username; workerUid נשמר כ-id מוכן-לשרת (username שווה-ל-uid בנתיב Firebase → אפס רגרסיה). הגיליון מעביר session.username בקריאה ובהגשה. טסט-בידוד: שני עובדים עם workerUid ריק ושמות-משתמש שונים — כל אחד רואה רק את שלו.
+### ג — כלל המניעה
+ANTIPATTERN: scope של רשומת-עובד-פר-משתמש על session.uid במקום session.username בנתיב מקומי או seed שבו uid ריק לכל עובד
+RULE: רשומת-עובד-פר-משתמש מסוננת תמיד לפי session.username; session.uid ריק לכל עובד seed או demo כל עוד kUidScopedQueries כבוי, אז משתמשים בו רק כשדה additive מוכן-לשרת ולא כמפתח-סינון
