@@ -7,6 +7,7 @@ firebase-functions **v2/gen2** (כל הפונקציות — Cloud Run/Eventarc).
 | function | סוג | תפקיד |
 |---|---|---|
 | `setRole` | callable | S1.9 — הקצאת תפקיד כ-custom-claim (admin בלבד). **ללא שינוי מה-skeleton.** |
+| `reviewRoleRequest` | callable | #6 — אישור/דחיית בקשת-תפקיד לפי **מטריצה היררכית** (worker→contractor · courier→store · store/contractor→manager · admin=any). באישור כותב claim של התפקיד התפעולי (Admin SDK) ומסמן `roleRequests/{uid}` approved + auditLog. המטריצה (`mayReviewRoleRequest`) טהורה + נבדקת ב-selftest. |
 | `advanceOrderStage` | callable | S8.1 — קידום הזמנה **צעד אחד** ב-`ORDER_FLOW`, עם אכיפת-תפקיד מה-claims. נתיב-הכתיבה המוסמך. |
 | `revertIllegalOrderStageWrite` | trigger (orders/{id} updated) | S8.1 — defense-in-depth: כתיבה ישירה של stage שאינה צעד-קדימה-בודד **מוחזרת לאחור** + auditLog. |
 | `computeCredit` | callable | S8.2 — אשראי-קבלן מחושב-שרת (port מדויק של `contractorCredit`) + used/balance/pct מההזמנות החיות. |
@@ -126,9 +127,9 @@ firebase functions:secrets:set R2_SECRET_ACCESS_KEY
 cd functions
 npm install
 npx tsc --noEmit     # typecheck (חובה ירוק)
-npm run selftest     # build + node lib/selftest.js — 53/53 PASS
+npm run selftest     # build + node lib/selftest.js — 65/65 PASS
                      # (לוגיקה טהורה: hash/credit מול probe של Dart VM,
-                     #  שרשרת-stages, מטריצת-תפקידים)
+                     #  שרשרת-stages, מטריצת-תפקידים, מטריצת-אישור #6)
 ```
 
 `src/` מודולרי: `index.ts` (entrypoint — setRole + re-exports) · `common.ts`

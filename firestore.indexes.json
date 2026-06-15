@@ -35,6 +35,11 @@
     "  6. chatMessages (threadId ASC, ts ASC) — ACTIVE NOW. threadId IS written",
     "     today; the per-thread stream where('threadId'==id).orderBy('ts') (S4.2)",
     "     renders the conversation chronologically (ascending).",
+    "  7. roleRequests (requestedRole ASC, status ASC) — #6. Serves the approver",
+    "     list: where('requestedRole'==r).where('status'=='pending') — a contractor",
+    "     sees worker requests, a store sees courier, a manager sees store+",
+    "     contractor (an in-list query over the same index). Approve/deny is the",
+    "     reviewRoleRequest callable; the client sorts the small pending set in-mem.",
     "",
     "NOTE: `ts` is written as an ISO-8601 STRING (orders_firebase toDoc:",
     "createdAt.toIso8601String()); ISO-8601 sorts lexicographically == chrono, so",
@@ -88,6 +93,14 @@
       "fields": [
         { "fieldPath": "threadId", "order": "ASCENDING" },
         { "fieldPath": "ts", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "roleRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "requestedRole", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
       ]
     }
   ],

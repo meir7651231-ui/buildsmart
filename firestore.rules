@@ -463,6 +463,42 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // ── roleRequests/{uid} — #6 · doc-id = the REQUESTER's auth uid ·
+    //    {requestedRole, status, displayName, phone, requestedAt, reviewed…} ──────
+    // A signed-in user requests ONE operational role for THEMSELF (doc-id == uid,
+    // status starts 'pending', no reviewer fields). They read/cancel their own.
+    // The designated approver (the matrix) may READ the tier they sign off:
+    //   worker→contractor · courier→store · store/contractor→manager · admin=any.
+    // The approve/deny (status flip + the role CLAIM) is server-only via
+    // reviewRoleRequest (Admin SDK) — clients NEVER write status (update: false).
+    match /roleRequests/{uid} {
+      // The role a caller must hold to review a request for `reqRole`.
+      function approverRoleFor(reqRole) {
+        return reqRole == 'worker' ? 'contractor'
+             : reqRole == 'courier' ? 'store'
+             : (reqRole == 'store' || reqRole == 'contractor') ? 'manager'
+             : '';
+      }
+      function canReview(reqRole) {
+        return isAdmin()
+            || (approverRoleFor(reqRole) != '' && hasRole(approverRoleFor(reqRole)));
+      }
+      allow read: if isSignedIn()
+          && (request.auth.uid == uid || canReview(resource.data.requestedRole));
+      allow create: if isSignedIn()
+          && request.auth.uid == uid
+          && request.resource.data.status == 'pending'
+          && request.resource.data.requestedRole
+              in ['worker', 'courier', 'store', 'contractor']
+          && !request.resource.data.keys()
+              .hasAny(['reviewedBy', 'reviewedByRole', 'reviewedAt']);
+      // The requester may cancel their OWN pending request (delete); admin too.
+      allow delete: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // status/claim changes are server-only (reviewRoleRequest, Admin SDK);
+      // a re-request is delete + create.
+      allow update: if false;
+    }
+
     // ── default — S5 deny-by-default ─────────────────────────────────────────
     // Anything not explicitly matched above (including any future collection
     // added without a rule) is denied for everyone. NOTE: the catalog (1,877
