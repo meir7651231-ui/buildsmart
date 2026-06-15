@@ -8,6 +8,15 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth #6 inc.3 (approval inbox) — #6 COMPLETE:** the profile screen shows
+> "📋 בקשות תפקיד" when the caller's CLAIM roles approve a tier (`approvableRolesForClaims`:
+> contractor↞worker, store↞courier, manager↞store+contractor, admin=all). The inbox streams
+> `roleRequests` SCOPED to that tier (`pendingRoleRequestsProvider` — matches the rules'
+> `canReview`, so it never issues a query the rule would deny) and approve/deny calls the
+> `reviewRoleRequest` callable via the `RoleReviewer` seam (a typedef'd function — testable, no
+> AuthGateway churn). A decision flips the doc out of the pending query, self-emptying the list.
+> Full #6 = inc.1 (server matrix) + inc.2 (request) + inc.3 (inbox).
+
 > **2026-06-15 — auth #6 inc.2 (role-request UI):** the profile screen (signed-in) gains a
 > "🪪 בקשת תפקיד" row → a bottom sheet listing the four requestable operational roles (each
 > stating WHO approves it per the matrix). Picking one writes `roleRequests/{uid}`

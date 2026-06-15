@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-06-15 — auth #6 inc.3: inbox אישור בקשות-תפקיד (#6 הושלם)
+
+**שינוי (UI, lib/screens + lib/state):** `role_requests_inbox_screen.dart` (חדש) + שורת "📋 בקשות תפקיד"
+בפרופיל — מוצגת רק כש-claim-roles של הקורא מאשרות tier (`approvableRolesForClaims`). ה-inbox מזרים
+`roleRequests` scoped ל-tier (`pendingRoleRequestsProvider` — תואם ל-`canReview` ברולס, לעולם לא query
+שייחסם), אישור/דחייה קוראים ל-callable `reviewRoleRequest` דרך seam-פונקציה `RoleReviewer`. החלטה מוציאה
+את הכרטיס מ-query-ה-pending → הרשימה מתרוקנת מעצמה. **אימות:** `analyze` 0 (שלי) · `role_request_test`
+4/4 (מטריצה + inbox-approve). #6 שלם: inc.1 שרת + inc.2 בקשה + inc.3 inbox.
+
+---
+
 ## 2026-06-15 — auth #6 inc.2: UI בקשת-תפקיד
 
 **שינוי (UI, lib/screens + lib/state):** `role_request_sheet.dart` (חדש) + שורת "🪪 בקשת תפקיד"

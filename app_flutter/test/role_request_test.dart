@@ -5,6 +5,7 @@
 
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/screens/role_request_sheet.dart';
+import 'package:buildsmart/screens/role_requests_inbox_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:flutter/material.dart';
@@ -80,5 +81,58 @@ void main() {
     // useFirebaseBackend is a const false in tests → the seam is null, so
     // submitRoleRequest short-circuits and nothing ever reaches Firestore.
     expect(container.read(roleRequestWriterProvider), isNull);
+  });
+
+  // ── inc.3 — approval matrix + inbox ────────────────────────────────────────
+  test('approvableRolesForClaims mirrors the server matrix', () {
+    expect(approvableRolesForClaims(['contractor']), ['worker']);
+    expect(approvableRolesForClaims(['store']), ['courier']);
+    expect(approvableRolesForClaims(['manager']), ['store', 'contractor']);
+    expect(approvableRolesForClaims(['admin']), kRequestableRoles);
+    expect(approvableRolesForClaims(['worker']), isEmpty);
+    expect(approvableRolesForClaims(['courier']), isEmpty);
+    expect(approvableRolesForClaims(<String>[]), isEmpty);
+  });
+
+  testWidgets('the inbox approves a pending request via the reviewer',
+      (t) async {
+    final calls = <({String uid, bool approve})>[];
+    await t.binding.setSurfaceSize(const Size(440, 950));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    await t.pumpWidget(
+      ProviderScope(
+        overrides: [
+          pendingRoleRequestsProvider.overrideWith(
+            (ref) => Stream<List<RemoteDoc>>.value([
+              RemoteDoc('u-w1', <String, dynamic>{
+                'requestedRole': 'worker',
+                'displayName': 'דנה',
+                'status': 'pending',
+              }),
+              RemoteDoc('u-w2', <String, dynamic>{
+                'requestedRole': 'worker',
+                'displayName': 'רון',
+                'status': 'pending',
+              }),
+            ]),
+          ),
+          roleReviewerProvider.overrideWithValue(
+            (String uid, {required bool approve}) async =>
+                calls.add((uid: uid, approve: approve)),
+          ),
+        ],
+        child: const MaterialApp(home: RoleRequestsInboxScreen()),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.text('דנה'), findsOneWidget);
+    expect(find.text('רון'), findsOneWidget);
+
+    // Approve the first card → the reviewer is called for that uid.
+    await t.tap(find.text('אישור').first);
+    await t.pumpAndSettle(const Duration(seconds: 3));
+    expect(calls.length, 1);
+    expect(calls.first.uid, 'u-w1');
+    expect(calls.first.approve, true);
   });
 }

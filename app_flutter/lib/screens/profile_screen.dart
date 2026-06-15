@@ -3,8 +3,10 @@ import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/role_request_sheet.dart';
+import 'package:buildsmart/screens/role_requests_inbox_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -302,6 +304,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 label: '🪪 בקשת תפקיד',
                 onTap: () => showRoleRequestSheet(context),
               ),
+              // #6 inc.3 — the inbox, only for a caller whose claims approve a tier.
+              if (approvableRolesForClaims(auth.roles).isNotEmpty) ...[
+                const SizedBox(height: BsTokens.space2),
+                _LinkRow(
+                  label: '📋 בקשות תפקיד',
+                  onTap: () => Navigator.of(context)
+                      .push(RoleRequestsInboxScreen.route()),
+                ),
+              ],
               const SizedBox(height: BsTokens.space2),
               _LinkRow(
                 label: '🗑️ מחיקת חשבון',
