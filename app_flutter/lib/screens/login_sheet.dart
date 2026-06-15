@@ -21,6 +21,7 @@
 import 'dart:async';
 
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -111,6 +112,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   final TextEditingController _code = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  // P2 — optional full name captured on the "צור חשבון" path (mirrored to the
+  // local profile → users/{uid}.displayName by the welcome flow's post-auth step).
+  final TextEditingController _name = TextEditingController();
 
   _LoginStep _step = _LoginStep.phone;
   bool _busy = false;
@@ -145,6 +149,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     _code.dispose();
     _email.dispose();
     _password.dispose();
+    _name.dispose();
     super.dispose();
   }
 
@@ -269,6 +274,16 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       await ref
           .read(authStateProvider.notifier)
           .createUserWithEmailPassword(email, password);
+      // P2 — capture the optional name into the local profile so the app knows
+      // the user; the welcome flow's post-auth step mirrors it to
+      // users/{uid}.displayName (read by computeCredit / the push sender name).
+      final name = _name.text.trim();
+      if (name.isNotEmpty) {
+        ref.read(userProfileProvider.notifier).register(
+              name: name,
+              contact: ref.read(userProfileProvider).contact,
+            );
+      }
       if (mounted) setState(() => _busy = false);
     } on AuthGatewayException catch (e) {
       _justCreated = false;
@@ -456,6 +471,15 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
       ];
 
   List<Widget> _emailPane() => [
+        // P2 — on the create path, capture an optional full name up front.
+        if (_emailCreateMode) ...[
+          _field(
+            controller: _name,
+            hint: 'שם מלא (לא חובה)',
+            icon: Icons.person_outline,
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
         _field(
           controller: _email,
           hint: 'אימייל',

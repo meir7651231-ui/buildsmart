@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-06-15 — auth P2: displayName ביצירת-חשבון-מייל
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — פיין-"צור חשבון" מקבל שדה "שם מלא (לא חובה)" מעל המייל;
+בהצלחה `register` שומר את השם בפרופיל-המקומי, וצעד-ה-post-auth של welcome (`_finishAfterAuth`) כבר ממראה
+אותו ל-`users/{uid}.displayName` (נקרא ע"י `computeCredit` + שם-השולח ב-push). client-only, ללא שינוי
+gateway/interface, ללא churn ב-fakes. **אימות:** `analyze` 0 · `login_sheet_test` 23/23 (נוסף טסט: שם→profile.name).
+
+---
+
 ## 2026-06-15 — auth P2: OTP resend cooldown + תוקף-קוד
 
 **שינוי (UI, lib/screens):** `login_sheet.dart` — צעד-הקוד אוכף cooldown של 30ש׳ ל"שליחת קוד חדש"

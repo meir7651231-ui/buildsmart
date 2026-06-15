@@ -8,6 +8,12 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth P2 (displayName on create):** the email "צור חשבון" pane now has an
+> optional "שם מלא" field; on success it `register`s the name into the local profile, which the
+> welcome flow's post-auth step (`_finishAfterAuth`) already mirrors to `users/{uid}.displayName`
+> (read by `computeCredit` + the push sender name). Client-only — no gateway/interface change,
+> no fake churn. `login_sheet_test` +1.
+
 > **2026-06-15 — auth P2 (OTP resend cooldown + expiry):** the phone code step now
 > enforces a 30s resend cooldown — re-tapping "שליחת קוד חדש" inside the window toasts the
 > remaining seconds instead of re-hitting the rate-limited/billable send — and pre-checks the

@@ -384,6 +384,36 @@ void main() {
       await drainToast(t);
     });
 
+    // P2 — an optional full name on the create path is captured into the local
+    // profile (the welcome flow's post-auth step mirrors it to users/{uid}).
+    testWidgets('צור חשבון with a name registers it to the local profile',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      await pumpLoginHost(t, gw);
+
+      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('אין לי חשבון — צור חשבון'));
+      await t.pumpAndSettle();
+      await t.enterText(
+        find.widgetWithText(TextField, 'שם מלא (לא חובה)'),
+        'רותי בונה',
+      );
+      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'ruti@b.co');
+      await t.enterText(
+        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
+        'create123',
+      );
+      await t.tap(find.text('צור חשבון'));
+      await t.pumpAndSettle();
+      expect(gw.emailCreations, ['ruti@b.co']);
+      // The name landed in the local profile (server mirror rides on _finishAfterAuth).
+      final container =
+          ProviderScope.containerOf(t.element(find.text('open')));
+      expect(container.read(userProfileProvider).name, 'רותי בונה');
+      await drainToast(t);
+    });
+
     testWidgets('צור חשבון — an already-registered email toasts honest Hebrew',
         (t) async {
       final gw = _FakeAuthGateway();
