@@ -1108,3 +1108,10 @@
 - תוצאה (TZ=Israel Standard Time, ה-spring-forward 2026 ב-27/3): 3 הטסטים התלויי-DST של daysBetweenDst **אדומים `+3 -3`** ✅ (adjacent dates, multi-day span, time-of-day ignored). טסטי startOfWeekSunday נשארו ירוקים (לא משתמשים ב-.utc).
 - שחזור → **+6 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: `DateTime(y,m,d)` מקומי הוא midnight מקומי; הפרש בין שני midnight-ים מקומיים חוצה spring-forward = 23h → `.inDays` מתקצר ל-0 (יום פחות) → בָּר נופל ביום שגוי / משלוח בדלי-שבוע שגוי. UTC (ימי-24h, בלי DST) נותן את הפער הלוחי המדויק בכל TZ. בנוסף: `weekStart` חושב ב-subtract Duration days (חיסור-שעות שנסחף ב-DST) → הוחלף ב-DateTime y m d-k (חשבון-לוח). הגאנט הוא pure (VM-safe) וכך גם calendar_days. ה-streak כבר היה חשבון-לוח — לא נגעתי. analyze 0.
+
+## A5-board-proposed-fold — משימה מוצעת (proposed) בלתי-נראית בלוח-המשימות — 2026-06-15
+- **קובץ:** `worker_task_board_screen.dart` — `_groups` שונה מ-status-יחיד ל-Set-של-statuses, ו-`'proposed'` קופל לקבוצת ⏳ בתור (יחד עם pending). חולצה `groupByStatus` טהורה (@visibleForTesting). build משתמש בה. טסט חדש `worker_task_board_group_test.dart` (+1).
+- **load-bearing:** סט-ה-בתור `{'pending', 'proposed'}`. מוטציה: הסרת `'proposed'` → `{'pending'}`.
+- תוצאה: `worker_task_board_group_test` **אדום `+0 -1`** ✅ — המשימה המוצעת (id 1) לא נכנסה לאף קבוצה → containsAll[1,2] נכשל plus הסכום 3≠4.
+- שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: המנוע מחזיק status `'proposed'` (worker proposeTask → ממתין ל-approveProposal של הקבלן), אבל `_groups` כיסה רק active/rejected/pending/review/done → משימה מוצעת נפלה בין-הכיסאות (לא הוצגה כלל, וה-invariant counts-sum-to-total נשבר בשקט). A5 (החלטת-בעלים): לא קבוצה חדשה — לקפל proposed לתוך בתור. עכשיו כל status ממופה לקבוצה אחת בדיוק. analyze 0.

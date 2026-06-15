@@ -35,15 +35,35 @@ class WorkerTaskBoardScreen extends ConsumerWidget {
       MaterialPageRoute<void>(builder: (_) => const WorkerTaskBoardScreen());
 
   /// The status groups, in the contract's order: פעילות → נדחו → בתור →
-  /// בבדיקה → הושלמו. Each is a single engine status (no status maps to two
-  /// groups, so counts sum to the worker's total).
-  static const List<({String status, String title})> _groups = [
-    (status: 'active', title: '🔨 פעילות'),
-    (status: 'rejected', title: '↩️ נדחו'),
-    (status: 'pending', title: '⏳ בתור'),
-    (status: 'review', title: '📸 בבדיקה'),
-    (status: 'done', title: '✅ הושלמו'),
+  /// בבדיקה → הושלמו. Each group is a SET of engine statuses; the worker's
+  /// `'proposed'` proposals (awaiting the contractor's approval) FOLD into בתור
+  /// — owner decision A5, NO separate group. Every engine status still maps to
+  /// exactly ONE group, so the group counts sum to the worker's total.
+  static const List<({Set<String> statuses, String title})> _groups = [
+    (statuses: {'active'}, title: '🔨 פעילות'),
+    (statuses: {'rejected'}, title: '↩️ נדחו'),
+    (statuses: {'pending', 'proposed'}, title: '⏳ בתור'),
+    (statuses: {'review'}, title: '📸 בבדיקה'),
+    (statuses: {'done'}, title: '✅ הושלמו'),
   ];
+
+  /// PURE grouping (testable): bucket [tasks] into [_groups] order — each group
+  /// its matching tasks, input order preserved. A `'proposed'` task lands in
+  /// בתור, never a group of its own; every task falls in exactly one group.
+  @visibleForTesting
+  static List<({String title, List<TaskItem> tasks})> groupByStatus(
+    List<TaskItem> tasks,
+  ) =>
+      [
+        for (final g in _groups)
+          (
+            title: g.title,
+            tasks: [
+              for (final t in tasks)
+                if (g.statuses.contains(t.status)) t,
+            ],
+          ),
+      ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -101,11 +121,8 @@ class WorkerTaskBoardScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            for (final g in _groups)
-              _StatusGroup(
-                title: g.title,
-                tasks: [for (final t in mine) if (t.status == g.status) t],
-              ),
+            for (final g in groupByStatus(mine))
+              _StatusGroup(title: g.title, tasks: g.tasks),
           ],
         ),
       ),

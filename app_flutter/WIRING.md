@@ -2187,3 +2187,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** עוזר טהור משותף `lib/logic/calendar_days.dart` — `daysBetweenDst` (DateTime.utc, ימי-24h) plus `startOfWeekSunday` (DateTime y m d-k חשבון-לוח). 3 אתרי-offset plus 2 weekStart עוברים דרכו. idiom אחיד.
 - **gate:** analyze 0 · calendar_days_test +6 (TZ=Israel, spring-forward 27/3/2026) · contractor_task_gantt_test +21 ירוק · mutation §mutation_log (DateTime.utc→DateTime → 3 טסטי-DST RED +3 -3 · GREEN +6).
 - **קבצים:** `lib/logic/calendar_days.dart` (חדש) · `lib/logic/tasks_gantt.dart` · `lib/screens/worker_reports_tab.dart` · `lib/screens/courier_reports_tab.dart` · `test/calendar_days_test.dart` (חדש).
+
+### #A5-board-proposed-fold — משימה מוצעת מקופלת ל-בתור בלוח-המשימות — 2026-06-15
+- **הבאג (החלטת-בעלים A5):** worker_task_board_screen קיבץ לפי status אבל לא כיסה proposed → משימה שעובד הציע (ממתינה לאישור קבלן) הייתה בלתי-נראית בלוח.
+- **התיקון:** כל קבוצה = Set-של-statuses; proposed קופל ל-⏳ בתור (לא קבוצה נפרדת). חולצה `groupByStatus` טהורה. כל status ממופה לקבוצה אחת → counts sum to total.
+- **gate:** analyze 0 · worker_task_board_group_test +1 · mutation §mutation_log (הסרת proposed מסט-בתור → RED +0 -1 · GREEN).
+- **קבצים:** `lib/screens/worker_task_board_screen.dart` · `test/worker_task_board_group_test.dart`.

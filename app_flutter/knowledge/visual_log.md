@@ -1193,3 +1193,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #A4-dst-day-idiom — worker/courier reports: dayIdx+weekStart דרך עוזר DST-safe (לוגיקה-בלבד)
 **אין screenshot — למה:** השינוי בשני קבצי-המסך הוא 3 שורות בכל אחד — שורת ה-import של calendar_days, `weekStart = startOfWeekSunday(today)` (במקום subtract Duration), ו-`dayIdx = daysBetweenDst(weekStart, c/d)` (במקום DateTime difference inDays). אפס שינוי פריסה/widget/צבע — אותה היסטוגרמת-שבוע, אותו עיצוב. ההשפעה הנראית מופיעה רק על גבול-DST (שבוע ה-spring-forward/fall-back): הדלי-יומי נכון במקום נסחף-ביום. מאומת ב-calendar_days_test (pure, mutation RED→GREEN §mutation_log, TZ=Israel). analyze 0.
+
+## 2026-06-15 — #A5-board-proposed-fold — worker_task_board: proposed מופיע תחת בתור (שינוי-נראות)
+**שינוי נראה (בלי screenshot — pure-verified):** משימה ב-status proposed שהייתה קודם בלתי-נראית בלוח מופיעה כעת תחת קבוצת "⏳ בתור" (יחד עם pending). אין שינוי בעיצוב/פריסת ה-_StatusGroup עצמו — אותו widget, אותו סגנון; רק תוכן-הדלי השתנה (כיסוי מלא של ה-statuses). מאומת ב-groupByStatus הטהורה (worker_task_board_group_test, mutation RED→GREEN §mutation_log) — הסכום-על-הקבוצות שווה ל-total. analyze 0.
