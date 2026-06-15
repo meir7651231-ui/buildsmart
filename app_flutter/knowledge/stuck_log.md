@@ -1501,3 +1501,12 @@ RULE: רשומת-עובד-פר-משתמש מסוננת תמיד לפי session.u
 ### ג — כלל המניעה
 ANTIPATTERN: id שנמכר מ-DateTime.now timestamp בלבד בלי סיומת _seq מונוטונית בקובץ-store שיש בו מחיקה לפי id
 RULE: כל id שנמכר מ-timestamp בקובץ עם מחיקה-לפי-id חייב סיומת מונוטונית _seq כמו worker_trainings ו-worker_notifs; web DateTime מדויק ל-1ms בערך אז timestamp לבדו מתנגש ומחיקה פוגעת בכל המתנגשים
+
+## 2026-06-15 — משימות-ריצה (createTask/proposeTask) לא שרדו restart — _load בנה רק מ-seeds
+### א — הבעיה
+מנוע-המשימות בנה את ה-state ב-_load רק מ-_seedTasks (ה-const kPersonaTasks, ids 1-5) plus overlay של מוטציות keyed-by-id. משימה שנוצרה בריצה — קבלן ב-createTask או עובד ב-proposeTask (id שווה למקסימום-הקיים plus 1) — נכתבה ל-overlay רק עם שדות-מוטציה (status/photo) בלי name/steps/worker, וב-_load שום ענף לא הוסיף ids שאינם-seed. לכן כל משימה שקבלן יצר או עובד הציע נמחקה בטעינה הבאה — לב החיווט קבלן↔עובד אבד ב-restart.
+### ב — הפתרון
+TaskItem קיבל toJson/tryFromJson (רשומה-מלאה). _persist כותב את משימות-הריצה (ids שאינם-seed) כרשומות-מלאות תחת מפתח נפרד kTasksRuntimeKey; _load משחזר אותן אחרי seed plus overlay. מפתח נפרד שומר back-compat מלא (payload ישן ללא-שינוי, ה-overlay של ה-seeds לא נגע). SERVER-READY דרך bindRemote.
+### ג — כלל המניעה
+ANTIPATTERN: _load של מנוע שבונה state רק מ-seeds קבועים ועוד overlay-מוטציות כשהמנוע מאפשר יצירת-entity בריצה עם id דינמי
+RULE: מנוע שמאפשר יצירת-entity בריצה עם id דינמי חייב לשמר את הרשומה-המלאה ב-toJson ולשחזר אותה ב-_load, לא רק overlay-מוטציות על seeds קבועים; אחרת ה-entity שנוצר בריצה נמחק ב-restart

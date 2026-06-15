@@ -2163,3 +2163,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** `int _seq = 0;` + סיומת `-${_seq++}` ל-id בכל 4 ה-notifiers (תבנית worker_trainings/worker_notifs). id נשאר String אטום → אפס שינוי-persist.
 - **gate:** analyze 0 · טסט `id_seq_collision_test` (4 חנויות) · mutation §mutation_log (RED `+3 -1` הסרת _seq מ-worker_certs · GREEN `+4`) · ANTIPATTERN+RULE §stuck_log · stuck_regression מסונכרן.
 - **קבצים:** `lib/state/worker_certs.dart` · `worker_forms.dart` · `cart_lists_state.dart` · `saved_projects.dart` · `test/id_seq_collision_test.dart`. **לא נגעתי** ב-UI / orders / auth / manager-board.
+
+### #A1-tasks-persistence — משימות-ריצה (קבלן/עובד) שורדות restart + server-ready — 2026-06-15
+- **הבאג (החלטת-בעלים A1 · high):** ה-_load של tasks_engine בנה state רק מ-seeds קבועים plus overlay → משימה שקבלן יצר (createTask) או עובד הציע (proposeTask) נמחקה ב-restart (ה-overlay גם לא שמר את ה-name/steps/worker שלה).
+- **התיקון:** TaskItem += toJson/tryFromJson; _persist שומר משימות-ריצה (non-seed ids) כרשומות-מלאות תחת kTasksRuntimeKey; _load משחזר אחרי seed plus overlay. **server-ready:** bindRemote (T1) יסנכרן חי כשה-Firebase ינחת. back-compat: מפתח-prefs נפרד.
+- **gate:** analyze 0 · טסט `tasks_runtime_persistence_test` (+2) · 3 טסטי-overlay הקיימים ירוקים (לא נשבר) · mutation §mutation_log (RED +0 -2 ביטול-השחזור · GREEN +2).
+- **קבצים:** `lib/state/tasks_engine.dart` · `test/tasks_runtime_persistence_test.dart`. **לא נגעתי** ב-UI / מסכים / orders / auth.

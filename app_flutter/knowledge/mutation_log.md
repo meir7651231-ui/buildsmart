@@ -1080,3 +1080,10 @@
 - תוצאה: `id_seq_collision_test` **אדום `+3 -1`** — רק 'worker_certs cert id' נכשל (הסגמנט-האחרון של ה-id הוא ה-micros ולא 0,1) ✅ נתפס. 3 החנויות האחרות נשארו ירוקות.
 - שחזור: `cp /tmp/wc.GOOD lib/state/worker_certs.dart` → RESTORED-IDENTICAL → **+4 ירוק**.
 - מסקנה: web DateTime ~1ms-precise; שני adds באותה מילישנייה התנגשו על id זהה, ו-remove(id)/deleteList(id)/rename(id) (שמורידים/משנים כל שורה עם אותו id) פגעו בשתיהן. ה-`_seq` המונוטוני (תבנית vacation/material/trainings/notifs/stock) מבטיח ייחודיות. id נשאר String אטום (toJson/fromJson ללא-שינוי) → אפס back-compat. נמצא ע"י ביקורת-הלילה סבב-2 של הצי. gate: analyze 0 · 4 stores ירוקים. נגעתי רק ב-4 ה-state-stores (+טסט). **לא נגעתי** ב-UI/orders/auth.
+
+## A1-tasks-persistence — משימות-ריצה (createTask/proposeTask) לא שרדו restart — 2026-06-15
+- **קבצים (lib/state + test):** `tasks_engine.dart` — TaskItem += toJson/tryFromJson (רשומה-מלאה); `_persist` כותב משימות-ריצה (non-seed ids) כרשומות-מלאות תחת `kTasksRuntimeKey='bs.tasks-runtime.v1'`; `_load` משחזר אותן אחרי seed+overlay. טסט חדש `test/tasks_runtime_persistence_test.dart` (+2).
+- **`tasks_engine.dart` _load — restore-runtime (load-bearing):** מוטציה — `if (runtime.isNotEmpty) super.state = [...state, ...runtime];` הוחלף ב-`{}` (משימות-הריצה מחושבות אך לא מוחלות — הבאג המקורי).
+- תוצאה: `tasks_runtime_persistence_test` **אדום `+0 -2`** — שני המקרים נכשלו (המשימה שנוצרה ב-session 1 לא קיימת ב-session 2) ✅ נתפס. 3 טסטי-ה-overlay הקיימים (worker_tasks_persistence) נשארו ירוקים.
+- שחזור: `cp /tmp/te.GOOD lib/state/tasks_engine.dart` → RESTORED-IDENTICAL → **+2 ירוק**.
+- מסקנה: ה-_load בנה state רק מ-_seedTasks (const ids 1-5) plus overlay; משימות-ריצה (id=max+1) נזרקו ב-restart וה-overlay גם לא שמר name/steps/worker שלהן. עכשיו הרשומה-המלאה נשמרת תחת מפתח-prefs נפרד ומשוחזרת. back-compat: payload פרה-A1 ללא-שינוי; ה-overlay של ה-seeds לא נגע (3 טסטיו ירוקים). SERVER-READY: bindRemote (T1) יסנכרן חי כשה-Firebase ינחת. החלטת-בעלים A1. gate: analyze 0. נגעתי רק ב-tasks_engine (+טסט).
