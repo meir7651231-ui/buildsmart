@@ -38,9 +38,6 @@ dependencies:
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3
 
-  # microphone permission (used by speech_to_text)
-  permission_handler: ^11.3.1
-
   # native/web share sheet — cart 'שתף' (falls back to the Web Share API on web)
   share_plus: ^10.0.0
 
