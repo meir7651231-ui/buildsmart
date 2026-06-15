@@ -1202,3 +1202,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #50-settings-merge-dup-categories — catalog_settings: 13→11 מקטעים (מיזוג כפולים)
 **שינוי נראה (בלי screenshot — 4 טסטי-מסך ירוקים):** במסך 'הגדרות' שני מקטעי-🔔 הפכו ל-🔔 'התראות' יחיד (כולל המשפחה מ-'התראות קטלוג'), ושני מקטעי-תצוגה הפכו ל-'תצוגה ומיון' יחיד (theme plus view/sort/grid/image plus סידור-בית). price-drop יחיד ('ירידת מחיר במועדפים'). אין שינוי-עיצוב ל-_SectionTile/_SwitchRow עצמם — אותם רכיבים, פחות מקטעים. מאומת ב-catalog_sort_alerts (טאפ 'התראות'+'תצוגה ומיון', toggling שדות מקופלים, mutation RED→GREEN §mutation_log) plus robustness/settings_honesty render. analyze 0.
+
+## 2026-06-15 — #54-remove-favorites-category — catalog_settings: הקטגוריה ❤️ הוסרה (10 מקטעים)
+**שינוי נראה (בלי screenshot — 4 טסטי-מסך ירוקים):** במסך 'הגדרות' המקטע ❤️ 'מועדפים ורשימות' אינו מוצג עוד (10 מקטעים במקום 11). אין שינוי-עיצוב לרכיבים אחרים. מאומת ב-catalog_sort_alerts (טסט findsNothing — RED בעוד המקטע קיים → GREEN אחרי הסרה §mutation_log) plus robustness/settings_honesty render. analyze 0.

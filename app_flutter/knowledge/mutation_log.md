@@ -1128,3 +1128,9 @@
 - **load-bearing:** השורה המקופלת `notifLowStock` ('מלאי נמוך') תחת המקטע-הממוזג 'התראות' — מוכיחה שמשפחת-קטלוג קופלה לתוך 'התראות'. ייחודי בקובץ (grep=1).
 - מוטציה: תווית `'מלאי נמוך'` → `'XX_MUT'`. תוצאה: טסט "מלאי נמוך flips notifLowStock" **אדום `+14 -1`** ✅. שחזור → **+16 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: היו שני מקטעי-התראה ושני מקטעי-תצוגה במסך-הגדרות אחד, plus 3 toggles ל-price-drop על-פני 2 שדות plus שדה-שלישי priceChangeAlert במועדפים. #50 מיזג את הכפילויות בתוך catalog_settings plus קיבע price-drop ל-notifPriceDrop. 4 טסטי-מסך ירוקים. analyze 0. שארית: typePriceDrops ב-notif_settings_screen (מסך-נפרד) plus priceChangeAlert (→#54).
+
+## #54-remove-favorites-category — הסרת קטגוריית 'מועדפים ורשימות' מההגדרות — 2026-06-15
+- **קובץ:** `catalog_settings_screen.dart` — מחיקת `_FavoritesSection` (❤️ 'מועדפים ורשימות') plus רשומתה ב-build (11→10 מקטעים). היה: 4 placeholders (סנכרון/רשימות-פרויקט/שיתוף/יבוא-ייצוא — כולם coming-soon backend-blocked) plus toggle אחד מחווט `priceChangeAlert`. priceChangeAlert מכוסה ע"י ה-price-drop הקנוני ב-'התראות' (notifPriceDrop, #50); השדה נשאר במודל back-compat בלי toggle. עדכון `catalog_sort_alerts_settings_test`: טסט-priceChangeAlert → טסט "הקטגוריה הוסרה" (findsNothing).
+- **load-bearing:** קיום המקטע ❤️ 'מועדפים ורשימות' במסך.
+- אימות RED→GREEN בלי perl: הטסט החדש רץ **בעוד `_FavoritesSection` קיים** → **אדום `+0 -1`** (מצא את הכותרת). אחרי מחיקת המקטע → **ירוק** (4 טסטי-מסך +54). מוכיח שהטסט תופס רגרסיה של חזרת-הקטגוריה.
+- מסקנה: קטגוריה שכולה placeholders backend-blocked plus toggle כפול שכבר-קנוני (#50) = קטגוריה מתה. הוסרה; ה-placeholders יחוברו כ-seams במשטחי-המועדפים/רשימות כשייחשף שם שקע-הגדרות (נדחה — הצבה עכשיו = ניחוש). analyze 0.

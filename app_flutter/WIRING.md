@@ -2205,3 +2205,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gate:** analyze 0 · 4 טסטי-מסך ירוקים (catalog_sort_alerts/catalog_price_units/robustness/settings_honesty) · mutation §mutation_log ('מלאי נמוך'→mut → RED +14 -1 · GREEN +16).
 - **שארית (תועדה):** typePriceDrops עדיין ב-notif_settings_screen (מסך-נפרד, לא קטגוריה כפולה בהגדרות) · priceChangeAlert במועדפים → ל-#54.
 - **קבצים:** `lib/screens/catalog_settings_screen.dart` · `test/catalog_sort_alerts_settings_test.dart`.
+
+### #54-remove-favorites-category — 'מועדפים ורשימות' הוסרה מההגדרות — 2026-06-15
+- **המהלך (החלטת-בעלים #54):** הוסר המקטע ❤️ 'מועדפים ורשימות' מ-catalog_settings (11→10 מקטעים). priceChangeAlert → מכוסה ע"י ה-price-drop הקנוני ב-'התראות' (#50); השדה נשאר במודל. 4 ה-placeholders (סנכרון/שיתוף/יבוא-ייצוא/רשימות-פרויקט) → server-ready seams במשטחי-המועדפים, נדחה עד שקע-הגדרות שם.
+- **gate:** analyze 0 · 4 טסטי-מסך ירוקים · RED→GREEN §mutation_log (טסט-findsNothing אדום בעוד המקטע קיים +0 -1, ירוק אחרי הסרה).
+- **קבצים:** `lib/screens/catalog_settings_screen.dart` · `test/catalog_sort_alerts_settings_test.dart`.

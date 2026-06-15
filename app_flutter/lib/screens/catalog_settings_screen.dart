@@ -52,7 +52,6 @@ class CatalogSettingsScreen extends ConsumerWidget {
           _RegionSection(),
           _SearchSection(),
           _PricesSection(),
-          _FavoritesSection(),
           _UnitsSection(),
           _SuppliersSection(),
           _AiSection(),
@@ -440,42 +439,14 @@ class _PricesSection extends ConsumerWidget {
   }
 }
 
-// ─── 4. favorites & lists ────────────────────────────────────────────────────
-
-class _FavoritesSection extends ConsumerWidget {
-  const _FavoritesSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    return _SectionTile(
-      emoji: '❤️',
-      title: 'מועדפים ורשימות',
-      children: [
-        // 🔑 cross-device sync needs a backend/account sync service — no local
-        // effect possible, kept honest as a placeholder.
-        const _PlaceholderRow(label: 'סנכרון מועדפים בין מכשירים'),
-        // 🔑 per-project shopping lists need project-list infra not present in
-        // the catalog layer.
-        const _PlaceholderRow(label: 'רשימות קנייה לפי פרויקט'),
-        // 🔑 sharing a list needs a team/backend channel.
-        const _PlaceholderRow(label: 'שיתוף רשימה עם צוות'),
-        // 🔑 import/export needs file-I/O plumbing — out of this batch's scope.
-        const _PlaceholderRow(label: 'יבוא / ייצוא רשימה'),
-        // 🟢 WIRED — persisted user preference. The toggle remembers state;
-        // DELIVERY of the alert is gated on the notification system (not yet
-        // pushing), so this stores intent only.
-        _SwitchRow(
-          label: 'התראה על שינוי מחיר במועדפים',
-          value: settings.priceChangeAlert,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(priceChangeAlert: v)),
-        ),
-      ],
-    );
-  }
-}
+// ─── 4. favorites & lists — REMOVED (#54) ───────────────────────────────────
+// The standalone 'מועדפים ורשימות' settings category was removed (owner #54).
+// Its price-alert is served by the canonical price-drop in 'התראות' (#50,
+// catalogSettings.notifPriceDrop); the four backend leaves (sync / share /
+// import-export / per-project lists) belong at the real favorites & lists
+// surfaces as server-ready seams, not a settings card — deferred until those
+// surfaces expose a settings slot. The catalogSettings.priceChangeAlert field
+// stays (back-compat), now without a toggle here.
 
 // ─── 6. units of measure ─────────────────────────────────────────────────────
 
