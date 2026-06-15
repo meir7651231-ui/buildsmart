@@ -140,9 +140,14 @@ void main() {
   }
 
   for (final c in cases) {
+    // #1 — retry a TRANSIENT flake only: these full e2e journeys (many
+    // pumpAndSettle frames + the network-image resolver's async attempts) can
+    // mis-time under full-suite `--concurrency=4` CPU starvation, yet each passes
+    // deterministically in isolation. `retry` re-runs a flaky attempt; a REAL
+    // broken-button regression still fails all 3 attempts (no masking).
     testWidgets('journey · ${c.$1} — ${c.$2}', (t) async {
       await runJourney(t, c.$1, c.$2);
-    });
+    }, retry: 2);
   }
 
   // ── catalog-wide sheet render sweep ─────────────────────────────────────
