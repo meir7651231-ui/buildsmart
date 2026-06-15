@@ -272,9 +272,11 @@ class PersonaPodSheet extends ConsumerWidget {
               onPressed: () async {
                 final sig = await openSignaturePad(context);
                 if (sig == null || !context.mounted) return;
-                fn.captureSignature(orderId, sig);
+                // A3 — await the persist; toast success ONLY when it landed.
+                final ok = await fn.captureSignature(orderId, sig);
                 if (!context.mounted) return;
-                showToast(context, 'החתימה נשמרה ✍️');
+                showToast(context,
+                    ok ? 'החתימה נשמרה ✍️' : 'החתימה לא נשמרה — נסה שוב');
               },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 13),

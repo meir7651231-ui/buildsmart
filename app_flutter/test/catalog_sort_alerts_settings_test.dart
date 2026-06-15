@@ -258,7 +258,8 @@ void main() {
     testWidgets('toggling "מלאי נמוך" flips the persisted notifLowStock',
         (t) async {
       final c = await pump(t);
-      final header = find.text('התראות קטלוג');
+      // #50 — 'התראות קטלוג' merged into the single 'התראות' section.
+      final header = find.text('התראות');
       await t.ensureVisible(header);
       await t.pumpAndSettle();
       await t.tap(header);
@@ -272,23 +273,36 @@ void main() {
       expect(c.read(catalogSettingsProvider).notifLowStock, false);
     });
 
-    testWidgets(
-        'toggling "התראה על שינוי מחיר במועדפים" flips priceChangeAlert',
+    testWidgets('toggling "ספקים מקומיים בלבד" flips localSuppliersOnly (#49)',
         (t) async {
       final c = await pump(t);
-      final header = find.text('מועדפים ורשימות');
+      final header = find.text('ספקים מועדפים');
       await t.ensureVisible(header);
       await t.pumpAndSettle();
       await t.tap(header);
       await t.pumpAndSettle();
 
-      expect(c.read(catalogSettingsProvider).priceChangeAlert, true);
-      final toggle = find.widgetWithText(
-          SwitchListTile, 'התראה על שינוי מחיר במועדפים');
+      expect(c.read(catalogSettingsProvider).localSuppliersOnly, false);
+      final toggle = find.widgetWithText(SwitchListTile, 'ספקים מקומיים בלבד');
       await t.ensureVisible(toggle);
       await t.tap(toggle);
       await t.pump();
-      expect(c.read(catalogSettingsProvider).priceChangeAlert, false);
+      expect(c.read(catalogSettingsProvider).localSuppliersOnly, true,
+          reason: 'the wired supplier preference persists (server-ready, #49)');
+    });
+
+    // #54 — the standalone 'מועדפים ורשימות' settings category is removed; its
+    // price-alert is served by the canonical price-drop in 'התראות' (#50) and
+    // the four backend leaves (sync/share/import/per-project-lists) belong at the
+    // real favorites/lists surfaces as server-ready seams, not a settings card.
+    testWidgets('the מועדפים ורשימות category is gone from settings (#54)',
+        (t) async {
+      await pump(t);
+      expect(
+        find.text('מועדפים ורשימות'),
+        findsNothing,
+        reason: 'the standalone favorites/lists settings category was removed',
+      );
     });
   });
 }

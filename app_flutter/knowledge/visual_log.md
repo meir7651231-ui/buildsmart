@@ -1259,3 +1259,36 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **הפיך:** השער מסתעף על `role==manager` בלבד; שאר הפרסונות verbatim. אפס Color/value:/activeColor: חדש (BsTokens + צבעי-אזהרה קיימים). flag-OFF: ה-DATA נשאר demo; ה-auth-gateway live כש-Firebase אותחל אך signed-out ⇒ התנהגות זהה כשאיש לא נכנס.
 **אימות:** analyze 0-errors · full-suite **+2632 -1** (baseline) · mutation §mutation_log. **caveat בעלים:** דורש 3 צעדי Firebase-Console (`knowledge/owner/google-signin-setup.md`). **לא נגעתי:** worker-board / 4 מחלקות.
+### #E3-leak-fix — worker_employer_stock_sheet: scope-key uid→username (לוגיקה-בלבד) — 2026-06-15
+**אין screenshot — למה:** השינוי בקובץ-המסך הוא מפתח-ה-scope של רשימת "הבקשות שלי" בלבד — `requestsForWorker(session.uid)` → `requestsForWorker(session.username)` (+`username` בקריאת-ה-submit). **אפס שינוי פריסה/צבע/widget** — אותו עץ, אותו עיצוב. ההשפעה הנראית-לעין היחידה: העובד רואה כעת רק את בקשות-החומר שלו (לפני-כן, בגלל uid ריק לכל עובד seed/demo, ראה את של כולם). למשתמש-יחיד הרשימה זהה לחלוטין.
+**אימות:** ההתנהגות (בידוד פר-עובד) מאומתת ב-`material_requests_test` (טסט-בידוד seed-session, mutation RED `+7 -1`→GREEN `+8` §mutation_log) — בידוד רב-עובדים אינו ניתן-לאימות-בצילום-בודד (דורש שתי הפעלות). analyze 0 · full-suite ירוק. **לא נגעתי** בפריסה/עיצוב/צבעים של הגיליון.
+
+## 2026-06-15 — #A2-hr-decide-once — contractor_hr_sheet: gate side-effects על decide-bool (לוגיקה-בלבד)
+**אין screenshot — למה:** השינוי בקובץ-המסך הוא 2 שורות בכל מתודת-החלטה — `final fired = approve ? notifier.approve(id) : notifier.reject(id); if (!fired) return;` לפני בלוק-ה-side-effects הקיים. **אפס שינוי פריסה/צבע/widget** — אותו עץ. ההשפעה הנראית: פעמון/צ'אט/toast יורים פעם-אחת במקום פעמיים ב-double-tap. מאומת ב-`hr_decide_once_test` (engine-level, mutation RED→GREEN §mutation_log). analyze 0.
+
+## 2026-06-15 — #A3-pod-signature — persona_pod_sheet: toast לא-משקר אחרי await (לוגיקה-בלבד)
+**אין screenshot — למה:** השינוי בקובץ-המסך הוא ב-onPressed של כפתור-החתימה הקיים: `final ok = await fn.captureSignature(...)` ואז `showToast(ok ? 'נשמרה ✍️' : 'לא נשמרה — נסה שוב')`. אפס שינוי פריסה/widget — אותו כפתור, אותו עיצוב. ההשפעה הנראית: בכשל-אחסון מופיע "לא נשמרה — נסה שוב" במקום "נשמרה" שקרית. מאומת ב-persona_fulfillment_test (engine-level, mutation RED→GREEN §mutation_log). analyze 0.
+
+## 2026-06-15 — #A4-dst-day-idiom — worker/courier reports: dayIdx+weekStart דרך עוזר DST-safe (לוגיקה-בלבד)
+**אין screenshot — למה:** השינוי בשני קבצי-המסך הוא 3 שורות בכל אחד — שורת ה-import של calendar_days, `weekStart = startOfWeekSunday(today)` (במקום subtract Duration), ו-`dayIdx = daysBetweenDst(weekStart, c/d)` (במקום DateTime difference inDays). אפס שינוי פריסה/widget/צבע — אותה היסטוגרמת-שבוע, אותו עיצוב. ההשפעה הנראית מופיעה רק על גבול-DST (שבוע ה-spring-forward/fall-back): הדלי-יומי נכון במקום נסחף-ביום. מאומת ב-calendar_days_test (pure, mutation RED→GREEN §mutation_log, TZ=Israel). analyze 0.
+
+## 2026-06-15 — #A5-board-proposed-fold — worker_task_board: proposed מופיע תחת בתור (שינוי-נראות)
+**שינוי נראה (בלי screenshot — pure-verified):** משימה ב-status proposed שהייתה קודם בלתי-נראית בלוח מופיעה כעת תחת קבוצת "⏳ בתור" (יחד עם pending). אין שינוי בעיצוב/פריסת ה-_StatusGroup עצמו — אותו widget, אותו סגנון; רק תוכן-הדלי השתנה (כיסוי מלא של ה-statuses). מאומת ב-groupByStatus הטהורה (worker_task_board_group_test, mutation RED→GREEN §mutation_log) — הסכום-על-הקבוצות שווה ל-total. analyze 0.
+
+## 2026-06-15 — #52-order-notif-to-orders-world — 🔔 בטאב הזמנות + הסרה מהגדרות
+**שינוי נראה (בלי screenshot — widget-verified):** בטאב 📦 הזמנות (store_screen) נוסף כפתור 🔔 בכותרת המקטע — גלוי רק כשהמקטע=הזמנות — שפותח גיליון תחתון "🔔 התראות הזמנות ומשלוחים" עם 2 toggles. במסך ההגדרות › התראות, שורות "הזמנות" plus "משלוחים" הוסרו ממקטע 🔔 (שאר ה-types נשארו). אין שינוי-עיצוב לרכיבים קיימים — 🔔 הוא IconButton סטנדרטי, הגיליון SwitchListTile-ים סטנדרטיים. מאומת ב-order_notif_sheet_test (mutation RED→GREEN §mutation_log) plus 2 טסטי-מסך קיימים ירוקים. analyze 0.
+
+## 2026-06-15 — #50-settings-merge-dup-categories — catalog_settings: 13→11 מקטעים (מיזוג כפולים)
+**שינוי נראה (בלי screenshot — 4 טסטי-מסך ירוקים):** במסך 'הגדרות' שני מקטעי-🔔 הפכו ל-🔔 'התראות' יחיד (כולל המשפחה מ-'התראות קטלוג'), ושני מקטעי-תצוגה הפכו ל-'תצוגה ומיון' יחיד (theme plus view/sort/grid/image plus סידור-בית). price-drop יחיד ('ירידת מחיר במועדפים'). אין שינוי-עיצוב ל-_SectionTile/_SwitchRow עצמם — אותם רכיבים, פחות מקטעים. מאומת ב-catalog_sort_alerts (טאפ 'התראות'+'תצוגה ומיון', toggling שדות מקופלים, mutation RED→GREEN §mutation_log) plus robustness/settings_honesty render. analyze 0.
+
+## 2026-06-15 — #54-remove-favorites-category — catalog_settings: הקטגוריה ❤️ הוסרה (10 מקטעים)
+**שינוי נראה (בלי screenshot — 4 טסטי-מסך ירוקים):** במסך 'הגדרות' המקטע ❤️ 'מועדפים ורשימות' אינו מוצג עוד (10 מקטעים במקום 11). אין שינוי-עיצוב לרכיבים אחרים. מאומת ב-catalog_sort_alerts (טסט findsNothing — RED בעוד המקטע קיים → GREEN אחרי הסרה §mutation_log) plus robustness/settings_honesty render. analyze 0.
+
+## 2026-06-15 — #49-wire-supplier-prefs — catalog_settings: ספקים מועדפים מחווט (3 פקדים אמיתיים)
+**שינוי נראה (בלי screenshot — widget-test ירוק):** מקטע '🏪 ספקים מועדפים' — 3 השורות הראשונות שהיו placeholders ("בבנייה") הן עכשיו פקדים אמיתיים: 'מרחק מקסימלי' (_NumberRow 5-300 ק"מ), 'דירוג מינימלי' (radio הכל/3+/4+/5), 'ספקים מקומיים בלבד' (switch). 'ספקים מסומנים כמועדפים'/'ספקים חסומים' נשארו placeholders (seam). מאומת ב-catalog_sort_alerts (tap → localSuppliersOnly נשמר, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.
+
+## 2026-06-16 — #36-voice-dictate-worker-board — מיקרופון בשדות הצעת-המשימה (לוח עובד)
+**שינוי נראה (בלי screenshot — widget-test ירוק):** בגיליון "הצע משימה" בלוח-העובד, 3 שדות-הטקסט (שם/תיאור/שלבים) קיבלו suffixIcon 🎤 (Icons.mic_none, אדום בזמן הקלטה Icons.mic). לחיצה מתחילה הכתבה קולית שמצרפת לשדה; לחיצה-שנייה עוצרת. אין שינוי-פריסה אחר — IconButton סטנדרטי בתוך ה-InputDecoration הקיים. מאומת ב-voice_dictate_button_test (fake-STT → controller מתמלא, mutation RED→GREEN §mutation_log). analyze 0.
+
+## 2026-06-16 — #45-weather-open-meteo — _Weather: תחזית אמיתית במקום seed
+**שינוי נראה (בלי screenshot — mapper נבדק + robustness render):** בכלי 🌦️ אוטומציית-מזג-אוויר (ai_hub), הכרטיסים מציגים עכשיו תחזית אמיתית מ-Open-Meteo לפי מיקום-המכשיר (כשזמין); ההערה "בפרודקשן API חיצוני" הוחלפה ב-"🌦️ תחזית Open-Meteo · לפי מיקום המכשיר". אין שינוי-פריסה לכרטיסים — אותו AiCard, רק מקור-הדאטה. ב-VM אין GPS → fallback ל-seed (המסך מרנדר כרגיל). מאומת ב-weather_service_test (mapper, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.

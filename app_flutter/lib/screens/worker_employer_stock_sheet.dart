@@ -75,7 +75,7 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
     // The worker's OWN material requests (newest-first) + their live status —
     // the contractor advances status in E3b and it flips here live.
     final myRequests =
-        ref.watch(requestsForWorker(session?.uid ?? ''));
+        ref.watch(requestsForWorker(session?.username ?? ''));
 
     return _sheetShell(
       context: context,
@@ -176,6 +176,7 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
     ref.read(materialRequestsProvider.notifier).submit(
           employerId: session?.employerId ?? '',
           workerUid: session?.uid ?? '',
+          username: session?.username ?? '',
           workerName: session?.displayName ?? '',
           items: lines,
           note: _noteCtrl.text,

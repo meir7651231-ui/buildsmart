@@ -41,6 +41,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
@@ -229,7 +230,7 @@ class CourierReportsTab extends ConsumerWidget {
     // ── ④ weekly buckets — Sunday-first; only deliveries stamped THIS week
     // land on a bar. Delivered orders without a stamp (before the delivery
     // clock landed) go to the honest 'ללא חותמת' bucket.
-    final weekStart = today.subtract(Duration(days: today.weekday % 7));
+    final weekStart = startOfWeekSunday(today);
     final perDay = List<int>.filled(7, 0);
     var noStamp = 0;
     for (final o in delivered) {
@@ -238,7 +239,7 @@ class CourierReportsTab extends ConsumerWidget {
         noStamp++;
         continue;
       }
-      final dayIdx = DateTime(d.year, d.month, d.day).difference(weekStart).inDays;
+      final dayIdx = daysBetweenDst(weekStart, d);
       if (dayIdx >= 0 && dayIdx < 7) perDay[dayIdx]++;
       // a delivery stamped in a previous week is simply outside this chart.
     }

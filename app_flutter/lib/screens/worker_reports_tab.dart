@@ -33,6 +33,7 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/screens/worker_report_drilldowns.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -263,7 +264,7 @@ class WorkerReportsTab extends ConsumerWidget {
     // task-clock landed) go to the honest 'ללא תאריך' bucket.
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final weekStart = today.subtract(Duration(days: today.weekday % 7));
+    final weekStart = startOfWeekSunday(today);
     final perDay = List<int>.filled(7, 0);
     var noDate = 0;
     for (final t in doneTasks) {
@@ -272,7 +273,7 @@ class WorkerReportsTab extends ConsumerWidget {
         noDate++;
         continue;
       }
-      final dayIdx = DateTime(c.year, c.month, c.day).difference(weekStart).inDays;
+      final dayIdx = daysBetweenDst(weekStart, c);
       if (dayIdx >= 0 && dayIdx < 7) perDay[dayIdx]++;
       // a completion stamped in a previous week is simply outside this chart.
     }

@@ -48,6 +48,7 @@ class MaterialRequest {
     required this.id,
     required this.employerId,
     required this.workerUid,
+    required this.username,
     required this.workerName,
     required this.items,
     required this.createdTs,
@@ -64,9 +65,17 @@ class MaterialRequest {
   /// this via [requestsForEmployer].
   final String employerId;
 
-  /// The requesting worker's uid (`session.uid`) — [requestsForWorker] filters
-  /// on this so the worker sees only their own requests.
+  /// The requesting worker's uid (`session.uid`) — the SERVER-READY identity,
+  /// '' on the local/seed path (only the Firebase-bind mints it). KEPT for the
+  /// SERVER-SWAP; do NOT scope on it — it collides at '' for every seed worker
+  /// (that was the cross-user leak). Scope on [username] instead.
   final String workerUid;
+
+  /// The requesting worker's board username (`session.username`) — the LOCAL
+  /// scope key, populated for every seed/demo worker. [requestsForWorker]
+  /// filters on THIS (the #66 per-username idiom shared by VacationRequest /
+  /// AttendanceDay / WorkerCert), so each worker sees only their own requests.
+  final String username;
 
   /// Hebrew display name of the requester (straight off the BoardSession) — so
   /// the contractor inbox shows who asked without a second lookup.
@@ -91,6 +100,7 @@ class MaterialRequest {
   MaterialRequest copyWith({
     String? employerId,
     String? workerUid,
+    String? username,
     String? workerName,
     List<String>? items,
     String? note,
@@ -101,6 +111,7 @@ class MaterialRequest {
         id: id,
         employerId: employerId ?? this.employerId,
         workerUid: workerUid ?? this.workerUid,
+        username: username ?? this.username,
         workerName: workerName ?? this.workerName,
         items: items ?? this.items,
         note: note ?? this.note,
@@ -112,6 +123,7 @@ class MaterialRequest {
         'id': id,
         'employerId': employerId,
         'workerUid': workerUid,
+        'username': username,
         'workerName': workerName,
         'items': items,
         'note': note,
@@ -145,6 +157,10 @@ class MaterialRequest {
       id: id,
       employerId: employerId,
       workerUid: workerUid,
+      // Back-compat: a pre-username payload has no key → '' (those old seed
+      // records carried workerUid '' anyway, so they correctly fall out of the
+      // per-username scope — that empty-key collision WAS the leak).
+      username: raw['username'] is String ? raw['username'] as String : '',
       workerName: workerName,
       items: items,
       note: raw['note'] is String ? raw['note'] as String : '',
@@ -207,6 +223,7 @@ class MaterialRequestsNotifier extends StateNotifier<List<MaterialRequest>> {
   String submit({
     required String employerId,
     required String workerUid,
+    required String username,
     required String workerName,
     required List<String> items,
     String note = '',
@@ -222,6 +239,7 @@ class MaterialRequestsNotifier extends StateNotifier<List<MaterialRequest>> {
       id: id,
       employerId: employerId,
       workerUid: workerUid,
+      username: username,
       workerName: workerName,
       items: cleaned,
       note: note.trim(),
@@ -283,14 +301,18 @@ final requestsForEmployer =
   return mine;
 });
 
-/// WORKER view — every request this [workerUid] filed, newest-first. The worker
+/// WORKER view — every request this [username] filed, newest-first. The worker
 /// stock sheet renders this so the worker sees their own requests + live status.
+/// Scopes on the board USERNAME (not workerUid): session.uid is '' for every
+/// seed/demo worker, so keying on it collided at '' and leaked every worker's
+/// requests to every other (the #66 per-username idiom — mirrors how the worker
+/// forms/attendance/certs stores scope — fixes that).
 final requestsForWorker =
-    Provider.family<List<MaterialRequest>, String>((ref, workerUid) {
+    Provider.family<List<MaterialRequest>, String>((ref, username) {
   final all = ref.watch(materialRequestsProvider);
   final mine = [
     for (final r in all)
-      if (r.workerUid == workerUid) r,
+      if (r.username == username) r,
   ]..sort((a, b) => b.createdTs.compareTo(a.createdTs));
   return mine;
 });

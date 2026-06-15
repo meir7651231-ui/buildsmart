@@ -62,6 +62,11 @@ class SavedProjectsNotifier extends StateNotifier<List<SavedProject>> {
   /// Guards against _load clobbering a mutation that arrived before prefs.
   bool _loaded = false;
 
+  /// Monotonic id suffix — web DateTime is ~1ms-precise, so two saves in the
+  /// same millisecond would collide on a timestamp-only id, and `remove(id)` /
+  /// `rename(id)` would then hit BOTH. Mirrors worker_notifs / worker_trainings.
+  int _seq = 0;
+
   @override
   set state(List<SavedProject> value) {
     _loaded = true; // mutation happened — block any pending _load
@@ -108,7 +113,7 @@ class SavedProjectsNotifier extends StateNotifier<List<SavedProject>> {
     List<String> branchSkus = const [],
   }) async {
     final p = SavedProject(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id: '${DateTime.now().microsecondsSinceEpoch}-${_seq++}',
       name: name,
       anchorSkus: List.of(anchorSkus),
       branchSkus: List.of(branchSkus),

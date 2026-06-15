@@ -1501,3 +1501,128 @@ RULE: מזהים טסט-שנכשל לפי בלוק-השגיאה המפורט ב�
 ### ג — כלל המניעה
 ANTIPATTERN: כריכת זמינות-auth לדגל ה-DATA backend במקום לאתחול Firebase
 RULE: זמינות שכבת-ה-auth נגזרת מאתחול-Firebase בפועל ולא מדגל-ה-DATA-backend; שומרים את גידור-ה-DATA נפרד כדי שכניסה-אמיתית תעבוד גם כשהנתונים עדיין דמו, בלי לשבור את ה-signed-out-byte-identical ל-Firebase-free
+## 2026-06-15 — בקשות-חומר: scope על session.uid דלף בין עובדי-seed (uid ריק לכולם)
+### א — הבעיה
+מנוע בקשות-החומר מיקד את "הבקשות שלי" של העובד ואת חותם-ההגשה על session.uid (requestsForWorker סינן workerUid). אבל session.uid מאוכלס רק בנתיב Firebase-Auth (kUidScopedQueries כבוי כברירת-מחדל); בנתיב seed או demo החי, login ו-enterDemo לא מאתחלים uid, אז כל עובד נושא uid ריק. לכן workerUid היה '' לכולם ו-requestsForWorker('') החזיר את בקשות-החומר הפרטיות של כל עובד לכל עובד אחר — הפרת אינווריאנט #66 (כל עובד רואה רק את שלו). מנועי-האחים (חופשה, נוכחות, תעודות) כבר מסננים לפי username דווקא בגלל זה; בקשות-החומר היה החריג.
+### ב — הפתרון
+הוספת שדה username ל-MaterialRequest (מפתח-ה-scope, כמו VacationRequest.username), submit מקבל וחותם אותו, requestsForWorker מסנן לפי username; workerUid נשמר כ-id מוכן-לשרת (username שווה-ל-uid בנתיב Firebase → אפס רגרסיה). הגיליון מעביר session.username בקריאה ובהגשה. טסט-בידוד: שני עובדים עם workerUid ריק ושמות-משתמש שונים — כל אחד רואה רק את שלו.
+### ג — כלל המניעה
+ANTIPATTERN: scope של רשומת-עובד-פר-משתמש על session.uid במקום session.username בנתיב מקומי או seed שבו uid ריק לכל עובד
+RULE: רשומת-עובד-פר-משתמש מסוננת תמיד לפי session.username; session.uid ריק לכל עובד seed או demo כל עוד kUidScopedQueries כבוי, אז משתמשים בו רק כשדה additive מוכן-לשרת ולא כמפתח-סינון
+
+## 2026-06-15 — id מבוסס-timestamp בלי _seq: התנגשות → מחיקה פוגעת בשתיהן (4 stores)
+### א — הבעיה
+4 stores מקומיים מינטו id מ-timestamp בלבד בלי סיומת מונוטונית: WorkerCert (`cert-${micros}`), SickNote (`sick-${micros}`), CartList (`${millis}`), SavedProject (`${micros}`). על web ה-DateTime מדויק רק ל-1ms בערך, אז שתי יצירות באותה מילישנייה מינטו id זהה. כל ה-remove/delete/rename בקבצים האלה שומרים כל שורה ש-id שלה איננו היעד, אז מחיקת רשומה אחת מחקה בשקט את שתיהן (וגם rename שינתה את שתיהן). המנועים האחים (vacation/material/trainings/notifs/stock) כבר משתמשים ב-_seq בדיוק בגלל זה.
+### ב — הפתרון
+לכל אחד מ-4 ה-notifiers נוסף שדה `int _seq = 0;` וה-id מינט עם הסיומת `-${_seq++}`, בדיוק כמו worker_trainings ו-worker_notifs. ה-id נשאר String אטום (toJson/fromJson לא נוגעים בפורמט) ולכן אפס שינוי-סכמה. טסט: שני adds לכל store → ה-ids נבדלים והסגמנט-האחרון הוא seq עוקב.
+### ג — כלל המניעה
+ANTIPATTERN: id שנמכר מ-DateTime.now timestamp בלבד בלי סיומת _seq מונוטונית בקובץ-store שיש בו מחיקה לפי id
+RULE: כל id שנמכר מ-timestamp בקובץ עם מחיקה-לפי-id חייב סיומת מונוטונית _seq כמו worker_trainings ו-worker_notifs; web DateTime מדויק ל-1ms בערך אז timestamp לבדו מתנגש ומחיקה פוגעת בכל המתנגשים
+
+## 2026-06-15 — משימות-ריצה (createTask/proposeTask) לא שרדו restart — _load בנה רק מ-seeds
+### א — הבעיה
+מנוע-המשימות בנה את ה-state ב-_load רק מ-_seedTasks (ה-const kPersonaTasks, ids 1-5) plus overlay של מוטציות keyed-by-id. משימה שנוצרה בריצה — קבלן ב-createTask או עובד ב-proposeTask (id שווה למקסימום-הקיים plus 1) — נכתבה ל-overlay רק עם שדות-מוטציה (status/photo) בלי name/steps/worker, וב-_load שום ענף לא הוסיף ids שאינם-seed. לכן כל משימה שקבלן יצר או עובד הציע נמחקה בטעינה הבאה — לב החיווט קבלן↔עובד אבד ב-restart.
+### ב — הפתרון
+TaskItem קיבל toJson/tryFromJson (רשומה-מלאה). _persist כותב את משימות-הריצה (ids שאינם-seed) כרשומות-מלאות תחת מפתח נפרד kTasksRuntimeKey; _load משחזר אותן אחרי seed plus overlay. מפתח נפרד שומר back-compat מלא (payload ישן ללא-שינוי, ה-overlay של ה-seeds לא נגע). SERVER-READY דרך bindRemote.
+### ג — כלל המניעה
+ANTIPATTERN: _load של מנוע שבונה state רק מ-seeds קבועים ועוד overlay-מוטציות כשהמנוע מאפשר יצירת-entity בריצה עם id דינמי
+RULE: מנוע שמאפשר יצירת-entity בריצה עם id דינמי חייב לשמר את הרשומה-המלאה ב-toJson ולשחזר אותה ב-_load, לא רק overlay-מוטציות על seeds קבועים; אחרת ה-entity שנוצר בריצה נמחק ב-restart
+
+## 2026-06-15 — side-effects (פעמון/צ'אט) ללא-תנאי אחרי decide → double-fire ב-double-tap
+### א — הבעיה
+ב-contractor_hr_sheet, _decide ו-_decideTraining קראו ל-approve/reject (void, status-guarded במנוע) ואז ירו פעמון plus צ'אט plus toast ללא-תנאי. ה-status הלכוד ב-r/t (מבניית-השורה) מתיישן: ב-double-tap מהיר השורה לא נבנית-מחדש בין ההקשות, אז שתי-ההקשות ראו pending וירו — העובד קיבל שני פעמונים ושתי הודעות-צ'אט לאישור אחד. וגם שני-משטחים (קבלן plus מנהל) שמחליטים על אותה בקשה ירו כל אחד.
+### ב — הפתרון
+approve/reject/_decide בשני המנועים (vacation, trainings) מחזירים bool — true רק על מעבר אמיתי pending→decided (re-read של ה-state החי, לא ה-row הלכוד). הווידג'ט יורה את ה-side-effects רק אם true. void→bool additive (callers שמתעלמים מהערך עובדים). הקבלן מחזיק את ההתראה.
+### ג — כלל המניעה
+ANTIPATTERN: ירי side-effects פעמון או צ'אט או toast ללא-תנאי אחרי קריאת engine status-guarded על סמך ה-status הלכוד ב-widget row
+RULE: side-effect שצריך לירות פעם-אחת אחרי מעבר-state חייב להיתלות בערך-ההחזרה של המנוע האם-באמת-עבר או ב-re-read של ה-state החי, לא ב-status הלכוד ב-row של ה-widget שמתיישן ב-double-tap
+
+## 2026-06-15 — captureSignature חתם "נשמרה" על persist fire-and-forget (fake-success)
+### א — הבעיה
+persona_pod_sheet הריע "החתימה נשמרה ✍️" ללא-תנאי אחרי `captureSignature` (void → _put → set state → _persist() לא-מוּמתן). כשל-אחסון (quota ב-web localStorage על data-URL גדול) השאיר את החתימה בזיכרון בלבד; ב-restart היא נעלמה — אבל המשתמש כבר ראה "נשמרה". capturePod כבר תיקן זאת (Future<bool> plus rollback); captureSignature פיגר.
+### ב — הפתרון
+captureSignature → Future<bool> בחיקוי capturePod: super.state=next (סינכרוני, לפני ה-await), await _persist, ובכשל rollback ל-before plus return false. הווידג'ט ממתין ומריע הצלחה רק על true (אחרת "לא נשמרה — נסה שוב"). החתימה רוכבת על ה-side-car הראשי podSig אז persist יחיד מספיק.
+### ג — כלל המניעה
+ANTIPATTERN: toast הצלחה אחרי כתיבה מתמשכת שעברה דרך set-state עם persist לא-מוּמתן בלי לבדוק שה-write נחת
+RULE: כל מתודת-כתיבה שיש לה side-effect חזותי של הצלחה חייבת להחזיר Future bool מ-await של ה-persist ולגלגל-אחור את ה-state בכשל, וה-UI מריע הצלחה רק על true כמו capturePod
+
+## 2026-06-15 — offset-יום חוצה גבול-DST: local-midnight difference inDays מתקצר ביום
+### א — הבעיה
+גאנט (startDay) plus שתי לשוניות-הדוחות (dayIdx בהיסטוגרמת-השבוע) חישבו offset-יום עם DateTime מקומי difference inDays על midnight-ים מקומיים. בלילה של spring-forward (ישראל: שישי לפני יום-ראשון האחרון של מרץ) היום הוא 23h, אז ההפרש בין שני midnight-ים מקומיים סמוכים = 23h ו-inDays מתקצר ל-0 — בָּר-גאנט נופל ביום שגוי, משלוח/השלמה נופלים בדלי-שבוע שגוי. בנוסף weekStart חושב ב-subtract Duration days (חיסור span קבוע של שעות) שנסחף ב-DST.
+### ב — הפתרון
+עוזר טהור משותף lib/logic/calendar_days.dart: daysBetweenDst מצמצם את שני הקצוות ל-DateTime.utc (ימי-24h, בלי DST → פער-לוחי מדויק בכל TZ); startOfWeekSunday בונה את עוגן-השבוע ב-DateTime y m d-k (חשבון-לוח, לא חיסור-שעות). שלושת אתרי-ה-offset ושתי בנְיות-weekStart עוברים דרכם. ה-streak כבר היה חשבון-לוח (DateTime y m d-streak plus contains) — נשאר.
+### ג — כלל המניעה
+ANTIPATTERN: offset-יום או מספר-ימים מחושב ב-DateTime מקומי עם difference inDays או ב-subtract Duration days על תאריך מקומי
+RULE: כל חשבון של מספר-ימים-לוחיים חייב לצמצם את שני הקצוות ל-DateTime.utc ולחסר שם ימי-24h, ועוגן-תאריך נבנה ב-DateTime y m d-k ולא ב-subtract Duration days — שניהם נסחפים על גבול-DST
+
+## 2026-06-15 — קיבוץ-status ל-UI שלא מכסה את כל הערכים → status נופל בין-הכיסאות
+### א — הבעיה
+worker_task_board_screen קיבץ את משימות-העובד ל-5 קבוצות-status (active/rejected/pending/review/done), כל קבוצה status-יחיד. המנוע מחזיק גם status proposed (משימה שעובד הציע, ממתינה לאישור הקבלן) — שלא הופיע באף קבוצה → משימה מוצעת בלתי-נראית לחלוטין בלוח, וה-הערה counts-sum-to-total נשברה בשקט.
+### ב — הפתרון
+כל קבוצה היא Set-של-statuses; proposed קופל לקבוצת בתור (pending) — אין קבוצה נפרדת (החלטת-בעלים A5). חולצה groupByStatus טהורה ובדוקה; הטסט מאמת שהסכום-על-פני-הקבוצות שווה ל-total (אף status לא נופל).
+### ג — כלל המניעה
+ANTIPATTERN: קיבוץ enum או status סופי לדליי-UI בלי לכסות כל ערך אפשרי — ערך לא-ממופה נופל בין-הכיסאות ונעלם מה-UI
+RULE: כשמקבצים status או enum לקבוצות-UI הדליים חייבים לכסות את כל קבוצת-הערכים, ולאמת בטסט שסכום-הפריטים-על-פני-הקבוצות שווה ל-total — כך ערך-status חדש לא יכול להיעלם בשקט
+
+## 2026-06-15 — מיקום-שני להגדרה: לקשור את אותו provider, לא להעתיק ערך ל-state מקומי
+### א — הבעיה (סיכון שנמנע)
+#52 מציג שני toggles של התראות (typeOrders/typeShipments) גם בעולם-ההזמנות (🔔 בטאב הזמנות), בנוסף להסרתם מההגדרות. פיתוי נפוץ: להחזיק ערך מקומי בגיליון ולסנכרן — מה שיוצר שני מקורות-אמת שמתפצלים (toggle אחד לא משקף את השני / לא נשמר).
+### ב — הפתרון
+OrderNotifSheet קושר ישירות את notifSettingsProvider — ref.watch לקריאה, notifier.update לכתיבה — בדיוק כמו מסך-ההגדרות. הזזת-UI מעל אותו state יחיד; הטסט מאמת שה-tap בגיליון כותב את notifSettingsProvider עצמו.
+### ג — כלל המניעה
+ANTIPATTERN: הצגת אותה הגדרה בשני מסכים תוך החזקת עותק-ערך ב-state מקומי בכל אחד — שני מקורות-אמת שמתפצלים
+RULE: כשמציגים הגדרה במשטח שני, לקשור את אותו provider בשני המקומות — ref.watch לקריאה ו-notifier לכתיבה — מקור-אמת יחיד, אף פעם לא עותק מקומי שדורש סנכרון
+
+## 2026-06-15 — אותה הגדרה לוגית בכמה מקטעים/שדות → מצב מתפצל ו-UX מבלבל
+### א — הבעיה
+מסך-ההגדרות הראשי (catalog_settings) הציג שני מקטעי-🔔 נפרדים (התראות plus התראות קטלוג) ושני מקטעי-תצוגה (תצוגה plus תצוגה ומיון), ו-toggle ל-price-drop הופיע פעמיים על שני שדות שונים (typePriceDrops 'התראות תקציב' מול notifPriceDrop 'ירידת מחיר במועדפים') — אותו מושג, שני מקורות-אמת, ערכים מתפצלים, וקטגוריות כפולות מבלבלות.
+### ב — הפתרון
+מיזוג כל זוג-מקטעים-חופף לאחד (🔔 'התראות' אחד, 'תצוגה ומיון' אחד), וקיבוע ה-price-drop לשדה-קנוני יחיד notifPriceDrop והסרת ה-toggle הכפול. order/shipment הושמטו (עולם-ההזמנות, #52). הטסט הייעודי עודכן לכותרת הממוזגת.
+### ג — כלל המניעה
+ANTIPATTERN: אותה הגדרה לוגית מוצגת בשני מקטעי-הגדרות או נשמרת בשני שדות שונים — קטגוריות כפולות ומצב מתפצל
+RULE: מושג-הגדרה אחד שווה שדה-אחד — להציג אותו פעם-אחת ולמזג מקטעים שמכסים אותו תחום, כך שאין שתי קטגוריות חופפות או שני שדות שמתפצלים
+
+## 2026-06-15 — קטגוריית-הגדרות שכולה placeholders עם toggle כפול = קטגוריה מתה
+### א — הבעיה
+'מועדפים ורשימות' בהגדרות הייתה 4 שורות placeholder (coming-soon, backend-blocked, מוסתרות תחת kHideUnderConstruction) plus toggle אחד priceChangeAlert שכבר כוסה ע"י ה-price-drop הקנוני (#50) — קטגוריה שמרגישה ריקה ומבלבלת, וכופלת שדה.
+### ב — הפתרון
+הסרת הקטגוריה כולה מ-catalog_settings. ה-placeholders שייכים כ-server-ready seams במשטחי-המועדפים/רשימות האמיתיים ולא ככרטיס-הגדרות, נדחים עד שייחשף שם שקע. השדה priceChangeAlert נשאר במודל back-compat.
+### ג — כלל המניעה
+ANTIPATTERN: קטגוריית-הגדרות שכל שורותיה placeholders backend-blocked עם toggle יחיד שכבר-קנוני במקום אחר — קטגוריה מתה ומבלבלת
+RULE: לא להחזיק קטגוריית-הגדרות שכל שורותיה placeholders backend-blocked עם toggle שכבר-קנוני במקום אחר — להסיר אותה ולחבר את ה-placeholders כ-seams במשטח-האמיתי שלהם כשהוא נחשף
+
+## 2026-06-15 — שדה-העדפה מגובה הושאר לא-מחווט כי שכבת-הסינון חסרת-דאטה
+### א — הבעיה
+ב-_SuppliersSection 3 שדות (maxDistance/minRating/localSuppliersOnly) קיימים ב-CatalogSettings אך הוצגו כ-placeholders לא-מחווטים — הנימוק היה שאין דאטת-ספק על מוצרים אז הסינון no-op ולשמור מספר שלא מסנן זה זיוף. התוצאה: המשתמש לא יכול אפילו לבטא את ההעדפה, ואין מצב server-ready.
+### ב — הפתרון
+חיווט 3 השדות לפקדים נשמרים server-ready: שמירת ה-intent מקומית עכשיו, והסינון מופעל אוטומטית כשצד-הספק יזין מרחק/דירוג/מקומיות. זה לא זיוף-תוצאה — זו העדפה כנה שהשכבה-העתידית תכבד. preferred/blocked רשימות דורשים זהות-ספק → נשארו seams.
+### ג — כלל המניעה
+ANTIPATTERN: השארת שדה-העדפה מגובה לא-מחווט רק כי שכבת-הסינון הצורכת עדיין חסרת-דאטה — המשתמש לא יכול אפילו לבטא את ההעדפה
+RULE: toggle של העדפה ששדה-הגיבוי שלו קיים צריך לשמור את כוונת-המשתמש עכשיו כ-server-ready, גם אם הסינון במורד-הזרם מופעל מאוחר יותר — להבדיל בין לזייף תוצאה לבין לשמור העדפה כנה שהשכבה-העתידית תכבד
+
+## 2026-06-15 — דאטה פרטית per-user תחת מפתח-אחסון גלובלי יחיד → דליפה בין משתמשים
+### א — הבעיה
+RewardsNotifier שמר את מאזן ה-BuildCoins/ההתקדמות תחת מפתח גלובלי יחיד bs.rewards.v1 — כל משתמשי-הלוח חלקו אותו מאזן (P-6/F-33): מטבעות שקבלן צבר נראו לעובד, החלפת-משתמש לא איפסה.
+### ב — הפתרון
+המפתח כולל את ה-username הנוכחי, ריק→גלובלי back-compat. ה-provider קורא את ה-session boardAuthProvider ובונה notifier scoped, כך שכל משתמש טוען/שומר את שלו. ה-leaderboard נשאר seed משותף — רק שורת 'אתה' משקפת את המאזן הפרטי. הערה: coupling provider→session נוגע ב-prefs, אז טסטים שקוראים אותו ב-ProviderContainer חשוף צריכים ensureInitialized plus setMockInitialValues.
+### ג — כלל המניעה
+ANTIPATTERN: דאטה פרטית per-user שנשמרת תחת מפתח-אחסון גלובלי יחיד — דולפת בין משתמשים, משתמש אחד רואה מאזן של אחר
+RULE: דאטה פרטית per-user חייבת להישמר תחת מפתח מסונכרן-ל-username הנוכחי או במפה username→data — מפתח-אחסון גלובלי יחיד דולף בין משתמשי-הלוח
+
+## 2026-06-16 — קול שמפעיל חיפוש/פעולה במקום להכתיב לשדה
+### א — הבעיה
+דיבור-למשימה (#36) המקורי הפעיל חיפוש-קטלוג במקום למלא שדה-משימה. בנוסף, widget שמשתמש ב-VoiceService.instance ישירות אינו בדיק (אין מיקרופון בטסטים).
+### ב — הפתרון
+VoiceDictateButton — כפתור per-field שמכתיב לתוך ה-controller של אותו שדה (append, cursor בסוף, לא דורס). ה-STT מוזרק כ-listenFn/stopFn seam (ברירת-מחדל VoiceService) → בדיק עם fake. מחווט בלוח-העובד בלבד (שם/תיאור/שלבים של הצעת-משימה).
+### ג — כלל המניעה
+ANTIPATTERN: כפתור-מיקרופון ששזור להפעיל חיפוש או פעולה אחרת במקום להכתיב לתוך השדה שבו המשתמש נמצא — קול חוטף לזרם אחר
+RULE: כפתור-קול per-field מכתיב לתוך ה-controller של אותו שדה בלבד — append עם cursor בסוף, ומזריקים את מנוע-ה-STT לבדיקות, לא ממחזרים קול כטריגר-חיפוש
+
+## 2026-06-16 — פיצ'ר נדחה כ"חסום-API" בלי לבדוק API חינמי ללא-מפתח
+### א — הבעיה
+אוטומציית מזג-אוויר (#45) הוצגה כ-placeholder "בפרודקשן שירות חיצוני" ונדחתה — בהנחה שצריך API בתשלום/מורכב. למעשה Open-Meteo נותן תחזית חינמית ללא-מפתח.
+### ב — הפתרון
+weather_service: fetchOpenMeteoDaily עם http-seam מוזרק plus mapper טהור (weather_code→אמוji/הערה) plus provider geo→fetch→map עם fallback ל-seed. ה-mapper נבדק בלי רשת/GPS; ה-provider מתדרדר בחן (no-GPS/רשת → seed, לא קריסה/ריק).
+### ג — כלל המניעה
+ANTIPATTERN: לסמן פיצ'ר-דאטה כ-deferred חסום-API-חיצוני בלי לבדוק אם קיים API ציבורי חינמי ללא-מפתח שמתאים
+RULE: לפני דחיית פיצ'ר-דאטה כחסום-API לחפש API חינמי ללא-מפתח כמו Open-Meteo, ולחווט אותו עם fetch-seam מוזרק ו-fallback ל-seed כן — כך זה בדיק ומתדרדר בחן

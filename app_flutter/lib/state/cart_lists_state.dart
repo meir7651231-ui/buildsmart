@@ -73,6 +73,11 @@ class CartListsNotifier extends StateNotifier<List<CartList>> {
   /// Guards against _load clobbering a mutation that arrived before prefs.
   bool _loaded = false;
 
+  /// Monotonic id suffix — web DateTime is ~1ms-precise, so two saves in the
+  /// same millisecond would collide on a timestamp-only id, and `deleteList(id)`
+  /// would then remove BOTH. Mirrors worker_notifs / worker_trainings.
+  int _seq = 0;
+
   @override
   set state(List<CartList> value) {
     _loaded = true; // mutation happened — block any pending _load
@@ -113,7 +118,7 @@ class CartListsNotifier extends StateNotifier<List<CartList>> {
 
   Future<void> saveCart(String name, List<CartItem> items) async {
     final newList = CartList(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: '${DateTime.now().microsecondsSinceEpoch}-${_seq++}',
       name: name,
       items: items,
       createdAt: DateTime.now(),

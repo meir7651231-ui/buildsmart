@@ -35,6 +35,7 @@ void main() {
       final id = c.read(materialRequestsProvider.notifier).submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['מלט', 'חול'],
         note: 'דחוף לאתר',
@@ -66,6 +67,7 @@ void main() {
       final id = c.read(materialRequestsProvider.notifier).submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['ברגים'],
       );
@@ -98,6 +100,7 @@ void main() {
       final id = c.read(materialRequestsProvider.notifier).submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['צבע'],
       );
@@ -118,6 +121,7 @@ void main() {
       final id = c.read(materialRequestsProvider.notifier).submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['דבק'],
       );
@@ -139,6 +143,7 @@ void main() {
       final id = c.read(materialRequestsProvider.notifier).submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['מלט', '   ', '', '  חול  '],
       );
@@ -158,12 +163,14 @@ void main() {
       final id1 = notifier.submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['פריט 1'],
       );
       final id2 = notifier.submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['פריט 2'],
       );
@@ -183,12 +190,14 @@ void main() {
       notifier.submit(
         employerId: employerId,
         workerUid: workerUid,
+        username: workerUid,
         workerName: workerName,
         items: const ['שלי'],
       );
       notifier.submit(
         employerId: 'other-contractor',
         workerUid: 'other-worker',
+        username: 'other-worker',
         workerName: 'מישהו אחר',
         items: const ['לא שלי'],
       );
@@ -196,6 +205,41 @@ void main() {
       final mine = c.read(requestsForEmployer(employerId));
       expect(mine, hasLength(1));
       expect(mine.single.items, const ['שלי']);
+    });
+
+    test(
+        'requestsForWorker scopes per-USERNAME even when workerUid is empty '
+        '(the seed-session cross-user leak)', () {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+
+      final n = c.read(materialRequestsProvider.notifier);
+      // Two seed workers: BOTH carry workerUid '' (session.uid is unset on the
+      // local/seed path) — only the username tells them apart.
+      n.submit(
+        employerId: employerId,
+        workerUid: '',
+        username: 'ran',
+        workerName: 'רן',
+        items: const ['מלט'],
+      );
+      n.submit(
+        employerId: employerId,
+        workerUid: '',
+        username: 'omer',
+        workerName: 'עומר',
+        items: const ['חול'],
+      );
+
+      final ran = c.read(requestsForWorker('ran'));
+      expect(ran, hasLength(1));
+      expect(ran.single.items, const ['מלט']);
+      // omer must NOT see ran's request (RED before the fix: both workerUid ''
+      // → requestsForWorker('') returned BOTH).
+      final omer = c.read(requestsForWorker('omer'));
+      expect(omer, hasLength(1));
+      expect(omer.single.items, const ['חול']);
     });
   });
 }

@@ -309,22 +309,10 @@ class _TypesSection extends ConsumerWidget {
       emoji: '🔔',
       title: 'סוגי התראות',
       children: [
-        _SwitchRow(
-          label: 'הזמנות',
-          value: settings.typeOrders,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typeOrders: v)),
-        ),
-        _SwitchRow(
-          label: 'משלוחים',
-          value: settings.typeShipments,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typeShipments: v)),
-        ),
+        // 🔔 #52 — 'הזמנות' + 'משלוחים' notifications RELOCATED to the orders
+        // world (store_screen · 📦 הזמנות → OrderNotifSheet). They bind the SAME
+        // notifSettingsProvider (typeOrders / typeShipments); every other type
+        // below stays here.
         _SwitchRow(
           label: 'מחירים במועדפים',
           value: settings.typePriceDrops,

@@ -9,8 +9,15 @@ import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  // #99 — rewardsProvider now watches boardAuthProvider (per-username key), which
+  // touches SharedPreferences; init the binding + an empty mock so reading it in
+  // a bare ProviderContainer no longer hits "Binding not initialized".
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues(const <String, Object>{}));
+
   // ─── T3.G — REWARDS / LOYALTY (proto Category H @21402-21659) ────────────────
   group('T3.G rewards hub', () {
     test('7 hub features map to the 7 verbatim leaves [L21464-21472]', () {

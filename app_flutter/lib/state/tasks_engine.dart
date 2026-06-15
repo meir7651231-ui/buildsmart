@@ -200,6 +200,76 @@ class TaskItem {
       );
 
   static const _sentinel = Object();
+
+  /// Wave A1 — FULL serialization (every field). Seed tasks ride the compact
+  /// id-keyed mutation overlay ([TasksNotifier._persist]); only RUNTIME tasks
+  /// (contractor-created / worker-proposed, non-seed ids) need the whole record
+  /// to survive a restart. Field-economy mirrors the overlay
+  /// (write-when-non-empty/non-default).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'detail': detail,
+        'worker': worker,
+        'status': status,
+        'days': days,
+        'steps': steps,
+        if (photo != null) 'photo': photo,
+        if (note.isNotEmpty) 'note': note,
+        if (startedAt != null) 'startedAt': startedAt!.toIso8601String(),
+        if (completedAt != null) 'completedAt': completedAt!.toIso8601String(),
+        if (doneSteps.isNotEmpty) 'doneSteps': (doneSteps.toList()..sort()),
+        if (orderId != null) 'orderId': orderId,
+        if (employerId.isNotEmpty) 'employerId': employerId,
+        if (assignedWorkerUid.isNotEmpty) 'assignedWorkerUid': assignedWorkerUid,
+        if (createdBy.isNotEmpty) 'createdBy': createdBy,
+        if (scheduledStart != null)
+          'scheduledStart': scheduledStart!.toIso8601String(),
+        if (kind != 'task') 'kind': kind,
+        if (location.isNotEmpty) 'location': location,
+        if (severity.isNotEmpty) 'severity': severity,
+      };
+
+  /// Defensive decode of a full record (mirrors the other engines' tryFromJson)
+  /// — a malformed entry returns null and is dropped, never crashes the load.
+  static TaskItem? tryFromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final id = raw['id'];
+    final name = raw['name'];
+    if (id is! int || name is! String) return null;
+    return TaskItem(
+      id: id,
+      name: name,
+      detail: raw['detail'] is String ? raw['detail'] as String : '',
+      worker: raw['worker'] is int ? raw['worker'] as int : 0,
+      status: raw['status'] is String ? raw['status'] as String : 'pending',
+      days: raw['days'] is int ? raw['days'] as int : 0,
+      steps: raw['steps'] is List
+          ? [for (final s in raw['steps'] as List) if (s is String) s]
+          : const [],
+      photo: raw['photo'] is String ? raw['photo'] as String : null,
+      note: raw['note'] is String ? raw['note'] as String : '',
+      startedAt: DateTime.tryParse('${raw['startedAt']}'),
+      completedAt: DateTime.tryParse('${raw['completedAt']}'),
+      doneSteps: raw['doneSteps'] is List
+          ? {
+              for (final s in raw['doneSteps'] as List)
+                if (s is num) s.toInt(),
+            }
+          : <int>{},
+      orderId: raw['orderId'] is String ? raw['orderId'] as String : null,
+      employerId:
+          raw['employerId'] is String ? raw['employerId'] as String : '',
+      assignedWorkerUid: raw['assignedWorkerUid'] is String
+          ? raw['assignedWorkerUid'] as String
+          : '',
+      createdBy: raw['createdBy'] is String ? raw['createdBy'] as String : '',
+      scheduledStart: DateTime.tryParse('${raw['scheduledStart']}'),
+      kind: raw['kind'] is String ? raw['kind'] as String : 'task',
+      location: raw['location'] is String ? raw['location'] as String : '',
+      severity: raw['severity'] is String ? raw['severity'] as String : '',
+    );
+  }
 }
 
 /// Build the verbatim §6 seed by joining the existing Dart seeds (R6 reuse).
@@ -224,6 +294,12 @@ List<TaskItem> _seedTasks() => [
     ];
 
 const String kTasksScreenKey = 'bs.tasks-screen.v1';
+
+/// Wave A1 — FULL records of RUNTIME-created tasks (non-seed ids), so a
+/// contractor-created / worker-proposed task survives an app restart (the
+/// [kTasksScreenKey] overlay only re-derives the const seeds 1..5). SERVER-READY:
+/// the Wave-T1 bindRemote seam syncs these once the Firebase tasks repo lands.
+const String kTasksRuntimeKey = 'bs.tasks-runtime.v1';
 
 /// ⏱️ #85ו cross-cluster side-map MIRROR of the clock stamps —
 /// `{taskId: {startedAt: iso, completedAt: iso}}`. The reports tab
@@ -272,13 +348,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (_loaded) return;
       final raw = prefs.getString(kTasksScreenKey);
-      if (raw == null || raw.isEmpty) {
-        _loaded = true;
-        return;
-      }
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      if (!_loaded) {
+      final m = (raw != null && raw.isNotEmpty)
+          ? jsonDecode(raw) as Map<String, dynamic>
+          : const <String, dynamic>{};
+      {
         super.state = [
           for (final t in _seedTasks())
             if (m['${t.id}'] is Map)
@@ -335,6 +410,21 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
             else
               t,
         ];
+        // Wave A1 — restore RUNTIME tasks (non-seed ids: contractor createTask /
+        // worker proposeTask) from their FULL records, so they survive a restart
+        // (the overlay above only rebuilds the const seeds). bindRemote (T1)
+        // will sync these live once the Firebase tasks repo lands.
+        final rawRt = prefs.getString(kTasksRuntimeKey);
+        if (rawRt != null && rawRt.isNotEmpty) {
+          final seedIds = {for (final t in kPersonaTasks) t.id};
+          final runtime = [
+            for (final e in jsonDecode(rawRt) as List)
+              if (TaskItem.tryFromJson(e) case final t?
+                  when !seedIds.contains(t.id))
+                t,
+          ];
+          if (runtime.isNotEmpty) super.state = [...state, ...runtime];
+        }
         _loaded = true;
       }
     } on Object catch (_) {
@@ -384,6 +474,16 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
               if (t.severity.isNotEmpty) 'severity': t.severity,
             },
         }),
+      );
+      // Wave A1 — persist RUNTIME tasks (non-seed ids) as FULL records so they
+      // survive a restart; the overlay above only re-derives the const seeds.
+      final seedIds = {for (final t in kPersonaTasks) t.id};
+      await prefs.setString(
+        kTasksRuntimeKey,
+        jsonEncode([
+          for (final t in state)
+            if (!seedIds.contains(t.id)) t.toJson(),
+        ]),
       );
       // ⏱️ #85ו: mirror the clock stamps into the bs.task-clock.v1 side-map
       // for the read-only consumer (worker_reports_tab.dart). Tasks with no

@@ -122,6 +122,12 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
   /// state, a late `_load()` becomes non-destructive.
   bool _userTouched = false;
 
+  /// Monotonic id suffix — web DateTime is ~1ms-precise, so two adds in the same
+  /// millisecond would collide on a timestamp-only id, and `remove(id)` (delete
+  /// every row with that id) would then wipe BOTH. Mirrors vacation_requests /
+  /// worker_trainings / material_requests.
+  int _seq = 0;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
@@ -168,7 +174,7 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
   }) async {
     _userTouched = true;
     final cert = WorkerCert(
-      id: 'cert-${DateTime.now().microsecondsSinceEpoch}',
+      id: 'cert-${DateTime.now().microsecondsSinceEpoch}-${_seq++}',
       username: username,
       name: name.trim(),
       issuer: issuer.trim(),

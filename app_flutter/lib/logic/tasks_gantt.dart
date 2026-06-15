@@ -22,6 +22,7 @@
 // timestamp-free total order, so the same task set always lays out identically
 // (no tie-break ambiguity from equal start days).
 
+import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 
 /// One task placed on the gantt timeline. [startDay] is the whole-day offset
@@ -157,7 +158,9 @@ TasksGanttLayout buildTasksGantt(List<TaskItem> tasks) {
         name: t.name,
         // earliest → 0; floored at 0 defensively (earliest is the min).
         startDay: () {
-          final off = _dateOnly(t.scheduledStart!).difference(earliest).inDays;
+          // DST-safe whole-day offset (A4): local-midnight differencing
+          // truncates across a spring-forward; daysBetweenDst counts UTC dates.
+          final off = daysBetweenDst(earliest, t.scheduledStart!);
           return off < 0 ? 0 : off;
         }(),
         lenDays: t.days < 1 ? 1 : t.days,

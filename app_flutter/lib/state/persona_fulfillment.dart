@@ -524,8 +524,26 @@ class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
   /// because a real signature image exists (the getter keys off podSignature).
   /// Honest: there is no empty-save path — the pad never hands back a blank
   /// data-URL, and a caller must not invoke this without one.
-  void captureSignature(String id, String dataUrl) =>
-      _put(id, of(id).copyWith(podSignature: dataUrl));
+  ///
+  /// A3 — mirrors [capturePod]'s await+rollback. The signature data-URL rides
+  /// the MAIN side-car (`'podSig'` in [Fulfillment.toJson]), so one awaited
+  /// [_persist] is the whole write (no [_mirrorPodPhoto] — that is photo-only).
+  /// Returns true only when the write actually landed; on a storage failure the
+  /// in-memory state is rolled back and false returned, so the caller must NOT
+  /// toast success on false (it says "החתימה לא נשמרה" instead).
+  Future<bool> captureSignature(String id, String dataUrl) async {
+    final before = state;
+    // Equivalence to the `set state` override minus its auto-persist, so the
+    // single awaited _persist below is the only write (same shape as capturePod).
+    _loaded = true;
+    super.state = {
+      ...state,
+      id: of(id).copyWith(podSignature: dataUrl),
+    };
+    final ok = await _persist();
+    if (!ok && mounted) super.state = before; // roll back a faked success
+    return ok;
+  }
 
   void clear(String id) {
     state = {...state}..remove(id);

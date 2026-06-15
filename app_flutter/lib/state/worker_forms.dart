@@ -276,6 +276,12 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
   /// late `_load()` becomes non-destructive.
   bool _userTouched = false;
 
+  /// Monotonic id suffix — web DateTime is ~1ms-precise, so two sick-note adds
+  /// in the same millisecond would collide on a timestamp-only id, and
+  /// `removeSickNote(id)` would then delete BOTH. Mirrors vacation_requests /
+  /// worker_trainings.
+  int _seq = 0;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
@@ -341,7 +347,7 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
   }) async {
     _userTouched = true;
     final note = SickNote(
-      id: 'sick-${DateTime.now().microsecondsSinceEpoch}',
+      id: 'sick-${DateTime.now().microsecondsSinceEpoch}-${_seq++}',
       username: username,
       ts: DateTime.now(),
       photo: photo,

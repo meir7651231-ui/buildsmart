@@ -1,5 +1,6 @@
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
+import 'package:buildsmart/screens/order_notif_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -649,7 +650,10 @@ class _SectionChipsRow extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      child: SingleChildScrollView(
+      child: Row(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
@@ -683,6 +687,17 @@ class _SectionChipsRow extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+          ),
+          // 🔔 #52 — order/shipment notification toggles live HERE in the
+          // orders world (relocated from settings). Shown only on 📦 הזמנות.
+          if (section == StoreSection.orders)
+            IconButton(
+              tooltip: 'התראות הזמנות ומשלוחים',
+              icon: const Text('🔔', style: TextStyle(fontSize: 18)),
+              onPressed: () => showOrderNotifSheet(context),
+            ),
+        ],
       ),
     );
   }

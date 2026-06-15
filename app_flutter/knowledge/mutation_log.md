@@ -1073,3 +1073,100 @@
 - תוצאה: `manager_google_login_test` **אדום `+3 -2`** — 'any other email — and null/empty — is rejected' (Expected false / Actual true) + 'non-owner Google sign-in → rejected' (זר קיבל session-מנהל ולא נותק) ✅ נתפס. owner-case + no-gateway + isOwnerEmail-true-case נשארו ירוקים.
 - שחזור: `cp /tmp/bal.GOOD lib/data/board_accounts_local.dart` (גיבוי byte-for-byte, לא git checkout — לשמר שינויים שטרם נדחפו) → RESTORED-IDENTICAL → הרצה חוזרת **+5 ירוק**.
 - מסקנה: `isOwnerEmail` load-bearing — בלעדיו כל חשבון Google נכנס כמנהל-על. השער client-side להצגת-UI; ה-authority האמיתי = admin/manager custom-claim ב-firestore.rules (server-swap, שלב 4). gate: analyze 0-errors · full-suite +2632 -1 (baseline). **לא נגעתי:** worker-board / 4 מחלקות / firebase_options / CI / geo.
+## E3-leak-fix — requestsForWorker scope על session.uid דלף בין עובדי-seed — 2026-06-15
+- **קבצים (lib/state + lib/screens + test):** `lib/state/material_requests_engine.dart` (MaterialRequest += שדה-scope `username`; submit מקבל `username` וחותם אותו; requestsForWorker מסנן `r.username == username` במקום workerUid; workerUid נשמר כ-id מוכן-לשרת) · `lib/screens/worker_employer_stock_sheet.dart` (read+submit מעבירים `session.username`) · `test/material_requests_test.dart` (+טסט-בידוד seed-session, +username בכל submit).
+- **`lib/state/material_requests_engine.dart` — requestsForWorker filter (ה-load-bearing של בידוד-העובד):** מוטציה — `if (r.username == username) r,` הוחזר ל-`if (r.workerUid == username) r,` (הבאג המקורי — keying על workerUid שהוא '' לכל עובד seed/demo).
+- תוצאה: `material_requests_test` **אדום `+7 -1`** — רק 'requestsForWorker scopes per-USERNAME even when workerUid is empty' נכשל (Expected length 1 / Actual 0 — query 'ran' מול רשומות שכולן workerUid '' → 0 התאמות) ✅ נתפס. 7 הטסטים האחרים (שמעבירים workerUid==username) נשארו ירוקים.
+- שחזור: `cp /tmp/mre.GOOD lib/state/material_requests_engine.dart` → RESTORED-IDENTICAL → **+8 ירוק**.
+- מסקנה: ה-scope-key של requestsForWorker load-bearing — session.uid='' לכל עובד seed/demo (רק נתיב Firebase-bind ממלא אותו, kUidScopedQueries default OFF ב-backend.dart), אז keying עליו התנגש ב-'' ו-requestsForWorker('') החזיר את בקשות-החומר הפרטיות של כל העובדים זה לזה (הפרת #66). המעבר ל-username (תבנית-האחים VacationRequest/AttendanceDay/WorkerCert) מבודד נכון; workerUid נשמר additive ל-SERVER-SWAP (username==uid בנתיב Firebase → אפס רגרסיה). נמצא ע"י ביקורת-התקינות האדוורסרית של הצי. gate: analyze 0 · caller יחיד (worker_employer_stock_sheet) עודכן. נגעתי רק ב-material_requests_engine + worker_employer_stock_sheet (+טסט). **לא נגעתי** ב-orders/auth/firebase.
+
+## R2-seq-guard — id מבוסס-timestamp בלי _seq → דליפת-מחיקה ב-4 stores — 2026-06-15
+- **קבצים (lib/state + test):** `worker_certs.dart` (cert id) · `worker_forms.dart` (sick-note id) · `cart_lists_state.dart` (cart id) · `saved_projects.dart` (project id) — לכל אחד נוסף `int _seq = 0;` והסיומת `-${_seq++}` ל-id. טסט חדש `test/id_seq_collision_test.dart` (4 חנויות).
+- **`lib/state/worker_certs.dart` — id mint (load-bearing):** מוטציה — הוסר `-${_seq++}` מה-id (חזרה ל-`'cert-${micros}'` — הבאג המקורי).
+- תוצאה: `id_seq_collision_test` **אדום `+3 -1`** — רק 'worker_certs cert id' נכשל (הסגמנט-האחרון של ה-id הוא ה-micros ולא 0,1) ✅ נתפס. 3 החנויות האחרות נשארו ירוקות.
+- שחזור: `cp /tmp/wc.GOOD lib/state/worker_certs.dart` → RESTORED-IDENTICAL → **+4 ירוק**.
+- מסקנה: web DateTime ~1ms-precise; שני adds באותה מילישנייה התנגשו על id זהה, ו-remove(id)/deleteList(id)/rename(id) (שמורידים/משנים כל שורה עם אותו id) פגעו בשתיהן. ה-`_seq` המונוטוני (תבנית vacation/material/trainings/notifs/stock) מבטיח ייחודיות. id נשאר String אטום (toJson/fromJson ללא-שינוי) → אפס back-compat. נמצא ע"י ביקורת-הלילה סבב-2 של הצי. gate: analyze 0 · 4 stores ירוקים. נגעתי רק ב-4 ה-state-stores (+טסט). **לא נגעתי** ב-UI/orders/auth.
+
+## A1-tasks-persistence — משימות-ריצה (createTask/proposeTask) לא שרדו restart — 2026-06-15
+- **קבצים (lib/state + test):** `tasks_engine.dart` — TaskItem += toJson/tryFromJson (רשומה-מלאה); `_persist` כותב משימות-ריצה (non-seed ids) כרשומות-מלאות תחת `kTasksRuntimeKey='bs.tasks-runtime.v1'`; `_load` משחזר אותן אחרי seed+overlay. טסט חדש `test/tasks_runtime_persistence_test.dart` (+2).
+- **`tasks_engine.dart` _load — restore-runtime (load-bearing):** מוטציה — `if (runtime.isNotEmpty) super.state = [...state, ...runtime];` הוחלף ב-`{}` (משימות-הריצה מחושבות אך לא מוחלות — הבאג המקורי).
+- תוצאה: `tasks_runtime_persistence_test` **אדום `+0 -2`** — שני המקרים נכשלו (המשימה שנוצרה ב-session 1 לא קיימת ב-session 2) ✅ נתפס. 3 טסטי-ה-overlay הקיימים (worker_tasks_persistence) נשארו ירוקים.
+- שחזור: `cp /tmp/te.GOOD lib/state/tasks_engine.dart` → RESTORED-IDENTICAL → **+2 ירוק**.
+- מסקנה: ה-_load בנה state רק מ-_seedTasks (const ids 1-5) plus overlay; משימות-ריצה (id=max+1) נזרקו ב-restart וה-overlay גם לא שמר name/steps/worker שלהן. עכשיו הרשומה-המלאה נשמרת תחת מפתח-prefs נפרד ומשוחזרת. back-compat: payload פרה-A1 ללא-שינוי; ה-overlay של ה-seeds לא נגע (3 טסטיו ירוקים). SERVER-READY: bindRemote (T1) יסנכרן חי כשה-Firebase ינחת. החלטת-בעלים A1. gate: analyze 0. נגעתי רק ב-tasks_engine (+טסט).
+
+## A2-hr-decide-once — אישור חופשה/הדרכה ירה פעמון+צ'אט פעמיים (double-tap) — 2026-06-15
+- **קבצים (lib/state + lib/screens + test):** `vacation_requests.dart` + `worker_trainings.dart` — `approve`/`reject`/`_decide` שונו מ-void ל-`bool` (true רק על מעבר אמיתי pending→decided). `contractor_hr_sheet.dart` — `_decide`/`_decideTraining` יורים bell+chat+toast רק אם ה-bool true. טסט חדש `test/hr_decide_once_test.dart` (+2).
+- **`vacation_requests.dart` _decide guard (load-bearing):** מוטציה — ה-`return false;` (כשהשורה כבר-לא-pending) → `return true;`.
+- תוצאה: `hr_decide_once_test` **אדום `+1 -1`** — מקרה-ה-vacation נכשל (approve שני החזיר true במקום false) ✅ נתפס. מקרה-ה-training (מנוע אחר) נשאר ירוק.
+- שחזור: `cp /tmp/vr.GOOD lib/state/vacation_requests.dart` → RESTORED-IDENTICAL → **+2 ירוק**.
+- מסקנה: ה-side-effects היו ללא-תנאי אחרי קריאת-המנוע; ה-r/t הלכוד מתיישן ב-double-tap (השורה לא נבנתה-מחדש בין הקשות) → שתי-ההקשות ירו. עכשיו המנוע מחזיר אם באמת עבר, והווידג'ט יורה פעם-אחת — מתקן double-tap plus שני-משטחים (השני רואה false). הקבלן מחזיק את ההתראה; ה-double-fire בלוח-המנהל נפתר ב-#84g (הוצאת HR מהמנהל). void→bool additive (17 טסטי-אישור קיימים ירוקים). gate: analyze 0. נגעתי ב-vacation plus trainings(state) plus contractor_hr_sheet(לוגיקה, ללא-פיקסל).
+
+## A3-pod-signature-await-rollback — חתימת POD "נשמרה" גם כשה-persist נכשל — 2026-06-15
+- **קבצים:** `persona_fulfillment.dart` — `captureSignature` שונה מ-`void` (→`_put` fire-and-forget) ל-`Future<bool>` עם await+rollback (חיקוי `capturePod`). `persona_pod_sheet.dart` — הכפתור ממתין ל-bool ומציג toast-הצלחה רק אם נשמר ("החתימה לא נשמרה — נסה שוב" אחרת). טסט חדש ב-`persona_fulfillment_test.dart` (+1, סה"כ +23).
+- **load-bearing:** `captureSignature` `return ok;` (ה-bool של ה-persist) — ייחודי בקובץ (grep=1).
+- מוטציה: `return ok;` → `return false;`. תוצאה: הטסט "captureSignature awaits persist (true) and survives a reload (A3)" **אדום `+22 -1`** ✅ (ה-isTrue על n1 נכשל). שאר 22 ירוקים.
+- שחזור → **+23 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: החתימה רוכבת על ה-side-car הראשי (`'podSig'` ב-toJson), אז await יחיד של `_persist` הוא כל הכתיבה (בלי `_mirrorPodPhoto` שהוא לתמונה בלבד). הקוד הישן עשה `_put`→`set state`→`_persist()` fire-and-forget — כשל-quota השאיר state בזיכרון אבל לא בדיסק, וה-UI הריע "נשמרה" שקרית; ב-reload החתימה נעלמה. עכשיו: rollback ל-state הקודם plus `false`, וה-UI כן. analyze 0. server-ready (החתימה שורדת restart; bindRemote יזרים חי).
+
+## A4-dst-day-idiom — off-by-one ב-offset יום חוצה גבול-DST (גאנט + 2 דוחות) — 2026-06-15
+- **קבצים:** חדש `lib/logic/calendar_days.dart` (`daysBetweenDst` מבוסס-`DateTime.utc` plus `startOfWeekSunday` חשבון-לוח). `tasks_gantt.dart` (startDay offset), `worker_reports_tab.dart` plus `courier_reports_tab.dart` (weekStart plus dayIdx של היסטוגרמת-השבוע) עוברים דרכם. טסט חדש `calendar_days_test.dart` (+6).
+- **load-bearing:** `daysBetweenDst` — `DateTime.utc(...)` (×2). מוטציה: `DateTime.utc(` → `DateTime(` (local).
+- תוצאה (TZ=Israel Standard Time, ה-spring-forward 2026 ב-27/3): 3 הטסטים התלויי-DST של daysBetweenDst **אדומים `+3 -3`** ✅ (adjacent dates, multi-day span, time-of-day ignored). טסטי startOfWeekSunday נשארו ירוקים (לא משתמשים ב-.utc).
+- שחזור → **+6 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: `DateTime(y,m,d)` מקומי הוא midnight מקומי; הפרש בין שני midnight-ים מקומיים חוצה spring-forward = 23h → `.inDays` מתקצר ל-0 (יום פחות) → בָּר נופל ביום שגוי / משלוח בדלי-שבוע שגוי. UTC (ימי-24h, בלי DST) נותן את הפער הלוחי המדויק בכל TZ. בנוסף: `weekStart` חושב ב-subtract Duration days (חיסור-שעות שנסחף ב-DST) → הוחלף ב-DateTime y m d-k (חשבון-לוח). הגאנט הוא pure (VM-safe) וכך גם calendar_days. ה-streak כבר היה חשבון-לוח — לא נגעתי. analyze 0.
+
+## A5-board-proposed-fold — משימה מוצעת (proposed) בלתי-נראית בלוח-המשימות — 2026-06-15
+- **קובץ:** `worker_task_board_screen.dart` — `_groups` שונה מ-status-יחיד ל-Set-של-statuses, ו-`'proposed'` קופל לקבוצת ⏳ בתור (יחד עם pending). חולצה `groupByStatus` טהורה (@visibleForTesting). build משתמש בה. טסט חדש `worker_task_board_group_test.dart` (+1).
+- **load-bearing:** סט-ה-בתור `{'pending', 'proposed'}`. מוטציה: הסרת `'proposed'` → `{'pending'}`.
+- תוצאה: `worker_task_board_group_test` **אדום `+0 -1`** ✅ — המשימה המוצעת (id 1) לא נכנסה לאף קבוצה → containsAll[1,2] נכשל plus הסכום 3≠4.
+- שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: המנוע מחזיק status `'proposed'` (worker proposeTask → ממתין ל-approveProposal של הקבלן), אבל `_groups` כיסה רק active/rejected/pending/review/done → משימה מוצעת נפלה בין-הכיסאות (לא הוצגה כלל, וה-invariant counts-sum-to-total נשבר בשקט). A5 (החלטת-בעלים): לא קבוצה חדשה — לקפל proposed לתוך בתור. עכשיו כל status ממופה לקבוצה אחת בדיוק. analyze 0.
+
+## #52-order-notif-to-orders-world — התראות הזמנה/משלוח מההגדרות → עולם-ההזמנות — 2026-06-15
+- **קבצים:** חדש `order_notif_sheet.dart` (OrderNotifSheet plus showOrderNotifSheet — 2 toggles הקשורים ל-notifSettingsProvider: typeOrders/typeShipments). `store_screen.dart` — 🔔 ב-_SectionChipsRow כשהמקטע=📦 הזמנות → פותח את הגיליון. `notif_settings_screen.dart` — הוסרו 2 השורות הזמנות/משלוחים ממקטע 🔔 (שאר ה-types נשארו). טסט חדש `order_notif_sheet_test.dart` (+1).
+- **load-bearing:** ה-toggle `onChanged: v => n.update(x => x.copyWith(typeOrders: v))` — כותב את ה-provider המשותף. מוטציה: `copyWith(typeOrders: v)` → `copyWith(typeOrders: x.typeOrders)` (מתעלם מ-v).
+- תוצאה: `order_notif_sheet_test` **אדום `+0 -1`** ✅ — אחרי tap, typeOrders נשאר true (הציפייה false נכשלה) → ה-tap לא כתב את ה-provider.
+- שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: ההתראות הקשורות-הזמנה הועברו למקום שבו הקונה עוקב אחרי הזמנות (🔔 בטאב 📦 הזמנות), כשהן קושרות את אותו notifSettingsProvider (מקור-אמת יחיד, לא עותק) — שאר ההתראות נשארו בהגדרות › התראות. שני הטסטים שנוגעים ב-typeOrders/typeShipments הם engine-level (notifMutedSections/copyWith) → לא הושפעו. שני טסטים שמרנדרים NotifSettingsScreen (robustness, settings_honesty) ירוקים. analyze 0. אין שער-format.
+
+## #50-settings-merge-dup-categories — מיזוג קטגוריות-הגדרות כפולות + price-drop קנוני — 2026-06-15
+- **קובץ:** `catalog_settings_screen.dart` (מסך 'הגדרות' הראשי). מוזגו 2 מקטעי-🔔 (`_NotificationsSection` plus `_CatalogNotifSection`) ל-🔔 'התראות' יחיד, ו-2 מקטעי-תצוגה (`_ThemeSection` plus `_DisplaySection`) ל-'תצוגה ומיון' יחיד. price-drop כפול קופל לשדה-קנוני יחיד `catalogSettings.notifPriceDrop` ('ירידת מחיר במועדפים'); ה-toggle הכפול `typePriceDrops` ('התראות תקציב') הוסר מהמסך. order/shipment הושמטו (עברו לעולם-ההזמנות, #52). הרשימה ב-build ירדה מ-13 ל-11 מקטעים. עדכון `catalog_sort_alerts_settings_test` ('התראות קטלוג'→'התראות').
+- **load-bearing:** השורה המקופלת `notifLowStock` ('מלאי נמוך') תחת המקטע-הממוזג 'התראות' — מוכיחה שמשפחת-קטלוג קופלה לתוך 'התראות'. ייחודי בקובץ (grep=1).
+- מוטציה: תווית `'מלאי נמוך'` → `'XX_MUT'`. תוצאה: טסט "מלאי נמוך flips notifLowStock" **אדום `+14 -1`** ✅. שחזור → **+16 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: היו שני מקטעי-התראה ושני מקטעי-תצוגה במסך-הגדרות אחד, plus 3 toggles ל-price-drop על-פני 2 שדות plus שדה-שלישי priceChangeAlert במועדפים. #50 מיזג את הכפילויות בתוך catalog_settings plus קיבע price-drop ל-notifPriceDrop. 4 טסטי-מסך ירוקים. analyze 0. שארית: typePriceDrops ב-notif_settings_screen (מסך-נפרד) plus priceChangeAlert (→#54).
+
+## #54-remove-favorites-category — הסרת קטגוריית 'מועדפים ורשימות' מההגדרות — 2026-06-15
+- **קובץ:** `catalog_settings_screen.dart` — מחיקת `_FavoritesSection` (❤️ 'מועדפים ורשימות') plus רשומתה ב-build (11→10 מקטעים). היה: 4 placeholders (סנכרון/רשימות-פרויקט/שיתוף/יבוא-ייצוא — כולם coming-soon backend-blocked) plus toggle אחד מחווט `priceChangeAlert`. priceChangeAlert מכוסה ע"י ה-price-drop הקנוני ב-'התראות' (notifPriceDrop, #50); השדה נשאר במודל back-compat בלי toggle. עדכון `catalog_sort_alerts_settings_test`: טסט-priceChangeAlert → טסט "הקטגוריה הוסרה" (findsNothing).
+- **load-bearing:** קיום המקטע ❤️ 'מועדפים ורשימות' במסך.
+- אימות RED→GREEN בלי perl: הטסט החדש רץ **בעוד `_FavoritesSection` קיים** → **אדום `+0 -1`** (מצא את הכותרת). אחרי מחיקת המקטע → **ירוק** (4 טסטי-מסך +54). מוכיח שהטסט תופס רגרסיה של חזרת-הקטגוריה.
+- מסקנה: קטגוריה שכולה placeholders backend-blocked plus toggle כפול שכבר-קנוני (#50) = קטגוריה מתה. הוסרה; ה-placeholders יחוברו כ-seams במשטחי-המועדפים/רשימות כשייחשף שם שקע-הגדרות (נדחה — הצבה עכשיו = ניחוש). analyze 0.
+
+## #49-wire-supplier-prefs — ספקים-מועדפים: חיווט 3 העדפות מגובות (server-ready) — 2026-06-15
+- **קובץ:** `catalog_settings_screen.dart` — `_SuppliersSection` שונה מ-StatelessWidget (5 placeholders) ל-ConsumerWidget: 3 השדות המגובים ב-CatalogSettings חוּוטו לפקדים נשמרים — `maxDistance` (_NumberRow 5-300 ק"מ), `minRating` (_RadioGroupRow any/3+/4+/5), `localSuppliersOnly` (_SwitchRow). 2 הרשימות (ספקים-מועדפים/חסומים) נשארו _PlaceholderRow כ-server-ready seams (דורשות זהות-ספק). טסט חדש ב-catalog_sort_alerts_settings_test (+1).
+- **load-bearing:** `_SwitchRow` 'ספקים מקומיים בלבד' `onChanged: copyWith(localSuppliersOnly: v)`. מוטציה: `copyWith(localSuppliersOnly: v)` → `copyWith(localSuppliersOnly: s.localSuppliersOnly)` (מתעלם מ-v).
+- תוצאה: טסט "ספקים מקומיים בלבד flips localSuppliersOnly (#49)" **אדום `+0 -1`** (אחרי tap נשאר false). שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: הקוד הקודם השאיר את 3 השדות לא-מחווטים בכוונה כי אין דאטת-ספק על מוצרים לסנן. אך שמירת ההעדפה אינה זיוף — היא ה-intent שהסינון העתידי יכבד (server-ready). החיווט שומר מקומית עכשיו ומופעל אוטומטית כשהספק יזין מרחק/דירוג/מקומיות. preferred/blocked דורשים זהות-ספק → seams כנים. analyze 0 · robustness/settings_honesty ירוקים.
+
+## #99-rewards-private-per-user — BuildCoins נשמרו תחת מפתח גלובלי → דליפה בין משתמשים — 2026-06-15
+- **קובץ:** `rewards_state.dart` — `RewardsNotifier` קיבל `username` plus getter `_storageKey` (`'$kRewardsKey.$username'`, ריק→מפתח-גלובלי back-compat). `_load`/`_persist` משתמשים ב-`_storageKey`. ה-provider קורא `ref.watch(boardAuthProvider)?.username` ובונה notifier scoped (re-build על login/switch). leaderboard נשאר seed משותף (רק שורת 'אתה' מסונכרנת למאזן הפרטי). טסט חדש `rewards_per_user_test.dart` (+1). תיקון-setup ב-`t3_ghi_rewards_ai_home_test.dart` (binding plus mock — ה-coupling החדש ל-boardAuth נוגע ב-prefs).
+- **load-bearing:** `_storageKey` getter `username.isEmpty ? kRewardsKey : '$kRewardsKey.$username'`. מוטציה: `username.isEmpty ?` → `true ?` (מפתח-גלובלי תמיד, מתעלם מ-username).
+- תוצאה: טסט "#99" **אדום `+0 -1`** — omer ירש את 440 של ran (440≠340 seed). שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: כל המשתמשים חלקו `bs.rewards.v1` יחיד → P-6/F-33 leak. עכשיו המפתח כולל username → פרטי per-user; ה-provider מ-re-build על שינוי-session. leaderboard משותף (החלטת-בעלים). אין מיגרציה ממפתח-גלובלי (מטבעות דמו מקומיים) — נרשם. analyze 0 · t3 מלא ירוק אחרי תיקון-binding.
+
+### #99-addendum — board_auth._load resilience (root-cause of the gate-32 baseline) — 2026-06-16
+- כש-`rewardsProvider` התחיל `ref.watch(boardAuthProvider)` (#99), כל טסט שמרנדר מסך-קורא-rewards (worker/courier reports · rewards hub · drilldowns) בנה את `BoardAuthNotifier`. ב-`_load` ה-`await SharedPreferences.getInstance()` **לא** היה ב-try/catch (רק ה-jsonDecode) — וב-context בלי `setMockInitialValues`/binding זה זורק "Binding not initialized" (StateError) כשגיאה אסינכרונית **לא-מטופלת** → הטסט נכשל.
+- **התיקון:** עטיפת כל ה-`_load` ב-try/catch (כמו rewards_state ומנועים אחרים) → כשל-prefs נבלע, נשאר logged-out. תיקון-robustness אמיתי.
+- **בונוס:** זה היה גם שורש ה-baseline הקדם-קיים `worker_reports_drilldown` (קורא דרך drilldown→boardAuth). אחרי התיקון הסוויטה המלאה = **+2658 ALL PASS, 0 כשלים**. baseline עודכן 1→0 (STATUS.md + known_failing.txt).
+- **קבצים נוספים ל-#99:** `lib/state/board_auth.dart` · `knowledge/STATUS.md` · `knowledge/known_failing.txt`.
+
+## #36-voice-dictate-worker-board — כפתור קול↔הקלדה בלוח-העובד — 2026-06-16
+- **קבצים:** חדש `lib/widgets/voice_dictate_button.dart` (VoiceDictateButton — IconButton-מיקרופון שמכתיב דרך VoiceService.listen ומצרף את הטקסט ל-controller; seams listenFn/stopFn לבדיקה). `worker_app_screen.dart` — מחווט כ-suffixIcon ל-3 שדות-הטקסט בגיליון-הצעת-המשימה (שם/תיאור/שלבים). טסט חדש `voice_dictate_button_test.dart` (+2). לוח-עובד בלבד (החלטת-בעלים #36), לא app-wide.
+- **load-bearing:** `_append` — `if (t.isEmpty) return;` ואז כתיבת ה-controller. מוטציה: `if (t.isEmpty) return;` → `return;` (תמיד early-return, אף פעם לא מצרף).
+- תוצאה: שני טסטי-#36 **אדומים `+0 -2`** — אחרי tap השדה לא השתנה. שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: ההכתבה ממלאת את השדה שבו המשתמש (append, cursor בסוף — לא דורסת הקלדה), במקום הבאג המקורי שבו קול הפעיל חיפוש-קטלוג. ה-STT מוזרק (seam) לבדיקה בלי מיקרופון. analyze 0.
+
+## #45-weather-open-meteo — תחזית מזג-אוויר אמיתית (Open-Meteo + GPS) — 2026-06-16
+- **קבצים:** חדש `lib/services/weather.dart` — `fetchOpenMeteoDaily` (Open-Meteo, חינמי ללא-מפתח, http-seam מוזרק) plus `weatherDaysFromOpenMeteo` (mapper טהור: WMO weather_code → אמוji/הערה/טמפ) plus `weatherIconFor`/`weatherNoteFor` plus `weatherForecastProvider` (FutureProvider: currentGeoFix→fetch→map, fallback ל-kWeather ב-no-GPS/רשת/parse). `ai_hub_screen.dart` — `_Weather` הפך ל-ConsumerWidget שצורך את ה-provider במקום ה-seed הקשיח; ההערה "⚙️ בפרודקשן API חיצוני" → "🌦️ Open-Meteo · לפי מיקום". טסט חדש `weather_service_test.dart` (+3).
+- **load-bearing:** `weatherNoteFor` ענף-הגשם (51-67) `'⚠️ גשם — לדחות יציקות בטון'`. מוטציה: `⚠️ גשם` → `גשם`.
+- תוצאה: טסטי-#45 **אדומים `+1 -2`** — days[2].warn (code 61) הפך false, ו-thresholds-test נכשל. שחזור → **+3 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: הכלי היה deferred כי "צריך API חיצוני" — Open-Meteo חינמי ללא-מפתח פותר זאת. ה-fetch מוזרק (seam) אז ה-mapper נבדק בלי רשת/GPS; ה-provider נופל ל-seed בחן (ב-VM אין GPS → seed מיידי, מסך לא נשבר). analyze 0 · ai_hub_compute/robustness ירוקים. נשאר deferred/hidden ל-Apple — un-hide הוא flip של הבעלים בשחרור; schedule-automation = micro-confirm עתידי.
