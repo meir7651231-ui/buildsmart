@@ -2302,3 +2302,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gate:** analyze 0 · help_coverage_test +2 (chrome מכוסה · tap-טאב מסביר) · mutation §mutation_log.
 - **שארית (גלים הבאים):** שליח→חנות→מנהל→מסכים-עמוקים. מפת-דרכים מלאה ב-help-coverage-roadmap workflow.
 - **קבצים:** `lib/widgets/help_target.dart` · `lib/screens/home_shell.dart` · `test/help_coverage_test.dart`.
+
+### #31-help-coverage-wave2 — מצב-היכרות לוח השליח — 2026-06-16
+- **המהלך:** גל 2 בכיסוי מצב-היכרות (לפי לוח). נוסף `HelpToggleButton` ל-AppBar של courier_dashboard (נקודת-כניסה למצב — היה חסר לכל לוח לא-קבלן). עטיפת פעמון/פרופיל/הגדרות/יציאה + בורר-הרכב ב-HelpTarget; 4 טאבים מוסברים דרך showHelpInfo.
+- **עיקרון חדש:** לוח ללא HelpToggleButton = הסברים מתים → כל לוח חייב toggle משלו (stuck_log).
+- **gate:** analyze 0 · help_coverage_courier_test +2 (toggle+chrome קיימים · tap-פעמון מסביר) · mutation §mutation_log (הסרת toggle → RED +0 -2 · GREEN +2).
+- **שארית (courier-deep):** כפתורי קידום-המשלוח+POD בכרטיסים · בורר-הרכב בטאב המשלוחים. גלים הבאים: חנות→מנהל→קבלן-עמוק→עובד→כניסה.
+- **קבצים:** `lib/screens/courier_dashboard_screen.dart` · `test/help_coverage_courier_test.dart`.

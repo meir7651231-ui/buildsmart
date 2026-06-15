@@ -1170,3 +1170,9 @@
 - **load-bearing:** ב-onTap של הניווט התחתון `body: _kTabHelp[i].$2` (ההסבר של הטאב הנלחץ). מוטציה: `.$2` → `.$1` (מציג את שם-הטאב במקום ההסבר).
 - תוצאה: טסט-הטאב **אדום `+1 -1`** — אחרי tap על "עדכונים" לא הופיע ההסבר "ההתראות והשיחות". שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: ה-💡 וה-✕ נשארים ללא-עטיפה כדי שתמיד אפשר לצאת מהמצב; אלמנטים מחוץ לשכבת-ההקפאה מוסברים דרך showHelpInfo. גל 1 מתוך כיסוי-לפי-לוח (קבלן→שליח→חנות→מנהל→עמוק). analyze 0.
+
+## #31-help-coverage-wave2 — מצב-היכרות: לוח השליח (courier_dashboard) — 2026-06-16
+- **קבצים:** `lib/screens/courier_dashboard_screen.dart` — נוסף `const HelpToggleButton()` ל-AppBar (קריטי — בלעדיו אי-אפשר להיכנס למצב-היכרות בלוח השליח); עטיפת פעמון/פרופיל/הגדרות/יציאה + בורר-הרכב ב-HelpTarget; 4 טאבי-הניווט מקבלים הסבר דרך showHelpInfo במצב-היכרות במקום החלפת-טאב. טסט חדש `help_coverage_courier_test.dart` (+2). כפתורי קידום-המשלוח+POD שבתוך כרטיסי-הרשימה + בורר-הרכב בטאב המשלוחים נדחו לתת-גל courier-deep.
+- **load-bearing:** `const HelpToggleButton()` ב-AppBar של השליח (נקודת-הכניסה היחידה למצב-היכרות בלוח). מוטציה: `const HelpToggleButton(),` → `const SizedBox.shrink(),`.
+- תוצאה: שני טסטי-השליח **אדומים `+0 -2`** — אין toggle אז find.byType(HelpToggleButton) ריק, ולא ניתן להיכנס למצב כדי שהפעמון יסביר. שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: עטיפת אלמנטים בלוח חסרת-ערך בלי toggle להפעלת המצב — כל לוח (שליח/חנות/מנהל) חייב HelpToggleButton משלו. analyze 0 (info יחיד comment_references קדם-קיים). גל 2/7 בכיסוי-לפי-לוח.
