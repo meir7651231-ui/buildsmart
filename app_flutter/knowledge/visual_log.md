@@ -1241,3 +1241,12 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **OFF byte-identical:** `kFsDiag` + `kUidScopedQueries` שניהם compile-time OFF ⇒ ה-gate `debugOverlayChildren` נשאר `isDebug` בלבד (release לא-מראה כלום), וה-scope של ה-orders נשאר whole-collection — בדיוק כהיום. ה-rules+index הם server-side (אינם משפיעים על בייטי-האפליקציה). אפס `Color(0x…)`/`value:`/`activeColor:` חדש (השתמשתי בקבועי-הצבע הקיימים בקובץ).
 
 **הפיך:** הדיאגנוסטיקה + ה-flag `FS_DIAG` מסומנים "REMOVE after go-live"; ה-fix של ה-rules/index הוא קבוע (תיקון-באג). **אימות:** `orders_sync_scope_index_diag_test` 13/13 (scope-fields · index↔toDoc · 4 mappings) · `debug_badge_gate_test` נשאר ירוק (FS_DIAG=false בטסט ⇒ gate ללא-שינוי) · analyze 0-errors · full-suite (ה-`-1` היחיד = `worker_reports_drilldown` baseline) · build web ✅ · mutation red `+5 -1`→green `+11` (§mutation_log). **לא נגעתי:** worker-board / 4 מחלקות / auth-gate / firebase_options / manager-credit / geo.
+
+## #manager-owner — מנהל = בעלים: בלי logout, בלי demo (שלב 1/4) — 2026-06-15
+
+**שינוי גלוי:** (א) לוח-המנהל (מרכז השליטה) — נעלם כפתור ה-logout מסרגל-הפעולות; נשארו 💬 שיחות · 👤 פרופיל · ⚙️ הגדרות · '‹ יציאה' (ניווט-בלבד). (ב) פרופיל-המנהל — נעלמה שורת '🚪 יציאה מהחשבון'; נשארו ⚙️ הגדרות + 🔁 החלפת תפקיד. (ג) שער-הכניסה ללוח-המנהל — נעלם כפתור "מצב דמו"; עובד/שליח/ספק עדיין מציגים אותו.
+
+**אין screenshot — למה:** השינוי הוא **הסרת אלמנטים** (כפתורים/שורה) מעצים-קיימים שלא שינו צורה/צבע/פריסה; אין מצב-ויזואלי-חדש. ההיעדרות מאומתת בהעדר-רגרסיה בטסטי-המסך (manager_dashboard_screen_test ירוק; אין טסט שמקיש על ה-logout/demo שהוסרו).
+
+**הפיך:** הסרת-affordance בלבד; המודל (`logout()`/`enterDemo()`) נשאר callable. אפס Color/value:/activeColor: חדש.
+**אימות:** analyze 0-errors · full-suite **+2626 -1** (ה-`-1` היחיד = `worker_reports_drilldown` baseline; 0 חדשים) · isolation manager_dashboard/apple_readiness/widget ירוקים. **לא נגעתי:** board_auth model / עובד·שליח·ספק / auth-gate.

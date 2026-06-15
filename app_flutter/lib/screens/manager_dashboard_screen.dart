@@ -28,7 +28,6 @@ import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
-import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -148,14 +147,9 @@ class ManagerDashboardScreen extends ConsumerWidget {
               onPressed: () =>
                   Navigator.of(context).push(CatalogSettingsScreen.route()),
             ),
-            // #21 — a REAL logout next to the navigation-only '‹ יציאה':
-            // confirmDestructive → boardAuthProvider.logout(); the gate
-            // (WelcomeScreen in role mode) swaps in place — task #65 rule 4.
-            IconButton(
-              tooltip: 'התנתקות מהחשבון',
-              icon: const Icon(Icons.logout, color: BsTokens.mutedLight),
-              onPressed: () => _logout(context, ref),
-            ),
+            // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").
+            // ה-session נשאר קבוע; אין כפתור logout. '‹ יציאה' למטה היא
+            // ניווט-בלבד (Navigator.maybePop) — חוזרת אחורה בלי לנקות את ה-session.
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: const Text(
@@ -191,20 +185,6 @@ class ManagerDashboardScreen extends ConsumerWidget {
     );
   }
 
-  /// #21 — explicit board logout (the '‹ יציאה' TextButton only pops the
-  /// route). Confirm first (destructive-confirm rule #57); on confirm the
-  /// session clears and this screen rebuilds into the registration gate.
-  Future<void> _logout(BuildContext context, WidgetRef ref) async {
-    final ok = await confirmDestructive(
-      context,
-      title: 'התנתקות מהחשבון?',
-      message: 'תנותק ממרכז השליטה ותחזור למסך הרישום.',
-      confirmLabel: 'התנתק',
-    );
-    if (!ok || !context.mounted) return;
-    ref.read(boardAuthProvider.notifier).logout();
-    showToast(context, 'התנתקת ממרכז השליטה');
-  }
 }
 
 /// A small green "חי" status pill in the AppBar — signals the dashboard is on

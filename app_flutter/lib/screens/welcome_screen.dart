@@ -182,6 +182,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   void _demo() {
     final role = widget.boardRole;
     if (role != null) {
+      // מנהל = חשבון הבעלים: אין כניסת דמו (גם הגנה אם נקרא בטעות) — "אין לו דמו".
+      if (role == BoardRole.manager) return;
       // Role-gate mode: the demo affordance enters a demo board session —
       // the contractor profile / startup flow is never touched.
       ref.read(boardAuthProvider.notifier).enterDemo(role);
@@ -368,21 +370,25 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           ),
         ),
       ],
-      const SizedBox(height: BsTokens.space2),
-      HelpTarget(
-        title: 'מצב דמו',
-        body: 'כניסה ללוח בלי חשבון — לסיור מהיר עם נתוני דוגמה בלבד.',
-        child: TextButton(
-          onPressed: _demo,
-          child: const Text(
-            'מצב דמו',
-            style: TextStyle(
-              color: BsTokens.mutedLight,
-              fontWeight: FontWeight.w600,
+      // מנהל = חשבון הבעלים: אין כניסת דמו (דרישת מוצר — "אין לו דמו"). שאר
+      // הלוחות שומרים על מצב הדמו לסיור מהיר.
+      if (role != BoardRole.manager) ...[
+        const SizedBox(height: BsTokens.space2),
+        HelpTarget(
+          title: 'מצב דמו',
+          body: 'כניסה ללוח בלי חשבון — לסיור מהיר עם נתוני דוגמה בלבד.',
+          child: TextButton(
+            onPressed: _demo,
+            child: const Text(
+              'מצב דמו',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
-      ),
+      ],
     ];
   }
 
