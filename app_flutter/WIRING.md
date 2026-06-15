@@ -8,6 +8,15 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — fleet-review HIGH fixes (login/registration, 2):** (1) `submitRoleRequest`
+> (role_requests.dart) now wraps its Firestore write in try/catch → returns false on a
+> network/permission failure instead of throwing past the sheet (which left it stuck
+> "loading" with no error toast) — a regression from #6 inc.2; `role_request_test` +1.
+> (2) welcome_screen's registration `_field` gained an `ltr` param: phone/email/code/password
+> render LTR (`textDirection`) while the Hebrew NAME field stays RTL — matching login_sheet's
+> twin (the registration screen previously had broken RTL caret/ordering on those inputs).
+> MEDIUM polish (keyboardType/autofillHints/textInputAction/emoji-a11y) batched separately.
+
 > **2026-06-15 — auth #6 inc.3 (approval inbox) — #6 COMPLETE:** the profile screen shows
 > "📋 בקשות תפקיד" when the caller's CLAIM roles approve a tier (`approvableRolesForClaims`:
 > contractor↞worker, store↞courier, manager↞store+contractor, admin=all). The inbox streams

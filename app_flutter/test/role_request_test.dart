@@ -12,14 +12,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Records set/delete; never touches Firebase.
+/// Records set/delete; never touches Firebase. [throwOnSet] simulates a
+/// network / permission-denied write failure.
 class _FakeSource implements RemoteCollectionSource {
+  _FakeSource({this.throwOnSet = false});
+  final bool throwOnSet;
   final List<({String id, Map<String, dynamic> data})> sets = [];
   final List<String> deletes = [];
 
   @override
-  Future<void> set(String id, Map<String, dynamic> data) async =>
-      sets.add((id: id, data: data));
+  Future<void> set(String id, Map<String, dynamic> data) async {
+    if (throwOnSet) throw StateError('write failed');
+    sets.add((id: id, data: data));
+  }
 
   @override
   Future<void> delete(String id) async => deletes.add(id);
@@ -72,6 +77,44 @@ void main() {
     expect(src.sets.first.data['requestedRole'], 'courier');
     expect(src.sets.first.data['status'], 'pending');
     expect(find.text('🪪 בקשת תפקיד'), findsNothing); // sheet closed
+  });
+
+  // HIGH-fix — a write failure must surface a clean Hebrew error (not throw past
+  // the handler and leave the sheet stuck busy).
+  testWidgets('a failed write shows the error and keeps the sheet usable',
+      (t) async {
+    final src = _FakeSource(throwOnSet: true);
+    await t.binding.setSurfaceSize(const Size(440, 950));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    await t.pumpWidget(
+      ProviderScope(
+        overrides: [
+          roleRequestWriterProvider.overrideWithValue(src),
+          currentUidProvider.overrideWithValue('u-1'),
+        ],
+        child: MaterialApp(
+          locale: const Locale('he'),
+          home: Builder(
+            builder: (ctx) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () => showRoleRequestSheet(ctx),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('משלוחים ועדכוני סטטוס')); // courier
+    await t.pumpAndSettle();
+    expect(find.text('לא ניתן לשלוח בקשה כעת'), findsOneWidget);
+    expect(find.text('🪪 בקשת תפקיד'), findsOneWidget); // sheet stays open
+    expect(src.sets, isEmpty); // the throw was caught, nothing recorded
+    await t.pumpAndSettle(const Duration(seconds: 3));
   });
 
   test('Firebase-free → the roleRequests writer is null (no Firebase touch)',

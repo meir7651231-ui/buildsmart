@@ -311,6 +311,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             'קוד',
             Icons.key_outlined,
             keyboardType: TextInputType.number,
+            ltr: true,
             errorText: _codeRejected
                 ? 'שם משתמש או קוד לא נכונים'
                 : _contact.text.trim().isEmpty || codeFormatOk
@@ -559,6 +560,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           _contact,
                           'טלפון או אימייל',
                           Icons.alternate_email,
+                          ltr: true,
                           errorText: _contact.text.trim().isEmpty || contactOk
                               ? null
                               : 'מספר נייד או אימייל לא תקינים',
@@ -579,6 +581,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             'סיסמה (6+ תווים)',
                             Icons.lock_outline,
                             obscure: true,
+                            ltr: true,
                             errorText: _password.text.isEmpty ||
                                     _password.text.length >= 6
                                 ? null
@@ -759,12 +762,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     String? errorText,
     TextInputType? keyboardType,
     bool obscure = false,
+    // LTR for digits/email/latin (phone, code, password); the default (RTL,
+    // inherited) keeps a Hebrew NAME field right-to-left. Mirrors login_sheet's
+    // _field, which forces ltr on its (all-latin) inputs.
+    bool ltr = false,
   }) {
     final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
       controller: c,
       keyboardType: keyboardType,
       obscureText: obscure,
+      textAlign: TextAlign.right,
+      textDirection: ltr ? TextDirection.ltr : null,
       decoration: InputDecoration(
         hintText: hint,
         errorText: errorText,

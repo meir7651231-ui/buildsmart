@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-06-15 — fleet-review HIGH fixes (כניסה/הרשמה)
+
+**שינוי (UI, lib/screens + lib/state):** (1) `role_requests.dart` — `submitRoleRequest` עוטף את
+הכתיבה ב-try/catch (כשל-רשת/הרשאה → `false` במקום throw שהשאיר את הגיליון תקוע "טוען" בלי הודעה;
+רגרסיה מ-#6 inc.2). (2) `welcome_screen.dart` — ל-`_field` נוסף `ltr`: טלפון/מייל/קוד/סיסמה מיושרים
+LTR (`textDirection`), שדה-השם העברי נשאר RTL — תואם ל-`login_sheet` (במסך-ההרשמה היה caret/סדר הפוך).
+**אימות:** `analyze` 0 (חדש) · `role_request_test` 5/5 (נוסף טסט: כתיבה-כושלת → "לא ניתן לשלוח" +
+הגיליון נשאר שמיש). תיקון-ה-RTL = שינוי-תכונה 2-שדות, mirror ל-login_sheet הבדוק (אומת ויזואלית).
+
+---
+
 ## 2026-06-15 — auth #6 inc.3: inbox אישור בקשות-תפקיד (#6 הושלם)
 
 **שינוי (UI, lib/screens + lib/state):** `role_requests_inbox_screen.dart` (חדש) + שורת "📋 בקשות תפקיד"

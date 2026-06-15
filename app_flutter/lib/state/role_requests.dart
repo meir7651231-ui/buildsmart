@@ -15,6 +15,7 @@ import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The four OPERATIONAL roles a user may request (#6). `manager`/`admin` are
@@ -47,15 +48,23 @@ Future<bool> submitRoleRequest(WidgetRef ref, String role) async {
     return false;
   }
   final p = ref.read(userProfileProvider);
-  await writer.delete(uid).catchError((Object _) {});
-  await writer.set(uid, <String, dynamic>{
-    'requestedRole': role,
-    'status': 'pending',
-    if (p.name.isNotEmpty) 'displayName': p.name,
-    if (p.contact.isNotEmpty) 'phone': p.contact,
-    'requestedAt': DateTime.now().toIso8601String(),
-  });
-  return true;
+  try {
+    await writer.delete(uid).catchError((Object _) {});
+    await writer.set(uid, <String, dynamic>{
+      'requestedRole': role,
+      'status': 'pending',
+      if (p.name.isNotEmpty) 'displayName': p.name,
+      if (p.contact.isNotEmpty) 'phone': p.contact,
+      'requestedAt': DateTime.now().toIso8601String(),
+    });
+    return true;
+  } on Object catch (e) {
+    // A network / permission-denied write must surface as a clean "couldn't
+    // send" (false → the sheet shows the Hebrew error + clears its spinner),
+    // never throw past the caller and leave the sheet stuck busy.
+    debugPrint('submitRoleRequest failed: $e');
+    return false;
+  }
 }
 
 // ── approval side (#6 inc.3) ─────────────────────────────────────────────────
