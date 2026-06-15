@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-06-15 — launch #6: פאנל-רגרסיה מגודר ל-debug (לוח-מנהל)
+
+**שינוי (UI):** `manager_dashboard_screen.dart` — סעיף "🔬 בדיקות רגרסיה" נעטף ב-`if(kDebugMode) ...[]`.
+ב-**release** הסעיף לא מוצג (משתמש שבוחר persona מנהל לא רואה כלי-פיתוח פנימי); ב-**debug** ללא שינוי
+(הדגל `true`). מראה כמו ה-`BackendDebugBadge` שכבר מגודר באותו דפוס.
+**אימות:** `flutter test` — `manager_dashboard_screen_test` + `manager_dashboard_test` ירוקים (+42);
+`kDebugMode`=true תחת flutter test → הסעיף עדיין נבדק (אפס רגרסיה); `analyze` 0 errors. הקוד נשאר (reversible).
+
+---
+
 ## v6.20 — חיווט קבלן↔עובד · גל DEBUNDLE (פירוק לוח-הקבלן — אימות חי בכרום)
 
 **שינוי (UI ב-5 מסכים):** `tasks_screen.dart` (הוסרו טוגל מנהל↔עובד + `_workerView` + `_RolePicker` + 4 כפתורי-כלים כפולים → לוח-קבלן ממוקד: יצירה+אישורים+הצעות) · `site_hub_screen.dart` (אריחי גאנט/ליקויים/נוכחות → גיליונות חיים `showTasksGanttSheet`/`showDefectsSheet`/`showContractorAttendanceSheet`; אריח חדש 👷 חופשות; נמחקו 3 מסכי-דמו `_SiteGantt`/`_SiteSnagging`/`_SiteAttendance`; הוחזר אריח **focused** 📋 משימות צוות → openTasks) · `manager_dashboard_screen.dart` (בדיקת-גבולות ל-`kWorkers[task.worker]`) · `worker_app_screen.dart` (`_SubmitButton` ≥48px tap-target + `EdgeInsetsDirectional` ל-5 כפתורים) · `tasks_gantt_sheet.dart` (scope לפי צופה: עובד→tasks שלו · קבלן→employerId==demo||ריק).

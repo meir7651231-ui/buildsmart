@@ -8,6 +8,11 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — launch B1+#6:** data-safety/privacy declarations updated to honestly list
+> Firebase Crashlytics/Analytics collection (B1, `LAUNCH_PACKAGE/`). The manager dashboard's
+> "🔬 בדיקות רגרסיה" section is now `if(kDebugMode)`-gated — **DEV-ONLY**, not reachable by an
+> end user in a shipped release (#6); the panel + `test_harness` stay in code (reversible).
+
 > **v6.13 → v6.16 wiring audits:** see `knowledge/WIRING_AUDIT.md` — six rounds (three fix passes + a deep
 > correctness/perf/a11y pass with adversarial validation). v6.16 corrected the manager express-fee display,
 > aligned contractor stage labels to the canonical map, made the manager customer/order detail sheets read
