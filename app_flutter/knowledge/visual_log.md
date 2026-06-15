@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-06-15 — auth P2: OTP resend cooldown + תוקף-קוד
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — צעד-הקוד אוכף cooldown של 30ש׳ ל"שליחת קוד חדש"
+(re-tap בתוך החלון → טוסט "אפשר לשלוח קוד חדש בעוד N שניות", בלי send חוזר), pre-check לתוקף ~2 דק׳
+לפני round-trip (ה-session-expired של השרת = backstop), וכותרת-המשנה של צעד-הקוד מציינת את חלון-התוקף
+("תקף לכ-2 דקות"). מבוסס-timestamp (**ללא Timer**) כדי ש-pumpAndSettle של טסטי-ה-OTP ימשיכו ל-settle.
+**אימות:** `analyze` 0 · `login_sheet_test` 22/22 (נוסף טסט-cooldown; כותרת-המשנה → `textContaining`).
+
+---
+
 ## 2026-06-15 — auth P2: ליטוש כניסה (אנונימיות, הצג-סיסמה, אורך-סיסמה)
 
 **שינוי (UI, lib/screens):** `login_sheet.dart` — (1) **anti-enumeration:** `hebrewAuthError('user-not-found')`

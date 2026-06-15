@@ -8,6 +8,13 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth P2 (OTP resend cooldown + expiry):** the phone code step now
+> enforces a 30s resend cooldown — re-tapping "שליחת קוד חדש" inside the window toasts the
+> remaining seconds instead of re-hitting the rate-limited/billable send — and pre-checks the
+> ~2-min code validity before the round-trip (the server session-expired stays the backstop);
+> the code subtitle states the validity window. Timestamp-driven (no Timer) so the OTP widget
+> tests' pumpAndSettle keep settling. `login_sheet_test` +1 (cooldown blocks the second send).
+
 > **2026-06-15 — auth P2 (login polish):** account-enumeration closed on the
 > sign-in path — `hebrewAuthError` folds `user-not-found` into the SAME generic
 > "אימייל או סיסמה שגויים" as a wrong password (was a distinct "לא נמצא חשבון",

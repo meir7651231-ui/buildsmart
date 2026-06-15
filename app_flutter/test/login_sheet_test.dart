@@ -212,7 +212,11 @@ void main() {
       await t.pumpAndSettle();
       expect(gw.otpPhones, ['+972501234567']);
       expect(find.text('קוד אימות נשלח ב-SMS 📱'), findsOneWidget);
-      expect(find.text('הקוד נשלח אל +972501234567'), findsOneWidget);
+      // P2 — the subtitle now also states the validity window.
+      expect(
+        find.textContaining('הקוד נשלח אל +972501234567'),
+        findsOneWidget,
+      );
 
       // S1.2 — type the code; success closes the sheet via the auth stream.
       await t.enterText(
@@ -223,6 +227,29 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('התחברת בהצלחה ✓'), findsOneWidget);
       expect(find.text('🔐 התחברות לחשבון'), findsNothing);
+      await drainToast(t);
+    });
+
+    // P2 — resend is cooldown-guarded: an immediate re-tap toasts the remaining
+    // seconds and does NOT re-send (gateway still hit exactly once).
+    testWidgets('resend within the cooldown is blocked (no second send)',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      await pumpLoginHost(t, gw);
+
+      await t.enterText(
+        find.widgetWithText(TextField, 'מספר טלפון נייד'),
+        '0501234567',
+      );
+      await t.tap(find.text('שלח קוד אימות'));
+      await t.pumpAndSettle();
+      expect(gw.otpPhones, ['+972501234567']); // sent once
+
+      // Immediately ask for a new code — still inside the 30s cooldown.
+      await t.tap(find.text('שליחת קוד חדש'));
+      await t.pumpAndSettle();
+      expect(find.textContaining('אפשר לשלוח קוד חדש בעוד'), findsOneWidget);
+      expect(gw.otpPhones, ['+972501234567']); // NOT re-sent
       await drainToast(t);
     });
 

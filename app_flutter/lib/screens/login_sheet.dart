@@ -18,6 +18,8 @@
 // throws `unavailable` → "שירות ההתחברות אינו זמין כרגע" (the entry row is
 // hidden in that case anyway — see profile_screen).
 
+import 'dart:async';
+
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -123,6 +125,12 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   bool _justCreated = false;
   // P2 — show/hide the password (the eye toggle in the email pane). Ephemeral.
   bool _showPassword = false;
+  // P2 — when the current SMS code was sent, for the resend cooldown + the
+  // code-validity (expiry) pre-check. Timestamp-driven (no Timer) so the OTP
+  // widget tests' pumpAndSettle keep settling.
+  DateTime? _otpSentAt;
+  static const int _kResendCooldownSecs = 30;
+  static const int _kCodeValiditySecs = 120;
 
   /// The verificationId [AuthGateway.sendOtp] resolved with — consumed by the
   /// code step. Null until a code was sent.
@@ -156,6 +164,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         _verificationId = id;
         _sentTo = phone;
         _step = _LoginStep.code;
+        _otpSentAt = DateTime.now(); // P2 — start the resend cooldown / expiry
         _busy = false;
       });
       showToast(
@@ -169,11 +178,35 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     }
   }
 
+  /// P2 — resend the SMS code, but enforce a [_kResendCooldownSecs] cooldown so
+  /// a user can't hammer the (rate-limited, billable) send. Within the window it
+  /// toasts the precise remaining seconds instead of re-sending.
+  void _onResendTapped() {
+    final sentAt = _otpSentAt;
+    if (sentAt != null) {
+      final remaining =
+          _kResendCooldownSecs - DateTime.now().difference(sentAt).inSeconds;
+      if (remaining > 0) {
+        showToast(context, 'אפשר לשלוח קוד חדש בעוד $remaining שניות');
+        return;
+      }
+    }
+    unawaited(_sendOtp(resend: true));
+  }
+
   Future<void> _confirmCode() async {
     final code = _code.text.trim();
     final verificationId = _verificationId;
     if (code.length < 6 || verificationId == null) {
       showToast(context, 'הזן את הקוד בן 6 הספרות שקיבלת ב-SMS');
+      return;
+    }
+    // P2 — expiry pre-check: skip the round-trip if the code is already past its
+    // validity window (the server also returns session-expired as a backstop).
+    final sentAt = _otpSentAt;
+    if (sentAt != null &&
+        DateTime.now().difference(sentAt).inSeconds > _kCodeValiditySecs) {
+      showToast(context, 'תוקף הקוד פג — שלחו קוד חדש');
       return;
     }
     setState(() => _busy = true);
@@ -336,7 +369,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             Text(
               switch (_step) {
                 _LoginStep.phone => 'נשלח לך קוד אימות חד-פעמי ב-SMS',
-                _LoginStep.code => 'הקוד נשלח אל $_sentTo',
+                _LoginStep.code => 'הקוד נשלח אל $_sentTo · תקף לכ-2 דקות',
                 _LoginStep.email => _emailCreateMode
                     ? 'יצירת חשבון חדש עם אימייל וסיסמה'
                     : 'כניסה עם אימייל וסיסמה',
@@ -394,7 +427,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextButton(
-              onPressed: _busy ? null : () => _sendOtp(resend: true),
+              onPressed: _busy ? null : _onResendTapped,
               child: const Text(
                 'שליחת קוד חדש',
                 style: TextStyle(
