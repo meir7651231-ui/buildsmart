@@ -2228,3 +2228,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** עטיפת כל ה-`_load` ב-try/catch (כמו rewards_state ומנועים אחרים) → כשל-prefs נבלע, נשאר logged-out. תיקון-robustness אמיתי.
 - **בונוס:** זה היה גם שורש ה-baseline הקדם-קיים `worker_reports_drilldown` (קורא דרך drilldown→boardAuth). אחרי התיקון הסוויטה המלאה = **+2658 ALL PASS, 0 כשלים**. baseline עודכן 1→0 (STATUS.md + known_failing.txt).
 - **קבצים נוספים ל-#99:** `lib/state/board_auth.dart` · `knowledge/STATUS.md` · `knowledge/known_failing.txt`.
+
+### #36-voice-dictate-worker-board — כפתור קול↔הקלדה (לוח עובד) — 2026-06-16
+- **המהלך (החלטת-בעלים #36):** widget חדש `VoiceDictateButton` (מיקרופון per-field, מכתיב דרך VoiceService ל-controller, append cursor-safe). מחווט כ-suffixIcon ל-3 שדות גיליון-הצעת-המשימה בלוח-העובד (שם/תיאור/שלבים). לוח-עובד בלבד, לא app-wide. ה-STT מוזרק (seam) לבדיקה.
+- **gate:** analyze 0 · voice_dictate_button_test +2 (fake-listen → השדה מתמלא) · mutation §mutation_log (_append early-return → RED +0 -2 · GREEN +2).
+- **קבצים:** `lib/widgets/voice_dictate_button.dart` (חדש) · `lib/screens/worker_app_screen.dart` · `test/voice_dictate_button_test.dart`.

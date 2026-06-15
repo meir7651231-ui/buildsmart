@@ -29,6 +29,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/widgets/voice_dictate_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -1856,9 +1857,11 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
                 key: const ValueKey('worker-propose-name'),
                 controller: widget.name,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'לדוגמה: התקנת ברז במטבח',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  // 🎤 #36 — dictate the task name (worker board only).
+                  suffixIcon: VoiceDictateButton(controller: widget.name),
                 ),
               ),
               const SizedBox(height: BsTokens.space3),
@@ -1867,9 +1870,10 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
                 key: const ValueKey('worker-propose-detail'),
                 controller: widget.detail,
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'פרטי הביצוע (אופציונלי)',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: VoiceDictateButton(controller: widget.detail),
                 ),
               ),
               const SizedBox(height: BsTokens.space3),
@@ -1878,9 +1882,10 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
                 key: const ValueKey('worker-propose-steps'),
                 controller: widget.steps,
                 maxLines: 4,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'כל שורה = שלב נפרד (אופציונלי)',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: VoiceDictateButton(controller: widget.steps),
                 ),
               ),
               const SizedBox(height: BsTokens.space3),

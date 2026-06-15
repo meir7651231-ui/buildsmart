@@ -1152,3 +1152,9 @@
 - **התיקון:** עטיפת כל ה-`_load` ב-try/catch (כמו rewards_state ומנועים אחרים) → כשל-prefs נבלע, נשאר logged-out. תיקון-robustness אמיתי.
 - **בונוס:** זה היה גם שורש ה-baseline הקדם-קיים `worker_reports_drilldown` (קורא דרך drilldown→boardAuth). אחרי התיקון הסוויטה המלאה = **+2658 ALL PASS, 0 כשלים**. baseline עודכן 1→0 (STATUS.md + known_failing.txt).
 - **קבצים נוספים ל-#99:** `lib/state/board_auth.dart` · `knowledge/STATUS.md` · `knowledge/known_failing.txt`.
+
+## #36-voice-dictate-worker-board — כפתור קול↔הקלדה בלוח-העובד — 2026-06-16
+- **קבצים:** חדש `lib/widgets/voice_dictate_button.dart` (VoiceDictateButton — IconButton-מיקרופון שמכתיב דרך VoiceService.listen ומצרף את הטקסט ל-controller; seams listenFn/stopFn לבדיקה). `worker_app_screen.dart` — מחווט כ-suffixIcon ל-3 שדות-הטקסט בגיליון-הצעת-המשימה (שם/תיאור/שלבים). טסט חדש `voice_dictate_button_test.dart` (+2). לוח-עובד בלבד (החלטת-בעלים #36), לא app-wide.
+- **load-bearing:** `_append` — `if (t.isEmpty) return;` ואז כתיבת ה-controller. מוטציה: `if (t.isEmpty) return;` → `return;` (תמיד early-return, אף פעם לא מצרף).
+- תוצאה: שני טסטי-#36 **אדומים `+0 -2`** — אחרי tap השדה לא השתנה. שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: ההכתבה ממלאת את השדה שבו המשתמש (append, cursor בסוף — לא דורסת הקלדה), במקום הבאג המקורי שבו קול הפעיל חיפוש-קטלוג. ה-STT מוזרק (seam) לבדיקה בלי מיקרופון. analyze 0.

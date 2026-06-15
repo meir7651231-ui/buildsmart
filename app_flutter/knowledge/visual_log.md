@@ -1208,3 +1208,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #49-wire-supplier-prefs — catalog_settings: ספקים מועדפים מחווט (3 פקדים אמיתיים)
 **שינוי נראה (בלי screenshot — widget-test ירוק):** מקטע '🏪 ספקים מועדפים' — 3 השורות הראשונות שהיו placeholders ("בבנייה") הן עכשיו פקדים אמיתיים: 'מרחק מקסימלי' (_NumberRow 5-300 ק"מ), 'דירוג מינימלי' (radio הכל/3+/4+/5), 'ספקים מקומיים בלבד' (switch). 'ספקים מסומנים כמועדפים'/'ספקים חסומים' נשארו placeholders (seam). מאומת ב-catalog_sort_alerts (tap → localSuppliersOnly נשמר, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.
+
+## 2026-06-16 — #36-voice-dictate-worker-board — מיקרופון בשדות הצעת-המשימה (לוח עובד)
+**שינוי נראה (בלי screenshot — widget-test ירוק):** בגיליון "הצע משימה" בלוח-העובד, 3 שדות-הטקסט (שם/תיאור/שלבים) קיבלו suffixIcon 🎤 (Icons.mic_none, אדום בזמן הקלטה Icons.mic). לחיצה מתחילה הכתבה קולית שמצרפת לשדה; לחיצה-שנייה עוצרת. אין שינוי-פריסה אחר — IconButton סטנדרטי בתוך ה-InputDecoration הקיים. מאומת ב-voice_dictate_button_test (fake-STT → controller מתמלא, mutation RED→GREEN §mutation_log). analyze 0.
