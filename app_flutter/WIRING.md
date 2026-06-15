@@ -8,6 +8,15 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth P2 (login polish):** account-enumeration closed on the
+> sign-in path — `hebrewAuthError` folds `user-not-found` into the SAME generic
+> "אימייל או סיסמה שגויים" as a wrong password (was a distinct "לא נמצא חשבון",
+> which let the form probe which emails are registered; the full server-side fix
+> is the Firebase console "Email Enumeration Protection" toggle — owner). Plus a
+> show/hide-password eye toggle on the email pane and a client-side ≥6-char
+> pre-check on "צור חשבון" (instant feedback; the server weak-password error is
+> still mapped as a backstop). `login_sheet_test` +2 (enumeration unit + length).
+
 > **2026-06-15 — auth #4 (account-deletion server cleanup):** the client's
 > `deleteAccount()` calls Firebase Auth `user.delete()` which removes ONLY the Auth
 > record — the user's `users/{uid}` profile (name/phone/email/fcmToken) + `diag/{uid}`

@@ -34,7 +34,12 @@ String hebrewAuthError(String code) => switch (code) {
       'session-expired' =>
         'תוקף הקוד פג — שלח קוד חדש',
       'too-many-requests' => 'יותר מדי ניסיונות — נסה שוב מאוחר יותר',
-      'user-not-found' => 'לא נמצא חשבון עם פרטים אלה',
+      // P2 — account-enumeration: user-not-found is folded into the SAME generic
+      // credential error as a wrong password, so the sign-in form can't be used
+      // to probe which emails are registered. (The full server-side fix is the
+      // Firebase console "Email Enumeration Protection" toggle — owner action;
+      // this is client defense-in-depth that helps even without it.)
+      'user-not-found' ||
       'wrong-password' ||
       'invalid-credential' =>
         'אימייל או סיסמה שגויים',
@@ -116,6 +121,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   // the email-verification notice (a verification mail was sent best-effort by
   // createUserWithEmailPassword) instead of the generic sign-in toast.
   bool _justCreated = false;
+  // P2 — show/hide the password (the eye toggle in the email pane). Ephemeral.
+  bool _showPassword = false;
 
   /// The verificationId [AuthGateway.sendOtp] resolved with — consumed by the
   /// code step. Null until a code was sent.
@@ -212,6 +219,13 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     final password = _password.text;
     if (email.isEmpty || password.isEmpty) {
       showToast(context, 'הזן אימייל וסיסמה');
+      return;
+    }
+    // P2 — client-side length pre-check (Firebase's floor is 6) so the user gets
+    // instant feedback without a round-trip; the server weak-password error is
+    // still mapped as a backstop.
+    if (password.length < 6) {
+      showToast(context, 'הסיסמה חייבת לפחות 6 תווים');
       return;
     }
     setState(() {
@@ -420,7 +434,18 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           controller: _password,
           hint: _emailCreateMode ? 'סיסמה (6+ תווים)' : 'סיסמה',
           icon: Icons.lock_outline,
-          obscure: true,
+          obscure: !_showPassword,
+          // P2 — show/hide eye toggle.
+          suffix: IconButton(
+            onPressed:
+                _busy ? null : () => setState(() => _showPassword = !_showPassword),
+            icon: Icon(
+              _showPassword ? Icons.visibility_off : Icons.visibility,
+              color: const Color(0xFFBBBBBB),
+              size: 20,
+            ),
+            tooltip: _showPassword ? 'הסתר סיסמה' : 'הצג סיסמה',
+          ),
         ),
         const SizedBox(height: BsTokens.space3),
         // server-gate-auth — the primary action follows the mode: sign-in
@@ -514,6 +539,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     TextInputType? keyboardType,
     int? maxLength,
     bool obscure = false,
+    Widget? suffix,
   }) {
     return TextField(
       controller: controller,
@@ -531,6 +557,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         filled: true,
         fillColor: const Color(0xFFF5F5F7),
         prefixIcon: Icon(icon, color: const Color(0xFFBBBBBB), size: 20),
+        suffixIcon: suffix,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,

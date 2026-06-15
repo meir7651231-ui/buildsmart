@@ -142,6 +142,12 @@ void main() {
         'יותר מדי ניסיונות — נסה שוב מאוחר יותר',
       );
       expect(hebrewAuthError('unavailable'), 'שירות ההתחברות אינו זמין כרגע');
+      // P2 — account-enumeration: user-not-found folds into the SAME generic
+      // credential message as a wrong password, so the sign-in form can't be
+      // used to probe which emails are registered.
+      expect(hebrewAuthError('user-not-found'), 'אימייל או סיסמה שגויים');
+      expect(hebrewAuthError('wrong-password'), 'אימייל או סיסמה שגויים');
+      expect(hebrewAuthError('invalid-credential'), 'אימייל או סיסמה שגויים');
       expect(hebrewAuthError('???'), 'ההתחברות נכשלה — נסה שוב');
     });
 
@@ -370,6 +376,30 @@ void main() {
       expect(find.text('האימייל כבר רשום — התחברו במקום'), findsOneWidget);
       expect(find.text('🔐 התחברות לחשבון'), findsOneWidget); // stays open
       expect(gw.emailCreations, isEmpty);
+      await drainToast(t);
+    });
+
+    // P2 — the client-side length pre-check short-circuits BEFORE the round-trip
+    // (the gateway is never reached; the server weak-password error is a backstop).
+    testWidgets('צור חשבון — a password under 6 chars is rejected client-side',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      await pumpLoginHost(t, gw);
+
+      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('אין לי חשבון — צור חשבון'));
+      await t.pumpAndSettle();
+      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'short@b.co');
+      await t.enterText(
+        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
+        '123',
+      );
+      await t.tap(find.text('צור חשבון'));
+      await t.pumpAndSettle();
+      expect(find.text('הסיסמה חייבת לפחות 6 תווים'), findsOneWidget);
+      expect(gw.emailCreations, isEmpty); // never reached the gateway
+      expect(find.text('🔐 התחברות לחשבון'), findsOneWidget); // stays open
       await drainToast(t);
     });
   });
