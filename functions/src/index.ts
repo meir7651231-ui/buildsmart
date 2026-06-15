@@ -102,13 +102,13 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 //   S7.2  getUploadUrl                 — callable; R2 presigned PUT (no creds
 //                                        in code — Secret Manager / env)
 //   S8.4  auditLog                     — append-only writes from all the above
-//   S1.8  onUserDeleted                — auth onDelete trigger (v1 — Auth has no
-//                                        v2 deletion hook); purges the deleted
-//                                        user's uid-keyed personal docs
+//   S1.8  deleteAccount                — gen2 callable; purges the caller's
+//                                        uid-keyed personal docs + deletes their
+//                                        Auth record (Admin SDK)
 // ─────────────────────────────────────────────────────────────────────────────
 
+export { deleteAccount } from "./deleteAccount";
 export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";
 export { computeCredit } from "./credit";
-export { onUserDeleted } from "./onUserDeleted";
 export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";

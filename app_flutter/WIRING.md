@@ -17,15 +17,20 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > pre-check on "צור חשבון" (instant feedback; the server weak-password error is
 > still mapped as a backstop). `login_sheet_test` +2 (enumeration unit + length).
 
-> **2026-06-15 — auth #4 (account-deletion server cleanup):** the client's
-> `deleteAccount()` calls Firebase Auth `user.delete()` which removes ONLY the Auth
-> record — the user's `users/{uid}` profile (name/phone/email/fcmToken) + `diag/{uid}`
-> probe were left orphaned in Firestore (GDPR right-to-erasure / Apple gap). New
-> server-side `onUserDeleted` (functions/ — v1 auth onDelete trigger, no v2 deletion
-> hook exists, no new dep) fires on EVERY Auth deletion and purges those uid-keyed
-> personal docs + writes an `auditLog` entry. SCOPE: only uid-keyed (single-owner)
-> docs; multi-party records (orders/chat/customers/projects/tasks) are RETAINED —
-> anonymizing the uid out of shared docs is a heavier follow-up (functions/README TODO).
+> **2026-06-15 — auth #4 (account-deletion server cleanup, gen2 callable):** the
+> client `deleteAccount()` used Firebase Auth `user.delete()` which removes ONLY the
+> Auth record — the user's `users/{uid}` profile (name/phone/email/fcmToken) +
+> `diag/{uid}` probe were left orphaned in Firestore (GDPR right-to-erasure / Apple
+> gap). Now `FirebaseAuthGateway.deleteAccount` calls the server `deleteAccount`
+> CALLABLE (functions/deleteAccount.ts), which purges those uid-keyed personal docs
+> AND deletes the Auth record via the Admin SDK (no recent-login needed), writes an
+> `auditLog` entry, then the client signs out locally. **Callable, not an Auth
+> onDelete trigger:** Auth has no gen2 deletion hook and a v1/gen1 trigger needs an
+> App Engine instance this project lacks — it 403s and ABORTS `firebase deploy
+> --only functions`, blocking the (live) gen2 functions too; a callable stays gen2.
+> SCOPE: only uid-keyed (single-owner) docs; multi-party records
+> (orders/chat/customers/projects/tasks) are RETAINED — anonymizing the uid out of
+> shared docs is a heavier follow-up (functions/README TODO).
 
 > **2026-06-15 — auth #3 (email-verification notice):** the "צור חשבון" success path
 > now toasts that a verification email was sent ("✓ החשבון נוצר — שלחנו מייל אימות…")

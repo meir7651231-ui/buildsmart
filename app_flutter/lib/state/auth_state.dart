@@ -329,7 +329,13 @@ class FirebaseAuthGateway implements AuthGateway {
         if (user == null) {
           throw const AuthGatewayException('no-current-user');
         }
-        await user.delete();
+        // S1.8 — server-side erasure: the `deleteAccount` callable purges the
+        // caller's Firestore docs (users/{uid} + diag/{uid}) AND deletes the
+        // Auth record itself via the Admin SDK (no recent-login required, unlike
+        // a client `user.delete()` which also left Firestore orphaned). We then
+        // clear the local session so the app re-gates to the login flow.
+        await _functions.httpsCallable('deleteAccount').call<dynamic>();
+        await _auth.signOut();
       });
 
   @override
@@ -512,11 +518,12 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     }
   }
 
-  /// S1.8 — in-app account deletion (`user.delete()` — Apple requirement) +
-  /// local user-data wipe. Unlike [signOut] the remote delete THROWS on
-  /// failure (e.g. `requires-recent-login`) and the local wipe does NOT run —
-  /// the account still exists, so the data must too. Server-side document
-  /// wipe-out is a Functions/S5 concern (see functions/README.md).
+  /// S1.8 — in-app account deletion (Apple requirement): the gateway calls the
+  /// server `deleteAccount` callable (purges the user's Firestore docs + deletes
+  /// the Auth record, Admin SDK — see functions/deleteAccount.ts) then clears
+  /// the local session. Unlike [signOut] this THROWS on failure and the local
+  /// wipe does NOT run — if the remote erasure didn't happen, the local
+  /// identity-coupled state stays put.
   Future<void> deleteAccount() async {
     await _required().deleteAccount();
     _gen++;
