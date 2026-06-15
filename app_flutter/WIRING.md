@@ -2295,3 +2295,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gate:** analyze 0 · weather_service_test +3 (mapper · thresholds · malformed-tolerant) · ai_hub_compute/robustness ירוקים · mutation §mutation_log (rain ⚠️ הוסר → RED +1 -2 · GREEN +3).
 - **שארית:** הכלי נשאר deferred/hidden ל-Apple (un-hide = flip בשחרור) · schedule-automation מהתחזית = micro-confirm עתידי.
 - **קבצים:** `lib/services/weather.dart` (חדש) · `lib/screens/ai_hub_screen.dart` · `test/weather_service_test.dart`.
+
+### #31-help-coverage-wave1 — מצב-היכרות כיסוי גל 1 (chrome ראשי של הקבלן) — 2026-06-16
+- **המהלך:** הרחבת כיסוי "מצב היכרות" (#30→#31) לפי לוח, גל 1 = home_shell. נוסף helper `showHelpInfo` ל-help_target. ב-home_shell: לוגו/חיוג-תפקיד, שבב-שם/פרופיל, חיפוש, ו-4 וריאנטי ⋮ עטופים ב-HelpTarget; 4 טאבי-הניווט מוסברים במצב-היכרות דרך showHelpInfo במקום ניווט.
+- **עיקרון:** ה-💡 וה-✕ לא נעטפים (אחרת לוכדים את המשתמש במצב); אלמנטים מחוץ לשכבת-ההקפאה מוסברים דרך showHelpInfo במקום בועת-זנב.
+- **gate:** analyze 0 · help_coverage_test +2 (chrome מכוסה · tap-טאב מסביר) · mutation §mutation_log.
+- **שארית (גלים הבאים):** שליח→חנות→מנהל→מסכים-עמוקים. מפת-דרכים מלאה ב-help-coverage-roadmap workflow.
+- **קבצים:** `lib/widgets/help_target.dart` · `lib/screens/home_shell.dart` · `test/help_coverage_test.dart`.

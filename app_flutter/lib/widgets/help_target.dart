@@ -66,16 +66,103 @@ class HelpTarget extends ConsumerWidget {
     final screen = MediaQuery.of(context).size;
     late OverlayEntry entry;
     entry = OverlayEntry(
-      builder: (_) => _HelpBubble(
-        target: target,
-        screen: screen,
-        title: title,
-        body: body,
-        onDismiss: entry.remove,
-      ),
+      builder:
+          (_) => _HelpBubble(
+            target: target,
+            screen: screen,
+            title: title,
+            body: body,
+            onDismiss: entry.remove,
+          ),
     );
     overlay.insert(entry);
   }
+}
+
+/// Shows the help explanation for an element that can't anchor a tail-bubble
+/// out of itself — a bottom-nav tab, a popup-menu entry, anything the
+/// [HelpTarget] wrapper can't reach. Same card chrome as [_HelpBubble] (💡 +
+/// title + body), centred as a lightweight dialog. Call this from a host's
+/// help-mode tap branch while "מצב היכרות" ([helpModeProvider]) is active.
+Future<void> showHelpInfo(
+  BuildContext context, {
+  required String title,
+  required String body,
+}) {
+  return showDialog<void>(
+    context: context,
+    barrierColor: const Color(0x33000000),
+    builder:
+        (ctx) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: 300,
+                  padding: const EdgeInsets.all(BsTokens.space4),
+                  decoration: BoxDecoration(
+                    color: BsTokens.cardLight,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x33000000),
+                        blurRadius: 20,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.lightbulb,
+                            color: BsTokens.brand,
+                            size: 18,
+                          ),
+                          const SizedBox(width: BsTokens.space2),
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: BsTokens.inkLight,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: BsTokens.space2),
+                      Text(
+                        body,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.45,
+                          color: BsTokens.mutedLight,
+                        ),
+                      ),
+                      const SizedBox(height: BsTokens.space3),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('הבנתי'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+  );
 }
 
 /// The chat-style speech bubble: a rounded card + a tail that points at the
@@ -111,8 +198,10 @@ class _HelpBubble extends StatelessWidget {
     var left = target.center.dx - _bubbleW / 2;
     left = left.clamp(_margin, screen.width - _bubbleW - _margin);
     // Tail x within the bubble, aligned under/over the target centre.
-    final tailCenterX =
-        (target.center.dx - left).clamp(_tailW, _bubbleW - _tailW);
+    final tailCenterX = (target.center.dx - left).clamp(
+      _tailW,
+      _bubbleW - _tailW,
+    );
 
     final tail = CustomPaint(
       size: const Size(_tailW, _tailH),
@@ -171,9 +260,7 @@ class _HelpBubble extends StatelessWidget {
       width: _bubbleW,
       height: _tailH,
       child: Stack(
-        children: [
-          Positioned(left: tailCenterX - _tailW / 2, child: tail),
-        ],
+        children: [Positioned(left: tailCenterX - _tailW / 2, child: tail)],
       ),
     );
 
@@ -228,11 +315,11 @@ class HelpToggleButton extends ConsumerWidget {
           on ? Icons.lightbulb : Icons.lightbulb_outline,
           color: on ? BsTokens.brandDark : (color ?? BsTokens.brand),
         ),
-        tooltip: onLongPress == null
-            ? 'מצב היכרות'
-            : 'מצב היכרות (לחיצה ארוכה: סיור)',
-        onPressed: () =>
-            ref.read(helpModeProvider.notifier).update((v) => !v),
+        tooltip:
+            onLongPress == null
+                ? 'מצב היכרות'
+                : 'מצב היכרות (לחיצה ארוכה: סיור)',
+        onPressed: () => ref.read(helpModeProvider.notifier).update((v) => !v),
       ),
     );
   }
@@ -296,10 +383,7 @@ class HelpModeScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final on = ref.watch(helpModeProvider);
     return Column(
-      children: [
-        if (on) const HelpModeBanner(),
-        Expanded(child: child),
-      ],
+      children: [if (on) const HelpModeBanner(), Expanded(child: child)],
     );
   }
 }

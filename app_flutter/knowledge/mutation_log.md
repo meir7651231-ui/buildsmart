@@ -1164,3 +1164,9 @@
 - **load-bearing:** `weatherNoteFor` ענף-הגשם (51-67) `'⚠️ גשם — לדחות יציקות בטון'`. מוטציה: `⚠️ גשם` → `גשם`.
 - תוצאה: טסטי-#45 **אדומים `+1 -2`** — days[2].warn (code 61) הפך false, ו-thresholds-test נכשל. שחזור → **+3 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: הכלי היה deferred כי "צריך API חיצוני" — Open-Meteo חינמי ללא-מפתח פותר זאת. ה-fetch מוזרק (seam) אז ה-mapper נבדק בלי רשת/GPS; ה-provider נופל ל-seed בחן (ב-VM אין GPS → seed מיידי, מסך לא נשבר). analyze 0 · ai_hub_compute/robustness ירוקים. נשאר deferred/hidden ל-Apple — un-hide הוא flip של הבעלים בשחרור; schedule-automation = micro-confirm עתידי.
+
+## #31-help-coverage-wave1 — מצב-היכרות: chrome ראשי של הקבלן (home_shell) — 2026-06-16
+- **קבצים:** `lib/widgets/help_target.dart` — נוסף `showHelpInfo` (כרטיס-הסבר מרכזי לאלמנטים שאי-אפשר לעגן להם בועת-זנב, כמו טאבים תחתונים). `lib/screens/home_shell.dart` — לוגו→חיוג-תפקיד, שבב-השם→פרופיל, חיפוש, ו-4 וריאנטי תפריט-⋮ נעטפו ב-HelpTarget; 4 טאבי-הניווט מקבלים הסבר במצב-היכרות דרך showHelpInfo במקום ניווט. טסט חדש `help_coverage_test.dart` (+2).
+- **load-bearing:** ב-onTap של הניווט התחתון `body: _kTabHelp[i].$2` (ההסבר של הטאב הנלחץ). מוטציה: `.$2` → `.$1` (מציג את שם-הטאב במקום ההסבר).
+- תוצאה: טסט-הטאב **אדום `+1 -1`** — אחרי tap על "עדכונים" לא הופיע ההסבר "ההתראות והשיחות". שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: ה-💡 וה-✕ נשארים ללא-עטיפה כדי שתמיד אפשר לצאת מהמצב; אלמנטים מחוץ לשכבת-ההקפאה מוסברים דרך showHelpInfo. גל 1 מתוך כיסוי-לפי-לוח (קבלן→שליח→חנות→מנהל→עמוק). analyze 0.

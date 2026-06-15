@@ -1275,3 +1275,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-16 — #45-weather-open-meteo — _Weather: תחזית אמיתית במקום seed
 **שינוי נראה (בלי screenshot — mapper נבדק + robustness render):** בכלי 🌦️ אוטומציית-מזג-אוויר (ai_hub), הכרטיסים מציגים עכשיו תחזית אמיתית מ-Open-Meteo לפי מיקום-המכשיר (כשזמין); ההערה "בפרודקשן API חיצוני" הוחלפה ב-"🌦️ תחזית Open-Meteo · לפי מיקום המכשיר". אין שינוי-פריסה לכרטיסים — אותו AiCard, רק מקור-הדאטה. ב-VM אין GPS → fallback ל-seed (המסך מרנדר כרגיל). מאומת ב-weather_service_test (mapper, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.
+
+## 2026-06-16 — #31-help-coverage-wave1 — מצב-היכרות: chrome ראשי של הקבלן
+**שינוי נראה (בלי screenshot — 2 טסטי-מסך ירוקים):** במצב-היכרות (💡) במסך-הבית, אלמנטים נוספים בסרגל-העליון מודגשים וניתנים-להסבר: הלוגו (החלפת לוח/זהות), שבב-השם (פרופיל), חיפוש, ותפריט ה-⋮ (מותאם לטאב). לחיצה על אחד מ-4 הטאבים התחתונים במצב-היכרות פותחת כרטיס-הסבר ("הבנתי" לסגירה) במקום לנווט. מחוץ למצב-היכרות — אפס שינוי-התנהגות. מאומת ב-help_coverage_test (mutation RED→GREEN §mutation_log) plus full analyze 0.
