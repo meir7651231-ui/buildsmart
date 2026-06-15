@@ -1510,3 +1510,12 @@ TaskItem קיבל toJson/tryFromJson (רשומה-מלאה). _persist כותב א
 ### ג — כלל המניעה
 ANTIPATTERN: _load של מנוע שבונה state רק מ-seeds קבועים ועוד overlay-מוטציות כשהמנוע מאפשר יצירת-entity בריצה עם id דינמי
 RULE: מנוע שמאפשר יצירת-entity בריצה עם id דינמי חייב לשמר את הרשומה-המלאה ב-toJson ולשחזר אותה ב-_load, לא רק overlay-מוטציות על seeds קבועים; אחרת ה-entity שנוצר בריצה נמחק ב-restart
+
+## 2026-06-15 — side-effects (פעמון/צ'אט) ללא-תנאי אחרי decide → double-fire ב-double-tap
+### א — הבעיה
+ב-contractor_hr_sheet, _decide ו-_decideTraining קראו ל-approve/reject (void, status-guarded במנוע) ואז ירו פעמון plus צ'אט plus toast ללא-תנאי. ה-status הלכוד ב-r/t (מבניית-השורה) מתיישן: ב-double-tap מהיר השורה לא נבנית-מחדש בין ההקשות, אז שתי-ההקשות ראו pending וירו — העובד קיבל שני פעמונים ושתי הודעות-צ'אט לאישור אחד. וגם שני-משטחים (קבלן plus מנהל) שמחליטים על אותה בקשה ירו כל אחד.
+### ב — הפתרון
+approve/reject/_decide בשני המנועים (vacation, trainings) מחזירים bool — true רק על מעבר אמיתי pending→decided (re-read של ה-state החי, לא ה-row הלכוד). הווידג'ט יורה את ה-side-effects רק אם true. void→bool additive (callers שמתעלמים מהערך עובדים). הקבלן מחזיק את ההתראה.
+### ג — כלל המניעה
+ANTIPATTERN: ירי side-effects פעמון או צ'אט או toast ללא-תנאי אחרי קריאת engine status-guarded על סמך ה-status הלכוד ב-widget row
+RULE: side-effect שצריך לירות פעם-אחת אחרי מעבר-state חייב להיתלות בערך-ההחזרה של המנוע האם-באמת-עבר או ב-re-read של ה-state החי, לא ב-status הלכוד ב-row של ה-widget שמתיישן ב-double-tap

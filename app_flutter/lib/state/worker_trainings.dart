@@ -327,19 +327,26 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
     _persist();
   }
 
-  /// CONTRACTOR write — approve a pending training (no-op once decided).
-  void approve(String id) => _decide(id, kTrainingApproved);
+  /// CONTRACTOR write — approve a pending training. Returns true iff a real
+  /// pending→decided transition happened (false once decided), so the UI fires
+  /// its bell/chat/toast EXACTLY once — no double-fire on a repeat decide (A2).
+  bool approve(String id) => _decide(id, kTrainingApproved);
 
-  /// CONTRACTOR write — reject a pending training (no-op once decided).
-  void reject(String id) => _decide(id, kTrainingRejected);
+  /// CONTRACTOR write — reject a pending training. Returns true iff it actually
+  /// transitioned (see [approve]).
+  bool reject(String id) => _decide(id, kTrainingRejected);
 
-  void _decide(String id, String status) {
+  bool _decide(String id, String status) {
+    if (!state.any((t) => t.id == id && t.status == kTrainingPending)) {
+      return false;
+    }
     _userTouched = true;
     state = [
       for (final t in state)
         if (t.id == id && t.status == kTrainingPending) t.copyWith(status: status) else t,
     ];
     _persist();
+    return true;
   }
 }
 

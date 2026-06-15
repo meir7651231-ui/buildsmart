@@ -2169,3 +2169,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** TaskItem += toJson/tryFromJson; _persist שומר משימות-ריצה (non-seed ids) כרשומות-מלאות תחת kTasksRuntimeKey; _load משחזר אחרי seed plus overlay. **server-ready:** bindRemote (T1) יסנכרן חי כשה-Firebase ינחת. back-compat: מפתח-prefs נפרד.
 - **gate:** analyze 0 · טסט `tasks_runtime_persistence_test` (+2) · 3 טסטי-overlay הקיימים ירוקים (לא נשבר) · mutation §mutation_log (RED +0 -2 ביטול-השחזור · GREEN +2).
 - **קבצים:** `lib/state/tasks_engine.dart` · `test/tasks_runtime_persistence_test.dart`. **לא נגעתי** ב-UI / מסכים / orders / auth.
+
+### #A2-hr-decide-once — אישור HR יורה פעם-אחת (לא double-fire) — 2026-06-15
+- **הבאג (החלטת-בעלים A2 · medium):** _decide/_decideTraining ב-contractor_hr_sheet ירו פעמון plus צ'אט plus toast ללא-תנאי → double-tap (או שני-משטחים) שלח לעובד התראה כפולה.
+- **התיקון:** approve/reject/_decide ב-vacation_requests plus worker_trainings מחזירים bool (מעבר-אמיתי); הווידג'ט יורה רק אם true. הקבלן מחזיק את ההתראה (פעמון plus צ'אט ב-th-worker-contractor, פעם-אחת). ה-double-fire בלוח-המנהל נפתר כש-#84g יוציא HR מהמנהל.
+- **gate:** analyze 0 · טסט `hr_decide_once_test` (+2) · 17 טסטי-אישור הקיימים ירוקים (void→bool additive) · mutation §mutation_log (RED +1 -1 · GREEN +2).
+- **קבצים:** `lib/state/vacation_requests.dart` · `worker_trainings.dart` · `lib/screens/contractor_hr_sheet.dart` · `test/hr_decide_once_test.dart`. **לא נגעתי** בלוח-המנהל.

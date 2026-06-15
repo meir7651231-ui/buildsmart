@@ -1184,3 +1184,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ### #E3-leak-fix — worker_employer_stock_sheet: scope-key uid→username (לוגיקה-בלבד) — 2026-06-15
 **אין screenshot — למה:** השינוי בקובץ-המסך הוא מפתח-ה-scope של רשימת "הבקשות שלי" בלבד — `requestsForWorker(session.uid)` → `requestsForWorker(session.username)` (+`username` בקריאת-ה-submit). **אפס שינוי פריסה/צבע/widget** — אותו עץ, אותו עיצוב. ההשפעה הנראית-לעין היחידה: העובד רואה כעת רק את בקשות-החומר שלו (לפני-כן, בגלל uid ריק לכל עובד seed/demo, ראה את של כולם). למשתמש-יחיד הרשימה זהה לחלוטין.
 **אימות:** ההתנהגות (בידוד פר-עובד) מאומתת ב-`material_requests_test` (טסט-בידוד seed-session, mutation RED `+7 -1`→GREEN `+8` §mutation_log) — בידוד רב-עובדים אינו ניתן-לאימות-בצילום-בודד (דורש שתי הפעלות). analyze 0 · full-suite ירוק. **לא נגעתי** בפריסה/עיצוב/צבעים של הגיליון.
+
+## 2026-06-15 — #A2-hr-decide-once — contractor_hr_sheet: gate side-effects על decide-bool (לוגיקה-בלבד)
+**אין screenshot — למה:** השינוי בקובץ-המסך הוא 2 שורות בכל מתודת-החלטה — `final fired = approve ? notifier.approve(id) : notifier.reject(id); if (!fired) return;` לפני בלוק-ה-side-effects הקיים. **אפס שינוי פריסה/צבע/widget** — אותו עץ. ההשפעה הנראית: פעמון/צ'אט/toast יורים פעם-אחת במקום פעמיים ב-double-tap. מאומת ב-`hr_decide_once_test` (engine-level, mutation RED→GREEN §mutation_log). analyze 0.

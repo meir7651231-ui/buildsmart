@@ -73,11 +73,11 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
     required bool approve,
   }) {
     final notifier = ref.read(vacationRequestsProvider.notifier);
-    if (approve) {
-      notifier.approve(r.id);
-    } else {
-      notifier.reject(r.id);
-    }
+    // A2 — fire the bell/chat/toast ONLY on a REAL transition (the engine returns
+    // false on an already-decided row), so a double-tap — or the manager
+    // deciding the same shared request — can't double-notify the worker.
+    final fired = approve ? notifier.approve(r.id) : notifier.reject(r.id);
+    if (!fired) return;
     // 🔔 the decision lands on the requester's bell (per-username — these are
     // worker requests, so it reaches exactly the worker who filed it). ONE
     // bell, matching the manager's single addNotification call.
@@ -119,11 +119,10 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
     required bool approve,
   }) {
     final notifier = ref.read(workerTrainingsProvider.notifier);
-    if (approve) {
-      notifier.approve(t.id);
-    } else {
-      notifier.reject(t.id);
-    }
+    // A2 — fire ONLY on a REAL transition (the engine returns false once
+    // decided), so a double-tap / second surface can't double-notify.
+    final fired = approve ? notifier.approve(t.id) : notifier.reject(t.id);
+    if (!fired) return;
     ref.read(workerNotifsProvider.notifier).addNotification(
           username: t.username,
           emoji: approve ? '✅' : '❌',

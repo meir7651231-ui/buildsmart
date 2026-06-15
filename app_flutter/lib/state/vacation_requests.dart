@@ -248,13 +248,23 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
     return r;
   }
 
-  /// MANAGER write — approve a pending request (no-op on a decided one).
-  void approve(String id) => _decide(id, kVacationApproved);
+  /// MANAGER/CONTRACTOR write — approve a pending request. Returns true iff a
+  /// real pending→decided transition happened (false on an already-decided row),
+  /// so the UI fires its bell/chat/toast EXACTLY once — a double-tap or a second
+  /// surface deciding the same request can't double-notify the worker (A2).
+  bool approve(String id) => _decide(id, kVacationApproved);
 
-  /// MANAGER write — reject a pending request (no-op on a decided one).
-  void reject(String id) => _decide(id, kVacationRejected);
+  /// MANAGER/CONTRACTOR write — reject a pending request. Returns true iff it
+  /// actually transitioned (see [approve]).
+  bool reject(String id) => _decide(id, kVacationRejected);
 
-  void _decide(String id, String status) {
+  bool _decide(String id, String status) {
+    // Re-read the LIVE state: only a row that is ACTUALLY still pending
+    // transitions, and a repeat decide reports false so the caller skips the
+    // duplicate side-effects (the re-read-then-fire idiom).
+    if (!state.any((r) => r.id == id && r.status == kVacationPending)) {
+      return false;
+    }
     _userTouched = true;
     state = [
       for (final r in state)
@@ -264,6 +274,7 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
           r,
     ];
     _persist();
+    return true;
   }
 }
 

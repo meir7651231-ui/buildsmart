@@ -1087,3 +1087,10 @@
 - תוצאה: `tasks_runtime_persistence_test` **אדום `+0 -2`** — שני המקרים נכשלו (המשימה שנוצרה ב-session 1 לא קיימת ב-session 2) ✅ נתפס. 3 טסטי-ה-overlay הקיימים (worker_tasks_persistence) נשארו ירוקים.
 - שחזור: `cp /tmp/te.GOOD lib/state/tasks_engine.dart` → RESTORED-IDENTICAL → **+2 ירוק**.
 - מסקנה: ה-_load בנה state רק מ-_seedTasks (const ids 1-5) plus overlay; משימות-ריצה (id=max+1) נזרקו ב-restart וה-overlay גם לא שמר name/steps/worker שלהן. עכשיו הרשומה-המלאה נשמרת תחת מפתח-prefs נפרד ומשוחזרת. back-compat: payload פרה-A1 ללא-שינוי; ה-overlay של ה-seeds לא נגע (3 טסטיו ירוקים). SERVER-READY: bindRemote (T1) יסנכרן חי כשה-Firebase ינחת. החלטת-בעלים A1. gate: analyze 0. נגעתי רק ב-tasks_engine (+טסט).
+
+## A2-hr-decide-once — אישור חופשה/הדרכה ירה פעמון+צ'אט פעמיים (double-tap) — 2026-06-15
+- **קבצים (lib/state + lib/screens + test):** `vacation_requests.dart` + `worker_trainings.dart` — `approve`/`reject`/`_decide` שונו מ-void ל-`bool` (true רק על מעבר אמיתי pending→decided). `contractor_hr_sheet.dart` — `_decide`/`_decideTraining` יורים bell+chat+toast רק אם ה-bool true. טסט חדש `test/hr_decide_once_test.dart` (+2).
+- **`vacation_requests.dart` _decide guard (load-bearing):** מוטציה — ה-`return false;` (כשהשורה כבר-לא-pending) → `return true;`.
+- תוצאה: `hr_decide_once_test` **אדום `+1 -1`** — מקרה-ה-vacation נכשל (approve שני החזיר true במקום false) ✅ נתפס. מקרה-ה-training (מנוע אחר) נשאר ירוק.
+- שחזור: `cp /tmp/vr.GOOD lib/state/vacation_requests.dart` → RESTORED-IDENTICAL → **+2 ירוק**.
+- מסקנה: ה-side-effects היו ללא-תנאי אחרי קריאת-המנוע; ה-r/t הלכוד מתיישן ב-double-tap (השורה לא נבנתה-מחדש בין הקשות) → שתי-ההקשות ירו. עכשיו המנוע מחזיר אם באמת עבר, והווידג'ט יורה פעם-אחת — מתקן double-tap plus שני-משטחים (השני רואה false). הקבלן מחזיק את ההתראה; ה-double-fire בלוח-המנהל נפתר ב-#84g (הוצאת HR מהמנהל). void→bool additive (17 טסטי-אישור קיימים ירוקים). gate: analyze 0. נגעתי ב-vacation plus trainings(state) plus contractor_hr_sheet(לוגיקה, ללא-פיקסל).
