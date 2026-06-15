@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## chat-sync — self-stamp participantUids (A14 last-mile) — 2026-06-15
+
+- **קובץ:** `test/chat_uid_a14_populate_test.dart` (קייס חדש: `lookup: null` → self-stamp).
+- תקלה שהוזרקה: `sys_chat.dart` `ensureParticipantUids` — `final union = <String>{me}` → `<String>{}` (לא לכלול את השולח).
+- תוצאה: **אדומה ✅** — "NULL lookup ... SENDER's own uid STILL stamped" נכשל (participantUids ריק במקום `[uid-c]`; `+6 -1`). שחזור → ירוק ✅ (`+7`).
+- מסקנה: הבדיקה חזקה — נועלת את ערובת ה-self-stamp (אנלוג ל-orders `contractorUid==auth.uid`): גם בלי users-directory (מצב-המכשיר שבו ה-lookup נכשל/null), ה-uid של השולח תמיד ב-participantUids → write/read של צ'אט אינם נדחים. לצד זה: `chat_repository` scope ל-`participantUids` (arrayContains, gated), ו-index+rules יושרו על אותו שדה.
+
 ## compatibleProductsCount/For — אינדקס-SKU O(1) (#2) — 2026-06-15
 
 - **קובץ:** `test/compat_index_test.dart` (חדש — נועל את האופטימיזציה).

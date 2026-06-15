@@ -8,6 +8,13 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — chat-sync (A14 last-mile, orders analog):** `ensureParticipantUids`
+> now ALWAYS stamps the sender's own uid (the `contractorUid==auth.uid` guarantee)
+> even with no users-directory; the `chatThreads` listen is scoped
+> `where('participantUids', arrayContains: uid)` (gated by `kUidScopedQueries`, like
+> orders); the index + the update rule (empty→self bootstrap) align on
+> `participantUids`. Chats now sync 2-way like orders. Flag OFF = byte-identical.
+
 > **2026-06-15 — launch B1+#6:** data-safety/privacy declarations updated to honestly list
 > Firebase Crashlytics/Analytics collection (B1, `LAUNCH_PACKAGE/`). The manager dashboard's
 > "🔬 בדיקות רגרסיה" section is now `if(kDebugMode)`-gated — **DEV-ONLY**, not reachable by an

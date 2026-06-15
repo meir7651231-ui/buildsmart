@@ -134,6 +134,30 @@ void main() {
       expect(t.messages.last.text, isNot('שלום, מה הסטטוס?'));
     });
 
+    test('flag ON + NULL lookup (the on-device failure mode): the SENDER\'s own '
+        'uid is STILL stamped — mirrors orders contractorUid==auth.uid', () async {
+      // THE BUG this locks: in production a null/failing UsersLookup made
+      // ensureParticipantUids bail BEFORE folding the sender ⇒ participantUids
+      // stayed EMPTY ⇒ thread/message writes silently denied. The fix ALWAYS
+      // folds currentUid, so the sender is a member even with no directory.
+      final engine = ChatEngineNotifier(
+        persist: false,
+        uidScoped: true,
+        lookup: null, // ← no users directory (the device's resolve path)
+        currentUid: () => 'uid-c',
+      );
+      addTearDown(engine.dispose);
+
+      await engine.ensureParticipantUids(contractorStore);
+
+      final t = engine.state.firstWhere((x) => x.id == contractorStore);
+      expect(t.participantUids, ['uid-c'],
+          reason: 'no directory ⇒ peer roles unresolved, but the sender is '
+              'ALWAYS a member so they can read/write the thread they stamped');
+      expect(chatThreadVisibleToUid(t.participantUids, 'uid-c'), isTrue);
+      expect(chatThreadVisibleToUid(t.participantUids, 'uid-x'), isFalse);
+    });
+
     test('flag OFF (default): participantUids stays EMPTY — zero-regression lock',
         () async {
       final engine = ChatEngineNotifier(

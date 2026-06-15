@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-06-15 — chat-sync: FS_DIAG step-4 probe (אין שינוי-UI נראה)
+
+**שינוי (lib/widgets):** `backend_debug_badge.dart` — שלב-4 (orders-create probe) משתמש ב-id ייחודי
+(`BS-diag-$uid-${ms}`) במקום קבוע → תמיד CREATE (היה UPDATE בריצה-שנייה → role=— → ❌ כוזב). **אין שינוי
+ויזואלי** בתג — רק לוגיקת-הבדיקה-הפנימית. **אימות:** `fsDiagStepResult` tests ירוקים, `analyze` 0.
+(שאר תיקון-הצ'אט — sys_chat/chat_repository/firestore rules+index — לוגי/שרת, לא-UI.)
+
+---
+
 ## 2026-06-15 — launch #6: פאנל-רגרסיה מגודר ל-debug (לוח-מנהל)
 
 **שינוי (UI):** `manager_dashboard_screen.dart` — סעיף "🔬 בדיקות רגרסיה" נעטף ב-`if(kDebugMode) ...[]`.
