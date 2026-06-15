@@ -202,20 +202,26 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
   bool _userTouched = false;
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    // F-36: the container may be disposed before prefs resolve (test teardown
-    // / ProviderScope rebuild) — setting state on a disposed notifier throws.
-    if (!mounted) return;
-    final raw = prefs.getString(kBoardAuthKey);
-    if (raw == null) return;
-    if (_userTouched) return;
     try {
+      // #99 — getInstance is INSIDE the guard now. A missing prefs platform
+      // (a non-widget ProviderContainer / a widget test that builds a board or
+      // rewards screen without SharedPreferences.setMockInitialValues) makes
+      // getInstance throw "Binding not initialized" (a StateError). Before, that
+      // escaped as an UNHANDLED async error and failed the test; now it is
+      // swallowed exactly like a corrupt value — stay logged out. Exposed once
+      // rewardsProvider began watching boardAuthProvider (#99 per-user keying).
+      final prefs = await SharedPreferences.getInstance();
+      // F-36: the container may be disposed before prefs resolve (test teardown
+      // / ProviderScope rebuild) — setting state on a disposed notifier throws.
+      if (!mounted) return;
+      final raw = prefs.getString(kBoardAuthKey);
+      if (raw == null || _userTouched) return;
       final session =
           BoardSession.fromJson(jsonDecode(raw) as Map<String, dynamic>);
       if (!mounted) return; // F-36: re-check before placing state
       state = session;
     } on Object catch (_) {
-      // Corrupt value — stay logged out.
+      // No prefs platform / corrupt value / binding hiccup — stay logged out.
     }
   }
 

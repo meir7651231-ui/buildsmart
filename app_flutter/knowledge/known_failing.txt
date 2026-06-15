@@ -11,4 +11,3 @@
 # 2026-06-14: כשל שהגיע מ-worker-board-v3 (merge של צי-העובד, commit 22ca2e2) — לא שלי.
 # הפיצ'ר עובד (ה-drill-down נפתח עם דאטה אמיתית); רק כפתור-הסגירה לא נמצא ע"י
 # find.bySemanticsLabel('סגור') (Semantics+InkWell+Icon ידני במקום IconButton). לתיקון ע"י צי-העובד.
-worker_reports_drilldown_test.dart :: tapping the first-pass KPI box opens a real drill-down sheet listing the seeded done task (not a dead tap)

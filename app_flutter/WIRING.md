@@ -2215,3 +2215,16 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **המהלך (החלטת-בעלים #49):** `_SuppliersSection` ב-catalog_settings — חיווט 3 השדות המגובים לפקדים נשמרים: maxDistance (_NumberRow), minRating (_RadioGroupRow), localSuppliersOnly (_SwitchRow). שמירה מקומית עכשיו · server-ready (הסינון מופעל כשצד-הספק יזין מרחק/דירוג/מקומיות). preferred/blocked = seams (דורשים זהות-ספק). שאר ה-placeholders (AI/השוואת-מחירים) חסומי-דאטה-חיצונית → seams כנים (#56).
 - **gate:** analyze 0 · catalog_sort_alerts +1 (toggle→persist) · robustness/settings_honesty ירוקים · mutation §mutation_log (localSuppliersOnly no-op → RED +0 -1 · GREEN).
 - **קבצים:** `lib/screens/catalog_settings_screen.dart` · `test/catalog_sort_alerts_settings_test.dart`.
+
+### #99-rewards-private-per-user — BuildCoins פרטי per board user — 2026-06-15
+- **הבאג (החלטת-בעלים #99 · P-6/F-33):** BuildCoins/התקדמות נשמרו תחת מפתח גלובלי יחיד → דלפו בין משתמשי-לוח.
+- **התיקון:** `RewardsNotifier._storageKey` = `'$kRewardsKey.$username'` (ריק→גלובלי back-compat); ה-provider קורא boardAuthProvider.username ובונה notifier scoped (re-build על login/switch). leaderboard נשאר seed משותף (רק 'אתה' פרטי). workerNotifs כבר היה per-username (P-13).
+- **gate:** analyze 0 · rewards_per_user_test +1 (שני usernames מבודדים) · t3_ghi_rewards ירוק אחרי תיקון-binding · mutation §mutation_log (key→גלובלי-תמיד → RED +0 -1 · GREEN).
+- **שארית:** אין מיגרציה ממפתח-גלובלי קודם (מטבעות דמו מקומיים).
+- **קבצים:** `lib/state/rewards_state.dart` · `test/rewards_per_user_test.dart` · `test/t3_ghi_rewards_ai_home_test.dart` (setup).
+
+### #99-addendum — board_auth._load resilience (root-cause of the gate-32 baseline) — 2026-06-16
+- כש-`rewardsProvider` התחיל `ref.watch(boardAuthProvider)` (#99), כל טסט שמרנדר מסך-קורא-rewards (worker/courier reports · rewards hub · drilldowns) בנה את `BoardAuthNotifier`. ב-`_load` ה-`await SharedPreferences.getInstance()` **לא** היה ב-try/catch (רק ה-jsonDecode) — וב-context בלי `setMockInitialValues`/binding זה זורק "Binding not initialized" (StateError) כשגיאה אסינכרונית **לא-מטופלת** → הטסט נכשל.
+- **התיקון:** עטיפת כל ה-`_load` ב-try/catch (כמו rewards_state ומנועים אחרים) → כשל-prefs נבלע, נשאר logged-out. תיקון-robustness אמיתי.
+- **בונוס:** זה היה גם שורש ה-baseline הקדם-קיים `worker_reports_drilldown` (קורא דרך drilldown→boardAuth). אחרי התיקון הסוויטה המלאה = **+2658 ALL PASS, 0 כשלים**. baseline עודכן 1→0 (STATUS.md + known_failing.txt).
+- **קבצים נוספים ל-#99:** `lib/state/board_auth.dart` · `knowledge/STATUS.md` · `knowledge/known_failing.txt`.

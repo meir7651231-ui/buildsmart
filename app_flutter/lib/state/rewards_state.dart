@@ -20,6 +20,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -213,7 +214,7 @@ class RewardsState {
 }
 
 class RewardsNotifier extends StateNotifier<RewardsState> {
-  RewardsNotifier({this.persist = true})
+  RewardsNotifier({this.persist = true, this.username = ''})
       : super(const RewardsState(
           coins: kBuildCoinsSeed,
           challenges: kMonthlyChallengesSeed,
@@ -225,6 +226,16 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   /// When false (tests), skip SharedPreferences entirely (engine pattern).
   final bool persist;
 
+  /// #99 — the logged board username. BuildCoins/progress are PRIVATE per user:
+  /// the persisted overlay is keyed by username (empty ⇒ the legacy global key,
+  /// for guest / no-session back-compat). The leaderboard stays a SHARED general
+  /// board — only your own 'אתה' balance row is private.
+  final String username;
+
+  /// Per-username storage key (#99). Empty username keeps the legacy global key.
+  String get _storageKey =>
+      username.isEmpty ? kRewardsKey : '$kRewardsKey.$username';
+
   /// One-shot guard (the board_auth/brand_history idiom): once a user
   /// mutation wrote state, a late async [_load] must not clobber it.
   bool _userTouched = false;
@@ -235,7 +246,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(kRewardsKey);
+      final raw = prefs.getString(_storageKey);
       if (raw == null || raw.isEmpty || _userTouched) return;
       final m = jsonDecode(raw) as Map<String, dynamic>;
       if (_userTouched) return;
@@ -265,7 +276,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
       final prefs = await SharedPreferences.getInstance();
       final live = {for (final c in state.challenges) c.id};
       await prefs.setString(
-        kRewardsKey,
+        _storageKey,
         jsonEncode({
           'coins': state.coins,
           'claimedChallengeIds': [
@@ -333,4 +344,10 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
 }
 
 final rewardsProvider =
-    StateNotifierProvider<RewardsNotifier, RewardsState>((_) => RewardsNotifier());
+    StateNotifierProvider<RewardsNotifier, RewardsState>((ref) {
+  // #99 — BuildCoins/progress are PRIVATE per board user (key = username); the
+  // leaderboard stays a shared general board. Watching the session rebuilds the
+  // notifier on login/switch, so each user loads exactly their own balance.
+  final username = ref.watch(boardAuthProvider)?.username ?? '';
+  return RewardsNotifier(username: username);
+});

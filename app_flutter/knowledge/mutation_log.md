@@ -1140,3 +1140,15 @@
 - **load-bearing:** `_SwitchRow` 'ספקים מקומיים בלבד' `onChanged: copyWith(localSuppliersOnly: v)`. מוטציה: `copyWith(localSuppliersOnly: v)` → `copyWith(localSuppliersOnly: s.localSuppliersOnly)` (מתעלם מ-v).
 - תוצאה: טסט "ספקים מקומיים בלבד flips localSuppliersOnly (#49)" **אדום `+0 -1`** (אחרי tap נשאר false). שחזור → **ירוק** · RESTORED-IDENTICAL.
 - מסקנה: הקוד הקודם השאיר את 3 השדות לא-מחווטים בכוונה כי אין דאטת-ספק על מוצרים לסנן. אך שמירת ההעדפה אינה זיוף — היא ה-intent שהסינון העתידי יכבד (server-ready). החיווט שומר מקומית עכשיו ומופעל אוטומטית כשהספק יזין מרחק/דירוג/מקומיות. preferred/blocked דורשים זהות-ספק → seams כנים. analyze 0 · robustness/settings_honesty ירוקים.
+
+## #99-rewards-private-per-user — BuildCoins נשמרו תחת מפתח גלובלי → דליפה בין משתמשים — 2026-06-15
+- **קובץ:** `rewards_state.dart` — `RewardsNotifier` קיבל `username` plus getter `_storageKey` (`'$kRewardsKey.$username'`, ריק→מפתח-גלובלי back-compat). `_load`/`_persist` משתמשים ב-`_storageKey`. ה-provider קורא `ref.watch(boardAuthProvider)?.username` ובונה notifier scoped (re-build על login/switch). leaderboard נשאר seed משותף (רק שורת 'אתה' מסונכרנת למאזן הפרטי). טסט חדש `rewards_per_user_test.dart` (+1). תיקון-setup ב-`t3_ghi_rewards_ai_home_test.dart` (binding plus mock — ה-coupling החדש ל-boardAuth נוגע ב-prefs).
+- **load-bearing:** `_storageKey` getter `username.isEmpty ? kRewardsKey : '$kRewardsKey.$username'`. מוטציה: `username.isEmpty ?` → `true ?` (מפתח-גלובלי תמיד, מתעלם מ-username).
+- תוצאה: טסט "#99" **אדום `+0 -1`** — omer ירש את 440 של ran (440≠340 seed). שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: כל המשתמשים חלקו `bs.rewards.v1` יחיד → P-6/F-33 leak. עכשיו המפתח כולל username → פרטי per-user; ה-provider מ-re-build על שינוי-session. leaderboard משותף (החלטת-בעלים). אין מיגרציה ממפתח-גלובלי (מטבעות דמו מקומיים) — נרשם. analyze 0 · t3 מלא ירוק אחרי תיקון-binding.
+
+### #99-addendum — board_auth._load resilience (root-cause of the gate-32 baseline) — 2026-06-16
+- כש-`rewardsProvider` התחיל `ref.watch(boardAuthProvider)` (#99), כל טסט שמרנדר מסך-קורא-rewards (worker/courier reports · rewards hub · drilldowns) בנה את `BoardAuthNotifier`. ב-`_load` ה-`await SharedPreferences.getInstance()` **לא** היה ב-try/catch (רק ה-jsonDecode) — וב-context בלי `setMockInitialValues`/binding זה זורק "Binding not initialized" (StateError) כשגיאה אסינכרונית **לא-מטופלת** → הטסט נכשל.
+- **התיקון:** עטיפת כל ה-`_load` ב-try/catch (כמו rewards_state ומנועים אחרים) → כשל-prefs נבלע, נשאר logged-out. תיקון-robustness אמיתי.
+- **בונוס:** זה היה גם שורש ה-baseline הקדם-קיים `worker_reports_drilldown` (קורא דרך drilldown→boardAuth). אחרי התיקון הסוויטה המלאה = **+2658 ALL PASS, 0 כשלים**. baseline עודכן 1→0 (STATUS.md + known_failing.txt).
+- **קבצים נוספים ל-#99:** `lib/state/board_auth.dart` · `knowledge/STATUS.md` · `knowledge/known_failing.txt`.

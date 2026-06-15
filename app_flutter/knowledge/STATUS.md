@@ -558,7 +558,7 @@ The only genuine tools DO exist, gathered into two live departments via
 tools). Guarded by `departments_test` (toolCats ⇒ live + every category >0;
 placeholders non-live).
 
-_known-failing: 1 (gate 32 baseline — worker_reports_drilldown_test close-button, הגיע מ-worker-board-v3 של צי-העובד, לא שלי; שמות ב-knowledge/known_failing.txt)_
+_known-failing: 0 (gate 32 baseline — worker_reports_drilldown_test close-button, הגיע מ-worker-board-v3 של צי-העובד, לא שלי; שמות ב-knowledge/known_failing.txt)_
 
 ## Search word-completion — `searchSuggestions` (v5.85 — Benzi #6)
 As-you-type suggestion chips above the search results (`_SearchSuggestions` in
