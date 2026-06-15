@@ -6,7 +6,7 @@ firebase-functions **v2/gen2** (כל הפונקציות — Cloud Run/Eventarc).
 
 | function | סוג | תפקיד |
 |---|---|---|
-| `setRole` | callable | S1.9 — הקצאת תפקיד כ-custom-claim (admin בלבד). **ללא שינוי מה-skeleton.** |
+| `setRole` | callable | S1.9 — הקצאת תפקיד כ-custom-claim (admin בלבד) + `auditLog` (הצלחה + דחיית-לא-admin = עקבת privilege-escalation). |
 | `reviewRoleRequest` | callable | #6 — אישור/דחיית בקשת-תפקיד לפי **מטריצה היררכית** (worker→contractor · courier→store · store/contractor→manager · admin=any). באישור כותב claim של התפקיד התפעולי (Admin SDK) ומסמן `roleRequests/{uid}` approved + auditLog. המטריצה (`mayReviewRoleRequest`) טהורה + נבדקת ב-selftest. |
 | `advanceOrderStage` | callable | S8.1 — קידום הזמנה **צעד אחד** ב-`ORDER_FLOW`, עם אכיפת-תפקיד מה-claims. נתיב-הכתיבה המוסמך. |
 | `revertIllegalOrderStageWrite` | trigger (orders/{id} updated) | S8.1 — defense-in-depth: כתיבה ישירה של stage שאינה צעד-קדימה-בודד **מוחזרת לאחור** + auditLog. |
@@ -205,14 +205,14 @@ GDPR right-to-erasure + דרישת-Apple למחיקת-חשבון בתוך-האפ
 > הוא מחזיר 403 **ועוצר את כל** `firebase deploy --only functions` (כולל ה-gen2).
 > callable נשאר gen2, נפרס נקי לצד השאר, ומחזיר תוצאה מאומתת לקליינט.
 
-**טווח מכוון:** רק מסמכים ממופתחי-uid (אישיים, בעלים-יחיד) נמחקים. רשומות
-רב-צדדיות (`orders`, `chatThreads`/`chatMessages`, `customers`, `projects`,
-`tasks`) **נשמרות** — כל אחת שייכת לעסקה/שיחה שמשתמשים אחרים עדיין רואים, ומחיקתה
-תשבש את נתוני-הצד-השני. אנונימיזציה של ה-uid ממסמכים משותפים = משימה נפרדת וכבדה
-(follow-up — ראה `app_flutter/WIRING.md`), לא בגל הזה.
+**טווח:** מסמכים ממופתחי-uid (אישיים, בעלים-יחיד) — `users/{uid}` + `diag/{uid}` —
+**נמחקים**. רשומות רב-צדדיות (`orders`, `chatThreads`/`chatMessages`, `customers`)
+**נשמרות אך מנוקות**: `purgeMultiPartyReferences` מנתק את ה-uid מהן (best-effort +
+paginated) — `orders.contractorUid/storeUid/courierUid` נמחק, `chatMessages.fromUid`
+נמחק, `chatThreads.participantUids` עובר `arrayRemove`, `customers.ownerId` נמחק —
+כך שהרשומה נשארת לצד-השני אך הקישור האישי של המשתמש שנמחק נעלם. נכתב ל-`auditLog`
+(`after.scrubbed` = ספירה per-target).
 
 ## TODO (לא בגל הזה)
 
 - אכיפת App Check (`enforceAppCheck: true`) על ה-callables אחרי ש-S0.5 יציב.
-- רישום אודיט גם ל-`setRole` (לא נגעתי — ה-skeleton קפוא בהוראה).
-- אנונימיזציה של uid ממסמכים רב-צדדיים במחיקת-חשבון (מעבר ל-`users`/`diag`).
