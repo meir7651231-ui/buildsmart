@@ -8,6 +8,12 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth #2 (forgot-password):** the login sheet gains a "שכחתי סיסמה"
+> link (sign-in mode only) → `AuthStateNotifier.resetPassword` →
+> `FirebaseAuth.sendPasswordResetEmail`. A neutral success toast shows regardless
+> of whether the email is registered (no account enumeration) — the recovery path
+> email users previously had none of.
+
 > **2026-06-15 — chat-sync (A14 last-mile, orders analog):** `ensureParticipantUids`
 > now ALWAYS stamps the sender's own uid (the `contractorUid==auth.uid` guarantee)
 > even with no users-directory; the `chatThreads` listen is scoped

@@ -151,6 +151,12 @@ abstract class AuthGateway {
   /// server-side, e.g. right after `setRole`).
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false});
 
+  /// S1 — send a password-reset email (the "forgot password" recovery path).
+  /// Recent Firebase SDKs are a no-throw for an unknown email; older ones throw
+  /// `user-not-found` — the caller treats both as success (no account
+  /// enumeration).
+  Future<void> resetPassword(String email);
+
   /// S1.7 — sign out.
   Future<void> signOut();
 
@@ -284,6 +290,10 @@ class FirebaseAuthGateway implements AuthGateway {
       _guard(
         () => _auth.signInWithEmailAndPassword(email: email, password: password),
       );
+
+  @override
+  Future<void> resetPassword(String email) =>
+      _guard(() => _auth.sendPasswordResetEmail(email: email));
 
   @override
   Future<void> createUserWithEmailPassword(String email, String password) =>
@@ -481,6 +491,11 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   /// [AuthGatewayException] (Hebrew-toasted by the caller).
   Future<void> createUserWithEmailPassword(String email, String password) async =>
       _required().createUserWithEmailPassword(email, password);
+
+  /// S1 — forgot-password recovery: send a reset email (delegates to the
+  /// gateway; throws [AuthGatewayException] the login sheet maps to Hebrew).
+  Future<void> resetPassword(String email) async =>
+      _required().resetPassword(email);
 
   /// S1.7 — sign out + local cache clear. The LOCAL sign-out is optimistic and
   /// unconditional (clean exit even when the network call fails — same

@@ -110,6 +110,9 @@ class _FakeAuthGateway implements AuthGateway {
   @override
   Future<void> setRole({required String uid, required String role}) async {}
 
+  @override
+  Future<void> resetPassword(String email) async {}
+
   Future<void> close() => _controller.close();
 }
 

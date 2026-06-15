@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-06-15 — auth #2: קישור "שכחתי סיסמה" בלשונית-הכניסה
+
+**שינוי (UI, lib/screens):** `login_sheet.dart` — קישור "שכחתי סיסמה" בפאנל-האימייל (מצב כניסה בלבד,
+`if(!_emailCreateMode)`) → `resetPassword` → `sendPasswordResetEmail`. טוסט-הצלחה ניטרלי ("אם קיים חשבון —
+נשלח אליו מייל") בלי לחשוף אילו אימיילים רשומים (אנטי-enumeration). **אימות:** `analyze` 0 · טסטי-auth +102
+ירוקים (6 fakes עודכנו ל-interface). אין שינוי-זרימה אחר; הקישור מוסתר במצב "צור חשבון".
+
+---
+
 ## 2026-06-15 — chat-sync: FS_DIAG step-4 probe (אין שינוי-UI נראה)
 
 **שינוי (lib/widgets):** `backend_debug_badge.dart` — שלב-4 (orders-create probe) משתמש ב-id ייחודי

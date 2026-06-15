@@ -151,6 +151,9 @@ class _FakeAuthGateway implements AuthGateway {
     setRoleCalls.add((uid: uid, role: role));
   }
 
+  @override
+  Future<void> resetPassword(String email) async {}
+
   Future<void> close() => _controller.close();
 }
 

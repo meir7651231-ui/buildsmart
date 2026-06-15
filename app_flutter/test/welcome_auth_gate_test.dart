@@ -88,6 +88,8 @@ class _RecordingAuthGateway implements AuthGateway {
   Future<void> deleteAccount() async {}
   @override
   Future<void> setRole({required String uid, required String role}) async {}
+  @override
+  Future<void> resetPassword(String email) async {}
 }
 
 void main() {

@@ -223,6 +223,33 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     }
   }
 
+  /// "שכחתי סיסמה" — send a reset email. The SAME neutral success toast shows
+  /// whether or not the email is registered (no account enumeration — a
+  /// `user-not-found` is folded into success); only real failures
+  /// (invalid-email / network / too-many) surface in Hebrew. Needs an email.
+  Future<void> _resetPassword() async {
+    final email = _email.text.trim();
+    if (email.isEmpty) {
+      showToast(context, 'הזן אימייל לאיפוס הסיסמה');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await ref.read(authStateProvider.notifier).resetPassword(email);
+    } on AuthGatewayException catch (e) {
+      if (e.code != 'user-not-found') {
+        _fail(hebrewAuthError(e.code));
+        return;
+      }
+    } on Object catch (_) {
+      _fail(hebrewAuthError('unknown'));
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    showToast(context, 'אם קיים חשבון — נשלח אליו מייל לאיפוס הסיסמה');
+  }
+
   void _fail(String message) {
     if (!mounted) return;
     setState(() => _busy = false);
@@ -401,6 +428,20 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             ),
           ),
         ),
+        // "שכחתי סיסמה" — only in sign-in mode (a create flow has no password to
+        // reset yet). Sends a reset email via _resetPassword (no enumeration).
+        if (!_emailCreateMode)
+          TextButton(
+            onPressed: _busy ? null : _resetPassword,
+            child: const Text(
+              'שכחתי סיסמה',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
         TextButton(
           onPressed: _busy
               ? null

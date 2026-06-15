@@ -71,6 +71,9 @@ class _FakeAuthGateway implements AuthGateway {
 
   @override
   Future<void> deleteAccount() async {}
+
+  @override
+  Future<void> resetPassword(String email) async {}
 }
 
 /// The users_lookup_a7_test fake source: a `users` snapshot emitted as neutral
