@@ -1205,3 +1205,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #54-remove-favorites-category — catalog_settings: הקטגוריה ❤️ הוסרה (10 מקטעים)
 **שינוי נראה (בלי screenshot — 4 טסטי-מסך ירוקים):** במסך 'הגדרות' המקטע ❤️ 'מועדפים ורשימות' אינו מוצג עוד (10 מקטעים במקום 11). אין שינוי-עיצוב לרכיבים אחרים. מאומת ב-catalog_sort_alerts (טסט findsNothing — RED בעוד המקטע קיים → GREEN אחרי הסרה §mutation_log) plus robustness/settings_honesty render. analyze 0.
+
+## 2026-06-15 — #49-wire-supplier-prefs — catalog_settings: ספקים מועדפים מחווט (3 פקדים אמיתיים)
+**שינוי נראה (בלי screenshot — widget-test ירוק):** מקטע '🏪 ספקים מועדפים' — 3 השורות הראשונות שהיו placeholders ("בבנייה") הן עכשיו פקדים אמיתיים: 'מרחק מקסימלי' (_NumberRow 5-300 ק"מ), 'דירוג מינימלי' (radio הכל/3+/4+/5), 'ספקים מקומיים בלבד' (switch). 'ספקים מסומנים כמועדפים'/'ספקים חסומים' נשארו placeholders (seam). מאומת ב-catalog_sort_alerts (tap → localSuppliersOnly נשמר, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.

@@ -2210,3 +2210,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **המהלך (החלטת-בעלים #54):** הוסר המקטע ❤️ 'מועדפים ורשימות' מ-catalog_settings (11→10 מקטעים). priceChangeAlert → מכוסה ע"י ה-price-drop הקנוני ב-'התראות' (#50); השדה נשאר במודל. 4 ה-placeholders (סנכרון/שיתוף/יבוא-ייצוא/רשימות-פרויקט) → server-ready seams במשטחי-המועדפים, נדחה עד שקע-הגדרות שם.
 - **gate:** analyze 0 · 4 טסטי-מסך ירוקים · RED→GREEN §mutation_log (טסט-findsNothing אדום בעוד המקטע קיים +0 -1, ירוק אחרי הסרה).
 - **קבצים:** `lib/screens/catalog_settings_screen.dart` · `test/catalog_sort_alerts_settings_test.dart`.
+
+### #49-wire-supplier-prefs — ספקים מועדפים: 3 העדפות מחווטות server-ready — 2026-06-15
+- **המהלך (החלטת-בעלים #49):** `_SuppliersSection` ב-catalog_settings — חיווט 3 השדות המגובים לפקדים נשמרים: maxDistance (_NumberRow), minRating (_RadioGroupRow), localSuppliersOnly (_SwitchRow). שמירה מקומית עכשיו · server-ready (הסינון מופעל כשצד-הספק יזין מרחק/דירוג/מקומיות). preferred/blocked = seams (דורשים זהות-ספק). שאר ה-placeholders (AI/השוואת-מחירים) חסומי-דאטה-חיצונית → seams כנים (#56).
+- **gate:** analyze 0 · catalog_sort_alerts +1 (toggle→persist) · robustness/settings_honesty ירוקים · mutation §mutation_log (localSuppliersOnly no-op → RED +0 -1 · GREEN).
+- **קבצים:** `lib/screens/catalog_settings_screen.dart` · `test/catalog_sort_alerts_settings_test.dart`.

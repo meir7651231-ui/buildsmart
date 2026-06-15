@@ -273,6 +273,24 @@ void main() {
       expect(c.read(catalogSettingsProvider).notifLowStock, false);
     });
 
+    testWidgets('toggling "ספקים מקומיים בלבד" flips localSuppliersOnly (#49)',
+        (t) async {
+      final c = await pump(t);
+      final header = find.text('ספקים מועדפים');
+      await t.ensureVisible(header);
+      await t.pumpAndSettle();
+      await t.tap(header);
+      await t.pumpAndSettle();
+
+      expect(c.read(catalogSettingsProvider).localSuppliersOnly, false);
+      final toggle = find.widgetWithText(SwitchListTile, 'ספקים מקומיים בלבד');
+      await t.ensureVisible(toggle);
+      await t.tap(toggle);
+      await t.pump();
+      expect(c.read(catalogSettingsProvider).localSuppliersOnly, true,
+          reason: 'the wired supplier preference persists (server-ready, #49)');
+    });
+
     // #54 — the standalone 'מועדפים ורשימות' settings category is removed; its
     // price-alert is served by the canonical price-drop in 'התראות' (#50) and
     // the four backend leaves (sync/share/import/per-project-lists) belong at the

@@ -1134,3 +1134,9 @@
 - **load-bearing:** קיום המקטע ❤️ 'מועדפים ורשימות' במסך.
 - אימות RED→GREEN בלי perl: הטסט החדש רץ **בעוד `_FavoritesSection` קיים** → **אדום `+0 -1`** (מצא את הכותרת). אחרי מחיקת המקטע → **ירוק** (4 טסטי-מסך +54). מוכיח שהטסט תופס רגרסיה של חזרת-הקטגוריה.
 - מסקנה: קטגוריה שכולה placeholders backend-blocked plus toggle כפול שכבר-קנוני (#50) = קטגוריה מתה. הוסרה; ה-placeholders יחוברו כ-seams במשטחי-המועדפים/רשימות כשייחשף שם שקע-הגדרות (נדחה — הצבה עכשיו = ניחוש). analyze 0.
+
+## #49-wire-supplier-prefs — ספקים-מועדפים: חיווט 3 העדפות מגובות (server-ready) — 2026-06-15
+- **קובץ:** `catalog_settings_screen.dart` — `_SuppliersSection` שונה מ-StatelessWidget (5 placeholders) ל-ConsumerWidget: 3 השדות המגובים ב-CatalogSettings חוּוטו לפקדים נשמרים — `maxDistance` (_NumberRow 5-300 ק"מ), `minRating` (_RadioGroupRow any/3+/4+/5), `localSuppliersOnly` (_SwitchRow). 2 הרשימות (ספקים-מועדפים/חסומים) נשארו _PlaceholderRow כ-server-ready seams (דורשות זהות-ספק). טסט חדש ב-catalog_sort_alerts_settings_test (+1).
+- **load-bearing:** `_SwitchRow` 'ספקים מקומיים בלבד' `onChanged: copyWith(localSuppliersOnly: v)`. מוטציה: `copyWith(localSuppliersOnly: v)` → `copyWith(localSuppliersOnly: s.localSuppliersOnly)` (מתעלם מ-v).
+- תוצאה: טסט "ספקים מקומיים בלבד flips localSuppliersOnly (#49)" **אדום `+0 -1`** (אחרי tap נשאר false). שחזור → **ירוק** · RESTORED-IDENTICAL.
+- מסקנה: הקוד הקודם השאיר את 3 השדות לא-מחווטים בכוונה כי אין דאטת-ספק על מוצרים לסנן. אך שמירת ההעדפה אינה זיוף — היא ה-intent שהסינון העתידי יכבד (server-ready). החיווט שומר מקומית עכשיו ומופעל אוטומטית כשהספק יזין מרחק/דירוג/מקומיות. preferred/blocked דורשים זהות-ספק → seams כנים. analyze 0 · robustness/settings_honesty ירוקים.

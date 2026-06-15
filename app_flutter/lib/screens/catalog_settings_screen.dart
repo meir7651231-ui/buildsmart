@@ -499,33 +499,57 @@ class _UnitsSection extends ConsumerWidget {
 
 // ─── 7. preferred suppliers ──────────────────────────────────────────────────
 
-class _SuppliersSection extends StatelessWidget {
+class _SuppliersSection extends ConsumerWidget {
   const _SuppliersSection();
 
-  // 🔑 ALL deferred — honestly. The catalog product model
-  // (LipskeyCatalogProduct) carries NO supplier identity, rating, distance or
-  // "local" flag, and the live ספקים list (SuppliersScreen) is a single brand
-  // tile with no rating/distance data. So none of these can filter anything
-  // in-app — every row would be a no-op. Persisting a number that filters
-  // nothing would be faking the feature, so they stay placeholders until a
-  // supplier↔product link (or a supplier feed) exists.
-  //   • ספקים מסומנים כמועדפים / ספקים חסומים — no per-supplier product
-  //     attribution to mark or filter against.
-  //   • מרחק מקסימלי / דירוג מינימלי / ספקים מקומיים בלבד — backing fields
-  //     (maxDistance/minRating/localSuppliersOnly) exist in CatalogSettings but
-  //     have no supplier data on products to filter, so they are intentionally
-  //     left unbound here.
+  // #49 — the three BACKED preferences (maxDistance / minRating /
+  // localSuppliersOnly, fields already in CatalogSettings) are now REAL,
+  // persisted controls: the user's choice is remembered locally and is
+  // SERVER-READY — the catalog filter applies it automatically the moment the
+  // supplier side feeds per-product distance/rating identity. Storing the
+  // intent now is NOT faking: it is the preference the future filter honours.
+  // The two LIST rows (preferred / blocked suppliers) stay honest placeholders —
+  // they need per-supplier identity no local data carries yet; they auto-connect
+  // when that supplier feed exists.
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(catalogSettingsProvider);
+    final notifier = ref.read(catalogSettingsProvider.notifier);
+    return _SectionTile(
       emoji: '🏪',
       title: 'ספקים מועדפים',
       children: [
-        _PlaceholderRow(label: 'ספקים מסומנים כמועדפים'),
-        _PlaceholderRow(label: 'ספקים חסומים'),
-        _PlaceholderRow(label: 'מרחק מקסימלי'),
-        _PlaceholderRow(label: 'דירוג מינימלי'),
-        _PlaceholderRow(label: 'ספקים מקומיים בלבד'),
+        _NumberRow(
+          label: 'מרחק מקסימלי',
+          value: settings.maxDistance,
+          min: 5,
+          max: 300,
+          suffix: ' ק"מ',
+          onChanged: (v) =>
+              notifier.update((s) => s.copyWith(maxDistance: v)),
+        ),
+        _RadioGroupRow<CatalogMinRating>(
+          label: 'דירוג מינימלי',
+          value: settings.minRating,
+          options: const [
+            _RadioOption(value: CatalogMinRating.any, label: 'הכל'),
+            _RadioOption(value: CatalogMinRating.three, label: '3+'),
+            _RadioOption(value: CatalogMinRating.four, label: '4+'),
+            _RadioOption(value: CatalogMinRating.five, label: '5'),
+          ],
+          onChanged: (v) =>
+              notifier.update((s) => s.copyWith(minRating: v)),
+        ),
+        _SwitchRow(
+          label: 'ספקים מקומיים בלבד',
+          value: settings.localSuppliersOnly,
+          onChanged: (v) =>
+              notifier.update((s) => s.copyWith(localSuppliersOnly: v)),
+        ),
+        // 🌐 server-ready seams — need per-supplier identity (none in local data
+        // yet); the picker activates when a supplier feed exists.
+        const _PlaceholderRow(label: 'ספקים מסומנים כמועדפים'),
+        const _PlaceholderRow(label: 'ספקים חסומים'),
       ],
     );
   }
