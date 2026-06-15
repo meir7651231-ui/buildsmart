@@ -8,6 +8,17 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — fleet VERIFICATION-scan fixes (3rd pass, final):** the 3rd fleet pass (over the
+> final code) was clean on security (0) + most of lifecycle/gating; it caught 1 HIGH + 3 MEDIUM,
+> now closed: (HIGH) `_registerViaAuth` no longer gates on the not-yet-propagated `signedIn`
+> snapshot after `createUserWithEmailPassword` — it advances unconditionally on a non-throwing
+> create, and `_finishAfterAuth` falls back to the gateway's `currentUser.uid` so the users/{uid}
+> mirror still lands (a freshly-registered email user was getting stuck on welcome). (MED) the
+> consent sentence's 3rd fragment darkened to `mutedLight` (the prior fix missed it). (MED) welcome
+> `_register`/`_existingLogin` gained a `_busy` latch + CTA-disable (no double-submit). (MED)
+> auth_state `signInWithSmsCode` now PEEKS the web ConfirmationResult and removes it only on a
+> successful confirm (a wrong-code retry on web stays valid). 60/60 affected tests green.
+
 > **2026-06-15 — fleet RE-SCAN fixes:** the re-scan (4 lenses) came back clean on security +
 > lifecycle (0 findings) and confirmed the prior fixes hold; it surfaced one new MEDIUM + a LOW
 > consistency gap, now closed: (1) `submitRoleRequest` no longer swallows the pre-write delete —

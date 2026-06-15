@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-06-15 — fleet VERIFICATION-scan fixes (מעבר 3, סופי)
+
+**שינוי (lib/screens + lib/state):** המעבר ה-3 של הצי (על הקוד הסופי) חזר נקי על אבטחה (0) + רוב
+lifecycle/gating, ותפס 1 HIGH + 3 MEDIUM — נסגרו: **(HIGH)** `_registerViaAuth` כבר לא תלוי ב-snapshot
+`signedIn` שטרם התעדכן אחרי יצירת-חשבון → מתקדם ללא-תנאי אחרי create מוצלח, ו-`_finishAfterAuth` נופל ל-
+`currentUser.uid` של ה-gateway כך שה-mirror ל-users/{uid} עדיין נכתב (משתמש-מייל רשום היה נתקע ב-welcome).
+**(MED)** הקטע ה-3 של טקסט-ההסכמה הוכהה ל-mutedLight (התיקון הקודם פספס אותו). **(MED)** ל-welcome
+`_register`/`_existingLogin` נוסף latch `_busy` + השבתת-CTA (אין double-submit). **(MED)** `signInWithSmsCode`
+עושה PEEK ל-ConfirmationResult של web ומסיר רק בהצלחה (retry של קוד-שגוי ב-web נשאר תקף).
+**אימות:** `analyze` 0 (שלי) · welcome_auth_gate + login + auth_state 60/60.
+
+---
+
 ## 2026-06-15 — fleet RE-SCAN fixes (כניסה/הרשמה)
 
 **שינוי (lib/screens + lib/state):** ה-re-scan (4 עדשות) חזר נקי על אבטחה+lifecycle (0 ממצאים), אישר

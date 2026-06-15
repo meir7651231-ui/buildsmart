@@ -68,6 +68,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// Ephemeral UI state on purpose — not persisted.
   bool _loginRevealed = false;
 
+  /// True while a flag-ON async entry (register / existing-login) is in flight,
+  /// so the CTAs are disabled and a double-tap can't fire two concurrent
+  /// create / login-sheet flows. Ephemeral.
+  bool _busy = false;
+
   void _onChanged() => setState(() => _codeRejected = false);
 
   /// task #65 · role-gate mode: FORMAT check for the 4-digit board code —
@@ -111,7 +116,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // NOT call `user_profile.register` here. Demo (flag OFF): the verbatim
     // local register + advance to the profession step, byte-identical.
     if (useFirebaseBackend) {
-      unawaited(_registerViaAuth());
+      if (_busy) return; // a flow is already in flight — ignore the double-tap
+      setState(() => _busy = true);
+      unawaited(
+        _registerViaAuth().whenComplete(() {
+          if (mounted) setState(() => _busy = false);
+        }),
+      );
       return;
     }
     ref
@@ -151,8 +162,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return;
       }
       if (!mounted) return;
-      // A real account now exists + the auth stream signed us in.
-      if (!ref.read(authStateProvider).signedIn) return;
+      // The account now exists (createUser signed us in at the FirebaseAuth
+      // level). The authStateProvider STREAM may not have propagated to the
+      // snapshot yet, so do NOT gate on `signedIn` — that race left a freshly
+      // registered email user stuck on welcome. Advance unconditionally;
+      // _finishAfterAuth reads the uid from the gateway's currentUser when the
+      // snapshot still lags.
       _finishAfterAuth();
       return;
     }
@@ -188,7 +203,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Contractor flow — live backend (flag ON): route to the Firebase
     // phone-OTP login sheet; on success we enter the app.
     if (useFirebaseBackend) {
-      unawaited(_enterViaAuth());
+      if (_busy) return; // a flow is already in flight — ignore the double-tap
+      setState(() => _busy = true);
+      unawaited(
+        _enterViaAuth().whenComplete(() {
+          if (mounted) setState(() => _busy = false);
+        }),
+      );
       return;
     }
     // Demo (flag OFF) — #19 honesty: there is no login server yet (tickets
@@ -228,7 +249,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// (rules-safe merge — empties skipped, never clobbers role/fcmToken) and
   /// flip the welcome-seen gate so the app opens.
   void _finishAfterAuth() {
-    final uid = ref.read(authStateProvider).user?.uid;
+    // Prefer the snapshot uid; fall back to the gateway's currentUser when the
+    // auth stream hasn't propagated yet (the direct email-create path, where
+    // createUser set FirebaseAuth.currentUser synchronously but the snapshot
+    // stream event is still queued).
+    final uid = ref.read(authStateProvider).user?.uid ??
+        ref.read(authGatewayProvider)?.currentUser?.uid;
     final writer = ref.read(usersProfileWriterProvider);
     if (uid != null && writer != null) {
       final p = ref.read(userProfileProvider);
@@ -494,7 +520,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: _existingLogin,
+                          onPressed: _busy ? null : _existingLogin,
                           child: const Text(
                             'כניסה ללקוח קיים',
                             style: TextStyle(
@@ -618,7 +644,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         body: 'מסיים את ההרשמה, שומר את הפרטים, וממשיך לבחירת '
                             'המקצוע. נפעל רק כשהשדות תקינים.',
                         child: _primaryButton(
-                          onPressed: valid ? _register : null,
+                          onPressed: (valid && !_busy) ? _register : null,
                         ),
                       ),
                       const SizedBox(height: BsTokens.space2),
@@ -693,7 +719,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           const Text(
                             ' של BuildSmart',
                             style: TextStyle(
-                              color: Color(0xFFB3B3B3),
+                              color: BsTokens.mutedLight,
                               fontSize: 12,
                             ),
                           ),
