@@ -25,11 +25,80 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { getAuth } from "firebase-admin/auth";
+import { FieldValue } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
 import { callerRoles, db, REGION } from "./common";
+
+/// GDPR cascade — sever the deleted [uid]'s personal LINK from multi-party docs
+/// (the records stay for the OTHER parties; only the uid reference is scrubbed).
+/// Best-effort + paginated (batches of [batchSize], capped at [maxRounds] per
+/// field to bound runaway); a failure on one field never aborts the rest.
+/// Returns a per-target scrub count for the audit trail.
+async function purgeMultiPartyReferences(
+  uid: string
+): Promise<Record<string, number>> {
+  const fs = db();
+  const counts: Record<string, number> = {};
+  const batchSize = 400;
+  const maxRounds = 25;
+
+  /// Scrub every doc where [field] equals/contains [uid], applying [update].
+  /// `arrayContains` is for the participantUids membership array.
+  async function scrub(
+    collection: string,
+    field: string,
+    update: Record<string, unknown>, {
+      arrayContains = false,
+    }: { arrayContains?: boolean } = {}
+  ): Promise<void> {
+    const key = `${collection}.${field}`;
+    try {
+      for (let round = 0; round < maxRounds; round++) {
+        const q = arrayContains
+          ? fs.collection(collection).where(field, "array-contains", uid)
+          : fs.collection(collection).where(field, "==", uid);
+        const snap = await q.limit(batchSize).get();
+        if (snap.empty) break;
+        const batch = fs.batch();
+        for (const doc of snap.docs) batch.update(doc.ref, update);
+        await batch.commit();
+        counts[key] = (counts[key] ?? 0) + snap.size;
+        if (snap.size < batchSize) break; // last page
+      }
+    } catch (e) {
+      logger.error("deleteAccount: cascade scrub failed", {
+        uid,
+        collection,
+        field,
+        error: String(e),
+      });
+    }
+  }
+
+  // orders — sever whichever party-uid the deleted user held (the order record
+  // remains for the other parties + manager/admin; the personal link is gone).
+  await scrub("orders", "contractorUid", {
+    contractorUid: FieldValue.delete(),
+  });
+  await scrub("orders", "storeUid", { storeUid: FieldValue.delete() });
+  await scrub("orders", "courierUid", { courierUid: FieldValue.delete() });
+  // chatMessages — sever authorship (the message text stays in the thread).
+  await scrub("chatMessages", "fromUid", { fromUid: FieldValue.delete() });
+  // customers — sever ownership (forward-ready: ownerId not yet written → no-op).
+  await scrub("customers", "ownerId", { ownerId: FieldValue.delete() });
+  // chatThreads — drop the uid from the membership array (thread stays for peers).
+  await scrub(
+    "chatThreads",
+    "participantUids",
+    { participantUids: FieldValue.arrayRemove(uid) },
+    { arrayContains: true },
+  );
+
+  return counts;
+}
 
 export const deleteAccount = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {
@@ -61,9 +130,13 @@ export const deleteAccount = onCall({ region: REGION }, async (request) => {
     })
   );
 
+  // 1b · GDPR cascade — sever the uid from multi-party docs (orders/chat/
+  //      customers); the records stay for the other parties, only the link goes.
+  const scrubbed = await purgeMultiPartyReferences(uid);
+
   // 2 · delete the Auth record itself (Admin SDK — bypasses recent-login).
   await getAuth().deleteUser(uid);
-  logger.info("deleteAccount: erased", { uid, existed });
+  logger.info("deleteAccount: erased", { uid, existed, scrubbed });
 
   await writeAudit({
     action: "account.delete",
@@ -72,7 +145,7 @@ export const deleteAccount = onCall({ region: REGION }, async (request) => {
     actorRole: roles.join(",") || null,
     target: `users/${uid}`,
     before: existed,
-    after: null,
+    after: { scrubbed },
     ok: true,
   });
 

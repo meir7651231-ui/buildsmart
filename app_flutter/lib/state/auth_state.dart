@@ -266,15 +266,26 @@ class FirebaseAuthGateway implements AuthGateway {
         },
       ),
     );
-    return completer.future;
+    // Backstop: if NONE of the callbacks ever fire (a rare SDK edge), don't hang
+    // the caller forever — surface `unavailable` after a window well past the
+    // SDK's own auto-retrieval timeout.
+    return completer.future.timeout(
+      const Duration(seconds: 120),
+      onTimeout: () => throw const AuthGatewayException('unavailable'),
+    );
   }
 
   @override
   Future<void> signInWithSmsCode(String verificationId, String smsCode) =>
       _guard(() async {
-        final pending = _webConfirmations.remove(verificationId);
+        // PEEK (not remove): a wrong code makes `confirm` throw, and the user
+        // retries with the SAME verificationId — so keep the ConfirmationResult
+        // in the map until a confirm SUCCEEDS, else the retry would fall through
+        // to the mobile-only credential path and fail on web.
+        final pending = _webConfirmations[verificationId];
         if (pending != null) {
           await pending.confirm(smsCode);
+          _webConfirmations.remove(verificationId); // consumed on success only
           return;
         }
         await _auth.signInWithCredential(

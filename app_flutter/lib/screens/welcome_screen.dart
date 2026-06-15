@@ -68,6 +68,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// Ephemeral UI state on purpose — not persisted.
   bool _loginRevealed = false;
 
+  /// True while a flag-ON async entry (register / existing-login) is in flight,
+  /// so the CTAs are disabled and a double-tap can't fire two concurrent
+  /// create / login-sheet flows. Ephemeral.
+  bool _busy = false;
+
   void _onChanged() => setState(() => _codeRejected = false);
 
   /// task #65 · role-gate mode: FORMAT check for the 4-digit board code —
@@ -111,7 +116,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // NOT call `user_profile.register` here. Demo (flag OFF): the verbatim
     // local register + advance to the profession step, byte-identical.
     if (useFirebaseBackend) {
-      unawaited(_registerViaAuth());
+      if (_busy) return; // a flow is already in flight — ignore the double-tap
+      setState(() => _busy = true);
+      unawaited(
+        _registerViaAuth().whenComplete(() {
+          if (mounted) setState(() => _busy = false);
+        }),
+      );
       return;
     }
     ref
@@ -151,8 +162,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return;
       }
       if (!mounted) return;
-      // A real account now exists + the auth stream signed us in.
-      if (!ref.read(authStateProvider).signedIn) return;
+      // The account now exists (createUser signed us in at the FirebaseAuth
+      // level). The authStateProvider STREAM may not have propagated to the
+      // snapshot yet, so do NOT gate on `signedIn` — that race left a freshly
+      // registered email user stuck on welcome. Advance unconditionally;
+      // _finishAfterAuth reads the uid from the gateway's currentUser when the
+      // snapshot still lags.
       _finishAfterAuth();
       return;
     }
@@ -188,7 +203,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Contractor flow — live backend (flag ON): route to the Firebase
     // phone-OTP login sheet; on success we enter the app.
     if (useFirebaseBackend) {
-      unawaited(_enterViaAuth());
+      if (_busy) return; // a flow is already in flight — ignore the double-tap
+      setState(() => _busy = true);
+      unawaited(
+        _enterViaAuth().whenComplete(() {
+          if (mounted) setState(() => _busy = false);
+        }),
+      );
       return;
     }
     // Demo (flag OFF) — #19 honesty: there is no login server yet (tickets
@@ -228,15 +249,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// (rules-safe merge — empties skipped, never clobbers role/fcmToken) and
   /// flip the welcome-seen gate so the app opens.
   void _finishAfterAuth() {
-    final uid = ref.read(authStateProvider).user?.uid;
+    // Prefer the snapshot uid; fall back to the gateway's currentUser when the
+    // auth stream hasn't propagated yet (the direct email-create path, where
+    // createUser set FirebaseAuth.currentUser synchronously but the snapshot
+    // stream event is still queued).
+    final uid = ref.read(authStateProvider).user?.uid ??
+        ref.read(authGatewayProvider)?.currentUser?.uid;
     final writer = ref.read(usersProfileWriterProvider);
     if (uid != null && writer != null) {
       final p = ref.read(userProfileProvider);
-      // Best-effort identity mirror (merge); never blocks entry.
+      // Best-effort identity mirror (merge); never blocks entry. The contact is
+      // EITHER a phone OR an email (the email-create flow stores the email in
+      // `contact`), so route it to the matching field — never write an email
+      // into `phone` (the field users_lookup.uidByPhone queries).
       unawaited(
         writer.set(uid, {
           if (p.name.isNotEmpty) 'displayName': p.name,
-          if (p.contact.isNotEmpty) 'phone': p.contact,
+          if (validIsraeliMobile(p.contact)) 'phone': p.contact,
+          if (validEmail(p.contact)) 'email': p.contact,
         }).catchError((Object _) {}),
       );
     }
@@ -299,7 +329,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           title: 'שם משתמש',
           body: 'שם המשתמש שהוגדר לך בלוח — באנגלית, בלי הבדל בין אותיות '
               'גדולות לקטנות.',
-          child: _field(_name, 'שם משתמש', Icons.person_outline),
+          child: _field(
+            _name,
+            'שם משתמש',
+            Icons.person_outline,
+            autofillHints: const [AutofillHints.username],
+            textInputAction: TextInputAction.next,
+          ),
         ),
         const SizedBox(height: BsTokens.space3),
         HelpTarget(
@@ -311,6 +347,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             'קוד',
             Icons.key_outlined,
             keyboardType: TextInputType.number,
+            ltr: true,
+            textInputAction: TextInputAction.done,
             errorText: _codeRejected
                 ? 'שם משתמש או קוד לא נכונים'
                 : _contact.text.trim().isEmpty || codeFormatOk
@@ -486,7 +524,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: _existingLogin,
+                          onPressed: _busy ? null : _existingLogin,
                           child: const Text(
                             'כניסה ללקוח קיים',
                             style: TextStyle(
@@ -548,7 +586,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         body: 'השם שיוצג בפרופיל ובהזמנות. שדה זה פחות קריטי — '
                             'הזיהוי בפועל הוא לפי טלפון/מייל.',
                         child:
-                            _field(_name, 'שם מלא', Icons.person_outline),
+                            _field(
+                              _name,
+                              'שם מלא',
+                              Icons.person_outline,
+                              autofillHints: const [AutofillHints.name],
+                              textInputAction: TextInputAction.next,
+                            ),
                       ),
                       const SizedBox(height: BsTokens.space3),
                       HelpTarget(
@@ -559,6 +603,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           _contact,
                           'טלפון או אימייל',
                           Icons.alternate_email,
+                          ltr: true,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          textInputAction: needsPassword
+                              ? TextInputAction.next
+                              : TextInputAction.done,
+                          onSubmitted:
+                              needsPassword ? null : (valid ? _register : null),
                           errorText: _contact.text.trim().isEmpty || contactOk
                               ? null
                               : 'מספר נייד או אימייל לא תקינים',
@@ -579,6 +631,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             'סיסמה (6+ תווים)',
                             Icons.lock_outline,
                             obscure: true,
+                            ltr: true,
+                            autofillHints: const [AutofillHints.newPassword],
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: valid ? _register : null,
                             errorText: _password.text.isEmpty ||
                                     _password.text.length >= 6
                                 ? null
@@ -592,7 +648,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         body: 'מסיים את ההרשמה, שומר את הפרטים, וממשיך לבחירת '
                             'המקצוע. נפעל רק כשהשדות תקינים.',
                         child: _primaryButton(
-                          onPressed: valid ? _register : null,
+                          onPressed: (valid && !_busy) ? _register : null,
                         ),
                       ),
                       const SizedBox(height: BsTokens.space2),
@@ -625,7 +681,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           const Text(
                             'בהרשמה אתה מאשר את ',
                             style: TextStyle(
-                              color: Color(0xFFB3B3B3),
+                              color: BsTokens.mutedLight,
                               fontSize: 12,
                             ),
                           ),
@@ -646,7 +702,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           const Text(
                             ' ואת ',
                             style: TextStyle(
-                              color: Color(0xFFB3B3B3),
+                              color: BsTokens.mutedLight,
                               fontSize: 12,
                             ),
                           ),
@@ -667,7 +723,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           const Text(
                             ' של BuildSmart',
                             style: TextStyle(
-                              color: Color(0xFFB3B3B3),
+                              color: BsTokens.mutedLight,
                               fontSize: 12,
                             ),
                           ),
@@ -759,12 +815,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     String? errorText,
     TextInputType? keyboardType,
     bool obscure = false,
+    // LTR for digits/email/latin (phone, code, password); the default (RTL,
+    // inherited) keeps a Hebrew NAME field right-to-left. Mirrors login_sheet's
+    // _field, which forces ltr on its (all-latin) inputs.
+    bool ltr = false,
+    Iterable<String>? autofillHints,
+    TextInputAction? textInputAction,
+    VoidCallback? onSubmitted,
   }) {
     final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
       controller: c,
       keyboardType: keyboardType,
       obscureText: obscure,
+      autofillHints: autofillHints,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted == null ? null : (_) => onSubmitted(),
+      textAlign: TextAlign.right,
+      textDirection: ltr ? TextDirection.ltr : null,
       decoration: InputDecoration(
         hintText: hint,
         errorText: errorText,

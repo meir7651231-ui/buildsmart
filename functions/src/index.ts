@@ -22,6 +22,9 @@ import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
+import { writeAudit } from "./audit";
+import { callerRoles } from "./common";
+
 initializeApp();
 
 /** The five persona ids the app knows (lib/data/personas.dart) — the client
@@ -40,14 +43,31 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Sign-in required.");
   }
+  const callerUid = request.auth.uid;
+  const callerRolesList = callerRoles(request.auth.token);
+  const { uid, role, roles } = (request.data ?? {}) as SetRoleData;
+  const targetLabel =
+    typeof uid === "string" && uid.length > 0 ? `users/${uid}` : "users/?";
+
   // 2 · caller must carry the admin claim (assigned once via the bootstrap
-  //     script in the README — the chicken-and-egg first admin).
+  //     script in the README — the chicken-and-egg first admin). A denied
+  //     attempt is audit-logged (privilege-escalation trail).
   if (request.auth.token.admin !== true) {
+    await writeAudit({
+      action: "role.set",
+      source: "setRole",
+      actorUid: callerUid,
+      actorRole: callerRolesList.join(",") || null,
+      target: targetLabel,
+      before: null,
+      after: null,
+      ok: false,
+      reason: "admin-claim-required",
+    });
     throw new HttpsError("permission-denied", "Admin claim required.");
   }
 
   // 3 · validate the payload: uid + a single role OR a roles list.
-  const { uid, role, roles } = (request.data ?? {}) as SetRoleData;
   if (typeof uid !== "string" || uid.length === 0) {
     throw new HttpsError("invalid-argument", "uid (string) is required.");
   }
@@ -83,6 +103,17 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
     claims.role = role;
   }
   await auth.setCustomUserClaims(uid, claims);
+
+  await writeAudit({
+    action: "role.set",
+    source: "setRole",
+    actorUid: callerUid,
+    actorRole: callerRolesList.join(",") || null,
+    target: `users/${uid}`,
+    before: null,
+    after: roleList ? { roles: roleList } : { role },
+    ok: true,
+  });
 
   return roleList ? { ok: true, uid, roles: roleList } : { ok: true, uid, role };
 });

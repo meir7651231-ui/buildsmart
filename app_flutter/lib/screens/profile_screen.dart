@@ -92,8 +92,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   /// S1.8 — in-app account deletion (Apple requirement): explicit Hebrew
-  /// confirm dialog → `user.delete()` + local user-data wipe. A failure (e.g.
-  /// requires-recent-login) keeps the account AND the data, Hebrew-toasted.
+  /// confirm dialog → the server `deleteAccount` callable (Admin-SDK erasure of
+  /// the Auth record + Firestore data, no recent-login needed) + local wipe. A
+  /// failure keeps the account AND the data (the local wipe runs only on
+  /// success), Hebrew-toasted.
   Future<void> _confirmDeleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,

@@ -8,6 +8,62 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — button-by-button fleet pass (4 surface traces) + fixes:** dispatched 4 read-only
+> agents tracing EVERY control + flow across login / registration / accounts / mechanism. Verdict:
+> every control wired correctly + every flow correct end-to-end; client↔server callable contracts
+> (setRole / deleteAccount / reviewRoleRequest) + the approval matrix verified **3-way consistent**
+> (client `approvableRolesForClaims` = server `APPROVER_FOR` inverse = rules `canReview`); flag-OFF
+> zero-regression confirmed. Fixed: (MED) the welcome email-create `users/{uid}` mirror wrote the
+> EMAIL into the `phone` field — now a phone→`phone`, an email→`email` (validIsraeliMobile/validEmail),
+> keeping the field `users_lookup.uidByPhone` queries clean. (cosmetic) profile delete doc-comment
+> updated (`user.delete` → `deleteAccount` callable); the OTP-expiry pre-check toast unified with the
+> server-mapped string. ACCEPTED (noted): the admin-only role-request inbox is UI-unreachable
+> (`rolesFromClaims` doesn't surface the `admin` bool) — but every requestable role already has an
+> operational reviewer (worker→contractor · courier→store · store/contractor→manager) and admin has
+> `setRole`, so no request is unreviewable; surfacing admin to the inbox is a deferred enhancement.
+
+> **2026-06-15 — fleet VERIFICATION-scan fixes (3rd pass, final):** the 3rd fleet pass (over the
+> final code) was clean on security (0) + most of lifecycle/gating; it caught 1 HIGH + 3 MEDIUM,
+> now closed: (HIGH) `_registerViaAuth` no longer gates on the not-yet-propagated `signedIn`
+> snapshot after `createUserWithEmailPassword` — it advances unconditionally on a non-throwing
+> create, and `_finishAfterAuth` falls back to the gateway's `currentUser.uid` so the users/{uid}
+> mirror still lands (a freshly-registered email user was getting stuck on welcome). (MED) the
+> consent sentence's 3rd fragment darkened to `mutedLight` (the prior fix missed it). (MED) welcome
+> `_register`/`_existingLogin` gained a `_busy` latch + CTA-disable (no double-submit). (MED)
+> auth_state `signInWithSmsCode` now PEEKS the web ConfirmationResult and removes it only on a
+> successful confirm (a wrong-code retry on web stays valid). 60/60 affected tests green.
+
+> **2026-06-15 — fleet RE-SCAN fixes:** the re-scan (4 lenses) came back clean on security +
+> lifecycle (0 findings) and confirmed the prior fixes hold; it surfaced one new MEDIUM + a LOW
+> consistency gap, now closed: (1) `submitRoleRequest` no longer swallows the pre-write delete —
+> a re-request after a denial starts from a fresh CREATE (no `merge:true` onto stale reviewer
+> fields), bailing to false if the delete fails. (2) welcome `_field` gained `onSubmitted` wired
+> to `_register` (the keyboard "done" submits, matching login_sheet). (3) consent-sentence text
+> darkened to `mutedLight` (AA contrast). Accepted-LOW (noted): legal-link Semantics (minor),
+> ltr-field textAlign (matches the login idiom), profession single-option (owner/UX call).
+
+> **2026-06-15 — fleet-review MEDIUM+LOW batch (login/registration):** swept the rest of the
+> review. login_sheet + welcome `_field` gained `autofillHints` + `textInputAction` (OS autofill
+> + keyboard next/go; login_sheet's single-field panes also wire `onSubmitted` to their action)
+> and a selective `ltr` (Hebrew NAME stays RTL — fixing login_sheet's name field too; digits/
+> email/code/password go LTR); welcome's contact field got `keyboardType: emailAddress`.
+> login_sheet: email-shape pre-validation on sign-in/create/reset; `_confirmCode` now requires
+> EXACTLY 6 digits; a `_popped` latch + `_justCreated` reset in the auth listener (no stale
+> "account created" toast / double-pop). auth_state: a 120s backstop timeout on the OTP completer
+> (no infinite hang if no callback fires). role_request: clear busy before the pop; chevron
+> `ExcludeSemantics`. Deferred w/ rationale: emoji-in-titles (app-wide style; canvaskit tofu is
+> web-only, launch is mobile) + the web `_webConfirmations` micro-leak (web OTP-map risk > benefit).
+> 59/59 affected tests green.
+
+> **2026-06-15 — fleet-review HIGH fixes (login/registration, 2):** (1) `submitRoleRequest`
+> (role_requests.dart) now wraps its Firestore write in try/catch → returns false on a
+> network/permission failure instead of throwing past the sheet (which left it stuck
+> "loading" with no error toast) — a regression from #6 inc.2; `role_request_test` +1.
+> (2) welcome_screen's registration `_field` gained an `ltr` param: phone/email/code/password
+> render LTR (`textDirection`) while the Hebrew NAME field stays RTL — matching login_sheet's
+> twin (the registration screen previously had broken RTL caret/ordering on those inputs).
+> MEDIUM polish (keyboardType/autofillHints/textInputAction/emoji-a11y) batched separately.
+
 > **2026-06-15 — auth #6 inc.3 (approval inbox) — #6 COMPLETE:** the profile screen shows
 > "📋 בקשות תפקיד" when the caller's CLAIM roles approve a tier (`approvableRolesForClaims`:
 > contractor↞worker, store↞courier, manager↞store+contractor, admin=all). The inbox streams

@@ -4,6 +4,67 @@
 
 ---
 
+## 2026-06-15 — מעבר צי כפתור-כפתור (4 traces) + תיקונים
+
+**שינוי (lib/screens):** 4 סוכנים read-only עברו על **כל פקד + כל זרימה** (כניסה/הרשמה/חשבונות/מנגנון).
+ורדיקט: כל הפקדים מחוּוטים נכון, כל הזרימות תקינות end-to-end, חוזי-callable + מטריצת-האישור **עקביים 3-כיוונית**,
+flag-OFF אפס-רגרסיה. **תוקן:** (MED) ה-mirror של הרשמת-מייל כתב את המייל לשדה `phone` ב-`users/{uid}` — עכשיו
+טלפון→`phone`, מייל→`email` (לפי `validIsraeliMobile`/`validEmail`). (קוסמטי) doc-comment של מחיקה
+(`user.delete`→callable); מחרוזת תוקף-OTP אוחדה. **מקובל (נרשם):** inbox בקשות-תפקיד לא-נגיש ל-admin-בלבד
+(`rolesFromClaims` לא חושף את claim ה-admin) — אך לכל תפקיד-מבוקש יש מאשר תפעולי, ול-admin יש `setRole`, אז שום
+בקשה לא נשארת ללא-מאשר; חשיפת admin ל-inbox = שיפור עתידי. **אימות:** `analyze` 0 (שלי) · welcome+login 29/29.
+
+---
+
+## 2026-06-15 — fleet VERIFICATION-scan fixes (מעבר 3, סופי)
+
+**שינוי (lib/screens + lib/state):** המעבר ה-3 של הצי (על הקוד הסופי) חזר נקי על אבטחה (0) + רוב
+lifecycle/gating, ותפס 1 HIGH + 3 MEDIUM — נסגרו: **(HIGH)** `_registerViaAuth` כבר לא תלוי ב-snapshot
+`signedIn` שטרם התעדכן אחרי יצירת-חשבון → מתקדם ללא-תנאי אחרי create מוצלח, ו-`_finishAfterAuth` נופל ל-
+`currentUser.uid` של ה-gateway כך שה-mirror ל-users/{uid} עדיין נכתב (משתמש-מייל רשום היה נתקע ב-welcome).
+**(MED)** הקטע ה-3 של טקסט-ההסכמה הוכהה ל-mutedLight (התיקון הקודם פספס אותו). **(MED)** ל-welcome
+`_register`/`_existingLogin` נוסף latch `_busy` + השבתת-CTA (אין double-submit). **(MED)** `signInWithSmsCode`
+עושה PEEK ל-ConfirmationResult של web ומסיר רק בהצלחה (retry של קוד-שגוי ב-web נשאר תקף).
+**אימות:** `analyze` 0 (שלי) · welcome_auth_gate + login + auth_state 60/60.
+
+---
+
+## 2026-06-15 — fleet RE-SCAN fixes (כניסה/הרשמה)
+
+**שינוי (lib/screens + lib/state):** ה-re-scan (4 עדשות) חזר נקי על אבטחה+lifecycle (0 ממצאים), אישר
+שהתיקונים מחזיקים, והעלה MEDIUM חדש + פער-עקביות LOW — נסגרו: (1) `submitRoleRequest` כבר לא בולע את
+ה-`delete` שלפני הכתיבה → re-request אחרי דחייה מתחיל מ-CREATE נקי (לא `merge:true` על שדות-reviewer ישנים),
+bail ל-false אם ה-delete נכשל. (2) ל-welcome `_field` נוסף `onSubmitted`→`_register` (מקש "סיום" שולח, כמו
+login). (3) טקסט-ההסכמה הוכהה ל-`mutedLight` (ניגודיות AA). **אימות:** `analyze` 0 (שלי) · role_request 5/5 +
+welcome_auth_gate 6/6. LOW שנותרו (מקובל, נימוק): Semantics לקישורים, textAlign בשדות-ltr (תואם idiom),
+בורר-מקצוע חד-אופציה (owner/UX).
+
+---
+
+## 2026-06-15 — fleet-review MEDIUM+LOW batch (כניסה/הרשמה)
+
+**שינוי (UI, lib/screens + lib/state):** מקלדת+נגישות+תקינות בשדות הכניסה/הרשמה: `autofillHints` +
+`textInputAction` (autofill + מקש הבא/שלח; ב-login גם `onSubmitted` בפיינים חד-שדה), `ltr` סלקטיבי
+(שם עברי RTL — תיקון גם לשדה-השם ב-login; ספרות/מייל/קוד/סיסמה LTR), ו-`keyboardType: emailAddress`
+לשדה-הקשר בהרשמה. login_sheet: ולידציית-מייל לפני round-trip, OTP בדיוק-6-ספרות, latch `_popped` +
+איפוס `_justCreated` (אין טוסט-שגוי / pop-כפול). auth_state: timeout-גיבוי 120ש׳ ל-completer של ה-OTP.
+role_request: ניקוי busy לפני ה-pop + `ExcludeSemantics` לאייקון. **אימות:** `analyze` 0 (שלי) ·
+login_sheet+role_request+auth_state 59/59. **דחוי (נימוק):** אמוji-בכותרות (סגנון אפליקציה-רוחבי;
+canvaskit-tofu הוא web-only וה-launch mobile) + micro-leak של מפת web-OTP (סיכון > תועלת).
+
+---
+
+## 2026-06-15 — fleet-review HIGH fixes (כניסה/הרשמה)
+
+**שינוי (UI, lib/screens + lib/state):** (1) `role_requests.dart` — `submitRoleRequest` עוטף את
+הכתיבה ב-try/catch (כשל-רשת/הרשאה → `false` במקום throw שהשאיר את הגיליון תקוע "טוען" בלי הודעה;
+רגרסיה מ-#6 inc.2). (2) `welcome_screen.dart` — ל-`_field` נוסף `ltr`: טלפון/מייל/קוד/סיסמה מיושרים
+LTR (`textDirection`), שדה-השם העברי נשאר RTL — תואם ל-`login_sheet` (במסך-ההרשמה היה caret/סדר הפוך).
+**אימות:** `analyze` 0 (חדש) · `role_request_test` 5/5 (נוסף טסט: כתיבה-כושלת → "לא ניתן לשלוח" +
+הגיליון נשאר שמיש). תיקון-ה-RTL = שינוי-תכונה 2-שדות, mirror ל-login_sheet הבדוק (אומת ויזואלית).
+
+---
+
 ## 2026-06-15 — auth #6 inc.3: inbox אישור בקשות-תפקיד (#6 הושלם)
 
 **שינוי (UI, lib/screens + lib/state):** `role_requests_inbox_screen.dart` (חדש) + שורת "📋 בקשות תפקיד"
