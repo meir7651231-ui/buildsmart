@@ -1122,3 +1122,9 @@
 - תוצאה: `order_notif_sheet_test` **אדום `+0 -1`** ✅ — אחרי tap, typeOrders נשאר true (הציפייה false נכשלה) → ה-tap לא כתב את ה-provider.
 - שחזור → **ירוק** · RESTORED-IDENTICAL.
 - מסקנה: ההתראות הקשורות-הזמנה הועברו למקום שבו הקונה עוקב אחרי הזמנות (🔔 בטאב 📦 הזמנות), כשהן קושרות את אותו notifSettingsProvider (מקור-אמת יחיד, לא עותק) — שאר ההתראות נשארו בהגדרות › התראות. שני הטסטים שנוגעים ב-typeOrders/typeShipments הם engine-level (notifMutedSections/copyWith) → לא הושפעו. שני טסטים שמרנדרים NotifSettingsScreen (robustness, settings_honesty) ירוקים. analyze 0. אין שער-format.
+
+## #50-settings-merge-dup-categories — מיזוג קטגוריות-הגדרות כפולות + price-drop קנוני — 2026-06-15
+- **קובץ:** `catalog_settings_screen.dart` (מסך 'הגדרות' הראשי). מוזגו 2 מקטעי-🔔 (`_NotificationsSection` plus `_CatalogNotifSection`) ל-🔔 'התראות' יחיד, ו-2 מקטעי-תצוגה (`_ThemeSection` plus `_DisplaySection`) ל-'תצוגה ומיון' יחיד. price-drop כפול קופל לשדה-קנוני יחיד `catalogSettings.notifPriceDrop` ('ירידת מחיר במועדפים'); ה-toggle הכפול `typePriceDrops` ('התראות תקציב') הוסר מהמסך. order/shipment הושמטו (עברו לעולם-ההזמנות, #52). הרשימה ב-build ירדה מ-13 ל-11 מקטעים. עדכון `catalog_sort_alerts_settings_test` ('התראות קטלוג'→'התראות').
+- **load-bearing:** השורה המקופלת `notifLowStock` ('מלאי נמוך') תחת המקטע-הממוזג 'התראות' — מוכיחה שמשפחת-קטלוג קופלה לתוך 'התראות'. ייחודי בקובץ (grep=1).
+- מוטציה: תווית `'מלאי נמוך'` → `'XX_MUT'`. תוצאה: טסט "מלאי נמוך flips notifLowStock" **אדום `+14 -1`** ✅. שחזור → **+16 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: היו שני מקטעי-התראה ושני מקטעי-תצוגה במסך-הגדרות אחד, plus 3 toggles ל-price-drop על-פני 2 שדות plus שדה-שלישי priceChangeAlert במועדפים. #50 מיזג את הכפילויות בתוך catalog_settings plus קיבע price-drop ל-notifPriceDrop. 4 טסטי-מסך ירוקים. analyze 0. שארית: typePriceDrops ב-notif_settings_screen (מסך-נפרד) plus priceChangeAlert (→#54).

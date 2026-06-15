@@ -1199,3 +1199,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #52-order-notif-to-orders-world — 🔔 בטאב הזמנות + הסרה מהגדרות
 **שינוי נראה (בלי screenshot — widget-verified):** בטאב 📦 הזמנות (store_screen) נוסף כפתור 🔔 בכותרת המקטע — גלוי רק כשהמקטע=הזמנות — שפותח גיליון תחתון "🔔 התראות הזמנות ומשלוחים" עם 2 toggles. במסך ההגדרות › התראות, שורות "הזמנות" plus "משלוחים" הוסרו ממקטע 🔔 (שאר ה-types נשארו). אין שינוי-עיצוב לרכיבים קיימים — 🔔 הוא IconButton סטנדרטי, הגיליון SwitchListTile-ים סטנדרטיים. מאומת ב-order_notif_sheet_test (mutation RED→GREEN §mutation_log) plus 2 טסטי-מסך קיימים ירוקים. analyze 0.
+
+## 2026-06-15 — #50-settings-merge-dup-categories — catalog_settings: 13→11 מקטעים (מיזוג כפולים)
+**שינוי נראה (בלי screenshot — 4 טסטי-מסך ירוקים):** במסך 'הגדרות' שני מקטעי-🔔 הפכו ל-🔔 'התראות' יחיד (כולל המשפחה מ-'התראות קטלוג'), ושני מקטעי-תצוגה הפכו ל-'תצוגה ומיון' יחיד (theme plus view/sort/grid/image plus סידור-בית). price-drop יחיד ('ירידת מחיר במועדפים'). אין שינוי-עיצוב ל-_SectionTile/_SwitchRow עצמם — אותם רכיבים, פחות מקטעים. מאומת ב-catalog_sort_alerts (טאפ 'התראות'+'תצוגה ומיון', toggling שדות מקופלים, mutation RED→GREEN §mutation_log) plus robustness/settings_honesty render. analyze 0.

@@ -51,10 +51,8 @@ class CatalogSettingsScreen extends ConsumerWidget {
           _NotificationsSection(),
           _RegionSection(),
           _SearchSection(),
-          _DisplaySection(),
           _PricesSection(),
           _FavoritesSection(),
-          _CatalogNotifSection(),
           _UnitsSection(),
           _SuppliersSection(),
           _AiSection(),
@@ -145,9 +143,14 @@ class _ThemeSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
+    final catalog = ref.watch(catalogSettingsProvider);
+    final catalogN = ref.read(catalogSettingsProvider.notifier);
+    // #50 — ONE 'תצוגה ומיון' section: theme + home-order (appSettings) folded
+    // together with the catalog view/sort/grid/image controls (catalogSettings)
+    // from the former separate 'תצוגה ומיון' section.
     return _SectionTile(
-      emoji: '🖥️',
-      title: 'תצוגה',
+      emoji: '📊',
+      title: 'תצוגה ומיון',
       children: [
         _RadioGroupRow<BsTheme>(
           label: 'ערכת נושא',
@@ -160,6 +163,73 @@ class _ThemeSection extends ConsumerWidget {
               (v) => ref
                   .read(appSettingsProvider.notifier)
                   .update((s) => s.copyWith(theme: v)),
+        ),
+        _RadioGroupRow<CatalogViewMode>(
+          label: 'סוג תצוגה',
+          value: catalog.viewMode,
+          options: const [
+            _RadioOption(
+              value: CatalogViewMode.grid,
+              label: 'רשת (Grid)',
+              icon: Icons.grid_view,
+            ),
+            _RadioOption(
+              value: CatalogViewMode.list,
+              label: 'רשימה (List)',
+              icon: Icons.view_list_rounded,
+            ),
+          ],
+          onChanged: (v) => catalogN.update((s) => s.copyWith(viewMode: v)),
+        ),
+        // 🟢 WIRED — persisted default catalog ordering (real ProductSort set).
+        // Writing it persists the default AND updates the live catalog sort
+        // (catalogProductSortProvider) so the change is visible immediately.
+        _RadioGroupRow<ProductSort>(
+          label: 'מיון ברירת מחדל',
+          value: catalog.productSortDefault,
+          options: const [
+            _RadioOption(value: ProductSort.byOrder, label: 'ברירת מחדל'),
+            _RadioOption(value: ProductSort.nameAZ, label: 'שם א-ת'),
+            _RadioOption(value: ProductSort.nameZA, label: 'שם ת-א'),
+            _RadioOption(value: ProductSort.sku, label: 'מק"ט'),
+          ],
+          onChanged: (v) {
+            catalogN.update((s) => s.copyWith(productSortDefault: v));
+            ref.read(catalogProductSortProvider.notifier).state = v;
+          },
+        ),
+        _NumberRow(
+          label: 'עמודות בתצוגת רשת',
+          value: catalog.gridColumns,
+          min: 1,
+          max: 4,
+          suffix: '',
+          onChanged: (v) =>
+              catalogN.update((s) => s.copyWith(gridColumns: v)),
+        ),
+        _RadioGroupRow<CatalogImageSize>(
+          label: 'גודל תמונות',
+          value: catalog.imageSize,
+          // Each label renders at its own size so the difference is visible.
+          options: const [
+            _RadioOption(
+              value: CatalogImageSize.small,
+              label: 'קטן',
+              labelFontSize: 13,
+            ),
+            _RadioOption(
+              value: CatalogImageSize.medium,
+              label: 'בינוני',
+              labelFontSize: 15,
+            ),
+            _RadioOption(
+              value: CatalogImageSize.large,
+              label: 'גדול',
+              labelFontSize: 18,
+            ),
+          ],
+          onChanged: (v) =>
+              catalogN.update((s) => s.copyWith(imageSize: v)),
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
@@ -183,18 +253,17 @@ class _NotificationsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notif = ref.watch(notifSettingsProvider);
+    final catalog = ref.watch(catalogSettingsProvider);
+    final catalogN = ref.read(catalogSettingsProvider.notifier);
+    // #50 — ONE 'התראות' section. The catalog-alert family folded in from the
+    // former separate 'התראות קטלוג'; the duplicate price-drop collapsed to the
+    // single canonical catalogSettings.notifPriceDrop ('ירידת מחיר במועדפים'),
+    // so the old typePriceDrops 'התראות תקציב' toggle is gone. Order/shipment
+    // updates moved to the orders world (#52) and are not shown here.
     return _SectionTile(
       emoji: '🔔',
       title: 'התראות',
       children: [
-        _SwitchRow(
-          label: 'עדכוני משלוחים',
-          value: notif.typeShipments,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typeShipments: v)),
-        ),
         _SwitchRow(
           label: 'מבצעים והטבות',
           value: notif.typeDeals,
@@ -204,20 +273,28 @@ class _NotificationsSection extends ConsumerWidget {
                   .update((s) => s.copyWith(typeDeals: v)),
         ),
         _SwitchRow(
-          label: 'התראות תקציב',
-          value: notif.typePriceDrops,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typePriceDrops: v)),
+          label: 'ירידת מחיר במועדפים',
+          value: catalog.notifPriceDrop,
+          onChanged: (v) =>
+              catalogN.update((s) => s.copyWith(notifPriceDrop: v)),
         ),
         _SwitchRow(
-          label: 'עדכוני הזמנות',
-          value: notif.typeOrders,
-          onChanged:
-              (v) => ref
-                  .read(notifSettingsProvider.notifier)
-                  .update((s) => s.copyWith(typeOrders: v)),
+          label: 'חזר למלאי',
+          value: catalog.notifBackInStock,
+          onChanged: (v) =>
+              catalogN.update((s) => s.copyWith(notifBackInStock: v)),
+        ),
+        _SwitchRow(
+          label: 'מלאי נמוך',
+          value: catalog.notifLowStock,
+          onChanged: (v) =>
+              catalogN.update((s) => s.copyWith(notifLowStock: v)),
+        ),
+        _SwitchRow(
+          label: 'מוצרים חדשים בקטגוריה',
+          value: catalog.notifNewProducts,
+          onChanged: (v) =>
+              catalogN.update((s) => s.copyWith(notifNewProducts: v)),
         ),
       ],
     );
@@ -311,99 +388,7 @@ class _SearchSection extends ConsumerWidget {
 
 // ─── 2. display & sort ───────────────────────────────────────────────────────
 
-class _DisplaySection extends ConsumerWidget {
-  const _DisplaySection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    return _SectionTile(
-      emoji: '📊',
-      title: 'תצוגה ומיון',
-      children: [
-        _RadioGroupRow<CatalogViewMode>(
-          label: 'סוג תצוגה',
-          value: settings.viewMode,
-          options: const [
-            _RadioOption(
-              value: CatalogViewMode.grid,
-              label: 'רשת (Grid)',
-              icon: Icons.grid_view,
-            ),
-            _RadioOption(
-              value: CatalogViewMode.list,
-              label: 'רשימה (List)',
-              icon: Icons.view_list_rounded,
-            ),
-          ],
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(viewMode: v)),
-        ),
-        // 🟢 WIRED — persisted default catalog ordering. Every option maps to a
-        // working sort (catalog products have no price/rating/date field, so we
-        // bind the real ProductSort set, not the price/rating CatalogSort enum).
-        // Writing it both persists the default AND updates the live catalog sort
-        // (catalogProductSortProvider) so the change is visible immediately.
-        _RadioGroupRow<ProductSort>(
-          label: 'מיון ברירת מחדל',
-          value: settings.productSortDefault,
-          options: const [
-            _RadioOption(value: ProductSort.byOrder, label: 'ברירת מחדל'),
-            _RadioOption(value: ProductSort.nameAZ, label: 'שם א-ת'),
-            _RadioOption(value: ProductSort.nameZA, label: 'שם ת-א'),
-            _RadioOption(value: ProductSort.sku, label: 'מק"ט'),
-          ],
-          onChanged: (v) {
-            ref
-                .read(catalogSettingsProvider.notifier)
-                .update((s) => s.copyWith(productSortDefault: v));
-            // Apply to the currently-open catalog list too, not just next launch.
-            ref.read(catalogProductSortProvider.notifier).state = v;
-          },
-        ),
-        _NumberRow(
-          label: 'עמודות בתצוגת רשת',
-          value: settings.gridColumns,
-          min: 1,
-          max: 4,
-          suffix: '',
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(gridColumns: v)),
-        ),
-        _RadioGroupRow<CatalogImageSize>(
-          label: 'גודל תמונות',
-          value: settings.imageSize,
-          // Each label renders at its own size so the difference is visible.
-          options: const [
-            _RadioOption(
-              value: CatalogImageSize.small,
-              label: 'קטן',
-              labelFontSize: 13,
-            ),
-            _RadioOption(
-              value: CatalogImageSize.medium,
-              label: 'בינוני',
-              labelFontSize: 15,
-            ),
-            _RadioOption(
-              value: CatalogImageSize.large,
-              label: 'גדול',
-              labelFontSize: 18,
-            ),
-          ],
-          onChanged:
-              (v) => ref
-                  .read(catalogSettingsProvider.notifier)
-                  .update((s) => s.copyWith(imageSize: v)),
-        ),
-      ],
-    );
-  }
-}
+// (Former _DisplaySection merged into _ThemeSection · 'תצוגה ומיון' — #50.)
 
 // ─── 3. prices & currency ────────────────────────────────────────────────────
 
@@ -486,52 +471,6 @@ class _FavoritesSection extends ConsumerWidget {
           onChanged: (v) => ref
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(priceChangeAlert: v)),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── 5. catalog notifications ────────────────────────────────────────────────
-
-class _CatalogNotifSection extends ConsumerWidget {
-  const _CatalogNotifSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(catalogSettingsProvider);
-    final notifier = ref.read(catalogSettingsProvider.notifier);
-    // 🟢 WIRED — all four are persisted ALERT-PREFERENCE toggles (the toggle
-    // remembers the user's choice across launches). DELIVERY of each alert is
-    // gated on the notification system (not yet pushing); these store the
-    // user's intent so the future delivery layer can honour it.
-    return _SectionTile(
-      emoji: '🔔',
-      title: 'התראות קטלוג',
-      children: [
-        _SwitchRow(
-          label: 'ירידת מחיר במועדפים',
-          value: settings.notifPriceDrop,
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(notifPriceDrop: v)),
-        ),
-        _SwitchRow(
-          label: 'חזר למלאי',
-          value: settings.notifBackInStock,
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(notifBackInStock: v)),
-        ),
-        _SwitchRow(
-          label: 'מלאי נמוך',
-          value: settings.notifLowStock,
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(notifLowStock: v)),
-        ),
-        _SwitchRow(
-          label: 'מוצרים חדשים בקטגוריה',
-          value: settings.notifNewProducts,
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(notifNewProducts: v)),
         ),
       ],
     );

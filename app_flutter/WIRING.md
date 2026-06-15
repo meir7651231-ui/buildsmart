@@ -2199,3 +2199,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **חיווט:** הגיליון קושר את אותו `notifSettingsProvider` — מקור-אמת יחיד, אין עותק. שורות-ה-UI ב-notif_settings_screen הוסרו (השדות/copyWith במודל נשארו — engine-tests לא הושפעו).
 - **gate:** analyze 0 · order_notif_sheet_test +1 (widget: tap → provider flips) · mutation §mutation_log (RED +0 -1 · GREEN) · de-risk: notif_settings_wiring/edge_cases/robustness/settings_honesty ירוקים.
 - **קבצים:** `lib/screens/order_notif_sheet.dart` (חדש) · `lib/screens/store_screen.dart` · `lib/screens/notif_settings_screen.dart` · `test/order_notif_sheet_test.dart`.
+
+### #50-settings-merge-dup-categories — מיזוג קטגוריות כפולות בהגדרות — 2026-06-15
+- **המהלך (החלטת-בעלים #50):** במסך 'הגדרות' (catalog_settings) — 2 מקטעי-🔔 → 'התראות' יחיד · 2 מקטעי-תצוגה → 'תצוגה ומיון' יחיד · price-drop קנוני יחיד = `notifPriceDrop` (הוסר ה-toggle הכפול typePriceDrops 'התראות תקציב'). order/shipment הושמטו (עולם-ההזמנות, #52). 13→11 מקטעים.
+- **gate:** analyze 0 · 4 טסטי-מסך ירוקים (catalog_sort_alerts/catalog_price_units/robustness/settings_honesty) · mutation §mutation_log ('מלאי נמוך'→mut → RED +14 -1 · GREEN +16).
+- **שארית (תועדה):** typePriceDrops עדיין ב-notif_settings_screen (מסך-נפרד, לא קטגוריה כפולה בהגדרות) · priceChangeAlert במועדפים → ל-#54.
+- **קבצים:** `lib/screens/catalog_settings_screen.dart` · `test/catalog_sort_alerts_settings_test.dart`.

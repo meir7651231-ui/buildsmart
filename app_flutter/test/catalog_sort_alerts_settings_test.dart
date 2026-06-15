@@ -258,7 +258,8 @@ void main() {
     testWidgets('toggling "מלאי נמוך" flips the persisted notifLowStock',
         (t) async {
       final c = await pump(t);
-      final header = find.text('התראות קטלוג');
+      // #50 — 'התראות קטלוג' merged into the single 'התראות' section.
+      final header = find.text('התראות');
       await t.ensureVisible(header);
       await t.pumpAndSettle();
       await t.tap(header);
