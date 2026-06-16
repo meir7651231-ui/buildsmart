@@ -1176,3 +1176,9 @@
 - **load-bearing:** `const HelpToggleButton()` ב-AppBar של השליח (נקודת-הכניסה היחידה למצב-היכרות בלוח). מוטציה: `const HelpToggleButton(),` → `const SizedBox.shrink(),`.
 - תוצאה: שני טסטי-השליח **אדומים `+0 -2`** — אין toggle אז find.byType(HelpToggleButton) ריק, ולא ניתן להיכנס למצב כדי שהפעמון יסביר. שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: עטיפת אלמנטים בלוח חסרת-ערך בלי toggle להפעלת המצב — כל לוח (שליח/חנות/מנהל) חייב HelpToggleButton משלו. analyze 0 (info יחיד comment_references קדם-קיים). גל 2/7 בכיסוי-לפי-לוח.
+
+## #31-helpfix-bottomnav — טאבים תחתונים: HelpTarget אמיתי במקום כרטיס-מרכזי — 2026-06-16
+- **קבצים:** `lib/widgets/help_target.dart` — widget משותף חדש `BottomNavCell` (תא-ניווט icon+label שאפשר לעטוף ב-HelpTarget). `lib/screens/home_shell.dart` + `lib/screens/courier_dashboard_screen.dart` — ה-BottomNavigationBar הוחלף ב-Material+Row של BottomNavCell, כל טאב עטוף ב-HelpTarget (קבלן: בית/מחלקות/עדכונים/חנות · שליח: משלוחים/פורטל/דוחות/אזור אישי). הוסר ענף showHelpInfo (+ משתנה helpMode הלא-נחוץ בשליח). טסט `help_coverage_test` עודכן.
+- **הבאג שתוקן:** הטאבים השתמשו ב-showHelpInfo (כרטיס מרכזי) + בלי טבעת → לא מודגשים והבועה לא יצאה מהם, בניגוד למצלמה/⋮. עכשיו עקבי: טבעת כתומה + בועה מעוגנת מכל טאב.
+- **load-bearing:** `body: _kTabHelp[i].$2` ב-HelpTarget של הטאב. מוטציה: `.$2` → `.$1` (הבועה תציג את שם-הטאב במקום ההסבר).
+- תוצאה: טסט-הטאב **אדום `+1 -1`** — אחרי tap על "עדכונים" לא הופיע "ההתראות והשיחות". שחזור → **+2 ירוק** · RESTORED-IDENTICAL. אומת חי בדפדפן (Chrome extension): טבעת על כל 4 הטאבים + בועה יוצאת מ"עדכונים".

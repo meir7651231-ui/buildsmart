@@ -242,53 +242,86 @@ class _CourierDashboardScreenState
     final vehicle = _vehicle;
     if (vehicle == null) return _vehicleGate(preferred);
 
-    // #31 — in "מצב היכרות" a bottom-nav tap explains the destination
-    // (showHelpInfo) instead of switching tab.
-    final helpMode = ref.watch(helpModeProvider);
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
         appBar: _appBar(),
         body: _tabBody(session, vehicle),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _tab,
-          onTap: (i) {
-            if (helpMode) {
-              showHelpInfo(
-                context,
-                title: _kCourierTabHelp[i].$1,
-                body: _kCourierTabHelp[i].$2,
-              );
-              return;
-            }
-            setState(() => _tab = i);
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFFFFFFFF),
-          selectedItemColor: BsTokens.brand,
-          unselectedItemColor: const Color(0xFF888888),
-          selectedFontSize: 12,
-          unselectedFontSize: 11,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.local_shipping_outlined),
-              activeIcon: Icon(Icons.local_shipping),
-              label: 'משלוחים',
+        // #31 — each tab wrapped in HelpTarget so help mode highlights it +
+        // pops a bubble out of the tab (consistent with the app-bar). Outside
+        // help mode the BottomNavCell's InkWell switches tab as before.
+        bottomNavigationBar: Material(
+          color: const Color(0xFFFFFFFF),
+          elevation: 8,
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 58,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[0].$1,
+                      body: _kCourierTabHelp[0].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 0
+                              ? Icons.local_shipping
+                              : Icons.local_shipping_outlined,
+                        ),
+                        label: 'משלוחים',
+                        selected: _tab == 0,
+                        onTap: () => setState(() => _tab = 0),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[1].$1,
+                      body: _kCourierTabHelp[1].$2,
+                      child: BottomNavCell(
+                        icon: const Icon(Icons.apps),
+                        label: 'פורטל',
+                        selected: _tab == 1,
+                        onTap: () => setState(() => _tab = 1),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[2].$1,
+                      body: _kCourierTabHelp[2].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 2
+                              ? Icons.insert_chart
+                              : Icons.insert_chart_outlined,
+                        ),
+                        label: 'דוחות',
+                        selected: _tab == 2,
+                        onTap: () => setState(() => _tab = 2),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[3].$1,
+                      body: _kCourierTabHelp[3].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 3 ? Icons.person : Icons.person_outline,
+                        ),
+                        label: 'אזור אישי',
+                        selected: _tab == 3,
+                        onTap: () => setState(() => _tab = 3),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'פורטל'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.insert_chart_outlined),
-              activeIcon: Icon(Icons.insert_chart),
-              label: 'דוחות',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'אזור אישי',
-            ),
-          ],
+          ),
         ),
       ),
     );

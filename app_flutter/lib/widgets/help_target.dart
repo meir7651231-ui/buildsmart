@@ -165,6 +165,54 @@ Future<void> showHelpInfo(
   );
 }
 
+/// One custom bottom-nav cell (icon + label) — used INSTEAD of a
+/// [BottomNavigationBarItem] so each tab can be wrapped in a [HelpTarget]
+/// (the built-in nav bar can't carry per-item help). Selected → brand orange,
+/// otherwise grey. The InkWell drives navigation; in help mode the wrapping
+/// HelpTarget swallows the tap and pops the bubble out of the tab instead.
+class BottomNavCell extends StatelessWidget {
+  const BottomNavCell({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  final Widget icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? BsTokens.brand : const Color(0xFF888888);
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconTheme.merge(
+            data: IconThemeData(color: color, size: 24),
+            child: icon,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: selected ? 12 : 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// The chat-style speech bubble: a rounded card + a tail that points at the
 /// [target] element. Placed below the target when it sits in the top half of
 /// the screen, otherwise above it. A full-screen transparent layer dismisses

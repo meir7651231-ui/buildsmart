@@ -100,16 +100,6 @@ class HomeShell extends ConsumerWidget {
       bottomNavigationBar: _BottomNav(
         currentIndex: tabIndex,
         onTap: (i) {
-          // #31 — in "מצב היכרות" a tab tap explains the destination instead of
-          // navigating (the tabs sit outside the freeze overlay).
-          if (helpMode) {
-            showHelpInfo(
-              context,
-              title: _kTabHelp[i].$1,
-              body: _kTabHelp[i].$2,
-            );
-            return;
-          }
           resetAllDials(ref);
           if (i == 0) {
             // בית — the smart-home landing, unscoped (clear any department).
@@ -744,38 +734,53 @@ class _BottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unreadCount = ref.watch(notifUnreadCountProvider);
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: const Color(0xFFFFFFFF),
-      selectedItemColor: BsTokens.brand,
-      unselectedItemColor: const Color(0xFF888888),
-      selectedFontSize: 12,
-      unselectedFontSize: 11,
-      items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
-          label: 'בית',
+    // #31 — each tab is wrapped in HelpTarget so help mode highlights it (orange
+    // ring) AND pops a bubble out of the tab itself, consistent with the app-bar
+    // icons (the old BottomNavigationBar couldn't carry per-item HelpTargets).
+    // Outside help mode the InkWell navigates exactly as before.
+    Widget tab(int i, Widget icon, String label) => Expanded(
+      child: HelpTarget(
+        title: _kTabHelp[i].$1,
+        body: _kTabHelp[i].$2,
+        child: BottomNavCell(
+          icon: icon,
+          label: label,
+          selected: currentIndex == i,
+          onTap: () => onTap(i),
         ),
-        const BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'מחלקות'),
-        BottomNavigationBarItem(
-          icon: _BadgedIcon(
-            icon: Icons.notifications_outlined,
-            count: unreadCount,
+      ),
+    );
+    return Material(
+      color: const Color(0xFFFFFFFF),
+      elevation: 8,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 58,
+          child: Row(
+            children: [
+              tab(
+                0,
+                Icon(currentIndex == 0 ? Icons.home : Icons.home_outlined),
+                'בית',
+              ),
+              tab(1, const Icon(Icons.apps), 'מחלקות'),
+              tab(
+                2,
+                _BadgedIcon(
+                  icon:
+                      currentIndex == 2
+                          ? Icons.notifications
+                          : Icons.notifications_outlined,
+                  count: unreadCount,
+                ),
+                'עדכונים',
+              ),
+              tab(3, const Icon(Icons.shopping_cart_outlined), 'חנות'),
+            ],
           ),
-          activeIcon: _BadgedIcon(
-            icon: Icons.notifications,
-            count: unreadCount,
-          ),
-          label: 'עדכונים',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart_outlined),
-          label: 'חנות',
-        ),
-      ],
+      ),
     );
   }
 }

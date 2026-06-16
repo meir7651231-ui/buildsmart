@@ -25,9 +25,7 @@ void main() {
     addTearDown(() => t.binding.setSurfaceSize(null));
     await t.pumpWidget(
       ProviderScope(
-        overrides: [
-          if (helpMode) helpModeProvider.overrideWith((ref) => true),
-        ],
+        overrides: [if (helpMode) helpModeProvider.overrideWith((ref) => true)],
         child: const MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -42,8 +40,9 @@ void main() {
     }
   }
 
-  testWidgets('home app-bar primary chrome is HelpTarget-covered (#31)',
-      (t) async {
+  testWidgets('home app-bar primary chrome is HelpTarget-covered (#31)', (
+    t,
+  ) async {
     await pumpShell(t);
     // Logo → opens the role/board switcher.
     expect(helpTargetWithTitle('החלפת לוח / זהות'), findsOneWidget);
@@ -54,18 +53,22 @@ void main() {
   });
 
   testWidgets(
-    'help mode: a bottom-nav tap explains instead of navigating (#31)',
+    'help mode: a bottom-nav tab is a HelpTarget + pops a bubble out of it (#31)',
     (t) async {
       await pumpShell(t, helpMode: true);
-      // Tap the עדכונים destination.
-      await t.tap(find.text('עדכונים'));
+      // Each tab is now wrapped in a HelpTarget (so help mode rings it), not a
+      // bare BottomNavigationBarItem.
+      final tab = find.byWidgetPredicate(
+        (w) => w is HelpTarget && w.title == 'עדכונים',
+      );
+      expect(tab, findsOneWidget);
+      // Tapping it pops the anchored explanation bubble out of the tab itself
+      // (the old build showed a detached centred "הבנתי" card instead).
+      await t.tap(tab);
       for (var i = 0; i < 5; i++) {
         await t.pump(const Duration(milliseconds: 120));
       }
-      // showHelpInfo surfaced the destination's explanation…
       expect(find.textContaining('ההתראות והשיחות'), findsOneWidget);
-      // …and an explicit "הבנתי" dismiss is offered.
-      expect(find.text('הבנתי'), findsOneWidget);
     },
   );
 }

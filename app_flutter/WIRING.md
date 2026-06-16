@@ -2309,3 +2309,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gate:** analyze 0 · help_coverage_courier_test +2 (toggle+chrome קיימים · tap-פעמון מסביר) · mutation §mutation_log (הסרת toggle → RED +0 -2 · GREEN +2).
 - **שארית (courier-deep):** כפתורי קידום-המשלוח+POD בכרטיסים · בורר-הרכב בטאב המשלוחים. גלים הבאים: חנות→מנהל→קבלן-עמוק→עובד→כניסה.
 - **קבצים:** `lib/screens/courier_dashboard_screen.dart` · `test/help_coverage_courier_test.dart`.
+
+### #31-helpfix-bottomnav — טאבים תחתונים כ-HelpTarget (קבלן+שליח) — 2026-06-16
+- **המהלך:** תיקון עקביות במצב-היכרות. ה-BottomNavigationBar בקבלן (home_shell) ובשליח (courier_dashboard) הוחלף ב-Material+Row של `BottomNavCell` (widget משותף חדש ב-help_target), כל טאב עטוף ב-HelpTarget → טבעת + בועה-מעוגנת. הוסר ה-showHelpInfo/helpMode מהטאבים.
+- **למה:** הקיצור הקודם (showHelpInfo כרטיס-מרכזי) השאיר את הטאבים בלי הדגשה ובלי בועה-יוצאת-מהם — חוסר-עקביות (stuck_log).
+- **gate:** analyze 0 · help_coverage_test +2 (טאב=HelpTarget + בועה) · 4 טסטי-עזרה ירוקים · mutation §mutation_log · אומת חי בדפדפן.
+- **קבצים:** `lib/widgets/help_target.dart` (BottomNavCell) · `lib/screens/home_shell.dart` · `lib/screens/courier_dashboard_screen.dart` · `test/help_coverage_test.dart`.
