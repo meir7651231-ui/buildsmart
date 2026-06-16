@@ -1,0 +1,65 @@
+name: Web — deploy to Firebase Hosting (always-latest, zero-install)
+
+# Builds the Flutter web app and deploys it to Firebase Hosting so the LATEST
+# build is always live at https://buildsmart-b0b78.web.app — zero install, just
+# open the URL (it "auto-updates" on refresh). firebase.json already targets
+# app_flutter/build/web with SPA rewrites; the SA→ADC pattern mirrors
+# bootstrap-admin.yml.
+#
+# ⚠️ Web Google sign-in needs a WEB OAuth client id in web/index.html (the app is
+#    Android-only today). The contractor / demo surfaces work on web; the manager
+#    "כניסה עם Google" on web is a follow-up (create a Web OAuth client in the
+#    Google Cloud console, then drop its id into web/index.html).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'app_flutter/**'
+      - 'firebase.json'
+      - '.github/workflows/web-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Build web (release)
+        working-directory: app_flutter
+        run: flutter build web --release
+
+      - name: Write service account credentials
+        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Firebase Hosting
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: |
+          npm install -g firebase-tools >/dev/null 2>&1
+          firebase deploy --only hosting --project buildsmart-b0b78 --non-interactive
