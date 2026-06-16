@@ -84,3 +84,20 @@ const List<BoardAccount> kBoardAccounts = [
 // (e.g. the worker's password-blocked role switch) — becomes a real
 // permission check when Firebase Auth lands.
 const String kRoleSwitchCode = '1234';
+
+/// OWNER allowlist — the Google account(s) allowed to enter the MANAGER board.
+/// The manager logs in with "כניסה עם Google" (firebase_auth Google provider);
+/// after the OAuth round-trip the welcome manager gate checks the returned email
+/// against this set before granting the manager [BoardSession]. Only the owner's
+/// real Google account can produce that session, so it cannot be impersonated
+/// without the owner's Google credentials (no shared/compiled password).
+/// SERVER-SWAP: the authoritative gate is an admin/manager CUSTOM CLAIM granted
+/// to these emails by a Cloud Function and enforced server-side by
+/// firestore.rules; on the demo (no-data) build this client allowlist is the
+/// gate for showing the manager UI.
+const Set<String> kOwnerEmails = {'meir7651231@gmail.com'};
+
+/// True when [email] (trimmed, case-insensitive) is an owner account allowed to
+/// enter the manager board. Pure → unit-testable.
+bool isOwnerEmail(String? email) =>
+    email != null && kOwnerEmails.contains(email.trim().toLowerCase());

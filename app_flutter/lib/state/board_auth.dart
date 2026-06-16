@@ -283,6 +283,25 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
     _persist();
   }
 
+  /// Manager (OWNER) login via Google — the owner-only secure path. Called by
+  /// the welcome manager gate AFTER a successful Google sign-in whose email
+  /// passed the [isOwnerEmail] allowlist. Sets a REAL (non-demo) manager session
+  /// carrying the Firebase [uid]; persisted like any board login so the owner
+  /// stays signed in ("המנהל לא מתנתק"). employerId is '' (a manager has none).
+  void loginManagerViaGoogle({
+    required String uid,
+    required String displayName,
+  }) {
+    _userTouched = true;
+    state = BoardSession(
+      role: BoardRole.manager,
+      username: uid,
+      displayName: displayName,
+      uid: uid,
+    );
+    _persist();
+  }
+
   /// Log out of the board — every gated board screen rebuilds into its gate.
   void logout() {
     _userTouched = true;

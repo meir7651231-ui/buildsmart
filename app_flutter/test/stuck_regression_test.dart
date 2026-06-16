@@ -1665,7 +1665,7 @@ void main() {
     test("antipattern #82 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('scope של רשומת-עובד-פר-משתמש על session.uid במקום session.username בנתיב מקומי או seed שבו uid ריק לכל עובד');
+      final re = RegExp('ייחוס כשל בהרצת הסוויטה לשם-הטסט שבשורת-ההתקדמות במקום לטסט שבאמת נכשל');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1686,7 +1686,7 @@ void main() {
     test("antipattern #83 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('id שנמכר מ-DateTime.now timestamp בלבד בלי סיומת _seq מונוטונית בקובץ-store שיש בו מחיקה לפי id');
+      final re = RegExp('כריכת זמינות-auth לדגל ה-DATA backend במקום לאתחול Firebase');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1707,7 +1707,7 @@ void main() {
     test("antipattern #84 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('_load של מנוע שבונה state רק מ-seeds קבועים ועוד overlay-מוטציות כשהמנוע מאפשר יצירת-entity בריצה עם id דינמי');
+      final re = RegExp('scope של רשומת-עובד-פר-משתמש על session.uid במקום session.username בנתיב מקומי או seed שבו uid ריק לכל עובד');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1728,7 +1728,7 @@ void main() {
     test("antipattern #85 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('ירי side-effects פעמון או צ\'אט או toast ללא-תנאי אחרי קריאת engine status-guarded על סמך ה-status הלכוד ב-widget row');
+      final re = RegExp('id שנמכר מ-DateTime.now timestamp בלבד בלי סיומת _seq מונוטונית בקובץ-store שיש בו מחיקה לפי id');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1749,7 +1749,7 @@ void main() {
     test("antipattern #86 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('toast הצלחה אחרי כתיבה מתמשכת שעברה דרך set-state עם persist לא-מוּמתן בלי לבדוק שה-write נחת');
+      final re = RegExp('_load של מנוע שבונה state רק מ-seeds קבועים ועוד overlay-מוטציות כשהמנוע מאפשר יצירת-entity בריצה עם id דינמי');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1770,7 +1770,7 @@ void main() {
     test("antipattern #87 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('offset-יום או מספר-ימים מחושב ב-DateTime מקומי עם difference inDays או ב-subtract Duration days על תאריך מקומי');
+      final re = RegExp('ירי side-effects פעמון או צ\'אט או toast ללא-תנאי אחרי קריאת engine status-guarded על סמך ה-status הלכוד ב-widget row');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1791,7 +1791,7 @@ void main() {
     test("antipattern #88 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('קיבוץ enum או status סופי לדליי-UI בלי לכסות כל ערך אפשרי — ערך לא-ממופה נופל בין-הכיסאות ונעלם מה-UI');
+      final re = RegExp('toast הצלחה אחרי כתיבה מתמשכת שעברה דרך set-state עם persist לא-מוּמתן בלי לבדוק שה-write נחת');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1812,7 +1812,7 @@ void main() {
     test("antipattern #89 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('הצגת אותה הגדרה בשני מסכים תוך החזקת עותק-ערך ב-state מקומי בכל אחד — שני מקורות-אמת שמתפצלים');
+      final re = RegExp('offset-יום או מספר-ימים מחושב ב-DateTime מקומי עם difference inDays או ב-subtract Duration days על תאריך מקומי');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1833,7 +1833,7 @@ void main() {
     test("antipattern #90 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('אותה הגדרה לוגית מוצגת בשני מקטעי-הגדרות או נשמרת בשני שדות שונים — קטגוריות כפולות ומצב מתפצל');
+      final re = RegExp('קיבוץ enum או status סופי לדליי-UI בלי לכסות כל ערך אפשרי — ערך לא-ממופה נופל בין-הכיסאות ונעלם מה-UI');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1854,7 +1854,7 @@ void main() {
     test("antipattern #91 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('קטגוריית-הגדרות שכל שורותיה placeholders backend-blocked עם toggle יחיד שכבר-קנוני במקום אחר — קטגוריה מתה ומבלבלת');
+      final re = RegExp('הצגת אותה הגדרה בשני מסכים תוך החזקת עותק-ערך ב-state מקומי בכל אחד — שני מקורות-אמת שמתפצלים');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1875,7 +1875,7 @@ void main() {
     test("antipattern #92 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('השארת שדה-העדפה מגובה לא-מחווט רק כי שכבת-הסינון הצורכת עדיין חסרת-דאטה — המשתמש לא יכול אפילו לבטא את ההעדפה');
+      final re = RegExp('אותה הגדרה לוגית מוצגת בשני מקטעי-הגדרות או נשמרת בשני שדות שונים — קטגוריות כפולות ומצב מתפצל');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1896,7 +1896,7 @@ void main() {
     test("antipattern #93 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('דאטה פרטית per-user שנשמרת תחת מפתח-אחסון גלובלי יחיד — דולפת בין משתמשים, משתמש אחד רואה מאזן של אחר');
+      final re = RegExp('קטגוריית-הגדרות שכל שורותיה placeholders backend-blocked עם toggle יחיד שכבר-קנוני במקום אחר — קטגוריה מתה ומבלבלת');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1917,7 +1917,7 @@ void main() {
     test("antipattern #94 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp('כפתור-מיקרופון ששזור להפעיל חיפוש או פעולה אחרת במקום להכתיב לתוך השדה שבו המשתמש נמצא — קול חוטף לזרם אחר');
+      final re = RegExp('השארת שדה-העדפה מגובה לא-מחווט רק כי שכבת-הסינון הצורכת עדיין חסרת-דאטה — המשתמש לא יכול אפילו לבטא את ההעדפה');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -1936,6 +1936,48 @@ void main() {
     });
 
     test("antipattern #95 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp('דאטה פרטית per-user שנשמרת תחת מפתח-אחסון גלובלי יחיד — דולפת בין משתמשים, משתמש אחד רואה מאזן של אחר');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #96 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp('כפתור-מיקרופון ששזור להפעיל חיפוש או פעולה אחרת במקום להכתיב לתוך השדה שבו המשתמש נמצא — קול חוטף לזרם אחר');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #97 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp('לסמן פיצ\'ר-דאטה כ-deferred חסום-API-חיצוני בלי לבדוק אם קיים API ציבורי חינמי ללא-מפתח שמתאים');

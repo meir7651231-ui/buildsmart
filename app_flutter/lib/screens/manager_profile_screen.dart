@@ -1,11 +1,11 @@
 // #20 — פרופיל מנהל ייעודי (מודל: courier_profile_screen.dart, #73).
 //
-// מציג את ה-session החי מ-[boardAuthProvider] (שם תצוגה, שם משתמש, מצב demo),
-// סטטיסטיקת הזמנות חיה ממנוע ההזמנות המשותף, ושלוש פעולות:
+// מציג את ה-session החי מ-[boardAuthProvider] (שם תצוגה, שם משתמש),
+// סטטיסטיקת הזמנות חיה ממנוע ההזמנות המשותף, ושתי פעולות:
 //   ⚙️ הגדרות         → CatalogSettingsScreen (אותו יעד כמו פעולת ההגדרות בלוח)
 //   🔁 החלפת תפקיד   → חסום בדיאלוג קוד-מעבר (kRoleSwitchCode) → showRolePicker
-//   🚪 יציאה          → confirmDestructive → boardAuthProvider.logout()
-//                       (הלוח עצמו נבנה מחדש כשער הרישום — כלל 4).
+//
+// מנהל = חשבון הבעלים: אין כאן 'יציאה'/logout (דרישת מוצר — "המנהל לא מתנתק").
 
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
@@ -16,8 +16,6 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
-import 'package:buildsmart/widgets/confirm_dialog.dart';
-import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -225,18 +223,6 @@ class _ManagerProfileBody extends ConsumerWidget {
                     const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
                 onTap: () => _askRoleSwitch(context),
               ),
-              const Divider(height: 1, color: Color(0xFFF0F0F0)),
-              ListTile(
-                leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-                title: const Text(
-                  'יציאה מהחשבון',
-                  style: TextStyle(
-                    color: Colors.redAccent,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onTap: () => _logout(context, ref),
-              ),
             ],
           ),
         ),
@@ -256,22 +242,6 @@ class _ManagerProfileBody extends ConsumerWidget {
     );
     if ((ok ?? false) && context.mounted) {
       await showRolePicker(context);
-    }
-  }
-
-  Future<void> _logout(BuildContext context, WidgetRef ref) async {
-    final ok = await confirmDestructive(
-      context,
-      title: 'יציאה מהחשבון?',
-      message: 'תנותק ממרכז השליטה ותחזור למסך הרישום.',
-      confirmLabel: 'יציאה',
-    );
-    if (!ok || !context.mounted) return;
-    ref.read(boardAuthProvider.notifier).logout();
-    showToast(context, 'התנתקת ממרכז השליטה');
-    // מסך עצמאי: קופצים חזרה ללוח — שעכשיו נבנה מחדש כשער הרישום (כלל 4).
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
     }
   }
 }

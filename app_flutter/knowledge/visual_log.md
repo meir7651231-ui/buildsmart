@@ -1242,6 +1242,23 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **הפיך:** הדיאגנוסטיקה + ה-flag `FS_DIAG` מסומנים "REMOVE after go-live"; ה-fix של ה-rules/index הוא קבוע (תיקון-באג). **אימות:** `orders_sync_scope_index_diag_test` 13/13 (scope-fields · index↔toDoc · 4 mappings) · `debug_badge_gate_test` נשאר ירוק (FS_DIAG=false בטסט ⇒ gate ללא-שינוי) · analyze 0-errors · full-suite (ה-`-1` היחיד = `worker_reports_drilldown` baseline) · build web ✅ · mutation red `+5 -1`→green `+11` (§mutation_log). **לא נגעתי:** worker-board / 4 מחלקות / auth-gate / firebase_options / manager-credit / geo.
 
+## #manager-owner — מנהל = בעלים: בלי logout, בלי demo (שלב 1/4) — 2026-06-15
+
+**שינוי גלוי:** (א) לוח-המנהל (מרכז השליטה) — נעלם כפתור ה-logout מסרגל-הפעולות; נשארו 💬 שיחות · 👤 פרופיל · ⚙️ הגדרות · '‹ יציאה' (ניווט-בלבד). (ב) פרופיל-המנהל — נעלמה שורת '🚪 יציאה מהחשבון'; נשארו ⚙️ הגדרות + 🔁 החלפת תפקיד. (ג) שער-הכניסה ללוח-המנהל — נעלם כפתור "מצב דמו"; עובד/שליח/ספק עדיין מציגים אותו.
+
+**אין screenshot — למה:** השינוי הוא **הסרת אלמנטים** (כפתורים/שורה) מעצים-קיימים שלא שינו צורה/צבע/פריסה; אין מצב-ויזואלי-חדש. ההיעדרות מאומתת בהעדר-רגרסיה בטסטי-המסך (manager_dashboard_screen_test ירוק; אין טסט שמקיש על ה-logout/demo שהוסרו).
+
+**הפיך:** הסרת-affordance בלבד; המודל (`logout()`/`enterDemo()`) נשאר callable. אפס Color/value:/activeColor: חדש.
+**אימות:** analyze 0-errors · full-suite **+2626 -1** (ה-`-1` היחיד = `worker_reports_drilldown` baseline; 0 חדשים) · isolation manager_dashboard/apple_readiness/widget ירוקים. **לא נגעתי:** board_auth model / עובד·שליח·ספק / auth-gate.
+
+## #manager-owner — שער-מנהל "כניסה עם Google" (שלב 2/4) — 2026-06-15
+
+**שינוי גלוי:** שער כניסת-המנהל (welcome ב-role-mode עבור manager) הוחלף לחלוטין: במקום "כניסה ללקוח קיים" + שדות שם-משתמש/קוד, מוצג עכשיו כותרת "כניסת מנהל המערכת" + שורת-הסבר + כפתור כתום יחיד **"המשך עם Google"** (FilledButton.icon, אייקון login, ספינר בזמן טעינה). אין שדה-קוד ואין "מצב דמו". כשאין Firebase — במקום הכפתור מוצגת כרטיסיה צהובה כנה: "כניסת מנהל דורשת חיבור לאינטרנט". שאר הלוחות (עובד/שליח/ספק) — שער ה-seed ללא-שינוי.
+
+**אין screenshot — למה:** רכיבים סטנדרטיים (FilledButton.icon + Text + Container צהוב) על אותו עץ-welcome; ההסתעפות (כפתור מול הודעה) + זרימת-הכניסה (בעלים→מנהל, זר→דחייה+טוסט, בלי-Firebase→הודעה) מאומתות ב-`manager_google_login_test` (widget-tests). אין מצב-ויזואלי-חדש מעבר לשניים אלה.
+
+**הפיך:** השער מסתעף על `role==manager` בלבד; שאר הפרסונות verbatim. אפס Color/value:/activeColor: חדש (BsTokens + צבעי-אזהרה קיימים). flag-OFF: ה-DATA נשאר demo; ה-auth-gateway live כש-Firebase אותחל אך signed-out ⇒ התנהגות זהה כשאיש לא נכנס.
+**אימות:** analyze 0-errors · full-suite **+2632 -1** (baseline) · mutation §mutation_log. **caveat בעלים:** דורש 3 צעדי Firebase-Console (`knowledge/owner/google-signin-setup.md`). **לא נגעתי:** worker-board / 4 מחלקות.
 ### #E3-leak-fix — worker_employer_stock_sheet: scope-key uid→username (לוגיקה-בלבד) — 2026-06-15
 **אין screenshot — למה:** השינוי בקובץ-המסך הוא מפתח-ה-scope של רשימת "הבקשות שלי" בלבד — `requestsForWorker(session.uid)` → `requestsForWorker(session.username)` (+`username` בקריאת-ה-submit). **אפס שינוי פריסה/צבע/widget** — אותו עץ, אותו עיצוב. ההשפעה הנראית-לעין היחידה: העובד רואה כעת רק את בקשות-החומר שלו (לפני-כן, בגלל uid ריק לכל עובד seed/demo, ראה את של כולם). למשתמש-יחיד הרשימה זהה לחלוטין.
 **אימות:** ההתנהגות (בידוד פר-עובד) מאומתת ב-`material_requests_test` (טסט-בידוד seed-session, mutation RED `+7 -1`→GREEN `+8` §mutation_log) — בידוד רב-עובדים אינו ניתן-לאימות-בצילום-בודד (דורש שתי הפעלות). analyze 0 · full-suite ירוק. **לא נגעתי** בפריסה/עיצוב/צבעים של הגיליון.
