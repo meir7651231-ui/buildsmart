@@ -1193,3 +1193,8 @@
 - **קבצים:** `lib/screens/store_dashboard_screen.dart` — נוסף `HelpToggleButton` ל-AppBar; פעמון/אזור-אישי/הגדרות/התנתקות/יציאה עטופים ב-HelpTarget; ה-BottomNavigationBar (5 טאבים) הוחלף ב-Material+Row של BottomNavCell+HelpTarget (בית/מלאי/שיחות/פורטל/אזור-אישי). טסט חדש `help_coverage_store_test` (+2).
 - **load-bearing:** `body: _kStoreTabHelp[1].$2` (הסבר טאב "מלאי"). מוטציה: `.$2`→`.$1`.
 - תוצאה: טסט-הטאב **אדום `+1 -1`** · שחזור → **+2 ירוק** · RESTORED-IDENTICAL. analyze 0. דפוס זהה לתיקון-הטאבים (BottomNavCell משותף). גל 3/7.
+
+## #31-swarm-wave — נחיל קנוני: מנהל + עובד-עמוק + שליח-עמוק — 2026-06-16
+- **הנחיל:** /swarm קנוני (DONNING — auditor 6+9 · validator 4+6 · fixer 3 · supervisor 6+7), צינור audit→validate→fix. 20 סוכנים, ~2.09M טוקנים. 181 אלמנטים נמצאו → 79 אומתו → **89 עטיפות HelpTarget ב-14 קבצים** (manager_dashboard 22 · worker profile/reports/today/notifs/app = 21 · courier dashboard/portal/profile/settings/reports/forms/attendance/certs = 46). הנחיל הוסיף 💡 toggle ל-courier settings/forms/attendance/certs שחסרו, וגילה שהמנהל משתמש ב-toggle עליון מקטעי (per-seg HelpTarget, לא BottomNavCell).
+- **אימות (תפקיד אורקסטרטור §3):** byte-verify (grep HelpTarget>0 בכל קובץ) · **central-verify GATE PASS** (analyze 0 · +2682 טסטים ירוקים · build ok · conformance 7/7 · required-tests 6/6) · supervisor (6+7). load-bearing: דפוס ה-HelpTarget שאומת ב-mutation בגלים 1-3 (אותו דפוס, byte-verified).
+- ניקיתי import מת (help_mode) ב-courier_dashboard שהנחיל סימן. push רק ב"תתדחוף".

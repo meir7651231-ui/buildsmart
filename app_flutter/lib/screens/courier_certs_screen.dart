@@ -10,6 +10,7 @@ import 'package:buildsmart/state/courier_hr.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +40,12 @@ class CourierCertsScreen extends ConsumerWidget {
       return const WelcomeScreen(boardRole: BoardRole.courier);
     }
     final username = session.username;
-    final certs = ref
-        .watch(courierCertsProvider)
-        .where((c) => c.username == username)
-        .toList()
-      ..sort((a, b) => a.expiry.compareTo(b.expiry));
+    final certs =
+        ref
+            .watch(courierCertsProvider)
+            .where((c) => c.username == username)
+            .toList()
+          ..sort((a, b) => a.expiry.compareTo(b.expiry));
 
     return Scaffold(
       backgroundColor: BsTokens.bgLight,
@@ -58,6 +60,7 @@ class CourierCertsScreen extends ConsumerWidget {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
+        actions: const [HelpToggleButton()],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -119,303 +122,329 @@ class CourierCertsScreen extends ConsumerWidget {
       backgroundColor: BsTokens.cardLight,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BsTokens.radiusCard),
+        ),
       ),
       // Explicit RTL wrap — the sheet convention (F-46); modal builders do
       // not inherit the app-level Directionality wrapper.
-      builder: (sheetCtx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            Future<void> pickExpiry() async {
-              final now = DateTime.now();
-              final picked = await showDatePicker(
-                context: ctx,
-                initialDate: expiry ?? now,
-                // Existing certificates may already be expired — allow
-                // recording them honestly (the red badge says so). NEVER
-                // restrict to future-only dates (F-17).
-                firstDate: DateTime(now.year - 10),
-                lastDate: DateTime(now.year + 15),
-              );
-              if (picked != null) setSheetState(() => expiry = picked);
-            }
-
-            Future<void> attachPhoto() async {
-              // CAM-cluster seam (#85ב) — honest null on cancel.
-              final p = await pickTaskPhoto(ctx);
-              if (p == null || p.isEmpty) return;
-              setSheetState(() => photo = p);
-            }
-
-            Future<void> save() async {
-              if (saving) return;
-              setSheetState(() {
-                errName =
-                    nameCtl.text.trim().isEmpty ? 'נא למלא שם תעודה' : null;
-                errIssuer =
-                    issuerCtl.text.trim().isEmpty ? 'נא למלא מנפיק' : null;
-                errExpiry = expiry == null ? 'נא לבחור תוקף' : null;
-              });
-              if (errName != null || errIssuer != null || errExpiry != null) {
-                return;
-              }
-              setSheetState(() => saving = true);
-              // Rollback-aware add (F-8): null = the storage write failed
-              // (web quota on an oversized photo) and the in-memory wallet
-              // was rolled back — keep the sheet open for an honest retry.
-              final cert = await ref.read(courierCertsProvider.notifier).add(
-                    username: username,
-                    name: nameCtl.text,
-                    issuer: issuerCtl.text,
-                    expiry: expiry!,
-                    photo: photo,
+      builder:
+          (sheetCtx) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: StatefulBuilder(
+              builder: (ctx, setSheetState) {
+                Future<void> pickExpiry() async {
+                  final now = DateTime.now();
+                  final picked = await showDatePicker(
+                    context: ctx,
+                    initialDate: expiry ?? now,
+                    // Existing certificates may already be expired — allow
+                    // recording them honestly (the red badge says so). NEVER
+                    // restrict to future-only dates (F-17).
+                    firstDate: DateTime(now.year - 10),
+                    lastDate: DateTime(now.year + 15),
                   );
-              if (!ctx.mounted) return;
-              if (cert == null) {
-                setSheetState(() => saving = false);
-                showToast(ctx, 'התמונה גדולה מדי — לא נשמרה');
-                return;
-              }
-              saved = true;
-              // Pop through ctx (same modal route as sheetCtx) — the mounted
-              // guard above covers this context across the async gap.
-              Navigator.of(ctx).pop();
-            }
+                  if (picked != null) setSheetState(() => expiry = picked);
+                }
 
-            return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  BsTokens.space4,
-                  BsTokens.space3,
-                  BsTokens.space4,
-                  BsTokens.space4 +
-                      MediaQuery.of(ctx).viewInsets.bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
+                Future<void> attachPhoto() async {
+                  // CAM-cluster seam (#85ב) — honest null on cancel.
+                  final p = await pickTaskPhoto(ctx);
+                  if (p == null || p.isEmpty) return;
+                  setSheetState(() => photo = p);
+                }
+
+                Future<void> save() async {
+                  if (saving) return;
+                  setSheetState(() {
+                    errName =
+                        nameCtl.text.trim().isEmpty ? 'נא למלא שם תעודה' : null;
+                    errIssuer =
+                        issuerCtl.text.trim().isEmpty ? 'נא למלא מנפיק' : null;
+                    errExpiry = expiry == null ? 'נא לבחור תוקף' : null;
+                  });
+                  if (errName != null ||
+                      errIssuer != null ||
+                      errExpiry != null) {
+                    return;
+                  }
+                  setSheetState(() => saving = true);
+                  // Rollback-aware add (F-8): null = the storage write failed
+                  // (web quota on an oversized photo) and the in-memory wallet
+                  // was rolled back — keep the sheet open for an honest retry.
+                  final cert = await ref
+                      .read(courierCertsProvider.notifier)
+                      .add(
+                        username: username,
+                        name: nameCtl.text,
+                        issuer: issuerCtl.text,
+                        expiry: expiry!,
+                        photo: photo,
+                      );
+                  if (!ctx.mounted) return;
+                  if (cert == null) {
+                    setSheetState(() => saving = false);
+                    showToast(ctx, 'התמונה גדולה מדי — לא נשמרה');
+                    return;
+                  }
+                  saved = true;
+                  // Pop through ctx (same modal route as sheetCtx) — the mounted
+                  // guard above covers this context across the async gap.
+                  Navigator.of(ctx).pop();
+                }
+
+                return SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      BsTokens.space4,
+                      BsTokens.space3,
+                      BsTokens.space4,
+                      BsTokens.space4 + MediaQuery.of(ctx).viewInsets.bottom,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Expanded(
-                          child: Text(
-                            '🪪 הוספת תעודה',
-                            style: TextStyle(
-                              color: BsTokens.inkLight,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        // Explicit X close (sheet rule).
-                        IconButton(
-                          tooltip: 'סגור',
-                          icon: const Icon(Icons.close,
-                              color: BsTokens.mutedLight),
-                          onPressed: () => Navigator.of(sheetCtx).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: BsTokens.space2),
-                    // Quick-add presets (#86.4) — pre-fill the NAME field
-                    // ONLY; issuer and expiry stay user input (אין המצאות:
-                    // no invented issuer, no invented dates).
-                    const Text(
-                      'מילוי מהיר — ממלא את שם התעודה בלבד:',
-                      style: TextStyle(
-                        color: BsTokens.mutedLight,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                    const SizedBox(height: BsTokens.space2),
-                    Wrap(
-                      spacing: BsTokens.space2,
-                      runSpacing: BsTokens.space2,
-                      children: [
-                        for (final p in kCourierCertPresets)
-                          _PresetChip(
-                            label: p,
-                            selected: nameCtl.text.trim() == p,
-                            onTap: () => setSheetState(() {
-                              nameCtl.text = p;
-                              errName = null;
-                            }),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: BsTokens.space3),
-                    TextField(
-                      controller: nameCtl,
-                      decoration: InputDecoration(
-                        labelText: 'שם התעודה (למשל: רישיון נהיגה)',
-                        errorText: errName,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: BsTokens.space3),
-                    TextField(
-                      controller: issuerCtl,
-                      decoration: InputDecoration(
-                        labelText: 'מנפיק (למשל: משרד הרישוי)',
-                        errorText: errIssuer,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: BsTokens.space3),
-                    // Expiry picker row (≥48dp).
-                    Material(
-                      color: BsTokens.bgLight,
-                      borderRadius: BorderRadius.circular(12),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: pickExpiry,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 48),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: BsTokens.space3),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: errExpiry == null
-                                  ? const Color(0xFFE2E2E2)
-                                  : BsTokens.danger,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Text('📅', style: TextStyle(fontSize: 16)),
-                              const SizedBox(width: BsTokens.space2),
-                              Expanded(
-                                child: Text(
-                                  expiry == null
-                                      ? (errExpiry ?? 'בתוקף עד')
-                                      : 'בתוקף עד ${_fmtDate(expiry!)}',
-                                  style: TextStyle(
-                                    color: expiry == null
-                                        ? (errExpiry == null
-                                            ? BsTokens.mutedLight
-                                            : BsTokens.danger)
-                                        : BsTokens.inkLight,
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                '🪪 הוספת תעודה',
+                                style: TextStyle(
+                                  color: BsTokens.inkLight,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
                                 ),
                               ),
-                            ],
+                            ),
+                            // Explicit X close (sheet rule).
+                            IconButton(
+                              tooltip: 'סגור',
+                              icon: const Icon(
+                                Icons.close,
+                                color: BsTokens.mutedLight,
+                              ),
+                              onPressed: () => Navigator.of(sheetCtx).pop(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: BsTokens.space2),
+                        // Quick-add presets (#86.4) — pre-fill the NAME field
+                        // ONLY; issuer and expiry stay user input (אין המצאות:
+                        // no invented issuer, no invented dates).
+                        const Text(
+                          'מילוי מהיר — ממלא את שם התעודה בלבד:',
+                          style: TextStyle(
+                            color: BsTokens.mutedLight,
+                            fontSize: 11.5,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: BsTokens.space3),
-                    // Optional photo via the camera seam.
-                    Material(
-                      color: BsTokens.cardLight,
-                      borderRadius:
-                          BorderRadius.circular(BsTokens.radiusPill),
-                      child: InkWell(
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
-                        onTap: attachPhoto,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 48),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(BsTokens.radiusPill),
-                            border:
-                                Border.all(color: const Color(0xFFE2E2E2)),
+                        const SizedBox(height: BsTokens.space2),
+                        Wrap(
+                          spacing: BsTokens.space2,
+                          runSpacing: BsTokens.space2,
+                          children: [
+                            for (final p in kCourierCertPresets)
+                              _PresetChip(
+                                label: p,
+                                selected: nameCtl.text.trim() == p,
+                                onTap:
+                                    () => setSheetState(() {
+                                      nameCtl.text = p;
+                                      errName = null;
+                                    }),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: BsTokens.space3),
+                        TextField(
+                          controller: nameCtl,
+                          decoration: InputDecoration(
+                            labelText: 'שם התעודה (למשל: רישיון נהיגה)',
+                            errorText: errName,
+                            border: const OutlineInputBorder(),
                           ),
-                          child: photo == null
-                              ? const Text(
-                                  '📷 צרף צילום תעודה (לא חובה)',
-                                  style: TextStyle(
-                                    color: BsTokens.inkLight,
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      '📷 צילום צורף ✓',
-                                      style: TextStyle(
-                                        color: BsTokens.inkLight,
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    const SizedBox(width: BsTokens.space2),
-                                    // 'הסר' X: clears the attached photo
-                                    // without closing the sheet (tap the
-                                    // pill itself to re-attach). 48dp — the
-                                    // worker template's 40dp X is below the
-                                    // touch floor (F-17).
-                                    Tooltip(
-                                      message: 'הסר צילום',
-                                      child: Semantics(
-                                        button: true,
-                                        label: 'הסר צילום',
-                                        child: InkWell(
-                                          customBorder: const CircleBorder(),
-                                          onTap: () => setSheetState(
-                                              () => photo = null),
-                                          child: const SizedBox(
-                                            width: 48,
-                                            height: 48,
-                                            child: Icon(
-                                              Icons.close,
-                                              size: 18,
-                                              color: BsTokens.mutedLight,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                        ),
+                        const SizedBox(height: BsTokens.space3),
+                        TextField(
+                          controller: issuerCtl,
+                          decoration: InputDecoration(
+                            labelText: 'מנפיק (למשל: משרד הרישוי)',
+                            errorText: errIssuer,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: BsTokens.space3),
+                        // Expiry picker row (≥48dp).
+                        Material(
+                          color: BsTokens.bgLight,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: pickExpiry,
+                            child: Container(
+                              constraints: const BoxConstraints(minHeight: 48),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: BsTokens.space3,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color:
+                                      errExpiry == null
+                                          ? const Color(0xFFE2E2E2)
+                                          : BsTokens.danger,
                                 ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: BsTokens.space3),
-                    // Save — dimmed + unreactive while the awaited persist is
-                    // in flight (F-38).
-                    Material(
-                      color: saving
-                          ? const Color(0xFFE9EAEC)
-                          : BsTokens.brand,
-                      borderRadius:
-                          BorderRadius.circular(BsTokens.radiusPill),
-                      child: InkWell(
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
-                        onTap: saving ? null : save,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 48),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '💾 שמור תעודה',
-                            style: TextStyle(
-                              // bsOnAccent on the brand fill (F-28).
-                              color: saving
-                                  ? BsTokens.mutedLight
-                                  : bsOnAccent(ctx),
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w800,
+                              ),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    '📅',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(width: BsTokens.space2),
+                                  Expanded(
+                                    child: Text(
+                                      expiry == null
+                                          ? (errExpiry ?? 'בתוקף עד')
+                                          : 'בתוקף עד ${_fmtDate(expiry!)}',
+                                      style: TextStyle(
+                                        color:
+                                            expiry == null
+                                                ? (errExpiry == null
+                                                    ? BsTokens.mutedLight
+                                                    : BsTokens.danger)
+                                                : BsTokens.inkLight,
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: BsTokens.space3),
+                        // Optional photo via the camera seam.
+                        Material(
+                          color: BsTokens.cardLight,
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusPill,
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(
+                              BsTokens.radiusPill,
+                            ),
+                            onTap: attachPhoto,
+                            child: Container(
+                              constraints: const BoxConstraints(minHeight: 48),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  BsTokens.radiusPill,
+                                ),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E2E2),
+                                ),
+                              ),
+                              child:
+                                  photo == null
+                                      ? const Text(
+                                        '📷 צרף צילום תעודה (לא חובה)',
+                                        style: TextStyle(
+                                          color: BsTokens.inkLight,
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      )
+                                      : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            '📷 צילום צורף ✓',
+                                            style: TextStyle(
+                                              color: BsTokens.inkLight,
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: BsTokens.space2,
+                                          ),
+                                          // 'הסר' X: clears the attached photo
+                                          // without closing the sheet (tap the
+                                          // pill itself to re-attach). 48dp — the
+                                          // worker template's 40dp X is below the
+                                          // touch floor (F-17).
+                                          Tooltip(
+                                            message: 'הסר צילום',
+                                            child: Semantics(
+                                              button: true,
+                                              label: 'הסר צילום',
+                                              child: InkWell(
+                                                customBorder:
+                                                    const CircleBorder(),
+                                                onTap:
+                                                    () => setSheetState(
+                                                      () => photo = null,
+                                                    ),
+                                                child: const SizedBox(
+                                                  width: 48,
+                                                  height: 48,
+                                                  child: Icon(
+                                                    Icons.close,
+                                                    size: 18,
+                                                    color: BsTokens.mutedLight,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: BsTokens.space3),
+                        // Save — dimmed + unreactive while the awaited persist is
+                        // in flight (F-38).
+                        Material(
+                          color:
+                              saving ? const Color(0xFFE9EAEC) : BsTokens.brand,
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusPill,
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(
+                              BsTokens.radiusPill,
+                            ),
+                            onTap: saving ? null : save,
+                            child: Container(
+                              constraints: const BoxConstraints(minHeight: 48),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '💾 שמור תעודה',
+                                style: TextStyle(
+                                  // bsOnAccent on the brand fill (F-28).
+                                  color:
+                                      saving
+                                          ? BsTokens.mutedLight
+                                          : bsOnAccent(ctx),
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                  ),
+                );
+              },
+            ),
+          ),
     );
     nameCtl.dispose();
     issuerCtl.dispose();
@@ -454,20 +483,17 @@ class _PresetChip extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(minHeight: 48),
             alignment: Alignment.center,
-            padding:
-                const EdgeInsets.symmetric(horizontal: BsTokens.space3),
+            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              border: selected
-                  ? null
-                  : Border.all(color: const Color(0xFFE2E2E2)),
+              border:
+                  selected ? null : Border.all(color: const Color(0xFFE2E2E2)),
             ),
             child: Text(
               label,
               style: TextStyle(
                 // bsOnAccent on the selected brand fill (F-28).
-                color:
-                    selected ? bsOnAccent(context) : BsTokens.inkLight,
+                color: selected ? bsOnAccent(context) : BsTokens.inkLight,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
@@ -531,26 +557,31 @@ class _CertsCard extends StatelessWidget {
             for (final c in certs)
               _CertRow(cert: c, onRemove: () => onRemove(c)),
           // excludeSemantics — the inner Text repeats the label (F-50).
-          Semantics(
-            button: true,
-            label: 'הוסף תעודה',
-            excludeSemantics: true,
-            child: Material(
-              color: BsTokens.brand,
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              child: InkWell(
+          HelpTarget(
+            title: 'הוספת תעודה',
+            body:
+                'פותח את גיליון הוספת תעודת-נהג — שם, מנפיק, תוקף וצילום אופציונלי.',
+            child: Semantics(
+              button: true,
+              label: 'הוסף תעודה',
+              excludeSemantics: true,
+              child: Material(
+                color: BsTokens.brand,
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                onTap: onAdd,
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 48),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '➕ הוסף תעודה',
-                    style: TextStyle(
-                      // bsOnAccent on the brand fill (F-28).
-                      color: bsOnAccent(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  onTap: onAdd,
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '➕ הוסף תעודה',
+                      style: TextStyle(
+                        // bsOnAccent on the brand fill (F-28).
+                        color: bsOnAccent(context),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -615,40 +646,49 @@ class _CertRow extends StatelessWidget {
                         const SizedBox(width: BsTokens.space2),
                         // Tappable thumbnail of the REAL cert photo →
                         // full-screen viewer (48dp tap target).
-                        Semantics(
-                          button: true,
-                          label: 'הצג צילום תעודה במסך מלא',
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
-                            onTap: () => showFullPhotoRefDialog(
-                              context,
-                              cert.photo,
-                              label: cert.name,
-                            ),
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              alignment: Alignment.center,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image(
-                                  // Decode at thumb resolution (F-43) — the
-                                  // full-res decode stays in the viewer only.
-                                  image: ResizeImage(
-                                    provider,
-                                    width: (40 *
-                                            MediaQuery.devicePixelRatioOf(
-                                                context))
-                                        .round(),
+                        HelpTarget(
+                          title: 'צפייה בצילום התעודה',
+                          body:
+                              'הקשה על התמונה פותחת את צילום-התעודה במסך מלא.',
+                          child: Semantics(
+                            button: true,
+                            label: 'הצג צילום תעודה במסך מלא',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap:
+                                  () => showFullPhotoRefDialog(
+                                    context,
+                                    cert.photo,
+                                    label: cert.name,
                                   ),
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                  gaplessPlayback: true,
-                                  // Corrupt payload → the honest 📷.
-                                  errorBuilder: (_, __, ___) => const Text(
-                                    '📷',
-                                    style: TextStyle(fontSize: 13),
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image(
+                                    // Decode at thumb resolution (F-43) — the
+                                    // full-res decode stays in the viewer only.
+                                    image: ResizeImage(
+                                      provider,
+                                      width:
+                                          (40 *
+                                                  MediaQuery.devicePixelRatioOf(
+                                                    context,
+                                                  ))
+                                              .round(),
+                                    ),
+                                    width: 40,
+                                    height: 40,
+                                    fit: BoxFit.cover,
+                                    gaplessPlayback: true,
+                                    // Corrupt payload → the honest 📷.
+                                    errorBuilder:
+                                        (_, __, ___) => const Text(
+                                          '📷',
+                                          style: TextStyle(fontSize: 13),
+                                        ),
                                   ),
                                 ),
                               ),
@@ -675,8 +715,7 @@ class _CertRow extends StatelessWidget {
             ),
             const SizedBox(width: BsTokens.space2),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -690,11 +729,17 @@ class _CertRow extends StatelessWidget {
                 ),
               ),
             ),
-            IconButton(
-              tooltip: 'מחק תעודה',
-              icon: const Icon(Icons.delete_outline,
-                  color: BsTokens.mutedLight),
-              onPressed: onRemove,
+            HelpTarget(
+              title: 'מחיקת תעודה',
+              body: 'מוחק את התעודה מהארנק לצמיתות (עם דיאלוג אישור).',
+              child: IconButton(
+                tooltip: 'מחק תעודה',
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed: onRemove,
+              ),
             ),
           ],
         ),

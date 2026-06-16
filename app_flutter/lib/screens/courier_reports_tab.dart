@@ -50,6 +50,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -87,17 +88,19 @@ class CourierClockEntry {
 
   /// Wall-clock pickup→delivered — null unless both stamps exist and are
   /// ordered (corrupt/clock-skewed pairs are not shown).
-  Duration? get pickupToDelivered => pickedUpAt != null &&
-          deliveredAt != null &&
-          deliveredAt!.isAfter(pickedUpAt!)
-      ? deliveredAt!.difference(pickedUpAt!)
-      : null;
+  Duration? get pickupToDelivered =>
+      pickedUpAt != null &&
+              deliveredAt != null &&
+              deliveredAt!.isAfter(pickedUpAt!)
+          ? deliveredAt!.difference(pickedUpAt!)
+          : null;
 }
 
 /// The bs.courier-clock.v1 side-map, re-read whenever the order list mutates
 /// (a stage advance is exactly when the writer stamps the clock).
-final courierClockProvider =
-    FutureProvider<Map<String, CourierClockEntry>>((ref) async {
+final courierClockProvider = FutureProvider<Map<String, CourierClockEntry>>((
+  ref,
+) async {
   ref.watch(sysOrdersProvider); // any order mutation → re-read the side-map
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -168,7 +171,8 @@ class CourierReportsTab extends ConsumerWidget {
     final session = ref.watch(boardAuthProvider);
     final orders = ref.watch(sysOrdersProvider);
     final fulfillment = ref.watch(fulfillmentProvider);
-    final clock = ref.watch(courierClockProvider).asData?.value ??
+    final clock =
+        ref.watch(courierClockProvider).asData?.value ??
         const <String, CourierClockEntry>{};
     final podPhotos = ref.watch(podPhotosProvider);
     final rewards = ref.watch(rewardsProvider);
@@ -178,14 +182,16 @@ class CourierReportsTab extends ConsumerWidget {
     // #86.6 (F-13): the MONEY figure is attributed to the logged-in courier
     // only — delivered orders whose fulfillment record carries MY courierUser
     // stamp. Legacy records without attribution are honestly excluded.
-    final su = (session != null && session.role == BoardRole.courier)
-        ? session.username
-        : null;
-    final mineDelivered = su == null
-        ? const <SysOrder>[]
-        : delivered
-            .where((o) => fulfillment[o.id]?.courierUser == su)
-            .toList();
+    final su =
+        (session != null && session.role == BoardRole.courier)
+            ? session.username
+            : null;
+    final mineDelivered =
+        su == null
+            ? const <SysOrder>[]
+            : delivered
+                .where((o) => fulfillment[o.id]?.courierUser == su)
+                .toList();
     final deliveredSum = mineDelivered.fold<int>(0, (a, o) => a + o.sum);
     const activeStages = [
       OrderStage.ready,
@@ -193,11 +199,14 @@ class CourierReportsTab extends ConsumerWidget {
       OrderStage.transit,
     ];
     final active = orders.where((o) => activeStages.contains(o.stage)).length;
-    final podCount = orders
-        .where((o) =>
-            (fulfillment[o.id]?.podCaptured ?? false) ||
-            podPhotos.containsKey(o.id))
-        .length;
+    final podCount =
+        orders
+            .where(
+              (o) =>
+                  (fulfillment[o.id]?.podCaptured ?? false) ||
+                  podPhotos.containsKey(o.id),
+            )
+            .length;
 
     // ── ② honest streak — consecutive calendar days ENDING TODAY with a
     // pickup/delivery stamp on the courier clock. No stamps at all → '—'.
@@ -210,8 +219,9 @@ class CourierReportsTab extends ConsumerWidget {
       }
     }
     var streak = 0;
-    while (activityDays
-        .contains(DateTime(today.year, today.month, today.day - streak))) {
+    while (activityDays.contains(
+      DateTime(today.year, today.month, today.day - streak),
+    )) {
       streak++;
     }
     final streakLabel = activityDays.isEmpty ? '—' : '$streak ימים';
@@ -220,12 +230,14 @@ class CourierReportsTab extends ConsumerWidget {
     // exists); attempts defaults to 1 (no re-attempt flow in the engine yet).
     final measuredDelivered =
         delivered.where((o) => clock[o.id]?.deliveredAt != null).toList();
-    final firstAttempt = measuredDelivered
-        .where((o) => (clock[o.id]?.attempts ?? 1) <= 1)
-        .length;
-    final firstAttemptLabel = measuredDelivered.isEmpty
-        ? '—'
-        : '${(firstAttempt * 100 / measuredDelivered.length).round()}%';
+    final firstAttempt =
+        measuredDelivered
+            .where((o) => (clock[o.id]?.attempts ?? 1) <= 1)
+            .length;
+    final firstAttemptLabel =
+        measuredDelivered.isEmpty
+            ? '—'
+            : '${(firstAttempt * 100 / measuredDelivered.length).round()}%';
 
     // ── ④ weekly buckets — Sunday-first; only deliveries stamped THIS week
     // land on a bar. Delivered orders without a stamp (before the delivery
@@ -297,7 +309,10 @@ class CourierReportsTab extends ConsumerWidget {
           children: [
             // F-33: מאזן המטבעות הוא overlay אחד לכל המכשיר (bs.rewards.v1,
             // ללא username) — תווית כנה, לא מספר שמתחזה ל-per-שליח.
-            _RStat(value: '${rewards.coins}', label: 'BuildCoins (מועדון משותף) 🪙'),
+            _RStat(
+              value: '${rewards.coins}',
+              label: 'BuildCoins (מועדון משותף) 🪙',
+            ),
             _RStat(value: streakLabel, label: 'רצף פעילות 🔥'),
             _RStat(value: firstAttemptLabel, label: 'מסירה-ראשונה 🎯'),
           ],
@@ -356,7 +371,10 @@ class CourierReportsTab extends ConsumerWidget {
                 delivered.isEmpty
                     ? 'עוד אין מסירות שהושלמו — מסירה שתסומן "נמסר ללקוח" תופיע כאן.'
                     : 'אין מסירות שנמדדו השבוע.',
-                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                style: const TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontSize: 13,
+                ),
               )
             else ...[
               _WeekBars(counts: perDay, todayIndex: today.weekday % 7),
@@ -365,8 +383,10 @@ class CourierReportsTab extends ConsumerWidget {
                 Text(
                   // Honest bucket — delivered before the delivery clock landed.
                   '🗓️ ללא חותמת: $noStamp ${noStamp == 1 ? 'מסירה' : 'מסירות'} בלי חותמת-זמן (לפני הפעלת שעון-המשלוחים)',
-                  style:
-                      const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  style: const TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ],
@@ -384,7 +404,10 @@ class CourierReportsTab extends ConsumerWidget {
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
             else ...[
-              _KvRow(label: 'ממוצע (${timed.length} מסירות)', value: _fmtDuration(avg!)),
+              _KvRow(
+                label: 'ממוצע (${timed.length} מסירות)',
+                value: _fmtDuration(avg!),
+              ),
               for (final o in timed)
                 _KvRow(
                   label: '📦 ${o.id}',
@@ -425,7 +448,10 @@ class CourierReportsTab extends ConsumerWidget {
                   SizedBox(height: 4),
                   Text(
                     'משלוח שיסומן "נמסר ללקוח" יופיע כאן',
-                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+                    style: TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
                   ),
                 ],
               ),
@@ -445,25 +471,30 @@ class CourierReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
 
         // ── ⑦ send daily report to the store — a REAL chat message + bell ──
-        Semantics(
-          button: true,
-          label: 'שלח דוח יומי לחנות',
-          child: Material(
-            color: BsTokens.brand,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
-              key: const ValueKey('courier-send-daily-report'),
+        HelpTarget(
+          title: 'שלח דוח-יומי לחנות',
+          body:
+              'שולח לחנות סיכום יומי כהודעת צ׳אט אמיתית + התראת-פעמון: כמה משלוחים נמסרו על-ידך, פעילים, POD וערך כספי. המספרים מיוחסים לשליח המחובר בלבד.',
+          child: Semantics(
+            button: true,
+            label: 'שלח דוח יומי לחנות',
+            child: Material(
+              color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: () => _sendDailyReport(context, ref),
-              child: Container(
-                height: 48, // ≥48dp target
-                alignment: Alignment.center,
-                child: Text(
-                  '🏪 שלח דוח-יומי לחנות',
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14.5,
+              child: InkWell(
+                key: const ValueKey('courier-send-daily-report'),
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: () => _sendDailyReport(context, ref),
+                child: Container(
+                  height: 48, // ≥48dp target
+                  alignment: Alignment.center,
+                  child: Text(
+                    '🏪 שלח דוח-יומי לחנות',
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14.5,
+                    ),
                   ),
                 ),
               ),
@@ -494,16 +525,18 @@ class CourierReportsTab extends ConsumerWidget {
     }
     final orders = ref.read(sysOrdersProvider);
     final fulfillment = ref.read(fulfillmentProvider);
-    final clock = ref.read(courierClockProvider).asData?.value ??
+    final clock =
+        ref.read(courierClockProvider).asData?.value ??
         const <String, CourierClockEntry>{};
 
     final delivered =
         orders.where((o) => o.stage == OrderStage.delivered).toList();
     // F-13: כל המונים המיוחסים-אישית מסוננים ל-courierUser של הסשן; רשומות
     // legacy ללא ייחוס אינן נספרות. "פעילים" נשאר כלל-מערכתי עם תווית כנה.
-    final mine = delivered
-        .where((o) => fulfillment[o.id]?.courierUser == s.username)
-        .toList();
+    final mine =
+        delivered
+            .where((o) => fulfillment[o.id]?.courierUser == s.username)
+            .toList();
     final deliveredSum = mine.fold<int>(0, (a, o) => a + o.sum);
     const activeStages = [
       OrderStage.ready,
@@ -511,19 +544,24 @@ class CourierReportsTab extends ConsumerWidget {
       OrderStage.transit,
     ];
     final active = orders.where((o) => activeStages.contains(o.stage)).length;
-    final podCount = orders
-        .where((o) =>
-            fulfillment[o.id]?.courierUser == s.username &&
-            (fulfillment[o.id]?.podCaptured ?? false))
-        .length;
+    final podCount =
+        orders
+            .where(
+              (o) =>
+                  fulfillment[o.id]?.courierUser == s.username &&
+                  (fulfillment[o.id]?.podCaptured ?? false),
+            )
+            .length;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final deliveredToday = mine.where((o) {
-      final d = clock[o.id]?.deliveredAt;
-      return d != null && DateTime(d.year, d.month, d.day) == today;
-    }).length;
+    final deliveredToday =
+        mine.where((o) {
+          final d = clock[o.id]?.deliveredAt;
+          return d != null && DateTime(d.year, d.month, d.day) == today;
+        }).length;
 
-    final text = 'דוח יומי — שליח ${s.displayName} (${now.day}.${now.month}):\n'
+    final text =
+        'דוח יומי — שליח ${s.displayName} (${now.day}.${now.month}):\n'
         '✅ נמסרו היום על-ידי (נמדד): $deliveredToday\n'
         '📦 סה״כ נמסרו על-ידי: ${mine.length}\n'
         '🚚 משלוחים פעילים (כלל המערכת): $active\n'
@@ -532,8 +570,9 @@ class CourierReportsTab extends ConsumerWidget {
 
     // Guard: send() is a silent no-op on an unknown thread — never toast a
     // success that did not happen (אין חצי-עבודה).
-    final exists =
-        ref.read(chatEngineProvider).any((t) => t.id == kStoreThreadId);
+    final exists = ref
+        .read(chatEngineProvider)
+        .any((t) => t.id == kStoreThreadId);
     if (!exists) {
       showToast(context, 'שיחת החנות לא נמצאה — הדוח לא נשלח');
       return;
@@ -543,7 +582,9 @@ class CourierReportsTab extends ConsumerWidget {
         .send(kStoreThreadId, BsRole.courier, text);
     // Bell notification under the STORE username — persisted in the shared
     // per-username feed; the supplier bell (#82) renders it on the store board.
-    ref.read(workerNotifsProvider.notifier).addNotification(
+    ref
+        .read(workerNotifsProvider.notifier)
+        .addNotification(
           username: kStoreUsername,
           emoji: '📋',
           title: 'דוח יומי מהשליח 🛵',
@@ -628,43 +669,51 @@ class _DeliveredCardState extends State<_DeliveredCard> {
         children: [
           // Tappable POD thumb — only when a REAL photo exists (≥48dp target).
           if (provider != null) ...[
-            Semantics(
-              button: true,
-              label: 'הצג אישור מסירה במסך מלא',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () => showFullPhotoRefDialog(
-                  context,
-                  widget.podPhoto,
-                  label: '📦 ${order.id} — אישור מסירה',
-                ),
-                child: ClipRRect(
+            HelpTarget(
+              title: 'צפייה באישור מסירה',
+              body:
+                  'הקשה על תמונת ה-POD פותחת אותה במסך מלא — צילום הוכחת-המסירה שצולם בעת מסירת המשלוח. מופיעה רק כשיש צילום אמיתי.',
+              child: Semantics(
+                button: true,
+                label: 'הצג אישור מסירה במסך מלא',
+                child: InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image(
-                    // F-43: decode at thumb resolution — the full-res bytes
-                    // are reserved for the full-screen viewer below.
-                    image: ResizeImage(
-                      provider,
-                      width:
-                          (56 * MediaQuery.devicePixelRatioOf(context)).round(),
-                    ),
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                    gaplessPlayback: true,
-                    // A corrupt payload renders an honest placeholder, no crash.
-                    errorBuilder: (_, __, ___) => Container(
+                  onTap:
+                      () => showFullPhotoRefDialog(
+                        context,
+                        widget.podPhoto,
+                        label: '📦 ${order.id} — אישור מסירה',
+                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image(
+                      // F-43: decode at thumb resolution — the full-res bytes
+                      // are reserved for the full-screen viewer below.
+                      image: ResizeImage(
+                        provider,
+                        width:
+                            (56 * MediaQuery.devicePixelRatioOf(context))
+                                .round(),
+                      ),
                       width: 56,
                       height: 56,
-                      alignment: Alignment.center,
-                      color: const Color(0xFFF2F3F5),
-                      child: const Text(
-                        '📷',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: BsTokens.mutedLight,
-                        ),
-                      ),
+                      fit: BoxFit.cover,
+                      gaplessPlayback: true,
+                      // A corrupt payload renders an honest placeholder, no crash.
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            width: 56,
+                            height: 56,
+                            alignment: Alignment.center,
+                            color: const Color(0xFFF2F3F5),
+                            child: const Text(
+                              '📷',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: BsTokens.mutedLight,
+                              ),
+                            ),
+                          ),
                     ),
                   ),
                 ),
@@ -695,8 +744,9 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFD7F5DF),
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          BsTokens.radiusPill,
+                        ),
                       ),
                       child: const Text(
                         'נמסר ✓',
@@ -722,7 +772,11 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                   '${order.items} פריטים · ${fMoney(order.sum)} · '
                   // POD line — honest per state: real photo → tap hint; legacy
                   // simulated capture → saved (no file); none → ללא POD.
-                  '${provider != null ? '📸 POD — הקש לתצוגה' : podCaptured ? '📸 POD נשמר ✓' : '📸 ללא POD'}'
+                  '${provider != null
+                      ? '📸 POD — הקש לתצוגה'
+                      : podCaptured
+                      ? '📸 POD נשמר ✓'
+                      : '📸 ללא POD'}'
                   '${deliveredAt != null ? ' · 🕒 ${deliveredAt!.day}.${deliveredAt!.month} ${deliveredAt!.hour.toString().padLeft(2, '0')}:${deliveredAt!.minute.toString().padLeft(2, '0')}' : ''}',
                   style: const TextStyle(
                     color: BsTokens.mutedLight,
@@ -898,9 +952,10 @@ class _WeekBars extends StatelessWidget {
                     width: 18,
                     height: 6 + (counts[i] / maxC) * 56,
                     decoration: BoxDecoration(
-                      color: counts[i] > 0
-                          ? BsTokens.brand
-                          : const Color(0xFFEDEDED),
+                      color:
+                          counts[i] > 0
+                              ? BsTokens.brand
+                              : const Color(0xFFEDEDED),
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(6),
                       ),
@@ -910,9 +965,10 @@ class _WeekBars extends StatelessWidget {
                   Text(
                     _kDayLetters[i],
                     style: TextStyle(
-                      color: i == todayIndex
-                          ? BsTokens.brandDark
-                          : BsTokens.mutedLight,
+                      color:
+                          i == todayIndex
+                              ? BsTokens.brandDark
+                              : BsTokens.mutedLight,
                       fontWeight:
                           i == todayIndex ? FontWeight.w800 : FontWeight.w500,
                       fontSize: 12,

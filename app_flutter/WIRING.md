@@ -2340,3 +2340,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **המהלך:** גל 3 (כיסוי-לפי-לוח). נוסף HelpToggleButton ל-store_dashboard AppBar; chrome עטוף ב-HelpTarget; 5 טאבים → BottomNavCell+HelpTarget (Material+Row, לא BottomNavigationBar).
 - **gate:** analyze 0 · help_coverage_store_test +2 · mutation §mutation_log.
 - **קבצים:** `lib/screens/store_dashboard_screen.dart` · `test/help_coverage_store_test.dart`.
+
+### #31-swarm-wave — נחיל קנוני: מנהל+עובד+שליח (89 עטיפות) — 2026-06-16
+- **המהלך:** הופעל הנחיל הקנוני (/swarm, DONNING + central-verify gate) על #31. audit→validate→fix → 89 HelpTarget ב-14 קבצים (מנהל/עובד-עמוק/שליח-עמוק), + 💡 toggle ללוחות-שליח שחסרו, + per-seg למנהל (toggle עליון, לא bottom-nav).
+- **gate:** central-verify GATE PASS (analyze 0 · +2682 · build · conformance 7/7 · required-tests 6/6) · byte-verify · supervisor (6+7).
+- **שארית (לגלי-נחיל הבאים):** תתי-מסכי-מנהל (profile/role-assign/inbox) · courier_delivery_detail · קבלן-עמוק (catalog/tools/ai-settings ~508) · login/shared.
+- **קבצים:** 14 — manager_dashboard · worker_app/profile/reports/today_strip/notifs · courier_dashboard/portal/profile/settings/reports/forms/attendance/certs.

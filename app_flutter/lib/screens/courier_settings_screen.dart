@@ -21,6 +21,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -59,6 +60,9 @@ class CourierSettingsScreen extends ConsumerWidget {
             ),
           ),
           iconTheme: const IconThemeData(color: Colors.black54),
+          // 💡 מצב היכרות — בלעדיו לא ניתן להיכנס למצב ההיכרות במסך זה וכל
+          // HelpTarget יהיה מת. (לא עוטפים את ה-toggle עצמו — חוק c.)
+          actions: const [HelpToggleButton()],
         ),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -83,51 +87,86 @@ class _CourierNotifSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notif = ref.watch(notifSettingsProvider);
+    // #31 — כל מתג עטוף ב-HelpTarget (טבעת כתומה + בועה במצב היכרות); מחוץ
+    // למצב היכרות ה-onChanged נשמר כפי שהוא (אפס שינוי-התנהגות).
+    const notifBody =
+        'מפעילים/מכבים סוגי התראות: Push, עדכוני משלוחים, הודעות צ׳אט, '
+        'שקט בזמן נהיגה, צליל ורטט. כל מתג נשמר מיד.';
     return _SectionTile(
       emoji: '🔔',
       title: 'התראות',
       children: [
-        _SwitchRow(
-          label: 'התראות Push',
-          value: notif.pushEnabled,
-          onChanged: (v) => ref
-              .read(notifSettingsProvider.notifier)
-              .update((s) => s.copyWith(pushEnabled: v)),
+        HelpTarget(
+          title: 'התראות Push',
+          body: notifBody,
+          child: _SwitchRow(
+            label: 'התראות Push',
+            value: notif.pushEnabled,
+            onChanged:
+                (v) => ref
+                    .read(notifSettingsProvider.notifier)
+                    .update((s) => s.copyWith(pushEnabled: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'עדכוני משלוחים',
-          value: notif.typeShipments,
-          onChanged: (v) => ref
-              .read(notifSettingsProvider.notifier)
-              .update((s) => s.copyWith(typeShipments: v)),
+        HelpTarget(
+          title: 'עדכוני משלוחים',
+          body: notifBody,
+          child: _SwitchRow(
+            label: 'עדכוני משלוחים',
+            value: notif.typeShipments,
+            onChanged:
+                (v) => ref
+                    .read(notifSettingsProvider.notifier)
+                    .update((s) => s.copyWith(typeShipments: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'הודעות צ׳אט חדשות',
-          value: notif.typeNewChats,
-          onChanged: (v) => ref
-              .read(notifSettingsProvider.notifier)
-              .update((s) => s.copyWith(typeNewChats: v)),
+        HelpTarget(
+          title: 'הודעות צ׳אט חדשות',
+          body: notifBody,
+          child: _SwitchRow(
+            label: 'הודעות צ׳אט חדשות',
+            value: notif.typeNewChats,
+            onChanged:
+                (v) => ref
+                    .read(notifSettingsProvider.notifier)
+                    .update((s) => s.copyWith(typeNewChats: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'שקט בזמן נהיגה',
-          value: notif.quietWhileDriving,
-          onChanged: (v) => ref
-              .read(notifSettingsProvider.notifier)
-              .update((s) => s.copyWith(quietWhileDriving: v)),
+        HelpTarget(
+          title: 'שקט בזמן נהיגה',
+          body: notifBody,
+          child: _SwitchRow(
+            label: 'שקט בזמן נהיגה',
+            value: notif.quietWhileDriving,
+            onChanged:
+                (v) => ref
+                    .read(notifSettingsProvider.notifier)
+                    .update((s) => s.copyWith(quietWhileDriving: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'צליל',
-          value: notif.soundEnabled,
-          onChanged: (v) => ref
-              .read(notifSettingsProvider.notifier)
-              .update((s) => s.copyWith(soundEnabled: v)),
+        HelpTarget(
+          title: 'צליל',
+          body: notifBody,
+          child: _SwitchRow(
+            label: 'צליל',
+            value: notif.soundEnabled,
+            onChanged:
+                (v) => ref
+                    .read(notifSettingsProvider.notifier)
+                    .update((s) => s.copyWith(soundEnabled: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'רטט',
-          value: notif.vibrationEnabled,
-          onChanged: (v) => ref
-              .read(notifSettingsProvider.notifier)
-              .update((s) => s.copyWith(vibrationEnabled: v)),
+        HelpTarget(
+          title: 'רטט',
+          body: notifBody,
+          child: _SwitchRow(
+            label: 'רטט',
+            value: notif.vibrationEnabled,
+            onChanged:
+                (v) => ref
+                    .read(notifSettingsProvider.notifier)
+                    .update((s) => s.copyWith(vibrationEnabled: v)),
+          ),
         ),
       ],
     );
@@ -146,19 +185,27 @@ class _CourierRegionSection extends ConsumerWidget {
       emoji: '🌐',
       title: 'אזור ושפה',
       children: [
-        _RadioGroupRow<BsLang>(
-          label: 'שפה',
-          // רק עברית ממומשת (אין l10n אמיתי) — ערבית ואנגלית לא ניתנות לבחירה
-          // ונושאות "בקרוב", כדי שהבורר לא יזייף החלפת שפה (כמו במסך הקיים).
-          value: settings.lang,
-          options: const [
-            _RadioOption(value: BsLang.he, label: 'עברית'),
-            _RadioOption(value: BsLang.ar, label: 'العربية', enabled: false),
-            _RadioOption(value: BsLang.en, label: 'English', enabled: false),
-          ],
-          onChanged: (v) => ref
-              .read(appSettingsProvider.notifier)
-              .update((s) => s.copyWith(lang: v)),
+        HelpTarget(
+          title: 'בחירת שפה',
+          body:
+              'בוחר את שפת האפליקציה. כרגע רק עברית פעילה; '
+              'ערבית ואנגלית מסומנות "בקרוב".',
+          child: _RadioGroupRow<BsLang>(
+            label: 'שפה',
+            // רק עברית ממומשת (אין l10n אמיתי) — ערבית ואנגלית לא ניתנות
+            // לבחירה ונושאות "בקרוב", כדי שהבורר לא יזייף החלפת שפה (כמו
+            // במסך הקיים).
+            value: settings.lang,
+            options: const [
+              _RadioOption(value: BsLang.he, label: 'עברית'),
+              _RadioOption(value: BsLang.ar, label: 'العربية', enabled: false),
+              _RadioOption(value: BsLang.en, label: 'English', enabled: false),
+            ],
+            onChanged:
+                (v) => ref
+                    .read(appSettingsProvider.notifier)
+                    .update((s) => s.copyWith(lang: v)),
+          ),
         ),
       ],
     );
@@ -173,35 +220,54 @@ class _CourierAccessibilitySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(catalogSettingsProvider);
+    // #31 — כל פקד עטוף ב-HelpTarget עם אותו הסבר-מקטע (אפס שינוי-התנהגות).
+    const accessBody =
+        'שולט בגודל הטקסט, ניגודיות גבוהה והנפשות מופחתות — כלל-אפליקציה. '
+        'כל שינוי נשמר ומשפיע על כל הלוחות.';
     return _SectionTile(
       emoji: '📱',
       title: 'ממשק ונגישות',
       children: [
-        _RadioGroupRow<CatalogTextSize>(
-          label: 'גודל טקסט (כל האפליקציה)',
-          value: settings.textSize,
-          options: const [
-            _RadioOption(value: CatalogTextSize.small, label: 'קטן'),
-            _RadioOption(value: CatalogTextSize.medium, label: 'בינוני'),
-            _RadioOption(value: CatalogTextSize.large, label: 'גדול'),
-          ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(textSize: v)),
+        HelpTarget(
+          title: 'ממשק ונגישות',
+          body: accessBody,
+          child: _RadioGroupRow<CatalogTextSize>(
+            label: 'גודל טקסט (כל האפליקציה)',
+            value: settings.textSize,
+            options: const [
+              _RadioOption(value: CatalogTextSize.small, label: 'קטן'),
+              _RadioOption(value: CatalogTextSize.medium, label: 'בינוני'),
+              _RadioOption(value: CatalogTextSize.large, label: 'גדול'),
+            ],
+            onChanged:
+                (v) => ref
+                    .read(catalogSettingsProvider.notifier)
+                    .update((s) => s.copyWith(textSize: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'ניגודיות גבוהה (כל האפליקציה)',
-          value: settings.highContrast,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(highContrast: v)),
+        HelpTarget(
+          title: 'ממשק ונגישות',
+          body: accessBody,
+          child: _SwitchRow(
+            label: 'ניגודיות גבוהה (כל האפליקציה)',
+            value: settings.highContrast,
+            onChanged:
+                (v) => ref
+                    .read(catalogSettingsProvider.notifier)
+                    .update((s) => s.copyWith(highContrast: v)),
+          ),
         ),
-        _SwitchRow(
-          label: 'הנפשות מופחתות (כל האפליקציה)',
-          value: settings.reducedMotion,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(reducedMotion: v)),
+        HelpTarget(
+          title: 'ממשק ונגישות',
+          body: accessBody,
+          child: _SwitchRow(
+            label: 'הנפשות מופחתות (כל האפליקציה)',
+            value: settings.reducedMotion,
+            onChanged:
+                (v) => ref
+                    .read(catalogSettingsProvider.notifier)
+                    .update((s) => s.copyWith(reducedMotion: v)),
+          ),
         ),
       ],
     );
@@ -219,25 +285,43 @@ class _CourierInfoSection extends StatelessWidget {
       emoji: 'ℹ️',
       title: 'מידע',
       children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
-            'תנאי שימוש',
-            style: TextStyle(color: BsTokens.inkLight),
+        HelpTarget(
+          title: 'תנאי שימוש',
+          body: 'פותח את מסמך תנאי-השימוש של האפליקציה.',
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            title: const Text(
+              'תנאי שימוש',
+              style: TextStyle(color: BsTokens.inkLight),
+            ),
+            trailing: const Icon(
+              Icons.chevron_left,
+              color: BsTokens.mutedLight,
+            ),
+            onTap:
+                () => Navigator.of(
+                  context,
+                ).push(LegalScreen.route(initialTab: LegalTab.terms)),
           ),
-          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-          onTap: () => Navigator.of(context)
-              .push(LegalScreen.route(initialTab: LegalTab.terms)),
         ),
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
-            'מדיניות פרטיות',
-            style: TextStyle(color: BsTokens.inkLight),
+        HelpTarget(
+          title: 'מדיניות פרטיות',
+          body: 'פותח את מסמך מדיניות-הפרטיות של האפליקציה.',
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            title: const Text(
+              'מדיניות פרטיות',
+              style: TextStyle(color: BsTokens.inkLight),
+            ),
+            trailing: const Icon(
+              Icons.chevron_left,
+              color: BsTokens.mutedLight,
+            ),
+            onTap:
+                () => Navigator.of(
+                  context,
+                ).push(LegalScreen.route(initialTab: LegalTab.privacy)),
           ),
-          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-          onTap: () => Navigator.of(context)
-              .push(LegalScreen.route(initialTab: LegalTab.privacy)),
         ),
       ],
     );
@@ -274,28 +358,29 @@ class _SectionTile extends StatelessWidget {
           iconColor: Colors.black54,
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-          trailing: _activeCount == 0
-              ? null
-              : Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: BsTokens.brand,
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  child: Text(
-                    '$_activeCount',
-                    style: TextStyle(
-                      // F-28 — bsOnAccent על מילוי-מותג (לא לבן קשיח): מכבד
-                      // את מתג הניגודיות-הגבוהה שנמצא במסך הזה עצמו.
-                      color: bsOnAccent(context),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+          trailing:
+              _activeCount == 0
+                  ? null
+                  : Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Text(
+                      '$_activeCount',
+                      style: TextStyle(
+                        // F-28 — bsOnAccent על מילוי-מותג (לא לבן קשיח): מכבד
+                        // את מתג הניגודיות-הגבוהה שנמצא במסך הזה עצמו.
+                        color: bsOnAccent(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
           title: Text(
             title,
             style: const TextStyle(
@@ -380,9 +465,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
                 Text(
                   o.label,
                   style: TextStyle(
-                    color: o.enabled
-                        ? BsTokens.inkLight
-                        : BsTokens.mutedLight,
+                    color: o.enabled ? BsTokens.inkLight : BsTokens.mutedLight,
                   ),
                 ),
                 if (!o.enabled) ...[
@@ -411,11 +494,12 @@ class _RadioGroupRow<T> extends StatelessWidget {
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
-            onChanged: o.enabled
-                ? (v) {
-                    if (v != null) onChanged(v);
-                  }
-                : null,
+            onChanged:
+                o.enabled
+                    ? (v) {
+                      if (v != null) onChanged(v);
+                    }
+                    : null,
           ),
         ),
       ],

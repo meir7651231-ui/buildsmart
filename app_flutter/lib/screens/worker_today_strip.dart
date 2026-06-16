@@ -142,64 +142,78 @@ class _StageRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            // #71 reuse — the same detail sheet a task card opens (same id
-            // space: both §6 and §7 are built from kPersonaTasks).
-            onTap: () =>
-                showWorkerTaskDetailSheet(context, taskId: stage.taskId),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: BsTokens.space1),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: emphasized
-                          ? const Color(0xFFFFF0E3)
-                          : const Color(0xFFF2F3F5),
-                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                    ),
-                    child: Text(
-                      tag,
-                      style: TextStyle(
+          child: HelpTarget(
+            title: 'שלב היום',
+            body:
+                'לחיצה על שלב-היום פותחת את פירוט המשימה שלו — שלבים '
+                'והוראות. כפתור הסימון (כבר עטוף) מסמן את היום כהושלם בתוכנית.',
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              // #71 reuse — the same detail sheet a task card opens (same id
+              // space: both §6 and §7 are built from kPersonaTasks).
+              onTap:
+                  () =>
+                      showWorkerTaskDetailSheet(context, taskId: stage.taskId),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: BsTokens.space1),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
                         color:
-                            emphasized ? BsTokens.brandDark : BsTokens.mutedLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
+                            emphasized
+                                ? const Color(0xFFFFF0E3)
+                                : const Color(0xFFF2F3F5),
+                        borderRadius: BorderRadius.circular(
+                          BsTokens.radiusPill,
+                        ),
+                      ),
+                      child: Text(
+                        tag,
+                        style: TextStyle(
+                          color:
+                              emphasized
+                                  ? BsTokens.brandDark
+                                  : BsTokens.mutedLight,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: BsTokens.space2),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          stage.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: ink,
-                            fontWeight:
-                                emphasized ? FontWeight.w800 : FontWeight.w600,
-                            fontSize: 13.5,
+                    const SizedBox(width: BsTokens.space2),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            stage.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontWeight:
+                                  emphasized
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                              fontSize: 13.5,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${stage.dayTag} · ${stage.steps.length} שלבים',
-                          style: const TextStyle(
-                            color: BsTokens.mutedLight,
-                            fontSize: 12,
+                          Text(
+                            '${stage.dayTag} · ${stage.steps.length} שלבים',
+                            style: const TextStyle(
+                              color: BsTokens.mutedLight,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -207,7 +221,8 @@ class _StageRow extends StatelessWidget {
         if (onMarkDone != null)
           HelpTarget(
             title: 'סימון יום כהושלם',
-            body: 'מסמן את יום-העבודה הנוכחי כהושלם בתוכנית הפרויקט — '
+            body:
+                'מסמן את יום-העבודה הנוכחי כהושלם בתוכנית הפרויקט — '
                 'אותו סימון שהקבלן רואה במסך "מאפס עד מסירה".',
             child: Semantics(
               button: true,

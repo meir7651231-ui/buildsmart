@@ -19,6 +19,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +98,8 @@ class WorkerProfileScreen extends ConsumerWidget {
 
     // #85ד — the worker's own editable profile (per username); every field is
     // an OVERRIDE that falls back honestly (name → session.displayName).
-    final profile = ref.watch(workerProfileProvider)[session.username] ??
+    final profile =
+        ref.watch(workerProfileProvider)[session.username] ??
         const WorkerProfile();
 
     // #104ב — התמחות derived from טופס 101 (single source of truth), with the
@@ -116,11 +118,7 @@ class WorkerProfileScreen extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        _IdentityCard(
-          session: session,
-          profile: profile,
-          specialty: specialty,
-        ),
+        _IdentityCard(session: session, profile: profile, specialty: specialty),
         const SizedBox(height: BsTokens.space3),
         _StatsCard(
           done: done,
@@ -218,81 +216,92 @@ class _IdentityCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-        children: [
-          _ProfileAvatar(photo: profile.photo, size: 56),
-          const SizedBox(width: BsTokens.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            children: [
+              _ProfileAvatar(photo: profile.photo, size: 56),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                            ),
+                          ),
                         ),
+                        if (session.demo) ...[
+                          const SizedBox(width: BsTokens.space2),
+                          // Honest demo-session marker (#66).
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F3F5),
+                              borderRadius: BorderRadius.circular(
+                                BsTokens.radiusPill,
+                              ),
+                            ),
+                            child: const Text(
+                              'דמו',
+                              style: TextStyle(
+                                color: BsTokens.mutedLight,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '@${session.username} · עובד',
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 13,
                       ),
                     ),
-                    if (session.demo) ...[
-                      const SizedBox(width: BsTokens.space2),
-                      // Honest demo-session marker (#66).
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF2F3F5),
-                          borderRadius:
-                              BorderRadius.circular(BsTokens.radiusPill),
-                        ),
-                        child: const Text(
-                          'דמו',
-                          style: TextStyle(
-                            color: BsTokens.mutedLight,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
+                    if (meta.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        meta,
+                        style: const TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 13,
                         ),
                       ),
                     ],
+                    // 📞/💬 — call or WhatsApp this worker (hidden when no phone).
+                    ContactActions(phone: profile.phone),
                   ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '@${session.username} · עובד',
-                  style: const TextStyle(
+              ),
+              // #85ד — opens the profile editor (48dp IconButton).
+              HelpTarget(
+                title: 'עריכת פרופיל',
+                body:
+                    'פותח טופס לעריכת הפרופיל שלך — שם-תצוגה, טלפון, תמונה ופרטים אישיים. '
+                    'ההתמחות נגזרת אוטומטית מטופס 101.',
+                child: IconButton(
+                  tooltip: 'עריכת פרופיל',
+                  icon: const Icon(
+                    Icons.edit_outlined,
                     color: BsTokens.mutedLight,
-                    fontSize: 13,
                   ),
+                  onPressed:
+                      () =>
+                          showWorkerProfileEditSheet(context, session: session),
                 ),
-                if (meta.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    meta,
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-                // 📞/💬 — call or WhatsApp this worker (hidden when no phone).
-                ContactActions(phone: profile.phone),
-              ],
-            ),
-          ),
-          // #85ד — opens the profile editor (48dp IconButton).
-          IconButton(
-            tooltip: 'עריכת פרופיל',
-            icon: const Icon(Icons.edit_outlined, color: BsTokens.mutedLight),
-            onPressed: () =>
-                showWorkerProfileEditSheet(context, session: session),
-          ),
-        ],
+              ),
+            ],
           ),
           // #104ג — the expanded personal details below the identity row,
           // each printed ONLY when filled (honest empty state).
@@ -496,9 +505,15 @@ class _PersonalAreaCard extends ConsumerWidget {
     }
     final _RowStatus attendance;
     if (today?.outTs != null) {
-      attendance = _RowStatus('יצא ${_hhmm(today!.outTs!)}', BsTokens.mutedLight);
+      attendance = _RowStatus(
+        'יצא ${_hhmm(today!.outTs!)}',
+        BsTokens.mutedLight,
+      );
     } else if (today?.inTs != null) {
-      attendance = _RowStatus('נכנס ${_hhmm(today!.inTs!)}', BsTokens.successDark);
+      attendance = _RowStatus(
+        'נכנס ${_hhmm(today!.inTs!)}',
+        BsTokens.successDark,
+      );
     } else {
       attendance = _RowStatus.empty('לא נרשם היום');
     }
@@ -506,10 +521,14 @@ class _PersonalAreaCard extends ConsumerWidget {
     // ── טפסים — most actionable first: a pending vacation, then a sick note
     //    count, then the 101 submission state, else the honest empty hint. ──
     final forms = ref.watch(workerFormsProvider);
-    final pendingVac = ref.watch(vacationRequestsProvider).where((r) =>
-        r.username == username &&
-        r.role == 'worker' &&
-        r.status == kVacationPending);
+    final pendingVac = ref
+        .watch(vacationRequestsProvider)
+        .where(
+          (r) =>
+              r.username == username &&
+              r.role == 'worker' &&
+              r.status == kVacationPending,
+        );
     final sickCount = forms.sickNotesFor(username).length;
     final form101 = forms.form101For(username, now.year);
     final _RowStatus formsStatus;
@@ -526,18 +545,21 @@ class _PersonalAreaCard extends ConsumerWidget {
     }
 
     // ── תיק בטיחות — certificate expiry traffic-light over the worker's wallet ──
-    final certs =
-        ref.watch(workerCertsProvider).where((c) => c.username == username);
+    final certs = ref
+        .watch(workerCertsProvider)
+        .where((c) => c.username == username);
     final _RowStatus safety;
     if (certs.isEmpty) {
       safety = _RowStatus.empty('אין תעודות');
     } else {
-      final expired = certs
-          .where((c) => c.statusAt(now) == CertExpiryStatus.expired)
-          .length;
-      final soon = certs
-          .where((c) => c.statusAt(now) == CertExpiryStatus.expiringSoon)
-          .length;
+      final expired =
+          certs
+              .where((c) => c.statusAt(now) == CertExpiryStatus.expired)
+              .length;
+      final soon =
+          certs
+              .where((c) => c.statusAt(now) == CertExpiryStatus.expiringSoon)
+              .length;
       if (expired > 0) {
         safety = _RowStatus('$expired פג תוקף', BsTokens.dangerDark);
       } else if (soon > 0) {
@@ -561,38 +583,66 @@ class _PersonalAreaCard extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _PersonalAreaRow(
-            emoji: '🕐',
+          HelpTarget(
             title: 'נוכחות',
-            subtitle: 'כניסה/יציאה ודוח חודשי',
-            status: attendance,
-            onTap: () =>
-                Navigator.of(context).push(WorkerAttendanceScreen.route()),
+            body:
+                'פותח את לוח-הנוכחות: כניסה/יציאה ודוח חודשי. '
+                'הפיל מציג את סטטוס הנוכחות החי של היום וקיצור ישיר אליו.',
+            child: _PersonalAreaRow(
+              emoji: '🕐',
+              title: 'נוכחות',
+              subtitle: 'כניסה/יציאה ודוח חודשי',
+              status: attendance,
+              onTap:
+                  () => Navigator.of(
+                    context,
+                  ).push(WorkerAttendanceScreen.route()),
+            ),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          _PersonalAreaRow(
-            emoji: '📄',
+          HelpTarget(
             title: 'טפסים',
-            subtitle: 'טופס 101 · בקשת חופשה · אישור מחלה',
-            status: formsStatus,
-            onTap: () => Navigator.of(context).push(WorkerFormsScreen.route()),
+            body:
+                'פותח את הטפסים שלך — טופס 101, בקשת חופשה ואישור מחלה. '
+                'הפיל מציג את מצב הטופס האחרון וקיצור אליו.',
+            child: _PersonalAreaRow(
+              emoji: '📄',
+              title: 'טפסים',
+              subtitle: 'טופס 101 · בקשת חופשה · אישור מחלה',
+              status: formsStatus,
+              onTap:
+                  () => Navigator.of(context).push(WorkerFormsScreen.route()),
+            ),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          _PersonalAreaRow(
-            emoji: '🛡️',
+          HelpTarget(
             title: 'תיק בטיחות',
-            subtitle: 'הדרכות ותעודות מקצועיות',
-            status: safety,
-            onTap: () => Navigator.of(context).push(WorkerSafetyScreen.route()),
+            body:
+                'פותח את ההדרכות והתעודות המקצועיות שלך. '
+                'הפיל מציג רמזור-תוקף (פג/לקראת-תפוגה/בתוקף) וקיצור אליו.',
+            child: _PersonalAreaRow(
+              emoji: '🛡️',
+              title: 'תיק בטיחות',
+              subtitle: 'הדרכות ותעודות מקצועיות',
+              status: safety,
+              onTap:
+                  () => Navigator.of(context).push(WorkerSafetyScreen.route()),
+            ),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          _PersonalAreaRow(
-            emoji: '💰',
+          HelpTarget(
             title: 'תלושי שכר',
-            subtitle: 'יחובר עם חיבור השרת',
-            // Honest: payslips have no on-device source yet (SERVER-READY).
-            status: _RowStatus.empty('מוכן לשרת'),
-            onTap: () => showWorkerPayslipsSheet(context),
+            body:
+                'פותח את תלושי השכר. כרגע אין מקור-נתונים מקומי — '
+                'המקטע מוכן לחיבור השרת.',
+            child: _PersonalAreaRow(
+              emoji: '💰',
+              title: 'תלושי שכר',
+              subtitle: 'יחובר עם חיבור השרת',
+              // Honest: payslips have no on-device source yet (SERVER-READY).
+              status: _RowStatus.empty('מוכן לשרת'),
+              onTap: () => showWorkerPayslipsSheet(context),
+            ),
           ),
         ],
       ),
@@ -644,9 +694,10 @@ class _PersonalAreaRow extends StatelessWidget {
             label: '${status.label} — פתח $title',
             excludeSemantics: true,
             child: Material(
-              color: status.muted
-                  ? const Color(0xFFF2F3F5)
-                  : status.color.withValues(alpha: 0.12),
+              color:
+                  status.muted
+                      ? const Color(0xFFF2F3F5)
+                      : status.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               child: InkWell(
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -703,41 +754,64 @@ class _ActionsCard extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          ListTile(
-            leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'הגדרות עובד',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          HelpTarget(
+            title: 'הגדרות עובד',
+            body:
+                'פותח את הגדרות הלוח המותאמות לעובד — התראות, אזור ושפה, '
+                'ממשק ונגישות ומידע משפטי.',
+            child: ListTile(
+              leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'הגדרות עובד',
+                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: BsTokens.mutedLight,
+              ),
+              onTap:
+                  () =>
+                      Navigator.of(context).push(WorkerSettingsScreen.route()),
             ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-            onTap: () =>
-                Navigator.of(context).push(WorkerSettingsScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('🔄', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'החלפת תפקיד',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          HelpTarget(
+            title: 'החלפת תפקיד',
+            body:
+                'מעבר ללוח אחר (קבלן/מנהל/חנות/שליח) — מוגן בקוד. '
+                'ללא הקוד הנכון המעבר אינו מתאפשר.',
+            child: ListTile(
+              leading: const Text('🔄', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'החלפת תפקיד',
+                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+              ),
+              subtitle: const Text(
+                'מוגן בקוד',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: BsTokens.mutedLight,
+              ),
+              onTap: () => _askRoleSwitchCode(context),
             ),
-            subtitle: const Text(
-              'מוגן בקוד',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-            onTap: () => _askRoleSwitchCode(context),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'יציאה',
-              // AA: redAccent על לבן נכשל — token חוזה 9.
-              style: TextStyle(color: BsTokens.dangerDark, fontSize: 15),
+          HelpTarget(
+            title: 'יציאה',
+            body:
+                'מנתק אותך מלוח העובד ומחזיר למסך ההרשמה. '
+                'תתבקש לאשר לפני הניתוק.',
+            child: ListTile(
+              leading: const Text('🚪', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'יציאה',
+                // AA: redAccent על לבן נכשל — token חוזה 9.
+                style: TextStyle(color: BsTokens.dangerDark, fontSize: 15),
+              ),
+              onTap: () => _logout(context, ref),
             ),
-            onTap: () => _logout(context, ref),
           ),
         ],
       ),
@@ -756,61 +830,58 @@ class _ActionsCard extends ConsumerWidget {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-          builder: (ctx, setState) {
-            void submit() {
-              // Validated against the local seed code — SERVER-SWAP: becomes a
-              // server-side permission check with Firebase Auth.
-              if (controller.text.trim() == kRoleSwitchCode) {
-                Navigator.pop(dialogCtx, true);
-              } else {
-                setState(() => error = 'קוד שגוי — נסה שוב');
+            builder: (ctx, setState) {
+              void submit() {
+                // Validated against the local seed code — SERVER-SWAP: becomes a
+                // server-side permission check with Firebase Auth.
+                if (controller.text.trim() == kRoleSwitchCode) {
+                  Navigator.pop(dialogCtx, true);
+                } else {
+                  setState(() => error = 'קוד שגוי — נסה שוב');
+                }
               }
-            }
 
-            return AlertDialog(
-              backgroundColor: const Color(0xFFFFFFFF),
-              title: const Text(
-                'החלפת תפקיד',
-                style: TextStyle(color: BsTokens.inkLight),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:',
-                    style: TextStyle(color: Colors.black54, fontSize: 13.5),
-                  ),
-                  const SizedBox(height: BsTokens.space3),
-                  TextField(
-                    controller: controller,
-                    autofocus: true,
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    onSubmitted: (_) => submit(),
-                    decoration: InputDecoration(
-                      // תווית נראית גם בזמן הקלדה (לא hint חולף בלבד).
-                      labelText: 'קוד מעבר',
-                      hintText: 'קוד',
-                      errorText: error,
-                      border: const OutlineInputBorder(),
+              return AlertDialog(
+                backgroundColor: const Color(0xFFFFFFFF),
+                title: const Text(
+                  'החלפת תפקיד',
+                  style: TextStyle(color: BsTokens.inkLight),
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:',
+                      style: TextStyle(color: Colors.black54, fontSize: 13.5),
                     ),
+                    const SizedBox(height: BsTokens.space3),
+                    TextField(
+                      controller: controller,
+                      autofocus: true,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      onSubmitted: (_) => submit(),
+                      decoration: InputDecoration(
+                        // תווית נראית גם בזמן הקלדה (לא hint חולף בלבד).
+                        labelText: 'קוד מעבר',
+                        hintText: 'קוד',
+                        errorText: error,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogCtx, false),
+                    child: const Text('ביטול'),
                   ),
+                  TextButton(onPressed: submit, child: const Text('אישור')),
                 ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogCtx, false),
-                  child: const Text('ביטול'),
-                ),
-                TextButton(
-                  onPressed: submit,
-                  child: const Text('אישור'),
-                ),
-              ],
-            );
-          },
+              );
+            },
           ),
         );
       },
@@ -869,18 +940,18 @@ class _ProfileAvatar extends StatelessWidget {
   }
 
   Widget _fallback() => Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFF0E3),
-          shape: BoxShape.circle,
-        ),
-        // Decorative: the full name is read just beside it.
-        child: ExcludeSemantics(
-          child: Text('🦺', style: TextStyle(fontSize: size * 0.46)),
-        ),
-      );
+    width: size,
+    height: size,
+    alignment: Alignment.center,
+    decoration: const BoxDecoration(
+      color: Color(0xFFFFF0E3),
+      shape: BoxShape.circle,
+    ),
+    // Decorative: the full name is read just beside it.
+    child: ExcludeSemantics(
+      child: Text('🦺', style: TextStyle(fontSize: size * 0.46)),
+    ),
+  );
 }
 
 /// #85ד — opens the worker profile editor (modal bottom sheet, X to close).
@@ -929,7 +1000,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   @override
   void initState() {
     super.initState();
-    final p = ref.read(workerProfileProvider)[widget.session.username] ??
+    final p =
+        ref.read(workerProfileProvider)[widget.session.username] ??
         const WorkerProfile();
     _name = TextEditingController(
       text: p.name.isNotEmpty ? p.name : widget.session.displayName,
@@ -971,22 +1043,25 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     final emPhone = _emPhone.text.trim();
     // FORMAT validation (the #64 validators), gathered so EVERY bad field is
     // marked at once — not one-at-a-time.
-    final phoneErr = phone.isEmpty
-        // #104א — the phone is now REQUIRED (no longer optional).
-        ? 'נא למלא מספר נייד'
-        : (!validIsraeliMobile(phone)
-            ? 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05'
-            : null);
+    final phoneErr =
+        phone.isEmpty
+            // #104א — the phone is now REQUIRED (no longer optional).
+            ? 'נא למלא מספר נייד'
+            : (!validIsraeliMobile(phone)
+                ? 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05'
+                : null);
     // #104ג — ת.ז is optional, but a non-empty value must be 9 digits
     // (FORMAT only — a real checksum/identity check is a server concern).
-    final idErr = idDigits.isNotEmpty && !RegExp(r'^\d{9}$').hasMatch(idDigits)
-        ? 'ת.ז חייבת להיות 9 ספרות'
-        : null;
+    final idErr =
+        idDigits.isNotEmpty && !RegExp(r'^\d{9}$').hasMatch(idDigits)
+            ? 'ת.ז חייבת להיות 9 ספרות'
+            : null;
     // #104ג — the emergency phone is optional, but a non-empty value must be
     // a valid Israeli mobile.
-    final emPhoneErr = emPhone.isNotEmpty && !validIsraeliMobile(emPhone)
-        ? 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05'
-        : null;
+    final emPhoneErr =
+        emPhone.isNotEmpty && !validIsraeliMobile(emPhone)
+            ? 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05'
+            : null;
     if (phoneErr != null || idErr != null || emPhoneErr != null) {
       setState(() {
         _phoneError = phoneErr;
@@ -1000,11 +1075,14 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     // #104ב — התמחות is NOT edited here (טופס 101 owns it). Preserve the
     // worker's existing legacy override verbatim so the back-compat fallback
     // is never clobbered to '' by a profile save.
-    final existing = ref.read(workerProfileProvider)[widget.session.username] ??
+    final existing =
+        ref.read(workerProfileProvider)[widget.session.username] ??
         const WorkerProfile();
     // #17 — the persist is AWAITED: a quota failure (an oversized photo on
     // web localStorage) reports honestly instead of a fake '✓ נשמר'.
-    final ok = await ref.read(workerProfileProvider.notifier).save(
+    final ok = await ref
+        .read(workerProfileProvider.notifier)
+        .save(
           widget.session.username,
           WorkerProfile(
             // Storing '' keeps the honest fallback to the session displayName.
@@ -1044,8 +1122,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       controller: ctl,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
-      onChanged:
-          onClearError == null ? null : (_) => onClearError(),
+      onChanged: onClearError == null ? null : (_) => onClearError(),
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
@@ -1070,8 +1147,9 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       textDirection: TextDirection.rtl,
       child: Padding(
         // Keep the fields above the keyboard.
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
         child: Container(
           decoration: const BoxDecoration(
             color: BsTokens.cardLight,
@@ -1130,8 +1208,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                             ),
                             if (_photo != null)
                               TextButton(
-                                onPressed: () =>
-                                    setState(() => _photo = null),
+                                onPressed: () => setState(() => _photo = null),
                                 child: const Text(
                                   'הסר תמונה',
                                   // AA: redAccent על לבן נכשל — token חוזה 9.
@@ -1221,8 +1298,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     color: BsTokens.brand,
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     child: InkWell(
-                      borderRadius:
-                          BorderRadius.circular(BsTokens.radiusPill),
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                       onTap: _saving ? null : _save,
                       child: Opacity(
                         opacity: _saving ? 0.6 : 1,

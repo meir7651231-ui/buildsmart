@@ -12,6 +12,7 @@ import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -36,8 +37,7 @@ class CourierFormsScreen extends ConsumerStatefulWidget {
       MaterialPageRoute<void>(builder: (_) => const CourierFormsScreen());
 
   @override
-  ConsumerState<CourierFormsScreen> createState() =>
-      _CourierFormsScreenState();
+  ConsumerState<CourierFormsScreen> createState() => _CourierFormsScreenState();
 }
 
 class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
@@ -94,11 +94,12 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
     final sickNotes = formsState.sickNotesFor(username);
     // "Mine" = username AND role (F-26): the demo username is shared across
     // boards, so a demo-worker's request must not appear as a demo-courier's.
-    final myVacations = ref
-        .watch(vacationRequestsProvider)
-        .where((r) => r.username == username && r.role == 'courier')
-        .toList()
-      ..sort((a, b) => b.createdTs.compareTo(a.createdTs));
+    final myVacations =
+        ref
+            .watch(vacationRequestsProvider)
+            .where((r) => r.username == username && r.role == 'courier')
+            .toList()
+          ..sort((a, b) => b.createdTs.compareTo(a.createdTs));
 
     // Prefill ONCE (ticket-#24 idiom): from the saved year-form when prefs
     // resolve; otherwise the live session name (the only profile field that
@@ -130,6 +131,7 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
+        actions: const [HelpToggleButton()],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -194,10 +196,11 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
                 DropdownMenuItem(value: m, child: Text(m)),
             ],
             // The dropdown also flips the #24 touched flag — every input does.
-            onChanged: (v) => setState(() {
-              _touched101 = true;
-              _marital = v ?? '';
-            }),
+            onChanged:
+                (v) => setState(() {
+                  _touched101 = true;
+                  _marital = v ?? '';
+                }),
           ),
         ),
         if (saved != null)
@@ -217,17 +220,29 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
         Row(
           children: [
             Expanded(
-              child: _PillButton(
-                label: '💾 שמור טופס',
-                filled: false,
-                onPressed: () => _save101(session, send: false),
+              child: HelpTarget(
+                title: 'שמירת טופס 101',
+                body:
+                    'שומר את טופס 101 במכשיר לשנת המס הנוכחית, בלי לשלוח. '
+                    'ניתן להמשיך לערוך ולשלוח מאוחר יותר.',
+                child: _PillButton(
+                  label: '💾 שמור טופס',
+                  filled: false,
+                  onPressed: () => _save101(session, send: false),
+                ),
               ),
             ),
             const SizedBox(width: BsTokens.space2),
             Expanded(
-              child: _PillButton(
-                label: '📨 שלח לחנות',
-                onPressed: () => _save101(session, send: true),
+              child: HelpTarget(
+                title: 'שליחת טופס 101 לחנות',
+                body:
+                    'שומר ושולח הודעת-הגשה לחנות דרך הצ׳אט. '
+                    'ההגשה הרשמית החתומה תחובר עם חיבור השרת.',
+                child: _PillButton(
+                  label: '📨 שלח לחנות',
+                  onPressed: () => _save101(session, send: true),
+                ),
               ),
             ),
           ],
@@ -245,12 +260,14 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
       _errName = _nameCtl.text.trim().isEmpty ? 'נא למלא שם מלא' : null;
       // FORMAT check only (9 digits) — like input_validators.dart; a real
       // checksum/identity verification is a server concern.
-      _errId = RegExp(r'^\d{9}$').hasMatch(idDigits)
-          ? null
-          : 'ת.ז חייבת להיות 9 ספרות';
-      _errPhone = validIsraeliMobile(_phoneCtl.text)
-          ? null
-          : 'מספר נייד לא תקין (05XXXXXXXX)';
+      _errId =
+          RegExp(r'^\d{9}$').hasMatch(idDigits)
+              ? null
+              : 'ת.ז חייבת להיות 9 ספרות';
+      _errPhone =
+          validIsraeliMobile(_phoneCtl.text)
+              ? null
+              : 'מספר נייד לא תקין (05XXXXXXXX)';
       _errMarital = _marital.isEmpty ? 'נא לבחור מצב משפחתי' : null;
     });
     if (_errName != null ||
@@ -261,16 +278,20 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
       return;
     }
 
-    ref.read(courierFormsProvider.notifier).saveForm101(Form101(
-      username: session.username,
-      year: _year,
-      fullName: _nameCtl.text.trim(),
-      idNumber: idDigits,
-      phone: _phoneCtl.text.trim(),
-      specialty: _specialtyCtl.text.trim(),
-      maritalStatus: _marital,
-      savedTs: DateTime.now(),
-    ));
+    ref
+        .read(courierFormsProvider.notifier)
+        .saveForm101(
+          Form101(
+            username: session.username,
+            year: _year,
+            fullName: _nameCtl.text.trim(),
+            idNumber: idDigits,
+            phone: _phoneCtl.text.trim(),
+            specialty: _specialtyCtl.text.trim(),
+            maritalStatus: _marital,
+            savedTs: DateTime.now(),
+          ),
+        );
     if (send) {
       // Guard: send() is a silent no-op on an unknown thread — never mark
       // "sent" or toast a success that did not happen.
@@ -290,7 +311,9 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
       // content stays on-device; only the notice is sent. The line carries
       // the sender's display name — fromRole=courier alone is not an
       // identity when more than one courier exists (F-39 rule).
-      ref.read(chatEngineProvider.notifier).send(
+      ref
+          .read(chatEngineProvider.notifier)
+          .send(
             kCourierAttendanceReportThreadId,
             BsRole.courier,
             '📄 ${session.displayName}: הגשתי טופס 101 לשנת $_year',
@@ -310,18 +333,30 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
         Row(
           children: [
             Expanded(
-              child: _DateField(
-                label: 'מתאריך',
-                value: _vacFrom,
-                onPick: () => _pickVacDate(isFrom: true),
+              child: HelpTarget(
+                title: 'תאריכי חופשה',
+                body:
+                    'בוחרים את תאריך ההתחלה והסיום של בקשת החופשה '
+                    'דרך לוח-שנה.',
+                child: _DateField(
+                  label: 'מתאריך',
+                  value: _vacFrom,
+                  onPick: () => _pickVacDate(isFrom: true),
+                ),
               ),
             ),
             const SizedBox(width: BsTokens.space2),
             Expanded(
-              child: _DateField(
-                label: 'עד תאריך',
-                value: _vacTo,
-                onPick: () => _pickVacDate(isFrom: false),
+              child: HelpTarget(
+                title: 'תאריכי חופשה',
+                body:
+                    'בוחרים את תאריך ההתחלה והסיום של בקשת החופשה '
+                    'דרך לוח-שנה.',
+                child: _DateField(
+                  label: 'עד תאריך',
+                  value: _vacTo,
+                  onPick: () => _pickVacDate(isFrom: false),
+                ),
               ),
             ),
           ],
@@ -342,9 +377,15 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        _PillButton(
-          label: '🏖️ שלח בקשה לאישור המנהל',
-          onPressed: () => _submitVacation(session),
+        HelpTarget(
+          title: 'שליחת בקשת חופשה',
+          body:
+              'שולח את בקשת החופשה לאישור המנהל בתור המשותף. '
+              'הסטטוס (ממתינה/אושרה/נדחתה) יתעדכן כאן.',
+          child: _PillButton(
+            label: '🏖️ שלח בקשה לאישור המנהל',
+            onPressed: () => _submitVacation(session),
+          ),
         ),
         if (mine.isNotEmpty) ...[
           const SizedBox(height: BsTokens.space4),
@@ -365,8 +406,8 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
 
   Future<void> _pickVacDate({required bool isFrom}) async {
     final now = DateTime.now();
-    final initial = (isFrom ? _vacFrom : _vacTo) ??
-        (isFrom ? now : (_vacFrom ?? now));
+    final initial =
+        (isFrom ? _vacFrom : _vacTo) ?? (isFrom ? now : (_vacFrom ?? now));
     final picked = await showDatePicker(
       context: context,
       initialDate: initial.isBefore(now) ? now : initial,
@@ -398,7 +439,9 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
     }
     // SHARED queue, reused as-is (SPEC #86.3) — the manager sees this in the
     // same בקשות חופשה queue; role: 'courier' tells the boards apart (F-26).
-    ref.read(vacationRequestsProvider.notifier).submit(
+    ref
+        .read(vacationRequestsProvider.notifier)
+        .submit(
           username: session.username,
           workerName: session.displayName,
           from: from,
@@ -425,9 +468,13 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
         ),
         const SizedBox(height: BsTokens.space3),
-        _PillButton(
-          label: '📷 צרף צילום אישור',
-          onPressed: () => _addSickNote(username),
+        HelpTarget(
+          title: 'צירוף אישור מחלה',
+          body: 'פותח את המצלמה לצילום אישור-מחלה; הצילום נשמר ברשימה למטה.',
+          child: _PillButton(
+            label: '📷 צרף צילום אישור',
+            onPressed: () => _addSickNote(username),
+          ),
         ),
         if (notes.isEmpty)
           const Padding(
@@ -482,34 +529,43 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
               Semantics(
                 button: true,
                 label: 'הצג אישור מחלה במסך מלא',
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => showFullPhotoRefDialog(
-                    context,
-                    n.photo,
-                    label: 'אישור מחלה · ${_fmtDate(n.ts)}',
-                  ),
-                  child: ClipRRect(
+                child: HelpTarget(
+                  title: 'צפייה באישור מחלה',
+                  body: 'הקשה על התמונה פותחת את אישור-המחלה במסך מלא.',
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image(
-                      // Decode at thumb resolution, not full-res (F-43).
-                      image: ResizeImage(
-                        provider,
-                        width: (48 * MediaQuery.devicePixelRatioOf(context))
-                            .round(),
-                      ),
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                      gaplessPlayback: true,
-                      // Corrupt image bytes → the honest 📷, never a crash.
-                      errorBuilder: (_, __, ___) => Container(
+                    onTap:
+                        () => showFullPhotoRefDialog(
+                          context,
+                          n.photo,
+                          label: 'אישור מחלה · ${_fmtDate(n.ts)}',
+                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image(
+                        // Decode at thumb resolution, not full-res (F-43).
+                        image: ResizeImage(
+                          provider,
+                          width:
+                              (48 * MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                        ),
                         width: 48,
                         height: 48,
-                        alignment: Alignment.center,
-                        color: const Color(0xFFF2F3F5),
-                        child: const Text('📷',
-                            style: TextStyle(fontSize: 18)),
+                        fit: BoxFit.cover,
+                        gaplessPlayback: true,
+                        // Corrupt image bytes → the honest 📷, never a crash.
+                        errorBuilder:
+                            (_, __, ___) => Container(
+                              width: 48,
+                              height: 48,
+                              alignment: Alignment.center,
+                              color: const Color(0xFFF2F3F5),
+                              child: const Text(
+                                '📷',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
                       ),
                     ),
                   ),
@@ -526,13 +582,17 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
                 ),
               ),
             ),
-            IconButton(
-              tooltip: 'מחק אישור',
-              icon: const Icon(
-                Icons.delete_outline,
-                color: BsTokens.mutedLight,
+            HelpTarget(
+              title: 'מחיקת אישור',
+              body: 'מוחק את אישור-המחלה לצמיתות (עם דיאלוג אישור).',
+              child: IconButton(
+                tooltip: 'מחק אישור',
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed: () => _removeSickNote(n),
               ),
-              onPressed: () => _removeSickNote(n),
             ),
           ],
         ),
@@ -719,9 +779,7 @@ class _DateField extends StatelessWidget {
           onTap: onPick,
           child: Container(
             constraints: const BoxConstraints(minHeight: 48),
-            padding: const EdgeInsets.symmetric(
-              horizontal: BsTokens.space3,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFE2E2E2)),
@@ -734,9 +792,10 @@ class _DateField extends StatelessWidget {
                   child: Text(
                     value == null ? label : _fmtDate(value!),
                     style: TextStyle(
-                      color: value == null
-                          ? BsTokens.mutedLight
-                          : BsTokens.inkLight,
+                      color:
+                          value == null
+                              ? BsTokens.mutedLight
+                              : BsTokens.inkLight,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                     ),
@@ -807,8 +866,7 @@ class _VacationRow extends StatelessWidget {
             ),
             const SizedBox(width: BsTokens.space2),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),

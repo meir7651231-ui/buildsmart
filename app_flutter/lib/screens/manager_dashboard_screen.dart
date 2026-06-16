@@ -29,6 +29,7 @@ import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -107,11 +108,14 @@ class ManagerDashboardScreen extends ConsumerWidget {
             ],
           ),
           actions: [
+            // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
+            // themselves in a bubble (the 💡 + ✕ stay tappable to toggle/exit).
+            const HelpToggleButton(),
             // Each persona reaches profile + settings from its OWN dashboard
             // (product-owner: separately per role). Three muted AppBar actions
             // sit before the '‹ יציאה' exit; tooltips double as Semantics
             // labels for a11y. RTL: actions lay out leading→trailing, so this
-            // reads 💬 שיחות · profile · settings · exit from the right.
+            // reads 💡 · 💬 שיחות · profile · settings · exit from the right.
             //
             // 🔒 ISOLATION (SPEC §2.5): the chat action ONLY pushes the manager's
             // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
@@ -122,30 +126,62 @@ class ManagerDashboardScreen extends ConsumerWidget {
             // threads the manager participates in (`_visibleToAudience`,
             // chats_screen.dart) — so 'th-worker-manager' (the worker's 'מנהל'
             // thread, rendered here as 'עובד — רן') is readable, not write-only.
-            IconButton(
-              tooltip: 'שיחות',
-              icon: const Icon(Icons.chat_bubble_outline,
-                  color: BsTokens.mutedLight),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const ChatsScreen(persona: BsRole.manager),
+            HelpTarget(
+              title: 'שיחות',
+              body:
+                  'פותח את מרכז השיחות של מנהל המערכת — קריאה ומענה לשרשורי '
+                  'הצ׳אט מול עובדים, קבלנים, חנויות ושליחים. נפתח כמסך עצמאי '
+                  'וחוזר אחורה ללוח; אינו מתנתק ואינו מחליף תפקיד.',
+              child: IconButton(
+                tooltip: 'שיחות',
+                icon: const Icon(
+                  Icons.chat_bubble_outline,
+                  color: BsTokens.mutedLight,
                 ),
+                onPressed:
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder:
+                            (_) => const ChatsScreen(persona: BsRole.manager),
+                      ),
+                    ),
               ),
             ),
-            IconButton(
-              tooltip: 'פרופיל',
-              icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
-              // #20 — the manager's OWN profile (session + role-switch +
-              // logout), not the contractor's ProfileScreen.
-              onPressed: () =>
-                  Navigator.of(context).push(ManagerProfileScreen.route()),
+            HelpTarget(
+              title: 'אזור אישי',
+              body:
+                  'פותח את האזור האישי של מנהל המערכת: פרטי החשבון, סטטיסטיקת '
+                  'הזמנות חיה, ומעבר להגדרות ולהחלפת תפקיד מוגנת בקוד.',
+              child: IconButton(
+                tooltip: 'פרופיל',
+                icon: const Icon(
+                  Icons.person_outline,
+                  color: BsTokens.mutedLight,
+                ),
+                // #20 — the manager's OWN profile (session + role-switch +
+                // logout), not the contractor's ProfileScreen.
+                onPressed:
+                    () => Navigator.of(
+                      context,
+                    ).push(ManagerProfileScreen.route()),
+              ),
             ),
-            IconButton(
-              tooltip: 'הגדרות',
-              icon:
-                  const Icon(Icons.settings_outlined, color: BsTokens.mutedLight),
-              onPressed: () =>
-                  Navigator.of(context).push(CatalogSettingsScreen.route()),
+            HelpTarget(
+              title: 'הגדרות הקטלוג',
+              body:
+                  'פותח את הגדרות הקטלוג והאפליקציה — שליטת No-Code על '
+                  'הפרמטרים שכל הקבלנים רואים.',
+              child: IconButton(
+                tooltip: 'הגדרות',
+                icon: const Icon(
+                  Icons.settings_outlined,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed:
+                    () => Navigator.of(
+                      context,
+                    ).push(CatalogSettingsScreen.route()),
+              ),
             ),
             // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").
             // ה-session נשאר קבוע; אין כפתור logout. '‹ יציאה' למטה היא
@@ -184,7 +220,6 @@ class ManagerDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 /// A small green "חי" status pill in the AppBar — signals the dashboard is on
@@ -195,7 +230,10 @@ class _LivePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: BsTokens.space3, vertical: 5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space3,
+        vertical: 5,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFFE7F6EC),
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -256,36 +294,47 @@ class _ManagerToggle extends ConsumerWidget {
           // correctly (gate 62 — no hard-coded edge inset).
           padding: EdgeInsetsDirectional.only(
             start: i == 0 ? 0 : BsTokens.space2 / 2,
-            end: i == ManagerDashboardScreen.tabCount - 1
-                ? 0
-                : BsTokens.space2 / 2,
+            end:
+                i == ManagerDashboardScreen.tabCount - 1
+                    ? 0
+                    : BsTokens.space2 / 2,
           ),
-          child: Material(
-            color: on ? BsTokens.brand : BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
+          // #31 — each tab wrapped in its OWN HelpTarget (orange ring + bubble
+          // out of the tab); the four pills are built in this one seg() loop so
+          // the per-index help text comes from [_kManagerTabHelp].
+          child: HelpTarget(
+            title: _kManagerTabHelp[i].$1,
+            body: _kManagerTabHelp[i].$2,
+            child: Material(
+              color: on ? BsTokens.brand : BsTokens.cardLight,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: () => ref.read(managerTabProvider.notifier).state = i,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(emoji, style: const TextStyle(fontSize: 15)),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: on ? bsOnAccent(context) : BsTokens.inkLight,
-                          fontSize: 13.5,
-                          fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: () => ref.read(managerTabProvider.notifier).state = i,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 6,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(emoji, style: const TextStyle(fontSize: 15)),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                            fontSize: 13.5,
+                            fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -406,9 +455,7 @@ class _MetricGrid extends StatelessWidget {
         return Wrap(
           spacing: gap,
           runSpacing: gap,
-          children: [
-            for (final t in tiles) SizedBox(width: tileW, child: t),
-          ],
+          children: [for (final t in tiles) SizedBox(width: tileW, child: t)],
         );
       },
     );
@@ -678,7 +725,8 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
 
     // Per-stage counts for the chips (@index.html:16965-16966).
     final counts = <String, int>{
-      for (final st in kManagerOrderFlow) st: all.where((o) => o.stage == st).length,
+      for (final st in kManagerOrderFlow)
+        st: all.where((o) => o.stage == st).length,
     };
 
     // If the active filter's stage has emptied out (e.g. its last order was
@@ -690,9 +738,10 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
 
     // Filtered list (@index.html:16974-16982) — by stage only (the legacy free-
     // text search is not part of this wave).
-    final list = effectiveFilter == 'all'
-        ? all
-        : all.where((o) => o.stage == effectiveFilter).toList();
+    final list =
+        effectiveFilter == 'all'
+            ? all
+            : all.where((o) => o.stage == effectiveFilter).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -755,7 +804,9 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
         .read(ordersEngineProvider)
         .firstWhere((x) => x.id == o.id, orElse: () => o);
     showToast(
-        context, 'הזמנה ${o.id} → ${_kOrderStageLabel[live.stage] ?? live.stage}');
+      context,
+      'הזמנה ${o.id} → ${_kOrderStageLabel[live.stage] ?? live.stage}',
+    );
   }
 
   /// The order-detail bottom sheet — the legacy `mgrOrderDetail`
@@ -769,18 +820,21 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
       backgroundColor: BsTokens.cardLight,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
-      ),
-      builder: (sheetCtx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: _OrderDetailSheet(
-          orderId: o.id,
-          onAdvance: () {
-            Navigator.of(sheetCtx).pop();
-            _advance(o);
-          },
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BsTokens.radiusCard),
         ),
       ),
+      builder:
+          (sheetCtx) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: _OrderDetailSheet(
+              orderId: o.id,
+              onAdvance: () {
+                Navigator.of(sheetCtx).pop();
+                _advance(o);
+              },
+            ),
+          ),
     );
   }
 }
@@ -801,24 +855,24 @@ class _OrderSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget stat(String value, String label) => Expanded(
-          child: Column(
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
-              ),
-            ],
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
           ),
-        );
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+        ],
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -859,26 +913,34 @@ class _OrderStageChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // #31 — each stage chip is wrapped in a HelpTarget (one bubble text for the
+    // whole filter row); in help mode it rings + explains, otherwise unchanged.
     Widget chip(String key, String label, int count) {
       final on = active == key;
-      return Material(
-        color: on ? BsTokens.brand : BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        child: InkWell(
+      return HelpTarget(
+        title: 'סינון לפי שלב',
+        body:
+            'מסנן את רשימת ההזמנות לשלב שנבחר; ׳הכל׳ מציג את כולן. רק שלבים '
+            'שיש בהם הזמנות מופיעים. סינון תצוגה בלבד — אינו משנה דאטה.',
+        child: Material(
+          color: on ? BsTokens.brand : BsTokens.cardLight,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          onTap: () => onSelect(key),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
-            ),
-            child: Text(
-              '$label ($count)',
-              style: TextStyle(
-                color: on ? bsOnAccent(context) : BsTokens.inkLight,
-                fontSize: 13,
-                fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: () => onSelect(key),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+              ),
+              child: Text(
+                '$label ($count)',
+                style: TextStyle(
+                  color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                  fontSize: 13,
+                  fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -924,73 +986,94 @@ class _OrderRow extends StatelessWidget {
     return Semantics(
       button: true,
       label: '📦 ${order.id} · ${order.who} · $stageLabel',
-      child: Material(
-        color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-        child: InkWell(
+      // #31 — tapping the card opens the order-detail sheet; in help mode the
+      // HelpTarget rings the whole card and explains it instead.
+      child: HelpTarget(
+        title: 'פרטי הזמנה',
+        body:
+            'פותח את גיליון פרטי ההזמנה: מעקב 6 שלבים, פריטים/סכום, '
+            'קבלן/אתר/סטטוס ופעולת קידום שלב.',
+        child: Material(
+          color: BsTokens.cardLight,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(BsTokens.space4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              border: Border.all(color: const Color(0xFFEDEDED)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '📦 ${order.id}',
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                border: Border.all(color: const Color(0xFFEDEDED)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '📦 ${order.id}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
+                      _StagePill(label: stageLabel, color: stageColor),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${order.who} · ${order.site}',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 13,
                     ),
-                    _StagePill(label: stageLabel, color: stageColor),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${order.who} · ${order.site}',
-                  style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-                ),
-                // 📞/💬 — call / WhatsApp the contractor who placed the order
-                // (hidden when the order carries no phone — seed/legacy).
-                ContactActions(phone: order.customerPhone, compact: true),
-                const SizedBox(height: BsTokens.space3),
-                _MiniTracker(stageIdx: stageIdx),
-                const SizedBox(height: BsTokens.space3),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${order.items} פריטים · ₪${_grouped(order.sum)}',
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                  ),
+                  // 📞/💬 — call / WhatsApp the contractor who placed the order
+                  // (hidden when the order carries no phone — seed/legacy).
+                  ContactActions(phone: order.customerPhone, compact: true),
+                  const SizedBox(height: BsTokens.space3),
+                  _MiniTracker(stageIdx: stageIdx),
+                  const SizedBox(height: BsTokens.space3),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${order.items} פריטים · ₪${_grouped(order.sum)}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    if (order.isOpen)
-                      _AdvanceButton(onPressed: onAdvance)
-                    else
-                      const Text(
-                        '✓ הושלם',
-                        style: TextStyle(
-                          color: Color(0xFF1B7A3D),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
+                      if (order.isOpen)
+                        // #31 — the god-mode stage-advance; in help mode the
+                        // HelpTarget rings + explains it instead of advancing.
+                        HelpTarget(
+                          title: 'קדם שלב להזמנה',
+                          body:
+                              'מקדם את ההזמנה לשלב הבא בצינור '
+                              '(התקבלה→בהכנה→מוכן→נאסף→בדרך→נמסר). עקיפת-מנהל '
+                              'המעדכנת מיד את כל הלוחות. הזמנה שנמסרה אינה ניתנת '
+                              'לקידום.',
+                          child: _AdvanceButton(onPressed: onAdvance),
+                        )
+                      else
+                        const Text(
+                          '✓ הושלם',
+                          style: TextStyle(
+                            color: Color(0xFF1B7A3D),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1118,67 +1201,69 @@ class _OrderDetailSheet extends ConsumerWidget {
     // If the order is gone (edge-case), close the sheet gracefully.
     if (order == null) {
       WidgetsBinding.instance.addPostFrameCallback(
-          (_) => Navigator.of(context, rootNavigator: false).maybePop());
+        (_) => Navigator.of(context, rootNavigator: false).maybePop(),
+      );
       return const SizedBox.shrink();
     }
 
     final stageIdx = kManagerOrderFlow.indexOf(order.stage);
     final stageLabel = _kOrderStageLabel[order.stage] ?? order.stage;
     // L7: guard stageIdx >= 0 to avoid index crash on unknown/corrupt stage.
-    final next = (stageIdx >= 0 && order.isOpen)
-        ? kManagerOrderFlow[stageIdx + 1]
-        : null;
+    final next =
+        (stageIdx >= 0 && order.isOpen)
+            ? kManagerOrderFlow[stageIdx + 1]
+            : null;
 
     Widget tile(String value, String label) => Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
-            decoration: BoxDecoration(
-              color: BsTokens.bgLight,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFEDEDED)),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+        decoration: BoxDecoration(
+          color: BsTokens.bgLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEDEDED)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
             ),
-            child: Column(
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-                ),
-              ],
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
 
     Widget row(String label, String value) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-                ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
           ),
-        );
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
 
     return SafeArea(
       child: Padding(
@@ -1192,7 +1277,11 @@ class _OrderDetailSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('📦', style: TextStyle(fontSize: 34), textAlign: TextAlign.center),
+            const Text(
+              '📦',
+              style: TextStyle(fontSize: 34),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: BsTokens.space2),
             Text(
               order.id,
@@ -1264,21 +1353,29 @@ class _SheetAdvanceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF1F8A4C),
-      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-      child: InkWell(
+    // #31 — the detail-sheet stage-advance; in help mode the HelpTarget rings +
+    // explains it instead of advancing.
+    return HelpTarget(
+      title: 'קדם לשלב הבא',
+      body:
+          'מקדם את ההזמנה לשלב הבא ישירות מתוך גיליון הפרטים. אותה עקיפת-מנהל '
+          'כמו ׳קדם שלב׳ ברשימה; השלב מתעדכן בכל הלוחות.',
+      child: Material(
+        color: const Color(0xFF1F8A4C),
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ),
@@ -1372,9 +1469,10 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
       _CustomerView(
         customer: c,
         // @legacy index.html:16559 — `min(100, round(spent/credit*100))`.
-        pct: c.creditLimit == 0
-            ? 0
-            : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100),
+        pct:
+            c.creditLimit == 0
+                ? 0
+                : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100),
         sites: sitesByBuyer[c.name]?.length ?? 0,
       ),
   ];
@@ -1397,8 +1495,10 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
 /// The detail sheet shows the sync `c.creditLimit` immediately and refines to
 /// this once it resolves — OFF the two are equal, so the displayed number never
 /// changes (no jarring flicker); ON it upgrades to the server-canonical value.
-final customerCreditProvider =
-    FutureProvider.family<CreditResult, String>((ref, name) async {
+final customerCreditProvider = FutureProvider.family<CreditResult, String>((
+  ref,
+  name,
+) async {
   return ref.read(customersRepositoryProvider).computeCredit(name);
 });
 
@@ -1437,10 +1537,14 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     // Summary (@index.html:16570-16578): contractor count, total spend
     // (Σ used), and the fleet credit-utilisation % (Σ used / Σ limit).
     final totalUsed = views.fold<int>(0, (s, v) => s + v.customer.totalSpend);
-    final totalCredit =
-        views.fold<int>(0, (s, v) => s + v.customer.creditLimit);
+    final totalCredit = views.fold<int>(
+      0,
+      (s, v) => s + v.customer.creditLimit,
+    );
     final fleetPct =
-        totalCredit == 0 ? 0 : ((totalUsed / totalCredit) * 100).round().clamp(0, 100);
+        totalCredit == 0
+            ? 0
+            : ((totalUsed / totalCredit) * 100).round().clamp(0, 100);
 
     // Per-status counts for the chips (only live/low are user-facing).
     final counts = <String, int>{
@@ -1453,9 +1557,10 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     final effectiveFilter =
         _filter == 'all' || (counts[_filter] ?? 0) > 0 ? _filter : 'all';
 
-    final list = effectiveFilter == 'all'
-        ? views
-        : views.where((v) => v.status == effectiveFilter).toList();
+    final list =
+        effectiveFilter == 'all'
+            ? views
+            : views.where((v) => v.status == effectiveFilter).toList();
 
     return ListView(
       // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
@@ -1494,10 +1599,7 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
           for (final v in list)
             Padding(
               padding: const EdgeInsets.only(bottom: BsTokens.space3),
-              child: _CustomerCard(
-                view: v,
-                onTap: () => _openDetail(v),
-              ),
+              child: _CustomerCard(view: v, onTap: () => _openDetail(v)),
             ),
       ],
     );
@@ -1513,13 +1615,15 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
       backgroundColor: BsTokens.cardLight,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(BsTokens.radiusCard),
+        ),
       ),
-      builder: (sheetCtx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: _CustomerDetailSheet(view: view),
-      ),
+      builder:
+          (sheetCtx) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: _CustomerDetailSheet(view: view),
+          ),
     );
   }
 }
@@ -1540,25 +1644,24 @@ class _CustomerSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget stat(String value, String label) => Expanded(
-          child: Column(
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style:
-                    const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
-              ),
-            ],
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
           ),
-        );
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+        ],
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -1608,26 +1711,34 @@ class _CustomerStatusChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // #31 — each status chip is wrapped in a HelpTarget (one bubble text for
+    // the whole filter row); help mode rings + explains, otherwise unchanged.
     Widget chip(String key, String label, int count) {
       final on = active == key;
-      return Material(
-        color: on ? BsTokens.brand : BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        child: InkWell(
+      return HelpTarget(
+        title: 'סינון קבלנים',
+        body:
+            'מסנן את רשימת הקבלנים לפי סטטוס אשראי (פעיל / אשראי גבוה); '
+            '׳הכל׳ מציג את כולם. סינון תצוגה בלבד.',
+        child: Material(
+          color: on ? BsTokens.brand : BsTokens.cardLight,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          onTap: () => onSelect(key),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
-            ),
-            child: Text(
-              '$label ($count)',
-              style: TextStyle(
-                color: on ? bsOnAccent(context) : BsTokens.inkLight,
-                fontSize: 13,
-                fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: () => onSelect(key),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+              ),
+              child: Text(
+                '$label ($count)',
+                style: TextStyle(
+                  color: on ? bsOnAccent(context) : BsTokens.inkLight,
+                  fontSize: 13,
+                  fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -1668,64 +1779,72 @@ class _CustomerCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: '👷 ${c.name} · $statusLabel',
-      child: Material(
-        color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-        child: InkWell(
+      // #31 — tapping the card opens the contractor-detail sheet; in help mode
+      // the HelpTarget rings the whole card and explains it instead.
+      child: HelpTarget(
+        title: 'פרטי קבלן',
+        body:
+            'פותח את גיליון פרטי הקבלן: מסגרת אשראי, נוצל, יתרה זמינה, אתרי '
+            'בנייה ורשימת ההזמנות שלו. תצוגה בלבד.',
+        child: Material(
+          color: BsTokens.cardLight,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(BsTokens.space4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              border: Border.all(color: const Color(0xFFEDEDED)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('👷', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: BsTokens.space2),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            c.name,
-                            style: const TextStyle(
-                              color: BsTokens.inkLight,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                border: Border.all(color: const Color(0xFFEDEDED)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('👷', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: BsTokens.space2),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              c.name,
+                              style: const TextStyle(
+                                color: BsTokens.inkLight,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${c.orderCount} הזמנות · ${view.sites} אתרים',
-                            style: const TextStyle(
-                              color: BsTokens.mutedLight,
-                              fontSize: 13,
+                            const SizedBox(height: 2),
+                            Text(
+                              '${c.orderCount} הזמנות · ${view.sites} אתרים',
+                              style: const TextStyle(
+                                color: BsTokens.mutedLight,
+                                fontSize: 13,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: BsTokens.space2),
-                    _StagePill(label: statusLabel, color: statusColor),
-                  ],
-                ),
-                const SizedBox(height: BsTokens.space3),
-                _CreditBar(pct: view.pct, color: statusColor),
-                const SizedBox(height: 6),
-                Text(
-                  'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(c.creditLimit)} (${view.pct}%)',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12.5,
+                      const SizedBox(width: BsTokens.space2),
+                      _StagePill(label: statusLabel, color: statusColor),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: BsTokens.space3),
+                  _CreditBar(pct: view.pct, color: statusColor),
+                  const SizedBox(height: 6),
+                  Text(
+                    'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(c.creditLimit)} (${view.pct}%)',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1788,10 +1907,8 @@ class _CustomerDetailSheet extends ConsumerWidget {
     final tag = _tagLabel[view.status] ?? view.status;
     // Watch live so orders placed while the sheet is open appear immediately
     // (@index.html:16612-16613 `SYS_ORDERS.filter(o=>o.who===name)`).
-    final orders = ref
-        .watch(ordersEngineProvider)
-        .where((o) => o.who == c.name)
-        .toList();
+    final orders =
+        ref.watch(ordersEngineProvider).where((o) => o.who == c.name).toList();
 
     // M4: recompute header stats from the LIVE orders so they stay in sync
     // with the order list below (the frozen aggregate snapshot on `c` lags
@@ -1807,67 +1924,69 @@ class _CustomerDetailSheet extends ConsumerWidget {
     // (byte-identical, no flicker); ON it upgrades to the server-canonical value.
     final creditLimit =
         ref.watch(customerCreditProvider(c.name)).valueOrNull?.creditLimit ??
-            c.creditLimit;
+        c.creditLimit;
 
-    final livePct = creditLimit == 0
-        ? 0
-        : ((liveTotalSpend / creditLimit) * 100).round().clamp(0, 100);
-    final liveSites = orders.map((o) => o.site).where((s) => s.isNotEmpty).toSet().length;
-    final balance =
-        (creditLimit - liveTotalSpend).clamp(0, creditLimit); // יתרה ≥ 0
+    final livePct =
+        creditLimit == 0
+            ? 0
+            : ((liveTotalSpend / creditLimit) * 100).round().clamp(0, 100);
+    final liveSites =
+        orders.map((o) => o.site).where((s) => s.isNotEmpty).toSet().length;
+    final balance = (creditLimit - liveTotalSpend).clamp(
+      0,
+      creditLimit,
+    ); // יתרה ≥ 0
 
     Widget tile(String value, String label) => Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
-            decoration: BoxDecoration(
-              color: BsTokens.bgLight,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFEDEDED)),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+        decoration: BoxDecoration(
+          color: BsTokens.bgLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEDEDED)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
             ),
-            child: Column(
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style:
-                      const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-                ),
-              ],
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
 
     Widget row(String label, String value) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style:
-                      const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-                ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
           ),
-        );
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -2012,8 +2131,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
   /// engine/global write.
   String _open = '';
 
-  void _toggle(String key) =>
-      setState(() => _open = _open == key ? '' : key);
+  void _toggle(String key) => setState(() => _open = _open == key ? '' : key);
 
   /// cluster #85ח — decide a vacation request. Writes the SHARED
   /// [vacationRequestsProvider] (the requester's own בקשות list reflects the
@@ -2033,7 +2151,9 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     }
     // 🔔 #18 — the decision lands on the requester's bell (per-username, so
     // it is correct for a worker AND a courier alike).
-    ref.read(workerNotifsProvider.notifier).addNotification(
+    ref
+        .read(workerNotifsProvider.notifier)
+        .addNotification(
           username: r.username,
           emoji: approve ? '✅' : '❌',
           title: approve ? 'בקשת החופשה אושרה' : 'בקשת החופשה נדחתה',
@@ -2046,7 +2166,9 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     // broadcast into the shared couriers group nor faked into a channel that
     // doesn't exist in the courier's chat list.
     if (!_isCourierVacationRequest(r)) {
-      ref.read(chatEngineProvider.notifier).send(
+      ref
+          .read(chatEngineProvider.notifier)
+          .send(
             'th-worker-manager',
             BsRole.manager,
             approve
@@ -2068,9 +2190,10 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     // map the 📊 dashboard reads, off the shared engine's analytics. Sorted by
     // count desc so the biggest categories read first (a stable display order).
     final cats = ref.watch(
-        managerAnalyticsProvider.select((a) => a.catalogCategories));
-    final catEntries = cats.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+      managerAnalyticsProvider.select((a) => a.catalogCategories),
+    );
+    final catEntries =
+        cats.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     final totalProducts = cats.values.fold<int>(0, (s, n) => s + n);
 
     // The LIVE worker-approval queue — tasks the worker submitted (status
@@ -2218,8 +2341,9 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
             open: _open == 'regression',
             onTap: () => _toggle('regression'),
             child: _RegressionBody(
-              onOpen: () =>
-                  Navigator.of(context).push(RegressionPanelScreen.route()),
+              onOpen:
+                  () =>
+                      Navigator.of(context).push(RegressionPanelScreen.route()),
             ),
           ),
           const SizedBox(height: BsTokens.space3),
@@ -2318,61 +2442,72 @@ class _ManageSection extends StatelessWidget {
           Semantics(
             button: true,
             label: '$emoji $title',
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: InkWell(
+            // #31 — the shared accordion-section header (opens/closes a No-Code
+            // management section); in help mode the HelpTarget rings + explains
+            // it. One wrapper covers every section instance of _ManageSection.
+            child: HelpTarget(
+              title: 'מקטע ניהול',
+              body:
+                  'פותח/סוגר מקטע ניהול באקורדיון (מקטע אחד פתוח בכל רגע). '
+                  'חל על כל המקטעים: אישורי עובדים, בקשות חופשה, קטגוריות, '
+                  'הגדרות אפליקציה, עץ מוצרים, מותגים, בדיקות רגרסיה ושיוך '
+                  'תפקידים.',
+              child: Material(
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                onTap: onTap,
-                child: Padding(
-                  padding: const EdgeInsets.all(BsTokens.space4),
-                  child: Row(
-                    children: [
-                      Text(emoji, style: const TextStyle(fontSize: 22)),
-                      const SizedBox(width: BsTokens.space3),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    title,
-                                    style: const TextStyle(
-                                      color: BsTokens.inkLight,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 15,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  onTap: onTap,
+                  child: Padding(
+                    padding: const EdgeInsets.all(BsTokens.space4),
+                    child: Row(
+                      children: [
+                        Text(emoji, style: const TextStyle(fontSize: 22)),
+                        const SizedBox(width: BsTokens.space3),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      title,
+                                      style: const TextStyle(
+                                        color: BsTokens.inkLight,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 15,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if (badge > 0) ...[
-                                  const SizedBox(width: BsTokens.space2),
-                                  _CountBadge(count: badge),
+                                  if (badge > 0) ...[
+                                    const SizedBox(width: BsTokens.space2),
+                                    _CountBadge(count: badge),
+                                  ],
                                 ],
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              sub,
-                              style: const TextStyle(
-                                color: BsTokens.mutedLight,
-                                fontSize: 12.5,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 2),
+                              Text(
+                                sub,
+                                style: const TextStyle(
+                                  color: BsTokens.mutedLight,
+                                  fontSize: 12.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: BsTokens.space2),
-                      Text(
-                        open ? '▾' : '‹',
-                        style: const TextStyle(
-                          color: BsTokens.mutedLight,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                        const SizedBox(width: BsTokens.space2),
+                        Text(
+                          open ? '▾' : '‹',
+                          style: const TextStyle(
+                            color: BsTokens.mutedLight,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2501,9 +2636,10 @@ class _ApprovalRow extends ConsumerWidget {
     // #5 — the worker's LIVE submit note also rides the rich engine (the
     // legacy PersonaTask.note never changes after the seed); prefer it when
     // non-empty so the manager reads what the worker actually wrote.
-    final note = richMatch.isNotEmpty && richMatch.first.note.isNotEmpty
-        ? richMatch.first.note
-        : task.note;
+    final note =
+        richMatch.isNotEmpty && richMatch.first.note.isNotEmpty
+            ? richMatch.first.note
+            : task.note;
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
@@ -2546,22 +2682,37 @@ class _ApprovalRow extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: _ApprovalButton(
-                  key: ValueKey('approve-${task.id}'),
-                  label: '✅ אשר',
-                  color: const Color(0xFF1F8A4C),
-                  onPressed: onApprove,
+                // #31 — help mode rings + explains; otherwise approves the task.
+                child: HelpTarget(
+                  title: 'אשר משימה',
+                  body:
+                      'מאשר משימה שעובד שלח לאישור: המשימה עוברת ל׳בוצע׳, מזכה '
+                      'מטבעות ושולחת התראת ✅ לעובד. כתיבה למנוע המשותף — '
+                      'נראית מיד בלוח העובד.',
+                  child: _ApprovalButton(
+                    key: ValueKey('approve-${task.id}'),
+                    label: '✅ אשר',
+                    color: const Color(0xFF1F8A4C),
+                    onPressed: onApprove,
+                  ),
                 ),
               ),
               const SizedBox(width: BsTokens.space2),
               Expanded(
-                child: _ApprovalButton(
-                  key: ValueKey('reject-${task.id}'),
-                  label: '↩️ דחה',
-                  color: BsTokens.cardLight,
-                  textColor: BsTokens.inkLight,
-                  bordered: true,
-                  onPressed: onReject,
+                // #31 — help mode rings + explains; otherwise rejects the task.
+                child: HelpTarget(
+                  title: 'דחה משימה',
+                  body:
+                      'דוחה משימה שנשלחה לאישור ומחזיר אותה לעובד עם סיבת '
+                      'דחייה. הסיבה והסטטוס מתעדכנים מיד בלוח העובד.',
+                  child: _ApprovalButton(
+                    key: ValueKey('reject-${task.id}'),
+                    label: '↩️ דחה',
+                    color: BsTokens.cardLight,
+                    textColor: BsTokens.inkLight,
+                    bordered: true,
+                    onPressed: onReject,
+                  ),
                 ),
               ),
             ],
@@ -2650,9 +2801,11 @@ class _VacationsBody extends StatelessWidget {
     final pending =
         requests.where((r) => r.status == kVacationPending).toList();
     final decided =
-        requests.where((r) => r.status != kVacationPending).toList()
-          ..sort((a, b) => (b.decidedTs ?? b.createdTs)
-              .compareTo(a.decidedTs ?? a.createdTs));
+        requests.where((r) => r.status != kVacationPending).toList()..sort(
+          (a, b) => (b.decidedTs ?? b.createdTs).compareTo(
+            a.decidedTs ?? a.createdTs,
+          ),
+        );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -2734,12 +2887,12 @@ class _VacationRequestRow extends StatelessWidget {
               ),
               if (!pending)
                 _StagePill(
-                  label: request.status == kVacationApproved
-                      ? 'אושרה'
-                      : 'נדחתה',
-                  color: request.status == kVacationApproved
-                      ? const Color(0xFF1F8A4C)
-                      : BsTokens.danger,
+                  label:
+                      request.status == kVacationApproved ? 'אושרה' : 'נדחתה',
+                  color:
+                      request.status == kVacationApproved
+                          ? const Color(0xFF1F8A4C)
+                          : BsTokens.danger,
                 ),
             ],
           ),
@@ -2747,8 +2900,10 @@ class _VacationRequestRow extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               request.reason,
-              style:
-                  const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+              style: const TextStyle(
+                color: BsTokens.mutedLight,
+                fontSize: 12.5,
+              ),
             ),
           ],
           if (pending) ...[
@@ -2756,22 +2911,36 @@ class _VacationRequestRow extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _ApprovalButton(
-                    key: ValueKey('vac-approve-${request.id}'),
-                    label: '✅ אשר',
-                    color: const Color(0xFF1F8A4C),
-                    onPressed: onApprove ?? () {},
+                  // #31 — help mode rings + explains; otherwise approves leave.
+                  child: HelpTarget(
+                    title: 'אשר בקשת חופשה',
+                    body:
+                        'מאשר בקשת חופשה שעובד/שליח הגיש: מעדכן את רשימת '
+                        'הבקשות שלו ושולח התראה. הסטטוס מתעדכן מיד אצל המבקש.',
+                    child: _ApprovalButton(
+                      key: ValueKey('vac-approve-${request.id}'),
+                      label: '✅ אשר',
+                      color: const Color(0xFF1F8A4C),
+                      onPressed: onApprove ?? () {},
+                    ),
                   ),
                 ),
                 const SizedBox(width: BsTokens.space2),
                 Expanded(
-                  child: _ApprovalButton(
-                    key: ValueKey('vac-reject-${request.id}'),
-                    label: '❌ דחה',
-                    color: BsTokens.cardLight,
-                    textColor: BsTokens.inkLight,
-                    bordered: true,
-                    onPressed: onReject ?? () {},
+                  // #31 — help mode rings + explains; otherwise rejects leave.
+                  child: HelpTarget(
+                    title: 'דחה בקשת חופשה',
+                    body:
+                        'דוחה את בקשת החופשה ומעדכן את המבקש בהתראה. הסטטוס '
+                        'מתעדכן מיד אצל העובד/שליח.',
+                    child: _ApprovalButton(
+                      key: ValueKey('vac-reject-${request.id}'),
+                      label: '❌ דחה',
+                      color: BsTokens.cardLight,
+                      textColor: BsTokens.inkLight,
+                      bordered: true,
+                      onPressed: onReject ?? () {},
+                    ),
                   ),
                 ),
               ],
@@ -2943,7 +3112,9 @@ class _ProductTreeBody extends StatelessWidget {
         const SizedBox(height: BsTokens.space2),
         _ManageRow(label: 'מוצרים בעץ', value: '$productCount'),
         _ManageRow(label: 'קטגוריות', value: '$categoryCount'),
-        const _ManageHint('כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי).'),
+        const _ManageHint(
+          'כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי).',
+        ),
       ],
     );
   }
@@ -3045,21 +3216,28 @@ class _RegressionBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        Material(
-          color: BsTokens.brand,
-          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          child: InkWell(
+        // #31 — help mode rings + explains; this whole body sits inside the
+        // kDebugMode gate, so the HelpTarget is dormant in release just like
+        // the button itself.
+        HelpTarget(
+          title: 'בדיקות רגרסיה',
+          body: 'פותח את מרכז בדיקות הרגרסיה (כלי פיתוח). קיים רק בבילד debug.',
+          child: Material(
+            color: BsTokens.brand,
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            onTap: onOpen,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                '🔬 פתח מרכז בדיקות רגרסיה',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: bsOnAccent(context),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              onTap: onOpen,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  '🔬 פתח מרכז בדיקות רגרסיה',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: bsOnAccent(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
@@ -3095,22 +3273,30 @@ class _RoleAssignBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        Material(
-          color: BsTokens.brand,
-          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          child: InkWell(
-            key: const ValueKey('open-role-assign'),
+        // #31 — help mode rings + explains; otherwise opens the role-assign
+        // sheet.
+        HelpTarget(
+          title: 'שיוך תפקידים',
+          body:
+              'פותח את גיליון שיוך התפקידים: הקצאת תפקיד (חנות/שליח/עובד/מנהל) '
+              'למשתמש לפי טלפון או מזהה. השיוך מבוצע דרך השרת של בעל המערכת.',
+          child: Material(
+            color: BsTokens.brand,
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            onTap: onOpen,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                '🔑 פתח שיוך תפקידים',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: bsOnAccent(context),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+            child: InkWell(
+              key: const ValueKey('open-role-assign'),
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              onTap: onOpen,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  '🔑 פתח שיוך תפקידים',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: bsOnAccent(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
@@ -3137,4 +3323,31 @@ const List<_ManagerTab> _kManagerTabs = [
   _ManagerTab(emoji: '🚚', label: 'הזמנות'),
   _ManagerTab(emoji: '👥', label: 'לקוחות'),
   _ManagerTab(emoji: '🛠️', label: 'ניהול'),
+];
+
+/// #31 — the per-tab "מצב היכרות" (title, body) explanations, indexed in
+/// lockstep with [_kManagerTabs]. The four pills are built in one seg() loop
+/// (`_ManagerToggle`), so each pill's HelpTarget reads its text from here by
+/// index — one bubble per tab.
+const List<(String, String)> _kManagerTabHelp = [
+  (
+    'לוח בקרה',
+    'מציג את לוח הבקרה החי: אריחי מדדים (הזמנות פתוחות, מוצרים, חנויות) '
+        'וצינור ההזמנות לפי שלב.',
+  ),
+  (
+    'הזמנות',
+    'פותח את מרכז ניהול ההזמנות החי — רשימת ההזמנות, סינון לפי שלב וקידום '
+        'שלב (עקיפת-מנהל).',
+  ),
+  (
+    'לקוחות',
+    'מציג את רשימת הקבלנים-הלקוחות החיה: ניצול אשראי, מספר אתרים והזמנות '
+        'לכל קבלן.',
+  ),
+  (
+    'ניהול',
+    'פותח את מרכז הניהול (No-Code): אישורי משימות, בקשות חופשה, קטגוריות, '
+        'הגדרות אפליקציה, עץ מוצרים, מותגים ושיוך תפקידים.',
+  ),
 ];

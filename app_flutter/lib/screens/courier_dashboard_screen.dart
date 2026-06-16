@@ -18,7 +18,6 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/courier_profile_store.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
-import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
@@ -967,170 +966,187 @@ class _CourierJobCard extends StatelessWidget {
         elevation: 1,
         shadowColor: Colors.black26,
         // #76 — "הקש לפרטים" אמיתי: InkWell על כל הכרטיס פותח את גיליון הפירוט.
-        child: InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(BsTokens.space4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Text(
-                            '📦 ${order.id}',
-                            style: const TextStyle(
-                              color: BsTokens.inkLight,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                            ),
-                          ),
-                          if (splitInto > 1) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE7F0FF),
-                                borderRadius: BorderRadius.circular(
-                                  BsTokens.radiusPill,
-                                ),
-                              ),
-                              child: Text(
-                                '🚚×$splitInto',
-                                style: const TextStyle(
-                                  color: Color(0xFF2B6CB0),
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11.5,
-                                ),
+        child: HelpTarget(
+          title: 'פרטי המשלוח',
+          body:
+              'הקשה על הכרטיס פותחת את גיליון פירוט המשלוח: רשימת הפריטים, לקוח, כתובת, סכום ומסלול ההזמנה, עם קיצורי קידום ו-POD.',
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              '📦 ${order.id}',
+                              style: const TextStyle(
+                                color: BsTokens.inkLight,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
                               ),
                             ),
+                            if (splitInto > 1) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE7F0FF),
+                                  borderRadius: BorderRadius.circular(
+                                    BsTokens.radiusPill,
+                                  ),
+                                ),
+                                child: Text(
+                                  '🚚×$splitInto',
+                                  style: const TextStyle(
+                                    color: Color(0xFF2B6CB0),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: pill.bg,
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusPill,
+                          ),
+                        ),
+                        child: Text(
+                          pill.label,
+                          style: TextStyle(
+                            color: pill.fg,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '👤 ${order.who}',
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 13.5,
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: pill.bg,
-                        borderRadius: BorderRadius.circular(
-                          BsTokens.radiusPill,
+                  ),
+                  Text(
+                    '📍 ${order.site}',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                  // 📞/💬 — call / WhatsApp the contractor who placed the order
+                  // (hidden when the order carries no phone — seed/legacy).
+                  ContactActions(phone: order.customerPhone, compact: true),
+                  Text(
+                    '🕒 נדרש: בתיאום · ${haul.ic} ${haul.name}',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  _Tracker(phase: phase),
+                  const SizedBox(height: BsTokens.space3),
+                  Text(
+                    '${order.items} פריטים · ${fMoney(order.sum)} · הקש לפרטים',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  HelpTarget(
+                    title: 'קידום המשלוח',
+                    body:
+                        "מקדם את המשלוח בשלב אחד. בשלב 'לקיחה' מאשר 'אספתי מהחנות' (→ בדרך); בשלב 'בדרך' מאשר 'נמסר ללקוח' — פעולה סופית עם דיאלוג אישור. בשלב 'לאיסוף' הכפתור מושבת עד שהחנות מוסרת לידיך.",
+                    child: FilledButton(
+                      onPressed: canAct ? () => onAdvance(order) : null,
+                      style: FilledButton.styleFrom(
+                        // F-34 — הרקע הירוק הוא successDark (AA מתחת ללבן) במקום
+                        // ‎#1F8A4C שנכשל-בקצה; F-28 — התווית ב-bsOnAccent (לא לבן
+                        // קשיח) גם על מילוי המותג.
+                        backgroundColor:
+                            order.stage == OrderStage.transit
+                                ? BsTokens.brand
+                                : BsTokens.successDark,
+                        foregroundColor: bsOnAccent(context),
+                        // #63 pattern — guarantees the ≥48dp touch target.
+                        minimumSize: const Size(64, 48),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusPill,
+                          ),
                         ),
                       ),
                       child: Text(
-                        pill.label,
-                        style: TextStyle(
-                          color: pill.fg,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12.5,
+                        actionLabel,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (canPod) ...[
+                    const SizedBox(height: BsTokens.space2),
+                    HelpTarget(
+                      title: 'אישור מסירה (POD)',
+                      body:
+                          'פותח את גיליון צילום אישור-המסירה — צילום הלקוח/המשלוח שנשמר כהוכחת מסירה. מופיע רק משלב האיסוף ואילך (כשהמשלוח כבר בידיך).',
+                      child: OutlinedButton(
+                        onPressed: onPod,
+                        style: OutlinedButton.styleFrom(
+                          // #63 pattern — guarantees the ≥48dp touch target.
+                          minimumSize: const Size(64, 48),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          side: const BorderSide(color: Color(0xFFE0E0E0)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              BsTokens.radiusPill,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          podCaptured
+                              ? '📸 אישור מסירה · נשמר ✓'
+                              : '📸 אישור מסירה',
+                          style: TextStyle(
+                            // F-34 — טקסט ירוק על רקע בהיר חייב AA 4.5:1 —
+                            // successDark (‎#15803D, ~5.0:1) במקום ‎#1F8A4C.
+                            color:
+                                podCaptured
+                                    ? BsTokens.successDark
+                                    : BsTokens.inkLight,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '👤 ${order.who}',
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontSize: 13.5,
-                  ),
-                ),
-                Text(
-                  '📍 ${order.site}',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12.5,
-                  ),
-                ),
-                // 📞/💬 — call / WhatsApp the contractor who placed the order
-                // (hidden when the order carries no phone — seed/legacy).
-                ContactActions(phone: order.customerPhone, compact: true),
-                Text(
-                  '🕒 נדרש: בתיאום · ${haul.ic} ${haul.name}',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12.5,
-                  ),
-                ),
-                const SizedBox(height: BsTokens.space3),
-                _Tracker(phase: phase),
-                const SizedBox(height: BsTokens.space3),
-                Text(
-                  '${order.items} פריטים · ${fMoney(order.sum)} · הקש לפרטים',
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 12.5,
-                  ),
-                ),
-                const SizedBox(height: BsTokens.space3),
-                FilledButton(
-                  onPressed: canAct ? () => onAdvance(order) : null,
-                  style: FilledButton.styleFrom(
-                    // F-34 — הרקע הירוק הוא successDark (AA מתחת ללבן) במקום
-                    // ‎#1F8A4C שנכשל-בקצה; F-28 — התווית ב-bsOnAccent (לא לבן
-                    // קשיח) גם על מילוי המותג.
-                    backgroundColor:
-                        order.stage == OrderStage.transit
-                            ? BsTokens.brand
-                            : BsTokens.successDark,
-                    foregroundColor: bsOnAccent(context),
-                    // #63 pattern — guarantees the ≥48dp touch target.
-                    minimumSize: const Size(64, 48),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                    ),
-                  ),
-                  child: Text(
-                    actionLabel,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                if (canPod) ...[
-                  const SizedBox(height: BsTokens.space2),
-                  OutlinedButton(
-                    onPressed: onPod,
-                    style: OutlinedButton.styleFrom(
-                      // #63 pattern — guarantees the ≥48dp touch target.
-                      minimumSize: const Size(64, 48),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      side: const BorderSide(color: Color(0xFFE0E0E0)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          BsTokens.radiusPill,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      podCaptured
-                          ? '📸 אישור מסירה · נשמר ✓'
-                          : '📸 אישור מסירה',
-                      style: TextStyle(
-                        // F-34 — טקסט ירוק על רקע בהיר חייב AA 4.5:1 —
-                        // successDark (‎#15803D, ~5.0:1) במקום ‎#1F8A4C.
-                        color:
-                            podCaptured
-                                ? BsTokens.successDark
-                                : BsTokens.inkLight,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),

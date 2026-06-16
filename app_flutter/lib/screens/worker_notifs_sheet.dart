@@ -9,6 +9,7 @@ import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,38 +39,50 @@ class WorkerNotifsBell extends ConsumerWidget {
       }
     });
     final unread = ref.watch(currentWorkerUnreadCountProvider);
-    return IconButton(
-      key: const ValueKey('worker-notifs-bell'),
-      tooltip: 'התראות',
-      onPressed: () => showWorkerNotifsSheet(context),
-      icon: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          const Icon(Icons.notifications_outlined, color: BsTokens.mutedLight),
-          if (unread > 0)
-            PositionedDirectional(
-              start: -4,
-              top: -4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                decoration: BoxDecoration(
-                  color: BsTokens.danger,
-                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  unread > 9 ? '9+' : '$unread',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    height: 1.4,
+    return HelpTarget(
+      title: 'התראות',
+      body:
+          'פותח את רשימת ההתראות שלך. התג האדום מציג כמה התראות לא-נקראו. '
+          'ממוקם ב-AppBar של הלוח שיש בו 💡, כך שניתן לעטיפה.',
+      child: IconButton(
+        key: const ValueKey('worker-notifs-bell'),
+        tooltip: 'התראות',
+        onPressed: () => showWorkerNotifsSheet(context),
+        icon: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(
+              Icons.notifications_outlined,
+              color: BsTokens.mutedLight,
+            ),
+            if (unread > 0)
+              PositionedDirectional(
+                start: -4,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: BsTokens.danger,
+                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    unread > 9 ? '9+' : '$unread',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -105,125 +118,134 @@ class _WorkerNotifsSheet extends ConsumerWidget {
         minChildSize: 0.4,
         maxChildSize: 0.95,
         expand: false,
-        builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(BsTokens.radiusCard),
-            ),
-          ),
-          child: ListView(
-            controller: scroll,
-            padding: const EdgeInsets.all(BsTokens.space4),
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        builder:
+            (_, scroll) => Container(
+              decoration: const BoxDecoration(
+                color: BsTokens.cardLight,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),
-              // ── header: title + X close ──
-              Row(
+              child: ListView(
+                controller: scroll,
+                padding: const EdgeInsets.all(BsTokens.space4),
                 children: [
-                  const Expanded(
-                    child: Text(
-                      '🔔 התראות',
-                      style: TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDDDDDD),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'סגירה',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: BsTokens.mutedLight),
-                  ),
-                ],
-              ),
-              const SizedBox(height: BsTokens.space2),
-
-              if (notifs.isEmpty)
-                // Honest empty state — the feed fills only from real events
-                // (אישור/דחייה של המנהל, משימה חדשה שנכנסה לביצוע).
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
-                    'אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.',
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
-                  ),
-                )
-              else ...[
-                // ── actions row: mark-all-read · clear-all (confirmed) ──
-                Row(
-                  children: [
-                    if (unread > 0)
-                      TextButton(
-                        onPressed: username == null
-                            ? null
-                            : () => ref
-                                .read(workerNotifsProvider.notifier)
-                                .markAllRead(username),
-                        child: const Text(
-                          'סמן הכל כנקרא',
+                  // ── header: title + X close ──
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          '🔔 התראות',
                           style: TextStyle(
-                            color: BsTokens.brandDark,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
                           ),
                         ),
                       ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: username == null
-                          ? null
-                          : () async {
-                              final ok = await confirmDestructive(
-                                context,
-                                title: 'לנקות את כל ההתראות?',
-                                message:
-                                    'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
-                                confirmLabel: 'נקה',
-                              );
-                              if (!ok) return;
-                              ref
-                                  .read(workerNotifsProvider.notifier)
-                                  .clear(username);
-                            },
-                      child: const Text(
-                        'נקה הכל',
-                        style: TextStyle(
-                          color: BsTokens.danger,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                      IconButton(
+                        tooltip: 'סגירה',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.close,
+                          color: BsTokens.mutedLight,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: BsTokens.space1),
-                for (final n in notifs)
-                  _NotifRow(
-                    notif: n,
-                    onTap: username == null || n.read
-                        ? null
-                        : () => ref
-                            .read(workerNotifsProvider.notifier)
-                            .markRead(username, n.id),
+                    ],
                   ),
-              ],
-              const SizedBox(height: BsTokens.space4),
-            ],
-          ),
-        ),
+                  const SizedBox(height: BsTokens.space2),
+
+                  if (notifs.isEmpty)
+                    // Honest empty state — the feed fills only from real events
+                    // (אישור/דחייה של המנהל, משימה חדשה שנכנסה לביצוע).
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                      child: Text(
+                        'אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    // ── actions row: mark-all-read · clear-all (confirmed) ──
+                    Row(
+                      children: [
+                        if (unread > 0)
+                          TextButton(
+                            onPressed:
+                                username == null
+                                    ? null
+                                    : () => ref
+                                        .read(workerNotifsProvider.notifier)
+                                        .markAllRead(username),
+                            child: const Text(
+                              'סמן הכל כנקרא',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed:
+                              username == null
+                                  ? null
+                                  : () async {
+                                    final ok = await confirmDestructive(
+                                      context,
+                                      title: 'לנקות את כל ההתראות?',
+                                      message:
+                                          'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
+                                      confirmLabel: 'נקה',
+                                    );
+                                    if (!ok) return;
+                                    ref
+                                        .read(workerNotifsProvider.notifier)
+                                        .clear(username);
+                                  },
+                          child: const Text(
+                            'נקה הכל',
+                            style: TextStyle(
+                              color: BsTokens.danger,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: BsTokens.space1),
+                    for (final n in notifs)
+                      _NotifRow(
+                        notif: n,
+                        onTap:
+                            username == null || n.read
+                                ? null
+                                : () => ref
+                                    .read(workerNotifsProvider.notifier)
+                                    .markRead(username, n.id),
+                      ),
+                  ],
+                  const SizedBox(height: BsTokens.space4),
+                ],
+              ),
+            ),
       ),
     );
   }

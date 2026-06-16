@@ -22,6 +22,7 @@ import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,10 +72,17 @@ class CourierPortalTab extends ConsumerWidget {
           childAspectRatio: 1.5,
           children: [
             for (final t in kCourierPortalTiles)
-              PortalTileButton(
-                title: t.title,
-                sub: t.sub,
-                onTap: () => _open(context, ref, t),
+              HelpTarget(
+                title: 'כלי הפורטל',
+                body:
+                    'ששת כלי השליח: אישור מסירה · צ׳אט עם החנות · צי רכב · '
+                    'אזורי הפצה · ניווט למשלוח · מעקב SLA. '
+                    'הקשה על אריח פותחת את הכלי המתאים.',
+                child: PortalTileButton(
+                  title: t.title,
+                  sub: t.sub,
+                  onTap: () => _open(context, ref, t),
+                ),
               ),
           ],
         ),
@@ -89,8 +97,7 @@ class CourierPortalTab extends ConsumerWidget {
       OrderStage.pickup,
       OrderStage.transit,
     ];
-    final active =
-        orders.where((o) => activeStages.contains(o.stage)).toList();
+    final active = orders.where((o) => activeStages.contains(o.stage)).toList();
 
     switch (tile.kind) {
       case PortalKind.pod:
@@ -100,10 +107,11 @@ class CourierPortalTab extends ConsumerWidget {
         // לכאן בלבד. audience:'courier' → רשימת השיחות של לוח השליח (#75).
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => ChatsScreen(
-              persona: BsRole.courier,
-              audience: 'courier',
-            ),
+            builder:
+                (_) => const ChatsScreen(
+                  persona: BsRole.courier,
+                  audience: 'courier',
+                ),
           ),
         );
       case PortalKind.fleet:
@@ -128,12 +136,13 @@ class CourierPortalTab extends ConsumerWidget {
   // ── 📸 אישור מסירה — PersonaPodSheet עבור המשלוח הפעיל ─────────────────────
   void _openPod(BuildContext context, List<SysOrder> orders) {
     // POD רלוונטי רק להזמנות שבידי השליח (pickup/transit) — כמו בכרטיס.
-    final eligible = orders
-        .where(
-          (o) =>
-              o.stage == OrderStage.pickup || o.stage == OrderStage.transit,
-        )
-        .toList();
+    final eligible =
+        orders
+            .where(
+              (o) =>
+                  o.stage == OrderStage.pickup || o.stage == OrderStage.transit,
+            )
+            .toList();
     if (eligible.isEmpty) {
       // ביושר: אין משלוח פעיל — לא מזייפים POD.
       _sheet(context, '📸 אישור מסירה', 'POD + צילום', [
@@ -286,43 +295,44 @@ class CourierPortalTab extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            BsTokens.space4,
-            BsTokens.space4,
-            BsTokens.space4,
-            BsTokens.space5,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 19,
-                  ),
+      builder:
+          (_) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                BsTokens.space4,
+                BsTokens.space4,
+                BsTokens.space4,
+                BsTokens.space5,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 19,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      sub,
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: BsTokens.space4),
+                    ...children,
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  sub,
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: BsTokens.space4),
-                ...children,
-              ],
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 

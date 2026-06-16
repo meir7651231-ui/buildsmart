@@ -40,6 +40,7 @@ import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,9 @@ class TaskClockEntry {
   /// Wall-clock time from start to approval — null unless both stamps exist
   /// and are ordered (corrupt/clock-skewed pairs are not shown).
   Duration? get duration =>
-      startedAt != null && completedAt != null && completedAt!.isAfter(startedAt!)
+      startedAt != null &&
+              completedAt != null &&
+              completedAt!.isAfter(startedAt!)
           ? completedAt!.difference(startedAt!)
           : null;
 }
@@ -149,10 +152,11 @@ class TaskRejectionLog extends StateNotifier<Set<int>> {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kTaskRejectionsKey);
       if (raw == null || raw.isEmpty || _userTouched) return;
-      final ids = (jsonDecode(raw) as List)
-          .whereType<num>()
-          .map((n) => n.toInt())
-          .toSet();
+      final ids =
+          (jsonDecode(raw) as List)
+              .whereType<num>()
+              .map((n) => n.toInt())
+              .toSet();
       if (ids.isEmpty || _userTouched) return;
       // MERGE (not replace) — ids recorded before prefs resolved are kept.
       state = {...state, ...ids};
@@ -192,8 +196,8 @@ class TaskRejectionLog extends StateNotifier<Set<int>> {
 
 final taskRejectionLogProvider =
     StateNotifierProvider<TaskRejectionLog, Set<int>>(
-  (_) => TaskRejectionLog(),
-);
+      (_) => TaskRejectionLog(),
+    );
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -244,19 +248,24 @@ class WorkerReportsTab extends ConsumerWidget {
     final mine =
         ref.watch(tasksProvider).where((t) => t.worker == worker).toList();
     final clock =
-        ref.watch(taskClockProvider).asData?.value ?? const <int, TaskClockEntry>{};
+        ref.watch(taskClockProvider).asData?.value ??
+        const <int, TaskClockEntry>{};
     final rejectNotes =
-        ref.watch(taskRejectNotesProvider).asData?.value ?? const <int, String>{};
+        ref.watch(taskRejectNotesProvider).asData?.value ??
+        const <int, String>{};
     final everRejected = ref.watch(taskRejectionLogProvider);
     final rewards = ref.watch(rewardsProvider);
 
     final doneTasks = mine.where((t) => t.status == 'done').toList();
-    final submitted = mine
-        .where((t) =>
-            t.status == 'review' ||
-            t.status == 'done' ||
-            t.status == 'rejected')
-        .toList();
+    final submitted =
+        mine
+            .where(
+              (t) =>
+                  t.status == 'review' ||
+                  t.status == 'done' ||
+                  t.status == 'rejected',
+            )
+            .toList();
     final rejectedTasks = mine.where((t) => t.status == 'rejected').toList();
 
     // ① weekly buckets — Sunday-first; only completions stamped THIS week land
@@ -290,8 +299,9 @@ class WorkerReportsTab extends ConsumerWidget {
       }
     }
     var streak = 0;
-    while (activityDays
-        .contains(DateTime(today.year, today.month, today.day - streak))) {
+    while (activityDays.contains(
+      DateTime(today.year, today.month, today.day - streak),
+    )) {
       streak++;
     }
     final streakLabel = activityDays.isEmpty ? '—' : '$streak ימים';
@@ -299,9 +309,10 @@ class WorkerReportsTab extends ConsumerWidget {
     // ② first-pass approval — approved-without-ever-being-rejected / submitted.
     final firstPass =
         doneTasks.where((t) => !everRejected.contains(t.id)).length;
-    final firstPassLabel = submitted.isEmpty
-        ? '—'
-        : '${(firstPass * 100 / submitted.length).round()}%';
+    final firstPassLabel =
+        submitted.isEmpty
+            ? '—'
+            : '${(firstPass * 100 / submitted.length).round()}%';
 
     // ③ durations — only pairs the clock actually measured.
     final timed = [
@@ -349,22 +360,38 @@ class WorkerReportsTab extends ConsumerWidget {
         // #109 — each box dives to a REAL drill-down of the data behind it.
         Row(
           children: [
-            _KpiBox(
-              value: firstPassLabel,
-              label: 'אישור-ראשון 🎯',
-              onTap: () => showFirstPassDrilldown(context, ref, worker: worker),
+            HelpTarget(
+              title: 'אישור ראשון',
+              body:
+                  'אחוז ההגשות שאושרו בלי דחייה מתוך כלל ההגשות. לחיצה פותחת פירוט מלא של הנתון.',
+              child: _KpiBox(
+                value: firstPassLabel,
+                label: 'אישור-ראשון 🎯',
+                onTap:
+                    () => showFirstPassDrilldown(context, ref, worker: worker),
+              ),
             ),
             // F-33: מאזן המטבעות הוא overlay אחד לכל המכשיר (bs.rewards.v1,
             // ללא username) — תווית כנה, לא מספר שמתחזה ל-per-עובד.
-            _KpiBox(
-              value: '${rewards.coins}',
-              label: 'BuildCoins (מועדון משותף) 🪙',
-              onTap: () => showCoinsDrilldown(context, ref),
+            HelpTarget(
+              title: 'BuildCoins',
+              body:
+                  'מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד). לחיצה פותחת פירוט.',
+              child: _KpiBox(
+                value: '${rewards.coins}',
+                label: 'BuildCoins (מועדון משותף) 🪙',
+                onTap: () => showCoinsDrilldown(context, ref),
+              ),
             ),
-            _KpiBox(
-              value: streakLabel,
-              label: 'רצף פעילות 🔥',
-              onTap: () => showStreakDrilldown(context, ref, worker: worker),
+            HelpTarget(
+              title: 'רצף פעילות',
+              body:
+                  'מספר הימים הרצופים עם פעילות לפי שעון-המשימות. לחיצה פותחת פירוט הרצף.',
+              child: _KpiBox(
+                value: streakLabel,
+                label: 'רצף פעילות 🔥',
+                onTap: () => showStreakDrilldown(context, ref, worker: worker),
+              ),
             ),
           ],
         ),
@@ -386,28 +413,33 @@ class WorkerReportsTab extends ConsumerWidget {
                 doneTasks.isEmpty
                     ? 'עוד אין משימות שאושרו — משימה שתאושר תופיע כאן.'
                     : 'אין משימות שאושרו השבוע.',
-                style:
-                    const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                style: const TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontSize: 13,
+                ),
               )
             else ...[
               _WeekBars(
                 counts: perDay,
                 todayIndex: today.weekday % 7,
                 // #109 — tapping a bar opens that day's clocked tasks.
-                onTapDay: (i) => showWeekDayDrilldown(
-                  context,
-                  ref,
-                  worker: worker,
-                  day: weekStart.add(Duration(days: i)),
-                ),
+                onTapDay:
+                    (i) => showWeekDayDrilldown(
+                      context,
+                      ref,
+                      worker: worker,
+                      day: weekStart.add(Duration(days: i)),
+                    ),
               ),
               if (noDate > 0) ...[
                 const SizedBox(height: BsTokens.space2),
                 Text(
                   // Honest bucket — approved before the task-clock existed.
                   '🗓️ ללא תאריך: $noDate ${noDate == 1 ? 'משימה שאושרה' : 'משימות שאושרו'} בלי חותמת-זמן (לפני הפעלת שעון המשימות)',
-                  style:
-                      const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  style: const TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ],
@@ -427,16 +459,26 @@ class WorkerReportsTab extends ConsumerWidget {
             else ...[
               // #109 — each timed row dives to that task's full time detail.
               for (final t in timed)
-                _KvRow(
-                  label: t.name,
-                  value: _fmtDuration(clock[t.id]!.duration!),
-                  onTap: () => showTaskTimeDrilldown(context, ref, task: t),
+                HelpTarget(
+                  title: 'זמן משימה',
+                  body:
+                      'מציג את משך-העבודה שנמדד למשימה. לחיצה פותחת פירוט זמן מלא של המשימה.',
+                  child: _KvRow(
+                    label: t.name,
+                    value: _fmtDuration(clock[t.id]!.duration!),
+                    onTap: () => showTaskTimeDrilldown(context, ref, task: t),
+                  ),
                 ),
               for (final t in running)
-                _KvRow(
-                  label: t.name,
-                  value: '🔨 בביצוע מאז ${_hhmm(clock[t.id]!.startedAt!)}',
-                  onTap: () => showTaskTimeDrilldown(context, ref, task: t),
+                HelpTarget(
+                  title: 'זמן משימה',
+                  body:
+                      'מציג את משך-העבודה שנמדד למשימה. לחיצה פותחת פירוט זמן מלא של המשימה.',
+                  child: _KvRow(
+                    label: t.name,
+                    value: '🔨 בביצוע מאז ${_hhmm(clock[t.id]!.startedAt!)}',
+                    onTap: () => showTaskTimeDrilldown(context, ref, task: t),
+                  ),
                 ),
             ],
           ],
@@ -449,12 +491,22 @@ class WorkerReportsTab extends ConsumerWidget {
           children: [
             // #109 — each area row dives to the tasks grouped under it.
             for (final e in areas.entries)
-              _KvRow(
-                label: e.key,
-                value:
-                    '${e.value.where((t) => t.status == 'done').length}/${e.value.length} אושרו',
-                onTap: () =>
-                    showAreaDrilldown(context, ref, worker: worker, area: e.key),
+              HelpTarget(
+                title: 'אזור עבודה',
+                body:
+                    'מסכם כמה משימות אושרו בכל אזור (הנגזר משם המשימה). לחיצה פותחת את המשימות באזור.',
+                child: _KvRow(
+                  label: e.key,
+                  value:
+                      '${e.value.where((t) => t.status == 'done').length}/${e.value.length} אושרו',
+                  onTap:
+                      () => showAreaDrilldown(
+                        context,
+                        ref,
+                        worker: worker,
+                        area: e.key,
+                      ),
+                ),
               ),
             const SizedBox(height: BsTokens.space1),
             const Text(
@@ -483,11 +535,12 @@ class WorkerReportsTab extends ConsumerWidget {
                   duration: clock[t.id]?.duration,
                   // #109 — the row BODY opens the submission detail; the proof
                   // thumbnail keeps its own full-screen viewer tap.
-                  onTap: () => showSubmissionDrilldown(
-                    context,
-                    task: t,
-                    duration: clock[t.id]?.duration,
-                  ),
+                  onTap:
+                      () => showSubmissionDrilldown(
+                        context,
+                        task: t,
+                        duration: clock[t.id]?.duration,
+                      ),
                 ),
           ],
         ),
@@ -505,55 +558,65 @@ class WorkerReportsTab extends ConsumerWidget {
             else
               // #109 — each rejection row dives to the manager's reason + task.
               for (final t in rejectedTasks)
-                Semantics(
-                  button: true,
-                  label: '${t.name} — הצג סיבת דחייה',
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () =>
-                        showRejectionDrilldown(context, ref, task: t),
-                    child: ConstrainedBox(
-                      constraints:
-                          const BoxConstraints(minHeight: 48), // ≥48dp target
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: ExcludeSemantics(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      t.name,
-                                      style: const TextStyle(
-                                        color: BsTokens.inkLight,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13.5,
+                HelpTarget(
+                  title: 'סיבת דחייה',
+                  body:
+                      'לחיצה פותחת את סיבת הדחייה של המנהל ואת פרטי המשימה לתיקון.',
+                  child: Semantics(
+                    button: true,
+                    label: '${t.name} — הצג סיבת דחייה',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap:
+                          () => showRejectionDrilldown(context, ref, task: t),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minHeight: 48,
+                        ), // ≥48dp target
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: ExcludeSemantics(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        t.name,
+                                        style: const TextStyle(
+                                          color: BsTokens.inkLight,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13.5,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      rejectNotes[t.id] != null
-                                          ? 'סיבת המנהל: "${rejectNotes[t.id]}"'
-                                          // Honest — rejected without a reason
-                                          // (or before reasons were stored).
-                                          : 'המנהל לא צירף סיבה לדחייה.',
-                                      style: TextStyle(
-                                        color: rejectNotes[t.id] != null
-                                            ? BsTokens.inkLight
-                                            : BsTokens.mutedLight,
-                                        fontSize: 12.5,
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        rejectNotes[t.id] != null
+                                            ? 'סיבת המנהל: "${rejectNotes[t.id]}"'
+                                            // Honest — rejected without a reason
+                                            // (or before reasons were stored).
+                                            : 'המנהל לא צירף סיבה לדחייה.',
+                                        style: TextStyle(
+                                          color:
+                                              rejectNotes[t.id] != null
+                                                  ? BsTokens.inkLight
+                                                  : BsTokens.mutedLight,
+                                          fontSize: 12.5,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const Icon(Icons.chevron_left,
-                                  size: 18, color: BsTokens.mutedLight),
-                            ],
+                                const Icon(
+                                  Icons.chevron_left,
+                                  size: 18,
+                                  color: BsTokens.mutedLight,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -565,25 +628,30 @@ class WorkerReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
 
         // ── ⑧ send daily report to the contractor — a REAL chat message ──
-        Semantics(
-          button: true,
-          label: 'שלח דוח יומי לקבלן',
-          child: Material(
-            color: BsTokens.brand,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
-              key: const ValueKey('send-daily-report'),
+        HelpTarget(
+          title: 'שלח דוח יומי לקבלן',
+          body:
+              "שולח לקבלן בצ'אט סיכום אמיתי של מצבי-המשימות הנוכחי שלך — בלי המצאות.",
+          child: Semantics(
+            button: true,
+            label: 'שלח דוח יומי לקבלן',
+            child: Material(
+              color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: () => _sendDailyReport(context, ref),
-              child: Container(
-                height: 48, // ≥48dp target
-                alignment: Alignment.center,
-                child: Text(
-                  '💬 שלח דוח יומי לקבלן',
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14.5,
+              child: InkWell(
+                key: const ValueKey('send-daily-report'),
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: () => _sendDailyReport(context, ref),
+                child: Container(
+                  height: 48, // ≥48dp target
+                  alignment: Alignment.center,
+                  child: Text(
+                    '💬 שלח דוח יומי לקבלן',
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14.5,
+                    ),
                   ),
                 ),
               ),
@@ -616,7 +684,8 @@ class WorkerReportsTab extends ConsumerWidget {
     final queued = count('pending');
 
     final now = DateTime.now();
-    final text = 'דוח יומי — ${workerShortName(worker)} (${now.day}.${now.month}):\n'
+    final text =
+        'דוח יומי — ${workerShortName(worker)} (${now.day}.${now.month}):\n'
         '✅ אושרו: $done\n'
         '📸 הוגשו וממתינות לאישור: $review\n'
         '↩️ נדחו לתיקון: $rejected\n'
@@ -625,8 +694,9 @@ class WorkerReportsTab extends ConsumerWidget {
 
     // Guard: send() is a silent no-op on an unknown thread — never toast a
     // success that did not happen (אין חצי-עבודה).
-    final exists =
-        ref.read(chatEngineProvider).any((t) => t.id == kContractorThreadId);
+    final exists = ref
+        .read(chatEngineProvider)
+        .any((t) => t.id == kContractorThreadId);
     if (!exists) {
       showToast(context, 'שיחת הקבלן לא נמצאה — הדוח לא נשלח');
       return;
@@ -691,20 +761,21 @@ class _KpiBox extends StatelessWidget {
             ),
           ],
         ),
-        child: onTap == null
-            ? inner
-            : Semantics(
-                button: true,
-                label: '$label — הצג פירוט',
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                    onTap: onTap,
-                    child: inner,
+        child:
+            onTap == null
+                ? inner
+                : Semantics(
+                  button: true,
+                  label: '$label — הצג פירוט',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                      onTap: onTap,
+                      child: inner,
+                    ),
                   ),
                 ),
-              ),
       ),
     );
   }
@@ -783,8 +854,7 @@ class _KvRow extends StatelessWidget {
         ),
         if (onTap != null) ...[
           const SizedBox(width: 2),
-          const Icon(Icons.chevron_left,
-              size: 18, color: BsTokens.mutedLight),
+          const Icon(Icons.chevron_left, size: 18, color: BsTokens.mutedLight),
         ],
       ],
     );
@@ -907,20 +977,21 @@ class _BarColumn extends StatelessWidget {
       ],
     );
     if (onTap == null) return column;
-    return Semantics(
-      button: true,
-      label: 'יום ${_kDayLetters[index]} — $count אושרו, הצג פירוט',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onTap,
-        // Fill the row's full height so the whole bar slot is the hit target,
-        // while the bar itself stays bottom-aligned (the chart look).
-        child: SizedBox(
-          height: double.infinity,
-          child: ExcludeSemantics(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: column,
+    return HelpTarget(
+      title: 'יום בגרף',
+      body: 'לחיצה על עמודת-יום פותחת את רשימת המשימות שאושרו באותו יום.',
+      child: Semantics(
+        button: true,
+        label: 'יום ${_kDayLetters[index]} — $count אושרו, הצג פירוט',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          // Fill the row's full height so the whole bar slot is the hit
+          // target, while the bar itself stays bottom-aligned (chart look).
+          child: SizedBox(
+            height: double.infinity,
+            child: ExcludeSemantics(
+              child: Align(alignment: Alignment.bottomCenter, child: column),
             ),
           ),
         ),
@@ -954,41 +1025,49 @@ class _HistoryRow extends StatelessWidget {
           if (imageProviderForRef(task.photo) != null)
             InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: () => showDialog<void>(
-                context: context,
-                builder: (_) => Dialog(
-                  backgroundColor: Colors.black,
-                  insetPadding: const EdgeInsets.all(16),
-                  child: Stack(
-                    children: [
-                      InteractiveViewer(
-                        child: Center(
-                          child: Image(
-                            image: imageProviderForRef(task.photo)!,
-                            errorBuilder: (_, __, ___) => const Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Text(
-                                '📷 לא ניתן להציג את התמונה',
-                                style: TextStyle(color: Colors.white70),
+              onTap:
+                  () => showDialog<void>(
+                    context: context,
+                    builder:
+                        (_) => Dialog(
+                          backgroundColor: Colors.black,
+                          insetPadding: const EdgeInsets.all(16),
+                          child: Stack(
+                            children: [
+                              InteractiveViewer(
+                                child: Center(
+                                  child: Image(
+                                    image: imageProviderForRef(task.photo)!,
+                                    errorBuilder:
+                                        (_, __, ___) => const Padding(
+                                          padding: EdgeInsets.all(24),
+                                          child: Text(
+                                            '📷 לא ניתן להציג את התמונה',
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              PositionedDirectional(
+                                top: 4,
+                                start: 4,
+                                // ≥48dp close target on the fullscreen viewer.
+                                child: IconButton(
+                                  tooltip: 'סגור',
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      PositionedDirectional(
-                        top: 4,
-                        start: 4,
-                        // ≥48dp close target on the fullscreen viewer.
-                        child: IconButton(
-                          tooltip: 'סגור',
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ),
               child: _ProofThumb(photo: task.photo),
             )
           else
@@ -1021,8 +1100,11 @@ class _HistoryRow extends StatelessWidget {
               ),
             ),
             if (onTap != null)
-              const Icon(Icons.chevron_left,
-                  size: 18, color: BsTokens.mutedLight),
+              const Icon(
+                Icons.chevron_left,
+                size: 18,
+                color: BsTokens.mutedLight,
+              ),
           ],
         ),
         const SizedBox(height: 2),
@@ -1046,27 +1128,28 @@ class _HistoryRow extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             '"${task.note}"',
-            style: const TextStyle(
-              color: BsTokens.mutedLight,
-              fontSize: 12.5,
-            ),
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
           ),
         ],
       ],
     );
 
     if (onTap == null) return column;
-    return Semantics(
-      button: true,
-      label: '${task.name} — הצג פרטי הגשה',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48), // ≥48dp target
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: ExcludeSemantics(child: column),
+    return HelpTarget(
+      title: 'פרטי הגשה',
+      body: 'לחיצה על שורת ההגשה פותחת את פירוט-ההגשה — מצב, זמן והערה.',
+      child: Semantics(
+        button: true,
+        label: '${task.name} — הצג פרטי הגשה',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48), // ≥48dp target
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: ExcludeSemantics(child: column),
+            ),
           ),
         ),
       ),
@@ -1123,23 +1206,28 @@ class _ProofThumb extends StatelessWidget {
     final p = photo;
     final provider = imageProviderForRef(p);
     if (provider != null) {
-      return Semantics(
-        button: true,
-        label: 'הצג תמונת הוכחה במסך מלא',
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => showFullPhotoRefDialog(context, p),
-          child: ClipRRect(
+      return HelpTarget(
+        title: 'תמונת הוכחה',
+        body: 'לחיצה על תמונת-ההוכחה הזעירה פותחת אותה במסך מלא עם זום.',
+        child: Semantics(
+          button: true,
+          label: 'הצג תמונת הוכחה במסך מלא',
+          child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            child: Image(
-              image: provider,
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
-              // A corrupt payload renders the honest placeholder, not a crash.
-              errorBuilder: (_, __, ___) =>
-                  const _ThumbPlaceholder(glyph: '📷'),
+            onTap: () => showFullPhotoRefDialog(context, p),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image(
+                image: provider,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+                // A corrupt payload renders the honest placeholder, not a
+                // crash.
+                errorBuilder:
+                    (_, __, ___) => const _ThumbPlaceholder(glyph: '📷'),
+              ),
             ),
           ),
         ),

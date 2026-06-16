@@ -150,14 +150,19 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
             // and disturbs none of the journal's layout/scroll order.
             HelpTarget(
               title: 'לוח משימות מלא',
-              body: 'פותח לוח של כל המשימות שלך מקובצות לפי מצב — פעילות, '
+              body:
+                  'פותח לוח של כל המשימות שלך מקובצות לפי מצב — פעילות, '
                   'בתור, בבדיקה והושלמו — עם פס-התקדמות וצלילה לכל משימה.',
               child: IconButton(
                 tooltip: 'לוח משימות מלא',
-                icon: const Icon(Icons.dashboard_outlined,
-                    color: BsTokens.mutedLight),
-                onPressed: () =>
-                    Navigator.of(context).push(WorkerTaskBoardScreen.route()),
+                icon: const Icon(
+                  Icons.dashboard_outlined,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed:
+                    () => Navigator.of(
+                      context,
+                    ).push(WorkerTaskBoardScreen.route()),
               ),
             ),
             // שיחות + פרופיל moved into the bottom tabs (#67). The gear opens
@@ -171,12 +176,15 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
             // 📷 סרוק מוצר (#85ה) — see _scanProduct.
             HelpTarget(
               title: 'סריקת מוצר',
-              body: 'פותח מצלמה לסריקת ברקוד או מק"ט. מוצר שנמצא בקטלוג '
+              body:
+                  'פותח מצלמה לסריקת ברקוד או מק"ט. מוצר שנמצא בקטלוג '
                   'נפתח כאן בכרטיס המוצר המלא — כולל ערכת ההתקנה שלו.',
               child: IconButton(
                 tooltip: 'סרוק מוצר',
-                icon: const Icon(Icons.qr_code_scanner,
-                    color: BsTokens.mutedLight),
+                icon: const Icon(
+                  Icons.qr_code_scanner,
+                  color: BsTokens.mutedLight,
+                ),
                 onPressed: _scanProduct,
               ),
             ),
@@ -185,17 +193,27 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
               body: 'פותח את הגדרות הלוח המותאמות לעובד.',
               child: IconButton(
                 tooltip: 'הגדרות',
-                icon: const Icon(Icons.settings_outlined,
-                    color: BsTokens.mutedLight),
-                onPressed: () =>
-                    Navigator.of(context).push(WorkerSettingsScreen.route()),
+                icon: const Icon(
+                  Icons.settings_outlined,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed:
+                    () => Navigator.of(
+                      context,
+                    ).push(WorkerSettingsScreen.route()),
               ),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(
-                '‹ יציאה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            HelpTarget(
+              title: 'יציאה מהלוח',
+              body:
+                  'סוגר את מסך לוח העובד וחוזר אחורה. אינו מנתק את החשבון — '
+                  'ניתוק מלא נמצא בטאב אזור אישי.',
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const Text(
+                  '‹ יציאה',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                ),
               ),
             ),
           ],
@@ -206,23 +224,21 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
           child: switch (_tab) {
             // 🔒 ISOLATION (SPEC §2.5): the chats tab embeds the worker-audience
             // ChatsScreen body (contract §3) — no route out of this board.
-            1 => const ChatsScreen(
-                persona: BsRole.worker,
-                audience: 'worker',
-              ),
+            1 => const ChatsScreen(persona: BsRole.worker, audience: 'worker'),
             2 => WorkerReportsTab(worker: worker),
             3 => const WorkerProfileScreen(embedded: true),
             _ => _TasksTab(
-                worker: worker,
-                username: session.username,
-                demo: session.demo,
-                onSubmit: _submit,
-              ),
+              worker: worker,
+              username: session.username,
+              demo: session.demo,
+              onSubmit: _submit,
+            ),
           },
         ),
         bottomNavigationBar: HelpTarget(
           title: 'טאבי הלוח',
-          body: 'ארבעת אזורי הלוח: משימות — העבודה שלך; שיחות — קבלן, מנהל '
+          body:
+              'ארבעת אזורי הלוח: משימות — העבודה שלך; שיחות — קבלן, מנהל '
               'ובוט; דוחות — היסטוריית ההגשות; אזור אישי — פרופיל ויציאה.',
           child: _WorkerNav(
             currentIndex: _tab,
@@ -325,10 +341,12 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
   /// Live tasks of the logged worker whose status is in [statuses] — the bucket
   /// filter (current = active|rejected · queue = pending · submitted =
   /// review|done).
-  List<TaskItem> _bucket(List<TaskItem> all, Set<String> statuses) => all
-      .where((t) =>
-          t.worker == widget.worker && statuses.contains(t.status))
-      .toList();
+  List<TaskItem> _bucket(List<TaskItem> all, Set<String> statuses) =>
+      all
+          .where(
+            (t) => t.worker == widget.worker && statuses.contains(t.status),
+          )
+          .toList();
 
   bool get _selectedIsToday {
     final now = DateTime.now();
@@ -374,8 +392,8 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
           username: widget.username,
           worker: widget.worker,
           onSelect: (d) => setState(() => _selected = d),
-          onFullMonth: () =>
-              Navigator.of(context).push(WorkerAttendanceScreen.route()),
+          onFullMonth:
+              () => Navigator.of(context).push(WorkerAttendanceScreen.route()),
         ),
         const SizedBox(height: BsTokens.space4),
         // נוכחות + מיקום של היום-הנבחר (#113). On TODAY the clock-with-GPS
@@ -410,9 +428,10 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
         // §6 tasks carry no calendar date, so these are the worker's CURRENT
         // live tasks shown under the selected day — not a per-day history.
         _Section(
-          header: current.isEmpty
-              ? '🎉 אין משימה פעילה כרגע'
-              : '🔨 המשימה הנוכחית שלך',
+          header:
+              current.isEmpty
+                  ? '🎉 אין משימה פעילה כרגע'
+                  : '🔨 המשימה הנוכחית שלך',
           tasks: current,
           // Only the current bucket (active/rejected) can be submitted.
           onSubmit: widget.onSubmit,
@@ -424,16 +443,14 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
         // the queue/submitted headers keep their order (reached by scroll).
         if (current.isNotEmpty)
           _EquipmentButton(
-            onPressed: () =>
-                showEquipmentChecklistSheet(context, ref, tasks: current),
+            onPressed:
+                () => showEquipmentChecklistSheet(context, ref, tasks: current),
           ),
         // 📦 מלאי הקבלן (Wave E1) — READ-ONLY view of the employing contractor's
         // stock (resolved via session.employerId). Always available (not gated
         // on a current task) so the worker can check what the contractor holds
         // anytime; the worker owns no stock and never mutates it.
-        _EmployerStockButton(
-          onPressed: () => showEmployerStockSheet(context),
-        ),
+        _EmployerStockButton(onPressed: () => showEmployerStockSheet(context)),
         // ➕ הוסף משימה (Wave G1b) — the worker PROPOSES their own next job. A
         // secondary (outlined) action peering with the stock/equipment buttons;
         // on save it mints a `proposed` task (TasksNotifier.proposeTask) that
@@ -496,10 +513,12 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
     if (clockingOut) {
       ok = notifier.clockOut(widget.username, lat: fix?.lat, lng: fix?.lng);
     } else {
-      ok = notifier.clockIn(widget.username,
-          lat: fix?.lat,
-          lng: fix?.lng,
-          employerId: ref.read(boardAuthProvider)?.employerId ?? '');
+      ok = notifier.clockIn(
+        widget.username,
+        lat: fix?.lat,
+        lng: fix?.lng,
+        employerId: ref.read(boardAuthProvider)?.employerId ?? '',
+      );
     }
 
     if (!ok) {
@@ -548,13 +567,14 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ProposeTaskSheet(
-        name: _proposeName,
-        detail: _proposeDetail,
-        steps: _proposeSteps,
-        days: _proposeDays,
-        onSave: _saveProposal,
-      ),
+      builder:
+          (_) => _ProposeTaskSheet(
+            name: _proposeName,
+            detail: _proposeDetail,
+            steps: _proposeSteps,
+            days: _proposeDays,
+            onSave: _saveProposal,
+          ),
     );
   }
 
@@ -567,17 +587,20 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
     final name = _proposeName.text.trim();
     if (name.isEmpty) return;
     final detail = _proposeDetail.text.trim();
-    final steps = _proposeSteps.text
-        .split('\n')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
+    final steps =
+        _proposeSteps.text
+            .split('\n')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
     // A non-positive / unparseable day count falls back to 1 (mirrors the
     // contractor author sheet's safeDays rule).
     final parsed = int.tryParse(_proposeDays.text.trim());
     final days = (parsed == null || parsed < 1) ? 1 : parsed;
     final s = ref.read(boardAuthProvider);
-    ref.read(tasksProvider.notifier).proposeTask(
+    ref
+        .read(tasksProvider.notifier)
+        .proposeTask(
           name: name,
           detail: detail,
           days: days,
@@ -621,7 +644,9 @@ class _WeekStripCard extends ConsumerWidget {
     final today = DateTime(now.year, now.month, now.day);
     // The seven days ending on today (today is the last/rightmost in RTL flow,
     // rendered start→end so the oldest is first).
-    final days = [for (var i = 6; i >= 0; i--) today.subtract(Duration(days: i))];
+    final days = [
+      for (var i = 6; i >= 0; i--) today.subtract(Duration(days: i)),
+    ];
 
     // Day-keys with attendance for this worker (a dot source).
     final ledger = ref.watch(workerAttendanceProvider);
@@ -672,7 +697,8 @@ class _WeekStripCard extends ConsumerWidget {
               ),
               HelpTarget(
                 title: 'חודש מלא',
-                body: 'פותח את לוח-הנוכחות החודשי המלא — כניסה/יציאה, מיקום '
+                body:
+                    'פותח את לוח-הנוכחות החודשי המלא — כניסה/יציאה, מיקום '
                     'וסיכום-עבודה לכל יום בחודש.',
                 child: Semantics(
                   button: true,
@@ -777,9 +803,10 @@ class _DayChip extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: fill,
                   shape: BoxShape.circle,
-                  border: isToday && !selected
-                      ? Border.all(color: BsTokens.brand, width: 1.5)
-                      : null,
+                  border:
+                      isToday && !selected
+                          ? Border.all(color: BsTokens.brand, width: 1.5)
+                          : null,
                 ),
                 child: Text(
                   '$dayNum',
@@ -797,9 +824,10 @@ class _DayChip extends StatelessWidget {
                 width: 6,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: hasDot
-                      ? (selected ? BsTokens.brandDark : BsTokens.brand)
-                      : Colors.transparent,
+                  color:
+                      hasDot
+                          ? (selected ? BsTokens.brandDark : BsTokens.brand)
+                          : Colors.transparent,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -879,9 +907,14 @@ class _DayAttendanceCard extends StatelessWidget {
           const SizedBox(height: BsTokens.space3),
           Row(
             children: [
-              _DayStat(label: 'כניסה', value: inTs == null ? '—' : _fmtTime(inTs)),
               _DayStat(
-                  label: 'יציאה', value: outTs == null ? '—' : _fmtTime(outTs)),
+                label: 'כניסה',
+                value: inTs == null ? '—' : _fmtTime(inTs),
+              ),
+              _DayStat(
+                label: 'יציאה',
+                value: outTs == null ? '—' : _fmtTime(outTs),
+              ),
               _DayStat(
                 label: 'סה"כ',
                 value: worked == null ? '—' : _fmtDur(worked),
@@ -894,7 +927,8 @@ class _DayAttendanceCard extends StatelessWidget {
           // no location was captured.
           HelpTarget(
             title: 'מיקום העבודה',
-            body: 'נשמר ממכשיר ה-GPS בעת רישום הכניסה. לחיצה פותחת ניווט '
+            body:
+                'נשמר ממכשיר ה-GPS בעת רישום הכניסה. לחיצה פותחת ניווט '
                 'ב-Waze או ב-Google Maps אל מיקום העבודה.',
             child: Semantics(
               button: hasLocation,
@@ -919,7 +953,9 @@ class _DayAttendanceCard extends StatelessWidget {
                         Icons.place_outlined,
                         size: 20,
                         color:
-                            hasLocation ? BsTokens.brandDark : BsTokens.mutedLight,
+                            hasLocation
+                                ? BsTokens.brandDark
+                                : BsTokens.mutedLight,
                       ),
                       const SizedBox(width: BsTokens.space2),
                       Expanded(
@@ -928,9 +964,10 @@ class _DayAttendanceCard extends StatelessWidget {
                               ? 'מיקום העבודה נשמר — פתח ניווט'
                               : 'לא נשמר מיקום ליום זה',
                           style: TextStyle(
-                            color: hasLocation
-                                ? BsTokens.inkLight
-                                : BsTokens.mutedLight,
+                            color:
+                                hasLocation
+                                    ? BsTokens.inkLight
+                                    : BsTokens.mutedLight,
                             fontSize: 13.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -952,7 +989,8 @@ class _DayAttendanceCard extends StatelessWidget {
             const SizedBox(height: BsTokens.space3),
             HelpTarget(
               title: 'נוכחות עם מיקום',
-              body: 'רושם כניסה/יציאה להיום ושומר את מיקום ה-GPS. אם המיקום '
+              body:
+                  'רושם כניסה/יציאה להיום ושומר את מיקום ה-GPS. אם המיקום '
                   'אינו זמין — הנוכחות נרשמת בלי מיקום, בלי המצאה.',
               child: Semantics(
                 button: true,
@@ -1182,8 +1220,9 @@ class _SummaryCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF2F3F5),
-                              borderRadius:
-                                  BorderRadius.circular(BsTokens.radiusPill),
+                              borderRadius: BorderRadius.circular(
+                                BsTokens.radiusPill,
+                              ),
                             ),
                             child: const Text(
                               'דמו',
@@ -1324,7 +1363,11 @@ class _Section extends StatelessWidget {
         if (tasks.isEmpty && emptyText != null)
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
-                BsTokens.space1, 0, BsTokens.space1, BsTokens.space2),
+              BsTokens.space1,
+              0,
+              BsTokens.space1,
+              BsTokens.space2,
+            ),
             child: Text(
               emptyText!,
               style: const TextStyle(
@@ -1337,7 +1380,8 @@ class _Section extends StatelessWidget {
           for (final t in tasks)
             HelpTarget(
               title: 'כרטיס משימה',
-              body: 'לחיצה על הכרטיס פותחת את פירוט המשימה — שלבים, הוראות, '
+              body:
+                  'לחיצה על הכרטיס פותחת את פירוט המשימה — שלבים, הוראות, '
                   '"מה להביא" ודיווח ביצוע. כפתור "שלח לאישור" מגיש את '
                   'המשימה לאישור המנהל.',
               child: _TaskCard(task: t, onSubmit: onSubmit),
@@ -1388,7 +1432,8 @@ class _TaskCard extends ConsumerWidget {
 
   /// Submittable = a worker-owned status the manager has not yet seen.
   bool get _canSubmit =>
-      onSubmit != null && (task.status == 'active' || task.status == 'rejected');
+      onSubmit != null &&
+      (task.status == 'active' || task.status == 'rejected');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1421,8 +1466,9 @@ class _TaskCard extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF2F3F5),
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          BsTokens.radiusPill,
+                        ),
                       ),
                       child: Text(
                         kTaskStatusLabel[task.status] ?? '',
@@ -1514,7 +1560,8 @@ class _EquipmentButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'בדוק ציוד נדרש',
-        body: 'מרכז את כל הכלים והחומרים הדרושים למשימות הפעילות שלך לרשימה '
+        body:
+            'מרכז את כל הכלים והחומרים הדרושים למשימות הפעילות שלך לרשימה '
             'אחת — צ\'קליסט מאוגד ליום, שאפשר לסמן ולשלוח לקבלן.',
         child: Semantics(
           button: true,
@@ -1565,7 +1612,8 @@ class _EmployerStockButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'מלאי הקבלן',
-        body: 'מציג לצפייה בלבד את מלאי הקבלן המעסיק — איזה פריט נמצא במחסן '
+        body:
+            'מציג לצפייה בלבד את מלאי הקבלן המעסיק — איזה פריט נמצא במחסן '
             'ואיזה באתר. אינך עורך מלאי זה; הוא של הקבלן.',
         child: Semantics(
           button: true,
@@ -1616,7 +1664,8 @@ class _ProposeTaskButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'הוסף משימה',
-        body: 'פותח טופס להצעת משימה חדשה לקבלן. המשימה שאתה מציע נשלחת '
+        body:
+            'פותח טופס להצעת משימה חדשה לקבלן. המשימה שאתה מציע נשלחת '
             'לקבלן לאישור, ורק לאחר שאישר אותה היא הופכת לפעילה אצלך.',
         child: Semantics(
           button: true,
@@ -1668,7 +1717,8 @@ class _GanttButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'גאנט משימות',
-        body: 'מציג לצפייה בלבד את לוח-הזמנים של המשימות לפי תאריך-התחלה '
+        body:
+            'מציג לצפייה בלבד את לוח-הזמנים של המשימות לפי תאריך-התחלה '
             'מתוזמן. הקבלן קובע את התאריכים; אתה רואה כאן את התזמון.',
         child: Semantics(
           button: true,
@@ -1721,7 +1771,8 @@ class _DefectsButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'ליקויים',
-        body: 'פותח טופס לדיווח על ליקוי שמצאת. הליקוי נשלח לקבלן לאישור, '
+        body:
+            'פותח טופס לדיווח על ליקוי שמצאת. הליקוי נשלח לקבלן לאישור, '
             'וברגע שאישר אותו הוא נכנס לביצוע — בדיוק כמו משימה.',
         child: Semantics(
           button: true,
@@ -1811,109 +1862,111 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
         minChildSize: 0.4,
         maxChildSize: 0.95,
         expand: false,
-        builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
-          ),
-          child: ListView(
-            controller: scroll,
-            padding: EdgeInsets.fromLTRB(
-              BsTokens.space4,
-              BsTokens.space4,
-              BsTokens.space4,
-              // Keep the save button clear of the on-screen keyboard.
-              BsTokens.space4 + MediaQuery.of(context).viewInsets.bottom,
-            ),
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
-                    borderRadius: BorderRadius.circular(2),
+        builder:
+            (_, scroll) => Container(
+              decoration: const BoxDecoration(
+                color: BsTokens.cardLight,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(BsTokens.radiusCard),
+                ),
+              ),
+              child: ListView(
+                controller: scroll,
+                padding: EdgeInsets.fromLTRB(
+                  BsTokens.space4,
+                  BsTokens.space4,
+                  BsTokens.space4,
+                  // Keep the save button clear of the on-screen keyboard.
+                  BsTokens.space4 + MediaQuery.of(context).viewInsets.bottom,
+                ),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDDDDDD),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                ),
+                  const Text(
+                    '➕ הצעת משימה לקבלן',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'המשימה תישלח לקבלן לאישור',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  const _ProposeSecH('שם המשימה'),
+                  TextField(
+                    key: const ValueKey('worker-propose-name'),
+                    controller: widget.name,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      hintText: 'לדוגמה: התקנת ברז במטבח',
+                      border: const OutlineInputBorder(),
+                      // 🎤 #36 — dictate the task name (worker board only).
+                      suffixIcon: VoiceDictateButton(controller: widget.name),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  const _ProposeSecH('תיאור'),
+                  TextField(
+                    key: const ValueKey('worker-propose-detail'),
+                    controller: widget.detail,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'פרטי הביצוע (אופציונלי)',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: VoiceDictateButton(controller: widget.detail),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  const _ProposeSecH('שלבי ביצוע — שלב בכל שורה'),
+                  TextField(
+                    key: const ValueKey('worker-propose-steps'),
+                    controller: widget.steps,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      hintText: 'כל שורה = שלב נפרד (אופציונלי)',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: VoiceDictateButton(controller: widget.steps),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  const _ProposeSecH('משך משוער (ימים)'),
+                  TextField(
+                    key: const ValueKey('worker-propose-days'),
+                    controller: widget.days,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      hintText: '1',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space4),
+                  // Guarded: disabled (greyed, no-op) until a name is entered.
+                  _ProposePrimaryBtn(
+                    key: const ValueKey('worker-propose-save'),
+                    label: 'שלח לקבלן לאישור',
+                    onTap: canSave ? widget.onSave : null,
+                  ),
+                  const SizedBox(height: BsTokens.space2),
+                  _ProposePrimaryBtn(
+                    label: 'ביטול',
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
+                ],
               ),
-              const Text(
-                '➕ הצעת משימה לקבלן',
-                style: TextStyle(
-                  color: BsTokens.inkLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 2),
-              const Text(
-                'המשימה תישלח לקבלן לאישור',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              const _ProposeSecH('שם המשימה'),
-              TextField(
-                key: const ValueKey('worker-propose-name'),
-                controller: widget.name,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  hintText: 'לדוגמה: התקנת ברז במטבח',
-                  border: const OutlineInputBorder(),
-                  // 🎤 #36 — dictate the task name (worker board only).
-                  suffixIcon: VoiceDictateButton(controller: widget.name),
-                ),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              const _ProposeSecH('תיאור'),
-              TextField(
-                key: const ValueKey('worker-propose-detail'),
-                controller: widget.detail,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'פרטי הביצוע (אופציונלי)',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: VoiceDictateButton(controller: widget.detail),
-                ),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              const _ProposeSecH('שלבי ביצוע — שלב בכל שורה'),
-              TextField(
-                key: const ValueKey('worker-propose-steps'),
-                controller: widget.steps,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: 'כל שורה = שלב נפרד (אופציונלי)',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: VoiceDictateButton(controller: widget.steps),
-                ),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              const _ProposeSecH('משך משוער (ימים)'),
-              TextField(
-                key: const ValueKey('worker-propose-days'),
-                controller: widget.days,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: '1',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: BsTokens.space4),
-              // Guarded: disabled (greyed, no-op) until a name is entered.
-              _ProposePrimaryBtn(
-                key: const ValueKey('worker-propose-save'),
-                label: 'שלח לקבלן לאישור',
-                onTap: canSave ? widget.onSave : null,
-              ),
-              const SizedBox(height: BsTokens.space2),
-              _ProposePrimaryBtn(
-                label: 'ביטול',
-                onTap: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        ),
+            ),
       ),
     );
   }
@@ -1928,23 +1981,27 @@ class _ProposeSecH extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: BsTokens.inkLight,
-            fontWeight: FontWeight.w800,
-            fontSize: 13.5,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Text(
+      text,
+      style: const TextStyle(
+        color: BsTokens.inkLight,
+        fontWeight: FontWeight.w800,
+        fontSize: 13.5,
+      ),
+    ),
+  );
 }
 
 /// Pill button inside the worker propose sheet — a file-local twin of the
 /// contractor sheet's `_PrimaryBtn`. A null [onTap] renders it disabled (greyed
 /// fill, no tap) so the save action can be guarded until the name is non-empty.
 class _ProposePrimaryBtn extends StatelessWidget {
-  const _ProposePrimaryBtn({required this.label, required this.onTap, super.key});
+  const _ProposePrimaryBtn({
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
 
   final String label;
   final VoidCallback? onTap;

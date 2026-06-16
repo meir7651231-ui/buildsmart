@@ -35,6 +35,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +73,8 @@ class CourierProfileScreen extends ConsumerWidget {
             ),
           ),
           iconTheme: const IconThemeData(color: Colors.black54),
+          // 💡 מצב היכרות — בלעדיו כל ה-HelpTarget של הגוף מתים במסך העצמאי.
+          actions: const [HelpToggleButton()],
         ),
         body: const SafeArea(child: CourierProfileBody(standalone: true)),
       ),
@@ -149,21 +152,25 @@ class CourierProfileBody extends ConsumerWidget {
     final int onRoad;
     final String onRoadLabel;
     if (effectiveVehicle != null) {
-      onRoad = orders
-          .courierJobs(effectiveVehicle)
-          .where(
-            (o) =>
-                o.stage == OrderStage.pickup || o.stage == OrderStage.transit,
-          )
-          .length;
+      onRoad =
+          orders
+              .courierJobs(effectiveVehicle)
+              .where(
+                (o) =>
+                    o.stage == OrderStage.pickup ||
+                    o.stage == OrderStage.transit,
+              )
+              .length;
       onRoadLabel = 'בדרך (מתאים לרכב) 🚚';
     } else {
-      onRoad = orders
-          .where(
-            (o) =>
-                o.stage == OrderStage.pickup || o.stage == OrderStage.transit,
-          )
-          .length;
+      onRoad =
+          orders
+              .where(
+                (o) =>
+                    o.stage == OrderStage.pickup ||
+                    o.stage == OrderStage.transit,
+              )
+              .length;
       onRoadLabel = 'בדרך (כלל המערכת)';
     }
 
@@ -234,44 +241,68 @@ class CourierProfileBody extends ConsumerWidget {
           ),
           child: Column(
             children: [
-              ListTile(
-                leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-                title: const Text(
-                  'הגדרות שליח',
-                  style: TextStyle(color: BsTokens.inkLight),
-                ),
-                trailing:
-                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-                onTap: () =>
-                    Navigator.of(context).push(CourierSettingsScreen.route()),
-              ),
-              const Divider(height: 1, color: Color(0xFFF0F0F0)),
-              ListTile(
-                leading: const Text('🔁', style: TextStyle(fontSize: 20)),
-                title: const Text(
-                  'החלפת תפקיד',
-                  style: TextStyle(color: BsTokens.inkLight),
-                ),
-                subtitle: const Text(
-                  'מוגן בקוד',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-                ),
-                trailing:
-                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-                onTap: () => _askRoleSwitch(context),
-              ),
-              const Divider(height: 1, color: Color(0xFFF0F0F0)),
-              ListTile(
-                leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-                title: const Text(
-                  'יציאה מהחשבון',
-                  style: TextStyle(
-                    // AA על כרטיס לבן (redAccent = 3.19:1 נכשל) — token חוזה 9.
-                    color: BsTokens.dangerDark,
-                    fontWeight: FontWeight.w600,
+              HelpTarget(
+                title: 'הגדרות שליח',
+                body:
+                    'פותח את מסך ההגדרות — התראות, אזור ושפה, ממשק '
+                    'ונגישות ומידע משפטי.',
+                child: ListTile(
+                  leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
+                  title: const Text(
+                    'הגדרות שליח',
+                    style: TextStyle(color: BsTokens.inkLight),
                   ),
+                  trailing: const Icon(
+                    Icons.chevron_left,
+                    color: BsTokens.mutedLight,
+                  ),
+                  onTap:
+                      () => Navigator.of(
+                        context,
+                      ).push(CourierSettingsScreen.route()),
                 ),
-                onTap: () => _logout(context, ref),
+              ),
+              const Divider(height: 1, color: Color(0xFFF0F0F0)),
+              HelpTarget(
+                title: 'החלפת תפקיד',
+                body:
+                    'מעבר ללוח של תפקיד אחר — מוגן בקוד מעבר. הזנת הקוד '
+                    'הנכון פותחת את בורר התפקידים.',
+                child: ListTile(
+                  leading: const Text('🔁', style: TextStyle(fontSize: 20)),
+                  title: const Text(
+                    'החלפת תפקיד',
+                    style: TextStyle(color: BsTokens.inkLight),
+                  ),
+                  subtitle: const Text(
+                    'מוגן בקוד',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_left,
+                    color: BsTokens.mutedLight,
+                  ),
+                  onTap: () => _askRoleSwitch(context),
+                ),
+              ),
+              const Divider(height: 1, color: Color(0xFFF0F0F0)),
+              HelpTarget(
+                title: 'יציאה מהחשבון',
+                body:
+                    'מתנתק מהחשבון ומחזיר אותך למסך ההרשמה — פעולה עם '
+                    'אישור. שונה מ-"יציאה" שב-AppBar של הלוח שרק חוזרת אחורה.',
+                child: ListTile(
+                  leading: const Text('🚪', style: TextStyle(fontSize: 20)),
+                  title: const Text(
+                    'יציאה מהחשבון',
+                    style: TextStyle(
+                      // AA על כרטיס לבן (redAccent = 3.19:1 נכשל) — token חוזה 9.
+                      color: BsTokens.dangerDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onTap: () => _logout(context, ref),
+                ),
               ),
             ],
           ),
@@ -285,10 +316,11 @@ class CourierProfileBody extends ConsumerWidget {
   Future<void> _askRoleSwitch(BuildContext context) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => const Directionality(
-        textDirection: TextDirection.rtl,
-        child: _RoleSwitchCodeDialog(),
-      ),
+      builder:
+          (_) => const Directionality(
+            textDirection: TextDirection.rtl,
+            child: _RoleSwitchCodeDialog(),
+          ),
     );
     if (ok == true && context.mounted) {
       await showRolePicker(context);
@@ -325,9 +357,10 @@ class _CourierIdentityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = profile.displayName.isNotEmpty
-        ? profile.displayName
-        : session.displayName;
+    final name =
+        profile.displayName.isNotEmpty
+            ? profile.displayName
+            : session.displayName;
     // רכב-מועדף מוצג רק כשה-id חוקי (kVehicleRank) — בלי haulInfo fallback
     // שממציא רכב שהמשתמש לא בחר.
     final hasHaul = kVehicleRank.containsKey(profile.preferredHaul);
@@ -383,8 +416,9 @@ class _CourierIdentityCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF2F3F5),
-                          borderRadius:
-                              BorderRadius.circular(BsTokens.radiusPill),
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusPill,
+                          ),
                         ),
                         child: const Text(
                           'דמו',
@@ -424,11 +458,17 @@ class _CourierIdentityCard extends StatelessWidget {
             ),
           ),
           // #86.1 — פותח את עורך הפרופיל (IconButton ≥48dp).
-          IconButton(
-            tooltip: 'עריכת פרופיל',
-            icon: const Icon(Icons.edit_outlined, color: BsTokens.mutedLight),
-            onPressed: () =>
-                showCourierProfileEditSheet(context, session: session),
+          HelpTarget(
+            title: 'עריכת פרופיל',
+            body:
+                'פותח את עורך הפרופיל — שם-תצוגה, טלפון, סוג-רכב מועדף '
+                'ותמונת-פרופיל. השינויים נשמרים בפרופיל שלך.',
+            child: IconButton(
+              tooltip: 'עריכת פרופיל',
+              icon: const Icon(Icons.edit_outlined, color: BsTokens.mutedLight),
+              onPressed:
+                  () => showCourierProfileEditSheet(context, session: session),
+            ),
           ),
         ],
       ),
@@ -466,18 +506,18 @@ class _CourierAvatar extends StatelessWidget {
   }
 
   Widget _fallback() => Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFF0E3),
-          shape: BoxShape.circle,
-        ),
-        // דקורטיבי: השם המלא נקרא ממש לידו.
-        child: ExcludeSemantics(
-          child: Text('🛵', style: TextStyle(fontSize: size * 0.46)),
-        ),
-      );
+    width: size,
+    height: size,
+    alignment: Alignment.center,
+    decoration: const BoxDecoration(
+      color: Color(0xFFFFF0E3),
+      shape: BoxShape.circle,
+    ),
+    // דקורטיבי: השם המלא נקרא ממש לידו.
+    child: ExcludeSemantics(
+      child: Text('🛵', style: TextStyle(fontSize: size * 0.46)),
+    ),
+  );
 }
 
 // ─── personal-area card (#86.7) ──────────────────────────────────────────────
@@ -505,68 +545,100 @@ class _CourierPersonalAreaCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          ListTile(
-            leading: const Text('🕐', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'נוכחות',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          HelpTarget(
+            title: 'נוכחות',
+            body:
+                'פותח את מסך הנוכחות — רישום כניסה/יציאה, טבלה חודשית '
+                'ושליחת דוח-נוכחות לחנות.',
+            child: ListTile(
+              leading: const Text('🕐', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'נוכחות',
+                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+              ),
+              subtitle: const Text(
+                'כניסה/יציאה ודוח חודשי',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: BsTokens.mutedLight,
+              ),
+              onTap:
+                  () => Navigator.of(
+                    context,
+                  ).push(CourierAttendanceScreen.route()),
             ),
-            subtitle: const Text(
-              'כניסה/יציאה ודוח חודשי',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-            onTap: () =>
-                Navigator.of(context).push(CourierAttendanceScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('📄', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'טפסים',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          HelpTarget(
+            title: 'טפסים',
+            body: 'פותח את מרכז הטפסים — טופס 101, בקשת חופשה ואישור מחלה.',
+            child: ListTile(
+              leading: const Text('📄', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'טפסים',
+                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+              ),
+              subtitle: const Text(
+                'טופס 101 · בקשת חופשה · אישור מחלה',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: BsTokens.mutedLight,
+              ),
+              onTap:
+                  () => Navigator.of(context).push(CourierFormsScreen.route()),
             ),
-            subtitle: const Text(
-              'טופס 101 · בקשת חופשה · אישור מחלה',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-            onTap: () =>
-                Navigator.of(context).push(CourierFormsScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('🪪', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'תעודות נהג',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          HelpTarget(
+            title: 'תעודות נהג',
+            body:
+                'פותח את ארנק תעודות-הנהג — רישיון נהיגה, ביטוח רכב '
+                'ורישיון רכב עם תאריכי תוקף.',
+            child: ListTile(
+              leading: const Text('🪪', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'תעודות נהג',
+                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+              ),
+              subtitle: const Text(
+                'רישיון נהיגה · ביטוח רכב · רישיון רכב',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: BsTokens.mutedLight,
+              ),
+              onTap:
+                  () => Navigator.of(context).push(CourierCertsScreen.route()),
             ),
-            subtitle: const Text(
-              'רישיון נהיגה · ביטוח רכב · רישיון רכב',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-            onTap: () =>
-                Navigator.of(context).push(CourierCertsScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('💰', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'תלושי שכר',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          HelpTarget(
+            title: 'תלושי שכר',
+            body:
+                'פותח את גיליון תלושי-השכר — מוכן לשרת; התלושים יחוברו '
+                'עם חיבור השרת.',
+            child: ListTile(
+              leading: const Text('💰', style: TextStyle(fontSize: 20)),
+              title: const Text(
+                'תלושי שכר',
+                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+              ),
+              subtitle: const Text(
+                'יחובר עם חיבור השרת',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: BsTokens.mutedLight,
+              ),
+              // reuse כמו-שהוא — ה-sheet role-agnostic ומוכן-לשרת (#86.5).
+              onTap: () => showWorkerPayslipsSheet(context),
             ),
-            subtitle: const Text(
-              'יחובר עם חיבור השרת',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-            // reuse כמו-שהוא — ה-sheet role-agnostic ומוכן-לשרת (#86.5).
-            onTap: () => showWorkerPayslipsSheet(context),
           ),
         ],
       ),
@@ -619,12 +691,12 @@ class _EditCourierProfileSheetState
   @override
   void initState() {
     super.initState();
-    final p = ref.read(courierProfileProvider)[widget.session.username] ??
+    final p =
+        ref.read(courierProfileProvider)[widget.session.username] ??
         const CourierProfile();
     _name = TextEditingController(
-      text: p.displayName.isNotEmpty
-          ? p.displayName
-          : widget.session.displayName,
+      text:
+          p.displayName.isNotEmpty ? p.displayName : widget.session.displayName,
     );
     _phone = TextEditingController(text: p.phone);
     // ערך persisted לא-מוכר ננקה ל-'' (לא-נבחר) — בלי haulInfo fallback
@@ -658,16 +730,16 @@ class _EditCourierProfileSheetState
     // ולידציית פורמט בלבד (#64) — הטלפון אופציונלי, אבל ערך לא-ריק חייב
     // להיות נייד ישראלי תקין.
     if (phone.isNotEmpty && !validIsraeliMobile(phone)) {
-      setState(
-        () => _phoneError = 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05',
-      );
+      setState(() => _phoneError = 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05');
       return;
     }
     setState(() => _saving = true);
     final name = _name.text.trim();
     // ה-persist הוא AWAITED: כשל quota (תמונה גדולה על web localStorage)
     // מדווח בכנות + rollback ב-store — לא '✓ נשמר' מזויף.
-    final ok = await ref.read(courierProfileProvider.notifier).save(
+    final ok = await ref
+        .read(courierProfileProvider.notifier)
+        .save(
           widget.session.username,
           CourierProfile(
             // שמירת '' משמרת את ה-fallback הכן ל-displayName של ה-session.
@@ -730,8 +802,9 @@ class _EditCourierProfileSheetState
       textDirection: TextDirection.rtl,
       child: Padding(
         // שומר את השדות מעל המקלדת.
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
         child: Container(
           decoration: const BoxDecoration(
             color: BsTokens.cardLight,
@@ -790,13 +863,11 @@ class _EditCourierProfileSheetState
                             ),
                             if (_photo != null)
                               TextButton(
-                                onPressed: () =>
-                                    setState(() => _photo = null),
+                                onPressed: () => setState(() => _photo = null),
                                 child: const Text(
                                   'הסר תמונה',
                                   // AA: redAccent על לבן נכשל — token חוזה 9.
-                                  style:
-                                      TextStyle(color: BsTokens.dangerDark),
+                                  style: TextStyle(color: BsTokens.dangerDark),
                                 ),
                               ),
                           ],
@@ -809,9 +880,7 @@ class _EditCourierProfileSheetState
                   TextField(
                     controller: _name,
                     textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(40),
-                    ],
+                    inputFormatters: [LengthLimitingTextInputFormatter(40)],
                     decoration: const InputDecoration(
                       labelText: 'שם תצוגה',
                       border: OutlineInputBorder(),
@@ -851,9 +920,7 @@ class _EditCourierProfileSheetState
                   Wrap(
                     spacing: BsTokens.space2,
                     runSpacing: BsTokens.space2,
-                    children: [
-                      for (final h in kHaulTypes) _haulChip(h),
-                    ],
+                    children: [for (final h in kHaulTypes) _haulChip(h)],
                   ),
                   const SizedBox(height: BsTokens.space4),
                   // ── שמירה ──
@@ -861,8 +928,7 @@ class _EditCourierProfileSheetState
                     color: BsTokens.brand,
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     child: InkWell(
-                      borderRadius:
-                          BorderRadius.circular(BsTokens.radiusPill),
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                       onTap: _saving ? null : _save,
                       child: Opacity(
                         opacity: _saving ? 0.6 : 1,

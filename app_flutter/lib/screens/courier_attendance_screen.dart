@@ -10,6 +10,7 @@ import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,7 +51,8 @@ class _CourierAttendanceScreenState
     _month = DateTime(now.year, now.month);
   }
 
-  String get _monthKey => '${_month.year.toString().padLeft(4, '0')}-'
+  String get _monthKey =>
+      '${_month.year.toString().padLeft(4, '0')}-'
       '${_month.month.toString().padLeft(2, '0')}';
 
   @override
@@ -72,8 +74,7 @@ class _CourierAttendanceScreenState
         break;
       }
     }
-    final monthDays =
-        attendanceMonth(all, username, _month.year, _month.month);
+    final monthDays = attendanceMonth(all, username, _month.year, _month.month);
     final monthTotal = attendanceTotal(monthDays);
     final sentThisMonth = _sentMonths.contains(_monthKey);
 
@@ -81,8 +82,10 @@ class _CourierAttendanceScreenState
     // month, so a viewed month can never navigate past it — even if _month
     // somehow got ahead, canGoNext stays false until it is truly behind now.
     final now = DateTime.now();
-    final canGoNext =
-        DateTime(_month.year, _month.month).isBefore(DateTime(now.year, now.month));
+    final canGoNext = DateTime(
+      _month.year,
+      _month.month,
+    ).isBefore(DateTime(now.year, now.month));
 
     return Scaffold(
       backgroundColor: BsTokens.bgLight,
@@ -97,6 +100,7 @@ class _CourierAttendanceScreenState
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
+        actions: const [HelpToggleButton()],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -117,21 +121,24 @@ class _CourierAttendanceScreenState
             days: monthDays,
             total: monthTotal,
             canGoNext: canGoNext,
-            onPrev: () => setState(
-              () => _month = DateTime(_month.year, _month.month - 1),
-            ),
-            onNext: () => setState(
-              () => _month = DateTime(_month.year, _month.month + 1),
-            ),
+            onPrev:
+                () => setState(
+                  () => _month = DateTime(_month.year, _month.month - 1),
+                ),
+            onNext:
+                () => setState(
+                  () => _month = DateTime(_month.year, _month.month + 1),
+                ),
           ),
           const SizedBox(height: BsTokens.space4),
           _SendReportButton(
             enabled: monthDays.isNotEmpty && !sentThisMonth,
-            label: sentThisMonth
-                ? 'הדוח נשלח ✓'
-                : (monthDays.isNotEmpty
-                    ? '📨 שלח דוח נוכחות לחנות'
-                    : 'אין רישומים לשליחה בחודש זה'),
+            label:
+                sentThisMonth
+                    ? 'הדוח נשלח ✓'
+                    : (monthDays.isNotEmpty
+                        ? '📨 שלח דוח נוכחות לחנות'
+                        : 'אין רישומים לשליחה בחודש זה'),
             onPressed: () => _sendReport(session, monthDays, monthTotal),
           ),
         ],
@@ -142,8 +149,7 @@ class _CourierAttendanceScreenState
   void _clockIn(String username) {
     // clockIn/clockOut are state-guarded (idempotent) in the notifier — a
     // double-tap is an honest no-op toast, never a second shift.
-    final ok =
-        ref.read(courierAttendanceProvider.notifier).clockIn(username);
+    final ok = ref.read(courierAttendanceProvider.notifier).clockIn(username);
     showToast(
       context,
       ok
@@ -190,7 +196,8 @@ class _CourierAttendanceScreenState
     }
     // The line carries the sender's display name — fromRole=courier alone is
     // not an identity when more than one courier exists.
-    final text = '📋 דוח נוכחות ${_month.month}/${_month.year} — '
+    final text =
+        '📋 דוח נוכחות ${_month.month}/${_month.year} — '
         '${session.displayName}: ${monthDays.length} ימי עבודה, '
         'סה"כ ${_fmtDur(total)} שעות';
     ref
@@ -200,11 +207,14 @@ class _CourierAttendanceScreenState
     // the single seeded store account ([CourierReportsTab.kStoreUsername]).
     // SERVER-SWAP: הפעמון ממוען לחשבון החנות היחיד ב-seed; סשן demo של החנות
     // לא מקבל פעמון — יוחלף במיעון אמיתי (uid) עם חיבור השרת.
-    ref.read(workerNotifsProvider.notifier).addNotification(
+    ref
+        .read(workerNotifsProvider.notifier)
+        .addNotification(
           username: CourierReportsTab.kStoreUsername,
           emoji: '📋',
           title: 'דוח נוכחות מהשליח 🛵',
-          body: '${session.displayName}: ${monthDays.length} ימי עבודה · '
+          body:
+              '${session.displayName}: ${monthDays.length} ימי עבודה · '
               '${_fmtDur(total)} שעות (${_month.month}/${_month.year})',
         );
     // Double-tap guard — this month is now sent (the button flips to a
@@ -281,30 +291,37 @@ class _ClockCard extends StatelessWidget {
           const SizedBox(height: BsTokens.space3),
           // excludeSemantics — the inner Text equals the label; without it
           // TalkBack announces the button twice (F-50).
-          Semantics(
-            button: onTap != null,
-            label: label,
-            excludeSemantics: true,
-            child: Material(
-              color: color,
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: InkWell(
+          HelpTarget(
+            title: 'כניסה / יציאה',
+            body:
+                'רישום נוכחות: לחיצה ראשונה רושמת כניסה (ירוק), השנייה '
+                'יציאה (אדום). לאחר השלמת היום הכפתור ננעל — משמרת אחת ליום.',
+            child: Semantics(
+              button: onTap != null,
+              label: label,
+              excludeSemantics: true,
+              child: Material(
+                color: color,
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                onTap: onTap,
-                child: Container(
-                  // Big primary target — comfortably above the 48dp floor.
-                  constraints: const BoxConstraints(minHeight: 64),
-                  alignment: Alignment.center,
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      // bsOnAccent, not a hard Colors.white — high-contrast
-                      // mode darkens the foreground on accent fills (F-28).
-                      color: onTap == null
-                          ? BsTokens.mutedLight
-                          : bsOnAccent(context),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  onTap: onTap,
+                  child: Container(
+                    // Big primary target — comfortably above the 48dp floor.
+                    constraints: const BoxConstraints(minHeight: 64),
+                    alignment: Alignment.center,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        // bsOnAccent, not a hard Colors.white — high-contrast
+                        // mode darkens the foreground on accent fills (F-28).
+                        color:
+                            onTap == null
+                                ? BsTokens.mutedLight
+                                : bsOnAccent(context),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -367,8 +384,18 @@ class _TodayStat extends StatelessWidget {
 
 /// Hebrew month names (calendar labels, not business data).
 const List<String> _kHebMonths = [
-  'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
-  'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר',
+  'ינואר',
+  'פברואר',
+  'מרץ',
+  'אפריל',
+  'מאי',
+  'יוני',
+  'יולי',
+  'אוגוסט',
+  'ספטמבר',
+  'אוקטובר',
+  'נובמבר',
+  'דצמבר',
 ];
 
 /// The month picker + the תאריך·כניסה·יציאה·סה"כ table + the monthly total.
@@ -415,13 +442,17 @@ class _MonthCard extends StatelessWidget {
           // icons so RTL direction stays unambiguous (gate #62).
           Row(
             children: [
-              TextButton(
-                onPressed: onPrev,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  foregroundColor: BsTokens.mutedLight,
+              HelpTarget(
+                title: 'חודש קודם',
+                body: 'מציג את טבלת הנוכחות של החודש הקודם.',
+                child: TextButton(
+                  onPressed: onPrev,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    foregroundColor: BsTokens.mutedLight,
+                  ),
+                  child: const Text('‹ הקודם', style: TextStyle(fontSize: 13)),
                 ),
-                child: const Text('‹ הקודם', style: TextStyle(fontSize: 13)),
               ),
               Expanded(
                 child: Text(
@@ -434,13 +465,19 @@ class _MonthCard extends StatelessWidget {
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: canGoNext ? onNext : null,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  foregroundColor: BsTokens.mutedLight,
+              HelpTarget(
+                title: 'חודש הבא',
+                body:
+                    'מציג את טבלת הנוכחות של החודש הבא — מושבת על החודש '
+                    'הנוכחי (אין עתיד).',
+                child: TextButton(
+                  onPressed: canGoNext ? onNext : null,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    foregroundColor: BsTokens.mutedLight,
+                  ),
+                  child: const Text('הבא ›', style: TextStyle(fontSize: 13)),
                 ),
-                child: const Text('הבא ›', style: TextStyle(fontSize: 13)),
               ),
             ],
           ),
@@ -558,26 +595,32 @@ class _SendReportButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // excludeSemantics — the inner Text equals the label (F-50).
-    return Semantics(
-      button: enabled,
-      label: label,
-      excludeSemantics: true,
-      child: Material(
-        color: enabled ? BsTokens.brand : const Color(0xFFE9EAEC),
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        child: InkWell(
+    return HelpTarget(
+      title: 'שלח דוח נוכחות לחנות',
+      body:
+          'שולח לחנות סיכום נוכחות חודשי (ימי עבודה + סה"כ שעות) כהודעת '
+          'צ׳אט + פעמון. ננעל אחרי שליחה למניעת כפילות.',
+      child: Semantics(
+        button: enabled,
+        label: label,
+        excludeSemantics: true,
+        child: Material(
+          color: enabled ? BsTokens.brand : const Color(0xFFE9EAEC),
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          onTap: enabled ? onPressed : null,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 48),
-            alignment: Alignment.center,
-            child: Text(
-              label,
-              style: TextStyle(
-                // bsOnAccent on the brand fill (F-28).
-                color: enabled ? bsOnAccent(context) : BsTokens.mutedLight,
-                fontSize: 14.5,
-                fontWeight: FontWeight.w800,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: enabled ? onPressed : null,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 48),
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: TextStyle(
+                  // bsOnAccent on the brand fill (F-28).
+                  color: enabled ? bsOnAccent(context) : BsTokens.mutedLight,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
