@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.21 — מד-חיבור חי + ✓✓ סטטוס צ׳אט · אם אתה רואה v6.21 במסך הבית = אתה על הבילד הנכון! · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.22 — תיקון סנכרון-אחרי-התחברות + אשראי/פרופיל/מלאי · אם אתה רואה v6.22 במסך הבית = הבילד הנכון! · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
