@@ -1998,7 +1998,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #96 לא קיים", () {
+    test("antipattern #98 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp('לעטוף את מתג מצב-ההיכרות עצמו או את ה-✕ של היציאה ב-HelpTarget כי זה חוסם את הלחיצה ולוכד את המשתמש בתוך המצב בלי דרך לצאת');
@@ -2019,7 +2019,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #97 לא קיים", () {
+    test("antipattern #99 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp('להוסיף עטיפות HelpTarget ללוח שאין בו כפתור מצב-היכרות להפעלה כי ההסברים הופכים בלתי-נגישים — אי-אפשר בכלל להיכנס למצב באותו לוח');
@@ -2040,7 +2040,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #98 לא קיים", () {
+    test("antipattern #100 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp('להחליף עטיפת HelpTarget אמיתית בכרטיס-הסבר מרכזי showHelpInfo בלי טבעת — האלמנט לא מודגש והבועה לא יוצאת ממנו, חוסר-עקביות מול שאר האלמנטים');
