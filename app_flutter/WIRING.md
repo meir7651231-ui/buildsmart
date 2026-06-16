@@ -8,6 +8,15 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-17 — owner-login dead-end fix (Google on the first screen):** on the LIVE backend the
+> `OnboardingGate` traps a signed-OUT user in `_OpeningFlow` until `auth.user != null`, but the owner's
+> manager Google login was only reachable from INSIDE `HomeShell` (unreachable while signed-out) — a
+> circular dead-end (register blocked = email-already-in-use; email-login blocked = a Google account has no
+> password). FIX: `welcome_screen.dart` now shows a **"כניסה עם Google (בעלים)"** FilledButton directly on
+> the contractor welcome (gated to `useFirebaseBackend`; `isOwnerEmail` enforced server-side in
+> `_managerGoogleLogin`), and `_managerGoogleLogin` flips `welcomeSeen` so a signed-in owner routes to
+> `HomeShell`, not back into the loop. Demo build byte-identical (button hidden without Firebase). v6.23 / 1.4.6.
+
 > **2026-06-16 — server-connect fix wave (real-fleet: 5 auditors → 2 validators → supervisor):**
 > closed 6 validated gaps that kept the *connected* build serving demo/local data. **A1 (load-bearing):**
 > `ordersEngineProvider`/`chatEngineProvider` now RE-BIND their repo on a uid-driven rebuild (the

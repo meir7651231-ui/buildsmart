@@ -370,6 +370,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             uid: user.uid,
             displayName: user.displayName ?? 'מנהל המערכת',
           );
+      // OWNER bypass: when this runs from the opening-flow welcome (not only the
+      // in-app role picker), the OnboardingGate must route to HomeShell — mark the
+      // welcome seen so a freshly-signed-in owner is not bounced back into the
+      // _OpeningFlow loop (auth.user != null + seen ⇒ HomeShell).
+      ref.read(welcomeSeenProvider.notifier).state = true;
+      unawaited(persistWelcomeSeen());
     } on AuthGatewayException catch (e) {
       if (mounted) showToast(context, hebrewAuthError(e.code));
     } on Object catch (_) {
@@ -612,6 +618,42 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       if (widget.boardRole != null)
                         ..._boardLoginChildren(widget.boardRole!)
                       else ...[
+                      // OWNER bypass (server-gate-auth): on the LIVE backend the
+                      // owner/manager signs in with Google RIGHT HERE. Without it
+                      // the manager Google login was only reachable from inside
+                      // HomeShell — which is unreachable while signed-out, since the
+                      // OnboardingGate forces _OpeningFlow until auth.user != null
+                      // (the circular dead-end a device test hit). isOwnerEmail is
+                      // enforced server-side in _managerGoogleLogin. Hidden on the
+                      // demo build (no Firebase) — byte-identical there.
+                      if (useFirebaseBackend) ...[
+                        HelpTarget(
+                          title: 'כניסה עם Google (בעלים/מנהל)',
+                          body: 'בעל המערכת נכנס עם חשבון ה-Google שלו — הדרך '
+                              'המהירה להיכנס מחובר. רק חשבון הבעלים מורשה.',
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: BsTokens.brand,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: BsTokens.space4,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: _busy ? null : _managerGoogleLogin,
+                            child: const Text(
+                              'כניסה עם Google (בעלים)',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: BsTokens.space4),
+                      ],
                       HelpTarget(
                         title: 'כניסה ללקוח קיים',
                         // server-gate-auth — flag ON: a real login sheet opens

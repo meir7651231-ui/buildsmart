@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-17 — תיקון כניסת-בעלים: כפתור "כניסה עם Google" במסך הראשון
+
+**שינוי (lib/screens):** `welcome_screen.dart` — בנתיב-הקבלן (`boardRole == null`), כשמחובר
+(`useFirebaseBackend`), נוסף בראש כרטיס-הכניסה כפתור **FilledButton כתום "כניסה עם Google (בעלים)"**
+(קורא ל-`_managerGoogleLogin` הקיים). הוסתר בדמו (אין Firebase). **ויזואלית:** כפתור מלא בצבע-המותג מעל
+"כניסה ללקוח קיים", באותו סגנון (radius 14, padding space4) — אין layout חדש, מתווסף ל-Column הקיים.
+**למה:** מבוי-הסתום שבו כניסת-ה-Google של הבעלים הייתה נגישה רק מתוך HomeShell (שלא נגיש בלי התחברות).
+**אימות:** analyze 0; הכפתור מופיע רק כשמחובר (gated), בדמו המסך byte-identical (לא נוגעים בנתיב flag-OFF).
+צילום על-מכשיר ע"י הבעלים בבילד הבא (1.4.6 / build #42) — המטרה: הכפתור גלוי ומחבר ב-tap אחד.
+
+---
+
 ## 2026-06-16 — server-connect fix wave (התראות: feed כן כשמחובר)
 
 **שינוי (lib/screens):** `notifications_screen.dart` (S2) — בבילד מחובר (`useFirebaseBackend`) ה-feed
