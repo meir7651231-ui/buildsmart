@@ -1293,6 +1293,14 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## 2026-06-16 — #45-weather-open-meteo — _Weather: תחזית אמיתית במקום seed
 **שינוי נראה (בלי screenshot — mapper נבדק + robustness render):** בכלי 🌦️ אוטומציית-מזג-אוויר (ai_hub), הכרטיסים מציגים עכשיו תחזית אמיתית מ-Open-Meteo לפי מיקום-המכשיר (כשזמין); ההערה "בפרודקשן API חיצוני" הוחלפה ב-"🌦️ תחזית Open-Meteo · לפי מיקום המכשיר". אין שינוי-פריסה לכרטיסים — אותו AiCard, רק מקור-הדאטה. ב-VM אין GPS → fallback ל-seed (המסך מרנדר כרגיל). מאומת ב-weather_service_test (mapper, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.
 
+## #manager-owner — מנהל: מעבר בין מסכים (התחזות · שלב 3/4) — 2026-06-16
+
+**שינוי גלוי:** (א) בפרופיל-המנהל הפעולה "🔁 החלפת תפקיד (מוגן בקוד)" הוחלפה ב-"🖥️ מעבר בין מסכים · צפייה בכל לוח — מצב מנהל". (ב) הקשה פותחת sheet עם 4 יעדים (🦺 עובד · 🛵 שליח · 🏪 חנות ספק · 👷 קבלן). (ג) בחירת יעד פותחת את הלוח עם **באנר כתום עליון** "👔 צפייה כ-X · מצב מנהל" + כפתור "חזרה לניהול"; חזרה (כפתור/back) מחזירה את session-המנהל.
+
+**אין screenshot — למה:** רכיבים סטנדרטיים (modal sheet + ListTiles + Material banner) על idiom קיים; זרימת-ההתחזות (manager→seed→back · no-op-ללא-מנהל · store-בלי-employer) מאומתת ב-`manager_impersonate_test`. אין מצב-ויזואלי-חדש מעבר לבאנר (Row פשוט).
+
+**הפיך:** ה-session-swap ephemeral (לא נשמר); שערי-הלוחות לא נגעו. אפס Color/value:/activeColor: חדש (BsTokens + brandDark הקיים).
+**אימות:** analyze 0-errors · full-suite **+2675 -1** (baseline) · manager_impersonate_test 3/3. **לא נגעתי:** worker/courier/store gates.
 ## 2026-06-16 — #31-help-coverage-wave1 — מצב-היכרות: chrome ראשי של הקבלן
 **שינוי נראה (בלי screenshot — 2 טסטי-מסך ירוקים):** במצב-היכרות (💡) במסך-הבית, אלמנטים נוספים בסרגל-העליון מודגשים וניתנים-להסבר: הלוגו (החלפת לוח/זהות), שבב-השם (פרופיל), חיפוש, ותפריט ה-⋮ (מותאם לטאב). לחיצה על אחד מ-4 הטאבים התחתונים במצב-היכרות פותחת כרטיס-הסבר ("הבנתי" לסגירה) במקום לנווט. מחוץ למצב-היכרות — אפס שינוי-התנהגות. מאומת ב-help_coverage_test (mutation RED→GREEN §mutation_log) plus full analyze 0.
 

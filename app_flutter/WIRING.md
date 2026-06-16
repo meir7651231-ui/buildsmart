@@ -2316,6 +2316,13 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **שארית:** הכלי נשאר deferred/hidden ל-Apple (un-hide = flip בשחרור) · schedule-automation מהתחזית = micro-confirm עתידי.
 - **קבצים:** `lib/services/weather.dart` (חדש) · `lib/screens/ai_hub_screen.dart` · `test/weather_service_test.dart`.
 
+### #manager-owner — מנהל ניגש לכל המסכים (התחזות · שלב 3/4) — 2026-06-16
+- **רקע:** המנהל = מנהל-הצי; צריך לפתוח כל לוח (עובד/שליח/ספק/קבלן) ולחזור. גישת הצי (b): session-swap מתוחם (impersonation), לא override פר-שער.
+- **`board_auth.dart` (lib/state):** `impersonate(BoardRole)` — מחליף את ה-session לחשבון-ה-seed של התפקיד (worker→ran עם employerId, courier→dudi, store→lipskey), שומר את session-המנהל ב-`_impersonationReturn` (מחסנית-חזרה חד-עומק). **לא נשמר** (restart חוזר ל-session-המנהל הזכור). `returnFromImpersonation()` משחזר. `isImpersonating` getter + `_seedFor(role)` עוזר. no-op אם ה-session הנוכחי אינו מנהל / אין seed.
+- **`manager_screens_sheet.dart` (lib/screens, חדש):** `showManagerScreensSheet` — grid עם 4 יעדים (🦺 עובד/🛵 שליח/🏪 חנות ספק/👷 קבלן). הקשה → impersonate + push דרך `_ImpersonationFrame` (PopScope→returnFromImpersonation בחזרה) + באנר כן "👔 צפייה כ-X · מצב מנהל" עם "חזרה לניהול". קבלן = HomeShell (לא לוח-מגודר, בלי impersonation).
+- **`manager_profile_screen.dart` (lib/screens):** הפעולה "🔁 החלפת תפקיד" (קוד-מעבר→showRolePicker) הוחלפה ב-"🖥️ מעבר בין מסכים" → showManagerScreensSheet (בלי קוד — המנהל הוא admin). הוסרו `_askRoleSwitch` + `_RoleSwitchCodeDialog` + imports לא-בשימוש (role_picker_sheet + board_accounts_local).
+- **gate:** analyze **0 errors** · full-suite **+2675 -1** (ה-`-1` = `worker_reports_drilldown` baseline; +3 חדשים = manager_impersonate_test) · manager_dashboard/board_auth ירוקים.
+- **קבצים נגועים:** `lib/state/board_auth.dart` · `lib/screens/manager_screens_sheet.dart`(חדש) · `lib/screens/manager_profile_screen.dart` · `test/manager_impersonate_test.dart`(חדש). **לא נגעתי:** שערי-הלוחות (worker/courier/store) — עוברים בלי שינוי (ה-session הוא seed תקין).
 ### #31-help-coverage-wave1 — מצב-היכרות כיסוי גל 1 (chrome ראשי של הקבלן) — 2026-06-16
 - **המהלך:** הרחבת כיסוי "מצב היכרות" (#30→#31) לפי לוח, גל 1 = home_shell. נוסף helper `showHelpInfo` ל-help_target. ב-home_shell: לוגו/חיוג-תפקיד, שבב-שם/פרופיל, חיפוש, ו-4 וריאנטי ⋮ עטופים ב-HelpTarget; 4 טאבי-הניווט מוסברים במצב-היכרות דרך showHelpInfo במקום ניווט.
 - **עיקרון:** ה-💡 וה-✕ לא נעטפים (אחרת לוכדים את המשתמש במצב); אלמנטים מחוץ לשכבת-ההקפאה מוסברים דרך showHelpInfo במקום בועת-זנב.
