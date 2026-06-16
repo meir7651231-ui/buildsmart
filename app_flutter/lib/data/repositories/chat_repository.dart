@@ -65,6 +65,13 @@ abstract class ChatRepository implements Listenable {
   /// participantUids when non-empty); a no-op on an unknown thread. Gated +
   /// additive — never called with the flag OFF, so today's path is unchanged.
   void setParticipantUids(String threadId, List<String> uids);
+
+  /// #chat-delivery-status — RE-FIRE a `failed` message's background write (the
+  /// "נסה שוב" action). Re-marks the message [msgId] in [threadId] `pending` and
+  /// re-attempts the Firestore write with the same outcome callback. A no-op on
+  /// the local/demo path (it has no Firebase → writes never fail → nothing rests
+  /// at `failed`); the Firestore impl ([FirebaseChatRepository]) does the work.
+  void retry(String threadId, String msgId);
 }
 
 /// The chat repository provider — the S4 seam the engine binds through. When

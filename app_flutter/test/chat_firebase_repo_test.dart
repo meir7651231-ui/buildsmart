@@ -301,6 +301,120 @@ void main() {
     });
   });
 
+  group('#chat-delivery-status — the HONEST per-message status', () {
+    test('a SERVER-sourced message (fromDoc) is delivered ✓✓', () async {
+      final r = _mkRepo();
+      r.repo.attach();
+
+      // A doc coming back from the snapshot really reached the server → the
+      // decode (fromDoc) stamps it delivered. This is the ONLY path to ✓✓.
+      r.messages.emit(const [
+        RemoteDoc('m-from-server', {
+          'threadId': contractorStore,
+          'fromRole': 'store',
+          'text': 'מהשרת',
+          'ts': '2026-06-10T09:00:00.000',
+        }),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      final msg = _thread(r.repo, contractorStore)
+          .messages
+          .firstWhere((m) => m.id == 'm-from-server');
+      expect(msg.status, MsgStatus.delivered);
+    });
+
+    test('toDoc OMITS status — it is sender-local, never written to the server',
+        () async {
+      final r = _mkRepo();
+
+      // Send a message (its user line starts pending) and inspect the captured
+      // write: the server doc must carry NO status field, whatever the local
+      // status is — delivered-ness is implied by coming back through fromDoc.
+      r.repo.send(contractorStore, BsRole.store, 'בלי status בשרת');
+      await Future<void>.delayed(Duration.zero);
+
+      final write = r.messages.sets
+          .firstWhere((e) => e.value['text'] == 'בלי status בשרת')
+          .value;
+      expect(write.containsKey('status'), isFalse);
+      expect(write.keys.toSet(), {'threadId', 'fromRole', 'text', 'ts'});
+    });
+
+    test('user line: pending → sent once the background write succeeds',
+        () async {
+      final r = _mkRepo();
+
+      r.repo.send(contractorStore, BsRole.store, 'יוצא לדרך');
+      // Optimistic + in flight → pending 🕐 (synchronous, before the write).
+      var msg = _thread(r.repo, contractorStore).messages.last;
+      expect(msg.status, MsgStatus.pending);
+
+      await Future<void>.delayed(Duration.zero); // write settles ok
+      msg = _thread(r.repo, contractorStore)
+          .messages
+          .firstWhere((m) => m.text == 'יוצא לדרך');
+      // sent ✓ (in the outbox) — NOT delivered: ✓✓ only via a server snapshot.
+      expect(msg.status, MsgStatus.sent);
+    });
+
+    test('user line: pending → failed when the background write throws',
+        () async {
+      final r = _mkRepo();
+      r.messages.failNextSet = true;
+
+      r.repo.send(contractorStore, BsRole.contractor, 'ייכשל');
+      await Future<void>.delayed(Duration.zero); // failing write swallowed
+
+      final msg = _thread(r.repo, contractorStore)
+          .messages
+          .firstWhere((m) => m.text == 'ייכשל');
+      expect(msg.status, MsgStatus.failed);
+    });
+
+    test('retry re-fires a failed write → pending then sent', () async {
+      final r = _mkRepo();
+      r.messages.failNextSet = true;
+
+      r.repo.send(contractorStore, BsRole.contractor, 'ניסיון');
+      await Future<void>.delayed(Duration.zero);
+      final failed = _thread(r.repo, contractorStore)
+          .messages
+          .firstWhere((m) => m.text == 'ניסיון');
+      expect(failed.status, MsgStatus.failed);
+
+      // Retry: re-mark pending, re-attempt — this time the write succeeds.
+      r.repo.retry(contractorStore, failed.id);
+      expect(
+        _thread(r.repo, contractorStore)
+            .messages
+            .firstWhere((m) => m.id == failed.id)
+            .status,
+        MsgStatus.pending,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        _thread(r.repo, contractorStore)
+            .messages
+            .firstWhere((m) => m.id == failed.id)
+            .status,
+        MsgStatus.sent,
+      );
+    });
+
+    test('the bot auto-reply stays sent (local, infallible — no server write)',
+        () async {
+      final r = _mkRepo();
+
+      r.repo.send(botThread, BsRole.contractor, 'מה הסטטוס?');
+      await Future<void>.delayed(Duration.zero);
+
+      final t = _thread(r.repo, botThread);
+      expect(t.messages.last.fromRole, BsRole.bot);
+      expect(t.messages.last.status, MsgStatus.sent);
+    });
+  });
+
   group('resetToSeed', () {
     test('restores BOTH collections to the verbatim seed + re-writes them',
         () async {

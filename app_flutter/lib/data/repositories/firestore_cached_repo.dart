@@ -229,7 +229,14 @@ abstract class FirestoreCachedRepo<T> extends ChangeNotifier {
   /// fire the matching Firestore `set` in the background (guarded). The UI sees
   /// the change synchronously; the remote catches up (and a later snapshot
   /// reconciles). A write failure is caught+logged, never thrown.
-  void upsert(T value, {bool prepend = true}) {
+  ///
+  /// [onWrite] (#chat-delivery-status — ADDITIVE, zero-regression: every existing
+  /// caller passes nothing, so behaviour is UNCHANGED) is invoked AFTER the
+  /// background write settles, with `true` on success / `false` on a swallowed
+  /// failure — the hook the chat send uses to flip a message `pending → sent`
+  /// (write ok) or `pending → failed` (write threw). The remote write is STILL
+  /// guarded (the failure never throws); the callback only OBSERVES the outcome.
+  void upsert(T value, {bool prepend = true, void Function(bool ok)? onWrite}) {
     final id = idOf(value);
     final idx = _cache.indexWhere((e) => idOf(e) == id);
     final next = List<T>.of(_cache);
@@ -242,7 +249,7 @@ abstract class FirestoreCachedRepo<T> extends ChangeNotifier {
     }
     _cache = _sorted(next);
     notifyListeners();
-    guardWrite(() => _source.set(id, toDoc(value)));
+    guardWrite(() => _source.set(id, toDoc(value)), onResult: onWrite);
   }
 
   /// Optimistically replace the WHOLE cache with [values] and push each to the
@@ -299,12 +306,22 @@ abstract class FirestoreCachedRepo<T> extends ChangeNotifier {
   /// single choke-point that guarantees rule #2: a write failure (offline, rules
   /// rejection, decode error) NEVER throws into the UI. Returns the (already
   /// guarded) future so callers/tests may await settling if they wish.
+  ///
+  /// [onResult] (#chat-delivery-status — additive, OPTIONAL: every existing call
+  /// passes nothing) is invoked with `true` once the write succeeds, or `false`
+  /// after a failure is swallowed — so an honest per-message status can observe
+  /// the real write outcome WITHOUT the failure ever propagating.
   @protected
-  Future<void> guardWrite(Future<void> Function() write) async {
+  Future<void> guardWrite(
+    Future<void> Function() write, {
+    void Function(bool ok)? onResult,
+  }) async {
     try {
       await write();
+      onResult?.call(true);
     } on Object catch (e) {
       debugPrint('FirestoreCachedRepo<$T>: write failed (ignored): $e');
+      onResult?.call(false);
     }
   }
 

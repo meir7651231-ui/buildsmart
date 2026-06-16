@@ -259,6 +259,12 @@ class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
   /// and still drives the mine/theirs UI; the eventual uid-scoping of
   /// messages/thread `participants` activates later via the firestore rules
   /// (forward-ready). The id is the doc-id, not a field.
+  /// `ChatMessage` → Firestore doc. #chat-delivery-status — the `status` field is
+  /// SENDER-LOCAL and must NOT be written to the server (a server doc carries no
+  /// status; its delivered-ness is implied purely by coming back through
+  /// [fromDoc]). `toJson` may emit `status` (the local prefs shape), so it is
+  /// stripped here — the produced map is identical to the pre-status schema
+  /// `{threadId, fromRole, text, ts, fromUid?}`.
   @override
   Map<String, dynamic> toDoc(ChatMessage m) => {
         'threadId': m.threadId,
@@ -274,11 +280,18 @@ class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
   /// null → THROW, and the base skips it per-doc (never blanks the chat).
   /// A8 — `fromUid` is read tolerantly by the decoder (present on a post-A8 doc,
   /// '' on every legacy/seed doc — the zero-regression default).
+  ///
+  /// #chat-delivery-status — THE HONEST INVARIANT lives here: a message decoded
+  /// from a SERVER snapshot really reached the server, so it is stamped
+  /// [MsgStatus.delivered] (✓✓). This is the ONLY place `delivered` is set, so a
+  /// message that never round-tripped through the server can NEVER show ✓✓. The
+  /// server doc carries no status (the decoder defaults it to `sent`); the
+  /// upgrade is applied AFTER preserving the existing null/throw behaviour.
   @override
   ChatMessage fromDoc(RemoteDoc doc) {
     final m = ChatMessage.tryFromJson({...doc.data, 'id': doc.id});
     if (m == null) throw const FormatException('chatMessages: bad doc');
-    return m;
+    return m.copyWith(status: MsgStatus.delivered);
   }
 
   /// `orderBy(ts)` (S4.2) re-established client-side: Firestore returns doc-id
@@ -394,28 +407,51 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
     final now = DateTime.now();
     // A8: the user line carries the sender uid; the bot auto-reply (appended
     // below) does NOT — it is the system, not a signed-in user.
-    final appended = <ChatMessage>[
-      _mk(threadId, fromRole, trimmed, now, fromUid: fromUid),
-    ];
+    // #chat-delivery-status — the USER's optimistic line starts `pending` 🕐
+    // (the Firebase write is in flight); the write outcome flips it (see the
+    // onWrite callback below). The BOT auto-reply stays the default `sent` ✓
+    // (it is local, infallible — there is no server write to confirm it).
+    final userMsg =
+        _mk(threadId, fromRole, trimmed, now, fromUid: fromUid)
+            .copyWith(status: MsgStatus.pending);
     if (head.isBot && fromRole != BsRole.bot) {
       final replyIdx = _messages
           .cached()
           .where((m) => m.threadId == threadId && m.fromRole == BsRole.bot)
           .length;
-      appended.add(
-        _mk(
-          threadId,
-          BsRole.bot,
-          kBotAutoReplies[replyIdx % kBotAutoReplies.length],
-          now.add(const Duration(milliseconds: 1)),
-        ),
+      final botMsg = _mk(
+        threadId,
+        BsRole.bot,
+        kBotAutoReplies[replyIdx % kBotAutoReplies.length],
+        now.add(const Duration(milliseconds: 1)),
       );
+      _upsertUserMessage(userMsg);
+      _messages.upsert(botMsg, prepend: false); // sortBy keeps it chronological
+      _threads.upsert(head.copyWith(lastMsg: botMsg.text, lastTs: botMsg.ts));
+      return;
     }
-    for (final m in appended) {
-      _messages.upsert(m, prepend: false); // sortBy keeps it chronological
-    }
+    _upsertUserMessage(userMsg);
     _threads.upsert(
-      head.copyWith(lastMsg: appended.last.text, lastTs: appended.last.ts),
+      head.copyWith(lastMsg: userMsg.text, lastTs: userMsg.ts),
+    );
+  }
+
+  /// #chat-delivery-status — upsert the USER's line `pending`, observing the
+  /// real background write outcome: on success patch it to `sent` ✓ (it is in
+  /// the outbox, NOT yet server-confirmed — ✓✓ only arrives later via the
+  /// snapshot `fromDoc`); on a swallowed failure patch it to `failed` ❌ (the UI
+  /// offers "נסה שוב"). `upsertLocalOnly` patches the cache with NO extra remote
+  /// write (the original upsert already fired the `set`); a later snapshot
+  /// reconciles and `fromDoc` then upgrades the echoed message to `delivered`.
+  void _upsertUserMessage(ChatMessage userMsg) {
+    _messages.upsert(
+      userMsg,
+      prepend: false,
+      onWrite: (ok) {
+        _messages.upsertLocalOnly(
+          userMsg.copyWith(status: ok ? MsgStatus.sent : MsgStatus.failed),
+        );
+      },
     );
   }
 
@@ -440,6 +476,21 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
     final idx = heads.indexWhere((h) => h.id == threadId);
     if (idx < 0) return;
     _threads.upsert(heads[idx].copyWith(participantUids: uids));
+  }
+
+  /// #chat-delivery-status — RE-FIRE a failed message's write. Finds the message
+  /// by [msgId] in [threadId], flips it back to `pending` 🕐, and re-`upsert`s it
+  /// with the SAME write-outcome callback (`pending → sent` on success,
+  /// `→ failed` again on a repeat failure) — exactly the [send] user-line path,
+  /// reused. No-op on an unknown id (already reconciled / never existed). The id
+  /// is stable (`m-<micros>-<role>`), so the re-write targets the same doc.
+  @override
+  void retry(String threadId, String msgId) {
+    final existing = _messages
+        .cached()
+        .where((m) => m.id == msgId && m.threadId == threadId);
+    if (existing.isEmpty) return;
+    _upsertUserMessage(existing.first.copyWith(status: MsgStatus.pending));
   }
 
   // ── lifecycle ────────────────────────────────────────────────────────────────

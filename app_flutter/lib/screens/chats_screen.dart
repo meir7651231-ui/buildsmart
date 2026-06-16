@@ -514,7 +514,17 @@ typedef _Thread = ({
   _ThreadCategory category,
 });
 
-typedef _Message = ({String text, bool isMe, String time});
+// #chat-delivery-status — the row carries the HONEST per-message [status] (drives
+// the check-mark: 🕐/✓/✓✓/❌) and the message [id] (the "נסה שוב" retry targets
+// it on the engine). Session-local rows (the detached chat) are always `sent`
+// and carry an empty id — they have no server write to confirm or retry.
+typedef _Message = ({
+  String text,
+  bool isMe,
+  String time,
+  MsgStatus status,
+  String id,
+});
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
@@ -1288,6 +1298,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         text: _thread.subtitle,
         isMe: false,
         time: _thread.time,
+        status: MsgStatus.sent, // #chat-delivery-status — local row, single ✓
+        id: '',
       ),);
     } else if (ref.read(chatSettingsProvider).greetingEnabled) {
       // Greeting message for a fresh, empty conversation.
@@ -1299,6 +1311,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         text: greetText,
         isMe: false,
         time: _nowTime(),
+        status: MsgStatus.sent, // #chat-delivery-status — local row, single ✓
+        id: '',
       ),);
     }
   }
@@ -1320,7 +1334,16 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     if (match.isEmpty) return const [];
     return [
       for (final m in match.first.messages)
-        (text: m.text, isMe: m.fromRole == _persona, time: _hhmm(m.ts)),
+        (
+          text: m.text,
+          isMe: m.fromRole == _persona,
+          time: _hhmm(m.ts),
+          // #chat-delivery-status — the honest per-message status (set by the
+          // engine/repo: pending → sent/failed on the write, delivered on a
+          // server `fromDoc`) and the id the "נסה שוב" retry targets.
+          status: m.status,
+          id: m.id,
+        ),
     ];
   }
 
@@ -1390,7 +1413,16 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     // ── Detached chat (legacy local list + bot auto-reply) ──
     final showTyping = settings.botEnabled && settings.typingIndicator;
     setState(() {
-      _localMessages.add((text: text, isMe: true, time: _nowTime()));
+      // #chat-delivery-status — detached chat: no Firebase, the local write is
+      // infallible → the user's line rests at `sent` ✓ (never ✓✓, which is
+      // server-only). Empty id — there is no server write to retry.
+      _localMessages.add((
+        text: text,
+        isMe: true,
+        time: _nowTime(),
+        status: MsgStatus.sent,
+        id: '',
+      ));
       _controller.clear();
       _isTyping = showTyping;
     });
@@ -1409,6 +1441,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
           text: _autoReplies[_replyIdx % _autoReplies.length],
           isMe: false,
           time: _nowTime(),
+          status: MsgStatus.sent, // #chat-delivery-status — local row, single ✓
+          id: '',
         ),);
         _replyIdx++;
       });
@@ -1627,7 +1661,19 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                 if (_isTyping && msgIdx == messages.length) {
                   return const _TypingBubble();
                 }
-                return _Bubble(msg: messages[msgIdx]);
+                final m = messages[msgIdx];
+                return _Bubble(
+                  msg: m,
+                  // #chat-delivery-status — "נסה שוב": re-fire the failed
+                  // message's write through the engine (delegates to the
+                  // Firestore repo's retry). Only engine-backed threads with a
+                  // real id can fail/retry; null otherwise → no retry affordance.
+                  onRetry: (_engineBacked && m.id.isNotEmpty)
+                      ? () => ref
+                          .read(chatEngineProvider.notifier)
+                          .retry(_threadId!, m.id)
+                      : null,
+                );
               },
             ),
           ),
@@ -1656,9 +1702,15 @@ AlignmentDirectional chatBubbleAlignment({required bool isMe}) =>
     isMe ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd;
 
 class _Bubble extends ConsumerWidget {
-  const _Bubble({required this.msg});
+  const _Bubble({required this.msg, this.onRetry});
 
   final _Message msg;
+
+  /// #chat-delivery-status — invoked by the "נסה שוב" tap on a `failed` message
+  /// (re-fires the write via the engine). Null when the message can't be retried
+  /// (incoming row, session-local chat, or already-delivered) — the ❌/retry UI
+  /// only renders for an own `failed` message that has a retry callback.
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1717,13 +1769,15 @@ class _Bubble extends ConsumerWidget {
                 ),
                 if (msg.isMe) ...[
                   const SizedBox(width: 3),
-                  // Read receipts: blue double-check when on, grey single when off.
-                  Icon(
-                    readReceipts ? Icons.done_all : Icons.done,
-                    size: 13,
-                    color: readReceipts
-                        ? const Color(0xFF4FC3F7)
-                        : const Color(0xFF999999),
+                  // #chat-delivery-status — HONEST, status-driven check-mark
+                  // (replaces the cosmetic readReceipts ✓✓): 🕐 pending · ✓ sent
+                  // · ✓✓ delivered (blue, server-confirmed via fromDoc; capped at
+                  // a single ✓ when readReceipts is OFF so the toggle stays
+                  // meaningful) · ❌ + "נסה שוב" on a failed write.
+                  _DeliveryStatus(
+                    status: msg.status,
+                    readReceipts: readReceipts,
+                    onRetry: onRetry,
                   ),
                 ],
               ],
@@ -1732,6 +1786,69 @@ class _Bubble extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// #chat-delivery-status — the HONEST per-message check-mark for an OWN message.
+/// Replaces the old cosmetic `readReceipts ? ✓✓ : ✓`: the glyph is now driven by
+/// the message's real [MsgStatus] (where it came from), not a global toggle.
+///   • [MsgStatus.pending] → 🕐 (grey) — the optimistic write is in flight;
+///   • [MsgStatus.sent] → ✓ (grey) — in the outbox / demo-local, NOT
+///     server-confirmed;
+///   • [MsgStatus.delivered] → ✓✓ (blue) — rebuilt from a SERVER snapshot
+///     (`fromDoc`); the readReceipts toggle is kept MEANINGFUL by capping this at
+///     a single grey ✓ when it is OFF (delivered is still true, just not shown);
+///   • [MsgStatus.failed] → ❌ + a tappable "נסה שוב" that re-fires the write.
+class _DeliveryStatus extends StatelessWidget {
+  const _DeliveryStatus({
+    required this.status,
+    required this.readReceipts,
+    this.onRetry,
+  });
+
+  final MsgStatus status;
+  final bool readReceipts;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (status) {
+      case MsgStatus.pending:
+        return const Icon(
+          Icons.access_time,
+          size: 13,
+          color: Color(0xFF999999),
+        );
+      case MsgStatus.sent:
+        return const Icon(Icons.done, size: 13, color: Color(0xFF999999));
+      case MsgStatus.delivered:
+        // readReceipts OFF caps delivered at a single grey ✓ — keeps the toggle
+        // meaningful while the message is honestly server-confirmed underneath.
+        return readReceipts
+            ? const Icon(Icons.done_all, size: 13, color: Color(0xFF4FC3F7))
+            : const Icon(Icons.done, size: 13, color: Color(0xFF999999));
+      case MsgStatus.failed:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 13, color: Colors.red),
+            const SizedBox(width: 3),
+            GestureDetector(
+              onTap: onRetry,
+              child: const Text(
+                'נסה שוב',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        );
+    }
   }
 }
 

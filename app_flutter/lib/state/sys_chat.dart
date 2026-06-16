@@ -44,6 +44,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// counterpart kept from the legacy `chats_screen` (SPEC §6 — "bot נשאר").
 enum BsRole { contractor, store, courier, worker, manager, bot }
 
+/// HONEST per-message delivery status (#chat-delivery-status). The check-mark a
+/// message renders is now driven STRUCTURALLY by where the message came from —
+/// it is no longer the cosmetic `readReceipts` toggle:
+///   • [pending] 🕐 — the optimistic write is in flight (Firebase path, initial);
+///   • [sent] ✓ — in the local outbox / demo-local, NO server confirmation (the
+///     back-compat default: every seed/legacy/demo message reads as sent ✓);
+///   • [delivered] ✓✓ — the message was rebuilt from a SERVER snapshot (it really
+///     reached the server). The HONEST INVARIANT: this is set ONLY by the
+///     Firestore decode (`FirebaseChatRepository` message `fromDoc`) — a message
+///     that never reached the server can NEVER show ✓✓ (enforced structurally);
+///   • [failed] ❌ — the background write threw (the user gets a "נסה שוב" retry).
+/// Status is SENDER-LOCAL: it is never written to the server doc (`toDoc` strips
+/// it), so a doc's delivered-ness is implied purely by coming back via `fromDoc`.
+enum MsgStatus { pending, sent, delivered, failed }
+
 /// A single message in a thread. `fromRole` drives "mine vs theirs" in the UI
 /// (the reading persona's own messages render right, others left — SPEC §1
 /// "כיווניות").
@@ -55,6 +70,7 @@ class ChatMessage {
     required this.text,
     required this.ts,
     this.fromUid = '',
+    this.status = MsgStatus.sent,
   });
 
   final String id;
@@ -72,6 +88,35 @@ class ChatMessage {
   /// round-trips byte-identical (zero regression).
   final String fromUid;
 
+  /// HONEST delivery status (#chat-delivery-status). Defaults to [MsgStatus.sent]
+  /// so every seed / legacy / demo message reads as a single ✓ with no migration;
+  /// [MsgStatus.delivered] is set ONLY by the server decode (`fromDoc`) — that is
+  /// the structural ✓✓-only-from-the-server invariant. SENDER-LOCAL — `toDoc`
+  /// strips it, so it never travels to or from the server doc fields.
+  final MsgStatus status;
+
+  /// The class had NO `copyWith` before #chat-delivery-status — the delivery
+  /// flow patches status (pending → sent/failed on the write outcome; delivered
+  /// on a `fromDoc` decode) immutably, so it is added covering ALL fields.
+  ChatMessage copyWith({
+    String? id,
+    String? threadId,
+    BsRole? fromRole,
+    String? text,
+    DateTime? ts,
+    String? fromUid,
+    MsgStatus? status,
+  }) =>
+      ChatMessage(
+        id: id ?? this.id,
+        threadId: threadId ?? this.threadId,
+        fromRole: fromRole ?? this.fromRole,
+        text: text ?? this.text,
+        ts: ts ?? this.ts,
+        fromUid: fromUid ?? this.fromUid,
+        status: status ?? this.status,
+      );
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'threadId': threadId,
@@ -79,6 +124,11 @@ class ChatMessage {
         'text': text,
         'ts': ts.toIso8601String(),
         if (fromUid.isNotEmpty) 'fromUid': fromUid,
+        // #chat-delivery-status — written ONLY when it differs from the default
+        // `sent`, so the seed + every legacy doc stays byte-identical (the same
+        // zero-regression rule fromUid follows). The server doc never carries it
+        // (the repo's `toDoc` strips it); this is the LOCAL prefs/JSON shape.
+        if (status != MsgStatus.sent) 'status': status.name,
       };
 
   static ChatMessage? tryFromJson(Object? raw) {
@@ -104,6 +154,15 @@ class ChatMessage {
       // A8 — tolerant read: present on a post-A8 doc, '' on every legacy/seed
       // doc (the zero-regression default). A non-String value coerces to ''.
       fromUid: raw['fromUid'] is String ? raw['fromUid'] as String : '',
+      // #chat-delivery-status — tolerant read mirroring the `LineStatus` idiom
+      // (persona_fulfillment.dart): an OLD doc with no `status` reads back `sent`
+      // (zero regression). Server docs carry no status either (toDoc strips it),
+      // so a message decoded by the repo's `fromDoc` arrives here as `sent` and
+      // is THEN upgraded to `delivered` by that decode — the honest invariant.
+      status: MsgStatus.values.firstWhere(
+        (s) => s.name == raw['status'],
+        orElse: () => MsgStatus.sent,
+      ),
     );
   }
 }
@@ -611,6 +670,17 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
     } finally {
       _uidResolveInFlight.remove(threadId);
     }
+  }
+
+  /// #chat-delivery-status — RE-FIRE a `failed` message's background write (the
+  /// UI's "נסה שוב"). Bound to Firestore this delegates to the repo's [retry]
+  /// (re-mark `pending` → re-attempt the write → `sent`/`failed` again); the
+  /// optimistic cache notify mirrors the new status back into the engine state.
+  /// On the local/demo path there is NO Firebase → writes never fail → no
+  /// message ever rests at `failed`, so this is a deliberate no-op (nothing to
+  /// retry). Minimal by design — the honest status flow lives in the repo.
+  void retry(String threadId, String msgId) {
+    _remote?.retry(threadId, msgId);
   }
 
   /// 🔒 ISOLATION primitive — the threads [role] participates in (SPEC §2.5).
