@@ -101,6 +101,31 @@ const bool kServerCallables = bool.fromEnvironment('SERVER_CALLABLES');
 /// the standard define-less suite without touching the network.
 const bool kCloudPhotos = bool.fromEnvironment('CLOUD_PHOTOS');
 
+/// S1 (launch demo-seed-isolation) — master switch for SEEDING a fresh remote
+/// backend from the local demo seed. When a manager/admin opens the app against
+/// an EMPTY Firestore, the first empty snapshot fires `onFirstSnapshotEmpty`,
+/// which routes 8 `_firebase` repos through [FirestoreCachedRepo.pushCacheToRemote]
+/// — writing every const DEMO row (orders/customers/stock/finance/…) into the
+/// REAL collections as if it were their own data.
+///
+/// Default OFF: with it OFF [pushCacheToRemote] short-circuits on its first line,
+/// so production NEVER auto-seeds — a real signed-in user's live backend stays
+/// exactly what the server holds (honest empty when fresh), and the in-memory
+/// optimistic cache still keeps the UI non-empty before the first snapshot (the
+/// born-seeded invariant is untouched — only the REMOTE write is suppressed). So
+/// flipping this flag is the ONLY thing that changes behaviour (the same
+/// zero-regression invariant as [kCloudPhotos] / [kServerCallables] /
+/// [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Flip on at build time ONLY for a deliberate demo/dev environment whose
+/// Firestore is meant to be populated from the seed:
+///   flutter build web --dart-define=SEED_FRESH_BACKEND=true
+///
+/// Tests never set the define, so the seeding path stays suppressed in the
+/// standard suite (any test that exercises [pushCacheToRemote]'s writes must
+/// drive the ON branch explicitly).
+const bool kSeedFreshBackend = bool.fromEnvironment('SEED_FRESH_BACKEND');
+
 /// F2 (launch App-Check-native) — master switch for the PRODUCTION App Check
 /// attestation providers at `FirebaseAppCheck.instance.activate` time
 /// (`lib/main.dart`).

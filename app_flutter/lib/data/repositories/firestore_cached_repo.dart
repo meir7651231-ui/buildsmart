@@ -37,6 +37,8 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/data/repositories/backend.dart'
+    show kSeedFreshBackend, useFirebaseBackend;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
@@ -296,7 +298,17 @@ abstract class FirestoreCachedRepo<T> extends ChangeNotifier {
   /// Push the ENTIRE current cache to the remote (no cache mutation) — used by
   /// [onFirstSnapshotEmpty] to seed a fresh backend from the local seed. Each
   /// write is guarded; a failure is logged, never thrown.
+  ///
+  /// S1 (launch demo-seed-isolation) — short-circuits on a REAL backend unless
+  /// [kSeedFreshBackend] is set. Gated on [useFirebaseBackend] so a manager's
+  /// fresh-prod first run never auto-seeds the const DEMO rows into real
+  /// collections, while the demo/Firebase-free path AND the whole test suite
+  /// still seed their local/fake source unchanged. Dev/emulator opts the real
+  /// backend in with --dart-define=SEED_FRESH_BACKEND=true. The born-seeded
+  /// in-memory cache always keeps the UI non-empty. This ONE guard covers all 8
+  /// repos that route through [onFirstSnapshotEmpty].
   void pushCacheToRemote() {
+    if (useFirebaseBackend && !kSeedFreshBackend) return;
     for (final v in _cache) {
       guardWrite(() => _source.set(idOf(v), toDoc(v)));
     }

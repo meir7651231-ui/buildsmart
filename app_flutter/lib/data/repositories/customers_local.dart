@@ -144,7 +144,15 @@ class LocalCustomersRepository implements CustomersRepository {
 /// `aggregate(orders)`, the Firestore impl serves its cached aggregates via `all()`.
 final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
   if (useFirebaseBackend) {
-    final repo = FirebaseCustomersRepository()..attach();
+    // A13 — inject the callable seam so the Firestore impl can reach the
+    // `computeCredit` callable (mirrors the local branch below; `serverCallables`
+    // is left at its compile-time default). Without this the gateway is null and
+    // the credit callable is unreachable even when the flag is ON.
+    final repo =
+        FirebaseCustomersRepository(
+            functions: ref.read(orderFunctionsGatewayProvider),
+          )
+          ..attach();
     ref.onDispose(repo.dispose);
     return repo;
   }

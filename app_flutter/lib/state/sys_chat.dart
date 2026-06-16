@@ -400,7 +400,13 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// never clobbers server state — under Firebase, Firestore's own offline
   /// persistence is the continuity source and prefs stays a write-behind copy.
   void bindRemote(ChatRepository remote) {
-    if (_remote != null) return; // bind once (provider-lifetime)
+    if (identical(_remote, remote)) return; // same repo — no-op
+    // A1 — RE-BIND on a uid-driven repo rebuild: the old repo was disposed (its
+    // snapshots listeners cancelled), so detach from it (mirror dispose) before
+    // binding the fresh one, then refresh immediately so the engine re-aligns
+    // with the new repo's caches from t0. When `_remote` is null this is the
+    // original first-bind path, byte-identical.
+    _remote?.removeListener(_refreshFromRemote);
     _remote = remote;
     remote.addListener(_refreshFromRemote);
     _refreshFromRemote();
@@ -733,6 +739,15 @@ final chatEngineProvider =
     );
     final remote = ref.read(chatRepositoryProvider);
     if (remote != null) engine.bindRemote(remote);
+    // A1 — RE-BIND on a uid-driven repo rebuild. ONLY on the live backend (same
+    // reasoning + circular-dependency guard as ordersEngineProvider): there the
+    // repo `watch`es `currentUidProvider` and rebuilds on sign-in; re-bind the
+    // engine to the fresh repo so live sync never freezes on the pre-sign-in repo.
+    if (useFirebaseBackend) {
+      ref.listen(chatRepositoryProvider, (prev, next) {
+        if (next != null) engine.bindRemote(next);
+      });
+    }
     return engine;
   },
 );

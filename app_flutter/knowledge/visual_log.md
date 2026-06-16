@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-06-16 — server-connect fix wave (התראות: feed כן כשמחובר)
+
+**שינוי (lib/screens):** `notifications_screen.dart` (S2) — בבילד מחובר (`useFirebaseBackend`) ה-feed
+מציג **ריק-כן** במקום רשימת-הדמו הקשיחה (`_kNotifs`) + ביטול באדג'-ה"לא-נקרא" המזויף. הגזירה דרך getter
+יחיד `_activeNotifs` (`useFirebaseBackend ? const [] : _kNotifs`); כל הצרכנים (badge, רשימה, mark-all,
+dismiss-all, header) עברו דרכו.
+**אימות ויזואלי (reasoning, לא screenshot — אין מכשיר כאן):** אין layout/widget חדש — המסך עובר
+ל-**empty-state הקיים** (אותה רשימה, ריקה). נתיב הדמו (`flag OFF`) **byte-identical** (`_activeNotifs ==
+_kNotifs`), מאומת ע"י הסוויטה (store_notif_widget_test ירוק). במחובר: הרשימה ריקה (אפס התראות מזויפות) עד
+שהשרת יכתוב `notifications/{uid}` אמיתיות — זה ה-empty-state ההגון, אותו רכיב, לא מסך חדש. analyze 0.
+**TODO (DEFER):** feed-התראות אמיתי (השרת כותב doc-ים) — גל נפרד.
+
+---
+
 ## 2026-06-15 — מעבר צי כפתור-כפתור (4 traces) + תיקונים
 
 **שינוי (lib/screens):** 4 סוכנים read-only עברו על **כל פקד + כל זרימה** (כניסה/הרשמה/חשבונות/מנגנון).

@@ -12,6 +12,7 @@
 // ANTI-COLLISION: NEW file (prefix stock_); no shared file edited.
 
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';
 import 'package:buildsmart/screens/contractor_material_requests_sheet.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -27,11 +28,63 @@ class StockNotifier extends StateNotifier<Map<String, String>> {
   /// [kStockDemo] so direct construction stays byte-identical; the
   /// `stockProvider` injects it THROUGH the stock repository (T6.3) — the same
   /// 11-row map, just sourced via the seam.
-  StockNotifier([Map<String, String>? seed])
-      : super(Map<String, String>.from(seed ?? kStockDemo));
+  ///
+  /// [repo] is the bound stock repository (passed by `stockProvider`). When it
+  /// is the Firestore-backed [FirebaseStockRepository] the notifier delegates
+  /// every move THROUGH it and mirrors its cache back into [state] — the same
+  /// cache ⇄ engine real-time loop `OrdersEngineNotifier.bindRemote` runs. On
+  /// the local/demo path (`LocalStockRepository`, which is `const` and has NO
+  /// mutable state) [repo] is left null and the move stays the in-memory flip
+  /// below — byte-identical to today (and to a direct `StockNotifier(seed)`).
+  StockNotifier([Map<String, String>? seed, FirebaseStockRepository? repo])
+      : super(Map<String, String>.from(seed ?? kStockDemo)) {
+    if (repo != null) _bindRemote(repo);
+  }
+
+  /// S4.4-style bind — the Firestore-backed stock repo, or null on the local
+  /// path (no Firebase → this notifier itself stays the store, byte-identical).
+  FirebaseStockRepository? _remote;
+
+  /// Bind to the live Firestore-backed stock repository (mirrors
+  /// `OrdersEngineNotifier.bindRemote`). The repo's `snapshots()` cache pushes
+  /// every change → `notifyListeners` → [_refreshFromRemote] rebuilds [state]
+  /// from the SYNC `stockDemo()` (so a server-side move lands live in this
+  /// screen, and through [stockProvider] in `employer_stock.dart`'s worker view).
+  /// Writes go the other way: [move] delegates to the repo's verbatim `move`,
+  /// whose optimistic cache notifies back synchronously — the UI sees the flip
+  /// in the same frame, the Firestore write fires in the background. The
+  /// immediate refresh aligns engine ⇄ cache from t0.
+  void _bindRemote(FirebaseStockRepository remote) {
+    if (identical(_remote, remote)) return; // same repo — no-op
+    _remote?.removeListener(_refreshFromRemote);
+    _remote = remote;
+    remote.addListener(_refreshFromRemote);
+    _refreshFromRemote();
+  }
+
+  void _refreshFromRemote() {
+    final r = _remote;
+    if (r == null) return;
+    state = r.stockDemo(); // sync read off the cache (name → location)
+  }
+
+  @override
+  void dispose() {
+    _remote?.removeListener(_refreshFromRemote);
+    super.dispose();
+  }
 
   /// moveStock(nm) (:8237) — flip a key between 'warehouse' and 'site'.
   void move(String name) {
+    // Bound to Firestore: delegate to the repo's verbatim port (same look-up by
+    // name + 'warehouse'⇄'site' flip); its optimistic cache mirrors back
+    // synchronously via [_refreshFromRemote], so [state] already carries the
+    // flip on return. The local/demo path keeps the in-memory flip below.
+    final r = _remote;
+    if (r != null) {
+      r.move(name);
+      return;
+    }
     final cur = state[name];
     if (cur == null) return;
     state = {
@@ -47,7 +100,12 @@ final stockProvider =
   // Source the seed through the repository (the local impl exposes it). Any
   // non-local impl falls back to the const seed — identical 11-row map either way.
   final seed = repo is LocalStockRepository ? repo.stockDemo() : kStockDemo;
-  return StockNotifier(seed);
+  // When Firebase is initialised the switch returned the attached Firestore
+  // repo: bind the notifier to it so the contractor's moves ride its optimistic
+  // write path out (and a worker reading `employer_stock.dart` sees real moves,
+  // not the seed). On the Firebase-free path (the whole test suite) nothing is
+  // bound — `move` stays the in-memory flip, byte-identical to today.
+  return StockNotifier(seed, repo is FirebaseStockRepository ? repo : null);
 });
 
 final stockTabProvider = StateProvider<String>((_) => 'warehouse');

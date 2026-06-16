@@ -8,6 +8,23 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-16 — server-connect fix wave (real-fleet: 5 auditors → 2 validators → supervisor):**
+> closed 6 validated gaps that kept the *connected* build serving demo/local data. **A1 (load-bearing):**
+> `ordersEngineProvider`/`chatEngineProvider` now RE-BIND their repo on a uid-driven rebuild (the
+> `ref.listen` is GATED to `useFirebaseBackend`, so the local/test path stays ACYCLIC —
+> `LocalOrdersRepository.all` reads the engine — and byte-identical) → live orders/chat sync no longer
+> freezes on the demo seed after the first sign-in. **C1+FS-1:** the live `FirebaseCustomersRepository`
+> now receives `orderFunctionsGateway`, so the deployed `computeCredit` callable is actually reached;
+> its no-callable fallback returns the honest 0, not the fabricated name-hash. **I1:** `profession`/
+> `address`/`businessId` now mirror to `users/{uid}` at sign-in AND on profile edit (merge-write,
+> rules-safe — no new rule/callable). **S2:** a connected build shows an honest-EMPTY in-app
+> notifications feed (not the hardcoded `_kNotifs` list + fake unread badge). **X4:** contractor stock
+> `move()` routes through the attached `FirebaseStockRepository` (reaches Firestore + the worker
+> employer-stock view). **S1:** `pushCacheToRemote` never auto-seeds a REAL backend — the manager
+> fresh-prod pollution path — gated on `useFirebaseBackend` (dev opts in with
+> `--dart-define=SEED_FRESH_BACKEND`). DEFER-LARGE feature-waves (tasks / material-requests / POD /
+> order-sum / attendance) intentionally NOT in this wave.
+
 > **2026-06-15 — button-by-button fleet pass (4 surface traces) + fixes:** dispatched 4 read-only
 > agents tracing EVERY control + flow across login / registration / accounts / mechanism. Verdict:
 > every control wired correctly + every flow correct end-to-end; client↔server callable contracts

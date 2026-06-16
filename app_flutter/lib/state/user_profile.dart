@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -82,9 +85,18 @@ bool registrationValid(String name, String contact) =>
     name.trim().isNotEmpty && contact.trim().isNotEmpty;
 
 class UserProfileNotifier extends StateNotifier<UserProfile> {
-  UserProfileNotifier() : super(const UserProfile()) {
+  UserProfileNotifier({Ref? ref})
+      : _ref = ref,
+        super(const UserProfile()) {
     _load();
   }
+
+  /// Server-mirror hook (launch uid-migration): lets [update] re-mirror the
+  /// edited identity fields to `users/{uid}` via [usersProfileWriterProvider] +
+  /// [currentUidProvider]. Null in unit tests (`UserProfileNotifier()`) and on
+  /// the demo/Firebase-free path — the re-mirror is then skipped and every
+  /// mutation behaves byte-identically to before.
+  final Ref? _ref;
 
   /// `true` once any mutating method (register/continueAsDemo/setProfession/
   /// update) has written state. The provider is lazy, so the constructor's
@@ -170,10 +182,39 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       registered: state.registered || registrationValid(n, c),
     );
     _persist();
+    _mirrorToServer();
+  }
+
+  /// Re-mirror the edited identity fields to `users/{uid}` so a profile edit
+  /// survives a reinstall and syncs across devices — the welcome flow writes
+  /// this doc once after auth (welcome_screen `_finishAfterAuth`), but later
+  /// edits used to persist ONLY on-device. Same merge write, same fields, same
+  /// contact routing (phone XOR email) as that post-auth mirror; never writes
+  /// `role`/`roles` (S5 rules: a signed-in user may self-merge these mirror
+  /// fields, role stays admin-only). A strict no-op on the demo/Firebase-free
+  /// path (no `_ref`, flag OFF, or signed-out → null uid/writer), so the demo
+  /// behavior is byte-identical.
+  void _mirrorToServer() {
+    final ref = _ref;
+    if (ref == null || !useFirebaseBackend) return;
+    final uid = ref.read(currentUidProvider);
+    final writer = ref.read(usersProfileWriterProvider);
+    if (uid == null || writer == null) return;
+    final p = state;
+    unawaited(
+      writer.set(uid, {
+        if (p.name.isNotEmpty) 'displayName': p.name,
+        if (validIsraeliMobile(p.contact)) 'phone': p.contact,
+        if (validEmail(p.contact)) 'email': p.contact,
+        if (p.profession.isNotEmpty) 'profession': p.profession,
+        if (p.address.isNotEmpty) 'address': p.address,
+        if (p.businessId.isNotEmpty) 'businessId': p.businessId,
+      }).catchError((Object _) {}),
+    );
   }
 }
 
 final userProfileProvider =
     StateNotifierProvider<UserProfileNotifier, UserProfile>(
-  (ref) => UserProfileNotifier(),
+  (ref) => UserProfileNotifier(ref: ref),
 );

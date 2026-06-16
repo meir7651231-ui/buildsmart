@@ -28,6 +28,7 @@ import 'package:buildsmart/data/phaseb_seeds.dart' show kStockDemo;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';
+import 'package:buildsmart/screens/stock_screen.dart' show StockNotifier;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,6 +70,32 @@ class _FakeSource implements RemoteCollectionSource {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // X4 (server-connect fix wave) — the contractor's stock `move` must reach the
+  // bound Firestore repo, not stay in the notifier's in-memory fork (pre-fix a
+  // worker reading `employer_stock.dart` saw the seed, never the real moves).
+  group('X4 — StockNotifier delegates moves through the bound FirebaseStockRepository', () {
+    test('move() routes through the repo + mirrors its cache (not in-memory only)',
+        () async {
+      final src = _FakeSource();
+      final r = FirebaseStockRepository(source: src);
+      final notifier = StockNotifier(kStockDemo, r); // bound to the live repo
+      addTearDown(src.close);
+      addTearDown(notifier.dispose);
+      addTearDown(r.dispose);
+
+      final name = kStockDemo.keys.first;
+      final before = kStockDemo[name];
+      notifier.move(name);
+
+      // DELEGATED: the notifier state mirrors the repo cache (flip visible
+      // synchronously), proving the move went THROUGH the repo, not the fork.
+      expect(notifier.state[name], isNot(before)); // 'warehouse'⇄'site' flipped
+      expect(r.stockDemo()[name], notifier.state[name]); // notifier == cache
+      await Future<void>.delayed(Duration.zero);
+      expect(src.sets, isNotEmpty); // the flip rode the repo's Firestore write
+    });
+  });
 
   group('FirebaseStockRepository — inventory (seed · move · mapping)', () {
     FirebaseStockRepository repo(_FakeSource src) =>

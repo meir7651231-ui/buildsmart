@@ -1,4 +1,6 @@
 import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show useFirebaseBackend;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/dial_state.dart';
@@ -83,7 +85,7 @@ final notifUnreadCountProvider = Provider<int>((ref) {
   if (!ref.watch(notifSettingsProvider).pushEnabled) return 0;
   final readIds = ref.watch(notifReadIdsProvider);
   final dismissedIds = ref.watch(notifDismissedIdsProvider);
-  return _kNotifs
+  return _activeNotifs
       .where(
         (n) =>
             n.badge > 0 &&
@@ -229,16 +231,25 @@ const List<_Notif> _kNotifs = [
   ),
 ];
 
+/// S2 (launch demo-seed-isolation) — the feed actually consumed by the badge,
+/// the list, and the read/dismiss-all actions. `_kNotifs` is 100% FABRICATED
+/// demo content (hardcoded order #1234 / shipment #892 / …) that MUST NOT be
+/// shown to a real signed-in user as if it were their own. When the live backend
+/// is ON there is no notifications source yet, so the honest answer is an EMPTY
+/// feed (mirrors `site_firebase` `projects() => const []`); when it is OFF (demo)
+/// the verbatim `_kNotifs` is returned unchanged, so the demo path is identical.
+List<_Notif> get _activeNotifs => useFirebaseBackend ? const [] : _kNotifs;
+
 /// Marks every notification as read. Called from AppBar 3-dot menu.
 void markAllNotifsRead(WidgetRef ref) {
   ref.read(notifReadIdsProvider.notifier).set(
-      _kNotifs.map((n) => n.id).toSet());
+      _activeNotifs.map((n) => n.id).toSet());
 }
 
 /// Dismisses every notification. Called from AppBar 3-dot menu.
 void dismissAllNotifs(WidgetRef ref) {
   ref.read(notifDismissedIdsProvider.notifier).set(
-      _kNotifs.map((n) => n.id).toSet());
+      _activeNotifs.map((n) => n.id).toSet());
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -289,7 +300,7 @@ List<_Notif> _filtered({
   required Set<NotifSection> mutedTypes,
   required NotifImportance importance,
 }) =>
-    _kNotifs
+    _activeNotifs
         .where((n) =>
             passesImportance(importance, n.highPriority) &&
             notifPasses(
@@ -488,7 +499,7 @@ class _Header extends ConsumerWidget {
     final readIds = ref.watch(notifReadIdsProvider);
     final dismissedIds = ref.watch(notifDismissedIdsProvider);
     final unread = ref.watch(notifUnreadCountProvider);
-    final hasReadNotDismissed = _kNotifs.any(
+    final hasReadNotDismissed = _activeNotifs.any(
       (n) => readIds.contains(n.id) && !dismissedIds.contains(n.id),
     );
 
@@ -531,7 +542,7 @@ class _Header extends ConsumerWidget {
               tooltip: 'סמן הכל כנקרא',
               onPressed: () {
                 ref.read(notifReadIdsProvider.notifier).set(
-                    _kNotifs.map((n) => n.id).toSet());
+                    _activeNotifs.map((n) => n.id).toSet());
               },
             ),
           ],

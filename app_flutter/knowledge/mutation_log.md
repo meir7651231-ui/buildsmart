@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## X4 — StockNotifier.move delegation ל-FirebaseStockRepository (server-connect wave) — 2026-06-16
+
+- **קובץ:** `test/stock_firebase_repo_test.dart` (קייס חדש: `move() routes through the repo + mirrors its cache`).
+- תקלה שהוזרקה: `stock_screen.dart` `StockNotifier.move` — שבירת ה-delegation (`if (r != null) {` → `if (r != null && false) {`), כך שהמהלך נשאר in-memory בלבד (בדיוק באג X4 שלפני התיקון).
+- תוצאה: **אדומה ✅** — נכשל `Expected: site / Actual: warehouse` (ה-repo cache לא זז → `r.stockDemo()[name]` ≠ `notifier.state[name]`; `+0 -1`). שחזור → ירוק ✅ (`+1`).
+- מסקנה: הבדיקה חזקה — נועלת ש-`StockNotifier.move` **מנתב דרך** ה-`FirebaseStockRepository` המחובר (לא ה-fork ה-in-memory), כך שמהלך-מלאי של הקבלן מגיע ל-Firestore ולתצוגת ה-worker (`employer_stock.dart`). זהה-בייט במסלול ה-local (repo=null → flip in-memory verbatim).
+
 ## chat-sync — self-stamp participantUids (A14 last-mile) — 2026-06-15
 
 - **קובץ:** `test/chat_uid_a14_populate_test.dart` (קייס חדש: `lookup: null` → self-stamp).

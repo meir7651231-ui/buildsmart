@@ -337,7 +337,13 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// clobbers server state — under Firebase, Firestore's own offline
   /// persistence is the continuity source and prefs stays a write-behind copy.
   void bindRemote(FirebaseOrdersRepository remote) {
-    if (_remote != null) return; // bind once (provider-lifetime)
+    if (identical(_remote, remote)) return; // same repo — no-op
+    // A1 — RE-BIND on a uid-driven repo rebuild: the old repo was disposed (its
+    // snapshots listener cancelled), so detach from it (mirror dispose) before
+    // binding the fresh one, then refresh immediately so the engine re-aligns
+    // with the new repo's cache from t0. When `_remote` is null this is the
+    // original first-bind path, byte-identical.
+    _remote?.removeListener(_refreshFromRemote);
     _remote = remote;
     remote.addListener(_refreshFromRemote);
     _refreshFromRemote();
@@ -641,6 +647,18 @@ final ordersEngineProvider =
     // Firebase-free path (the whole test suite) nothing is bound — the engine
     // behaves byte-identically to today.
     if (repo is FirebaseOrdersRepository) engine.bindRemote(repo);
+    // A1 — RE-BIND on a uid-driven repo rebuild. ONLY on the live backend: there
+    // `ordersRepositoryProvider` `watch`es `currentUidProvider`, so on sign-in it
+    // REBUILDS + disposes the old repo (its snapshots listener cancelled) — re-bind
+    // the engine to the fresh (uid-scoped) repo so live sync never freezes on the
+    // pre-sign-in (demo seed) repo. GATED on `useFirebaseBackend`: on the local
+    // path the repo never rebuilds on uid AND `LocalOrdersRepository.all` reads
+    // THIS engine, so a tracked listen there would be a circular dependency.
+    if (useFirebaseBackend) {
+      ref.listen(ordersRepositoryProvider, (prev, next) {
+        if (next is FirebaseOrdersRepository) engine.bindRemote(next);
+      });
+    }
     // S9.2 — drain the EXPLICIT offline batch-order queue on engine init (app
     // start): intents queued while offline-suspect replay FIFO through the
     // `ordersRepositoryProvider` seam. Fire-and-forget; the queue guards every

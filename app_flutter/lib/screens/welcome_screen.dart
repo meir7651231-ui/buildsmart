@@ -270,6 +270,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           if (p.name.isNotEmpty) 'displayName': p.name,
           if (validIsraeliMobile(p.contact)) 'phone': p.contact,
           if (validEmail(p.contact)) 'email': p.contact,
+          if (p.profession.isNotEmpty) 'profession': p.profession,
+          if (p.address.isNotEmpty) 'address': p.address,
+          if (p.businessId.isNotEmpty) 'businessId': p.businessId,
         }).catchError((Object _) {}),
       );
     }
