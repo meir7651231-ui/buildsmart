@@ -26,6 +26,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Use the committed stable test key for release signing (key.properties)
+        run: |
+          mkdir -p ~/.android
+          cp app_flutter/android/app/bs-test-debug.keystore ~/.android/debug.keystore
+          printf 'storePassword=android\nkeyPassword=android\nkeyAlias=androiddebugkey\nstoreFile=bs-test-debug.keystore\n' > app_flutter/android/key.properties
+          echo "✅ key.properties -> app/bs-test-debug.keystore (SHA-1 68:F9:...:57:68:52) so Google sign-in works"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
