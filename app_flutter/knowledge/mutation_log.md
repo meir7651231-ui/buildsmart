@@ -1170,3 +1170,21 @@
 - **load-bearing:** `weatherNoteFor` ענף-הגשם (51-67) `'⚠️ גשם — לדחות יציקות בטון'`. מוטציה: `⚠️ גשם` → `גשם`.
 - תוצאה: טסטי-#45 **אדומים `+1 -2`** — days[2].warn (code 61) הפך false, ו-thresholds-test נכשל. שחזור → **+3 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: הכלי היה deferred כי "צריך API חיצוני" — Open-Meteo חינמי ללא-מפתח פותר זאת. ה-fetch מוזרק (seam) אז ה-mapper נבדק בלי רשת/GPS; ה-provider נופל ל-seed בחן (ב-VM אין GPS → seed מיידי, מסך לא נשבר). analyze 0 · ai_hub_compute/robustness ירוקים. נשאר deferred/hidden ל-Apple — un-hide הוא flip של הבעלים בשחרור; schedule-automation = micro-confirm עתידי.
+
+## #31-help-coverage-wave1 — מצב-היכרות: chrome ראשי של הקבלן (home_shell) — 2026-06-16
+- **קבצים:** `lib/widgets/help_target.dart` — נוסף `showHelpInfo` (כרטיס-הסבר מרכזי לאלמנטים שאי-אפשר לעגן להם בועת-זנב, כמו טאבים תחתונים). `lib/screens/home_shell.dart` — לוגו→חיוג-תפקיד, שבב-השם→פרופיל, חיפוש, ו-4 וריאנטי תפריט-⋮ נעטפו ב-HelpTarget; 4 טאבי-הניווט מקבלים הסבר במצב-היכרות דרך showHelpInfo במקום ניווט. טסט חדש `help_coverage_test.dart` (+2).
+- **load-bearing:** ב-onTap של הניווט התחתון `body: _kTabHelp[i].$2` (ההסבר של הטאב הנלחץ). מוטציה: `.$2` → `.$1` (מציג את שם-הטאב במקום ההסבר).
+- תוצאה: טסט-הטאב **אדום `+1 -1`** — אחרי tap על "עדכונים" לא הופיע ההסבר "ההתראות והשיחות". שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: ה-💡 וה-✕ נשארים ללא-עטיפה כדי שתמיד אפשר לצאת מהמצב; אלמנטים מחוץ לשכבת-ההקפאה מוסברים דרך showHelpInfo. גל 1 מתוך כיסוי-לפי-לוח (קבלן→שליח→חנות→מנהל→עמוק). analyze 0.
+
+## #31-help-coverage-wave2 — מצב-היכרות: לוח השליח (courier_dashboard) — 2026-06-16
+- **קבצים:** `lib/screens/courier_dashboard_screen.dart` — נוסף `const HelpToggleButton()` ל-AppBar (קריטי — בלעדיו אי-אפשר להיכנס למצב-היכרות בלוח השליח); עטיפת פעמון/פרופיל/הגדרות/יציאה + בורר-הרכב ב-HelpTarget; 4 טאבי-הניווט מקבלים הסבר דרך showHelpInfo במצב-היכרות במקום החלפת-טאב. טסט חדש `help_coverage_courier_test.dart` (+2). כפתורי קידום-המשלוח+POD שבתוך כרטיסי-הרשימה + בורר-הרכב בטאב המשלוחים נדחו לתת-גל courier-deep.
+- **load-bearing:** `const HelpToggleButton()` ב-AppBar של השליח (נקודת-הכניסה היחידה למצב-היכרות בלוח). מוטציה: `const HelpToggleButton(),` → `const SizedBox.shrink(),`.
+- תוצאה: שני טסטי-השליח **אדומים `+0 -2`** — אין toggle אז find.byType(HelpToggleButton) ריק, ולא ניתן להיכנס למצב כדי שהפעמון יסביר. שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: עטיפת אלמנטים בלוח חסרת-ערך בלי toggle להפעלת המצב — כל לוח (שליח/חנות/מנהל) חייב HelpToggleButton משלו. analyze 0 (info יחיד comment_references קדם-קיים). גל 2/7 בכיסוי-לפי-לוח.
+
+## #31-helpfix-bottomnav — טאבים תחתונים: HelpTarget אמיתי במקום כרטיס-מרכזי — 2026-06-16
+- **קבצים:** `lib/widgets/help_target.dart` — widget משותף חדש `BottomNavCell` (תא-ניווט icon+label שאפשר לעטוף ב-HelpTarget). `lib/screens/home_shell.dart` + `lib/screens/courier_dashboard_screen.dart` — ה-BottomNavigationBar הוחלף ב-Material+Row של BottomNavCell, כל טאב עטוף ב-HelpTarget (קבלן: בית/מחלקות/עדכונים/חנות · שליח: משלוחים/פורטל/דוחות/אזור אישי). הוסר ענף showHelpInfo (+ משתנה helpMode הלא-נחוץ בשליח). טסט `help_coverage_test` עודכן.
+- **הבאג שתוקן:** הטאבים השתמשו ב-showHelpInfo (כרטיס מרכזי) + בלי טבעת → לא מודגשים והבועה לא יצאה מהם, בניגוד למצלמה/⋮. עכשיו עקבי: טבעת כתומה + בועה מעוגנת מכל טאב.
+- **load-bearing:** `body: _kTabHelp[i].$2` ב-HelpTarget של הטאב. מוטציה: `.$2` → `.$1` (הבועה תציג את שם-הטאב במקום ההסבר).
+- תוצאה: טסט-הטאב **אדום `+1 -1`** — אחרי tap על "עדכונים" לא הופיע "ההתראות והשיחות". שחזור → **+2 ירוק** · RESTORED-IDENTICAL. אומת חי בדפדפן (Chrome extension): טבעת על כל 4 הטאבים + בועה יוצאת מ"עדכונים".

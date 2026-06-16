@@ -32,6 +32,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// X). Cleared whenever the cart shrinks so later adds surface fresh bubbles.
 final cartBubbleDismissedProvider = StateProvider<Set<int>>((_) => {});
 
+/// #31 — "מצב היכרות" copy for the 4 bottom-nav destinations, in tab order
+/// (בית · מחלקות · עדכונים · חנות). The tabs live in the Scaffold's nav bar
+/// (outside the freeze overlay), so help mode can't wrap them in a tail-bubble;
+/// instead a help-mode tap pops [showHelpInfo] with the matching entry rather
+/// than navigating.
+const List<(String, String)> _kTabHelp = [
+  (
+    'בית',
+    'מסך הבית החכם — נחיתה עם תוכן מותאם ("תוכן הבית"), ומשם כניסה לקטלוג המלא.',
+  ),
+  (
+    'מחלקות',
+    'רשת המחלקות — דפדוף לפי קטגוריות מוצרים (אינסטלציה · גמר · כלים…) לניווט מהיר בקטלוג.',
+  ),
+  (
+    'עדכונים',
+    'ההתראות והשיחות במקום אחד — הזמנות, חוסרים והודעות מספקים ומהצוות. התג מציג כמה לא נקראו.',
+  ),
+  ('חנות', 'החנות — הסל שלך, ההזמנות והמעקב אחריהן. כאן משלימים את הרכישה.'),
+];
+
 /// WhatsApp-style shell: AppBar + 4 bottom tabs.
 /// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
 class HomeShell extends ConsumerWidget {
@@ -95,16 +116,18 @@ class HomeShell extends ConsumerWidget {
           ref.read(mainTabProvider.notifier).state = i;
         },
       ),
-      floatingActionButton: tabIndex != 3
-          ? (helpMode
-              ? const HelpTarget(
-                  title: 'סל הקנייה',
-                  body: 'הסל הצף מציג כמה פריטים נאספו. לחיצה עליו קופצת '
-                      'לחנות עם הסל המסונן — משם ממשיכים להזמנה.',
-                  child: CartFab(),
-                )
-              : const CartFab())
-          : null,
+      floatingActionButton:
+          tabIndex != 3
+              ? (helpMode
+                  ? const HelpTarget(
+                    title: 'סל הקנייה',
+                    body:
+                        'הסל הצף מציג כמה פריטים נאספו. לחיצה עליו קופצת '
+                        'לחנות עם הסל המסונן — משם ממשיכים להזמנה.',
+                    child: CartFab(),
+                  )
+                  : const CartFab())
+              : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -148,10 +171,10 @@ class _HelpModeOverlay extends ConsumerWidget {
                   child: Tooltip(
                     message: 'צא ממצב היכרות',
                     child: InkWell(
-                      onTap: () =>
-                          ref.read(helpModeProvider.notifier).state = false,
-                      borderRadius:
-                          BorderRadius.circular(BsTokens.radiusPill),
+                      onTap:
+                          () =>
+                              ref.read(helpModeProvider.notifier).state = false,
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                       // ≥48dp tap target around the small ✕ (a11y), without
                       // enlarging the visible glyph.
                       child: const SizedBox(
@@ -258,8 +281,7 @@ class CartFab extends ConsumerWidget {
               top: -10,
               right: -12,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 constraints: const BoxConstraints(minWidth: 18),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -289,8 +311,12 @@ class CartFab extends ConsumerWidget {
           _CartChatBubble(
             line: lines[i],
             onTap: () => openCartLineProductSheet(context, lines[i]),
-            onClose: () => ref.read(cartBubbleDismissedProvider.notifier).state =
-                {...dismissed, i},
+            onClose:
+                () =>
+                    ref.read(cartBubbleDismissedProvider.notifier).state = {
+                      ...dismissed,
+                      i,
+                    },
           ),
           const SizedBox(height: 8),
         ],
@@ -414,8 +440,11 @@ class _CartChatBubble extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.edit_outlined,
-                    size: 13, color: Colors.black38),
+                const Icon(
+                  Icons.edit_outlined,
+                  size: 13,
+                  color: Colors.black38,
+                ),
               ],
             ),
           ),
@@ -447,8 +476,11 @@ class _CartChatBubble extends StatelessWidget {
                       child: const SizedBox(
                         width: 20,
                         height: 20,
-                        child:
-                            Icon(Icons.close, size: 13, color: Colors.black54),
+                        child: Icon(
+                          Icons.close,
+                          size: 13,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
                   ),
@@ -476,9 +508,10 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final tabIndex = ref.watch(mainTabProvider);
     // Registered user's first name → chip beside the logo (guest/demo → none).
     final profile = ref.watch(userProfileProvider);
-    final firstName = profile.registered && profile.name.trim().isNotEmpty
-        ? profile.name.trim().split(RegExp(r'\s+')).first
-        : '';
+    final firstName =
+        profile.registered && profile.name.trim().isNotEmpty
+            ? profile.name.trim().split(RegExp(r'\s+')).first
+            : '';
     return AppBar(
       backgroundColor: const Color(0xFFFFFFFF),
       elevation: 0,
@@ -497,12 +530,22 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'BuildSmart',
-                      style: TextStyle(
-                        color: BsTokens.brand,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 22,
+                    // #31 — explains the logo's real job: it opens the role
+                    // picker. (Help mode intercepts the tap; the ancestor
+                    // InkWell still runs showRolePicker outside help mode.)
+                    const HelpTarget(
+                      title: 'החלפת לוח / זהות',
+                      body:
+                          'לחיצה על הלוגו פותחת את בורר התפקידים — מעבר בין '
+                          'לוח קבלן · מנהל · חנות · שליח · עובד. כך עוברים בין '
+                          'סוגי המשתמשים באפליקציה.',
+                      child: Text(
+                        'BuildSmart',
+                        style: TextStyle(
+                          color: BsTokens.brand,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                        ),
                       ),
                     ),
                     if (firstName.isNotEmpty) ...[
@@ -518,30 +561,41 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         label: 'הפרופיל שלי',
                         child: Tooltip(
                           message: 'הפרופיל שלי',
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => showProfileCard(context),
-                            // ≥48dp tap target around the small pill (a11y),
-                            // without enlarging the visible chip.
-                            child: ConstrainedBox(
-                              constraints:
-                                  const BoxConstraints(minHeight: 48),
-                              child: Center(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFF0E3),
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    firstName,
-                                    style: const TextStyle(
-                                      color: BsTokens.brandDark,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 13,
+                          // #31 — the chip explains itself in help mode (opens
+                          // the read-only profile card); the GestureDetector's
+                          // real onTap still fires outside help mode.
+                          child: HelpTarget(
+                            title: 'הפרופיל שלי',
+                            body:
+                                'פותח כרטיס פרופיל לקריאה — שם · מקצוע · '
+                                'כתובת · ח.פ. · איש קשר; ומשם "ערוך פרופיל" '
+                                'לעריכה מלאה.',
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => showProfileCard(context),
+                              // ≥48dp tap target around the small pill (a11y),
+                              // without enlarging the visible chip.
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: 48,
+                                ),
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFF0E3),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      firstName,
+                                      style: const TextStyle(
+                                        color: BsTokens.brandDark,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -586,33 +640,66 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
       actions: [
         // Search icon — appears when the active tab's header is scrolled away.
         if (ref.watch(tabHeaderHiddenProvider))
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black54),
-            tooltip: 'חיפוש',
-            onPressed: () {
-              ref.read(tabHeaderHiddenProvider.notifier).state = false;
-            },
+          HelpTarget(
+            title: 'חיפוש',
+            body:
+                'מחזיר את שורת החיפוש של הטאב הפעיל (שנעלמה בגלילה) '
+                'כדי לחפש מוצר או פריט במהירות.',
+            child: IconButton(
+              icon: const Icon(Icons.search, color: Colors.black54),
+              tooltip: 'חיפוש',
+              onPressed: () {
+                ref.read(tabHeaderHiddenProvider.notifier).state = false;
+              },
+            ),
           ),
         HelpTarget(
           title: 'מצלמה / סורק',
-          body: 'פותח את הסורק: צילום ברקוד או מק"ט לזיהוי מוצר, '
+          body:
+              'פותח את הסורק: צילום ברקוד או מק"ט לזיהוי מוצר, '
               'או סריקת תוכנית כדי להפיק ממנה רשימת מוצרים — בלי להקליד ידנית.',
           child: IconButton(
-            icon:
-                const Icon(Icons.photo_camera_outlined, color: Colors.black54),
+            icon: const Icon(
+              Icons.photo_camera_outlined,
+              color: Colors.black54,
+            ),
             tooltip: 'מצלמה',
             onPressed: () => openCameraSheet(context),
           ),
         ),
+        // #31 — the ⋮ menu explains itself in help mode (copy tailored to the
+        // active tab); outside help mode it opens the real popup as before.
         if (tabIndex == 0 || tabIndex == 1)
-          const _CatalogMenuButton() // בית + מחלקות both drill into the catalog
+          const HelpTarget(
+            title: 'תפריט הקטלוג',
+            body:
+                'כלים נוספים של הקטלוג — בינה מלאכותית ואוטומציה, '
+                'והגדרות האפליקציה.',
+            child: _CatalogMenuButton(), // בית + מחלקות drill into the catalog
+          )
         else if (tabIndex == 2)
           // עדכונים — menu follows the active sub-toggle (התראות / שיחות).
           (ref.watch(updatesSubTabProvider) == 1
-              ? const _ChatsMenuButton()
-              : const _NotificationsMenuButton())
+              ? const HelpTarget(
+                title: 'תפריט השיחות',
+                body:
+                    'כלים לשיחות — פתיחת שיחה חדשה, ארכיון, '
+                    'והשתקת כל השיחות.',
+                child: _ChatsMenuButton(),
+              )
+              : const HelpTarget(
+                title: 'תפריט ההתראות',
+                body:
+                    'כלים להתראות — סימון הכל כנקרא, ניקוי הכל, '
+                    'והגדרות התראות.',
+                child: _NotificationsMenuButton(),
+              ))
         else
-          const _StoreMenuButton(),
+          const HelpTarget(
+            title: 'תפריט החנות',
+            body: 'כלים לחנות — הסל שלי, ההזמנות, שירותים, והגדרות החנות.',
+            child: _StoreMenuButton(),
+          ),
         // 💡 — tap toggles "מצב היכרות" (interactive help mode); long-press
         // still replays the first-run intro slides.
         Builder(
@@ -626,9 +713,9 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   color: helpOn ? BsTokens.brandDark : BsTokens.brand,
                 ),
                 tooltip: 'מצב היכרות (לחיצה ארוכה: סיור)',
-                onPressed: () => ref
-                    .read(helpModeProvider.notifier)
-                    .update((on) => !on),
+                onPressed:
+                    () =>
+                        ref.read(helpModeProvider.notifier).update((on) => !on),
               ),
             );
           },
@@ -647,41 +734,53 @@ class _BottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unreadCount = ref.watch(notifUnreadCountProvider);
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: const Color(0xFFFFFFFF),
-      selectedItemColor: BsTokens.brand,
-      unselectedItemColor: const Color(0xFF888888),
-      selectedFontSize: 12,
-      unselectedFontSize: 11,
-      items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
-          label: 'בית',
+    // #31 — each tab is wrapped in HelpTarget so help mode highlights it (orange
+    // ring) AND pops a bubble out of the tab itself, consistent with the app-bar
+    // icons (the old BottomNavigationBar couldn't carry per-item HelpTargets).
+    // Outside help mode the InkWell navigates exactly as before.
+    Widget tab(int i, Widget icon, String label) => Expanded(
+      child: HelpTarget(
+        title: _kTabHelp[i].$1,
+        body: _kTabHelp[i].$2,
+        child: BottomNavCell(
+          icon: icon,
+          label: label,
+          selected: currentIndex == i,
+          onTap: () => onTap(i),
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.apps),
-          label: 'מחלקות',
-        ),
-        BottomNavigationBarItem(
-          icon: _BadgedIcon(
-            icon: Icons.notifications_outlined,
-            count: unreadCount,
+      ),
+    );
+    return Material(
+      color: const Color(0xFFFFFFFF),
+      elevation: 8,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 58,
+          child: Row(
+            children: [
+              tab(
+                0,
+                Icon(currentIndex == 0 ? Icons.home : Icons.home_outlined),
+                'בית',
+              ),
+              tab(1, const Icon(Icons.apps), 'מחלקות'),
+              tab(
+                2,
+                _BadgedIcon(
+                  icon:
+                      currentIndex == 2
+                          ? Icons.notifications
+                          : Icons.notifications_outlined,
+                  count: unreadCount,
+                ),
+                'עדכונים',
+              ),
+              tab(3, const Icon(Icons.shopping_cart_outlined), 'חנות'),
+            ],
           ),
-          activeIcon: _BadgedIcon(
-            icon: Icons.notifications,
-            count: unreadCount,
-          ),
-          label: 'עדכונים',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart_outlined),
-          label: 'חנות',
-        ),
-      ],
+      ),
     );
   }
 }
@@ -741,18 +840,19 @@ class _CatalogMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
-      itemBuilder: (_) => const [
-        // 🏠 home-tab tools, surfaced natively (mirror the menu-dial 🏠 branch).
-        PopupMenuItem<String>(
-          value: 'ai_hub',
-          child: _MenuRow(emoji: '🤖', label: 'בינה מלאכותית ואוטומציה'),
-        ),
-        PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
-      ],
+      itemBuilder:
+          (_) => const [
+            // 🏠 home-tab tools, surfaced natively (mirror the menu-dial 🏠 branch).
+            PopupMenuItem<String>(
+              value: 'ai_hub',
+              child: _MenuRow(emoji: '🤖', label: 'בינה מלאכותית ואוטומציה'),
+            ),
+            PopupMenuDivider(),
+            PopupMenuItem<String>(
+              value: 'settings',
+              child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+            ),
+          ],
     );
   }
 
@@ -808,7 +908,10 @@ class _ChatsMenuButton extends ConsumerWidget {
   }
 
   Future<void> _onSelected(
-      BuildContext context, WidgetRef ref, String value) async {
+    BuildContext context,
+    WidgetRef ref,
+    String value,
+  ) async {
     switch (value) {
       case 'new_chat':
         showModalBottomSheet<void>(
@@ -834,10 +937,7 @@ class _ChatsMenuButton extends ConsumerWidget {
           if (!ok || !context.mounted) return;
         }
         toggleMuteAllChats(ref);
-        showToast(
-          context,
-          wasAllMuted ? 'ההשתקה בוטלה' : 'כל השיחות הושתקו',
-        );
+        showToast(context, wasAllMuted ? 'ההשתקה בוטלה' : 'כל השיחות הושתקו');
     }
   }
 }
@@ -856,25 +956,29 @@ class _NotificationsMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
-      itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'mark_all_read',
-          child: _MenuRow(emoji: '✅', label: 'סמן הכל כנקרא'),
-        ),
-        PopupMenuItem<String>(
-          value: 'clear_all',
-          child: _MenuRow(emoji: '🗑️', label: 'נקה הכל'),
-        ),
-        PopupMenuItem<String>(
-          value: 'notif_settings',
-          child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות'),
-        ),
-      ],
+      itemBuilder:
+          (_) => const [
+            PopupMenuItem<String>(
+              value: 'mark_all_read',
+              child: _MenuRow(emoji: '✅', label: 'סמן הכל כנקרא'),
+            ),
+            PopupMenuItem<String>(
+              value: 'clear_all',
+              child: _MenuRow(emoji: '🗑️', label: 'נקה הכל'),
+            ),
+            PopupMenuItem<String>(
+              value: 'notif_settings',
+              child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות'),
+            ),
+          ],
     );
   }
 
   Future<void> _onSelected(
-      BuildContext context, WidgetRef ref, String value) async {
+    BuildContext context,
+    WidgetRef ref,
+    String value,
+  ) async {
     switch (value) {
       case 'mark_all_read':
         markAllNotifsRead(ref);
@@ -909,28 +1013,29 @@ class _StoreMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
-      itemBuilder: (_) => [
-        const PopupMenuItem<String>(
-          value: 'cart',
-          child: _MenuRow(emoji: '🛒', label: 'הסל שלי'),
-        ),
-        const PopupMenuItem<String>(
-          value: 'orders',
-          child: _MenuRow(emoji: '📦', label: 'הזמנות'),
-        ),
-        // 🔧 שירותים opens the all-"בבנייה" services section — hidden for Apple
-        // review (kHideUnderConstruction); the route + section stay (reversible).
-        if (!kHideUnderConstruction)
-          const PopupMenuItem<String>(
-            value: 'services',
-            child: _MenuRow(emoji: '🔧', label: 'שירותים'),
-          ),
-        const PopupMenuDivider(),
-        const PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
-      ],
+      itemBuilder:
+          (_) => [
+            const PopupMenuItem<String>(
+              value: 'cart',
+              child: _MenuRow(emoji: '🛒', label: 'הסל שלי'),
+            ),
+            const PopupMenuItem<String>(
+              value: 'orders',
+              child: _MenuRow(emoji: '📦', label: 'הזמנות'),
+            ),
+            // 🔧 שירותים opens the all-"בבנייה" services section — hidden for Apple
+            // review (kHideUnderConstruction); the route + section stay (reversible).
+            if (!kHideUnderConstruction)
+              const PopupMenuItem<String>(
+                value: 'services',
+                child: _MenuRow(emoji: '🔧', label: 'שירותים'),
+              ),
+            const PopupMenuDivider(),
+            const PopupMenuItem<String>(
+              value: 'settings',
+              child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+            ),
+          ],
     );
   }
 
@@ -1080,11 +1185,13 @@ class _ProfileCard extends ConsumerWidget {
     final hasName = p.name.trim().isNotEmpty;
     final name = hasName ? p.name.trim() : 'אורח';
     final rows = <(IconData, String)>[
-      if (p.profession.trim().isNotEmpty) (Icons.work_outline, p.profession.trim()),
+      if (p.profession.trim().isNotEmpty)
+        (Icons.work_outline, p.profession.trim()),
       if (p.address.trim().isNotEmpty) (Icons.place_outlined, p.address.trim()),
       if (p.businessId.trim().isNotEmpty)
         (Icons.badge_outlined, p.businessId.trim()),
-      if (p.contact.trim().isNotEmpty) (Icons.alternate_email, p.contact.trim()),
+      if (p.contact.trim().isNotEmpty)
+        (Icons.alternate_email, p.contact.trim()),
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -1118,17 +1225,21 @@ class _ProfileCard extends ConsumerWidget {
                     shape: BoxShape.circle,
                   ),
                   child: ExcludeSemantics(
-                    child: hasName
-                        ? Text(
-                            name.characters.first,
-                            style: const TextStyle(
+                    child:
+                        hasName
+                            ? Text(
+                              name.characters.first,
+                              style: const TextStyle(
+                                color: BsTokens.brandDark,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 24,
+                              ),
+                            )
+                            : const Icon(
+                              Icons.person,
                               color: BsTokens.brandDark,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 24,
+                              size: 28,
                             ),
-                          )
-                        : const Icon(Icons.person,
-                            color: BsTokens.brandDark, size: 28),
                   ),
                 ),
                 const SizedBox(width: BsTokens.space3),
@@ -1155,8 +1266,9 @@ class _ProfileCard extends ConsumerWidget {
               const SizedBox(height: BsTokens.space2),
               for (final (icon, value) in rows)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: BsTokens.space2),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: BsTokens.space2,
+                  ),
                   child: Row(
                     children: [
                       Icon(icon, size: 18, color: BsTokens.mutedLight),
@@ -1184,8 +1296,9 @@ class _ProfileCard extends ConsumerWidget {
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: BsTokens.brand,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: BsTokens.space3),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: BsTokens.space3,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                   ),
@@ -1243,9 +1356,10 @@ class _PulsingStatusState extends ConsumerState<_PulsingStatus>
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
-      opacity: Tween<double>(begin: 0.35, end: 1).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-      ),
+      opacity: Tween<double>(
+        begin: 0.35,
+        end: 1,
+      ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -18,6 +18,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/courier_profile_store.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
+import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
@@ -27,6 +28,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,6 +46,29 @@ const int kCourierDeliveryCoins = 20;
 /// המצאות: notifications derive only from actual engine stages (pickup/transit
 /// = the store really handed the shipment to the courier).
 const String kCourierHandoffSeenKey = 'bs.courier-handoff-seen.v1';
+
+/// #31 — "מצב היכרות" copy for the courier's 4 bottom-nav tabs, in order
+/// (משלוחים · פורטל · דוחות · אזור אישי). The tabs sit in the nav bar, so a
+/// help-mode tap pops [showHelpInfo] with the matching entry rather than
+/// switching tab.
+const List<(String, String)> _kCourierTabHelp = [
+  (
+    'משלוחים',
+    'הבית שלך — המשלוחים להיום לפי הרכב שבחרת, עם קידום כל משלוח מאיסוף עד מסירה.',
+  ),
+  (
+    'פורטל',
+    'מרכז הכלים — ניווט, צי, אזורי-חלוקה, צ׳אט, יעדי-SLA ואישורי-מסירה במקום אחד.',
+  ),
+  (
+    'דוחות',
+    'הביצועים שלך — משלוחים שהושלמו, זמני-מסירה ושליחת דוח-יומי לחנות.',
+  ),
+  (
+    'אזור אישי',
+    'הפרופיל שלך — פרטי-נהג, נוכחות, טפסים, תעודות-נהג ותלושי-שכר.',
+  ),
+];
 
 /// 🛵 שליח — the courier role app. Same shell/style as the contractor app, a
 /// faithful port of the prototype `screen-courier` (proto 06 §3 / preact 03
@@ -158,7 +183,9 @@ class _CourierDashboardScreenState
       if (!inHand || seen.contains(o.id)) continue;
       seen.add(o.id);
       dirty = true;
-      ref.read(workerNotifsProvider.notifier).addNotification(
+      ref
+          .read(workerNotifsProvider.notifier)
+          .addNotification(
             username: s.username,
             emoji: '📦',
             title: 'משלוח חדש — נמסר לידיך מהחנות',
@@ -221,33 +248,80 @@ class _CourierDashboardScreenState
         backgroundColor: BsTokens.bgLight,
         appBar: _appBar(),
         body: _tabBody(session, vehicle),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _tab,
-          onTap: (i) => setState(() => _tab = i),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFFFFFFFF),
-          selectedItemColor: BsTokens.brand,
-          unselectedItemColor: const Color(0xFF888888),
-          selectedFontSize: 12,
-          unselectedFontSize: 11,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.local_shipping_outlined),
-              activeIcon: Icon(Icons.local_shipping),
-              label: 'משלוחים',
+        // #31 — each tab wrapped in HelpTarget so help mode highlights it +
+        // pops a bubble out of the tab (consistent with the app-bar). Outside
+        // help mode the BottomNavCell's InkWell switches tab as before.
+        bottomNavigationBar: Material(
+          color: const Color(0xFFFFFFFF),
+          elevation: 8,
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 58,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[0].$1,
+                      body: _kCourierTabHelp[0].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 0
+                              ? Icons.local_shipping
+                              : Icons.local_shipping_outlined,
+                        ),
+                        label: 'משלוחים',
+                        selected: _tab == 0,
+                        onTap: () => setState(() => _tab = 0),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[1].$1,
+                      body: _kCourierTabHelp[1].$2,
+                      child: BottomNavCell(
+                        icon: const Icon(Icons.apps),
+                        label: 'פורטל',
+                        selected: _tab == 1,
+                        onTap: () => setState(() => _tab = 1),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[2].$1,
+                      body: _kCourierTabHelp[2].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 2
+                              ? Icons.insert_chart
+                              : Icons.insert_chart_outlined,
+                        ),
+                        label: 'דוחות',
+                        selected: _tab == 2,
+                        onTap: () => setState(() => _tab = 2),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kCourierTabHelp[3].$1,
+                      body: _kCourierTabHelp[3].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 3 ? Icons.person : Icons.person_outline,
+                        ),
+                        label: 'אזור אישי',
+                        selected: _tab == 3,
+                        onTap: () => setState(() => _tab = 3),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'פורטל'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.insert_chart_outlined),
-              activeIcon: Icon(Icons.insert_chart),
-              label: 'דוחות',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'אזור אישי',
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -258,8 +332,9 @@ class _CourierDashboardScreenState
   /// שייפול ל-[haulInfo], שממציא את kHaulTypes.first).
   String _preferredHaul(BoardSession session) {
     final p = ref.watch(
-      courierProfileProvider
-          .select((m) => m[session.username]?.preferredHaul ?? ''),
+      courierProfileProvider.select(
+        (m) => m[session.username]?.preferredHaul ?? '',
+      ),
     );
     return kVehicleRank.containsKey(p) ? p : '';
   }
@@ -300,24 +375,51 @@ class _CourierDashboardScreenState
         ),
       ),
       actions: [
-        const _CourierNotifsBell(),
-        IconButton(
-          tooltip: 'פרופיל',
-          icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
-          onPressed:
-              () => Navigator.of(context).push(CourierProfileScreen.route()),
+        // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
+        // themselves in a bubble instead of acting (the 💡 + ✕ stay tappable
+        // so the courier can always toggle/exit).
+        const HelpToggleButton(),
+        const HelpTarget(
+          title: 'התראות',
+          body:
+              'פעמון ההתראות — נפתח לרשימת המשלוחים שנמסרו לידיך מהחנות '
+              'והמסירות שהשלמת. התג האדום מציין כמה לא נקראו.',
+          child: _CourierNotifsBell(),
         ),
-        IconButton(
-          tooltip: 'הגדרות',
-          icon: const Icon(Icons.settings_outlined, color: BsTokens.mutedLight),
-          onPressed:
-              () => Navigator.of(context).push(CourierSettingsScreen.route()),
+        HelpTarget(
+          title: 'פרופיל',
+          body: 'האזור האישי שלך — פרטי הנהג, תעודות, טפסים ותלושים.',
+          child: IconButton(
+            tooltip: 'פרופיל',
+            icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
+            onPressed:
+                () => Navigator.of(context).push(CourierProfileScreen.route()),
+          ),
         ),
-        TextButton(
-          onPressed: () => Navigator.of(context).maybePop(),
-          child: const Text(
-            '‹ יציאה',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+        HelpTarget(
+          title: 'הגדרות',
+          body: 'הגדרות לוח-השליח — התראות, תצוגה והעדפות אישיות.',
+          child: IconButton(
+            tooltip: 'הגדרות',
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: BsTokens.mutedLight,
+            ),
+            onPressed:
+                () => Navigator.of(context).push(CourierSettingsScreen.route()),
+          ),
+        ),
+        HelpTarget(
+          title: 'יציאה',
+          body:
+              'יציאה מהלוח חזרה למסך הקודם — אינה מנתקת אותך מהחשבון; '
+              'התנתקות מלאה נמצאת באזור האישי.',
+          child: TextButton(
+            onPressed: () => Navigator.of(context).maybePop(),
+            child: const Text(
+              '‹ יציאה',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            ),
           ),
         ),
       ],
@@ -361,23 +463,33 @@ class _CourierDashboardScreenState
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
               const SizedBox(height: BsTokens.space4),
-              Row(
-                children: [
-                  for (var i = 0; i < kHaulTypes.length; i++) ...[
-                    if (i > 0) const SizedBox(width: BsTokens.space2),
-                    Expanded(
-                      child: _VehicleButton(
-                        haul: kHaulTypes[i],
-                        on: false,
-                        preferred: kHaulTypes[i].id == preferred,
-                        onTap: () => setState(() {
-                          _vehicleTouched = true; // #24 — בחירה ידנית גוברת
-                          _vehicle = kHaulTypes[i].id;
-                        }),
+              // #31 — explains the vehicle picker as a concept (help mode shows
+              // the bubble; outside it the buttons select normally).
+              HelpTarget(
+                title: 'בחירת רכב למשמרת',
+                body:
+                    'בוחרים את הרכב להיום — רשימת המשלוחים תסונן לפי הקיבולת '
+                    'שלו, ומשלוחים גדולים מדי יוצגו בנפרד תחת "דורש רכב אחר".',
+                child: Row(
+                  children: [
+                    for (var i = 0; i < kHaulTypes.length; i++) ...[
+                      if (i > 0) const SizedBox(width: BsTokens.space2),
+                      Expanded(
+                        child: _VehicleButton(
+                          haul: kHaulTypes[i],
+                          on: false,
+                          preferred: kHaulTypes[i].id == preferred,
+                          onTap:
+                              () => setState(() {
+                                _vehicleTouched =
+                                    true; // #24 — בחירה ידנית גוברת
+                                _vehicle = kHaulTypes[i].id;
+                              }),
+                        ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ],
           ),
@@ -407,8 +519,9 @@ class _CourierDashboardScreenState
     // F-29 — הברכה מכבדת את ה-override מפרופיל-השליח (#86.1): שם מהפרופיל
     // כשאינו ריק, אחרת displayName של ה-session (בלי המצאות).
     final profileName = ref.watch(
-      courierProfileProvider
-          .select((m) => m[session.username]?.displayName ?? ''),
+      courierProfileProvider.select(
+        (m) => m[session.username]?.displayName ?? '',
+      ),
     );
     final greetName =
         profileName.isNotEmpty ? profileName : session.displayName;
@@ -482,10 +595,11 @@ class _CourierDashboardScreenState
                   haul: kHaulTypes[i],
                   on: kHaulTypes[i].id == vehicle,
                   preferred: kHaulTypes[i].id == preferred,
-                  onTap: () => setState(() {
-                    _vehicleTouched = true; // #24 — בחירה ידנית גוברת
-                    _vehicle = kHaulTypes[i].id;
-                  }),
+                  onTap:
+                      () => setState(() {
+                        _vehicleTouched = true; // #24 — בחירה ידנית גוברת
+                        _vehicle = kHaulTypes[i].id;
+                      }),
                 ),
               ),
             ],
@@ -669,9 +783,11 @@ class _CourierDashboardScreenState
     // — delivered is terminal + courierAdvance no-ops on it, so the 🪙+🔔 pair
     // can never double-fire for the same order.
     final after = ref.read(sysOrdersProvider);
-    final movedToTransit = wasPickup &&
+    final movedToTransit =
+        wasPickup &&
         after.any((x) => x.id == o.id && x.stage == OrderStage.transit);
-    final delivered = wasTransit &&
+    final delivered =
+        wasTransit &&
         after.any((x) => x.id == o.id && x.stage == OrderStage.delivered);
 
     // F-10 — ה-writer של bs.courier-clock.v1: חותמת-שעון ברגעי ה-advance
@@ -695,7 +811,9 @@ class _CourierDashboardScreenState
       // per-courier בפרופיל ובדוחות.
       ref.read(fulfillmentProvider.notifier).stampCourier(o.id, s.username);
       // 🔔 'delivered' event onto the courier's own per-username feed.
-      ref.read(workerNotifsProvider.notifier).addNotification(
+      ref
+          .read(workerNotifsProvider.notifier)
+          .addNotification(
             username: s.username,
             emoji: '✅',
             title: 'המשלוח נמסר — +$kCourierDeliveryCoins מטבעות',
@@ -1215,131 +1333,140 @@ class _CourierNotifsSheet extends ConsumerWidget {
         minChildSize: 0.4,
         maxChildSize: 0.95,
         expand: false,
-        builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(BsTokens.radiusCard),
-            ),
-          ),
-          child: ListView(
-            controller: scroll,
-            padding: const EdgeInsets.all(BsTokens.space4),
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        builder:
+            (_, scroll) => Container(
+              decoration: const BoxDecoration(
+                color: BsTokens.cardLight,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),
-              // ── header: title + X close ──
-              Row(
+              child: ListView(
+                controller: scroll,
+                padding: const EdgeInsets.all(BsTokens.space4),
                 children: [
-                  const Expanded(
-                    child: Text(
-                      '🔔 התראות',
-                      style: TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDDDDDD),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'סגירה',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: BsTokens.mutedLight),
-                  ),
-                ],
-              ),
-              const SizedBox(height: BsTokens.space2),
-
-              if (notifs.isEmpty)
-                // Honest empty state — the feed fills only from real engine
-                // events (משלוח שנמסר לידיך מהחנות · משלוח שמסרת ללקוח).
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
-                    'אין התראות עדיין.\nמשלוחים חדשים שנמסרים לידיך ומסירות שהשלמת יופיעו כאן.',
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
-                  ),
-                )
-              else ...[
-                // ── actions row: mark-all-read · clear-all (confirmed) ──
-                Row(
-                  children: [
-                    if (unread > 0)
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size(64, 48),
-                        ),
-                        onPressed: username == null
-                            ? null
-                            : () => ref
-                                .read(workerNotifsProvider.notifier)
-                                .markAllRead(username),
-                        child: const Text(
-                          'סמן הכל כנקרא',
+                  // ── header: title + X close ──
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          '🔔 התראות',
                           style: TextStyle(
-                            color: BsTokens.brandDark,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
                           ),
                         ),
                       ),
-                    const Spacer(),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(64, 48),
-                      ),
-                      onPressed: username == null
-                          ? null
-                          : () async {
-                              final ok = await confirmDestructive(
-                                context,
-                                title: 'לנקות את כל ההתראות?',
-                                message:
-                                    'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
-                                confirmLabel: 'נקה',
-                              );
-                              if (!ok) return;
-                              ref
-                                  .read(workerNotifsProvider.notifier)
-                                  .clear(username);
-                            },
-                      child: const Text(
-                        'נקה הכל',
-                        style: TextStyle(
-                          color: BsTokens.danger,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                      IconButton(
+                        tooltip: 'סגירה',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.close,
+                          color: BsTokens.mutedLight,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: BsTokens.space1),
-                for (final n in notifs)
-                  _CourierNotifRow(
-                    notif: n,
-                    onTap: username == null || n.read
-                        ? null
-                        : () => ref
-                            .read(workerNotifsProvider.notifier)
-                            .markRead(username, n.id),
+                    ],
                   ),
-              ],
-              const SizedBox(height: BsTokens.space4),
-            ],
-          ),
-        ),
+                  const SizedBox(height: BsTokens.space2),
+
+                  if (notifs.isEmpty)
+                    // Honest empty state — the feed fills only from real engine
+                    // events (משלוח שנמסר לידיך מהחנות · משלוח שמסרת ללקוח).
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                      child: Text(
+                        'אין התראות עדיין.\nמשלוחים חדשים שנמסרים לידיך ומסירות שהשלמת יופיעו כאן.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    // ── actions row: mark-all-read · clear-all (confirmed) ──
+                    Row(
+                      children: [
+                        if (unread > 0)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(64, 48),
+                            ),
+                            onPressed:
+                                username == null
+                                    ? null
+                                    : () => ref
+                                        .read(workerNotifsProvider.notifier)
+                                        .markAllRead(username),
+                            child: const Text(
+                              'סמן הכל כנקרא',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            minimumSize: const Size(64, 48),
+                          ),
+                          onPressed:
+                              username == null
+                                  ? null
+                                  : () async {
+                                    final ok = await confirmDestructive(
+                                      context,
+                                      title: 'לנקות את כל ההתראות?',
+                                      message:
+                                          'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
+                                      confirmLabel: 'נקה',
+                                    );
+                                    if (!ok) return;
+                                    ref
+                                        .read(workerNotifsProvider.notifier)
+                                        .clear(username);
+                                  },
+                          child: const Text(
+                            'נקה הכל',
+                            style: TextStyle(
+                              color: BsTokens.danger,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: BsTokens.space1),
+                    for (final n in notifs)
+                      _CourierNotifRow(
+                        notif: n,
+                        onTap:
+                            username == null || n.read
+                                ? null
+                                : () => ref
+                                    .read(workerNotifsProvider.notifier)
+                                    .markRead(username, n.id),
+                      ),
+                  ],
+                  const SizedBox(height: BsTokens.space4),
+                ],
+              ),
+            ),
       ),
     );
   }
