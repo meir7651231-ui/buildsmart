@@ -1188,3 +1188,8 @@
 - **הבאג שתוקן:** הטאבים השתמשו ב-showHelpInfo (כרטיס מרכזי) + בלי טבעת → לא מודגשים והבועה לא יצאה מהם, בניגוד למצלמה/⋮. עכשיו עקבי: טבעת כתומה + בועה מעוגנת מכל טאב.
 - **load-bearing:** `body: _kTabHelp[i].$2` ב-HelpTarget של הטאב. מוטציה: `.$2` → `.$1` (הבועה תציג את שם-הטאב במקום ההסבר).
 - תוצאה: טסט-הטאב **אדום `+1 -1`** — אחרי tap על "עדכונים" לא הופיע "ההתראות והשיחות". שחזור → **+2 ירוק** · RESTORED-IDENTICAL. אומת חי בדפדפן (Chrome extension): טבעת על כל 4 הטאבים + בועה יוצאת מ"עדכונים".
+
+## #31-helpcov-wave3 — לוח החנות/ספק (store_dashboard) — 2026-06-16
+- **קבצים:** `lib/screens/store_dashboard_screen.dart` — נוסף `HelpToggleButton` ל-AppBar; פעמון/אזור-אישי/הגדרות/התנתקות/יציאה עטופים ב-HelpTarget; ה-BottomNavigationBar (5 טאבים) הוחלף ב-Material+Row של BottomNavCell+HelpTarget (בית/מלאי/שיחות/פורטל/אזור-אישי). טסט חדש `help_coverage_store_test` (+2).
+- **load-bearing:** `body: _kStoreTabHelp[1].$2` (הסבר טאב "מלאי"). מוטציה: `.$2`→`.$1`.
+- תוצאה: טסט-הטאב **אדום `+1 -1`** · שחזור → **+2 ירוק** · RESTORED-IDENTICAL. analyze 0. דפוס זהה לתיקון-הטאבים (BottomNavCell משותף). גל 3/7.

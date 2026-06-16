@@ -2335,3 +2335,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **למה:** הקיצור הקודם (showHelpInfo כרטיס-מרכזי) השאיר את הטאבים בלי הדגשה ובלי בועה-יוצאת-מהם — חוסר-עקביות (stuck_log).
 - **gate:** analyze 0 · help_coverage_test +2 (טאב=HelpTarget + בועה) · 4 טסטי-עזרה ירוקים · mutation §mutation_log · אומת חי בדפדפן.
 - **קבצים:** `lib/widgets/help_target.dart` (BottomNavCell) · `lib/screens/home_shell.dart` · `lib/screens/courier_dashboard_screen.dart` · `test/help_coverage_test.dart`.
+
+### #31-helpcov-wave3 — מצב-היכרות לוח החנות — 2026-06-16
+- **המהלך:** גל 3 (כיסוי-לפי-לוח). נוסף HelpToggleButton ל-store_dashboard AppBar; chrome עטוף ב-HelpTarget; 5 טאבים → BottomNavCell+HelpTarget (Material+Row, לא BottomNavigationBar).
+- **gate:** analyze 0 · help_coverage_store_test +2 · mutation §mutation_log.
+- **קבצים:** `lib/screens/store_dashboard_screen.dart` · `test/help_coverage_store_test.dart`.

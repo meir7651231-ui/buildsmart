@@ -30,12 +30,26 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// #31 — "מצב היכרות" copy for the store board's 5 bottom-nav tabs, in order
+/// (בית · מלאי · שיחות · פורטל · אזור אישי).
+const List<(String, String)> _kStoreTabHelp = [
+  ('בית', 'מסך הבית — ההזמנות הנכנסות מהקבלנים והסטטוס שלהן במבט אחד.'),
+  ('מלאי', 'ניהול מלאי החנות — מוצרים, מחירים, זמינות והוספת מוצר חדש.'),
+  ('שיחות', 'הצ׳אטים שלך — קבלנים, שליחים, מנהל וקבוצת הספקים.'),
+  (
+    'פורטל',
+    'מרכז הכלים של החנות — דירוג, יעדי-SLA, אזורי-חלוקה, הנחות וברקודים.',
+  ),
+  ('אזור אישי', 'הפרופיל העסקי — פרטי החנות, תעודות, מסמכים ותלושים.'),
+];
 
 /// 🏪 חנות ספק — the supplier-store role app.
 ///
@@ -80,7 +94,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   /// #77/#78 — 0 בית (the הזמנות pipeline, default) · 1 מלאי · 2 שיחות ·
   /// 3 פורטל · 4 אזור אישי (#87.5).
   int _tab = 0;
-  String _orderFilter = 'active'; // active | new | preparing | ready | delivered
+  String _orderFilter =
+      'active'; // active | new | preparing | ready | delivered
   String _stockFilter = 'all'; // all | in | out
   String _stockSearch = '';
 
@@ -111,9 +126,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
       for (final l in o.lines) {
         if (seen.add(l.name)) {
           final p = _catalogByName[l.name];
-          out.add(
-            _InvItem(name: l.name, sku: p?.sku, category: p?.categoryHe),
-          );
+          out.add(_InvItem(name: l.name, sku: p?.sku, category: p?.categoryHe));
         }
       }
     }
@@ -155,11 +168,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         (m) => (m[session.username]?.businessName ?? '').trim(),
       ),
     );
-    final storeName = businessName.isNotEmpty
-        ? businessName
-        : (session.displayName.trim().isNotEmpty
-              ? session.displayName.trim()
-              : _store.name);
+    final storeName =
+        businessName.isNotEmpty
+            ? businessName
+            : (session.displayName.trim().isNotEmpty
+                ? session.displayName.trim()
+                : _store.name);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -183,82 +197,172 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           ),
           actions: [
+            // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
+            // themselves in a bubble (the 💡 + ✕ stay tappable to toggle/exit).
+            const HelpToggleButton(),
             // #82 — the supplier bell: per-username runtime notifications off
             // the shared [workerNotifsProvider] (the courier's daily report +
             // future order events land here — every write has a reader).
-            _StoreNotifsBell(username: session.username),
+            HelpTarget(
+              title: 'התראות',
+              body:
+                  'פעמון ההתראות — הזמנות חדשות, חוסרים ועדכונים מהקבלנים '
+                  'ומהשליחים. התג האדום מציין כמה לא נקראו.',
+              child: _StoreNotifsBell(username: session.username),
+            ),
             // #87.5 (F-19) — the person icon opens the SUPPLIER'S OWN gated
             // personal area (StoreProfileScreen), NOT the contractor's
             // ProfileScreen (which leaked the contractor identity into the
             // store board and bypassed the role-switch code-gate).
-            IconButton(
-              tooltip: 'אזור אישי',
-              icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
-              onPressed: () =>
-                  Navigator.of(context).push(StoreProfileScreen.route()),
+            HelpTarget(
+              title: 'אזור אישי',
+              body: 'קיצור לאזור האישי של העסק — פרטי החנות, תעודות ומסמכים.',
+              child: IconButton(
+                tooltip: 'אזור אישי',
+                icon: const Icon(
+                  Icons.person_outline,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed:
+                    () =>
+                        Navigator.of(context).push(StoreProfileScreen.route()),
+              ),
             ),
             // #82 — supplier-specific settings (business profile), NOT the
             // contractor's CatalogSettingsScreen.
-            IconButton(
-              tooltip: 'הגדרות',
-              icon:
-                  const Icon(Icons.settings_outlined, color: BsTokens.mutedLight),
-              onPressed: () =>
-                  Navigator.of(context).push(SupplierSettingsScreen.route()),
+            HelpTarget(
+              title: 'הגדרות',
+              body: 'הגדרות החנות — פרופיל-העסק, התראות והעדפות.',
+              child: IconButton(
+                tooltip: 'הגדרות',
+                icon: const Icon(
+                  Icons.settings_outlined,
+                  color: BsTokens.mutedLight,
+                ),
+                onPressed:
+                    () => Navigator.of(
+                      context,
+                    ).push(SupplierSettingsScreen.route()),
+              ),
             ),
             // #21 — a REAL logout next to the navigation-only '‹ יציאה':
             // confirmDestructive → boardAuthProvider.logout(); the gate
             // (WelcomeScreen in role mode) swaps in place — task #65 rule 4.
-            IconButton(
-              tooltip: 'התנתקות מהחשבון',
-              icon: const Icon(Icons.logout, color: BsTokens.mutedLight),
-              onPressed: _logout,
+            HelpTarget(
+              title: 'התנתקות',
+              body:
+                  'מתנתק מחשבון החנות — לא רק יציאה מהמסך; חוזרים למסך הכניסה.',
+              child: IconButton(
+                tooltip: 'התנתקות מהחשבון',
+                icon: const Icon(Icons.logout, color: BsTokens.mutedLight),
+                onPressed: _logout,
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(
-                '‹ יציאה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            HelpTarget(
+              title: 'יציאה',
+              body: 'יציאה מהלוח חזרה למסך הקודם — אינה מנתקת אותך מהחשבון.',
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const Text(
+                  '‹ יציאה',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                ),
               ),
             ),
           ],
         ),
         body: _body(storeName),
         // #77 — the tabs moved to the BOTTOM (the courier-board pattern).
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _tab,
-          onTap: (i) => setState(() => _tab = i),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFFFFFFFF),
-          selectedItemColor: BsTokens.brand,
-          unselectedItemColor: const Color(0xFF888888),
-          selectedFontSize: 12,
-          unselectedFontSize: 11,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'בית',
+        // #31 — each tab wrapped in HelpTarget (orange ring + bubble out of the
+        // tab), consistent with the app-bar; a custom Material+Row replaces
+        // BottomNavigationBar, which can't carry a per-item HelpTarget.
+        bottomNavigationBar: Material(
+          color: const Color(0xFFFFFFFF),
+          elevation: 8,
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 58,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kStoreTabHelp[0].$1,
+                      body: _kStoreTabHelp[0].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 0 ? Icons.home : Icons.home_outlined,
+                        ),
+                        label: 'בית',
+                        selected: _tab == 0,
+                        onTap: () => setState(() => _tab = 0),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kStoreTabHelp[1].$1,
+                      body: _kStoreTabHelp[1].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 1
+                              ? Icons.inventory_2
+                              : Icons.inventory_2_outlined,
+                        ),
+                        label: 'מלאי',
+                        selected: _tab == 1,
+                        onTap: () => setState(() => _tab = 1),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kStoreTabHelp[2].$1,
+                      body: _kStoreTabHelp[2].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 2
+                              ? Icons.chat_bubble
+                              : Icons.chat_bubble_outline,
+                        ),
+                        label: 'שיחות',
+                        selected: _tab == 2,
+                        onTap: () => setState(() => _tab = 2),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kStoreTabHelp[3].$1,
+                      body: _kStoreTabHelp[3].$2,
+                      child: BottomNavCell(
+                        icon: const Icon(Icons.apps),
+                        label: 'פורטל',
+                        selected: _tab == 3,
+                        onTap: () => setState(() => _tab = 3),
+                      ),
+                    ),
+                  ),
+                  // #87.5 — personal area as a REAL labeled tab (not only an
+                  // app-bar icon).
+                  Expanded(
+                    child: HelpTarget(
+                      title: _kStoreTabHelp[4].$1,
+                      body: _kStoreTabHelp[4].$2,
+                      child: BottomNavCell(
+                        icon: Icon(
+                          _tab == 4 ? Icons.person : Icons.person_outline,
+                        ),
+                        label: 'אזור אישי',
+                        selected: _tab == 4,
+                        onTap: () => setState(() => _tab = 4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.inventory_2_outlined),
-              activeIcon: Icon(Icons.inventory_2),
-              label: 'מלאי',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
-              label: 'שיחות',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'פורטל'),
-            // #87.5 — the personal area as a REAL labeled tab (not only an
-            // AppBar icon); `type: fixed` keeps the label always visible.
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'אזור אישי',
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -319,14 +423,14 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     final inPrep = orders.countAt(OrderStage.preparing);
     final ready = orders.countAt(OrderStage.ready);
     final revenue = orders.todayRevenue;
-    final outCount =
-        ref.watch(storeOosProvider.select((oos) => oos.length));
+    final outCount = ref.watch(storeOosProvider.select((oos) => oos.length));
     final fulfillment = ref.watch(fulfillmentProvider);
     // Orders held for a missing-item decision (proto §2.2 "held" card).
-    final held = orders.where((o) {
-      final f = fulfillment[o.id];
-      return f != null && f.heldForMissing;
-    }).toList();
+    final held =
+        orders.where((o) {
+          final f = fulfillment[o.id];
+          return f != null && f.heldForMissing;
+        }).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -428,9 +532,10 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
                   ? '⚠️ $outCount מוצרים אזלו מהמלאי — הקש לעדכון'
                   : '✓ כל המוצרים זמינים במלאי',
               style: TextStyle(
-                color: outCount > 0
-                    ? BsTokens.brandDark
-                    : BsTokens.inkLight.withValues(alpha: 0.8),
+                color:
+                    outCount > 0
+                        ? BsTokens.brandDark
+                        : BsTokens.inkLight.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -446,11 +551,13 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             Expanded(
               child: _BigButton(
                 label: '🚛 ניהול צי רכב',
-                onTap: () => showPortalSheet(
-                  context,
-                  kStorePortalTiles
-                      .firstWhere((t) => t.kind == PortalKind.fleet),
-                ),
+                onTap:
+                    () => showPortalSheet(
+                      context,
+                      kStorePortalTiles.firstWhere(
+                        (t) => t.kind == PortalKind.fleet,
+                      ),
+                    ),
               ),
             ),
             const SizedBox(width: BsTokens.space2),
@@ -469,9 +576,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           const SizedBox(height: BsTokens.space3),
           OutlinedButton(
             onPressed: () {
-              final id = ref
-                  .read(sysOrdersProvider.notifier)
-                  .simulateIncomingOrder();
+              final id =
+                  ref.read(sysOrdersProvider.notifier).simulateIncomingOrder();
               showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
             },
             style: OutlinedButton.styleFrom(
@@ -528,11 +634,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
       }
     }
 
-    final shown = orders.where(match).toList()
-      ..sort(
-        (a, b) =>
-            kOrderFlow.indexOf(a.stage).compareTo(kOrderFlow.indexOf(b.stage)),
-      );
+    final shown =
+        orders.where(match).toList()..sort(
+          (a, b) => kOrderFlow
+              .indexOf(a.stage)
+              .compareTo(kOrderFlow.indexOf(b.stage)),
+        );
     final fulfillment = ref.watch(fulfillmentProvider);
 
     return [
@@ -648,7 +755,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     final shown = filtered.take(_kStockShownCap).toList();
     // Honest "more results exist" count: catalog matches that were not added
     // (beyond the cap) + matched rows truncated by the cap after filtering.
-    final hiddenCount = (filtered.length - shown.length) +
+    final hiddenCount =
+        (filtered.length - shown.length) +
         (catalogMatchTotal - (matched.length - baseMatchedCount));
 
     return ListView(
@@ -747,25 +855,26 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               },
               // #79 — only supplier-added overlay products are removable; the
               // const catalog + order lines are untouchable by design.
-              onRemove: item.overlayId == null
-                  ? null
-                  : () async {
-                      final ok = await confirmDestructive(
-                        context,
-                        title: 'להסיר את המוצר?',
-                        message:
-                            '"${item.name}" יוסר מהמלאי ומהקטלוג — פעולה בלתי הפיכה.',
-                        confirmLabel: 'הסר',
-                      );
-                      if (!ok || !mounted) return;
-                      ref
-                          .read(storeProductsProvider.notifier)
-                          .remove(item.overlayId!);
-                      // Drop a stale אזל flag so a future same-name product
-                      // starts clean.
-                      oosNotifier.markAvailable(item.name);
-                      showToast(context, 'המוצר הוסר');
-                    },
+              onRemove:
+                  item.overlayId == null
+                      ? null
+                      : () async {
+                        final ok = await confirmDestructive(
+                          context,
+                          title: 'להסיר את המוצר?',
+                          message:
+                              '"${item.name}" יוסר מהמלאי ומהקטלוג — פעולה בלתי הפיכה.',
+                          confirmLabel: 'הסר',
+                        );
+                        if (!ok || !mounted) return;
+                        ref
+                            .read(storeProductsProvider.notifier)
+                            .remove(item.overlayId!);
+                        // Drop a stale אזל flag so a future same-name product
+                        // starts clean.
+                        oosNotifier.markAvailable(item.name);
+                        showToast(context, 'המוצר הוסר');
+                      },
             ),
           if (hiddenCount > 0)
             Padding(
@@ -773,8 +882,10 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               child: Text(
                 'מוצגות ${shown.length} תוצאות ראשונות (עוד $hiddenCount בקטלוג) — דייקו את החיפוש',
                 textAlign: TextAlign.center,
-                style:
-                    const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+                style: const TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontSize: 12.5,
+                ),
               ),
             ),
         ],
@@ -786,11 +897,13 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   Widget _portalTab() {
     // #78 — 'ניהול צי רכב' + 'עדכון מלאי' are home quick-actions now; the
     // portal keeps the remaining 6 tiles.
-    final tiles = kStorePortalTiles
-        .where(
-          (t) => t.kind != PortalKind.fleet && t.kind != PortalKind.autoStock,
-        )
-        .toList();
+    final tiles =
+        kStorePortalTiles
+            .where(
+              (t) =>
+                  t.kind != PortalKind.fleet && t.kind != PortalKind.autoStock,
+            )
+            .toList();
     return GridView.count(
       crossAxisCount: 2,
       padding: const EdgeInsets.all(BsTokens.space4),
@@ -847,10 +960,11 @@ void _showAddProductSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => const Directionality(
-      textDirection: TextDirection.rtl,
-      child: _AddProductSheet(),
-    ),
+    builder:
+        (_) => const Directionality(
+          textDirection: TextDirection.rtl,
+          child: _AddProductSheet(),
+        ),
   );
 }
 
@@ -909,7 +1023,9 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
       return;
     }
     final cat = kCatalogCats[_catIdx!];
-    final p = ref.read(storeProductsProvider.notifier).add(
+    final p = ref
+        .read(storeProductsProvider.notifier)
+        .add(
           name: _name.text,
           sku: _sku.text,
           category: cat.title,
@@ -1037,8 +1153,7 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
               children: [
                 for (var i = 0; i < kCatalogCats.length; i++)
                   _Chip(
-                    label:
-                        '${kCatalogCats[i].emoji} ${kCatalogCats[i].title}',
+                    label: '${kCatalogCats[i].emoji} ${kCatalogCats[i].title}',
                     on: _catIdx == i,
                     onTap: () => setState(() => _catIdx = i),
                   ),
@@ -1141,9 +1256,9 @@ const String kSupplierSettingsKey = 'bs.supplier-settings.v1';
 /// is dropped. Survives F5 (SharedPreferences = localStorage on web).
 class SupplierSettingsNotifier extends StateNotifier<SupplierProfile> {
   SupplierSettingsNotifier({this.persist = true})
-      // Default business name = the seeded demo store (verbatim kStores[0]) —
-      // no invented business details.
-      : super(SupplierProfile(businessName: kStores.first.name)) {
+    // Default business name = the seeded demo store (verbatim kStores[0]) —
+    // no invented business details.
+    : super(SupplierProfile(businessName: kStores.first.name)) {
     if (persist) unawaited(_load());
   }
 
@@ -1156,8 +1271,9 @@ class SupplierSettingsNotifier extends StateNotifier<SupplierProfile> {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kSupplierSettingsKey);
       if (raw == null || raw.isEmpty || _userTouched) return;
-      final loaded =
-          SupplierProfile.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      final loaded = SupplierProfile.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
       if (_userTouched) return;
       state = loaded;
     } on Object catch (_) {
@@ -1170,7 +1286,9 @@ class SupplierSettingsNotifier extends StateNotifier<SupplierProfile> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(kSupplierSettingsKey, jsonEncode(state.toJson()));
-    } on Object catch (_) {/* best-effort */}
+    } on Object catch (_) {
+      /* best-effort */
+    }
   }
 
   /// Apply a user edit (flags the load-guard) and persist.
@@ -1183,8 +1301,8 @@ class SupplierSettingsNotifier extends StateNotifier<SupplierProfile> {
 
 final supplierSettingsProvider =
     StateNotifierProvider<SupplierSettingsNotifier, SupplierProfile>(
-  (_) => SupplierSettingsNotifier(),
-);
+      (_) => SupplierSettingsNotifier(),
+    );
 
 /// #82/#87.1 — the supplier-specific settings screen: the business profile,
 /// re-wired (F-18) from the legacy GLOBAL record onto the per-username
@@ -1255,10 +1373,12 @@ class _SupplierSettingsScreenState
     setState(() => _saving = true);
     final current =
         ref.read(storeProfileProvider)[session.username] ??
-            const StoreProfile();
+        const StoreProfile();
     // ONE awaited commit (F-18) — the store rolls back and returns false on
     // a persist failure (web localStorage quota), so '✓' is never faked.
-    final ok = await ref.read(storeProfileProvider.notifier).save(
+    final ok = await ref
+        .read(storeProfileProvider.notifier)
+        .save(
           session.username,
           StoreProfile(
             businessName: _businessName.trim(),
@@ -1293,10 +1413,12 @@ class _SupplierSettingsScreenState
     setState(() => _saving = true);
     final current =
         ref.read(storeProfileProvider)[session.username] ??
-            const StoreProfile();
+        const StoreProfile();
     // F-18 — the heavy field is AWAITED: a quota failure rolls back in the
     // store and reports honestly (no fake 'הלוגו נשמר ✓' that vanishes on F5).
-    final ok = await ref.read(storeProfileProvider.notifier).save(
+    final ok = await ref
+        .read(storeProfileProvider.notifier)
+        .save(
           session.username,
           StoreProfile(
             businessName: current.businessName,
@@ -1325,8 +1447,10 @@ class _SupplierSettingsScreenState
     setState(() => _saving = true);
     final current =
         ref.read(storeProfileProvider)[session.username] ??
-            const StoreProfile();
-    final ok = await ref.read(storeProfileProvider.notifier).save(
+        const StoreProfile();
+    final ok = await ref
+        .read(storeProfileProvider.notifier)
+        .save(
           session.username,
           StoreProfile(
             businessName: current.businessName,
@@ -1355,9 +1479,10 @@ class _SupplierSettingsScreenState
     // touches another username's data.
     final profile =
         ref.watch(storeProfileProvider.select((m) => m[username])) ??
-            const StoreProfile();
-    final legacyHours =
-        ref.watch(supplierSettingsProvider.select((p) => p.hours));
+        const StoreProfile();
+    final legacyHours = ref.watch(
+      supplierSettingsProvider.select((p) => p.hours),
+    );
     // Seed/re-seed the drafts from the persisted record until the user types
     // (#24 — the async load lands after the first build; _ProfileField syncs
     // its controller from `value` while unfocused).
@@ -1405,8 +1530,10 @@ class _SupplierSettingsScreenState
             // silent best-effort persist-per-keystroke, scoped per-username.
             Text(
               'הפרטים נשמרים לחשבון @$username בלבד — בלחיצת שמירה',
-              style:
-                  const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+              style: const TextStyle(
+                color: BsTokens.mutedLight,
+                fontSize: 12.5,
+              ),
             ),
             const SizedBox(height: BsTokens.space3),
             _ProfileField(
@@ -1423,10 +1550,10 @@ class _SupplierSettingsScreenState
               value: _businessId,
               keyboardType: TextInputType.number,
               // task #64: format-only check — uniqueness deferred to Firebase.
-              errorText: _businessId.trim().isEmpty ||
-                      validBusinessId(_businessId)
-                  ? null
-                  : 'ח.פ. חייב להכיל 9 ספרות',
+              errorText:
+                  _businessId.trim().isEmpty || validBusinessId(_businessId)
+                      ? null
+                      : 'ח.פ. חייב להכיל 9 ספרות',
               onChanged: (v) => _draft(() => _businessId = v),
             ),
             _ProfileField(
@@ -1434,9 +1561,10 @@ class _SupplierSettingsScreenState
               hint: '05X-XXXXXXX',
               value: _phone,
               keyboardType: TextInputType.phone,
-              errorText: _phone.trim().isEmpty || validIsraeliMobile(_phone)
-                  ? null
-                  : 'נייד ישראלי: 10 ספרות שמתחילות ב-05',
+              errorText:
+                  _phone.trim().isEmpty || validIsraeliMobile(_phone)
+                      ? null
+                      : 'נייד ישראלי: 10 ספרות שמתחילות ב-05',
               onChanged: (v) => _draft(() => _phone = v),
             ),
             _ProfileField(
@@ -1560,8 +1688,9 @@ class _ProfileField extends StatefulWidget {
 }
 
 class _ProfileFieldState extends State<_ProfileField> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.value);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.value,
+  );
   final FocusNode _focus = FocusNode();
 
   @override
@@ -1591,9 +1720,10 @@ class _ProfileFieldState extends State<_ProfileField> {
         textDirection: TextDirection.rtl,
         onChanged: widget.onChanged,
         maxLength: widget.maxLength,
-        inputFormatters: widget.maxLength != null
-            ? [LengthLimitingTextInputFormatter(widget.maxLength)]
-            : null,
+        inputFormatters:
+            widget.maxLength != null
+                ? [LengthLimitingTextInputFormatter(widget.maxLength)]
+                : null,
         decoration: InputDecoration(
           labelText: widget.label,
           hintText: widget.hint,
@@ -1629,8 +1759,9 @@ class _LogoPreview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dataUrl =
-        ref.watch(storeProfileProvider.select((m) => m[username]?.logo));
+    final dataUrl = ref.watch(
+      storeProfileProvider.select((m) => m[username]?.logo),
+    );
     final provider = imageProviderForRef(dataUrl);
     return Container(
       height: 120,
@@ -1640,24 +1771,25 @@ class _LogoPreview extends ConsumerWidget {
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
-      child: provider != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: Image(
-                image: ResizeImage(
-                  provider,
-                  height:
-                      (120 * MediaQuery.devicePixelRatioOf(context)).round(),
+      child:
+          provider != null
+              ? ClipRRect(
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                child: Image(
+                  image: ResizeImage(
+                    provider,
+                    height:
+                        (120 * MediaQuery.devicePixelRatioOf(context)).round(),
+                  ),
+                  height: 120,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
                 ),
-                height: 120,
-                fit: BoxFit.contain,
-                gaplessPlayback: true,
+              )
+              : const Text(
+                'אין לוגו עדיין — צלמו או העלו אחד',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
-            )
-          : const Text(
-              'אין לוגו עדיין — צלמו או העלו אחד',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-            ),
     );
   }
 }
@@ -1744,117 +1876,125 @@ class _StoreNotifsSheet extends ConsumerWidget {
         minChildSize: 0.4,
         maxChildSize: 0.95,
         expand: false,
-        builder: (_, scroll) => Container(
-          decoration: const BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(BsTokens.radiusCard),
-            ),
-          ),
-          child: ListView(
-            controller: scroll,
-            padding: const EdgeInsets.all(BsTokens.space4),
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        builder:
+            (_, scroll) => Container(
+              decoration: const BoxDecoration(
+                color: BsTokens.cardLight,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(BsTokens.radiusCard),
                 ),
               ),
-              Row(
+              child: ListView(
+                controller: scroll,
+                padding: const EdgeInsets.all(BsTokens.space4),
                 children: [
-                  const Expanded(
-                    child: Text(
-                      '🔔 התראות',
-                      style: TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDDDDDD),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'סגירה',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: BsTokens.mutedLight),
-                  ),
-                ],
-              ),
-              const SizedBox(height: BsTokens.space2),
-              if (notifs.isEmpty)
-                // Honest empty state — the feed fills only from real events
-                // (דוח יומי מהשליח, עדכוני משלוחים).
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
-                    'אין התראות עדיין.\nדוחות מהשליח ועדכוני משלוחים יופיעו כאן.',
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
-                  ),
-                )
-              else ...[
-                Row(
-                  children: [
-                    if (unread > 0)
-                      TextButton(
-                        onPressed: () => ref
-                            .read(workerNotifsProvider.notifier)
-                            .markAllRead(username),
-                        child: const Text(
-                          'סמן הכל כנקרא',
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          '🔔 התראות',
                           style: TextStyle(
-                            color: BsTokens.brandDark,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
                           ),
                         ),
                       ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () async {
-                        final ok = await confirmDestructive(
-                          context,
-                          title: 'לנקות את כל ההתראות?',
-                          message: 'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
-                          confirmLabel: 'נקה',
-                        );
-                        if (!ok) return;
-                        ref
-                            .read(workerNotifsProvider.notifier)
-                            .clear(username);
-                      },
-                      child: const Text(
-                        'נקה הכל',
-                        style: TextStyle(
-                          color: BsTokens.danger,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                      IconButton(
+                        tooltip: 'סגירה',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.close,
+                          color: BsTokens.mutedLight,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: BsTokens.space1),
-                for (final n in notifs)
-                  _StoreNotifRow(
-                    notif: n,
-                    onTap: n.read
-                        ? null
-                        : () => ref
-                            .read(workerNotifsProvider.notifier)
-                            .markRead(username, n.id),
+                    ],
                   ),
-              ],
-              const SizedBox(height: BsTokens.space4),
-            ],
-          ),
-        ),
+                  const SizedBox(height: BsTokens.space2),
+                  if (notifs.isEmpty)
+                    // Honest empty state — the feed fills only from real events
+                    // (דוח יומי מהשליח, עדכוני משלוחים).
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                      child: Text(
+                        'אין התראות עדיין.\nדוחות מהשליח ועדכוני משלוחים יופיעו כאן.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    Row(
+                      children: [
+                        if (unread > 0)
+                          TextButton(
+                            onPressed:
+                                () => ref
+                                    .read(workerNotifsProvider.notifier)
+                                    .markAllRead(username),
+                            child: const Text(
+                              'סמן הכל כנקרא',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () async {
+                            final ok = await confirmDestructive(
+                              context,
+                              title: 'לנקות את כל ההתראות?',
+                              message: 'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
+                              confirmLabel: 'נקה',
+                            );
+                            if (!ok) return;
+                            ref
+                                .read(workerNotifsProvider.notifier)
+                                .clear(username);
+                          },
+                          child: const Text(
+                            'נקה הכל',
+                            style: TextStyle(
+                              color: BsTokens.danger,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: BsTokens.space1),
+                    for (final n in notifs)
+                      _StoreNotifRow(
+                        notif: n,
+                        onTap:
+                            n.read
+                                ? null
+                                : () => ref
+                                    .read(workerNotifsProvider.notifier)
+                                    .markRead(username, n.id),
+                      ),
+                  ],
+                  const SizedBox(height: BsTokens.space4),
+                ],
+              ),
+            ),
       ),
     );
   }
@@ -2188,26 +2328,30 @@ class _StoreOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final held = fulfillment.heldForMissing;
-    final pill = held
-        ? (
-            label: 'פריט חסר',
-            bg: const Color(0xFFFFF4D6),
-            fg: const Color(0xFF8A6D00),
-          )
-        : _storePill(order.stage);
+    final pill =
+        held
+            ? (
+              label: 'פריט חסר',
+              bg: const Color(0xFFFFF4D6),
+              fg: const Color(0xFF8A6D00),
+            )
+            : _storePill(order.stage);
 
     // proto §2.4 per-card button logic (held → wait; missingResolved → fix done;
     // else the stage action), with the live two-step ready→pickup hand-off.
-    final (String label, bool active) = held
-        ? ('⏳ פריט חסר — אנא המתן להחלטת הקבלן', false)
-        : switch (order.stage) {
-            OrderStage.newOrder => ('✓ אשר וקבל להכנה', true),
-            OrderStage.preparing => ('📦 סמן כמוכן — העבר לשליח', true),
-            OrderStage.ready => ('🛵 מסור לשליח', true),
-            _ => ('✓ נמסר לשליח', false),
-          };
+    final (String label, bool active) =
+        held
+            ? ('⏳ פריט חסר — אנא המתן להחלטת הקבלן', false)
+            : switch (order.stage) {
+              OrderStage.newOrder => ('✓ אשר וקבל להכנה', true),
+              OrderStage.preparing => ('📦 סמן כמוכן — העבר לשליח', true),
+              OrderStage.ready => ('🛵 מסור לשליח', true),
+              _ => ('✓ נמסר לשליח', false),
+            };
     final splitTag =
-        fulfillment.splitInto > 1 ? ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות' : '';
+        fulfillment.splitInto > 1
+            ? ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות'
+            : '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
@@ -2270,7 +2414,9 @@ class _StoreOrderCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: pill.bg,
-                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          BsTokens.radiusPill,
+                        ),
                       ),
                       child: Text(
                         pill.label,
@@ -2337,12 +2483,15 @@ class _StoreOrderCard extends StatelessWidget {
                       onAdvance(order);
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: order.stage == OrderStage.preparing
-                          ? BsTokens.brand
-                          : const Color(0xFF1F8A4C),
+                      backgroundColor:
+                          order.stage == OrderStage.preparing
+                              ? BsTokens.brand
+                              : const Color(0xFF1F8A4C),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          BsTokens.radiusPill,
+                        ),
                       ),
                     ),
                     child: Text(
@@ -2358,17 +2507,19 @@ class _StoreOrderCard extends StatelessWidget {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 11),
                     decoration: BoxDecoration(
-                      color: held
-                          ? const Color(0xFFFFF4D6)
-                          : const Color(0xFFF2F3F5),
+                      color:
+                          held
+                              ? const Color(0xFFFFF4D6)
+                              : const Color(0xFFF2F3F5),
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     ),
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: held
-                            ? const Color(0xFF8A6D00)
-                            : BsTokens.mutedLight,
+                        color:
+                            held
+                                ? const Color(0xFF8A6D00)
+                                : BsTokens.mutedLight,
                         fontWeight: FontWeight.w700,
                         fontSize: 13.5,
                       ),
@@ -2441,8 +2592,9 @@ class _DeliveredCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFD7F5DF),
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          BsTokens.radiusPill,
+                        ),
                       ),
                       child: const Text(
                         'נמסר ✓',
@@ -2483,14 +2635,16 @@ class _DeliveredCard extends StatelessWidget {
                     vertical: BsTokens.space2,
                   ),
                   decoration: BoxDecoration(
-                    color: hasPod
-                        ? const Color(0xFFEAF6EE)
-                        : const Color(0xFFF2F3F5),
+                    color:
+                        hasPod
+                            ? const Color(0xFFEAF6EE)
+                            : const Color(0xFFF2F3F5),
                     borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                     border: Border.all(
-                      color: hasPod
-                          ? const Color(0xFF1F8A4C)
-                          : const Color(0xFFE0E0E0),
+                      color:
+                          hasPod
+                              ? const Color(0xFF1F8A4C)
+                              : const Color(0xFFE0E0E0),
                     ),
                   ),
                   child: Row(
@@ -2501,11 +2655,12 @@ class _DeliveredCard extends StatelessWidget {
                           label: 'הצג אישור מסירה במסך מלא',
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
-                            onTap: () => showFullPhotoRefDialog(
-                              context,
-                              fulfillment.podPhoto,
-                              label: '📦 ${order.id} — אישור מסירה',
-                            ),
+                            onTap:
+                                () => showFullPhotoRefDialog(
+                                  context,
+                                  fulfillment.podPhoto,
+                                  label: '📦 ${order.id} — אישור מסירה',
+                                ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: Image(
@@ -2515,19 +2670,20 @@ class _DeliveredCard extends StatelessWidget {
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                                 // Corrupt payload → honest placeholder, no crash.
-                                errorBuilder: (_, __, ___) => Container(
-                                  width: 56,
-                                  height: 56,
-                                  alignment: Alignment.center,
-                                  color: const Color(0xFFF2F3F5),
-                                  child: const Text(
-                                    '📷',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: BsTokens.mutedLight,
+                                errorBuilder:
+                                    (_, __, ___) => Container(
+                                      width: 56,
+                                      height: 56,
+                                      alignment: Alignment.center,
+                                      color: const Color(0xFFF2F3F5),
+                                      child: const Text(
+                                        '📷',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: BsTokens.mutedLight,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
                               ),
                             ),
                           ),
@@ -2540,9 +2696,10 @@ class _DeliveredCard extends StatelessWidget {
                               ? '📸 אישור מסירה נשמר ✓${signed ? ' · ✍️ נחתם' : ''}${podProvider != null ? '\nהקש על התמונה לצפייה מלאה' : ''}'
                               : 'ללא POD — לא צולם אישור מסירה',
                           style: TextStyle(
-                            color: hasPod
-                                ? const Color(0xFF1F8A4C)
-                                : BsTokens.mutedLight,
+                            color:
+                                hasPod
+                                    ? const Color(0xFF1F8A4C)
+                                    : BsTokens.mutedLight,
                             fontWeight: FontWeight.w700,
                             fontSize: 12.5,
                           ),
@@ -2578,9 +2735,10 @@ class _StockRow extends StatelessWidget {
   Widget build(BuildContext context) {
     // #80 — surface the real catalog identity; an unmapped (order-line-only)
     // product honestly shows 'ללא מק"ט' instead of an invented code.
-    final idLine = item.sku != null
-        ? '🏷️ מק"ט ${item.sku}${item.category != null ? ' · ${item.category}' : ''}'
-        : 'ללא מק"ט בקטלוג';
+    final idLine =
+        item.sku != null
+            ? '🏷️ מק"ט ${item.sku}${item.category != null ? ' · ${item.category}' : ''}'
+            : 'ללא מק"ט בקטלוג';
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Container(
@@ -2626,8 +2784,9 @@ class _StockRow extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFF0E3),
-                            borderRadius:
-                                BorderRadius.circular(BsTokens.radiusPill),
+                            borderRadius: BorderRadius.circular(
+                              BsTokens.radiusPill,
+                            ),
                           ),
                           // The shared overlay tag — the contractor catalog
                           // shows the SAME token on these products.
@@ -2655,9 +2814,10 @@ class _StockRow extends StatelessWidget {
                   Text(
                     available ? '✅ זמין במלאי' : '❌ אזל מהמלאי',
                     style: TextStyle(
-                      color: available
-                          ? const Color(0xFF1F8A4C)
-                          : BsTokens.brandDark,
+                      color:
+                          available
+                              ? const Color(0xFF1F8A4C)
+                              : BsTokens.brandDark,
                       fontSize: 12.5,
                     ),
                   ),
