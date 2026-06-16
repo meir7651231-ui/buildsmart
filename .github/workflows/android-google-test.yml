@@ -90,32 +90,9 @@ jobs:
           path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      # ── Firebase App Distribution — push the build to the tester's device so it
-      #    AUTO-UPDATES: install ONCE (via the emailed invite / the "App Tester"
-      #    app), then every new build pings the device for a one-tap update. Uses
-      #    the existing FIREBASE_SERVICE_ACCOUNT (same SA→ADC pattern as
-      #    bootstrap-admin.yml). The artifact above stays as a manual fallback if
-      #    the SA lacks the "Firebase App Distribution Admin" role.
-      - name: Write service account credentials
-        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
-        env:
-          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-
-      - name: Distribute to Firebase App Distribution
-        # build + artifact already succeeded above; until the deploy SA has the
-        # "Firebase App Distribution Admin" role this upload 403s — keep it
-        # NON-FATAL (the uploaded artifact is the manual fallback). The SA email
-        # is printed so it's clear which account to grant the role to.
-        continue-on-error: true
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
-        run: |
-          echo "── deploy SA (grant THIS account 'Firebase App Distribution Admin' if the upload 403s):"
-          grep -oE '"client_email"[^,]+' "$GOOGLE_APPLICATION_CREDENTIALS" || true
-          npm install -g firebase-tools >/dev/null 2>&1
-          firebase appdistribution:distribute \
-            app_flutter/build/app/outputs/flutter-apk/app-release.apk \
-            --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
-            --testers "meir7651231@gmail.com" \
-            --release-notes "BuildSmart build #${{ github.run_number }} (${{ github.sha }})" \
-            --project buildsmart-b0b78
+      # App Distribution intentionally lives on the FLAGS-ON build
+      # (android-test-build.yml), NOT here: both share the package
+      # com.buildsmart.buildsmart, so only ONE may own the tester's auto-update
+      # stream. The owner tests the LIVE features (🟢/🔴 connection · ✓✓/❌
+      # delivery) on the real-backend build; this DEMO build stays artifact-only
+      # (manual download from the run).
