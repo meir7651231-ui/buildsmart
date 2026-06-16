@@ -60,7 +60,12 @@ jobs:
       - name: Build APK with backend flags ON (debug-signed, connects to server)
         working-directory: app_flutter
         run: |
+          # --build-number = CI run number → a UNIQUE, monotonically rising Android
+          # versionCode on every build. Without it the versionCode stays pinned at
+          # pubspec's +N, so App Distribution / Android saw every build as the SAME
+          # version "1.4.x (8)" and never offered the update (the v6.20 delivery bug).
           flutter build apk --release \
+            --build-number=${{ github.run_number }} \
             --dart-define=USE_FIREBASE_BACKEND=true \
             --dart-define=UID_SCOPED_QUERIES=true \
             --dart-define=SERVER_CALLABLES=true
@@ -96,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "BuildSmart נתונים אמיתיים (flags-ON) · build #${{ github.run_number }} (${{ github.sha }})" \
+            --release-notes "🟢 v6.21 — מד-חיבור חי + ✓✓ סטטוס צ׳אט · אם אתה רואה v6.21 במסך הבית = אתה על הבילד הנכון! · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
