@@ -1326,3 +1326,15 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **למה אין צילום-מסך:** widgets סטנדרטיים בלבד (`Icon`/`Row`/`GestureDetector`/`Text`) — אין asset/layout חדש; RTL ופריסת-הבועה/הצבעים ללא שינוי, רק לוגיקת הצ׳ק-מרק הוחלפה. הרינדור מפוסל ע״י `sys_chat_test.dart` (טסטי-מסך של `ChatsScreen`).
 
 **הפיכות:** לחזרה ל-✓✓-הקוסמטי — להחזיר ב-`_Bubble` את `Icon(readReceipts ? Icons.done_all : Icons.done, ...)` ולהסיר את `_DeliveryStatus`; השדה/enum תוספים ו-default `sent` שומר על seed byte-identical, כך שהמודל יכול להישאר בלי השפעה נראית.
+
+## 2026-06-16 — #connection-indicator — חיווי-חיבור חי ALWAYS-ON (🟢/🔴/דמו) בראש כל מסך
+**שינוי נראה (analyze 0 · +2699 -1, רק baseline · אומת ע״י ה-gate הקיים):** נוספה **גלולת-חיווי קבועה (always-on pill) בראש כל מסך** שמשקפת אמיתית האם פעולות יישמרו לשרת:
+- 🟢 **"מחובר לשרת"** — גלולה ירוקה (`BsTokens.success` 0xFF22C55E), **קטנה ולא-פולשנית** (`typeCaption` 11px, padding דק, שקיפות 92%) — רשת+מחובר+Firestore חי;
+- 🔴 **"מנותק · פעולות לא יישמרו"** — גלולה אדומה (`BsTokens.danger` 0xFFEF4444), **בולטת יותר** (`typeMicro` 12px, w800, אטומה) — אזהרת-איבוד-נתונים כש-wifi כבוי / לא-מחובר / Firestore cache-only;
+- **"מצב דמו"** — גלולה אפורה ניטרלית (`BsTokens.chainSlate` 0xFF64748B), כנה — אין שרת אמיתי לטעון אליו חיבור (מסלול ה-demo / no-Firebase), עדינה.
+
+**מיקום:** `Positioned` בראש, RTL, `Alignment.topCenter`, עטוף `IgnorePointer` (לא בולע tap). ב-debug מוסט מטה +44px שלא יתנגש ב-BackendDebugBadge; ב-release הוא לבדו בראש. מעבר-מצב מונפש (`AnimatedContainer`, `microIn` 150ms).
+
+**למה אין צילום-מסך:** widgets סטנדרטיים בלבד (`Positioned`/`Align`/`AnimatedContainer`/`Text`) — אין asset/layout/פונט חדש; טוקני-צבע קיימים (success/danger/chainSlate). הרינדור על המסלול שטסטים מריצים הוא תמיד "מצב דמו" האינרטי (אין Firebase), כך שהמראה החי (🟢/🔴) נצפה רק בבילד-שרת אמיתי.
+
+**הפיכות:** הסרה = למחוק את `const ConnectionIndicator()` מה-Stack ב-`main.dart` (+ ה-import) ולהסיר את שני הקבצים החדשים + `connectivity_plus` מ-pubspec. אין שינוי-מצב שמורה — החיווי הוא קריאה-בלבד (read-only) ולעולם לא כותב.

@@ -1204,3 +1204,21 @@
 - **שינוי-לוגיקה (ה-INVARIANT):** `delivered` ✓✓ נקבע **מבנית ובמקום יחיד** — `FirebaseChatRepository` message `fromDoc` → `decoded.copyWith(status: delivered)`. הודעה שלא חזרה מ-snapshot של השרת לעולם לא delivered. `toDoc` **משמיט** status (sender-local, לא נכתב לשרת). `send`: שורת-המשתמש `pending` → onWrite מטליא `sent`/`failed` (דרך `upsertLocalOnly`, ללא set נוסף); בוט נשאר `sent`. `guardWrite`/`upsert` קיבלו callback-תוצאה אופציונלי (תוסף, zero-regression). `retry` ב-repo/interface/engine (local = no-op).
 - **טסט-נעיצה (pinning):** `test/chat_msg_status_test.dart` (9 טסטים — default sent מושמט מ-toJson · pending/delivered/failed round-trip · json ישן→sent · status לא-מוכר→sent · copyWith) + הרחבת `test/chat_firebase_repo_test.dart` (+6 — **fromDoc→delivered** (ה-invariant) · **toDoc משמיט status** · pending→sent בהצלחה · pending→failed בכשל · retry→pending→sent · bot auto-reply נשאר sent). load-bearing: ה-fromDoc-delivered וה-toDoc-omits-status נועצים את ה-honest invariant; דפוס ה-fake-source verbatim מ-S4 base-test.
 - **gate:** analyze 0 · `flutter test` +2699 -1 (baseline `worker_reports_drilldown_test.dart` בלבד; אומת נכשל בבידוד, לא קשור). push רק ב"תתדחוף".
+
+## #connection-indicator — חיווי-חיבור חי ALWAYS-ON (provider + לוגיקת-קומביין) — 2026-06-16
+- **תלות חדשה:** `connectivity_plus: ^6.1.0` → נפתר **6.1.5** (`flutter pub get` הצליח; `pubspec.lock` עודכן). first-party web/iOS/Android — `flutter build web` ממשיך להדר.
+- **state חדש (`lib/state/connection_status.dart`):** `enum ConnectionStatus { connected, disconnected, demo }` + `ConnectionStatusNotifier extends StateNotifier<ConnectionStatus>` + `connectionStatusProvider`. מראה את אידיום ה-notifier/provider של `auth_state.dart` (gateway-נ-null → אינרטי).
+- **לוגיקת-הקומביין (RECOMPUTE חי, לא בדיקה חד-פעמית; החלטי-ביותר ראשון):**
+  ```dart
+  if (!_active)              next = ConnectionStatus.demo;          // !useFirebaseBackend
+  else if (!_networkOnline) next = ConnectionStatus.disconnected;  // connectivity none
+  else if (!_signedIn)      next = ConnectionStatus.disconnected;  // אין uid
+  else if (_firestoreCacheOnly) next = ConnectionStatus.disconnected; // isFromCache
+  else                      next = ConnectionStatus.connected;
+  ```
+- **אותות:** (1) `Connectivity().onConnectivityChanged` (+seed `checkConnectivity()`) — 6.x `List<ConnectivityResult>`, offline == רשימה ריקה / רק `none` → `_resultsOnline` = `any(r != none)`. (2) `ref.listen(authStateProvider)` → `_signedIn`/`_uid`, ו-re-bind ל-probe כש-uid משתנה. (3) `FirebaseFirestore.instance.collection('diag').doc(uid).snapshots(includeMetadataChanges:true)` → `_firestoreCacheOnly = snap.metadata.isFromCache` — **מאזין בלבד**, default **FALSE** (assume-live, מונע ריצוד-התחלה).
+- **HARD RULES (אכיפה):** (#1) `_active = useFirebaseBackend` בקונסטרקטור; כש-false → `return` מיד, **לא נפתח שום listener** (state נשאר `demo`), `FirebaseFirestore.instance` לא נגעת → אינרטי בכל ה-suite ה-Firebase-free + sandbox (אפס עלות, אפס ערוץ-פלטפורמה). (#2/#3) כל connectivity/Firestore touch ב-try/catch + `onError`; init אופטימי (`networkOnline=true`, `firestoreCacheOnly=false`) — שגיאה מורידה חיווי, לא זורקת. dispose מבטל את שלושת ה-subscriptions (`_authRemove` · `_connSub` · `_fsSub`).
+- **widget חדש (`lib/widgets/connection_indicator.dart`):** `ConsumerWidget` שמחזיר `Positioned` (top/RTL/topCenter, `IgnorePointer`) ו-`ref.watch(connectionStatusProvider)` → switch: connected=ירוק קטן · disconnected=אדום בולט+"פעולות לא יישמרו" · demo=אפור עדין. `kConnectionIndicatorDebugDrop=44` מסיט בדיבאג מתחת ל-BackendDebugBadge.
+- **wire:** `main.dart` — import + `const ConnectionIndicator()` כ-child אחרון ב-`Stack` של `MaterialApp.builder` (אחרי `debugOverlayChildren`), בתוך מבנה `_AutoLogout`/Stack הקיים (ללא restructure).
+- **למה אין טסט חדש:** המסלול שכל טסט-widget בונה (flags OFF, אין Firebase) הוא ה-demo האינרטי שלא פותח listener — אין מה לנעוץ מעבר ל"לא קורס", וזה כבר מכוסה ע״י ה-gate הקיים (`+2699 -1`, אפס כשל חדש). ה-API של connectivity_plus 6.x (`List<ConnectivityResult>`) אומת מול ה-resolved 6.1.5.
+- **gate:** analyze **0 errors** · `flutter test` **+2699 -1** (baseline `worker_reports_drilldown_test.dart` בלבד; אומת נכשל בבידוד, לא קשור; הקובץ לא נגעת). **אין כשל חדש.** push רק ב"תתדחוף".

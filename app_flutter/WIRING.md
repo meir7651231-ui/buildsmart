@@ -2361,3 +2361,21 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **ה-onWrite plumbing:** `FirestoreCachedRepo.guardWrite` קיבל `{void Function(bool ok)? onResult}` (try→`onResult(true)`, catch→debugPrint+`onResult(false)`); `upsert` קיבל `{void Function(bool ok)? onWrite}` המועבר ל-guardWrite. **תוסף בלבד** — כל קורא קיים מעביר כלום → התנהגות ללא-שינוי. ב-`send`, שורת-המשתמש נשלחת `pending` עם onWrite שמטליא ל-`sent` (ok) / `failed` (כשל) דרך `upsertLocalOnly` (ללא כתיבת-רשת נוספת); auto-reply של הבוט נשאר `sent` רגיל. `retry(threadId, msgId)` נוסף ל-repo (re-fire `pending` + אותו onWrite), ל-`ChatRepository` interface, ולמנוע (`retry` → `_remote?.retry(...)`; local = no-op כי demo לא נכשל).
 - **קבצים שנגעו:** `lib/state/sys_chat.dart` (enum + שדה/copyWith/toJson/fromJson + engine `retry`) · `lib/data/repositories/firestore_cached_repo.dart` (onWrite/onResult) · `lib/data/repositories/chat_firebase.dart` (send pending+onWrite · fromDoc delivered · toDoc מסיר status · retry) · `lib/data/repositories/chat_repository.dart` (retry ב-interface) · `lib/screens/chats_screen.dart` (`_Message` += status,id · 5 בניות-tuple · `_Bubble` onRetry · widget `_DeliveryStatus`).
 - **gate:** analyze **0 errors** · `flutter test` **+2699 -1** (ה-`-1` היחיד = baseline ידוע `worker_reports_drilldown_test.dart`, לא קשור לצ׳אט, נכשל בבידוד). אין כשל חדש. טסטים חדשים: `test/chat_msg_status_test.dart` (9) + הרחבת `test/chat_firebase_repo_test.dart` (+6: fromDoc→delivered · toDoc משמיט status · pending→sent · pending→failed · retry · bot נשאר sent).
+
+### #connection-indicator — חיווי-חיבור חי ALWAYS-ON (🟢 מחובר / 🔴 מנותק / מצב דמו) — 2026-06-16
+- **המהלך:** גלולת-חיווי (pill) קבועה בראש כל מסך שמשקפת **אמיתית וחיה** האם פעולות יישמרו. נוסף `connectivity_plus: ^6.1.0` (נפתר **6.1.5**). שני קבצים חדשים: state (`lib/state/connection_status.dart`) + widget (`lib/widgets/connection_indicator.dart`), הורכבו פעם-אחת ב-`main.dart`.
+- **הקומביין (החלטי-ביותר ראשון; כל סעיף מאוחר רק מעדן):**
+  1. `!useFirebaseBackend` → **demo** (אין שרת בכלל — כנה, "מצב דמו")
+  2. `!networkOnline` → **disconnected** (wifi כבוי — מקרה ה-DoD ~2s)
+  3. `!signedIn` → **disconnected** (אין uid — אי-אפשר לשמר)
+  4. `firestoreCacheOnly` → **disconnected** (רשת למעלה אבל השרת לא נגיש)
+  5. אחרת → **connected** 🟢
+- **האותות (signals):**
+  - **networkOnline** — `connectivity_plus`: seed ב-`checkConnectivity()` ואז חי דרך `onConnectivityChanged`. 6.x מחזיר `List<ConnectivityResult>`; **offline == הרשימה ריקה או רק `ConnectivityResult.none`**. זה האות המהיר שמגשים "wifi כבוי → 🔴 תוך ~2s".
+  - **signedIn / uid** — נקרא מ-`authStateProvider` דרך `ref.listen` (re-bind ל-probe כש-uid משתנה).
+  - **firestoreCacheOnly** — `diag/{uid}.snapshots(includeMetadataChanges:true)` → `snap.metadata.isFromCache`. **מאזין בלבד, לא כותב** (ה-BackendDebugBadge הוא הכותב). ברירת-מחדל **FALSE** (מניחים live עד שמוכח cache-only) — מונע ריצוד 🔴 בהתחלה.
+- **התנהגות demo / Firebase-free (HARD RULE #1):** במסלול `!useFirebaseBackend` ה-notifier **אינרטי לחלוטין** — `connectionStatusProvider` הוא קבוע `demo`, **לא נפתח שום listener** (לא connectivity ולא Firestore), `FirebaseFirestore.instance` לא נגעת. לכן כל ה-suite ה-Firebase-free + ה-sandbox בונים את האפליקציה בלי לגעת בערוץ-פלטפורמה — zero regression, וזו הסיבה שטסטי-widget שבונים MaterialApp לא קורסים.
+- **בטיחות (HARD RULE #2/#3):** כל מגע ב-connectivity/Firestore עטוף try/catch + `onError`; שגיאה מורידה את החיווי, לעולם לא זורקת לתוך מסך.
+- **mount point:** `main.dart` — בתוך ה-`Stack` של `MaterialApp.builder` (אחרי `...debugOverlayChildren(isDebug: kDebugMode)`) נוסף `const ConnectionIndicator()`. ב-debug החיווי מוסט מטה (`kConnectionIndicatorDebugDrop=44`) שלא יתנגש ב-BackendDebugBadge; ב-release (kDebugMode false) הוא לבדו בראש. עטוף ב-`IgnorePointer` — לא בולע tap.
+- **gate:** analyze **0 errors** · `flutter test` **+2699 -1** (ה-`-1` היחיד = baseline ידוע `worker_reports_drilldown_test.dart`, לא קשור — נכשל בבידוד). **אין כשל חדש.** (אין טסט חדש — המסלול שטסטים בונים הוא ה-demo האינרטי, שמוגן ע״י ה-gate הקיים.)
+- **קבצים:** `lib/state/connection_status.dart` (חדש) · `lib/widgets/connection_indicator.dart` (חדש) · `lib/main.dart` (import + Stack child) · `pubspec.yaml` (`connectivity_plus`).

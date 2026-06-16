@@ -109,6 +109,13 @@ dependencies:
   # seam in services/task_photo.dart. Cross-platform (web BrowserClient + io).
   http: ^1.6.0
 
+  # ALWAYS-ON live connection indicator (🟢 מחובר / 🔴 מנותק) — the fast network
+  # signal (Connectivity().onConnectivityChanged) that flips the top-of-screen
+  # pill within ~2s of wifi off. First-party web/iOS/Android support, so
+  # `flutter build web` keeps compiling. Read-only on the DEMO/no-Firebase path
+  # (the indicator opens NO listeners there — byte-identical to before).
+  connectivity_plus: ^6.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

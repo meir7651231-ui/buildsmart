@@ -12,6 +12,7 @@ import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
+import 'package:buildsmart/widgets/connection_indicator.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -385,6 +386,13 @@ class BuildSmartApp extends ConsumerWidget {
                   // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
                   // (release self-test for the cross-device-sync investigation).
                   ...debugOverlayChildren(isDebug: kDebugMode),
+                  // ALWAYS-ON live connection pill (🟢 מחובר / 🔴 מנותק · מצב
+                  // דמו) — overlays every screen. Inert on the demo/test path
+                  // (connectionStatusProvider is a constant `demo` there); on
+                  // the live backend it recomputes from connectivity + auth +
+                  // the diag/{uid} isFromCache probe. Positioned below the debug
+                  // badge in debug; owns the top in release.
+                  const ConnectionIndicator(),
                 ],
               ),
             ),
