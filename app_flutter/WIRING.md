@@ -2315,3 +2315,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gate:** analyze 0 · weather_service_test +3 (mapper · thresholds · malformed-tolerant) · ai_hub_compute/robustness ירוקים · mutation §mutation_log (rain ⚠️ הוסר → RED +1 -2 · GREEN +3).
 - **שארית:** הכלי נשאר deferred/hidden ל-Apple (un-hide = flip בשחרור) · schedule-automation מהתחזית = micro-confirm עתידי.
 - **קבצים:** `lib/services/weather.dart` (חדש) · `lib/screens/ai_hub_screen.dart` · `test/weather_service_test.dart`.
+
+### #manager-owner — מנהל ניגש לכל המסכים (התחזות · שלב 3/4) — 2026-06-16
+- **רקע:** המנהל = מנהל-הצי; צריך לפתוח כל לוח (עובד/שליח/ספק/קבלן) ולחזור. גישת הצי (b): session-swap מתוחם (impersonation), לא override פר-שער.
+- **`board_auth.dart` (lib/state):** `impersonate(BoardRole)` — מחליף את ה-session לחשבון-ה-seed של התפקיד (worker→ran עם employerId, courier→dudi, store→lipskey), שומר את session-המנהל ב-`_impersonationReturn` (מחסנית-חזרה חד-עומק). **לא נשמר** (restart חוזר ל-session-המנהל הזכור). `returnFromImpersonation()` משחזר. `isImpersonating` getter + `_seedFor(role)` עוזר. no-op אם ה-session הנוכחי אינו מנהל / אין seed.
+- **`manager_screens_sheet.dart` (lib/screens, חדש):** `showManagerScreensSheet` — grid עם 4 יעדים (🦺 עובד/🛵 שליח/🏪 חנות ספק/👷 קבלן). הקשה → impersonate + push דרך `_ImpersonationFrame` (PopScope→returnFromImpersonation בחזרה) + באנר כן "👔 צפייה כ-X · מצב מנהל" עם "חזרה לניהול". קבלן = HomeShell (לא לוח-מגודר, בלי impersonation).
+- **`manager_profile_screen.dart` (lib/screens):** הפעולה "🔁 החלפת תפקיד" (קוד-מעבר→showRolePicker) הוחלפה ב-"🖥️ מעבר בין מסכים" → showManagerScreensSheet (בלי קוד — המנהל הוא admin). הוסרו `_askRoleSwitch` + `_RoleSwitchCodeDialog` + imports לא-בשימוש (role_picker_sheet + board_accounts_local).
+- **gate:** analyze **0 errors** · full-suite **+2675 -1** (ה-`-1` = `worker_reports_drilldown` baseline; +3 חדשים = manager_impersonate_test) · manager_dashboard/board_auth ירוקים.
+- **קבצים נגועים:** `lib/state/board_auth.dart` · `lib/screens/manager_screens_sheet.dart`(חדש) · `lib/screens/manager_profile_screen.dart` · `test/manager_impersonate_test.dart`(חדש). **לא נגעתי:** שערי-הלוחות (worker/courier/store) — עוברים בלי שינוי (ה-session הוא seed תקין).

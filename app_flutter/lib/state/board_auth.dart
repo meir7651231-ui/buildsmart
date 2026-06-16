@@ -302,6 +302,56 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
     _persist();
   }
 
+  /// The saved manager session while [isImpersonating]; restored by
+  /// [returnFromImpersonation]. Null when not impersonating.
+  BoardSession? _impersonationReturn;
+
+  /// True while the manager is VIEWING another board via [impersonate].
+  bool get isImpersonating => _impersonationReturn != null;
+
+  /// שלב 3 — the manager's "access all screens": VIEW [role]'s board by swapping
+  /// the session to that role's SEED account (carrying its real employerId), with
+  /// the manager session saved on a one-deep return stack. NOT persisted — a
+  /// restart lands back on the remembered MANAGER session (impersonation is
+  /// ephemeral oversight, never the device identity). Honest: the board renders
+  /// as a real seed user behind a visible "צופה כ-…" banner. No-op unless the
+  /// current session is a manager and a seed for [role] exists.
+  void impersonate(BoardRole role) {
+    final current = state;
+    if (current == null || current.role != BoardRole.manager) return;
+    final seed = _seedFor(role);
+    if (seed == null) return;
+    _impersonationReturn = current;
+    _userTouched = true;
+    state = BoardSession(
+      role: seed.role,
+      username: seed.username,
+      displayName: seed.displayName,
+      employerId:
+          (seed.role == BoardRole.worker || seed.role == BoardRole.courier)
+              ? seed.employerId
+              : '',
+    );
+  }
+
+  /// שלב 3 — return from [impersonate] to the saved manager session.
+  void returnFromImpersonation() {
+    final saved = _impersonationReturn;
+    if (saved == null) return;
+    _impersonationReturn = null;
+    _userTouched = true;
+    state = saved;
+  }
+
+  /// The first seeded account for [role] (worker→ran · courier→dudi · store→
+  /// lipskey) — the identity a manager impersonates to view that board.
+  BoardAccount? _seedFor(BoardRole role) {
+    for (final a in kBoardAccounts) {
+      if (a.role == role) return a;
+    }
+    return null;
+  }
+
   /// Log out of the board — every gated board screen rebuilds into its gate.
   void logout() {
     _userTouched = true;

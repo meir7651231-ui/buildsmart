@@ -3,15 +3,14 @@
 // מציג את ה-session החי מ-[boardAuthProvider] (שם תצוגה, שם משתמש),
 // סטטיסטיקת הזמנות חיה ממנוע ההזמנות המשותף, ושתי פעולות:
 //   ⚙️ הגדרות         → CatalogSettingsScreen (אותו יעד כמו פעולת ההגדרות בלוח)
-//   🔁 החלפת תפקיד   → חסום בדיאלוג קוד-מעבר (kRoleSwitchCode) → showRolePicker
+//   🖥️ מעבר בין מסכים → showManagerScreensSheet (התחזות לכל לוח — שלב 3)
 //
 // מנהל = חשבון הבעלים: אין כאן 'יציאה'/logout (דרישת מוצר — "המנהל לא מתנתק").
 
-import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
-import 'package:buildsmart/screens/role_picker_sheet.dart';
+import 'package:buildsmart/screens/manager_screens_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
@@ -210,18 +209,18 @@ class _ManagerProfileBody extends ConsumerWidget {
               ),
               const Divider(height: 1, color: Color(0xFFF0F0F0)),
               ListTile(
-                leading: const Text('🔁', style: TextStyle(fontSize: 20)),
+                leading: const Text('🖥️', style: TextStyle(fontSize: 20)),
                 title: const Text(
-                  'החלפת תפקיד',
+                  'מעבר בין מסכים',
                   style: TextStyle(color: BsTokens.inkLight),
                 ),
                 subtitle: const Text(
-                  'מוגן בקוד מעבר',
+                  'צפייה בכל לוח — מצב מנהל',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                 ),
                 trailing:
                     const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-                onTap: () => _askRoleSwitch(context),
+                onTap: () => showManagerScreensSheet(context),
               ),
             ],
           ),
@@ -230,98 +229,6 @@ class _ManagerProfileBody extends ConsumerWidget {
     );
   }
 
-  /// #20 — החלפת תפקיד חסומה בדיאלוג קוד (kRoleSwitchCode); קוד נכון פותח את
-  /// בורר התפקידים הקיים (showRolePicker).
-  Future<void> _askRoleSwitch(BuildContext context) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => const Directionality(
-        textDirection: TextDirection.rtl,
-        child: _RoleSwitchCodeDialog(),
-      ),
-    );
-    if ((ok ?? false) && context.mounted) {
-      await showRolePicker(context);
-    }
-  }
-}
-
-/// דיאלוג קוד-המעבר — שדה קוד + שגיאה inline על קוד שגוי (בלי לזייף הצלחה).
-class _RoleSwitchCodeDialog extends StatefulWidget {
-  const _RoleSwitchCodeDialog();
-
-  @override
-  State<_RoleSwitchCodeDialog> createState() => _RoleSwitchCodeDialogState();
-}
-
-class _RoleSwitchCodeDialogState extends State<_RoleSwitchCodeDialog> {
-  final TextEditingController _code = TextEditingController();
-  String? _error;
-
-  @override
-  void dispose() {
-    _code.dispose();
-    super.dispose();
-  }
-
-  void _confirm() {
-    if (_code.text.trim() == kRoleSwitchCode) {
-      Navigator.pop(context, true);
-    } else {
-      setState(() => _error = 'קוד שגוי — נסה שוב');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFFFFFFFF),
-      title: const Text(
-        'החלפת תפקיד',
-        style: TextStyle(color: BsTokens.inkLight),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'הזן את קוד המעבר כדי לפתוח את בורר התפקידים.',
-            style: TextStyle(color: Colors.black54),
-          ),
-          const SizedBox(height: BsTokens.space3),
-          TextField(
-            controller: _code,
-            obscureText: true,
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            autofocus: true,
-            onSubmitted: (_) => _confirm(),
-            decoration: InputDecoration(
-              hintText: 'קוד מעבר',
-              errorText: _error,
-              filled: true,
-              fillColor: const Color(0xFFF5F5F7),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('ביטול'),
-        ),
-        TextButton(
-          onPressed: _confirm,
-          style: TextButton.styleFrom(foregroundColor: BsTokens.brandDark),
-          child: const Text('אישור'),
-        ),
-      ],
-    );
-  }
 }
 
 /// תיבת סטטיסטיקה קטנה (אותו מראה כמו _PStat בפרופיל השליח).
