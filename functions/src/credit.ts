@@ -21,7 +21,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
 import { asString, callerRoles, db, REGION } from "./common";
-import { contractorCredit } from "./creditCore";
+import { contractorCredit, orderSum } from "./creditCore";
 
 interface ComputeCreditData {
   name?: unknown;
@@ -73,8 +73,15 @@ export const computeCredit = onCall({ region: REGION }, async (request) => {
     .get();
   let used = 0;
   for (const doc of q.docs) {
+    // Harden `used`: recompute the order total from its `lines` (Σ line.price,
+    // qty is NOT a multiplier — see orderSum) instead of trusting the
+    // client-written `sum`. Legacy/seed docs carry no `lines` → fall back to the
+    // stored `sum` (finite numbers only).
+    const lines: unknown = doc.get("lines");
     const s: unknown = doc.get("sum");
-    if (typeof s === "number" && Number.isFinite(s)) used += s;
+    used += Array.isArray(lines)
+      ? orderSum(lines)
+      : (typeof s === "number" && Number.isFinite(s) ? s : 0);
   }
   const orderCount = q.size;
 

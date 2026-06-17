@@ -64,6 +64,24 @@ export function contractorCredit(name: string): number {
 }
 
 /**
+ * Authoritative order total = Σ(line.price). Each line's `price` is ALREADY the
+ * full line total (the client stamps `OrderLineItem.price = lineTotal`, qty is
+ * informational, not a multiplier), so we sum `price` alone — multiplying by qty
+ * would double-count. Tolerant of malformed input: non-array → 0, and any line
+ * whose `price` isn't a finite number contributes 0. Used by `computeCredit` to
+ * fold `used` from each order's lines instead of trusting a client-written `sum`.
+ */
+export function orderSum(lines: unknown): number {
+  if (!Array.isArray(lines)) return 0;
+  let t = 0;
+  for (const l of lines) {
+    const p = (l as { price?: unknown })?.price;
+    if (typeof p === "number" && Number.isFinite(p)) t += Math.round(p);
+  }
+  return t;
+}
+
+/**
  * Ground truth captured from the Dart VM (dart 3.7.2, 2026-06-10):
  * `[name, name.hashCode, contractorCredit(name)]`. The first four names are
  * the seed contractors (`kManagerOrderSeed.who`). Asserted by selftest.ts.

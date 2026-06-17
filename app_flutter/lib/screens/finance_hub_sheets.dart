@@ -29,6 +29,8 @@ import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/backend.dart'
     show useFirebaseBackend;
+import 'package:buildsmart/data/repositories/finance_firebase.dart'
+    show FirebaseFinanceRepository;
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/logic/finance_report_pdf.dart';
 import 'package:buildsmart/logic/input_validators.dart';
@@ -520,6 +522,16 @@ void _openPayTerms(BuildContext context) {
                         onTap: () {
                           ref.read(activePaymentTermProvider.notifier).state =
                               t.id;
+                          // S-connect: on the live backend ALSO persist via the
+                          // finance repo. The in-memory notifier above is the
+                          // demo path; when connected the reads come from
+                          // financeRepo(), so the term must reach Firestore too.
+                          if (useFirebaseBackend) {
+                            final r = financeRepo();
+                            if (r is FirebaseFinanceRepository) {
+                              r.setPaymentTerm(t.id);
+                            }
+                          }
                           // proto: toast('תנאי התשלום עודכנו: '+t.name)
                           showToast(context, 'תנאי התשלום עודכנו: ${t.name}');
                         },
@@ -740,6 +752,12 @@ void _decide(BuildContext context, WidgetRef ref, FinanceApproval a, bool ok) {
     return;
   }
   ref.read(approvalQueueProvider.notifier).decide(a.id, ok);
+  // S-connect: persist the decision on the live backend too (the notifier is
+  // the demo path; connected reads come from financeRepo()).
+  if (useFirebaseBackend) {
+    final r = financeRepo();
+    if (r is FirebaseFinanceRepository) r.decide(a.id, ok);
+  }
   // proto auditLog('החלטת רכש', id+': '+(ok?'אושר':'נדחה'))
   ref
       .read(auditTrailProvider.notifier)
@@ -1098,6 +1116,12 @@ void _openPenalties(BuildContext context) {
                       final amt = ref
                           .read(penaltyLedgerProvider.notifier)
                           .add(days);
+                      // S-connect: record the penalty on the live backend too
+                      // (same amount; the notifier is the demo path).
+                      if (useFirebaseBackend) {
+                        final r = financeRepo();
+                        if (r is FirebaseFinanceRepository) r.addPenalty(days);
+                      }
                       // proto toast('קנס איחור נרשם: '+finMoney(days*perDay))
                       showToast(context, 'קנס איחור נרשם: ${fMoney(amt)}');
                     },

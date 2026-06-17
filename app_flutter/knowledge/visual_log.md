@@ -1376,3 +1376,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **למה אין צילום-מסך:** widgets/מאפיינים סטנדרטיים בלבד (`Tooltip`/`textDirection`/`SizedBox`/`AppBar`/`TextButton`) — אין asset/layout/פונט חדש. ה-a11y-fields אומתו ע״י הסוויטה (+2700; מסכי-הפרופיל/טפסים נבנים בטסטי-מסך); ה-perf-memo ע״י `compat_memo_test` + 75 טסטי compat/system_division ירוקים.
 
 **הפיכות:** כל פריט עצמאי — הסרת `tooltip:`/`textDirection:`/ה-`SizedBox`-wrap/ה-AppBar מחזירה למצב הקודם; ה-memo נשלף ע״י החזרת הגוף ל-`return out;` (ללא ה-cache). אף שינוי לא נוגע ב-state שמור.
+
+## 2026-06-17 — #wave2a-connect — פיננסים נשמרים לשרת (ללא שינוי-מראה)
+**שינוי נראה: אין.** השינוי ב-`finance_hub_sheets.dart` הוא **side-effect של שמירה בלבד** על המסלול-המחובר (`if (useFirebaseBackend)`): אישור/דחייה, קנס-איחור ותנאי-תשלום נכתבים עכשיו גם ל-Firestore דרך `FirebaseFinanceRepository`. ה-UI, ה-toasts, וה-state-בזיכרון זהים-לחלוטין; במצב-דמו/טסטים (flags OFF) הקוד החדש כלל לא רץ → byte-identical. אין widget/layout/צבע/טקסט חדש.
+**אימות:** `flutter analyze` 0 errors; הפורטים שמאחורי השמירה (`decide`/`addPenalty`/`setPaymentTerm`) מכוסים ב-`finance_firebase_repo_test.dart`. הקריאות (approvals/penalties/payment-term) כבר עברו דרך `financeRepo()` מקודם (CLEAN), כך שהמראה על הבילד-המחובר כבר היה נכון — רק הכתיבה הושלמה.
+**הפיכות:** הסרת שלושת בלוקי ה-`if (useFirebaseBackend) { … r.<port>() }` + ה-import של `FirebaseFinanceRepository` מחזירה למצב הקודם (כתיבה-לזיכרון בלבד).

@@ -8,7 +8,12 @@
 // This file is NOT exported by index.ts — it never deploys as a function.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { contractorCredit, CREDIT_PROBE, dartStringHashCode } from "./creditCore";
+import {
+  contractorCredit,
+  CREDIT_PROBE,
+  dartStringHashCode,
+  orderSum,
+} from "./creditCore";
 import {
   isLegalStep,
   nextStage,
@@ -46,6 +51,13 @@ for (const n of ["x", "אבג", "long ".repeat(40)]) {
   const c = contractorCredit(n);
   check(c >= 30000 && c <= 120000 && c % 100 === 0, `band/₪100 for "${n}"`);
 }
+
+// ── orderSum — authoritative total = Σ line.price (qty is NOT a multiplier) ──
+check(orderSum([{ price: 600 }, { price: 300 }]) === 900, "orderSum sums price");
+check(orderSum([]) === 0, "orderSum([]) === 0");
+check(orderSum(undefined) === 0, "orderSum(undefined) === 0");
+check(orderSum("x") === 0, 'orderSum("x") === 0 (non-array)');
+check(orderSum([{ qty: 5, price: 100 }]) === 100, "orderSum ignores qty (≠500)");
 
 // ── orderFlow — chain + legality ─────────────────────────────────────────────
 check(ORDER_FLOW.length === 6, "six stages");

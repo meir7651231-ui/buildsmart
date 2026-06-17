@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.24 — גל-איכות: מהירות (memo) + נגישות (tooltips/LTR/יעד-מגע 48dp) + תיקוני-ניווט (כפתור יציאה) · v6.24 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.25 — חיבור-לשרת: פיננסים (אישורים/קנסות/תנאי-תשלום) נשמרים לשרת + יושרת-אשראי (השרת מחשב-מחדש מהשורות) · v6.25 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
