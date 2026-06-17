@@ -26,6 +26,8 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
+import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
+    show quickLabel;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
@@ -249,11 +251,51 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   void showConnectionsForTest(LipskeyCatalogProduct anchor) =>
       _showConnections(anchor);
 
-  /// Plain display label for a product key in a [ShowProducts] grid — the
-  /// trimmed `nameHe`, NO icon (rendered via the same icon-free [BsKey] idiom as
-  /// word/chip keys). Kept as a helper so the key labels and the tap→product
-  /// lookup use ONE definition (no drift between render and resolve).
-  String _productLabel(LipskeyCatalogProduct p) => p.nameHe.trim();
+  /// @visibleForTesting — resolve a tapped product key against a supplied
+  /// [products] list using the SAME sku-keyed lookup the live [_onWordTap]
+  /// product branch uses ([_resolveBySku]). Lets a behavioral test seed a list
+  /// where two DISTINCT cards share a plain-word label and prove the tap reaches
+  /// the product by its unique sku payload — tapping the SECOND of a same-label
+  /// pair resolves to the SECOND product, not the first (the label-match bug
+  /// this fix removes). Routes through the one shared helper, so it cannot drift
+  /// from production resolution.
+  @visibleForTesting
+  LipskeyCatalogProduct? resolveTappedProductForTest(
+    List<LipskeyCatalogProduct> products,
+    WordKey key,
+  ) =>
+      _resolveBySku(products, key.payload);
+
+  /// Plain display label for a product key in a [ShowProducts] grid (and the
+  /// connections view) — the SHORT plain word `quickLabel(p)`, NOT the full
+  /// technical `nameHe` (full jargon violates the simplify-to-words vision; the
+  /// quick pad already buckets by this same derived word). NO icon (rendered via
+  /// the same icon-free [BsKey] idiom as word/chip keys).
+  ///
+  /// The label is display-only and intentionally NOT unique — two distinct skus
+  /// can share a plain word (e.g. 'ונטיל'). Tapped-product resolution therefore
+  /// keys on the WordKey PAYLOAD (the product's unique sku — see [_resolveBySku]
+  /// / [WordKey] payloads in [_keysFor]), never on this label.
+  String _productLabel(LipskeyCatalogProduct p) => quickLabel(p);
+
+  /// Resolve a tapped product key's PAYLOAD (a sku) back to the product in
+  /// [products]. Keying on the unique sku — not the display label — is what lets
+  /// two distinct cards that share a plain word (e.g. 'ונטיל' = skus
+  /// 178700/187700) BOTH be reachable; a label match would always return the
+  /// first. Returns null when no product in [products] carries [payload]
+  /// (defensive — payload/state drift). This is the ONE definition both the live
+  /// [_onWordTap] handler and the @visibleForTesting [resolveTappedProductForTest]
+  /// route through, so render and resolve can never drift.
+  LipskeyCatalogProduct? _resolveBySku(
+    List<LipskeyCatalogProduct> products,
+    Object? payload,
+  ) {
+    if (payload is! String) return null;
+    for (final p in products) {
+      if (p.sku == payload) return p;
+    }
+    return null;
+  }
 
   /// 7th engine: the anchor the 'מה מתחבר לזה?' entry key targets for the current
   /// question, or null when no reached product is a valid connection anchor (so
@@ -273,20 +315,29 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     return null;
   }
 
-  /// Handle a tapped word key. `payload=='word'` seeds the pool with the
-  /// products the word names; `payload=='chip'` narrows by the tapped axis chip;
-  /// `payload=='product'` opens the reach-product sheet for the tapped product
-  /// (the [ShowProducts] terminus of the converged cascade).
+  /// Handle a tapped word key, dispatched by its [WordKey.payload]:
+  ///  • `'word'`    — seed the pool with the products the word names;
+  ///  • `'chip'`    — narrow by the tapped axis chip;
+  ///  • `'connect'` — open the "מה מתחבר לזה" connections view;
+  ///  • anything else is a PRODUCT key whose payload is the product's unique
+  ///    SKU — open the reach-product sheet for the product resolved by that sku
+  ///    (the [ShowProducts] / connections terminus). Resolution keys on the sku,
+  ///    NOT the display label, so two cards sharing a plain word both resolve.
   void _onWordTap(WordKey key) {
     final label = key.label;
     // 7th engine: a 'connect' key opens the "מה מתחבר לזה" view for the reached
-    // anchor (the representative the affordance was offered for).
+    // anchor (the representative the affordance was offered for). The connect key
+    // carries the literal 'connect' string as its payload (not a sku), so it is
+    // matched here BEFORE the sku-payload product branch below.
     if (key.payload == 'connect') {
       final anchor = _connectionEntryAnchor;
       if (anchor != null) _showConnections(anchor);
       return;
     }
-    if (key.payload == 'product') {
+    // 'word'/'chip' navigation keys carry those literal payloads; every OTHER
+    // key the cascade renders is a PRODUCT key whose payload is the product's
+    // unique sku (set in [_keysFor] / [_connectionKeys]).
+    if (key.payload != 'word' && key.payload != 'chip') {
       // A product key reaches that product directly. While the connections view
       // is open the keys are the COMPATIBLE PARTS, so resolve against that list;
       // otherwise resolve against the converged ShowProducts list. Either way,
@@ -300,12 +351,13 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
         if (current is! ShowProducts) return; // defensive — state moved under us
         products = current.products;
       }
-      final picked = products
-          .where((p) => _productLabel(p) == label)
-          .toList();
-      if (picked.isEmpty) return; // defensive — label drift
+      // Resolve by the unique sku PAYLOAD, not the (non-unique) display label:
+      // two distinct cards can share a plain word (e.g. 'ונטיל' = 178700/187700),
+      // and a label match always returned the FIRST, making the 2nd unreachable.
+      final picked = _resolveBySku(products, key.payload);
+      if (picked == null) return; // defensive — payload/state drift
       if (openSheetOnResolve) {
-        showLipskeyProductSheet(context, picked.first, products);
+        showLipskeyProductSheet(context, picked, products);
       }
       return;
     }
@@ -401,13 +453,17 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     }
     if (q is ShowProducts) {
       // The converged cascade: render each distinct product as a plain
-      // icon-free word-key (same BsKey idiom). Tapping one opens its sheet.
+      // icon-free word-key (same BsKey idiom). The key LABEL is the SHORT plain
+      // word (`_productLabel` → `quickLabel`); the key PAYLOAD is the product's
+      // unique SKU, so the tap handler resolves it by sku — never by the
+      // non-unique label (two cards can share a plain word). Tapping one opens
+      // its sheet.
       return [
-        for (final p in q.products)
-          WordKey(_productLabel(p), payload: 'product'),
+        for (final p in q.products) WordKey(_productLabel(p), payload: p.sku),
         // 7th engine: when a reached product is a valid connection anchor, offer
         // a plain-text (icon-free) 'מה מתחבר לזה?' key that opens the parts-that-
-        // connect view. Appended LAST so it never displaces a product key.
+        // connect view. Appended LAST so it never displaces a product key. Its
+        // payload is the literal 'connect' sentinel (not a sku).
         if (_connectionEntryAnchor != null)
           const WordKey(kConnectionsKey, payload: 'connect'), // OWNER-REVIEW copy
       ];
@@ -416,11 +472,14 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   }
 
   /// 7th engine: the keys for the connections view — the compatible PARTS as
-  /// plain product-keys (same icon-free idiom + same 'product' payload as a
-  /// ShowProducts list, so a tap reuses the existing open-sheet add-path).
+  /// plain product-keys. SAME icon-free idiom as a ShowProducts list: the label
+  /// is the SHORT plain word (`_productLabel` → `quickLabel`) and the payload is
+  /// the product's unique SKU, so a tap reuses the existing sku-resolved
+  /// open-sheet add-path. The connections list is NOT collapse-deduped, so two
+  /// parts CAN share a plain word — keying the tap on sku (not label) is what
+  /// keeps both reachable.
   List<WordKey> _connectionKeys() => [
-        for (final p in connectionsShown)
-          WordKey(_productLabel(p), payload: 'product'),
+        for (final p in connectionsShown) WordKey(_productLabel(p), payload: p.sku),
       ];
 
   /// The header prompt for the current question (empty for Resolve).
@@ -527,7 +586,14 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
             ),
           )
         else
-          WordKeyboard(words: keys, onWordTap: _onWordTap),
+          // No skip/type affordance in the connections view, so suppress the
+          // הכל/הקלדה utility row — those keys would be dead no-ops here (no
+          // onAll/onType is wired). Only the compatible-part keys render.
+          WordKeyboard(
+            words: keys,
+            onWordTap: _onWordTap,
+            showUtilityRow: false,
+          ),
       ],
     );
   }

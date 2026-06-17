@@ -24,8 +24,10 @@ import 'package:flutter/material.dart';
 ///
 /// [words] are chunked into rows of [_wordsPerRow]; each renders as a plain
 /// (icon-free) [BsKey]. The [primary] word — matched by identity — is drawn in
-/// brand orange. A final utility row carries exactly two icon-free keys:
-/// `הכל` → [onAll] and `הקלדה` → [onType].
+/// brand orange. When [showUtilityRow] is true (the default), a final utility
+/// row carries exactly two icon-free keys: `הכל` → [onAll] and `הקלדה` →
+/// [onType]. Surfaces with no skip/type affordance (e.g. the connections view)
+/// pass `showUtilityRow: false` so those would-be dead keys are not rendered.
 class WordKeyboard extends StatelessWidget {
   const WordKeyboard({
     required this.words,
@@ -34,6 +36,7 @@ class WordKeyboard extends StatelessWidget {
     this.onAll,
     this.onType,
     this.primary,
+    this.showUtilityRow = true,
   });
 
   /// The word suggestions to render, in order.
@@ -51,6 +54,12 @@ class WordKeyboard extends StatelessWidget {
   /// When non-null and present in [words], this word renders with the brand
   /// accent fill instead of the plain white key.
   final WordKey? primary;
+
+  /// Whether to append the trailing `הכל` · `הקלדה` utility row. Defaults to
+  /// true (every existing call site keeps both keys). Pass false on surfaces
+  /// that have no skip-axis / emergency-type affordance — the connections view —
+  /// where those keys would be dead no-ops (their callbacks are unwired there).
+  final bool showUtilityRow;
 
   /// Words per word-row before wrapping to the next row.
   static const int _wordsPerRow = 3;
@@ -108,8 +117,12 @@ class WordKeyboard extends StatelessWidget {
         ..add(_buildWordRow(words.sublist(i, end)))
         ..add(const SizedBox(height: BsTokens.space1));
     }
-    // The trailing utility row (הכל · הקלדה).
-    rowWidgets.add(_buildUtilityRow());
+    // The trailing utility row (הכל · הקלדה) — omitted when the caller has no
+    // skip/type affordance to wire (e.g. the connections view), so those keys
+    // are never rendered as dead no-ops.
+    if (showUtilityRow) {
+      rowWidgets.add(_buildUtilityRow());
+    }
 
     return Directionality(
       textDirection: TextDirection.ltr,

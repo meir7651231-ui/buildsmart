@@ -42,10 +42,13 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show productHasChip;
+import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
+    show quickLabel;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_finder_screen.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
+import 'package:buildsmart/features/word_finder/word_keys_model.dart';
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery, searchRelevance;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_key.dart';
@@ -511,9 +514,10 @@ void main() {
           reason: 'a ShowProducts pick offers the remaining products');
       expect(find.text(kPickProductQuestion), findsOneWidget,
           reason: 'the ShowProducts header prompts the user to pick a product');
-      // Each distinct product renders as a tappable key bearing its trimmed
-      // name — the icon-free BsKey idiom (NO icons added).
-      final firstProductLabel = reached.products.first.nameHe.trim();
+      // Each distinct product renders as a tappable key bearing its SHORT plain
+      // word (quickLabel) — NOT the full technical nameHe — via the icon-free
+      // BsKey idiom (NO icons added). (Fix 1: simplify-to-words.)
+      final firstProductLabel = quickLabel(reached.products.first);
       expect(find.widgetWithText(BsKey, firstProductLabel), findsWidgets,
           reason: 'each ShowProducts product renders as a plain word-key');
       expect(find.byType(WordKeyboard), findsOneWidget,
@@ -613,13 +617,20 @@ void main() {
     // The view's header renders (OWNER-REVIEW copy).
     expect(find.text(kConnectionsHeader), findsWidgets,
         reason: 'the connections view shows its header');
-    // The compatible parts render as plain word-keys (icon-free BsKey idiom).
-    final firstPartLabel = parts.first.nameHe.trim();
+    // The compatible parts render as plain word-keys (icon-free BsKey idiom):
+    // the SHORT plain word (quickLabel), NOT the full nameHe (Fix 1).
+    final firstPartLabel = quickLabel(parts.first);
     expect(find.widgetWithText(BsKey, firstPartLabel), findsWidgets,
         reason: 'each compatible part renders as a plain product key');
     // A WordKeyboard carries the part keys (reusing the existing key idiom).
     expect(find.byType(WordKeyboard), findsOneWidget,
         reason: 'the parts are rendered via the WordKeyboard key idiom');
+    // Fix 3: the connections view has NO skip/type affordance, so the
+    // הכל/הקלדה utility row is suppressed — those keys must NOT render here.
+    expect(find.widgetWithText(BsKey, 'הכל'), findsNothing,
+        reason: 'the connections view passes showUtilityRow:false → no הכל key');
+    expect(find.widgetWithText(BsKey, 'הקלדה'), findsNothing,
+        reason: 'the connections view passes showUtilityRow:false → no הקלדה key');
     // The shown set equals the engine's connectionsFor (the screen adds no
     // compat logic of its own).
     final shown = (state.connectionsShown as List).cast<LipskeyCatalogProduct>();
@@ -662,5 +673,177 @@ void main() {
         reason: 'opening connections for a non-anchor is a guarded no-op');
     expect(find.text(kConnectionsHeader), findsNothing,
         reason: 'no connections header for a non-anchor');
+  });
+
+  // ── Test 11 (Fix 1): a ShowProducts key shows the PLAIN word, not nameHe ────
+
+  testWidgets(
+      'plain-word labels: a ShowProducts product key renders quickLabel '
+      '(the short plain word), NOT the full technical nameHe', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // DATA-DRIVEN seed (same approach as Test 8): pick an offered first-question
+    // word whose "tap the first chip each turn" dive reaches a ShowProducts pick
+    // within the tap bound — simulated PURELY first, then replayed via the UI.
+    final firstQ = state.currentQuestion as AskWords;
+    const tapBound = 6;
+    String? seedWord;
+    for (final e in firstQ.words) {
+      var pool = resolveWord(e.word, wordFinderLexicon);
+      if (pool.length < 2 || distinctCardCount(pool) < 2) continue;
+      final stack = <NewbieStep>[
+        NewbieStep(
+          axisLabel: 'דגם',
+          chipLabel: e.word,
+          predicate: (_) => true,
+          crumbWord: e.word,
+        ),
+      ];
+      var reachedShow = false;
+      for (var i = 0; i < tapBound; i++) {
+        final q = offerQuestion(pool, stack, wordFinderLexicon, null);
+        if (q is ShowProducts) {
+          reachedShow = true;
+          break;
+        }
+        if (q is! AskAxis || q.chips.isEmpty) break;
+        final chip = q.chips.first;
+        pool = pool.where((p) => productHasChip(p, chip)).toList();
+        stack.add(NewbieStep(
+          axisLabel: q.axisLabel,
+          chipLabel: chip,
+          predicate: (p) => productHasChip(p, chip),
+          crumbWord: chip,
+        ));
+      }
+      if (reachedShow) {
+        seedWord = e.word;
+        break;
+      }
+    }
+    expect(seedWord, isNotNull,
+        reason: 'kDivePool must offer a word whose dive reaches a ShowProducts '
+            'pick within $tapBound taps to exercise plain-word labels');
+    final w = seedWord!;
+
+    // Replay through the real UI to the ShowProducts pick.
+    await tester.tap(find.widgetWithText(BsKey, w).first);
+    await tester.pumpAndSettle();
+    var taps = 0;
+    while (state.currentQuestion is! ShowProducts && taps < tapBound) {
+      final q = state.currentQuestion as NewbieQuestion;
+      if (q is! AskAxis || q.chips.isEmpty) break;
+      await tester.tap(find.widgetWithText(BsKey, q.chips.first).first);
+      await tester.pumpAndSettle();
+      taps++;
+    }
+    final reached = state.currentQuestion as NewbieQuestion;
+    expect(reached, isA<ShowProducts>(),
+        reason: 'the chosen seed must converge on a ShowProducts pick');
+    final products = (reached as ShowProducts).products;
+    expect(products, isNotEmpty);
+
+    // Pick a rendered product whose PLAIN word genuinely differs from its full
+    // nameHe (catalog names are multi-word jargon; quickLabel folds to the first
+    // meaningful token), so the assertion proves simplification, not a tautology.
+    LipskeyCatalogProduct? simplified;
+    for (final p in products) {
+      if (quickLabel(p) != p.nameHe.trim()) {
+        simplified = p;
+        break;
+      }
+    }
+    expect(simplified, isNotNull,
+        reason: 'the converged ShowProducts list must contain at least one '
+            'product whose quickLabel differs from its full nameHe');
+    final p = simplified!;
+
+    // The key bears the SHORT plain word...
+    expect(find.widgetWithText(BsKey, quickLabel(p)), findsWidgets,
+        reason: 'the product key renders the plain word quickLabel(p)');
+    // ...and the FULL technical nameHe is NOT rendered on any key (Fix 1: the
+    // simplify-to-words vision — full jargon must not leak onto the key face).
+    expect(find.widgetWithText(BsKey, p.nameHe.trim()), findsNothing,
+        reason: 'the full technical nameHe must NOT appear as a key label');
+  });
+
+  // ── Test 12 (Fix 2): tapping the SECOND of a same-label pair → SECOND sku ───
+
+  testWidgets(
+      'sku resolution: two distinct cards sharing a plain word both resolve by '
+      'sku — tapping the SECOND reaches the SECOND product, not the first',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // Two REAL, DISTINCT skus from kDivePool that share an IDENTICAL nameHe
+    // ('ונטיל לכיור אמריקאי') → identical quickLabel ('ונטיל'). This is exactly
+    // the bug fixture from the wall-check: 117 identical-nameHe groups where a
+    // label match always returned the FIRST, making the 2nd unreachable.
+    final first = kDivePool.firstWhere((p) => p.sku == '178700');
+    final second = kDivePool.firstWhere((p) => p.sku == '187700');
+    expect(first.sku, isNot(second.sku),
+        reason: 'fixture skus must be distinct');
+    expect(first.nameHe, second.nameHe,
+        reason: 'fixture skus must share an identical nameHe (the bug trigger)');
+    expect(quickLabel(first), quickLabel(second),
+        reason: 'identical nameHe → identical plain-word label, so a label '
+            'match could never tell the two apart');
+
+    // The products list the converged cascade / connections view would carry,
+    // with BOTH same-label cards present (order: first, then second).
+    final products = <LipskeyCatalogProduct>[first, second];
+
+    // Build the product keys exactly as the screen does: label = plain word,
+    // payload = the product's UNIQUE sku.
+    final firstKey = WordKey(quickLabel(first), payload: first.sku);
+    final secondKey = WordKey(quickLabel(second), payload: second.sku);
+    expect(firstKey.label, secondKey.label,
+        reason: 'both keys show the SAME plain word — only the sku payload '
+            'distinguishes them');
+
+    // Resolve each key against the list using the SAME sku-keyed lookup the live
+    // tap handler uses. The SECOND key must resolve to the SECOND product — the
+    // label-match bug (always returning products.first) is gone.
+    final resolvedSecond = state.resolveTappedProductForTest(products, secondKey)
+        as LipskeyCatalogProduct?;
+    expect(resolvedSecond, isNotNull,
+        reason: 'a key whose sku payload is in the list must resolve');
+    expect(resolvedSecond!.sku, second.sku,
+        reason: 'tapping the SECOND same-label card resolves to the SECOND sku '
+            '(${second.sku}), NOT the first (${first.sku}) — the label-match '
+            'bug this fix removes would have returned the first');
+
+    // And the first key still resolves to the first product (sanity: resolution
+    // is by the unique payload, not by list position).
+    final resolvedFirst = state.resolveTappedProductForTest(products, firstKey)
+        as LipskeyCatalogProduct?;
+    expect(resolvedFirst!.sku, first.sku,
+        reason: 'the first key resolves to the first sku by its payload');
+  });
+
+  // ── Test 13 (Fix 3): the NORMAL cascade keyboard KEEPS the utility row ──────
+
+  testWidgets(
+      'utility row: the normal word/chip cascade keyboard still shows '
+      'הכל and הקלדה (showUtilityRow defaults true)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    // On the opening AskWords cascade keyboard (no connections view), both
+    // utility keys are present — the default showUtilityRow:true is preserved.
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'the opening cascade renders the word keyboard');
+    expect(find.widgetWithText(BsKey, 'הכל'), findsOneWidget,
+        reason: 'the normal cascade keeps the הכל utility key');
+    expect(find.widgetWithText(BsKey, 'הקלדה'), findsOneWidget,
+        reason: 'the normal cascade keeps the הקלדה utility key');
   });
 }
