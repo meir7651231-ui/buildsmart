@@ -86,6 +86,32 @@ void main() {
         reason: 'with kWordFinderFlag off the screen must render nothing');
   });
 
+  testWidgets('SHORT screen: the key grid scrolls, never RenderFlex-overflows '
+      '(canonical-audit crash guard)', (tester) async {
+    // A deliberately short viewport: the opening 24-word grid is far taller than
+    // the screen. Before the SingleChildScrollView wrap this threw a RenderFlex
+    // overflow (the crash the canonical audit caught — the other tests masked it
+    // by forcing a 1080x2400 surface). With the scroll wrap, the grid scrolls
+    // and no exception is thrown.
+    tester.view.physicalSize = const Size(360, 300);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({
+      'bs.feature-flags.v1': [kWordFinderFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: WordFinderScreen())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'the word keyboard mounts on the short screen');
+    expect(tester.takeException(), isNull,
+        reason: 'a tall key grid must SCROLL within the bounded short screen, '
+            'never throw a RenderFlex overflow');
+  });
+
   testWidgets('newbie path: word → narrow → reach a product pick',
       (tester) async {
     SharedPreferences.setMockInitialValues({

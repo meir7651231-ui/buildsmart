@@ -727,59 +727,77 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                   ),
                 ),
 
-              const Spacer(),
-
-              // ── 7th engine: connections view (highest priority when open) ─
-              if (_connectionsAnchor != null)
-                _buildConnectionsView()
-              // ── Empty-pool dead-end → neutral empty-state (no keyboard) ───
-              else if (showEmptyState) ...[
-                _buildEmptyState(),
-                const Spacer(),
-              ]
-              // ── Emergency typing surface (only when `הקלדה` was tapped) ───
-              else if (_typeController != null) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: BsTokens.space2, vertical: BsTokens.space1),
-                  child: TextField(
-                    controller: _typeController,
-                    textDirection: TextDirection.rtl,
-                    decoration: const InputDecoration(
-                      hintText: 'מה לחפש?',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: _submitQuery,
-                  ),
+              // The key region SCROLLS when its grid is taller than the
+              // viewport — a well-connected connections anchor (uncapped) or a
+              // full 24-word / 30-product grid on a short phone. The old
+              // `const Spacer()` + a non-scrolling Column threw a RenderFlex
+              // overflow (and crashed) on a normal-height device; the canonical
+              // audit caught it (the screen test masked it at 1080x2400).
+              // Expanded takes the remaining height; SingleChildScrollView lets
+              // the content exceed it gracefully.
+              Expanded(
+                child: SingleChildScrollView(
+                  child: _connectionsAnchor != null
+                      // ── 7th engine: connections view (when open) ──────────
+                      ? _buildConnectionsView()
+                      : showEmptyState
+                          // ── Empty-pool dead-end → neutral empty-state ─────
+                          ? _buildEmptyState()
+                          : _typeController != null
+                              // ── Emergency typing surface (`הקלדה`) ────────
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: BsTokens.space2,
+                                          vertical: BsTokens.space1),
+                                      child: TextField(
+                                        controller: _typeController,
+                                        textDirection: TextDirection.rtl,
+                                        decoration: const InputDecoration(
+                                          hintText: 'מה לחפש?',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        onSubmitted: _submitQuery,
+                                      ),
+                                    ),
+                                    BsKeyboard(
+                                      onKey: (s) {
+                                        final c = _typeController!;
+                                        c
+                                          ..text = c.text + s
+                                          ..selection =
+                                              TextSelection.collapsed(
+                                                  offset: c.text.length);
+                                      },
+                                      onBackspace: () {
+                                        final c = _typeController!;
+                                        if (c.text.isNotEmpty) {
+                                          c
+                                            ..text = c.text.substring(
+                                                0, c.text.length - 1)
+                                            ..selection =
+                                                TextSelection.collapsed(
+                                                    offset: c.text.length);
+                                        }
+                                      },
+                                      onEnter: () =>
+                                          _submitQuery(_typeController!.text),
+                                      onSend: () =>
+                                          _submitQuery(_typeController!.text),
+                                    ),
+                                  ],
+                                )
+                              // ── The word/chip keyboard — the happy path ───
+                              : WordKeyboard(
+                                  words: keys,
+                                  onWordTap: _onWordTap,
+                                  onAll: _onAll,
+                                  onType: _onType,
+                                ),
                 ),
-                BsKeyboard(
-                  onKey: (s) {
-                    final c = _typeController!;
-                    c
-                      ..text = c.text + s
-                      ..selection =
-                          TextSelection.collapsed(offset: c.text.length);
-                  },
-                  onBackspace: () {
-                    final c = _typeController!;
-                    if (c.text.isNotEmpty) {
-                      c
-                        ..text = c.text.substring(0, c.text.length - 1)
-                        ..selection =
-                            TextSelection.collapsed(offset: c.text.length);
-                    }
-                  },
-                  onEnter: () => _submitQuery(_typeController!.text),
-                  onSend: () => _submitQuery(_typeController!.text),
-                ),
-              ] else
-                // ── The word/chip keyboard — the happy path ───────────────
-                WordKeyboard(
-                  words: keys,
-                  onWordTap: _onWordTap,
-                  onAll: _onAll,
-                  onType: _onType,
-                ),
+              ),
             ],
           ),
         ),

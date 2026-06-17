@@ -41,12 +41,14 @@ void main() {
       // Spot the two seed brands named in the swarm brief explicitly.
       expect(lex.wordToSkus.containsKey('סיגמא'), isFalse);
       expect(lex.wordToSkus.containsKey('דיור'), isFalse);
-      // The 18 NEW brand prefixes must ALSO never be keys (verified to lead a
+      // The 17 NEW brand prefixes must ALSO never be keys (verified to lead a
       // name, surfacing the real noun behind them). ג'נבה/אנג'ל use ASCII '.
+      // ('זקיף' was REMOVED — the canonical audit found it is a product noun,
+      // not a brand prefix; it is asserted to be a real key below.)
       const newBrands = [
         'טרפז', 'טולדו', 'טיטוניק', "ג'נבה", 'אוסלו', "אנג'ל", 'גאלרי',
         'גל', 'פלורה', 'כנרת', 'הוואי', 'אלפא', 'ויגה', 'גליל', 'דלתא',
-        'זקיף', 'פיטרה', 'בתא',
+        'פיטרה', 'בתא',
       ];
       for (final brand in newBrands) {
         expect(kBrandPrefixBlocklist.contains(brand), isTrue,
@@ -54,6 +56,14 @@ void main() {
         expect(lex.wordToSkus.containsKey(brand), isFalse,
             reason: 'new brand "$brand" leaked into the lexicon as a key');
       }
+      // REGRESSION (canonical audit, data-seed): 'זקיף' was wrongly blocklisted
+      // as a brand. It is the product noun ('זקיף אסלה', sku 121216); while
+      // blocked, that product mis-keyed to 'אסלה' and was unsearchable. After the
+      // fix it must be OUT of the blocklist AND present as a real lexicon key.
+      expect(kBrandPrefixBlocklist.contains('זקיף'), isFalse,
+          reason: 'זקיף is a product noun, not a brand prefix (audit fix)');
+      expect(lex.wordToSkus.containsKey('זקיף'), isTrue,
+          reason: 'זקיף must now be a searchable lexicon key (sku 121216)');
     });
 
     test('every entry agrees with wordToSkus (freq + ordering invariant)', () {

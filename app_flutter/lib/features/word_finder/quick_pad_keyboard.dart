@@ -64,42 +64,33 @@ class QuickPadKeyboard extends StatefulWidget {
 }
 
 class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
-  /// Per-item quantity, keyed by item index. Defaults to 1, floored at 1.
-  late final List<int> _qty;
+  /// Per-item quantity, keyed by the item's STABLE identity (its payload — the
+  /// catalog product instance — falling back to its label), NOT the list index.
+  /// A same-length REORDER of items (a favorites swap, or a re-viewed recent
+  /// moving to the front) would otherwise leave the old index→count binding in
+  /// place and add the WRONG quantity (naming the wrong product) to the cart.
+  /// Keying by identity makes any reorder harmless. Absent key ⇒ quantity 1;
+  /// floored at 1, capped at kMaxQty. (Fix: canonical audit, money-numeric lens.)
+  final Map<Object, int> _qty = <Object, int>{};
 
-  @override
-  void initState() {
-    super.initState();
-    _qty = List<int>.filled(widget.items.length, 1, growable: true);
-  }
+  /// The stable identity key for an item: its payload (the product) when set,
+  /// else its label — so [_qty] follows the product, never the slot.
+  Object _key(QuickPadItem item) => item.payload ?? item.label;
 
-  @override
-  void didUpdateWidget(QuickPadKeyboard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // If the item list length changes, resize the qty list, preserving
-    // existing counts where the indices still line up.
-    if (widget.items.length != _qty.length) {
-      final next = List<int>.filled(widget.items.length, 1);
-      for (var i = 0; i < next.length && i < _qty.length; i++) {
-        next[i] = _qty[i];
-      }
-      _qty
-        ..clear()
-        ..addAll(next);
-    }
-  }
+  /// The current quantity for [item] (defaults to 1 when never stepped).
+  int _qtyOf(QuickPadItem item) => _qty[_key(item)] ?? 1;
 
-  void _increment(int index) {
+  void _increment(QuickPadItem item) {
     setState(() {
-      final next = _qty[index] + 1;
-      _qty[index] = next > kMaxQty ? kMaxQty : next; // cap at kMaxQty
+      final next = _qtyOf(item) + 1;
+      _qty[_key(item)] = next > kMaxQty ? kMaxQty : next; // cap at kMaxQty
     });
   }
 
-  void _decrement(int index) {
+  void _decrement(QuickPadItem item) {
     setState(() {
-      final next = _qty[index] - 1;
-      _qty[index] = next < 1 ? 1 : next; // floor at 1
+      final next = _qtyOf(item) - 1;
+      _qty[_key(item)] = next < 1 ? 1 : next; // floor at 1
     });
   }
 
@@ -107,7 +98,7 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
   /// stepper row ('−' | qty | '+'). All keys are icon-free KeyKind.letter.
   Widget _buildItemCell(int index) {
     final item = widget.items[index];
-    final qty = _qty[index];
+    final qty = _qtyOf(item);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -116,7 +107,7 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
         BsKey(
           // KeyKind.letter → BsKey renders the label as plain text, no icon.
           model: KbKey(item.label),
-          onTap: () => widget.onAdd(item, _qty[index]),
+          onTap: () => widget.onAdd(item, _qtyOf(item)),
         ),
         const SizedBox(height: BsTokens.space1),
         // Compact stepper: '−'  qty  '+' — text glyphs, no Material icons.
@@ -125,7 +116,7 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
             Expanded(
               child: BsKey(
                 model: const KbKey(QuickPadKeyboard._minusGlyph),
-                onTap: () => _decrement(index),
+                onTap: () => _decrement(item),
               ),
             ),
             const SizedBox(width: BsTokens.space1),
@@ -134,14 +125,14 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
                 model: KbKey('$qty'),
                 // Tapping the qty readout is a no-op affordance; it carries the
                 // count visually. Routed to onAdd so a tap there still adds.
-                onTap: () => widget.onAdd(item, _qty[index]),
+                onTap: () => widget.onAdd(item, _qtyOf(item)),
               ),
             ),
             const SizedBox(width: BsTokens.space1),
             Expanded(
               child: BsKey(
                 model: const KbKey(QuickPadKeyboard._plusGlyph),
-                onTap: () => _increment(index),
+                onTap: () => _increment(item),
               ),
             ),
           ],

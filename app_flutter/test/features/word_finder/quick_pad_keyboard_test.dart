@@ -301,5 +301,63 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets(
+        'qty follows the PRODUCT across a same-length reorder, not the slot '
+        '(canonical-audit money guard)', (tester) async {
+      // Step product A to qty 3, REORDER the same-length list so A moves to the
+      // other slot, then add A. Before the fix _qty was keyed by list index, so
+      // the count stayed bound to slot 0 and A added the WRONG qty after a
+      // reorder; now _qty is keyed by item identity, so the count follows A.
+      QuickPadItem? added;
+      int? addedQty;
+      var items = const [
+        QuickPadItem('ברז', payload: 'A'),
+        QuickPadItem('צינור', payload: 'B'),
+      ];
+      late StateSetter setOuter;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                setOuter = setState;
+                return QuickPadKeyboard(
+                  items: items,
+                  onAdd: (item, qty) {
+                    added = item;
+                    addedQty = qty;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // A is at slot 0 — step its '+' twice → qty 3.
+      await tester.tap(find.text('+').first);
+      await tester.pump();
+      await tester.tap(find.text('+').first);
+      await tester.pump();
+
+      // Reorder to [B, A] — SAME length, A now at slot 1.
+      setOuter(() {
+        items = const [
+          QuickPadItem('צינור', payload: 'B'),
+          QuickPadItem('ברז', payload: 'A'),
+        ];
+      });
+      await tester.pumpAndSettle();
+
+      // Tapping A's label adds A with qty 3 — the count followed the product
+      // across the reorder, it did not stay on slot 0 (the index bug).
+      await tester.tap(find.text('ברז'));
+      await tester.pump();
+      expect(added?.payload, 'A', reason: 'the tapped label is product A');
+      expect(addedQty, 3,
+          reason: 'qty 3 must follow product A across the reorder, never stay '
+              'bound to the old slot index');
+    });
   });
 }

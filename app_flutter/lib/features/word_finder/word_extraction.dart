@@ -78,10 +78,10 @@ const Set<String> kBrandPrefixBlocklist = {
   'הדר',
   'קורל',
   'קונקורד',
-  // OWNER-REVIEW: 18 NEW brand/series prefixes verified against the real
+  // OWNER-REVIEW: 17 NEW brand/series prefixes verified against the real
   // catalog bytes — each LEADS >=1 product name in the union pool, surfacing a
   // real noun behind it (e.g. בתא→ברז ×10, פיטרה→אסלה, גל/כנרת→ראש, ויגה→סוללה)
-  // and the 18 collide with ZERO non-leading product nouns (only כנרת appears
+  // and the 17 collide with ZERO non-leading product nouns (only כנרת appears
   // mid-name in 2 cistern names that already key on 'מיכל', so it is harmless).
   // Reversible: delete this block to fall back to the 16-seed list. ג'נבה and
   // אנג'ל use the ASCII apostrophe U+0027 (the tokenizer does NOT split it, so
@@ -101,7 +101,9 @@ const Set<String> kBrandPrefixBlocklist = {
   'ויגה', // OWNER-REVIEW
   'גליל', // OWNER-REVIEW
   'דלתא', // OWNER-REVIEW
-  'זקיף', // OWNER-REVIEW
+  // 'זקיף' removed (canonical audit · data-seed lens): it is the PRODUCT NOUN
+  // ('זקיף אסלה', sku 121216) — not a brand prefix. Blocklisting it skipped the
+  // leading token and mis-keyed that product to 'אסלה', making it unsearchable.
   'פיטרה', // OWNER-REVIEW
   'בתא', // OWNER-REVIEW
 };
