@@ -912,6 +912,7 @@ class _NumberRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
+            tooltip: 'הפחת',
             icon: const Icon(Icons.remove, color: Colors.black54, size: 20),
             onPressed:
                 value > min
@@ -923,6 +924,7 @@ class _NumberRow extends StatelessWidget {
             style: const TextStyle(color: Colors.black54, fontSize: 14),
           ),
           IconButton(
+            tooltip: 'הוסף',
             icon: const Icon(Icons.add, color: Colors.black54, size: 20),
             onPressed:
                 value < max

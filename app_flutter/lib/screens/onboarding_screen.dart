@@ -152,6 +152,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // the background.
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());
+    // Rewind the opening step so a later sign-out re-opens the flow at the
+    // welcome/login screen (step 0), not the leftover slides (step 2) — which
+    // would loop "בואו נתחיל". Harmless on a fresh first run (already 0).
+    ref.read(startupStepProvider.notifier).state = 0;
   }
 
   void _next() {

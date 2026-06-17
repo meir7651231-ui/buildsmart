@@ -1364,3 +1364,15 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **למה אין צילום-מסך:** widgets סטנדרטיים בלבד (`Positioned`/`Align`/`AnimatedContainer`/`Text`) — אין asset/layout/פונט חדש; טוקני-צבע קיימים (success/danger/chainSlate). הרינדור על המסלול שטסטים מריצים הוא תמיד "מצב דמו" האינרטי (אין Firebase), כך שהמראה החי (🟢/🔴) נצפה רק בבילד-שרת אמיתי.
 
 **הפיכות:** הסרה = למחוק את `const ConnectionIndicator()` מה-Stack ב-`main.dart` (+ ה-import) ולהסיר את שני הקבצים החדשים + `connectivity_plus` מ-pubspec. אין שינוי-מצב שמורה — החיווי הוא קריאה-בלבד (read-only) ולעולם לא כותב.
+
+## 2026-06-16 — #quality-wave1 — ליטוש a11y/ניווט (tooltips · LTR-numeric · 48dp · כפתור-יציאה)
+**שינוי נראה (analyze 0 · +2700 -1 רק baseline · ה-perf-memo אומת byte-equivalent):** גל-איכות. הנראה הוא a11y+ניווט בלבד (ה-perf-memo אינו נראה — תוצאה byte-identical):
+- **tooltips עבריים** על כפתורי-אייקון שהיו ללא-תווית: `ערוך`/`מחק` (catalog) · `הפחת`/`הוסף` (catalog-settings stepper) · `מחק` (store) — long-press/hover מראה את הפעולה (חשוב ל-screen-reader + בהירות).
+- **כיוון-טקסט LTR לשדות-מספר**: טלפון/ת.ז/ח.פ ב-store-dashboard · פרופיל עובד/שליח/חנות · טפסי עובד/שליח · שם-משתמש בכניסת-לוח (welcome) — מספרים+ID נקראים עכשיו שמאל-לימין (טבעי למספרים) בעוד שדות-שם עבריים נשארים RTL. אין שינוי-פריסה, רק כיוון הקלדה/תצוגה של הספרות.
+- **יעד-מגע 48dp**: כפתורי +/− ב-install-studio עטופים ב-`SizedBox(48,48)`+`Center`+`HitTestBehavior.opaque` — אזור-הלחיצה גדל לתקן-הנגישות, המראה (האייקון) זהה.
+- **טוקן-צבע**: `Color(0xFFAAAAAA)`→`BsTokens.mutedLight` (×3, store) — אחידות עם שאר ה-muted, הפרש-גוון מינימלי.
+- **כפתור-יציאה**: ב-`docs_readiness_gate` נוסף AppBar עם `‹ יציאה` (`maybePop`) — קודם המסך היה מלכודת ללא דרך-חזרה גלויה.
+
+**למה אין צילום-מסך:** widgets/מאפיינים סטנדרטיים בלבד (`Tooltip`/`textDirection`/`SizedBox`/`AppBar`/`TextButton`) — אין asset/layout/פונט חדש. ה-a11y-fields אומתו ע״י הסוויטה (+2700; מסכי-הפרופיל/טפסים נבנים בטסטי-מסך); ה-perf-memo ע״י `compat_memo_test` + 75 טסטי compat/system_division ירוקים.
+
+**הפיכות:** כל פריט עצמאי — הסרת `tooltip:`/`textDirection:`/ה-`SizedBox`-wrap/ה-AppBar מחזירה למצב הקודם; ה-memo נשלף ע״י החזרת הגוף ל-`return out;` (ללא ה-cache). אף שינוי לא נוגע ב-state שמור.

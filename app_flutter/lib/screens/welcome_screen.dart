@@ -446,6 +446,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             _name,
             'שם משתמש',
             Icons.person_outline,
+            // Board username is latin (see HelpTarget body) — render LTR.
+            ltr: true,
             autofillHints: const [AutofillHints.username],
             textInputAction: TextInputAction.next,
           ),

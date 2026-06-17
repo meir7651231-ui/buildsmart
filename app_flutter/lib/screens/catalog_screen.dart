@@ -895,6 +895,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                         onPressed: () => _toggleHidden(s),
                       ),
                       IconButton(
+                        tooltip: 'ערוך',
                         icon: const Icon(
                           Icons.edit_outlined,
                           color: Color(0xFF888888),
@@ -903,6 +904,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                         onPressed: () => _showItemPickerSheet(context, ref, s),
                       ),
                       IconButton(
+                        tooltip: 'מחק',
                         icon: const Icon(
                           Icons.delete_outline,
                           color: Color(0xFF888888),
@@ -2651,6 +2653,58 @@ String _treeNodeDesc(CatalogNode node, [WaterSystem? system]) {
   return '${node.brandIds.length} מותגים';
 }
 
+/// PERF: a tree row needs BOTH the count and the description for the SAME
+/// (node, system); computing them separately ran the (now-memoised)
+/// `nodeHasSystem` child filter twice. This bundles them and caches the pair
+/// per `node.id|system` so `_TreeCatRow` builds it ONCE — not twice per row,
+/// not again every frame. Identical values to calling the two helpers directly.
+final Map<String, ({int count, String desc})> _treeNodeSummaryCache = {};
+({int count, String desc}) _treeNodeSummary(CatalogNode node,
+    [WaterSystem? system]) {
+  final key = '${node.id}|${system?.name ?? ''}';
+  return _treeNodeSummaryCache[key] ??= (
+    count: _treeNodeCount(node, system),
+    desc: _treeNodeDesc(node, system),
+  );
+}
+
+/// The engine-derived "נתוני קטלוג" facts a card shows for a product: each of
+/// these is an O(catalog)-scale sweep (`compatibleProductsFor` ≈ O(855);
+/// `installKitFor` + `variantSiblingsCountFor` touch the whole catalog), so the
+/// card's Builder recomputed all six on every setState (filter chip, depth
+/// toggle, …). They depend ONLY on the product, so we bundle and cache them
+/// keyed on sku — byte-identical to calling the helpers inline (same pure
+/// inputs → same outputs), just computed once per SKU.
+class _CardCatalogData {
+  _CardCatalogData(LipskeyCatalogProduct prod)
+      : spec = engineeringSpecFor(prod),
+        price = priceFor(prod),
+        compat = compatibleProductsFor(prod),
+        finder = finderGroupFor(prod),
+        kit = installKitFor(prod),
+        variants = variantSiblingsCountFor(prod),
+        readiness = cardReadinessScore(prod);
+
+  final ({
+    String material,
+    String? pressureRating,
+    double maxTempC,
+    String waterSystem,
+    String endsSummary,
+    double? minBoreMm,
+  })? spec;
+  final int? price;
+  final List<LipskeyCatalogProduct> compat;
+  final ({String emoji, String label})? finder;
+  final ({int must, int optional, int tools})? kit;
+  final int variants;
+  final ({int score, String label, int breadth, int depth}) readiness;
+}
+
+final Map<String, _CardCatalogData> _cardCatalogDataCache = {};
+_CardCatalogData _cardCatalogDataFor(LipskeyCatalogProduct prod) =>
+    _cardCatalogDataCache[prod.sku] ??= _CardCatalogData(prod);
+
 class _TreeDrill extends ConsumerWidget {
   const _TreeDrill({required this.path});
   final List<CatalogNode> path;
@@ -3345,8 +3399,11 @@ class _TreeCatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final count = _treeNodeCount(node, system);
-    final desc = _treeNodeDesc(node, system);
+    // PERF: count + desc for this (node, system) computed once and cached,
+    // instead of two passes over the children per row, every frame.
+    final summary = _treeNodeSummary(node, system);
+    final count = summary.count;
+    final desc = summary.desc;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -4742,12 +4799,16 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   final prod =
                       ref.read(catalogRepositoryProvider).productForBrand(brand);
                   if (prod == null) return const SizedBox.shrink();
-                  final spec = engineeringSpecFor(prod);
-                  final price = priceFor(prod);
-                  final compat = compatibleProductsFor(prod);
-                  final finder = finderGroupFor(prod);
-                  final kit = installKitFor(prod);
-                  final variants = variantSiblingsCountFor(prod);
+                  // PERF: the six engine sweeps below are pure in `prod`, so the
+                  // bundle is computed once per SKU and reused across setState
+                  // rebuilds instead of recomputed every time.
+                  final data = _cardCatalogDataFor(prod);
+                  final spec = data.spec;
+                  final price = data.price;
+                  final compat = data.compat;
+                  final finder = data.finder;
+                  final kit = data.kit;
+                  final variants = data.variants;
                   // Roadmap step 95 — expert/simple depth toggle (persisted).
                   final expert =
                       ref.watch(cardDetailModeProvider) == CardDetailMode.expert;
@@ -4767,7 +4828,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             // Roadmap step 30 — card data readiness score
                             // (polish E — colorised by band 🟢/🟡/🔴).
                             Builder(builder: (_) {
-                              final s = cardReadinessScore(prod);
+                              final s = data.readiness;
                               final c = scoreBandColors(s.score);
                               return Container(
                                 padding: const EdgeInsets.symmetric(
@@ -5388,7 +5449,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         // Roadmap steps 71/72/74 — assign to a project.
                         Builder(builder: (_) {
                           const proj = 'הפרויקט שלי';
-                          final loc = finderGroupFor(prod)?.label ?? 'כללי';
+                          final loc = data.finder?.label ?? 'כללי';
                           ProjectItem mk(String l) => ProjectItem(
                               project: proj,
                               location: l,

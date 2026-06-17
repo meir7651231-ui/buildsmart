@@ -5,6 +5,8 @@
 // the shared LipskeyProductsList so cards behave like the rest of the catalog.
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart'
+    show WaterSystem;
 import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
@@ -417,6 +419,66 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   String? _letter;
   String? _wall;
 
+  // Memo of the system-filtered group pool. `filterBySystem(_productsForGroup(g))`
+  // is a full O(catalog) scan, but it depends ONLY on the active group + system
+  // filter — NOT on the chip selections (_size/_angle/_sub/_letter/_wall) that
+  // setState on every tap. Cache it keyed on (group, systemFilter) so toggling a
+  // chip reuses the same base instead of rescanning the catalog each build.
+  FinderGroup? _baseGroup;
+  WaterSystem? _baseSystem;
+  List<LipskeyCatalogProduct>? _baseCache;
+
+  List<LipskeyCatalogProduct> _baseFor(FinderGroup g, WaterSystem? systemFilter) {
+    if (_baseCache != null &&
+        identical(_baseGroup, g) &&
+        _baseSystem == systemFilter) {
+      return _baseCache!;
+    }
+    _baseGroup = g;
+    _baseSystem = systemFilter;
+    return _baseCache = filterBySystem(_productsForGroup(g), systemFilter);
+  }
+
+  // Per-(systemFilter) tally of how many in-system products each `categoryHe`
+  // has — built ONCE per system from a single catalog pass, so `_typeList` can
+  // size all 12 group badges by summing each group's categories instead of
+  // re-scanning the whole catalog 12× (filterBySystem ∘ _productsForGroup per
+  // group). Byte-identical: filtering-then-grouping == grouping-then-filtering.
+  WaterSystem? _catCountSystem;
+  Map<String, int>? _catCountCache;
+
+  Map<String, int> _categoryCountsFor(WaterSystem? systemFilter) {
+    if (_catCountCache != null && _catCountSystem == systemFilter) {
+      return _catCountCache!;
+    }
+    final counts = <String, int>{};
+    for (final p
+        in filterBySystem(catalogRepo().allProducts(), systemFilter)) {
+      counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+    }
+    _catCountSystem = systemFilter;
+    return _catCountCache = counts;
+  }
+
+  /// In-system product count for [g] — sums the per-category tally so it avoids
+  /// the old per-group `filterBySystem(_productsForGroup(g))` rescan. Catch-all
+  /// (`g.cats` empty) sums every category not claimed by another group, exactly
+  /// as `_productsForGroup` selects them.
+  int _groupCount(FinderGroup g, Map<String, int> catCounts) {
+    if (g.cats.isEmpty) {
+      var n = 0;
+      catCounts.forEach((cat, c) {
+        if (!_claimedCats.contains(cat)) n += c;
+      });
+      return n;
+    }
+    var n = 0;
+    for (final c in g.cats) {
+      n += catCounts[c] ?? 0;
+    }
+    return n;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_group == null) return _typeList();
@@ -425,7 +487,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     // catalogSystemFilterProvider, so the finder's whole pool — subs, narrow
     // chips, results — derives from the filtered base.
     final systemFilter = ref.watch(catalogSystemFilterProvider);
-    final base = filterBySystem(_productsForGroup(_group!), systemFilter);
+    final base = _baseFor(_group!, systemFilter);
     final subs = _subsFor(base);
     FinderSub? sel;
     for (final s in subs) {
@@ -602,11 +664,14 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   // ── step 1: type rows — same WhatsApp-style row as _CatalogList ──────────
   Widget _typeList() {
     // Scope to the active water system (Benzi #1, option 2): hide groups with no
-    // products in it, and show the in-system count.
+    // products in it, and show the in-system count. The count comes from a
+    // single per-category tally (built once per system) summed per group —
+    // instead of one full catalog scan per group (was ≈12×O(catalog) per build).
     final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final catCounts = _categoryCountsFor(systemFilter);
     final groups = <(FinderGroup, int)>[];
     for (final g in kFinderGroups) {
-      final n = filterBySystem(_productsForGroup(g), systemFilter).length;
+      final n = _groupCount(g, catCounts);
       if (n > 0) groups.add((g, n));
     }
     return ListView.separated(

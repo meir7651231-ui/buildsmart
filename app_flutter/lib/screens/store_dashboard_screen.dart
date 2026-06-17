@@ -1549,6 +1549,7 @@ class _SupplierSettingsScreenState
               hint: '9 ספרות...',
               value: _businessId,
               keyboardType: TextInputType.number,
+              textDirection: TextDirection.ltr,
               // task #64: format-only check — uniqueness deferred to Firebase.
               errorText:
                   _businessId.trim().isEmpty || validBusinessId(_businessId)
@@ -1561,6 +1562,7 @@ class _SupplierSettingsScreenState
               hint: '05X-XXXXXXX',
               value: _phone,
               keyboardType: TextInputType.phone,
+              textDirection: TextDirection.ltr,
               errorText:
                   _phone.trim().isEmpty || validIsraeliMobile(_phone)
                       ? null
@@ -1670,6 +1672,7 @@ class _ProfileField extends StatefulWidget {
     this.errorText,
     this.keyboardType,
     this.maxLength,
+    this.textDirection = TextDirection.rtl,
   });
 
   final String label;
@@ -1677,6 +1680,10 @@ class _ProfileField extends StatefulWidget {
   final String value;
   final String? errorText;
   final TextInputType? keyboardType;
+
+  /// RTL for Hebrew text (the default); LTR for digit/phone/number fields
+  /// (ח.פ, טלפון) so the latin digits render left-to-right.
+  final TextDirection textDirection;
 
   /// F-41 — hard input bound (enforced by a [LengthLimitingTextInputFormatter]
   /// too); null = unbounded (the legacy behavior).
@@ -1717,7 +1724,7 @@ class _ProfileFieldState extends State<_ProfileField> {
         controller: _controller,
         focusNode: _focus,
         keyboardType: widget.keyboardType,
-        textDirection: TextDirection.rtl,
+        textDirection: widget.textDirection,
         onChanged: widget.onChanged,
         maxLength: widget.maxLength,
         inputFormatters:

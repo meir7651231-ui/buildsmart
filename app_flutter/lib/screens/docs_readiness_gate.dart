@@ -46,6 +46,33 @@ class DocsReadinessGate extends ConsumerWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
+        // '‹ יציאה' so a demo worker/courier who can't pass the docs gate is not
+        // trapped on it (only OS-back would otherwise escape). Navigation-only
+        // (Navigator.maybePop) — pops the board route back to the home shell;
+        // it does NOT log out (the board keeps its boardAuth session).
+        appBar: AppBar(
+          backgroundColor: BsTokens.cardLight,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          titleSpacing: BsTokens.space4,
+          title: const Text(
+            '🔒 מסמכים חסרים',
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              child: const Text(
+                '‹ יציאה',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+              ),
+            ),
+          ],
+        ),
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(BsTokens.space5),

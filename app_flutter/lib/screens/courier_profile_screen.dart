@@ -891,6 +891,8 @@ class _EditCourierProfileSheetState
                   TextField(
                     controller: _phone,
                     keyboardType: TextInputType.phone,
+                    // Latin digits render LTR (phone) under the RTL layout.
+                    textDirection: TextDirection.ltr,
                     onChanged: (_) {
                       if (_phoneError != null) {
                         setState(() => _phoneError = null);

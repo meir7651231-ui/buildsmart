@@ -1229,3 +1229,8 @@
 - **wire:** `main.dart` — import + `const ConnectionIndicator()` כ-child אחרון ב-`Stack` של `MaterialApp.builder` (אחרי `debugOverlayChildren`), בתוך מבנה `_AutoLogout`/Stack הקיים (ללא restructure).
 - **למה אין טסט חדש:** המסלול שכל טסט-widget בונה (flags OFF, אין Firebase) הוא ה-demo האינרטי שלא פותח listener — אין מה לנעוץ מעבר ל"לא קורס", וזה כבר מכוסה ע״י ה-gate הקיים (`+2699 -1`, אפס כשל חדש). ה-API של connectivity_plus 6.x (`List<ConnectivityResult>`) אומת מול ה-resolved 6.1.5.
 - **gate:** analyze **0 errors** · `flutter test` **+2699 -1** (baseline `worker_reports_drilldown_test.dart` בלבד; אומת נכשל בבידוד, לא קשור; הקובץ לא נגעת). **אין כשל חדש.** push רק ב"תתדחוף".
+
+## #quality-wave1 — memo `compatibleProductsFor` (per-SKU cache, byte-equivalent) — 2026-06-16
+- **ההלפר החדש:** `_compatCache` (`Map<String,List<LipskeyCatalogProduct>>`) ב-`related_info.dart` — `compatibleProductsFor(p)` מחזיר `_compatCache[p.sku] ??= (…גוף קיים…)`; טהור מעל קטלוג-`const`, וכל הקוראים read-only (אומת: 15 אתרי-קריאה — card/sheet/finder/tests — אף אחד לא מוטט את הרשימה המוחזרת, לכן שיתוף-instance בטוח).
+- **טסט-נעיצה:** `test/compat_memo_test.dart` — ה-load-bearing: `identical(compatibleProductsFor(p), compatibleProductsFor(p))` חייב `true` (proof שה-memo חי — רשימת `out` טרייה לעולם לא `identical` בלי ה-cache-store).
+- **mutation-verify:** baseline **+2 ירוק** → הזרקתי `return _compatCache[p.sku] = out;` → `return out;` (ה-cache-store הוסר) → טסט **אדום `+1 -1`** (`memo live` → `Expected: true / Actual: <false>`; טסט ה-empty-path נשאר ירוק כי `const []` קנוני ללא תלות ב-cache) → שחזור → **+2 ירוק**, RESTORED-IDENTICAL (אפס שארית MUTATION). analyze 0.

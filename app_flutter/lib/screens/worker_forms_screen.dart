@@ -229,12 +229,14 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
           'תעודת זהות (9 ספרות)',
           errorText: _errId,
           keyboardType: TextInputType.number,
+          ltr: true,
         ),
         _field(
           _phoneCtl,
           'טלפון נייד',
           errorText: _errPhone,
           keyboardType: TextInputType.phone,
+          ltr: true,
         ),
         _field(_specialtyCtl, 'מקצוע / התמחות'),
         Padding(
@@ -852,12 +854,16 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     String label, {
     String? errorText,
     TextInputType? keyboardType,
+    // LTR for the 101 digit fields (ת.ז, טלפון) so latin digits render
+    // left-to-right under the RTL layout; default stays RTL for Hebrew text.
+    bool ltr = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: TextField(
         controller: ctl,
         keyboardType: keyboardType,
+        textDirection: ltr ? TextDirection.ltr : null,
         onChanged: (_) => _touched101 = true,
         decoration: InputDecoration(
           labelText: label,

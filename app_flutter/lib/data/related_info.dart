@@ -84,6 +84,23 @@ LipskeyCatalogProduct? catalogProductForBrand(SmartBrand brand) =>
 LipskeyCatalogProduct? catalogProductForSmart(SmartProduct sp) =>
     sp.brands.isEmpty ? null : catalogProductForBrand(sp.recBrand);
 
+// ─── אינדקס משפחות וריאנטים (canonical-key → family size) ────────────────────
+// `productCanonicalKey` runs a `RegExp(r'\s+')` split per product, so counting a
+// product's family by rescanning all of `kCatalogProducts` per call is O(catalog)
+// with a regex on every element. Build the key→count tally ONCE (single
+// O(catalog) group-by) and look it up in O(1). Byte-equivalent: the count for a
+// key is exactly how many catalog rows share that canonical key.
+Map<String, int>? _canonKeyCount;
+Map<String, int> get _canonKeyCountIndex {
+  if (_canonKeyCount != null) return _canonKeyCount!;
+  final m = <String, int>{};
+  for (final p in kCatalogProducts) {
+    final k = productCanonicalKey(p);
+    m[k] = (m[k] ?? 0) + 1;
+  }
+  return _canonKeyCount = m;
+}
+
 // ─── פילטר מותג מהיר (Roadmap step 65) ──────────────────────────────────────
 /// Whether a brand's product is rated for hot water at [tempC] (default 60°C).
 /// Mirrors the engine rule: an unknown/spec-less brand is kept (not filtered
@@ -183,6 +200,14 @@ int compatibleProductsCount(LipskeyCatalogProduct p) {
   return n;
 }
 
+// ─── זיכרון תאימות (compatibleProductsFor memo) ─────────────────────────────
+// `compatibleProductsFor` is a pure function of the COMPILE-TIME-const catalog
+// (kVerifiedSpecs + the memoised `_skuIndex`), yet the card/sheet/finder call it
+// repeatedly for the same SKU — each call re-runs the O(catalog) mate-sweep plus
+// a sort. Memoise the result per SKU: byte-identical list (same elements, same
+// order). Never invalidated because the catalog is `const`.
+final Map<String, List<LipskeyCatalogProduct>> _compatCache = {};
+
 /// The actual list of products that attach to [p] directly, ordered so the
 /// most natural matches come first:
 ///   1. same material (brass↔brass before brass↔HDPE)
@@ -190,8 +215,10 @@ int compatibleProductsCount(LipskeyCatalogProduct p) {
 ///   3. same productType
 /// Within the same rank, products are kept in catalog order (stable).
 List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
+  final cached = _compatCache[p.sku];
+  if (cached != null) return cached;
   final mySpec = kVerifiedSpecs[p.sku];
-  if (mySpec == null) return const [];
+  if (mySpec == null) return _compatCache[p.sku] = const [];
   final myMat = mySpec.material;
   final myCat = p.categoryHe;
   final myType = p.productType ?? '';
@@ -226,7 +253,7 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
     // tie-break by catalog page so adjacent SKUs stay together
     return a.page.compareTo(b.page);
   });
-  return out;
+  return _compatCache[p.sku] = out;
 }
 
 /// The matched joint between [a] and [b] as structured data — the STRONGEST
@@ -434,14 +461,12 @@ String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
 /// How many catalog rows share [p]'s canonical key (same family, different
 /// attribute — size/color/model/subtype). Returns the FULL family size,
 /// including [p] itself. 1 means "no siblings".
-int variantSiblingsCountFor(LipskeyCatalogProduct p) {
-  final key = productCanonicalKey(p);
-  var n = 0;
-  for (final q in kCatalogProducts) {
-    if (productCanonicalKey(q) == key) n++;
-  }
-  return n;
-}
+int variantSiblingsCountFor(LipskeyCatalogProduct p) =>
+    // O(1) lookup via the memoised canonical-key tally (was an O(catalog)
+    // rescan with a `productCanonicalKey` regex per element). Byte-equivalent:
+    // a catalog [p] matches itself (count ≥ 1); a synthetic [p] not in the
+    // catalog has no key entry → 0, exactly as the old scan returned.
+    _canonKeyCountIndex[productCanonicalKey(p)] ?? 0;
 
 /// The actual variant family members of [p] — the products that share its
 /// canonical key. Includes [p] itself. Ordered by SKU so the result is stable.

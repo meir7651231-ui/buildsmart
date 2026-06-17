@@ -823,6 +823,8 @@ class _EditStoreProfileSheetState
                     controller: _phone,
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.next,
+                    // Latin digits render LTR (phone) under the RTL layout.
+                    textDirection: TextDirection.ltr,
                     onChanged: (_) {
                       if (_phoneError != null) {
                         setState(() => _phoneError = null);
@@ -851,6 +853,8 @@ class _EditStoreProfileSheetState
                   TextField(
                     controller: _bid,
                     keyboardType: TextInputType.number,
+                    // Latin digits render LTR (ח.פ) under the RTL layout.
+                    textDirection: TextDirection.ltr,
                     onChanged: (_) {
                       if (_bidError != null) {
                         setState(() => _bidError = null);

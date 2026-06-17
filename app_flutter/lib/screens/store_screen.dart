@@ -872,7 +872,7 @@ class _QuickAction extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 12),
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
           ),
         ],
       ),
@@ -1930,7 +1930,7 @@ class _SmartCartRow extends ConsumerWidget {
                       child: Text(
                         '${a.name} × ${a.qty}',
                         style: const TextStyle(
-                          color: Color(0xFFAAAAAA),
+                          color: BsTokens.mutedLight,
                           fontSize: 12,
                         ),
                       ),
@@ -3133,6 +3133,7 @@ class _CartActionsRow extends ConsumerWidget {
                                   ),
                                 ),
                                 trailing: IconButton(
+                                  tooltip: 'מחק',
                                   icon: const Icon(
                                     Icons.delete_outline,
                                     color: Color(0xFF666666),
@@ -3442,7 +3443,7 @@ class _ServiceSheet extends StatelessWidget {
                       : Text(
                         r.sub,
                         style: const TextStyle(
-                          color: Color(0xFFAAAAAA),
+                          color: BsTokens.mutedLight,
                           fontSize: 12,
                         ),
                       ),

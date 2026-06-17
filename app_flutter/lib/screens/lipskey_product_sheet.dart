@@ -1857,6 +1857,41 @@ String _formatSpecValue(
 class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
   _StripKind? _open;
 
+  // Per-product memo of the engine-derived strip facts. Each of these is an
+  // O(catalog)-scale sweep (compatibleProductsCount ≈ O(855); installKitFor +
+  // variantSiblingsCountFor touch the whole catalog), so recomputing them on
+  // every build() — including each settings change watched in the price strip —
+  // was pure waste. They depend ONLY on the product, so we cache them keyed on
+  // sku and recompute only when the parent swaps to a different product. Byte-
+  // identical to calling the helpers inline (same pure inputs → same outputs).
+  String? _factsSku;
+  late ({String emoji, String label})? _finder;
+  late int _compat;
+  late ({int must, int optional, int tools})? _kit;
+  late int _famCount;
+  late List<({String label, String reason})> _compliance;
+  late ({
+    String material,
+    String? pressureRating,
+    double maxTempC,
+    String waterSystem,
+    String endsSummary,
+    double? minBoreMm,
+  })? _spec;
+
+  /// Recompute the cached per-product facts when [p] differs from the cached
+  /// product (or on first build). Same single source as the inline calls.
+  void _ensureFacts(LipskeyCatalogProduct p) {
+    if (_factsSku == p.sku) return;
+    _factsSku = p.sku;
+    _finder = finderGroupFor(p);
+    _compat = compatibleProductsCount(p);
+    _kit = installKitFor(p);
+    _famCount = variantSiblingsCountFor(p);
+    _compliance = complianceTriggersFor(p);
+    _spec = engineeringSpecFor(p);
+  }
+
   @override
   void didUpdateWidget(covariant _QuickInfoStrips oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1873,10 +1908,11 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
-    final finder = finderGroupFor(p);
-    final compat = compatibleProductsCount(p);
-    final kit = installKitFor(p);
-    final famCount = variantSiblingsCountFor(p);
+    _ensureFacts(p);
+    final finder = _finder;
+    final compat = _compat;
+    final kit = _kit;
+    final famCount = _famCount;
 
     final rows = <_StripDef>[
       if (finder != null)
@@ -1915,20 +1951,20 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
           tint: const Color(0xFFC9A7FF),
         ),
       // ── New strips: compliance · engineering spec · price ─────────
-      if (complianceTriggersFor(p).isNotEmpty)
+      if (_compliance.isNotEmpty)
         _StripDef(
           kind: _StripKind.compliance,
           emoji: '🛡',
           label: 'תקינות',
-          value: '${complianceTriggersFor(p).length} דרישות',
+          value: '${_compliance.length} דרישות',
           tint: const Color(0xFFEF4444),
         ),
-      if (engineeringSpecFor(p) != null)
+      if (_spec != null)
         _StripDef(
           kind: _StripKind.spec,
           emoji: '📊',
           label: 'מפרט הנדסי',
-          value: _formatSpecValue(engineeringSpecFor(p)!),
+          value: _formatSpecValue(_spec!),
           tint: const Color(0xFF8B5CF6),
         ),
       if (priceFor(p) != null)

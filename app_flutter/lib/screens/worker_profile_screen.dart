@@ -1117,11 +1117,15 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     TextInputType? keyboardType,
     VoidCallback? onClearError,
     TextInputAction textInputAction = TextInputAction.next,
+    // LTR for digit/phone/number fields (phone, ת.ז) so latin digits render
+    // left-to-right under the sheet's RTL Directionality; default stays RTL.
+    bool ltr = false,
   }) {
     return TextField(
       controller: ctl,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
+      textDirection: ltr ? TextDirection.ltr : null,
       onChanged: onClearError == null ? null : (_) => onClearError(),
       decoration: InputDecoration(
         labelText: label,
@@ -1237,6 +1241,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     'טלפון נייד',
                     hintText: '050-1234567',
                     keyboardType: TextInputType.phone,
+                    ltr: true,
                     errorText: _phoneError,
                     onClearError: () {
                       if (_phoneError != null) {
@@ -1250,6 +1255,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     _idNumber,
                     'תעודת זהות (9 ספרות)',
                     keyboardType: TextInputType.number,
+                    ltr: true,
                     errorText: _idError,
                     onClearError: () {
                       if (_idError != null) {
@@ -1284,6 +1290,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     'טלפון',
                     hintText: '050-1234567',
                     keyboardType: TextInputType.phone,
+                    ltr: true,
                     errorText: _emPhoneError,
                     textInputAction: TextInputAction.done,
                     onClearError: () {
