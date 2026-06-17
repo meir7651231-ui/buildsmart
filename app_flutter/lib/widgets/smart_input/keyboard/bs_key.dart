@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/key_models.dart';
@@ -17,11 +18,29 @@ class BsKey extends StatelessWidget {
   /// accent-legible foreground.
   final bool isAccent;
 
+  /// Optional product-thumbnail asset shown BEFORE the text label.
+  ///
+  /// Null is the default EVERYWHERE — every existing call site omits it, so the
+  /// key renders byte-identically to before (a single centered [Text] / [Icon],
+  /// no structural change). Only the word-finder's FINAL selection keys (a
+  /// ShowProducts / connections product key) pass a real per-product crop here.
+  /// When non-null AND the key is a text kind, [_content] becomes a centered
+  /// Row: a small rounded thumbnail, a hair gap, then the SAME [Text] label
+  /// (kept as a plain `Text` so `find.widgetWithText(BsKey, label)` still
+  /// matches). An icon-kind key NEVER takes a leading image — its early `Icon`
+  /// return in [_content] runs first and ignores this entirely.
+  // OWNER-REVIEW: the thumbnail SIZE (~32 logical px), POSITION (leading, before
+  // the label), and FORMAT (rounded, BoxFit.cover, cacheWidth ~64) are all
+  // reversible defaults — pass null (the default) anywhere to drop the image and
+  // fall back to the plain text key.
+  final String? leadingImageAsset;
+
   const BsKey({
     super.key,
     required this.model,
     required this.onTap,
     this.isAccent = false,
+    this.leadingImageAsset,
   });
 
   @override
@@ -73,12 +92,18 @@ class BsKey extends StatelessWidget {
   }
 
   /// Tool kinds render a Material icon; symbols and text kinds render the label.
+  ///
+  /// When [leadingImageAsset] is non-null on a TEXT kind, the label is preceded
+  /// by a small rounded product thumbnail in a centered [Row]. The icon branch
+  /// runs FIRST, so an icon-kind key never takes a leading image. When the asset
+  /// is null the original single-[Text] body is returned UNCHANGED (no Row, no
+  /// wrapping) so every plain key in the app stays byte-identical.
   Widget _content(Color fg) {
     final IconData? icon = _iconFor(model.kind);
     if (icon != null) {
       return Icon(icon, size: BsTokens.dialIconSize, color: fg);
     }
-    return Text(
+    final label = Text(
       model.label,
       textAlign: TextAlign.center,
       style: TextStyle(
@@ -86,6 +111,32 @@ class BsKey extends StatelessWidget {
         color: fg,
         fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
       ),
+    );
+    final asset = leadingImageAsset;
+    if (asset == null) return label;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _Thumb(asset),
+        const SizedBox(width: BsTokens.space1),
+        // The label stays a plain [Text] (so text-based finds keep matching) but
+        // is made [Flexible] with two lines + ellipsis so a long label beside a
+        // thumbnail wraps/clips instead of overflowing a narrow key.
+        Flexible(
+          child: Text(
+            model.label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 17,
+              color: fg,
+              fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -130,5 +181,53 @@ class BsKey extends StatelessWidget {
       case KeyKind.punct:
         return model.label;
     }
+  }
+}
+
+/// A small rounded product thumbnail shown leading a [BsKey]'s label.
+///
+/// Resolves the image through the app's single source of truth
+/// [resolveProductImage] — the SAME helper every other product surface uses — so
+/// it streams from the Cloudflare R2 CDN (or the bundled asset when no CDN base
+/// is configured). It deliberately does NOT use a raw `Image.asset`: the app
+/// does not bundle the product crops, so a raw asset load would silently
+/// collapse to nothing in a release build (the resolver-bypass class this
+/// avoids). The provider is wrapped in a [ResizeImage] at [_cacheWidth] so a
+/// list of thumbnails never decodes at full resolution, and the `errorBuilder`
+/// returns an empty `SizedBox.shrink` so a missing, corrupt, or not-yet-fetched
+/// image NEVER throws and NEVER overflows the key — in the widget-test
+/// environment the bytes do not decode, so this is the path that keeps those
+/// tests green while `find.byType(Image)` still sees the Image widget.
+// OWNER-REVIEW: size / radius / cacheWidth are reversible visual defaults.
+class _Thumb extends StatelessWidget {
+  const _Thumb(this.asset);
+
+  final String asset;
+
+  static const double _size = 32; // logical px — small, beside the label
+  static const double _radius = 6;
+  static const int _cacheWidth = 64; // ~2x _size, memory-frugal decode
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(_radius),
+      child: Image(
+        // Route through the app image resolver (CDN + on-device cache, or the
+        // bundled asset when no CDN base is set) — NOT a raw Image.asset, which
+        // would find no bundled crop and vanish in a release build. ResizeImage
+        // caps decode memory for a list of small thumbnails.
+        image: ResizeImage(resolveProductImage(asset), width: _cacheWidth),
+        width: _size,
+        height: _size,
+        fit: BoxFit.cover,
+        // Decorative beside the text label — the key's Semantics carries meaning.
+        excludeFromSemantics: true,
+        // A missing / undecodable / not-yet-fetched image collapses to nothing —
+        // never a crash, never an overflow. Critical for tests and for products
+        // with no photo.
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      ),
+    );
   }
 }

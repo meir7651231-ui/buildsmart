@@ -77,6 +77,12 @@ class WordKeyboard extends StatelessWidget {
             // KeyKind.letter → BsKey renders the label as plain text, no icon.
             model: KbKey(word.label),
             isAccent: identical(word, primary),
+            // Forward the optional product thumbnail. Null on every word / chip
+            // key (the default), so those keys stay plain text — only a final
+            // selection key (a product key with a real crop) draws a thumbnail.
+            // The trailing הכל/הקלדה utility row builds its own bare KbKeys and
+            // never passes this, so it always stays clean.
+            leadingImageAsset: word.imageAsset,
             onTap: () => onWordTap(word),
           ),
         ),

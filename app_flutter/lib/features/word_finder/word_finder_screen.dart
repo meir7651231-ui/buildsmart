@@ -280,6 +280,24 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// / [WordKey] payloads in [_keysFor]), never on this label.
   String _productLabel(LipskeyCatalogProduct p) => quickLabel(p);
 
+  /// The small product-thumbnail asset for a FINAL selection key, or null.
+  ///
+  /// Returns the product's [LipskeyCatalogProduct.imageAsset] ONLY when its
+  /// underlying [LipskeyCatalogProduct.imageFile] is a real per-product CROP — i.e. non-null and NOT a
+  /// full catalog-page image (those filenames start with `page_`, the same
+  /// convention `_imgPath` uses to route into `pages/`). A zoomed-out full
+  /// catalog page is useless as a tiny thumbnail (the product is a speck on it),
+  /// so such products show TEXT ONLY (null → no thumbnail). Null is also the
+  /// result for any product with no image at all — the safe default everywhere.
+  // OWNER-REVIEW: gating thumbnails to real crops (excluding full `page_` images)
+  // is a reversible product call — return p.imageAsset unconditionally to show a
+  // (cropped-to-cover) page image too.
+  String? _thumbAssetFor(LipskeyCatalogProduct p) {
+    final file = p.imageFile;
+    if (file == null || file.startsWith('page_')) return null;
+    return p.imageAsset;
+  }
+
   /// Resolve a tapped product key's PAYLOAD (a sku) back to the product in
   /// [products]. Keying on the unique sku — not the display label — is what lets
   /// two distinct cards that share a plain word (e.g. 'ונטיל' = skus
@@ -467,11 +485,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       final labels = distinctSelectionLabels(q.products);
       return [
         for (final p in q.products)
-          WordKey(labels[p.sku] ?? _productLabel(p), payload: p.sku),
+          WordKey(
+            labels[p.sku] ?? _productLabel(p),
+            payload: p.sku,
+            // FINAL selection key → carry the small product thumbnail (a real
+            // crop only; null for page-image / image-less products). The text
+            // label is unchanged, so text-based finds still match the key.
+            imageAsset: _thumbAssetFor(p), // OWNER-REVIEW: product thumbnails
+          ),
         // 7th engine: when a reached product is a valid connection anchor, offer
         // a plain-text (icon-free) 'מה מתחבר לזה?' key that opens the parts-that-
         // connect view. Appended LAST so it never displaces a product key. Its
-        // payload is the literal 'connect' sentinel (not a sku).
+        // payload is the literal 'connect' sentinel (not a sku). It carries NO
+        // imageAsset — a navigation key stays clean (text only).
         if (_connectionEntryAnchor != null)
           const WordKey(kConnectionsKey, payload: 'connect'), // OWNER-REVIEW copy
       ];
@@ -496,7 +522,13 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     final labels = distinctSelectionLabels(parts);
     return [
       for (final p in parts)
-        WordKey(labels[p.sku] ?? _productLabel(p), payload: p.sku),
+        WordKey(
+          labels[p.sku] ?? _productLabel(p),
+          payload: p.sku,
+          // FINAL selection key (a compatible part) → carry its product
+          // thumbnail (real crop only; null otherwise). Label unchanged.
+          imageAsset: _thumbAssetFor(p), // OWNER-REVIEW: product thumbnails
+        ),
     ];
   }
 

@@ -858,4 +858,129 @@ void main() {
     expect(find.widgetWithText(BsKey, 'הקלדה'), findsOneWidget,
         reason: 'the normal cascade keeps the הקלדה utility key');
   });
+
+  // ── Test 14: product thumbnails — ShowProducts keys carry a thumbnail Image,
+  //    the opening AskWords word keys stay clean (image-free) ─────────────────
+
+  testWidgets(
+      'thumbnails: a ShowProducts product key contains an Image while an '
+      'AskWords word key does not (word keys stay clean)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // The opening AskWords screen is entirely image-free: word keys are plain
+    // text (no thumbnail), and the only other widgets are text/util keys.
+    expect(state.currentQuestion, isA<AskWords>(),
+        reason: 'the opening question must be a word ask');
+    expect(find.byType(Image), findsNothing,
+        reason: 'the opening word screen shows NO thumbnails — word keys are '
+            'plain text only (clean by default)');
+
+    // Mirror the product/`imageFile` rule the screen uses (`_thumbAssetFor`): a
+    // thumbnail is shown ONLY for a real per-product crop — imageFile non-null
+    // and NOT a full `page_` catalog image. Used to compute the EXACT number of
+    // thumbnail Images the converged product list should render.
+    bool hasThumb(LipskeyCatalogProduct p) {
+      final f = p.imageFile;
+      return f != null && !f.startsWith('page_');
+    }
+
+    // DATA-DRIVEN seed (same pure-simulation approach as Test 8/11): pick an
+    // offered first-question word whose "tap the first chip each turn" dive
+    // reaches a ShowProducts pick that contains AT LEAST ONE thumbnail-bearing
+    // product — so the assertion below actually observes a rendered Image.
+    final firstQ = state.currentQuestion as AskWords;
+    const tapBound = 6;
+    String? seedWord;
+    List<LipskeyCatalogProduct> reachedProducts = const [];
+    for (final e in firstQ.words) {
+      var pool = resolveWord(e.word, wordFinderLexicon);
+      if (pool.length < 2 || distinctCardCount(pool) < 2) continue;
+      final stack = <NewbieStep>[
+        NewbieStep(
+          axisLabel: 'דגם',
+          chipLabel: e.word,
+          predicate: (_) => true,
+          crumbWord: e.word,
+        ),
+      ];
+      List<LipskeyCatalogProduct>? show;
+      for (var i = 0; i < tapBound; i++) {
+        final q = offerQuestion(pool, stack, wordFinderLexicon, null);
+        if (q is ShowProducts) {
+          show = q.products;
+          break;
+        }
+        if (q is! AskAxis || q.chips.isEmpty) break;
+        final chip = q.chips.first;
+        pool = pool.where((p) => productHasChip(p, chip)).toList();
+        stack.add(NewbieStep(
+          axisLabel: q.axisLabel,
+          chipLabel: chip,
+          predicate: (p) => productHasChip(p, chip),
+          crumbWord: chip,
+        ));
+      }
+      if (show != null && show.any(hasThumb)) {
+        seedWord = e.word;
+        reachedProducts = show;
+        break;
+      }
+    }
+    expect(seedWord, isNotNull,
+        reason: 'kDivePool must offer a word whose dive reaches a ShowProducts '
+            'pick containing at least one real-crop product (a thumbnail)');
+    final w = seedWord!;
+
+    // Replay through the REAL UI to the ShowProducts pick.
+    await tester.tap(find.widgetWithText(BsKey, w).first);
+    await tester.pumpAndSettle();
+    var taps = 0;
+    while (state.currentQuestion is! ShowProducts && taps < tapBound) {
+      final q = state.currentQuestion as NewbieQuestion;
+      if (q is! AskAxis || q.chips.isEmpty) break;
+      await tester.tap(find.widgetWithText(BsKey, q.chips.first).first);
+      await tester.pumpAndSettle();
+      taps++;
+    }
+    final reached = state.currentQuestion as NewbieQuestion;
+    expect(reached, isA<ShowProducts>(),
+        reason: 'the chosen seed must converge on a ShowProducts pick');
+    final products = (reached as ShowProducts).products;
+    // The live converged list matches the pure simulation that chose the seed.
+    expect(products.map((p) => p.sku).toSet(),
+        reachedProducts.map((p) => p.sku).toSet(),
+        reason: 'the replayed dive reaches the same ShowProducts list');
+
+    // The number of thumbnail Images on screen equals the number of converged
+    // products that carry a real crop — proving product keys (and ONLY product
+    // keys) render a thumbnail. In the test environment the asset bytes never
+    // decode, so each Image paints its errorBuilder SizedBox.shrink, but the
+    // Image WIDGET stays mounted → find.byType(Image) is a resilient presence
+    // check (no pixels asserted), exactly the brittle-proof approach required.
+    final expectedThumbs = products.where(hasThumb).length;
+    expect(expectedThumbs, greaterThan(0),
+        reason: 'the chosen ShowProducts list has at least one thumbnail');
+    expect(find.byType(Image), findsNWidgets(expectedThumbs),
+        reason: 'each real-crop product key renders exactly one thumbnail '
+            'Image; non-crop / navigation / util keys render none');
+
+    // Structural guard: a thumbnail Image is a DESCENDANT of a product BsKey.
+    // Pick the first thumbnail-bearing product and assert its key contains an
+    // Image (it still exposes its plain text label, so widgetWithText matches).
+    final showLabels = distinctSelectionLabels(products);
+    final withThumb = products.firstWhere(hasThumb);
+    final thumbLabel = showLabels[withThumb.sku]!;
+    final thumbKey = find.widgetWithText(BsKey, thumbLabel);
+    expect(thumbKey, findsWidgets,
+        reason: 'a real-crop product key still exposes its plain text label');
+    expect(
+      find.descendant(of: thumbKey.first, matching: find.byType(Image)),
+      findsOneWidget,
+      reason: 'the thumbnail Image is a descendant of the product key',
+    );
+  });
 }
