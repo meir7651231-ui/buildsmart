@@ -14,6 +14,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/smart_input/nav/category_suggestion_strip.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -470,6 +471,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _SearchBar(),
+                        CategorySuggestionStrip(),
                         _SectionChipsRow(),
                         _SummaryRow(),
                         _QuickActionsRow(),

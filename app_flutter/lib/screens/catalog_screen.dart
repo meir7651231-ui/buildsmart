@@ -16,6 +16,12 @@ import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+// OWNER-REVIEW · kWordFinder seam — flag-gated in-app entry to WordFinderHome.
+// Additive only: when kWordFinderFlag is OFF the section pill never renders and
+// the _CatalogBody routing branch is unreachable, so catalog behaviour is
+// byte-identical for normal users.
+import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
+import 'package:buildsmart/features/word_finder/word_finder_home.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
@@ -41,6 +47,7 @@ import 'package:buildsmart/state/display_temp.dart';
 import 'package:buildsmart/state/cart_safety.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
@@ -618,6 +625,10 @@ class _SectionChipsRow extends ConsumerWidget {
     final active   = ref.watch(catalogSectionProvider);
     final sections = ref.watch(catalogSectionsListProvider);
     final hidden   = ref.watch(hiddenCatalogSectionsProvider);
+    // OWNER-REVIEW · kWordFinder seam — render the 'מאתר חכם' pill ONLY when the
+    // flag is on. OFF (default) → no extra pill, byte-identical chips row.
+    final wordFinderOn =
+        ref.watch(featureFlagsProvider).contains(kWordFinderFlag);
 
     void activate(String label) =>
         ref.read(catalogSectionProvider.notifier).state = label;
@@ -742,6 +753,17 @@ class _SectionChipsRow extends ConsumerWidget {
                 active: active == s,
                 onTap: () => activate(s),
                 onLongPress: () => showLongPressMenu(context, s),
+              ),
+            ],
+            // OWNER-REVIEW · kWordFinder seam — flag-gated 'מאתר חכם' pill.
+            // Visible only when kWordFinderFlag is on; like 'בית' it carries no
+            // long-press manage menu (it is not a user-defined list).
+            if (wordFinderOn) ...[
+              const SizedBox(width: 8),
+              _SectionPill(
+                label: 'מאתר חכם',
+                active: active == 'מאתר חכם',
+                onTap: () => activate('מאתר חכם'),
               ),
             ],
             const SizedBox(width: 8),
@@ -2266,6 +2288,11 @@ class _CatalogBody extends ConsumerWidget {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'בית') return SmartHomeBody(scrollCtrl: scrollCtrl);
     if (active == 'מאתר') return const FinderScreen();
+    // OWNER-REVIEW · kWordFinder seam — routes the flag-gated 'מאתר חכם' pill to
+    // the two-mode word-finder host. Unreachable when kWordFinderFlag is off
+    // (the pill that sets this active section never renders), so this branch is
+    // inert by default. WordFinderHome also self-gates on the same flag.
+    if (active == 'מאתר חכם') return const WordFinderHome();
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
@@ -2497,6 +2524,24 @@ CatalogNode? _findCatalogTreeNodeByTitle(String title) {
     if (n.title == title) return n;
   }
   return null;
+}
+
+/// Smart-nav: switch to the catalog tab and drill into [categoryTitle], so a
+/// tapped category suggestion takes the user straight to those products.
+void openCatalogCategory(WidgetRef ref, String categoryTitle) {
+  ref.read(mainTabProvider.notifier).state = 0; // catalog tab
+  final node = _findCatalogTreeNodeByTitle(categoryTitle) ??
+      CatalogNode(
+        id: 'placeholder.$categoryTitle',
+        title: categoryTitle,
+        emoji: kCatalogCats
+            .firstWhere(
+              (c) => c.title == categoryTitle,
+              orElse: () => const Section(id: '', emoji: '', title: ''),
+            )
+            .emoji,
+      );
+  ref.read(catalogTreePathProvider.notifier).state = [node];
 }
 
 class _CatalogRow extends ConsumerWidget {
