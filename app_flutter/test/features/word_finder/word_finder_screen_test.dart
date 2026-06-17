@@ -577,4 +577,90 @@ void main() {
     expect(state.crumbs, crumbsBefore,
         reason: 'הכל adds no breadcrumb step');
   });
+
+  // ── Test 9: 7th engine — "מה מתחבר לזה" connections view ───────────────────
+
+  testWidgets(
+      'connections: opening an anchor shows compatible parts as keys (no icons), '
+      'back closes the view', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // A KNOWN valid anchor from the real pool: '217861' (PVC DN32 bottle trap),
+    // confirmed inCompat + hasSpec by dive_pool_test. Pulled live from kDivePool
+    // (no fabricated product). The connections view's entry key is only rendered
+    // inside a ShowProducts state, so we drive the view through the screen's
+    // @visibleForTesting hook (`showConnectionsForTest`) — the SAME method the
+    // 'מה מתחבר לזה?' key calls — rather than navigating the dive onto an anchor.
+    final anchor = kDivePool.firstWhere((p) => p.sku == '217861');
+    expect(isConnectionAnchor(anchor), isTrue,
+        reason: 'fixture must be a valid anchor');
+
+    // The parts the engine says connect — the EXPECTED on-screen product keys.
+    final parts = connectionsFor(anchor);
+    expect(parts, isNotEmpty,
+        reason: 'a valid anchor must yield at least one compatible part');
+
+    // Open the connections view.
+    state.showConnectionsForTest(anchor);
+    await tester.pumpAndSettle();
+
+    expect(state.connectionsViewOpen as bool, isTrue,
+        reason: 'the hook opens the connections view');
+    // The view's header renders (OWNER-REVIEW copy).
+    expect(find.text(kConnectionsHeader), findsWidgets,
+        reason: 'the connections view shows its header');
+    // The compatible parts render as plain word-keys (icon-free BsKey idiom).
+    final firstPartLabel = parts.first.nameHe.trim();
+    expect(find.widgetWithText(BsKey, firstPartLabel), findsWidgets,
+        reason: 'each compatible part renders as a plain product key');
+    // A WordKeyboard carries the part keys (reusing the existing key idiom).
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'the parts are rendered via the WordKeyboard key idiom');
+    // The shown set equals the engine's connectionsFor (the screen adds no
+    // compat logic of its own).
+    final shown = (state.connectionsShown as List).cast<LipskeyCatalogProduct>();
+    expect(shown.map((p) => p.sku).toSet(),
+        parts.map((p) => p.sku).toSet(),
+        reason: 'the view shows exactly connectionsFor(anchor)');
+
+    // The view's back control closes it (a single back arrow tooltip is present;
+    // the breadcrumb back is absent because the dive stack is empty here).
+    final backBtn = find.byTooltip('חזרה');
+    expect(backBtn, findsOneWidget,
+        reason: 'the connections view offers a חזרה back control');
+    await tester.tap(backBtn);
+    await tester.pumpAndSettle();
+    expect(state.connectionsViewOpen as bool, isFalse,
+        reason: 'tapping back closes the connections view');
+  });
+
+  // ── Test 10: 7th engine — a non-anchor opens NO connections view ───────────
+
+  testWidgets('connections: a non-anchor product opens no view (guarded)',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // '171026' — a toilet seat ('מושבי אסלה'), deliberately without a verified
+    // spec → NOT an anchor. The screen's enter-guard must refuse to open the
+    // view (so a non-anchor can never present an empty/confusing connections UI).
+    final seat = kDivePool.firstWhere((p) => p.sku == '171026');
+    expect(isConnectionAnchor(seat), isFalse,
+        reason: 'fixture must be a non-anchor');
+
+    state.showConnectionsForTest(seat);
+    await tester.pumpAndSettle();
+
+    expect(state.connectionsViewOpen as bool, isFalse,
+        reason: 'opening connections for a non-anchor is a guarded no-op');
+    expect(find.text(kConnectionsHeader), findsNothing,
+        reason: 'no connections header for a non-anchor');
+  });
 }

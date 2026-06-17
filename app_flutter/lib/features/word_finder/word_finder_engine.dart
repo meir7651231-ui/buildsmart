@@ -23,10 +23,24 @@ library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart'
-    show kDivePool, offerAxis;
+    show divePoolIndex, kDivePool, offerAxis;
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show angleTokensIn, colorOptions, productHasChip, sizeTokensIn, wordOptions;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
+// The 7th engine ("מה מתחבר לזה" / connection-planner) reuses the REAL,
+// verified compatibility engine rather than re-deriving a parallel one — see
+// [connectionsFor]. This is the SAME function `install_engine`'s own
+// pathfinder calls, so the finder can never drift from the install logic.
+//
+// COUPLING NOTE (documented, same spirit as the `_size_norm` re-export this
+// file already depends on): `install_engine.dart` transitively imports
+// `package:flutter_riverpod` (it also declares the compat-screen's
+// StateProviders). That import is NOT used here — `connectionsFor` touches only
+// the pure `compatibleWith` transform over the const `kCompatCatalog`. The
+// engine was already non-runnable under a plain `dart test` (it pulls
+// `package:flutter/widgets` via `_size_norm`), so this adds no new test-harness
+// requirement: the finder's tests already run under `flutter_test`.
+import 'package:buildsmart/logic/install_engine.dart' show compatibleWith;
 import 'package:buildsmart/screens/_size_norm.dart'
     show parseAngleTokens, parseSizeTokens;
 
@@ -161,6 +175,26 @@ const String kFirstQuestion = 'מה אתה מחפש?';
 /// OWNER-REVIEW: default copy (was 'בחר מוצר'). At this step the cascade has
 /// converged to a short list — 'בחר את המוצר' signals the final pick.
 const String kPickProductQuestion = 'בחר את המוצר';
+
+/// 7th engine: the plain-text key that, on a reached anchor, opens the
+/// "parts that connect to this" view. Icon-free (rendered via the same BsKey
+/// letter idiom as every other word/chip key).
+///
+/// OWNER-REVIEW: default copy — the polished anchor affordance is owner-design.
+const String kConnectionsKey = 'מה מתחבר לזה?';
+
+/// 7th engine: the header shown above the compatible-parts list in the
+/// connections view.
+///
+/// OWNER-REVIEW: default copy.
+const String kConnectionsHeader = 'מה מתחבר לזה?';
+
+/// 7th engine: empty-state copy when a reached anchor has no compatible parts
+/// (rare — a valid anchor almost always mates something; shown defensively so
+/// the view is never a blank keyboard).
+///
+/// OWNER-REVIEW: default copy.
+const String kNoConnections = 'אין חלקים מתאימים';
 
 /// How many top words (by frequency) the first question offers.
 ///
@@ -477,3 +511,55 @@ List<LipskeyCatalogProduct> applyNarrow(
   String chipLabel,
 ) =>
     pool.where((p) => productHasChip(p, chipLabel)).toList();
+
+// ── 7th engine: CONNECTION-PLANNER ("מה מתחבר לזה") ─────────────────────────
+//
+// After the dive reaches a product, let the user see the parts that physically
+// CONNECT to it. This is a THIN, pure wrapper over the install engine's verified
+// `compatibleWith` — the finder adds no new compatibility logic of its own, so a
+// connection it offers is exactly a connection the install/path engine would
+// make. The only finder-side rule is the ANCHOR gate below.
+
+/// True when [anchor] is a VALID connection anchor: the finder will only offer
+/// "מה מתחבר לזה" for a product that the compatibility engine can reason about
+/// with TRUSTWORTHY geometry. PURE — reads only the const [divePoolIndex].
+///
+/// GATE (both required, mirroring `dive_pool.Membership`):
+///  • `inCompat` — the sku is in `kCompatCatalog`, the universe `compatibleWith`
+///    scans. A product outside it (a polyroll/huliot sku) can never appear as an
+///    anchor on either side of `canConnect`, so connections would be vacuous.
+///  • `hasSpec`  — the sku has a `kVerifiedSpec` (the SAME predicate
+///    `install_engine._usableConnector` uses). Without verified ends,
+///    `canConnect` would fall back to loose name-inference; we refuse to surface
+///    those as confident "this connects" claims to a non-technical user.
+///
+/// A sku the index doesn't know (not in the union pool) is NOT an anchor.
+bool isConnectionAnchor(LipskeyCatalogProduct anchor) {
+  final m = divePoolIndex[anchor.sku];
+  return m != null && m.inCompat && m.hasSpec;
+}
+
+/// The parts that CONNECT to [anchor] — the catalog products the install
+/// engine's verified `compatibleWith` says can physically join it, at [tempC]
+/// (default 20 °C = a cold line, where no temperature filtering applies). PURE
+/// (delegates to the memoized, const-data `compatibleWith`).
+///
+/// Returns EMPTY when [anchor] is not a valid anchor ([isConnectionAnchor] is
+/// false) — so a fixture/accessory/uncovered product yields no list rather than
+/// a misleading name-inference guess. When it IS an anchor, the result is
+/// exactly `compatibleWith(anchor)`: every product `p` in `kCompatCatalog` with
+/// `canConnect(anchor, p)` (the anchor itself is excluded — `canConnect` rejects
+/// `a.sku == b.sku`), ordered with same-category parts first (the order
+/// `compatibleWith` already applies).
+///
+/// This is the engine half of the 7th engine. The UI half (a flag-gated,
+/// icon-free 'מה מתחבר לזה?' affordance) lives in `word_finder_screen.dart`;
+/// the polished anchor UX is an OWNER-design decision and is deliberately left
+/// minimal here.
+List<LipskeyCatalogProduct> connectionsFor(
+  LipskeyCatalogProduct anchor, {
+  int tempC = 20,
+}) {
+  if (!isConnectionAnchor(anchor)) return const <LipskeyCatalogProduct>[];
+  return compatibleWith(anchor, tempC: tempC);
+}

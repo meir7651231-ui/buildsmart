@@ -82,6 +82,16 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   // back to plain base-pool order.
   String? _typedQuery;
 
+  /// 7th engine ("מה מתחבר לזה" / connection-planner) view-state. Non-null only
+  /// while the user is viewing the parts that connect to a reached anchor: it
+  /// holds the anchor whose connections are shown. When set, the keyboard area
+  /// renders the compatible parts (from [connectionsFor]) as plain product-keys
+  /// instead of the word/chip keyboard; tapping one opens the existing product
+  /// sheet (the same add-path as a reached product). Cleared by the back key and
+  /// by any dive reset. This is the MINIMAL surface — the polished anchor UX is
+  /// an OWNER-design decision (see the // OWNER-REVIEW affordance below).
+  LipskeyCatalogProduct? _connectionsAnchor;
+
   /// @visibleForTesting — when false, reaching a [Resolve] does NOT auto-open
   /// the real [showLipskeyProductSheet]. Production keeps this true (the flow
   /// ENDS by opening the sheet). A behavioral widget test flips it off so it can
@@ -200,8 +210,44 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     setState(() {
       stack.clear();
       _typedQuery = null;
+      _connectionsAnchor = null;
     });
   }
+
+  /// 7th engine: ENTER the "מה מתחבר לזה" view for [anchor] — show the parts that
+  /// connect to it. A no-op unless [anchor] is a valid connection anchor
+  /// ([isConnectionAnchor]); the caller only offers the affordance for anchors,
+  /// and this re-checks defensively so a non-anchor can never open an empty view.
+  void _showConnections(LipskeyCatalogProduct anchor) {
+    if (!isConnectionAnchor(anchor)) return;
+    setState(() => _connectionsAnchor = anchor);
+  }
+
+  /// 7th engine: LEAVE the connections view, back to the converged product list.
+  void _closeConnections() {
+    setState(() => _connectionsAnchor = null);
+  }
+
+  /// @visibleForTesting — the parts shown in the connections view, or empty when
+  /// the view is closed. Lets a behavioral test assert the affordance reached a
+  /// non-empty compatible set for an anchor WITHOUT needing the product sheet's
+  /// heavy Riverpod deps (the same pattern as [currentQuestion]).
+  @visibleForTesting
+  List<LipskeyCatalogProduct> get connectionsShown {
+    final a = _connectionsAnchor;
+    return a == null ? const [] : connectionsFor(a);
+  }
+
+  /// @visibleForTesting — true while the connections view is active.
+  @visibleForTesting
+  bool get connectionsViewOpen => _connectionsAnchor != null;
+
+  /// @visibleForTesting — drive the "מה מתחבר לזה" entry directly (the affordance
+  /// is only rendered inside the ShowProducts keyboard, so a test reaches it
+  /// through this rather than synthesising a key tap).
+  @visibleForTesting
+  void showConnectionsForTest(LipskeyCatalogProduct anchor) =>
+      _showConnections(anchor);
 
   /// Plain display label for a product key in a [ShowProducts] grid — the
   /// trimmed `nameHe`, NO icon (rendered via the same icon-free [BsKey] idiom as
@@ -209,19 +255,51 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// lookup use ONE definition (no drift between render and resolve).
   String _productLabel(LipskeyCatalogProduct p) => p.nameHe.trim();
 
+  /// 7th engine: the anchor the 'מה מתחבר לזה?' entry key targets for the current
+  /// question, or null when no reached product is a valid connection anchor (so
+  /// the affordance is NOT offered). For a [Resolve] it is the resolved product;
+  /// for [ShowProducts] it is the FIRST shown product that is an anchor (a stable,
+  /// predictable pick). Returns null for any other question.
+  LipskeyCatalogProduct? get _connectionEntryAnchor {
+    final q = currentQuestion;
+    if (q is Resolve) {
+      return isConnectionAnchor(q.product) ? q.product : null;
+    }
+    if (q is ShowProducts) {
+      for (final p in q.products) {
+        if (isConnectionAnchor(p)) return p;
+      }
+    }
+    return null;
+  }
+
   /// Handle a tapped word key. `payload=='word'` seeds the pool with the
   /// products the word names; `payload=='chip'` narrows by the tapped axis chip;
   /// `payload=='product'` opens the reach-product sheet for the tapped product
   /// (the [ShowProducts] terminus of the converged cascade).
   void _onWordTap(WordKey key) {
     final label = key.label;
+    // 7th engine: a 'connect' key opens the "מה מתחבר לזה" view for the reached
+    // anchor (the representative the affordance was offered for).
+    if (key.payload == 'connect') {
+      final anchor = _connectionEntryAnchor;
+      if (anchor != null) _showConnections(anchor);
+      return;
+    }
     if (key.payload == 'product') {
-      // ShowProducts: tapping a product key reaches that product directly. Look
-      // it up by its display label in the CURRENT question's product list, then
-      // open the existing sheet with the whole list as its category context.
-      final current = currentQuestion;
-      if (current is! ShowProducts) return; // defensive — state moved under us
-      final products = current.products;
+      // A product key reaches that product directly. While the connections view
+      // is open the keys are the COMPATIBLE PARTS, so resolve against that list;
+      // otherwise resolve against the converged ShowProducts list. Either way,
+      // open the existing sheet with the surrounding list as category context —
+      // the SAME add-path, no new cart route.
+      final List<LipskeyCatalogProduct> products;
+      if (_connectionsAnchor != null) {
+        products = connectionsShown;
+      } else {
+        final current = currentQuestion;
+        if (current is! ShowProducts) return; // defensive — state moved under us
+        products = current.products;
+      }
       final picked = products
           .where((p) => _productLabel(p) == label)
           .toList();
@@ -327,10 +405,23 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       return [
         for (final p in q.products)
           WordKey(_productLabel(p), payload: 'product'),
+        // 7th engine: when a reached product is a valid connection anchor, offer
+        // a plain-text (icon-free) 'מה מתחבר לזה?' key that opens the parts-that-
+        // connect view. Appended LAST so it never displaces a product key.
+        if (_connectionEntryAnchor != null)
+          const WordKey(kConnectionsKey, payload: 'connect'), // OWNER-REVIEW copy
       ];
     }
     return const <WordKey>[]; // Resolve → handled by the sheet, no keys
   }
+
+  /// 7th engine: the keys for the connections view — the compatible PARTS as
+  /// plain product-keys (same icon-free idiom + same 'product' payload as a
+  /// ShowProducts list, so a tap reuses the existing open-sheet add-path).
+  List<WordKey> _connectionKeys() => [
+        for (final p in connectionsShown)
+          WordKey(_productLabel(p), payload: 'product'),
+      ];
 
   /// The header prompt for the current question (empty for Resolve).
   String _headerFor(NewbieQuestion q) => switch (q) {
@@ -375,6 +466,72 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     );
   }
 
+  /// 7th engine: the connections view — a MINIMAL parts-that-connect surface.
+  /// Header ('מה מתחבר לזה?') + a back key (to the product list) + the compatible
+  /// parts as plain icon-free product-keys (tapping one opens the existing
+  /// product sheet). The polished anchor UX is OWNER-design; this is the smallest
+  /// honest default. When an anchor somehow has no parts, a neutral line is shown
+  /// instead of an empty keyboard.
+  // OWNER-REVIEW: connections-view layout + copy.
+  Widget _buildConnectionsView() {
+    final keys = _connectionKeys();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              BsTokens.space2, 0, BsTokens.space2, 0),
+          child: Row(
+            children: [
+              Semantics(
+                button: true,
+                label: 'חזרה',
+                child: IconButton(
+                  // Icon-free copy is required on the word/chip KEYS; this is the
+                  // same back-arrow IconButton the breadcrumb already uses (not a
+                  // word-key), kept consistent with the dive's existing back.
+                  icon: const Icon(Icons.arrow_forward),
+                  tooltip: 'חזרה',
+                  onPressed: _closeConnections,
+                ),
+              ),
+              const Expanded(
+                child: Text(
+                  kConnectionsHeader, // OWNER-REVIEW
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              // Symmetry spacer so the header text stays centred opposite the
+              // back button.
+              const SizedBox(width: 48),
+            ],
+          ),
+        ),
+        if (keys.isEmpty)
+          const Padding(
+            padding: EdgeInsets.all(BsTokens.space3),
+            child: Text(
+              kNoConnections, // OWNER-REVIEW
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          )
+        else
+          WordKeyboard(words: keys, onWordTap: _onWordTap),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // SELF-GATE first — render nothing unless the flag is on. Mirrors the
@@ -403,7 +560,9 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // ── Breadcrumb + back ────────────────────────────────────────
-              if (stack.isNotEmpty)
+              // Hidden while the connections view is open: that view owns the
+              // single back control (otherwise two 'חזרה' arrows would show).
+              if (stack.isNotEmpty && _connectionsAnchor == null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                       BsTokens.space2, BsTokens.space2, BsTokens.space2, 0),
@@ -435,7 +594,10 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                 ),
 
               // ── Question header ──────────────────────────────────────────
-              if (header.isNotEmpty && !showEmptyState)
+              // Hidden while the connections view is open — that view carries
+              // its own header (kConnectionsHeader).
+              if (header.isNotEmpty && !showEmptyState &&
+                  _connectionsAnchor == null)
                 Padding(
                   padding: const EdgeInsets.all(BsTokens.space2),
                   child: Text(
@@ -451,8 +613,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
 
               const Spacer(),
 
+              // ── 7th engine: connections view (highest priority when open) ─
+              if (_connectionsAnchor != null)
+                _buildConnectionsView()
               // ── Empty-pool dead-end → neutral empty-state (no keyboard) ───
-              if (showEmptyState) ...[
+              else if (showEmptyState) ...[
                 _buildEmptyState(),
                 const Spacer(),
               ]
