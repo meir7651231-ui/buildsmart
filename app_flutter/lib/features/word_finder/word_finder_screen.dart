@@ -355,7 +355,9 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'לא נמצאו תוצאות — נסו שוב', // OWNER-REVIEW
+            // OWNER-REVIEW: singular 'נסה' (was plural 'נסו') for one voice, and
+            // 'מוצר מתאים' not search-jargon 'תוצאות' (was 'לא נמצאו תוצאות').
+            'לא נמצא מוצר מתאים — נסה שוב', // OWNER-REVIEW
             textAlign: TextAlign.center,
             style: TextStyle(
               color: BsTokens.inkLight,

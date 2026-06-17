@@ -106,6 +106,9 @@ void main() {
 
       Resolve? resolved;
       ShowProducts? picked;
+      // Axis labels asked across the dive — the Phase-1b engine asks each
+      // splitting axis AT MOST once, so this list must stay duplicate-free.
+      final askedAxes = <String>[];
       const maxIters = 8;
       var iters = 0;
       while (iters < maxIters) {
@@ -117,8 +120,9 @@ void main() {
           break;
         }
         if (q is ShowProducts) {
-          // Converged to a product pick (the small-pool / repeat-axis
-          // shortcut) — a valid terminal state, not necessarily a single card.
+          // Converged to a product pick (the small-pool shortcut, or every
+          // splitting axis answered) — a valid terminal state, not necessarily
+          // a single card.
           picked = q;
           break;
         }
@@ -135,13 +139,20 @@ void main() {
         expect(axis.chips, isNotEmpty,
             reason: 'an offered axis must carry chips to choose from');
 
+        // Each AskAxis is for a DISTINCT axis the dive has not answered yet
+        // (the Phase-1b engine walks size → angle → colour → word, asking each
+        // at most once). Track the asked labels so we can prove no axis repeats.
+        expect(askedAxes.contains(axis.axisLabel), isFalse,
+            reason: 'the dive must NEVER re-ask an axis label it already asked '
+                '(asked so far: $askedAxes, got "${axis.axisLabel}")');
+        askedAxes.add(axis.axisLabel);
+
         final before = pool.length;
         // Choose a chip that makes progress. Most chips strictly shrink the
-        // pool, but a product can carry several size tokens (cross-dims like
-        // `25 ס"מ × 30 ס"מ`), so `chips.first` alone might keep every product.
-        // We pick the chip giving the smallest non-empty PROPER subset — that
-        // is the user-meaningful narrowing step, and it guarantees forward
-        // progress so the bounded loop reaches a single card or a real wall.
+        // pool, but a product can carry SEVERAL tokens of one axis (cross-dims
+        // like `25 ס"מ × 30 ס"מ`, or a faucet's ½"+¾"), so `chips.first` alone
+        // might keep every product. We pick the chip giving the smallest
+        // non-empty PROPER subset — the user-meaningful narrowing step.
         String? bestChip;
         var bestLen = before;
         for (final c in axis.chips) {
@@ -154,14 +165,15 @@ void main() {
           }
         }
 
-        if (bestChip == null) {
-          // No chip on this axis splits the pool — a genuine "wall" (every
-          // product carries every chip). The loop must stop rather than spin.
-          fail('axis "${axis.axisLabel}" offered chips ${axis.chips} but none '
-              'shrinks the $before-product pool — unsplittable');
-        }
-
-        final chip = bestChip;
+        // If NO chip on this axis shrinks the pool, it is a NON-narrowing axis
+        // for this pool (every product carries every chip — e.g. the faucet
+        // that has BOTH ½" and ¾"). That is NOT a dead end under the Phase-1b
+        // engine: answering it (any chip) lets the engine advance to the NEXT
+        // unanswered axis, and once every splitting axis is answered it converges
+        // to ShowProducts. So we answer with `chips.first` and continue, instead
+        // of failing — forward progress is guaranteed by the bounded, each-axis-
+        // once walk, not by a strict per-step shrink.
+        final chip = bestChip ?? axis.chips.first;
         pool = applyNarrow(pool, chip);
         stack.add(NewbieStep(
           axisLabel: axis.axisLabel,
@@ -173,14 +185,27 @@ void main() {
         expect(pool, isNotEmpty,
             reason: "narrowing by a real chip from the pool keeps that chip's "
                 'products — never empties the pool');
-        expect(pool.length, lessThan(before),
-            reason: 'each narrow strictly shrinks the pool toward one card');
+        // Non-increasing every step; STRICTLY decreasing whenever a narrowing
+        // chip existed (the common case). A non-narrowing axis keeps the size
+        // but is asked at most once, so the bounded walk still terminates.
+        expect(pool.length, lessThanOrEqualTo(before),
+            reason: 'a narrow never grows the pool');
+        if (bestChip != null) {
+          expect(pool.length, lessThan(before),
+              reason: 'a narrowing chip strictly shrinks the pool toward one '
+                  'card');
+        }
       }
 
       expect(iters, lessThanOrEqualTo(maxIters),
           reason: 'the dive must terminate within the iteration bound');
+      // No axis label was asked twice — the dive narrows through each available
+      // axis ONCE (the Phase-1b invariant), which is also what bounds it.
+      expect(askedAxes.toSet().length, askedAxes.length,
+          reason: 'every asked axis label is distinct — the dive never re-asks '
+              'an axis (asked: $askedAxes)');
       // The cascade converges — EITHER to a single resolved card, OR to a
-      // ShowProducts pick (the small-pool / repeat-axis shortcut). Both are
+      // ShowProducts pick (the small-pool / no-more-axes shortcut). Both are
       // valid terminal states; it must never loop forever on an axis.
       expect(resolved != null || picked != null, isTrue,
           reason: 'the conversation must converge to a single card or a '
@@ -198,43 +223,63 @@ void main() {
     });
 
     test(
-        'multi-size pool CONVERGES: a repeated size axis becomes ShowProducts, '
-        'never re-asks איזה גודל forever', () {
-      // REPRODUCES THE LIVE LOOP. Faucet names carry MULTIPLE size tokens
-      // (e.g. ½"×¾"). Here every product carries the SAME ½" AND a SECOND ¾"
-      // (space-separated so the tokenizer yields TWO distinct inch tokens, not
-      // one cross-size). So tapping ½" removes NO product, and the remaining
-      // pool STILL surfaces a size axis → the old engine re-asked 'איזה גודל?'
-      // forever, growing the breadcrumb 'ברז · ½" · ½"' without ever reaching
-      // a product. The fix must turn the repeat into a ShowProducts pick.
+        'multi-size pool NARROWS THROUGH the other axes (size → angle → colour) '
+        'then converges — never re-asks the SAME axis label twice', () {
+      // REPRODUCES THE LIVE LOOP, then proves the Phase-1b enhancement. Faucet
+      // names carry MULTIPLE size tokens (e.g. ½"×¾") AND multiple angle tokens
+      // (45°/90°), space-separated so the tokenizer yields TWO distinct inch
+      // tokens and TWO distinct angle tokens — NOT one cross-size. Every product
+      // carries BOTH sizes AND BOTH angles, so tapping a size (or an angle)
+      // removes NO product and the pool STILL surfaces that axis.
       //
-      // We build MORE than kShowProductsThreshold distinct cards on purpose: it
-      // keeps the FIRST turn a genuine size AskAxis (the small-pool shortcut
-      // does NOT fire), so when turn 2 returns ShowProducts it can ONLY be the
-      // REPEAT-axis guard breaking the loop — exactly the live bug.
+      // OLD behaviour: after the user tapped a size, `offerAxis` re-offered the
+      // SAME size axis; the engine converged STRAIGHT to a 14-product
+      // ShowProducts (the repeat-axis shortcut). That dumped a long product list
+      // the instant a second size couldn't narrow.
+      //
+      // NEW behaviour (this test): a repeated/answered axis is SKIPPED and the
+      // dive walks to the next UNANSWERED axis — size → angle → colour — narrow-
+      // ing the user through each available axis ONCE before it finally shows
+      // products. The SAME axis label is never asked twice.
+      //
+      // We build MORE than kShowProductsThreshold distinct cards so the small-
+      // pool shortcut does NOT fire on the early turns — every early turn is a
+      // genuine AskAxis, and ONLY the colour tap (which halves the pool below
+      // the threshold) trips the final ShowProducts.
       final pool = <LipskeyCatalogProduct>[
         for (var i = 0; i < kShowProductsThreshold + 2; i++)
           LipskeyCatalogProduct(
             sku: 'FAUCET-$i',
-            // Distinct non-size word so the products DON'T collapse onto one
-            // card (else it would Resolve immediately). Stripping ½"/¾" leaves
-            // 'ברז דגם<i>' — kShowProductsThreshold+2 distinct cards.
-            nameHe: 'ברז דגם$i ½" ¾"',
-            nameEn: 'faucet model$i 1/2" 3/4"',
+            // Distinct non-size/non-angle word ('דגם<i>') so the products DON'T
+            // collapse onto one card (else it would Resolve immediately).
+            // Stripping ½"/¾"/45°/90° + colour leaves 'ברז דגם<i>' — exactly
+            // kShowProductsThreshold+2 distinct cards. BOTH sizes AND BOTH
+            // angles on every product make size/angle the NON-narrowing
+            // (loop-trigger) axes; colour is the axis that finally splits.
+            nameHe: 'ברז דגם$i ½" ¾" 45° 90°',
+            nameEn: 'faucet model$i 1/2" 3/4" 45deg 90deg',
             categoryHe: 'ברזים',
             categoryEn: 'faucets',
             categoryEmoji: '🚰',
+            // Two distinct colours, evenly split → a colour axis with >1 chip
+            // that HALVES the pool when answered (the converging tap).
+            color: i.isEven ? 'שחור' : 'כרום',
             page: 1,
           ),
       ];
 
-      // Sanity: the fixture really is a multi-size, multi-card pool.
+      // Sanity: the fixture really is a multi-size, multi-angle, multi-card
+      // pool whose collapse strips size+angle+colour down to one card per דגם.
       expect(distinctCardCount(pool), kShowProductsThreshold + 2,
           reason: 'each faucet model is its own collapsed card');
       expect(
-          productHasChip(pool.first, '½"') && productHasChip(pool.first, '¾"'),
+          productHasChip(pool.first, '½"') &&
+              productHasChip(pool.first, '¾"') &&
+              productHasChip(pool.first, '45°') &&
+              productHasChip(pool.first, '90°'),
           isTrue,
-          reason: 'every faucet carries BOTH size tokens (the loop trigger)');
+          reason: 'every faucet carries BOTH sizes AND BOTH angles (the loop '
+              'trigger on two axes)');
 
       // A sentinel word-step so offerQuestion leaves the AskWords branch.
       final stack = <NewbieStep>[
@@ -246,8 +291,9 @@ void main() {
         ),
       ];
 
-      // TURN 1 — the engine offers the size axis (genuine AskAxis, since the
-      // pool is larger than the small-pool shortcut threshold).
+      // TURN 1 — the engine offers the SIZE axis (genuine AskAxis; the pool is
+      // larger than the small-pool shortcut threshold). narrowAxis ranks size
+      // before angle/colour, so size is asked first.
       final t1 = offerQuestion(pool, stack, lexicon, null);
       expect(t1, isA<AskAxis>(),
           reason: 'the first turn over a multi-size pool asks a size axis');
@@ -257,62 +303,131 @@ void main() {
       expect(axis1.chips, containsAll(<String>['½"', '¾"']),
           reason: 'both size tokens are offered as chips');
 
-      // Tap the SHARED size ½" — this removes NO product (all carry it), the
-      // classic non-narrowing tap that fed the loop.
-      final narrowed = applyNarrow(pool, '½"');
-      expect(narrowed.length, pool.length,
+      // Tap the SHARED size ½" — removes NO product (all carry it): the classic
+      // non-narrowing tap that USED to feed the loop. 'גודל' is now answered.
+      final afterSize = applyNarrow(pool, '½"');
+      expect(afterSize.length, pool.length,
           reason: 'tapping the shared ½" narrows nothing — the loop trigger');
       stack.add(NewbieStep(
-        axisLabel: axis1.axisLabel, // 'גודל' is now an ANSWERED axis
+        axisLabel: axis1.axisLabel,
         chipLabel: '½"',
         predicate: (p) => productHasChip(p, '½"'),
         crumbWord: '½"',
       ));
 
-      // TURN 2 — the OLD engine would AskAxis('גודל') AGAIN here. The fix must
-      // NOT: 'גודל' is already in the answered set, so the convergence guard
-      // returns ShowProducts instead. Assert NO repeated size axis.
-      final t2 = offerQuestion(narrowed, stack, lexicon, null);
-      expect(t2, isNot(isA<AskAxis>()),
-          reason: 'turn 2 must NOT re-ask any axis — the multi-size loop break');
-      expect(t2, isA<ShowProducts>(),
-          reason: 'a repeated (already-answered) size axis becomes a product '
-              'pick, never an endless איזה גודל');
-      final show = t2 as ShowProducts;
+      // TURN 2 — the OLD engine re-asked 'גודל' (then short-circuited to a long
+      // ShowProducts). The FIX skips the answered size axis and asks the next
+      // UNANSWERED axis: ANGLE. NOT a ShowProducts, NOT another size question.
+      final t2 = offerQuestion(afterSize, stack, lexicon, null);
+      expect(t2, isA<AskAxis>(),
+          reason: 'turn 2 narrows by the NEXT unanswered axis, not a product '
+              'dump — the Phase-1b enhancement');
+      final axis2 = t2 as AskAxis;
+      expect(axis2.axisLabel, 'זווית',
+          reason: 'after size is answered the dive moves to the angle axis '
+              '(narrowAxis priority size → angle → colour → word)');
+      expect(axis2.axisLabel, isNot('גודל'),
+          reason: 'the SAME size axis is never asked twice');
+      expect(axis2.questionHe, kAxisQuestion['זווית']);
+      expect(axis2.chips, containsAll(<String>['45°', '90°']),
+          reason: 'both angle tokens are offered as chips');
 
-      // ShowProducts carries the DISTINCT products of the pool (deduped by the
-      // engine's own collapse), capped at kShowProductsCap.
+      // Tap the SHARED angle 45° — again removes NO product. 'זווית' answered.
+      final afterAngle = applyNarrow(afterSize, '45°');
+      expect(afterAngle.length, afterSize.length,
+          reason: 'tapping the shared 45° narrows nothing — the angle loop');
+      stack.add(NewbieStep(
+        axisLabel: axis2.axisLabel,
+        chipLabel: '45°',
+        predicate: (p) => productHasChip(p, '45°'),
+        crumbWord: '45°',
+      ));
+
+      // TURN 3 — size AND angle answered; the dive walks to the next unanswered
+      // axis: COLOUR. Still an AskAxis (the pool is still > threshold cards),
+      // and still a NEW axis label.
+      final t3 = offerQuestion(afterAngle, stack, lexicon, null);
+      expect(t3, isA<AskAxis>(),
+          reason: 'turn 3 narrows by colour — the third distinct axis');
+      final axis3 = t3 as AskAxis;
+      expect(axis3.axisLabel, 'צבע',
+          reason: 'after size+angle the dive moves to the colour axis');
+      expect(<String>{'גודל', 'זווית'}.contains(axis3.axisLabel), isFalse,
+          reason: 'no axis label is asked twice across the dive');
+      expect(axis3.questionHe, kAxisQuestion['צבע']);
+      expect(axis3.chips, containsAll(<String>['כרום', 'שחור']),
+          reason: 'both colours are offered as chips');
+
+      // Tap a colour — THIS narrows (halves the pool below the threshold).
+      final afterColor = applyNarrow(afterAngle, 'שחור');
+      expect(afterColor.length, lessThan(afterAngle.length),
+          reason: 'a colour tap finally narrows the pool');
+      stack.add(NewbieStep(
+        axisLabel: axis3.axisLabel,
+        chipLabel: 'שחור',
+        predicate: (p) => productHasChip(p, 'שחור'),
+        crumbWord: 'שחור',
+      ));
+
+      // TURN 4 — the colour-narrowed pool is now at/under the threshold, so the
+      // small-pool shortcut converges to a ShowProducts product pick.
+      final t4 = offerQuestion(afterColor, stack, lexicon, null);
+      expect(t4, isA<ShowProducts>(),
+          reason: 'once the pool is small enough the dive shows the products');
+      final show = t4 as ShowProducts;
       expect(show.products, isNotEmpty,
           reason: 'the converged pick offers the remaining products');
-      expect(show.products.length,
-          distinctProducts(narrowed).length,
+      expect(show.products.length, distinctProducts(afterColor).length,
           reason: 'ShowProducts carries exactly the distinct products');
       expect(show.products.length, lessThanOrEqualTo(kShowProductsCap),
           reason: 'the product pick is capped at kShowProductsCap');
-      // The distinct products are genuine pool members, one per collapsed card.
-      final poolSkus = {for (final p in narrowed) p.sku};
+      final poolSkus = {for (final p in afterColor) p.sku};
       for (final p in show.products) {
         expect(poolSkus.contains(p.sku), isTrue,
             reason: 'every shown product is a real pool member');
       }
-      expect(
-          show.products.map((p) => p.sku).toSet().length,
+      expect(show.products.map((p) => p.sku).toSet().length,
           show.products.length,
           reason: 'the shown products are distinct (no duplicate card)');
 
-      // BELT & BRACES: even if a user kept tapping the SAME shared size, the
-      // engine never spins on a third size axis — it stays converged.
-      stack.add(NewbieStep(
-        axisLabel: 'גודל',
-        chipLabel: '½"',
-        predicate: (p) => productHasChip(p, '½"'),
-        crumbWord: '½"',
-      ));
-      final t3 = offerQuestion(applyNarrow(narrowed, '½"'), stack, lexicon, null);
-      expect(t3, isNot(isA<AskAxis>()),
-          reason: 'within <=2 size answers the cascade has converged for good');
-      expect(t3, anyOf(isA<ShowProducts>(), isA<Resolve>()),
-          reason: 'the cascade terminates on a product pick, never an axis loop');
+      // INVARIANT (bounded convergence + no repeated axis): replay the whole
+      // dive generically from the seed, tapping the first chip each turn, and
+      // assert it reaches a terminal pick within a bounded number of taps while
+      // NEVER asking the same axis label twice in a row OR across the dive.
+      var replayPool = pool;
+      final replayStack = <NewbieStep>[
+        const NewbieStep(
+          axisLabel: 'מילה',
+          chipLabel: 'ברז',
+          predicate: _alwaysTrue,
+          crumbWord: 'ברז',
+        ),
+      ];
+      final askedAxes = <String>[];
+      const maxTaps = 8;
+      var taps = 0;
+      var q = offerQuestion(replayPool, replayStack, lexicon, null);
+      while (q is AskAxis && taps < maxTaps) {
+        expect(askedAxes.contains(q.axisLabel), isFalse,
+            reason: 'the dive must NEVER re-ask an axis label it already asked '
+                '(asked so far: $askedAxes, got "${q.axisLabel}")');
+        askedAxes.add(q.axisLabel);
+        final chip = q.chips.first;
+        replayPool = applyNarrow(replayPool, chip);
+        replayStack.add(NewbieStep(
+          axisLabel: q.axisLabel,
+          chipLabel: chip,
+          predicate: (p) => productHasChip(p, chip),
+          crumbWord: chip,
+        ));
+        taps++;
+        q = offerQuestion(replayPool, replayStack, lexicon, null);
+      }
+      expect(q, anyOf(isA<ShowProducts>(), isA<Resolve>()),
+          reason: 'the dive converges to a product pick within $maxTaps taps, '
+              'never an endless axis loop (asked axes: $askedAxes)');
+      expect(askedAxes.toSet().length, askedAxes.length,
+          reason: 'every asked axis label is distinct — no axis asked twice');
     });
 
     test('small multi-card pool short-circuits straight to ShowProducts', () {

@@ -61,6 +61,7 @@ String canonicalizeWord(String token, Map<String, String> synonyms) =>
 /// seen in `מערכות אמבטיה`). The category fallback (`kCategoryFallbackWord`)
 /// catches those, but the owner should finalize the authoritative brand set.
 const Set<String> kBrandPrefixBlocklist = {
+  // SEED (16) — original hand-picked brand prefixes.
   'דיור',
   'אקווה',
   'סיגמא',
@@ -77,14 +78,62 @@ const Set<String> kBrandPrefixBlocklist = {
   'הדר',
   'קורל',
   'קונקורד',
+  // OWNER-REVIEW: 18 NEW brand/series prefixes verified against the real
+  // catalog bytes — each LEADS >=1 product name in the union pool, surfacing a
+  // real noun behind it (e.g. בתא→ברז ×10, פיטרה→אסלה, גל/כנרת→ראש, ויגה→סוללה)
+  // and the 18 collide with ZERO non-leading product nouns (only כנרת appears
+  // mid-name in 2 cistern names that already key on 'מיכל', so it is harmless).
+  // Reversible: delete this block to fall back to the 16-seed list. ג'נבה and
+  // אנג'ל use the ASCII apostrophe U+0027 (the tokenizer does NOT split it, so
+  // the whole token incl. apostrophe is the entry).
+  'טרפז', // OWNER-REVIEW
+  'טולדו', // OWNER-REVIEW
+  'טיטוניק', // OWNER-REVIEW
+  'ג\'נבה', // OWNER-REVIEW (ASCII apostrophe U+0027)
+  'אוסלו', // OWNER-REVIEW
+  'אנג\'ל', // OWNER-REVIEW (ASCII apostrophe U+0027)
+  'גאלרי', // OWNER-REVIEW
+  'גל', // OWNER-REVIEW
+  'פלורה', // OWNER-REVIEW
+  'כנרת', // OWNER-REVIEW
+  'הוואי', // OWNER-REVIEW
+  'אלפא', // OWNER-REVIEW
+  'ויגה', // OWNER-REVIEW
+  'גליל', // OWNER-REVIEW
+  'דלתא', // OWNER-REVIEW
+  'זקיף', // OWNER-REVIEW
+  'פיטרה', // OWNER-REVIEW
+  'בתא', // OWNER-REVIEW
 };
 
-/// Synonym → canonical-word map. EMPTY by default.
+/// Synonym → canonical-word map.
 ///
-/// OWNER-REVIEW: whether to collapse near-synonyms (e.g. 'זווית' → 'ברך',
-/// 'מזלף' → 'מקלח') is an owner product decision. Do NOT add entries without
-/// sign-off — collapsing changes which products share a word bucket.
-const Map<String, String> kWordSynonyms = <String, String>{};
+/// OWNER-REVIEW: granularity / normalization. Each entry collapses a word onto
+/// its canonical layman form so near-synonyms share ONE bucket (verified by
+/// reading real product names). These are REVERSIBLE defaults — empty this map
+/// to restore identity canonicalization. Granularity merges (one elbow / one
+/// tee / one coupler / one reducer key) trade specificity for a simpler newbie
+/// search; the map is a FLAT global Map<String,String> so a merge applies to
+/// EVERY product regardless of category. NOTE: 'מחבר'→'מצמד' and 'מקטין'→'מצרה'
+/// were explicitly REJECTED ('מחבר גמיש' flex-connectors and 'מקטין לחץ'
+/// pressure-reducers are distinct products that must not fold in).
+const Map<String, String> kWordSynonyms = <String, String>{
+  // Reducer normalization (plural → singular). // OWNER-REVIEW
+  'מצרות': 'מצרה', // OWNER-REVIEW
+  // Tee family → one 'מסעף' key (catalog itself writes 'מסעף (טי)'). // OWNER-REVIEW
+  'סעף': 'מסעף', // OWNER-REVIEW
+  'טי': 'מסעף', // OWNER-REVIEW
+  'הסתעפות': 'מסעף', // OWNER-REVIEW
+  // Elbow → one 'ברך' key ('זווית נחושת פ.פ' IS an elbow). // OWNER-REVIEW
+  'זווית': 'ברך', // OWNER-REVIEW
+  // Coupler family → one 'מצמד' key (socket/connector synonyms). // OWNER-REVIEW
+  'מקשר': 'מצמד', // OWNER-REVIEW
+  'מופה': 'מצמד', // OWNER-REVIEW
+  // Drainage-channel leak fix ('סיגמא פלוס תעלת …' → 'פלוס' otherwise). // OWNER-REVIEW
+  'פלוס': 'תעלה', // OWNER-REVIEW
+  // Check-valve tokenizer artifact ('אל חזור …' splits 'אל' bare). // OWNER-REVIEW
+  'אל': 'אל-חזור', // OWNER-REVIEW
+};
 
 /// categoryHe → simple layman word, used when a product's first meaningful
 /// token is unavailable (all brand + numbers) so the lexicon never loses it.
@@ -116,4 +165,18 @@ const Map<String, String> kCategoryFallbackWord = <String, String>{
   // Spouts & water-points (lead with 'דיור').
   'דיורים ופיות': 'פיה',
   'נקודות מים': 'נקודה',
+  // OWNER-REVIEW: 8 NEW per-category fallbacks. Every key below is a VERBATIM
+  // real `categoryHe` value confirmed present in the catalog (lipskey), and its
+  // value is the plain layman word. A fallback fires ONLY when a name yields no
+  // meaningful token (pure brand+number) — so these only catch the brand/number
+  // -only names in each category; otherwise the product keeps its own token.
+  // Reversible: delete this block to fall back to the 17-seed map.
+  'מושבי אסלה': 'מושב', // OWNER-REVIEW (cat exists, 26 products)
+  'ידיות אחיזה': 'ידית', // OWNER-REVIEW (cat exists, 3 products)
+  'סיפונים': 'סיפון', // OWNER-REVIEW (cat exists, 7 products)
+  'מחלקים': 'מחלק', // OWNER-REVIEW (cat exists, 11 products)
+  'ארונות מחלק': 'ארון', // OWNER-REVIEW (cat exists, 3 products)
+  'צינורות גמישים': 'צינור', // OWNER-REVIEW (cat exists, 17 products)
+  'מצופים': 'מצוף', // OWNER-REVIEW (cat exists, 4 products)
+  'מכשירי לחץ': 'מד', // OWNER-REVIEW (cat exists, 4 products)
 };

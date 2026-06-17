@@ -3,7 +3,7 @@
 /// STEP 3 of the word-finder swarm — the layer that turns the pure data
 /// primitives (STEP 0 `narrow_axis`, STEP 1 `dive_pool`, STEP 2 `word_lexicon`)
 /// into a deterministic question/answer loop a non-technical user walks:
-///   1. "מה אתה צריך?"  →  pick a plain WORD (top words by frequency),
+///   1. "מה אתה מחפש?"  →  pick a plain WORD (top words by frequency),
 ///   2. then repeatedly "narrow by" one axis (size / angle / colour / model /
 ///      curated option) until the pool collapses to ONE product card,
 ///   3. at which point the engine RESOLVES to that product (+ its siblings).
@@ -25,7 +25,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart'
     show kDivePool, offerAxis;
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
-    show productHasChip;
+    show angleTokensIn, colorOptions, productHasChip, sizeTokensIn, wordOptions;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/_size_norm.dart'
     show parseAngleTokens, parseSizeTokens;
@@ -137,10 +137,10 @@ class ShowProducts extends NewbieQuestion {
 /// OWNER-REVIEW: default copy. The owner may reword any of these prompts.
 const Map<String, String> kAxisQuestion = <String, String>{
   'גודל': 'איזה גודל?',
-  'זווית': 'ישר או בזווית?',
+  'זווית': 'ישר או עם זווית?', // OWNER-REVIEW (was 'ישר או בזווית?')
   'צבע': 'איזה צבע?',
-  'דגם': 'איזה דגם?',
-  'אפשרות': 'מה מתאים?',
+  'דגם': 'איזה סוג?', // OWNER-REVIEW (was 'איזה דגם?')
+  'אפשרות': 'מה מתאים לך?', // OWNER-REVIEW (was 'מה מתאים?')
 };
 
 /// Fallback question for an axis label not in [kAxisQuestion] (e.g. a future
@@ -151,14 +151,16 @@ const String kAxisFallbackQuestion = 'מה מתאים?';
 
 /// The opening prompt of the newbie path.
 ///
-/// OWNER-REVIEW: default copy.
-const String kFirstQuestion = 'מה אתה צריך?';
+/// OWNER-REVIEW: default copy (was 'מה אתה צריך?'). The user taps concrete part
+/// nouns (ברז/מסעף/ברך/צינור) — you SEARCH FOR a part, not "need" it.
+const String kFirstQuestion = 'מה אתה מחפש?';
 
 /// The [ShowProducts] prompt — shown when the cascade converged and the user
 /// picks a product directly instead of answering another axis.
 ///
-/// OWNER-REVIEW: default copy.
-const String kPickProductQuestion = 'בחר מוצר';
+/// OWNER-REVIEW: default copy (was 'בחר מוצר'). At this step the cascade has
+/// converged to a short list — 'בחר את המוצר' signals the final pick.
+const String kPickProductQuestion = 'בחר את המוצר';
 
 /// How many top words (by frequency) the first question offers.
 ///
@@ -254,23 +256,80 @@ List<LipskeyCatalogProduct> distinctProducts(
   return out;
 }
 
+/// The next axis to narrow by that has NOT yet been answered, given the current
+/// [pool] and the set of axis labels [answeredLabels] already chosen on this
+/// dive. PURE.
+///
+/// WHY THIS EXISTS: `offerAxis`/`narrowAxis` return only the SINGLE best
+/// splitting axis (the first that splits, in priority order) — once the user
+/// answers it, `offerAxis` re-offers the SAME best axis for as long as it still
+/// splits (e.g. a faucet whose name carries `½"×¾"` keeps surfacing a size
+/// axis). The old engine treated that repeat as "stop, show products". This
+/// helper instead walks PAST the already-answered axis to the next UNANSWERED
+/// one, so the dive narrows through each available axis ONCE
+/// (size → angle → colour → word) before falling back to a product pick.
+///
+/// AXIS VOCABULARY — must stay byte-identical to what `narrowAxis` emits so the
+/// resulting [AskAxis] label feeds [applyNarrow]/`productHasChip` and lands in
+/// the answered-set consistently. Built from the SAME PUBLIC lifted helpers
+/// `narrowAxis` uses, in the SAME priority order (curated facets are handled by
+/// `offerAxis` in [offerQuestion] — they need a subtype — so this helper starts
+/// at the subtype-free axes):
+///   • `sizeTokensIn(pool)`  → label 'גודל', chips = token labels,
+///   • `angleTokensIn(pool)` → label 'זווית', chips = token labels,
+///   • `colorOptions(pool)`  → label 'צבע',  chips = colours,
+///   • `wordOptions(pool)`   → label 'דגם',  chips = characterizing words.
+///
+/// An axis is a candidate only when its label is NOT in [answeredLabels] AND it
+/// has >1 DISTINCT chip (a lone chip can't narrow anything — same `>1` gate
+/// `narrowAxis` applies). Returns the first such axis by the priority order
+/// above as `(label, chips)`, or null when every splitting axis is already
+/// answered (the caller then shows products).
+({String label, List<String> chips})? nextUnansweredAxis(
+  List<LipskeyCatalogProduct> pool,
+  Set<String> answeredLabels,
+) {
+  // Candidates in narrowAxis priority order. Chip lists are deduped to a
+  // DISTINCT set (sizeTokensIn/angleTokensIn already dedupe tokens, but we fold
+  // their labels too so the >1 gate counts distinct CHIPS exactly).
+  final candidates = <({String label, List<String> chips})>[
+    (label: 'גודל', chips: sizeTokensIn(pool).map((t) => t.label).toList()),
+    (label: 'זווית', chips: angleTokensIn(pool).map((t) => t.label).toList()),
+    (label: 'צבע', chips: colorOptions(pool)),
+    (label: 'דגם', chips: wordOptions(pool)),
+  ];
+  for (final c in candidates) {
+    if (answeredLabels.contains(c.label)) continue;
+    if (c.chips.toSet().length > 1) return c;
+  }
+  return null;
+}
+
 /// The next thing to ask the user, given the current [pool], the answered
 /// [stack], the [lexicon] (for the first word list) and an optional [subtype]
 /// (passed through to `offerAxis`/`narrowAxis` for curated facets). PURE.
 ///
-///  - Empty [stack] → [AskWords] with the top [kFirstWordCount] words by freq.
-///  - Pool collapses to ONE distinct card → [Resolve] (representative +
-///    siblings = the whole pool).
-///  - The cascade can't (or shouldn't) narrow further → [ShowProducts] with the
-///    distinct remaining products. This fires when:
-///      • `offerAxis` returns NO chips (nothing splits the pool), OR
-///      • the best axis is one ALREADY answered (the multi-size LOOP: a faucet
-///        name carries several size tokens, so after a size tap `narrowAxis`
-///        still finds a size axis and would re-ask 'איזה גודל?' forever), OR
-///      • the pool is already small (`distinctCardCount <= kShowProductsThreshold`).
-///    This GUARANTEES the cascade always advances to a product pick instead of
-///    spinning on the same axis or an unsplittable wall.
-///  - Otherwise → [AskAxis] for the best splitting axis (`offerAxis`).
+/// Ordering (each step short-circuits):
+///  1. Empty [stack] → [AskWords] with the top [kFirstWordCount] words by freq.
+///  2. Pool collapses to ONE distinct card → [Resolve] (representative +
+///     siblings = the whole pool).
+///  3. Pool is already small (`distinctCardCount <= kShowProductsThreshold`) →
+///     [ShowProducts] with the distinct remaining products. The small-pool
+///     shortcut: don't drag a non-technical user through axis taps when the
+///     remaining cards already fit on one scan.
+///  4. The best splitting axis (`offerAxis`, which honours the curated-facet
+///     override) is NOT yet answered and has chips → [AskAxis] for it.
+///  5. Otherwise that best axis is a REPEAT (already answered — the multi-size
+///     ½"×¾" loop, where `narrowAxis` keeps surfacing a size axis). Instead of
+///     stopping, walk to the next UNANSWERED axis via [nextUnansweredAxis]
+///     (size → angle → colour → word, skipping answered ones). If one exists →
+///     [AskAxis] for it (mapped question), so the dive narrows through EACH
+///     available axis ONCE.
+///  6. No unanswered splitting axis remains → [ShowProducts] with the distinct
+///     remaining products. This is the real convergence floor: every axis the
+///     pool can split on has been answered (or the best axis was empty /
+///     unsplittable), so the dive advances to a product pick instead of
+///     spinning on an axis it already asked.
 NewbieQuestion offerQuestion(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
@@ -286,33 +345,47 @@ NewbieQuestion offerQuestion(
     );
   }
 
+  // (2) Resolved to a single distinct card.
   if (pool.isNotEmpty && distinctCardCount(pool) <= 1) {
     return Resolve(pool.first, pool);
   }
 
-  // The axis labels already answered on this dive — used to detect a REPEAT
-  // (the multi-size loop: re-offering 'גודל' after the user already answered a
-  // size). `narrowAxis` is shared with finder_screen and we must not touch it,
-  // so the loop break lives HERE.
-  final answeredAxes = {for (final s in stack) s.axisLabel};
-
-  final ax = offerAxis(pool, subtype);
-
-  // CONVERGENCE GUARD: stop asking and let the user pick a product when the
-  // axis is empty (unsplittable), is a repeat of an already-answered axis (the
-  // observed faucet ½"×¾" loop), or the pool is already small enough to scan.
-  final isEmptyAxis = ax.chips.isEmpty;
-  final isRepeatAxis = ax.label.isNotEmpty && answeredAxes.contains(ax.label);
-  final isSmallEnough = distinctCardCount(pool) <= kShowProductsThreshold;
-  if (isEmptyAxis || isRepeatAxis || isSmallEnough) {
+  // (3) Small-pool shortcut — already few enough cards to scan by eye.
+  if (distinctCardCount(pool) <= kShowProductsThreshold) {
     return ShowProducts(distinctProducts(pool));
   }
 
-  return AskAxis(
-    kAxisQuestion[ax.label] ?? kAxisFallbackQuestion,
-    ax.chips,
-    ax.label,
-  );
+  // The axis labels already answered on this dive. `narrowAxis` is shared with
+  // finder_screen and we must not touch it, so the "narrow through each axis
+  // once" logic lives HERE.
+  final answeredAxes = {for (final s in stack) s.axisLabel};
+
+  // (4) The best splitting axis (curated facets → size → angle → colour → word
+  // via offerAxis/narrowAxis). Ask it when it is UNANSWERED and has chips.
+  final ax = offerAxis(pool, subtype);
+  final axIsUnanswered = ax.label.isEmpty || !answeredAxes.contains(ax.label);
+  if (axIsUnanswered && ax.chips.isNotEmpty) {
+    return AskAxis(
+      kAxisQuestion[ax.label] ?? kAxisFallbackQuestion,
+      ax.chips,
+      ax.label,
+    );
+  }
+
+  // (5) The best axis is a REPEAT (already answered — the multi-size loop) or
+  // empty. Narrow by the next UNANSWERED axis instead of re-asking it, so the
+  // dive walks through each available axis once (size → angle → colour → word).
+  final next = nextUnansweredAxis(pool, answeredAxes);
+  if (next != null) {
+    return AskAxis(
+      kAxisQuestion[next.label] ?? kAxisFallbackQuestion,
+      next.chips,
+      next.label,
+    );
+  }
+
+  // (6) Every splitting axis is answered (or unsplittable) → show the products.
+  return ShowProducts(distinctProducts(pool));
 }
 
 /// Maps a chosen [word] to the products it names, via the [lexicon]'s

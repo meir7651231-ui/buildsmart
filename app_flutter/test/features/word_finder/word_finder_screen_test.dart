@@ -301,7 +301,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The neutral empty-state text renders...
-    expect(find.text('לא נמצאו תוצאות — נסו שוב'), findsOneWidget,
+    expect(find.text('לא נמצא מוצר מתאים — נסה שוב'), findsOneWidget,
         reason: 'an empty pool must show the neutral empty-state, never a '
             'silent zero-chip keyboard');
     // ...and a restart affordance is offered, while the dead-end word keyboard

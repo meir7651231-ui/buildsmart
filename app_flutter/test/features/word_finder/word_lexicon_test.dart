@@ -38,9 +38,22 @@ void main() {
         expect(lex.wordToSkus.containsKey(brand), isFalse,
             reason: 'blocked brand "$brand" leaked into the lexicon as a key');
       }
-      // Spot the two named in the swarm brief explicitly.
+      // Spot the two seed brands named in the swarm brief explicitly.
       expect(lex.wordToSkus.containsKey('סיגמא'), isFalse);
       expect(lex.wordToSkus.containsKey('דיור'), isFalse);
+      // The 18 NEW brand prefixes must ALSO never be keys (verified to lead a
+      // name, surfacing the real noun behind them). ג'נבה/אנג'ל use ASCII '.
+      const newBrands = [
+        'טרפז', 'טולדו', 'טיטוניק', 'ג\'נבה', 'אוסלו', 'אנג\'ל', 'גאלרי',
+        'גל', 'פלורה', 'כנרת', 'הוואי', 'אלפא', 'ויגה', 'גליל', 'דלתא',
+        'זקיף', 'פיטרה', 'בתא',
+      ];
+      for (final brand in newBrands) {
+        expect(kBrandPrefixBlocklist.contains(brand), isTrue,
+            reason: 'new brand "$brand" must be in the blocklist');
+        expect(lex.wordToSkus.containsKey(brand), isFalse,
+            reason: 'new brand "$brand" leaked into the lexicon as a key');
+      }
     });
 
     test('every entry agrees with wordToSkus (freq + ordering invariant)', () {
@@ -84,12 +97,46 @@ void main() {
       expect(firstMeaningfulToken('1/2" 250', const <String>{}), isNull);
     });
 
-    test('canonicalizeWord is identity with the EMPTY default synonyms', () {
-      expect(canonicalizeWord('זווית', kWordSynonyms), 'זווית');
+    test('canonicalizeWord folds a synonym onto its canonical word', () {
+      // 'זווית' (elbow) now folds onto the canonical elbow word 'ברך'; an
+      // unmapped word passes through unchanged.
+      expect(canonicalizeWord('זווית', kWordSynonyms), 'ברך');
+      expect(canonicalizeWord('צינור', kWordSynonyms), 'צינור');
     });
 
-    test('kWordSynonyms is empty pending owner sign-off', () {
-      expect(kWordSynonyms, isEmpty);
+    test('kWordSynonyms maps the signed-off folds (and NOT the rejected ones)',
+        () {
+      // The owner-signed-off folds: tee family → מסעף, elbow → ברך, coupler
+      // family → מצמד, reducer plural → מצרה, plus two tokenizer/leak fixes.
+      expect(kWordSynonyms['טי'], 'מסעף');
+      expect(kWordSynonyms['הסתעפות'], 'מסעף');
+      expect(kWordSynonyms['סעף'], 'מסעף');
+      expect(kWordSynonyms['זווית'], 'ברך');
+      expect(kWordSynonyms['מקשר'], 'מצמד');
+      expect(kWordSynonyms['מופה'], 'מצמד');
+      expect(kWordSynonyms['מצרות'], 'מצרה');
+      expect(kWordSynonyms['פלוס'], 'תעלה');
+      expect(kWordSynonyms['אל'], 'אל-חזור');
+      // Explicitly REJECTED pairs must NOT be present (distinct products).
+      expect(kWordSynonyms.containsKey('מחבר'), isFalse,
+          reason: "'מחבר גמיש' flex-connectors must NOT fold into מצמד");
+      expect(kWordSynonyms.containsKey('מקטין'), isFalse,
+          reason: "'מקטין לחץ' pressure-reducer must NOT fold into מצרה");
+    });
+
+    test('a folded word resolves into its canonical bucket, not its own key',
+        () {
+      // After folding, the source words ('זווית','טי','הסתעפות') are NOT their
+      // own lexicon keys — their products live under the canonical word.
+      for (final folded in const ['זווית', 'טי', 'הסתעפות']) {
+        expect(lex.wordToSkus.containsKey(folded), isFalse,
+            reason: '"$folded" folds into its canonical word — not a key');
+      }
+      // And the canonical targets are real keys naming products.
+      for (final canon in const ['ברך', 'מסעף']) {
+        expect((lex.wordToSkus[canon]?.length ?? 0) > 1, isTrue,
+            reason: 'canonical word "$canon" must name >1 sku after folding');
+      }
     });
   });
 }

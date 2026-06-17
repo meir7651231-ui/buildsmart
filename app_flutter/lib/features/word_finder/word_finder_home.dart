@@ -61,7 +61,7 @@ class _WordFinderHomeState extends ConsumerState<WordFinderHome> {
   _Mode _mode = _Mode.cascade;
 
   // OWNER-REVIEW copy — segment labels. Plain Hebrew text, no icons.
-  static const String _cascadeLabel = 'חפש לי'; // OWNER-REVIEW
+  static const String _cascadeLabel = 'מצא לי'; // OWNER-REVIEW (was 'חפש לי')
   static const String _quickPadLabel = 'המהיר שלי'; // OWNER-REVIEW
 
   void _setMode(_Mode mode) {

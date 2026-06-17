@@ -141,7 +141,9 @@ class _QuickPadScreenState extends ConsumerState<QuickPadScreen> {
       padding: EdgeInsets.all(BsTokens.space3),
       child: Center(
         child: Text(
-          'עדיין אין מועדפים — תתחיל לבחור מוצרים',
+          // OWNER-REVIEW: 'התחל' is the clean singular-masc imperative (was the
+          // colloquial 'תתחיל') — matches the voice of kFirstQuestion.
+          'עדיין אין מועדפים — התחל לבחור מוצרים',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: BsTokens.inkLight,
