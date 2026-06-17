@@ -31,6 +31,7 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
+import 'package:buildsmart/features/word_finder/recipe_acc_overrides.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchRelevance;
 import 'package:flutter/foundation.dart';
 
@@ -47,7 +48,11 @@ import 'package:flutter/foundation.dart';
 ///    can be trusted; the best candidate is kept so the owner can confirm/reject.
 ///  - [none]    : nothing in the catalog matched the name at all (score 0 or
 ///    below the minimum floor). No product is attached.
-enum KitMatch { curated, auto, ambiguous, none }
+///  - [swarm]   : no owner sku and the keyword scorer could not resolve it, but
+///    the match+verify SWARM picked a product semantically AND a second agent
+///    verified it (see [kAccSkuOverrides]). Machine-confident, pending owner
+///    spot-check — counted as resolved like [curated] / [auto].
+enum KitMatch { curated, auto, ambiguous, none, swarm }
 
 /// The resolution of ONE accessory row: the original [acc], the catalog
 /// [product] it bound to (null for [KitMatch.none]), the [match] confidence, and
@@ -169,6 +174,23 @@ KitLine resolveAccessory(SmartAcc acc) {
     }
   }
 
+  // (1b) Swarm override: a verified machine-match for a name the scorer could
+  // not resolve. Wins over scoring (it was adversarially confirmed) but NEVER
+  // over an owner-set sku (checked above). Falls through if the sku is somehow
+  // not in the pool.
+  final overrideSku = kAccSkuOverrides[acc.name];
+  if (overrideSku != null) {
+    final swarmProduct = _bySku[overrideSku];
+    if (swarmProduct != null) {
+      return KitLine(
+        acc: acc,
+        product: swarmProduct,
+        match: KitMatch.swarm,
+        score: 0,
+      );
+    }
+  }
+
   // (2) Score the pool. Track the single best product, its score, and the
   // runner-up score (the best among products OTHER THAN `best`) so we can
   // measure the margin between the winner and the next product.
@@ -235,6 +257,7 @@ class KitCoverage {
     required this.total,
     required this.curated,
     required this.auto,
+    required this.swarm,
     required this.ambiguous,
     required this.none,
     this.perRecipe = const {},
@@ -243,6 +266,7 @@ class KitCoverage {
   final int total;
   final int curated;
   final int auto;
+  final int swarm;
   final int ambiguous;
   final int none;
 
@@ -251,9 +275,10 @@ class KitCoverage {
   /// [measureKitCoverage].
   final Map<String, KitCoverage> perRecipe;
 
-  /// curated + auto — the accessories that resolve to a product WITHOUT needing
-  /// owner review (the "real, usable" coverage).
-  int get resolved => curated + auto;
+  /// curated + auto + swarm — the accessories that resolve to a product (an
+  /// owner sku, a high-confidence scorer match, or a verified swarm override).
+  /// The "real, usable" coverage (swarm matches are pending owner spot-check).
+  int get resolved => curated + auto + swarm;
 
   /// Share of [total] that is [resolved] (curated + auto), in 0..1. 0 when the
   /// set is empty. PURE.
@@ -263,6 +288,7 @@ class KitCoverage {
 
   double get curatedRatio => _ratio(curated);
   double get autoRatio => _ratio(auto);
+  double get swarmRatio => _ratio(swarm);
   double get ambiguousRatio => _ratio(ambiguous);
   double get noneRatio => _ratio(none);
 }
@@ -271,6 +297,7 @@ class KitCoverage {
 KitCoverage _tally(List<KitLine> lines) {
   var curated = 0;
   var auto = 0;
+  var swarm = 0;
   var ambiguous = 0;
   var none = 0;
   for (final l in lines) {
@@ -279,6 +306,8 @@ KitCoverage _tally(List<KitLine> lines) {
         curated++;
       case KitMatch.auto:
         auto++;
+      case KitMatch.swarm:
+        swarm++;
       case KitMatch.ambiguous:
         ambiguous++;
       case KitMatch.none:
@@ -289,6 +318,7 @@ KitCoverage _tally(List<KitLine> lines) {
     total: lines.length,
     curated: curated,
     auto: auto,
+    swarm: swarm,
     ambiguous: ambiguous,
     none: none,
   );
@@ -301,6 +331,7 @@ KitCoverage _tally(List<KitLine> lines) {
 KitCoverage measureKitCoverage() {
   var curated = 0;
   var auto = 0;
+  var swarm = 0;
   var ambiguous = 0;
   var none = 0;
   var total = 0;
@@ -312,6 +343,7 @@ KitCoverage measureKitCoverage() {
     total += c.total;
     curated += c.curated;
     auto += c.auto;
+    swarm += c.swarm;
     ambiguous += c.ambiguous;
     none += c.none;
   }
@@ -319,6 +351,7 @@ KitCoverage measureKitCoverage() {
     total: total,
     curated: curated,
     auto: auto,
+    swarm: swarm,
     ambiguous: ambiguous,
     none: none,
     perRecipe: perRecipe,

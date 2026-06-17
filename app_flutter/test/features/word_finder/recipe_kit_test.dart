@@ -95,6 +95,17 @@ void main() {
               'floor (140) — it stays ambiguous/none for owner review');
     });
 
+    test('(swarm) an accessory in the verified overrides → KitMatch.swarm', () {
+      // "מחסום רצפה" is in kAccSkuOverrides (swarm-matched + adversarially
+      // verified). It has no owner sku, so it resolves via the override table to
+      // KitMatch.swarm, bound to the verified product — not left to the scorer.
+      final line = resolveAccessory(_acc('מחסום רצפה'));
+      expect(line.match, KitMatch.swarm,
+          reason: 'a verified swarm override resolves as swarm');
+      expect(line.product, isNotNull,
+          reason: 'the override sku must bind to a real pooled product');
+    });
+
     test('every line falls in exactly one bucket (enum is total)', () {
       for (final recipe in kSmartProducts) {
         for (final a in recipe.acc) {
@@ -145,20 +156,29 @@ void main() {
       print('total accessories : ${cov.total}');
       print('curated  : ${cov.curated}  (${pct(cov.curatedRatio)})');
       print('auto     : ${cov.auto}  (${pct(cov.autoRatio)})');
+      print('swarm    : ${cov.swarm}  (${pct(cov.swarmRatio)})');
       print('ambiguous: ${cov.ambiguous}  (${pct(cov.ambiguousRatio)})');
       print('none     : ${cov.none}  (${pct(cov.noneRatio)})');
-      print('resolved (curated+auto): ${cov.resolved}  '
+      print('resolved (curated+auto+swarm): ${cov.resolved}  '
           '(${pct(cov.resolvedRatio)})');
 
       // ── Sane bounds. ──
       expect(cov.total, liveTotal,
           reason: "total must equal the sum of every recipe's accessories");
-      expect(cov.curated + cov.auto + cov.ambiguous + cov.none, cov.total,
+      expect(cov.curated + cov.auto + cov.swarm + cov.ambiguous + cov.none,
+          cov.total,
           reason: 'every accessory lands in exactly one bucket');
       expect(cov.resolved, greaterThan(0),
-          reason: 'curated + auto must be > 0 (the bridge resolves something)');
+          reason: 'curated + auto + swarm must be > 0 (the bridge resolves '
+              'something)');
       // Each bucket is a non-negative share of the whole.
-      for (final n in [cov.curated, cov.auto, cov.ambiguous, cov.none]) {
+      for (final n in [
+        cov.curated,
+        cov.auto,
+        cov.swarm,
+        cov.ambiguous,
+        cov.none,
+      ]) {
         expect(n, greaterThanOrEqualTo(0));
         expect(n, lessThanOrEqualTo(cov.total));
       }
