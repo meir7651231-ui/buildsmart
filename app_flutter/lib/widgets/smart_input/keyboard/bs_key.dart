@@ -114,16 +114,15 @@ class BsKey extends StatelessWidget {
     );
     final asset = leadingImageAsset;
     if (asset == null) return label;
+    // Thumbnail pinned to the FAR (RTL) edge: the keyboard is LTR-ordered, so the
+    // LAST child sits at the key's RIGHT edge. The label fills the rest via an
+    // [Expanded] (the image is pushed hard to the right, not centered beside the
+    // text). The label stays a plain [Text] (so text-based finds keep matching)
+    // with two lines + ellipsis so a long label never overflows a narrow key.
+    // OWNER-REVIEW: thumbnail anchored to the right edge.
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _Thumb(asset),
-        const SizedBox(width: BsTokens.space1),
-        // The label stays a plain [Text] (so text-based finds keep matching) but
-        // is made [Flexible] with two lines + ellipsis so a long label beside a
-        // thumbnail wraps/clips instead of overflowing a narrow key.
-        Flexible(
+        Expanded(
           child: Text(
             model.label,
             textAlign: TextAlign.center,
@@ -136,6 +135,8 @@ class BsKey extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(width: BsTokens.space1),
+        _Thumb(asset),
       ],
     );
   }
@@ -184,7 +185,8 @@ class BsKey extends StatelessWidget {
   }
 }
 
-/// A small rounded product thumbnail shown leading a [BsKey]'s label.
+/// A small rounded product thumbnail shown at the trailing (right) edge of a
+/// [BsKey], beside its label.
 ///
 /// Resolves the image through the app's single source of truth
 /// [resolveProductImage] — the SAME helper every other product surface uses — so
@@ -204,9 +206,9 @@ class _Thumb extends StatelessWidget {
 
   final String asset;
 
-  static const double _size = 32; // logical px — small, beside the label
+  static const double _size = 40; // logical px — beside the label, at the edge
   static const double _radius = 6;
-  static const int _cacheWidth = 64; // ~2x _size, memory-frugal decode
+  static const int _cacheWidth = 80; // ~2x _size, memory-frugal decode
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +222,9 @@ class _Thumb extends StatelessWidget {
         image: ResizeImage(resolveProductImage(asset), width: _cacheWidth),
         width: _size,
         height: _size,
-        fit: BoxFit.cover,
+        // contain (not cover) so the WHOLE product is visible — never cropped.
+        // OWNER-REVIEW: BoxFit.contain.
+        fit: BoxFit.contain,
         // Decorative beside the text label — the key's Semantics carries meaning.
         excludeFromSemantics: true,
         // A missing / undecodable / not-yet-fetched image collapses to nothing —
