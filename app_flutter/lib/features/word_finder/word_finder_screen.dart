@@ -25,6 +25,8 @@
 // hatch only — the happy path is word → chip taps.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/features/word_finder/distinct_label.dart'
+    show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
@@ -452,13 +454,20 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     }
     if (q is ShowProducts) {
       // The converged cascade: render each distinct product as a plain
-      // icon-free word-key (same BsKey idiom). The key LABEL is the SHORT plain
-      // word (`_productLabel` → `quickLabel`); the key PAYLOAD is the product's
+      // icon-free word-key (same BsKey idiom). The key PAYLOAD is the product's
       // unique SKU, so the tap handler resolves it by sku — never by the
       // non-unique label (two cards can share a plain word). Tapping one opens
       // its sheet.
+      //
+      // KEY LABEL — to fix the identical-key bug (every converged key showing
+      // the same plain `quickLabel`), compute a MINIMAL-distinction label map
+      // ONCE over the whole list (`distinctSelectionLabels`) so each key is
+      // UNIQUE in plain language. Fall back to the bare `_productLabel` only if
+      // a sku is somehow missing from the map (defensive — never expected).
+      final labels = distinctSelectionLabels(q.products);
       return [
-        for (final p in q.products) WordKey(_productLabel(p), payload: p.sku),
+        for (final p in q.products)
+          WordKey(labels[p.sku] ?? _productLabel(p), payload: p.sku),
         // 7th engine: when a reached product is a valid connection anchor, offer
         // a plain-text (icon-free) 'מה מתחבר לזה?' key that opens the parts-that-
         // connect view. Appended LAST so it never displaces a product key. Its
@@ -471,15 +480,25 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   }
 
   /// 7th engine: the keys for the connections view — the compatible PARTS as
-  /// plain product-keys. SAME icon-free idiom as a ShowProducts list: the label
-  /// is the SHORT plain word (`_productLabel` → `quickLabel`) and the payload is
-  /// the product's unique SKU, so a tap reuses the existing sku-resolved
-  /// open-sheet add-path. The connections list is NOT collapse-deduped, so two
-  /// parts CAN share a plain word — keying the tap on sku (not label) is what
-  /// keeps both reachable.
-  List<WordKey> _connectionKeys() => [
-        for (final p in connectionsShown) WordKey(_productLabel(p), payload: p.sku),
-      ];
+  /// plain product-keys. SAME icon-free idiom as a ShowProducts list: the
+  /// payload is the product's unique SKU, so a tap reuses the existing
+  /// sku-resolved open-sheet add-path. The connections list is NOT
+  /// collapse-deduped, so size/angle/colour ALSO differ between parts.
+  ///
+  /// KEY LABEL — the connections list is also vulnerable to the identical-key
+  /// bug (two parts sharing a plain `quickLabel`), so the SAME
+  /// `distinctSelectionLabels` map is computed ONCE over the shown parts; each
+  /// key takes its unique plain-language label from the map, falling back to the
+  /// bare `_productLabel` only if a sku is missing (defensive). Keying the TAP
+  /// on sku (not label) still keeps every part reachable.
+  List<WordKey> _connectionKeys() {
+    final parts = connectionsShown;
+    final labels = distinctSelectionLabels(parts);
+    return [
+      for (final p in parts)
+        WordKey(labels[p.sku] ?? _productLabel(p), payload: p.sku),
+    ];
+  }
 
   /// The header prompt for the current question (empty for Resolve).
   String _headerFor(NewbieQuestion q) => switch (q) {

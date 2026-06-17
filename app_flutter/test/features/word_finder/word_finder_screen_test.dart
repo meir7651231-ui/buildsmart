@@ -39,6 +39,7 @@
 // async-persist churn.)
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/features/word_finder/distinct_label.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show productHasChip;
@@ -514,12 +515,14 @@ void main() {
           reason: 'a ShowProducts pick offers the remaining products');
       expect(find.text(kPickProductQuestion), findsOneWidget,
           reason: 'the ShowProducts header prompts the user to pick a product');
-      // Each distinct product renders as a tappable key bearing its SHORT plain
-      // word (quickLabel) — NOT the full technical nameHe — via the icon-free
-      // BsKey idiom (NO icons added). (Fix 1: simplify-to-words.)
-      final firstProductLabel = quickLabel(reached.products.first);
+      // Each distinct product renders as a tappable key bearing its DISTINCT
+      // plain label — the short word (quickLabel) plus the MINIMAL distinguishing
+      // suffix the labeller adds so two same-word cards never look identical —
+      // via the icon-free BsKey idiom (NO icons). (Fix: distinct selection labels.)
+      final labels = distinctSelectionLabels(reached.products);
+      final firstProductLabel = labels[reached.products.first.sku]!;
       expect(find.widgetWithText(BsKey, firstProductLabel), findsWidgets,
-          reason: 'each ShowProducts product renders as a plain word-key');
+          reason: 'each ShowProducts product renders as a distinct plain word-key');
       expect(find.byType(WordKeyboard), findsOneWidget,
           reason: 'the product pick reuses the WordKeyboard key idiom');
     }
@@ -618,10 +621,13 @@ void main() {
     expect(find.text(kConnectionsHeader), findsWidgets,
         reason: 'the connections view shows its header');
     // The compatible parts render as plain word-keys (icon-free BsKey idiom):
-    // the SHORT plain word (quickLabel), NOT the full nameHe (Fix 1).
-    final firstPartLabel = quickLabel(parts.first);
+    // the DISTINCT plain label (quickLabel + minimal distinguishing suffix), NOT
+    // the full nameHe. The connections list is NOT collapse-deduped, so the
+    // labeller may use size/colour to tell same-word parts apart.
+    final partLabels = distinctSelectionLabels(parts);
+    final firstPartLabel = partLabels[parts.first.sku]!;
     expect(find.widgetWithText(BsKey, firstPartLabel), findsWidgets,
-        reason: 'each compatible part renders as a plain product key');
+        reason: 'each compatible part renders as a distinct plain product key');
     // A WordKeyboard carries the part keys (reusing the existing key idiom).
     expect(find.byType(WordKeyboard), findsOneWidget,
         reason: 'the parts are rendered via the WordKeyboard key idiom');
@@ -762,10 +768,16 @@ void main() {
             'product whose quickLabel differs from its full nameHe');
     final p = simplified!;
 
-    // The key bears the SHORT plain word...
-    expect(find.widgetWithText(BsKey, quickLabel(p)), findsWidgets,
-        reason: 'the product key renders the plain word quickLabel(p)');
-    // ...and the FULL technical nameHe is NOT rendered on any key (Fix 1: the
+    // The key bears the DISTINCT plain label — quickLabel(p) plus, if it
+    // collided, a minimal distinguishing suffix; it always STARTS WITH the plain
+    // word and never becomes the full jargon nameHe.
+    final showLabels = distinctSelectionLabels(products);
+    final pLabel = showLabels[p.sku]!;
+    expect(pLabel.startsWith(quickLabel(p)), isTrue,
+        reason: 'the distinct label still starts with the plain word quickLabel(p)');
+    expect(find.widgetWithText(BsKey, pLabel), findsWidgets,
+        reason: 'the product key renders the distinct plain label');
+    // ...and the FULL technical nameHe is NOT rendered on any key (the
     // simplify-to-words vision — full jargon must not leak onto the key face).
     expect(find.widgetWithText(BsKey, p.nameHe.trim()), findsNothing,
         reason: 'the full technical nameHe must NOT appear as a key label');
