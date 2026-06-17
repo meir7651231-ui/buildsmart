@@ -66,22 +66,30 @@ class KitLine {
     required this.product,
     required this.match,
     required this.score,
+    this.alternatives = const <LipskeyCatalogProduct>[],
   });
 
   /// The recipe accessory this line resolves (name / why / must / etc.).
   final SmartAcc acc;
 
   /// The catalog product the accessory bound to, or null when [match] is
-  /// [KitMatch.none].
+  /// [KitMatch.none]. For a [KitMatch.swarm] line this is the RECOMMENDED
+  /// (top-ranked) product; [alternatives] holds the rest.
   final LipskeyCatalogProduct? product;
 
   /// How confident the binding is.
   final KitMatch match;
 
   /// The [searchRelevance] score behind an [KitMatch.auto] / [KitMatch.ambiguous]
-  /// binding. For [KitMatch.curated] it is 0 (the row was bound by sku, not by
-  /// score); for [KitMatch.none] it is the top score seen (0 or below floor).
+  /// binding. For [KitMatch.curated] / [KitMatch.swarm] it is 0 (the row was
+  /// bound by sku/rank, not by score); for [KitMatch.none] it is the top score
+  /// seen (0 or below floor).
   final int score;
+
+  /// For a [KitMatch.swarm] line: the ALTERNATIVE products (ranked AFTER
+  /// [product]) the UI can offer beside the recommended default — the "or here
+  /// are other options" list. Empty for every other match kind.
+  final List<LipskeyCatalogProduct> alternatives;
 }
 
 // ── OWNER-REVIEW tuning constants ───────────────────────────────────────────
@@ -174,19 +182,27 @@ KitLine resolveAccessory(SmartAcc acc) {
     }
   }
 
-  // (1b) Swarm override: a verified machine-match for a name the scorer could
-  // not resolve. Wins over scoring (it was adversarially confirmed) but NEVER
-  // over an owner-set sku (checked above). Falls through if the sku is somehow
-  // not in the pool.
-  final overrideSku = kAccSkuOverrides[acc.name];
-  if (overrideSku != null) {
-    final swarmProduct = _bySku[overrideSku];
-    if (swarmProduct != null) {
+  // (1b) Swarm-RANKED override: the RANK+verify swarm produced a ranked list of
+  // fitting products for a name the scorer could not resolve — best-fit first.
+  // The FIRST in-pool product is the RECOMMENDED default ([product]); the rest
+  // become [KitLine.alternatives] for the UI to offer ("or here are others").
+  // Wins over scoring (adversarially verified) but NEVER over an owner-set sku
+  // (checked above). Skus not in the pool are skipped.
+  final ranked = kAccRankedSkus[acc.name];
+  if (ranked != null && ranked.isNotEmpty) {
+    final products = <LipskeyCatalogProduct>[
+      for (final s in ranked)
+        if (_bySku[s] != null) _bySku[s]!,
+    ];
+    if (products.isNotEmpty) {
       return KitLine(
         acc: acc,
-        product: swarmProduct,
+        product: products.first,
         match: KitMatch.swarm,
         score: 0,
+        alternatives: products.length > 1
+            ? products.sublist(1)
+            : const <LipskeyCatalogProduct>[],
       );
     }
   }

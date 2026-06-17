@@ -44,17 +44,19 @@ void main() {
           reason: 'the line carries the original SmartAcc');
     });
 
-    test('(auto) a clear, unique name → KitMatch.auto with a decisive score', () {
-      // "מד לחץ" tops at 140 (whole phrase in the product name) with the runner-up
-      // far behind (20) → margin 120, well past kKitAutoMargin. A genuine 1:1 name.
+    test('(precedence) a ranked override wins over the auto scorer — מד לחץ '
+        'resolves as swarm, not auto', () {
+      // "מד לחץ" scores high enough for the scorer to auto-match it, but it is
+      // ALSO in the swarm-ranked overrides — and the override layer (1b) runs
+      // BEFORE the scorer (2), so it resolves as KitMatch.swarm (the ranked
+      // recommended), not KitMatch.auto. With the ranked overrides in place the
+      // auto scorer-branch is shadowed for all current recipe data (auto == 0);
+      // the branch stays as a defensive fallback for a future un-ranked name.
       final line = resolveAccessory(_acc('מד לחץ'));
-
-      expect(line.match, KitMatch.auto,
-          reason: 'a uniquely-named accessory must auto-resolve');
-      expect(line.product, isNotNull);
-      expect(line.score, greaterThanOrEqualTo(kKitAutoScore));
-      // The bound product name contains the accessory phrase (sanity on the pick).
-      expect(line.product!.nameHe, contains('מד לחץ'));
+      expect(line.match, KitMatch.swarm,
+          reason: 'the ranked override takes precedence over the auto scorer');
+      expect(line.product, isNotNull,
+          reason: 'the top ranked sku binds to a real pooled product');
     });
 
     test('(ambiguous) a generic name ("אטם") → KitMatch.ambiguous, NOT auto', () {
@@ -95,15 +97,23 @@ void main() {
               'floor (140) — it stays ambiguous/none for owner review');
     });
 
-    test('(swarm) an accessory in the verified overrides → KitMatch.swarm', () {
-      // "מחסום רצפה" is in kAccSkuOverrides (swarm-matched + adversarially
-      // verified). It has no owner sku, so it resolves via the override table to
-      // KitMatch.swarm, bound to the verified product — not left to the scorer.
+    test('(swarm) a ranked accessory → KitMatch.swarm with recommended + '
+        'alternatives', () {
+      // 'מחסום רצפה' has a swarm-ranked candidate list (best first). It resolves
+      // to swarm: product = the RECOMMENDED (top), alternatives = the rest — the
+      // "take this, or here are other options" model. No owner pick needed.
       final line = resolveAccessory(_acc('מחסום רצפה'));
       expect(line.match, KitMatch.swarm,
-          reason: 'a verified swarm override resolves as swarm');
+          reason: 'a ranked accessory resolves as swarm');
       expect(line.product, isNotNull,
-          reason: 'the override sku must bind to a real pooled product');
+          reason: 'the top ranked sku binds to a real pooled product');
+      expect(line.alternatives, isNotEmpty,
+          reason: 'a multi-candidate accessory offers alternatives beside the '
+              'recommended default');
+      for (final alt in line.alternatives) {
+        expect(alt.sku, isNot(line.product!.sku),
+            reason: 'an alternative is never a duplicate of the recommended top');
+      }
     });
 
     test('every line falls in exactly one bucket (enum is total)', () {
