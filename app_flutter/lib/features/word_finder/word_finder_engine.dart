@@ -256,53 +256,113 @@ List<LipskeyCatalogProduct> distinctProducts(
   return out;
 }
 
-/// The next axis to narrow by that has NOT yet been answered, given the current
-/// [pool] and the set of axis labels [answeredLabels] already chosen on this
-/// dive. PURE.
+/// The subtype-free narrow axes, in `narrowAxis` priority order, built from the
+/// SAME PUBLIC lifted helpers `narrowAxis`/`offerAxis` use. PURE.
 ///
-/// WHY THIS EXISTS: `offerAxis`/`narrowAxis` return only the SINGLE best
-/// splitting axis (the first that splits, in priority order) — once the user
-/// answers it, `offerAxis` re-offers the SAME best axis for as long as it still
-/// splits (e.g. a faucet whose name carries `½"×¾"` keeps surfacing a size
-/// axis). The old engine treated that repeat as "stop, show products". This
-/// helper instead walks PAST the already-answered axis to the next UNANSWERED
-/// one, so the dive narrows through each available axis ONCE
-/// (size → angle → colour → word) before falling back to a product pick.
-///
-/// AXIS VOCABULARY — must stay byte-identical to what `narrowAxis` emits so the
+/// AXIS VOCABULARY — must stay byte-identical to what `narrowAxis` emits so a
 /// resulting [AskAxis] label feeds [applyNarrow]/`productHasChip` and lands in
-/// the answered-set consistently. Built from the SAME PUBLIC lifted helpers
-/// `narrowAxis` uses, in the SAME priority order (curated facets are handled by
-/// `offerAxis` in [offerQuestion] — they need a subtype — so this helper starts
-/// at the subtype-free axes):
+/// the answered-set consistently. Curated facets ('אפשרות') are NOT here: they
+/// need a subtype and are handled by `offerAxis` in [offerQuestion]; this list
+/// covers only the subtype-free axes the scorer ranks by information gain:
 ///   • `sizeTokensIn(pool)`  → label 'גודל', chips = token labels,
 ///   • `angleTokensIn(pool)` → label 'זווית', chips = token labels,
 ///   • `colorOptions(pool)`  → label 'צבע',  chips = colours,
 ///   • `wordOptions(pool)`   → label 'דגם',  chips = characterizing words.
 ///
-/// An axis is a candidate only when its label is NOT in [answeredLabels] AND it
-/// has >1 DISTINCT chip (a lone chip can't narrow anything — same `>1` gate
-/// `narrowAxis` applies). Returns the first such axis by the priority order
-/// above as `(label, chips)`, or null when every splitting axis is already
-/// answered (the caller then shows products).
-({String label, List<String> chips})? nextUnansweredAxis(
+/// The ORDER of this list is the canonical tie-break: when two axes score
+/// identically under [axisExpectedRemaining], the earlier one (size before
+/// angle before colour before word — the same precedence `narrowAxis` applies)
+/// wins, keeping selection deterministic.
+List<({String label, List<String> chips})> _candidateAxes(
+  List<LipskeyCatalogProduct> pool,
+) =>
+    <({String label, List<String> chips})>[
+      (label: 'גודל', chips: sizeTokensIn(pool).map((t) => t.label).toList()),
+      (label: 'זווית', chips: angleTokensIn(pool).map((t) => t.label).toList()),
+      (label: 'צבע', chips: colorOptions(pool)),
+      (label: 'דגם', chips: wordOptions(pool)),
+    ];
+
+/// INFORMATION-GAIN score for one axis: the EXPECTED number of distinct cards
+/// still remaining after the user picks one of its [chips]. PURE; LOWER is
+/// better (a more even / more decisive split leaves fewer cards on average).
+///
+/// FORMULA — for each chip `c`, let `n_c = distinctCardCount(applyNarrow(pool,
+/// c))` be the distinct CARDS that survive picking `c`. The chance a uniformly-
+/// random user lands in bucket `c` is `n_c / N` (`N = distinctCardCount(pool)`),
+/// and the cards left if they do is `n_c`, so the expected remainder is
+///   Σ_c (n_c / N) · n_c  =  Σ_c n_c²  /  N .
+/// Equivalently `sum(n_c^2) / distinctCardCount(pool)` — exactly the value the
+/// spec prescribes. It rewards an EVEN split (many small buckets → small Σn_c²)
+/// and punishes a lopsided one (one bucket ≈ N → Σn_c² ≈ N² → score ≈ N, i.e.
+/// "you learned almost nothing"). It scores CARDS via [distinctCardCount], NOT
+/// raw `pool.length`, so variant-collapsed duplicates are not double-counted.
+///
+/// NOTE — buckets can OVERLAP (a product carrying ½" AND ¾" lands in both size
+/// chips), so Σn_c is not bounded by N; that is intentional. The measure is a
+/// monotone "how lopsided" proxy, not a partition entropy: an axis where every
+/// chip keeps the whole pool (the ½"×¾" loop) scores ≈ N·(#chips) — strictly
+/// WORSE than any axis that actually carves the pool, so the scorer naturally
+/// defers non-narrowing axes. Determinism: integer arithmetic, no randomness.
+///
+/// PERF: computes `distinctCardCount(applyNarrow(pool, c))` EXACTLY ONCE per
+/// chip (no repeated work), and the caller invokes it once per candidate axis.
+double axisExpectedRemaining(
+  List<LipskeyCatalogProduct> pool,
+  List<String> chips,
+) {
+  final n = distinctCardCount(pool);
+  if (n == 0) return 0;
+  var sumSq = 0;
+  for (final c in chips) {
+    final nc = distinctCardCount(applyNarrow(pool, c));
+    sumSq += nc * nc;
+  }
+  return sumSq / n;
+}
+
+/// The next axis to narrow by — the UNANSWERED axis that, scored by
+/// [axisExpectedRemaining], splits the [pool] MOST decisively (lowest expected
+/// remaining cards). This is the "easiest path" core: ask the question that
+/// removes the most uncertainty first, so the dive reaches a product in the
+/// FEWEST taps. PURE. Replaces the old fixed size→angle→colour→word priority.
+///
+/// WHY THIS EXISTS: `offerAxis`/`narrowAxis` return only the SINGLE best
+/// splitting axis by a FIXED order — once the user answers it, `offerAxis`
+/// re-offers the SAME axis for as long as it still splits (e.g. a faucet whose
+/// name carries `½"×¾"` keeps surfacing a size axis). This helper instead
+/// considers EVERY still-unanswered subtype-free axis, scores each by how
+/// evenly it carves the pool, and returns the most decisive one — walking the
+/// dive through the axes in best-first order, each at most once, before
+/// falling back to a product pick.
+///
+/// CANDIDATES — built via [_candidateAxes] (the SAME public lifted helpers
+/// `narrowAxis` uses). An axis is a candidate only when its label is NOT in
+/// [answeredLabels] AND it has >1 DISTINCT chip (a lone chip can't narrow
+/// anything — the same `>1` gate `narrowAxis` applies). Among the candidates
+/// the LOWEST [axisExpectedRemaining] wins; TIES break by [_candidateAxes]
+/// order (size → angle → colour → word) for determinism. Returns the winner as
+/// `(label, chips)`, or null when no unanswered splitting axis remains (the
+/// caller then shows products), which also guarantees termination: every
+/// returned axis is unanswered, so the answered-set strictly grows each turn.
+({String label, List<String> chips})? bestUnansweredAxis(
   List<LipskeyCatalogProduct> pool,
   Set<String> answeredLabels,
 ) {
-  // Candidates in narrowAxis priority order. Chip lists are deduped to a
-  // DISTINCT set (sizeTokensIn/angleTokensIn already dedupe tokens, but we fold
-  // their labels too so the >1 gate counts distinct CHIPS exactly).
-  final candidates = <({String label, List<String> chips})>[
-    (label: 'גודל', chips: sizeTokensIn(pool).map((t) => t.label).toList()),
-    (label: 'זווית', chips: angleTokensIn(pool).map((t) => t.label).toList()),
-    (label: 'צבע', chips: colorOptions(pool)),
-    (label: 'דגם', chips: wordOptions(pool)),
-  ];
-  for (final c in candidates) {
+  ({String label, List<String> chips})? best;
+  double? bestScore;
+  // Iterate in priority order; a STRICT `<` keeps the FIRST (higher-priority)
+  // axis on a tie, so the tie-break is the canonical narrowAxis order.
+  for (final c in _candidateAxes(pool)) {
     if (answeredLabels.contains(c.label)) continue;
-    if (c.chips.toSet().length > 1) return c;
+    if (c.chips.toSet().length <= 1) continue; // can't narrow → not a candidate
+    final score = axisExpectedRemaining(pool, c.chips);
+    if (bestScore == null || score < bestScore) {
+      bestScore = score;
+      best = c;
+    }
   }
-  return null;
+  return best;
 }
 
 /// The next thing to ask the user, given the current [pool], the answered
@@ -317,19 +377,21 @@ List<LipskeyCatalogProduct> distinctProducts(
 ///     [ShowProducts] with the distinct remaining products. The small-pool
 ///     shortcut: don't drag a non-technical user through axis taps when the
 ///     remaining cards already fit on one scan.
-///  4. The best splitting axis (`offerAxis`, which honours the curated-facet
-///     override) is NOT yet answered and has chips → [AskAxis] for it.
-///  5. Otherwise that best axis is a REPEAT (already answered — the multi-size
-///     ½"×¾" loop, where `narrowAxis` keeps surfacing a size axis). Instead of
-///     stopping, walk to the next UNANSWERED axis via [nextUnansweredAxis]
-///     (size → angle → colour → word, skipping answered ones). If one exists →
-///     [AskAxis] for it (mapped question), so the dive narrows through EACH
-///     available axis ONCE.
+///  4. The MOST-DECISIVE unanswered subtype-free axis ([bestUnansweredAxis] —
+///     information-gain scored, lowest [axisExpectedRemaining]) → [AskAxis] for
+///     it. THIS is the "easiest path": ask the question that narrows the pool
+///     most first, so the dive reaches a product in the fewest taps. Replaces
+///     the old fixed size→angle→colour→word order. Each axis is unanswered, so
+///     it is asked at most once.
+///  5. No subtype-free axis scores (all answered / unsplittable), but the
+///     curated-facet axis (`offerAxis`/`narrowAxis` with [subtype]) is
+///     UNANSWERED and has chips → [AskAxis] for it. This PRESERVES the curated
+///     'אפשרות' path (covers/grates, round/square…), which [bestUnansweredAxis]
+///     does not score because it needs a subtype.
 ///  6. No unanswered splitting axis remains → [ShowProducts] with the distinct
-///     remaining products. This is the real convergence floor: every axis the
-///     pool can split on has been answered (or the best axis was empty /
-///     unsplittable), so the dive advances to a product pick instead of
-///     spinning on an axis it already asked.
+///     remaining products. The convergence floor: every axis the pool can split
+///     on has been answered (or is unsplittable), so the dive advances to a
+///     product pick instead of spinning on an axis it already asked.
 NewbieQuestion offerQuestion(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
@@ -356,12 +418,28 @@ NewbieQuestion offerQuestion(
   }
 
   // The axis labels already answered on this dive. `narrowAxis` is shared with
-  // finder_screen and we must not touch it, so the "narrow through each axis
-  // once" logic lives HERE.
+  // finder_screen and we must not touch it, so the "ask the most-decisive axis,
+  // each at most once" logic lives HERE.
   final answeredAxes = {for (final s in stack) s.axisLabel};
 
-  // (4) The best splitting axis (curated facets → size → angle → colour → word
-  // via offerAxis/narrowAxis). Ask it when it is UNANSWERED and has chips.
+  // (4) The MOST-DECISIVE unanswered subtype-free axis (information-gain scored
+  // — lowest expected-remaining cards). This is the easiest path: ask the
+  // question that narrows the pool most first, so the dive reaches a product in
+  // the fewest taps. Every returned axis is UNANSWERED → asked at most once.
+  final best = bestUnansweredAxis(pool, answeredAxes);
+  if (best != null) {
+    return AskAxis(
+      kAxisQuestion[best.label] ?? kAxisFallbackQuestion,
+      best.chips,
+      best.label,
+    );
+  }
+
+  // (5) No subtype-free axis scores, but the curated-facet axis (offerAxis/
+  // narrowAxis honours the subtype 'אפשרות' override) may still be UNANSWERED
+  // with chips. Ask it — this PRESERVES the curated facet path that the scorer
+  // does not cover (it needs a subtype). An empty axis label can't be answered,
+  // so `ax.label.isEmpty` also routes here only when it carries no chips.
   final ax = offerAxis(pool, subtype);
   final axIsUnanswered = ax.label.isEmpty || !answeredAxes.contains(ax.label);
   if (axIsUnanswered && ax.chips.isNotEmpty) {
@@ -369,18 +447,6 @@ NewbieQuestion offerQuestion(
       kAxisQuestion[ax.label] ?? kAxisFallbackQuestion,
       ax.chips,
       ax.label,
-    );
-  }
-
-  // (5) The best axis is a REPEAT (already answered — the multi-size loop) or
-  // empty. Narrow by the next UNANSWERED axis instead of re-asking it, so the
-  // dive walks through each available axis once (size → angle → colour → word).
-  final next = nextUnansweredAxis(pool, answeredAxes);
-  if (next != null) {
-    return AskAxis(
-      kAxisQuestion[next.label] ?? kAxisFallbackQuestion,
-      next.chips,
-      next.label,
     );
   }
 
