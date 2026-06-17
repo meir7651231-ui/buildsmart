@@ -270,7 +270,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// connections view) — the SHORT plain word `quickLabel(p)`, NOT the full
   /// technical `nameHe` (full jargon violates the simplify-to-words vision; the
   /// quick pad already buckets by this same derived word). NO icon (rendered via
-  /// the same icon-free [BsKey] idiom as word/chip keys).
+  /// the same icon-free `BsKey` idiom as word/chip keys).
   ///
   /// The label is display-only and intentionally NOT unique — two distinct skus
   /// can share a plain word (e.g. 'ונטיל'). Tapped-product resolution therefore
@@ -299,14 +299,13 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
 
   /// 7th engine: the anchor the 'מה מתחבר לזה?' entry key targets for the current
   /// question, or null when no reached product is a valid connection anchor (so
-  /// the affordance is NOT offered). For a [Resolve] it is the resolved product;
-  /// for [ShowProducts] it is the FIRST shown product that is an anchor (a stable,
-  /// predictable pick). Returns null for any other question.
+  /// the affordance is NOT offered). Only a [ShowProducts] question carries the
+  /// entry key (the keyboard that renders it) — it is the FIRST shown product
+  /// that is an anchor (a stable, predictable pick). A [Resolve] opens the
+  /// product sheet and renders NO keyboard, so the entry key never shows there;
+  /// every other question returns null too.
   LipskeyCatalogProduct? get _connectionEntryAnchor {
     final q = currentQuestion;
-    if (q is Resolve) {
-      return isConnectionAnchor(q.product) ? q.product : null;
-    }
     if (q is ShowProducts) {
       for (final p in q.products) {
         if (isConnectionAnchor(p)) return p;

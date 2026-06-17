@@ -89,9 +89,9 @@ const Set<String> kBrandPrefixBlocklist = {
   'טרפז', // OWNER-REVIEW
   'טולדו', // OWNER-REVIEW
   'טיטוניק', // OWNER-REVIEW
-  'ג\'נבה', // OWNER-REVIEW (ASCII apostrophe U+0027)
+  "ג'נבה", // OWNER-REVIEW (ASCII apostrophe U+0027)
   'אוסלו', // OWNER-REVIEW
-  'אנג\'ל', // OWNER-REVIEW (ASCII apostrophe U+0027)
+  "אנג'ל", // OWNER-REVIEW (ASCII apostrophe U+0027)
   'גאלרי', // OWNER-REVIEW
   'גל', // OWNER-REVIEW
   'פלורה', // OWNER-REVIEW
@@ -113,7 +113,7 @@ const Set<String> kBrandPrefixBlocklist = {
 /// reading real product names). These are REVERSIBLE defaults — empty this map
 /// to restore identity canonicalization. Granularity merges (one elbow / one
 /// tee / one coupler / one reducer key) trade specificity for a simpler newbie
-/// search; the map is a FLAT global Map<String,String> so a merge applies to
+/// search; the map is a FLAT global `Map<String,String>` so a merge applies to
 /// EVERY product regardless of category. NOTE: 'מחבר'→'מצמד' and 'מקטין'→'מצרה'
 /// were explicitly REJECTED ('מחבר גמיש' flex-connectors and 'מקטין לחץ'
 /// pressure-reducers are distinct products that must not fold in).

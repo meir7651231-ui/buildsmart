@@ -44,7 +44,7 @@ void main() {
       // The 18 NEW brand prefixes must ALSO never be keys (verified to lead a
       // name, surfacing the real noun behind them). ג'נבה/אנג'ל use ASCII '.
       const newBrands = [
-        'טרפז', 'טולדו', 'טיטוניק', 'ג\'נבה', 'אוסלו', 'אנג\'ל', 'גאלרי',
+        'טרפז', 'טולדו', 'טיטוניק', "ג'נבה", 'אוסלו', "אנג'ל", 'גאלרי',
         'גל', 'פלורה', 'כנרת', 'הוואי', 'אלפא', 'ויגה', 'גליל', 'דלתא',
         'זקיף', 'פיטרה', 'בתא',
       ];

@@ -11,7 +11,7 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
-    show productHasChip;
+    show productHasChip, sizeTokensIn;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -345,7 +345,7 @@ void main() {
       // The terminal ShowProducts carries exactly the distinct remaining
       // products, capped, all genuine pool members and distinct.
       if (q is ShowProducts) {
-        final show = q as ShowProducts;
+        final show = q;
         expect(show.products, isNotEmpty,
             reason: 'the converged pick offers the remaining products');
         expect(show.products.length, distinctProducts(pool2).length,
@@ -445,6 +445,65 @@ void main() {
       expect(axis.questionHe, kAxisQuestion['צבע']);
       expect(axis.chips, containsAll(<String>['כרום', 'שחור']),
           reason: 'the decisive axis offers both colours');
+    });
+
+    test('scorer tie-break is deterministic', () {
+      // When two axes score IDENTICALLY under axisExpectedRemaining, the winner
+      // must be the higher-priority one in the canonical _candidateAxes order
+      // (size > angle > colour > word), chosen by the strict `<` that keeps the
+      // FIRST axis on a tie. Here angle and colour split the SAME pool the SAME
+      // way (each evenly 2/2), so their scores are exactly equal and the tie
+      // must resolve to ANGLE ('זווית'), never COLOUR ('צבע').
+      //
+      // 4 distinct cards, each:
+      //   • a distinct 'דגם<i>' token (the digit makes wordOptions ignore it, so
+      //     there is NO word axis, yet _collapseKey keeps it → 4 distinct cards),
+      //   • NO size token at all → the size axis has no chips (not a candidate),
+      //   • ONE angle (45° / 90°) split 2/2 → angle halves the pool,
+      //   • ONE colour (שחור / כרום) split 2/2 → colour halves the pool too.
+      final pool = <LipskeyCatalogProduct>[
+        for (var i = 0; i < 4; i++)
+          LipskeyCatalogProduct(
+            sku: 'TIE-$i',
+            // angle: 45° for i<2, 90° for i>=2 (2/2). colour split orthogonally
+            // (שחור for even i, כרום for odd i — also 2/2). The 'דגם<i>' digit
+            // token is ignored by wordOptions but kept by _collapseKey, so every
+            // card stays distinct and there is no competing word axis.
+            nameHe: 'ברך דגם$i ${i < 2 ? '45°' : '90°'}',
+            nameEn: 'elbow model$i ${i < 2 ? '45deg' : '90deg'}',
+            categoryHe: 'ברכים',
+            categoryEn: 'elbows',
+            categoryEmoji: '🔧',
+            color: i.isEven ? 'שחור' : 'כרום',
+            page: 1,
+          ),
+      ];
+
+      // 4 distinct cards; size carries no chips; angle & colour each split 2/2.
+      expect(distinctCardCount(pool), 4,
+          reason: 'each model is its own collapsed card');
+      expect(sizeTokensIn(pool), isEmpty,
+          reason: 'no size token in the names → the size axis is not a candidate');
+
+      // The two scores are EXACTLY equal: angle = (2²+2²)/4 = 2.0,
+      // colour = (2²+2²)/4 = 2.0. This equality is what arms the tie-break.
+      final angleScore = axisExpectedRemaining(pool, <String>['45°', '90°']);
+      final colourScore = axisExpectedRemaining(pool, <String>['שחור', 'כרום']);
+      expect(angleScore, closeTo(2.0, 1e-9),
+          reason: 'angle halves the pool: (2²+2²)/4');
+      expect(colourScore, closeTo(2.0, 1e-9),
+          reason: 'colour halves the pool: (2²+2²)/4');
+      expect(angleScore, closeTo(colourScore, 1e-9),
+          reason: 'angle and colour score IDENTICALLY — the tie the order breaks');
+
+      // The tie resolves DETERMINISTICALLY to the higher-priority angle axis.
+      final best = bestUnansweredAxis(pool, <String>{});
+      expect(best, isNotNull, reason: 'two axes split the pool');
+      expect(best!.label, 'זווית',
+          reason: 'on an exact score tie the canonical order (size > angle > '
+              'colour > word) keeps the FIRST — angle, not colour');
+      expect(best.label, isNot('צבע'),
+          reason: 'colour must lose the tie to the higher-priority angle axis');
     });
 
     test('small multi-card pool short-circuits straight to ShowProducts', () {

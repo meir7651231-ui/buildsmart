@@ -102,7 +102,7 @@ void main() {
 
     test('a non-anchor is empty regardless of tempC', () {
       final seat = product('171026');
-      expect(connectionsFor(seat, tempC: 20), isEmpty);
+      expect(connectionsFor(seat), isEmpty);
       expect(connectionsFor(seat, tempC: 60), isEmpty,
           reason: 'the anchor gate is temperature-independent');
     });
