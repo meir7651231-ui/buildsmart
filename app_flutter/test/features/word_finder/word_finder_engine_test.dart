@@ -567,4 +567,51 @@ void main() {
           reason: 'only the product structurally carrying the size chip passes');
     });
   });
+
+  group('wordsByFrequency — full opening word ordering', () {
+    final lexicon = buildWordLexicon(kDivePool);
+
+    test('returns EVERY lexicon word (the full tail, nothing dropped)', () {
+      final all = wordsByFrequency(lexicon);
+      expect(all.length, lexicon.entries.length,
+          reason: 'the full ordering must include every lexicon word — that is '
+              'the whole point of the show-more tail');
+      expect({for (final e in all) e.word},
+          {for (final e in lexicon.entries) e.word},
+          reason: 'a permutation of the lexicon: same word SET, nothing added');
+    });
+
+    test('is sorted by frequency, highest first (non-increasing)', () {
+      final all = wordsByFrequency(lexicon);
+      for (var i = 1; i < all.length; i++) {
+        expect(all[i - 1].freq, greaterThanOrEqualTo(all[i].freq),
+            reason: 'wordsByFrequency must be non-increasing in freq');
+      }
+    });
+
+    test('ties break by first-seen lexicon order (stable, deterministic)', () {
+      final all = wordsByFrequency(lexicon);
+      final seen = <String, int>{};
+      for (var i = 0; i < lexicon.entries.length; i++) {
+        seen[lexicon.entries[i].word] = i;
+      }
+      for (var i = 1; i < all.length; i++) {
+        if (all[i - 1].freq == all[i].freq) {
+          expect(seen[all[i - 1].word]!, lessThan(seen[all[i].word]!),
+              reason: 'equal-freq words keep their first-seen lexicon order');
+        }
+      }
+    });
+
+    test('the AskWords opening list is exactly its top-kFirstWordCount prefix',
+        () {
+      final ask =
+          offerQuestion(const [], const [], lexicon, null) as AskWords;
+      final prefix = wordsByFrequency(lexicon).take(kFirstWordCount).toList();
+      expect(ask.words.map((e) => e.word).toList(),
+          prefix.map((e) => e.word).toList(),
+          reason: 'the opening question is the prefix of the full ordering — '
+              'one source of truth for word order');
+    });
+  });
 }

@@ -76,6 +76,16 @@ const String kKitMoreOptions = 'עוד אפשרויות';
 /// catalog") instead of hiding it.
 const String kKitNotInCatalog = 'אין בקטלוג';
 
+/// OWNER-REVIEW: the icon-free key appended to the OPENING word list that reveals
+/// the long tail of words hidden below the top-[kFirstWordCount] cut (the ~80
+/// rarer part-nouns a non-technical user otherwise can't reach without typing —
+/// `ניפל`, `רקורד`, `בושינג`). Tapping it shows EVERY lexicon word.
+const String kMoreWordsKey = 'עוד…';
+
+/// OWNER-REVIEW: the icon-free key shown IN PLACE OF [kMoreWordsKey] once the full
+/// word list is revealed — tap it to collapse back to the top words.
+const String kFewerWordsKey = 'פחות';
+
 /// The flag-gated newbie product-finder screen.
 ///
 /// Holds the answered-step [_WordFinderScreenState.stack] and the optional
@@ -134,6 +144,14 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// Mirrors [_connectionsAnchor] exactly; the polished kit UX is an OWNER-design
   /// decision (see the // OWNER-REVIEW affordances below).
   SmartProduct? _kitRecipe;
+
+  /// Opening word-list expansion. False (default) → the opening [AskWords] shows
+  /// only the top [kFirstWordCount] words by frequency plus a [kMoreWordsKey]
+  /// ('עוד…') key. True → it shows EVERY lexicon word (via [wordsByFrequency])
+  /// plus a [kFewerWordsKey] ('פחות') key to collapse back. Only meaningful at
+  /// the opening word question (empty stack); reset to false on any restart /
+  /// re-seed so a fresh dive always opens collapsed.
+  bool _showAllWords = false;
 
   /// @visibleForTesting — when false, reaching a [Resolve] does NOT auto-open
   /// the real [showLipskeyProductSheet]. Production keeps this true (the flow
@@ -235,7 +253,10 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     if (stack.isEmpty) return;
     setState(() {
       stack.removeLast();
-      if (stack.isEmpty) _typedQuery = null;
+      if (stack.isEmpty) {
+        _typedQuery = null;
+        _showAllWords = false;
+      }
     });
   }
 
@@ -255,6 +276,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       _typedQuery = null;
       _connectionsAnchor = null;
       _kitRecipe = null;
+      _showAllWords = false;
     });
   }
 
@@ -297,6 +319,18 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// Mirrors [showConnectionsForTest].
   @visibleForTesting
   void showKitForTest(SmartProduct recipe) => _showKit(recipe);
+
+  /// @visibleForTesting — true while the opening word list is expanded to the
+  /// full lexicon (the 'עוד…' affordance was tapped). Lets a behavioral test
+  /// assert the expand/collapse toggle without depending on rendered copy.
+  @visibleForTesting
+  bool get showAllWordsActive => _showAllWords;
+
+  /// @visibleForTesting — clear the whole dive (mirrors the empty-state's
+  /// 'התחל מחדש' restart). Used to assert the opening-word expansion does not
+  /// leak across dives.
+  @visibleForTesting
+  void restartForTest() => _restart();
 
   /// @visibleForTesting — the parts shown in the connections view, or empty when
   /// the view is closed. Lets a behavioral test assert the affordance reached a
@@ -449,6 +483,17 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       if (recipe != null) _showKit(recipe);
       return;
     }
+    // Opening-list expansion toggle: 'עוד…' reveals every lexicon word, 'פחות'
+    // collapses back to the top words. Sentinel payloads (not skus), matched
+    // here BEFORE the product branch — exactly like 'connect'/'buildkit'.
+    if (key.payload == 'morewords') {
+      setState(() => _showAllWords = true);
+      return;
+    }
+    if (key.payload == 'fewerwords') {
+      setState(() => _showAllWords = false);
+      return;
+    }
     // 'word'/'chip' navigation keys carry those literal payloads; every OTHER
     // key the cascade renders is a PRODUCT key whose payload is the product's
     // unique sku (set in [_keysFor] / [_connectionKeys]).
@@ -550,6 +595,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     setState(() {
       stack.clear();
       _typedQuery = null;
+      _showAllWords = false;
       _typeController?.dispose();
       _typeController = null;
       if (q.isEmpty) return;
@@ -577,7 +623,22 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// Map the engine's question to the word-key list the keyboard renders.
   List<WordKey> _keysFor(NewbieQuestion q) {
     if (q is AskWords) {
-      return [for (final e in q.words) WordKey(e.word, payload: 'word')];
+      // Collapsed → the engine's top-kFirstWordCount words (q.words). Expanded
+      // ('עוד…' tapped) → EVERY lexicon word, SAME frequency order, via the
+      // engine's wordsByFrequency (q.words is just its prefix, so the common
+      // words stay on top). The toggle key trails the list: 'עוד…' while
+      // collapsed AND a tail exists, 'פחות' while expanded. Sentinel payloads
+      // ('morewords'/'fewerwords'), like the 'connect'/'buildkit' keys.
+      final shown =
+          _showAllWords ? wordsByFrequency(wordFinderLexicon) : q.words;
+      return [
+        for (final e in shown) WordKey(e.word, payload: 'word'),
+        if (!_showAllWords &&
+            wordFinderLexicon.entries.length > q.words.length)
+          const WordKey(kMoreWordsKey, payload: 'morewords'), // OWNER-REVIEW
+        if (_showAllWords)
+          const WordKey(kFewerWordsKey, payload: 'fewerwords'), // OWNER-REVIEW
+      ];
     }
     if (q is AskAxis) {
       return [for (final c in q.chips) WordKey(c, payload: 'chip')];

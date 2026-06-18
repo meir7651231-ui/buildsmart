@@ -426,6 +426,28 @@ double axisExpectedRemaining(
 ///     remaining products. The convergence floor: every axis the pool can split
 ///     on has been answered (or is unsplittable), so the dive advances to a
 ///     product pick instead of spinning on an axis it already asked.
+/// All lexicon words, highest-frequency first — the COMPLETE ordering the opening
+/// question ([AskWords]) draws its top-[kFirstWordCount] prefix from. Exposed so
+/// the UI's "show more words" affordance can reveal the long tail BELOW the
+/// opening cut (the ~80 rarer part-nouns a frequency cap hides — `ניפל`,
+/// `רקורד`, `בושינג`, …) WITHOUT re-deriving the sort or duplicating the rule.
+/// PURE.
+///
+/// STABLE: `List.sort` is not guaranteed stable, so equal-frequency words are
+/// tie-broken by their first-seen position in [WordLexicon.entries] (an index
+/// key) — the lexicon's own deterministic order. This makes the full list, and
+/// therefore the [AskWords] prefix `offerQuestion` takes from it, byte-stable.
+List<WordEntry> wordsByFrequency(WordLexicon lexicon) {
+  final indexed = <({WordEntry e, int i})>[
+    for (var i = 0; i < lexicon.entries.length; i++)
+      (e: lexicon.entries[i], i: i),
+  ]..sort((a, b) {
+      final byFreq = b.e.freq.compareTo(a.e.freq);
+      return byFreq != 0 ? byFreq : a.i.compareTo(b.i);
+    });
+  return [for (final r in indexed) r.e];
+}
+
 NewbieQuestion offerQuestion(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
@@ -433,11 +455,12 @@ NewbieQuestion offerQuestion(
   String? subtype,
 ) {
   if (stack.isEmpty) {
-    final top = [...lexicon.entries]
-      ..sort((a, b) => b.freq.compareTo(a.freq));
+    // Top words by frequency — the deterministic FULL ordering, capped at
+    // kFirstWordCount. The UI's "עוד…" (show-more) affordance reveals the rest
+    // of [wordsByFrequency] below this cut (one ordering source → no drift).
     return AskWords(
       kFirstQuestion,
-      top.take(kFirstWordCount).toList(),
+      wordsByFrequency(lexicon).take(kFirstWordCount).toList(),
     );
   }
 

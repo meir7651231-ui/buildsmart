@@ -1318,4 +1318,77 @@ void main() {
         reason: 'the kit view (its work-name header) must not render while the '
             'feature flag is off');
   });
+
+  testWidgets('opening word list offers the "עוד…" expand key', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'bs.feature-flags.v1': [kWordFinderFlag],
+    });
+    await pumpScreen(tester);
+
+    expect(find.widgetWithText(BsKey, kMoreWordsKey), findsOneWidget,
+        reason: 'the opening list offers a show-more-words key');
+    expect(find.widgetWithText(BsKey, kFewerWordsKey), findsNothing,
+        reason: 'the collapse key only appears once expanded');
+  });
+
+  testWidgets('"עוד…" reveals a word hidden below the top-cut, "פחות" collapses '
+      'it back', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'bs.feature-flags.v1': [kWordFinderFlag],
+    });
+    await pumpScreen(tester);
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+
+    // A word GUARANTEED below the opening cut: the (kFirstWordCount+1)-th by
+    // frequency. Data-driven (no hard-coded 'ניפל' that could drift) — by
+    // construction it is NOT in the opening list.
+    final all = wordsByFrequency(wordFinderLexicon);
+    expect(all.length, greaterThan(kFirstWordCount),
+        reason: 'this test only means something when a hidden tail EXISTS');
+    final hiddenWord = all[kFirstWordCount].word;
+
+    expect(find.widgetWithText(BsKey, hiddenWord), findsNothing,
+        reason: '$hiddenWord is below the cut → not shown while collapsed');
+    expect(state.showAllWordsActive, isFalse);
+
+    await tester.tap(find.widgetWithText(BsKey, kMoreWordsKey));
+    await tester.pumpAndSettle();
+
+    expect(state.showAllWordsActive, isTrue);
+    expect(find.widgetWithText(BsKey, hiddenWord), findsOneWidget,
+        reason: 'after "עוד…" every lexicon word (incl. the hidden tail) is '
+            'reachable by tap — the whole point of the affordance');
+    expect(find.widgetWithText(BsKey, kFewerWordsKey), findsOneWidget,
+        reason: 'expanded → the collapse key shows');
+    expect(find.widgetWithText(BsKey, kMoreWordsKey), findsNothing,
+        reason: 'expanded → the expand key is replaced by collapse');
+
+    await tester.tap(find.widgetWithText(BsKey, kFewerWordsKey));
+    await tester.pumpAndSettle();
+
+    expect(state.showAllWordsActive, isFalse);
+    expect(find.widgetWithText(BsKey, hiddenWord), findsNothing,
+        reason: 'collapsed again → the hidden word is hidden again');
+    expect(find.widgetWithText(BsKey, kMoreWordsKey), findsOneWidget);
+  });
+
+  testWidgets('restart resets the expansion (no leak across dives)',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'bs.feature-flags.v1': [kWordFinderFlag],
+    });
+    await pumpScreen(tester);
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+
+    await tester.tap(find.widgetWithText(BsKey, kMoreWordsKey));
+    await tester.pumpAndSettle();
+    expect(state.showAllWordsActive, isTrue);
+
+    state.restartForTest();
+    await tester.pumpAndSettle();
+
+    expect(state.showAllWordsActive, isFalse,
+        reason: 'a fresh dive must open collapsed — no expansion leak');
+    expect(find.widgetWithText(BsKey, kMoreWordsKey), findsOneWidget);
+  });
 }
