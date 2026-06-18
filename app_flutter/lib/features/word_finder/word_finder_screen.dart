@@ -25,11 +25,15 @@
 // hatch only — the happy path is word → chip taps.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/smart_tree.dart'
+    show SmartProduct, smartProductForSku;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
+import 'package:buildsmart/features/word_finder/recipe_kit.dart'
+    show KitLine, KitMatch, assembleKit;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
@@ -48,6 +52,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// the (potentially large) build runs a single time per isolate rather than on
 /// every screen mount — the engine's `resolveWord`/`offerQuestion` read it.
 final WordLexicon wordFinderLexicon = buildWordLexicon(kDivePool);
+
+// ── 6th engine (work-recipe / "מתכון העבודה") view-only copy ────────────────
+//
+// These three strings are the ONLY display copy the kit view adds. They live
+// here (not in the engine) because they are pure VIEW text — the same place
+// `_buildEmptyState` keeps its copy. All three are OWNER-REVIEW: reword freely;
+// the kit LOGIC (assembleKit / KitMatch) is untouched by a copy change.
+
+/// OWNER-REVIEW: the icon-free key that, on a reached WORK-product, builds and
+/// shows its recommended kit. Rendered via the same BsKey letter idiom as every
+/// other word/chip key (no icon).
+const String kBuildKitKey = 'בנה לי את הערכה';
+
+/// OWNER-REVIEW: the expandable "more options" row label shown under a kit line
+/// that has alternatives. The count of alternatives is appended in
+/// [_WordFinderScreenState._buildKitLine] (e.g. 'עוד אפשרויות (3)').
+const String kKitMoreOptions = 'עוד אפשרויות';
+
+/// OWNER-REVIEW: the prefix for an accessory the catalog has no product for
+/// (a [KitMatch.none] line) — shown as plain text, never a tappable key, so the
+/// recipe still LISTS the part honestly ("you also need X — not in the
+/// catalog") instead of hiding it.
+const String kKitNotInCatalog = 'אין בקטלוג';
 
 /// The flag-gated newbie product-finder screen.
 ///
@@ -95,6 +122,18 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// by any dive reset. This is the MINIMAL surface — the polished anchor UX is
   /// an OWNER-design decision (see the // OWNER-REVIEW affordance below).
   LipskeyCatalogProduct? _connectionsAnchor;
+
+  /// 6th engine ("מתכון העבודה" / work-recipe) view-state. Non-null only while
+  /// the user is viewing the assembled KIT for a reached WORK-product: it holds
+  /// the [SmartProduct] recipe whose kit is shown. When set, the keyboard area
+  /// renders the per-accessory kit (from [assembleKit]) — each resolved line as
+  /// a product-key with its recommended product + collapsible alternatives, each
+  /// unmatched line as plain text — instead of the word/chip keyboard. Tapping a
+  /// product key opens the existing product sheet (the same add-path as a reached
+  /// product / connections part). Cleared by the back key and by any dive reset.
+  /// Mirrors [_connectionsAnchor] exactly; the polished kit UX is an OWNER-design
+  /// decision (see the // OWNER-REVIEW affordances below).
+  SmartProduct? _kitRecipe;
 
   /// @visibleForTesting — when false, reaching a [Resolve] does NOT auto-open
   /// the real [showLipskeyProductSheet]. Production keeps this true (the flow
@@ -215,6 +254,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       stack.clear();
       _typedQuery = null;
       _connectionsAnchor = null;
+      _kitRecipe = null;
     });
   }
 
@@ -231,6 +271,32 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   void _closeConnections() {
     setState(() => _connectionsAnchor = null);
   }
+
+  /// 6th engine: ENTER the work-recipe KIT view for [recipe] — show its
+  /// assembled per-accessory kit. Mirrors [_showConnections]: a pure state flip
+  /// (the kit content is derived in [_buildKitView] via the pure [assembleKit]).
+  void _showKit(SmartProduct recipe) {
+    setState(() => _kitRecipe = recipe);
+  }
+
+  /// 6th engine: LEAVE the kit view, back to the converged product list.
+  void _closeKit() {
+    setState(() => _kitRecipe = null);
+  }
+
+  /// @visibleForTesting — true while the kit view is active. Mirrors
+  /// [connectionsViewOpen]; lets a behavioral test assert the view opened
+  /// without depending on rendered copy.
+  @visibleForTesting
+  bool get kitViewOpen => _kitRecipe != null;
+
+  /// @visibleForTesting — drive the kit-view entry directly. The 'בנה לי את
+  /// הערכה' key is only rendered inside a ShowProducts keyboard (and only when
+  /// the reached product is a work-product), so a test reaches the view through
+  /// this rather than synthesising a key tap on a specific dived-to product.
+  /// Mirrors [showConnectionsForTest].
+  @visibleForTesting
+  void showKitForTest(SmartProduct recipe) => _showKit(recipe);
 
   /// @visibleForTesting — the parts shown in the connections view, or empty when
   /// the view is closed. Lets a behavioral test assert the affordance reached a
@@ -334,6 +400,27 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     return null;
   }
 
+  /// 6th engine: the WORK-recipe the 'בנה לי את הערכה' entry key targets for the
+  /// current question, or null when no reached product is a work-product (so the
+  /// affordance is NOT offered). Mirrors [_connectionEntryAnchor]: only a
+  /// [ShowProducts] question carries the entry key (the keyboard that renders
+  /// it), and it is the FIRST shown product that is a work-product — i.e. whose
+  /// sku resolves via [smartProductForSku] to a [SmartProduct] recipe (a stable,
+  /// predictable pick). A [Resolve] opens the product sheet and renders NO
+  /// keyboard, so the entry key never shows there; every other question returns
+  /// null too. The returned [SmartProduct] is the recipe whose kit [_showKit]
+  /// will display.
+  SmartProduct? get _kitEntryRecipe {
+    final q = currentQuestion;
+    if (q is ShowProducts) {
+      for (final p in q.products) {
+        final recipe = smartProductForSku(p.sku);
+        if (recipe != null) return recipe;
+      }
+    }
+    return null;
+  }
+
   /// Handle a tapped word key, dispatched by its [WordKey.payload]:
   ///  • `'word'`    — seed the pool with the products the word names;
   ///  • `'chip'`    — narrow by the tapped axis chip;
@@ -351,6 +438,15 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     if (key.payload == 'connect') {
       final anchor = _connectionEntryAnchor;
       if (anchor != null) _showConnections(anchor);
+      return;
+    }
+    // 6th engine: a 'buildkit' key opens the work-recipe KIT view for the reached
+    // work-product (the representative the affordance was offered for). Like
+    // 'connect', it carries the literal 'buildkit' string as its payload (not a
+    // sku), so it is matched here BEFORE the sku-payload product branch below.
+    if (key.payload == 'buildkit') {
+      final recipe = _kitEntryRecipe;
+      if (recipe != null) _showKit(recipe);
       return;
     }
     // 'word'/'chip' navigation keys carry those literal payloads; every OTHER
@@ -409,6 +505,22 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
         crumbWord: label,
         predicate: (p) => applyNarrow([p], label).isNotEmpty,
       ));
+    }
+  }
+
+  /// 6th engine: handle a tapped KIT product key. The key's payload is the
+  /// product's unique sku; resolve it within [contextList] (the line's
+  /// product + alternatives, the SAME list `distinctSelectionLabels` labelled)
+  /// and open the existing product sheet with that list as its category context —
+  /// the SAME sku-keyed add-path the ShowProducts / connections terminus uses, so
+  /// the kit view adds NO new cart route. A no-op when the sku is not in
+  /// [contextList] (defensive — payload/state drift) or when the sheet is
+  /// suppressed in a behavioral test ([openSheetOnResolve] false).
+  void _onKitProductTap(WordKey key, List<LipskeyCatalogProduct> contextList) {
+    final picked = _resolveBySku(contextList, key.payload);
+    if (picked == null) return; // defensive — payload/state drift
+    if (openSheetOnResolve) {
+      showLipskeyProductSheet(context, picked, contextList);
     }
   }
 
@@ -500,6 +612,14 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
         // imageAsset — a navigation key stays clean (text only).
         if (_connectionEntryAnchor != null)
           const WordKey(kConnectionsKey, payload: 'connect'), // OWNER-REVIEW copy
+        // 6th engine: when a reached product is a WORK-product (its sku resolves
+        // to a SmartProduct recipe), offer a plain-text (icon-free) 'בנה לי את
+        // הערכה' key that builds + shows the recommended kit. Appended LAST (after
+        // the connect key) so it never displaces a product key. Its payload is the
+        // literal 'buildkit' sentinel (not a sku). NO imageAsset — a navigation
+        // key stays clean (text only), like the connect key.
+        if (_kitEntryRecipe != null)
+          const WordKey(kBuildKitKey, payload: 'buildkit'), // OWNER-REVIEW copy
       ];
     }
     return const <WordKey>[]; // Resolve → handled by the sheet, no keys
@@ -648,6 +768,167 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     );
   }
 
+  /// 6th engine: ONE kit line for accessory resolution [line], built in the SAME
+  /// icon-free BsKey idiom as a ShowProducts / connections product key.
+  ///
+  ///  • [KitMatch.none] (product == null) → plain TEXT only (no key): the
+  ///    accessory name plus a '(אין בקטלוג)' note, so the recipe still lists the
+  ///    part honestly instead of hiding it. NOT tappable.
+  ///  • otherwise → the RECOMMENDED [KitLine.product] as a product-key (thumbnail
+  ///    via [_thumbAssetFor], DISTINCT plain label, payload = its sku; tap opens
+  ///    the existing sheet). When [KitLine.alternatives] is non-empty, a
+  ///    collapsible 'עוד אפשרויות (N)' row beneath it (DEFAULT COLLAPSED) reveals
+  ///    the alternatives as the SAME idiom of product-keys.
+  ///
+  /// DISTINCT LABELS: the label map is computed ONCE over the line's
+  /// `[product, ...alternatives]` TOGETHER, so three same-name products (e.g.
+  /// three 'אטם דו צדדי' in different sizes) render with the minimal distinguishing
+  /// suffix the labeller adds — never three identical-looking keys. The SAME list
+  /// is the sheet's category context, so the sku-keyed [_onKitProductTap]
+  /// resolution can never drift from the rendered keys.
+  // OWNER-REVIEW: kit-line layout (product-key + collapsible alternatives) + the
+  // text-only treatment of an un-catalogued accessory.
+  Widget _buildKitLine(KitLine line) {
+    final product = line.product;
+    // Un-catalogued accessory → honest plain-text line, no key.
+    if (product == null || line.match == KitMatch.none) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: BsTokens.space2, vertical: BsTokens.space1),
+        child: Text(
+          // OWNER-REVIEW: 'name (אין בקטלוג)'.
+          '${line.acc.name} ($kKitNotInCatalog)',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    // Label the recommended product + its alternatives TOGETHER so identical
+    // names (same-name, different-size variants) get distinct plain labels.
+    final lineProducts = <LipskeyCatalogProduct>[product, ...line.alternatives];
+    final labels = distinctSelectionLabels(lineProducts);
+
+    final recKey = WordKey(
+      labels[product.sku] ?? _productLabel(product),
+      payload: product.sku,
+      imageAsset: _thumbAssetFor(product), // OWNER-REVIEW: product thumbnails
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // The recommended product, rendered via the shared WordKeyboard idiom
+        // (one key, no utility row). Tapping it opens the sheet with the whole
+        // line (recommended + alternatives) as category context.
+        WordKeyboard(
+          words: [recKey],
+          onWordTap: (k) => _onKitProductTap(k, lineProducts),
+          showUtilityRow: false,
+        ),
+        // Collapsible alternatives — default COLLAPSED. The chevron is a standard
+        // ExpansionTile control (not a word KEY), consistent with the back-arrow
+        // IconButton the dive already uses; word keys themselves stay icon-free.
+        if (line.alternatives.isNotEmpty)
+          Theme(
+            // Strip the default ExpansionTile divider lines so it blends with the
+            // surrounding surfaceMid keyboard area.
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space2),
+              childrenPadding: EdgeInsets.zero,
+              // OWNER-REVIEW: 'עוד אפשרויות (N)'.
+              title: Text(
+                '$kKitMoreOptions (${line.alternatives.length})',
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              children: [
+                WordKeyboard(
+                  words: [
+                    for (final alt in line.alternatives)
+                      WordKey(
+                        labels[alt.sku] ?? _productLabel(alt),
+                        payload: alt.sku,
+                        imageAsset:
+                            _thumbAssetFor(alt), // OWNER-REVIEW: thumbnails
+                      ),
+                  ],
+                  onWordTap: (k) => _onKitProductTap(k, lineProducts),
+                  showUtilityRow: false,
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// 6th engine: the work-recipe KIT view — the assembled kit for [_kitRecipe].
+  /// Header (the work-name) + a back key (to the product list) + one
+  /// [_buildKitLine] per [assembleKit] line. Mirrors [_buildConnectionsView]'s
+  /// header/back idiom.
+  ///
+  /// MUST be wrapped in a [SingleChildScrollView] (the build() caller already
+  /// is): a long kit (many accessories, each with an expandable alternatives
+  /// block) is taller than a normal phone viewport, and a non-scrolling Column
+  /// throws a RenderFlex overflow on a short screen — the SAME crash the
+  /// canonical audit caught for the main dive (see build()'s scroll note). The
+  /// outer Expanded + SingleChildScrollView in build() supplies that scroll.
+  // OWNER-REVIEW: kit-view layout + copy.
+  Widget _buildKitView(SmartProduct recipe) {
+    final lines = assembleKit(recipe);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              BsTokens.space2, 0, BsTokens.space2, 0),
+          child: Row(
+            children: [
+              Semantics(
+                button: true,
+                label: 'חזרה',
+                child: IconButton(
+                  // Same back-arrow IconButton the breadcrumb / connections view
+                  // use (not a word-key), kept consistent with the dive's back.
+                  icon: const Icon(Icons.arrow_forward),
+                  tooltip: 'חזרה',
+                  onPressed: _closeKit,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  recipe.name, // the work-name (OWNER-authored recipe title)
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              // Symmetry spacer so the title stays centred opposite the back
+              // button (mirrors the connections-view header).
+              const SizedBox(width: 48),
+            ],
+          ),
+        ),
+        for (final line in lines) _buildKitLine(line),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // SELF-GATE first — render nothing unless the flag is on. Mirrors the
@@ -676,9 +957,12 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // ── Breadcrumb + back ────────────────────────────────────────
-              // Hidden while the connections view is open: that view owns the
-              // single back control (otherwise two 'חזרה' arrows would show).
-              if (stack.isNotEmpty && _connectionsAnchor == null)
+              // Hidden while the connections OR kit view is open: each of those
+              // views owns its single back control (otherwise two 'חזרה' arrows
+              // would show).
+              if (stack.isNotEmpty &&
+                  _connectionsAnchor == null &&
+                  _kitRecipe == null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                       BsTokens.space2, BsTokens.space2, BsTokens.space2, 0),
@@ -710,10 +994,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                 ),
 
               // ── Question header ──────────────────────────────────────────
-              // Hidden while the connections view is open — that view carries
-              // its own header (kConnectionsHeader).
+              // Hidden while the connections OR kit view is open — each carries
+              // its own header (kConnectionsHeader / the work-recipe name).
               if (header.isNotEmpty && !showEmptyState &&
-                  _connectionsAnchor == null)
+                  _connectionsAnchor == null &&
+                  _kitRecipe == null)
                 Padding(
                   padding: const EdgeInsets.all(BsTokens.space2),
                   child: Text(
@@ -737,7 +1022,13 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
               // the content exceed it gracefully.
               Expanded(
                 child: SingleChildScrollView(
-                  child: _connectionsAnchor != null
+                  child: _kitRecipe != null
+                      // ── 6th engine: work-recipe kit view (when open) ──────
+                      // Highest priority — a user inside the kit is deeper than
+                      // the connections / typing surfaces. Captured into a local
+                      // for null promotion.
+                      ? _buildKitView(_kitRecipe!)
+                      : _connectionsAnchor != null
                       // ── 7th engine: connections view (when open) ──────────
                       ? _buildConnectionsView()
                       : showEmptyState

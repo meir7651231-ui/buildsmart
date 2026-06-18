@@ -39,12 +39,16 @@
 // async-persist churn.)
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/smart_tree.dart'
+    show SmartProduct, kSmartProducts, smartProductForSku;
 import 'package:buildsmart/features/word_finder/distinct_label.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show productHasChip;
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
+import 'package:buildsmart/features/word_finder/recipe_kit.dart'
+    show KitLine, KitMatch, assembleKit;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_finder_screen.dart';
@@ -921,7 +925,7 @@ void main() {
     final firstQ = state.currentQuestion as AskWords;
     const tapBound = 6;
     String? seedWord;
-    List<LipskeyCatalogProduct> reachedProducts = const [];
+    var reachedProducts = <LipskeyCatalogProduct>[];
     for (final e in firstQ.words) {
       var pool = resolveWord(e.word, wordFinderLexicon);
       if (pool.length < 2 || distinctCardCount(pool) < 2) continue;
@@ -1008,5 +1012,310 @@ void main() {
       findsOneWidget,
       reason: 'the thumbnail Image is a descendant of the product key',
     );
+  });
+
+  // ── Test 15: 6th engine — the work-recipe KIT view ─────────────────────────
+  //
+  // The kit view (engine #6, "מתכון העבודה") shows, for a reached WORK-product,
+  // the assembled kit: each accessory's recommended product + collapsible
+  // alternatives, and un-catalogued accessories as honest plain text. Driven via
+  // the screen's @visibleForTesting `showKitForTest` hook (the SAME method the
+  // 'בנה לי את הערכה' key calls) — the entry key only renders inside a
+  // ShowProducts state for a work-product, so a test reaches the view through
+  // the hook rather than navigating the dive onto a specific product (the same
+  // pattern Test 9 uses for connections).
+
+  /// A DATA-DRIVEN kit fixture, derived from the real tree so it can never drift
+  /// to a hard-coded recipe: the FIRST [SmartProduct] that simultaneously
+  ///  (a) is a real WORK-product — one of its brand skus resolves back via
+  ///      `smartProductForSku` to ITSELF (so `_kitEntryRecipe` would pick it),
+  ///  (b) has a kit line carrying a RECOMMENDED product PLUS alternatives whose
+  ///      product+alternatives include >=3 with an IDENTICAL nameHe (so
+  ///      `distinctSelectionLabels` is genuinely exercised — three same-name,
+  ///      different-size variants must render distinct), and
+  ///  (c) has at least one un-catalogued ([KitMatch.none]) accessory (so the
+  ///      plain-text branch is exercised).
+  ({SmartProduct recipe, String selfSku, KitLine richLine})? findKitFixture() {
+    for (final r in kSmartProducts) {
+      // (a) a self-mapping brand sku.
+      String? selfSku;
+      for (final b in r.brands) {
+        final s = b.sku;
+        if (s != null && identical(smartProductForSku(s), r)) {
+          selfSku = s;
+          break;
+        }
+      }
+      if (selfSku == null) continue;
+
+      final kit = assembleKit(r);
+      // (c) an un-catalogued accessory line.
+      if (!kit.any((l) => l.match == KitMatch.none)) continue;
+
+      // (b) a line whose product + alternatives contain >=3 identical names.
+      KitLine? richLine;
+      for (final l in kit) {
+        final p = l.product;
+        if (p == null || l.alternatives.length < 2) continue;
+        final byName = <String, int>{};
+        for (final q in <LipskeyCatalogProduct>[p, ...l.alternatives]) {
+          byName[q.nameHe] = (byName[q.nameHe] ?? 0) + 1;
+        }
+        if (byName.values.any((c) => c >= 3)) {
+          richLine = l;
+          break;
+        }
+      }
+      if (richLine == null) continue;
+
+      return (recipe: r, selfSku: selfSku, richLine: richLine);
+    }
+    return null;
+  }
+
+  testWidgets(
+      'kit view: opens for a work-product and shows its accessory keys + the '
+      'work name header', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull,
+        reason: 'kSmartProducts must offer a work-product whose kit has an '
+            'identical-name alternatives line AND an un-catalogued accessory');
+    final recipe = fx!.recipe;
+    // Sanity: the fixture really is a work-product (the entry-seam predicate).
+    expect(smartProductForSku(fx.selfSku), isNotNull,
+        reason: 'the fixture brand sku must resolve to a work recipe (the '
+            '_kitEntryRecipe seam test)');
+
+    // Open the kit view through the hook (the same method the buildkit key calls).
+    state.showKitForTest(recipe);
+    await tester.pumpAndSettle();
+
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'the hook opens the kit view');
+    // The header is the work-recipe name.
+    expect(find.text(recipe.name), findsWidgets,
+        reason: 'the kit view header shows the work-recipe name');
+
+    // At least one RESOLVED accessory (a product line) renders as a tappable
+    // BsKey bearing its distinct plain label — proving accessory keys render.
+    final kit = assembleKit(recipe);
+    final firstProductLine =
+        kit.firstWhere((l) => l.product != null);
+    final lineProducts = <LipskeyCatalogProduct>[
+      firstProductLine.product!,
+      ...firstProductLine.alternatives,
+    ];
+    final recLabel =
+        distinctSelectionLabels(lineProducts)[firstProductLine.product!.sku]!;
+    expect(find.widgetWithText(BsKey, recLabel), findsWidgets,
+        reason: 'a resolved accessory renders as a product key bearing its '
+            'distinct plain label');
+    // The kit view reuses the WordKeyboard key idiom.
+    expect(find.byType(WordKeyboard), findsWidgets,
+        reason: 'kit lines render product keys via the WordKeyboard idiom');
+  });
+
+  testWidgets(
+      'kit view: three same-name products render with DISTINCT labels '
+      '(distinctSelectionLabels applied to product + alternatives)',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    final richLine = fx!.richLine;
+
+    // The labeller's output over the line's product + alternatives. Because the
+    // line has >=3 IDENTICAL nameHe, a naive label (the bare quickLabel) would
+    // collide; the labeller must add a minimal distinguishing suffix so EVERY
+    // label in the line is unique.
+    final lineProducts = <LipskeyCatalogProduct>[
+      richLine.product!,
+      ...richLine.alternatives,
+    ];
+    final labels = distinctSelectionLabels(lineProducts);
+    final distinctLabels = labels.values.toSet();
+    expect(distinctLabels.length, lineProducts.length,
+        reason: 'distinctSelectionLabels must make EVERY product in a same-name '
+            'line unique (no two identical key faces)');
+
+    state.showKitForTest(fx.recipe);
+    await tester.pumpAndSettle();
+
+    // Expand the alternatives so all the same-name variants are on screen.
+    expect(richLine.alternatives, isNotEmpty);
+    final more = find.textContaining('עוד אפשרויות');
+    expect(more, findsWidgets,
+        reason: 'a line with alternatives offers a "עוד אפשרויות" expander');
+    await tester.tap(more.first);
+    await tester.pumpAndSettle();
+
+    // The RECOMMENDED product and EACH alternative render under their DISTINCT
+    // label (e.g. three "אטם דו צדדי" become size-distinguished), and crucially
+    // the bare (undistinguished) shared name is NOT what the keys show.
+    for (final p in lineProducts) {
+      expect(find.widgetWithText(BsKey, labels[p.sku]!), findsWidgets,
+          reason: 'each same-name product renders under its distinct label '
+              '"${labels[p.sku]}"');
+    }
+  });
+
+  testWidgets(
+      'kit view: "עוד אפשרויות" is collapsed by default and reveals the '
+      'alternatives when tapped', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    final richLine = fx!.richLine;
+    final lineProducts = <LipskeyCatalogProduct>[
+      richLine.product!,
+      ...richLine.alternatives,
+    ];
+    final labels = distinctSelectionLabels(lineProducts);
+    // An alternative whose distinct label differs from the recommended one (so
+    // its appearance is an observable change, not already-on-screen text).
+    final altLabel = labels[richLine.alternatives.first.sku]!;
+    final recLabel = labels[richLine.product!.sku]!;
+    expect(altLabel, isNot(recLabel),
+        reason: 'the alternative must carry a label distinct from the '
+            'recommended product (the labeller guarantees this)');
+
+    state.showKitForTest(fx.recipe);
+    await tester.pumpAndSettle();
+
+    // DEFAULT COLLAPSED: the recommended product is visible, the alternative is
+    // NOT yet rendered.
+    expect(find.widgetWithText(BsKey, recLabel), findsWidgets,
+        reason: 'the recommended product is always visible');
+    expect(find.widgetWithText(BsKey, altLabel), findsNothing,
+        reason: 'alternatives are collapsed by default — not yet on screen');
+
+    // Tap the "עוד אפשרויות (N)" expander → the alternative key appears.
+    final more = find.textContaining('עוד אפשרויות');
+    expect(more, findsWidgets);
+    await tester.tap(more.first);
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(BsKey, altLabel), findsWidgets,
+        reason: 'expanding "עוד אפשרויות" reveals the alternatives as keys');
+  });
+
+  testWidgets(
+      'kit view: an un-catalogued accessory shows as plain text (אין בקטלוג), '
+      'not a key', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    final recipe = fx!.recipe;
+    final noneLine =
+        assembleKit(recipe).firstWhere((l) => l.match == KitMatch.none);
+
+    state.showKitForTest(recipe);
+    await tester.pumpAndSettle();
+
+    // The un-catalogued accessory is listed honestly as plain text with the
+    // "אין בקטלוג" note, and is NOT rendered as a tappable product key.
+    expect(find.text('${noneLine.acc.name} (אין בקטלוג)'), findsOneWidget,
+        reason: 'a KitMatch.none accessory is shown as plain text with the '
+            'not-in-catalog note');
+    expect(find.widgetWithText(BsKey, noneLine.acc.name), findsNothing,
+        reason: 'an un-catalogued accessory is NOT a tappable key');
+  });
+
+  testWidgets(
+      'kit view: a back control closes it back to the dive', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    state.showKitForTest(fx!.recipe);
+    await tester.pumpAndSettle();
+    expect(state.kitViewOpen as bool, isTrue);
+
+    final backBtn = find.byTooltip('חזרה');
+    expect(backBtn, findsOneWidget,
+        reason: 'the kit view offers a single חזרה back control');
+    await tester.tap(backBtn);
+    await tester.pumpAndSettle();
+    expect(state.kitViewOpen as bool, isFalse,
+        reason: 'tapping back closes the kit view');
+  });
+
+  testWidgets(
+      'kit view SHORT screen: a long kit scrolls, never RenderFlex-overflows '
+      '(audit crash guard)', (tester) async {
+    // The same crash-guard the main dive carries (the canonical audit lesson): a
+    // long kit (many accessories, each with an expandable alternatives block) is
+    // far taller than a short phone viewport. The kit view MUST live inside the
+    // build()'s Expanded + SingleChildScrollView, so the content scrolls and no
+    // RenderFlex overflow is thrown at 360x300.
+    tester.view.physicalSize = const Size(360, 300);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    seedFlagOn();
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: WordFinderScreen())),
+    );
+    await tester.pumpAndSettle();
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    state.showKitForTest(fx!.recipe);
+    await tester.pumpAndSettle();
+
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'the kit view is open on the short screen');
+    expect(tester.takeException(), isNull,
+        reason: 'a tall kit must SCROLL within the bounded short screen, never '
+            'throw a RenderFlex overflow');
+  });
+
+  testWidgets('kit view: flag OFF → inert (no kit view, screen is a shrink)',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({}); // flag NOT set
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+
+    // Even if the kit state is forced open, a flag-OFF screen renders nothing —
+    // the self-gate short-circuits build() before the kit view branch.
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    state.showKitForTest(fx!.recipe);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WordKeyboard), findsNothing,
+        reason: 'with kWordFinderFlag off the gated screen renders nothing, so '
+            'no kit keyboard mounts');
+    expect(find.text(fx.recipe.name), findsNothing,
+        reason: 'the kit view (its work-name header) must not render while the '
+            'feature flag is off');
   });
 }
