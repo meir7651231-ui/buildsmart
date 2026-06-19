@@ -1640,4 +1640,181 @@ void main() {
         reason: 'back from the first material-scoped noun keeps the material '
             '(stable scope); the user exits only via כל החומרים');
   });
+
+  // ── Jobs-first entry ("לפי עבודה"): the discoverable way into the recipe kit ─
+  //
+  // The recipe kit (engine #6) was otherwise reachable ONLY when the dive
+  // happened to converge on a work-product — hard to discover. The jobs-first
+  // entry adds an opening 'לפי עבודה' affordance → a JOB LIST (every
+  // kSmartProducts recipe by .name as an icon-free key, via _iconFreeKeyRows, NOT
+  // a second WordKeyboard) → tapping a job opens its kit via the EXISTING
+  // _showKit. These tests assert the entry is offered, lists the jobs, opens the
+  // kit, holds the one-WordKeyboard invariant, resets, and is flag-gated. Driven
+  // via UI taps where practical and via the @visibleForTesting hooks
+  // (openJobsForTest / jobsViewOpen / kitViewOpen / restartForTest), mirroring the
+  // material-axis + kit-view patterns above.
+
+  testWidgets('jobs entry: the opening offers a "לפי עבודה" key',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    // The opening (closed list) offers the 'לפי עבודה' affordance as an icon-free
+    // key, and exactly ONE WordKeyboard (the cascade) — the jobs entry + material
+    // row are _iconFreeKeyRows, NOT WordKeyboards, so the invariant holds.
+    expect(find.widgetWithText(BsKey, kByJobLabel), findsOneWidget,
+        reason: 'the opening offers the jobs-first "לפי עבודה" entry key');
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'the jobs entry adds NO second WordKeyboard at the opening '
+            '(it is an icon-free key, like the material row)');
+  });
+
+  testWidgets(
+      'jobs entry: tapping "לפי עבודה" opens the JOB LIST — recipes render as '
+      'icon-free keys and the cascade WordKeyboard is replaced', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    expect(state.jobsViewOpen as bool, isFalse,
+        reason: 'the list starts closed');
+
+    // Tap the 'לפי עבודה' entry key (the opening affordance).
+    await tester.tap(find.widgetWithText(BsKey, kByJobLabel));
+    await tester.pumpAndSettle();
+
+    expect(state.jobsViewOpen as bool, isTrue,
+        reason: 'tapping "לפי עבודה" opens the JOB LIST');
+    // The list header renders (OWNER-REVIEW copy).
+    expect(find.text(kJobsHeader), findsWidgets,
+        reason: 'the job list shows its "איזו עבודה?" header');
+
+    // A KNOWN recipe (the first kSmartProducts entry, pulled live so it can't
+    // drift) renders as a job key bearing its .name. Scroll it into view first
+    // (the list is ~80 keys, taller than the viewport).
+    final knownJob = kSmartProducts.first;
+    final jobKey = find.widgetWithText(BsKey, knownJob.name);
+    expect(jobKey, findsWidgets,
+        reason: 'each recipe renders as a job key bearing its .name '
+            '("${knownJob.name}")');
+
+    // The cascade WordKeyboard is REPLACED while the list is open — the list uses
+    // _iconFreeKeyRows, so there is ZERO WordKeyboard (the one-WordKeyboard
+    // invariant at the opening is the CLOSED-list state; open, it is replaced).
+    expect(find.byType(WordKeyboard), findsNothing,
+        reason: 'the open JOB LIST replaces the cascade keyboard — it renders '
+            'icon-free key rows, never a second WordKeyboard');
+  });
+
+  testWidgets(
+      'jobs entry: tapping a job opens its kit (kitViewOpen) via the existing '
+      '_showKit', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // Open the JOB LIST through the hook (the SAME state change the entry key
+    // tap performs — mirrors showKitForTest / pickMaterialForTest).
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue);
+    expect(state.kitViewOpen as bool, isFalse,
+        reason: 'no kit is open yet — only the job list');
+
+    // Tap a known job key → its kit opens via the existing _showKit (the kit
+    // view takes priority over the still-open list). Scroll the key into view
+    // first (the list is taller than the viewport) — ensureVisible, NOT
+    // scrollUntilVisible, per the test idiom.
+    final knownJob = kSmartProducts.first;
+    final jobKey = find.widgetWithText(BsKey, knownJob.name).first;
+    await tester.ensureVisible(jobKey);
+    await tester.pumpAndSettle();
+    await tester.tap(jobKey);
+    await tester.pumpAndSettle();
+
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'tapping a job opens its kit (the SAME kit view _showKit drives)');
+    // The kit view header is the tapped recipe's work-name.
+    expect(find.text(knownJob.name), findsWidgets,
+        reason: 'the opened kit view shows the work-recipe name as its header');
+  });
+
+  testWidgets(
+      'jobs entry: the JOB LIST back control closes it back to the opening '
+      'cascade', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue);
+
+    // The list owns a single חזרה back control (the breadcrumb back is absent —
+    // the dive stack is empty at the opening). Tapping it closes the list.
+    final backBtn = find.byTooltip('חזרה');
+    expect(backBtn, findsOneWidget,
+        reason: 'the job list offers a single חזרה back control');
+    await tester.tap(backBtn);
+    await tester.pumpAndSettle();
+
+    expect(state.jobsViewOpen as bool, isFalse,
+        reason: 'tapping back closes the job list');
+    // Back at the opening: the cascade WordKeyboard and the 'לפי עבודה' entry
+    // are restored.
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'closing the list returns the opening cascade keyboard');
+    expect(find.widgetWithText(BsKey, kByJobLabel), findsOneWidget,
+        reason: 'the "לפי עבודה" entry returns after closing the list');
+  });
+
+  testWidgets('jobs entry: restart clears the open JOB LIST (no leak across '
+      'dives)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue);
+
+    // restart (the SAME reset path _restart / the empty-state's 'התחל מחדש' uses)
+    // must clear the open list so a fresh dive opens at the cascade, not the list.
+    state.restartForTest();
+    await tester.pumpAndSettle();
+
+    expect(state.jobsViewOpen as bool, isFalse,
+        reason: 'a restart clears the open job list — no jobs-state leak');
+    expect(state.currentQuestion, isA<AskWords>(),
+        reason: 'a cleared dive is back at the opening word question');
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'the cascade keyboard is back after a restart');
+  });
+
+  testWidgets('jobs entry: flag OFF → no "לפי עבודה" entry (screen is a shrink)',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({}); // flag NOT set
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+
+    // Even if the job-list state is forced open, a flag-OFF screen renders
+    // nothing — the self-gate short-circuits build() before any jobs branch.
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(BsKey, kByJobLabel), findsNothing,
+        reason: 'with kWordFinderFlag off the gated screen renders nothing, so '
+            'the jobs entry does not mount');
+    expect(find.text(kJobsHeader), findsNothing,
+        reason: 'the job list header must not render while the flag is off');
+  });
 }

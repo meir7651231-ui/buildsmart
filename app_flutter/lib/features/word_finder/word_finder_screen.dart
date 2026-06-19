@@ -26,7 +26,7 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart'
-    show SmartProduct, smartProductForSku;
+    show SmartProduct, kSmartProducts, smartProductForSku;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
@@ -62,6 +62,24 @@ final WordLexicon wordFinderLexicon = buildWordLexicon(kDivePool);
 /// the pool scan does not re-run every build — the opening material chip-row
 /// offers one key per entry.
 final List<String> kMaterialsInDivePool = materialsInPool(kDivePool);
+
+/// Jobs-first entry: the work-recipes ([kSmartProducts]) sorted by `.name`, for
+/// the JOB LIST keys. Computed ONCE at the top level (like [kMaterialsInDivePool])
+/// so the sort does not re-run every build. A flat A→Z list is the v1 ordering;
+/// grouping by category is a future refinement.
+// OWNER-REVIEW: a flat name-sorted job list (grouping/sort by category is a
+// future refinement — the brief accepts a flat sorted list for v1).
+final List<SmartProduct> kJobsByName = [...kSmartProducts]
+  ..sort((a, b) => a.name.compareTo(b.name));
+
+/// Jobs-first entry: `SmartProduct.key` → recipe, over [kSmartProducts]. Built
+/// once. A tapped job key carries the recipe's unique `.key` as its payload (the
+/// SAME sku-keyed-resolution philosophy the product keys use — resolve by a
+/// stable id, never by the display label), and this index resolves it back to
+/// the [SmartProduct] whose kit [_WordFinderScreenState._showKit] will show.
+final Map<String, SmartProduct> kJobByKey = {
+  for (final r in kSmartProducts) r.key: r,
+};
 
 // ── 6th engine (work-recipe / "מתכון העבודה") view-only copy ────────────────
 //
@@ -114,6 +132,28 @@ const String kByMaterialLabel = 'לפי חומר';
 /// tapping it drops the material filter (back to ALL materials) and clears the
 /// dive. Rendered via the same BsKey letter idiom as every other key (no icon).
 const String kAllMaterials = 'כל החומרים';
+
+// ── Jobs-first entry ("לפי עבודה") view copy ─────────────────────────────────
+//
+// The recipe KIT (engine #6) is otherwise reachable ONLY when the dive happens
+// to converge on a work-product — hard to discover. The jobs-first entry, like
+// the material chip-row, is offered at the opening: tapping it opens a JOB LIST
+// (every [kSmartProducts] recipe by `.name`, as icon-free keys); tapping a job
+// opens its kit via the EXISTING [_WordFinderScreenState._showKit]. These two
+// strings are the ONLY display copy the entry adds; both OWNER-REVIEW (reword
+// freely — the kit LOGIC, assembleKit / KitMatch, is untouched by a copy change).
+
+/// OWNER-REVIEW: the icon-free key shown at the OPENING (beside the material
+/// chip-row) that opens the JOB LIST — the discoverable entry into the recipe
+/// kit. Rendered via the same BsKey letter idiom as every other key (no icon);
+/// its payload is the literal 'jobs' sentinel.
+const String kByJobLabel = 'לפי עבודה';
+
+/// OWNER-REVIEW: the leading caption of the JOB-LIST view — names the list so the
+/// user reads it as "pick a job" above the per-job keys. A plain non-tappable
+/// heading (mirrors [kConnectionsHeader] / the kit view's work-name header), NOT
+/// a word key, so it carries no payload.
+const String kJobsHeader = 'איזו עבודה?';
 
 /// The flag-gated newbie product-finder screen.
 ///
@@ -198,6 +238,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// ([_activeLexicon]) reads it so both [currentQuestion] and the tapped-noun
   /// [resolveWord] resolve WITHIN the material pool.
   WordLexicon? _materialLexicon;
+
+  /// Jobs-first entry ("לפי עבודה") view-state. False (default) → the opening
+  /// shows the 'לפי עבודה' entry key (beside the material chip-row). True → the
+  /// keyboard area renders the JOB LIST: every [kSmartProducts] recipe by `.name`
+  /// as an icon-free key (via [_iconFreeKeyRows], NOT a second [WordKeyboard], so
+  /// the opening keeps exactly one WordKeyboard — the cascade — when the list is
+  /// closed, and ZERO while it is open). Tapping a job opens its kit via the
+  /// existing [_showKit]. Like the material entry it is meaningful ONLY at the
+  /// opening (empty stack); reset to false on any restart / re-seed / pop-to-empty
+  /// so a fresh dive never lingers in the job list. Mirrors the material view-state
+  /// flags exactly; the polished jobs UX (grouping/sort) is an OWNER-design
+  /// decision (see the // OWNER-REVIEW affordance below).
+  bool _jobsOpen = false;
 
   /// @visibleForTesting — when false, reaching a [Resolve] does NOT auto-open
   /// the real [showLipskeyProductSheet]. Production keeps this true (the flow
@@ -320,6 +373,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       if (stack.isEmpty) {
         _typedQuery = null;
         _showAllWords = false;
+        _jobsOpen = false;
       }
     });
   }
@@ -340,6 +394,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       _typedQuery = null;
       _connectionsAnchor = null;
       _kitRecipe = null;
+      _jobsOpen = false;
       _showAllWords = false;
       _material = null;
       _materialLexicon = null;
@@ -372,16 +427,32 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     setState(() => _kitRecipe = null);
   }
 
+  /// Jobs-first entry: OPEN the JOB LIST (the 'לפי עבודה' affordance). A pure
+  /// state flip (the list content is derived in [_buildJobsView] from
+  /// [kJobsByName]). Mirrors [_showKit] / the material entry.
+  void _openJobs() {
+    setState(() => _jobsOpen = true);
+  }
+
+  /// Jobs-first entry: CLOSE the JOB LIST, back to the opening word cascade.
+  void _closeJobs() {
+    setState(() => _jobsOpen = false);
+  }
+
   /// True while a SUB-VIEW that owns its OWN back control is open — the kit view
-  /// ([_kitRecipe]) or the connections view ([_connectionsAnchor]). The dive's
-  /// breadcrumb back ([_popStep]) and the question header are BOTH suppressed
-  /// while this is true, so each state shows EXACTLY ONE 'חזרה' affordance: the
-  /// sub-view's own back when a sub-view is open, the breadcrumb back otherwise.
-  /// Defined ONCE here (rather than repeating `_connectionsAnchor == null &&
-  /// _kitRecipe == null` at each guard site) so the "one back per state"
-  /// invariant cannot drift if a third sub-view is ever added — a new sub-view
-  /// just ORs into this getter and the breadcrumb back stays correctly hidden.
-  bool get _subViewOpen => _kitRecipe != null || _connectionsAnchor != null;
+  /// ([_kitRecipe]), the connections view ([_connectionsAnchor]), or the JOB LIST
+  /// ([_jobsOpen]). The dive's breadcrumb back ([_popStep]) and the question
+  /// header are BOTH suppressed while this is true, so each state shows EXACTLY
+  /// ONE 'חזרה' affordance: the sub-view's own back when a sub-view is open, the
+  /// breadcrumb back otherwise. (The JOB LIST opens only at the empty-stack
+  /// opening, where the breadcrumb back is already hidden, but ORing it in keeps
+  /// the question header suppressed under the job list and future-proofs the
+  /// invariant.) Defined ONCE here (rather than repeating the null/flag checks at
+  /// each guard site) so the "one back per state" invariant cannot drift if a
+  /// further sub-view is ever added — a new sub-view just ORs into this getter and
+  /// the breadcrumb back stays correctly hidden.
+  bool get _subViewOpen =>
+      _kitRecipe != null || _connectionsAnchor != null || _jobsOpen;
 
   /// @visibleForTesting — true while the kit view is active. Mirrors
   /// [connectionsViewOpen]; lets a behavioral test assert the view opened
@@ -396,6 +467,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// Mirrors [showConnectionsForTest].
   @visibleForTesting
   void showKitForTest(SmartProduct recipe) => _showKit(recipe);
+
+  /// @visibleForTesting — true while the JOB LIST ('לפי עבודה') is open. Mirrors
+  /// [kitViewOpen]; lets a behavioral test assert the list opened without
+  /// depending on rendered copy.
+  @visibleForTesting
+  bool get jobsViewOpen => _jobsOpen;
+
+  /// @visibleForTesting — drive the jobs-list entry directly (the SAME state
+  /// change the 'לפי עבודה' key tap performs). The entry key only renders at the
+  /// opening, so a test reaches the list through this rather than synthesising the
+  /// key tap. Mirrors [showKitForTest].
+  @visibleForTesting
+  void openJobsForTest() => _openJobs();
 
   /// @visibleForTesting — true while the opening word list is expanded to the
   /// full lexicon (the 'עוד…' affordance was tapped). Lets a behavioral test
@@ -575,12 +659,35 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   ///  • `'word'`    — seed the pool with the products the word names;
   ///  • `'chip'`    — narrow by the tapped axis chip;
   ///  • `'connect'` — open the "מה מתחבר לזה" connections view;
+  ///  • `'jobs'`    — open the JOB LIST ('לפי עבודה' opening entry);
+  ///  • while the JOB LIST is open, any OTHER key is a JOB key whose payload is
+  ///    the recipe's unique `.key` — open that recipe's kit via [_showKit];
   ///  • anything else is a PRODUCT key whose payload is the product's unique
   ///    SKU — open the reach-product sheet for the product resolved by that sku
   ///    (the [ShowProducts] / connections terminus). Resolution keys on the sku,
   ///    NOT the display label, so two cards sharing a plain word both resolve.
   void _onWordTap(WordKey key) {
     final label = key.label;
+    // Jobs-first entry: the 'לפי עבודה' opening key opens the JOB LIST. Sentinel
+    // payload ('jobs'), matched here BEFORE the product branch — like 'material'.
+    // (The list's own back is a header IconButton calling [_closeJobs], the same
+    // back idiom the kit / connections views use — not a word key.)
+    if (key.payload == 'jobs') {
+      _openJobs();
+      return;
+    }
+    // Jobs-first entry: while the JOB LIST is open, every remaining key IS a job
+    // key — its payload is the recipe's unique `.key` (resolved via [kJobByKey],
+    // the SAME stable-id resolution the product keys use on sku, never the label).
+    // Tapping it opens that recipe's kit through the EXISTING [_showKit]. Handled
+    // here (before the sku-payload product branch) because a job `.key` is not a
+    // sku and would otherwise fall through to a no-op. A no-op if the payload is
+    // somehow not a known job key (defensive — payload/state drift).
+    if (_jobsOpen) {
+      final recipe = kJobByKey[key.payload];
+      if (recipe != null) _showKit(recipe);
+      return;
+    }
     // 7th engine: a 'connect' key opens the "מה מתחבר לזה" view for the reached
     // anchor (the representative the affordance was offered for). The connect key
     // carries the literal 'connect' string as its payload (not a sku), so it is
@@ -738,6 +845,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       stack.clear();
       _typedQuery = null;
       _showAllWords = false;
+      _jobsOpen = false;
       _material = null;
       _materialLexicon = null;
       _typeController?.dispose();
@@ -1255,6 +1363,98 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     );
   }
 
+  /// Jobs-first entry: the opening 'לפי עבודה' affordance — a single icon-free
+  /// key (the SAME [_iconFreeKeyRows] / [BsKey] idiom as the material chip-row, so
+  /// it adds NO second [WordKeyboard] to the opening). Its payload is the literal
+  /// 'jobs' sentinel; tapping it opens the JOB LIST ([_openJobs] via [_onWordTap]).
+  /// Shown ONLY at the opening (see the gate in [build]), beside the material row.
+  // OWNER-REVIEW: jobs-entry affordance layout + copy.
+  Widget _buildJobsEntry() {
+    return Padding(
+      padding: const EdgeInsets.all(BsTokens.space1),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: _iconFreeKeyRows(
+          const [WordKey(kByJobLabel, payload: 'jobs')], // OWNER-REVIEW
+        ),
+      ),
+    );
+  }
+
+  /// Jobs-first entry: the JOB LIST keys — one icon-free key per work-recipe in
+  /// [kJobsByName] (A→Z by `.name`), each labelled by the recipe `.name` and
+  /// carrying the recipe's unique `.key` as its payload (so [_onWordTap] resolves
+  /// it via [kJobByKey] → [_showKit], keying on the stable id, never the label).
+  /// SAME icon-free [WordKey] idiom as the material / word / chip keys.
+  List<WordKey> _jobChips() => [
+        for (final r in kJobsByName) WordKey(r.name, payload: r.key),
+      ];
+
+  /// Jobs-first entry: the JOB LIST view — the discoverable way into the recipe
+  /// kit. Header ('איזו עבודה?') + a back IconButton (to the opening cascade, via
+  /// [_closeJobs]) + every work-recipe as an icon-free key (via [_iconFreeKeyRows]
+  /// — NOT a [WordKeyboard], so the opening's "exactly one WordKeyboard" invariant
+  /// holds: the cascade keyboard is replaced by this list while it is open).
+  /// Tapping a job opens its kit via the EXISTING [_showKit]. Mirrors
+  /// [_buildConnectionsView]'s header/back idiom.
+  ///
+  /// MUST live inside a [SingleChildScrollView] (the build() caller already is):
+  /// the list is ~80 keys, far taller than a phone viewport, so a non-scrolling
+  /// Column would throw a RenderFlex overflow — the SAME crash the canonical audit
+  /// caught for the main dive. The outer Expanded + SingleChildScrollView in
+  /// build() supplies that scroll.
+  // OWNER-REVIEW: jobs-list layout + copy (a flat A→Z list is v1; grouping by
+  // category is a future refinement).
+  Widget _buildJobsView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              BsTokens.space2, 0, BsTokens.space2, 0),
+          child: Row(
+            children: [
+              Semantics(
+                button: true,
+                label: 'חזרה',
+                child: IconButton(
+                  // Same back-arrow IconButton the breadcrumb / kit / connections
+                  // views use (not a word-key), kept consistent with the dive's
+                  // existing back.
+                  icon: const Icon(Icons.arrow_forward),
+                  tooltip: 'חזרה',
+                  onPressed: _closeJobs,
+                ),
+              ),
+              const Expanded(
+                child: Text(
+                  kJobsHeader, // OWNER-REVIEW
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              // Symmetry spacer so the header text stays centred opposite the
+              // back button (mirrors the connections / kit view headers).
+              const SizedBox(width: 48),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(BsTokens.space1),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _iconFreeKeyRows(_jobChips()),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // SELF-GATE first — render nothing unless the flag is on. Mirrors the
@@ -1293,18 +1493,25 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
         ? <String>[_material!, ...crumbs].join(' · ')
         : crumbs.join(' · ');
 
-    // Material axis: the opening (empty stack, no typing, no kit/connections
-    // view, pool non-empty) is where the material entry lives. With NO material
-    // picked yet → the material chip-row. With a material picked → its
-    // breadcrumb + the 'כל החומרים' clear affordance. Both render only here, so
-    // a mid-dive (non-empty stack) never shows a material control.
+    // Material axis + jobs-first entry: the opening (empty stack, no typing, no
+    // kit/connections view, NOT in the job list, pool non-empty) is where BOTH
+    // the material entry and the 'לפי עבודה' jobs entry live. Material: with NO
+    // material picked → the chip-row; with one picked → its breadcrumb + the
+    // 'כל החומרים' clear. Jobs: the 'לפי עבודה' key (opens the JOB LIST). All
+    // render only here, so a mid-dive (non-empty stack) — or the open job list
+    // itself — never shows a material/jobs control. `!_jobsOpen` keeps the
+    // opening controls hidden once the JOB LIST replaces the keyboard region.
     final atOpening = stack.isEmpty &&
         _typeController == null &&
         _connectionsAnchor == null &&
         _kitRecipe == null &&
+        !_jobsOpen &&
         !showEmptyState;
     final showMaterialRow = atOpening && _material == null;
     final showMaterialClear = atOpening && _material != null;
+    // Jobs-first entry: the 'לפי עבודה' affordance shows at the opening (beside
+    // the material controls), regardless of whether a material is picked.
+    final showJobsEntry = atOpening;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -1379,6 +1586,15 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
               if (showMaterialRow) _buildMaterialRow(),
               if (showMaterialClear) _buildMaterialClear(),
 
+              // ── Jobs-first entry ("לפי עבודה") opening affordance ─────────
+              // Beside the material controls at the opening: a single icon-free
+              // key that opens the JOB LIST (the discoverable way into the recipe
+              // kit). Like the material row it is short and sits above the
+              // Expanded keyboard region; it renders ONLY at the opening (the
+              // showJobsEntry gate), and the list it opens then REPLACES the
+              // cascade keyboard in the Expanded region below.
+              if (showJobsEntry) _buildJobsEntry(),
+
               // The key region SCROLLS when its grid is taller than the
               // viewport — a well-connected connections anchor (uncapped) or a
               // full 24-word / 30-product grid on a short phone. The old
@@ -1398,7 +1614,15 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                       : _connectionsAnchor != null
                       // ── 7th engine: connections view (when open) ──────────
                       ? _buildConnectionsView()
-                      : showEmptyState
+                      : _jobsOpen
+                          // ── Jobs-first entry: the JOB LIST (when open) ────
+                          // Below the kit/connections views (a job tap OPENS the
+                          // kit on top, and closing the kit returns here while the
+                          // list stays open), above the cascade — while open it
+                          // REPLACES the word keyboard, so the opening still has
+                          // exactly one WordKeyboard (zero while the list shows).
+                          ? _buildJobsView()
+                          : showEmptyState
                           // ── Empty-pool dead-end → neutral empty-state ─────
                           ? _buildEmptyState()
                           : _typeController != null
