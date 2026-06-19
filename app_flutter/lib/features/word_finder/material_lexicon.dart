@@ -71,6 +71,7 @@ const Map<String, String> kCategoryMaterial = <String, String>{
   'ברזי קיר': 'נחושת',
   'ברזי כיור': 'נחושת',
   'מחלקים': 'נחושת', // brass manifolds
+  'נקודות מים': 'נחושת', // brass rough-in water points (#24 re-run batch)
 };
 
 /// The material of [p]: the FIRST [kMaterials] key whose any term is a substring
