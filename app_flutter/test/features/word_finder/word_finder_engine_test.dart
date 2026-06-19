@@ -11,7 +11,12 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
-    show productHasChip, sizeTokensIn;
+    show
+        productHasChip,
+        sizeTokensIn,
+        angleTokensIn,
+        colorOptions,
+        wordOptions;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -539,6 +544,192 @@ void main() {
               'axis and offers the products to pick');
       expect((q as ShowProducts).products.length, 3,
           reason: 'all three distinct cards are offered');
+    });
+
+    test('a pool that collapses to ONE distinct card RESOLVES (path 2)', () {
+      // Two products with the SAME brand + category + stripped name, differing
+      // ONLY by colour. _collapseKey strips the colour, so both fold onto one
+      // distinct card (distinctCardCount == 1). With a non-empty stack,
+      // offerQuestion must return Resolve(pool.first, pool) — NOT another axis.
+      const white = LipskeyCatalogProduct(
+        sku: 'RES-W', nameHe: 'מחסום סיפון', nameEn: 'trap',
+        color: 'לבן',
+        categoryHe: 'מחסומים', categoryEn: 'traps', categoryEmoji: '🚰', page: 1,
+      );
+      const grey = LipskeyCatalogProduct(
+        sku: 'RES-G', nameHe: 'מחסום סיפון', nameEn: 'trap',
+        color: 'אפור',
+        categoryHe: 'מחסומים', categoryEn: 'traps', categoryEmoji: '🚰', page: 1,
+      );
+      final pool = [white, grey];
+      expect(distinctCardCount(pool), 1,
+          reason: 'colour-only variants fold onto ONE collapsed card');
+
+      // A sentinel word-step so offerQuestion is past the AskWords branch.
+      final stack = <NewbieStep>[
+        const NewbieStep(
+          axisLabel: 'מילה',
+          chipLabel: 'מחסום',
+          predicate: _alwaysTrue,
+          crumbWord: 'מחסום',
+        ),
+      ];
+      final q = offerQuestion(pool, stack, lexicon, null);
+      expect(q, isA<Resolve>(),
+          reason: 'a single distinct card resolves rather than asking an axis');
+      final res = q as Resolve;
+      // The representative is pool.first; siblings are the WHOLE pool.
+      expect(res.product.sku, white.sku,
+          reason: 'Resolve(pool.first, pool) — the first member represents');
+      expect(res.siblings, same(pool),
+          reason: 'every colour variant is offered as a sibling');
+      expect(res.siblings, contains(res.product));
+    });
+
+    test('curated-facet fallback asks אפשרות when no scored axis applies '
+        '(path 5)', () {
+      // Construct a >threshold pool where the information-gain scorer finds NO
+      // subtype-free axis (size/angle/colour/word all ≤1 distinct chip), yet the
+      // curated facet for the subtype still splits it — so offerQuestion falls
+      // through path-4 (bestUnansweredAxis == null) into path-5 and asks the
+      // curated 'אפשרות' axis via offerAxis.
+      //
+      // SHAPE — 14 cards (> kShowProductsThreshold so the small-pool shortcut
+      // does NOT pre-empt), each named 'מחסום נסתר מטבח דגם<i>':
+      //   • 'דגם<i>' carries a DIGIT → wordOptions ignores it (no word axis),
+      //     but _collapseKey keeps it → 14 distinct cards,
+      //   • 'מחסום'/'נסתר'/'מטבח' are shared by ALL → no distinguishing word,
+      //   • NO unit-glyph size token, NO angle token, ONE colour → size/angle/
+      //     colour axes are all empty/lone, so bestUnansweredAxis returns null,
+      //   • category 'מחסומים גלויים' IS a curated facet; the names hit TWO of
+      //     its keys ('נסתר' AND 'מטבח') → narrowAxis/offerAxis returns 'אפשרות'.
+      const cards = kShowProductsThreshold + 2; // 14
+      final pool = <LipskeyCatalogProduct>[
+        for (var i = 0; i < cards; i++)
+          LipskeyCatalogProduct(
+            sku: 'CURATED-$i',
+            nameHe: 'מחסום נסתר מטבח דגם$i',
+            nameEn: 'trap hidden kitchen model$i',
+            categoryHe: 'מחסומים גלויים',
+            categoryEn: 'visible traps',
+            categoryEmoji: '🚰',
+            color: 'לבן',
+            page: 1,
+          ),
+      ];
+
+      // Preconditions that ROUTE the engine to path-5 (assert each, so a fixture
+      // drift that lets an earlier path fire fails loudly here).
+      expect(distinctCardCount(pool), cards,
+          reason: 'each דגם<i> is its own collapsed card (>threshold)');
+      expect(distinctCardCount(pool),
+          greaterThan(kShowProductsThreshold),
+          reason: 'must exceed the small-pool shortcut, else path-3 fires');
+      expect(sizeTokensIn(pool), isEmpty, reason: 'no size axis');
+      expect(angleTokensIn(pool), isEmpty, reason: 'no angle axis');
+      expect(colorOptions(pool), isEmpty,
+          reason: 'one colour ⇒ the colour axis is not a candidate');
+      expect(wordOptions(pool), isEmpty,
+          reason: 'all words shared / digit-bearing ⇒ no word axis');
+      expect(bestUnansweredAxis(pool, <String>{}), isNull,
+          reason: 'NO subtype-free axis scores — this is what forces path-5');
+      // The curated facet IS the only thing that splits — via the subtype.
+      final curated = offerAxis(pool, 'מחסומים גלויים');
+      expect(curated.label, 'אפשרות',
+          reason: 'the curated facet override carries the split');
+      expect(curated.chips, containsAll(<String>['נסתר', 'מטבח']));
+
+      final stack = <NewbieStep>[
+        const NewbieStep(
+          axisLabel: 'מילה',
+          chipLabel: 'מחסום',
+          predicate: _alwaysTrue,
+          crumbWord: 'מחסום',
+        ),
+      ];
+      final q = offerQuestion(pool, stack, lexicon, 'מחסומים גלויים');
+      expect(q, isA<AskAxis>(),
+          reason: 'path-5 surfaces the curated facet as an AskAxis');
+      final axis = q as AskAxis;
+      expect(axis.axisLabel, 'אפשרות',
+          reason: 'the curated-facet path preserves the אפשרות axis the scorer '
+              'cannot reach (it needs a subtype)');
+      expect(axis.questionHe, kAxisQuestion['אפשרות'],
+          reason: 'mapped plain-Hebrew copy for the curated axis');
+      expect(axis.chips, containsAll(<String>['נסתר', 'מטבח']),
+          reason: 'the curated keys the pool matches are offered as chips');
+    });
+
+    test('all splitting axes answered → ShowProducts convergence floor '
+        '(path 6)', () {
+      // The convergence floor: a >threshold pool whose ONLY splitting axis is
+      // colour, but that axis is ALREADY in the answered set. Then path-4 finds
+      // no UNANSWERED scored axis (colour is skipped as answered), and path-5's
+      // offerAxis returns 'צבע' — which IS answered — so axIsUnanswered is false
+      // and the engine falls to path-6: ShowProducts(distinctProducts(pool)).
+      //
+      // SHAPE — 14 cards 'מסעף דגם<i>' split across TWO colours:
+      //   • 'דגם<i>' digit → no word axis, but 14 distinct collapsed cards,
+      //   • NO size, NO angle → those axes are empty,
+      //   • colour splits the pool (שחור/כרום) — the SOLE splitting axis.
+      const cards = kShowProductsThreshold + 2; // 14
+      final pool = <LipskeyCatalogProduct>[
+        for (var i = 0; i < cards; i++)
+          LipskeyCatalogProduct(
+            sku: 'FLOOR-$i',
+            nameHe: 'מסעף דגם$i',
+            nameEn: 'manifold model$i',
+            categoryHe: 'מסעפים',
+            categoryEn: 'manifolds',
+            categoryEmoji: '🔧',
+            color: i.isEven ? 'שחור' : 'כרום',
+            page: 1,
+          ),
+      ];
+
+      expect(distinctCardCount(pool), cards,
+          reason: 'each model is its own collapsed card (>threshold)');
+      expect(sizeTokensIn(pool), isEmpty);
+      expect(angleTokensIn(pool), isEmpty);
+      expect(wordOptions(pool), isEmpty,
+          reason: 'digit-bearing model token ⇒ no word axis');
+      expect(colorOptions(pool).length, 2,
+          reason: 'colour is the ONLY axis that splits this pool');
+      // Colour is unanswered RIGHT NOW, so it WOULD be asked — proving the
+      // answered-set is what suppresses it below.
+      expect(bestUnansweredAxis(pool, <String>{})?.label, 'צבע',
+          reason: 'colour is the sole scored axis until it is answered');
+      // Once colour is in the answered set, no unanswered scored axis remains.
+      expect(bestUnansweredAxis(pool, <String>{'צבע'}), isNull,
+          reason: 'answering colour leaves no unanswered splitting axis');
+
+      // A stack that ANSWERS colour (axisLabel 'צבע') plus the seeding word.
+      final stack = <NewbieStep>[
+        const NewbieStep(
+          axisLabel: 'מילה',
+          chipLabel: 'מסעף',
+          predicate: _alwaysTrue,
+          crumbWord: 'מסעף',
+        ),
+        const NewbieStep(
+          axisLabel: 'צבע',
+          chipLabel: 'שחור',
+          predicate: _alwaysTrue,
+          crumbWord: 'שחור',
+        ),
+      ];
+      final q = offerQuestion(pool, stack, lexicon, null);
+      expect(q, isA<ShowProducts>(),
+          reason: 'every splitting axis answered (or unsplittable) ⇒ the dive '
+              'advances to a product pick instead of re-asking colour');
+      final show = q as ShowProducts;
+      expect(show.products.length, distinctProducts(pool).length,
+          reason: 'path-6 offers exactly the distinct remaining products');
+      expect(show.products.length, lessThanOrEqualTo(kShowProductsCap),
+          reason: 'the product pick is capped at kShowProductsCap');
+      expect(show.products.map((p) => p.sku).toSet().length,
+          show.products.length,
+          reason: 'the shown products are distinct (no duplicate card)');
     });
 
     test('applyNarrow uses structural chip matching (no loose contains)', () {

@@ -6,6 +6,7 @@
 // and (b) NO blocked brand prefix ever leaks in as a lookup key (the adversarial
 // byte-verify the swarm requires).
 
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/word_extraction.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
@@ -147,6 +148,91 @@ void main() {
         expect((lex.wordToSkus[canon]?.length ?? 0) > 1, isTrue,
             reason: 'canonical word "$canon" must name >1 sku after folding');
       }
+    });
+  });
+
+  group('buildWordLexicon — category fallback branch (brand-led names)', () {
+    // No REAL catalog product yields a NULL first meaningful token (every real
+    // nameHe has a real noun after its brand prefix), so the category-fallback
+    // branch is exercised with MINIMAL synthetic products whose nameHe is a
+    // blocked brand prefix + numbers ONLY — the exact shape the branch exists
+    // for ("all brand + numbers"). Built over a small controlled pool (not
+    // kDivePool) so the fallback word's first-seen source is observably
+    // 'category' rather than being shadowed by a real token-sourced entry.
+
+    // 'בתא' is a blocked brand prefix; the rest are digit-bearing → no real word
+    // survives → firstMeaningfulToken returns null → the category fallback runs.
+    const brandLedSeeded = LipskeyCatalogProduct(
+      sku: 'SYN-FALLBACK', nameHe: 'בתא 1/2" 250', nameEn: 'bta 1/2" 250',
+      categoryHe: 'ברזי כיור', // seeded → kCategoryFallbackWord['ברזי כיור']='ברז'
+      categoryEn: 'sink taps', categoryEmoji: '🚰', page: 1,
+    );
+    // Same null-token shape, but an UNSEEDED category → fallback is null → the
+    // product is dropped from the lexicon (the `continue`).
+    const brandLedUnseeded = LipskeyCatalogProduct(
+      sku: 'SYN-DROP', nameHe: 'סיגמא 3/4" 40', nameEn: 'sigma 3/4" 40',
+      categoryHe: 'קטגוריה-לא-זרועה-בכלל', // deliberately NOT in the fallback map
+      categoryEn: 'no-fallback', categoryEmoji: '❓', page: 1,
+    );
+    // A normal product so the pool also has a 'token'-sourced control word.
+    const tokenControl = LipskeyCatalogProduct(
+      sku: 'SYN-TOKEN', nameHe: 'מחבר עגול', nameEn: 'connector round',
+      categoryHe: 'מחברים', categoryEn: 'connectors', categoryEmoji: '🔩',
+      page: 1,
+    );
+
+    test('a brand+number name in a SEEDED category falls back to the category '
+        'word (sourceKind category)', () {
+      // Guard the fixture: the first meaningful token really is null, and the
+      // category really has a seeded fallback word.
+      expect(firstMeaningfulToken(brandLedSeeded.nameHe, kBrandPrefixBlocklist),
+          isNull,
+          reason: 'brand+numbers ⇒ no meaningful token ⇒ the fallback fires');
+      final fallbackWord = kCategoryFallbackWord[brandLedSeeded.categoryHe];
+      expect(fallbackWord, 'ברז',
+          reason: 'ברזי כיור is a seeded category fallback');
+
+      final lex = buildWordLexicon(const [brandLedSeeded, tokenControl]);
+      // The fallback word IS a key, names the fallback product, and is labelled
+      // 'category' (the branch's distinctive output).
+      final entry =
+          lex.entries.firstWhere((e) => e.word == 'ברז', orElse: () {
+        fail('the category-fallback word ברז must be a lexicon entry');
+      });
+      expect(entry.skus, contains(brandLedSeeded.sku),
+          reason: 'the brand-led product is bucketed under its category word');
+      expect(entry.sourceKind, 'category',
+          reason: 'a word that came from kCategoryFallbackWord is source '
+              "'category' — the branch under test");
+      expect(lex.wordToSkus['ברז'], contains(brandLedSeeded.sku));
+      // Control: the normal product is token-sourced, proving the two paths
+      // diverge on source.
+      expect(lex.entries.firstWhere((e) => e.word == 'מחבר').sourceKind,
+          'token');
+    });
+
+    test('a brand+number name in an UNSEEDED category is DROPPED (continue)',
+        () {
+      // The unseeded category must genuinely have no fallback, else this would
+      // not exercise the `continue`.
+      expect(firstMeaningfulToken(
+              brandLedUnseeded.nameHe, kBrandPrefixBlocklist),
+          isNull);
+      expect(kCategoryFallbackWord.containsKey(brandLedUnseeded.categoryHe),
+          isFalse,
+          reason: 'fixture category must have NO seeded fallback word');
+
+      final lex = buildWordLexicon(const [brandLedUnseeded, tokenControl]);
+      // The dropped product's sku appears under NO word — it has no searchable
+      // word, so the lexicon omits it entirely (the `continue` path).
+      for (final e in lex.entries) {
+        expect(e.skus.contains(brandLedUnseeded.sku), isFalse,
+            reason: 'a brand+number product with no category fallback is '
+                'dropped — never keyed under any word');
+      }
+      // Only the token-sourced control survives.
+      expect(lex.entries.map((e) => e.word).toList(), <String>['מחבר'],
+          reason: 'exactly the one product that yields a word remains');
     });
   });
 }

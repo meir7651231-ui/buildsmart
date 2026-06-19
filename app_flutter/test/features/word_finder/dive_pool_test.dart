@@ -4,8 +4,11 @@
 // genuinely deduped, that it FIXES the kCatalogProducts hot-water omission,
 // and that divePoolIndex carries plausible membership flags.
 
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
+import 'package:buildsmart/features/word_finder/narrow_axis.dart'
+    show narrowAxis;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -59,6 +62,41 @@ void main() {
         expect(divePoolIndex.containsKey(p.sku), isTrue,
             reason: 'every pooled sku must have a Membership entry');
       }
+    });
+  });
+
+  group('offerAxis', () {
+    // offerAxis is the thin pass-through dive_pool re-exports so finder callers
+    // depend on ONE library; the logic lives in narrow_axis.narrowAxis. Prove it
+    // is exactly that pass-through on a pool that genuinely yields chips: two
+    // angle-only elbows (no unit-glyph size, so the size axis is empty and the
+    // angle axis carries the split) → both functions must return the IDENTICAL
+    // ({label, chips}) record.
+    test('equals narrowAxis for a pool/subtype that yields chips', () {
+      const a45 = LipskeyCatalogProduct(
+        sku: 'OA-45', nameHe: 'ברך נחושת 45°', nameEn: 'elbow 45deg',
+        categoryHe: 'ברכים', categoryEn: 'elbows', categoryEmoji: '🔧', page: 1,
+      );
+      const a90 = LipskeyCatalogProduct(
+        sku: 'OA-90', nameHe: 'ברך נחושת 90°', nameEn: 'elbow 90deg',
+        categoryHe: 'ברכים', categoryEn: 'elbows', categoryEmoji: '🔧', page: 1,
+      );
+      final pool = [a45, a90];
+
+      final viaOffer = offerAxis(pool, null);
+      final viaNarrow = narrowAxis(pool, null);
+
+      // The pass-through actually produced a split (not the empty sentinel).
+      expect(viaOffer.chips, isNotEmpty,
+          reason: 'the angle pool must yield chips so the test is non-vacuous');
+      expect(viaOffer.label, 'זווית');
+      expect(viaOffer.chips, containsAll(<String>['45°', '90°']));
+
+      // BYTE-equal to narrowAxis: same label and same chip order.
+      expect(viaOffer.label, viaNarrow.label,
+          reason: 'offerAxis must return narrowAxis\'s label verbatim');
+      expect(viaOffer.chips, viaNarrow.chips,
+          reason: 'offerAxis must return narrowAxis\'s chips verbatim');
     });
   });
 }

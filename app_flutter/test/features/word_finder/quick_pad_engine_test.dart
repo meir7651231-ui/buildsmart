@@ -8,8 +8,11 @@
 // an unknown sku must NOT leak into the pad, and a sku in two sources must
 // appear ONCE under its highest source.
 
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart';
+import 'package:buildsmart/features/word_finder/word_extraction.dart'
+    show firstMeaningfulToken, kBrandPrefixBlocklist, kCategoryFallbackWord;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -41,6 +44,47 @@ void main() {
       expect(label.length, lessThan(p.nameHe.length));
       expect(label.contains(' '), isFalse,
           reason: 'label should be one short token, got "$label"');
+    });
+
+    // The two FALLBACK branches of quickLabel. No real catalog product has a
+    // null first meaningful token (every real nameHe carries a real noun after
+    // its brand prefix), so these use MINIMAL synthetic products whose nameHe is
+    // a blocked brand prefix + numbers ONLY — the precise shape that forces the
+    // first token to be null and drives quickLabel past the token branch.
+    test('falls back to the CATEGORY word when no meaningful token (seeded '
+        'category)', () {
+      // 'בתא' is a blocked brand prefix; the rest is a digit-bearing size, so no
+      // real word survives → quickLabel skips the token branch.
+      const p = LipskeyCatalogProduct(
+        sku: 'QP-CAT', nameHe: 'בתא 1/2" 250', nameEn: 'bta 1/2" 250',
+        categoryHe: 'ברזי כיור', // seeded → kCategoryFallbackWord = 'ברז'
+        categoryEn: 'sink taps', categoryEmoji: '🚰', page: 1,
+      );
+      // Guard: token branch is genuinely skipped, and the category has a word.
+      expect(firstMeaningfulToken(p.nameHe, kBrandPrefixBlocklist), isNull,
+          reason: 'brand+numbers ⇒ no meaningful token ⇒ category fallback');
+      expect(kCategoryFallbackWord[p.categoryHe], 'ברז');
+
+      expect(quickLabel(p), 'ברז',
+          reason: 'with no token, the label is the category fallback word');
+    });
+
+    test('falls back to the trimmed nameHe when neither token nor category '
+        'fallback applies', () {
+      // Brand+numbers (null token) AND an unseeded category (no fallback word) →
+      // the LAST resort: nameHe.trim(). Leading/trailing spaces prove the trim.
+      const p = LipskeyCatalogProduct(
+        sku: 'QP-NAME', nameHe: '  סיגמא 3/4" 40  ', nameEn: 'sigma 3/4" 40',
+        categoryHe: 'קטגוריה-לא-זרועה-בכלל', // NOT in the fallback map
+        categoryEn: 'no-fallback', categoryEmoji: '❓', page: 1,
+      );
+      expect(firstMeaningfulToken(p.nameHe, kBrandPrefixBlocklist), isNull);
+      expect(kCategoryFallbackWord.containsKey(p.categoryHe), isFalse,
+          reason: 'fixture category must have NO seeded fallback word');
+
+      expect(quickLabel(p), 'סיגמא 3/4" 40',
+          reason: 'last-resort label is the trimmed full name (never empty for '
+              'a real product) — surrounding whitespace is stripped');
     });
   });
 
