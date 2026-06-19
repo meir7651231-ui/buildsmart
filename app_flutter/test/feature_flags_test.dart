@@ -18,6 +18,18 @@ void main() {
     expect(n.isOn('anything'), isFalse);
   });
 
+  test('word-finder NOT force-enabled without the build define (safe default)',
+      () async {
+    // The buildsmart-il.com demo build passes --dart-define=ENABLE_WORD_FINDER
+    // to turn 'kWordFinder' on; EVERY other build (app, Android, tests) must
+    // leave it OFF. Tests run with no define, so the forced set is empty.
+    SharedPreferences.setMockInitialValues({});
+    final n = FeatureFlagsNotifier();
+    await _settle();
+    expect(n.isOn('kWordFinder'), isFalse,
+        reason: 'kWordFinder must stay OFF unless the demo build define is set');
+  });
+
   test('enable adds; isOn → true', () async {
     SharedPreferences.setMockInitialValues({});
     final n = FeatureFlagsNotifier();
