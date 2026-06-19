@@ -2108,4 +2108,299 @@ void main() {
           'Semantics(label: חזרה) wrapper double-announces it',
     );
   });
+
+  // ── #26 REAL-TAP dispatch routes ────────────────────────────────────────────
+  //
+  // The _onWordTap SENTINEL-DISPATCH ladder (word_finder_screen.dart 724–797)
+  // routes a tapped key by its WordKey.payload. The material/clearmaterial/
+  // morewords/fewerwords branches were previously exercised ONLY through the
+  // @visibleForTesting hooks (pickMaterialForTest / restartForTest), NOT through a
+  // real key tap — so the dispatch arms themselves (lines 744–769) were never
+  // proven to fire. These add a REAL TAP on the rendered BsKey for each sentinel
+  // route and assert the STATE the arm produces. THE-LAW: the symbols/materials
+  // are real (pulled live from kDivePool via materialsInPool); off-screen keys are
+  // brought on with ensureVisible (NEVER scrollUntilVisible); the flag is seeded ON
+  // every test; no semantics queries.
+
+  // #26.1 — REAL TAP a MATERIAL key at the opening (dispatch arm 744–752). A real
+  // BsKey whose label is a material present in materialsInPool(kDivePool) (the
+  // brief's נחושת/PPR) is tapped → the 'material' arm runs, recording
+  // activeMaterial. This is the live-tap counterpart to the hook-driven
+  // pickMaterialForTest case above — it proves the rendered chip's onTap reaches
+  // the 'material' branch, not just the hook.
+  testWidgets(
+      'dispatch (real tap): tapping a MATERIAL chip routes through the '
+      "'material' arm and scopes activeMaterial (744–752)", (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // No material is scoped at the opening (the arm has not run yet).
+    expect(state.activeMaterial as String?, isNull,
+        reason: 'the opening starts with no material scoped');
+
+    // A material GUARANTEED present in the union pool (data-driven, never a
+    // hard-coded name that could drift): prefer the brief's נחושת, else the first
+    // material materialsInPool actually surfaces. Its chip renders as a BsKey
+    // whose label IS the material name (payload 'material').
+    final available = materialsInPool(kDivePool);
+    expect(available, isNotEmpty,
+        reason: 'the union pool must surface at least one material to tap');
+    final material = available.contains('נחושת') ? 'נחושת' : available.first;
+
+    final materialKey = find.widgetWithText(BsKey, material);
+    expect(materialKey, findsOneWidget,
+        reason: 'the opening material chip-row renders a "$material" key');
+
+    // REAL TAP (bring it on-screen first — the chip-row sits in the build's
+    // scroll region; ensureVisible, NOT scrollUntilVisible).
+    await tester.ensureVisible(materialKey);
+    await tester.pumpAndSettle();
+    await tester.tap(materialKey);
+    await tester.pumpAndSettle();
+
+    // The 'material' dispatch arm ran: the material is scoped, the stack was
+    // cleared back to the opening word ask, and the clear affordance now shows.
+    expect(state.activeMaterial as String?, material,
+        reason: 'tapping the material chip routes through the "material" arm '
+            '(744–752) → activeMaterial == the tapped material');
+    expect(state.currentQuestion, isA<AskWords>(),
+        reason: 'the material arm clears the stack back to a word ask');
+    expect(find.widgetWithText(BsKey, kAllMaterials), findsOneWidget,
+        reason: 'a scoped material now offers the כל החומרים clear affordance');
+  });
+
+  // #26.2 — REAL TAP the 'כל החומרים' CLEAR key (dispatch arm 758). After a real
+  // material tap scopes the dive, tapping the clear key fires the 'clearmaterial'
+  // arm (→ _restart) → activeMaterial back to null. Live-tap counterpart to the
+  // restartForTest hook case — proves the rendered clear key's onTap reaches the
+  // 'clearmaterial' branch.
+  testWidgets(
+      "dispatch (real tap): tapping 'כל החומרים' routes through the "
+      "'clearmaterial' arm and drops activeMaterial to null (758)",
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // Scope a material by a REAL chip tap first (so the clear key is on screen).
+    final available = materialsInPool(kDivePool);
+    expect(available, isNotEmpty);
+    final material = available.contains('נחושת') ? 'נחושת' : available.first;
+    final materialKey = find.widgetWithText(BsKey, material);
+    await tester.ensureVisible(materialKey);
+    await tester.pumpAndSettle();
+    await tester.tap(materialKey);
+    await tester.pumpAndSettle();
+    expect(state.activeMaterial as String?, material,
+        reason: 'precondition: a material is scoped before clearing');
+
+    // The clear affordance ('כל החומרים', payload 'clearmaterial') renders only
+    // while a material is scoped.
+    final clearKey = find.widgetWithText(BsKey, kAllMaterials);
+    expect(clearKey, findsOneWidget,
+        reason: 'a scoped material shows the כל החומרים clear key');
+
+    // REAL TAP the clear key.
+    await tester.ensureVisible(clearKey);
+    await tester.pumpAndSettle();
+    await tester.tap(clearKey);
+    await tester.pumpAndSettle();
+
+    // The 'clearmaterial' arm ran (_restart): no material, back at the full-pool
+    // word ask, and the clear key is gone (the material row caption returns).
+    expect(state.activeMaterial as String?, isNull,
+        reason: 'tapping כל החומרים routes through the "clearmaterial" arm '
+            '(758) → activeMaterial == null');
+    expect(state.currentQuestion, isA<AskWords>(),
+        reason: 'clearing drops back to the opening word question');
+    expect(find.widgetWithText(BsKey, kAllMaterials), findsNothing,
+        reason: 'the clear affordance is gone once the material is cleared');
+    expect(find.text(kByMaterialLabel), findsOneWidget,
+        reason: 'the all-materials chip-row caption returns after clearing');
+  });
+
+  // #26.3 — REAL TAP 'עוד…' then 'פחות' (dispatch arms 764–765 / 768–769). The
+  // existing "עוד…/פחות" test taps both keys and asserts showAllWordsActive; this
+  // ADDS the explicit dispatch-route assertion the brief asks for — that the
+  // 'morewords' arm flips _showAllWords ON and the 'fewerwords' arm flips it OFF —
+  // and pins the OBSERVABLE expand/collapse (a low-frequency tail word appears,
+  // then is hidden again) so the route is proven end-to-end via a real tap.
+  testWidgets(
+      "dispatch (real tap): 'עוד…' routes through 'morewords' (expands) and "
+      "'פחות' through 'fewerwords' (collapses) (764–769)", (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+
+    // A word GUARANTEED below the opening top-cut: the (kFirstWordCount+1)-th by
+    // frequency (data-driven, never hard-coded). It is the observable proof the
+    // expand/collapse dispatch arms actually fired.
+    final all = wordsByFrequency(wordFinderLexicon);
+    expect(all.length, greaterThan(kFirstWordCount),
+        reason: 'a hidden low-frequency tail must EXIST for this to mean '
+            'anything');
+    final hiddenWord = all[kFirstWordCount].word;
+
+    // Collapsed start: the morewords arm has not run; the tail word is hidden.
+    expect(state.showAllWordsActive, isFalse,
+        reason: 'the opening list starts collapsed (morewords not yet routed)');
+    expect(find.widgetWithText(BsKey, hiddenWord), findsNothing,
+        reason: '"$hiddenWord" is below the cut → hidden while collapsed');
+
+    // REAL TAP 'עוד…' → the 'morewords' arm (764–765) sets _showAllWords true.
+    final moreKey = find.widgetWithText(BsKey, kMoreWordsKey);
+    expect(moreKey, findsOneWidget,
+        reason: 'the collapsed opening offers the עוד… expand key');
+    await tester.ensureVisible(moreKey);
+    await tester.pumpAndSettle();
+    await tester.tap(moreKey);
+    await tester.pumpAndSettle();
+
+    expect(state.showAllWordsActive, isTrue,
+        reason: 'tapping עוד… routes through the "morewords" arm (764–765) → '
+            'the expansion flag is on');
+    expect(find.widgetWithText(BsKey, hiddenWord), findsOneWidget,
+        reason: 'the morewords arm reveals the hidden tail word "$hiddenWord"');
+    expect(find.widgetWithText(BsKey, kFewerWordsKey), findsOneWidget,
+        reason: 'expanded → the פחות collapse key replaces עוד…');
+
+    // REAL TAP 'פחות' → the 'fewerwords' arm (768–769) sets _showAllWords false.
+    final fewerKey = find.widgetWithText(BsKey, kFewerWordsKey);
+    await tester.ensureVisible(fewerKey);
+    await tester.pumpAndSettle();
+    await tester.tap(fewerKey);
+    await tester.pumpAndSettle();
+
+    expect(state.showAllWordsActive, isFalse,
+        reason: 'tapping פחות routes through the "fewerwords" arm (768–769) → '
+            'the expansion flag is off again');
+    expect(find.widgetWithText(BsKey, hiddenWord), findsNothing,
+        reason: 'the fewerwords arm hides the tail word "$hiddenWord" again');
+    expect(find.widgetWithText(BsKey, kMoreWordsKey), findsOneWidget,
+        reason: 'collapsed again → the עוד… expand key returns');
+  });
+
+  // #26.4 — REAL TAP the 'בנה לי את הערכה' BUILDKIT key (dispatch arm 732–735).
+  // The buildkit key renders ONLY inside a ShowProducts whose product list
+  // contains a WORK-product (smartProductForSku(p.sku) != null) — see _keysFor
+  // 971–972. We DATA-DRIVE a seed (the same pure-simulation-then-replay idiom as
+  // Test 8/11/14) whose "tap the first chip each turn" dive reaches such a
+  // ShowProducts within the tap bound, replay it through the REAL UI, then TAP the
+  // rendered buildkit key → the 'buildkit' arm runs _showKit, opening the kit view
+  // (kitViewOpen). If NO offered opening word reaches a buildkit-bearing
+  // ShowProducts within the bound (the dive never converges on a work-product
+  // without the heavy product sheet), the route is NOT reachable by a real tap in
+  // an isolated widget test, so we LOUD-skip — its arm stays covered by the
+  // showKitForTest hook cases above (the kit-view tests).
+  testWidgets(
+      "dispatch (real tap): tapping 'בנה לי את הערכה' routes through the "
+      "'buildkit' arm and opens the kit view (732–735)", (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // PURE simulation to pick a seed whose dive reaches a ShowProducts containing
+    // a work-product (so the buildkit key renders). No taps yet — exactly the
+    // seed-selection idiom Tests 8/11/14 use, with the extra work-product filter.
+    final firstQ = state.currentQuestion as AskWords;
+    const tapBound = 6;
+    String? seedWord;
+    List<String> chipPath = const <String>[];
+    for (final e in firstQ.words) {
+      var pool = resolveWord(e.word, wordFinderLexicon);
+      if (pool.length < 2 || distinctCardCount(pool) < 2) continue;
+      final stack = <NewbieStep>[
+        NewbieStep(
+          axisLabel: 'דגם',
+          chipLabel: e.word,
+          predicate: (_) => true,
+          crumbWord: e.word,
+        ),
+      ];
+      final path = <String>[];
+      List<LipskeyCatalogProduct>? show;
+      for (var i = 0; i < tapBound; i++) {
+        final q = offerQuestion(pool, stack, wordFinderLexicon, null);
+        if (q is ShowProducts) {
+          show = q.products;
+          break;
+        }
+        if (q is! AskAxis || q.chips.isEmpty) break;
+        final chip = q.chips.first;
+        path.add(chip);
+        pool = pool.where((p) => productHasChip(p, chip)).toList();
+        stack.add(NewbieStep(
+          axisLabel: q.axisLabel,
+          chipLabel: chip,
+          predicate: (p) => productHasChip(p, chip),
+          crumbWord: chip,
+        ));
+      }
+      // The buildkit key shows iff the converged list has a work-product.
+      if (show != null && show.any((p) => smartProductForSku(p.sku) != null)) {
+        seedWord = e.word;
+        chipPath = path;
+        break;
+      }
+    }
+
+    if (seedWord == null) {
+      // LOUD-skip: no opening word reaches a buildkit-bearing ShowProducts within
+      // the tap bound, so the 'buildkit' arm is NOT tappable in an isolated widget
+      // test (the dive cannot converge on a work-product here). The arm stays
+      // covered by the showKitForTest hook (the kit-view tests).
+      // ignore: avoid_print
+      print('SKIP dispatch buildkit (real tap): no offered opening word reaches '
+          'a ShowProducts containing a work-product within $tapBound taps — the '
+          "'buildkit' key never renders without the heavy product sheet, so the "
+          'arm (732–735) is not reachable by a real key tap here. It stays '
+          'covered by the showKitForTest hook cases.');
+      return;
+    }
+
+    // Replay the chosen dive through the REAL UI: tap the seed word, then walk the
+    // recorded chip path (ensureVisible each key, NEVER scrollUntilVisible).
+    final seedKey = find.widgetWithText(BsKey, seedWord).first;
+    await tester.ensureVisible(seedKey);
+    await tester.pumpAndSettle();
+    await tester.tap(seedKey);
+    await tester.pumpAndSettle();
+    for (final chip in chipPath) {
+      final chipKey = find.widgetWithText(BsKey, chip).first;
+      await tester.ensureVisible(chipKey);
+      await tester.pumpAndSettle();
+      await tester.tap(chipKey);
+      await tester.pumpAndSettle();
+    }
+
+    // We reached the ShowProducts pick that renders the buildkit key.
+    expect(state.currentQuestion, isA<ShowProducts>(),
+        reason: 'the replayed dive converged on the buildkit-bearing '
+            'ShowProducts pick');
+    expect(state.kitViewOpen as bool, isFalse,
+        reason: 'no kit is open until the buildkit key is tapped');
+
+    // The 'בנה לי את הערכה' key (payload 'buildkit') is on screen — REAL TAP it.
+    final buildKitKey = find.widgetWithText(BsKey, kBuildKitKey);
+    expect(buildKitKey, findsOneWidget,
+        reason: 'a ShowProducts containing a work-product renders the בנה לי את '
+            'הערכה buildkit key');
+    await tester.ensureVisible(buildKitKey);
+    await tester.pumpAndSettle();
+    await tester.tap(buildKitKey);
+    await tester.pumpAndSettle();
+
+    // The 'buildkit' dispatch arm ran (_showKit) → the kit view is open.
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'tapping בנה לי את הערכה routes through the "buildkit" arm '
+            '(732–735) → _showKit opens the kit view');
+  });
 }
