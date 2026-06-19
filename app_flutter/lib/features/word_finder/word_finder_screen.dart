@@ -268,9 +268,17 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// that material's products ([materialOf] == _material), so the ENTIRE existing
   /// word→size→colour cascade then runs over the material-scoped pool with zero
   /// engine changes.
-  List<LipskeyCatalogProduct> get _basePool => _material == null
-      ? kDivePool
-      : kDivePool.where((p) => materialOf(p) == _material).toList();
+  List<LipskeyCatalogProduct> get _basePool =>
+      _material == null ? kDivePool : _materialPool!;
+
+  /// The material-scoped pool, MEMOIZED alongside [_materialLexicon] (both are
+  /// the costly `materialOf` / `buildWordLexicon` derivations of a material
+  /// pick). Built once at each material pick-site, read by [_basePool], and
+  /// cleared to null wherever [_materialLexicon] is — so the O(pool × terms)
+  /// `materialOf` scan never runs on the per-build path (the sibling lexicon
+  /// memoization the class already documents as necessary). The bang in
+  /// [_basePool] is safe: non-null whenever [_material] is (set/cleared together).
+  List<LipskeyCatalogProduct>? _materialPool;
 
   /// The lexicon the engine + tapped-noun resolution use for the CURRENT state:
   /// the full [wordFinderLexicon] when no material is picked, else the MEMOIZED
@@ -385,6 +393,17 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   @visibleForTesting
   void popStepForTest() => _popStep();
 
+  /// Reset every SUB-VIEW flag to closed in ONE place, so the [_subViewOpen]
+  /// sibling set (kit / connections / jobs) cannot drift: any new sub-view that
+  /// ORs into [_subViewOpen] adds its reset here once, and every full dive-reset
+  /// path ([_restart], [_submitQuery]) clears the whole set together. Field-only
+  /// (no setState) — callers already wrap their own setState.
+  void _resetSubViews() {
+    _kitRecipe = null;
+    _connectionsAnchor = null;
+    _jobsOpen = false;
+  }
+
   /// Clear the whole dive — every answered step and any typed-query rank
   /// context — back to the opening word question. Used by the empty-pool
   /// empty-state's restart affordance.
@@ -392,12 +411,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     setState(() {
       stack.clear();
       _typedQuery = null;
-      _connectionsAnchor = null;
-      _kitRecipe = null;
-      _jobsOpen = false;
+      _resetSubViews();
       _showAllWords = false;
       _material = null;
       _materialLexicon = null;
+      _materialPool = null;
     });
   }
 
@@ -503,7 +521,8 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     setState(() {
       _material = m;
       stack.clear();
-      _materialLexicon = buildWordLexicon(_basePool);
+      _materialPool = kDivePool.where((p) => materialOf(p) == m).toList();
+      _materialLexicon = buildWordLexicon(_materialPool!);
       _showAllWords = false;
     });
   }
@@ -717,7 +736,8 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       setState(() {
         _material = label;
         stack.clear();
-        _materialLexicon = buildWordLexicon(_basePool);
+        _materialPool = kDivePool.where((p) => materialOf(p) == label).toList();
+        _materialLexicon = buildWordLexicon(_materialPool!);
         _showAllWords = false;
       });
       return;
@@ -845,9 +865,10 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       stack.clear();
       _typedQuery = null;
       _showAllWords = false;
-      _jobsOpen = false;
+      _resetSubViews();
       _material = null;
       _materialLexicon = null;
+      _materialPool = null;
       _typeController?.dispose();
       _typeController = null;
       if (q.isEmpty) return;
@@ -1033,26 +1054,26 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
               BsTokens.space2, 0, BsTokens.space2, 0),
           child: Row(
             children: [
-              Semantics(
-                button: true,
-                label: 'חזרה',
-                child: IconButton(
-                  // Icon-free copy is required on the word/chip KEYS; this is the
-                  // same back-arrow IconButton the breadcrumb already uses (not a
-                  // word-key), kept consistent with the dive's existing back.
-                  icon: const Icon(Icons.arrow_forward),
-                  tooltip: 'חזרה',
-                  onPressed: _closeConnections,
-                ),
+              // Back: a bare IconButton — its tooltip supplies BOTH the accessible
+              // name ('חזרה') and the button role, so no wrapping Semantics(label)
+              // is needed (a wrapper would double-announce 'חזרה'). Tests anchor on
+              // find.byTooltip('חזרה').
+              IconButton(
+                icon: const Icon(Icons.arrow_forward),
+                tooltip: 'חזרה',
+                onPressed: _closeConnections,
               ),
-              const Expanded(
-                child: Text(
-                  kConnectionsHeader, // OWNER-REVIEW
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: BsTokens.inkLight,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: const Text(
+                    kConnectionsHeader, // OWNER-REVIEW
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -1216,25 +1237,24 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
               BsTokens.space2, 0, BsTokens.space2, 0),
           child: Row(
             children: [
-              Semantics(
-                button: true,
-                label: 'חזרה',
-                child: IconButton(
-                  // Same back-arrow IconButton the breadcrumb / connections view
-                  // use (not a word-key), kept consistent with the dive's back.
-                  icon: const Icon(Icons.arrow_forward),
-                  tooltip: 'חזרה',
-                  onPressed: _closeKit,
-                ),
+              // Back: bare IconButton; tooltip = accessible name + button role (no
+              // wrapping Semantics → no double-announce). See connections view.
+              IconButton(
+                icon: const Icon(Icons.arrow_forward),
+                tooltip: 'חזרה',
+                onPressed: _closeKit,
               ),
               Expanded(
-                child: Text(
-                  recipe.name, // the work-name (OWNER-authored recipe title)
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    recipe.name, // the work-name (OWNER-authored recipe title)
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -1278,6 +1298,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     for (var i = 0; i < keys.length; i += perRow) {
       final end = (i + perRow < keys.length) ? i + perRow : keys.length;
       final rowKeys = keys.sublist(i, end);
+      // OWNER-REVIEW: these rows follow the app's ambient RTL (Hebrew reading
+      // order — first key on the right), UNLIKE the cascade WordKeyboard which
+      // deliberately pins LTR for stable key-ORDER. The two opening surfaces thus
+      // differ in horizontal order by design; wrap this in Directionality(ltr) if
+      // you prefer the material chip-row to match the cascade's order.
       rows.add(Row(
         children: [
           for (var j = 0; j < rowKeys.length; j++) ...[
@@ -1304,16 +1329,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
               BsTokens.space2, BsTokens.space1, BsTokens.space2, 0),
-          child: Text(
-            kByMaterialLabel, // OWNER-REVIEW
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: BsTokens.inkLight,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+          child: Semantics(
+            header: true,
+            child: const Text(
+              kByMaterialLabel, // OWNER-REVIEW
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -1418,26 +1446,24 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
               BsTokens.space2, 0, BsTokens.space2, 0),
           child: Row(
             children: [
-              Semantics(
-                button: true,
-                label: 'חזרה',
-                child: IconButton(
-                  // Same back-arrow IconButton the breadcrumb / kit / connections
-                  // views use (not a word-key), kept consistent with the dive's
-                  // existing back.
-                  icon: const Icon(Icons.arrow_forward),
-                  tooltip: 'חזרה',
-                  onPressed: _closeJobs,
-                ),
+              // Back: bare IconButton; tooltip = accessible name + button role (no
+              // wrapping Semantics → no double-announce). See connections view.
+              IconButton(
+                icon: const Icon(Icons.arrow_forward),
+                tooltip: 'חזרה',
+                onPressed: _closeJobs,
               ),
-              const Expanded(
-                child: Text(
-                  kJobsHeader, // OWNER-REVIEW
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: BsTokens.inkLight,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: const Text(
+                    kJobsHeader, // OWNER-REVIEW
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -1535,14 +1561,12 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                       BsTokens.space2, BsTokens.space2, BsTokens.space2, 0),
                   child: Row(
                     children: [
-                      Semantics(
-                        button: true,
-                        label: 'חזרה',
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_forward),
-                          tooltip: 'חזרה',
-                          onPressed: _popStep,
-                        ),
+                      // Back: bare IconButton; tooltip = name + role (no
+                      // wrapping Semantics → no double-announce).
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        tooltip: 'חזרה',
+                        onPressed: _popStep,
                       ),
                       Expanded(
                         child: Text(
