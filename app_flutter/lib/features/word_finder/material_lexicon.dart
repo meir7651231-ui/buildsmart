@@ -17,8 +17,9 @@
 ///   is a substring of `'<nameHe> <categoryHe>'`. The key order is therefore both
 ///   the precedence order (a product matching two materials takes the earlier
 ///   key) AND the display order the UI offers. כרום is a FINISH, not a material,
-///   so it is intentionally absent; PVC/PE/מולטיגול carry zero products in the
-///   pool, so they are omitted too (see the brief's SCOUT DATA).
+///   so it is intentionally absent; PVC/מולטיגול carry zero products in the pool,
+///   so they are omitted too. HDPE was ADDED 19/6 (120 products) — the #14 scout
+///   searched 'PE'/'פוליאתילן' and missed the 'HDPE'-token category.
 ///
 /// PURITY: imports NO Flutter widgets and builds NO UI — a plain transform over
 /// const data and product fields. Deterministic: same input ⇒ same output, no
@@ -40,11 +41,13 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 ///   • 'רב-שכבתי' is listed BEFORE 'פקס' so a multilayer pipe is not mis-bucketed
 ///     by an incidental PEX token; both spellings (spaced / hyphenated) are
 ///     detected.
-///   • finishes (כרום) and zero-product materials (PVC/PE/מולטיגול) are
-///     deliberately omitted (see SCOUT DATA).
+///   • finishes (כרום) and zero-product materials (PVC/מולטיגול) are deliberately
+///     omitted; HDPE was added 19/6 — the #14 scout missed its 120 products by
+///     searching 'PE' rather than the 'HDPE' token in 'מחברי HDPE'.
 const Map<String, List<String>> kMaterials = <String, List<String>>{
   'נחושת': ['נחושת', 'פליז'], // OWNER-REVIEW
   'PPR': ['PPR'], // OWNER-REVIEW
+  'HDPE': ['HDPE', 'פוליאתילן'], // OWNER-REVIEW — 120 products ('מחברי HDPE'); the #14 scout searched 'PE' and missed the 'HDPE' token
   'רב-שכבתי': ['רב שכבתי', 'רב-שכבתי'], // OWNER-REVIEW
   'פקס': ['פקסגול', 'פקס', 'PEX'], // OWNER-REVIEW
   'נירוסטה': ['נירוסטה'], // OWNER-REVIEW
