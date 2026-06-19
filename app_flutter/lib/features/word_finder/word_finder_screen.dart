@@ -30,6 +30,7 @@ import 'package:buildsmart/data/smart_tree.dart'
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
+import 'package:buildsmart/features/word_finder/material_lexicon.dart';
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
 import 'package:buildsmart/features/word_finder/recipe_kit.dart'
@@ -44,7 +45,10 @@ import 'package:buildsmart/screens/catalog_screen.dart'
 import 'package:buildsmart/screens/lipskey_product_sheet.dart' show showLipskeyProductSheet;
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_key.dart' show BsKey;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/key_models.dart'
+    show KbKey;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -52,6 +56,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// the (potentially large) build runs a single time per isolate rather than on
 /// every screen mount — the engine's `resolveWord`/`offerQuestion` read it.
 final WordLexicon wordFinderLexicon = buildWordLexicon(kDivePool);
+
+/// Material axis: the materials present in the union dive-pool, in [kMaterials]
+/// display order. Computed ONCE at the top level (like [wordFinderLexicon]) so
+/// the pool scan does not re-run every build — the opening material chip-row
+/// offers one key per entry.
+final List<String> kMaterialsInDivePool = materialsInPool(kDivePool);
 
 // ── 6th engine (work-recipe / "מתכון העבודה") view-only copy ────────────────
 //
@@ -85,6 +95,25 @@ const String kMoreWordsKey = 'עוד…';
 /// OWNER-REVIEW: the icon-free key shown IN PLACE OF [kMoreWordsKey] once the full
 /// word list is revealed — tap it to collapse back to the top words.
 const String kFewerWordsKey = 'פחות';
+
+// ── Material axis ("ציר-חומר") view copy ─────────────────────────────────────
+//
+// The material entry is offered ONLY at the opening (empty stack): the user
+// picks a material (נחושת / PPR / פקס…) → the dive filters to that material's
+// products and the noun keys then show only that material's parts. These three
+// strings are the ONLY display copy the material entry adds; all OWNER-REVIEW
+// (reword/reorder freely — the detection LOGIC lives in `material_lexicon.dart`).
+
+/// OWNER-REVIEW: the leading label of the opening MATERIAL chip-row — names the
+/// row so the user reads it as "by material" before the per-material keys. It is
+/// a plain non-tappable caption (rendered as a heading above the keys), NOT a
+/// word key, so it carries no payload.
+const String kByMaterialLabel = 'לפי חומר';
+
+/// OWNER-REVIEW: the icon-free clear affordance shown once a material is picked —
+/// tapping it drops the material filter (back to ALL materials) and clears the
+/// dive. Rendered via the same BsKey letter idiom as every other key (no icon).
+const String kAllMaterials = 'כל החומרים';
 
 /// The flag-gated newbie product-finder screen.
 ///
@@ -153,6 +182,23 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// re-seed so a fresh dive always opens collapsed.
   bool _showAllWords = false;
 
+  /// Material axis ("ציר-חומר") selection. Null (default) = ALL materials (the
+  /// full [kDivePool] base). When set to a [kMaterials] key, [_basePool] narrows
+  /// to that material's products, so the ENTIRE existing word→size→colour cascade
+  /// runs over the material-scoped pool with zero engine changes. Picked at the
+  /// opening only (via the material chip-row / [pickMaterialForTest]); cleared by
+  /// the 'כל החומרים' affordance and by every dive reset.
+  String? _material;
+
+  /// MEMOIZED lexicon scoped to the current material's pool. Non-null only while
+  /// [_material] is set. Built ONCE when the material is PICKED (in the tap
+  /// handler / [pickMaterialForTest]) — NOT inside a getter/build: a fresh
+  /// `buildWordLexicon` over 111–774 products on every frame would jank. Cleared
+  /// (set null) whenever the material is cleared. The active-lexicon helper
+  /// ([_activeLexicon]) reads it so both [currentQuestion] and the tapped-noun
+  /// [resolveWord] resolve WITHIN the material pool.
+  WordLexicon? _materialLexicon;
+
   /// @visibleForTesting — when false, reaching a [Resolve] does NOT auto-open
   /// the real [showLipskeyProductSheet]. Production keeps this true (the flow
   /// ENDS by opening the sheet). A behavioral widget test flips it off so it can
@@ -161,12 +207,27 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   @visibleForTesting
   bool openSheetOnResolve = true;
 
-  /// The base pool the dive walks. We use [kDivePool] DIRECTLY rather than
-  /// `filterBySystem`: that helper lives in Flutter-/Riverpod-coupled screen +
-  /// logic files and needs a `WaterSystem` argument we have no source for here,
-  /// so applying it is NOT trivial. The full union pool is the correct newbie
-  /// default — every product the app knows about is reachable.
-  List<LipskeyCatalogProduct> get _basePool => kDivePool;
+  /// The base pool the dive walks. With no material picked ([_material] null) it
+  /// is [kDivePool] DIRECTLY — the full union pool is the correct newbie default
+  /// (every product the app knows about is reachable; we do NOT apply
+  /// `filterBySystem`, a Flutter-/Riverpod-coupled helper needing a `WaterSystem`
+  /// we have no source for here). When a material IS picked, the base narrows to
+  /// that material's products ([materialOf] == _material), so the ENTIRE existing
+  /// word→size→colour cascade then runs over the material-scoped pool with zero
+  /// engine changes.
+  List<LipskeyCatalogProduct> get _basePool => _material == null
+      ? kDivePool
+      : kDivePool.where((p) => materialOf(p) == _material).toList();
+
+  /// The lexicon the engine + tapped-noun resolution use for the CURRENT state:
+  /// the full [wordFinderLexicon] when no material is picked, else the MEMOIZED
+  /// [_materialLexicon] scoped to the material pool. Reading the memoized field
+  /// (never rebuilding here) is what keeps the costly `buildWordLexicon` off the
+  /// per-frame path — it is built once when the material is picked. The bang is
+  /// safe: [_materialLexicon] is non-null whenever [_material] is non-null (both
+  /// are set together in the 'material' tap and cleared together everywhere).
+  WordLexicon get _activeLexicon =>
+      _material == null ? wordFinderLexicon : _materialLexicon!;
 
   /// The live pool: base products that satisfy EVERY answered step's predicate.
   ///
@@ -208,7 +269,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// exactly.
   @visibleForTesting
   NewbieQuestion get currentQuestion =>
-      offerQuestion(_pool, stack, wordFinderLexicon, widget.subtype);
+      offerQuestion(_pool, stack, _activeLexicon, widget.subtype);
 
   /// @visibleForTesting — distinct collapsed cards left in the live pool.
   @visibleForTesting
@@ -247,8 +308,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   }
 
   /// Pop the last answered step (the back affordance). A no-op on an empty
-  /// stack. When the pop empties the stack, the dive is back at the first
-  /// word question, so the typed-query rank context is cleared too.
+  /// stack. When the pop empties the stack, the dive is back at the opening word
+  /// question, so the typed-query rank + expand context are cleared. A picked
+  /// MATERIAL is KEPT (a stable scope): back returns to the material opening (its
+  /// scoped word list + 'כל החומרים'); the user exits the material explicitly via
+  /// the 'כל החומרים' key. // OWNER-REVIEW: back stays within the picked material.
   void _popStep() {
     if (stack.isEmpty) return;
     setState(() {
@@ -277,6 +341,8 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       _connectionsAnchor = null;
       _kitRecipe = null;
       _showAllWords = false;
+      _material = null;
+      _materialLexicon = null;
     });
   }
 
@@ -325,6 +391,27 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// assert the expand/collapse toggle without depending on rendered copy.
   @visibleForTesting
   bool get showAllWordsActive => _showAllWords;
+
+  /// @visibleForTesting — the currently picked material, or null for all
+  /// materials. Lets a behavioral test assert the material entry was taken (and
+  /// cleared) without depending on rendered copy.
+  @visibleForTesting
+  String? get activeMaterial => _material;
+
+  /// @visibleForTesting — drive the material entry directly (the SAME state
+  /// change the 'material' key tap performs): set the material, clear the stack,
+  /// build the scoped lexicon ONCE, and re-collapse the opening word list. The
+  /// material chip-row only renders at the opening, so a test reaches the entry
+  /// through this rather than synthesising the key tap. Mirrors [showKitForTest].
+  @visibleForTesting
+  void pickMaterialForTest(String m) {
+    setState(() {
+      _material = m;
+      stack.clear();
+      _materialLexicon = buildWordLexicon(_basePool);
+      _showAllWords = false;
+    });
+  }
 
   /// @visibleForTesting — clear the whole dive (mirrors the empty-state's
   /// 'התחל מחדש' restart). Used to assert the opening-word expansion does not
@@ -483,6 +570,29 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       if (recipe != null) _showKit(recipe);
       return;
     }
+    // Material axis: a 'material' key (the label IS the material name) enters the
+    // material-FIRST dive. Matched here BEFORE the sku-payload product branch,
+    // exactly like 'connect'/'buildkit'. It sets the material, clears the stack
+    // back to the opening, and BUILDS THE SCOPED LEXICON ONCE (memoized in
+    // _materialLexicon) so the costly `buildWordLexicon` never runs per-frame —
+    // the noun keys then show only this material's parts. Re-collapse the opening
+    // word list so the fresh material opening starts collapsed.
+    if (key.payload == 'material') {
+      setState(() {
+        _material = label;
+        stack.clear();
+        _materialLexicon = buildWordLexicon(_basePool);
+        _showAllWords = false;
+      });
+      return;
+    }
+    // Material axis clear: 'כל החומרים' drops the material filter back to ALL
+    // materials and clears the dive (via _restart, which nulls both _material and
+    // _materialLexicon). Sentinel payload, matched here before the product branch.
+    if (key.payload == 'clearmaterial') {
+      _restart();
+      return;
+    }
     // Opening-list expansion toggle: 'עוד…' reveals every lexicon word, 'פחות'
     // collapses back to the top words. Sentinel payloads (not skus), matched
     // here BEFORE the product branch — exactly like 'connect'/'buildkit'.
@@ -524,8 +634,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     if (key.payload == 'word') {
       // Precompute the resolved sku set ONCE so the per-product predicate is an
       // O(1) set lookup rather than re-resolving the lexicon for every product.
+      // Resolve against the ACTIVE lexicon (the material-scoped one when a
+      // material is picked) so a tapped noun resolves to skus WITHIN the material
+      // pool, never the full union.
       final skuSet = {
-        for (final p in resolveWord(label, wordFinderLexicon)) p.sku,
+        for (final p in resolveWord(label, _activeLexicon)) p.sku,
       };
       _pushStep(NewbieStep(
         axisLabel: 'דגם',
@@ -596,6 +709,8 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       stack.clear();
       _typedQuery = null;
       _showAllWords = false;
+      _material = null;
+      _materialLexicon = null;
       _typeController?.dispose();
       _typeController = null;
       if (q.isEmpty) return;
@@ -626,15 +741,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
       // Collapsed → the engine's top-kFirstWordCount words (q.words). Expanded
       // ('עוד…' tapped) → EVERY lexicon word, SAME frequency order, via the
       // engine's wordsByFrequency (q.words is just its prefix, so the common
-      // words stay on top). The toggle key trails the list: 'עוד…' while
-      // collapsed AND a tail exists, 'פחות' while expanded. Sentinel payloads
-      // ('morewords'/'fewerwords'), like the 'connect'/'buildkit' keys.
+      // words stay on top). The lexicon is the ACTIVE one — the material-scoped
+      // lexicon when a material is picked, so 'עוד…' reveals the rest of THAT
+      // material's words (never a global word that names no material product),
+      // matching the collapsed q.words which `currentQuestion` already scoped.
+      // The toggle key trails the list: 'עוד…' while collapsed AND a tail
+      // exists, 'פחות' while expanded. Sentinel payloads ('morewords'/
+      // 'fewerwords'), like the 'connect'/'buildkit' keys.
       final shown =
-          _showAllWords ? wordsByFrequency(wordFinderLexicon) : q.words;
+          _showAllWords ? wordsByFrequency(_activeLexicon) : q.words;
       return [
         for (final e in shown) WordKey(e.word, payload: 'word'),
         if (!_showAllWords &&
-            wordFinderLexicon.entries.length > q.words.length)
+            _activeLexicon.entries.length > q.words.length)
           const WordKey(kMoreWordsKey, payload: 'morewords'), // OWNER-REVIEW
         if (_showAllWords)
           const WordKey(kFewerWordsKey, payload: 'fewerwords'), // OWNER-REVIEW
@@ -990,6 +1109,120 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     );
   }
 
+  /// Material axis: the opening MATERIAL chip-row keys — one icon-free key per
+  /// material present in the FULL union pool (in [kMaterials] display order),
+  /// each carrying the literal 'material' payload and the material name as its
+  /// label (so [_onWordTap] enters that material). SAME icon-free WordKey idiom
+  /// as the word/chip keys. The materials are read off [kDivePool] (NOT the
+  /// scoped pool) because this row only shows at the opening, when no material is
+  /// picked yet.
+  List<WordKey> _materialChips() => [
+        for (final m in kMaterialsInDivePool) WordKey(m, payload: 'material'),
+      ];
+
+  /// Material axis: the opening chip-row — a 'לפי חומר' caption above one
+  /// icon-free key per available material (the [WordKeyboard] idiom, no
+  /// skip/type utility row — those keys would be dead no-ops here). Shown ONLY at
+  /// the opening (see the gate in [build]); tapping a key enters that material's
+  /// dive.
+  /// Renders [keys] as icon-free BsKey rows (3 per row, each Expanded) — the
+  /// same look as a WordKeyboard word-row, but WITHOUT being a [WordKeyboard],
+  /// so the material chip-row + clear do NOT add a second WordKeyboard to the
+  /// tree (the opening must keep exactly one — the word cascade). Taps route
+  /// through [_onWordTap] by the key's payload, like every other key.
+  List<Widget> _iconFreeKeyRows(List<WordKey> keys) {
+    final rows = <Widget>[];
+    for (var i = 0; i < keys.length; i += 3) {
+      final end = (i + 3 < keys.length) ? i + 3 : keys.length;
+      final rowKeys = keys.sublist(i, end);
+      rows.add(Row(
+        children: [
+          for (var j = 0; j < rowKeys.length; j++) ...[
+            if (j > 0) const SizedBox(width: BsTokens.space1),
+            Expanded(
+              child: BsKey(
+                model: KbKey(rowKeys[j].label),
+                onTap: () => _onWordTap(rowKeys[j]),
+              ),
+            ),
+          ],
+        ],
+      ));
+      if (i + 3 < keys.length) {
+        rows.add(const SizedBox(height: BsTokens.space1));
+      }
+    }
+    return rows;
+  }
+
+  // OWNER-REVIEW: material chip-row layout + copy.
+  Widget _buildMaterialRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(
+              BsTokens.space2, BsTokens.space1, BsTokens.space2, 0),
+          child: Text(
+            kByMaterialLabel, // OWNER-REVIEW
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(BsTokens.space1),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _iconFreeKeyRows(_materialChips()),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Material axis: the picked-material breadcrumb + clear affordance, shown in
+  /// the opening (empty-stack) state once a material IS picked. Mirrors the
+  /// 'כל החומרים' clear: tapping it drops the material filter and clears the dive
+  /// via [_restart] (which nulls [_material] + [_materialLexicon]). Rendered via
+  /// the same WordKeyboard key idiom (icon-free), with no utility row.
+  // OWNER-REVIEW: picked-material breadcrumb + clear copy/layout.
+  Widget _buildMaterialClear() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              BsTokens.space2, BsTokens.space1, BsTokens.space2, 0),
+          child: Text(
+            // The picked material as a breadcrumb caption (e.g. 'נחושת').
+            _material ?? '',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(BsTokens.space1),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _iconFreeKeyRows(
+              const [WordKey(kAllMaterials, payload: 'clearmaterial')],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // SELF-GATE first — render nothing unless the flag is on. Mirrors the
@@ -1007,7 +1240,25 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     final q = currentQuestion;
     final keys = _keysFor(q);
     final header = _headerFor(q);
-    final crumbLine = crumbs.join(' · ');
+    // Material axis: when scoped to a material, prefix it onto the trail so the
+    // breadcrumb keeps the material context mid-dive (e.g. 'נחושת · ניפל · 1/2"'),
+    // not just the answered steps. // OWNER-REVIEW
+    final crumbLine = _material != null
+        ? <String>[_material!, ...crumbs].join(' · ')
+        : crumbs.join(' · ');
+
+    // Material axis: the opening (empty stack, no typing, no kit/connections
+    // view, pool non-empty) is where the material entry lives. With NO material
+    // picked yet → the material chip-row. With a material picked → its
+    // breadcrumb + the 'כל החומרים' clear affordance. Both render only here, so
+    // a mid-dive (non-empty stack) never shows a material control.
+    final atOpening = stack.isEmpty &&
+        _typeController == null &&
+        _connectionsAnchor == null &&
+        _kitRecipe == null &&
+        !showEmptyState;
+    final showMaterialRow = atOpening && _material == null;
+    final showMaterialClear = atOpening && _material != null;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -1072,6 +1323,17 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                     ),
                   ),
                 ),
+
+              // ── Material axis ("ציר-חומר") opening controls ──────────────
+              // The material entry: at the opening, offer the material chip-row
+              // (no material picked) OR the picked-material breadcrumb + clear
+              // ('כל החומרים'). Placed ABOVE the word keyboard so the user picks
+              // a material FIRST, then the noun keys below show only that
+              // material's parts. Both are inside the build's scroll region only
+              // via this Column child (they are short, so they sit above the
+              // Expanded keyboard region).
+              if (showMaterialRow) _buildMaterialRow(),
+              if (showMaterialClear) _buildMaterialClear(),
 
               // The key region SCROLLS when its grid is taller than the
               // viewport — a well-connected connections anchor (uncapped) or a

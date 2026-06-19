@@ -43,6 +43,7 @@ import 'package:buildsmart/data/smart_tree.dart'
     show SmartProduct, kSmartProducts, smartProductForSku;
 import 'package:buildsmart/features/word_finder/distinct_label.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
+import 'package:buildsmart/features/word_finder/material_lexicon.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show productHasChip;
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
@@ -54,6 +55,8 @@ import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_finder_screen.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:buildsmart/features/word_finder/word_keys_model.dart';
+import 'package:buildsmart/features/word_finder/word_lexicon.dart'
+    show buildWordLexicon;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery, searchRelevance;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_key.dart';
@@ -1390,5 +1393,189 @@ void main() {
     expect(state.showAllWordsActive, isFalse,
         reason: 'a fresh dive must open collapsed — no expansion leak');
     expect(find.widgetWithText(BsKey, kMoreWordsKey), findsOneWidget);
+  });
+
+  // ── Material axis ("ציר-חומר"): the opening material entry ──────────────────
+  //
+  // The finder gains a material-FIRST entry: at the opening the user picks a
+  // material (נחושת / PPR / …) → the dive filters to that material and the noun
+  // keys then show only that material's parts, after which the normal
+  // word→size→colour cascade continues unchanged. These tests assert the entry
+  // is offered, that picking a material scopes the words to that material, and —
+  // the MONEY TEST — that the entry SURFACES a copper part unreachable from the
+  // full opening's top-24. Driven via the @visibleForTesting hooks
+  // (pickMaterialForTest / activeMaterial / restartForTest), mirroring Test 9's
+  // connections pattern: the material chip-row only renders at the opening, so a
+  // test reaches the entry through the hook AND (for the chip-presence case) by
+  // finding the rendered key.
+
+  testWidgets('material axis: the opening offers a נחושת material chip',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    // נחושת is a material present in the full pool (SCOUT DATA ~111), so the
+    // opening chip-row must render a נחושת key.
+    expect(materialsInPool(kDivePool), contains('נחושת'),
+        reason: 'נחושת must be a material present in the union pool');
+    expect(find.widgetWithText(BsKey, 'נחושת'), findsOneWidget,
+        reason: 'the opening material chip-row offers a נחושת key');
+    // The leading caption is shown too.
+    expect(find.text(kByMaterialLabel), findsOneWidget,
+        reason: 'the material chip-row shows its "לפי חומר" caption');
+  });
+
+  testWidgets(
+      'material axis: picking נחושת scopes the word keys to copper nouns AND '
+      'surfaces a part unreachable from the full opening (MONEY TEST)',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // The copper pool + its scoped lexicon, computed live (no hard-coded sku).
+    final copperPool = productsOfMaterial(kDivePool, 'נחושת');
+    expect(copperPool, isNotEmpty,
+        reason: 'the copper pool must be non-empty to exercise the entry');
+    final copperWords =
+        buildWordLexicon(copperPool).entries.map((e) => e.word).toSet();
+
+    // Pick the material through the hook (the SAME state change the chip tap
+    // performs).
+    state.pickMaterialForTest('נחושת');
+    await tester.pumpAndSettle();
+
+    // The material is recorded and the opening is back to a word ask.
+    expect(state.activeMaterial as String?, 'נחושת',
+        reason: 'pickMaterialForTest records the picked material');
+    final scopedQ = state.currentQuestion;
+    expect(scopedQ, isA<AskWords>(),
+        reason: 'after picking a material the opening is still a word ask, now '
+            'scoped to that material');
+
+    // The offered words are a SUBSET of the copper nouns (the scoped lexicon
+    // never offers a word that names no copper product).
+    final offered = (scopedQ as AskWords).words.map((e) => e.word).toSet();
+    expect(offered.difference(copperWords), isEmpty,
+        reason: 'every offered word after picking נחושת must be a copper noun '
+            '(the words are scoped to the copper pool)');
+
+    // A noun that exists ONLY in copper (its word is in the copper lexicon but
+    // NOT in the FULL union lexicon's word set) — proof the scoping is real.
+    final fullWords =
+        wordFinderLexicon.entries.map((e) => e.word).toSet();
+    final copperOnly = copperWords.difference(fullWords);
+    // (copperOnly may be empty if every copper word also appears globally; the
+    // MONEY TEST below is the stronger, always-meaningful assertion.)
+
+    // ── MONEY TEST ──────────────────────────────────────────────────────────
+    // A word present in the copper pool but NOT in the full opening's top-24 is
+    // OFFERED after picking נחושת — proving the material entry surfaces parts
+    // unreachable before. Compute the full top-24 opening word set live, then a
+    // copper word outside it that the scoped opening DOES offer.
+    final fullTop24 = wordsByFrequency(wordFinderLexicon)
+        .take(kFirstWordCount)
+        .map((e) => e.word)
+        .toSet();
+    final surfaced =
+        offered.firstWhere((w) => !fullTop24.contains(w), orElse: () => '');
+    expect(surfaced, isNot(''),
+        reason: 'picking נחושת must offer at least one word that the full '
+            'opening top-$kFirstWordCount did NOT — the whole point of the '
+            'material entry (copperOnly words: $copperOnly)');
+    expect(find.widgetWithText(BsKey, surfaced), findsWidgets,
+        reason: 'the surfaced copper word "$surfaced" renders as a tappable key '
+            'after picking נחושת');
+  });
+
+  testWidgets(
+      'material axis: clearing (restart) returns the full word list and drops '
+      'the material', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // The full opening word set, before any material is picked.
+    final fullOffered = (state.currentQuestion as AskWords)
+        .words
+        .map((e) => e.word)
+        .toSet();
+
+    state.pickMaterialForTest('נחושת');
+    await tester.pumpAndSettle();
+    expect(state.activeMaterial as String?, 'נחושת');
+
+    // Clear via restart (the SAME reset path _restart / the 'כל החומרים' clear
+    // uses).
+    state.restartForTest();
+    await tester.pumpAndSettle();
+
+    expect(state.activeMaterial as String?, isNull,
+        reason: 'clearing the material returns to ALL materials');
+    final clearedQ = state.currentQuestion;
+    expect(clearedQ, isA<AskWords>(),
+        reason: 'a cleared dive is back at the opening word question');
+    expect((clearedQ as AskWords).words.map((e) => e.word).toSet(), fullOffered,
+        reason: 'clearing the material restores the FULL (union) opening word '
+            'list, identical to before any material was picked');
+    // The material chip-row is offered again (back at the all-materials opening).
+    expect(find.widgetWithText(BsKey, 'נחושת'), findsOneWidget,
+        reason: 'the material chip-row returns after clearing');
+  });
+
+  testWidgets(
+      'material axis: the breadcrumb keeps the material once the dive starts '
+      '(MAJOR-fix lock)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.pickMaterialForTest('נחושת');
+    await tester.pumpAndSettle();
+
+    // Start the dive: tap the first scoped copper noun so the stack is non-empty
+    // (the point at which the breadcrumb row renders).
+    final noun = (state.currentQuestion as AskWords).words.first.word;
+    final nounKey = find.widgetWithText(BsKey, noun).first;
+    await tester.ensureVisible(nounKey);
+    await tester.tap(nounKey);
+    await tester.pumpAndSettle();
+
+    // Mid-dive the material context must persist in the rendered breadcrumb —
+    // otherwise the user loses the copper scope (the MAJOR finding this fixes).
+    expect(find.textContaining('נחושת'), findsWidgets,
+        reason: 'the breadcrumb must keep the material once diving in');
+  });
+
+  testWidgets(
+      'material axis: back from the first noun keeps the material (stable scope)',
+      (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.pickMaterialForTest('נחושת');
+    await tester.pumpAndSettle();
+
+    final noun = (state.currentQuestion as AskWords).words.first.word;
+    final nounKey = find.widgetWithText(BsKey, noun).first;
+    await tester.ensureVisible(nounKey);
+    await tester.tap(nounKey);
+    await tester.pumpAndSettle();
+
+    // Back (pop the noun) → the material is KEPT (returns to the copper opening,
+    // not all the way out to all-materials).
+    state.popStepForTest();
+    await tester.pumpAndSettle();
+
+    expect(state.activeMaterial as String?, 'נחושת',
+        reason: 'back from the first material-scoped noun keeps the material '
+            '(stable scope); the user exits only via כל החומרים');
   });
 }
