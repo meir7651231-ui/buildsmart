@@ -3,6 +3,10 @@ import 'package:buildsmart/features/word_finder/quick_pad_keyboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// A const-friendly no-op `onAdd` — a top-level tear-off so a `const`
+/// [QuickPadKeyboard] can be built in a test that only inspects rendering.
+void _noop(QuickPadItem _, int __) {}
+
 void main() {
   group('QuickPadKeyboard', () {
     testWidgets('renders product labels as text and uses no Material icons',
@@ -299,6 +303,81 @@ void main() {
       expect(
         find.descendant(of: cellFor('צינור'), matching: find.text('2')),
         findsOneWidget,
+      );
+    });
+
+    testWidgets(
+        'a11y: the stepper +/− keys carry product-named Semantics and the qty '
+        'readout exposes its count as a Semantics value', (tester) async {
+      // The stepper keys render bare glyphs ('−' / '+' / a number); without
+      // Semantics a screen reader announces only "minus" / "plus" / a lone
+      // digit. The keyboard wraps each in a Semantics node naming the action +
+      // product, and exposes the qty via Semantics.value. This guards that the
+      // a11y wrapping is present and follows the product label. ALL checks are
+      // at the WIDGET level (SemanticsProperties on the Semantics widgets), so no
+      // SemanticsHandle / semantics-tree access is needed.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: QuickPadKeyboard(
+              items: [QuickPadItem('ברז', payload: 'sku-1')],
+              onAdd: _noop,
+            ),
+          ),
+        ),
+      );
+
+      // The increase / decrease keys carry a product-named Semantics label (the
+      // bare '+' / '−' glyph label is excluded), so a screen-reader user hears
+      // WHAT they are stepping. Checked at the widget level.
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Semantics && w.properties.label == 'הוסף כמות · ברז',
+        ),
+        findsOneWidget,
+        reason: 'the + key announces "increase quantity · <product>"',
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Semantics && w.properties.label == 'הפחת כמות · ברז',
+        ),
+        findsOneWidget,
+        reason: 'the − key announces "decrease quantity · <product>"',
+      );
+
+      // ACTIVATION (the synth-caught blocker): the increase/decrease Semantics
+      // must carry the tap action THEMSELVES — excludeSemantics drops the child
+      // InkWell's action, so without onTap on the labelled node an AT double-tap
+      // is a no-op. Assert at the WIDGET level (SemanticsProperties.onTap),
+      // mirroring the qty-value check below, so we don't touch the semantics-tree
+      // machinery (and avoid a stray SemanticsHandle).
+      final incNode = find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'הוסף כמות · ברז',
+      );
+      expect(tester.widget<Semantics>(incNode).properties.onTap, isNotNull,
+          reason: 'the + key must carry a tap action (AT-activatable, not just '
+              'announced)');
+      final decNode = find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'הפחת כמות · ברז',
+      );
+      expect(tester.widget<Semantics>(decNode).properties.onTap, isNotNull,
+          reason: 'the − key must carry a tap action (AT-activatable, not just '
+              'announced)');
+
+      // The qty readout exposes its count as a Semantics VALUE (not just a bare
+      // digit label). Locate the explicit Semantics widget the keyboard added
+      // (the one whose label is 'כמות') and assert its value tracks the count
+      // (default 1) — matching on the widget's own SemanticsProperties so the
+      // check is robust to ancestor/merge layout.
+      final qtyNode = find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'כמות',
+      );
+      expect(qtyNode, findsOneWidget,
+          reason: 'the qty readout is wrapped in a labelled Semantics node');
+      expect(
+        tester.widget<Semantics>(qtyNode).properties.value,
+        '1',
+        reason: 'the qty readout exposes the count (default 1) as its value',
       );
     });
 

@@ -79,12 +79,19 @@ String _numberSuffix(int ordinal) => ' ($ordinal)'; // 2-based; 1 → no suffix
 /// bucketing does — the two can never drift.
 final RegExp _kWordSplit = RegExp(r'[\s()"׳/×,.+\-]+');
 
+/// Matches any digit — used to drop number-bearing tokens (sizes `250`,
+/// fractions `1/2"`, codes `DN40`). PERF: hoisted to a top-level final so it is
+/// compiled ONCE, not re-`RegExp(...)`-constructed on every [_wordTokens] call
+/// ([_wordTokens] runs once per product per label pass). Behaviour-identical to
+/// the inline `RegExp(r'\d')` it replaces.
+final RegExp _kHasDigit = RegExp(r'\d');
+
 /// Real-word tokens of [name] — the SAME rule `wordOptions` uses: split on
 /// [_kWordSplit], keep tokens of length ≥ 2 that carry NO digit (drops sizes
 /// `250`, fractions `1/2"`, codes `DN40`). PURE.
 List<String> _wordTokens(String name) => name
     .split(_kWordSplit)
-    .where((w) => w.length >= 2 && !RegExp(r'\d').hasMatch(w))
+    .where((w) => w.length >= 2 && !_kHasDigit.hasMatch(w))
     .toList();
 
 /// The size axis value for a product: every `productSizeTokens` label joined by

@@ -17,13 +17,19 @@
 // `SizedBox.shrink`) unless `kWordFinderFlag` is enabled. It is safe to land
 // dark; wiring it into a real navigation seam is a SEPARATE later step.
 //
-// LAYOUT: Directionality.rtl > Column([ toggle row, Expanded(active screen) ]).
+// LAYOUT: Directionality.rtl > Column([ toggle row, Expanded(IndexedStack) ]).
 // The toggle row is two PLAIN-TEXT segment keys (NO Material icons) — the
 // active one drawn with the brand accent. Each child screen brings its own
-// Directionality + Material/Scaffold; we wrap the active child in [Expanded]
-// so [QuickPadScreen]'s Scaffold (which needs bounded height) and
+// Directionality + Material/Scaffold; we wrap the body in [Expanded] so
+// [QuickPadScreen]'s Scaffold (which needs bounded height) and
 // [WordFinderScreen]'s Spacer-bearing Column both lay out cleanly inside the
 // host Column.
+//
+// STATE PRESERVATION: the body is an [IndexedStack] (not a switch that returns
+// one child), so BOTH child screens stay mounted across a toggle and keep their
+// in-progress State — the cascade's answered-step stack / typed query and the
+// quick pad's per-item quantities survive switching modes and switching back,
+// instead of resetting each time the user flips the toggle.
 
 import 'package:buildsmart/features/word_finder/quick_pad_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
@@ -73,32 +79,52 @@ class _WordFinderHomeState extends ConsumerState<WordFinderHome> {
   /// [KbKey] of [KeyKind.letter], which [BsKey] draws as plain text (see
   /// `BsKey._iconFor` → null for `KeyKind.letter`). The `active` segment gets
   /// the brand accent fill (`isAccent: true`).
+  ///
+  /// A11Y: the active state is colour-only on the key face, so a [Semantics]
+  /// wrapper carries `selected:` for a screen reader — it announces "selected"
+  /// on the active segment of this two-way toggle (mirrors a SegmentedButton's
+  /// per-segment selected semantics). `container: false` lets it merge with the
+  /// [BsKey]'s own `button: true` Semantics rather than splitting the node.
   Widget _segment(String label, _Mode mode) {
     return Expanded(
-      child: BsKey(
-        // KeyKind.letter → rendered as plain text, no icon.
-        model: KbKey(label),
-        isAccent: _mode == mode,
-        onTap: () => _setMode(mode),
+      child: Semantics(
+        selected: _mode == mode,
+        container: false,
+        child: BsKey(
+          // KeyKind.letter → rendered as plain text, no icon.
+          model: KbKey(label),
+          isAccent: _mode == mode,
+          onTap: () => _setMode(mode),
+        ),
       ),
     );
   }
 
-  /// The active child surface. Each child self-gates and brings its own
-  /// Directionality + Material/Scaffold, so nesting is fine; we only return the
-  /// raw widget here and let the build wrap it in [Expanded].
+  /// The two child surfaces, kept side-by-side in an [IndexedStack] so BOTH
+  /// stay mounted across a toggle and PRESERVE their in-progress State (the
+  /// cascade's answered-step stack / typed query; the pad's per-item
+  /// quantities). Only the [_mode]-selected child is shown; the other is laid
+  /// out (zero-size) but retained, so flipping the toggle back finds it exactly
+  /// as the user left it instead of rebuilt from scratch.
+  ///
+  /// Each child self-gates and brings its own Directionality + Material/Scaffold,
+  /// so nesting is fine; the build wraps the whole stack in [Expanded]. Child
+  /// order is fixed ([cascade, quickPad]) and matches [_Mode.index], so the
+  /// selected index is the enum's own index.
   Widget _body() {
-    switch (_mode) {
-      case _Mode.cascade:
-        return const WordFinderScreen();
-      case _Mode.quickPad:
-        // The pad's `מצב רגיל` utility key flips back to the cascade. The
-        // cascade itself has no onSwitchMode param, so switching is driven only
-        // from this host's toggle (+ this callback).
-        return QuickPadScreen(
-          onSwitchMode: () => _setMode(_Mode.cascade),
-        );
-    }
+    return IndexedStack(
+      index: _mode.index,
+      sizing: StackFit.expand,
+      children: [
+        // [_Mode.cascade] (index 0). No onSwitchMode param — the cascade has no
+        // switch affordance of its own; switching is driven only from the host
+        // toggle (+ the pad's callback below).
+        const WordFinderScreen(),
+        // [_Mode.quickPad] (index 1). The pad's `מצב רגיל` utility key flips back
+        // to the cascade via this callback.
+        QuickPadScreen(onSwitchMode: () => _setMode(_Mode.cascade)),
+      ],
+    );
   }
 
   @override

@@ -688,6 +688,68 @@ void main() {
         reason: 'tapping back closes the connections view');
   });
 
+  // ── Test 9b (Fix 2): exactly ONE back control even with a non-empty dive ────
+  //
+  // The breadcrumb back appears whenever the dive stack is non-empty; a sub-view
+  // (connections / kit) brings its OWN back. The bug guarded here is BOTH showing
+  // at once (two 'חזרה' arrows). The screen suppresses the breadcrumb back while
+  // any sub-view is open (the single `_subViewOpen` guard), so even with a
+  // non-empty stack UNDER an open connections view there must be exactly one
+  // back control.
+
+  testWidgets(
+      'back control: a sub-view over a non-empty dive shows exactly ONE חזרה '
+      '(breadcrumb back is suppressed)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // Drive the dive to a NON-EMPTY stack: tap an offered word that seeds a
+    // multi-card pool (so a step persists and the breadcrumb back would show).
+    final firstQ = state.currentQuestion as AskWords;
+    String? seedWord;
+    for (final e in firstQ.words) {
+      if (resolveWord(e.word, wordFinderLexicon).length > 1) {
+        seedWord = e.word;
+        break;
+      }
+    }
+    expect(seedWord, isNotNull,
+        reason: 'need an offered word seeding a multi-card pool');
+    await tester.tap(find.widgetWithText(BsKey, seedWord!).first);
+    await tester.pumpAndSettle();
+    expect(state.crumbs, isNotEmpty,
+        reason: 'the dive now has a non-empty stack (breadcrumb would show)');
+
+    // Sanity: with NO sub-view open and a non-empty stack, the breadcrumb back
+    // is the single back control.
+    expect(find.byTooltip('חזרה'), findsOneWidget,
+        reason: 'a non-empty dive shows the breadcrumb back');
+
+    // Open the connections view ON TOP of the non-empty dive (a known anchor).
+    final anchor = kDivePool.firstWhere((p) => p.sku == '217861');
+    expect(isConnectionAnchor(anchor), isTrue);
+    state.showConnectionsForTest(anchor);
+    await tester.pumpAndSettle();
+    expect(state.connectionsViewOpen as bool, isTrue);
+
+    // EXACTLY ONE back control — the connections view's own back; the breadcrumb
+    // back is suppressed (no double 'חזרה').
+    expect(find.byTooltip('חזרה'), findsOneWidget,
+        reason: 'a sub-view over a non-empty dive must show EXACTLY ONE back '
+            'control — the breadcrumb back is suppressed while a sub-view owns '
+            'its own back');
+
+    // Closing the sub-view restores the (single) breadcrumb back.
+    await tester.tap(find.byTooltip('חזרה'));
+    await tester.pumpAndSettle();
+    expect(state.connectionsViewOpen as bool, isFalse);
+    expect(find.byTooltip('חזרה'), findsOneWidget,
+        reason: 'closing the sub-view returns to the single breadcrumb back');
+  });
+
   // ── Test 10: 7th engine — a non-anchor opens NO connections view ───────────
 
   testWidgets('connections: a non-anchor product opens no view (guarded)',

@@ -96,6 +96,14 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
 
   /// Builds one product cell: the label key (routes to onAdd) above a compact
   /// stepper row ('−' | qty | '+'). All keys are icon-free KeyKind.letter.
+  ///
+  /// A11Y: the stepper keys render bare glyphs ('−' / '+' / a number), which a
+  /// screen reader would otherwise announce as "minus sign" / "plus" / a lone
+  /// digit with no idea what is being changed. Each is wrapped in a [Semantics]
+  /// node that NAMES the action and the product (e.g. "הוסף אחד · <product>")
+  /// and the qty readout exposes the count as a [Semantics.value]. The glyph's
+  /// own inner Semantics is suppressed (`excludeSemantics: true`) so the symbol
+  /// is not double-announced. // OWNER-REVIEW: the spoken stepper copy.
   Widget _buildItemCell(int index) {
     final item = widget.items[index];
     final qty = _qtyOf(item);
@@ -114,25 +122,50 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
         Row(
           children: [
             Expanded(
-              child: BsKey(
-                model: const KbKey(QuickPadKeyboard._minusGlyph),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true, // suppress the bare '−' glyph label
+                // OWNER-REVIEW: "decrease quantity of <product>".
+                label: 'הפחת כמות · ${item.label}',
+                // a11y: the tap action must live on the LABELLED node —
+                // excludeSemantics drops BsKey's InkWell action, so without this
+                // an AT double-tap is a no-op (announced-but-inoperable).
                 onTap: () => _decrement(item),
+                child: BsKey(
+                  model: const KbKey(QuickPadKeyboard._minusGlyph),
+                  onTap: () => _decrement(item),
+                ),
               ),
             ),
             const SizedBox(width: BsTokens.space1),
             Expanded(
-              child: BsKey(
-                model: KbKey('$qty'),
-                // Tapping the qty readout is a no-op affordance; it carries the
-                // count visually. Routed to onAdd so a tap there still adds.
-                onTap: () => widget.onAdd(item, _qtyOf(item)),
+              child: Semantics(
+                // OWNER-REVIEW: "quantity" + the value spoken as the count.
+                label: 'כמות',
+                value: '$qty',
+                excludeSemantics: true, // the bare number reads via `value`
+                child: BsKey(
+                  model: KbKey('$qty'),
+                  // Tapping the qty readout is a no-op affordance; it carries the
+                  // count visually. Routed to onAdd so a tap there still adds.
+                  onTap: () => widget.onAdd(item, _qtyOf(item)),
+                ),
               ),
             ),
             const SizedBox(width: BsTokens.space1),
             Expanded(
-              child: BsKey(
-                model: const KbKey(QuickPadKeyboard._plusGlyph),
+              child: Semantics(
+                button: true,
+                excludeSemantics: true, // suppress the bare '+' glyph label
+                // OWNER-REVIEW: "increase quantity of <product>".
+                label: 'הוסף כמות · ${item.label}',
+                // a11y: tap action on the LABELLED node (excludeSemantics drops
+                // the child InkWell action) so AT can actually activate the +.
                 onTap: () => _increment(item),
+                child: BsKey(
+                  model: const KbKey(QuickPadKeyboard._plusGlyph),
+                  onTap: () => _increment(item),
+                ),
               ),
             ),
           ],

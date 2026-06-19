@@ -372,6 +372,17 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     setState(() => _kitRecipe = null);
   }
 
+  /// True while a SUB-VIEW that owns its OWN back control is open — the kit view
+  /// ([_kitRecipe]) or the connections view ([_connectionsAnchor]). The dive's
+  /// breadcrumb back ([_popStep]) and the question header are BOTH suppressed
+  /// while this is true, so each state shows EXACTLY ONE 'חזרה' affordance: the
+  /// sub-view's own back when a sub-view is open, the breadcrumb back otherwise.
+  /// Defined ONCE here (rather than repeating `_connectionsAnchor == null &&
+  /// _kitRecipe == null` at each guard site) so the "one back per state"
+  /// invariant cannot drift if a third sub-view is ever added — a new sub-view
+  /// just ORs into this getter and the breadcrumb back stays correctly hidden.
+  bool get _subViewOpen => _kitRecipe != null || _connectionsAnchor != null;
+
   /// @visibleForTesting — true while the kit view is active. Mirrors
   /// [connectionsViewOpen]; lets a behavioral test assert the view opened
   /// without depending on rendered copy.
@@ -504,15 +515,20 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     return null;
   }
 
-  /// 7th engine: the anchor the 'מה מתחבר לזה?' entry key targets for the current
-  /// question, or null when no reached product is a valid connection anchor (so
-  /// the affordance is NOT offered). Only a [ShowProducts] question carries the
+  /// 7th engine: the anchor the 'מה מתחבר לזה?' entry key targets for [q], or
+  /// null when no reached product is a valid connection anchor (so the
+  /// affordance is NOT offered). Only a [ShowProducts] question carries the
   /// entry key (the keyboard that renders it) — it is the FIRST shown product
   /// that is an anchor (a stable, predictable pick). A [Resolve] opens the
   /// product sheet and renders NO keyboard, so the entry key never shows there;
   /// every other question returns null too.
-  LipskeyCatalogProduct? get _connectionEntryAnchor {
-    final q = currentQuestion;
+  ///
+  /// PERF: takes the already-computed [q] so [build] (via [_keysFor]) does not
+  /// re-derive [currentQuestion] — which re-derives [_pool] and re-runs
+  /// `offerQuestion` — a second time per frame. The [_connectionEntryAnchor]
+  /// getter below preserves the no-arg call for the tap-handler path, where a
+  /// single re-eval is fine (it is one user tap, not the per-frame build path).
+  LipskeyCatalogProduct? _connectionEntryAnchorFor(NewbieQuestion q) {
     if (q is ShowProducts) {
       for (final p in q.products) {
         if (isConnectionAnchor(p)) return p;
@@ -521,18 +537,26 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     return null;
   }
 
-  /// 6th engine: the WORK-recipe the 'בנה לי את הערכה' entry key targets for the
-  /// current question, or null when no reached product is a work-product (so the
-  /// affordance is NOT offered). Mirrors [_connectionEntryAnchor]: only a
-  /// [ShowProducts] question carries the entry key (the keyboard that renders
-  /// it), and it is the FIRST shown product that is a work-product — i.e. whose
-  /// sku resolves via [smartProductForSku] to a [SmartProduct] recipe (a stable,
-  /// predictable pick). A [Resolve] opens the product sheet and renders NO
-  /// keyboard, so the entry key never shows there; every other question returns
-  /// null too. The returned [SmartProduct] is the recipe whose kit [_showKit]
-  /// will display.
-  SmartProduct? get _kitEntryRecipe {
-    final q = currentQuestion;
+  /// The connection entry anchor for the CURRENT question — the no-arg wrapper
+  /// for the tap-handler call site ([_onWordTap]'s 'connect' branch), where no
+  /// pre-computed question is in scope. The per-frame build path uses
+  /// [_connectionEntryAnchorFor] with the question it already computed instead.
+  LipskeyCatalogProduct? get _connectionEntryAnchor =>
+      _connectionEntryAnchorFor(currentQuestion);
+
+  /// 6th engine: the WORK-recipe the 'בנה לי את הערכה' entry key targets for [q],
+  /// or null when no reached product is a work-product (so the affordance is NOT
+  /// offered). Mirrors [_connectionEntryAnchorFor]: only a [ShowProducts]
+  /// question carries the entry key (the keyboard that renders it), and it is
+  /// the FIRST shown product that is a work-product — i.e. whose sku resolves via
+  /// [smartProductForSku] to a [SmartProduct] recipe (a stable, predictable
+  /// pick). A [Resolve] opens the product sheet and renders NO keyboard, so the
+  /// entry key never shows there; every other question returns null too. The
+  /// returned [SmartProduct] is the recipe whose kit [_showKit] will display.
+  ///
+  /// PERF: takes the already-computed [q] (same reason as
+  /// [_connectionEntryAnchorFor]).
+  SmartProduct? _kitEntryRecipeFor(NewbieQuestion q) {
     if (q is ShowProducts) {
       for (final p in q.products) {
         final recipe = smartProductForSku(p.sku);
@@ -541,6 +565,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     }
     return null;
   }
+
+  /// The kit entry recipe for the CURRENT question — the no-arg wrapper for the
+  /// tap-handler call site ([_onWordTap]'s 'buildkit' branch). The per-frame
+  /// build path uses [_kitEntryRecipeFor] with its already-computed question.
+  SmartProduct? get _kitEntryRecipe => _kitEntryRecipeFor(currentQuestion);
 
   /// Handle a tapped word key, dispatched by its [WordKey.payload]:
   ///  • `'word'`    — seed the pool with the products the word names;
@@ -789,16 +818,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
         // a plain-text (icon-free) 'מה מתחבר לזה?' key that opens the parts-that-
         // connect view. Appended LAST so it never displaces a product key. Its
         // payload is the literal 'connect' sentinel (not a sku). It carries NO
-        // imageAsset — a navigation key stays clean (text only).
-        if (_connectionEntryAnchor != null)
+        // imageAsset — a navigation key stays clean (text only). PERF: passes the
+        // SAME `q` (the ShowProducts we are already inside) so the anchor scan
+        // reuses this frame's question instead of re-deriving currentQuestion.
+        if (_connectionEntryAnchorFor(q) != null)
           const WordKey(kConnectionsKey, payload: 'connect'), // OWNER-REVIEW copy
         // 6th engine: when a reached product is a WORK-product (its sku resolves
         // to a SmartProduct recipe), offer a plain-text (icon-free) 'בנה לי את
         // הערכה' key that builds + shows the recommended kit. Appended LAST (after
         // the connect key) so it never displaces a product key. Its payload is the
         // literal 'buildkit' sentinel (not a sku). NO imageAsset — a navigation
-        // key stays clean (text only), like the connect key.
-        if (_kitEntryRecipe != null)
+        // key stays clean (text only), like the connect key. PERF: passes the SAME
+        // `q` (reuses this frame's question, same as the connect key above).
+        if (_kitEntryRecipeFor(q) != null)
           const WordKey(kBuildKitKey, payload: 'buildkit'), // OWNER-REVIEW copy
       ];
     }
@@ -1230,14 +1262,28 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     final on = ref.watch(featureFlagsProvider).contains(kWordFinderFlag);
     if (!on) return const SizedBox.shrink();
 
+    // PERF: derive the live pool ONCE per build and reuse it for BOTH the
+    // empty-pool check below AND the engine question — `_pool` walks the stack
+    // predicates (and may relevance-sort a typed query), so the canonical audit
+    // flagged build re-deriving it 3-4× (once for poolIsEmpty, again via
+    // currentQuestion, again via each entry-anchor getter). Computing it here
+    // and feeding `offerQuestion` directly collapses that to a single derive;
+    // `_keysFor(q)` already takes the question, and the entry-anchor helpers now
+    // take it too, so no getter re-derives the pool this frame. Behaviour is
+    // identical — same pool, same question — purely fewer recomputations.
+    final pool = _pool;
+
     // Detect the empty-pool dead-end FIRST: when the derived pool is empty
     // (only possible once the stack is non-empty — the base pool is never
     // empty) and we are NOT mid-typing, the engine would otherwise hand back a
     // zero-chip AskAxis. Render a neutral empty-state with a way back instead.
-    final poolIsEmpty = _pool.isEmpty && stack.isNotEmpty;
+    final poolIsEmpty = pool.isEmpty && stack.isNotEmpty;
     final showEmptyState = poolIsEmpty && _typeController == null;
 
-    final q = currentQuestion;
+    // The engine's verdict for THIS frame's pool — the same value the
+    // `currentQuestion` getter computes, but over the already-derived `pool`
+    // (the getter stays for the tap handlers / @visibleForTesting hooks).
+    final q = offerQuestion(pool, stack, _activeLexicon, widget.subtype);
     final keys = _keysFor(q);
     final header = _headerFor(q);
     // Material axis: when scoped to a material, prefix it onto the trail so the
@@ -1269,12 +1315,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // ── Breadcrumb + back ────────────────────────────────────────
-              // Hidden while the connections OR kit view is open: each of those
-              // views owns its single back control (otherwise two 'חזרה' arrows
-              // would show).
-              if (stack.isNotEmpty &&
-                  _connectionsAnchor == null &&
-                  _kitRecipe == null)
+              // Hidden while a sub-view (connections OR kit) is open: each of
+              // those views owns its single back control, so showing the
+              // breadcrumb back too would put TWO 'חזרה' arrows on screen. The
+              // single [_subViewOpen] guard keeps that invariant in one place.
+              if (stack.isNotEmpty && !_subViewOpen)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                       BsTokens.space2, BsTokens.space2, BsTokens.space2, 0),
@@ -1306,11 +1351,10 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
                 ),
 
               // ── Question header ──────────────────────────────────────────
-              // Hidden while the connections OR kit view is open — each carries
-              // its own header (kConnectionsHeader / the work-recipe name).
-              if (header.isNotEmpty && !showEmptyState &&
-                  _connectionsAnchor == null &&
-                  _kitRecipe == null)
+              // Hidden while a sub-view (connections OR kit) is open — each
+              // carries its own header (kConnectionsHeader / the work-recipe
+              // name). Same single [_subViewOpen] guard as the breadcrumb above.
+              if (header.isNotEmpty && !showEmptyState && !_subViewOpen)
                 Padding(
                   padding: const EdgeInsets.all(BsTokens.space2),
                   child: Text(

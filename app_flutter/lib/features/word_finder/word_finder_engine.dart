@@ -223,6 +223,16 @@ final Map<String, LipskeyCatalogProduct> _divePoolBySku = {
   for (final p in kDivePool) p.sku: p,
 };
 
+/// Matches runs of whitespace — used by [_collapseKey] to fold the gaps left by
+/// removed size/angle/colour tokens. PERF: hoisted to a top-level final so it is
+/// compiled ONCE, not re-`RegExp(...)`-constructed on every [_collapseKey] call.
+/// [_collapseKey] runs once per product inside [distinctCardCount] /
+/// [distinctProducts], and the scorer ([axisExpectedRemaining]) calls
+/// [distinctCardCount] once per chip per candidate axis — so this construction
+/// was on a genuinely hot per-build path. Behaviour-identical to the inline
+/// `RegExp(r'\s+')` it replaces.
+final RegExp _kWhitespace = RegExp(r'\s+');
+
 /// Pure variant-collapse key — the engine's stand-in for finder_screen's
 /// `productListDedupeKey`.
 ///
@@ -259,7 +269,7 @@ String _collapseKey(LipskeyCatalogProduct p) {
     stripped = stripped.replaceAll(color, ' ');
   }
   // Collapse whitespace so removed tokens don't leave key-affecting gaps.
-  stripped = stripped.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).join(' ');
+  stripped = stripped.split(_kWhitespace).where((w) => w.isNotEmpty).join(' ');
   return '${p.brand}||${p.categoryHe}||$stripped';
 }
 

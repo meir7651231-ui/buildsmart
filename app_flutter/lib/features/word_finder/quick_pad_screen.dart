@@ -92,7 +92,15 @@ class _QuickPadScreenState extends ConsumerState<QuickPadScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('נוסף לסל ✓  ${quickLabel(p)} ×$qty'),
+        // BIDI: this label mixes Hebrew with a Latin '×' and a digit quantity
+        // ('נוסף לסל ✓  ברך ×3'). A SnackBar renders in the app-root Overlay,
+        // ABOVE this screen's Directionality.rtl, so without an explicit
+        // direction the trailing '×N' run can flip to the wrong side. Pin the
+        // text RTL so the Hebrew leads and the count trails correctly.
+        content: Text(
+          'נוסף לסל ✓  ${quickLabel(p)} ×$qty',
+          textDirection: TextDirection.rtl,
+        ),
         duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
       ),
