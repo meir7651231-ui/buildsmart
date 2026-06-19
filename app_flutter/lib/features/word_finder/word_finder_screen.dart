@@ -1270,10 +1270,13 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   /// so the material chip-row + clear do NOT add a second WordKeyboard to the
   /// tree (the opening must keep exactly one — the word cascade). Taps route
   /// through [_onWordTap] by the key's payload, like every other key.
-  List<Widget> _iconFreeKeyRows(List<WordKey> keys) {
+  ///
+  /// [perRow] is keys-per-row (default 3, like the material chip-row); the job
+  /// list passes 1 so long work-names render full-width and never clip.
+  List<Widget> _iconFreeKeyRows(List<WordKey> keys, {int perRow = 3}) {
     final rows = <Widget>[];
-    for (var i = 0; i < keys.length; i += 3) {
-      final end = (i + 3 < keys.length) ? i + 3 : keys.length;
+    for (var i = 0; i < keys.length; i += perRow) {
+      final end = (i + perRow < keys.length) ? i + perRow : keys.length;
       final rowKeys = keys.sublist(i, end);
       rows.add(Row(
         children: [
@@ -1288,7 +1291,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
           ],
         ],
       ));
-      if (i + 3 < keys.length) {
+      if (i + perRow < keys.length) {
         rows.add(const SizedBox(height: BsTokens.space1));
       }
     }
@@ -1448,7 +1451,7 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
           padding: const EdgeInsets.all(BsTokens.space1),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: _iconFreeKeyRows(_jobChips()),
+            children: _iconFreeKeyRows(_jobChips(), perRow: 1),
           ),
         ),
       ],
