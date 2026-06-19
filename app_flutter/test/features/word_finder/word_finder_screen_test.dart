@@ -1817,4 +1817,295 @@ void main() {
     expect(find.text(kJobsHeader), findsNothing,
         reason: 'the job list header must not render while the flag is off');
   });
+
+  // ── #22 cross-state regression locks (audit-verified, previously untested) ──
+  //
+  // The #21 canonical audit VERIFIED several cross-STATE invariants by hand —
+  // interactions BETWEEN the material scope, the sub-views (kit / connections /
+  // jobs), the breadcrumb back, and the a11y header/back semantics — but none
+  // were covered by a test, so a future refactor could silently break them.
+  // These seven lock them in. Each seeds the flag ON, reuses `pumpScreen` + the
+  // existing @visibleForTesting hooks, drives the SAME state changes the live
+  // keys perform, and asserts at the WIDGET level (byWidgetPredicate +
+  // `.properties`) — NEVER tester.ensureSemantics()/getSemantics() (those leak a
+  // SemanticsHandle and fail the suite on the leak), exactly like the quick-pad
+  // a11y idiom. Off-screen keys are reached with `ensureVisible`, never
+  // `scrollUntilVisible`.
+
+  // #22.1 — Material → jobs → kit chain survives. A material scope and the JOB
+  // LIST + kit view are independent state; the audit checked the dive into a kit
+  // does not crash (and the kit opens) even while a material is scoped. Lock it:
+  // pick a material, open the JOB LIST, tap a real job key → the kit opens.
+  testWidgets(
+      'cross-state: material scoped → open jobs → tap a job opens the kit '
+      '(the dive survives a scoped material)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // Scope a material first (the same state change the chip tap performs).
+    state.pickMaterialForTest('נחושת');
+    await tester.pumpAndSettle();
+    expect(state.activeMaterial as String?, 'נחושת',
+        reason: 'the material is scoped before the jobs dive');
+
+    // Open the JOB LIST WHILE a material is scoped — the jobs view does not gate
+    // on the material, so it must still open.
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue,
+        reason: 'the JOB LIST opens even while a material is scoped');
+    expect(state.kitViewOpen as bool, isFalse,
+        reason: 'no kit is open yet — only the job list');
+
+    // Tap a KNOWN job key (a real kJobsByName / kSmartProducts .name, pulled
+    // live so it cannot drift) → its kit opens via the existing _showKit. The
+    // list is taller than the viewport, so bring the key on-screen with
+    // ensureVisible (NOT scrollUntilVisible) before tapping.
+    final knownJob = kJobsByName.first;
+    final jobKey = find.widgetWithText(BsKey, knownJob.name).first;
+    await tester.ensureVisible(jobKey);
+    await tester.pumpAndSettle();
+    await tester.tap(jobKey);
+    await tester.pumpAndSettle();
+
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'tapping a job opens its kit even while a material is scoped — '
+            'the material→jobs→kit chain does not crash or get blocked');
+    // The kit view header is the tapped recipe work-name (the chain reached the
+    // right kit, not just any kit).
+    expect(find.text(knownJob.name), findsWidgets,
+        reason: 'the opened kit view shows the tapped recipe name as its header');
+  });
+
+  // #22.2 — _resetSubViews symmetry on a typed query. The audit flagged that
+  // _submitQuery historically reset only the jobs flag; the fix routes it
+  // through _resetSubViews, which clears the kit, connections AND jobs flags
+  // together. Open a sub-view (the kit), then drive a typed-query submit through
+  // the REAL typing surface (the same UI path Test 3 uses) → ALL THREE sub-view
+  // getters must be false, not just jobs.
+  testWidgets(
+      'cross-state: a typed-query submit resets ALL sub-views (kit + '
+      'connections + jobs), not just jobs', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // Open the kit view (a sub-view) via the hook — the SAME state change the
+    // 'בנה לי את הערכה' key performs.
+    final fx = findKitFixture();
+    expect(fx, isNotNull,
+        reason: 'a kit fixture is needed to open a sub-view before the query');
+    state.showKitForTest(fx!.recipe);
+    await tester.pumpAndSettle();
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'the kit sub-view is open before the typed query');
+
+    // Drive the typed-query submit DIRECTLY via the hook. The typing surface is
+    // mutually exclusive with the sub-views (a sub-view REPLACES the cascade, so
+    // 'הקלדה' is not on screen while the kit is open) — which is exactly why the
+    // _submitQuery sub-view reset was a LATENT path the audit flagged. The hook
+    // runs _submitQuery (→ _resetSubViews) from inside the open sub-view, the one
+    // state a UI tap cannot reach.
+    const query = 'ברז';
+    state.submitQueryForTest(query);
+    await tester.pumpAndSettle();
+
+    // The submit re-seeded the dive to the query (sanity the path ran)...
+    expect(state.crumbs, [query],
+        reason: 'the typed-query submit re-seeded the dive to the query');
+    // ...and crucially reset EVERY sub-view flag — the latent bug the audit
+    // flagged was that only jobs was reset; _resetSubViews clears all three.
+    expect(state.kitViewOpen as bool, isFalse,
+        reason: 'a typed-query submit must reset the KIT sub-view '
+            '(_submitQuery routes through _resetSubViews)');
+    expect(state.connectionsViewOpen as bool, isFalse,
+        reason: 'a typed-query submit must reset the CONNECTIONS sub-view');
+    expect(state.jobsViewOpen as bool, isFalse,
+        reason: 'a typed-query submit must reset the JOBS sub-view');
+  });
+
+  // #22.3 — _resetSubViews on restart. _restart also routes through
+  // _resetSubViews, so a restart from inside ANY sub-view must clear all three
+  // sub-view getters (not just the one that was open). Open the kit, restart →
+  // all three false.
+  testWidgets(
+      'cross-state: restart from inside a sub-view resets ALL sub-views (kit + '
+      'connections + jobs)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    final fx = findKitFixture();
+    expect(fx, isNotNull);
+    state.showKitForTest(fx!.recipe);
+    await tester.pumpAndSettle();
+    expect(state.kitViewOpen as bool, isTrue,
+        reason: 'the kit sub-view is open before the restart');
+
+    // Restart (the SAME reset path the empty-state התחל מחדש / clearmaterial use).
+    state.restartForTest();
+    await tester.pumpAndSettle();
+
+    expect(state.kitViewOpen as bool, isFalse,
+        reason: 'a restart must clear the KIT sub-view (_restart routes through '
+            '_resetSubViews)');
+    expect(state.connectionsViewOpen as bool, isFalse,
+        reason: 'a restart must clear the CONNECTIONS sub-view');
+    expect(state.jobsViewOpen as bool, isFalse,
+        reason: 'a restart must clear the JOBS sub-view');
+    expect(state.currentQuestion, isA<AskWords>(),
+        reason: 'a cleared dive is back at the opening word question');
+  });
+
+  // #22.4 — Material cleared on restart (no stale pool). Picking a material
+  // builds a scoped pool/lexicon; _restart nulls _material (and _materialPool /
+  // _materialLexicon), so the opening returns to the full non-material pool.
+  // Behavioral proxy for _materialPool == null: the picked-material CLEAR
+  // affordance ('כל החומרים' = kAllMaterials), which renders ONLY while a
+  // material is scoped, is gone after the restart — and activeMaterial is null.
+  // (Data-driven material pick so the scoped pool is real regardless of catalog
+  // drift; prefer the brief's PPR when present, else the first available.)
+  testWidgets(
+      'cross-state: restart clears the material scope — the כל החומרים clear '
+      'affordance disappears and the opening is the full pool', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    // A material guaranteed to have a non-empty pool (so pickMaterialForTest
+    // builds a real scoped lexicon): prefer PPR (the brief's example) when it is
+    // present in the pool, else the first material that actually appears.
+    final available = materialsInPool(kDivePool);
+    expect(available, isNotEmpty,
+        reason: 'the union pool must expose at least one material to scope');
+    final material =
+        available.contains('PPR') ? 'PPR' : available.first;
+
+    state.pickMaterialForTest(material);
+    await tester.pumpAndSettle();
+    expect(state.activeMaterial as String?, material,
+        reason: 'the material is scoped before the restart');
+    // While scoped, the CLEAR affordance is on screen (it renders only when a
+    // material is picked) and the chip-row caption is NOT.
+    expect(find.widgetWithText(BsKey, kAllMaterials), findsOneWidget,
+        reason: 'a scoped material shows the כל החומרים clear affordance');
+
+    // Restart — the same reset _restart performs (nulls _material, _materialPool
+    // and _materialLexicon).
+    state.restartForTest();
+    await tester.pumpAndSettle();
+
+    // The material scope is gone: no clear affordance, activeMaterial null, and
+    // the opening is back to a (full-pool) word ask offering the chip-row again.
+    expect(state.activeMaterial as String?, isNull,
+        reason: 'restart clears the picked material (no stale _materialPool)');
+    expect(find.widgetWithText(BsKey, kAllMaterials), findsNothing,
+        reason: 'the כל החומרים clear affordance is gone once the material is '
+            'cleared — the opening is back to the full (non-material) pool');
+    expect(state.currentQuestion, isA<AskWords>(),
+        reason: 'a cleared dive opens on the full-pool word question');
+    // The all-materials opening offers the chip-row caption again (proof the
+    // opening reverted to the non-material entry, not a lingering scope).
+    expect(find.text(kByMaterialLabel), findsOneWidget,
+        reason: 'the non-material opening offers the לפי חומר chip-row again');
+  });
+
+  // #22.5 — Single back under material + jobs. With a material scoped AND the
+  // JOB LIST open, the JOB LIST owns its single back; the breadcrumb back is
+  // suppressed (the stack is empty at the opening, and the _subViewOpen guard
+  // also suppresses it). So there is EXACTLY ONE 'חזרה' control, never two.
+  testWidgets(
+      'cross-state: material scoped + JOB LIST open shows exactly ONE חזרה '
+      '(the breadcrumb back is suppressed)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.pickMaterialForTest('נחושת');
+    await tester.pumpAndSettle();
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue,
+        reason: 'the JOB LIST is open over the scoped material');
+
+    expect(find.byTooltip('חזרה'), findsOneWidget,
+        reason: 'a material scope + an open JOB LIST must show EXACTLY ONE back '
+            'control — the JOB LIST owns the one back; the breadcrumb back is '
+            'suppressed');
+  });
+
+  // #22.6 — Headers carry heading semantics. The #21 fix wraps each sub-view
+  // header in Semantics(header: true). Open the JOB LIST → at least one Semantics
+  // widget with properties.header == true wraps a header. Asserted at the WIDGET
+  // level (byWidgetPredicate + .properties), NOT via getSemantics (which would
+  // leak a SemanticsHandle).
+  testWidgets(
+      'cross-state a11y: an open sub-view header carries heading semantics '
+      '(Semantics.properties.header == true)', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue);
+    // The header copy is on screen...
+    expect(find.text(kJobsHeader), findsWidgets,
+        reason: 'the JOB LIST shows its header text');
+    // ...and it is wrapped in a Semantics marked as a heading (the #21 fix).
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.header == true,
+      ),
+      findsWidgets,
+      reason: 'an open sub-view header must be wrapped in Semantics(header: '
+          'true) — the #21 header-semantics fix this locks in',
+    );
+  });
+
+  // #22.7 — Back announces once (no double Semantics). The back control is a
+  // bare IconButton whose tooltip ('חזרה') supplies BOTH its accessible name and
+  // its button role — there is NO additional Semantics(label: 'חזרה') wrapper
+  // (which would double-announce). In an open sub-view: exactly one חזרה tooltip,
+  // and NO Semantics widget whose properties.label == 'חזרה'.
+  testWidgets(
+      'cross-state a11y: the sub-view back announces once — one חזרה tooltip and '
+      'no explicit Semantics(label: חזרה) wrapper', (tester) async {
+    seedFlagOn();
+    await pumpScreen(tester);
+
+    final dynamic state = tester.state(find.byType(WordFinderScreen));
+    state.openSheetOnResolve = false;
+
+    state.openJobsForTest();
+    await tester.pumpAndSettle();
+    expect(state.jobsViewOpen as bool, isTrue);
+
+    // Exactly one back control (the tooltip is its single accessible name).
+    expect(find.byTooltip('חזרה'), findsOneWidget,
+        reason: 'the sub-view offers a single חזרה back control');
+    // The name comes from the tooltip ONLY — there is NO Semantics widget that
+    // ALSO labels it 'חזרה' (a wrapper would announce 'חזרה' twice).
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'חזרה',
+      ),
+      findsNothing,
+      reason: 'the back name comes from the tooltip alone — no explicit '
+          'Semantics(label: חזרה) wrapper double-announces it',
+    );
+  });
 }

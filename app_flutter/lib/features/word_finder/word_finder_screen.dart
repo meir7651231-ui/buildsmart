@@ -533,6 +533,15 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
   @visibleForTesting
   void restartForTest() => _restart();
 
+  /// @visibleForTesting — drive a typed-query submit directly. The typing surface
+  /// is mutually exclusive with the sub-views (a sub-view REPLACES the cascade,
+  /// so 'הקלדה' is not on screen while a sub-view is open) — so a test cannot
+  /// reach it through the UI from inside a sub-view; this exercises the
+  /// [_submitQuery] reset path (incl. [_resetSubViews]) from any state. Mirrors
+  /// [restartForTest].
+  @visibleForTesting
+  void submitQueryForTest(String query) => _submitQuery(query);
+
   /// @visibleForTesting — the parts shown in the connections view, or empty when
   /// the view is closed. Lets a behavioral test assert the affordance reached a
   /// non-empty compatible set for an anchor WITHOUT needing the product sheet's
