@@ -12,6 +12,11 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/smart_input/chat_suggestion_source.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/kb_field_mode.dart';
+import 'package:buildsmart/widgets/smart_input/models.dart';
+import 'package:buildsmart/widgets/smart_input/smart_suggestion_strip.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1249,6 +1254,7 @@ class _ChatPage extends ConsumerStatefulWidget {
 
 class _ChatPageState extends ConsumerState<_ChatPage> {
   final _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   final _scroll = ScrollController();
 
   /// Session-local fallback messages — ONLY used for a detached chat
@@ -1677,7 +1683,23 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
               },
             ),
           ),
+          // Smart suggestion strip — sits directly above the composer. Renders
+          // nothing (a zero-size SizedBox) unless kSmartInput is ON and no
+          // screen reader is active, so OFF is byte-identical to before.
+          SmartSuggestionStrip(
+            controller: _controller,
+            fieldContext: const SmartInputContext(
+              kind: InputFieldKind.freeTextHe,
+              screenId: 'chat',
+            ),
+            source: const ChatSuggestionSource(),
+          ),
           _InputBar(controller: _controller, onSend: _send),
+          BsKeyboardHost(
+            controller: _controller,
+            focusNode: _focusNode,
+            onSend: _send,
+          ),
         ],
       ),
     );
@@ -1686,6 +1708,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -2130,14 +2153,15 @@ void _insertText(TextEditingController controller, String text) {
 
 // ─── input bar ────────────────────────────────────────────────────────────────
 
-class _InputBar extends StatelessWidget {
+class _InputBar extends ConsumerWidget {
   const _InputBar({required this.controller, required this.onSend});
 
   final TextEditingController controller;
   final VoidCallback onSend;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final custom = useCustomKeyboard(ref, context);
     return Container(
       color: const Color(0xFFECE5DD),
       padding: const EdgeInsets.fromLTRB(6, 6, 6, 10),
@@ -2203,6 +2227,8 @@ class _InputBar extends StatelessWidget {
                     Expanded(
                       child: TextField(
                         controller: controller,
+                        readOnly: custom,
+                        showCursor: custom ? true : null,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
                         onSubmitted: (_) => onSend(),

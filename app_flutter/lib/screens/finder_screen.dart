@@ -10,6 +10,7 @@ import 'package:buildsmart/data/lipskey_verified_connections.dart'
 import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
+import '../features/word_finder/narrow_axis.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -263,148 +264,6 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
       .toList();
 }
 
-/// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
-/// 50 מ"מ). Catches inch/fraction, DN, cross-sizes, and Hebrew "מ"מ" (mm).
-/// (Regex lives in `_size_norm.dart` now; this comment marker stays as the
-/// reading entry-point.)
-
-/// Size labels a product carries — readable tokens from the name AND from
-/// the dims map. A pipe carries TWO orthogonal axes: a diameter (in dims)
-/// and a length (in name); the chooser needs both — they aren't substitutes.
-/// Returns a deduped set; the family tag lets the chooser keep family-
-/// coherent ordering (no inch interleaved with cm).
-List<SizeToken> _productSizeTokens(LipskeyCatalogProduct p) {
-  final out = <SizeToken>{...parseSizeTokens(p.nameHe)};
-  final d = p.dims;
-  if (d != null) out.addAll(tokensFromDims(d));
-  return out.toList();
-}
-
-/// Sorted, deduped chip list for the pool. Keeps every family the pool
-/// surfaces (mm + cm, inch + DN, …) but groups them so the row reads
-/// coherently: all mm in numeric order, THEN all cm in numeric order — never
-/// `200 · 25 · 250 · 30` interleaved. Length equivalents across cm/meters/mm
-/// collapse to one chip (e.g. `15 ס"מ` ≡ `0.15 מ׳`).
-List<SizeToken> _sizeTokensIn(List<LipskeyCatalogProduct> ps) {
-  final all = <SizeToken>{};
-  for (final p in ps) {
-    all.addAll(_productSizeTokens(p));
-  }
-  final out = dedupLengthByMm(all.toList());
-  sortSizeTokens(out);
-  return out;
-}
-
-/// Angle chips for the pool (separate axis — used only when sizes don't
-/// split). Sorted ascending.
-List<SizeToken> _angleTokensIn(List<LipskeyCatalogProduct> ps) {
-  final all = <SizeToken>{};
-  for (final p in ps) {
-    all.addAll(parseAngleTokens(p.nameHe));
-  }
-  final out = all.toList()..sort((a, b) => a.mm.compareTo(b.mm));
-  return out;
-}
-
-/// Characterizing-word chips for sub-types with no size axis (e.g. toilet seats
-/// differ by model/shape, not size). The first distinguishing word per name —
-/// same idea as the catalog's auto-facets.
-List<String> _wordOptions(List<LipskeyCatalogProduct> pool) {
-  if (pool.length <= 1) return const [];
-  List<String> toks(String name) => name
-      .split(RegExp(r'[\s()"׳/×,.+-]+'))
-      .where((w) => w.length >= 2 && !RegExp(r'\d').hasMatch(w))
-      .toList();
-  final lists = [for (final p in pool) toks(p.nameHe)];
-  final shared = lists.first.toSet();
-  for (final t in lists.skip(1)) {
-    shared.retainAll(t.toSet());
-  }
-  final counts = <String, int>{};
-  for (final t in lists) {
-    for (final w in t) {
-      if (shared.contains(w)) continue;
-      counts[w] = (counts[w] ?? 0) + 1;
-      break; // first distinguishing word wins
-    }
-  }
-  final entries = counts.entries.toList()
-    ..sort((a, b) => b.value.compareTo(a.value));
-  return [for (final e in entries.take(12)) e.key];
-}
-
-/// Curated narrow chips for sub-types that resist auto size/word detection —
-/// keyword splits a non-technical user understands (cover/grate, round/square…).
-const Map<String, List<String>> kFinderFacets = {
-  'מכסים ורשתות': ['מכסה', 'רשת', 'עגול', 'מרובע', 'ניקל', 'נחושת', 'שחור'],
-  'מחסומים גלויים': ['אמריקאי', 'נסתר', 'לכיור', 'למדיח', 'כביסה', 'מטבח'],
-  // floor drains read off plain words, not opaque "245/50" DN codes
-  'מחסומי רצפה': ['פתוח', 'סגור', 'למקלחת', 'קומקום'],
-};
-
-/// Distinct product colours in the pool (≥2) — narrows identical-name items
-/// that differ only by colour (e.g. toilet seats: לבן/פרגמון/אפור).
-List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
-  final cols = <String>{};
-  for (final p in pool) {
-    final c = p.color;
-    if (c != null && c.trim().isNotEmpty) cols.add(c);
-  }
-  return cols.length > 1 ? (cols.toList()..sort()) : const [];
-}
-
-/// "Narrow by" axis for a pool, best first: curated facets → sizes → angles
-/// (when sizes don't split) → colours → characterizing words. Returns a Hebrew
-/// axis label (for the chip-row hint) plus the chip *labels*; empty when
-/// nothing splits the pool.
-({String label, List<String> chips}) _narrowAxis(
-    List<LipskeyCatalogProduct> pool, String? subtype,) {
-  final curated = subtype == null ? null : kFinderFacets[subtype];
-  if (curated != null) {
-    final matching =
-        curated.where((k) => pool.any((p) => p.nameHe.contains(k))).toList();
-    if (matching.length > 1) return (label: 'אפשרות', chips: matching);
-  }
-  // Each axis must actually split the pool (>1 option); a lone chip can't
-  // narrow anything, so fall through to the next axis (or show no bar).
-  final sizes = _sizeTokensIn(pool);
-  if (sizes.length > 1) {
-    return (label: 'גודל', chips: sizes.map((t) => t.label).toList());
-  }
-  final angles = _angleTokensIn(pool);
-  if (angles.length > 1) {
-    return (label: 'זווית', chips: angles.map((t) => t.label).toList());
-  }
-  final colors = _colorOptions(pool);
-  if (colors.length > 1) return (label: 'צבע', chips: colors);
-  final words = _wordOptions(pool);
-  return words.length > 1
-      ? (label: 'דגם', chips: words)
-      : (label: '', chips: const <String>[]);
-}
-
-/// Returns true iff a product carries the structural token for [chipLabel] —
-/// no String.contains fallback. Lets the filter reject "25 שנים אחריות" when
-/// the chip is "25 ס"מ".
-bool _productHasChip(LipskeyCatalogProduct p, String chipLabel) {
-  for (final t in _productSizeTokens(p)) {
-    if (t.label == chipLabel) return true;
-  }
-  for (final t in parseAngleTokens(p.nameHe)) {
-    if (t.label == chipLabel) return true;
-  }
-  // curated-facet chips (kFinderFacets) are plain Hebrew words — substring
-  // match is correct ONLY for them (e.g. "אמריקאי" inside a drain name). It
-  // must NEVER run for a digit-bearing size/angle label: "5\"" is a substring
-  // of "1.25\"", "50 מ\"מ" of "250 מ\"מ", "2\"" of "1/2\"" — so a bare contains
-  // would let a chip match a larger size it isn't. Those are handled
-  // structurally above; here we gate the fallback to digit-free labels.
-  if (!RegExp(r'\d').hasMatch(chipLabel) && p.nameHe.contains(chipLabel)) {
-    return true;
-  }
-  return p.color == chipLabel;
-}
-
 class FinderScreen extends ConsumerStatefulWidget {
   const FinderScreen({super.key});
   @override
@@ -499,13 +358,13 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final pool = sel == null
         ? base
         : base.where((p) => sel!.cats.contains(p.categoryHe)).toList();
-    final narrow = _narrowAxis(pool, _sub);
+    final narrow = narrowAxis(pool, _sub);
     // Secondary angle row appears whenever the primary axis was סוג/גודל/דגם
     // AND the pool has >1 angles — so a user looking at a 90° elbow can flip
     // to 45° from the same screen.
     final angleChips = narrow.label == 'זווית'
         ? const <String>[]
-        : _angleTokensIn(pool).map((t) => t.label).toList();
+        : angleTokensIn(pool).map((t) => t.label).toList();
     // Secondary letter-size row (S/M/L): some collars/anchors carry a letter
     // size instead of a number. Surfaced like the angle axis, co-filterable.
     final letterChips = _letterOptions(pool);
@@ -515,10 +374,10 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final wallChips = _wallOptions(pool);
     var results = pool;
     if (_size != null) {
-      results = results.where((p) => _productHasChip(p, _size!)).toList();
+      results = results.where((p) => productHasChip(p, _size!)).toList();
     }
     if (_angle != null) {
-      results = results.where((p) => _productHasChip(p, _angle!)).toList();
+      results = results.where((p) => productHasChip(p, _angle!)).toList();
     }
     if (_letter != null) {
       results = results
