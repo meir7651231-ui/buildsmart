@@ -50,7 +50,12 @@ jobs:
 
       - name: Build web (release)
         working-directory: app_flutter
-        run: flutter build web --release
+        # --dart-define=ENABLE_WORD_FINDER=true: this workflow ALSO deploys to the
+        # live channel (buildsmart-il.com / buildsmart-b0b78.web.app), racing
+        # firebase-hosting.yml — so it must carry the SAME flag, else whichever
+        # deploy wins could ship a flag-OFF build with 'מאתר חכם' hidden.
+        # OWNER-REVIEW, reversible: drop the flag to hide the word-finder again.
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true
 
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
