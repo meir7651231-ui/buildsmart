@@ -54,9 +54,29 @@ const Map<String, List<String>> kMaterials = <String, List<String>>{
   'פלדה': ['פלדה'], // OWNER-REVIEW
 };
 
-/// The material of [p], or null when none of [kMaterials]' terms appear in its
-/// `'<nameHe> <categoryHe>'` text. Returns the FIRST matching key (so [kMaterials]
-/// order is the precedence). PURE & deterministic.
+/// Whole-CATEGORY material overrides — for categories whose products are
+/// uniformly one material but do NOT say so in their text (e.g. chrome/nickel-
+/// plated brass taps that read as neither 'נחושת' nor 'פליז'). Consulted by
+/// [materialOf] ONLY as a fallback AFTER the [kMaterials] term heuristic, so it
+/// can ADD a classification but can never change an existing one. Keyed by EXACT
+/// `categoryHe`.
+///
+/// OWNER-REVIEW: produced 2026-06-19 by the donned classify+verify swarm (#24),
+/// which mapped a category here ONLY when confident the WHOLE category is that
+/// material; brass folds into 'נחושת' (copper+brass), matching the original
+/// "where are all the copper fittings?" intent. Add/trim entries freely.
+const Map<String, String> kCategoryMaterial = <String, String>{
+  'ברזי ניל': 'נחושת', // brass-bodied (nickel/chrome-plated) taps
+  'ברזי מעבר': 'נחושת',
+  'ברזי קיר': 'נחושת',
+  'ברזי כיור': 'נחושת',
+  'מחלקים': 'נחושת', // brass manifolds
+};
+
+/// The material of [p]: the FIRST [kMaterials] key whose any term is a substring
+/// of the `'<nameHe> <categoryHe>'` text (so [kMaterials] order is the precedence);
+/// else the [kCategoryMaterial] whole-category override for its `categoryHe`; else
+/// null. PURE & deterministic.
 String? materialOf(LipskeyCatalogProduct p) {
   final haystack = '${p.nameHe} ${p.categoryHe}';
   for (final entry in kMaterials.entries) {
@@ -64,7 +84,7 @@ String? materialOf(LipskeyCatalogProduct p) {
       if (haystack.contains(term)) return entry.key;
     }
   }
-  return null;
+  return kCategoryMaterial[p.categoryHe];
 }
 
 /// The [kMaterials] keys (IN [kMaterials] ORDER) that have at least one product

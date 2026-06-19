@@ -31,23 +31,25 @@ void main() {
           reason: 'a product whose text carries PPR must bucket as PPR');
     });
 
-    test('a product matching NO material term → null', () {
-      // Find a real product none of whose terms appear in its text.
+    test('a product with NO material term AND no category override → null', () {
+      // Find a real product with no material term in its text AND whose category
+      // has no whole-category override (so materialOf has nothing to fall to).
       final none = kDivePool.firstWhere((p) {
         final haystack = '${p.nameHe} ${p.categoryHe}';
         return kMaterials.values
-            .every((terms) => terms.every((t) => !haystack.contains(t)));
+                .every((terms) => terms.every((t) => !haystack.contains(t))) &&
+            !kCategoryMaterial.containsKey(p.categoryHe);
       });
       expect(materialOf(none), isNull,
-          reason: 'a product with no material term carries no material');
+          reason: 'no material term and no category override → no material');
     });
 
-    test('precedence: the FIRST matching kMaterials key wins', () {
-      // Every assigned material must equal the FIRST key whose any term hits —
-      // i.e. materialOf never returns a later key when an earlier one matched.
+    test('precedence: a term match wins (kMaterials order); else category '
+        'override', () {
+      // A term hit wins in kMaterials order; when NO term hits, materialOf falls
+      // back to the whole-category override (kCategoryMaterial) or null.
       for (final p in kDivePool) {
         final assigned = materialOf(p);
-        if (assigned == null) continue;
         final haystack = '${p.nameHe} ${p.categoryHe}';
         String? firstHit;
         for (final entry in kMaterials.entries) {
@@ -56,10 +58,28 @@ void main() {
             break;
           }
         }
-        expect(assigned, firstHit,
-            reason: 'materialOf must return the first matching key (precedence '
-                '= kMaterials order)');
+        expect(assigned, firstHit ?? kCategoryMaterial[p.categoryHe],
+            reason: 'materialOf = first matching term (precedence = kMaterials '
+                'order), else the category override');
       }
+    });
+
+    test('category override (#24): a brass-tap category with no material term '
+        '→ נחושת', () {
+      // The whole-category overrides classify uniformly-brass tap categories
+      // that carry no נחושת/פליז token in their product text.
+      final tap = kDivePool.firstWhere(
+        (p) {
+          final haystack = '${p.nameHe} ${p.categoryHe}';
+          return kCategoryMaterial[p.categoryHe] == 'נחושת' &&
+              !haystack.contains('נחושת') &&
+              !haystack.contains('פליז');
+        },
+        orElse: () => throw StateError('expected >=1 brass-override product'),
+      );
+      expect(materialOf(tap), 'נחושת',
+          reason: 'a kCategoryMaterial brass category buckets as נחושת via the '
+              'fallback even with no material term in the text');
     });
   });
 
