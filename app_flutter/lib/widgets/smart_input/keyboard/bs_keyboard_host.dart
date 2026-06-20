@@ -63,6 +63,13 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// (no-op). STEP 3.
   final ValueChanged<String>? onPrediction;
 
+  /// Override for a tapped tool tile. Null by default → the host uses the
+  /// step-2 seam ([runKeyboardTool]) directly, so every existing mount keeps its
+  /// behaviour. A mount that must act BEFORE navigating (e.g. the card-keyboard
+  /// sheet, which closes itself first) supplies this and drives
+  /// [runKeyboardTool] on the right navigator itself. STEP 4.
+  final ValueChanged<KbTool>? onTool;
+
   const BsKeyboardHost({
     super.key,
     required this.controller,
@@ -71,6 +78,7 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     this.showToolStrip = false,
     this.predictions = const <String>[],
     this.onPrediction,
+    this.onTool,
   });
 
   @override
@@ -140,7 +148,10 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
           onPrediction: widget.onPrediction,
           onToolGrid: _onToolGrid,
           onToolGear: _onToolGear,
-          onTool: (t) => runKeyboardTool(ref, context, t),
+          // STEP 4: a mount may override onTool (the card-keyboard sheet closes
+          // itself first, then drives runKeyboardTool on the home's navigator);
+          // with no override every existing mount keeps the step-2 default.
+          onTool: widget.onTool ?? (t) => runKeyboardTool(ref, context, t),
         ),
       ),
     );

@@ -4,6 +4,8 @@ import 'package:buildsmart/data/repositories/catalog_local.dart'
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/supplier_data.dart'
     show SysOrder, kOrderStageLabel;
+import 'package:buildsmart/screens/card_keyboard_sheet.dart'
+    show openCardKeyboardSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openScanPlanSheet;
 import 'package:buildsmart/screens/departments_screen.dart';
@@ -19,6 +21,8 @@ import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
+    show kKeyboardToolStrip;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -109,6 +113,16 @@ class SmartHomeBody extends ConsumerWidget {
       key: const Key('catalog-list'),
       padding: const EdgeInsets.only(bottom: BsTokens.space6),
       children: [
+        // STEP 4 (flagged OFF): the 'card keyboard' launcher — a predictive
+        // search surface that opens the keyboard-with-tools sheet. When
+        // kKeyboardToolStrip is false this spread is NOT built, so the home
+        // ListView is byte-identical to before.
+        if (kKeyboardToolStrip) ...[
+          _CardKeyboardLauncher(
+            onTap: () => openCardKeyboardSheet(context, ref),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
         const SizedBox(height: BsTokens.space2),
         for (final s in order) ...[
           smartHomeSectionFor(s),
@@ -118,6 +132,78 @@ class SmartHomeBody extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
         const _Favorites(),
       ],
+    );
+  }
+}
+
+/// STEP 4 — the flagged home launcher for the card-keyboard sheet. A tappable
+/// card styled like the rest of the home (uses [_pal] + [_Pad] + [BsTokens]),
+/// only built when [kKeyboardToolStrip] is on (so the OFF home is byte-identical).
+class _CardKeyboardLauncher extends StatelessWidget {
+  const _CardKeyboardLauncher({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = _pal(context);
+    return _Pad(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: onTap,
+          child: Semantics(
+            button: true,
+            label: 'מקלדת חכמה — מצא מוצר בהקלדה חכמה',
+            child: Container(
+              padding: const EdgeInsets.all(BsTokens.space3),
+              decoration: BoxDecoration(
+                color: pal.card,
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                border: Border.all(color: pal.border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: pal.box,
+                      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    ),
+                    child: const Icon(Icons.keyboard,
+                        color: BsTokens.brand, size: 22),
+                  ),
+                  const SizedBox(width: BsTokens.space3),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'מקלדת חכמה',
+                          style: TextStyle(
+                            color: pal.ink,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'מצא מוצר בהקלדה חכמה',
+                          style: TextStyle(color: pal.muted, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.search, color: pal.muted, size: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
