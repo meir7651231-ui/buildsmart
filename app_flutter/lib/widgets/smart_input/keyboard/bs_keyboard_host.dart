@@ -21,6 +21,12 @@ import 'package:buildsmart/widgets/smart_input/keyboard/kb_field_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// FLAG — the tool strip (grid/gear toggles + predictions + tool layers) is OFF
+/// by default, so the LIVE keyboard renders exactly as before. Flip to true to
+/// preview the keyboard-with-tools surface. Kept a top-level const so it folds
+/// away entirely when off.
+const bool kKeyboardToolStrip = false;
+
 /// Bottom-docked host that shows the custom [BsKeyboard] when (and only when)
 /// [useCustomKeyboard] is true, and forwards its taps onto [controller].
 class BsKeyboardHost extends ConsumerStatefulWidget {
@@ -53,6 +59,22 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
   /// by the globe key.
   bool _english = false;
 
+  /// Which tool layer (if any) the strip toggles have opened over the letter
+  /// grid. Always [KbToolLayer.none] while the strip flag is off.
+  KbToolLayer _toolLayer = KbToolLayer.none;
+
+  /// Grid toggle: open the home-tools layer, or close it back to the letters.
+  void _onToolGrid() => setState(() {
+        _toolLayer =
+            _toolLayer == KbToolLayer.home ? KbToolLayer.none : KbToolLayer.home;
+      });
+
+  /// Gear toggle: open the keyboard-tools layer, or close it back to letters.
+  void _onToolGear() => setState(() {
+        _toolLayer =
+            _toolLayer == KbToolLayer.kbd ? KbToolLayer.none : KbToolLayer.kbd;
+      });
+
   @override
   Widget build(BuildContext context) {
     // GATE: feature OFF or screen reader active → render nothing; the OS
@@ -80,6 +102,15 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
             _english = !_english;
             _showSymbols = false;
           }),
+          // FLAGGED tool surface — off by default, so this is a no-op overlay
+          // that leaves the live keyboard unchanged. Predictions and onTool are
+          // placeholders for STEP 1 (no navigation yet).
+          showToolStrip: kKeyboardToolStrip,
+          toolLayer: _toolLayer,
+          predictions: const <String>['ברז כדורי', 'ניפל', 'סיפון'],
+          onToolGrid: _onToolGrid,
+          onToolGear: _onToolGear,
+          onTool: (_) {},
         ),
       ),
     );
