@@ -32,7 +32,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// host no longer reads it directly, so each mount decides whether its own
 /// keyboard shows the strip. The live chat mount leaves `showToolStrip` at its
 /// default (false), so the live keyboard stays byte-identical.
-const bool kKeyboardToolStrip = false;
+///
+/// GO-LIVE (step 4): flipped to true so the home surfaces the card-keyboard
+/// launcher ([openCardKeyboardSheet]). Only the home opts in via this flag; the
+/// chat mount still passes its own default (false), so its keyboard is unchanged.
+const bool kKeyboardToolStrip = true;
 
 /// Bottom-docked host that shows the custom [BsKeyboard] when (and only when)
 /// [useCustomKeyboard] is true, and forwards its taps onto [controller].
