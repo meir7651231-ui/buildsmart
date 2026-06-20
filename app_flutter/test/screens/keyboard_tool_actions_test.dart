@@ -124,4 +124,15 @@ void main() {
     await tester.pump(); // let the SnackBar enter
     expect(find.textContaining('בקרוב'), findsOneWidget);
   });
+
+  testWidgets('menu → opens the app menu sheet (AI hub + settings)',
+      (tester) async {
+    await pumpAndRun(
+      tester,
+      (ref, context) => runKeyboardTool(ref, context, KbTool.menu),
+    );
+    await tester.pumpAndSettle(); // let the bottom sheet animate in
+    expect(find.text('הגדרות'), findsOneWidget);
+    expect(find.text('בינה מלאכותית ואוטומציה'), findsOneWidget);
+  });
 }
