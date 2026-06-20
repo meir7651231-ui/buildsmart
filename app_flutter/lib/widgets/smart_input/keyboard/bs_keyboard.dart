@@ -31,35 +31,60 @@ import 'package:flutter/material.dart';
 ///   • [kbd]  — the 5 keyboard-adjacent tools ([_kKbdTools]).
 enum KbToolLayer { none, home, kbd }
 
-/// One tool tile's definition: a Material [icon] and its Hebrew [label]. The
-/// label is BOTH what shows under the icon AND what is passed back through
-/// [BsKeyboard.onTool] on tap (the tiles carry no navigation yet — STEP 1).
+/// Stable, typed identity of each tool tile — the payload of [BsKeyboard.onTool].
+///
+/// The tile still DISPLAYS its Hebrew [_ToolDef.label]; this enum is what the
+/// callback carries so the (single) keyboard→app coupling point
+/// ([lib/screens/keyboard_tool_actions.dart]) can switch on a value instead of
+/// matching a free-form string. The 8 `home` ids then the 5 `kbd` ids, declared
+/// in the SAME order the tiles appear in [_kHomeTools] / [_kKbdTools].
+enum KbTool {
+  departments,
+  smartTree,
+  workRoute,
+  quickTools,
+  recentOrders,
+  finder,
+  connect,
+  favorites,
+  voice,
+  search,
+  menu,
+  camera,
+  intro,
+}
+
+/// One tool tile's definition: a stable [id] (the callback payload), a Material
+/// [icon], and its Hebrew [label]. The label is what shows under the icon AND
+/// drives Semantics; the [id] is what is passed back through [BsKeyboard.onTool]
+/// on tap.
 @immutable
 class _ToolDef {
+  final KbTool id;
   final IconData icon;
   final String label;
-  const _ToolDef(this.icon, this.label);
+  const _ToolDef(this.id, this.icon, this.label);
 }
 
 /// The 8 home tools, in layout order. Material icons (the app uses Material).
 const List<_ToolDef> _kHomeTools = <_ToolDef>[
-  _ToolDef(Icons.grid_view, 'מחלקות'),
-  _ToolDef(Icons.account_tree, 'עץ חכם'),
-  _ToolDef(Icons.route, 'מסלול'),
-  _ToolDef(Icons.bolt, 'מהירים'),
-  _ToolDef(Icons.receipt_long, 'הזמנות'),
-  _ToolDef(Icons.gps_fixed, 'מאתר'),
-  _ToolDef(Icons.cable, 'חיבור'),
-  _ToolDef(Icons.star_border, 'מועדפים'),
+  _ToolDef(KbTool.departments, Icons.grid_view, 'מחלקות'),
+  _ToolDef(KbTool.smartTree, Icons.account_tree, 'עץ חכם'),
+  _ToolDef(KbTool.workRoute, Icons.route, 'מסלול'),
+  _ToolDef(KbTool.quickTools, Icons.bolt, 'מהירים'),
+  _ToolDef(KbTool.recentOrders, Icons.receipt_long, 'הזמנות'),
+  _ToolDef(KbTool.finder, Icons.gps_fixed, 'מאתר'),
+  _ToolDef(KbTool.connect, Icons.cable, 'חיבור'),
+  _ToolDef(KbTool.favorites, Icons.star_border, 'מועדפים'),
 ];
 
 /// The 5 keyboard tools, in layout order.
 const List<_ToolDef> _kKbdTools = <_ToolDef>[
-  _ToolDef(Icons.mic, 'קולי'),
-  _ToolDef(Icons.search, 'חיפוש'),
-  _ToolDef(Icons.more_vert, 'תפריט'),
-  _ToolDef(Icons.camera_alt, 'מצלמה'),
-  _ToolDef(Icons.lightbulb_outline, 'היכרות'),
+  _ToolDef(KbTool.voice, Icons.mic, 'קולי'),
+  _ToolDef(KbTool.search, Icons.search, 'חיפוש'),
+  _ToolDef(KbTool.menu, Icons.more_vert, 'תפריט'),
+  _ToolDef(KbTool.camera, Icons.camera_alt, 'מצלמה'),
+  _ToolDef(KbTool.intro, Icons.lightbulb_outline, 'היכרות'),
 ];
 
 /// The custom keyboard. Renders one of three layers — the Hebrew letters
@@ -119,8 +144,9 @@ class BsKeyboard extends StatelessWidget {
   /// Tapped the gear-toggle (right of the strip, [Icons.settings]).
   final VoidCallback? onToolGear;
 
-  /// Tapped a tool tile — receives the tile's label (no navigation yet).
-  final ValueChanged<String>? onTool;
+  /// Tapped a tool tile — receives the tile's typed [KbTool] id. The single
+  /// keyboard→app coupling point ([runKeyboardTool]) switches on this id.
+  final ValueChanged<KbTool>? onTool;
 
   /// Tapped a prediction chip — receives the chip's text.
   final ValueChanged<String>? onPrediction;
@@ -254,8 +280,8 @@ class BsKeyboard extends StatelessWidget {
 
   /// Lays the given tool [defs] out as a single [Row] of equal-width tiles
   /// (each [Expanded]) with the same small inter-key gap the letter rows use,
-  /// followed by a spacer to match the letter-row rhythm. Each tile calls
-  /// [onTool] with its label on tap (PLACEHOLDER — no navigation yet).
+  /// followed by a spacer to match the letter-row rhythm. Each tile DISPLAYS
+  /// its [_ToolDef.label] but calls [onTool] with its typed [_ToolDef.id].
   List<Widget> _toolRows(List<_ToolDef> defs) {
     final children = <Widget>[];
     for (var i = 0; i < defs.length; i++) {
@@ -266,7 +292,7 @@ class BsKeyboard extends StatelessWidget {
           child: _ToolTile(
             icon: def.icon,
             label: def.label,
-            onTap: () => onTool?.call(def.label),
+            onTap: () => onTool?.call(def.id),
           ),
         ),
       );

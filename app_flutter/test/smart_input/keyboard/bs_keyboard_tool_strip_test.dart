@@ -12,7 +12,8 @@
 //     the letters are gone, and kBottomRow is still present.
 //   • toolLayer:kbd → the 5 kbd tiles render (assert 'קולי'), letters gone,
 //     kBottomRow present.
-//   • toggles fire onToolGrid / onToolGear; tapping a tile fires onTool(label);
+//   • toggles fire onToolGrid / onToolGear; tapping a tile fires onTool with
+//     the tile's typed KbTool id ('מחלקות'→departments, 'מצלמה'→camera);
 //     tapping a prediction fires onPrediction(text).
 //   • switching a tool layer back to none restores the letters.
 //
@@ -44,7 +45,7 @@ void main() {
     List<String> preds = const <String>[],
     VoidCallback? onToolGrid,
     VoidCallback? onToolGear,
-    ValueChanged<String>? onTool,
+    ValueChanged<KbTool>? onTool,
     ValueChanged<String>? onPrediction,
   }) async {
     await tester.pumpWidget(
@@ -168,18 +169,19 @@ void main() {
       expect(find.byIcon(Icons.send), findsOneWidget);
     });
 
-    testWidgets('tapping a home tile fires onTool with its label',
+    testWidgets('tapping a home tile fires onTool with its typed id',
         (tester) async {
-      final tapped = <String>[];
+      final tapped = <KbTool>[];
       await pump(
         tester,
         toolLayer: KbToolLayer.home,
         onTool: tapped.add,
       );
 
+      // The tile still DISPLAYS 'מחלקות', but the callback carries the enum.
       await tester.tap(find.text('מחלקות'));
       await tester.pump();
-      expect(tapped, <String>['מחלקות']);
+      expect(tapped, <KbTool>[KbTool.departments]);
     });
   });
 
@@ -199,18 +201,19 @@ void main() {
       expect(find.byIcon(Icons.send), findsOneWidget);
     });
 
-    testWidgets('tapping a kbd tile fires onTool with its label',
+    testWidgets('tapping a kbd tile fires onTool with its typed id',
         (tester) async {
-      final tapped = <String>[];
+      final tapped = <KbTool>[];
       await pump(
         tester,
         toolLayer: KbToolLayer.kbd,
         onTool: tapped.add,
       );
 
-      await tester.tap(find.text('קולי'));
+      // 'מצלמה' displays on the tile; the callback carries KbTool.camera.
+      await tester.tap(find.text('מצלמה'));
       await tester.pump();
-      expect(tapped, <String>['קולי']);
+      expect(tapped, <KbTool>[KbTool.camera]);
     });
   });
 

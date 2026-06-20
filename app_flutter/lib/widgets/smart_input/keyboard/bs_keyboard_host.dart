@@ -14,6 +14,7 @@
 // platform keyboard never appears. The globe key ([onLanguage]) toggles between
 // the Hebrew and English letter layers (for typing English product names).
 
+import 'package:buildsmart/screens/keyboard_tool_actions.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/smart_input/caret.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
@@ -103,14 +104,15 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
             _showSymbols = false;
           }),
           // FLAGGED tool surface — off by default, so this is a no-op overlay
-          // that leaves the live keyboard unchanged. Predictions and onTool are
-          // placeholders for STEP 1 (no navigation yet).
+          // that leaves the live keyboard unchanged. Predictions stay a STEP-1
+          // placeholder; onTool now routes each typed KbTool through the single
+          // keyboard→app seam ([runKeyboardTool]).
           showToolStrip: kKeyboardToolStrip,
           toolLayer: _toolLayer,
           predictions: const <String>['ברז כדורי', 'ניפל', 'סיפון'],
           onToolGrid: _onToolGrid,
           onToolGear: _onToolGear,
-          onTool: (_) {},
+          onTool: (t) => runKeyboardTool(ref, context, t),
         ),
       ),
     );
