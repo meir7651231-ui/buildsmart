@@ -33,7 +33,8 @@ void main() {
   // presence/absence proves whether the letters are showing).
   const hebrewLetter = 'ק';
 
-  // The three placeholder predictions the host passes.
+  // Sample predictions this strip-render test feeds BsKeyboard directly (the
+  // host now supplies the LIVE finder chips at its mount — see STEP 3).
   const predictions = <String>['ברז כדורי', 'ניפל', 'סיפון'];
 
   // Pump BsKeyboard with the tool props under test. All keyboard callbacks are

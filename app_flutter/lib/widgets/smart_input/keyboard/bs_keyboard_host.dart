@@ -26,6 +26,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// by default, so the LIVE keyboard renders exactly as before. Flip to true to
 /// preview the keyboard-with-tools surface. Kept a top-level const so it folds
 /// away entirely when off.
+///
+/// As of STEP 3 this flag is applied by the MOUNT (the screen that builds a
+/// [BsKeyboardHost] passes it as `showToolStrip:`), NOT inside the host: the
+/// host no longer reads it directly, so each mount decides whether its own
+/// keyboard shows the strip. The live chat mount leaves `showToolStrip` at its
+/// default (false), so the live keyboard stays byte-identical.
 const bool kKeyboardToolStrip = false;
 
 /// Bottom-docked host that shows the custom [BsKeyboard] when (and only when)
@@ -41,11 +47,30 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// Fired by the brand-orange send key.
   final VoidCallback onSend;
 
+  /// Whether to render the flagged tool strip (grid/gear toggles + prediction
+  /// row + tool layers). Off by default so every existing mount stays
+  /// byte-identical; the MOUNT passes [kKeyboardToolStrip] (or its own flag)
+  /// here to opt in. STEP 3.
+  final bool showToolStrip;
+
+  /// The prediction-row chips to show in the strip's MIDDLE (rendered no-scroll
+  /// by [BsKeyboard]). Empty by default; a mount feeds the live finder engine's
+  /// chips here (see `keyboard_predictions.dart`). Ignored while
+  /// [showToolStrip] is false. STEP 3.
+  final List<String> predictions;
+
+  /// Fired with the chip text when the user taps a prediction. Null by default
+  /// (no-op). STEP 3.
+  final ValueChanged<String>? onPrediction;
+
   const BsKeyboardHost({
     super.key,
     required this.controller,
     required this.focusNode,
     required this.onSend,
+    this.showToolStrip = false,
+    this.predictions = const <String>[],
+    this.onPrediction,
   });
 
   @override
@@ -103,13 +128,16 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
             _english = !_english;
             _showSymbols = false;
           }),
-          // FLAGGED tool surface — off by default, so this is a no-op overlay
-          // that leaves the live keyboard unchanged. Predictions stay a STEP-1
-          // placeholder; onTool now routes each typed KbTool through the single
-          // keyboard→app seam ([runKeyboardTool]).
-          showToolStrip: kKeyboardToolStrip,
+          // FLAGGED tool surface — controlled by the MOUNT via [showToolStrip].
+          // When false (every current mount), this is a no-op overlay that
+          // leaves the live keyboard unchanged. The prediction row now carries
+          // the mount-supplied [predictions] (the live finder chips) and reports
+          // taps via [onPrediction]; onTool routes each typed KbTool through the
+          // single keyboard→app seam ([runKeyboardTool]).
+          showToolStrip: widget.showToolStrip,
           toolLayer: _toolLayer,
-          predictions: const <String>['ברז כדורי', 'ניפל', 'סיפון'],
+          predictions: widget.predictions,
+          onPrediction: widget.onPrediction,
           onToolGrid: _onToolGrid,
           onToolGear: _onToolGear,
           onTool: (t) => runKeyboardTool(ref, context, t),
