@@ -90,11 +90,11 @@ void main() {
   // ── WIDGET: the sheet, opened via the real helper ─────────────────────────
   group('openCardKeyboardSheet — the card-keyboard sheet', () {
     setUp(() {
-      // Enable the custom keyboard (kSmartInput) so BsKeyboardHost renders its
-      // BsKeyboard; without this the host self-gates to SizedBox.shrink().
-      SharedPreferences.setMockInitialValues({
-        'bs.feature-flags.v1': ['kSmartInput'],
-      });
+      // EMPTY flags — the kSmartInput opt-in is OFF, exactly as in production.
+      // The sheet passes forceShow:true, so its keyboard must render anyway; this
+      // guards the go-live gate fix (previously this test enabled the flag, which
+      // masked that the live default left the sheet's keyboard hidden).
+      SharedPreferences.setMockInitialValues({});
     });
 
     /// Pumps a tiny home harness with a single "open" button that calls the REAL

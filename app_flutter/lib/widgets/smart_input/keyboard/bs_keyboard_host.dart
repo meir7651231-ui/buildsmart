@@ -74,6 +74,13 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// [runKeyboardTool] on the right navigator itself. STEP 4.
   final ValueChanged<KbTool>? onTool;
 
+  /// When true, BYPASS the [useCustomKeyboard] gate entirely and always show the
+  /// keyboard. For a DEDICATED keyboard surface the user opened on purpose (the
+  /// card-keyboard sheet), where the keyboard must appear regardless of the
+  /// opt-in [kSmartInputFlag]. Default false → existing mounts (chat/finder)
+  /// stay gated by the flag + screen-reader check. STEP 4 (go-live fix).
+  final bool forceShow;
+
   const BsKeyboardHost({
     super.key,
     required this.controller,
@@ -83,6 +90,7 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     this.predictions = const <String>[],
     this.onPrediction,
     this.onTool,
+    this.forceShow = false,
   });
 
   @override
@@ -116,8 +124,9 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
   @override
   Widget build(BuildContext context) {
     // GATE: feature OFF or screen reader active → render nothing; the OS
-    // keyboard handles input instead.
-    final use = useCustomKeyboard(ref, context);
+    // keyboard handles input instead. [forceShow] bypasses this for a dedicated
+    // keyboard surface (the card-keyboard sheet) the user opened on purpose.
+    final use = widget.forceShow || useCustomKeyboard(ref, context);
     if (!use) return const SizedBox.shrink();
 
     // Bottom-docked panel. SafeArea(top:false) keeps the home-indicator inset

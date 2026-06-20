@@ -232,6 +232,10 @@ class _CardKeyboardSheetState extends ConsumerState<_CardKeyboardSheet> {
             // 'done' — close the sheet (the field text is the search seed).
             onSend: () => Navigator.of(context).pop(),
             showToolStrip: true,
+            // This sheet IS a dedicated keyboard surface the user opened on
+            // purpose, so it shows the keyboard regardless of the opt-in
+            // kSmartInput feature flag (off by default in production).
+            forceShow: true,
             predictions: _preds,
             onPrediction: _onPrediction,
             // Close the sheet FIRST, then navigate on the home's navigator/ref
