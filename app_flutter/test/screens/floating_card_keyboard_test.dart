@@ -29,6 +29,8 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
     show matchDestinations;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
+import 'package:buildsmart/screens/updates_screen.dart'
+    show updatesSubTabProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/widgets/smart_input/caret.dart' show insertAtCaret;
@@ -708,6 +710,262 @@ void main() {
               reason: 'tapping a product word keeps the overlay open');
           expect(find.byType(BsKeyboard), findsOneWidget);
         }
+      });
+    });
+
+    // ── CONTEXT-FITTING (empty field): the row reflects WHERE I AM + WHAT I
+    // PRESSED, not only what I type. Owner mandate: at the letters the empty row
+    // is the CURRENT TAB's destinations; drilled it is the current node-list;
+    // the TYPED path stays untouched. ───────────────────────────────────────────
+    group('context-fitting prediction (empty field)', () {
+      /// Like [pumpPanel] but seeds [mainTabProvider] to [tab] so the empty-field
+      /// row is computed for that tab (the panel `ref.watch`es it in build). Same
+      /// hermetic shell otherwise; returns the container for provider reads.
+      Future<ProviderContainer> pumpPanelOnTab(
+        WidgetTester tester,
+        int tab,
+      ) async {
+        final container = ProviderContainer(
+          overrides: [
+            keyboardOverlayOpenProvider.overrideWith((_) => true),
+            mainTabProvider.overrideWith((_) => tab),
+          ],
+        );
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Scaffold(
+                  body: Consumer(
+                    builder: (context, ref, _) {
+                      final open = ref.watch(keyboardOverlayOpenProvider);
+                      return Stack(
+                        children: [
+                          const Center(child: Text('screen-underneath')),
+                          if (open)
+                            const Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: FloatingCardKeyboard(),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        return container;
+      }
+
+      /// True when [label] renders as a NAVIGABLE prediction chip — i.e. a
+      /// `_PredictionChip` InkWell that contains the `Icons.north_east` nav glyph.
+      /// This is exactly how the pure keyboard marks a destination/leaf chip, and
+      /// it distinguishes a CHIP from a same-text tool TILE (tiles carry no glyph)
+      /// or a product-word chip (also no glyph).
+      Finder navChip(String label) => find.descendant(
+            of: find.widgetWithText(InkWell, label),
+            matching: find.byIcon(Icons.north_east),
+          );
+
+      // (a) AT THE LETTERS, the empty row = the CURRENT TAB's destination chips,
+      // and flipping the tab swaps the whole set. The tab labels are NOT product
+      // opening-words, so their PRESENCE proves the context path fired (not the
+      // legacy product row), and the other tab's labels being ABSENT proves the
+      // row is tab-scoped — both would break if _rowFor stopped reading the tab.
+      testWidgets(
+          'empty field, tab 3 → store destination chips (not product words); '
+          'tab 1 → the 4 departments', (tester) async {
+        // Sanity: these tab labels are destination labels, NOT product
+        // opening-words — so finding them can only come from the context path.
+        final lexicon = buildWordLexicon(kDivePool);
+        final opening = cardKeyboardPredictions('', kDivePool, lexicon).toSet();
+        const store = ['הסל שלי', 'ההזמנות שלי', 'שירותים'];
+        const depts = [
+          'אינסטלציה',
+          'ברזים וסניטריים',
+          'כלי עבודה ידני',
+          'כלי עבודה חשמלי',
+        ];
+        for (final l in [...store, ...depts]) {
+          expect(opening.contains(l), isFalse,
+              reason: 'sanity: "$l" is a tab destination, not a product word');
+        }
+
+        // TAB 3 (חנות): the store section chips show, each with the nav glyph;
+        // the tab-1 department chips do NOT (the row is tab-scoped).
+        await pumpPanelOnTab(tester, 3);
+        for (final l in store) {
+          expect(navChip(l), findsOneWidget,
+              reason: 'tab 3 empty row shows the store chip "$l" (navigable)');
+        }
+        for (final l in depts) {
+          expect(find.text(l), findsNothing,
+              reason: 'tab 3 must not show a tab-1 department chip ("$l")');
+        }
+
+        // TAB 1 (מחלקות): now the 4 departments show; the store chips are gone.
+        await pumpPanelOnTab(tester, 1);
+        for (final l in depts) {
+          expect(navChip(l), findsOneWidget,
+              reason: 'tab 1 empty row shows the department chip "$l"');
+        }
+        for (final l in store) {
+          expect(find.text(l), findsNothing,
+              reason: 'tab 1 must not show a tab-3 store chip ("$l")');
+        }
+      });
+
+      // (b) DRILLED with an EMPTY field → owner decision (option 1): the row does
+      // NOT mirror the drilled tools as chips (that duplicated them with the body
+      // tiles). The drill morphs the BODY; the prediction row keeps the tab
+      // context. This guards that drilling adds NO navigable node chip.
+      testWidgets(
+          'empty field + drilled (grid) → NO node chips (body morphs, row keeps '
+          'tab context)', (tester) async {
+        final container = await pumpPanel(tester); // tab 0, empty field.
+        expect(container.read(mainTabProvider), 0, reason: 'starts on tab 0');
+
+        // Open the home node-list (grid): the BODY now shows the tool tiles, but
+        // the prediction row must NOT add a navigable 'מחלקות' chip (option 1).
+        await tester.tap(find.byIcon(Icons.grid_view));
+        await tester.pumpAndSettle();
+        expect(find.text('מחלקות'), findsOneWidget,
+            reason: 'the drill shows the tool TILE in the body (morph)');
+        expect(navChip('מחלקות'), findsNothing,
+            reason: 'option 1: drilling adds NO navigable prediction chip');
+        expect(navChip('מהירים'), findsNothing,
+            reason: 'no drilled branch chip in the row either');
+      });
+
+      // (c) The TYPED-query path is UNCHANGED by the empty-field rework: typing a
+      // destination term still surfaces the merged destination chip with its nav
+      // glyph (guards that adding the context branches did not regress branch 1).
+      testWidgets('typing a query still shows the merged typed destination row',
+          (tester) async {
+        await pumpPanelOnTab(tester, 3); // start on a NON-zero tab on purpose.
+
+        // Empty field on tab 3 shows the store context chips (not 'מחלקות').
+        expect(find.text('מחלקות'), findsNothing,
+            reason: 'empty tab-3 row has no מחלקות (that is a typed match)');
+
+        // Type "מח" → the TYPED branch runs (text non-empty), merging the
+        // 'מחלקות' destination ahead of product words — exactly as before, even
+        // though we began on a non-zero tab.
+        final hits = matchDestinations('מח').map((d) => d.label).toList();
+        expect(hits, contains('מחלקות'),
+            reason: 'sanity: the matcher offers מחלקות for "מח"');
+
+        await tester.tap(find.text('מ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('ח'));
+        await tester.pumpAndSettle();
+
+        expect(navChip('מחלקות'), findsOneWidget,
+            reason: 'the typed destination chip surfaced with its nav glyph');
+      });
+
+      // (d) TAB 2 (עדכונים) empty row = שיחות + התראות, and TAPPING a tab chip
+      // dispatches via KbDestination.run (dispatch case ii). Tab 2 is otherwise
+      // untested, and no other test taps an EMPTY-FIELD tab chip — a regression
+      // that rendered tab chips but failed to persist _destByChip on the tab
+      // branch (so the tap fell through to the product-word append) would pass
+      // every other test yet FAIL the tab/sub-tab assertions below.
+      testWidgets(
+          'empty field, tab 2 → שיחות + התראות chips; tapping שיחות routes '
+          '(tab 2 + sub-tab) and keeps floating', (tester) async {
+        final container = await pumpPanelOnTab(tester, 2);
+
+        // Both updates sub-tab labels show as NAVIGABLE chips (each carries its
+        // real run from the registry, sourced by label).
+        expect(navChip('שיחות'), findsOneWidget,
+            reason: 'tab 2 empty row shows the שיחות chip (navigable)');
+        expect(navChip('התראות'), findsOneWidget,
+            reason: 'tab 2 empty row shows the התראות chip (navigable)');
+        // The row is tab-scoped: a tab-3 store label must NOT leak in.
+        expect(find.text('הסל שלי'), findsNothing,
+            reason: 'tab 2 must not show a tab-3 store chip');
+
+        // Tap שיחות → its KbDestination.run fires (_openUpdatesSub(1)): tab 2 +
+        // updatesSubTabProvider == 1 (שיחות). The pre-feature empty row showed
+        // product words, so this navigation is the regression catch. Overlay
+        // stays open (a sub-tab swap under the floating keyboard).
+        await tester.tap(navChip('שיחות'));
+        await tester.pumpAndSettle();
+        expect(container.read(mainTabProvider), 2,
+            reason: 'the שיחות tab chip ran its action (→ updates tab 2)');
+        expect(container.read(updatesSubTabProvider), 1,
+            reason: 'שיחות selected the chats sub-tab (1)');
+        expect(container.read(keyboardOverlayOpenProvider), isTrue,
+            reason: 'an empty-field tab chip tap keeps the overlay floating');
+        expect(find.byType(BsKeyboard), findsOneWidget,
+            reason: 'the keyboard keeps floating after the tab-chip nav');
+      });
+
+      // (e) TAB 0 (בית/catalog) empty field is UNCHANGED: it keeps product
+      // opening-words ONLY — NO tab/destination chip, and crucially NO nav glyph
+      // anywhere. The spec's "tab 0 keeps product opening-words" invariant. A
+      // regression that routed tab 0 into the destination path would surface a
+      // 'בית'/'מחלקות' destination chip and a nav glyph on the empty catalog
+      // field; this is the only test asserting the tab-0 empty row is glyph-free.
+      testWidgets(
+          'empty field, tab 0 → product opening-words only (no nav glyph, no '
+          'tab destination chip)', (tester) async {
+        await pumpPanelOnTab(tester, 0); // explicit tab 0, empty field.
+
+        // No navigable glyph at all — the empty tab-0 row is product words, which
+        // are plain (the destination/leaf path is what adds Icons.north_east).
+        expect(find.byIcon(Icons.north_east), findsNothing,
+            reason: 'tab 0 empty row is product words → no nav glyph');
+        // And no tab-destination label leaked into the catalog opening row.
+        for (final l in const ['בית', 'מחלקות', 'הסל שלי', 'שיחות']) {
+          expect(navChip(l), findsNothing,
+              reason: 'tab 0 must not surface a destination chip ("$l")');
+        }
+        // Positive sanity: the genuine product opening-words DO render here, so
+        // the negatives above are about the right (populated) row, not an empty
+        // one.
+        final lexicon = buildWordLexicon(kDivePool);
+        final opening = cardKeyboardPredictions('', kDivePool, lexicon);
+        expect(opening, isNotEmpty, reason: 'sanity: opening words exist');
+        expect(find.text(opening.first), findsWidgets,
+            reason: 'the tab-0 empty row still shows product opening-words');
+      });
+
+      // (f) An empty-field TAB chip carries its REAL run sourced BY LABEL — not a
+      // no-op. Existing (b) taps a DRILL chip (dispatch i); none proves a TAB
+      // chip routes through KbDestination.run to set a SECTION provider. Tap הסל
+      // שלי on tab 3 → storeSectionProvider == StoreSection.cart (distinct from
+      // the default StoreSection.all), proving the by-label lookup wired the
+      // registry's real run. A regression sourcing a wrong/empty run would leave
+      // the section unchanged and FAIL here.
+      testWidgets(
+          'empty field, tab 3 → tapping הסל שלי runs its registry action '
+          '(store cart section)', (tester) async {
+        final container = await pumpPanelOnTab(tester, 3);
+
+        // הסל שלי is present as a navigable chip on the empty tab-3 row.
+        expect(navChip('הסל שלי'), findsOneWidget,
+            reason: 'tab 3 empty row shows the cart chip (navigable)');
+
+        await tester.tap(navChip('הסל שלי'));
+        await tester.pumpAndSettle();
+
+        // The chip's KbDestination.run (_openStoreSection cart) fired: still tab
+        // 3, and the section flipped to cart (NOT the default 'all') — so the
+        // chip carried the real registry action, not a stub. Overlay floats on.
+        expect(container.read(mainTabProvider), 3,
+            reason: 'הסל שלי kept the store tab (3)');
+        expect(container.read(storeSectionProvider), StoreSection.cart,
+            reason: 'הסל שלי ran its registry action → cart section');
+        expect(container.read(keyboardOverlayOpenProvider), isTrue,
+            reason: 'the cart tab chip keeps the overlay floating');
       });
     });
   });

@@ -174,7 +174,12 @@ void _openDepartment(WidgetRef ref, String name) {
 /// is verified against real code (see file header); ambiguous or not-cleanly-
 /// reachable targets are intentionally LEFT OUT (deferred) rather than wired to
 /// a broken nav.
-List<KbDestination> kbDestinations() => <KbDestination>[
+List<KbDestination>? _kbDestinationsCache;
+/// Memoized: the registry is built ONCE then reused — avoids re-allocating the
+/// full list + every `run` closure on each keystroke (matchDestinations and the
+/// floating keyboard both call this per text/tab/drill change). All call sites
+/// read it, never mutate it, so a single shared instance is safe.
+List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>[
       // ── The 4 bottom-nav tabs ───────────────────────────────────────────────
       KbDestination(
         label: 'בית',

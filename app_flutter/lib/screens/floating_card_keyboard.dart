@@ -33,7 +33,25 @@
 // exact nav targets, so they lead. The row is still a plain `List<String>` to
 // the pure keyboard; this widget keeps a parallel map from each shown chip label
 // to either a [KbDestination] (→ run its nav action, KEEP the overlay floating)
-// or a product word (→ append to the field, as before). The empty field shows
+// or a product word (→ append to the field, as before).
+//
+// CONTEXT-FITTING (empty field). When the field is EMPTY the row reflects WHERE
+// I AM and WHAT I PRESSED, not just what I type — computed in [build] (the only
+// place that can `ref.watch` the tab + read the drill stack):
+//   • DRILLED (a tool node-list is open) → the chips ARE the current node-list
+//     labels, one per node in index order; tapping a chip routes through the
+//     EXISTING [_onTile] by index (leaf runs + keeps floating · branch drills ·
+//     voice starts voice) — zero nav logic duplicated. Leaf/voice chips get the
+//     nav glyph; a BRANCH chip morphs (no glyph), matching its tile.
+//   • AT THE LETTERS (not drilled) → chips for the CURRENT TAB
+//     (ref.watch(mainTabProvider)): tab 1 the 4 departments · tab 2 שיחות +
+//     התראות · tab 3 הסל שלי + ההזמנות שלי + שירותים — each sourced from
+//     [kbDestinations] BY LABEL so it carries its REAL run (typing it navigates
+//     identically). Tab 0 (בית/catalog) keeps product opening-words, unchanged.
+// Dispatch ([_onPrediction]) reads two MUTUALLY-EXCLUSIVE parallel maps rebuilt
+// every build: [_drillIndexByChip] (drilled chips → node index) then
+// [_destByChip] (tab/typed destination chips → [KbDestination]); a chip in
+// neither is a product WORD (appended). The empty field at tab 0 still shows
 // product opening-words ONLY (no destinations), unchanged.
 
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -42,10 +60,11 @@ import 'package:buildsmart/features/word_finder/word_lexicon.dart'
 import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
-    show KbDestination, matchDestinations;
+    show KbDestination, kbDestinations, matchDestinations;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
+import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
 import 'package:buildsmart/theme/tokens.dart';
@@ -76,6 +95,21 @@ class FloatingCardKeyboard extends ConsumerStatefulWidget {
 /// more so a couple of nav targets never fully crowd out the product words.
 const int _kRowCap = 5;
 
+/// MEMOIZED label→destination index, built ONCE from [kbDestinations] on first
+/// use and reused for every build thereafter. [kbDestinations] is a factory that
+/// re-allocates the whole ~50-entry registry on each call; rebuilding this map
+/// inside [build] (which fires on every keystroke / tab change / drill setState)
+/// re-scanned all ~50 destinations every frame. The registry is deterministic
+/// and its labels are unique (see keyboard_destinations.dart header), so a single
+/// lazy `final` is safe to share across all builds — the lookup drops from O(n)
+/// per build to O(1). Lazy (not a top-level `const`) because the `run` closures
+/// and the list literal are not const-constructible; `late final` resolves the
+/// factory exactly once, on the first build that reads it.
+late final Map<String, KbDestination> _kbDestinationByLabel =
+    <String, KbDestination>{
+  for (final d in kbDestinations()) d.label: d,
+};
+
 class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   late final TextEditingController _controller;
   late final FocusNode _focus;
@@ -84,16 +118,23 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// every keystroke's recompute so we never rebuild it per change.
   late final WordLexicon _lexicon;
 
-  /// The current prediction-row chips (LIVE: recomputed from `_controller.text`).
-  /// Destinations FIRST (exact nav targets), then product words; capped at
-  /// [_kRowCap]. This is the plain `List<String>` handed to the pure keyboard.
-  late List<String> _preds;
-
   /// Parallel map from a shown chip label → the [KbDestination] it stands for.
-  /// Only the destination chips appear here; a chip absent from this map is a
-  /// product WORD (appended to the field on tap, as before). Rebuilt on every
-  /// recompute alongside [_preds] so the two never drift.
+  /// Only DESTINATION chips appear here: the typed-row matches AND the empty-field
+  /// TAB chips (both navigate via [KbDestination.run]). A chip absent from BOTH
+  /// this map and [_drillIndexByChip] is a product WORD (appended to the field on
+  /// tap, as before). REBUILT on every [build] (the chips themselves are computed
+  /// there now), so the dispatch map can never drift from the rendered row, and a
+  /// stale tab/drill's mapping is never carried into the next tap.
   Map<String, KbDestination> _destByChip = const <String, KbDestination>{};
+
+  /// Parallel map from an empty-field DRILLED chip label → its node INDEX in the
+  /// current node-list (`_currentNodes`), so [_onPrediction] can route a tapped
+  /// drill chip through the EXISTING [_onTile] by index (leaf/branch/voice). Set
+  /// ONLY on the drilled empty-field branch; EMPTY on the typed and tab branches,
+  /// so it is MUTUALLY EXCLUSIVE with [_destByChip] by construction (dispatch
+  /// checks this map first, so the two can never mis-route). Rebuilt every [build]
+  /// from the CURRENT nodes, so the index always matches the list the tiles tap.
+  Map<String, int> _drillIndexByChip = const <String, int>{};
 
   /// The MORPH drill-stack: each entry is the tool node-list at that depth. Empty
   /// (the default) → the keyboard shows its LETTERS (no tool view). Pushing the
@@ -114,24 +155,26 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     _controller = TextEditingController();
     _focus = FocusNode();
     _lexicon = buildWordLexicon(kDivePool);
-    // Seed: empty field → product opening-words ONLY (no destinations, empty
-    // map), exactly as before. _build below produces this for the empty text.
-    final seed = _buildRow('');
-    _preds = seed.chips;
-    _destByChip = seed.destByChip;
+    // No row seed here: [build] is the single source of truth for the row (it is
+    // the only place that can `ref.watch(mainTabProvider)` + read the drill
+    // stack), and it runs before the first frame is shown. The dispatch maps keep
+    // their const-empty defaults until that first build assigns them; a tap is
+    // impossible before the first frame, so the empty maps are never read stale.
+    // The listener stays a pure repaint trigger so the text-conditional in build
+    // re-evaluates on every keystroke (see [_recompute]).
     _controller.addListener(_recompute);
   }
 
-  /// Recompute the prediction row from the field text. Cheap (pure pool filter +
-  /// engine verdict + pure destination match); guarded by `mounted` so a late
-  /// listener tick after dispose can never `setState` on a defunct element.
+  /// REPAINT trigger on every field-text change: [build] is the single source of
+  /// truth for the prediction row (it computes the chips + the two dispatch maps
+  /// from the text, the watched tab, and the drill stack), so the listener only
+  /// needs to mark this element dirty — the row is rebuilt in the next [build].
+  /// Guarded by `mounted` so a late listener tick after dispose can never
+  /// `setState` on a defunct element (the guard also keeps the closure non-empty,
+  /// so very_good_analysis's empty-block lint stays quiet).
   void _recompute() {
     if (!mounted) return;
-    final next = _buildRow(_controller.text);
-    setState(() {
-      _preds = next.chips;
-      _destByChip = next.destByChip;
-    });
+    setState(() {});
   }
 
   /// Builds the merged prediction row for [text]: navigable DESTINATIONS first
@@ -140,9 +183,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// returns the parallel chip→destination map (only destination chips are
   /// keyed; everything else is a product word).
   ///
-  /// Empty/blank [text] → product opening-words ONLY (matchDestinations returns
-  /// empty for a blank query), so the empty-field row is byte-identical to the
-  /// product-only behaviour. Pure: no side effects, no provider/context reads.
+  /// This is the TYPED-query builder, now invoked from [_rowFor] for the NON-EMPTY
+  /// branch (its output is byte-identical to before — the body is unchanged). It
+  /// is also reused for the EMPTY field at tab 0 (catalog): [_rowFor] routes empty
+  /// text here only for tab 0, where [matchDestinations] returns empty for the
+  /// blank query, so the row is product opening-words ONLY (empty destByChip) —
+  /// byte-identical to the legacy empty-field behaviour. Pure: no side effects,
+  /// no provider/context reads.
   _PredRow _buildRow(String text) {
     // Product WORDS for the query. We RESERVE one row slot for a word when any
     // exists, so a flood of nav matches never fully hides the catalogue words —
@@ -174,6 +221,78 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     return _PredRow(chips, destByChip);
   }
 
+  /// THE 3-WAY ROW SELECTOR — the single decision for what the prediction row
+  /// shows, called from [build] (the only place that can read [tab] +
+  /// [nodes]). PURE (no side effects, no setState): it returns a [_PredRow] of
+  /// chips + the two dispatch maps; [build] persists those maps to fields.
+  ///
+  ///   1. [text] NON-EMPTY → the TYPED row, byte-identical to before:
+  ///      [_buildRow] (destinations-first merge + reserved word slot). The drill
+  ///      map is EMPTY here (typed text never enters the drilled branch).
+  ///   2. [text] EMPTY + DRILLED ([nodes] != null) → the current node-list
+  ///      LABELS, one per node in index order; tapping routes through [_onTile]
+  ///      by that index. destByChip is EMPTY (drill chips dispatch via the drill
+  ///      map only — mutually exclusive). LEAF/voice chips are "navigable" (get
+  ///      the nav glyph via [_PredRow.destinationChips]); a BRANCH chip morphs.
+  ///   3. [text] EMPTY + NOT drilled → the CURRENT [tab]'s chips: tabs 1/2/3
+  ///      source their [KbDestination]s from [kbDestinations] BY LABEL (each
+  ///      carries its REAL run); tab 0 keeps product opening-words via
+  ///      [_buildRow] (empty destByChip — today's exact empty-field behaviour).
+  _PredRow _rowFor({
+    required String text,
+    required int tab,
+  }) {
+    // (1) TYPED row — unchanged path.
+    if (text.isNotEmpty) return _buildRow(text);
+
+    // (2) EMPTY — CONTEXT row by TAB ("where I am"). Owner decision (option 1): a
+    // DRILL does NOT add chips here. Drilling already morphs the BODY tiles (that
+    // IS the "what I pressed" feedback); mirroring those tools as chips would
+    // DUPLICATE them on-screen (tool tile + prediction chip). So the empty row
+    // reflects the current TAB whether or not a tool is drilled. Tab 0 keeps
+    // product opening-words (today's behaviour: _buildRow('') → matchDestinations
+    // ('') empty, so product words only with an empty destByChip). Tabs 1/2/3 show
+    // their destination chips, sourced from the registry BY LABEL (REAL run each).
+    if (tab == 0) return _buildRow('');
+
+    // Label→destination lookup, MEMOIZED at module scope ([_kbDestinationByLabel])
+    // so it is built ONCE from the registry instead of re-scanning all ~50
+    // destinations on every build (kbDestinations' labels are unique, so the map
+    // is total + unambiguous). The per-tab label lists below are copied
+    // BYTE-FOR-BYTE from the registry labels (owner-verbatim Hebrew strings).
+    final byLabel = _kbDestinationByLabel;
+    const labelsByTab = <int, List<String>>{
+      // tab 1 (מחלקות) — the 4 live departments, owner order.
+      1: <String>[
+        'אינסטלציה',
+        'ברזים וסניטריים',
+        'כלי עבודה ידני',
+        'כלי עבודה חשמלי',
+      ],
+      // tab 2 (עדכונים) — שיחות first (owner order), then התראות.
+      2: <String>['שיחות', 'התראות'],
+      // tab 3 (חנות).
+      3: <String>['הסל שלי', 'ההזמנות שלי', 'שירותים'],
+    };
+
+    final chips = <String>[];
+    final destByChip = <String, KbDestination>{};
+    for (final label in labelsByTab[tab] ?? const <String>[]) {
+      // Defensive: cannot miss given the registry presence+uniqueness, but stays
+      // deref-safe (never key a null destination).
+      final d = byLabel[label];
+      if (d == null) continue;
+      chips.add(label);
+      destByChip[label] = d;
+    }
+    // Every tab chip is a destination → all are navigable (get the nav glyph).
+    return _PredRow(
+      chips,
+      destByChip,
+      destinationChips: destByChip.keys.toSet(),
+    );
+  }
+
   @override
   void dispose() {
     _controller
@@ -183,15 +302,29 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     super.dispose();
   }
 
-  /// Tapped a prediction chip. If it is a DESTINATION (present in [_destByChip])
-  /// → run its nav action on THIS widget's own ref/context and KEEP the overlay
-  /// floating (do NOT close): a tab/section swaps the screen underneath while the
-  /// keyboard keeps floating; a route pushes over everything (the keyboard
-  /// reappears when it pops). Otherwise it is a product WORD → append it (+ a
-  /// trailing space) at the caret to narrow further, exactly as before; the
-  /// controller listener then recomputes the row. [insertAtCaret] leaves the
-  /// caret collapsed after the inserted text (and appends when no selection).
+  /// Tapped a prediction chip — THREE cases, read from the two parallel maps that
+  /// [build] rebuilt for the CURRENT row (so dispatch always matches what is on
+  /// screen). The maps are MUTUALLY EXCLUSIVE by construction and each is checked
+  /// with a null-guard, so a tap can never mis-route or deref a missing entry:
+  ///   (i) a DRILLED-node chip ([_drillIndexByChip]) → route through the EXISTING
+  ///       [_onTile] by index (leaf runs + keeps floating · branch drills · voice
+  ///       starts voice). [_onTile] is itself bounds-guarded, so a stale index is
+  ///       safe. Checked FIRST (the drill branch never populates [_destByChip]).
+  ///   (ii) a DESTINATION chip ([_destByChip] — a typed match OR an empty-field
+  ///       TAB chip) → run its nav action on THIS widget's own ref/context and
+  ///       KEEP the overlay floating: a tab/section swaps the screen underneath
+  ///       while the keyboard keeps floating; a route pushes over everything (the
+  ///       keyboard reappears when it pops).
+  ///   (iii) otherwise a product WORD → append it (+ a trailing space) at the
+  ///       caret to narrow further, exactly as before; the controller listener
+  ///       then repaints. [insertAtCaret] leaves the caret collapsed after the
+  ///       inserted text (and appends when no selection).
   void _onPrediction(String chip) {
+    final idx = _drillIndexByChip[chip];
+    if (idx != null) {
+      _onTile(idx);
+      return;
+    }
     final dest = _destByChip[chip];
     if (dest != null) {
       dest.run(ref, context);
@@ -325,6 +458,38 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // sheet. SafeArea(top:false) keeps the home-indicator inset clear; the host
     // adds its own bottom SafeArea too, which is harmless (nested insets clamp).
     final nodes = _currentNodes;
+
+    // WATCH the active tab so the EMPTY-field row recomputes when the user
+    // switches tabs (req D) — drill changes already setState. Then compute the
+    // whole prediction row HERE (the single source of truth): the text decides
+    // typed-vs-context, the tab + drill decide the context chips.
+    final tab = ref.watch(mainTabProvider);
+    final row = _rowFor(text: _controller.text, tab: tab);
+    // Persist the dispatch maps to fields EVERY build (even to empty) so the
+    // out-of-build [_onPrediction] callback reads the CURRENT row's mapping and a
+    // stale tab/drill's mapping is never carried into the next tap. This is a
+    // plain field write inside an already-running build (no setState).
+    //
+    // DISPATCH-UNAMBIGUITY (spec 318-320) — ACCEPTED, DOCUMENTED RISK. The two
+    // alternatives are both worse here: `setState` is illegal inside `build`, and
+    // deferring the write to an `addPostFrameCallback` would leave the maps stale
+    // (or empty) for THIS frame's taps — directly violating the invariant that
+    // each tap reads the CURRENT row's mapping, since the chips paint this frame
+    // but their dispatch would lag one frame. A plain in-build field write is the
+    // only option that keeps the maps in lock-step with the rendered chips.
+    //
+    // Why this is race-free in practice: Flutter is single-isolate and runs on
+    // one event loop. `build` (assigning these fields) and `_onPrediction` (a
+    // synchronous tap callback reading them) are BOTH ordinary microtask/event
+    // work on that loop — they NEVER interleave. A `mainTabProvider` change from
+    // the bottom-nav also runs on the same loop and schedules a rebuild; the
+    // rebuild's field write and any subsequent tap are serialized after it. There
+    // is no preemption point between paint and the tap handler, so the "<1ms"
+    // window in the audit cannot actually be hit. Documented rather than wrapped
+    // in an epoch counter, which would add state without removing a real race.
+    _destByChip = row.destByChip;
+    _drillIndexByChip = row.drillIndexByChip;
+
     return Material(
       color: const Color(0xFFFFFFFF),
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -403,13 +568,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 // purpose, so it shows the keyboard regardless of the opt-in
                 // kSmartInput feature flag (off by default in production).
                 forceShow: true,
-                predictions: _preds,
-                // The chips that are navigable DESTINATIONS (the _destByChip
-                // keys ARE the destination labels) → the keyboard marks them
-                // with the nav glyph + brand accent; product WORDS (absent from
-                // the map) stay plain, so the user can tell a one-tap nav target
-                // from a query-narrowing word.
-                destinationChips: _destByChip.keys.toSet(),
+                predictions: row.chips,
+                // The chips that are NAVIGABLE (get the nav glyph + brand accent
+                // in the pure keyboard): typed/tab destination chips AND drill
+                // LEAF/voice chips. Product WORDS and drill BRANCH chips are
+                // absent, so they stay plain — the user can tell a one-tap nav
+                // target from a query-narrowing word or a morph-in-place tile.
+                // [_PredRow] already unions the dest + navigable-drill labels.
+                destinationChips: row.destinationChips,
                 onPrediction: _onPrediction,
                 // MORPH drill state → the keyboard. The grid/gear toggles push
                 // the home/kbd node-list; a tapped tile bubbles its index to
@@ -434,16 +600,45 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   }
 }
 
-/// The result of [_FloatingCardKeyboardState._buildRow]: the merged chip labels
-/// ([chips], destinations-first then product words, capped) AND the parallel map
-/// from a destination chip's label to its [KbDestination]. A chip absent from
-/// [destByChip] is a product word. Bundling the two keeps them in lock-step (one
-/// build produces both), so the row the keyboard shows and the tap-dispatch map
-/// can never disagree.
+/// The result of [_FloatingCardKeyboardState._rowFor]: the [chips] to render plus
+/// the TWO mutually-exclusive dispatch maps and the navigable-chip set.
+///
+///   • [chips] — the row labels (typed merge · drill node labels · tab dest
+///     labels), already ordered + capped by the producing branch.
+///   • [destByChip] — chip label → [KbDestination] for the TYPED matches and the
+///     empty-field TAB chips (dispatch (ii): run the nav action).
+///   • [drillIndexByChip] — chip label → node INDEX for the empty-field DRILLED
+///     chips (dispatch (i): route through `_onTile`). EMPTY on every non-drilled
+///     branch, so it is mutually exclusive with [destByChip].
+///   • [destinationChips] — the subset of [chips] that are NAVIGABLE (get the nav
+///     glyph in the pure keyboard): tab/typed dest labels + drill LEAF/voice
+///     labels (NOT product words, NOT drill BRANCH labels). Defaults to the
+///     [destByChip] keys when the producer doesn't pass an explicit set, so the
+///     typed path ([_buildRow]) stays byte-identical without naming it.
+///
+/// A chip in NEITHER map is a product word (appended on tap). Bundling all of
+/// this keeps the rendered row and the tap dispatch in lock-step (one build
+/// produces them together), so they can never disagree.
 @immutable
 class _PredRow {
-  const _PredRow(this.chips, this.destByChip);
+  const _PredRow(
+    this.chips,
+    this.destByChip, {
+    this.drillIndexByChip = const <String, int>{},
+    Set<String>? destinationChips,
+  }) : _destinationChips = destinationChips;
 
   final List<String> chips;
   final Map<String, KbDestination> destByChip;
+  final Map<String, int> drillIndexByChip;
+
+  /// Explicit navigable set when the producer supplies one (drill/tab branches);
+  /// null on the typed path, where it falls back to the [destByChip] keys.
+  final Set<String>? _destinationChips;
+
+  /// The chips that get the nav glyph (see class doc). For the typed path this is
+  /// exactly the destination keys — byte-identical to the previous
+  /// `_destByChip.keys.toSet()` the host used to pass.
+  Set<String> get destinationChips =>
+      _destinationChips ?? destByChip.keys.toSet();
 }
