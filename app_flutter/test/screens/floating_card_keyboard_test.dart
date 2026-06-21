@@ -1,28 +1,30 @@
-// 🃏 card_keyboard_sheet — STEP 4 coverage.
+// 🃏 floating_card_keyboard — the PERSISTENT floating card-keyboard panel.
 //
 // Two layers, mirroring how the rest of the word-finder swarm is tested:
 //   • UNIT (pure): `cardKeyboardPredictions` over the REAL union pool
 //     (`kDivePool`) + the REAL lexicon (`buildWordLexicon`). Asserts the
-//     opening-words result is non-empty & capped, and that a real narrowing
-//     query yields a non-empty, capped, DIFFERENT result — proving the row is
-//     query-sensitive (it mirrors the finder's `_submitQuery` + `_pool`).
-//   • WIDGET (hermetic): drives the REAL `openCardKeyboardSheet` from a tiny
-//     harness (capturing a live context/ref via a Consumer), then asserts the
-//     strip toggles render (grid + gear), the prediction chips render, tapping
-//     the ▦ grid toggle reveals a home tool ('מחלקות'), and typing into the
-//     field recomputes the predictions without crashing.
+//     opening-words result is non-empty & capped, a real narrowing query yields
+//     a non-empty, capped, DIFFERENT result, determinism, and a custom max.
+//     (Moved here from the deleted card_keyboard_sheet widget test; the helper
+//     still lives in card_keyboard_sheet.dart.)
+//   • WIDGET (hermetic): pumps the REAL [FloatingCardKeyboard] inside
+//     ProviderScope + MaterialApp(home: Scaffold) and asserts the strip toggles
+//     render (grid + gear), the prediction chips render, tapping the ▦ grid
+//     toggle reveals a home tool ('מחלקות'), typing recomputes the row, and the
+//     onTool path: tapping a tool sets keyboardOverlayOpenProvider to false AND
+//     routes (departments → mainTab == 1).
 //
-// The custom keyboard self-gates on `kSmartInput` (kb_field_mode.dart), so the
-// widget pump enables that flag via the SharedPreferences mock exactly as
-// bs_keyboard_host_test.dart does; otherwise BsKeyboardHost renders nothing.
-// No `kKeyboardToolStrip` flip is needed: the sheet passes `showToolStrip: true`
-// to the host directly, and the helper + sheet are exercised on their own (the
-// launcher's compile-time flag gate is trivially correct and not retested here).
+// kSmartInput is NOT needed: [FloatingCardKeyboard] passes forceShow:true to the
+// host, so the keyboard renders regardless of the opt-in flag. We still seed an
+// EMPTY SharedPreferences mock (as production has it OFF) to prove forceShow is
+// what surfaces the keyboard.
 
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/card_keyboard_sheet.dart';
+import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +42,8 @@ void main() {
       final chips = cardKeyboardPredictions('', kDivePool, lexicon);
       expect(chips, isNotEmpty,
           reason: 'an empty query opens with the engine word question');
-      expect(chips.length, lessThanOrEqualTo(4), reason: 'capped at default max');
+      expect(chips.length, lessThanOrEqualTo(4),
+          reason: 'capped at default max');
       for (final c in chips) {
         expect(c.trim(), isNotEmpty, reason: 'no blank chip: "$c"');
       }
@@ -87,34 +90,48 @@ void main() {
     });
   });
 
-  // ── WIDGET: the sheet, opened via the real helper ─────────────────────────
-  group('openCardKeyboardSheet — the card-keyboard sheet', () {
+  // ── WIDGET: the floating panel, pumped directly ───────────────────────────
+  group('FloatingCardKeyboard — the floating card-keyboard panel', () {
     setUp(() {
       // EMPTY flags — the kSmartInput opt-in is OFF, exactly as in production.
-      // The sheet passes forceShow:true, so its keyboard must render anyway; this
-      // guards the go-live gate fix (previously this test enabled the flag, which
-      // masked that the live default left the sheet's keyboard hidden).
+      // FloatingCardKeyboard passes forceShow:true, so its keyboard must render
+      // anyway; this guards that forceShow (not the opt-in flag) surfaces it.
       SharedPreferences.setMockInitialValues({});
     });
 
-    /// Pumps a tiny home harness with a single "open" button that calls the REAL
-    /// [openCardKeyboardSheet] with a live context+ref (captured from the
-    /// Consumer's builder), taps it, and settles so the sheet + async flag load
-    /// resolve. Leaves the sheet open for assertions.
-    Future<void> pumpAndOpenSheet(WidgetTester tester) async {
+    /// Pumps the REAL [FloatingCardKeyboard] inside ProviderScope +
+    /// MaterialApp(home: Scaffold). The panel is mounted ONLY while
+    /// [keyboardOverlayOpenProvider] is true (mirroring the real shell), seeded
+    /// true here, so a tool/close that flips it false actually removes the panel
+    /// — letting us assert the overlay closed. Returns the container for
+    /// provider reads.
+    Future<ProviderContainer> pumpPanel(WidgetTester tester) async {
+      final container = ProviderContainer(
+        overrides: [keyboardOverlayOpenProvider.overrideWith((_) => true)],
+      );
       await tester.pumpWidget(
-        ProviderScope(
+        UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             home: Directionality(
               textDirection: TextDirection.rtl,
-              child: Consumer(
-                builder: (context, ref, _) => Scaffold(
-                  body: Center(
-                    child: ElevatedButton(
-                      onPressed: () => openCardKeyboardSheet(context, ref),
-                      child: const Text('open'),
-                    ),
-                  ),
+              child: Scaffold(
+                body: Consumer(
+                  builder: (context, ref, _) {
+                    final open = ref.watch(keyboardOverlayOpenProvider);
+                    return Stack(
+                      children: [
+                        const Center(child: Text('screen-underneath')),
+                        if (open)
+                          const Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: FloatingCardKeyboard(),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -122,16 +139,15 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
+      return container;
     }
 
-    testWidgets('opens with the strip toggles + prediction chips', (tester) async {
-      await pumpAndOpenSheet(tester);
+    testWidgets('renders the strip toggles + prediction chips', (tester) async {
+      await pumpPanel(tester);
 
-      // The keyboard mounted (custom keyboard enabled).
+      // The keyboard mounted (forceShow bypassed the kSmartInput gate).
       expect(find.byType(BsKeyboard), findsOneWidget,
-          reason: 'the sheet shows the keyboard-with-tools');
+          reason: 'the panel shows the keyboard-with-tools');
 
       // The strip toggles: grid (▦) + gear (⚙️).
       expect(find.byIcon(Icons.grid_view), findsOneWidget,
@@ -143,8 +159,11 @@ void main() {
       expect(find.text('מה לחפש?'), findsOneWidget,
           reason: 'the search field hint shows');
 
-      // At least one opening prediction chip is present. The opening words are
-      // real lexicon words; assert one of the helper's own chips is on screen.
+      // The close down-chevron handle.
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget,
+          reason: 'the floating panel has a close affordance');
+
+      // At least one opening prediction chip is present (real lexicon words).
       final lexicon = buildWordLexicon(kDivePool);
       final opening = cardKeyboardPredictions('', kDivePool, lexicon);
       expect(opening, isNotEmpty, reason: 'sanity: opening words exist');
@@ -154,7 +173,7 @@ void main() {
 
     testWidgets('tapping the ▦ grid toggle reveals a home tool (מחלקות)',
         (tester) async {
-      await pumpAndOpenSheet(tester);
+      await pumpPanel(tester);
 
       // Before: no home-tools tile is shown (the strip toggle uses a Semantics
       // label, not a Text, so find.text finds nothing).
@@ -172,32 +191,26 @@ void main() {
 
     testWidgets('typing into the field recomputes the predictions',
         (tester) async {
-      await pumpAndOpenSheet(tester);
+      await pumpPanel(tester);
 
-      // Capture the opening chip set from the helper (ground truth).
       final lexicon = buildWordLexicon(kDivePool);
       final opening = cardKeyboardPredictions('', kDivePool, lexicon);
 
       // Type a Hebrew letter on the keyboard → it inserts into the controller,
       // whose listener recomputes the prediction row. 'ב' is the first letter of
-      // 'ברז' and a real lexicon prefix, so the row should change to the engine's
-      // narrowed offer for that query (computed here as the expected truth).
+      // 'ברז' and a real lexicon prefix.
       final afterB = cardKeyboardPredictions('ב', kDivePool, lexicon);
 
       await tester.tap(find.text('ב'));
       await tester.pumpAndSettle();
 
       // The recompute ran without crashing and the on-screen row matches the
-      // helper's verdict for the typed text. (If the narrowed row equals the
-      // opening row for this prefix the test still holds — we assert the live
-      // row tracks the helper, the source of truth, not that it necessarily
-      // differs.)
+      // helper's verdict for the typed text.
       if (afterB.isNotEmpty) {
         expect(find.text(afterB.first), findsWidgets,
             reason: 'the live row tracks the helper for the typed text');
       }
-      // And the field now carries the typed character (proves the keystroke
-      // reached the controller that drives the recompute).
+      // And the field now carries the typed character.
       expect(find.text('ב'), findsWidgets,
           reason: 'the typed letter reached the field/controller');
 
@@ -205,9 +218,25 @@ void main() {
       expect(opening, isNotEmpty);
     });
 
-    testWidgets('tapping a home tool closes the sheet and navigates',
+    testWidgets('the close chevron sets keyboardOverlayOpenProvider false',
         (tester) async {
-      await pumpAndOpenSheet(tester);
+      final container = await pumpPanel(tester);
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'seeded open');
+
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+      await tester.pumpAndSettle();
+
+      expect(container.read(keyboardOverlayOpenProvider), isFalse,
+          reason: 'the close chevron flips the overlay provider off');
+      // The panel is gone (the harness unmounts it when the provider is false).
+      expect(find.byType(BsKeyboard), findsNothing,
+          reason: 'closing removed the floating keyboard');
+    });
+
+    testWidgets('tapping a home tool closes the overlay AND navigates',
+        (tester) async {
+      final container = await pumpPanel(tester);
 
       // Open the home-tools layer, then tap the first tool ('מחלקות').
       await tester.tap(find.byIcon(Icons.grid_view));
@@ -217,14 +246,16 @@ void main() {
       await tester.tap(find.text('מחלקות'));
       await tester.pumpAndSettle();
 
-      // onTool popped the sheet (the keyboard is gone, the launcher is back)…
+      // onTool flipped the overlay provider off (no route to pop) → the panel is
+      // gone, the screen underneath remains.
+      expect(container.read(keyboardOverlayOpenProvider), isFalse,
+          reason: 'the tool tap closed the floating overlay');
       expect(find.byType(BsKeyboard), findsNothing,
-          reason: 'the tool tap closed the sheet');
-      expect(find.text('open'), findsOneWidget);
+          reason: 'the tool tap removed the floating keyboard');
+      expect(find.text('screen-underneath'), findsOneWidget,
+          reason: 'the full screen underneath stays');
 
-      // …and then ran runKeyboardTool(departments) on the home → tab index 1.
-      final container =
-          ProviderScope.containerOf(tester.element(find.text('open')));
+      // …and then ran runKeyboardTool(departments) → tab index 1.
       expect(container.read(mainTabProvider), 1,
           reason: 'departments tool routed the home to the departments tab');
     });

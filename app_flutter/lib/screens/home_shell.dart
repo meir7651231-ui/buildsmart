@@ -5,6 +5,7 @@ import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
@@ -16,6 +17,7 @@ import 'package:buildsmart/screens/updates_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/help_mode.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -24,6 +26,8 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/version.g.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
+    show kKeyboardToolStrip;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,6 +99,39 @@ class HomeShell extends ConsumerWidget {
           // "מצב היכרות": freezes the content + a banner. Explainable elements
           // (📷 in the app-bar, the cart FAB) sit above this and stay tappable.
           if (helpMode) const Positioned.fill(child: _HelpModeOverlay()),
+          // 🃏 The FLOATING card-keyboard (the NAVIGATOR layer). A separate
+          // Positioned SIBLING of the IndexedStack — it overlays the BOTTOM like
+          // a real keyboard, so the screen underneath stays FULL (the IndexedStack
+          // is never wrapped/resized/scaled/dimmed). Gated by kKeyboardToolStrip,
+          // so with the flag OFF this collapses away (shell byte-identical).
+          if (kKeyboardToolStrip && ref.watch(keyboardOverlayOpenProvider))
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: SafeArea(top: false, child: FloatingCardKeyboard()),
+            ),
+          // ⌨️ The keyboard FAB — mirrors the cart FAB on the OPPOSITE side. The
+          // cart FAB uses floatingActionButtonLocation.endFloat (bottom-end =
+          // bottom-LEFT under RTL), so this one sits at the bottom-START
+          // (bottom-RIGHT under RTL). Hidden while the overlay is open so it never
+          // sits on top of the keyboard. Gated by kKeyboardToolStrip.
+          if (kKeyboardToolStrip && !ref.watch(keyboardOverlayOpenProvider))
+            PositionedDirectional(
+              start: 16,
+              bottom: 16,
+              child: FloatingActionButton(
+                heroTag: 'keyboard-fab',
+                onPressed:
+                    () =>
+                        ref.read(keyboardOverlayOpenProvider.notifier).state =
+                            true,
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Colors.white,
+                tooltip: 'מקלדת חכמה',
+                child: const Icon(Icons.keyboard),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: _BottomNav(

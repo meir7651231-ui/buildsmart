@@ -34,8 +34,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// default (false), so the live keyboard stays byte-identical.
 ///
 /// GO-LIVE (step 4): flipped to true so the home surfaces the card-keyboard
-/// launcher ([openCardKeyboardSheet]). Only the home opts in via this flag; the
-/// chat mount still passes its own default (false), so its keyboard is unchanged.
+/// surface. STEP A: that surface is now a PERSISTENT FLOATING overlay
+/// ([FloatingCardKeyboard]) opened by a keyboard FAB in [HomeShell] — both gated
+/// by this flag — replacing the old modal launcher. Only the home opts in via
+/// this flag; the chat mount still passes its own default (false), so its
+/// keyboard is unchanged. With the flag OFF the shell is byte-identical (no FAB,
+/// no overlay).
 const bool kKeyboardToolStrip = true;
 
 /// Bottom-docked host that shows the custom [BsKeyboard] when (and only when)
