@@ -42,6 +42,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// no overlay).
 const bool kKeyboardToolStrip = true;
 
+/// FLAG — the עדכונים LIVE-MIRROR keyboard (the floating keyboard becomes a live
+/// mirror of the עדכונים tab: at every click it re-derives BOTH its tools AND its
+/// predictions from the current spot). OFF by default, so the floating keyboard
+/// is BYTE-IDENTICAL to today: the new `_rowFor` branch + the `build()` watches
+/// in [FloatingCardKeyboard] all fold out under this const guard (they
+/// tree-shake away when the define is absent), the hardcoded tab-2 row
+/// ['שיחות','התראות'] stays, the typed path is untouched, and bs_keyboard.dart
+/// stays PURE.
+///
+/// Same foldable idiom as [kKeyboardToolStrip]: a top-level
+/// `bool.fromEnvironment` const, default OFF, flipped ON for a demo build via
+/// `--dart-define=KB_LIVE_MIRROR=true`. A staged RUNTIME toggle for owner demos
+/// is ALSO available without a rebuild via `featureFlagsProvider`
+/// ([kKbLiveMirrorFlag] in state/feature_flags.dart) — the floating keyboard's
+/// guard is `kKbLiveMirror || featureFlags.isOn(kKbLiveMirrorFlag)`, so either
+/// path enables it and BOTH default OFF.
+const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR');
+
 /// Bottom-docked host that shows the custom [BsKeyboard] when (and only when)
 /// [useCustomKeyboard] is true, and forwards its taps onto [controller].
 class BsKeyboardHost extends ConsumerStatefulWidget {

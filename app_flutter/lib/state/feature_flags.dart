@@ -11,6 +11,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 const bool kEnableWordFinderDemo =
     bool.fromEnvironment('ENABLE_WORD_FINDER');
 
+/// Runtime tier name for the עדכונים LIVE-MIRROR keyboard (plan Q4). The floating
+/// keyboard's mirror branch is guarded by `kKbLiveMirror ||
+/// featureFlagsProvider.isOn(kKbLiveMirrorFlag)`, so the orchestrator can stage
+/// the feature ON for a demo WITHOUT a rebuild — `ref.read(
+/// featureFlagsProvider.notifier).enable(kKbLiveMirrorFlag)` — exactly like the
+/// 'kWordFinder' demo tier. Default OFF (the flag is absent from the persisted
+/// set and is not in [FeatureFlagsNotifier._forcedOnFlags]), so a normal build is
+/// byte-identical; the compile-time `kKbLiveMirror` const is the other, also-OFF,
+/// path. Naming it here keeps callers from stringly-typing the flag.
+const String kKbLiveMirrorFlag = 'kKbLiveMirror';
+
 /// Feature-flag infrastructure (ROADMAP step 10).
 ///
 /// A persisted `Set<String>` of *enabled* flag names. The set survives a refresh
@@ -37,6 +48,18 @@ class FeatureFlagsNotifier extends StateNotifier<Set<String>> {
   /// 'kWordFinder' (== kWordFinderFlag) turns ON, so the 'מאתר חכם' demo is
   /// visible THERE ONLY. Reversible: drop the dart-define → back to default-off.
   // OWNER-REVIEW: build-time demo enablement of the word-finder.
+  //
+  // DELIBERATELY word-finder ONLY. [kKbLiveMirrorFlag] ('kKbLiveMirror') is
+  // intentionally NOT force-enabled here even under a demo define (plan Q4):
+  // its compile-time twin is the separate `kKbLiveMirror` const
+  // (== bool.fromEnvironment('KB_LIVE_MIRROR'), in
+  // widgets/smart_input/keyboard/bs_keyboard_host.dart), and the live-mirror
+  // guard is `kKbLiveMirror || featureFlags.isOn(kKbLiveMirrorFlag)`. So the
+  // two OFF-by-default paths stay distinct: the compile-only const (its own
+  // dart-define) and the runtime tier reached SOLELY via a no-rebuild
+  // `enable(kKbLiveMirrorFlag)`. Adding it to this set would conflate the two
+  // and break the default-OFF assumption that
+  // test/screens/keyboard_updates_deriver_test.dart relies on.
   static const Set<String> _forcedOnFlags =
       kEnableWordFinderDemo ? <String>{'kWordFinder'} : <String>{};
 

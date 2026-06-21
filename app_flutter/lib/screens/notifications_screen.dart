@@ -109,6 +109,20 @@ typedef _Notif = ({
   bool highPriority,
 });
 
+/// PUBLIC, leaf-ownable projection of one active notification — the four fields
+/// the floating keyboard's deriver needs to build a phase-4 individual-notif chip
+/// (label glyph + title + the type filter it belongs to). A deliberate SUBSET of
+/// the private [_Notif] (no preview/time/badge/dateGroup/highPriority): the
+/// keyboard mirrors WHICH notifications exist, not their full row chrome, and a
+/// leaf file cannot import the private `_Notif` shape. Projected by
+/// [activeNotifViewsProvider]; see that provider for the empty-feed contract.
+typedef NotifLite = ({
+  String id,
+  String emoji,
+  String title,
+  NotifSection type,
+});
+
 class _ShowMore {
   const _ShowMore({required this.groupKey, required this.hiddenCount});
   final String groupKey;
@@ -239,6 +253,25 @@ const List<_Notif> _kNotifs = [
 /// feed (mirrors `site_firebase` `projects() => const []`); when it is OFF (demo)
 /// the verbatim `_kNotifs` is returned unchanged, so the demo path is identical.
 List<_Notif> get _activeNotifs => useFirebaseBackend ? const [] : _kNotifs;
+
+/// PUBLIC projection of the active feed to [NotifLite] views — the load-bearing
+/// seam (plan section 10) the floating keyboard's deriver consumes to build the
+/// phase-4 INDIVIDUAL-notification chips (Tier 1) alongside the 6 static type
+/// chips (Tier 2). Mirrors the SAME `_activeNotifs` source the badge, the list,
+/// and the read/dismiss-all actions consume, so it can never diverge from what
+/// the screen shows: when the live backend is ON `_activeNotifs` is already
+/// `const []` (the honest empty feed — no notifications source yet, mirroring
+/// `site_firebase`'s `projects() => const []`), so this emits `const []` too;
+/// when it is OFF (demo) it projects the verbatim `_kNotifs` to lite views, so
+/// the demo path stays identical. Pure derived `Provider` (reads no other
+/// provider), so it never churns: `_activeNotifs` is a compile-time-stable
+/// getter, so the projection is recomputed only when the provider is first read.
+final activeNotifViewsProvider = Provider<List<NotifLite>>(
+  (_) => <NotifLite>[
+    for (final n in _activeNotifs)
+      (id: n.id, emoji: n.emoji, title: n.title, type: n.type),
+  ],
+);
 
 /// Marks every notification as read. Called from AppBar 3-dot menu.
 void markAllNotifsRead(WidgetRef ref) {

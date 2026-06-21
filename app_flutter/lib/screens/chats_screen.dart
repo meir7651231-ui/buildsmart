@@ -188,9 +188,116 @@ _ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead) {
 /// "זמן מקוון אחרון" privacy: online presence is shown unless set to nobody.
 bool showOnlinePresence(ChatLastSeen p) => p != ChatLastSeen.nobody;
 
-final _chatSearchQueryProvider = StateProvider<String>((_) => '');
+/// The שיחות search query. PUBLIC (was `_chatSearchQueryProvider`) so the
+/// עדכונים live-mirror keyboard's "חיפוש שיחות" tool can seed it — the same
+/// state the in-screen [_SearchBar] writes and [_ThreadList] / the exported
+/// [visibleThreadsProvider] read for the name/subtitle filter (the sixth link
+/// of the visible-thread chain).
+final updatesChatSearchProvider = StateProvider<String>((_) => '');
 final _chatFilterProvider =
     StateProvider<_ChatFilter>((_) => _ChatFilter.all);
+
+/// A keyboard-consumable projection of ONE visible chat thread: the engine
+/// [id] (what a conversation chip dispatches into [updatesChatOpenProvider])
+/// plus the persona-relative display [name] (the chip label). Public + minimal
+/// on purpose — the עדכונים deriver consumes this surface without importing the
+/// private `_Thread`/`_ThreadView` types, so `bs_keyboard` stays pure (it only
+/// ever sees `List<String>` chips derived from these names).
+typedef ThreadLite = ({String id, String name});
+
+/// The threads currently VISIBLE in the שיחות list for the home-shell scope
+/// (contractor, audience 'contractor'), projected to [ThreadLite]. This is the
+/// SAME six-filter chain `_ThreadList.build` applies (chats_screen ~907-944):
+///   1. [_visibleToAudience] (participation + audience),
+///   2. the [_audienceChipIndexProvider] chip (none for the contractor),
+///   3. not-archived ([chatArchivedIdsProvider]),
+///   4. the contractor-only [_chatFilterProvider] category,
+///   5/6. the [updatesChatSearchProvider] name/subtitle match,
+/// over the persona-relative view-models built by the private [_viewOf]. The
+/// keyboard sources conversation chips from THIS provider so it can never leak
+/// a thread the list hides. Pure read of existing providers; no new state.
+final visibleThreadsProvider = Provider<List<ThreadLite>>((ref) {
+  const persona = BsRole.contractor;
+  const audience = 'contractor';
+
+  final lastRead = ref.watch(chatLastReadProvider);
+  final filter = ref.watch(_chatFilterProvider);
+  final archivedIds = ref.watch(chatArchivedIdsProvider);
+  final query = ref.watch(updatesChatSearchProvider);
+
+  // Board-audience chip set + selected chip — null for the contractor, so the
+  // legacy נציגים/ספקים path (filter, below) is what actually narrows here.
+  final audienceChips = _audienceChipsFor(audience);
+  final chipRaw = ref.watch(_audienceChipIndexProvider);
+  final audienceChip = audienceChips == null
+      ? null
+      : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
+
+  final views = [
+    for (final t in ref.watch(chatEngineProvider).where(
+          (t) =>
+              _visibleToAudience(t, persona, audience) &&
+              (audienceChip == null || audienceChip.matches(t)),
+        ))
+      _viewOf(t, persona, lastRead),
+  ];
+
+  return [
+    for (final v in views)
+      if (_threadPassesListFilters(
+        v.thread,
+        audience: audience,
+        filter: filter,
+        archivedIds: archivedIds,
+        query: query,
+      ))
+        (id: v.thread.id, name: v.thread.name),
+  ];
+});
+
+/// The archived/category/search tail of the visible-thread chain — the EXACT
+/// predicate `_ThreadList.build` applies (chats_screen ~916-943), factored out
+/// so the on-screen list and [visibleThreadsProvider] share one source of
+/// truth and can never diverge.
+bool _threadPassesListFilters(
+  _Thread t, {
+  required String audience,
+  required _ChatFilter filter,
+  required Set<String> archivedIds,
+  required String query,
+}) {
+  if (archivedIds.contains(t.id)) return false;
+  // The legacy נציגים/ספקים chips apply only to the contractor audience —
+  // board audiences are filtered by their own _AudienceChip set upstream.
+  if (audience == 'contractor') {
+    if (filter == _ChatFilter.agents && t.category != _ThreadCategory.agent) {
+      return false;
+    }
+    if (filter == _ChatFilter.suppliers &&
+        t.category != _ThreadCategory.supplier) {
+      return false;
+    }
+    if (filter == _ChatFilter.bot && t.category != _ThreadCategory.bot) {
+      return false;
+    }
+  }
+  if (query.isNotEmpty) {
+    final q = query.toLowerCase();
+    if (!t.name.toLowerCase().contains(q) &&
+        !t.subtitle.toLowerCase().contains(q)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// The עדכונים live-mirror "open a conversation" hand-off (StateProvider):
+/// a conversation chip SETS this to a thread id; [ChatsScreen] WATCHES it,
+/// performs the real `_ChatPage` push for the matching thread, then nulls it
+/// (and it resets to null on pop). Mirrors the established
+/// "keyboard sets a provider, screen reacts" contract — the keyboard never
+/// imports the private `_ChatPage`, so the overlay stays floating.
+final updatesChatOpenProvider = StateProvider<String?>((_) => null);
 
 // ─── per-username chat-UX state (F-37) ────────────────────────────────────────
 //
@@ -608,6 +715,42 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     return false;
   }
 
+  /// Opens the engine thread [id] (set by a עדכונים live-mirror conversation
+  /// chip via [updatesChatOpenProvider]) as the real `_ChatPage`, mirroring
+  /// `_ThreadRow.onTap`. Resolves [id] through the SAME persona-relative
+  /// [_viewOf] the list uses, so the page renders identically; the provider is
+  /// nulled immediately (a repeat tap of the same chip re-fires) and again on
+  /// pop (defensive — it is already null). If the thread vanished between the
+  /// chip render and the tap, we simply reset and stay on the list (edge-crash
+  /// safety: no push for a missing thread).
+  void _openChatById(String id) {
+    // Null the trigger first so a second tap on the same conversation re-sets
+    // it and re-fires — and so a vanished thread leaves no stale id behind.
+    ref.read(updatesChatOpenProvider.notifier).state = null;
+    final threads = ref.read(chatEngineProvider);
+    final match = threads.where((t) => t.id == id);
+    if (match.isEmpty) return; // thread deleted after the chip rendered
+    final lastRead = ref.read(chatLastReadProvider);
+    final view = _viewOf(match.first, widget.persona, lastRead);
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => _ChatPage(
+              view: (
+                thread: view.thread,
+                threadId: view.threadId,
+                persona: view.persona,
+              ),
+            ),
+          ),
+        )
+        .then((_) {
+      // On pop, return the keyboard to the chats-list state (idempotent — the
+      // provider was already nulled on open).
+      if (mounted) ref.read(updatesChatOpenProvider.notifier).state = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_inHomeShell) {
@@ -615,6 +758,13 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         if (!hidden && !_headerVisible) _setHeaderVisible(true);
       });
     }
+    // עדכונים live-mirror hand-off: a conversation chip on the floating keyboard
+    // SETS [updatesChatOpenProvider] to a thread id; the screen turns that into
+    // the real `_ChatPage` push here (the keyboard never touches the private
+    // route) and immediately nulls the provider so a repeat tap re-fires.
+    ref.listen<String?>(updatesChatOpenProvider, (_, id) {
+      if (id != null) _openChatById(id);
+    });
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -707,7 +857,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
   @override
   Widget build(BuildContext context) {
     final hasText =
-        ref.watch(_chatSearchQueryProvider.select((q) => q.isNotEmpty));
+        ref.watch(updatesChatSearchProvider.select((q) => q.isNotEmpty));
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: TextField(
@@ -715,7 +865,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
         onChanged: (v) =>
-            ref.read(_chatSearchQueryProvider.notifier).state = v,
+            ref.read(updatesChatSearchProvider.notifier).state = v,
         decoration: InputDecoration(
           hintText: 'חיפוש שיחות...',
           hintStyle: const TextStyle(color: Color(0xFF888888)),
@@ -734,7 +884,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                   ),
                   onPressed: () {
                     _controller.clear();
-                    ref.read(_chatSearchQueryProvider.notifier).state = '';
+                    ref.read(updatesChatSearchProvider.notifier).state = '';
                   },
                 )
               : null,
@@ -890,7 +1040,7 @@ class _ThreadList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query = ref.watch(_chatSearchQueryProvider);
+    final query = ref.watch(updatesChatSearchProvider);
     final filter = ref.watch(_chatFilterProvider);
     final archivedIds = ref.watch(chatArchivedIdsProvider);
     // 🔒 ISOLATION: only the threads this persona takes part in (SPEC §2.5) —
@@ -913,35 +1063,17 @@ class _ThreadList extends ConsumerWidget {
         _viewOf(t, persona, lastRead),
     ];
 
-    final threads = views.where((v) {
-      final t = v.thread;
-      if (archivedIds.contains(t.id)) {
-        return false;
-      }
-      // The legacy נציגים/ספקים chips apply only to the contractor audience —
-      // board audiences are filtered by their own _AudienceChip set above.
-      if (audience == 'contractor') {
-        if (filter == _ChatFilter.agents &&
-            t.category != _ThreadCategory.agent) {
-          return false;
-        }
-        if (filter == _ChatFilter.suppliers &&
-            t.category != _ThreadCategory.supplier) {
-          return false;
-        }
-        if (filter == _ChatFilter.bot && t.category != _ThreadCategory.bot) {
-          return false;
-        }
-      }
-      if (query.isNotEmpty) {
-        final q = query.toLowerCase();
-        if (!t.name.toLowerCase().contains(q) &&
-            !t.subtitle.toLowerCase().contains(q)) {
-          return false;
-        }
-      }
-      return true;
-    }).toList();
+    final threads = views
+        .where(
+          (v) => _threadPassesListFilters(
+            v.thread,
+            audience: audience,
+            filter: filter,
+            archivedIds: archivedIds,
+            query: query,
+          ),
+        )
+        .toList();
 
     if (threads.isEmpty) {
       return const Center(

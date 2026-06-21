@@ -630,15 +630,19 @@ class _PredictionChip extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 48),
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
-              border: Border.all(color: BsTokens.divider),
+          child: Semantics(
+            button: true,
+            label: '$text (חיפוש)',
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 48),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+                border: Border.all(color: BsTokens.divider),
+              ),
+              child: label,
             ),
-            child: label,
           ),
         ),
       );
@@ -654,29 +658,33 @@ class _PredictionChip extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: radius,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
-          decoration: BoxDecoration(
-            // Faint brand wash so the destination reads as accented without
-            // shouting over the neutral keyboard.
-            color: BsTokens.brand.withOpacity(0.06),
-            borderRadius: radius,
-            border: Border.all(color: BsTokens.brand),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Icon(
-                Icons.north_east,
-                size: 14,
-                color: BsTokens.brand,
-              ),
-              const SizedBox(width: BsTokens.spaceHair),
-              Flexible(child: label),
-            ],
+        child: Semantics(
+          button: true,
+          label: '$text (ניווט)',
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 48),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
+            decoration: BoxDecoration(
+              // Faint brand wash so the destination reads as accented without
+              // shouting over the neutral keyboard.
+              color: BsTokens.brand.withOpacity(0.06),
+              borderRadius: radius,
+              border: Border.all(color: BsTokens.brand),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Icon(
+                  Icons.north_east,
+                  size: 14,
+                  color: BsTokens.brand,
+                ),
+                const SizedBox(width: BsTokens.spaceHair),
+                Flexible(child: label),
+              ],
+            ),
           ),
         ),
       ),

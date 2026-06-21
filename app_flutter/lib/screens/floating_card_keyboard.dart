@@ -59,20 +59,29 @@ import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
 import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
+import 'package:buildsmart/screens/chats_screen.dart'
+    show ThreadLite, visibleThreadsProvider;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, kbDestinations, matchDestinations;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
+import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
+    show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/feature_flags.dart'
+    show featureFlagsProvider, kKbLiveMirrorFlag;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
+import 'package:buildsmart/state/updates_location.dart'
+    show UpdatesLocation, updatesLocationProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/smart_input/caret.dart' show insertAtCaret;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbToolLayer;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
-    show BsKeyboardHost;
+    show BsKeyboardHost, kKbLiveMirror;
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -136,6 +145,22 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// from the CURRENT nodes, so the index always matches the list the tiles tap.
   Map<String, int> _drillIndexByChip = const <String, int>{};
 
+  /// THE THIRD dispatch map (עדכונים LIVE-MIRROR, [kKbLiveMirror]) — from a
+  /// truly-dynamic chip label (a conversation name · a notification TYPE label) →
+  /// the closure to run on tap with THIS widget's own `ref`/`context`. These chips
+  /// belong to NEITHER existing map: they are not registry destinations (no static
+  /// nav target) and not drill-node indices, so without this map [_onPrediction]
+  /// would WRONGLY type them into the search field. The deriver
+  /// ([deriveUpdatesContext]) populates it (each closure sets a provider —
+  /// `notifSectionProvider` / `updatesChatOpenProvider` — so the SCREEN reacts; the
+  /// keyboard never pushes a route, keeping the overlay floating). Checked AFTER
+  /// the two existing maps and BEFORE the product-word fallback, so the three are
+  /// pairwise-disjoint by the [_PredRow] ctor assert. EMPTY on every path except
+  /// the flag-ON tab-2 mirror branch (default const-empty → byte-identical when the
+  /// flag is off), rebuilt every [build] alongside the other two so it can never
+  /// drift from the rendered row.
+  Map<String, KbRunByChip> _runByChip = const <String, KbRunByChip>{};
+
   /// The MORPH drill-stack: each entry is the tool node-list at that depth. Empty
   /// (the default) → the keyboard shows its LETTERS (no tool view). Pushing the
   /// home/kbd node-list (grid/gear) makes `_stack == [thatList]`; drilling a
@@ -144,10 +169,25 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
 
   /// Which strip toggle to highlight: the layer of the stack BASE. Set when
   /// grid/gear pushes the first node-list; back to `none` when the stack clears.
+  /// A LIVE-MIRROR context base ([_syncContextToolBase]) is "ambient": it leaves
+  /// [_baseLayer] at `none` (no grid/gear highlight), so the strip toggles only
+  /// ever light for a MANUAL drill — the context base and a manual drill are
+  /// mutually exclusive by the `_baseLayer == none` guard in the sync.
   KbToolLayer _baseLayer = KbToolLayer.none;
 
   /// The node-list currently shown (null while the stack is empty → letters).
   List<KbToolNode>? get _currentNodes => _stack.isEmpty ? null : _stack.last;
+
+  /// The LABELS of the LIVE-MIRROR tool base currently installed by
+  /// [_syncContextToolBase] (null when none is installed). Used to (a) detect when
+  /// the deriver's toolBase actually CHANGED — so the sync re-installs only on a
+  /// real change, never every frame (the no-churn guard, plan risk "tool-base
+  /// in-build mutation") — and (b) know whether the live base is mine to tear down
+  /// when the deriver stops supplying one (flag off / left tab). Compared by label
+  /// (tool closures are never structurally equal), matching [KbUpdatesContext]'s
+  /// own equality. Always null when [kKbLiveMirror] is off (the sync's `base` arg
+  /// is always null), so the manual drill behaviour is byte-identical.
+  List<String>? _lastDerivedBase;
 
   @override
   void initState() {
@@ -238,12 +278,42 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   ///      source their [KbDestination]s from [kbDestinations] BY LABEL (each
   ///      carries its REAL run); tab 0 keeps product opening-words via
   ///      [_buildRow] (empty destByChip — today's exact empty-field behaviour).
+  ///
+  /// LIVE-MIRROR ([kKbLiveMirror], guarded): when the flag is on AND we are on the
+  /// עדכונים tab (tab == 2) AND [ctx] was derived in [build], this returns the PURE
+  /// deriver's row instead of the hardcoded ['שיחות','התראות'] tab-2 fallback —
+  /// re-derived at every click. [ctx] is non-null ONLY on that flag-ON tab-2 path
+  /// (see [build], which derives the WHOLE [KbUpdatesContext] once — both the row
+  /// AND the tool base — from one location snapshot, then passes it here and uses
+  /// its toolBase for [_syncContextToolBase]). With the flag OFF [ctx] is always
+  /// null and this branch is skipped, so the tab-2 fallback below runs and every
+  /// path stays byte-identical.
   _PredRow _rowFor({
     required String text,
     required int tab,
+    KbUpdatesContext? ctx,
   }) {
-    // (1) TYPED row — unchanged path.
+    // (1) TYPED row — unchanged path. Typed text never enters the mirror branch
+    // (the deriver mirrors the EMPTY-field surfaces), so it leads even under the
+    // flag — the universal typed path stays untouched.
     if (text.isNotEmpty) return _buildRow(text);
+
+    // (1.5) LIVE-MIRROR — folds out entirely when [kKbLiveMirror] is false (const
+    // guard ⇒ tree-shaken) OR when [ctx] is null (every non-flag-ON-tab-2 path).
+    // ADAPTER: the deriver returns a PUBLIC [KbUpdatesContext] whose row is a
+    // [KbPredRow] (a leaf file cannot construct this private [_PredRow]); copy it
+    // field-for-field into [_PredRow] — chips + destByChip + destinationChips, plus
+    // the NEW runByChip map (the deriver never drills, so drillIndexByChip stays
+    // const-empty). [build] then persists row.runByChip into [_runByChip].
+    if (kKbLiveMirror && tab == 2 && ctx != null) {
+      final r = ctx.row;
+      return _PredRow(
+        r.chips,
+        r.destByChip,
+        runByChip: r.runByChip,
+        destinationChips: r.destinationChips,
+      );
+    }
 
     // (2) EMPTY — CONTEXT row by TAB ("where I am"). Owner decision (option 1): a
     // DRILL does NOT add chips here. Drilling already morphs the BODY tiles (that
@@ -293,6 +363,61 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     );
   }
 
+  /// LIVE-MIRROR tool-base sync (plan seam 5) — install the deriver's [base] as
+  /// the drill-stack base via a PLAIN in-build field write (the SAME discipline as
+  /// the dispatch-map writes; NEVER setState in build — that is illegal, and a
+  /// post-frame callback would leave the tool view stale for THIS frame's taps,
+  /// the precedent documented at the dispatch-map persist). Two guards keep it
+  /// safe and churn-free:
+  ///
+  ///   • `_baseLayer == KbToolLayer.none` — a context base is AMBIENT, never
+  ///     clobbers a MANUAL grid/gear drill. While the user has grid/gear (or a
+  ///     deeper drill) open, the context base waits; the manual stack is left
+  ///     exactly as-is (interaction-matrix invariant: open grid → change location
+  ///     → BACK must not corrupt the stack).
+  ///   • label-equality vs [_lastDerivedBase] — re-install ONLY when the derived
+  ///     base actually changed (compared by LABEL, since tool closures are never
+  ///     structurally equal), so an unchanged context does NOT re-push every frame
+  ///     (the no-churn guard; plan risk "tool-base in-build mutation").
+  ///
+  /// [base] is null whenever the mirror is inactive ([kKbLiveMirror] off / not on
+  /// tab 2 / runtime tier off), in which case this either (a) tears down a context
+  /// base THIS widget previously installed — returning to the letters — or (b)
+  /// does nothing if none was installed or a manual drill owns the stack. So with
+  /// the flag off this is a pure no-op and the manual drill behaviour is
+  /// byte-identical.
+  void _syncContextToolBase(List<KbToolNode>? base) {
+    // A manual grid/gear drill owns the stack → leave it untouched. We also do NOT
+    // touch [_lastDerivedBase] here: when the manual drill closes (back to
+    // `_baseLayer == none`) the next build re-runs this and installs/clears the
+    // context base correctly from the then-current [base].
+    if (_baseLayer != KbToolLayer.none) return;
+
+    final newLabels =
+        base == null ? null : <String>[for (final n in base) n.label];
+
+    // No change since the last context sync → nothing to do (the churn guard).
+    if (listEquals(newLabels, _lastDerivedBase)) return;
+
+    if (base == null || base.isEmpty) {
+      // The deriver stopped supplying a base (flag off / left tab / empty list).
+      // If a CONTEXT base is currently installed (the stack base is mine, marked
+      // by a non-null [_lastDerivedBase]), tear it down so the letters return.
+      // Never clear a non-context stack (guarded above by `_baseLayer == none`,
+      // and a non-null [_lastDerivedBase] proves the current base is the context's).
+      if (_lastDerivedBase != null) _stack.clear();
+      _lastDerivedBase = null;
+      return;
+    }
+
+    // Install (or swap) the context base as the SINGLE stack entry. `_baseLayer`
+    // stays `none` (ambient — the strip toggles do not light for a context base).
+    _stack
+      ..clear()
+      ..add(base);
+    _lastDerivedBase = newLabels;
+  }
+
   @override
   void dispose() {
     _controller
@@ -315,7 +440,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   ///       KEEP the overlay floating: a tab/section swaps the screen underneath
   ///       while the keyboard keeps floating; a route pushes over everything (the
   ///       keyboard reappears when it pops).
-  ///   (iii) otherwise a product WORD → append it (+ a trailing space) at the
+  ///   (iii) a LIVE-MIRROR dynamic chip ([_runByChip] — a עדכונים conversation or
+  ///       a notification TYPE chip, flag [kKbLiveMirror]) → run its closure on
+  ///       THIS widget's own ref/context. The closure only SETS a provider
+  ///       (`notifSectionProvider` / `updatesChatOpenProvider`) for the SCREEN to
+  ///       react to — it never pushes a route from the keyboard, so the overlay
+  ///       stays floating. EMPTY (so this step is a no-op) on every path but the
+  ///       flag-ON tab-2 mirror, keeping flag-OFF dispatch byte-identical. Checked
+  ///       AFTER [_destByChip] and BEFORE the word fallback; the three maps are
+  ///       pairwise-disjoint (the [_PredRow] ctor asserts it), so the order only
+  ///       sets precedence for an impossible collision.
+  ///   (iv) otherwise a product WORD → append it (+ a trailing space) at the
   ///       caret to narrow further, exactly as before; the controller listener
   ///       then repaints. [insertAtCaret] leaves the caret collapsed after the
   ///       inserted text (and appends when no selection).
@@ -328,6 +463,11 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     final dest = _destByChip[chip];
     if (dest != null) {
       dest.run(ref, context);
+      return;
+    }
+    final run = _runByChip[chip];
+    if (run != null) {
+      run(ref, context);
       return;
     }
     insertAtCaret(_controller, '$chip ');
@@ -343,7 +483,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// already the base, toggle the whole stack closed back to the letters (so a
   /// second tap on the lit toggle dismisses the tool view, matching the legacy
   /// strip behaviour). Never closes the overlay.
+  ///
+  /// A MANUAL drill takes over the stack from any LIVE-MIRROR context base, so it
+  /// clears [_lastDerivedBase] (the stack is no longer the context's): on close
+  /// (or on a deeper BACK) the next build's [_syncContextToolBase] re-installs the
+  /// then-current context base afresh. Null-safe no-op when the mirror is off.
   void _onGrid() => setState(() {
+        _lastDerivedBase = null;
         if (_baseLayer == KbToolLayer.home) {
           _stack.clear();
           _baseLayer = KbToolLayer.none;
@@ -356,8 +502,10 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       });
 
   /// GEAR toggle: open the KBD node-list as the stack base — or toggle closed if
-  /// KBD is already the base. Never closes the overlay.
+  /// KBD is already the base. Never closes the overlay. Clears [_lastDerivedBase]
+  /// (a manual drill takes over the stack from any context base — see [_onGrid]).
   void _onGear() => setState(() {
+        _lastDerivedBase = null;
         if (_baseLayer == KbToolLayer.kbd) {
           _stack.clear();
           _baseLayer = KbToolLayer.none;
@@ -457,14 +605,55 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // A floating panel (rounded-top Material + a subtle top shadow), NOT a modal
     // sheet. SafeArea(top:false) keeps the home-indicator inset clear; the host
     // adds its own bottom SafeArea too, which is harmless (nested insets clamp).
-    final nodes = _currentNodes;
+    //
+    // [_currentNodes] is read LATER (after [_syncContextToolBase]), so the tiles
+    // reflect a LIVE-MIRROR context base installed THIS frame rather than lagging
+    // it by one frame.
 
     // WATCH the active tab so the EMPTY-field row recomputes when the user
     // switches tabs (req D) — drill changes already setState. Then compute the
     // whole prediction row HERE (the single source of truth): the text decides
     // typed-vs-context, the tab + drill decide the context chips.
     final tab = ref.watch(mainTabProvider);
-    final row = _rowFor(text: _controller.text, tab: tab);
+
+    // LIVE-MIRROR ([kKbLiveMirror], plan seam 2 + Q4) — two-stage guard.
+    //
+    // OUTER `tab == 2`: the deriver mirrors the עדכונים tab ONLY, so every other
+    // tab skips all of this with a single int compare (zero new cost off-tab).
+    //
+    // INNER `kKbLiveMirror || featureFlagsProvider.contains(kKbLiveMirrorFlag)`:
+    // EITHER the compile flag (a `--dart-define` demo build) OR the runtime tier
+    // (the orchestrator's no-rebuild `enable(kKbLiveMirrorFlag)`, plan Q4) turns
+    // the mirror on; BOTH default OFF. When the compile flag is on, the `||`
+    // short-circuits TRUE and the featureFlags watch is dead code (tree-shaken).
+    // When the compile flag is OFF, the runtime tier is still reachable on tab 2 at
+    // the cost of ONE cheap Set-contains watch — the deliberate price of a
+    // no-rebuild demo toggle (plan Q4 names this exact guard). The EXPENSIVE watches
+    // ([updatesLocationProvider] + [visibleThreadsProvider]) stay INSIDE `if
+    // (live)`, so a plain prod build (both flags off) never subscribes to them and
+    // their rebuild timing is unchanged (plan risk "flag-OFF timing leak").
+    //
+    // ATOMIC SNAPSHOT (plan, async-race lens): when active we derive the ENTIRE
+    // [KbUpdatesContext] ONCE — both the prediction row AND the tool base — from a
+    // single [updatesLocationProvider] + [visibleThreadsProvider] snapshot, so the
+    // two halves can never disagree. `ctx.row` feeds [_rowFor]; `ctx.toolBase`
+    // feeds [_syncContextToolBase] below.
+    KbUpdatesContext? ctx;
+    if (tab == 2) {
+      // Two-tier gate: the compile-time flag (kKbLiveMirror) short-circuits at
+      // build time, so when it is ON the featureFlags watch is dead code and
+      // tree-shakes; the runtime flag is only ever watched when the compile flag
+      // is OFF (the deliberate one-Set-contains cost of the no-rebuild toggle).
+      final live = kKbLiveMirror ||
+          ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
+      if (live) {
+        final UpdatesLocation upd = ref.watch(updatesLocationProvider);
+        final List<ThreadLite> threads = ref.watch(visibleThreadsProvider);
+        ctx = deriveUpdatesContext(upd, threads: threads);
+      }
+    }
+
+    final row = _rowFor(text: _controller.text, tab: tab, ctx: ctx);
     // Persist the dispatch maps to fields EVERY build (even to empty) so the
     // out-of-build [_onPrediction] callback reads the CURRENT row's mapping and a
     // stale tab/drill's mapping is never carried into the next tap. This is a
@@ -489,6 +678,25 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // in an epoch counter, which would add state without removing a real race.
     _destByChip = row.destByChip;
     _drillIndexByChip = row.drillIndexByChip;
+    // The THIRD dispatch map (LIVE-MIRROR dynamic chips), persisted in lock-step
+    // with the other two so [_onPrediction] reads the CURRENT row's closures.
+    // const-empty on every flag-OFF / non-tab-2 path, so this write is a no-op
+    // there and flag-OFF dispatch stays byte-identical.
+    _runByChip = row.runByChip;
+
+    // TOOL-BASE sync (LIVE-MIRROR, plan seam 5) — install the deriver's toolBase
+    // as the drill-stack base via a PLAIN in-build field write (same discipline as
+    // the dispatch maps; never setState in build). Guarded INSIDE the method so
+    // that with the flag off `ctx` is null ⇒ this is a no-op and the stack is
+    // untouched; with the flag on it installs only when no manual grid/gear drill
+    // is open and only when the base actually changed (so it never re-installs
+    // every frame and never clobbers a manual drill).
+    _syncContextToolBase(ctx?.toolBase);
+
+    // Read the current node-list AFTER the context-base sync so the tiles (and
+    // [showBack]) reflect a base installed this frame (no one-frame lag). Null →
+    // the keyboard shows its letters; otherwise the synced node-list as tiles.
+    final nodes = _currentNodes;
 
     return Material(
       color: const Color(0xFFFFFFFF),
@@ -580,13 +788,22 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 // MORPH drill state → the keyboard. The grid/gear toggles push
                 // the home/kbd node-list; a tapped tile bubbles its index to
                 // [_onTile] (leaf → keep-floating action · branch → morph). The
-                // BACK tile shows on EVERY tool-view (incl. a top one): it pops
-                // one drill level, and from a top tool-view that empties the
-                // stack → the letters return (spec: "from a top tool-view, back
-                // returns to the letters").
+                // BACK tile shows on a MANUAL drill (grid/gear base, or any deeper
+                // level): it pops one drill level, and from a top MANUAL tool-view
+                // that empties the stack → the letters return (spec: "from a top
+                // tool-view, back returns to the letters").
+                //
+                // A LIVE-MIRROR context base ([_syncContextToolBase]) is AMBIENT
+                // and always depth-1 (its nodes are all leaves — no branches), so
+                // it carries NO back tile (`_baseLayer == none` && `length == 1`):
+                // it is replaced by switching context, not dismissed by BACK, so
+                // BACK never strands the ambient base. When the flag is off the
+                // stack is non-empty ONLY via a manual base (which sets
+                // `_baseLayer != none`), so this is byte-identical to the prior
+                // `_stack.isNotEmpty` there.
                 tiles: nodes == null ? null : kbTilesFor(nodes),
                 onTile: _onTile,
-                showBack: _stack.isNotEmpty,
+                showBack: _baseLayer != KbToolLayer.none || _stack.length > 1,
                 onBack: _onBack,
                 activeLayer: _baseLayer,
                 onToolGrid: _onGrid,
@@ -601,39 +818,76 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
 }
 
 /// The result of [_FloatingCardKeyboardState._rowFor]: the [chips] to render plus
-/// the TWO mutually-exclusive dispatch maps and the navigable-chip set.
+/// the THREE mutually-exclusive dispatch maps and the navigable-chip set.
 ///
 ///   • [chips] — the row labels (typed merge · drill node labels · tab dest
-///     labels), already ordered + capped by the producing branch.
+///     labels · LIVE-MIRROR dynamic labels), already ordered + capped by the
+///     producing branch.
 ///   • [destByChip] — chip label → [KbDestination] for the TYPED matches and the
 ///     empty-field TAB chips (dispatch (ii): run the nav action).
 ///   • [drillIndexByChip] — chip label → node INDEX for the empty-field DRILLED
 ///     chips (dispatch (i): route through `_onTile`). EMPTY on every non-drilled
 ///     branch, so it is mutually exclusive with [destByChip].
+///   • [runByChip] — chip label → tap closure for the LIVE-MIRROR dynamic chips
+///     (a עדכונים conversation / a notification TYPE chip; dispatch (iii)). EMPTY
+///     on every branch but the flag-ON tab-2 mirror (so flag-OFF carries the
+///     const-empty default). The deriver supplies it (copied straight from
+///     [KbUpdatesContext]'s [KbRunByChip] map — identical type); [build] persists
+///     it into [_runByChip].
 ///   • [destinationChips] — the subset of [chips] that are NAVIGABLE (get the nav
 ///     glyph in the pure keyboard): tab/typed dest labels + drill LEAF/voice
-///     labels (NOT product words, NOT drill BRANCH labels). Defaults to the
-///     [destByChip] keys when the producer doesn't pass an explicit set, so the
-///     typed path ([_buildRow]) stays byte-identical without naming it.
+///     labels + LIVE-MIRROR dynamic labels (NOT product words, NOT drill BRANCH
+///     labels). Defaults to the [destByChip] keys when the producer doesn't pass
+///     an explicit set, so the typed path ([_buildRow]) stays byte-identical
+///     without naming it.
 ///
-/// A chip in NEITHER map is a product word (appended on tap). Bundling all of
-/// this keeps the rendered row and the tap dispatch in lock-step (one build
+/// A chip in NONE of the three maps is a product word (appended on tap). The
+/// three maps are PAIRWISE-DISJOINT (asserted in the ctor), so the dispatch
+/// fall-through in [_onPrediction] is STRUCTURAL, not coincidental. Bundling all
+/// of this keeps the rendered row and the tap dispatch in lock-step (one build
 /// produces them together), so they can never disagree.
 @immutable
 class _PredRow {
-  const _PredRow(
+  _PredRow(
     this.chips,
     this.destByChip, {
     this.drillIndexByChip = const <String, int>{},
+    this.runByChip = const <String, KbRunByChip>{},
     Set<String>? destinationChips,
-  }) : _destinationChips = destinationChips;
+  }) : _destinationChips = destinationChips {
+    // DISPATCH DISJOINTNESS (plan, lenses): [_onPrediction] checks the three maps
+    // in order (drill → dest → run) then falls through to a product word, so the
+    // maps MUST be pairwise-disjoint for the fall-through to be structural — a
+    // label in two maps would route by accident of order. Asserted here (debug
+    // only; release strips it) so a producer that ever overlapped them fails loud
+    // in tests. Today each branch fills at most one map, so the sets are trivially
+    // disjoint; the deriver's own [KbPredRow] ctor re-asserts dest∩run as well.
+    assert(
+      () {
+        final drill = drillIndexByChip.keys.toSet();
+        final dest = destByChip.keys.toSet();
+        final run = runByChip.keys.toSet();
+        return drill.intersection(dest).isEmpty &&
+            drill.intersection(run).isEmpty &&
+            dest.intersection(run).isEmpty;
+      }(),
+      '_PredRow: drillIndexByChip / destByChip / runByChip key-sets must be '
+      'pairwise-disjoint (each chip dispatches via exactly one map).',
+    );
+  }
 
   final List<String> chips;
   final Map<String, KbDestination> destByChip;
   final Map<String, int> drillIndexByChip;
 
-  /// Explicit navigable set when the producer supplies one (drill/tab branches);
-  /// null on the typed path, where it falls back to the [destByChip] keys.
+  /// LIVE-MIRROR dynamic-chip dispatch (dispatch (iii)); const-empty except on the
+  /// flag-ON tab-2 mirror branch. Same value type as the deriver's map, so the
+  /// adapter in [_rowFor] copies it through unchanged.
+  final Map<String, KbRunByChip> runByChip;
+
+  /// Explicit navigable set when the producer supplies one (drill/tab/mirror
+  /// branches); null on the typed path, where it falls back to the [destByChip]
+  /// keys.
   final Set<String>? _destinationChips;
 
   /// The chips that get the nav glyph (see class doc). For the typed path this is

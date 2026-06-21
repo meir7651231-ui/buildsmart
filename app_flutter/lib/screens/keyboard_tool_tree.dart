@@ -27,6 +27,10 @@ import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openScanPlanSheet;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
+import 'package:buildsmart/screens/notif_settings_screen.dart'
+    show NotifSettingsScreen;
+import 'package:buildsmart/screens/notifications_screen.dart'
+    show markAllNotifsRead;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
 import 'package:buildsmart/screens/store_screen.dart'
@@ -233,5 +237,84 @@ List<KbToolNode> kbKbdNodes() => <KbToolNode>[
         icon: Icons.lightbulb_outline,
         label: 'היכרות',
         action: (ref, context) => runKeyboardTool(ref, context, KbTool.intro),
+      ),
+    ];
+
+// ─── עדכונים live-mirror tool node-lists (plan seam 11) ───────────────────────
+//
+// The עדכונים deriver ([keyboard_updates_deriver.dart]) supplies a THIRD
+// stack-base node-list (alongside [kbHomeNodes]/[kbKbdNodes]) reflecting WHERE
+// the floating keyboard is on the עדכונים tab. These two factories build those
+// node-lists with the SAME [KbToolNode.leaf]/[.branch] shape every other tool
+// view uses, so the floating keyboard renders + dispatches them through the
+// unchanged `kbTilesFor → tiles:` + `_onTile` path. Each is a `()` factory (not
+// a const) because the leaf actions are non-const closures, mirroring
+// [kbHomeNodes]/[kbKbdNodes].
+
+/// Shows the honest "<label> — בקרוב" SnackBar for a not-yet-wired updates tool
+/// leaf — the SAME deferral idiom `keyboard_tool_actions.dart`'s private
+/// `_comingSoon` uses for מסלול/מהירים, reproduced here (that helper is private
+/// to its file). Used for the chat tools whose real openers are not exposed yet
+/// (new-chat / search-chats / attach — wired for real in plan phase 6).
+void _updatesToolSoon(BuildContext context, String label) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text('$label — בקרוב')));
+}
+
+/// התראות tools (owner steps 1 + 4): 🔕 סמן הכל כנקרא + ⚙️ הגדרות התראות. Both
+/// reuse EXISTING public actions verbatim:
+///   • mark-all-read → [markAllNotifsRead] (notifications_screen.dart) — the same
+///     action the AppBar 3-dot 'סמן הכל כנקרא' runs (it honours the empty live
+///     feed, marking the active set);
+///   • notif-settings → push [NotifSettingsScreen.route()] — the same route the
+///     notifications 3-dot 'הגדרות התראות' and `keyboard_destinations.dart` push.
+/// Keep-floating: mark-all-read mutates a provider (overlay stays); settings
+/// pushes a full route over everything (the keyboard reappears when it pops).
+List<KbToolNode> kbUpdatesNotifNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.done_all,
+        label: 'סמן הכל כנקרא',
+        action: (ref, context) => markAllNotifsRead(ref),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings,
+        label: 'הגדרות התראות',
+        action: (ref, context) =>
+            Navigator.of(context).push(NotifSettingsScreen.route()),
+      ),
+    ];
+
+/// שיחות tools (owner steps 2 + 3): ➕ שיחה חדשה · 🔍 חיפוש שיחות · 📎 צרף ·
+/// 🎤 קולי. Per plan Q2 the first three ship as HONEST "בקרוב" deferred leaves
+/// now — the real openers (openNewChatWith / a search-focus seam / a compose
+/// attach) are exposed and wired in plan phase 6; the conversation PREDICTIONS
+/// (the headline real-data surface) are fully wired in the deriver meanwhile.
+/// 🎤 קולי REUSES the existing voice leaf verbatim ([KbToolNode.leaf] with
+/// `isVoiceInput: true`): the FLOATING keyboard already intercepts a voice-marked
+/// node in `_onTile` and runs mic→`insertAtCaret` itself, so the same leaf works
+/// here with no new plumbing (its non-morph `action` is the legacy "בקרוב"
+/// fallback only, exactly as in [kbKbdNodes]).
+List<KbToolNode> kbUpdatesChatsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.add_comment_outlined,
+        label: 'שיחה חדשה',
+        action: (ref, context) => _updatesToolSoon(context, 'שיחה חדשה'),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.search,
+        label: 'חיפוש שיחות',
+        action: (ref, context) => _updatesToolSoon(context, 'חיפוש שיחות'),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.attach_file,
+        label: 'צרף',
+        action: (ref, context) => _updatesToolSoon(context, 'צרף'),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.mic,
+        label: 'קולי',
+        isVoiceInput: true,
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.voice),
       ),
     ];
