@@ -26,12 +26,23 @@
 //
 // Only the PURE [cardKeyboardPredictions] helper is imported from
 // card_keyboard_sheet.dart — never a widget (the modal widget is deleted).
+//
+// TYPE-TO-NAVIGATE (universal destinations). When the field text is non-empty
+// the prediction row MERGES navigable DESTINATIONS ([matchDestinations],
+// keyboard_destinations.dart) AHEAD of the product words — destinations are
+// exact nav targets, so they lead. The row is still a plain `List<String>` to
+// the pure keyboard; this widget keeps a parallel map from each shown chip label
+// to either a [KbDestination] (→ run its nav action, KEEP the overlay floating)
+// or a product word (→ append to the field, as before). The empty field shows
+// product opening-words ONLY (no destinations), unchanged.
 
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
 import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
+import 'package:buildsmart/screens/keyboard_destinations.dart'
+    show KbDestination, matchDestinations;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
 import 'package:buildsmart/state/keyboard_overlay.dart'
@@ -59,6 +70,11 @@ class FloatingCardKeyboard extends ConsumerStatefulWidget {
       _FloatingCardKeyboardState();
 }
 
+/// Total prediction-row chips shown at once (destinations + product words). The
+/// product-only helper caps at 4; with destinations merged in ahead we allow one
+/// more so a couple of nav targets never fully crowd out the product words.
+const int _kRowCap = 5;
+
 class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   late final TextEditingController _controller;
   late final FocusNode _focus;
@@ -68,7 +84,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   late final WordLexicon _lexicon;
 
   /// The current prediction-row chips (LIVE: recomputed from `_controller.text`).
+  /// Destinations FIRST (exact nav targets), then product words; capped at
+  /// [_kRowCap]. This is the plain `List<String>` handed to the pure keyboard.
   late List<String> _preds;
+
+  /// Parallel map from a shown chip label → the [KbDestination] it stands for.
+  /// Only the destination chips appear here; a chip absent from this map is a
+  /// product WORD (appended to the field on tap, as before). Rebuilt on every
+  /// recompute alongside [_preds] so the two never drift.
+  Map<String, KbDestination> _destByChip = const <String, KbDestination>{};
 
   /// The MORPH drill-stack: each entry is the tool node-list at that depth. Empty
   /// (the default) → the keyboard shows its LETTERS (no tool view). Pushing the
@@ -89,17 +113,64 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     _controller = TextEditingController();
     _focus = FocusNode();
     _lexicon = buildWordLexicon(kDivePool);
-    _preds = cardKeyboardPredictions('', kDivePool, _lexicon);
+    // Seed: empty field → product opening-words ONLY (no destinations, empty
+    // map), exactly as before. _build below produces this for the empty text.
+    final seed = _buildRow('');
+    _preds = seed.chips;
+    _destByChip = seed.destByChip;
     _controller.addListener(_recompute);
   }
 
   /// Recompute the prediction row from the field text. Cheap (pure pool filter +
-  /// engine verdict); guarded by `mounted` so a late listener tick after dispose
-  /// can never `setState` on a defunct element.
+  /// engine verdict + pure destination match); guarded by `mounted` so a late
+  /// listener tick after dispose can never `setState` on a defunct element.
   void _recompute() {
     if (!mounted) return;
-    final next = cardKeyboardPredictions(_controller.text, kDivePool, _lexicon);
-    setState(() => _preds = next);
+    final next = _buildRow(_controller.text);
+    setState(() {
+      _preds = next.chips;
+      _destByChip = next.destByChip;
+    });
+  }
+
+  /// Builds the merged prediction row for [text]: navigable DESTINATIONS first
+  /// (exact nav targets via [matchDestinations]), then the product WORDS
+  /// ([cardKeyboardPredictions]), de-duplicated and capped at [_kRowCap]. Also
+  /// returns the parallel chip→destination map (only destination chips are
+  /// keyed; everything else is a product word).
+  ///
+  /// Empty/blank [text] → product opening-words ONLY (matchDestinations returns
+  /// empty for a blank query), so the empty-field row is byte-identical to the
+  /// product-only behaviour. Pure: no side effects, no provider/context reads.
+  _PredRow _buildRow(String text) {
+    // Product WORDS for the query. We RESERVE one row slot for a word when any
+    // exists, so a flood of nav matches never fully hides the catalogue words —
+    // destinations still LEAD, they just cannot take the very last slot.
+    final words = cardKeyboardPredictions(text, kDivePool, _lexicon);
+    final reserve = words.isEmpty ? 0 : 1;
+    final destCap = _kRowCap - reserve;
+
+    // DESTINATIONS lead, up to destCap (leaving the reserved word slot free).
+    final dests = matchDestinations(text, max: destCap);
+    final chips = <String>[];
+    final destByChip = <String, KbDestination>{};
+    for (final d in dests) {
+      if (chips.length >= destCap) break;
+      // De-dupe by visible label (two destinations sharing a label collapse to
+      // the first — none do today, but the row stays unambiguous regardless).
+      if (destByChip.containsKey(d.label) || chips.contains(d.label)) continue;
+      chips.add(d.label);
+      destByChip[d.label] = d;
+    }
+
+    // Then product WORDS fill the remaining slots (including the reserved one),
+    // skipping any string already shown as a destination chip.
+    for (final w in words) {
+      if (chips.length >= _kRowCap) break;
+      if (chips.contains(w)) continue;
+      chips.add(w);
+    }
+    return _PredRow(chips, destByChip);
   }
 
   @override
@@ -111,10 +182,20 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     super.dispose();
   }
 
-  /// Append a tapped chip (+ a trailing space) at the caret to narrow further;
-  /// the controller listener then recomputes the row. [insertAtCaret] leaves the
+  /// Tapped a prediction chip. If it is a DESTINATION (present in [_destByChip])
+  /// → run its nav action on THIS widget's own ref/context and KEEP the overlay
+  /// floating (do NOT close): a tab/section swaps the screen underneath while the
+  /// keyboard keeps floating; a route pushes over everything (the keyboard
+  /// reappears when it pops). Otherwise it is a product WORD → append it (+ a
+  /// trailing space) at the caret to narrow further, exactly as before; the
+  /// controller listener then recomputes the row. [insertAtCaret] leaves the
   /// caret collapsed after the inserted text (and appends when no selection).
   void _onPrediction(String chip) {
+    final dest = _destByChip[chip];
+    if (dest != null) {
+      dest.run(ref, context);
+      return;
+    }
     insertAtCaret(_controller, '$chip ');
   }
 
@@ -291,4 +372,18 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       ),
     );
   }
+}
+
+/// The result of [_FloatingCardKeyboardState._buildRow]: the merged chip labels
+/// ([chips], destinations-first then product words, capped) AND the parallel map
+/// from a destination chip's label to its [KbDestination]. A chip absent from
+/// [destByChip] is a product word. Bundling the two keeps them in lock-step (one
+/// build produces both), so the row the keyboard shows and the tap-dispatch map
+/// can never disagree.
+@immutable
+class _PredRow {
+  const _PredRow(this.chips, this.destByChip);
+
+  final List<String> chips;
+  final Map<String, KbDestination> destByChip;
 }

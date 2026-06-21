@@ -22,7 +22,11 @@
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/card_keyboard_sheet.dart';
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show catalogSectionProvider;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
+import 'package:buildsmart/screens/keyboard_destinations.dart'
+    show matchDestinations;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
@@ -367,6 +371,156 @@ void main() {
       expect(find.text(hebrewLetter), findsOneWidget,
           reason: 'a second tap on the lit toggle clears the tool view');
       expect(find.text('מחלקות'), findsNothing);
+    });
+
+    // ── TYPE-TO-NAVIGATE: destinations merged into the prediction row ──────────
+    group('type-to-navigate destinations', () {
+      testWidgets(
+          'typing a destination term surfaces it in the prediction row',
+          (tester) async {
+        await pumpPanel(tester);
+
+        // Empty field: the prediction row shows product WORDS only — no
+        // destination chip yet (matchDestinations('') is empty).
+        expect(matchDestinations(''), isEmpty, reason: 'sanity: empty → none');
+        expect(find.text('מחלקות'), findsNothing,
+            reason: 'no destination chip on the empty field');
+
+        // Type "מח" (two letter taps). matchDestinations('מח') surfaces the
+        // 'מחלקות' destination (label contains the typed prefix). The pure
+        // matcher's verdict and the on-screen row must agree.
+        final hits = matchDestinations('מח').map((d) => d.label).toList();
+        expect(hits, contains('מחלקות'),
+            reason: 'sanity: the matcher offers מחלקות for "מח"');
+
+        await tester.tap(find.text('מ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('ח'));
+        await tester.pumpAndSettle();
+
+        // The destination chip now renders in the prediction row (as plain Text,
+        // exactly like a product-word chip — the pure keyboard sees only labels).
+        expect(find.text('מחלקות'), findsWidgets,
+            reason: 'the destination chip surfaced from typing "מח"');
+      });
+
+      testWidgets(
+          'tapping a destination chip NAVIGATES and keeps the overlay floating',
+          (tester) async {
+        final container = await pumpPanel(tester);
+        expect(container.read(mainTabProvider), 0, reason: 'starts on tab 0');
+
+        // Type "מח" → surface the מחלקות destination chip.
+        await tester.tap(find.text('מ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('ח'));
+        await tester.pumpAndSettle();
+        expect(find.text('מחלקות'), findsWidgets,
+            reason: 'sanity: the destination chip is present to tap');
+
+        // Tap the destination chip. מחלקות runs runKeyboardTool(departments),
+        // which sets mainTabProvider = 1 (DepartmentsScreen in the IndexedStack).
+        await tester.tap(find.text('מחלקות').first);
+        await tester.pumpAndSettle();
+
+        // Owner model: a DESTINATION chip navigates the screen underneath but the
+        // keyboard KEEPS FLOATING — the overlay stays OPEN and the keyboard stays
+        // mounted (contrast a product WORD, which only appends to the field).
+        expect(container.read(mainTabProvider), 1,
+            reason: 'the מחלקות destination routed to the departments tab');
+        expect(container.read(keyboardOverlayOpenProvider), isTrue,
+            reason: 'a destination tap must NOT close the floating overlay');
+        expect(find.byType(BsKeyboard), findsOneWidget,
+            reason: 'the keyboard keeps floating after navigating');
+        expect(find.text('screen-underneath'), findsOneWidget,
+            reason: 'the full screen underneath stays');
+      });
+
+      testWidgets(
+          'tapping a SECTION destination sets the catalog section provider',
+          (tester) async {
+        final container = await pumpPanel(tester);
+
+        // Type "מאת" → the מאתר destination (catalog 'מאתר' section). Three taps:
+        // מ · א · ת. matchDestinations('מאת') offers מאתר.
+        expect(matchDestinations('מאת').map((d) => d.label), contains('מאתר'),
+            reason: 'sanity: the matcher offers מאתר for "מאת"');
+
+        await tester.tap(find.text('מ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('א'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('ת'));
+        await tester.pumpAndSettle();
+        expect(find.text('מאתר'), findsWidgets,
+            reason: 'sanity: the מאתר destination chip surfaced');
+
+        await tester.tap(find.text('מאתר').first);
+        await tester.pumpAndSettle();
+
+        // מאתר routes via runKeyboardTool(finder): tab 0 + catalogSectionProvider
+        // == 'מאתר'. The overlay stays open (keep-floating).
+        expect(container.read(mainTabProvider), 0,
+            reason: 'the finder destination lands on the catalog tab');
+        expect(container.read(catalogSectionProvider), 'מאתר',
+            reason: 'the catalog section provider switched to מאתר');
+        expect(container.read(keyboardOverlayOpenProvider), isTrue,
+            reason: 'a section destination keeps the overlay floating');
+      });
+
+      testWidgets('a product WORD chip still appends to the field (unchanged)',
+          (tester) async {
+        final container = await pumpPanel(tester);
+
+        // Type "ב" → the row carries product words (e.g. 'ברז'-family) and NO
+        // destination starts with bare "ב" as a leading label, so the first
+        // chips are words. We tap a chip that is a product word (absent from the
+        // destination map) and assert the field GREW (append behaviour), the tab
+        // did NOT change, and the overlay stayed open.
+        await tester.tap(find.text('ב'));
+        await tester.pumpAndSettle();
+
+        final lexicon = buildWordLexicon(kDivePool);
+        final words = cardKeyboardPredictions('ב', kDivePool, lexicon);
+        final dests = matchDestinations('ב').map((d) => d.label).toSet();
+        // Pick a product word that is NOT a destination AND is actually rendered
+        // in the (capped, destinations-lead) row. The reserved word slot
+        // guarantees at least one such word is on screen.
+        var wordOnly = '';
+        for (final w in words) {
+          if (dests.contains(w)) continue;
+          if (find.text(w).evaluate().isNotEmpty) {
+            wordOnly = w;
+            break;
+          }
+        }
+
+        if (wordOnly.isNotEmpty) {
+          final tabBefore = container.read(mainTabProvider);
+
+          // Read the read-only field's live text via its EditableText controller
+          // (the floating panel owns exactly one TextField → one EditableText).
+          String fieldText() =>
+              tester.widget<EditableText>(find.byType(EditableText)).controller.text;
+          final before = fieldText();
+
+          await tester.tap(find.text(wordOnly).first);
+          await tester.pumpAndSettle();
+
+          // Word path: insertAtCaret appended "$wordOnly " → the field GREW and
+          // now contains the tapped word; navigation did NOT fire; overlay open.
+          final after = fieldText();
+          expect(after.length, greaterThan(before.length),
+              reason: 'a product word appends to the field (grows it)');
+          expect(after.contains(wordOnly), isTrue,
+              reason: 'the tapped product word "$wordOnly" reached the field');
+          expect(container.read(mainTabProvider), tabBefore,
+              reason: 'tapping a product word must NOT navigate');
+          expect(container.read(keyboardOverlayOpenProvider), isTrue,
+              reason: 'tapping a product word keeps the overlay open');
+          expect(find.byType(BsKeyboard), findsOneWidget);
+        }
+      });
     });
   });
 }
