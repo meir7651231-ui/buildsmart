@@ -13,16 +13,24 @@
 // destination, checked against the real code:
 //   • tabs            → mainTabProvider (home_shell.dart:90-96 IndexedStack:
 //                       0 בית · 1 מחלקות · 2 עדכונים · 3 חנות).
+//   • departments     → tab 1 + homeDepartmentProvider = the EXACT name from
+//                       DepartmentsScreen.departments (departments_screen.dart:
+//                       105-110, `live == true` only), mirroring a department
+//                       tile's onTap. One destination per live department.
 //   • catalog sections→ tab 0 + catalogSectionProvider (catalog_screen.dart:
 //                       2292-2303 maps each label to its section widget).
 //   • store sections  → tab 3 + storeSectionProvider (store_screen.dart:38-41).
 //   • updates sub-tabs→ tab 2 + updatesSubTabProvider (updates_screen.dart:8).
 //   • pushed screens  → the screen's own `static route()` (ai_hub / settings /
-//                       profile / stock / chats-archive / notif-settings) or a
-//                       MaterialPageRoute (install-studio — it has no route()).
+//                       profile / stock / chats-archive / notif-settings /
+//                       home-arrangement / rewards / budget / legal) or a
+//                       MaterialPageRoute (install-studio + audit — no route()).
+//   • no-arg openers  → the exact opener fn the app uses for a sheet/hub:
+//                       openSiteHub / openProjects / openFinanceHub /
+//                       openScanPlanSheet / openCheaperAlternativesSheet /
+//                       openPriceCompareSheet (all `(context)` only — no arg).
 //   • global actions  → openCameraSheet (camera_sheet.dart:18), helpModeProvider
-//                       (help_mode.dart:12), showRolePicker (role_picker_sheet),
-//                       openSiteHub (site_hub_screen.dart:60).
+//                       (help_mode.dart:12), showRolePicker (role_picker_sheet).
 //   • the 5 BOARDS    → showRolePicker(context): the SAME gate-respecting dialog
 //                       the app-bar logo opens. We do NOT push the dashboard
 //                       route()s directly — those bypass `_BoardGateRoute`
@@ -42,21 +50,42 @@
 // only ever sees a plain `List<String>` — the destination-vs-word mapping lives
 // in the floating keyboard, never here and never in the pure widget.
 
+import 'package:buildsmart/logic/system_division.dart'
+    show catalogSystemFilterProvider;
 import 'package:buildsmart/screens/ai_hub_screen.dart' show AIHubScreen;
+import 'package:buildsmart/screens/audit_screen.dart' show AuditScreen;
+import 'package:buildsmart/screens/budget_screen.dart' show BudgetScreen;
 import 'package:buildsmart/screens/catalog_screen.dart'
-    show catalogSectionProvider;
+    show catalogSectionProvider, catalogTreePathProvider;
 import 'package:buildsmart/screens/catalog_settings_screen.dart'
     show CatalogSettingsScreen;
 import 'package:buildsmart/screens/chats_screen.dart' show ChatsArchiveScreen;
+import 'package:buildsmart/screens/contractor_tools_sheets.dart'
+    show
+        openCheaperAlternativesSheet,
+        openPriceCompareSheet,
+        openScanPlanSheet;
+import 'package:buildsmart/screens/departments_screen.dart'
+    show deptFlatProductsProvider, homeDepartmentProvider;
+import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
+import 'package:buildsmart/screens/home_content_reorder.dart'
+    show HomeContentReorder;
 import 'package:buildsmart/screens/install_studio_screen.dart'
     show InstallStudioScreen;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
+import 'package:buildsmart/screens/legal_screen.dart'
+    show LegalScreen, LegalTab;
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/profile_screen.dart' show ProfileScreen;
+import 'package:buildsmart/screens/projects_screen.dart' show openProjects;
+import 'package:buildsmart/screens/rewards_hub_screen.dart'
+    show RewardsHubScreen;
 import 'package:buildsmart/screens/role_picker_sheet.dart' show showRolePicker;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
+import 'package:buildsmart/screens/smart_project_screen.dart'
+    show openSmartProject;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
@@ -120,6 +149,25 @@ void _openUpdatesSub(WidgetRef ref, int sub) {
   ref.read(updatesSubTabProvider.notifier).state = sub;
 }
 
+/// Opens a single live department [name] inside the departments tab — the SAME
+/// state a department tile sets. Mirrors smart_home_screen.dart `_Departments`
+/// onTap (~264-268: homeDepartmentProvider = name + mainTabProvider = 1) and the
+/// common reset in departments_screen.dart `_DeptTile` onTap (~231-235:
+/// catalogTreePathProvider = const [] + deptFlatProductsProvider = false +
+/// catalogSystemFilterProvider = null), so a typed department always lands on its
+/// TOP view (`_DeptCatGroups` for a catalog dept, the catalog finder for a tool
+/// dept — departments_screen.dart:137-140) rather than a stale drill path.
+///
+/// [name] MUST be one of `DepartmentsScreen.departments` where `live == true`
+/// (verified at the call sites below); a non-live name would just toast 'בקרוב'.
+void _openDepartment(WidgetRef ref, String name) {
+  ref.read(catalogSystemFilterProvider.notifier).state = null;
+  ref.read(catalogTreePathProvider.notifier).state = const [];
+  ref.read(deptFlatProductsProvider.notifier).state = false;
+  ref.read(homeDepartmentProvider.notifier).state = name;
+  ref.read(mainTabProvider.notifier).state = 1;
+}
+
 /// The MAIN navigable destinations of the app, for the type-to-navigate
 /// keyboard. Ordered roughly by how central each is (tabs → catalog sections →
 /// store → updates → global actions → settings/AI/finder → boards). Every `run`
@@ -150,6 +198,69 @@ List<KbDestination> kbDestinations() => <KbDestination>[
         run: (ref, context) =>
             runKeyboardTool(ref, context, KbTool.departments),
       ),
+
+      // ── PER-DEPARTMENT (the 4 LIVE departments) ──────────────────────────────
+      // Labels are the EXACT names in DepartmentsScreen.departments where
+      // `live == true` (departments_screen.dart:105-110). Each `run` opens that
+      // one department via [_openDepartment] (homeDepartmentProvider = name +
+      // tab 1), exactly as a department tile does — so TYPING a department name
+      // lands directly on it, no extra tap. Non-live departments (חשמל / חומרי
+      // בניין / צבע / גבס / אספקה) are intentionally absent: their tiles only
+      // toast 'בקרוב', so they are not real destinations (see stillDeferred).
+      KbDestination(
+        label: 'אינסטלציה',
+        keywords: const [
+          'אינסטלציה',
+          'מחלקת אינסטלציה',
+          'צנרת',
+          'צינורות',
+          'שפכים',
+          'ניקוז',
+          'אינסטלטור',
+          'plumbing',
+        ],
+        run: (ref, context) => _openDepartment(ref, 'אינסטלציה'),
+      ),
+      KbDestination(
+        label: 'ברזים וסניטריים',
+        keywords: const [
+          'ברזים וסניטריים',
+          'ברזים',
+          'סניטריים',
+          'כלים סניטריים',
+          'אסלות',
+          'כיורים',
+          'מקלחות',
+          'אמבטיה',
+          'faucets',
+          'sanitary',
+        ],
+        run: (ref, context) => _openDepartment(ref, 'ברזים וסניטריים'),
+      ),
+      KbDestination(
+        label: 'כלי עבודה ידני',
+        keywords: const [
+          'כלי עבודה ידני',
+          'כלים ידניים',
+          'כלי יד',
+          'חותך צינורות',
+          'hand tools',
+        ],
+        run: (ref, context) => _openDepartment(ref, 'כלי עבודה ידני'),
+      ),
+      KbDestination(
+        label: 'כלי עבודה חשמלי',
+        keywords: const [
+          'כלי עבודה חשמלי',
+          'כלים חשמליים',
+          'כלי ריתוך',
+          'ריתוך PPR',
+          'מכונת ריתוך',
+          'power tools',
+        ],
+        run: (ref, context) => _openDepartment(ref, 'כלי עבודה חשמלי'),
+      ),
+
       KbDestination(
         label: 'עדכונים',
         keywords: const ['עדכונים', 'updates'],
@@ -393,6 +504,182 @@ List<KbDestination> kbDestinations() => <KbDestination>[
         // route the notifications 3-dot menu 'הגדרות התראות' pushes.
         run: (ref, context) =>
             Navigator.of(context).push(NotifSettingsScreen.route()),
+      ),
+      KbDestination(
+        label: 'סידור מסך הבית',
+        keywords: const [
+          'סידור מסך הבית',
+          'סידור הבית',
+          'סדר הבית',
+          'ארגון מסך',
+          'סידור מסכים',
+          'home arrangement',
+          'reorder',
+        ],
+        // HomeContentReorder.route() (home_content_reorder.dart:21) — the same
+        // route catalog settings' 'סידור מסך הבית' row pushes (settings:240).
+        run: (ref, context) =>
+            Navigator.of(context).push(HomeContentReorder.route()),
+      ),
+      KbDestination(
+        label: 'מועדון BuildSmart',
+        keywords: const [
+          'מועדון',
+          'מועדון BuildSmart',
+          'נקודות',
+          'הטבות',
+          'תגמולים',
+          'פרסים',
+          'rewards',
+          'club',
+        ],
+        // RewardsHubScreen.route() (rewards_hub_screen.dart:24) — the same route
+        // profile's '🎮 מועדון BuildSmart' row pushes (profile_screen.dart:288).
+        run: (ref, context) =>
+            Navigator.of(context).push(RewardsHubScreen.route()),
+      ),
+      KbDestination(
+        label: 'פרויקטים',
+        keywords: const [
+          'פרויקטים',
+          'פרויקט',
+          'הפרויקטים שלי',
+          'אתרים',
+          'projects',
+        ],
+        // openProjects(context) (projects_screen.dart:28) pushes
+        // ProjectsScreen.route() — the projects dial/menu leaf. The budget +
+        // smart-project tiles live one tap inside it.
+        run: (ref, context) => openProjects(context),
+      ),
+      KbDestination(
+        label: 'פרויקט חכם',
+        keywords: const [
+          'פרויקט חכם',
+          'מאפס עד מסירה',
+          'שלבי פרויקט',
+          'התקדמות פרויקט',
+          'smart project',
+        ],
+        // openSmartProject(context) (smart_project_screen.dart:20) pushes
+        // SmartProjectScreen.route() — the same opener the projects screen's
+        // smart-project tile uses (projects_screen.dart:90).
+        run: (ref, context) => openSmartProject(context),
+      ),
+      KbDestination(
+        label: 'תקציב',
+        keywords: const [
+          'תקציב',
+          'תקציבים',
+          'הוצאות',
+          'עלויות',
+          'כסף',
+          'budget',
+        ],
+        // BudgetScreen.route() (budget_screen.dart:138) — the same route the
+        // projects screen's '💰 תקציב' tile pushes (projects_screen.dart:79).
+        run: (ref, context) =>
+            Navigator.of(context).push(BudgetScreen.route()),
+      ),
+      KbDestination(
+        label: 'כספים',
+        keywords: const [
+          'כספים',
+          'מרכז פיננסים',
+          'פיננסים',
+          'חשבוניות',
+          'תשלומים',
+          'הכנסות',
+          'finance',
+        ],
+        // openFinanceHub(context) (finance_hub_sheets.dart:60) — the same opener
+        // the store hub's 'כספים' quick action uses (store_screen.dart:811).
+        run: (ref, context) => openFinanceHub(context),
+      ),
+      KbDestination(
+        label: 'אודיט',
+        keywords: const [
+          'אודיט',
+          'ביקורת',
+          'בדיקת איכות',
+          'תאימות',
+          'audit',
+        ],
+        // AuditScreen has NO route() — push via MaterialPageRoute exactly as the
+        // install studio's '🧪 אודיט' button does (install_studio_screen.dart:
+        // 799-801). The screen is self-contained (const ctor, no required args).
+        run: (ref, context) => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const AuditScreen()),
+        ),
+      ),
+      KbDestination(
+        label: 'חלופות זולות',
+        keywords: const [
+          'חלופות זולות',
+          'חלופות',
+          'זול יותר',
+          'חיסכון',
+          'מוצר זול',
+          'cheaper',
+        ],
+        // openCheaperAlternativesSheet(context) (contractor_tools_sheets.dart:34)
+        // — the same sheet the AI hub's '💡 חלופות זולות' row opens
+        // (ai_hub_screen.dart:164).
+        run: (ref, context) => openCheaperAlternativesSheet(context),
+      ),
+      KbDestination(
+        label: 'השוואת מחירים',
+        keywords: const [
+          'השוואת מחירים',
+          'השוואה',
+          'מחירים',
+          'השוואת ספקים',
+          'price compare',
+        ],
+        // openPriceCompareSheet(context) (contractor_tools_sheets.dart:47) — the
+        // same sheet the store services grid's price-comparison tile opens
+        // (store_screen.dart:3277).
+        run: (ref, context) => openPriceCompareSheet(context),
+      ),
+      KbDestination(
+        label: 'סריקת תוכנית',
+        keywords: const [
+          'סריקת תוכנית',
+          'סרוק תוכנית',
+          'תוכנית עבודה',
+          'סריקת תוכניות',
+          'scan plan',
+        ],
+        // openScanPlanSheet(context) (contractor_tools_sheets.dart:21) — the same
+        // sheet the smart home 'כלים מהירים → 📐 סרוק תוכנית עבודה' row and the
+        // keyboard 'מהירים → סריקת תוכנית' leaf open (keyboard_tool_tree.dart:138).
+        run: (ref, context) => openScanPlanSheet(context),
+      ),
+      KbDestination(
+        label: 'תנאי שימוש',
+        keywords: const [
+          'תנאי שימוש',
+          'תנאים',
+          'תקנון',
+          'terms',
+        ],
+        // LegalScreen.route() defaults to the terms tab (legal_screen.dart:27) —
+        // the same route catalog settings' 'תנאי שימוש' row pushes (settings:650).
+        run: (ref, context) =>
+            Navigator.of(context).push(LegalScreen.route()),
+      ),
+      KbDestination(
+        label: 'מדיניות פרטיות',
+        keywords: const [
+          'מדיניות פרטיות',
+          'פרטיות',
+          'privacy',
+        ],
+        // LegalScreen.route(initialTab: LegalTab.privacy) (legal_screen.dart:27)
+        // — the same route catalog settings' 'מדיניות פרטיות' row pushes
+        // (settings:660). Distinct tab from 'תנאי שימוש' above.
+        run: (ref, context) => Navigator.of(context)
+            .push(LegalScreen.route(initialTab: LegalTab.privacy)),
       ),
 
       // ── The 5 ROLE BOARDS ───────────────────────────────────────────────────

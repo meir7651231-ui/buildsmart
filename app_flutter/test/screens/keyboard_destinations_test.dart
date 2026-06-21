@@ -37,11 +37,14 @@ void main() {
 
     test('covers the headline destinations the owner asked for', () {
       final labels = {for (final d in kbDestinations()) d.label};
-      // 4 tabs, catalog sections, store sections, global actions, settings/AI,
-      // and the 5 boards — a representative slice (exact labels).
+      // 4 tabs, departments, catalog sections, store sections, global actions,
+      // settings/AI, the new no-arg screens/sheets, and the 5 boards — a
+      // representative slice (exact labels).
       const required = <String>[
         // tabs
         'בית', 'מחלקות', 'עדכונים', 'חנות',
+        // the 4 LIVE departments (per-department destinations)
+        'אינסטלציה', 'ברזים וסניטריים', 'כלי עבודה ידני', 'כלי עבודה חשמלי',
         // updates sub-tabs
         'התראות', 'שיחות',
         // store sections
@@ -51,8 +54,11 @@ void main() {
         'תכנון חיבור', 'חיפושים אחרונים',
         // global actions
         'מצלמה', 'מצב היכרות', 'פרופיל', 'בורר תפקידים',
-        // pushed screens
+        // pushed screens / no-arg sheets & hubs
         'הגדרות', 'בינה', 'מלאי', 'משימות',
+        'סידור מסך הבית', 'מועדון BuildSmart', 'פרויקטים', 'פרויקט חכם',
+        'תקציב', 'כספים', 'אודיט', 'חלופות זולות', 'השוואת מחירים',
+        'סריקת תוכנית', 'תנאי שימוש', 'מדיניות פרטיות',
         // the 5 boards
         'קבלן', 'מנהל', 'חנות ספק', 'שליח', 'עובד',
       ];
@@ -60,6 +66,12 @@ void main() {
         expect(labels.contains(r), isTrue,
             reason: 'registry must include the "$r" destination');
       }
+    });
+
+    test('every label is UNIQUE (no two destinations share a label)', () {
+      final labels = [for (final d in kbDestinations()) d.label];
+      expect(labels.toSet().length, labels.length,
+          reason: 'duplicate labels would make a typed term ambiguous');
     });
   });
 
@@ -82,6 +94,63 @@ void main() {
       final hits = matchDestinations('מחלקות');
       expect(hits.map((d) => d.label), contains('מחלקות'),
           reason: 'typing מחלקות must surface Departments');
+    });
+
+    test('each LIVE department name surfaces its own department destination', () {
+      // The 4 live departments (departments_screen.dart:105-110): typing the
+      // exact name must land on that single department's destination.
+      const depts = <String>[
+        'אינסטלציה',
+        'ברזים וסניטריים',
+        'כלי עבודה ידני',
+        'כלי עבודה חשמלי',
+      ];
+      for (final name in depts) {
+        final hits = matchDestinations(name);
+        expect(hits.map((d) => d.label), contains(name),
+            reason: 'typing "$name" must surface its department destination');
+      }
+    });
+
+    test('a department SYNONYM keyword resolves to its department', () {
+      // 'אסלות' is a ברזים-וסניטריים keyword; 'ריתוך' a כלי-עבודה-חשמלי keyword;
+      // 'צנרת' an אינסטלציה keyword — none is the label, so this proves the
+      // department keywords (not just labels) are matched.
+      expect(matchDestinations('אסלות').map((d) => d.label),
+          contains('ברזים וסניטריים'),
+          reason: 'אסלות → ברזים וסניטריים');
+      expect(matchDestinations('ריתוך').map((d) => d.label),
+          contains('כלי עבודה חשמלי'),
+          reason: 'ריתוך → כלי עבודה חשמלי');
+      expect(matchDestinations('צנרת').map((d) => d.label),
+          contains('אינסטלציה'),
+          reason: 'צנרת → אינסטלציה');
+    });
+
+    test('new no-arg screens/sheets are reachable by typing', () {
+      // Each newly-wired standalone destination must surface on a representative
+      // term (label or a distinctive keyword).
+      expect(matchDestinations('תקציב').map((d) => d.label), contains('תקציב'),
+          reason: 'תקציב → Budget');
+      expect(matchDestinations('פרויקטים').map((d) => d.label),
+          contains('פרויקטים'),
+          reason: 'פרויקטים → Projects');
+      expect(matchDestinations('מועדון').map((d) => d.label),
+          contains('מועדון BuildSmart'),
+          reason: 'מועדון → Rewards hub');
+      expect(matchDestinations('אודיט').map((d) => d.label), contains('אודיט'),
+          reason: 'אודיט → Audit screen');
+      expect(matchDestinations('פרטיות').map((d) => d.label),
+          contains('מדיניות פרטיות'),
+          reason: 'פרטיות → Privacy policy (LegalTab.privacy)');
+      expect(matchDestinations('תנאי שימוש').map((d) => d.label),
+          contains('תנאי שימוש'),
+          reason: 'תנאי שימוש → Terms (LegalTab.terms)');
+      // 'terms' and 'privacy' resolve to DISTINCT legal destinations.
+      expect(matchDestinations('terms').map((d) => d.label),
+          contains('תנאי שימוש'));
+      expect(matchDestinations('privacy').map((d) => d.label),
+          contains('מדיניות פרטיות'));
     });
 
     test('a board term ("מנהל") returns its board destination', () {
