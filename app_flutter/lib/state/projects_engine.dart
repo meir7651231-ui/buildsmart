@@ -112,8 +112,12 @@ class ProjectsState {
   /// Next project sequence number — `projSeq` (starts at 4; PRJ-1..3 seeded).
   final int seq;
 
-  LiveProject get active =>
-      projects.firstWhere((p) => p.id == activeId, orElse: () => projects.first);
+  LiveProject get active => projects.isEmpty
+      // Empty board (the server's honest-empty contract) — return a const
+      // sentinel so consumers that read `.name` (app-bar label, cart default,
+      // smart-project title) get '' instead of crashing on `projects.first`.
+      ? const LiveProject(id: '', name: '', addr: '', manager: '')
+      : projects.firstWhere((p) => p.id == activeId, orElse: () => projects.first);
 
   ProjectsState copyWith({
     List<LiveProject>? projects,
@@ -305,15 +309,19 @@ final projectsProvider =
     StateNotifierProvider<ProjectsNotifier, ProjectsState>(
   (ref) {
     final repo = ref.read(siteRepositoryProvider);
-    // Source the seed through the repository (the local impl exposes it). Any
-    // non-local impl falls back to the const seed — identical sites either way.
-    if (repo is LocalSiteRepository) {
-      return ProjectsNotifier(
-        seed: repo.seed(),
-        activeId: repo.seedActiveId(),
-      );
-    }
-    return ProjectsNotifier();
+    // Source the seed through the repository's LIVE contract (not the
+    // local-only `seed()`), so a SERVER impl's honest-empty board flows through
+    // instead of the engine falling back to the const demo seed. The local
+    // impl returns `kProjects`/`kActiveProjectId` → byte-identical to before.
+    // Persistence follows the impl: the local demo is prefs-backed (persist on);
+    // a server impl is backend-driven and must NOT replay stale local demo
+    // projects from prefs, so persist is off on the connected path.
+    final isLocal = repo is LocalSiteRepository;
+    return ProjectsNotifier(
+      seed: repo.projects(),
+      activeId: repo.activeProjectId(),
+      persist: isLocal,
+    );
   },
 );
 
