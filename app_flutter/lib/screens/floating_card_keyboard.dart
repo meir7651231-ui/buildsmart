@@ -1,4 +1,5 @@
-// 🃏 floating_card_keyboard — the PERSISTENT floating card-keyboard panel.
+// 🃏 floating_card_keyboard — the PERSISTENT floating card-keyboard panel AND
+// the MORPH NAVIGATOR (STEP B).
 //
 // This is the same surface the old modal `_CardKeyboardSheet` rendered (a
 // read-only query field driven by the custom keyboard, plus a LIVE prediction
@@ -9,16 +10,19 @@
 // Positioned in [HomeShell]'s body Stack, so it never wraps/resizes/dims the
 // IndexedStack).
 //
-// Differences from the deleted modal sheet:
-//   • No modal route. [HomeShell] mounts this directly in its body Stack (gated
-//     by [kKeyboardToolStrip] + [keyboardOverlayOpenProvider]).
-//   • The drag handle becomes a real CLOSE affordance: a down-chevron that sets
-//     [keyboardOverlayOpenProvider] to false (there is no route to pop).
-//   • `onTool` must NOT pop a route (there is none). It closes the overlay (sets
-//     the provider false) THEN runs [runKeyboardTool] with THIS widget's own
-//     ref/context — both stay valid because the home stays mounted underneath.
-//   • A Material/Container with rounded-top corners + a subtle top shadow gives
-//     it the lifted "floating keyboard" look in place of the sheet chrome.
+// STEP B — the morph engine. This widget owns a DRILL-STACK of tool node-lists
+// ([keyboard_tool_tree.dart]). The strip's grid/gear toggles PUSH the home/kbd
+// node-list; tapping a node either:
+//   • LEAF  → runs the node's action (navigate the screen underneath / push a
+//             route) and KEEPS the overlay floating (the panel does NOT close);
+//   • BRANCH→ pushes its children onto the stack, MORPHING the tool view in
+//             place (e.g. תפריט → its AI-hub/settings tiles) with no navigation.
+// A BACK tile pops the stack; popping the last tool-view returns to the letters
+// (stack empty). The only explicit dismiss is the close-chevron (unchanged).
+//
+// The keyboard itself ([bs_keyboard.dart]) stays PURE: it is handed the current
+// node-list projected to pure [KbTile]s and bubbles a tapped tile back as an
+// opaque int — all the navigation meaning lives in the tree here.
 //
 // Only the PURE [cardKeyboardPredictions] helper is imported from
 // card_keyboard_sheet.dart — never a widget (the modal widget is deleted).
@@ -28,14 +32,14 @@ import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
 import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
-import 'package:buildsmart/screens/keyboard_tool_actions.dart'
-    show runKeyboardTool;
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/smart_input/caret.dart' show insertAtCaret;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
-    show KbTool;
+    show KbToolLayer;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show BsKeyboardHost;
 import 'package:flutter/material.dart';
@@ -43,9 +47,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The persistent floating card-keyboard panel: a read-only field driven by the
 /// custom keyboard, with a LIVE prediction row recomputed from the field text on
-/// every change. Self-contained and crash-safe: the controller/focus are owned
-/// here; this widget's own `ref`/`context` drive tool navigation (the home stays
-/// mounted under the overlay, so they stay valid).
+/// every change, AND the morph drill-stack navigator. Self-contained and
+/// crash-safe: the controller/focus/stack are owned here; this widget's own
+/// `ref`/`context` drive tool navigation (the home stays mounted under the
+/// overlay, so they stay valid).
 class FloatingCardKeyboard extends ConsumerStatefulWidget {
   const FloatingCardKeyboard({super.key});
 
@@ -64,6 +69,19 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
 
   /// The current prediction-row chips (LIVE: recomputed from `_controller.text`).
   late List<String> _preds;
+
+  /// The MORPH drill-stack: each entry is the tool node-list at that depth. Empty
+  /// (the default) → the keyboard shows its LETTERS (no tool view). Pushing the
+  /// home/kbd node-list (grid/gear) makes `_stack == [thatList]`; drilling a
+  /// BRANCH pushes its children; BACK pops the last entry.
+  final List<List<KbToolNode>> _stack = <List<KbToolNode>>[];
+
+  /// Which strip toggle to highlight: the layer of the stack BASE. Set when
+  /// grid/gear pushes the first node-list; back to `none` when the stack clears.
+  KbToolLayer _baseLayer = KbToolLayer.none;
+
+  /// The node-list currently shown (null while the stack is empty → letters).
+  List<KbToolNode>? get _currentNodes => _stack.isEmpty ? null : _stack.last;
 
   @override
   void initState() {
@@ -101,15 +119,77 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   }
 
   /// Close the floating overlay (no route to pop — flip the provider instead).
+  /// The ONLY explicit dismiss (the close-chevron + the send key).
   void _close() {
     ref.read(keyboardOverlayOpenProvider.notifier).state = false;
   }
+
+  /// GRID toggle: open the HOME node-list as the stack base — or, if HOME is
+  /// already the base, toggle the whole stack closed back to the letters (so a
+  /// second tap on the lit toggle dismisses the tool view, matching the legacy
+  /// strip behaviour). Never closes the overlay.
+  void _onGrid() => setState(() {
+        if (_baseLayer == KbToolLayer.home) {
+          _stack.clear();
+          _baseLayer = KbToolLayer.none;
+        } else {
+          _stack
+            ..clear()
+            ..add(kbHomeNodes());
+          _baseLayer = KbToolLayer.home;
+        }
+      });
+
+  /// GEAR toggle: open the KBD node-list as the stack base — or toggle closed if
+  /// KBD is already the base. Never closes the overlay.
+  void _onGear() => setState(() {
+        if (_baseLayer == KbToolLayer.kbd) {
+          _stack.clear();
+          _baseLayer = KbToolLayer.none;
+        } else {
+          _stack
+            ..clear()
+            ..add(kbKbdNodes());
+          _baseLayer = KbToolLayer.kbd;
+        }
+      });
+
+  /// Tapped a tool tile (its opaque [id] is the node's index in the current
+  /// node-list). LEAF → run its action and KEEP the overlay floating (do NOT
+  /// flip the provider); BRANCH → push its children, morphing the tool view in
+  /// place. Bounds-guarded so a stale id can never throw.
+  void _onTile(int id) {
+    final nodes = _currentNodes;
+    if (nodes == null || id < 0 || id >= nodes.length) return;
+    final node = nodes[id];
+    if (node.isBranch) {
+      setState(() => _stack.add(node.children));
+    } else {
+      // KEEP-FLOATING: run the leaf action on THIS widget's own ref/context
+      // (the home stays mounted under the overlay) and leave the overlay OPEN.
+      // Leaf actions that change a tab/section swap the screen UNDERNEATH while
+      // the keyboard keeps floating; leaf actions that push a full route push
+      // over everything (the keyboard reappears when that route pops). Neither
+      // closes the overlay.
+      node.action?.call(ref, context);
+    }
+  }
+
+  /// BACK tile: pop one drill level. From a deeper view this returns to the
+  /// parent node-list; from a TOP tool-view (the base) it empties the stack so
+  /// the LETTERS return — and the [_baseLayer] strip highlight is cleared with
+  /// it. Present on every tool-view (see [build]'s `showBack`).
+  void _onBack() => setState(() {
+        if (_stack.isNotEmpty) _stack.removeLast();
+        if (_stack.isEmpty) _baseLayer = KbToolLayer.none;
+      });
 
   @override
   Widget build(BuildContext context) {
     // A floating panel (rounded-top Material + a subtle top shadow), NOT a modal
     // sheet. SafeArea(top:false) keeps the home-indicator inset clear; the host
     // adds its own bottom SafeArea too, which is harmless (nested insets clamp).
+    final nodes = _currentNodes;
     return Material(
       color: const Color(0xFFFFFFFF),
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -174,7 +254,10 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                   ),
                 ),
               ),
-              // The assembled keyboard-with-tools, fed the LIVE finder chips.
+              // The assembled keyboard-with-tools, fed the LIVE finder chips AND
+              // the morph drill state. When [nodes] is null the keyboard shows
+              // its letters; otherwise it renders the current node-list as pure
+              // tiles (with a BACK tile once the stack is deeper than its base).
               BsKeyboardHost(
                 controller: _controller,
                 focusNode: _focus,
@@ -187,13 +270,20 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 forceShow: true,
                 predictions: _preds,
                 onPrediction: _onPrediction,
-                // Close the overlay FIRST (no route to pop), then navigate on
-                // THIS widget's own ref/context — both stay valid because the
-                // home stays mounted under the floating panel.
-                onTool: (KbTool t) {
-                  _close();
-                  runKeyboardTool(ref, context, t);
-                },
+                // MORPH drill state → the keyboard. The grid/gear toggles push
+                // the home/kbd node-list; a tapped tile bubbles its index to
+                // [_onTile] (leaf → keep-floating action · branch → morph). The
+                // BACK tile shows on EVERY tool-view (incl. a top one): it pops
+                // one drill level, and from a top tool-view that empties the
+                // stack → the letters return (spec: "from a top tool-view, back
+                // returns to the letters").
+                tiles: nodes == null ? null : kbTilesFor(nodes),
+                onTile: _onTile,
+                showBack: _stack.isNotEmpty,
+                onBack: _onBack,
+                activeLayer: _baseLayer,
+                onToolGrid: _onGrid,
+                onToolGear: _onGear,
               ),
             ],
           ),

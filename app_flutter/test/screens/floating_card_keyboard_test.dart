@@ -234,11 +234,13 @@ void main() {
           reason: 'closing removed the floating keyboard');
     });
 
-    testWidgets('tapping a home tool closes the overlay AND navigates',
+    testWidgets(
+        'tapping a LEAF (מחלקות) navigates AND keeps the overlay floating',
         (tester) async {
       final container = await pumpPanel(tester);
 
-      // Open the home-tools layer, then tap the first tool ('מחלקות').
+      // Open the home-tools layer (grid toggle pushes the home node-list), then
+      // tap the first LEAF ('מחלקות').
       await tester.tap(find.byIcon(Icons.grid_view));
       await tester.pumpAndSettle();
       expect(find.text('מחלקות'), findsOneWidget);
@@ -246,18 +248,125 @@ void main() {
       await tester.tap(find.text('מחלקות'));
       await tester.pumpAndSettle();
 
-      // onTool flipped the overlay provider off (no route to pop) → the panel is
-      // gone, the screen underneath remains.
-      expect(container.read(keyboardOverlayOpenProvider), isFalse,
-          reason: 'the tool tap closed the floating overlay');
-      expect(find.byType(BsKeyboard), findsNothing,
-          reason: 'the tool tap removed the floating keyboard');
+      // STEP B owner model: a LEAF navigates the screen UNDERNEATH (departments
+      // → tab 1) but the keyboard KEEPS FLOATING — the overlay stays OPEN and the
+      // BsKeyboard is still mounted over the swapped screen.
+      expect(container.read(mainTabProvider), 1,
+          reason: 'departments LEAF routed the home to the departments tab');
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'a LEAF tap must NOT close the floating overlay');
+      expect(find.byType(BsKeyboard), findsOneWidget,
+          reason: 'the keyboard keeps floating over the swapped screen');
       expect(find.text('screen-underneath'), findsOneWidget,
           reason: 'the full screen underneath stays');
+    });
 
-      // …and then ran runKeyboardTool(departments) → tab index 1.
-      expect(container.read(mainTabProvider), 1,
-          reason: 'departments tool routed the home to the departments tab');
+    testWidgets(
+        'tapping the תפריט BRANCH morphs in place (children appear, no nav)',
+        (tester) async {
+      final container = await pumpPanel(tester);
+      final tabBefore = container.read(mainTabProvider);
+
+      // Open the kbd-tools layer (gear toggle), revealing the תפריט branch tile.
+      await tester.tap(find.byIcon(Icons.settings));
+      await tester.pumpAndSettle();
+      expect(find.text('תפריט'), findsOneWidget,
+          reason: 'the gear toggle opened the kbd tools (תפריט is a branch)');
+
+      // Tapping the BRANCH morphs the tool view IN PLACE to its children — the
+      // AI hub (בינה) + settings (הגדרות) tiles — with NO navigation and NO close.
+      await tester.tap(find.text('תפריט'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('בינה'), findsOneWidget,
+          reason: 'the branch morphed to its AI-hub child tile');
+      expect(find.text('הגדרות'), findsOneWidget,
+          reason: 'the branch morphed to its settings child tile');
+      // The parent label is gone (we drilled into the branch).
+      expect(find.text('תפריט'), findsNothing,
+          reason: 'the view morphed away from the parent node-list');
+
+      // No navigation happened, and the overlay is still open.
+      expect(container.read(mainTabProvider), tabBefore,
+          reason: 'morphing a branch does not navigate');
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'morphing a branch keeps the overlay open');
+      expect(find.byType(BsKeyboard), findsOneWidget);
+      // No route was pushed (the AI-hub/settings screens are not present yet).
+      expect(find.text('screen-underneath'), findsOneWidget);
+    });
+
+    testWidgets('BACK pops the branch back to its parent node-list',
+        (tester) async {
+      await pumpPanel(tester);
+
+      // Drill: gear → תפריט branch → its children.
+      await tester.tap(find.byIcon(Icons.settings));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('תפריט'));
+      await tester.pumpAndSettle();
+      expect(find.text('הגדרות'), findsOneWidget, reason: 'drilled in');
+      // A BACK tile leads the drilled view.
+      expect(find.text('חזרה'), findsOneWidget,
+          reason: 'a back affordance leads a tool-view');
+
+      // BACK → pop to the parent (kbd) node-list: the branch tile is back and
+      // the children are gone. (A back tile still leads the parent — it is a top
+      // tool-view, whose own back returns to the letters.)
+      await tester.tap(find.text('חזרה'));
+      await tester.pumpAndSettle();
+      expect(find.text('תפריט'), findsOneWidget,
+          reason: 'back returned to the parent kbd node-list');
+      expect(find.text('בינה'), findsNothing,
+          reason: 'the branch children are popped away');
+    });
+
+    testWidgets('BACK from a top tool-view returns to the letters',
+        (tester) async {
+      // A representative Hebrew letter present ONLY on the letter layer.
+      const hebrewLetter = 'ק';
+      await pumpPanel(tester);
+
+      // Open the home base (top) tool-view: the letters are hidden and a BACK
+      // tile leads it (the spec's "from a top tool-view, back returns").
+      await tester.tap(find.byIcon(Icons.grid_view));
+      await tester.pumpAndSettle();
+      expect(find.text('מחלקות'), findsOneWidget);
+      expect(find.text(hebrewLetter), findsNothing);
+      expect(find.text('חזרה'), findsOneWidget,
+          reason: 'a top tool-view still shows a back tile');
+
+      // BACK from the top tool-view empties the stack → the letters return.
+      await tester.tap(find.text('חזרה'));
+      await tester.pumpAndSettle();
+      expect(find.text(hebrewLetter), findsOneWidget,
+          reason: 'back from a top tool-view returns to the letters');
+      expect(find.text('מחלקות'), findsNothing,
+          reason: 'the tool tiles are gone once back at the letters');
+    });
+
+    testWidgets('re-tapping the lit grid toggle also closes back to letters',
+        (tester) async {
+      const hebrewLetter = 'ק';
+      await pumpPanel(tester);
+
+      // The strip's grid toggle is the FIRST grid_view icon (the strip renders
+      // above the tiles). Once the home layer opens, the departments tile ALSO
+      // draws a grid_view icon, so we always target the toggle via `.first`.
+      Finder gridToggle() => find.byIcon(Icons.grid_view).first;
+
+      // Open the home base…
+      await tester.tap(gridToggle());
+      await tester.pumpAndSettle();
+      expect(find.text('מחלקות'), findsOneWidget);
+
+      // …then tap the now-lit grid toggle again → the strip toggle is the
+      // secondary close path (legacy parity), also returning to the letters.
+      await tester.tap(gridToggle());
+      await tester.pumpAndSettle();
+      expect(find.text(hebrewLetter), findsOneWidget,
+          reason: 'a second tap on the lit toggle clears the tool view');
+      expect(find.text('מחלקות'), findsNothing);
     });
   });
 }

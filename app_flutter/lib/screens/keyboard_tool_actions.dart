@@ -17,10 +17,8 @@
 // standalone opener) show a "בקרוב" SnackBar via [_comingSoon] instead of a
 // guessed/broken navigation. Each is marked TODO(step-2).
 
-import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show catalogSectionProvider;
-import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/help_mode.dart' show helpModeProvider;
@@ -98,9 +96,13 @@ void runKeyboardTool(WidgetRef ref, BuildContext context, KbTool tool) {
       _comingSoon(context, 'קולי');
 
     case KbTool.menu:
-      // The app's home/catalog overflow menu (the app-bar 3-dots) surfaced as a
-      // sheet so the keyboard tool can reach it from anywhere.
-      _openAppMenu(context);
+      // STEP B: תפריט is no longer a single destination — it is a BRANCH in the
+      // morph keyboard ([keyboard_tool_tree.dart]) whose children are the AI hub
+      // + settings (replacing the old `_openAppMenu` sheet). The morph keyboard
+      // never routes KbTool.menu here (it drills the branch instead); this case
+      // only fires from a legacy non-morph mount, where the menu has no single
+      // target, so we surface "בקרוב" rather than a guessed/half nav.
+      _comingSoon(context, 'תפריט');
   }
 }
 
@@ -110,46 +112,6 @@ void runKeyboardTool(WidgetRef ref, BuildContext context, KbTool tool) {
 void _openCatalogSection(WidgetRef ref, String section) {
   ref.read(mainTabProvider.notifier).state = 0;
   ref.read(catalogSectionProvider.notifier).state = section;
-}
-
-/// Opens the home/catalog overflow menu (the app-bar 3-dots, `_CatalogMenuButton`
-/// in home_shell.dart) as a bottom sheet, so the keyboard's תפריט tool can reach
-/// it from anywhere. Mirrors that menu's two items: AI hub + settings.
-void _openAppMenu(BuildContext context) {
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: const Color(0xFFFFFFFF),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (sheetCtx) => Directionality(
-      textDirection: TextDirection.rtl,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Text('🤖', style: TextStyle(fontSize: 22)),
-              title: const Text('בינה מלאכותית ואוטומציה'),
-              onTap: () {
-                Navigator.of(sheetCtx).pop();
-                Navigator.of(context).push(AIHubScreen.route());
-              },
-            ),
-            ListTile(
-              leading: const Text('⚙️', style: TextStyle(fontSize: 22)),
-              title: const Text('הגדרות'),
-              onTap: () {
-                Navigator.of(sheetCtx).pop();
-                Navigator.of(context).push(CatalogSettingsScreen.route());
-              },
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 /// Shows a transient "בקרוב" SnackBar for a not-yet-wired tool [label]. Used in

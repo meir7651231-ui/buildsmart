@@ -66,6 +66,31 @@ class _ToolDef {
   const _ToolDef(this.id, this.icon, this.label);
 }
 
+/// A PURE description of one morph tile — the data the screens-layer drill
+/// engine ([keyboard_tool_tree.dart]) hands to [BsKeyboard.tiles].
+///
+/// This keeps [BsKeyboard] screen-agnostic for the MORPH path (the drill-stack)
+/// exactly as [_ToolDef]/[KbTool] keep it agnostic for the legacy [toolLayer]
+/// path: a tile is just an [icon] + a Hebrew [label] + a plain integer [id].
+/// The id carries no app meaning here — the screens layer chose it and switches
+/// on it when [BsKeyboard.onTile] bubbles it back on tap. No import from
+/// `lib/screens` or `lib/state` is needed to render a tile, so this type (and
+/// the whole tiles path) keeps the widget pure.
+@immutable
+class KbTile {
+  /// The Material icon shown above the label.
+  final IconData icon;
+
+  /// The Hebrew label shown under the icon (also the Semantics label).
+  final String label;
+
+  /// An opaque, screens-layer-chosen identity bubbled back via [BsKeyboard.onTile]
+  /// when this tile is tapped. Meaningless to [BsKeyboard] itself.
+  final int id;
+
+  const KbTile({required this.icon, required this.label, required this.id});
+}
+
 /// The 8 home tools, in layout order. Material icons (the app uses Material).
 const List<_ToolDef> _kHomeTools = <_ToolDef>[
   _ToolDef(KbTool.departments, Icons.grid_view, 'מחלקות'),
@@ -77,6 +102,11 @@ const List<_ToolDef> _kHomeTools = <_ToolDef>[
   _ToolDef(KbTool.connect, Icons.cable, 'חיבור'),
   _ToolDef(KbTool.favorites, Icons.star_border, 'מועדפים'),
 ];
+
+/// How many morph tiles ([_tileRows]) sit in one row. The legacy fixed layers
+/// pack their 8/5 into a single row; the variable-length drill view wraps at
+/// this width so deep branches stay legible.
+const int _kTilesPerRow = 4;
 
 /// The 5 keyboard tools, in layout order.
 const List<_ToolDef> _kKbdTools = <_ToolDef>[
@@ -151,6 +181,30 @@ class BsKeyboard extends StatelessWidget {
   /// Tapped a prediction chip — receives the chip's text.
   final ValueChanged<String>? onPrediction;
 
+  // ── MORPH path (drill-stack) — PURE tiles, screens-layer driven ───────────
+  // When [tiles] is non-null it OVERRIDES the letter/symbol/[toolLayer] grid:
+  // the main area renders exactly these pure [KbTile]s (the current drill
+  // node-list), with a leading BACK tile when [showBack] is true. This is the
+  // path the floating keyboard uses for the morph engine; the legacy
+  // [toolLayer]/[onTool] path is left untouched so the golden + strip tests are
+  // byte-identical. Both default OFF (null) so every existing mount is unchanged.
+
+  /// The pure tiles to render in the main grid (the current drill node-list).
+  /// Null (default) → render the letters/symbols/[toolLayer] grid as before.
+  final List<KbTile>? tiles;
+
+  /// Tapped a [tiles] tile — receives that tile's opaque [KbTile.id]. The
+  /// screens-layer drill engine switches on it (leaf → run · branch → morph).
+  final ValueChanged<int>? onTile;
+
+  /// When true (and [tiles] is shown), prepend a BACK tile that drills out one
+  /// level. False on a top tool-view (back there returns to the letters, which
+  /// the screens layer drives by clearing [tiles]).
+  final bool showBack;
+
+  /// Tapped the BACK tile — pops one drill level. Only rendered when [showBack].
+  final VoidCallback? onBack;
+
   const BsKeyboard({
     super.key,
     required this.onKey,
@@ -168,6 +222,10 @@ class BsKeyboard extends StatelessWidget {
     this.onToolGear,
     this.onTool,
     this.onPrediction,
+    this.tiles,
+    this.onTile,
+    this.showBack = false,
+    this.onBack,
   });
 
   /// Dispatches a tapped [key] to the matching callback based on its [kind].
@@ -245,6 +303,14 @@ class BsKeyboard extends StatelessWidget {
   /// tool layer is active it returns that layer's tool-tile rows instead — the
   /// letters/KeyKind routing are never touched in that case.
   List<Widget> _mainRows() {
+    // MORPH path: a non-null [tiles] list replaces the whole grid with the
+    // current drill node-list (pure tiles), with a leading BACK tile when asked.
+    // Checked FIRST so it takes precedence over the legacy layers; when [tiles]
+    // is null this whole branch is skipped and the historical render is exact.
+    if (tiles != null) {
+      return _tileRows(tiles!);
+    }
+
     // Tool layers replace the letter grid (the existing layer mechanism, the
     // same idea as showSymbols). kBottomRow is added by build(), not here.
     switch (toolLayer) {
@@ -301,6 +367,53 @@ class BsKeyboard extends StatelessWidget {
       Row(children: children),
       const SizedBox(height: BsTokens.space1),
     ];
+  }
+
+  /// Lays the MORPH drill node-list out as pure tiles, wrapped at
+  /// [_kTilesPerRow] per row so a variable-length children list stays readable
+  /// (the legacy [_toolRows] packs a fixed 8 into ONE row; a drill view can hold
+  /// any count). When [showBack] is true a BACK tile leads the FIRST row.
+  ///
+  /// Each tile is [Expanded] like the letter rows; the final row is padded with
+  /// empty [Expanded]s so every tile keeps the same width as a full row's. Each
+  /// tile DISPLAYS its [KbTile.label] and calls [onTile] with its [KbTile.id];
+  /// the back tile calls [onBack].
+  List<Widget> _tileRows(List<KbTile> tiles) {
+    // Build the flat sequence of tile widgets (a leading back tile first).
+    final cells = <Widget>[];
+    if (showBack) {
+      cells.add(
+        _BackTile(onTap: onBack),
+      );
+    }
+    for (final t in tiles) {
+      cells.add(
+        _ToolTile(icon: t.icon, label: t.label, onTap: () => onTile?.call(t.id)),
+      );
+    }
+
+    // Chunk into rows of [_kTilesPerRow], padding the last row with empty slots
+    // so widths stay uniform across rows.
+    final rowWidgets = <Widget>[];
+    for (var start = 0; start < cells.length; start += _kTilesPerRow) {
+      final end =
+          (start + _kTilesPerRow) < cells.length
+              ? start + _kTilesPerRow
+              : cells.length;
+      final rowCells = cells.sublist(start, end);
+      final children = <Widget>[];
+      for (var i = 0; i < _kTilesPerRow; i++) {
+        if (i > 0) children.add(const SizedBox(width: BsTokens.space1));
+        children.add(
+          Expanded(
+            child: i < rowCells.length ? rowCells[i] : const SizedBox.shrink(),
+          ),
+        );
+      }
+      rowWidgets.add(Row(children: children));
+      rowWidgets.add(const SizedBox(height: BsTokens.space1));
+    }
+    return rowWidgets;
   }
 
   @override
@@ -539,6 +652,66 @@ class _ToolTile extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: BsTokens.typeMicro,
                     color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The BACK tile that leads a MORPH drill view ([_tileRows] with `showBack`).
+/// Same key-style shell as [_ToolTile] but an arrow-back glyph + 'חזרה' label,
+/// tinted with the brand colour so the drill-out affordance reads as distinct
+/// from the navigable tool tiles. Tapping pops one drill level ([onBack]).
+class _BackTile extends StatelessWidget {
+  final VoidCallback? onTap;
+
+  const _BackTile({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+        child: Semantics(
+          button: true,
+          label: 'חזרה',
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsets.symmetric(
+              vertical: BsTokens.space2,
+              horizontal: BsTokens.space1,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+              border: Border.all(color: BsTokens.brand),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.arrow_back,
+                  size: BsTokens.dialIconSize,
+                  color: BsTokens.brand,
+                ),
+                const SizedBox(height: BsTokens.spaceHair),
+                const Text(
+                  'חזרה',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: BsTokens.typeMicro,
+                    color: BsTokens.brand,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

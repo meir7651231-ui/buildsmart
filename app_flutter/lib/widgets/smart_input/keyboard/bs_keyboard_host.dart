@@ -85,6 +85,46 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// stay gated by the flag + screen-reader check. STEP 4 (go-live fix).
   final bool forceShow;
 
+  // ── MORPH path (drill-stack) — STEP B ─────────────────────────────────────
+  // A mount that drives its OWN morph engine (the floating keyboard) supplies
+  // [tiles]/[onTile]/[showBack]/[onBack]; when [tiles] is non-null the host
+  // forwards them to [BsKeyboard] (which then renders those pure tiles instead
+  // of the letters/[toolLayer] grid) AND routes the strip grid/gear toggles to
+  // [onToolGrid]/[onToolGear] instead of its internal [_toolLayer] toggle. Every
+  // existing mount leaves these null and keeps the legacy internal behaviour.
+
+  /// The pure tiles to render (the current drill node-list). Null → the host's
+  /// own letters/symbols/[toolLayer] grid (legacy behaviour).
+  final List<KbTile>? tiles;
+
+  /// Tapped a [tiles] tile — bubbles the tile's opaque id to the mount's drill
+  /// engine. Ignored while [tiles] is null.
+  final ValueChanged<int>? onTile;
+
+  /// Whether to show the leading BACK tile in the morph grid. Ignored while
+  /// [tiles] is null.
+  final bool showBack;
+
+  /// Tapped the BACK tile. Ignored while [tiles] is null.
+  final VoidCallback? onBack;
+
+  /// Override for the strip GRID toggle. Null → the host's internal home-layer
+  /// toggle (legacy). The floating keyboard supplies this to push its home
+  /// node-list onto the drill stack.
+  final VoidCallback? onToolGrid;
+
+  /// Override for the strip GEAR toggle. Null → the host's internal kbd-layer
+  /// toggle (legacy). The floating keyboard supplies this to push its kbd
+  /// node-list onto the drill stack.
+  final VoidCallback? onToolGear;
+
+  /// Which toggle the strip should highlight while a morph mount drives the grid
+  /// ([KbToolLayer.home] when the home node-list is on the stack base,
+  /// [KbToolLayer.kbd] for the kbd list, [KbToolLayer.none] when neither). Null
+  /// → the host uses its own internal [_toolLayer] (legacy). Only consulted for
+  /// the strip's active-highlight; the grid render is driven by [tiles].
+  final KbToolLayer? activeLayer;
+
   const BsKeyboardHost({
     super.key,
     required this.controller,
@@ -95,6 +135,13 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     this.onPrediction,
     this.onTool,
     this.forceShow = false,
+    this.tiles,
+    this.onTile,
+    this.showBack = false,
+    this.onBack,
+    this.onToolGrid,
+    this.onToolGear,
+    this.activeLayer,
   });
 
   @override
@@ -160,15 +207,27 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
           // taps via [onPrediction]; onTool routes each typed KbTool through the
           // single keyboard→app seam ([runKeyboardTool]).
           showToolStrip: widget.showToolStrip,
-          toolLayer: _toolLayer,
+          // Strip highlight: a morph mount drives the active toggle via
+          // [activeLayer]; otherwise the host's own [_toolLayer] decides.
+          toolLayer: widget.activeLayer ?? _toolLayer,
           predictions: widget.predictions,
           onPrediction: widget.onPrediction,
-          onToolGrid: _onToolGrid,
-          onToolGear: _onToolGear,
+          // Grid/gear: a morph mount overrides both toggles to push its
+          // home/kbd node-list onto the drill stack; otherwise the host's
+          // internal layer toggle runs (legacy mounts).
+          onToolGrid: widget.onToolGrid ?? _onToolGrid,
+          onToolGear: widget.onToolGear ?? _onToolGear,
           // STEP 4: a mount may override onTool (the card-keyboard sheet closes
           // itself first, then drives runKeyboardTool on the home's navigator);
           // with no override every existing mount keeps the step-2 default.
           onTool: widget.onTool ?? (t) => runKeyboardTool(ref, context, t),
+          // STEP B morph path: forward the mount's pure tiles + drill controls.
+          // Null tiles (every legacy mount) → BsKeyboard renders its letters/
+          // [toolLayer] grid exactly as before.
+          tiles: widget.tiles,
+          onTile: widget.onTile,
+          showBack: widget.showBack,
+          onBack: widget.onBack,
         ),
       ),
     );

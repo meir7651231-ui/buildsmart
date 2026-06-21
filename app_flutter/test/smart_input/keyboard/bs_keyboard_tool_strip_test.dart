@@ -48,6 +48,10 @@ void main() {
     VoidCallback? onToolGear,
     ValueChanged<KbTool>? onTool,
     ValueChanged<String>? onPrediction,
+    List<KbTile>? tiles,
+    ValueChanged<int>? onTile,
+    bool showBack = false,
+    VoidCallback? onBack,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -66,6 +70,10 @@ void main() {
             onToolGear: onToolGear,
             onTool: onTool,
             onPrediction: onPrediction,
+            tiles: tiles,
+            onTile: onTile,
+            showBack: showBack,
+            onBack: onBack,
           ),
         ),
       ),
@@ -245,5 +253,77 @@ void main() {
 
     await pump(tester, toolLayer: KbToolLayer.kbd); // kbd tools
     expect(find.byIcon(Icons.send), findsOneWidget);
+  });
+
+  // ── MORPH path (pure tiles) — STEP B ───────────────────────────────────────
+  // The new screen-agnostic path: a non-null [tiles] list replaces the grid with
+  // those pure tiles (bubbling an opaque int id), takes precedence over both the
+  // letters and the legacy [toolLayer], and shows a BACK tile only on request.
+  group('tiles (morph path)', () {
+    const tiles = <KbTile>[
+      KbTile(icon: Icons.account_tree, label: 'אלפא', id: 0),
+      KbTile(icon: Icons.route, label: 'בטא', id: 1),
+      KbTile(icon: Icons.bolt, label: 'גמא', id: 2),
+    ];
+
+    testWidgets('renders the pure tiles; letters gone; kBottomRow present',
+        (tester) async {
+      await pump(tester, tiles: tiles);
+
+      // Each pure tile's label renders…
+      expect(find.text('אלפא'), findsOneWidget);
+      expect(find.text('בטא'), findsOneWidget);
+      expect(find.text('גמא'), findsOneWidget);
+
+      // …the letter grid is replaced…
+      expect(find.text(hebrewLetter), findsNothing);
+
+      // …and the bottom action row stays.
+      expect(find.byIcon(Icons.send), findsOneWidget);
+    });
+
+    testWidgets('tapping a tile fires onTile with its opaque id',
+        (tester) async {
+      final tapped = <int>[];
+      await pump(tester, tiles: tiles, onTile: tapped.add);
+
+      await tester.tap(find.text('בטא'));
+      await tester.pump();
+      expect(tapped, <int>[1], reason: 'the tile bubbles its KbTile.id');
+    });
+
+    testWidgets('tiles override the legacy toolLayer (no home tiles render)',
+        (tester) async {
+      // Even with toolLayer:home, a non-null tiles list wins — the home tile
+      // labels (e.g. 'מחלקות') must NOT appear; the morph tiles do.
+      await pump(tester, toolLayer: KbToolLayer.home, tiles: tiles);
+      expect(find.text('מחלקות'), findsNothing,
+          reason: 'tiles take precedence over the legacy layer');
+      expect(find.text('אלפא'), findsOneWidget);
+    });
+
+    testWidgets('showBack:false → no back tile; showBack:true → back tile fires',
+        (tester) async {
+      // No back tile by default.
+      await pump(tester, tiles: tiles);
+      expect(find.text('חזרה'), findsNothing,
+          reason: 'no back affordance at a top tool-view');
+
+      // With showBack, a leading back tile renders and fires onBack.
+      var back = 0;
+      await pump(tester, tiles: tiles, showBack: true, onBack: () => back++);
+      expect(find.text('חזרה'), findsOneWidget,
+          reason: 'the back tile leads a drilled view');
+      await tester.tap(find.text('חזרה'));
+      await tester.pump();
+      expect(back, 1, reason: 'tapping back pops one drill level');
+    });
+
+    testWidgets('null tiles → the letters render (morph path fully off)',
+        (tester) async {
+      await pump(tester); // tiles defaults null
+      expect(find.text(hebrewLetter), findsOneWidget);
+      expect(find.text('חזרה'), findsNothing);
+    });
   });
 }

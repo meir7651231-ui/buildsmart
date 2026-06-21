@@ -125,14 +125,20 @@ void main() {
     expect(find.textContaining('בקרוב'), findsOneWidget);
   });
 
-  testWidgets('menu → opens the app menu sheet (AI hub + settings)',
-      (tester) async {
+  // STEP B: תפריט is no longer a single destination in the seam — it became a
+  // BRANCH in the morph keyboard ([keyboard_tool_tree.dart]) whose children are
+  // the AI hub + settings (the old `_openAppMenu` sheet is removed). The morph
+  // keyboard drills the branch directly and never calls runKeyboardTool(menu);
+  // the legacy seam path for KbTool.menu now surfaces "בקרוב" instead of a
+  // half/guessed nav. The branch itself is asserted in keyboard_tool_tree_test.
+  testWidgets('menu → "בקרוב" SnackBar (no longer a sheet)', (tester) async {
     await pumpAndRun(
       tester,
       (ref, context) => runKeyboardTool(ref, context, KbTool.menu),
     );
-    await tester.pumpAndSettle(); // let the bottom sheet animate in
-    expect(find.text('הגדרות'), findsOneWidget);
-    expect(find.text('בינה מלאכותית ואוטומציה'), findsOneWidget);
+    await tester.pump(); // let the SnackBar enter
+    expect(find.textContaining('בקרוב'), findsOneWidget);
+    // The removed sheet's items must NOT appear.
+    expect(find.text('הגדרות'), findsNothing);
   });
 }
