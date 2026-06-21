@@ -84,9 +84,12 @@ void main() {
     expect(lines.single.productName, name);
     expect(lines.single.productQty, 1);
 
-    // 5 · jump to the store via the cart FAB
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-    await t.tap(find.byType(FloatingActionButton));
+    // 5 · jump to the store via the cart FAB. (Target the CART FAB by its
+    // shopping-cart icon — the home now also floats a keyboard FAB behind
+    // kKeyboardToolStrip, so a bare byType(FloatingActionButton) is ambiguous.)
+    final cartFab = find.widgetWithIcon(FloatingActionButton, Icons.shopping_cart);
+    expect(cartFab, findsOneWidget);
+    await t.tap(cartFab);
     await t.pumpAndSettle();
 
     // 6 · open the cart section
