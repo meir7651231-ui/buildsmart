@@ -168,6 +168,17 @@ class BsKeyboard extends StatelessWidget {
   /// as-is with no horizontal scroll. Empty by default.
   final List<String> predictions;
 
+  /// The subset of [predictions] that are navigable DESTINATIONS (a tap
+  /// navigates) rather than query-narrowing product WORDS (a tap narrows the
+  /// query). A chip whose text is in this set renders with a small leading nav
+  /// glyph ([Icons.north_east]) + a subtle brand accent so the user can tell a
+  /// one-tap nav target from a word; every other chip renders EXACTLY as before.
+  ///
+  /// PURE plain data — just the destination chip LABELS — so [BsKeyboard] stays
+  /// screen-agnostic (no import from `lib/screens` or `lib/state`). Empty by
+  /// default, which makes every chip render byte-identically to today.
+  final Set<String> destinationChips;
+
   /// Tapped the grid-toggle (left of the strip, [Icons.grid_view]).
   final VoidCallback? onToolGrid;
 
@@ -218,6 +229,7 @@ class BsKeyboard extends StatelessWidget {
     this.showToolStrip = false,
     this.toolLayer = KbToolLayer.none,
     this.predictions = const <String>[],
+    this.destinationChips = const <String>{},
     this.onToolGrid,
     this.onToolGear,
     this.onTool,
@@ -425,6 +437,7 @@ class BsKeyboard extends StatelessWidget {
         _ToolStrip(
           toolLayer: toolLayer,
           predictions: predictions,
+          destinationChips: destinationChips,
           onToolGrid: onToolGrid,
           onToolGear: onToolGear,
           onPrediction: onPrediction,
@@ -462,6 +475,10 @@ class BsKeyboard extends StatelessWidget {
 class _ToolStrip extends StatelessWidget {
   final KbToolLayer toolLayer;
   final List<String> predictions;
+
+  /// The subset of [predictions] that are navigable destinations (gets the nav
+  /// glyph + brand accent). Empty → every chip renders as before.
+  final Set<String> destinationChips;
   final VoidCallback? onToolGrid;
   final VoidCallback? onToolGear;
   final ValueChanged<String>? onPrediction;
@@ -469,6 +486,7 @@ class _ToolStrip extends StatelessWidget {
   const _ToolStrip({
     required this.toolLayer,
     required this.predictions,
+    required this.destinationChips,
     required this.onToolGrid,
     required this.onToolGear,
     required this.onPrediction,
@@ -496,6 +514,7 @@ class _ToolStrip extends StatelessWidget {
                 Expanded(
                   child: _PredictionChip(
                     text: predictions[i],
+                    isDestination: destinationChips.contains(predictions[i]),
                     onTap: () => onPrediction?.call(predictions[i]),
                   ),
                 ),
@@ -562,38 +581,102 @@ class _StripToggle extends StatelessWidget {
 /// A single prediction chip in the middle of the [_ToolStrip]. Keyboard key
 /// styling (white fill, hairline border, rounded); shows its text on one line
 /// with ellipsis so a long suggestion never overflows the strip.
+///
+/// "FITTING PREDICTION" distinction: a chip is EITHER a navigable DESTINATION (a
+/// tap navigates) or a product WORD (a tap narrows the query). When
+/// [isDestination] is true the chip reads as a one-tap nav target — a small
+/// leading [Icons.north_east] glyph (brand-tinted) precedes the text, the
+/// hairline border becomes a thin brand border, and the fill gets a faint
+/// brand wash — mirroring the [_BackTile] brand affordance. When false (the
+/// DEFAULT for every chip, and for every chip while [destinationChips] is empty)
+/// it renders EXACTLY as before — byte-identical: a centered single [Text] with
+/// the hairline [BsTokens.divider] border and white fill, no glyph.
 class _PredictionChip extends StatelessWidget {
   final String text;
+
+  /// When true, render the nav-target affordance (leading glyph + brand accent);
+  /// when false (default), render byte-identically to the historical chip.
+  final bool isDestination;
   final VoidCallback? onTap;
 
-  const _PredictionChip({required this.text, required this.onTap});
+  const _PredictionChip({
+    required this.text,
+    this.isDestination = false,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // The shared text label — identical styling in both branches, so a
+    // destination chip and a word chip read the same except for the affordance.
+    final label = Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        fontSize: 15,
+        color: BsTokens.inkLight,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+
+    // DEFAULT (word / empty destinationChips): EXACTLY the historical render —
+    // white Material, hairline divider border, centered single Text, no glyph.
+    if (!isDestination) {
+      return Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 48),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+              border: Border.all(color: BsTokens.divider),
+            ),
+            child: label,
+          ),
+        ),
+      );
+    }
+
+    // DESTINATION: a one-tap nav target. Leading north-east glyph + a thin brand
+    // border + a faint brand wash. Kept compact — one line, ellipsis preserved
+    // (the label stays Flexible inside a centered, min-width Row).
+    final radius = BorderRadius.circular(BsTokens.radiusCard / 2);
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+      borderRadius: radius,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
+        borderRadius: radius,
         child: Container(
           constraints: const BoxConstraints(minHeight: 48),
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
-            border: Border.all(color: BsTokens.divider),
+            // Faint brand wash so the destination reads as accented without
+            // shouting over the neutral keyboard.
+            color: BsTokens.brand.withOpacity(0.06),
+            borderRadius: radius,
+            border: Border.all(color: BsTokens.brand),
           ),
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 15,
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Icon(
+                Icons.north_east,
+                size: 14,
+                color: BsTokens.brand,
+              ),
+              const SizedBox(width: BsTokens.spaceHair),
+              Flexible(child: label),
+            ],
           ),
         ),
       ),

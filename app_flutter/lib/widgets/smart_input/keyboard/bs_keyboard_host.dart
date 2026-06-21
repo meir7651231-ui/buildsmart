@@ -67,6 +67,12 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// [showToolStrip] is false. STEP 3.
   final List<String> predictions;
 
+  /// The subset of [predictions] that are navigable DESTINATIONS (a tap
+  /// navigates) rather than query-narrowing product WORDS. Forwarded verbatim to
+  /// [BsKeyboard] so those chips get the nav glyph + brand accent. Empty by
+  /// default → every chip renders as a plain word chip (byte-identical).
+  final Set<String> destinationChips;
+
   /// Fired with the chip text when the user taps a prediction. Null by default
   /// (no-op). STEP 3.
   final ValueChanged<String>? onPrediction;
@@ -132,6 +138,7 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     required this.onSend,
     this.showToolStrip = false,
     this.predictions = const <String>[],
+    this.destinationChips = const <String>{},
     this.onPrediction,
     this.onTool,
     this.forceShow = false,
@@ -211,6 +218,9 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
           // [activeLayer]; otherwise the host's own [_toolLayer] decides.
           toolLayer: widget.activeLayer ?? _toolLayer,
           predictions: widget.predictions,
+          // The destination subset → BsKeyboard tints those chips (nav glyph +
+          // brand accent). Empty by default, so legacy mounts are unchanged.
+          destinationChips: widget.destinationChips,
           onPrediction: widget.onPrediction,
           // Grid/gear: a morph mount overrides both toggles to push its
           // home/kbd node-list onto the drill stack; otherwise the host's

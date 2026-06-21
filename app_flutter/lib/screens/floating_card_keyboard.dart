@@ -404,6 +404,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 // kSmartInput feature flag (off by default in production).
                 forceShow: true,
                 predictions: _preds,
+                // The chips that are navigable DESTINATIONS (the _destByChip
+                // keys ARE the destination labels) → the keyboard marks them
+                // with the nav glyph + brand accent; product WORDS (absent from
+                // the map) stay plain, so the user can tell a one-tap nav target
+                // from a query-narrowing word.
+                destinationChips: _destByChip.keys.toSet(),
                 onPrediction: _onPrediction,
                 // MORPH drill state → the keyboard. The grid/gear toggles push
                 // the home/kbd node-list; a tapped tile bubbles its index to

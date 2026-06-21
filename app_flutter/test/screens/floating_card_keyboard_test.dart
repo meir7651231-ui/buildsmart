@@ -533,6 +533,66 @@ void main() {
       });
 
       testWidgets(
+          'the destination chip shows the nav glyph; a product word chip does NOT',
+          (tester) async {
+        // FITTING PREDICTION (owner: "חיזוי מתאים"): after typing a destination
+        // term, the destination chip is visually distinct — a leading
+        // Icons.north_east nav glyph — while a query-narrowing product WORD chip
+        // stays plain. The floating keyboard feeds _destByChip.keys as the
+        // destinationChips, so only the destination chip is tinted.
+        await pumpPanel(tester);
+
+        // Empty field: the row is product WORDS only → no nav glyph anywhere.
+        expect(find.byIcon(Icons.north_east), findsNothing,
+            reason: 'no destination chip (hence no glyph) on the empty field');
+
+        // Type "מח" → surface the מחלקות destination chip.
+        await tester.tap(find.text('מ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('ח'));
+        await tester.pumpAndSettle();
+        expect(find.text('מחלקות'), findsWidgets,
+            reason: 'sanity: the destination chip is present');
+
+        // The nav glyph is INSIDE the מחלקות chip (a descendant of the chip's
+        // own InkWell, which wraps both the glyph and the label).
+        final glyphInDest = find.descendant(
+          of: find.widgetWithText(InkWell, 'מחלקות'),
+          matching: find.byIcon(Icons.north_east),
+        );
+        expect(glyphInDest, findsOneWidget,
+            reason: 'the destination chip מחלקות shows the nav glyph');
+
+        // Now prove a PRODUCT WORD chip in the SAME row carries NO glyph. Pick a
+        // word the pure helpers say is on screen for "מח" and is NOT a
+        // destination label (so the floating keyboard left it plain).
+        final lexicon = buildWordLexicon(kDivePool);
+        final words = cardKeyboardPredictions('מח', kDivePool, lexicon);
+        final dests = matchDestinations('מח').map((d) => d.label).toSet();
+        var wordOnly = '';
+        for (final w in words) {
+          if (dests.contains(w)) continue;
+          if (find.text(w).evaluate().isNotEmpty) {
+            wordOnly = w;
+            break;
+          }
+        }
+
+        // Only assert the negative when such a rendered word chip exists (the
+        // reserved word slot makes this the normal case; guard keeps the test
+        // robust if the catalogue ever offers none for this prefix).
+        if (wordOnly.isNotEmpty) {
+          final glyphInWord = find.descendant(
+            of: find.widgetWithText(InkWell, wordOnly),
+            matching: find.byIcon(Icons.north_east),
+          );
+          expect(glyphInWord, findsNothing,
+              reason:
+                  'the product word chip "$wordOnly" must not show the nav glyph');
+        }
+      });
+
+      testWidgets(
           'tapping a destination chip NAVIGATES and keeps the overlay floating',
           (tester) async {
         final container = await pumpPanel(tester);

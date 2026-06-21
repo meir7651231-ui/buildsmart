@@ -44,6 +44,7 @@ void main() {
     bool showToolStrip = false,
     KbToolLayer toolLayer = KbToolLayer.none,
     List<String> preds = const <String>[],
+    Set<String> destinationChips = const <String>{},
     VoidCallback? onToolGrid,
     VoidCallback? onToolGear,
     ValueChanged<KbTool>? onTool,
@@ -66,6 +67,7 @@ void main() {
             showToolStrip: showToolStrip,
             toolLayer: toolLayer,
             predictions: preds,
+            destinationChips: destinationChips,
             onToolGrid: onToolGrid,
             onToolGear: onToolGear,
             onTool: onTool,
@@ -253,6 +255,82 @@ void main() {
 
     await pump(tester, toolLayer: KbToolLayer.kbd); // kbd tools
     expect(find.byIcon(Icons.send), findsOneWidget);
+  });
+
+  // ── FITTING PREDICTION: destination-chip distinction ───────────────────────
+  // A chip whose text is in [destinationChips] is a navigable DESTINATION and
+  // gets a leading nav glyph ([Icons.north_east]) + brand accent; every other
+  // chip (and EVERY chip while the set is empty — the default) renders as a
+  // plain word chip with NO glyph (the byte-identical historical render).
+  group('destinationChips (fitting-prediction distinction)', () {
+    // Finds the nav glyph that is a DESCENDANT of the chip whose label is
+    // [chip] — i.e. the glyph rendered INSIDE that specific prediction chip
+    // (its Row sits in the same InkWell as the label Text).
+    Finder glyphInChip(String chip) => find.descendant(
+          of: find.widgetWithText(InkWell, chip),
+          matching: find.byIcon(Icons.north_east),
+        );
+
+    testWidgets(
+        'a chip in destinationChips shows the nav glyph; a word chip does NOT',
+        (tester) async {
+      // 'ברז כדורי' is marked a destination; 'ניפל' and 'סיפון' stay words.
+      await pump(
+        tester,
+        showToolStrip: true,
+        preds: predictions,
+        destinationChips: const <String>{'ברז כדורי'},
+      );
+
+      // All three chip labels still render (the text is unchanged).
+      for (final p in predictions) {
+        expect(find.text(p), findsOneWidget);
+      }
+
+      // Exactly one nav glyph exists, and it is INSIDE the destination chip.
+      expect(find.byIcon(Icons.north_east), findsOneWidget,
+          reason: 'only the destination chip carries the nav glyph');
+      expect(glyphInChip('ברז כדורי'), findsOneWidget,
+          reason: 'the destination chip ברז כדורי shows the nav glyph');
+
+      // The product-word chips carry NO glyph.
+      expect(glyphInChip('ניפל'), findsNothing,
+          reason: 'a product word chip must not show the nav glyph');
+      expect(glyphInChip('סיפון'), findsNothing,
+          reason: 'a product word chip must not show the nav glyph');
+    });
+
+    testWidgets(
+        'default (destinationChips empty) → no glyph on any chip (byte-identical)',
+        (tester) async {
+      // The default: destinationChips omitted → empty. The strip renders, the
+      // predictions render, and NOT ONE chip shows a nav glyph.
+      await pump(tester, showToolStrip: true, preds: predictions);
+
+      for (final p in predictions) {
+        expect(find.text(p), findsOneWidget);
+      }
+      expect(find.byIcon(Icons.north_east), findsNothing,
+          reason: 'with no destinations, every chip is the plain word chip');
+    });
+
+    testWidgets('tapping a destination chip still fires onPrediction(text)',
+        (tester) async {
+      // The glyph is purely visual — the tap contract is unchanged.
+      final picked = <String>[];
+      await pump(
+        tester,
+        showToolStrip: true,
+        preds: predictions,
+        destinationChips: const <String>{'ברז כדורי'},
+        onPrediction: picked.add,
+      );
+
+      await tester.tap(find.text('ברז כדורי'));
+      await tester.pump();
+      expect(picked, <String>['ברז כדורי'],
+          reason: 'a destination chip still reports its text on tap');
+    });
   });
 
   // ── MORPH path (pure tiles) — STEP B ───────────────────────────────────────
