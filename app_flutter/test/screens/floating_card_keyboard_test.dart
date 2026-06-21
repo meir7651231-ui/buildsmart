@@ -27,8 +27,11 @@ import 'package:buildsmart/screens/catalog_screen.dart'
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show matchDestinations;
+import 'package:buildsmart/screens/store_screen.dart'
+    show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/widgets/smart_input/caret.dart' show insertAtCaret;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -263,6 +266,131 @@ void main() {
           reason: 'the keyboard keeps floating over the swapped screen');
       expect(find.text('screen-underneath'), findsOneWidget,
           reason: 'the full screen underneath stays');
+    });
+
+    // ── STEP D — מהירים / הזמנות / קולי wiring ─────────────────────────────────
+    testWidgets(
+        'drilling the מהירים BRANCH shows its 3 quick-action children',
+        (tester) async {
+      final container = await pumpPanel(tester);
+      final tabBefore = container.read(mainTabProvider);
+
+      // Open the home-tools layer (grid toggle), revealing the מהירים branch.
+      await tester.tap(find.byIcon(Icons.grid_view));
+      await tester.pumpAndSettle();
+      expect(find.text('מהירים'), findsOneWidget,
+          reason: 'the grid toggle opened the home tools (מהירים is a branch)');
+
+      // Tapping the BRANCH morphs IN PLACE to the 3 _QuickTools children — with
+      // NO navigation and NO close (matching smart_home_screen _QuickTools).
+      await tester.tap(find.text('מהירים'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('סריקת תוכנית'), findsOneWidget,
+          reason: 'the branch morphed to the scan-plan child');
+      expect(find.text('המלאי שלי'), findsOneWidget,
+          reason: 'the branch morphed to the my-stock child');
+      expect(find.text('משימות'), findsOneWidget,
+          reason: 'the branch morphed to the tasks child');
+      // The parent label is gone (we drilled in), and nothing navigated.
+      expect(find.text('מהירים'), findsNothing,
+          reason: 'the view morphed away from the home node-list');
+      expect(container.read(mainTabProvider), tabBefore,
+          reason: 'morphing the מהירים branch does not navigate');
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'morphing a branch keeps the overlay open');
+
+      // BACK from the children returns to the home node-list (מהירים reappears).
+      await tester.tap(find.text('חזרה'));
+      await tester.pumpAndSettle();
+      expect(find.text('מהירים'), findsOneWidget,
+          reason: 'back returned to the home node-list');
+      expect(find.text('סריקת תוכנית'), findsNothing,
+          reason: 'the branch children are popped away');
+    });
+
+    testWidgets(
+        'tapping the הזמנות LEAF jumps to the store orders section, floating',
+        (tester) async {
+      final container = await pumpPanel(tester);
+      expect(container.read(mainTabProvider), 0, reason: 'starts on tab 0');
+
+      // Open the home-tools layer and tap the הזמנות LEAF.
+      await tester.tap(find.byIcon(Icons.grid_view));
+      await tester.pumpAndSettle();
+      expect(find.text('הזמנות'), findsOneWidget);
+
+      await tester.tap(find.text('הזמנות'));
+      await tester.pumpAndSettle();
+
+      // הזמנות mirrors the store's own pills: tab 3 (חנות) + orders section. The
+      // keyboard KEEPS FLOATING (a section swap under the overlay, no close).
+      expect(container.read(mainTabProvider), 3,
+          reason: 'הזמנות routed the home to the store tab (3)');
+      expect(container.read(storeSectionProvider), StoreSection.orders,
+          reason: 'הזמנות selected the orders section');
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'a LEAF tap must NOT close the floating overlay');
+      expect(find.byType(BsKeyboard), findsOneWidget,
+          reason: 'the keyboard keeps floating over the swapped screen');
+    });
+
+    testWidgets(
+        'the קולי voice node is present and its tap path is wired (crash-safe, '
+        'no live mic)', (tester) async {
+      final container = await pumpPanel(tester);
+
+      // Open the KBD-tools layer (gear toggle) → the קולי tile is present. This
+      // is the field-intercept node (KbToolNode.isVoiceInput): the floating
+      // keyboard routes its tap to the mic→insertAtCaret path, NOT a nav action.
+      await tester.tap(find.byIcon(Icons.settings));
+      await tester.pumpAndSettle();
+      expect(find.text('קולי'), findsOneWidget,
+          reason: 'the gear toggle revealed the voice node');
+
+      // Tapping it exercises the REAL _onTile → _startVoiceInput intercept. The
+      // speech plugin is not registered in a widget test, so listen() throws a
+      // MissingPluginException — which the wiring must swallow into a quiet
+      // "בקרוב" WITHOUT crashing the overlay. We assert: no nav happened, the
+      // overlay stayed floating, and the keyboard is still mounted.
+      final tabBefore = container.read(mainTabProvider);
+      await tester.tap(find.text('קולי'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(mainTabProvider), tabBefore,
+          reason: 'voice does not navigate');
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'the voice tap keeps the overlay floating');
+      expect(find.byType(BsKeyboard), findsOneWidget,
+          reason: 'the voice tap is crash-safe (keyboard still mounted)');
+      // NOTE: we do NOT assert the "בקרוב" SnackBar here — in a widget test the
+      // unregistered speech_to_text method channel leaves listen() PENDING (it
+      // neither throws nor returns), so the fallback feedback may not fire. The
+      // point of THIS test is that the voice tap is crash-safe + keep-floating;
+      // the transcript SINK (insertAtCaret) is asserted in the next test.
+    });
+
+    // The voice node's SINK (what onFinal does with a transcript) is the same
+    // caret-insert the prediction-word path uses. We assert that field-insert
+    // behaviour directly on the panel's own controller — proving the wiring's
+    // landing point works — without invoking the real mic plugin.
+    testWidgets('voice transcript sink: insertAtCaret lands text in the field',
+        (tester) async {
+      await pumpPanel(tester);
+
+      // The floating panel owns exactly one TextField → one EditableText.
+      final controller =
+          tester.widget<EditableText>(find.byType(EditableText)).controller;
+      expect(controller.text, isEmpty, reason: 'field starts empty');
+
+      // This is EXACTLY what _startVoiceInput's onFinal runs with a transcript.
+      insertAtCaret(controller, 'ברז כדורי ');
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'ברז כדורי ',
+          reason: 'the spoken transcript lands in the search field');
+      // And the live prediction-row listener recomputed without crashing.
+      expect(find.byType(BsKeyboard), findsOneWidget);
     });
 
     testWidgets(

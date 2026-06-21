@@ -45,6 +45,7 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, matchDestinations;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
+import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
 import 'package:buildsmart/theme/tokens.dart';
@@ -245,6 +246,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     final node = nodes[id];
     if (node.isBranch) {
       setState(() => _stack.add(node.children));
+    } else if (node.isVoiceInput) {
+      // STEP D — VOICE-INPUT leaf (קולי): the field controller lives HERE, not
+      // in the (ref, context) action, so the floating keyboard runs the mic
+      // itself: VoiceService.listen → insertAtCaret(_controller, transcript).
+      // Keep-floating (the spoken text lands in the field; the prediction-row
+      // listener then recomputes). The node's own action is the legacy fallback
+      // only — we do NOT call it here.
+      _startVoiceInput();
     } else {
       // KEEP-FLOATING: run the leaf action on THIS widget's own ref/context
       // (the home stays mounted under the overlay) and leave the overlay OPEN.
@@ -254,6 +263,51 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       // closes the overlay.
       node.action?.call(ref, context);
     }
+  }
+
+  /// STEP D — start a voice-to-text session that drops the final transcript into
+  /// the search field. Async + crash-safe: the [VoiceService.listen] callbacks
+  /// can fire after this element is gone (a long mic session, a late error), so
+  /// EVERY callback is `mounted`-guarded before it touches `_controller` or
+  /// shows a SnackBar. The spoken text is inserted at the caret via
+  /// [insertAtCaret] (exactly like a tapped prediction word), and the
+  /// controller listener then recomputes the prediction row. A failure (no mic
+  /// permission, no speech recognized, unsupported platform) surfaces a quiet
+  /// "בקרוב" — never a silent dead button.
+  Future<void> _startVoiceInput() async {
+    try {
+      final ok = await VoiceService.instance.listen(
+        onFinal: (text) {
+          if (!mounted) return;
+          final t = text.trim();
+          if (t.isEmpty) return;
+          // Append a trailing space so the next word/prediction is separated,
+          // matching the product-word append path (`_onPrediction`).
+          insertAtCaret(_controller, '$t ');
+        },
+        onError: (_) {
+          if (!mounted) return;
+          _voiceUnavailable();
+        },
+      );
+      // A `false` return means the platform has no speech support at all (onError
+      // is NOT called in that case — the `false` is the signal); surface it.
+      if (!ok && mounted) _voiceUnavailable();
+    } on Object catch (_) {
+      // The STT plugin can throw before any callback (e.g. a MissingPlugin /
+      // PlatformException when the engine can't init — on an unsupported host or
+      // a test harness with no plugin registered). Never let that crash the
+      // overlay: swallow it into the same quiet "בקרוב".
+      if (mounted) _voiceUnavailable();
+    }
+  }
+
+  /// Quiet, non-crashing feedback when voice can't run (no mic / no result /
+  /// unsupported). Mirrors the tool seam's "בקרוב" SnackBar style.
+  void _voiceUnavailable() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('קולי — בקרוב')));
   }
 
   /// BACK tile: pop one drill level. From a deeper view this returns to the

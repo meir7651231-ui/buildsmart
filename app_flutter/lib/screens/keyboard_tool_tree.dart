@@ -23,8 +23,15 @@
 
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/contractor_tools_sheets.dart'
+    show openScanPlanSheet;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
+import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
+import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
+import 'package:buildsmart/screens/store_screen.dart'
+    show StoreSection, storeSectionProvider;
+import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
 import 'package:flutter/material.dart';
@@ -40,13 +47,15 @@ class KbToolNode {
     required this.icon,
     required this.label,
     required this.action,
+    this.isVoiceInput = false,
   }) : children = const <KbToolNode>[];
 
   const KbToolNode.branch({
     required this.icon,
     required this.label,
     required this.children,
-  }) : action = null;
+  })  : action = null,
+        isVoiceInput = false;
 
   /// The Material icon shown on the tile.
   final IconData icon;
@@ -62,6 +71,13 @@ class KbToolNode {
   /// leaf.
   final List<KbToolNode> children;
 
+  /// STEP D — VOICE-INPUT marker. `true` ONLY on the קולי leaf: voice-to-text
+  /// needs the field controller (`_controller`), which the `(ref, context)`
+  /// [action] signature cannot reach, so the FLOATING keyboard intercepts a tap
+  /// on a voice-marked node (in `_onTile`) and runs the mic→`insertAtCaret`
+  /// path itself instead of the (no-op) [action]. Every other node is `false`.
+  final bool isVoiceInput;
+
   /// True when this node drills into [children] (morph) rather than running an
   /// action (navigate/keep-floating).
   bool get isBranch => children.isNotEmpty;
@@ -76,10 +92,13 @@ List<KbTile> kbTilesFor(List<KbToolNode> nodes) => <KbTile>[
         KbTile(icon: nodes[i].icon, label: nodes[i].label, id: i),
     ];
 
-/// The 8 HOME tool nodes (grid toggle) — all leaves. Each action delegates to
-/// the existing [runKeyboardTool] for the matching [KbTool], so the per-tool
+/// The 8 HOME tool nodes (grid toggle). Most are leaves whose action delegates
+/// to the existing [runKeyboardTool] for the matching [KbTool], so the per-tool
 /// destination stays IDENTICAL to today (departments → tab 1, finder → catalog
-/// 'מאתר', …). Order matches the legacy home layer.
+/// 'מאתר', …). STEP D rewired three: מהירים is now a BRANCH (its 3 _QuickTools
+/// children), הזמנות jumps to the store orders section directly, and מסלול stays
+/// a deferred "בקרוב" leaf (no nav target exists). Order matches the legacy home
+/// layer.
 List<KbToolNode> kbHomeNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.grid_view,
@@ -93,23 +112,57 @@ List<KbToolNode> kbHomeNodes() => <KbToolNode>[
         action: (ref, context) =>
             runKeyboardTool(ref, context, KbTool.smartTree),
       ),
+      // STEP D — "מסלול" stays DEFERRED. The only מסלול surface
+      // (smart_home_screen.dart `_WorkPath`, ~414-476) is a display-only hero
+      // with NO onTap / no nav target, so wiring a leaf would be a guessed/broken
+      // destination. It remains a "בקרוב" leaf (via [runKeyboardTool]) until a
+      // real work-route/project screen exists. Recorded in deferred[].
       KbToolNode.leaf(
         icon: Icons.route,
         label: 'מסלול',
         action: (ref, context) =>
             runKeyboardTool(ref, context, KbTool.workRoute),
       ),
-      KbToolNode.leaf(
+      // STEP D — "מהירים" is now a BRANCH whose 3 children mirror
+      // smart_home_screen.dart `_QuickTools` (~485-503) EXACTLY: scan-plan sheet,
+      // my-stock screen, tasks hub. Tapping it MORPHS the tool view in place to
+      // these three (no nav); each child is a keep-floating LEAF.
+      KbToolNode.branch(
         icon: Icons.bolt,
         label: 'מהירים',
-        action: (ref, context) =>
-            runKeyboardTool(ref, context, KbTool.quickTools),
+        children: <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.description_outlined,
+            label: 'סריקת תוכנית',
+            // smart_home_screen.dart:490 — openScanPlanSheet(context).
+            action: (ref, context) => openScanPlanSheet(context),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.inventory_2_outlined,
+            label: 'המלאי שלי',
+            // smart_home_screen.dart:496 — push StockScreen.route().
+            action: (ref, context) =>
+                Navigator.of(context).push(StockScreen.route()),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.checklist_rtl,
+            label: 'משימות',
+            // smart_home_screen.dart:502 — openSiteHub(context).
+            action: (ref, context) => openSiteHub(context),
+          ),
+        ],
       ),
+      // STEP D — "הזמנות" is a REAL leaf now: jump to the store's ORDERS section,
+      // mirroring the store's own section pills (store_screen.dart:38-41,676 +
+      // keyboard_destinations.dart:111-114): tab 3 (חנות) + storeSectionProvider
+      // = orders. Keep-floating (a section swap under the overlay).
       KbToolNode.leaf(
         icon: Icons.receipt_long,
         label: 'הזמנות',
-        action: (ref, context) =>
-            runKeyboardTool(ref, context, KbTool.recentOrders),
+        action: (ref, context) {
+          ref.read(mainTabProvider.notifier).state = 3;
+          ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+        },
       ),
       KbToolNode.leaf(
         icon: Icons.gps_fixed,
@@ -136,9 +189,16 @@ List<KbToolNode> kbHomeNodes() => <KbToolNode>[
 /// floating keyboard reappears when that route pops). Order matches the legacy
 /// kbd layer (with תפריט now opening children instead of a sheet).
 List<KbToolNode> kbKbdNodes() => <KbToolNode>[
+      // STEP D — "קולי" is voice-to-text INTO the keyboard field. The mic needs
+      // the field controller, which the (ref, context) action can't reach, so it
+      // is MARKED [isVoiceInput]: the FLOATING keyboard intercepts a tap on it
+      // (floating_card_keyboard.dart `_onTile`) and runs VoiceService.listen →
+      // insertAtCaret(_controller, …) itself. The [action] here is only the
+      // legacy non-morph fallback (a "בקרוב" SnackBar via [runKeyboardTool]).
       KbToolNode.leaf(
         icon: Icons.mic,
         label: 'קולי',
+        isVoiceInput: true,
         action: (ref, context) => runKeyboardTool(ref, context, KbTool.voice),
       ),
       KbToolNode.leaf(

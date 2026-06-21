@@ -11,15 +11,24 @@
 // real app symbols). This file must NEVER import bs_keyboard_host.dart, so no
 // import cycle is created.
 //
-// Tools with no single, unambiguous destination (workRoute / quickTools /
-// recentOrders) and tools we cannot meaningfully drive from a fire-and-forget
-// helper yet (voice needs a transcript sink; menu is a PopupMenuButton with no
-// standalone opener) show a "בקרוב" SnackBar via [_comingSoon] instead of a
-// guessed/broken navigation. Each is marked TODO(step-2).
+// STEP D — most of the legacy "בקרוב" tools are now wired in the MORPH keyboard
+// tree ([keyboard_tool_tree.dart]): מהירים became a 3-child branch, הזמנות jumps
+// to the store orders section, and קולי runs voice-to-text into the field (the
+// floating keyboard intercepts it). This seam is only reached from a LEGACY
+// non-morph mount, so it still carries those cases:
+//   • recentOrders → the same store-orders jump (cheap, single destination), so
+//     even a legacy mount routes correctly;
+//   • workRoute → still "בקרוב" (no nav target exists — display-only hero);
+//   • quickTools → "בקרוב" here (it is a BRANCH, not a single destination — a
+//     legacy flat mount has nowhere to drill);
+//   • voice → "בקרוב" here (no field controller in a fire-and-forget helper; the
+//     real mic→field path lives in the floating keyboard).
 
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show catalogSectionProvider;
 import 'package:buildsmart/screens/install_studio_screen.dart';
+import 'package:buildsmart/screens/store_screen.dart'
+    show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/help_mode.dart' show helpModeProvider;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
@@ -76,23 +85,30 @@ void runKeyboardTool(WidgetRef ref, BuildContext context, KbTool tool) {
         MaterialPageRoute<String>(builder: (_) => const BarcodeScanner()),
       );
 
-    // ── No clean single target yet → "בקרוב" (never a guessed nav) ───────────
+    // ── STEP D wired-or-deferred (legacy non-morph mount only) ───────────────
+    case KbTool.recentOrders:
+      // "הזמנות" → the store's ORDERS section (tab 3 + storeSectionProvider),
+      // mirroring the store's own pills (store_screen.dart:38-41,676). The morph
+      // keyboard wires this in the tree; this case keeps a legacy mount correct.
+      ref.read(mainTabProvider.notifier).state = 3;
+      ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+
     case KbTool.workRoute:
-      // TODO(step-2): "מסלול" has no single nav target (display-only surface).
+      // "מסלול" still has no single nav target — the only surface
+      // (smart_home_screen.dart `_WorkPath`) is a display-only hero with no
+      // onTap. Deferred (both here AND in the morph tree) until one exists.
       _comingSoon(context, 'מסלול');
 
     case KbTool.quickTools:
-      // TODO(step-2): "מהירים" is a 3-way-ambiguous quick-actions surface.
+      // "מהירים" is a BRANCH in the morph tree (3 quick-action children). A
+      // legacy FLAT mount has nowhere to drill, so it surfaces "בקרוב" here.
       _comingSoon(context, 'מהירים');
 
-    case KbTool.recentOrders:
-      // TODO(step-2): "הזמנות" has no single destination (orders is a pilot).
-      _comingSoon(context, 'הזמנות');
-
     case KbTool.voice:
-      // TODO(step-2): VoiceService.listen (voice.dart:57) requires an onFinal
-      // transcript sink we have no field to route to from here — wiring it to a
-      // no-op would silently drop the transcript, so defer rather than break.
+      // "קולי" runs voice-to-text into the field — but that needs the field
+      // controller, which this fire-and-forget helper does not own. The real
+      // mic→insertAtCaret path lives in the FLOATING keyboard (it intercepts the
+      // voice-marked node); a legacy mount has no field, so "בקרוב" here.
       _comingSoon(context, 'קולי');
 
     case KbTool.menu:
