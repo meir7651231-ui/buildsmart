@@ -56,6 +56,7 @@ import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/state/finance_hub_state.dart'
     show FinanceApproval, Penalty, kPenaltyPerDay;
+import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -222,6 +223,84 @@ class _PaymentTermCacheRepo extends FirestoreCachedRepo<_PaymentTermRow> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// `financeBudget` — the editable project budget, persisted as ONE document
+// (`active`) holding total + spent + the category list. Same single-doc shape as
+// `_PaymentTermCacheRepo`. The seed is EMPTY (0/0/[]) — NOT the const demo: a real
+// signed-in user starts from an honest blank budget (matching the budget box's
+// honest-empty reads), never fabricated demo money. `onFirstSnapshotEmpty` is the
+// base no-op, so a fresh backend is NEVER seeded with figures.
+// ─────────────────────────────────────────────────────────────────────────────
+typedef _BudgetRow = ({
+  String id,
+  int total,
+  int spent,
+  List<BudgetCategory> categories,
+});
+
+/// The fixed doc-id for the single budget document.
+const String kBudgetDocId = 'active';
+
+class _BudgetCacheRepo extends FirestoreCachedRepo<_BudgetRow> {
+  _BudgetCacheRepo({RemoteCollectionSource? source})
+      : super(source ?? FirestoreCollectionSource('financeBudget'));
+
+  /// EMPTY genesis — an honest blank budget before the first snapshot. The base
+  /// `onFirstSnapshotEmpty` no-op means a fresh backend is NOT seeded with money.
+  @override
+  List<_BudgetRow> get seed =>
+      const [(id: kBudgetDocId, total: 0, spent: 0, categories: <BudgetCategory>[])];
+
+  @override
+  String idOf(_BudgetRow value) => value.id;
+
+  @override
+  Map<String, dynamic> toDoc(_BudgetRow v) => {
+        'total': v.total,
+        'spent': v.spent,
+        'cats': [
+          for (final c in v.categories)
+            {'name': c.name, 'icon': c.icon, 'amount': c.amount},
+        ],
+      };
+
+  @override
+  _BudgetRow fromDoc(RemoteDoc doc) => (
+        id: doc.id,
+        total: (doc.data['total'] as num?)?.toInt() ?? 0,
+        spent: (doc.data['spent'] as num?)?.toInt() ?? 0,
+        categories: [
+          for (final c in (doc.data['cats'] as List<dynamic>? ?? const []))
+            if (c is Map)
+              BudgetCategory(
+                (c['name'] as String?) ?? '',
+                (c['icon'] as String?) ?? '📦',
+                (c['amount'] as num?)?.toInt() ?? 0,
+              ),
+        ],
+      );
+
+  /// The active budget row, or the empty default if the cache is somehow empty
+  /// (defensive — the seed guarantees one row).
+  _BudgetRow active() {
+    for (final r in cached()) {
+      if (r.id == kBudgetDocId) return r;
+    }
+    return const (
+      id: kBudgetDocId,
+      total: 0,
+      spent: 0,
+      categories: <BudgetCategory>[],
+    );
+  }
+
+  /// Persist the WHOLE budget — optimistic upsert of the single `active` row +
+  /// guarded background write.
+  void setBudget(int total, int spent, List<BudgetCategory> categories) => upsert(
+        (id: kBudgetDocId, total: total, spent: spent, categories: categories),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // FirebaseFinanceRepository — composes the three persisted sub-repos for the
 // LIVE state, and forwards the const budget reads + `activeRevenue` to the same
 // backing the local impl uses (NEVER pushing derived values to Firestore).
@@ -245,12 +324,14 @@ class FirebaseFinanceRepository implements FinanceRepository {
     RemoteCollectionSource? approvalsSource,
     RemoteCollectionSource? penaltiesSource,
     RemoteCollectionSource? paymentTermSource,
+    RemoteCollectionSource? budgetSource,
   })  : _derived = ref == null
             ? const LocalFinanceRepository.constData()
             : LocalFinanceRepository(ref),
         _approvals = _ApprovalsCacheRepo(source: approvalsSource),
         _penalties = _PenaltiesCacheRepo(source: penaltiesSource),
-        _paymentTerm = _PaymentTermCacheRepo(source: paymentTermSource);
+        _paymentTerm = _PaymentTermCacheRepo(source: paymentTermSource),
+        _budget = _BudgetCacheRepo(source: budgetSource);
 
   /// Delegate for the const budget reads + `activeRevenue` — the EXACT same
   /// values the local impl serves (forwarded to the const helpers / the live
@@ -260,45 +341,49 @@ class FirebaseFinanceRepository implements FinanceRepository {
   final _ApprovalsCacheRepo _approvals;
   final _PenaltiesCacheRepo _penalties;
   final _PaymentTermCacheRepo _paymentTerm;
+  final _BudgetCacheRepo _budget;
 
-  // ── lifecycle (fan out to the three sub-repos) ──────────────────────────────
+  // ── lifecycle (fan out to the four sub-repos) ───────────────────────────────
 
-  /// Subscribe all three persisted sub-repos to their `snapshots()`. Called by
+  /// Subscribe all four persisted sub-repos to their `snapshots()`. Called by
   /// the provider after construction (mirrors `FirebaseOrdersRepository.attach`).
   void attach() {
     _approvals.attach();
     _penalties.attach();
     _paymentTerm.attach();
+    _budget.attach();
   }
 
-  /// Cancel all three subscriptions. Called by `ref.onDispose`.
+  /// Cancel all four subscriptions. Called by `ref.onDispose`.
   void dispose() {
     _approvals.dispose();
     _penalties.dispose();
     _paymentTerm.dispose();
+    _budget.dispose();
   }
 
-  // ── budget DATA reads (no real source yet → EMPTY/ZERO on the live backend) ──
-  // On the live Firebase backend there is NO real accounting source for the
-  // project budget, so the const demo figures (15000/9840/categories/pct/
-  // revenue) MUST NOT be shown to a real signed-in user as if they were theirs.
-  // These run ONLY when the backend is ON (the provider routes here only when
-  // `useFirebaseBackend` is true), so returning empty/zero unconditionally is
-  // correct — a real user sees an honest empty state, not invented money.
-  // KEEP `budgetLevel` (a PURE band function — no fabricated data) and
-  // `financeHub` (STATIC UI scaffolding — the menu's section list, not data).
+  // ── budget DATA reads (now backed by the persisted `_budget` sub-repo) ───────
+  // The editable project budget is persisted in the single `financeBudget/active`
+  // doc. Its genesis is EMPTY (0/0/[]) and `onFirstSnapshotEmpty` is the base
+  // no-op, so a real signed-in user still sees an HONEST blank budget until THEY
+  // set one — never fabricated demo money — but once set it round-trips through
+  // the cache. (`budgetLevel` stays a pure band fn; `financeHub` is static UI
+  // scaffolding; `activeRevenue` has no real accounting source → 0.)
 
   @override
-  int budgetTotal() => 0;
+  int budgetTotal() => _budget.active().total;
 
   @override
-  int budgetSpent() => 0;
+  int budgetSpent() => _budget.active().spent;
 
   @override
-  List<BudgetCategory> budgetCategories() => const [];
+  List<BudgetCategory> budgetCategories() => _budget.active().categories;
 
   @override
-  int budgetPct() => 0;
+  int budgetPct() {
+    final r = _budget.active();
+    return r.total > 0 ? (r.spent / r.total * 100).round() : 0;
+  }
 
   @override
   ({String label, String cls}) budgetLevel(int pct) =>
@@ -309,6 +394,18 @@ class FirebaseFinanceRepository implements FinanceRepository {
 
   @override
   int activeRevenue() => 0;
+
+  // ── budget WRITE + change stream (server-connect persistence) ───────────────
+
+  @override
+  void setBudget(int total, int spent, List<BudgetCategory> categories) =>
+      _budget.setBudget(total, spent, categories);
+
+  /// The budget sub-repo IS a [ChangeNotifier] (fires on every snapshot + our own
+  /// optimistic write), so the budget editor re-seeds from the live reads when it
+  /// changes — that's how a persisted budget shows up after the snapshot lands.
+  @override
+  Listenable? get budgetListenable => _budget;
 
   // ── PERSISTED lists (extra concrete members — the seed() precedent) ─────────
 

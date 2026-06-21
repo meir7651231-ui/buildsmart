@@ -53,6 +53,7 @@ import 'package:buildsmart/data/repositories/finance_firebase.dart'
 import 'package:buildsmart/data/repositories/finance_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
+import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Module-level pass-throughs to the const helpers whose names this class's
@@ -100,6 +101,16 @@ class LocalFinanceRepository implements FinanceRepository {
 
   @override
   ({String label, String cls}) budgetLevel(int pct) => _budgetLevelFor(pct);
+
+  // ── budget writes (no-op: the demo budget is the in-memory budgetProvider,
+  //    ephemeral as it always was — the const-backed repo has nothing to persist) ─
+  @override
+  void setBudget(int total, int spent, List<BudgetCategory> categories) {}
+
+  /// Nothing streams on the const-backed local impl — the budget editor keeps its
+  /// in-memory state, so no re-seed source is needed.
+  @override
+  Listenable? get budgetListenable => null;
 
   // ── finance-hub section list ────────────────────────────────────────────────
 

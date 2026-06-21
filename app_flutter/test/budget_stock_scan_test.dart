@@ -5,6 +5,8 @@
 // Pure logic + StateNotifier behaviour; sources noted to index.html line anchors.
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/finance_local.dart'
+    show LocalFinanceRepository;
 import 'package:buildsmart/screens/budget_screen.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/stock_screen.dart';
@@ -17,7 +19,7 @@ void main() {
   // ── T3.C · תקציב ──────────────────────────────────────────────────────────
   group('T3.C budget [L7150]', () {
     test('seeds from kBudget* — pct=66% (9840/15000) [L7162]', () {
-      final n = BudgetNotifier();
+      final n = BudgetNotifier(const LocalFinanceRepository.constData());
       expect(n.state.total, kBudgetTotal);
       expect(n.state.spent, kBudgetSpent);
       expect(n.state.pct, 66);
@@ -26,13 +28,13 @@ void main() {
     });
 
     test('left turns negative on overspend [L7196]', () {
-      final n = BudgetNotifier()..setTotals(15000, 16000);
+      final n = BudgetNotifier(const LocalFinanceRepository.constData())..setTotals(15000, 16000);
       expect(n.state.left, -1000);
       expect(n.state.pct, 107);
     });
 
     test('adjustSpent(+/-) — add / remove a cost [L7291]', () {
-      final n = BudgetNotifier();
+      final n = BudgetNotifier(const LocalFinanceRepository.constData());
       final base = n.state.spent;
       n.adjustSpent(1, 500);
       expect(n.state.spent, base + 500);
@@ -43,7 +45,7 @@ void main() {
     });
 
     test('category save / add / delete (keep >=1) [L7259-7278]', () {
-      final n = BudgetNotifier();
+      final n = BudgetNotifier(const LocalFinanceRepository.constData());
       n.saveCategory(0, 'אינסטלציה', 4000);
       expect(n.state.categories[0].amount, 4000);
       final i = n.addCategory();
@@ -60,7 +62,7 @@ void main() {
     });
 
     test('category share sums to ~1 over Σamount', () {
-      final cats = BudgetNotifier().state.categories;
+      final cats = BudgetNotifier(const LocalFinanceRepository.constData()).state.categories;
       final sum = cats.fold<int>(0, (s, c) => s + c.amount);
       expect(sum, kBudgetSpent); // Σ categories == spent (proto invariant)
       final shareSum =

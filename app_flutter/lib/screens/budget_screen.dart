@@ -14,6 +14,8 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
+import 'package:buildsmart/data/repositories/finance_repository.dart'
+    show FinanceRepository;
 import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -60,32 +62,64 @@ class BudgetState {
 }
 
 class BudgetNotifier extends StateNotifier<BudgetState> {
-  /// [total]/[spent]/[categories] default to the const demo seed so a bare
-  /// `BudgetNotifier()` stays byte-identical; `budgetProvider` injects them
-  /// THROUGH the finance repo — local → the same const demo, connected → the
-  /// repo's HONEST reads (0/0/[] today, NOT fabricated demo money — matching the
-  /// finance-hub budget box + finance_firebase's stated philosophy). Mirrors the
-  /// projects-engine repo-seam idiom (T6.2).
-  BudgetNotifier({int? total, int? spent, List<BudgetCat>? categories})
-      : super(BudgetState(
-          total: total ?? kBudgetTotal,
-          spent: spent ?? kBudgetSpent,
-          categories: categories ??
-              [
-                for (final c in kBudgetCategories)
-                  BudgetCat(c.name, c.icon, c.amount),
-              ],
-        ));
+  /// Seeds from + persists through the finance [_repo] (T6.2 seam). Local → the
+  /// const demo budget (byte-identical; `setBudget` is a no-op, so demo stays
+  /// in-memory/ephemeral as it always was, and there's no listenable). Connected
+  /// → the repo's HONEST reads, RE-SEEDED whenever `budgetListenable` fires (a
+  /// snapshot landed), with every edit persisted via `repo.setBudget`. Mirrors
+  /// the orders/projects repo-seam idiom.
+  BudgetNotifier(this._repo) : super(_seedFrom(_repo)) {
+    _changes = _repo.budgetListenable;
+    _changes?.addListener(_syncFromRepo);
+  }
+
+  final FinanceRepository _repo;
+  Listenable? _changes;
+
+  /// Build a [BudgetState] from the repo's live reads — the single source of
+  /// truth on the connected path (the const demo on local).
+  static BudgetState _seedFrom(FinanceRepository r) => BudgetState(
+        total: r.budgetTotal(),
+        spent: r.budgetSpent(),
+        categories: [
+          for (final c in r.budgetCategories())
+            BudgetCat(c.name, c.icon, c.amount),
+        ],
+      );
+
+  /// A snapshot (or our own optimistic write) changed the persisted budget →
+  /// re-seed from the live reads. Idempotent after our own writes (the cache
+  /// already holds what we wrote). Never fires on local (no listenable).
+  void _syncFromRepo() {
+    if (!mounted) return;
+    state = _seedFrom(_repo);
+  }
+
+  /// Persist the WHOLE budget after a local edit (a no-op on the local impl).
+  void _persist() => _repo.setBudget(
+        state.total,
+        state.spent,
+        [for (final c in state.categories) BudgetCategory(c.name, c.ic, c.amount)],
+      );
+
+  @override
+  void dispose() {
+    _changes?.removeListener(_syncFromRepo);
+    super.dispose();
+  }
 
   // saveBudget(:7281)
-  void setTotals(int total, int spent) =>
-      state = state.copyWith(total: total, spent: spent);
+  void setTotals(int total, int spent) {
+    state = state.copyWith(total: total, spent: spent);
+    _persist();
+  }
 
   // adjustBudget(dir) (:7291) — dir +1 add a cost, -1 remove one.
   // Math.max(0, spent + dir*amt) — never below zero.
   void adjustSpent(int dir, int amt) {
     final next = state.spent + dir * amt;
     state = state.copyWith(spent: next < 0 ? 0 : next);
+    _persist();
   }
 
   // saveCategoryEdit(:7259) — edit existing or commit a freshly-added category.
@@ -94,12 +128,14 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
     final next = [...state.categories];
     next[i] = next[i].copyWith(name: name, amount: amount);
     state = state.copyWith(categories: next);
+    _persist();
   }
 
   // addBudgetCategory(:7254) — push a blank category, returns its index.
   int addCategory() {
     state = state
         .copyWith(categories: [...state.categories, const BudgetCat('', '📦', 0)]);
+    _persist();
     return state.categories.length - 1;
   }
 
@@ -108,26 +144,18 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
     if (state.categories.length <= 1) return;
     final next = [...state.categories]..removeAt(i);
     state = state.copyWith(categories: next);
+    _persist();
   }
 }
 
 final budgetProvider =
     StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
-  // Honest source via the repo (T6.2 seam): local → the const demo budget
-  // (byte-identical to before); connected → the repo's HONEST reads (0/0/[]
-  // today — no fabricated demo money on a real account, matching the finance-hub
-  // budget box + finance_firebase's philosophy). budget_screen already renders
-  // an empty budget gracefully (the `b.categories.isEmpty` branch @~259).
-  // NOTE: write-persistence (a budget collection) is a separate new-feature
-  // follow-up; this fix only stops showing fabricated demo money on the backend.
-  final repo = financeRepo();
-  return BudgetNotifier(
-    total: repo.budgetTotal(),
-    spent: repo.budgetSpent(),
-    categories: [
-      for (final c in repo.budgetCategories()) BudgetCat(c.name, c.icon, c.amount),
-    ],
-  );
+  // Seeds from + persists through the finance repo (T6.2 seam): local → the const
+  // demo budget (byte-identical, ephemeral as always); connected → the HONEST
+  // persisted budget — empty until the user sets one (no fabricated demo money),
+  // round-tripped via `setBudget` and re-seeded when the snapshot lands. The
+  // screen renders an empty budget gracefully (the `b.categories.isEmpty` branch).
+  return BudgetNotifier(financeRepo());
 });
 
 // ─── helpers ──────────────────────────────────────────────────────────────────

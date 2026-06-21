@@ -75,21 +75,31 @@ class _FakeSource implements RemoteCollectionSource {
   _FakeSource approvals,
   _FakeSource penalties,
   _FakeSource term,
+  _FakeSource budget,
 }) _build() {
   final approvals = _FakeSource();
   final penalties = _FakeSource();
   final term = _FakeSource();
+  final budget = _FakeSource();
   final repo = FirebaseFinanceRepository(
     null,
     approvalsSource: approvals,
     penaltiesSource: penalties,
     paymentTermSource: term,
+    budgetSource: budget,
   );
   addTearDown(approvals.close);
   addTearDown(penalties.close);
   addTearDown(term.close);
+  addTearDown(budget.close);
   addTearDown(repo.dispose);
-  return (repo: repo, approvals: approvals, penalties: penalties, term: term);
+  return (
+    repo: repo,
+    approvals: approvals,
+    penalties: penalties,
+    term: term,
+    budget: budget,
+  );
 }
 
 void main() {

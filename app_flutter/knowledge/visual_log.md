@@ -1397,3 +1397,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **למה אין צילום:** אין widget/asset/layout חדש — רק מקור-ה-seed של ה-state השתנה (דרך `financeRepo()` במקום const ישיר). ענף ה-`categories.isEmpty` שמרנדר את הריק כבר היה קיים. אומת ב-`budget_server_empty_test` (+2) + `budget_stock_scan_test` (+14).
 **מגבלה מתועדת:** עריכות-תקציב עדיין לא נשמרות (in-memory, נמחקות ברענון — כך היה גם בדמו מאז ומתמיד). שמירה-לשרת = פיצ'ר נפרד שנדחה (collection חדש). התיקון הזה רק מפסיק להציג כסף-דמו מזויף.
 **הפיכות:** להחזיר `budgetProvider` ל-`((_) => BudgetNotifier())` — חוזר להצגת ה-const demo על המחובר.
+
+## 2026-06-17 — #wave2b-budget-persist — עריכות-תקציב נשמרות לשרת (שורדות רענון)
+**שינוי נראה (רק על המחובר; demo/טסטים byte-identical):** המשך ל-v6.28 — עכשיו כשמשתמש מחובר עורך תקציב (סכום/נוצל/קטגוריות), העריכה **נשמרת לשרת ושורדת רענון/החלפת-מכשיר**. קודם (v6.28) הוא ראה ריק-כן אבל עריכות נמחקו ברענון. אין שינוי layout/widget — אותו עורך-תקציב בדיוק; רק שהנתונים נשמרים מאחורי-הקלעים (`financeBudget/active` ב-Firestore) ונטענים-מחדש כש-snapshot נוחת. בדמו — אפמרי כתמיד (אפס שינוי).
+**למה אין צילום:** אין UI חדש — רק שכבת-persistence מאחורי `budgetProvider`. אומת ב-`budget_server_empty_test` (4: empty/local-demo/persist/re-seed, fake repo) + `budget_stock_scan_test` (+14) + `finance_firebase_repo_test` (+ budget source). mutation-verified (§mutation_log).
+**הפיכות:** להחזיר `BudgetNotifier` ל-seed-only (בלי `_persist`/listener) ו-`budgetProvider` ל-seed הישיר; להסיר את `_BudgetCacheRepo` + `setBudget`/`budgetListenable` מה-repos — חוזר ל-read-honesty (v6.28).

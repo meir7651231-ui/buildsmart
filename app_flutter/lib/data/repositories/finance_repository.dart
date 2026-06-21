@@ -18,6 +18,7 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart' show BudgetCategory;
 import 'package:buildsmart/data/sections.dart' show Section;
+import 'package:flutter/foundation.dart' show Listenable;
 
 /// Server-ready contract over the project budget + finance hub. The current
 /// backing is `data/contractor_seeds.dart` (budget seeds) + `data/menu_trees.dart`
@@ -47,4 +48,17 @@ abstract class FinanceRepository {
   /// Active revenue (Σ sum of open orders) in ₪ — the manager's 💰 figure,
   /// derived from the shared orders engine's live analytics.
   int activeRevenue();
+
+  // ── budget WRITES (server-connect: persist the editable project budget) ──────
+
+  /// Persist the WHOLE editable project budget (total + spent + categories) — the
+  /// single source the budget editor commits on every change. The local impl is a
+  /// no-op (the demo budget is the in-memory `budgetProvider`, ephemeral as it has
+  /// always been); the Firebase impl upserts the single `financeBudget/active` doc.
+  void setBudget(int total, int spent, List<BudgetCategory> categories);
+
+  /// A [Listenable] that fires when the persisted budget changes — a snapshot
+  /// arrived OR our own optimistic write landed — so the budget editor can re-seed
+  /// from the live reads. Null on the const-backed local impl (nothing streams).
+  Listenable? get budgetListenable;
 }
