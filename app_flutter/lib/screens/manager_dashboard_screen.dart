@@ -1764,17 +1764,29 @@ class _CustomerStatusChips extends StatelessWidget {
 /// a utilisation bar (green, or amber `hot` at pct≥90) and the line
 /// `ניצול אשראי: ₪used / ₪limit (pct%)`. A WHITE card; tapping it opens the
 /// detail sheet.
-class _CustomerCard extends StatelessWidget {
+class _CustomerCard extends ConsumerWidget {
   const _CustomerCard({required this.view, required this.onTap});
 
   final _CustomerView view;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = view.customer;
-    final statusLabel = _kCustomerStatusLabel[view.status] ?? view.status;
-    final statusColor = _kCustomerStatusColor[view.status] ?? BsTokens.brand;
+    // S-connect: resolve the LIVE credit ceiling via computeCredit (the same
+    // seam the detail sheet uses). OFF → byte-identical to c.creditLimit (the
+    // provider returns contractorCredit(name) with no network); ON → the
+    // gateway-bound server figure. The list card showed the fabricated seed
+    // ceiling before — only the detail sheet was wired (C1/A13).
+    final liveLimit =
+        ref.watch(customerCreditProvider(c.name)).valueOrNull?.creditLimit ??
+            c.creditLimit;
+    final pct = liveLimit == 0
+        ? 0
+        : ((c.totalSpend / liveLimit) * 100).round().clamp(0, 100);
+    final status = pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
+    final statusLabel = _kCustomerStatusLabel[status] ?? status;
+    final statusColor = _kCustomerStatusColor[status] ?? BsTokens.brand;
 
     return Semantics(
       button: true,
@@ -1834,10 +1846,10 @@ class _CustomerCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: BsTokens.space3),
-                  _CreditBar(pct: view.pct, color: statusColor),
+                  _CreditBar(pct: pct, color: statusColor),
                   const SizedBox(height: 6),
                   Text(
-                    'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(c.creditLimit)} (${view.pct}%)',
+                    'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(liveLimit)} ($pct%)',
                     style: const TextStyle(
                       color: BsTokens.mutedLight,
                       fontSize: 12.5,

@@ -228,6 +228,27 @@ void main() {
     );
 
     testWidgets(
+      'OFF: rendering the customers LIST (no card tap) ALREADY reaches '
+      'computeCredit — the list card consumes the live seam, not the seed',
+      (t) async {
+        final spy = await pumpSpy(t);
+        await openCustomersTab(t);
+
+        // No tap. The wave-2b fix makes _CustomerCard itself watch
+        // `customerCreditProvider`, so the LIST (the first thing the manager
+        // sees) reaches `repo.computeCredit` on render. Before, only the detail
+        // sheet did, so the list showed the fabricated `contractorCredit` seed
+        // ceiling that never updates from the server.
+        expect(
+          spy.computeCreditCalls,
+          contains(buyer),
+          reason: 'the customer LIST card now routes its ceiling through '
+              'repo.computeCredit (no tap needed)',
+        );
+      },
+    );
+
+    testWidgets(
       'OFF: the rendered ceiling matches the repo derivation (no flicker — the '
       'sync fallback equals the resolved figure)',
       (t) async {

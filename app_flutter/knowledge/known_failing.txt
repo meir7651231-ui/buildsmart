@@ -12,3 +12,10 @@
 # הפיצ'ר עובד (ה-drill-down נפתח עם דאטה אמיתית); רק כפתור-הסגירה לא נמצא ע"י
 # find.bySemanticsLabel('סגור') (Semantics+InkWell+Icon ידני במקום IconButton). לתיקון ע"י צי-העובד.
 worker_reports_drilldown_test.dart :: tapping the first-pass KPI box opens a real drill-down sheet listing the seeded done task (not a dead tap)
+
+# 2026-06-17: golden-test של צי-המקלדת (merge ~commit 9b3d01b) — לא שלי. `_loadIcons()`
+# קורא path קשיח של Windows: `C:/flutter/bin/cache/artifacts/material_fonts/
+# materialicons-regular.otf` → File.readAsBytes זורק ב-setUpAll על Linux (הקונטיינר
+# הזה + ה-CI). הפיצ'ר עצמו עובד; רק ה-golden setup שבור חוצה-פלטפורמה. לתיקון ע"י
+# צי-המקלדת (path חוצה-פלטפורמה דרך rootBundle/flutter cache, או skip כשהקובץ חסר).
+kb_golden_test.dart :: (setUpAll)

@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.26 — חיבור-לשרת: פרויקטים מציגים לוח-ריק כן (במקום 3 דמו מזויפים) על הבילד-המחובר · v6.26 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.27 — חיבור-לשרת: רשימת-הלקוחות מציגה מסגרת-אשראי חיה מהשרת (computeCredit), לא ערך-דמו מזויף · v6.27 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
