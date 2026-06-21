@@ -1402,3 +1402,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה (רק על המחובר; demo/טסטים byte-identical):** המשך ל-v6.28 — עכשיו כשמשתמש מחובר עורך תקציב (סכום/נוצל/קטגוריות), העריכה **נשמרת לשרת ושורדת רענון/החלפת-מכשיר**. קודם (v6.28) הוא ראה ריק-כן אבל עריכות נמחקו ברענון. אין שינוי layout/widget — אותו עורך-תקציב בדיוק; רק שהנתונים נשמרים מאחורי-הקלעים (`financeBudget/active` ב-Firestore) ונטענים-מחדש כש-snapshot נוחת. בדמו — אפמרי כתמיד (אפס שינוי).
 **למה אין צילום:** אין UI חדש — רק שכבת-persistence מאחורי `budgetProvider`. אומת ב-`budget_server_empty_test` (4: empty/local-demo/persist/re-seed, fake repo) + `budget_stock_scan_test` (+14) + `finance_firebase_repo_test` (+ budget source). mutation-verified (§mutation_log).
 **הפיכות:** להחזיר `BudgetNotifier` ל-seed-only (בלי `_persist`/listener) ו-`budgetProvider` ל-seed הישיר; להסיר את `_BudgetCacheRepo` + `setBudget`/`budgetListenable` מה-repos — חוזר ל-read-honesty (v6.28).
+
+## 2026-06-17 — #wave2b-fleetpct — רצועת-סיכום אשראי-הצי מחושבת חי (סגירת גל 2)
+**שינוי נראה (רק על המחובר; demo/טסטים byte-identical):** בראש טאב-הלקוחות בלוח-המנהל, מספר ה"ניצול אשראי %" המצרפי (3-stat summary) מחושב עכשיו מסכום-התקרות החי (`computeCredit` לכל הלקוחות) במקום מסכום ה-seed המזויף. כבוי — אותו אחוז בדיוק (הסכום זהה); מחובר — האחוז משקף את תקרות-השרת. אין שינוי layout/widget — רק מקור-הנתון של המספר. בזמן טעינה מוצג סכום-ה-seed (אפס ריצוד) עד שהחי נפתר.
+**למה אין צילום:** אין UI חדש — רק provider מצרף (`fleetCreditProvider`) מאחורי מספר קיים. אומת ב-46 טסטי manager ירוקים (byte-identical כבוי) + ה-seam מכוסה ב-`manager_credit_computecredit_consumer_test`.
+**הפיכות:** להחזיר את `totalCredit` ל-`views.fold(Σ c.creditLimit)` ולמחוק את `fleetCreditProvider` — חוזר לסכום ה-seed.

@@ -1502,6 +1502,22 @@ final customerCreditProvider = FutureProvider.family<CreditResult, String>((
   return ref.read(customersRepositoryProvider).computeCredit(name);
 });
 
+/// The fleet-wide credit ceiling — Σ of the LIVE `computeCredit` ceiling across
+/// all customers, so the manager's "ניצול אשראי %" summary stops aggregating the
+/// fabricated seed ceiling. OFF (demo/tests): each `computeCredit` returns
+/// `contractorCredit(name) == c.creditLimit`, so the sum is byte-identical to the
+/// old `Σ c.creditLimit`; ON it sums the server-canonical ceilings. The summary
+/// falls back to the seed sum while this resolves, so the number never flickers.
+final fleetCreditProvider = FutureProvider<int>((ref) async {
+  final customers = ref.watch(managerCustomersProvider);
+  var total = 0;
+  for (final c in customers) {
+    final r = await ref.watch(customerCreditProvider(c.name).future);
+    total += r.creditLimit;
+  }
+  return total;
+});
+
 /// The 👥 לקוחות tab body — the manager's LIVE customer list, a faithful port of
 /// the legacy `renderMgrCustomers` (@index.html:16566-16607). Each contractor is
 /// derived from the shared [ordersEngineProvider] (grouped by `who` via
@@ -1537,10 +1553,11 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     // Summary (@index.html:16570-16578): contractor count, total spend
     // (Σ used), and the fleet credit-utilisation % (Σ used / Σ limit).
     final totalUsed = views.fold<int>(0, (s, v) => s + v.customer.totalSpend);
-    final totalCredit = views.fold<int>(
-      0,
-      (s, v) => s + v.customer.creditLimit,
-    );
+    // S-connect: the fleet ceiling is the LIVE computeCredit sum (byte-identical
+    // OFF == Σ c.creditLimit, the proven invariant); fall back to the seed sum
+    // while it resolves so the % never flickers.
+    final totalCredit = ref.watch(fleetCreditProvider).valueOrNull ??
+        views.fold<int>(0, (s, v) => s + v.customer.creditLimit);
     final fleetPct =
         totalCredit == 0
             ? 0
