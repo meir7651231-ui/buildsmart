@@ -13,6 +13,7 @@
 // ANTI-COLLISION: this is a NEW file (prefix budget_); no shared file edited.
 
 import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -59,13 +60,21 @@ class BudgetState {
 }
 
 class BudgetNotifier extends StateNotifier<BudgetState> {
-  BudgetNotifier()
+  /// [total]/[spent]/[categories] default to the const demo seed so a bare
+  /// `BudgetNotifier()` stays byte-identical; `budgetProvider` injects them
+  /// THROUGH the finance repo — local → the same const demo, connected → the
+  /// repo's HONEST reads (0/0/[] today, NOT fabricated demo money — matching the
+  /// finance-hub budget box + finance_firebase's stated philosophy). Mirrors the
+  /// projects-engine repo-seam idiom (T6.2).
+  BudgetNotifier({int? total, int? spent, List<BudgetCat>? categories})
       : super(BudgetState(
-          total: kBudgetTotal,
-          spent: kBudgetSpent,
-          categories: [
-            for (final c in kBudgetCategories) BudgetCat(c.name, c.icon, c.amount),
-          ],
+          total: total ?? kBudgetTotal,
+          spent: spent ?? kBudgetSpent,
+          categories: categories ??
+              [
+                for (final c in kBudgetCategories)
+                  BudgetCat(c.name, c.icon, c.amount),
+              ],
         ));
 
   // saveBudget(:7281)
@@ -103,7 +112,23 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
 }
 
 final budgetProvider =
-    StateNotifierProvider<BudgetNotifier, BudgetState>((_) => BudgetNotifier());
+    StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
+  // Honest source via the repo (T6.2 seam): local → the const demo budget
+  // (byte-identical to before); connected → the repo's HONEST reads (0/0/[]
+  // today — no fabricated demo money on a real account, matching the finance-hub
+  // budget box + finance_firebase's philosophy). budget_screen already renders
+  // an empty budget gracefully (the `b.categories.isEmpty` branch @~259).
+  // NOTE: write-persistence (a budget collection) is a separate new-feature
+  // follow-up; this fix only stops showing fabricated demo money on the backend.
+  final repo = financeRepo();
+  return BudgetNotifier(
+    total: repo.budgetTotal(),
+    spent: repo.budgetSpent(),
+    categories: [
+      for (final c in repo.budgetCategories()) BudgetCat(c.name, c.icon, c.amount),
+    ],
+  );
+});
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
