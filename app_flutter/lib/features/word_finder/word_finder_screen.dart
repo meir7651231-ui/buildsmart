@@ -40,6 +40,7 @@ import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:buildsmart/features/word_finder/word_keys_model.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
+import 'package:buildsmart/screens/ai_finder_screen.dart' show AiFinderScreen;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery, searchRelevance;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart' show showLipskeyProductSheet;
@@ -1421,6 +1422,19 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     );
   }
 
+  /// #ai-finder — opening affordance: a free-text entry that pushes the AI
+  /// product finder ([AiFinderScreen]) — Claude narrows the catalog by category.
+  /// Pure navigation; the pushed screen self-gates on the Claude gateway (an
+  /// honest "requires connection" state when AI is off, so demo is unchanged).
+  Widget _buildAiFinderEntry() => Padding(
+        padding: const EdgeInsets.all(BsTokens.space1),
+        child: OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(AiFinderScreen.route()),
+          icon: const Text('🗣️'),
+          label: const Text('תאר במילים שלך → חיפוש חכם'),
+        ),
+      );
+
   /// Jobs-first entry: the JOB LIST keys — one icon-free key per work-recipe in
   /// [kJobsByName] (A→Z by `.name`), each labelled by the recipe `.name` and
   /// carrying the recipe's unique `.key` as its payload (so [_onWordTap] resolves
@@ -1630,6 +1644,11 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
               // showJobsEntry gate), and the list it opens then REPLACES the
               // cascade keyboard in the Expanded region below.
               if (showJobsEntry) _buildJobsEntry(),
+
+              // #ai-finder — opening affordance: a free-text "תאר → מצא" entry
+              // (Claude narrows the catalog by category). Same opening gate as
+              // the jobs/material affordances.
+              if (showJobsEntry) _buildAiFinderEntry(),
 
               // The key region SCROLLS when its grid is taller than the
               // viewport — a well-connected connections anchor (uncapped) or a

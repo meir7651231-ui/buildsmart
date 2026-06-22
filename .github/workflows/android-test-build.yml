@@ -102,5 +102,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.43 — AI-native: 'תאר עבודה → סל' ב-AI hub — תאר תקלה בשפה חופשית, Claude בונה לך את הסל · v6.43 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.44 — שדרוג-המאתר: 'תאר → מצא' — תאר מוצר בשפה חופשית והמאתר מצמצם עם AI לקטגוריה הנכונה · v6.44 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

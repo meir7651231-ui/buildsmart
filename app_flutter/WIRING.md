@@ -2542,3 +2542,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gating:** `claudeGatewayProvider` null → "הפיצ'ר דורש חיבור". maxTokens=32 (מחזיר key קצר → זול). demo/test byte-identical.
 - **AI-hub tile:** הרשימה גדלה מ-9 (proto-verbatim) ל-10; `apple_readiness_hide_pass_test` עודכן 6→7 visible (10−3 deferred).
 - **gate:** analyze 0 errors · `describe_to_cart_test` (matchRecipe דוחה key מומצא · prompt grounding · resolvedKitProducts=מוצרים-אמיתיים) + apple_readiness + ai_hub tests +39 ירוק. recipe_kit נוצל **בקריאה-בלבד** (לא נגעתי בקוד-המאתר). screens → גייט 24/116.
+
+### #ai-finder — שדרוג-המאתר: "תאר → מצא" (out-of-box גל ⑥, נגיעה מאושרת במאתר) — 2026-06-22
+- **המהלך:** `ai_finder_screen.dart` (חדש) + נגיעה מינימלית ב-`word_finder_screen.dart`: בפתיחה `if (showJobsEntry) _buildAiFinderEntry()` (אותו opening-gate) + מתודה `_buildAiFinderEntry` (OutlinedButton → `AiFinderScreen.route()`) + import. **באישור המשתמש** (הצי לא עובד על מסך-המאתר).
+- **הזרימה:** טקסט-חופשי → `aiFinderPrompt` מוסר את הסט-הסגור של הקטגוריות (`finderCategories()` = distinct `categoryHe`, ~68) → Claude מחזיר **קטגוריה אחת או NONE** → `matchCategory` מאמת (exact→contained, זורק מומצא/NONE) → `productsInCategory(cat)` = `kCatalogProducts.where(categoryHe==)` → רשימה (לחיצה → `showLipskeyProductSheet`).
+- **anti-hallucination:** Claude לא יכול לנקוב שם-מוצר — רק קטגוריה מהרשימה; המוצרים אמיתיים-בלבד.
+- **gating:** `claudeGatewayProvider` null → "החיפוש החכם דורש חיבור". maxTokens=48. demo/test byte-identical.
+- **gate:** analyze 0 errors · `ai_finder_test` (matchCategory closed-set + prompt grounding + products-real + **DEMO מודפס**) + 18 טסטי finder ירוקים. word_finder_screen ב-features/ (לא screens|state|logic) → לא מפעיל גייט-lib; ai_finder_screen ב-screens → גייט 24/116.
