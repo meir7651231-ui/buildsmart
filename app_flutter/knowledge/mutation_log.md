@@ -1239,3 +1239,8 @@
 - **ההלפר החדש:** `BudgetNotifier._persist()` ב-`budget_screen.dart` (=`_repo.setBudget(total,spent,cats)`), נקרא מכל mutator; + `_BudgetCacheRepo.setBudget` (`upsert` ל-`financeBudget/active`) ב-`finance_firebase.dart`. data/repositories נגע → גייט 44 דורש mutation-verify.
 - **טסט-נעיצה:** `test/budget_server_empty_test.dart` — ה-load-bearing: "connected: an edit PERSISTS via setBudget and the state round-trips" (fake `FinanceRepository` מקליט `setCalls`; `setTotals(30000,12000)` חייב לרשום call + state לעשות round-trip).
 - **mutation-verify:** baseline **+4 ירוק** → הזרקתי הסרת `_persist();` מ-`setTotals` (`// MUTATION`) → טסט **אדום `+3 -1`** (`an edit PERSISTS via setBudget` → `Actual: []` — אין setCalls) → שחזור → **+4 ירוק**, RESTORED-IDENTICAL (0 MUTATION markers). analyze 0. דפוס: כל mutator מנותב דרך `_persist` (אותו דפוס שאומת), כך שהמחיקה של אחד תופסת את העיקרון.
+
+## #autoflowfix-pump — autoFlowFix מוסיף HW-PUMP-40 (kCompatCatalog) — 2026-06-22
+- **ההלפר:** `pressure_drop.autoFlowFix` (lib/logic) — שלב prepend-המשאבה ב-ΔP>1bar; תוקן לפתור `HW-PUMP-40` מול `kCompatCatalog`.
+- **טסט-נעיצה:** `test/pressure_pump_test.dart` — load-bearing: "autoFlowFix prepends the booster pump on high ΔP" (chain מוכח + params 1000m/5LPS/50m → ΔP>1bar → chain חייב להכיל HW-PUMP-40).
+- **mutation-verify:** baseline **+3 ירוק** → הזרקתי `kCompatCatalog`→`kLipskeyCatalog` ב-:237 (`// MUTATION`) → **אדום `+2 -1`** (autoFlowFix-prepends → אין HW-PUMP-40; ה-suggestion וה-membership נשארו ירוקים כי הם לא תלויים בשורה הזו) → שחזור → **+3 ירוק**, 0 MUTATION markers. analyze 0.

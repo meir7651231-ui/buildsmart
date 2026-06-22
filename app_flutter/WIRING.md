@@ -2515,3 +2515,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** `kLipskeyCatalog`→`kCompatCatalog` בשני המקומות (one-line swap; kCompatCatalog כבר מיובא+בשימוש ב-install_studio). byte-equivalent לעוגנים שאינם-HW (kCompatCatalog⊇kLipskeyCatalog), מוסיף רק את ה-HW. אותו class כמו תיקון-הברקוד (129c5f4).
 - **תיקון-טסט (קריטי):** `saved_project_autobom_test._resolve` שיקף את ה-baggy `kLipskeyCatalog` → **נעץ את הבאג**. עודכן ל-`kCompatCatalog` + case חדש: עוגן ב-`kCompatCatalog`-שאינו-`kLipskeyCatalog` (מים-חם) פותר ל-length 1 (ה-kLipskeyCatalog הישן היה מחזיר 0).
 - **gate:** analyze 0 errors · saved_project_autobom + robustness + install_plan_coverage +27 ירוק.
+
+### #autoflowfix-pump — תיקון-באג: משאבת-הגברה אוטומטית הייתה מתה (לולאה סבב-3) — 2026-06-22
+- **הבאג (Check missing סבב-3, HIGH):** `pressure_drop.autoFlowFix:237` פתר `HW-PUMP-40` (מים-חם-בלבד, lipskey_hotwater:39) מול `kLipskeyCatalog` → `.where` תמיד ריק → המשאבה לעולם לא נוספה בקווי ΔP>1bar. ה-auto-fix נקרא בפועל (install_studio:965) אך עשה no-op שקט. המופע האחרון של מחלקת-הבאג (סיבלינג של 129c5f4/15fa473).
+- **התיקון:** `kLipskeyCatalog`→`kCompatCatalog` (import חדש `lipskey_hotwater show kCompatCatalog`). byte-equivalent לכל SKU שאינו-HW.
+- **gate (lib/logic → 24+42+44):** analyze 0 · טסט חדש `pressure_pump_test` (+3: autoFlowFix מוסיף משאבה ב-ΔP גבוה · estimatePressureDrop מציע HW-PUMP-40 · HW-PUMP-40 רק ב-kCompatCatalog) · mutation-verified (§mutation_log) · WIRING. הטסט ה-3 (membership) שומר גם את swaps של install_studio (15fa473) מ-regression.

@@ -20,6 +20,7 @@
 // for warning the user about long or twisty chains, not a certification.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_hotwater.dart' show kCompatCatalog;
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart';
 
@@ -233,8 +234,11 @@ class PressureDropResult {
     verticalRiseMeters: verticalRiseMeters,
   );
   if (pd2.dropBar > 1.0) {
+    // HW-PUMP-40 lives in the hot-water catalog, so resolve against the UNIFIED
+    // kCompatCatalog — kLipskeyCatalog alone never found it, so this auto-prepend
+    // silently no-op'd on every high-ΔP chain (the auto-fix was dead).
     final pump =
-        kLipskeyCatalog.where((p) => p.sku == 'HW-PUMP-40').toList();
+        kCompatCatalog.where((p) => p.sku == 'HW-PUMP-40').toList();
     if (pump.isNotEmpty && !working.any((p) => p.sku == 'HW-PUMP-40')) {
       working = [pump.first, ...working];
       changes.add(
