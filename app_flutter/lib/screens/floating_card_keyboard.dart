@@ -61,18 +61,30 @@ import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
 import 'package:buildsmart/screens/chats_screen.dart'
     show ThreadLite, visibleThreadsProvider;
+import 'package:buildsmart/screens/keyboard_dept_deriver.dart'
+    show deriveDeptContext;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, kbDestinations, matchDestinations;
+import 'package:buildsmart/screens/keyboard_store_deriver.dart'
+    show deriveStoreContext;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
+import 'package:buildsmart/state/dept_location.dart'
+    show DeptLocation, deptLocationProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kKbLiveMirrorFlag;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
+import 'package:buildsmart/state/orders_engine.dart'
+    show Order, ordersEngineProvider;
+import 'package:buildsmart/state/smart_cart.dart'
+    show SmartCartLine, smartCartProvider;
+import 'package:buildsmart/state/store_location.dart'
+    show StoreLocation, storeLocationProvider;
 import 'package:buildsmart/state/updates_location.dart'
     show UpdatesLocation, updatesLocationProvider;
 import 'package:buildsmart/theme/tokens.dart';
@@ -279,15 +291,19 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   ///      carries its REAL run); tab 0 keeps product opening-words via
   ///      [_buildRow] (empty destByChip — today's exact empty-field behaviour).
   ///
-  /// LIVE-MIRROR ([kKbLiveMirror], guarded): when the flag is on AND we are on the
-  /// עדכונים tab (tab == 2) AND [ctx] was derived in [build], this returns the PURE
-  /// deriver's row instead of the hardcoded ['שיחות','התראות'] tab-2 fallback —
-  /// re-derived at every click. [ctx] is non-null ONLY on that flag-ON tab-2 path
-  /// (see [build], which derives the WHOLE [KbUpdatesContext] once — both the row
-  /// AND the tool base — from one location snapshot, then passes it here and uses
-  /// its toolBase for [_syncContextToolBase]). With the flag OFF [ctx] is always
-  /// null and this branch is skipped, so the tab-2 fallback below runs and every
-  /// path stays byte-identical.
+  /// LIVE-MIRROR ([kKbLiveMirror], guarded): when the flag is on AND we are on a
+  /// MIRRORED tab — מחלקות (tab == 1) OR עדכונים (tab == 2) OR חנות (tab == 3) —
+  /// AND [ctx] was derived in [build], this returns the PURE deriver's row instead
+  /// of the hardcoded tab fallback (the 4 departments for tab 1, ['שיחות','התראות']
+  /// for tab 2, the store sections for tab 3) — re-derived at every click. [ctx]
+  /// is non-null ONLY on a flag-ON mirrored-tab path (see [build], which derives
+  /// the WHOLE [KbUpdatesContext] once — both the row AND the tool base — from one
+  /// location snapshot via the matching deriver (`deriveDeptContext` at tab 1,
+  /// `deriveUpdatesContext` at tab 2, `deriveStoreContext` at tab 3), then passes
+  /// it here and uses its toolBase for [_syncContextToolBase]). All three derivers
+  /// emit the SAME [KbUpdatesContext] type, so this ONE adapter serves all tabs.
+  /// With the flag OFF [ctx] is always null and this branch is skipped, so the
+  /// hardcoded tab fallback below runs and every path stays byte-identical.
   _PredRow _rowFor({
     required String text,
     required int tab,
@@ -299,13 +315,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     if (text.isNotEmpty) return _buildRow(text);
 
     // (1.5) LIVE-MIRROR — folds out entirely when [kKbLiveMirror] is false (const
-    // guard ⇒ tree-shaken) OR when [ctx] is null (every non-flag-ON-tab-2 path).
-    // ADAPTER: the deriver returns a PUBLIC [KbUpdatesContext] whose row is a
-    // [KbPredRow] (a leaf file cannot construct this private [_PredRow]); copy it
-    // field-for-field into [_PredRow] — chips + destByChip + destinationChips, plus
-    // the NEW runByChip map (the deriver never drills, so drillIndexByChip stays
-    // const-empty). [build] then persists row.runByChip into [_runByChip].
-    if (kKbLiveMirror && tab == 2 && ctx != null) {
+    // guard ⇒ tree-shaken) OR when [ctx] is null (every non-flag-ON-mirrored-tab
+    // path). The tab guard accepts the THREE mirrored tabs (1 = מחלקות,
+    // 2 = עדכונים, 3 = חנות); they are mutually exclusive and [ctx] is built by the
+    // matching deriver in [build], so this single branch routes all three. ADAPTER:
+    // the deriver returns a
+    // PUBLIC [KbUpdatesContext] whose row is a [KbPredRow] (a leaf file cannot
+    // construct this private [_PredRow]); copy it field-for-field into [_PredRow] —
+    // chips + destByChip + destinationChips, plus the runByChip map (neither
+    // deriver drills, so drillIndexByChip stays const-empty). [build] then persists
+    // row.runByChip into [_runByChip].
+    if (kKbLiveMirror && ctx != null && (tab == 1 || tab == 2 || tab == 3)) {
       final r = ctx.row;
       return _PredRow(
         r.chips,
@@ -381,7 +401,8 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   ///     (the no-churn guard; plan risk "tool-base in-build mutation").
   ///
   /// [base] is null whenever the mirror is inactive ([kKbLiveMirror] off / not on
-  /// tab 2 / runtime tier off), in which case this either (a) tears down a context
+  /// a mirrored tab (1, 2, or 3) / runtime tier off), in which case this either (a)
+  /// tears down a context
   /// base THIS widget previously installed — returning to the letters — or (b)
   /// does nothing if none was installed or a manual drill owns the stack. So with
   /// the flag off this is a pure no-op and the manual drill behaviour is
@@ -446,7 +467,8 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   ///       (`notifSectionProvider` / `updatesChatOpenProvider`) for the SCREEN to
   ///       react to — it never pushes a route from the keyboard, so the overlay
   ///       stays floating. EMPTY (so this step is a no-op) on every path but the
-  ///       flag-ON tab-2 mirror, keeping flag-OFF dispatch byte-identical. Checked
+  ///       flag-ON mirrored-tab mirrors (tabs 1/2/3), keeping flag-OFF dispatch
+  ///       byte-identical. Checked
   ///       AFTER [_destByChip] and BEFORE the word fallback; the three maps are
   ///       pairwise-disjoint (the [_PredRow] ctor asserts it), so the order only
   ///       sets precedence for an impossible collision.
@@ -618,38 +640,92 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
 
     // LIVE-MIRROR ([kKbLiveMirror], plan seam 2 + Q4) — two-stage guard.
     //
-    // OUTER `tab == 2`: the deriver mirrors the עדכונים tab ONLY, so every other
-    // tab skips all of this with a single int compare (zero new cost off-tab).
+    // OUTER tab gate: the mirror covers exactly THREE tabs (1 = מחלקות,
+    // 2 = עדכונים, 3 = חנות); every other tab skips all of this with a single int
+    // compare (zero new cost off-tab). The three are an `if`/`else if` chain
+    // because `mainTabProvider` is a single int — they are mutually exclusive, so
+    // at most one assigns [ctx].
     //
     // INNER `kKbLiveMirror || featureFlagsProvider.contains(kKbLiveMirrorFlag)`:
     // EITHER the compile flag (a `--dart-define` demo build) OR the runtime tier
     // (the orchestrator's no-rebuild `enable(kKbLiveMirrorFlag)`, plan Q4) turns
     // the mirror on; BOTH default OFF. When the compile flag is on, the `||`
     // short-circuits TRUE and the featureFlags watch is dead code (tree-shaken).
-    // When the compile flag is OFF, the runtime tier is still reachable on tab 2 at
-    // the cost of ONE cheap Set-contains watch — the deliberate price of a
-    // no-rebuild demo toggle (plan Q4 names this exact guard). The EXPENSIVE watches
-    // ([updatesLocationProvider] + [visibleThreadsProvider]) stay INSIDE `if
-    // (live)`, so a plain prod build (both flags off) never subscribes to them and
-    // their rebuild timing is unchanged (plan risk "flag-OFF timing leak").
+    // When the compile flag is OFF, the runtime tier is still reachable on a
+    // mirrored tab at the cost of ONE cheap Set-contains watch — the deliberate
+    // price of a no-rebuild demo toggle (plan Q4 names this exact guard). The
+    // EXPENSIVE watches stay INSIDE `if (live)`, so a plain prod build (both flags
+    // off) never subscribes to them and their rebuild timing is unchanged (plan
+    // risk "flag-OFF timing leak").
     //
     // ATOMIC SNAPSHOT (plan, async-race lens): when active we derive the ENTIRE
     // [KbUpdatesContext] ONCE — both the prediction row AND the tool base — from a
-    // single [updatesLocationProvider] + [visibleThreadsProvider] snapshot, so the
-    // two halves can never disagree. `ctx.row` feeds [_rowFor]; `ctx.toolBase`
-    // feeds [_syncContextToolBase] below.
+    // single location (+ live-data) snapshot, so the two halves can never disagree.
+    // `ctx.row` feeds [_rowFor]; `ctx.toolBase` feeds [_syncContextToolBase] below.
     KbUpdatesContext? ctx;
-    if (tab == 2) {
-      // Two-tier gate: the compile-time flag (kKbLiveMirror) short-circuits at
-      // build time, so when it is ON the featureFlags watch is dead code and
-      // tree-shakes; the runtime flag is only ever watched when the compile flag
-      // is OFF (the deliberate one-Set-contains cost of the no-rebuild toggle).
+    if (tab == 1) {
+      // PARALLEL מחלקות mirror — the same two-tier gate as the tab-2/3 blocks
+      // below, just for the departments tab. It is the HEAD of the `else if` chain
+      // (the three mirrored tabs are mutually exclusive at the tab== level, so this
+      // branch completely replaces the tab==2/3 checks when tab==1; both blocks
+      // below stay untouched). The EXPENSIVE watch [deptLocationProvider] stays
+      // INSIDE `if (live)`, so off-tab cost is one int compare. UNLIKE store/updates
+      // the four department surfaces are STATIC (no live cart/orders/threads to
+      // snapshot), so the deriver takes only the [deptLocationProvider] location —
+      // but that watch still stays INSIDE `if (live)`, so a plain prod build (both
+      // flags off) never subscribes to it and the off-tab cost is one int compare. The deriver emits the SAME
+      // [KbUpdatesContext], so `ctx.row`/`ctx.toolBase` flow through the SAME
+      // [_rowFor] adapter + [_syncContextToolBase] below as tabs 2/3.
+      //
+      // Two-tier gate (identical to the tab-2/3 blocks): [kKbLiveMirror] at compile
+      // time short-circuits the `||` so when it is ON the [featureFlagsProvider]
+      // watch is dead code and tree-shakes; the runtime tier is only ever watched
+      // when the compile flag is OFF (the deliberate one-Set-contains cost of the
+      // no-rebuild toggle).
+      final live = kKbLiveMirror ||
+          ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
+      if (live) {
+        final DeptLocation dept = ref.watch(deptLocationProvider);
+        ctx = deriveDeptContext(dept);
+      }
+    } else if (tab == 2) {
+      // The SECOND of the three mutually-exclusive mirrored-tab branches (tab 1 =
+      // מחלקות is the HEAD; tab 3 = חנות follows). Two-tier gate: the compile-time
+      // flag (kKbLiveMirror) short-circuits at build time, so when it is ON the
+      // featureFlags watch is dead code and tree-shakes; the runtime flag is only
+      // ever watched when the compile flag is OFF (the deliberate one-Set-contains
+      // cost of the no-rebuild toggle).
       final live = kKbLiveMirror ||
           ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
       if (live) {
         final UpdatesLocation upd = ref.watch(updatesLocationProvider);
         final List<ThreadLite> threads = ref.watch(visibleThreadsProvider);
         ctx = deriveUpdatesContext(upd, threads: threads);
+      }
+    } else if (tab == 3) {
+      // PARALLEL חנות mirror — byte-for-byte the same two-tier gate + atomic
+      // snapshot as the tab-2 (עדכונים) block above, just for the store tab. It
+      // is an `else if` because the two mirrored tabs are mutually exclusive
+      // (mainTabProvider is a single int), so at most one assigns [ctx]; the
+      // tab-2 path is completely untouched. The EXPENSIVE watches
+      // ([storeLocationProvider] + [smartCartProvider] + [ordersEngineProvider])
+      // stay INSIDE `if (live)`, so a plain prod build (both flags off) never
+      // subscribes to them and the off-tab cost is one int compare. Both derivers
+      // emit the SAME [KbUpdatesContext], so `ctx.row`/`ctx.toolBase` flow through
+      // the SAME [_rowFor] adapter + [_syncContextToolBase] below as tab 2.
+      //
+      // Two-tier gate (identical to the tab-2 block): [kKbLiveMirror] at compile
+      // time short-circuits the `||` so when it is ON the [featureFlagsProvider]
+      // watch is dead code and tree-shakes; the runtime tier is only ever watched
+      // when the compile flag is OFF (the deliberate one-Set-contains cost of the
+      // no-rebuild toggle).
+      final live = kKbLiveMirror ||
+          ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
+      if (live) {
+        final StoreLocation st = ref.watch(storeLocationProvider);
+        final List<SmartCartLine> cart = ref.watch(smartCartProvider);
+        final List<Order> orders = ref.watch(ordersEngineProvider);
+        ctx = deriveStoreContext(st, cart: cart, orders: orders);
       }
     }
 
@@ -680,8 +756,10 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     _drillIndexByChip = row.drillIndexByChip;
     // The THIRD dispatch map (LIVE-MIRROR dynamic chips), persisted in lock-step
     // with the other two so [_onPrediction] reads the CURRENT row's closures.
-    // const-empty on every flag-OFF / non-tab-2 path, so this write is a no-op
-    // there and flag-OFF dispatch stays byte-identical.
+    // const-empty on every non-mirrored-tab path (tabs 0 and 4+, non-tabs-1-2-3)
+    // and on every flag-OFF path; the mirrored tabs (1/2/3) populate it only when
+    // the flag is ON, so this write is a no-op otherwise and flag-OFF dispatch
+    // stays byte-identical.
     _runByChip = row.runByChip;
 
     // TOOL-BASE sync (LIVE-MIRROR, plan seam 5) — install the deriver's toolBase

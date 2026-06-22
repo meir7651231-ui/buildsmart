@@ -24,13 +24,16 @@
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
-    show openScanPlanSheet;
+    show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
+import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/notifications_screen.dart'
     show markAllNotifsRead;
+import 'package:buildsmart/screens/order_notif_sheet.dart'
+    show showOrderNotifSheet;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
 import 'package:buildsmart/screens/store_screen.dart'
@@ -251,12 +254,16 @@ List<KbToolNode> kbKbdNodes() => <KbToolNode>[
 // a const) because the leaf actions are non-const closures, mirroring
 // [kbHomeNodes]/[kbKbdNodes].
 
-/// Shows the honest "<label> — בקרוב" SnackBar for a not-yet-wired updates tool
-/// leaf — the SAME deferral idiom `keyboard_tool_actions.dart`'s private
-/// `_comingSoon` uses for מסלול/מהירים, reproduced here (that helper is private
-/// to its file). Used for the chat tools whose real openers are not exposed yet
-/// (new-chat / search-chats / attach — wired for real in plan phase 6).
-void _updatesToolSoon(BuildContext context, String label) {
+/// Shows the honest "<label> — בקרוב" SnackBar for ANY not-yet-wired tool leaf in
+/// this file — the SINGLE deferral helper shared by the עדכונים / חנות / מחלקות
+/// live-mirror node-lists (the SAME idiom `keyboard_tool_actions.dart`'s private
+/// `_comingSoon` uses for מסלול/מהירים, reproduced here because that helper is
+/// private to its file). Used wherever a tool's real opener is not exposed yet and
+/// shipping "בקרוב" is the honest deferral rather than a broken nav:
+///   • שיחות   — new-chat / search-chats / attach (real openers wired plan phase 6);
+///   • חנות    — cart לקופה / רוקן סל (handlers live in private store widgets);
+///   • מחלקות  — מסלול עבודה (no real work-route screen exists yet).
+void _toolSoon(BuildContext context, String label) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text('$label — בקרוב')));
@@ -299,22 +306,164 @@ List<KbToolNode> kbUpdatesChatsNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.add_comment_outlined,
         label: 'שיחה חדשה',
-        action: (ref, context) => _updatesToolSoon(context, 'שיחה חדשה'),
+        action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
       ),
       KbToolNode.leaf(
         icon: Icons.search,
         label: 'חיפוש שיחות',
-        action: (ref, context) => _updatesToolSoon(context, 'חיפוש שיחות'),
+        action: (ref, context) => _toolSoon(context, 'חיפוש שיחות'),
       ),
       KbToolNode.leaf(
         icon: Icons.attach_file,
         label: 'צרף',
-        action: (ref, context) => _updatesToolSoon(context, 'צרף'),
+        action: (ref, context) => _toolSoon(context, 'צרף'),
       ),
       KbToolNode.leaf(
         icon: Icons.mic,
         label: 'קולי',
         isVoiceInput: true,
         action: (ref, context) => runKeyboardTool(ref, context, KbTool.voice),
+      ),
+    ];
+
+// ─── חנות live-mirror tool node-lists ─────────────────────────────────────────
+//
+// The חנות deriver ([keyboard_store_deriver.dart]) supplies a THIRD stack-base
+// node-list (alongside [kbHomeNodes]/[kbKbdNodes], exactly like the עדכונים
+// node-lists above) reflecting WHICH store section the floating keyboard is on
+// (mainTabProvider == 3). [kbStoreNodes] returns the per-section node-list with
+// the SAME [KbToolNode.leaf]/[.branch] shape every other tool view uses, so the
+// floating keyboard renders + dispatches them through the unchanged
+// `kbTilesFor → tiles:` + `_onTile` path. It is a `(StoreSection)` factory (not a
+// const) because the leaf actions are non-const closures, mirroring
+// [kbHomeNodes]/[kbUpdatesNotifNodes].
+
+/// The per-section store tool node-list ([mainTabProvider] == 3). Each section
+/// surfaces the actions that are REAL + verified for that surface; where the real
+/// handler is private (cart checkout/clear) it ships an honest "בקרוב" leaf (the
+/// established deferral), never a broken nav.
+///
+///   • [StoreSection.cart]  — 🛒: לקופה / רוקן סל are private store handlers ⇒
+///     honest "בקרוב" leaves; 💰 כספים reuses [openFinanceHub] (the SAME opener
+///     the store hub's 'כספים' quick action uses, store_screen.dart:811).
+///   • [StoreSection.orders]— 📦: 🔔 התראות הזמנות reuses [showOrderNotifSheet]
+///     (the SAME sheet the orders section's 🔔 button opens,
+///     store_screen.dart:700); 📊 השוואת מחירים reuses [openPriceCompareSheet].
+///   • [StoreSection.services]— 🔧: 📊 השוואת מחירים ([openPriceCompareSheet]) +
+///     💡 חלופות זולות ([openCheaperAlternativesSheet]) — both real service
+///     sheets the store already opens.
+///   • [StoreSection.all]   — the hub root: 📦 הזמנות jumps to the orders section
+///     (the SAME pairing keyboard_destinations.dart's `_openStoreSection` does:
+///     tab 3 + storeSectionProvider = orders) + 💰 כספים ([openFinanceHub]).
+/// Keep-floating throughout: a section-jump swaps the screen underneath; a sheet
+/// opener pushes over everything (the keyboard reappears when it pops).
+List<KbToolNode> kbStoreNodes(StoreSection section) => switch (section) {
+      StoreSection.cart => <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.point_of_sale,
+            label: 'לקופה',
+            action: (ref, context) => _toolSoon(context, 'לקופה'),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.delete_outline,
+            label: 'רוקן סל',
+            action: (ref, context) => _toolSoon(context, 'רוקן סל'),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'כספים',
+            action: (ref, context) => openFinanceHub(context),
+          ),
+        ],
+      StoreSection.orders => <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.notifications_outlined,
+            label: 'התראות הזמנות',
+            action: (ref, context) => showOrderNotifSheet(context),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.compare_arrows,
+            label: 'השוואת מחירים',
+            action: (ref, context) => openPriceCompareSheet(context),
+          ),
+        ],
+      StoreSection.services => <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.compare_arrows,
+            label: 'השוואת מחירים',
+            action: (ref, context) => openPriceCompareSheet(context),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.lightbulb_outline,
+            label: 'חלופות זולות',
+            action: (ref, context) => openCheaperAlternativesSheet(context),
+          ),
+        ],
+      StoreSection.all => <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.receipt_long,
+            label: 'הזמנות',
+            action: (ref, context) {
+              ref.read(mainTabProvider.notifier).state = 3;
+              ref.read(storeSectionProvider.notifier).state =
+                  StoreSection.orders;
+            },
+          ),
+          KbToolNode.leaf(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'כספים',
+            action: (ref, context) => openFinanceHub(context),
+          ),
+        ],
+    };
+
+// ─── מחלקות live-mirror tool node-list ────────────────────────────────────────
+//
+// The מחלקות deriver ([keyboard_dept_deriver.dart]) supplies a THIRD stack-base
+// node-list (alongside [kbHomeNodes]/[kbKbdNodes], exactly like the
+// עדכונים/חנות node-lists above) reflecting the departments surface
+// (mainTabProvider == 1). [kbDeptNodes] returns the department-level node-list
+// with the SAME [KbToolNode.leaf]/[.branch] shape every other tool view uses, so
+// the floating keyboard renders + dispatches them through the unchanged
+// `kbTilesFor → tiles:` + `_onTile` path. It is a `()` factory (not a const)
+// because the leaf actions are non-const closures, mirroring
+// [kbHomeNodes]/[kbStoreNodes].
+
+/// The department-level tool node-list ([mainTabProvider] == 1). These are the
+/// catalog-navigation tools that make sense ACROSS the departments surface,
+/// REUSING existing public openers verbatim (the SAME [runKeyboardTool] seam
+/// [kbHomeNodes] uses, so the destination stays identical to the home tiles):
+///   • עץ חכם → [runKeyboardTool] with [KbTool.smartTree] (catalog smart-tree
+///     section — the SAME target kbHomeNodes' 'עץ חכם' leaf and the
+///     keyboard_destinations.dart 'עץ חכם' destination open);
+///   • מאתר  → [runKeyboardTool] with [KbTool.finder] (the catalog FinderScreen —
+///     the SAME target kbHomeNodes' 'מאתר' leaf opens).
+/// DEFERRED: מסלול עבודה has no real work-route/project screen yet (the only
+/// current surface is a display-only hero in smart_home_screen.dart — `_WorkPath`,
+/// ~414-476 — with NO onTap / no nav target), so wiring it would be a
+/// guessed/broken nav. It ships HONEST via the [_toolSoon] "בקרוב" SnackBar until
+/// a real opener exists (plan phase 7+). Mirrors the deferred 'מסלול' in
+/// [kbHomeNodes] (keyboard_tool_tree.dart:122-132) exactly. Keep-floating
+/// throughout: a tool that swaps the catalog section swaps the screen underneath;
+/// a route push pushes over everything (the keyboard reappears when it pops); the
+/// "בקרוב" leaf only shows a SnackBar.
+List<KbToolNode> kbDeptNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.account_tree,
+        label: 'עץ חכם',
+        action: (ref, context) =>
+            runKeyboardTool(ref, context, KbTool.smartTree),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.gps_fixed,
+        label: 'מאתר',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
+      ),
+      // DEFERRED like kbHomeNodes' 'מסלול' (no real work-route surface exists);
+      // honest "בקרוב" leaf, never a broken nav.
+      KbToolNode.leaf(
+        icon: Icons.route,
+        label: 'מסלול עבודה',
+        action: (ref, context) => _toolSoon(context, 'מסלול עבודה'),
       ),
     ];
