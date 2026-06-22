@@ -4,6 +4,24 @@
 
 ---
 
+## v6.49 — #ai-alt-explain · sheet החלופות: כפתור "🤔 למה כדאי?" לכל שורה — 2026-06-22
+
+**שינוי (lib/screens):** `contractor_tools_sheets.dart` — בכל שורת-חלופה ב-`_CheaperAlternativesSheet`
+נוסף `Consumer` שמרנדר `TextButton.icon` **"🤔 למה כדאי?"** מתחת לבאדג'-החיסכון → `AltExplainScreen.route(...)`.
+`alt_explain_screen.dart` (חדש) — מסך שמציג את ההחלפה האמיתית (שמות+מחירים+חיסכון מה-data) וקורא ל-Claude
+ב-`initState` להסבר ה-tradeoff.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): כל שורה בסheet מציגה את הכפתור; לחיצה פותחת את `AltExplainScreen`
+  עם המספרים האמיתיים בראש (loader → טקסט-הסבר של Claude). אם הקריאה נכשלת → "נסה שוב".
+- **AI כבוי** (demo/web, gateway null): ה-`Consumer` מחזיר `SizedBox.shrink()` → הכפתור **לא בעץ** → ה-sheet
+  נשאר **byte-identical** (שורת-מוצר + המלצה + חלופה + באדג'-חיסכון, בדיוק כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings. צילום על-מכשיר ע"י הבעלים
+בבילד הבא (v6.49).
+
+---
+
 ## v6.48 — #ai-search-fallback · קטלוג: כפתור "נסה חיפוש חכם" במצב no-results — 2026-06-22
 
 **שינוי (lib/screens):** `catalog_screen.dart` — מצב "אין תוצאות" (`filtered.isEmpty && products.isEmpty`)

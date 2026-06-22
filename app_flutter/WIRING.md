@@ -2556,3 +2556,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **gating:** הכפתור עטוף ב-`if (query.isNotEmpty && ref.watch(claudeGatewayProvider) != null)` → ב-demo/no-AI הוא **לא קיים בעץ** → ה-no-results נשאר ה-`Text` המקורי (byte-identical). `initialQuery` ריק/null → `initState` לא מריץ כלום (המסך הידני ללא-שינוי).
 - **anti-hallucination:** ללא חדש — חוזר על #ai-finder (closed-set `matchCategory`, מוצרים מ-`kCatalogProducts.where`).
 - **gate:** analyze 0 errors/warnings (405 infos pre-existing) · `ai_finder_test`/`claude_gateway_test`/`describe_to_cart_test`/`search_fallback_test` ירוקים. catalog_screen + ai_finder_screen ב-screens → גייט 24/116.
+
+### #ai-alt-explain — "למה החלופה הזולה שווה?" על sheet החלופות (out-of-box גל ⑥, המשך) — 2026-06-22
+- **המהלך:** `alt_explain_screen.dart` (חדש) + נגיעה מינימלית ב-`contractor_tools_sheets.dart`: בכל שורת-חלופה ב-`_CheaperAlternativesSheet` נוסף `Consumer` שמרנדר כפתור **"🤔 למה כדאי?"** (`TextButton.icon`) → `AltExplainScreen.route(product/recName/recPrice/altName/altPrice)`. +2 imports (`claudeGatewayProvider`, `AltExplainScreen`).
+- **הזרימה:** ההחלפה (מותג-מומלץ↔מותג-זול) + כל המספרים (מחיר-המלצה, מחיר-חלופה, חיסכון) מגיעים מ-`cheaperAlternativesAcrossCatalog()` האמיתי. המסך מציג אותם (data), קורא ל-Claude ב-`initState`, ו-Claude **רק מנסח** את ה-tradeoff ב-2–3 משפטים + הדבר-האחד-לבדוק.
+- **anti-hallucination (grounded, לא closed-set):** ה-prompt (`altExplainPrompt`) **מוסר** את שני המותגים + שני המחירים + החיסכון, ו**אוסר** להמציא מפרט/מספר/שם-מוצר שלא ניתן + אוסר להבטיח ש"הזול תמיד עדיף". המספרים על המסך = של ה-data, לעולם לא של המודל.
+- **gating:** הכפתור עטוף ב-`Consumer` שבודק `claudeGatewayProvider == null → SizedBox.shrink()` → ב-demo/no-AI **לא קיים בעץ**, ה-sheet byte-identical. המסך עצמו ב-null → "ההסבר החכם דורש חיבור".
+- **gate:** analyze 0 errors/warnings · `alt_explain_test` (prompt-grounding: שני מותגים+מחירים+חיסכון · anti-hallucination guard) ירוק. alt_explain_screen + contractor_tools_sheets ב-screens → גייט 24/116.
