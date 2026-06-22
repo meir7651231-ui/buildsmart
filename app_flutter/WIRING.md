@@ -2529,3 +2529,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **grounding:** ה-callable גנרי+טיפש בכוונה; כל פיצ'ר מעביר דאטה מאומתת ב-prompt/system → המודל מנמק מעל אמת, לא ממציא מק"טים.
 - **gate:** functions `tsc --noEmit` 0 + `npm run selftest` 70/70 · flutter analyze 0 · `test/claude_gateway_test.dart` (null-when-OFF + fake-seam + neutral-exception), mutation-verified (§mutation_log). data/ → גייט 42(test ✓)+44(mutation ✓). הדחיפה מפעילה `firebase-deploy` (functions/** trigger) → `askClaude` נפרס מול הסוד שקיים עכשיו.
 - **הבא:** הפיצ'ר הראשון — קופיילוט-מפרט ("60°C ו-6 בר?") מעל `VerifiedSpec` (התשובה ב-Dart, Claude מסביר → אפס הזיות).
+
+### #ai-spec-copilot — קופיילוט-מפרט (out-of-box גל ⑤, הפיצ'ר הראשון) — 2026-06-22
+- **המהלך:** הפיצ'ר-AI הראשון על שלד-Claude (v6.40). `lib/screens/spec_copilot_screen.dart` (חדש) + כפתור-כניסה ב-`lipskey_product_sheet.dart` ("🌡️ מתאים לתנאים שלי?", מופיע רק כש-`kVerifiedSpecs.containsKey(p.sku)`).
+- **zero-hallucination:** ה-verdict כן/לא מחושב ב-Dart ב-`specTempVerdict` (=`VerifiedSpec.suitableForTemp`, `tempC ≤ maxTempC`) — תמיד נכון, offline. Claude **רק מנסח**: `specCopilotPrompt` מוסר לו את התשובה-שכבר-חושבה + המספרים + "אל תמציא/אל תסתור". המודל לא מחליט ולא ממציא מספר.
+- **gating:** `claudeGatewayProvider` (null אם דגל כבוי/לא-מחובר) → ה-verdict הדטרמיניסטי עדיין מוצג + "הסבר-AI דורש חיבור" (כן). demo/test byte-identical. מצבי loading/failed("נסה שוב") מטופלים.
+- **gate:** analyze 0 errors · `spec_copilot_test` +3 (verdict ≤/null-on-no-spec · ה-prompt מכיל את ה-verdict+המספרים) · `huliot_card_render_test` +2 (כרטיס עדיין מרונדר). screens → גייט 24/116. ה-verdict עצמו מבוסס `suitableForTemp` (כבר מכוסה במנוע).

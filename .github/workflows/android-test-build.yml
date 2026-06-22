@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.40 — תשתית-AI: שלד Claude מאובטח (callable שרת + מפתח ב-Secret Manager). הפיצ'ר הראשון בקרוב · v6.40 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.41 — AI ראשון: קופיילוט-מפרט בכרטיס-מוצר ('מתאים ל-60°C?') — תשובה מאומתת + הסבר חכם · v6.41 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

@@ -5,6 +5,8 @@ import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/screens/spec_copilot_screen.dart'
+    show SpecCopilotScreen;
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/score_band.dart';
@@ -843,6 +845,22 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                       ),
                     ),
+                    // #ai-spec-copilot — "is this OK for my conditions?" (verified
+                    // temp verdict in Dart + Claude phrasing). Only when the product
+                    // carries a verified spec (the verdict's source of truth).
+                    if (kVerifiedSpecs.containsKey(p.sku)) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.of(context)
+                              .push(SpecCopilotScreen.route(p)),
+                          icon: const Text('🌡️', style: TextStyle(fontSize: 15)),
+                          label: const Text('מתאים לתנאים שלי?',
+                              style: TextStyle(fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
