@@ -2499,3 +2499,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** שניהם → `catalogProductForSku(code)` → `showLipskeyProductSheet(context, product, siblings)` (siblings = `kCatalogProducts.where(categoryHe==)` inline); fallback ל-search רק כשלא-נמצא. catalog_screen: 0 imports חדשים (כבר מייבא הכל). ai_hub: +3 imports (`polyroll_catalog.kCatalogProducts` (שם מוגדר ה-unified), `related_info.catalogProductForSku`, `lipskey_product_sheet.showLipskeyProductSheet`).
 - **תפס באג-build תוך-כדי:** ייבאתי תחילה `kCatalogProducts` מ-`lipskey_catalog` (שם יש `kLipskeyCatalog`, לא `kCatalogProducts`) → analyze error → תוקן ל-`polyroll_catalog`.
 - **gate:** analyze 0 errors · robustness + catalog + ai_hub tests +141 ירוק. screens → גייט 24/116. ה-resolve split כבר נעוץ ב-barcode_resolve_test (אותה לוגיקה).
+
+### #autobom-pin — טסט-נעיצה ל-auto-BOM glue (לולאה, Check2 #3) — 2026-06-22
+- **Check2 #3:** ה-engine half של auto-BOM נעוץ ב-install_plan_coverage_test, אבל ה-**glue** (`_loadProject`: SavedProject.anchorSkus → `kLipskeyCatalog.where` → `found.length>=2` gate) לא היה נעוץ.
+- **הטסט:** `test/saved_project_autobom_test.dart` (טסט-בלבד, אפס שינוי-lib): SavedProject עם זוג מוכח-מתחבר → resolve → length==2 (gate עובר) → `buildInstallation` items לא-ריק + מכיל את שני העוגנים · עוגן-בודד → length==1 (gate false, נשאר על קנבס) · SKU חסר-מקטלוג → נושר בשקט (glue בטוח).
+- **gate:** analyze 0 errors · +3 ירוק. אין lib staged → אין גייט 24/42/44/116; אין bump-גרסה (טסט-בלבד).
