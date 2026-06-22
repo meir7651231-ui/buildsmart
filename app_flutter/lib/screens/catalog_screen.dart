@@ -28,6 +28,8 @@ import 'package:buildsmart/features/word_finder/word_finder_home.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
+import 'package:buildsmart/screens/adapter_explain_screen.dart'
+    show AdapterExplainScreen;
 import 'package:buildsmart/screens/ai_finder_screen.dart' show AiFinderScreen;
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/smart_home_screen.dart';
@@ -5118,18 +5120,46 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 29 — physical-connection warning.
-                        Builder(builder: (_) {
+                        Builder(builder: (context) {
                           final warn = connectionWarningHe(prod);
                           if (warn == null) return const SizedBox.shrink();
+                          final aiOn =
+                              ref.watch(claudeGatewayProvider) != null;
                           return Padding(
                             padding: const EdgeInsets.only(top: 6),
-                            child: Text(warn,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Color(0xFFB91C1C),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(warn,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFFB91C1C),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                                // #ai-adapter-explain — when AI is live, explain
+                                // which adapter bridges the gap (grounded on the
+                                // part's REAL verified ends). gateway null → not
+                                // in the tree → byte-identical demo.
+                                if (aiOn)
+                                  GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                        AdapterExplainScreen.route(
+                                            productName: prod.nameHe,
+                                            sku: prod.sku)),
+                                    child: const Padding(
+                                      padding: EdgeInsets.only(top: 4),
+                                      child: Text('🔌 איך לגשר?',
+                                          style: TextStyle(
+                                              color: Color(0xFF1D4ED8),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                              decoration:
+                                                  TextDecoration.underline)),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           );
                         }),
                         // Roadmap step 28 — "your line so far": how this product

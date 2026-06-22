@@ -4,6 +4,23 @@
 
 ---
 
+## v6.52 — #ai-adapter-explain · קטלוג: לינק "🔌 איך לגשר?" מתחת לאזהרת-החיבור — 2026-06-22
+
+**שינוי (lib/screens):** `catalog_screen.dart` — ה-Builder של אזהרת-החיבור (step 29) הורחב מ-`Text` ל-`Column`:
+האזהרה "נדרש מתאם" + לינק **"🔌 איך לגשר?"** (רק כש-`aiOn`) → `AdapterExplainScreen`. `adapter_explain_screen.dart`
+(חדש) — מציג את הקצוות האמיתיים (chips מ-`kVerifiedSpecs[sku].ends`) + חומר, וקורא ל-Claude להסבר "למה + איזה מתאם".
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`) + אזהרת-חיבור פעילה: מתחת ל"נדרש מתאם" מופיע לינק "🔌 איך לגשר?";
+  לחיצה פותחת מסך עם ה-chips של הקצוות האמיתיים (loader → הסבר Claude ברמת סוג-מתאם). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`if (aiOn)` שקרי → הלינק **לא בעץ** → הכרטיס byte-identical
+  (אזהרת-החיבור עצמה ללא-שינוי; ה-`Column` עוטף רק את ה-`Text` הקיים).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `adapter_explain_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.52).
+
+---
+
 ## v6.51 — #ai-assistant · "🤖 העוזר החכם" — צ'אט-AI מעוגן ב-AI hub — 2026-06-22
 
 **שינוי (lib/screens):** `ai_hub_screen.dart` — tile חדש "🤖 עוזר חכם" בסוף הגריד (tail — שומר index לטסטי-position) → `AiAssistantScreen`.
