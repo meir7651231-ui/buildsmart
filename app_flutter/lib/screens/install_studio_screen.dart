@@ -1281,8 +1281,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                                   },
                                 ),
                                 onTap: () {
-                                  _loadProject(p);
+                                  // Close the saved-list sheet FIRST, then load +
+                                  // auto-build (so the BOM sheet isn't popped).
                                   Navigator.pop(ctx);
+                                  _loadProject(p);
                                 },
                               );
                             },
@@ -1311,6 +1313,14 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     ref.read(lineMaxTempProvider.notifier).state = p.tempC;
     ref.read(lineAccessoriesProvider.notifier).state = p.accessories;
     showToast(context, '📂 נפתח: ${p.name}');
+    // #autobom — one-tap auto-BOM: a saved job carries its anchors + temp +
+    // accessories, so immediately build the full bill of materials and open it
+    // (reusing the exact _assemble path), instead of requiring a separate manual
+    // "assemble" tap. Needs ≥2 anchors to form a real line; a single-anchor job
+    // just stays on the canvas.
+    if (found.length >= 2) {
+      _assemble(found, p.tempC);
+    }
   }
 
   void _renameProject(SavedProject p) async {

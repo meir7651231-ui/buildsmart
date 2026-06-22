@@ -2469,3 +2469,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **המהלך:** ב-`install_studio_screen.dart`, לפני `if (plan.gaps.isNotEmpty)` (אזור ה-add-to-cart), נוסף חותם ירוק "🛡️ אחריות: הסל משלים את העבודה — אין נסיעה שנייה" שמוצג רק כש-`ok && checkCritical == 0` — שני אותות שכבר מחושבים ב-build (`ok=plan.isComplete` @1808 · `checkCritical` @1815 = unsatisfied-critical מ-`lineComplianceChecklist`). צבע `_ok` (0xFF16A34A). המשלים החיובי לאזהרת "⚠️ חסרים חיבורים" הקיימת.
 - **למה זה ה-moat:** מנוע-התאימות (`install_engine`) כבר יודע אם הקו שלם+בטוח; החותם רק *ממתג* את האות הזה ברגע-הקנייה — בלתי-ניתן-להעתקה בלי גרף-תאימות מאומת.
 - **gate:** analyze 0 errors · `robustness_test` +19 ירוק (כולל "install studio renders"). additive בלבד (widget מותנה). screen → גייט 24/116; אין logic/data.
+
+### #autobom-saved-job — BOM-אוטומטי: פתיחת עבודה-שמורה = רשימת-חומרים בלחיצה (out-of-box גל ③) — 2026-06-22
+- **המהלך:** `_loadProject(p)` ב-`install_studio_screen.dart` טען רק את הקנבס (chain/temp/accessories). נוסף: אם `found.length >= 2` → `_assemble(found, p.tempC)` מיד — בונה את ה-BOM המלא (`buildInstallation`/`buildTreeInstallation` עם autoCompliance) ופותח את גיליון-ה-BOM/האזהרה-הקריטית. לחיצה אחת מ"עבודה שמורה" ל-רשימת-חומרים מוכנה-לסל.
+- **סדר ה-pop:** ה-tap-handler של פריט-העבודה שונה ל-`Navigator.pop(ctx)` (סגירת גיליון-הרשימה) **לפני** `_loadProject` — אחרת ה-pop היה סוגר את גיליון-ה-BOM החדש.
+- **מנצל קיים:** כל הצינור (auto-flow-fix → buildInstallation → BOM sheet → add-to-cart) כבר היה; רק החיווט מ"טען עבודה" ל"בנה מיד".
+- **gate:** analyze 0 errors · robustness + install-engine/gaps tests +77 ירוק. additive. screen → גייט 24/116; אין logic/data.
