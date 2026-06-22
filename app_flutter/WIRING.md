@@ -2475,3 +2475,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **סדר ה-pop:** ה-tap-handler של פריט-העבודה שונה ל-`Navigator.pop(ctx)` (סגירת גיליון-הרשימה) **לפני** `_loadProject` — אחרת ה-pop היה סוגר את גיליון-ה-BOM החדש.
 - **מנצל קיים:** כל הצינור (auto-flow-fix → buildInstallation → BOM sheet → add-to-cart) כבר היה; רק החיווט מ"טען עבודה" ל"בנה מיד".
 - **gate:** analyze 0 errors · robustness + install-engine/gaps tests +77 ירוק. additive. screen → גייט 24/116; אין logic/data.
+
+### #barcode-plus-wiring — ברקוד: סריקה → כרטיס-מוצר (out-of-box גל ④) — 2026-06-22
+- **המהלך:** `camera_sheet._onDetect` הציג רק `showToast('נקלט: code')` (מבוי-סתום). עכשיו: `catalogProductForSku(code)` → אם נמצא, `showLipskeyProductSheet(context, product, const [])` (הכרטיס נושא add-to-cart/הזמנה-חוזרת + רצועת-תאימות שמחושבת ע"י הכרטיס עצמו); אם לא-נמצא, ה-toast הכן נשאר. imports חדשים: `related_info(catalogProductForSku)` + `lipskey_product_sheet(showLipskeyProductSheet)` (אין import-cycle — analyze 0).
+- **נדחה לבעלים (דאטה, לא קוד):** טבלת EAN→SKU או הדפסת תוויות-SKU. מק"טי-הקטלוג הם הקודים הפנימיים, אז סריקת תווית-SKU עצמית עובדת היום; EAN מסחרי אמיתי דורש מיפוי שאתה מספק. עד אז ה-fallback מדווח את הקוד.
+- **gate:** analyze 0 errors (כולל בדיקת import-cycle camera_sheet↔product_sheet) · camera/scan tests +24 ירוק (כולל camera_sheet_capture). screen → גייט 24/116; אין logic/data.

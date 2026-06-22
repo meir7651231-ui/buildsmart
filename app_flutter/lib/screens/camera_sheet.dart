@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:buildsmart/data/related_info.dart' show catalogProductForSku;
+import 'package:buildsmart/screens/lipskey_product_sheet.dart'
+    show showLipskeyProductSheet;
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -77,7 +80,17 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     if (code == null || code.isEmpty) return;
     _scanned = true;
     Navigator.pop(context);
-    showToast(context, 'נקלט: $code');
+    // #barcode-plus — resolve the scanned code to a catalog product (catalog SKUs
+    // ARE the internal codes, so a self-printed SKU/Code-128 label round-trips
+    // here). Found → open the product card (it carries add-to-cart / reorder +
+    // the compatibility strip). Not found → the honest fallback (the EAN→SKU map
+    // is owner-supplied data, deferred — until then a real EAN just reports).
+    final product = catalogProductForSku(code);
+    if (product != null) {
+      showLipskeyProductSheet(context, product, const []);
+    } else {
+      showToast(context, 'נקלט: $code');
+    }
   }
 
   /// REAL capture for the non-barcode modes AND the "כל הגלריה" button — opens

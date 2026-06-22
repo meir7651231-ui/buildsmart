@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.33 — BOM-אוטומטי: פתיחת עבודה-שמורה ב-install-studio בונה מיד רשימת-חומרים שלמה מוכנה-לסל · v6.33 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.34 — ברקוד-פלוס: סריקה פותחת כרטיס-מוצר (עם הזמנה-חוזרת+תאימות) במקום toast · v6.34 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
