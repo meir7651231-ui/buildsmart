@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.31 — Project-Twin: 'הוצאות לפי אתר' בתקציב מחושבות מהזמנות אמיתיות (לא נתון-המחשה) על הבילד-המחובר · v6.31 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.32 — אחריות-סל-שלם: חותם '🛡️ אין נסיעה שנייה' ב-install-studio כשהקו שלם ובטוח · v6.32 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

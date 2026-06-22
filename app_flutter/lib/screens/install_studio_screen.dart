@@ -2496,6 +2496,30 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   );
                 }),
                 ..._buildBomRows(plan, anchorSkus),
+                // #guarantee — "אין נסיעה שנייה": a branded green seal at the buy
+                // moment, shown ONLY when the line is physically complete (no
+                // gaps) AND no critical safety check is open. The signal is the
+                // already-computed `ok`(=plan.isComplete) + `checkCritical`; this
+                // is the positive counterpart to the "חסרים חיבורים" warning below.
+                if (ok && checkCritical == 0)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
+                    child: Row(
+                      children: const [
+                        Text('🛡️', style: TextStyle(fontSize: 16)),
+                        SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'אחריות: הסל משלים את העבודה — אין נסיעה שנייה',
+                            style: TextStyle(
+                                color: _ok,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (plan.gaps.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 12, 18, 4),

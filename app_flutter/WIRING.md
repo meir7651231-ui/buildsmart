@@ -2464,3 +2464,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון (byte-identical בדמו):** ב-`BudgetScreen.build`, כש-`useFirebaseBackend` — קיפול `ordersEngineProvider` לפי `o.site`→Σ`o.sum` (`spendBySite`), וה-`_SiteRow` מציג `spendBySite[project.name] ?? 0`. הזמנות מטביעות `site = cartProjectProvider = שם-הפרויקט הפעיל` ב-checkout, אז הן תואמות את שורות-הפרויקטים. כבוי → המשקל-הממחיש נשאר (אין backend לקפל → זהה). imports: `backend(useFirebaseBackend)` + `orders_engine(ordersEngineProvider)`.
 - **למה גייטינג ולא תמיד-אמיתי:** הזמנות-ה-seed (supplier_data) משתמשות ב-site מקוצר ('מגדל הרצליה') שלא תואם שמות-פרויקטים מלאים ('מגדל הרצליה — קומה 4') → fold-אמיתי בדמו היה מראה ₪0. לכן דמו=המחשה, מחובר=אמיתי (הזמנות-אמת תואמות-שם).
 - **gate:** analyze 0 errors · budget tests +18 ירוק (byte-identical כבוי). screen → גייט 24/116; אין logic/data.
+
+### #guarantee-seal — אחריות-סל-שלם "אין נסיעה שנייה" (out-of-box גל ②) — 2026-06-22
+- **המהלך:** ב-`install_studio_screen.dart`, לפני `if (plan.gaps.isNotEmpty)` (אזור ה-add-to-cart), נוסף חותם ירוק "🛡️ אחריות: הסל משלים את העבודה — אין נסיעה שנייה" שמוצג רק כש-`ok && checkCritical == 0` — שני אותות שכבר מחושבים ב-build (`ok=plan.isComplete` @1808 · `checkCritical` @1815 = unsatisfied-critical מ-`lineComplianceChecklist`). צבע `_ok` (0xFF16A34A). המשלים החיובי לאזהרת "⚠️ חסרים חיבורים" הקיימת.
+- **למה זה ה-moat:** מנוע-התאימות (`install_engine`) כבר יודע אם הקו שלם+בטוח; החותם רק *ממתג* את האות הזה ברגע-הקנייה — בלתי-ניתן-להעתקה בלי גרף-תאימות מאומת.
+- **gate:** analyze 0 errors · `robustness_test` +19 ירוק (כולל "install studio renders"). additive בלבד (widget מותנה). screen → גייט 24/116; אין logic/data.
