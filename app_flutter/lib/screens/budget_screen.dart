@@ -13,11 +13,14 @@
 // ANTI-COLLISION: this is a NEW file (prefix budget_); no shared file edited.
 
 import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show useFirebaseBackend;
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/data/repositories/finance_repository.dart'
     show FinanceRepository;
 import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -203,6 +206,18 @@ class BudgetScreen extends ConsumerWidget {
     // amounts are byte-identical; a future field-ops backend swaps in behind it.
     final projects = ref.watch(siteRepositoryProvider).projects();
 
+    // #twin — "הוצאות לפי אתר": on the CONNECTED backend, sum the REAL orders by
+    // their site (orders stamp `site = active project name` at checkout, so they
+    // match the project rows). Demo/tests keep the illustrative weighting below
+    // (byte-identical — no real backend to fold), fulfilling the on-screen
+    // disclaimer's "full version uses real orders" promise.
+    final spendBySite = <String, int>{};
+    if (useFirebaseBackend) {
+      for (final o in ref.watch(ordersEngineProvider)) {
+        spendBySite[o.site] = (spendBySite[o.site] ?? 0) + o.sum;
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
@@ -342,9 +357,11 @@ class BudgetScreen extends ConsumerWidget {
             for (var i = 0; i < projects.length; i++)
               _SiteRow(
                 name: projects[i].name,
-                value: _fmt(b.spent *
-                    (projects.length - i) /
-                    (projects.length * (projects.length + 1) / 2)),
+                value: useFirebaseBackend
+                    ? _fmt(spendBySite[projects[i].name] ?? 0)
+                    : _fmt(b.spent *
+                        (projects.length - i) /
+                        (projects.length * (projects.length + 1) / 2)),
               ),
           const SizedBox(height: 12),
           const Text(
