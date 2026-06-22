@@ -7,6 +7,8 @@ import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
+import 'package:buildsmart/screens/ai_assistant_screen.dart'
+    show AiAssistantScreen;
 import 'package:buildsmart/screens/describe_to_cart_screen.dart'
     show DescribeToCartScreen;
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
@@ -63,6 +65,9 @@ class AIHubScreen extends ConsumerWidget {
     (id: 'weather', ic: '🌦️', t: 'אוטומציית מזג אוויר', s: 'התראות לפי תחזית'),
     (id: 'wear', ic: '🔧', t: 'זיהוי בלאי', s: 'תחזוקת ציוד'),
     (id: 'analytics', ic: '📊', t: 'Analytics חכם', s: 'תובנות ומגמות'),
+    // #ai-assistant — appended at the tail so every existing tile keeps its grid
+    // index (the compute/dedup widget tests tap tiles by on-screen position).
+    (id: 'assistant', ic: '🤖', t: 'עוזר חכם', s: 'שאל אותי כל דבר'),
   ];
 
   /// The DEFERRED tools — each needs an EXTERNAL data source the app does not
@@ -173,6 +178,9 @@ class AIHubScreen extends ConsumerWidget {
                         case 'describe':
                           Navigator.of(context)
                               .push(DescribeToCartScreen.route());
+                        case 'assistant':
+                          Navigator.of(context)
+                              .push(AiAssistantScreen.route());
                         case 'barcode':
                           _runBarcode(context, ref);
                         case 'voice':

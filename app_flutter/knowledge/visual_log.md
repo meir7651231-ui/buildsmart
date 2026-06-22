@@ -4,6 +4,24 @@
 
 ---
 
+## v6.51 — #ai-assistant · "🤖 העוזר החכם" — צ'אט-AI מעוגן ב-AI hub — 2026-06-22
+
+**שינוי (lib/screens):** `ai_hub_screen.dart` — tile חדש "🤖 עוזר חכם" בסוף הגריד (tail — שומר index לטסטי-position) → `AiAssistantScreen`.
+`ai_assistant_screen.dart` (חדש) — מסך-צ'אט: בועות משתמש/עוזר, typing-indicator, שורת-קלט. כל הודעה →
+Claude (system מעוגן) → תשובה. **לא נוגע ב-sys_chat** (מנוע-הצ'אט בפרודקשן).
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): tile פותח את המסך; הקלדה+שליחה → בועת-משתמש (ימין) +
+  typing → בועת-עוזר (שמאל). שאלה "תבנה לי סל" → ה-system מפנה ל"תאר עבודה → סל", **לא** ממציא מוצרים.
+  כשל-רשת → בועת "משהו השתבש — נסה שוב". היסטוריה חסומה ל-12 תורות.
+- **AI כבוי** (demo/web · gateway null): המסך מציג "💡 העוזר החכם דורש חיבור לשרת" + קלט מושבת. ה-tile
+  עצמו תמיד גלוי (כמו describe→cart) — אין שינוי בדמו מעבר ל-tile החדש שמוביל ל-off-state כן.
+
+**תוצאה:** ✅ שני המצבים נכונים. analyze 0 errors/warnings · 6 טסטי-grounding + readiness 8-visible ירוקים.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.51).
+
+---
+
 ## v6.50 — #ai-paired-explain · כרטיס-מוצר: כפתור "🧩 מה עוד צריך להתקנה?" — 2026-06-22
 
 **שינוי (lib/screens):** `lipskey_product_sheet.dart` — ליד "מתאים לתנאים שלי?" נוסף `Builder`+`Consumer`
