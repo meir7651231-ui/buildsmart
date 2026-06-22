@@ -2535,3 +2535,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **zero-hallucination:** ה-verdict כן/לא מחושב ב-Dart ב-`specTempVerdict` (=`VerifiedSpec.suitableForTemp`, `tempC ≤ maxTempC`) — תמיד נכון, offline. Claude **רק מנסח**: `specCopilotPrompt` מוסר לו את התשובה-שכבר-חושבה + המספרים + "אל תמציא/אל תסתור". המודל לא מחליט ולא ממציא מספר.
 - **gating:** `claudeGatewayProvider` (null אם דגל כבוי/לא-מחובר) → ה-verdict הדטרמיניסטי עדיין מוצג + "הסבר-AI דורש חיבור" (כן). demo/test byte-identical. מצבי loading/failed("נסה שוב") מטופלים.
 - **gate:** analyze 0 errors · `spec_copilot_test` +3 (verdict ≤/null-on-no-spec · ה-prompt מכיל את ה-verdict+המספרים) · `huliot_card_render_test` +2 (כרטיס עדיין מרונדר). screens → גייט 24/116. ה-verdict עצמו מבוסס `suitableForTemp` (כבר מכוסה במנוע).
+
+### #ai-describe-to-cart — "תאר תקלה → סל" (out-of-box גל ⑤, AI-native אמיתי) — 2026-06-22
+- **המהלך:** `describe_to_cart_screen.dart` (חדש) + אריח-ראשון ב-`ai_hub_screen.dart` ("🗣️ תאר עבודה → סל") + dispatch case. הקבלן מתאר חופשי → Claude ממפה למתכון → `assembleKit` בונה סל.
+- **anti-hallucination (closed-set):** ה-prompt (`describeToCartPrompt`) מוסר את כל ה-`key=name` מ-`kSmartProducts` ודורש **רק key** (או NONE) — Claude לא יכול לנקוב שם-מוצר. `matchRecipe` מאמת את התשובה מול הסט-האמיתי (exact→contained) וזורק NONE/מומצא. `resolvedKitProducts` מחזיר רק שורות עם `product != null && match != none` → **כל פריט-סל הוא מק"ט אמיתי**. ה-cart-add מראה את דפוס `_addKitToCart` של product_sheet.
+- **gating:** `claudeGatewayProvider` null → "הפיצ'ר דורש חיבור". maxTokens=32 (מחזיר key קצר → זול). demo/test byte-identical.
+- **AI-hub tile:** הרשימה גדלה מ-9 (proto-verbatim) ל-10; `apple_readiness_hide_pass_test` עודכן 6→7 visible (10−3 deferred).
+- **gate:** analyze 0 errors · `describe_to_cart_test` (matchRecipe דוחה key מומצא · prompt grounding · resolvedKitProducts=מוצרים-אמיתיים) + apple_readiness + ai_hub tests +39 ירוק. recipe_kit נוצל **בקריאה-בלבד** (לא נגעתי בקוד-המאתר). screens → גייט 24/116.

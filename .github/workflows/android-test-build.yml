@@ -102,5 +102,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.42 — ה-AI חי! קופיילוט-המפרט נותן הסברי-Claude אמיתיים בכרטיס-מוצר (🌡️ מתאים לתנאים שלי?) · v6.42 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.43 — AI-native: 'תאר עבודה → סל' ב-AI hub — תאר תקלה בשפה חופשית, Claude בונה לך את הסל · v6.43 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

@@ -7,6 +7,8 @@ import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
+import 'package:buildsmart/screens/describe_to_cart_screen.dart'
+    show DescribeToCartScreen;
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
@@ -48,8 +50,10 @@ class AIHubScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const AIHubScreen());
 
-  /// 9 tiles — VERBATIM fn/ic/t/s from proto `items` @21124-21134.
+  /// 10 tiles — the 9 VERBATIM proto `items` (@21124-21134) + the AI
+  /// describe→cart feature (#ai-describe-to-cart) at the head.
   static const List<({String id, String ic, String t, String s})> _tiles = [
+    (id: 'describe', ic: '🗣️', t: 'תאר עבודה → סל', s: 'ספר מה צריך, נבנה סל'),
     (id: 'stock', ic: '📦', t: 'חיזוי מלאי', s: 'מתי להזמין שוב'),
     (id: 'barcode', ic: '📷', t: 'סורק ברקוד', s: 'זיהוי מוצר מהיר'),
     (id: 'voice', ic: '🎙️', t: 'דיבור למשימה', s: 'יצירת משימה בקול'),
@@ -166,6 +170,9 @@ class AIHubScreen extends ConsumerWidget {
                     sub: t.s,
                     onTap: () {
                       switch (t.id) {
+                        case 'describe':
+                          Navigator.of(context)
+                              .push(DescribeToCartScreen.route());
                         case 'barcode':
                           _runBarcode(context, ref);
                         case 'voice':

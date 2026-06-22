@@ -96,8 +96,8 @@ void main() {
 
     test('exactly the 3 deferred tools are dropped (count check)', () {
       if (hiding) {
-        // 9 tiles total − 3 deferred = 6 visible.
-        expect(AIHubScreen.visibleToolIds, hasLength(6));
+        // 10 tiles total − 3 deferred = 7 visible.
+        expect(AIHubScreen.visibleToolIds, hasLength(7));
         expect(AIHubScreen.deferredToolIds, {'3way', 'weather', 'wear'});
       }
     });
