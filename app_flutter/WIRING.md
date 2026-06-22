@@ -2584,3 +2584,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination (grounded, type-level):** ה-prompt (`adapterExplainPrompt`) מוסר את הקצוות האמיתיים + החומר ומגביל **לרמת סוג-המתאם בלבד** — אוסר להמציא שם-מוצר/מק"ט/מחיר. ה-chips על המסך = של ה-spec, לא של המודל. `endTypeHe` מכסה את כל 6 ערכי `EndType` (אף קצה לא חסר-תווית).
 - **gating:** הלינק עטוף ב-`if (aiOn)` בתוך ה-Builder → ב-demo/no-AI **לא קיים בעץ**, הכרטיס byte-identical (האזהרה עצמה ללא-שינוי). המסך ב-null → "דורש חיבור".
 - **gate:** analyze 0 errors/warnings · `adapter_explain_test` (grounding: ends+material · anti-hallucination · endTypeHe-לכל-EndType) ירוק. adapter_explain_screen + catalog_screen ב-screens → גייט 24/116.
+
+### #ai-quote-polish — "✨ נסח הצעה מקצועית" בכרטיס-המוצר (out-of-box batch-2 · הצעת-מחיר) — 2026-06-22
+- **המהלך:** `quote_polish_screen.dart` (חדש) + נגיעה ב-`catalog_screen.dart`: ליד כפתור "📋 הצעה" (שמעתיק את `quoteTextFor(p, _selectedBrand)` הגולמי ל-clipboard) נוסף `Builder` gated שמרנדר **"✨ נסח"** → `QuotePolishScreen.route(rawQuote, productName)`. +1 import.
+- **הזרימה:** `quoteTextFor` (פונקציה קיימת) בונה הצעת-מחיר גולמית מ-`lineCostEstimateFor` (מוצר/אביזרים/עבודה/סה"כ — מספרים אמיתיים). המסך מציג את הגולמי, קורא ל-Claude שמנסח אותו להודעה מקצועית ללקוח, ומאפשר **העתקה לשליחה**.
+- **anti-hallucination (grounded, rewrite-only):** ה-prompt (`quotePolishPrompt`) מוסר את ההצעה הגולמית ו**אוסר** לשנות/להוסיף/למחוק מספר/מחיר/מק"ט — רק לנסח. הצעה שממציאה מחיר = אסון עסקי, אז המשמעת כאן קשיחה. המספרים על המסך = של ה-data.
+- **gating:** הכפתור עטוף ב-`Builder` שבודק `claudeGatewayProvider == null → shrink` → ב-demo/no-AI **לא קיים בעץ**, הכרטיס byte-identical (כפתור "📋 הצעה" הגולמי ללא-שינוי). המסך ב-null → "דורש חיבור".
+- **gate:** analyze 0 errors/warnings · `quote_polish_test` (raw-quote verbatim · forbids-changing-numbers guard) ירוק · full-suite baseline. quote_polish_screen + catalog_screen ב-screens → גייט 24/116.

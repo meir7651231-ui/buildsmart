@@ -4,6 +4,23 @@
 
 ---
 
+## v6.53 — #ai-quote-polish · קטלוג: כפתור "✨ נסח" ליד "📋 הצעה" — 2026-06-22
+
+**שינוי (lib/screens):** `catalog_screen.dart` — ליד כפתור "📋 הצעה" (העתק-גולמי) נוסף `Builder` gated עם "✨ נסח"
+→ `QuotePolishScreen`. `quote_polish_screen.dart` (חדש) — מציג את ההצעה הגולמית, קורא ל-Claude לניסוח מקצועי,
+ומאפשר "📋 העתק לשליחה".
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): ליד "📋 הצעה" מופיע "✨ נסח"; לחיצה פותחת מסך עם ההצעה-הגולמית
+  למעלה (loader → טקסט מנוסח של Claude) + כפתור העתקה. המספרים זהים לגולמי (rewrite-only). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`Builder` מחזיר `SizedBox.shrink()` → הכפתור **לא בעץ** →
+  שורת-הכפתורים בכרטיס byte-identical (רק "📋 הצעה" הגולמי, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `quote_polish_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.53).
+
+---
+
 ## v6.52 — #ai-adapter-explain · קטלוג: לינק "🔌 איך לגשר?" מתחת לאזהרת-החיבור — 2026-06-22
 
 **שינוי (lib/screens):** `catalog_screen.dart` — ה-Builder של אזהרת-החיבור (step 29) הורחב מ-`Text` ל-`Column`:

@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.52 — 🔌 'איך לגשר?' בקטלוג: כשחלק לא מתחבר ישירות, Claude מסביר על הקצוות האמיתיים איזה מתאם מגשר · + 🤖 'העוזר החכם' · 'מה עוד צריך' · 'למה כדאי' · 'תאר → מצא/סל' · v6.52 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.53 — ✨ 'נסח הצעה' בכרטיס-מוצר: Claude הופך הצעת-מחיר גולמית להודעה מקצועית ללקוח (המספרים נשמרים בדיוק) · + 🔌 'איך לגשר' · 🤖 'העוזר החכם' · 'מה עוד צריך' · 'למה כדאי' · v6.53 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

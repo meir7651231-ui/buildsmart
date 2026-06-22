@@ -32,6 +32,8 @@ import 'package:buildsmart/screens/adapter_explain_screen.dart'
     show AdapterExplainScreen;
 import 'package:buildsmart/screens/ai_finder_screen.dart' show AiFinderScreen;
 import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/quote_polish_screen.dart'
+    show QuotePolishScreen;
 import 'package:buildsmart/screens/smart_home_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
@@ -5033,6 +5035,35 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 ),
                               ),
                             ),
+                            // #ai-quote-polish — when AI is live, turn the raw
+                            // quote into a professional customer message (every
+                            // number preserved). gateway null → not in the tree
+                            // → demo byte-identical.
+                            Builder(builder: (context) {
+                              if (ref.watch(claudeGatewayProvider) == null) {
+                                return const SizedBox.shrink();
+                              }
+                              return Tooltip(
+                                message:
+                                    'נסח הצעה מקצועית עם AI — מוכן לשליחה ללקוח',
+                                child: GestureDetector(
+                                  onTap: () => Navigator.of(context).push(
+                                      QuotePolishScreen.route(
+                                          rawQuote:
+                                              quoteTextFor(p, _selectedBrand),
+                                          productName: p.name)),
+                                  child: const Padding(
+                                    padding:
+                                        EdgeInsetsDirectional.only(end: 8),
+                                    child: Text('✨ נסח',
+                                        style: TextStyle(
+                                            color: Color(0xFF6D28D9),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
+                                ),
+                              );
+                            }),
                             Tooltip(
                               message: expert
                                   ? 'מצב מורחב — מציג את כל המפרט. טאפ לפישוט.'
