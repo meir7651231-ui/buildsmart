@@ -1,6 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// askClaude — a thin, AUTH-gated, App-Check-enforced server proxy to the
-// Anthropic API. Mirrors the `r2.ts` callable pattern exactly.
+// askClaude — a thin, AUTH-gated server proxy to the Anthropic API. Mirrors the
+// `r2.ts` callable pattern exactly (auth-gated, no App-Check enforcement — the
+// same posture as computeCredit/getUploadUrl/reviewRoleRequest; App-Check
+// enforcement is a later, all-callables-together hardening once attestation is
+// confirmed in the shipped build, NOT a one-off that breaks only this endpoint).
 //
 // SSOT / security: the API key lives ONLY in Secret Manager
 // (`ANTHROPIC_API_KEY`, bound via `secrets:` below — `firebase functions:secrets:set
@@ -46,7 +49,7 @@ interface AskClaudeData {
 }
 
 export const askClaude = onCall(
-  { region: REGION, secrets: [anthropicKey], enforceAppCheck: true },
+  { region: REGION, secrets: [anthropicKey] },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign-in required.");

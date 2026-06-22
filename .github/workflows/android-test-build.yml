@@ -102,5 +102,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.45 — ה-AI חי לבדיקה! 'תאר עבודה → סל' (ב-AI hub) + 'תאר → מצא' (במאתר) · v6.45 במסך הבית = הבילד לבדוק · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.46 — ה-AI חי! (תיקון: askClaude auth-only) 'תאר עבודה → סל' + 'תאר → מצא' · v6.46 במסך הבית = הבילד לבדוק · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
