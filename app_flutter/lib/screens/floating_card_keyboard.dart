@@ -54,6 +54,7 @@
 // neither is a product WORD (appended). The empty field at tab 0 still shows
 // product opening-words ONLY (no destinations), unchanged.
 
+import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
@@ -61,6 +62,8 @@ import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
 import 'package:buildsmart/screens/chats_screen.dart'
     show ThreadLite, visibleThreadsProvider;
+import 'package:buildsmart/screens/keyboard_catalog_deriver.dart'
+    show deriveCatalogContext;
 import 'package:buildsmart/screens/keyboard_dept_deriver.dart'
     show deriveDeptContext;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
@@ -72,6 +75,8 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart'
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
+import 'package:buildsmart/state/catalog_location.dart'
+    show CatalogLocation, catalogLocationProvider;
 import 'package:buildsmart/state/dept_location.dart'
     show DeptLocation, deptLocationProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
@@ -316,16 +321,18 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
 
     // (1.5) LIVE-MIRROR — folds out entirely when [kKbLiveMirror] is false (const
     // guard ⇒ tree-shaken) OR when [ctx] is null (every non-flag-ON-mirrored-tab
-    // path). The tab guard accepts the THREE mirrored tabs (1 = מחלקות,
-    // 2 = עדכונים, 3 = חנות); they are mutually exclusive and [ctx] is built by the
-    // matching deriver in [build], so this single branch routes all three. ADAPTER:
+    // path). The tab guard accepts the FOUR mirrored tabs (0 = בית/catalog,
+    // 1 = מחלקות, 2 = עדכונים, 3 = חנות); they are mutually exclusive and [ctx] is
+    // built by the matching deriver in [build], so this one branch routes all four. ADAPTER:
     // the deriver returns a
     // PUBLIC [KbUpdatesContext] whose row is a [KbPredRow] (a leaf file cannot
     // construct this private [_PredRow]); copy it field-for-field into [_PredRow] —
     // chips + destByChip + destinationChips, plus the runByChip map (neither
     // deriver drills, so drillIndexByChip stays const-empty). [build] then persists
     // row.runByChip into [_runByChip].
-    if (kKbLiveMirror && ctx != null && (tab == 1 || tab == 2 || tab == 3)) {
+    if (kKbLiveMirror &&
+        ctx != null &&
+        (tab == 0 || tab == 1 || tab == 2 || tab == 3)) {
       final r = ctx.row;
       return _PredRow(
         r.chips,
@@ -726,6 +733,40 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
         final List<SmartCartLine> cart = ref.watch(smartCartProvider);
         final List<Order> orders = ref.watch(ordersEngineProvider);
         ctx = deriveStoreContext(st, cart: cart, orders: orders);
+      }
+    } else if (tab == 0) {
+      // PARALLEL קטלוג mirror — the FOURTH mirrored tab, the same two-tier gate as
+      // the tab-1/2/3 blocks above, just for the catalog tab. It is the TAIL of the
+      // `else if` chain (the four mirrored tabs are mutually exclusive at the tab==
+      // level, so this branch completely replaces the others when tab==0; they all
+      // stay untouched). The EXPENSIVE watch [catalogLocationProvider] stays INSIDE
+      // `if (live)`, so a plain prod build (both flags off) never subscribes to it
+      // and the off-tab cost is one int compare. The deriver emits the SAME
+      // [KbUpdatesContext], so `ctx.row`/`ctx.toolBase` flow through the SAME
+      // [_rowFor] adapter + [_syncContextToolBase] below as tabs 1/2/3.
+      //
+      // FLAG-OFF BYTE-IDENTITY (tab 0's unique obligation): with [kKbLiveMirror]
+      // const-false the `||` makes `live` const-false ⇒ this whole block (and the
+      // [catalogLocationProvider] watch) tree-shakes ⇒ [ctx] stays null ⇒ the
+      // [_rowFor] guard's tab==0 disjunct is dead ⇒ control falls to the UNCHANGED
+      // `if (tab == 0) return _buildRow('')` there. Net flag-OFF diff = ZERO.
+      //
+      // Two-tier gate (identical to the tab-1/2/3 blocks): [kKbLiveMirror] at
+      // compile time short-circuits the `||` so when it is ON the
+      // [featureFlagsProvider] watch is dead code and tree-shakes; the runtime tier
+      // is only ever watched when the compile flag is OFF (the deliberate
+      // one-Set-contains cost of the no-rebuild toggle).
+      final live = kKbLiveMirror ||
+          ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
+      if (live) {
+        final CatalogLocation loc = ref.watch(catalogLocationProvider);
+        // The live set of product categories that actually have rows — lets the
+        // pure deriver tell a product-leaf from a smart/dead leaf WITHOUT importing
+        // the product list itself (mirrors `_TreeDrill`'s `p.categoryHe` test).
+        final productCats = <String>{
+          for (final p in kCatalogProducts) p.categoryHe,
+        };
+        ctx = deriveCatalogContext(loc, productCats: productCats);
       }
     }
 

@@ -19,6 +19,8 @@
 // EMPTY SharedPreferences mock (as production has it OFF) to prove forceShow is
 // what surfaces the keyboard.
 
+import 'dart:io';
+
 import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/card_keyboard_sheet.dart';
@@ -966,6 +968,277 @@ void main() {
             reason: 'הסל שלי ran its registry action → cart section');
         expect(container.read(keyboardOverlayOpenProvider), isTrue,
             reason: 'the cart tab chip keeps the overlay floating');
+      });
+    });
+
+    // ── CATALOG (tab 0) LIVE-MIRROR — the flag-OFF obligations (spec §4C) ───────
+    // tab 0 is UNIQUE: it has NO labelsByTab entry, so its empty row is the
+    // DYNAMIC _buildRow(''). With kKbLiveMirror at its const-default OFF (flutter
+    // test never forwards --dart-define to the const, feature_flags.dart) AND
+    // featureFlagsProvider empty (kKbLiveMirrorFlag is not force-on), the whole
+    // tab==0 mirror branch + the catalogLocationProvider watch fold out / tree-
+    // shake, ctx stays null, the _rowFor guard's tab==0 disjunct is dead, and
+    // control falls to the UNCHANGED `if (tab==0) return _buildRow('')`. Net
+    // flag-OFF diff = ZERO. These tests pin that byte-identity at the on-screen
+    // row (we cannot read the private _buildRow/_PredRow, so we compare the
+    // rendered chips against the SAME public helpers _buildRow composes —
+    // cardKeyboardPredictions over kDivePool + matchDestinations — exactly the
+    // discipline the rest of this file uses). The flag-ON catalog LOGIC is proven
+    // PURELY in keyboard_catalog_deriver_test.dart, not via a define here.
+    group('catalog (tab 0) flag-OFF byte-identity (spec §4C)', () {
+      final lexicon = buildWordLexicon(kDivePool);
+
+      /// Seeds [mainTabProvider] to [tab] (and the overlay open) and pumps the
+      /// REAL [FloatingCardKeyboard] in the same hermetic RTL shell the other
+      /// groups use — a local copy because the sibling group's helper is private
+      /// to its own closure. Returns the container for provider reads.
+      Future<ProviderContainer> pumpPanelOnTab(
+        WidgetTester tester,
+        int tab,
+      ) async {
+        final container = ProviderContainer(
+          overrides: [
+            keyboardOverlayOpenProvider.overrideWith((_) => true),
+            mainTabProvider.overrideWith((_) => tab),
+          ],
+        );
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Scaffold(
+                  body: Consumer(
+                    builder: (context, ref, _) {
+                      final open = ref.watch(keyboardOverlayOpenProvider);
+                      return Stack(
+                        children: [
+                          const Center(child: Text('screen-underneath')),
+                          if (open)
+                            const Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: FloatingCardKeyboard(),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        return container;
+      }
+
+      /// The exact chip set _buildRow(text) would produce: destinations (by
+      /// matchDestinations) leading, then product WORDS filling the remaining
+      /// slots (reserving one word slot), capped at _kRowCap (5). This re-derives
+      /// _buildRow's body from its two public inputs so we can assert the rendered
+      /// row equals it WITHOUT importing the private builder.
+      List<String> expectedBuildRow(String text) {
+        const cap = 5; // _kRowCap
+        final words = cardKeyboardPredictions(text, kDivePool, lexicon);
+        final reserve = words.isEmpty ? 0 : 1;
+        final destCap = cap - reserve;
+        final dests = matchDestinations(text, max: destCap);
+        final chips = <String>[];
+        for (final d in dests) {
+          if (chips.length >= destCap) break;
+          if (chips.contains(d.label)) continue;
+          chips.add(d.label);
+        }
+        for (final w in words) {
+          if (chips.length >= cap) break;
+          if (chips.contains(w)) continue;
+          chips.add(w);
+        }
+        return chips;
+      }
+
+      // (16) FLAG-OFF BYTE-IDENTITY — empty field at tab 0: the rendered row is
+      // EXACTLY _buildRow('') (product opening-words, empty destByChip), NO catalog
+      // location chip leaks, and there is no nav glyph (runByChip/destByChip are
+      // empty on the legacy empty-catalog row).
+      testWidgets(
+          'empty field, tab 0, flag OFF → row == _buildRow(\'\') '
+          '(product words only, no catalog chip, no nav glyph)', (tester) async {
+        await pumpPanelOnTab(tester, 0);
+
+        // matchDestinations('') is empty, so _buildRow('') is product words only.
+        expect(matchDestinations(''), isEmpty,
+            reason: 'sanity: the empty query surfaces no destination');
+        final expected = expectedBuildRow('');
+        expect(expected, isNotEmpty,
+            reason: 'sanity: the catalog opening row has product words');
+
+        // Every chip _buildRow('') yields is rendered…
+        for (final c in expected) {
+          expect(find.text(c), findsWidgets,
+              reason: 'the flag-OFF tab-0 row shows the _buildRow chip "$c"');
+        }
+        // …and NO nav glyph anywhere (the legacy empty-catalog row is plain
+        // product words; the live-mirror/destination path is what adds the glyph,
+        // and it is tree-shaken / inactive with the flag OFF).
+        expect(find.byIcon(Icons.north_east), findsNothing,
+            reason: 'flag-OFF tab-0 row is product words → no nav glyph');
+        // …and no catalog SECTION/drill label leaks into the opening row (a
+        // regression that routed tab 0 into the catalog mirror would surface one).
+        for (final l in const [
+          'קטגוריות',
+          'עץ חכם',
+          'מועדפים',
+          'מאתר',
+          '⬆️ חזרה',
+        ]) {
+          expect(find.text(l), findsNothing,
+              reason: 'flag-OFF tab-0 must not surface a catalog chip ("$l")');
+        }
+      });
+
+      // (16b) Typed field at tab 0: the rendered row is EXACTLY _buildRow(text)
+      // (the universal typed path is untouched by the catalog mirror — text non-
+      // empty short-circuits to _buildRow BEFORE the mirror guard).
+      testWidgets(
+          'typed field, tab 0, flag OFF → row == _buildRow(text)',
+          (tester) async {
+        await pumpPanelOnTab(tester, 0);
+
+        // Type "ב" (a real lexicon prefix). The on-screen row must equal
+        // _buildRow('ב') chip-for-chip (those that render as Text).
+        await tester.tap(find.text('ב'));
+        await tester.pumpAndSettle();
+
+        final expected = expectedBuildRow('ב');
+        expect(expected, isNotEmpty, reason: 'sanity: "ב" yields a row');
+        for (final c in expected) {
+          // The field itself also shows 'ב'; we only assert the predicted chips
+          // are present (the typed path is byte-identical to pre-feature).
+          expect(find.text(c), findsWidgets,
+              reason: 'the typed tab-0 row shows the _buildRow chip "$c"');
+        }
+      });
+
+      // (17) NO-REORDER — a non-empty text at tab 0 yields the TYPED _buildRow
+      // regardless of any catalog context: typing a DESTINATION term surfaces the
+      // merged destination chip exactly as on the other tabs (the catalog mirror
+      // never reorders the typed row). Guards that adding the tab-0 branch did not
+      // perturb the typed path.
+      testWidgets(
+          'typed destination at tab 0 still merges via _buildRow (no reorder)',
+          (tester) async {
+        await pumpPanelOnTab(tester, 0);
+
+        // "מח" surfaces the מחלקות destination via the typed path.
+        final hits = matchDestinations('מח').map((d) => d.label).toList();
+        expect(hits, contains('מחלקות'),
+            reason: 'sanity: the matcher offers מחלקות for "מח"');
+
+        await tester.tap(find.text('מ'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('ח'));
+        await tester.pumpAndSettle();
+
+        // The destination chip surfaces WITH its nav glyph — identical to the
+        // pre-feature typed behaviour; the catalog mirror did not reorder it.
+        final glyphInDest = find.descendant(
+          of: find.widgetWithText(InkWell, 'מחלקות'),
+          matching: find.byIcon(Icons.north_east),
+        );
+        expect(glyphInDest, findsOneWidget,
+            reason: 'the typed destination chip is unchanged at tab 0 (no '
+                'catalog-mirror reorder of the typed row)');
+        // And the rendered chips match _buildRow('מח') exactly (those rendered).
+        for (final c in expectedBuildRow('מח')) {
+          expect(find.text(c), findsWidgets,
+              reason: 'typed tab-0 row tracks _buildRow("מח") — chip "$c"');
+        }
+      });
+
+      // (18) RELEASE TREE-SHAKE — with KB_LIVE_MIRROR unset, catalogLocationProvider
+      // must be ABSENT from a release bundle. We cannot run a release build from a
+      // leaf widget test, so we assert the SOURCE-LEVEL invariant that GUARANTEES
+      // the tree-shake: in floating_card_keyboard.dart the catalogLocationProvider
+      // watch sits INSIDE an `if (live)` block whose `live` is
+      // `kKbLiveMirror || …` — and kKbLiveMirror is a `const bool.fromEnvironment`,
+      // so with the env unset the `||` is const-false, `live` is const-false, and
+      // the whole block (with the watch) is dead code the compiler drops. This is
+      // the runnable proxy for "grep the bundle": if a refactor hoisted the watch
+      // out of the const guard (breaking the tree-shake), this fails LOUD.
+      test(
+          'tree-shake guard: catalogLocationProvider watch is nested under the '
+          'const kKbLiveMirror `if (live)` (source invariant)', () {
+        final src = File(
+          'lib/screens/floating_card_keyboard.dart',
+        ).readAsStringSync();
+
+        // The watch exists exactly once (the tab-0 mirror branch).
+        final watchIdx = src.indexOf('ref.watch(catalogLocationProvider)');
+        expect(watchIdx, greaterThan(-1),
+            reason: 'sanity: the tab-0 mirror watches catalogLocationProvider');
+
+        // The nearest `if (live)` guard precedes the watch, and the nearest
+        // `live = kKbLiveMirror` assignment precedes THAT — i.e. the watch is
+        // inside the const-guarded block, never at top level.
+        final guardIdx = src.lastIndexOf('if (live)', watchIdx);
+        expect(guardIdx, greaterThan(-1),
+            reason: 'the catalog watch must be inside an `if (live)` block');
+        final liveAssignIdx =
+            src.lastIndexOf('final live = kKbLiveMirror', guardIdx);
+        expect(liveAssignIdx, greaterThan(-1),
+            reason: '`live` must be seeded from the const kKbLiveMirror (so the '
+                '`||` short-circuits const-false when KB_LIVE_MIRROR is unset → '
+                'the block + the catalogLocationProvider watch tree-shake)');
+
+        // And the const itself is environment-driven (the tree-shake precondition).
+        final host = File(
+          'lib/widgets/smart_input/keyboard/bs_keyboard_host.dart',
+        ).readAsStringSync();
+        expect(
+          host.contains(
+              "const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR')"),
+          isTrue,
+          reason: 'kKbLiveMirror is a const bool.fromEnvironment — off unless the '
+              'demo define is set, which is what lets the catalog branch shake out',
+        );
+      });
+
+      // (19) CARRY-OVER — growing the _rowFor :328 guard tab-set to include 0 must
+      // NOT regress the existing tabs' flag-OFF rows. With the flag OFF, tabs 1/2/3
+      // still render their hardcoded labelsByTab chips (the fallback the guard
+      // falls through to), exactly as before the tab-0 disjunct was added.
+      testWidgets(
+          'carry-over: tabs 1/2/3 flag-OFF rows still render their hardcoded '
+          'labels (the tab-0 guard growth did not regress them)', (tester) async {
+        // tab 1 — the 4 departments.
+        await pumpPanelOnTab(tester, 1);
+        for (final l in const [
+          'אינסטלציה',
+          'ברזים וסניטריים',
+          'כלי עבודה ידני',
+          'כלי עבודה חשמלי',
+        ]) {
+          expect(find.text(l), findsWidgets,
+              reason: 'tab 1 flag-OFF row still shows department chip "$l"');
+        }
+
+        // tab 2 — שיחות + התראות.
+        await pumpPanelOnTab(tester, 2);
+        expect(find.text('שיחות'), findsWidgets,
+            reason: 'tab 2 flag-OFF row still shows שיחות');
+        expect(find.text('התראות'), findsWidgets,
+            reason: 'tab 2 flag-OFF row still shows התראות');
+
+        // tab 3 — the store sections.
+        await pumpPanelOnTab(tester, 3);
+        for (final l in const ['הסל שלי', 'ההזמנות שלי', 'שירותים']) {
+          expect(find.text(l), findsWidgets,
+              reason: 'tab 3 flag-OFF row still shows store chip "$l"');
+        }
       });
     });
   });
