@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:buildsmart/data/related_info.dart' show catalogProductForSku;
+import 'package:buildsmart/data/task_skus_local.dart' show catalogSiblingsFor;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/services/task_photo.dart';
@@ -79,17 +80,23 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     final code = cap.barcodes.firstOrNull?.rawValue;
     if (code == null || code.isEmpty) return;
     _scanned = true;
-    Navigator.pop(context);
+    // Capture the ROOT navigator's context BEFORE popping this camera screen —
+    // anchoring the sheet/toast on the popped route's own context reaches a
+    // defunct element (the toast silently no-ops, the sheet may not anchor).
+    final rootCtx = Navigator.of(context, rootNavigator: true).context;
+    Navigator.of(context).pop();
     // #barcode-plus — resolve the scanned code to a catalog product (catalog SKUs
     // ARE the internal codes, so a self-printed SKU/Code-128 label round-trips
     // here). Found → open the product card (it carries add-to-cart / reorder +
-    // the compatibility strip). Not found → the honest fallback (the EAN→SKU map
-    // is owner-supplied data, deferred — until then a real EAN just reports).
+    // the compatibility strip). Not found → an HONEST miss (the EAN→SKU map is
+    // owner-supplied data, deferred — until then a real EAN reports "not found").
     final product = catalogProductForSku(code);
     if (product != null) {
-      showLipskeyProductSheet(context, product, const []);
+      // Pass same-category siblings so the scanned card keeps its variant pager
+      // (every other entry to this sheet does — e.g. worker_app_screen).
+      showLipskeyProductSheet(rootCtx, product, catalogSiblingsFor(product));
     } else {
-      showToast(context, 'נקלט: $code');
+      showToast(rootCtx, 'הקוד $code לא נמצא במק"ט');
     }
   }
 

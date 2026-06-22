@@ -2480,3 +2480,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **המהלך:** `camera_sheet._onDetect` הציג רק `showToast('נקלט: code')` (מבוי-סתום). עכשיו: `catalogProductForSku(code)` → אם נמצא, `showLipskeyProductSheet(context, product, const [])` (הכרטיס נושא add-to-cart/הזמנה-חוזרת + רצועת-תאימות שמחושבת ע"י הכרטיס עצמו); אם לא-נמצא, ה-toast הכן נשאר. imports חדשים: `related_info(catalogProductForSku)` + `lipskey_product_sheet(showLipskeyProductSheet)` (אין import-cycle — analyze 0).
 - **נדחה לבעלים (דאטה, לא קוד):** טבלת EAN→SKU או הדפסת תוויות-SKU. מק"טי-הקטלוג הם הקודים הפנימיים, אז סריקת תווית-SKU עצמית עובדת היום; EAN מסחרי אמיתי דורש מיפוי שאתה מספק. עד אז ה-fallback מדווח את הקוד.
 - **gate:** analyze 0 errors (כולל בדיקת import-cycle camera_sheet↔product_sheet) · camera/scan tests +24 ירוק (כולל camera_sheet_capture). screen → גייט 24/116; אין logic/data.
+
+### #barcode-harden — הקשחת-ברקוד (use-after-pop) + טסט (לולאה, סבב-3-בדיקות) — 2026-06-22
+- **באג שתוקן (Check 3 #1, MED):** `camera_sheet._onDetect` עשה `Navigator.pop(context)` ואז `showLipskeyProductSheet(context,…)`/`showToast(context,…)` על אותו context — אחרי ה-pop האלמנט defunct (toast no-op, sheet לא-מעוגן). תוקן: `final rootCtx = Navigator.of(context, rootNavigator:true).context;` **לפני** `Navigator.of(context).pop()`, ושימוש ב-`rootCtx` לשניהם.
+- **ניסוח כן (Check 3 #4, LOW):** קוד לא-מוכר → `'הקוד $code לא נמצא במק"ט'` (במקום "נקלט: code" שנשמע כהצלחה).
+- **טסט (Check 2 #4):** `test/barcode_resolve_test.dart` נועץ את ה-found/not-found split: SKU אמיתי→מוצר (round-trip) · `'NOPE-12345'`/`''`/`null`→null.
+- **gate:** analyze 0 errors · barcode_resolve +camera_sheet_capture +5 ירוק. screen → גייט 24/116.
