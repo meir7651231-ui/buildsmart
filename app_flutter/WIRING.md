@@ -2549,3 +2549,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination:** Claude לא יכול לנקוב שם-מוצר — רק קטגוריה מהרשימה; המוצרים אמיתיים-בלבד.
 - **gating:** `claudeGatewayProvider` null → "החיפוש החכם דורש חיבור". maxTokens=48. demo/test byte-identical.
 - **gate:** analyze 0 errors · `ai_finder_test` (matchCategory closed-set + prompt grounding + products-real + **DEMO מודפס**) + 18 טסטי finder ירוקים. word_finder_screen ב-features/ (לא screens|state|logic) → לא מפעיל גייט-lib; ai_finder_screen ב-screens → גייט 24/116.
+
+### #ai-search-fallback — קטלוג: כשהחיפוש-הדטרמיניסטי לא מצא → גשר ל-AI finder (out-of-box גל ⑥, המשך) — 2026-06-22
+- **המהלך:** ב-`catalog_screen.dart` מצב ה-no-results (`filtered.isEmpty && products.isEmpty`) הוחלף מ-`Text` בודד ל-`Column`: אותה הודעת "לא נמצאו תוצאות" + כפתור **"🗣️ נסה חיפוש חכם"** (`OutlinedButton.icon`) → `AiFinderScreen.route(initialQuery: query)`. שני imports נוספו (`claude_functions show claudeGatewayProvider`, `ai_finder_screen show AiFinderScreen`).
+- **הזרימה:** החיפוש-הדטרמיניסטי (AND→OR→fuzzy ב-`searchResultsProvider`) מחזיר 0 → הקבלן מקבל גשר במקום מבוי-סתום: לחיצה פותחת את ה-AI finder **עם השאילתה כבר ממולאת**, ו-`AiFinderScreen.initState` מריץ `_search()` ב-`addPostFrameCallback` → Claude → קטגוריה → מוצרים אמיתיים. אפס הקלדה-חוזרת.
+- **gating:** הכפתור עטוף ב-`if (query.isNotEmpty && ref.watch(claudeGatewayProvider) != null)` → ב-demo/no-AI הוא **לא קיים בעץ** → ה-no-results נשאר ה-`Text` המקורי (byte-identical). `initialQuery` ריק/null → `initState` לא מריץ כלום (המסך הידני ללא-שינוי).
+- **anti-hallucination:** ללא חדש — חוזר על #ai-finder (closed-set `matchCategory`, מוצרים מ-`kCatalogProducts.where`).
+- **gate:** analyze 0 errors/warnings (405 infos pre-existing) · `ai_finder_test`/`claude_gateway_test`/`describe_to_cart_test`/`search_fallback_test` ירוקים. catalog_screen + ai_finder_screen ב-screens → גייט 24/116.

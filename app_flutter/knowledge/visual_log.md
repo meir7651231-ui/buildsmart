@@ -4,6 +4,25 @@
 
 ---
 
+## v6.48 — #ai-search-fallback · קטלוג: כפתור "נסה חיפוש חכם" במצב no-results — 2026-06-22
+
+**שינוי (lib/screens):** `catalog_screen.dart` — מצב "אין תוצאות" (`filtered.isEmpty && products.isEmpty`)
+הוחלף מ-`Text` בודד ל-`Column`: אותה הודעת "לא נמצאו תוצאות עבור …" + מתחתיה `OutlinedButton.icon`
+**"🗣️ נסה חיפוש חכם"** → `AiFinderScreen.route(initialQuery: query)`. `ai_finder_screen.dart` — `initialQuery`
+חדש + `initState` מריץ `_search()` ב-`addPostFrameCallback` (חיפוש-אוטומטי כשמגיעים עם שאילתה).
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): חיפוש ללא-תוצאות מציג טקסט + כפתור; לחיצה פותחת את ה-AI
+  finder עם השדה **כבר ממולא** והחיפוש רץ אוטומטית (loader → קטגוריה + מוצרים אמיתיים). הכפתור עטוף ב-
+  `if (query.isNotEmpty && gateway != null)`.
+- **AI כבוי** (demo/web, gateway null): ה-`if` נופל → הכפתור **לא בעץ** → ה-no-results נשאר **byte-identical**
+  ל-`Text` המקורי; `initialQuery` ברירת-מחדל null → `initState` no-op → המסך הידני ללא-שינוי.
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings. צילום על-מכשיר ע"י הבעלים
+בבילד הבא (v6.48).
+
+---
+
 ## 2026-06-17 — תיקון כניסת-בעלים: כפתור "כניסה עם Google" במסך הראשון
 
 **שינוי (lib/screens):** `welcome_screen.dart` — בנתיב-הקבלן (`boardRole == null`), כשמחובר
