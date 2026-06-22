@@ -12,6 +12,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/task_skus_local.dart' show catalogSiblingsFor;
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
@@ -1806,12 +1807,7 @@ class _SearchToolsRow extends ConsumerWidget {
               final product = catalogProductForSku(code);
               if (product != null) {
                 showLipskeyProductSheet(
-                  context,
-                  product,
-                  kCatalogProducts
-                      .where((p) => p.categoryHe == product.categoryHe)
-                      .toList(),
-                );
+                    context, product, catalogSiblingsFor(product));
               } else {
                 ref.read(searchQueryProvider.notifier).state = code;
               }

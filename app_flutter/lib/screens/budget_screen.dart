@@ -178,6 +178,13 @@ Map<String, int> budgetSpendBySite(List<Order> orders) {
 num illustrativeSiteSpend(num spent, int count, int index) =>
     count <= 0 ? 0 : spent * (count - index) / (count * (count + 1) / 2);
 
+/// #twin — orders whose site matched NO project (the "אחר / ללא פרויקט" residual):
+/// Σ all orders − Σ orders that landed on a known project name. Pure → testable;
+/// the row only renders when this is `> 0`.
+int budgetResidualSpend(Map<String, int> spendBySite, Iterable<String> projectNames) =>
+    spendBySite.values.fold<int>(0, (s, v) => s + v) -
+    projectNames.fold<int>(0, (s, n) => s + (spendBySite[n] ?? 0));
+
 String _fmt(num n) {
   final r = n.round();
   // Sign before the ₪ symbol so a negative reads "-₪3,150", not "₪-3,150".
@@ -233,8 +240,7 @@ class BudgetScreen extends ConsumerWidget {
     // vanish from the per-site rows, making them sum to less than the real
     // total with no hint — surface them as one residual "אחר" row.
     final residualSpend = useFirebaseBackend
-        ? spendBySite.values.fold<int>(0, (s, v) => s + v) -
-            projects.fold<int>(0, (s, p) => s + (spendBySite[p.name] ?? 0))
+        ? budgetResidualSpend(spendBySite, projects.map((p) => p.name))
         : 0;
 
     return Scaffold(

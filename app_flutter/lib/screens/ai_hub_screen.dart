@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/related_info.dart' show catalogProductForSku;
+import 'package:buildsmart/data/task_skus_local.dart' show catalogSiblingsFor;
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
@@ -93,13 +93,7 @@ class AIHubScreen extends ConsumerWidget {
     // fallback only when it's not a known catalog SKU.
     final product = catalogProductForSku(code);
     if (product != null) {
-      showLipskeyProductSheet(
-        context,
-        product,
-        kCatalogProducts
-            .where((p) => p.categoryHe == product.categoryHe)
-            .toList(),
-      );
+      showLipskeyProductSheet(context, product, catalogSiblingsFor(product));
       return;
     }
     ref.read(searchQueryProvider.notifier).state = code;

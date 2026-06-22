@@ -27,4 +27,17 @@ void main() {
     expect(illustrativeSiteSpend(600, 0, 0), 0,
         reason: 'no projects → 0 (guards divide-by-zero)');
   });
+
+  test('budgetResidualSpend = orders on non-project sites (the "אחר" row)', () {
+    // Orphan surfaces: rows(100) + residual(40) == real total(140).
+    final m1 = budgetSpendBySite([_ord('אתר א', 100), _ord('ללא פרויקט', 40)]);
+    expect(budgetResidualSpend(m1, ['אתר א']), 40);
+    // No orphans → 0 → the row is hidden (pins the `> 0` render gate).
+    final m2 = budgetSpendBySite([_ord('אתר א', 100), _ord('אתר ב', 30)]);
+    expect(budgetResidualSpend(m2, ['אתר א', 'אתר ב']), 0);
+    // Multiple orphans aggregate into ONE residual row.
+    final m3 =
+        budgetSpendBySite([_ord('אתר א', 100), _ord('X', 10), _ord('Y', 5)]);
+    expect(budgetResidualSpend(m3, ['אתר א']), 15);
+  });
 }

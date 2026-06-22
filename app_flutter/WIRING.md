@@ -2504,3 +2504,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **Check2 #3:** ה-engine half של auto-BOM נעוץ ב-install_plan_coverage_test, אבל ה-**glue** (`_loadProject`: SavedProject.anchorSkus → `kLipskeyCatalog.where` → `found.length>=2` gate) לא היה נעוץ.
 - **הטסט:** `test/saved_project_autobom_test.dart` (טסט-בלבד, אפס שינוי-lib): SavedProject עם זוג מוכח-מתחבר → resolve → length==2 (gate עובר) → `buildInstallation` items לא-ריק + מכיל את שני העוגנים · עוגן-בודד → length==1 (gate false, נשאר על קנבס) · SKU חסר-מקטלוג → נושר בשקט (glue בטוח).
 - **gate:** analyze 0 errors · +3 ירוק. אין lib staged → אין גייט 24/42/44/116; אין bump-גרסה (טסט-בלבד).
+
+### #twin-residual-pin + barcode-siblings-DRY (לולאה סבב-2) — 2026-06-22
+- **residual pin (Check unverified):** חולץ `budgetResidualSpend(spendBySite, projectNames)` כ-top-level pure (היה inline) + 3 asserts ב-`budget_twin_test` (אורפן צף · 0→שורה מוסתרת · ריבוי-אורפנים מצטבר). אפס שינוי-התנהגות.
+- **siblings DRY (Check improve):** שני סורקי-הברקוד החדשים (catalog_screen, ai_hub) הוחלפו מ-inline `kCatalogProducts.where(categoryHe==)` ל-`catalogSiblingsFor(product)` (כמו camera_sheet) — 3 הסורקים עקביים. byte-identical (catalogSiblingsFor = אותו ביטוי). ai_hub: import הוחלף polyroll_catalog→task_skus_local.
+- **gate:** analyze 0 errors · budget_twin + robustness +22 ירוק. refactor+test, אפס שינוי-נראה → אין bump-גרסה.

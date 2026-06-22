@@ -1442,3 +1442,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** הכלי 📷 בקטלוג ובמרכז-ה-AI — סריקת מק"ט פותחת עכשיו את כרטיס-המוצר (כמו במצלמת-הבית), במקום רק לדחוף את הקוד לחיפוש (שהחטיא מק"טים קצרים). קוד לא-מק"ט → חיפוש כקודם.
 **למה אין צילום:** מנצל את showLipskeyProductSheet הקיים; אומת ב-+141 (robustness+catalog+ai_hub).
 **הפיכות:** להחזיר את שני ה-callers ל-`searchQueryProvider.state = code` בלבד.
+
+## 2026-06-22 — #twin-residual-pin + barcode-siblings-DRY — ללא שינוי-נראה
+**שינוי נראה: אין.** refactor טהור: חילוץ `budgetResidualSpend` (היה inline, אותו חישוב) + האחדת רשימת-האחים ב-2 סורקי-ברקוד ל-helper הקיים `catalogSiblingsFor` (ביטוי זהה). התנהגות/מראה זהים לחלוטין; נוסף כיסוי-טסט לשורת-"אחר".
+**למה אין צילום:** אין שינוי-UI. אומת ב-budget_twin (+3 residual) + robustness +22.
