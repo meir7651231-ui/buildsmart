@@ -44,10 +44,12 @@
 //     labels are user-editable, UNLIKE the fixed dept/store quartets, so this arm
 //     `continue`s on a miss rather than throwing).
 //   • `runByChip` — every DYNAMIC catalog chip: the drill closures (push /
-//     breadcrumb-jump / back / exit, all reading the LIVE path at tap time), the
-//     smart-tree category setters, the facet setters, and the honest 'בקרוב'
-//     coming-soon leaves. The maps are pairwise-disjoint BY CONSTRUCTION (asserted
-//     in the reused [KbPredRow] ctor).
+//     breadcrumb-jump / back / exit, all reading the LIVE path at tap time AND
+//     resetting the side-axes before the path write, mirroring the screen — B2),
+//     the smart-tree category setters, and the honest 'בקרוב' coming-soon leaves.
+//     The keyboard emits NO facet setters (B1 — faceting is the screen's job).
+//     The maps are pairwise-disjoint BY CONSTRUCTION (asserted in the reused
+//     [KbPredRow] ctor).
 //
 // HONESTY (review #20 — the dead-no-op blocker): a chip whose tap merely
 // RE-ASSERTS the axis value the user is already on is a DEAD no-op. This deriver
@@ -62,7 +64,12 @@
 import 'package:buildsmart/data/catalog_tree.dart'
     show CatalogNode, kCatalogTree;
 import 'package:buildsmart/screens/catalog_screen.dart'
-    show catalogFacetProvider, catalogTreePathProvider, smartTreeCatProvider;
+    show
+        catalogFacetProvider,
+        catalogTreePathProvider,
+        catalogTreeQueryProvider,
+        smartTreeCatProvider,
+        smartTreeQueryProvider;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, kbDestinations;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart' show kbHomeNodes;
@@ -136,8 +143,10 @@ KbRunByChip _comingSoon(String what) =>
 ///   • [productLeaf] — a leaf whose `lipskeyCategory` resolves to real products
 ///                     (its category is in [productCats]): the screen drills
 ///                     in-tab to the facet + product list (catalog_screen.dart:
-///                     2809-2814). We emit facet chips; the per-product OPEN is
-///                     the deep finder #38 = OUT OF SCOPE.
+///                     2809-2814). We emit NO node-kind chips here (B1 — the
+///                     keyboard does not facet); the screen's _FacetRow does the
+///                     filtering and the per-product OPEN is the deep finder #38,
+///                     both OUT OF SCOPE for the keyboard.
 ///   • [smartLeaf]   — a leaf with a `smartKey` but no product-backed category:
 ///                     the screen opens the unified product SHEET as a route
 ///                     (catalog_screen.dart:2816-2818). The keep-floating opener
@@ -253,9 +262,16 @@ KbUpdatesContext deriveCatalogContext(
         // open is the deep finder #38 = OUT OF SCOPE, so the products themselves
         // are NOT chips; a product tap defers honestly. The back chip is a real
         // move (grid != category), never a dead re-assert.
+        //
+        // CROSS-AXIS RESET (B2): mirror _SmartTreeProductListState._back()
+        // (catalog_screen.dart:3723-3725) EXACTLY — clear the smart-tree query
+        // BEFORE nulling the category, so a query typed in the screen's search
+        // field never leaks back onto the grid as a stale filter.
         chips.add(_kBackChip);
-        runByChip[_kBackChip] =
-            (ref, context) => ref.read(smartTreeCatProvider.notifier).state = null;
+        runByChip[_kBackChip] = (ref, context) {
+          ref.read(smartTreeQueryProvider.notifier).state = '';
+          ref.read(smartTreeCatProvider.notifier).state = null;
+        };
       }
       return KbUpdatesContext(
         row: KbPredRow(
@@ -267,12 +283,16 @@ KbUpdatesContext deriveCatalogContext(
       );
 
     // ── the in-tab kCatalogTree drill — the core arm ───────────────────────────
-    case CatalogDrill(:final pathIds, :final pathTitles, :final facetSel):
+    //
+    // facetSel is intentionally NOT destructured: B1 deleted the only reader (the
+    // product-leaf facet emission). The keyboard no longer facets here, so the
+    // current screen-side facet selection is irrelevant to the chips this arm
+    // emits — the navigating closures RESET facets (B2) rather than read them.
+    case CatalogDrill(:final pathIds, :final pathTitles):
       return _drillContext(
         tree: tree,
         pathIds: pathIds,
         pathTitles: pathTitles,
-        facetSel: facetSel,
         productCats: productCats,
       );
   }
@@ -303,15 +323,15 @@ KbUpdatesContext _sectionEntryContext({String? exclude}) {
 /// The drill arm body. PURE. Resolves the deepest node from [pathIds] (graceful
 /// truncation), then emits — in this fixed order — the BACK chip FIRST (never
 /// starved by the cap), the ancestor BREADCRUMB chips, then the node-kind chips
-/// (children for a branch, facets for a product-leaf, a coming-soon for a
+/// (children for a branch, NOTHING for a product-leaf — B1, a coming-soon for a
 /// smart-leaf, nothing more for a dead-end). Every chip rides `runByChip` and, for
 /// the navigating ones, RE-READS the live `catalogTreePathProvider` at tap time so
-/// a stale closure can never push onto an outdated path.
+/// a stale closure can never push onto an outdated path, and RESETS the side-axes
+/// (facets + scoped query) before the path write exactly as the screen does (B2).
 KbUpdatesContext _drillContext({
   required List<CatalogNode> tree,
   required List<String> pathIds,
   required List<String> pathTitles,
-  required List<String> facetSel,
   required Set<String> productCats,
 }) {
   final node = _resolvePath(tree, pathIds);
@@ -327,10 +347,18 @@ KbUpdatesContext _drillContext({
   // starved. Pops one level off the LIVE path (re-read at tap time). At depth 1
   // `sublist(0, 0)` is `const []`, which EXITS the drill; the `isEmpty` guard +
   // `sublist` make underflow impossible. Mirrors catalog_screen.dart:2790/2797.
+  //
+  // CROSS-AXIS RESET (B2): the screen's cancel()/jumpToTree()/openNode() ALL
+  // resetQuery()+resetFacets() BEFORE every catalogTreePathProvider write
+  // (catalog_screen.dart:2782-2825). Mirror that here so a facet set via the
+  // screen's _FacetRow (or a scoped query) never survives a keyboard back into
+  // the next leaf as a stale, wrong/empty filter (orphan crumbs + wrong list).
   chips.add(_kBackChip);
   runByChip[_kBackChip] = (ref, context) {
     final cur = ref.read(catalogTreePathProvider);
     if (cur.isEmpty) return;
+    ref.read(catalogFacetProvider.notifier).state = const <String>[];
+    ref.read(catalogTreeQueryProvider.notifier).state = '';
     ref.read(catalogTreePathProvider.notifier).state =
         cur.sublist(0, cur.length - 1);
   };
@@ -348,6 +376,12 @@ KbUpdatesContext _drillContext({
     runByChip[label] = (ref, context) {
       final cur = ref.read(catalogTreePathProvider);
       if (index + 1 > cur.length) return; // stale-path guard.
+      // CROSS-AXIS RESET (B2): mirror the screen's jumpToTree()
+      // (catalog_screen.dart:2794-2799) — clear facets + scoped query BEFORE the
+      // path jump so a stale facetSel/query never orphans the breadcrumbs or
+      // applies to the ancestor level.
+      ref.read(catalogFacetProvider.notifier).state = const <String>[];
+      ref.read(catalogTreeQueryProvider.notifier).state = '';
       ref.read(catalogTreePathProvider.notifier).state =
           cur.sublist(0, index + 1);
     };
@@ -382,6 +416,14 @@ KbUpdatesContext _drillContext({
             _comingSoon('פתיחת קטגוריה')(ref, context);
             return;
           }
+          // CROSS-AXIS RESET (B2): mirror the screen's openNode()
+          // (catalog_screen.dart:2811-2813/2822-2824) — resetQuery()+resetFacets()
+          // BEFORE pushing the path, so a facet/query from the level we are
+          // leaving is never carried into the child leaf (a foreign facetSel →
+          // wrong/empty product list). Done AFTER the live-resolve guard so an
+          // honest coming-soon defer (vanished child) leaves all axes untouched.
+          ref.read(catalogFacetProvider.notifier).state = const <String>[];
+          ref.read(catalogTreeQueryProvider.notifier).state = '';
           ref.read(catalogTreePathProvider.notifier).state = <CatalogNode>[
             ...cur,
             liveChild,
@@ -390,25 +432,21 @@ KbUpdatesContext _drillContext({
       }
 
     case CatalogNodeKind.productLeaf:
-      // Facet chips — each APPENDS a facet to catalogFacetProvider (a real
-      // refinement of the product list; mirrors catalog_screen.dart:2888's
-      // `catalogFacetProvider.notifier).state = [...]`). The facet LABELS come
-      // from the node's brandIds (the in-scope, pure facet source); a richer
-      // facet model is the product layer's job. PRODUCT WORDS are NOT chips —
-      // they fall through `_rowFor`'s tab-0 opening-word path; the per-product
-      // OPEN is the deep finder #38 = OUT OF SCOPE, so there is no product-open
-      // chip. Re-reads the live facet selection at tap time.
-      for (final facet in node.brandIds) {
-        if (chips.length >= _kCatalogRowCap) break;
-        if (facetSel.contains(facet)) continue; // already applied — no re-assert.
-        if (runByChip.containsKey(facet)) continue; // de-dup by visible label.
-        chips.add(facet);
-        runByChip[facet] = (ref, context) {
-          final cur = ref.read(catalogFacetProvider);
-          if (cur.contains(facet)) return; // idempotent — no dead re-assert.
-          ref.read(catalogFacetProvider.notifier).state = <String>[...cur, facet];
-        };
-      }
+      // NO facet chips (B1). The keyboard does NOT facet here: a product leaf's
+      // `brandIds` are LATIN brand SLUGS (aquatec/lipskey/huliot/…), NOT curated
+      // facet LABELS — writing them to catalogFacetProvider mis-filters (a slug
+      // matches no kProductFacets label) or empties the screen's product list (an
+      // ASCII slug is no substring of the Hebrew nameHe → 0 products). That is a
+      // dishonest control on the public home tab, so the emission is DELETED.
+      //
+      // Filtering the product list is the SCREEN's job (its _FacetRow, which
+      // uses the curated kProductFacets / auto-facet labels — catalog_screen.dart:
+      // 2882-2889) and the deep product-finder's (#38). The product-leaf arm
+      // therefore emits ONLY navigation: the back chip + breadcrumb chips already
+      // added above. PRODUCT WORDS are NOT chips — they fall through `_rowFor`'s
+      // tab-0 opening-word path; the per-product OPEN is the deep finder #38 =
+      // OUT OF SCOPE. So there is nothing more to add here.
+      break;
 
     case CatalogNodeKind.smartLeaf:
       // A smartKey leaf opens the unified product SHEET as a route on the screen;
