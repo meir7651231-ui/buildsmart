@@ -68,7 +68,8 @@ jobs:
             --build-number=${{ github.run_number }} \
             --dart-define=USE_FIREBASE_BACKEND=true \
             --dart-define=UID_SCOPED_QUERIES=true \
-            --dart-define=SERVER_CALLABLES=true
+            --dart-define=SERVER_CALLABLES=true \
+            --dart-define=CLAUDE_AI=true
 
       - name: Upload backend-ON APK artifact
         uses: actions/upload-artifact@v4
@@ -101,5 +102,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.41 — AI ראשון: קופיילוט-מפרט בכרטיס-מוצר ('מתאים ל-60°C?') — תשובה מאומתת + הסבר חכם · v6.41 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.42 — ה-AI חי! קופיילוט-המפרט נותן הסברי-Claude אמיתיים בכרטיס-מוצר (🌡️ מתאים לתנאים שלי?) · v6.42 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
