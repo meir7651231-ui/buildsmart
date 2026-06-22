@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/related_info.dart' show catalogProductForSku;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/data/task_skus_local.dart' show catalogSiblingsFor;
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
@@ -9,6 +11,8 @@ import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/ai_assistant_screen.dart'
     show AiAssistantScreen;
+import 'package:buildsmart/screens/business_summary_screen.dart'
+    show BusinessSummaryScreen;
 import 'package:buildsmart/screens/describe_to_cart_screen.dart'
     show DescribeToCartScreen;
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
@@ -529,6 +533,24 @@ class _Analytics extends ConsumerWidget {
         const AiServerNote(
             '🧮 מחושב מנתוני אמת — מנוע ההזמנות, התקציב והשוואת המחירים בקטלוג'),
         const SizedBox(height: BsTokens.space2),
+        // #ai-business-summary — when AI is live, narrate the REAL computed
+        // insights into a short Hebrew business check-in. gateway null (demo)
+        // → not in the tree → the analytics view is byte-identical.
+        if (ref.watch(claudeGatewayProvider) != null && insights.isNotEmpty) ...[
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                BusinessSummaryScreen.route(insightLines: [
+                  for (final it in insights) '${it.ic} ${it.title} — ${it.sub}',
+                ]),
+              ),
+              icon: const Text('✨'),
+              label: const Text('סיכום בעברית'),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space2),
+        ],
         for (final it in insights)
           AiCard(
             overdue: false,

@@ -4,6 +4,23 @@
 
 ---
 
+## v6.54 — #ai-business-summary · Analytics: כפתור "✨ סיכום בעברית" — 2026-06-22
+
+**שינוי (lib/screens):** `ai_hub_screen.dart` — בתוך מסך-ה-`_Analytics` (לא ברשימת-ה-tiles!), אחרי הערת-השרת,
+נוסף `if (gateway != null && insights.isNotEmpty)` עם `OutlinedButton.icon` "✨ סיכום בעברית" → `BusinessSummaryScreen`.
+`business_summary_screen.dart` (חדש) — מציג את שורות-התובנה האמיתיות (bullets) וקורא ל-Claude לסיכום-עסקי זורם.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`) + יש תובנות: בראש מסך-ה-Analytics (מעל כרטיסי-התובנה) מופיע
+  "✨ סיכום בעברית"; לחיצה פותחת מסך עם ה-bullets האמיתיים (loader → נרטיב של Claude). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → מסך-ה-Analytics byte-identical
+  (כרטיסי-התובנה בלבד, בדיוק כמו קודם). **לא נגעתי ברשימת-ה-tiles** → tile-position-tests נשארים ירוקים.
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `business_summary_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.54).
+
+---
+
 ## v6.53 — #ai-quote-polish · קטלוג: כפתור "✨ נסח" ליד "📋 הצעה" — 2026-06-22
 
 **שינוי (lib/screens):** `catalog_screen.dart` — ליד כפתור "📋 הצעה" (העתק-גולמי) נוסף `Builder` gated עם "✨ נסח"

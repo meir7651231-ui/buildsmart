@@ -2591,3 +2591,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination (grounded, rewrite-only):** ה-prompt (`quotePolishPrompt`) מוסר את ההצעה הגולמית ו**אוסר** לשנות/להוסיף/למחוק מספר/מחיר/מק"ט — רק לנסח. הצעה שממציאה מחיר = אסון עסקי, אז המשמעת כאן קשיחה. המספרים על המסך = של ה-data.
 - **gating:** הכפתור עטוף ב-`Builder` שבודק `claudeGatewayProvider == null → shrink` → ב-demo/no-AI **לא קיים בעץ**, הכרטיס byte-identical (כפתור "📋 הצעה" הגולמי ללא-שינוי). המסך ב-null → "דורש חיבור".
 - **gate:** analyze 0 errors/warnings · `quote_polish_test` (raw-quote verbatim · forbids-changing-numbers guard) ירוק · full-suite baseline. quote_polish_screen + catalog_screen ב-screens → גייט 24/116.
+
+### #ai-business-summary — "✨ סיכום עסקי" ב-Analytics (out-of-box batch-2 · סיכום-עסקי) — 2026-06-22
+- **המהלך:** `business_summary_screen.dart` (חדש) + נגיעה ב-`ai_hub_screen.dart` (תוך ה-`_Analytics` בלבד — **לא** ברשימת-ה-tiles, כך ש-tile-position-tests בטוחים): אחרי ה-`AiServerNote` נוסף `if (gateway != null && insights.isNotEmpty) ...[` עם `OutlinedButton.icon` **"✨ סיכום בעברית"** → `BusinessSummaryScreen.route(insightLines)`. +2 imports (`claudeGatewayProvider`, `BusinessSummaryScreen`).
+- **הזרימה:** `computeAnalyticsInsights(orders)` (מנוע קיים) מקפל את מנוע-ההזמנות + התקציב + סריקת-החלופות למספרים אמיתיים (הזמנות·ממוצע·פתוח/סופק·חיסכון·תקציב). הכפתור בונה `insightLines` מ-`'${it.ic} ${it.title} — ${it.sub}'` ומעביר למסך; Claude **רק מנסח** סיכום זורם.
+- **anti-hallucination (grounded, narrate-only):** ה-prompt (`businessSummaryPrompt`) מוסר את שורות-התובנה ו**אוסר** להמציא/לשנות/להוסיף מספר — רק לשזור. ה-bullets על המסך = של המנוע.
+- **gating:** ה-`if (claudeGatewayProvider != null …)` → ב-demo/no-AI הכפתור **לא קיים בעץ**, מסך-ה-Analytics byte-identical (כרטיסי-התובנה ללא-שינוי). המסך ב-null → "דורש חיבור".
+- **gate:** analyze 0 errors/warnings · `business_summary_test` (insight-lines verbatim · forbids-inventing-numbers guard) ירוק · full-suite baseline. business_summary_screen + ai_hub_screen ב-screens → גייט 24/116.
