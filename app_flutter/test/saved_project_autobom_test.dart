@@ -5,15 +5,17 @@
 // containing both anchors. The engine half is pinned elsewhere
 // (install_plan_coverage_test); this pins the saved-job → catalog resolution glue.
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_hotwater.dart' show kCompatCatalog;
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/state/saved_projects.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Mirrors install_studio _loadProject's anchor resolution verbatim.
+// Mirrors install_studio _loadProject's anchor resolution: the UNIFIED
+// kCompatCatalog (Lipskey + hot-water) — the superset the pickers add from.
 List<LipskeyCatalogProduct> _resolve(List<String> skus) {
   final found = <LipskeyCatalogProduct>[];
   for (final sku in skus) {
-    final hits = kLipskeyCatalog.where((q) => q.sku == sku);
+    final hits = kCompatCatalog.where((q) => q.sku == sku);
     if (hits.isNotEmpty) found.add(hits.first);
   }
   return found;
@@ -56,5 +58,19 @@ void main() {
     final anchors = _resolve(const ['779096G', 'GONE-SKU-999']);
     expect(anchors.length, 1,
         reason: 'an unresolvable SKU shrinks `found` without throwing');
+  });
+
+  test('a saved HOT-WATER anchor resolves (kLipskeyCatalog alone would drop it)',
+      () {
+    // A product in the unified catalog but NOT in kLipskeyCatalog (hot-water-
+    // only). Resolving anchors against kLipskeyCatalog dropped it → the >=2 gate
+    // then silently produced no BOM. kCompatCatalog resolves it.
+    final hwOnly = kCompatCatalog.firstWhere(
+        (p) => !kLipskeyCatalog.any((l) => l.sku == p.sku),
+        orElse: () => throw StateError('expected a hot-water-only product'));
+    expect(_resolve([hwOnly.sku]).length, 1,
+        reason: 'kCompatCatalog resolves the HW anchor (the bug dropped it)');
+    expect(kLipskeyCatalog.any((l) => l.sku == hwOnly.sku), isFalse,
+        reason: 'proves this SKU is exactly what the old kLipskeyCatalog missed');
   });
 }

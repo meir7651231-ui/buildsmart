@@ -1302,7 +1302,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   void _loadProject(SavedProject p) {
     final found = <LipskeyCatalogProduct>[];
     for (final sku in p.anchorSkus) {
-      final hits = kLipskeyCatalog.where((q) => q.sku == sku);
+      // Resolve against the UNIFIED kCompatCatalog (Lipskey + hot-water) — the
+      // same superset the anchor pickers add from. Resolving against
+      // kLipskeyCatalog alone silently DROPPED saved hot-water (HW-*) anchors,
+      // which the auto-BOM `found.length >= 2` gate then turned into a no-BOM.
+      final hits = kCompatCatalog.where((q) => q.sku == sku);
       if (hits.isNotEmpty) found.add(hits.first);
     }
     if (found.isEmpty) {
@@ -1794,7 +1798,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           context, '✅ "${wider.nameHe}" הוחלף — לחץ "צור רשימת קנייה" לבנייה מחדש');
     } else if (s.actionKind == SuggestionKind.add &&
         s.addProductSku != null) {
-      final hits = kLipskeyCatalog.where((p) => p.sku == s.addProductSku);
+      // UNIFIED catalog (incl. hot-water) — a recommended HW-* accessory was
+      // falsely reported "not in the catalog" when resolved against Lipskey only.
+      final hits = kCompatCatalog.where((p) => p.sku == s.addProductSku);
       if (hits.isEmpty) {
         showToast(context, 'המוצר המומלץ אינו זמין במאגר');
         return;

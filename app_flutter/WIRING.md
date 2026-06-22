@@ -2509,3 +2509,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **residual pin (Check unverified):** חולץ `budgetResidualSpend(spendBySite, projectNames)` כ-top-level pure (היה inline) + 3 asserts ב-`budget_twin_test` (אורפן צף · 0→שורה מוסתרת · ריבוי-אורפנים מצטבר). אפס שינוי-התנהגות.
 - **siblings DRY (Check improve):** שני סורקי-הברקוד החדשים (catalog_screen, ai_hub) הוחלפו מ-inline `kCatalogProducts.where(categoryHe==)` ל-`catalogSiblingsFor(product)` (כמו camera_sheet) — 3 הסורקים עקביים. byte-identical (catalogSiblingsFor = אותו ביטוי). ai_hub: import הוחלף polyroll_catalog→task_skus_local.
 - **gate:** analyze 0 errors · budget_twin + robustness +22 ירוק. refactor+test, אפס שינוי-נראה → אין bump-גרסה.
+
+### #autobom-hotwater-fix — תיקון-באג: עוגני מים-חמים נושרים מעבודה-שמורה (לולאה סבב-2) — 2026-06-22
+- **הבאג (Check missing סבב-2, MED):** `install_studio._loadProject:1305` פתר `anchorSkus` מול `kLipskeyCatalog` בלבד, אבל עוגנים מתווספים מ-`kCompatCatalog` (=`[...kLipskeyCatalog, ...kHotWaterCatalog]`, הפיקרים ב-271/3070). עוגן מים-חם (HW-*) שמור → `where` ב-kLipskeyCatalog מחזיר ריק → נושר. ה-auto-BOM של גל ③ (`found.length>=2`) הפך "קנבס-חלקי" ל**no-BOM שקט**. סיבלינג: :1797 ("הוסף מוצר מומלץ") דיווח שקרית "אינו במאגר" על HW.
+- **התיקון:** `kLipskeyCatalog`→`kCompatCatalog` בשני המקומות (one-line swap; kCompatCatalog כבר מיובא+בשימוש ב-install_studio). byte-equivalent לעוגנים שאינם-HW (kCompatCatalog⊇kLipskeyCatalog), מוסיף רק את ה-HW. אותו class כמו תיקון-הברקוד (129c5f4).
+- **תיקון-טסט (קריטי):** `saved_project_autobom_test._resolve` שיקף את ה-baggy `kLipskeyCatalog` → **נעץ את הבאג**. עודכן ל-`kCompatCatalog` + case חדש: עוגן ב-`kCompatCatalog`-שאינו-`kLipskeyCatalog` (מים-חם) פותר ל-length 1 (ה-kLipskeyCatalog הישן היה מחזיר 0).
+- **gate:** analyze 0 errors · saved_project_autobom + robustness + install_plan_coverage +27 ירוק.
