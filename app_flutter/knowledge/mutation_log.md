@@ -1261,3 +1261,9 @@
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — load-bearing קבוצת "Qondus/Aquatec": `7777708G` color='זהב מוברש' + dims['מידה']='250 מ"מ'; `778580` color='ניקל'.
 - **mutation-verify:** baseline **+5 ירוק** → הזרקתי `color: 'זהב מוברש'`→`'בדיקה'` בבלוק 7777708G → טסט **אדום `+4 -1`** ("shower-head finish + size") → שחזור → **+5 ירוק**, 0 שארית. analyze 0 errors. parity+product_journey(935)+twenty_products ירוקים.
 - **לקח-regex:** מק"טי-Qondus אלפא-נומריים — recon-numeric (`\d{6,9}`) פספס; חילוץ-ויזואלי תפס אותם נכון (`779096G` אכן בקטלוג).
+
+## #qondus-connectors-pass2 — מחברי-תשתית מטבלאות צפופות (R8) — 2026-06-23
+- **הדאטה (`lib/data/lipskey_catalog.dart`, data/ → גייט 44):** נחיל-מעבר-שני ממוקד קרא 23 עמודי-טבלאות-מחברים בהגדרה-גבוהה (×2.6). הוחל **254 dims (מידה/תיאור) + 17 color** למוצרי-AQUATEC דלילים (מכסים/רשתות · ברזי-מעבר ת.פ/פ.פ · נחושת: ניפל/כפה/מופה/פקק/רקורד/בושינג/מאריך).
+- **תיקון-מחיל (`scripts/apply_lipskey_enrich.py`):** מוצרי-AQUATEC כתובים ב**שורה-אחת** (`LipskeyCatalogProduct(...page:N...),`) — עוגן-ה-page-בשורה-נפרדת לא תפס אותם (0 הוחל). נוסף ענף שמזהה constructor-בשורה-אחת ומחיל את השדות **לפני ה-`),` הסוגר**. (אותה מחלקת-באג כמו 186666 הבודד.)
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — קבוצת Qondus, "connector dims/finish": `77003023` dims['מידה']='6"'+color='ניקל'; `77777311` dims['מידה']='1/2"'.
+- **mutation-verify:** baseline **+6 ירוק** → הזרקתי `'מידה': '6"'`→`'9"'` בשורת 77003023 → טסט **אדום `+4 -1`** ("connector dims/finish") → שחזור → **+6 ירוק**, 0 שארית. analyze 0. parity+product_journey(935)+twenty_products ירוקים.

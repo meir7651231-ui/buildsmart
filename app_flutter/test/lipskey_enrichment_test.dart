@@ -30,6 +30,12 @@ void main() {
     test('bath-accessory set finish was extracted', () {
       expect(bySku('778580').color, 'ניקל');
     });
+    test('connector dims/finish from the dense table pages (pass 2)', () {
+      // single-line AQUATEC rows — מכסים/ברזי מעבר
+      expect(bySku('77003023').dims?['מידה'], '6"');
+      expect(bySku('77003023').color, 'ניקל');
+      expect(bySku('77777311').dims?['מידה'], '1/2"');
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {

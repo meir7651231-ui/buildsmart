@@ -43,6 +43,34 @@ def main():
     i = 0
     while i < len(lines):
         ln = lines[i]
+        stripped = ln.rstrip()
+        # ── single-line product: `LipskeyCatalogProduct(... page: N, ...),` on ONE line
+        #    (AQUATEC/Qondus rows) — insert the new fields before the closing `),`.
+        if stripped.lstrip().startswith('LipskeyCatalogProduct(') and stripped.endswith('),'):
+            m = re.search(r"sku:\s*'([^']*)'", ln)
+            if m:
+                s = m.group(1)
+                inserts = []
+                if s in color_by_sku:
+                    if re.search(r"\bcolor:\s*'", ln): skip_color += 1
+                    else: inserts.append(f"color: {dart_value(color_by_sku[s])}"); applied_color += 1
+                if s in qty_by_sku:
+                    q = qty_by_sku[s]
+                    if 'qtyPack' in q:
+                        if re.search(r"\bqtyPack:\s*\d", ln): skip_pack += 1
+                        else: inserts.append(f"qtyPack: {int(q['qtyPack'])}"); applied_pack += 1
+                    if 'qtyPallet' in q:
+                        if re.search(r"\bqtyPallet:\s*\d", ln): skip_pallet += 1
+                        else: inserts.append(f"qtyPallet: {int(q['qtyPallet'])}"); applied_pallet += 1
+                if s in dims_by_sku:
+                    if re.search(r"\bdims:\s*\{", ln): skip_dims += 1
+                    else: inserts.append(f"dims: {dart_map(dims_by_sku[s])}"); applied_dims += 1
+                if inserts:
+                    ln = stripped[:-2] + ', ' + ', '.join(inserts) + '),'
+                out.append(ln)
+                cur_sku = None
+                i += 1
+                continue
         m_sku = re.search(r"^\s*sku:\s*'([^']*)',", ln)
         if m_sku:
             cur_sku = m_sku.group(1)
