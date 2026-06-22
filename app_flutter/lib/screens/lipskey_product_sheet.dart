@@ -1785,16 +1785,24 @@ class _Divider extends StatelessWidget {
 Widget _SpecRow(String emoji, String label, String value) => Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(emoji, style: const TextStyle(fontSize: 15)),
           const SizedBox(width: 8),
-          Text(label,
-              style: const TextStyle(
-                  color: Colors.black38, fontSize: 13)),
-          const Spacer(),
-          Text(value,
-              style: const TextStyle(
-                  color: BsTokens.inkLight, fontSize: 13)),
+          Flexible(
+            child: Text(label,
+                style: const TextStyle(
+                    color: Colors.black38, fontSize: 13)),
+          ),
+          const SizedBox(width: 12),
+          // Wrap long values (e.g. dims מידות / תיאור) instead of overflowing
+          // the Row — short values still right-align identically to before.
+          Expanded(
+            child: Text(value,
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                    color: BsTokens.inkLight, fontSize: 13)),
+          ),
         ],
       ),
     );

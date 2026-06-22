@@ -2549,3 +2549,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination:** Claude לא יכול לנקוב שם-מוצר — רק קטגוריה מהרשימה; המוצרים אמיתיים-בלבד.
 - **gating:** `claudeGatewayProvider` null → "החיפוש החכם דורש חיבור". maxTokens=48. demo/test byte-identical.
 - **gate:** analyze 0 errors · `ai_finder_test` (matchCategory closed-set + prompt grounding + products-real + **DEMO מודפס**) + 18 טסטי finder ירוקים. word_finder_screen ב-features/ (לא screens|state|logic) → לא מפעיל גייט-lib; ai_finder_screen ב-screens → גייט 24/116.
+
+### #lipskey-pdf-enrich — העשרת קטלוג-הבית מ-PDF הרשמי (R8) + תיקון render — 2026-06-23
+- **דאטה (`lib/data/lipskey_catalog.dart`):** נחיל-חילוץ ויזואלי קרא את 58 עמודי קטלוג-ליפסקי הרשמי (תמונתי, דו-לשוני). הוחל R8-verbatim: **93 dims (מידות/תיאור/הערה) · 44 qtyPallet · 2 color** על מוצרים קיימים (התאמה לפי SKU, 287/287). `scripts/match_lipskey_pdf.py` ממפה qty→qtyPack/qtyPallet ו-**מחריג color ל-SKUs מוצמדי-gate-117** (`lipskey_pdf_parity_test`, שמצמיד color=null לאביזרים) — מונע התנגשות. `scripts/apply_lipskey_enrich.py` idempotent (לא דורס).
+- **render (`lib/screens/lipskey_product_sheet.dart`):** `_SpecRow` — הערך היה `Text(value)` אחרי `Spacer()` (לא נגלל → ערך-מפרט ארוך גלש). תוקן: `Flexible(label)` + `Expanded(Text(value, textAlign:end))` — ערכים ארוכים נגללים, קצרים נראים זהה. תיקון-שורש לכל מוצר עם dims עשיר.
+- **gate:** analyze 0 errors · `lipskey_enrichment_test` (מידות+qtyPallet, mutation-verified) · `lipskey_pdf_parity_test` (gate-117) + `product_journey` (935 sheets) **ירוקים**. screens → גייט 24/116. כלים+תוכנית: `knowledge/LIPSKEY-INGESTION-PLAN.md`. push רק ב"תתדחוף".

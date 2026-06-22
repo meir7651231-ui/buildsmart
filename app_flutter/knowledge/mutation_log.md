@@ -1249,3 +1249,9 @@
 - **ההלפר החדש:** `claudeGatewayProvider` ב-`claude_functions.dart` (data/ → גייט 44) — `if (useFirebaseBackend && kClaudeAi) return FirebaseClaudeGateway(); return null;`. הוא ה-load-bearing gate ש-(א) מונע AI offline ו-(ב) שומר demo/test byte-identical (null gateway).
 - **טסט-נעיצה:** `test/claude_gateway_test.dart` — "claudeGatewayProvider is null when AI is off".
 - **mutation-verify:** baseline **+3 ירוק** → הזרקתי החלפת הגוף ב-`return FirebaseClaudeGateway();` (gate מוסר) → טסט **אדום `+2 -1`** (`is null when off` → ה-provider החזיר gateway, לא null) → שחזור → **+3 ירוק**, RESTORED-IDENTICAL. analyze 0. הקונסטרקטור lazy אז ה-mutation לא נגע ב-Firebase — נכשל נקי על ה-null-check.
+
+## #lipskey-pdf-enrich — העשרת קטלוג-הבית מ-PDF הרשמי (R8) — 2026-06-23
+- **הדאטה (`lib/data/lipskey_catalog.dart`, data/ → גייט 44):** נחיל-חילוץ ויזואלי קרא 58 עמודי קטלוג-ליפסקי והחיל **93 dims (מידות/תיאור) · 44 qtyPallet · 2 color** verbatim על מוצרים קיימים (התאמה לפי SKU). `match_lipskey_pdf.py` **מחריג color למוצרי gate-117** (מונע התנגשות עם `lipskey_pdf_parity_test` שמצמיד color=null). תיקון render נלווה: `_SpecRow` עוטף ערך ארוך (Flexible/Expanded) במקום לגלוש.
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — load-bearing: `217861` qtyPallet=2250 + dims['מידות']='190-270 / 140 / 55 / 110-245 / Ø32.0'; `218553`/`116649` qtyPallet; אינווריאנט qty>0.
+- **mutation-verify:** baseline **+3 ירוק** → הזרקתי `qtyPallet: 2250`→`9999` בבלוק 217861 → טסט **אדום `+2 -1`** ("pallet quantities were extracted") → שחזור → **+3 ירוק**, 0 שארית (`grep 9999`=0). analyze 0 errors.
+- **למה אין fixer מקביל:** יעד = קובץ-גנרי יחיד; החלה דטרמיניסטית ע"י האורקסטרטור (`apply_lipskey_enrich.py`, idempotent) — כלל PLAYBOOK "אין שני fixers על אותו קובץ". **לקח:** להצליב gate-117 לפני העשרה (השחזור הראשון היה תגובת-יתר).
