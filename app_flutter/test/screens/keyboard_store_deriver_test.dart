@@ -444,12 +444,17 @@ void main() {
           container: container,
           child: MaterialApp(
             navigatorObservers: [_PushSpy(pushed)],
-            home: Consumer(
-              builder: (context, ref, _) {
-                capturedRef = ref;
-                capturedContext = context;
-                return const SizedBox.shrink();
-              },
+            // A Scaffold so a dispatch closure's ScaffoldMessenger.showSnackBar
+            // (the honest "בקרוב" item hint) has a Scaffold to present in,
+            // exactly as the real home shell does at runtime.
+            home: Scaffold(
+              body: Consumer(
+                builder: (context, ref, _) {
+                  capturedRef = ref;
+                  capturedContext = context;
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
           ),
         ),
@@ -501,13 +506,17 @@ void main() {
 
       final before = r.pushed.length;
       ctx.row.runByChip['🚿 ברז']!(r.ref, r.context);
-      await tester.pump();
+      await tester.pump(); // build the SnackBar frame
 
+      expect(find.textContaining('בקרוב'), findsOneWidget,
+          reason: 'the cart chip surfaces an HONEST "בקרוב" hint — never a '
+              'silent no-op (a per-line opener replaces it once a seam exists)');
       expect(container.read(storeSectionProvider), StoreSection.cart,
-          reason: 'the cart chip keeps the user on the cart section '
-              '(keep-floating deferral — the SCREEN owns any real per-line nav)');
+          reason: 'the hint does NOT navigate — the user stays on the cart '
+              'section (the SCREEN owns any real per-line nav)');
       expect(r.pushed.length, before,
-          reason: 'the chip itself pushes no route — keep-floating');
+          reason: 'the chip itself pushes no route');
+      await tester.pumpAndSettle(); // drain the SnackBar timer before teardown
     });
 
     testWidgets(
@@ -523,12 +532,15 @@ void main() {
 
       final before = r.pushed.length;
       ctx.row.runByChip['BS-1042 · בדרך 🚛']!(r.ref, r.context);
-      await tester.pump();
+      await tester.pump(); // build the SnackBar frame
 
+      expect(find.textContaining('בקרוב'), findsOneWidget,
+          reason: 'the order chip surfaces an HONEST "בקרוב" hint, not a no-op');
       expect(container.read(storeSectionProvider), StoreSection.orders,
-          reason: 'the order chip keeps the user on the orders section');
+          reason: 'the hint does NOT navigate — stays on the orders section');
       expect(r.pushed.length, before,
-          reason: 'the chip itself pushes no route — keep-floating');
+          reason: 'the chip itself pushes no route');
+      await tester.pumpAndSettle(); // drain the SnackBar timer before teardown
     });
 
     testWidgets(

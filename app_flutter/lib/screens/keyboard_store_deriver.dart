@@ -47,7 +47,7 @@ import 'package:buildsmart/screens/store_screen.dart'
 import 'package:buildsmart/state/orders_engine.dart' show Order;
 import 'package:buildsmart/state/smart_cart.dart' show SmartCartLine;
 import 'package:buildsmart/state/store_location.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Max dynamic chips any store arm emits — reuses the keyboard's own
@@ -126,6 +126,20 @@ late final Map<String, KbDestination> _storeSectionByLabel =
 void Function(WidgetRef, BuildContext) _keepInSection(StoreSection section) =>
     (ref, context) =>
         ref.read(storeSectionProvider.notifier).state = section;
+
+/// An HONEST deferred tap for a dynamic ITEM chip (a cart line / an order) with
+/// no real per-item opener yet: surface a brief "בקרוב" hint so the tap does
+/// something OBSERVABLE and truthful — NEVER a silent no-op behind an
+/// actionable-looking chip. It never navigates, never pushes a route, and never
+/// crashes (`maybeOf` is null when there is no ScaffoldMessenger). Swap for the
+/// real opener once a per-line / order-detail seam is exposed.
+void Function(WidgetRef, BuildContext) _comingSoon(String what) =>
+    (ref, context) => ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text('$what — בקרוב'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
 
 /// THE PURE DERIVER — [StoreLocation] (+ live data) -> [KbUpdatesContext], via an
 /// EXHAUSTIVE switch over the sealed location (no default: a future location is a
@@ -206,9 +220,9 @@ KbUpdatesContext deriveStoreContext(
         // rest collapse — the row stays unambiguous.
         if (runByChip.containsKey(label)) continue;
         chips.add(label);
-        // No public per-line opener (the cart rows live in private widgets); a
-        // SAFE keep-floating tap (stay on the cart section) until one exists.
-        runByChip[label] = _keepInSection(StoreSection.cart);
+        // No public per-line opener (the cart rows live in private widgets); an
+        // HONEST "בקרוב" hint until a per-line seam exists — never a dead no-op.
+        runByChip[label] = _comingSoon('פתיחת פריט');
       }
       return KbUpdatesContext(
         row: KbPredRow(
@@ -229,9 +243,9 @@ KbUpdatesContext deriveStoreContext(
         final label = '${o.id} · ${_stageLabelFor(o.stage)}';
         if (runByChip.containsKey(label)) continue;
         chips.add(label);
-        // No public per-order opener exposed yet; SAFE keep-floating tap (stay on
-        // the orders section) until an order-detail seam exists.
-        runByChip[label] = _keepInSection(StoreSection.orders);
+        // No public per-order opener exposed yet; an HONEST "בקרוב" hint until an
+        // order-detail seam exists — never a dead no-op.
+        runByChip[label] = _comingSoon('פתיחת הזמנה');
       }
       return KbUpdatesContext(
         row: KbPredRow(
