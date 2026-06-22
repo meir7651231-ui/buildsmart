@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.49 — חלופות זולות עם הסבר-AI: ב-💡 'חלופות זולות' כל שורה קיבלה '🤔 למה כדאי?' (Claude מסביר את ה-tradeoff על המחירים האמיתיים) · + גשר-AI מהקטלוג · 'תאר → מצא' · 'תאר עבודה → סל' · v6.49 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.50 — בכרטיס-מוצר '🧩 מה עוד צריך להתקנה?' (Claude מסביר אילו אביזרים משלימים נחוצים + אל-תשכח) · + 'למה כדאי?' בחלופות הזולות · גשר-AI מהקטלוג · 'תאר → מצא' · 'תאר עבודה → סל' · v6.50 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

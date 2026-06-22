@@ -4,6 +4,24 @@
 
 ---
 
+## v6.50 — #ai-paired-explain · כרטיס-מוצר: כפתור "🧩 מה עוד צריך להתקנה?" — 2026-06-22
+
+**שינוי (lib/screens):** `lipskey_product_sheet.dart` — ליד "מתאים לתנאים שלי?" נוסף `Builder`+`Consumer`
+שמרנדר `OutlinedButton.icon` **"🧩 מה עוד צריך להתקנה?"** → `PairedExplainScreen.route(...)`.
+`paired_explain_screen.dart` (חדש) — מציג את המוצר + chips של סוגי-המוצרים המשלימים (data) וקורא ל-Claude
+ב-`initState` להסבר "למה כל סוג + אל תשכח".
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`) ויש סוגים-משלימים (`frequentlyPairedTypesFor(p).isNotEmpty`):
+  הכפתור מופיע מתחת ל-spec-copilot; לחיצה פותחת מסך עם ה-chips האמיתיים (loader → הסבר Claude). כשל → "נסה שוב".
+- **AI כבוי / אין סוגים** (demo/web · gateway null · רשימה ריקה): ה-`Builder`/`Consumer` מחזיר `SizedBox.shrink()`
+  → הכפתור **לא בעץ** → ה-sheet נשאר **byte-identical** (כולל מקרה ה-spec-copilot-בלבד שכבר קיים).
+
+**תוצאה:** ✅ שלושת המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors (4 warnings dead-code ישנים, לא שלי).
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.50).
+
+---
+
 ## v6.49 — #ai-alt-explain · sheet החלופות: כפתור "🤔 למה כדאי?" לכל שורה — 2026-06-22
 
 **שינוי (lib/screens):** `contractor_tools_sheets.dart` — בכל שורת-חלופה ב-`_CheaperAlternativesSheet`
