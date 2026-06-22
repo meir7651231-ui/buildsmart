@@ -126,6 +126,17 @@ const bool kCloudPhotos = bool.fromEnvironment('CLOUD_PHOTOS');
 /// drive the ON branch explicitly).
 const bool kSeedFreshBackend = bool.fromEnvironment('SEED_FRESH_BACKEND');
 
+/// AI (out-of-box) — master switch for the Claude-backed features (spec co-pilot,
+/// …). They route through the `askClaude` callable (functions/src/claude.ts) via
+/// [ClaudeGateway] (claude_functions.dart). Default OFF: `claudeGatewayProvider`
+/// returns null, so the AI entry points show an honest "requires connection"
+/// state and the demo/test build is byte-identical (same zero-regression invariant
+/// as [kServerCallables] / [kCloudPhotos]). Needs [useFirebaseBackend] too — no AI
+/// offline. Flip on at build time (AFTER `ANTHROPIC_API_KEY` is set in Secret
+/// Manager + the function is deployed):
+///   flutter build … --dart-define=USE_FIREBASE_BACKEND=true --dart-define=CLAUDE_AI=true
+const bool kClaudeAi = bool.fromEnvironment('CLAUDE_AI');
+
 /// F2 (launch App-Check-native) — master switch for the PRODUCTION App Check
 /// attestation providers at `FirebaseAppCheck.instance.activate` time
 /// (`lib/main.dart`).

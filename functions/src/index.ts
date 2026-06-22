@@ -144,6 +144,7 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 export { deleteAccount } from "./deleteAccount";
 export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";
 export { computeCredit } from "./credit";
+export { askClaude } from "./claude";
 export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";
 export { reviewRoleRequest } from "./reviewRoleRequest";

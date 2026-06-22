@@ -1244,3 +1244,8 @@
 - **ההלפר:** `pressure_drop.autoFlowFix` (lib/logic) — שלב prepend-המשאבה ב-ΔP>1bar; תוקן לפתור `HW-PUMP-40` מול `kCompatCatalog`.
 - **טסט-נעיצה:** `test/pressure_pump_test.dart` — load-bearing: "autoFlowFix prepends the booster pump on high ΔP" (chain מוכח + params 1000m/5LPS/50m → ΔP>1bar → chain חייב להכיל HW-PUMP-40).
 - **mutation-verify:** baseline **+3 ירוק** → הזרקתי `kCompatCatalog`→`kLipskeyCatalog` ב-:237 (`// MUTATION`) → **אדום `+2 -1`** (autoFlowFix-prepends → אין HW-PUMP-40; ה-suggestion וה-membership נשארו ירוקים כי הם לא תלויים בשורה הזו) → שחזור → **+3 ירוק**, 0 MUTATION markers. analyze 0.
+
+## #ai-backbone — claudeGatewayProvider gating (no-AI-offline / byte-identical) — 2026-06-22
+- **ההלפר החדש:** `claudeGatewayProvider` ב-`claude_functions.dart` (data/ → גייט 44) — `if (useFirebaseBackend && kClaudeAi) return FirebaseClaudeGateway(); return null;`. הוא ה-load-bearing gate ש-(א) מונע AI offline ו-(ב) שומר demo/test byte-identical (null gateway).
+- **טסט-נעיצה:** `test/claude_gateway_test.dart` — "claudeGatewayProvider is null when AI is off".
+- **mutation-verify:** baseline **+3 ירוק** → הזרקתי החלפת הגוף ב-`return FirebaseClaudeGateway();` (gate מוסר) → טסט **אדום `+2 -1`** (`is null when off` → ה-provider החזיר gateway, לא null) → שחזור → **+3 ירוק**, RESTORED-IDENTICAL. analyze 0. הקונסטרקטור lazy אז ה-mutation לא נגע ב-Firebase — נכשל נקי על ה-null-check.
