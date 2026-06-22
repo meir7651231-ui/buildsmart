@@ -20,7 +20,8 @@ import 'package:buildsmart/data/repositories/finance_repository.dart'
     show FinanceRepository;
 import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
-import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
+import 'package:buildsmart/state/orders_engine.dart'
+    show ordersEngineProvider, Order;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -163,6 +164,20 @@ final budgetProvider =
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
+/// #twin — Σ orders by `site` (the connected per-site spend). Pure → testable.
+Map<String, int> budgetSpendBySite(List<Order> orders) {
+  final m = <String, int>{};
+  for (final o in orders) {
+    m[o.site] = (m[o.site] ?? 0) + o.sum;
+  }
+  return m;
+}
+
+/// #twin — the demo/illustrative per-site weight (decreasing by index): the
+/// verbatim shipped formula `spent*(count-index)/(count*(count+1)/2)`. Pure.
+num illustrativeSiteSpend(num spent, int count, int index) =>
+    count <= 0 ? 0 : spent * (count - index) / (count * (count + 1) / 2);
+
 String _fmt(num n) {
   final r = n.round();
   // Sign before the ₪ symbol so a negative reads "-₪3,150", not "₪-3,150".
@@ -211,12 +226,16 @@ class BudgetScreen extends ConsumerWidget {
     // match the project rows). Demo/tests keep the illustrative weighting below
     // (byte-identical — no real backend to fold), fulfilling the on-screen
     // disclaimer's "full version uses real orders" promise.
-    final spendBySite = <String, int>{};
-    if (useFirebaseBackend) {
-      for (final o in ref.watch(ordersEngineProvider)) {
-        spendBySite[o.site] = (spendBySite[o.site] ?? 0) + o.sum;
-      }
-    }
+    final spendBySite = useFirebaseBackend
+        ? budgetSpendBySite(ref.watch(ordersEngineProvider))
+        : const <String, int>{};
+    // Orders whose site isn't a project (e.g. 'ללא פרויקט') would otherwise
+    // vanish from the per-site rows, making them sum to less than the real
+    // total with no hint — surface them as one residual "אחר" row.
+    final residualSpend = useFirebaseBackend
+        ? spendBySite.values.fold<int>(0, (s, v) => s + v) -
+            projects.fold<int>(0, (s, p) => s + (spendBySite[p.name] ?? 0))
+        : 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -353,20 +372,23 @@ class BudgetScreen extends ConsumerWidget {
                 style: TextStyle(fontSize: 13, color: _muted),
               ),
             )
-          else
+          else ...[
             for (var i = 0; i < projects.length; i++)
               _SiteRow(
                 name: projects[i].name,
                 value: useFirebaseBackend
                     ? _fmt(spendBySite[projects[i].name] ?? 0)
-                    : _fmt(b.spent *
-                        (projects.length - i) /
-                        (projects.length * (projects.length + 1) / 2)),
+                    : _fmt(illustrativeSiteSpend(b.spent, projects.length, i)),
               ),
+            if (useFirebaseBackend && residualSpend > 0)
+              _SiteRow(name: 'אחר / ללא פרויקט', value: _fmt(residualSpend)),
+          ],
           const SizedBox(height: 12),
-          const Text(
-              '* הנתונים להמחשה — בגרסה המלאה יתבססו על ההזמנות וההוצאות בפועל של הלקוח.',
-              style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+          Text(
+              useFirebaseBackend
+                  ? 'מבוסס על ההזמנות בפועל לפי אתר.'
+                  : '* הנתונים להמחשה — בגרסה המלאה יתבססו על ההזמנות וההוצאות בפועל של הלקוח.',
+              style: const TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

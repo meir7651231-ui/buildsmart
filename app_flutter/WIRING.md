@@ -2486,3 +2486,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **ניסוח כן (Check 3 #4, LOW):** קוד לא-מוכר → `'הקוד $code לא נמצא במק"ט'` (במקום "נקלט: code" שנשמע כהצלחה).
 - **טסט (Check 2 #4):** `test/barcode_resolve_test.dart` נועץ את ה-found/not-found split: SKU אמיתי→מוצר (round-trip) · `'NOPE-12345'`/`''`/`null`→null.
 - **gate:** analyze 0 errors · barcode_resolve +camera_sheet_capture +5 ירוק. screen → גייט 24/116.
+
+### #twin-harden — הקשחת-Twin: disclaimer + שארית + נעיצה (לולאה, סבב-3-בדיקות) — 2026-06-22
+- **disclaimer (Check3 #2, MED):** ב-`budget_screen` הערת "* הנתונים להמחשה…" הייתה שקרית על המחובר (הנתונים כבר אמיתיים) → `useFirebaseBackend ? 'מבוסס על ההזמנות בפועל לפי אתר.' : '* הנתונים להמחשה…'`.
+- **שארית (Check3 #3, LOW):** הזמנות עם `site` שאינו שם-פרויקט (למשל 'ללא פרויקט') נכנסו ל-`spendBySite` אך לא הוצגו → השורות הסתכמו לפחות מהסך. נוסף `residualSpend` (Σ-orders − Σ-projects) + שורת `_SiteRow('אחר / ללא פרויקט')` כשהוא >0.
+- **נעיצה (Check2 #1):** חולצו `budgetSpendBySite(List<Order>)` (הקיפול) + `illustrativeSiteSpend(spent,n,i)` (נוסחת-ההמחשה) כ-top-level pure; `test/budget_twin_test.dart` נועץ את שניהם (קיפול לפי site · המחשה verbatim 3/6,2/6,1/6 · n=0→0). import הורחב ל-`Order`.
+- **נדחה (החלטת-בעלים):** Check1 #2 — כותרת-התקציב (הוצא/%נוצל/bar/אזהרת-חריגה) עדיין `b.spent` (הנערך/persisted מ-v6.29), בעוד השורות אמיתיות → סתירה-פנימית על המחובר. תיקון דורש החלטה: spent-מחובר = Σ-הזמנות (דורס עריכה) או נשאר נערך? לא ננגע עד החלטה.
+- **gate:** analyze 0 errors · budget_twin + budget_server_empty + budget_stock_scan +20 ירוק. screen → גייט 24/116.
