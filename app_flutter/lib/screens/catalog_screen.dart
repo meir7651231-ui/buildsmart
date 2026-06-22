@@ -1799,7 +1799,20 @@ class _SearchToolsRow extends ConsumerWidget {
             label: 'ברקוד',
             onTap: () async {
               final code = await openBarcodeScanner(context);
-              if (code != null && code.isNotEmpty) {
+              if (code == null || code.isEmpty || !context.mounted) return;
+              // #barcode-plus — a scanned SKU opens the product card directly
+              // (the catalog SKU-search floor of len>=5 would miss short SKUs);
+              // fall back to search only when it's not a known catalog SKU.
+              final product = catalogProductForSku(code);
+              if (product != null) {
+                showLipskeyProductSheet(
+                  context,
+                  product,
+                  kCatalogProducts
+                      .where((p) => p.categoryHe == product.categoryHe)
+                      .toList(),
+                );
+              } else {
                 ref.read(searchQueryProvider.notifier).state = code;
               }
             },

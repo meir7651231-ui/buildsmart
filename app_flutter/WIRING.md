@@ -2493,3 +2493,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **נעיצה (Check2 #1):** חולצו `budgetSpendBySite(List<Order>)` (הקיפול) + `illustrativeSiteSpend(spent,n,i)` (נוסחת-ההמחשה) כ-top-level pure; `test/budget_twin_test.dart` נועץ את שניהם (קיפול לפי site · המחשה verbatim 3/6,2/6,1/6 · n=0→0). import הורחב ל-`Order`.
 - **נדחה (החלטת-בעלים):** Check1 #2 — כותרת-התקציב (הוצא/%נוצל/bar/אזהרת-חריגה) עדיין `b.spent` (הנערך/persisted מ-v6.29), בעוד השורות אמיתיות → סתירה-פנימית על המחובר. תיקון דורש החלטה: spent-מחובר = Σ-הזמנות (דורס עריכה) או נשאר נערך? לא ננגע עד החלטה.
 - **gate:** analyze 0 errors · budget_twin + budget_server_empty + budget_stock_scan +20 ירוק. screen → גייט 24/116.
+
+### #barcode-allscanners — ברקוד פותח כרטיס בכל שלושת הסורקים (לולאה) — 2026-06-22
+- **Check1 #1:** שני ה-callers האחרים של `openBarcodeScanner` רק זרקו ל-search: `catalog_screen` (הכלי 📷) ו-`ai_hub_screen._runBarcode`. הרצפה `q.length>=5` בחיפוש-מק"ט החטיאה מק"טים קצרים → 0 תוצאות גם כש-`catalogProductForSku` היה מוצא.
+- **התיקון:** שניהם → `catalogProductForSku(code)` → `showLipskeyProductSheet(context, product, siblings)` (siblings = `kCatalogProducts.where(categoryHe==)` inline); fallback ל-search רק כשלא-נמצא. catalog_screen: 0 imports חדשים (כבר מייבא הכל). ai_hub: +3 imports (`polyroll_catalog.kCatalogProducts` (שם מוגדר ה-unified), `related_info.catalogProductForSku`, `lipskey_product_sheet.showLipskeyProductSheet`).
+- **תפס באג-build תוך-כדי:** ייבאתי תחילה `kCatalogProducts` מ-`lipskey_catalog` (שם יש `kLipskeyCatalog`, לא `kCatalogProducts`) → analyze error → תוקן ל-`polyroll_catalog`.
+- **gate:** analyze 0 errors · robustness + catalog + ai_hub tests +141 ירוק. screens → גייט 24/116. ה-resolve split כבר נעוץ ב-barcode_resolve_test (אותה לוגיקה).

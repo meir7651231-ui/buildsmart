@@ -101,5 +101,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.36 — הקשחת-Twin: הערת-שוליים כנה על המחובר + שורת 'אחר/ללא פרויקט' + טסטים · v6.36 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.37 — ברקוד בכל הסורקים: גם הכלי בקטלוג וגם ה-AI-hub פותחים כרטיס-מוצר מסריקה (לא רק חיפוש) · v6.37 במסך הבית = הבילד הנכון · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

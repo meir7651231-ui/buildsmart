@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
+import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/related_info.dart' show catalogProductForSku;
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
+import 'package:buildsmart/screens/lipskey_product_sheet.dart'
+    show showLipskeyProductSheet;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/services/weather.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
@@ -85,6 +89,19 @@ class AIHubScreen extends ConsumerWidget {
   Future<void> _runBarcode(BuildContext context, WidgetRef ref) async {
     final code = await openBarcodeScanner(context);
     if (code == null || code.isEmpty || !context.mounted) return;
+    // #barcode-plus — a scanned SKU opens the product card directly; search
+    // fallback only when it's not a known catalog SKU.
+    final product = catalogProductForSku(code);
+    if (product != null) {
+      showLipskeyProductSheet(
+        context,
+        product,
+        kCatalogProducts
+            .where((p) => p.categoryHe == product.categoryHe)
+            .toList(),
+      );
+      return;
+    }
     ref.read(searchQueryProvider.notifier).state = code;
     ref.read(mainTabProvider.notifier).state = 0;
     unawaited(Navigator.of(context).maybePop());
