@@ -1255,3 +1255,9 @@
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — load-bearing: `217861` qtyPallet=2250 + dims['מידות']='190-270 / 140 / 55 / 110-245 / Ø32.0'; `218553`/`116649` qtyPallet; אינווריאנט qty>0.
 - **mutation-verify:** baseline **+3 ירוק** → הזרקתי `qtyPallet: 2250`→`9999` בבלוק 217861 → טסט **אדום `+2 -1`** ("pallet quantities were extracted") → שחזור → **+3 ירוק**, 0 שארית (`grep 9999`=0). analyze 0 errors.
 - **למה אין fixer מקביל:** יעד = קובץ-גנרי יחיד; החלה דטרמיניסטית ע"י האורקסטרטור (`apply_lipskey_enrich.py`, idempotent) — כלל PLAYBOOK "אין שני fixers על אותו קובץ". **לקח:** להצליב gate-117 לפני העשרה (השחזור הראשון היה תגובת-יתר).
+
+## #qondus-pdf-enrich — העשרת קטלוג מ-Qondus/Aquatec PDF (R8) — 2026-06-23
+- **הדאטה (`lib/data/lipskey_catalog.dart`, data/ → גייט 44):** נחיל-חילוץ ויזואלי קרא 102 עמודי קטלוג Qondus/Aquatec 2023 (תמונתי). חולצו 572 מוצרים, **562 תואמים לקטלוג** (SKUs אלפא-נומריים `779096G`/`7777708G`), והוחל R8-verbatim: **154 dims (מידה/תיאור) + 42 color (גימורי-ברזים: זהב-מוברש/שחור-מט/ניקל)**. `match_lipskey_pdf.py` מטפל ב-SKU כמחרוזת-מלאה (אלפא-נומרי) ומחריג color ל-gate-117 (0 התנגשות).
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — load-bearing קבוצת "Qondus/Aquatec": `7777708G` color='זהב מוברש' + dims['מידה']='250 מ"מ'; `778580` color='ניקל'.
+- **mutation-verify:** baseline **+5 ירוק** → הזרקתי `color: 'זהב מוברש'`→`'בדיקה'` בבלוק 7777708G → טסט **אדום `+4 -1`** ("shower-head finish + size") → שחזור → **+5 ירוק**, 0 שארית. analyze 0 errors. parity+product_journey(935)+twenty_products ירוקים.
+- **לקח-regex:** מק"טי-Qondus אלפא-נומריים — recon-numeric (`\d{6,9}`) פספס; חילוץ-ויזואלי תפס אותם נכון (`779096G` אכן בקטלוג).
