@@ -51,41 +51,6 @@ class AssistantTurn {
   final List<LipskeyCatalogProduct> kit;
 }
 
-/// The system prompt — this IS the grounding for an open assistant: domain-bound,
-/// invention-forbidden, and routes catalog actions to the real tools.
-const String assistantSystem =
-    'אתה "העוזר החכם" של BuildSmart — אפליקציית-רכש לאינסטלטורים וקבלני-בנייה. '
-    'ענה בעברית, קצר ולעניין.\n'
-    'מותר: שאלות מקצועיות כלליות באינסטלציה/בנייה/רכש, הסבר על תהליכי-עבודה, '
-    'עזרה בניסוח.\n'
-    'אסור: להמציא שמות-מוצר, מק"טים, מחירים או זמינות-מלאי ספציפיים — אין לך גישה '
-    'לקטלוג החי, אז לעולם אל תַמְצִיא נתון כזה.\n'
-    'כשהמשתמש רוצה לבנות סל / למצוא מוצר / לבדוק מחיר — הַפְנֵה אותו לכלים האמיתיים '
-    'באפליקציה: "תאר עבודה → סל" (בונה סל מתיאור), "חיפוש חכם / מאתר חכם" (מוצא '
-    'מוצר מתיאור), וכרטיס-המוצר ("מתאים לתנאים שלי?" · "מה עוד צריך להתקנה?").\n'
-    'אם אינך יודע — אמור זאת בכנות. אל תמציא.';
-
-/// The maximum prior turns folded into a single prompt (the `askClaude` callable
-/// takes ONE user message, so we serialize a bounded history into it).
-const int kAssistantHistoryWindow = 12;
-
-/// Fold the (bounded) prior turns + the new message into one prompt string.
-String assistantTurnPrompt(List<AssistantTurn> history, String userText) {
-  final recent = history.length > kAssistantHistoryWindow
-      ? history.sublist(history.length - kAssistantHistoryWindow)
-      : history;
-  final b = StringBuffer();
-  if (recent.isNotEmpty) {
-    b.writeln('השיחה עד כה:');
-    for (final m in recent) {
-      b.writeln('${m.user ? "משתמש" : "עוזר"}: ${m.text}');
-    }
-    b.writeln();
-  }
-  b.write('משתמש: $userText');
-  return b.toString();
-}
-
 class AiAssistantScreen extends ConsumerStatefulWidget {
   const AiAssistantScreen({super.key});
 

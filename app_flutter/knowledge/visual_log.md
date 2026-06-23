@@ -4,6 +4,21 @@
 
 ---
 
+## v6.64 — swarm-fixes גל-1 · a11y + spec_copilot (אודיט-הנחיל) — 2026-06-23
+
+**שינויים (lib/screens):** `contractor_tools_sheets.dart` — כפתור "🤔 למה כדאי?" ל-≥48dp (היה 32dp).
+`spec_copilot_screen.dart` — טקסט-הוורדיקט (✓/✗) ל-`successDark`/`dangerDark` (ניגודיות) + מירוץ-טמפרטורה.
+(`ai_assistant_screen.dart` — הסרת prompt-מת, ללא שינוי-תצוגה.)
+
+**אימות (reasoning + טסטים — אין מכשיר):**
+- כפתור-החלופה: יעד-מגע גדל מ-32dp ל-48dp; הטקסט/האייקון ללא-שינוי → רק קל יותר ללחוץ.
+- spec_copilot: צבע-הטקסט כהה יותר (ירוק/אדום-כהה) על אותו רקע-תינט → קריא יותר, אותו תוכן. מירוץ: בחירת
+  טמפ' חדשה בזמן-בקשה כבר לא מציגה הסבר של הטמפ' הישנה (snapshot של `_temp`) ולא משאירה spinner תקוע.
+
+**תוצאה:** ✅ שינויי-UI מינוריים ובטוחים, אפס שינוי-תוכן. analyze 0 · spec_copilot/ai_assistant/alt טסטים ירוקים.
+
+---
+
 ## v6.62 — #ai-reject-reason · בקשות-תפקיד (מנהל): כפתור "✨ נסח סיבת-דחייה" — 2026-06-23
 
 **שינוי (lib/screens):** `role_requests_inbox_screen.dart` (`_RequestCard`) — מתחת לאישור/דחייה נוסף `Consumer`

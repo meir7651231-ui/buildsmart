@@ -344,12 +344,11 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                               ),
                               icon: const Text('🤔'),
                               label: const Text('למה כדאי?'),
+                              // a11y (swarm): ≥48dp tap target (was 32dp+shrinkWrap).
                               style: TextButton.styleFrom(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                minimumSize: const Size(0, 32),
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                minimumSize: const Size(0, 48),
                               ),
                             ),
                           );
