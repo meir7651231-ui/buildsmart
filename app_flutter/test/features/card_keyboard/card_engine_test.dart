@@ -141,4 +141,34 @@ void main() {
       expect(word.soft, isFalse, reason: 'an emitted key is never soft');
     });
   });
+
+  group('representativeTake (dense-axis buckets, §1.4 #11)', () {
+    List<SignalChip> sizes(int n) => <SignalChip>[
+          for (var i = 0; i < n; i++)
+            SignalChip(axisId: 'size', value: 's$i', displayLabel: 's$i'),
+        ];
+
+    test('spreads across the range incl. both endpoints (no tail-cut)', () {
+      final picked = representativeTake(sizes(15), 4);
+      expect(picked.length, 4);
+      expect(picked.first.value, 's0', reason: 'smallest included');
+      expect(picked.last.value, 's14',
+          reason: 'largest included — NOT front-truncated');
+      expect(picked.map((c) => c.value).toList(),
+          isNot(<String>['s0', 's1', 's2', 's3']),
+          reason: 'not simply the first 4');
+    });
+
+    test('returns all (unchanged) when it already fits', () {
+      expect(representativeTake(sizes(3), 4).length, 3);
+    });
+
+    test('no duplicate chips; both endpoints kept', () {
+      final picked = representativeTake(sizes(20), 5);
+      expect(picked.map((c) => c.value).toSet().length, picked.length,
+          reason: 'no duplicate index');
+      expect(picked.first.value, 's0');
+      expect(picked.last.value, 's19');
+    });
+  });
 }

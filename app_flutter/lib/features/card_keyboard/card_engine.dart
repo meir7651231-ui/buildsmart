@@ -204,8 +204,12 @@ class _AxisScore {
 /// (lower = a more decisive split; zero float as a sort key → byte-stable under
 /// input shuffle, no NaN), then lays out the row best-axis-first with a per-axis
 /// floor (≥ [kMergedAxisFloor]) and caps (≤ [kMergedAxisMaxPerAxis] per axis,
-/// ≤ [kMergedKeyCap] total). Soft tilts (Phase 3) will re-weight BEFORE this
-/// top-K; here every chip is a hard-axis key (`soft == false`).
+/// ≤ [kMergedKeyCap] total). The size axis is sampled by [representativeTake]
+/// (not front-truncated). Soft tilts are NOT applied here (softTilt is inert):
+/// realising Phase 3 will mean giving each [SignalChip] a computed per-chip
+/// weight and replacing the per-axis positional take with a per-axis scored
+/// top-K — a restructure of this loop, not just populating [SignalChip.infoGain]
+/// (today always 0). Until then chip order within an axis is the live helper's.
 ///
 /// Returns empty when no unanswered axis can split the pool — [mergedKeys] then
 /// falls to the convergence floor ([CardShowProducts]).
@@ -262,7 +266,35 @@ List<SignalChip> _mergedChips(
     final room = kMergedKeyCap - out.length;
     if (out.isNotEmpty && room < kMergedAxisFloor) break;
     final take = room < kMergedAxisMaxPerAxis ? room : kMergedAxisMaxPerAxis;
-    out.addAll(a.chips.take(take));
+    // SIZE is magnitude-ordered (ascending mm), so a positional take(take) would
+    // front-truncate and HIDE every larger size (build-plan §1.4 #11 forbids a
+    // tail-cut that hides sizes). Sample REPRESENTATIVE buckets across the sorted
+    // range instead — always including the smallest AND the largest. Other axes
+    // are not magnitude-ordered (word is frequency-ordered, where top-N IS the
+    // best pick), so they keep the natural first-N.
+    final taken = a.chips.first.axisId == 'size'
+        ? representativeTake(a.chips, take)
+        : a.chips.take(take).toList();
+    out.addAll(taken);
+  }
+  return out;
+}
+
+/// Pick [count] chips spread EVENLY across [chips] — representative buckets, NOT
+/// the first [count]. For a dense, magnitude-ordered axis (size, ascending mm)
+/// this surfaces the smallest AND the largest (and a spread between), never
+/// front-truncating away the big sizes (build-plan §1.4 #11). Both endpoints are
+/// always included; duplicate rounded indices are de-duplicated, so the result
+/// may be slightly shorter than [count] in degenerate cases but never longer,
+/// and never fewer than 2 when [chips] has ≥ 2 (the endpoints differ). Returns
+/// [chips] unchanged when it already fits in [count]. PURE & deterministic.
+List<SignalChip> representativeTake(List<SignalChip> chips, int count) {
+  if (count <= 1 || chips.length <= count) return chips.take(count).toList();
+  final picked = <int>{};
+  final out = <SignalChip>[];
+  for (var i = 0; i < count; i++) {
+    final idx = (i * (chips.length - 1) / (count - 1)).round();
+    if (picked.add(idx)) out.add(chips[idx]);
   }
   return out;
 }
