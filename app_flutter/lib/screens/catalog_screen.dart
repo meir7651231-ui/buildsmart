@@ -24,6 +24,8 @@ import 'package:buildsmart/data/variant_families.dart';
 // Additive only: when kWordFinderFlag is OFF the section pill never renders and
 // the _CatalogBody routing branch is unreachable, so catalog behaviour is
 // byte-identical for normal users.
+import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
+import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/word_finder/word_finder_home.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
@@ -719,6 +721,10 @@ class _SectionChipsRow extends ConsumerWidget {
     // flag is on. OFF (default) → no extra pill, byte-identical chips row.
     final wordFinderOn =
         ref.watch(featureFlagsProvider).contains(kWordFinderFlag);
+    // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — the 'מקלדת חכמה' pill renders
+    // ONLY when the flag is on. OFF (default) → no extra pill, byte-identical.
+    final cardKeyboardOn =
+        ref.watch(featureFlagsProvider).contains(kCardKeyboardFlag);
 
     void activate(String label) =>
         ref.read(catalogSectionProvider.notifier).state = label;
@@ -854,6 +860,16 @@ class _SectionChipsRow extends ConsumerWidget {
                 label: 'מאתר חכם',
                 active: active == 'מאתר חכם',
                 onTap: () => activate('מאתר חכם'),
+              ),
+            ],
+            // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — flag-gated 'מקלדת חכמה'
+            // pill BESIDE 'מאתר חכם'. Visible only when kCardKeyboard is on.
+            if (cardKeyboardOn) ...[
+              const SizedBox(width: 8),
+              _SectionPill(
+                label: 'מקלדת חכמה',
+                active: active == 'מקלדת חכמה',
+                onTap: () => activate('מקלדת חכמה'),
               ),
             ],
             const SizedBox(width: 8),
@@ -2439,6 +2455,22 @@ class _CatalogBody extends ConsumerWidget {
     // (the pill that sets this active section never renders), so this branch is
     // inert by default. WordFinderHome also self-gates on the same flag.
     if (active == 'מאתר חכם') return const WordFinderHome();
+    // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — routes the flag-gated
+    // 'מקלדת חכמה' pill to the unified card-keyboard. Unreachable when the flag is
+    // off (the pill that sets this active never renders); CardKeyboardScreen also
+    // self-gates. It has no Scaffold/Directionality of its own, so wrap it RTL +
+    // scrollable (swarm R10).
+    if (active == 'מקלדת חכמה') {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+            child: CardKeyboardScreen(),
+          ),
+        ),
+      );
+    }
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();

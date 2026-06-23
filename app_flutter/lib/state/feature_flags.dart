@@ -11,6 +11,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 const bool kEnableWordFinderDemo =
     bool.fromEnvironment('ENABLE_WORD_FINDER');
 
+/// True iff the build passed `--dart-define=ENABLE_CARD_KEYBOARD=true` — the
+/// A/B demo build for the unified card-keyboard (#38). SAME idiom as
+/// [kEnableWordFinderDemo]: default false → 'kCardKeyboard' stays off → the new
+/// 'מקלדת חכמה' catalog pill never renders → byte-identical. The live deploy
+/// workflows do NOT pass it (the cut-over stays owner-gated); a demo build (or
+/// _app_cardkeyboard_demo.dart) flips it to A/B the new finder beside the old.
+const bool kEnableCardKeyboardDemo =
+    bool.fromEnvironment('ENABLE_CARD_KEYBOARD');
+
 /// Runtime tier name for the עדכונים LIVE-MIRROR keyboard (plan Q4). The floating
 /// keyboard's mirror branch is guarded by `kKbLiveMirror ||
 /// featureFlagsProvider.isOn(kKbLiveMirrorFlag)`, so the orchestrator can stage
@@ -49,8 +58,9 @@ class FeatureFlagsNotifier extends StateNotifier<Set<String>> {
   /// visible THERE ONLY. Reversible: drop the dart-define → back to default-off.
   // OWNER-REVIEW: build-time demo enablement of the word-finder.
   //
-  // DELIBERATELY word-finder ONLY. [kKbLiveMirrorFlag] ('kKbLiveMirror') is
-  // intentionally NOT force-enabled here even under a demo define (plan Q4):
+  // The two A/B DEMO surfaces (word-finder + card-keyboard #38), each behind its
+  // own dart-define. [kKbLiveMirrorFlag] ('kKbLiveMirror') is intentionally NOT
+  // force-enabled here even under a demo define (plan Q4):
   // its compile-time twin is the separate `kKbLiveMirror` const
   // (== bool.fromEnvironment('KB_LIVE_MIRROR'), in
   // widgets/smart_input/keyboard/bs_keyboard_host.dart), and the live-mirror
@@ -60,8 +70,10 @@ class FeatureFlagsNotifier extends StateNotifier<Set<String>> {
   // `enable(kKbLiveMirrorFlag)`. Adding it to this set would conflate the two
   // and break the default-OFF assumption that
   // test/screens/keyboard_updates_deriver_test.dart relies on.
-  static const Set<String> _forcedOnFlags =
-      kEnableWordFinderDemo ? <String>{'kWordFinder'} : <String>{};
+  static const Set<String> _forcedOnFlags = <String>{
+    if (kEnableWordFinderDemo) 'kWordFinder',
+    if (kEnableCardKeyboardDemo) 'kCardKeyboard',
+  };
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
