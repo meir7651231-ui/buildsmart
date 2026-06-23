@@ -14,6 +14,7 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart'
     show CreditExplainScreen;
+import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
@@ -114,6 +115,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
           actions: [
             // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
             // themselves in a bubble (the 💡 + ✕ stay tappable to toggle/exit).
+            // (The 🤖 Co-Pilot entry is the cockpit HERO card — not an AppBar
+            // action — to keep the 5-action bar from overflowing on narrow widths.)
             const HelpToggleButton(),
             // Each persona reaches profile + settings from its OWN dashboard
             // (product-owner: separately per role). Three muted AppBar actions
@@ -404,10 +407,71 @@ class _DashboardTab extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
+        const _CopilotHero(),
+        const SizedBox(height: BsTokens.space4),
         _MetricGrid(analytics: analytics),
         const SizedBox(height: BsTokens.space5),
         _OrderPipeline(byStage: byStage),
       ],
+    );
+  }
+}
+
+/// 🤖 Co-Pilot hero — the cockpit's headline gateway into "שאל את העסק שלך".
+/// A brand-gradient card at the very top of 📊 לוח בקרה → pushes the co-pilot.
+class _CopilotHero extends ConsumerWidget {
+  const _CopilotHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final live = ref.watch(claudeGatewayProvider) != null;
+    return Semantics(
+      button: true,
+      label: 'קו-פיילוט — שאל את העסק שלך',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        onTap: () =>
+            Navigator.of(context).push(ManagerCopilotScreen.route()),
+        child: Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [BsTokens.brand, BsTokens.brandDark],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            ),
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          ),
+          child: Row(
+            children: [
+              const Text('🤖', style: TextStyle(fontSize: 34)),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('שאל את העסק שלך',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 2),
+                    Text(
+                      live
+                          ? 'מה בוער? מי הלקוח הכי שווה? — אני עונה מהנתונים החיים'
+                          : 'מודיעין-עסקי AI · דורש חיבור לשרת',
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 12.5),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_left, color: Colors.white),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1394,3 +1394,8 @@
 - **טסט-נעיצה:** `firestore_cached_repo_test` — `'SCOPED first-empty BLANKS the seed to honest-empty (no seed-hook)'` (`scoped=true` + emit ריק → cache ריק, `firstEmptyCalls==0`); הטסט הקיים unscoped (seed נשמר + hook) עדיין ירוק.
 - **mutation-verify:** baseline ירוק → ביטול ענף-ה-`isScoped` (always keep-seed) → הטסט-החדש **אדום** (`cached()` היה `[1,2,3]` במקום ריק) → שחזור → ירוק. analyze 0 errors.
 - **גם (`lib/data/repositories/order_functions.dart`, LOW):** `advanceOrderStage`/`computeCredit` עטופים ב-`.timeout(30s)` → קריאה תקועה נכשלת-מהר ל-`_guard` במקום לתלות UI עד ~70s (inert: `kServerCallables` כבוי).
+
+## #manager-copilot — קו-פיילוט-מנהל: context-builder מקורקע — 2026-06-23
+- **הלוגיקה (`lib/logic/manager_copilot.dart` → גייט 42/44):** `buildManagerContext` מקפל את נתוני-האמת (Σ-מחזור=Σspend · openOrders · per-stage · top-5 לקוחות · אשראי) לטקסט-עברית שמוזרק ל-Claude; ה-system אוסר-להמציא. כל מספר מהמנועים, לא מהמודל.
+- **טסט-נעיצה:** `manager_copilot_test` — context מכיל `פתוחות N`/`התקבלה 1`/הלקוח-המוביל-ראשון · revenue==Σspend (מחרוזת-₪) · system מכיל "אסור להמציא" · prompt עוטף ctx+שאלה+grounding · שאלה ארוכה capped ל-400 · brief מכיל "תדריך-בוקר".
+- **mutation-verify:** baseline ירוק → שינוי מחרוזת-הgrounding ל-"מותר להמציא" → הטסט (`forbids invention`) אדום → שחזור → ירוק. analyze 0. (screens-only שאר-הפיצ'ר; לוגיקה-זו נבדקת.)

@@ -4,6 +4,18 @@
 
 ---
 
+## v6.76 — 🤖 קו-פיילוט-מנהל + כרטיס-hero בקוקפיט — 2026-06-23
+
+**שינויי-UI (lib/screens):** מסך חדש `ManagerCopilotScreen` + כרטיס-hero חדש בראש 📊 לוח-בקרה.
+
+**אימות-ויזואלי:**
+- **כרטיס-hero (`_CopilotHero`):** כרטיס brand-gradient (`brand`→`brandDark`, top-right→bottom-left) בראש הקוקפיט: 🤖 + "שאל את העסק שלך" + שורת-משנה (live: "מה בוער?..." / off: "דורש חיבור") + chevron. `Semantics(button)`. נבדק ע"י 49 טסטי-מנהל שמרנדרים את הקוקפיט (כולם ירוקים, כולל "builds as LIGHT frame").
+- **מסך-הקו-פיילוט:** RTL · AppBar "🤖 קו-פיילוט / שאל את העסק שלך" · `_Welcome` (🤖 + צ'יפי-שאלות + כפתור-תדריך) · בועות-צ'אט (משתמש=brand-ימין · עוזר=card-שמאל, maxWidth 82%) · `_Typing` spinner · `_InputBar` (TextField + שלח). off-state = `AiOffState` כשאין-gateway. נבדק ב-`manager_copilot_screen_test`.
+- **אפס שינוי-מבני בלוח** — רק כרטיס-hero additive בראש הרשימה. שאר הקוקפיט (5 מדדים + צינור) ללא-שינוי. **AppBar לא שונה** (הסרתי action-6 שגרם overflow).
+- **תואם-ממשל:** מודיעין/פיקוח · אפס-HR.
+
+**טסט:** `manager_copilot_test` 7 + `manager_copilot_screen_test` 1 + 49 מנהל ירוקים · analyze 0 · full-suite.
+
 ## v6.73 — חיפוש-AI היברידי · כותרת-תוצאה משתנה לפי-מסלול — 2026-06-23
 
 **שינוי-UI (lib/screens):** `ai_finder_screen` + `ai_assistant_screen` (findProduct) — החיפוש עכשיו literal-first.

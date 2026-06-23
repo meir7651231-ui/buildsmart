@@ -2703,3 +2703,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **assistant:** `_dispatchIntent(intent, userText)` — userText מועבר כדי לאפשר fuzzy על הטקסט-הגולמי; שאר ה-cases (answer/summarizeOrders/checkBudget/addToCart) ללא-שינוי.
 - **טסט (`ai_finder_test` +4):** COLOR `שחור`→מוצרים-שחורים ולא `'אביזרי נחושת'` · GENERIC `ברז`→>1 · SIZE `1"`→לא-ריק · חוזה-חיווט (המסך מפנה ל-`fuzzySearchProducts`). הטסטים הקיימים (`matchCategory`/`productsInCategory`) עדיין ירוקים (ה-AI-fallback נשמר).
 - **gate:** analyze 0 errors · `ai_finder`+`ai_assistant`+`assistant_intent` tests ירוקים · full-suite baseline · `lib/screens` → גייט 24/116 (לא 42/44; `fuzzy_search.dart` לא-נגע). **נדחה:** ניקוי ה-stray `34-5017`/`'ברזים'` (דאטה — מיותר כעת כי fuzzy-first עוקף את המלכודת).
+
+### #manager-copilot — 🤖 קו-פיילוט למנהל "שאל את העסק שלך" (M2) — 2026-06-23
+הפיצ'ר-הדגל הראשון מ-`MANAGER-BUILD-PLAN.md`. הבעלים שואל בעברית → Claude עונה מהדאטה-החיה. **grounded** מלא.
+- **`lib/logic/manager_copilot.dart` (חדש · גייט 42/44):** `buildManagerContext({analytics, customers, stageCounts})` מקפל snapshot-עברית מקורקע (הזמנות/מחזור/צינור/קטלוג/אשראי/לקוחות-מובילים) · `managerCopilotSystem` (אנליסט, אסור-להמציא, ענה-מהקונטקסט-בלבד) · `managerCopilotPrompt(ctx,q)` (שאלה capped ב-`promptSafeText`) · `managerMorningBriefPrompt(ctx)` · `kManagerCopilotSuggestions`.
+- **`lib/screens/manager_copilot_screen.dart` (חדש):** `ManagerCopilotScreen` — צ'אט RTL (בועות user-brand/assistant-card · `_Welcome` עם צ'יפי-שאלות + "☀️ תדריך-בוקר" · `_InputBar`). קורא `managerAnalyticsProvider`/`managerCustomersProvider`/`ordersEngineProvider` ב-ask-time → `buildManagerContext` → `gw.ask(prompt, system: managerCopilotSystem, maxTokens:420)`. גדור `claudeGatewayProvider` (null → `AiOffState`). race-guard `_loading`.
+- **`manager_dashboard_screen.dart`:** `_CopilotHero` (כרטיס brand-gradient בראש `_DashboardTab`) → `ManagerCopilotScreen.route()`. **לא** AppBar-action (6th action גרם RenderFlex-overflow 18px — נבדק; ה-hero בולט יותר ממילא).
+- **ממשל:** מודיעין/פיקוח = תחום-המנהל · אפס-HR · additive · אפס-רגרסיה (מנהל-בלבד · off-state בלי-שרת).
+- **gate:** analyze 0 · `manager_copilot_test` (7: context-folding · grounding-system · prompt · cap · brief · suggestions) + `manager_copilot_screen_test` (off-state render) · 49 טסטי-מנהל ירוקים · full-suite. screens → 24/116.
