@@ -59,6 +59,9 @@ void main() {
       expect(bySku('77701117').dims?['מצבים'], '5'); // מערכת אמבטיה 5 מצבים
       expect(bySku('77701204').dims?['מצבים'], '3'); // מזלף 3 מצבים
     });
+    test('structural material from the name (100%-certain, brand-agnostic)', () {
+      expect(bySku('77777481').dims?['חומר'], 'נחושת'); // מצוף נחושת
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
