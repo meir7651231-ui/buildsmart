@@ -2648,3 +2648,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **שונה מהשאר — generative, לא narrate:** כאן ה-AI **מייצר טקסט** ולא מנסח נתון אמיתי, אז העיגון הוא **closed-set של קטגוריות-סיבה** (מסמכים/הדרכה/בדיקת-רקע/אין-מקום) שה-prompt מוסר, + **איסור להמציא עובדות ספציפיות** על האדם. ה-system מגביל לנוסח כללי-מכובד; המנהל עורך/מעתיק לפני שליחה (לא מחווט אוטומטית לדחייה).
 - **gating:** ה-`Consumer` בודק `claudeGatewayProvider == null → shrink` → ב-demo/no-AI **לא קיים בעץ**, הכרטיס byte-identical (אישור/דחייה בלבד).
 - **gate:** analyze 0 errors/warnings · `reject_reason_test` (role+person+closed-set · anti-invention guard) ירוק · full-suite baseline. reject_reason_screen + role_requests_inbox_screen ב-screens → גייט 24/116.
+
+### #swarm-fixes-w1 — תיקוני אודיט-הנחיל גל-1 (HIGH test-hygiene + a11y + spec_copilot) — 2026-06-23
+- **רקע:** אודיט-נחיל-מלא (9 עדשות) על כל פיצ'רי-ה-AI — הארכיטקטורה תקינה (0 HIGH בקוד-הרץ). גל-1 סוגר את ה-ROI-הגבוה.
+- **HIGH (test-hygiene):** `ai_assistant_screen` — הוסרו `assistantSystem`/`assistantTurnPrompt`/`kAssistantHistoryWindow` (מתים מאז ה-agentic upgrade; הנתיב-החי `_send` קורא ל-`assistantIntentSystem`/`assistantIntentPrompt`). `ai_assistant_test` כּוון-מחדש לבדוק את ה-grounding **החי** (היה בודק את המת → ביטחון-שווא). ספירת-טסטים נשמרה (6).
+- **MED (a11y):** `contractor_tools_sheets` כפתור "🤔 למה כדאי?" → ≥48dp (היה `Size(0,32)`+shrinkWrap).
+- **MED (spec_copilot):** טקסט-וורדיקט → `successDark`/`dangerDark` (WCAG AA) · מירוץ-טמפרטורה: `_temp` snapshot + drop-late-reply + ניקוי-spinner ב-onSelected.
+- **gate:** analyze 0 errors/warnings · `ai_assistant_test` (live grounding) + `spec_copilot_test` + `alt_explain_test` ירוקים · full-suite baseline. 3 screens ב-screens → גייט 24/116.

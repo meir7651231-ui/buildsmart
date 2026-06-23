@@ -76,7 +76,11 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
 
   Future<void> _explain() async {
     final gw = ref.read(claudeGatewayProvider);
-    final v = specTempVerdict(widget.product, _temp);
+    // Snapshot the temp this request is for — if the user changes the chip while
+    // the call is in flight, the late reply (which captured THIS temp) is dropped
+    // so it can't render under the now-different verdict (swarm race fix).
+    final reqTemp = _temp;
+    final v = specTempVerdict(widget.product, reqTemp);
     if (gw == null || v.spec == null) return; // honest: no AI / no spec
     setState(() {
       _loading = true;
@@ -85,18 +89,18 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
     });
     try {
       final r = await gw.ask(
-        prompt: specCopilotPrompt(widget.product, _temp, v.spec!),
+        prompt: specCopilotPrompt(widget.product, reqTemp, v.spec!),
         system: _kCopilotSystem,
         maxTokens: 200,
       );
-      if (mounted) {
+      if (mounted && _temp == reqTemp) {
         setState(() {
           _explanation = r.text.trim();
           _loading = false;
         });
       }
     } catch (_) {
-      if (mounted) {
+      if (mounted && _temp == reqTemp) {
         setState(() {
           _failed = true;
           _loading = false;
@@ -146,6 +150,7 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
                       _temp = t;
                       _explanation = null;
                       _failed = false;
+                      _loading = false; // a chip change cancels any in-flight spinner
                     }),
                   ),
               ],
@@ -168,7 +173,9 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
                       ? '✓ כן — מחזיק $_temp°C (מקס׳ מאומת ${v.maxTempC!.toInt()}°C)'
                       : '✗ לא — מעבר למקס׳ המאומת (${v.maxTempC!.toInt()}°C)',
                   style: TextStyle(
-                      color: v.ok! ? BsTokens.success : BsTokens.danger,
+                      // a11y (swarm): *Dark token for TEXT — success/danger fail
+                      // WCAG AA on the light tint; the tint background stays.
+                      color: v.ok! ? BsTokens.successDark : BsTokens.dangerDark,
                       fontSize: 15,
                       fontWeight: FontWeight.w800),
                 ),

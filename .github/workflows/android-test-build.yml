@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.62 — ✨ 'נסח סיבת-דחייה' לבקשות-תפקיד (מנהל): Claude מנסח נוסח-דחייה מנומס · + 'סכם התקדמות' · 'נסח דוח-יום' · 💳 'הסבר אשראי' · כל פיצ'רי-ה-AI · v6.62 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.64 — ליטוש (אודיט-נחיל): היגיינת-טסט + נגישות (כפתור 48dp, ניגודיות-WCAG ב-spec) + תיקון-מירוץ · כל פיצ'רי-ה-AI ללא-שינוי-תוכן · v6.64 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
