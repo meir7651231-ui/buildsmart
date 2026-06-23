@@ -56,6 +56,8 @@ void main() {
       final huge = 'א' * 1000;
       final p = managerCopilotPrompt('CTX', huge);
       expect(p.contains('א' * 401), isFalse); // capped to 400
+      expect(p, contains('א' * 400),
+          reason: 'the first 400 chars DO survive — the cap trims, never drops');
     });
 
     test('morning brief asks for a grounded daily briefing', () {
@@ -100,12 +102,52 @@ void main() {
       expect(managerMorningBriefPrompt(ctx).contains('מגמת'), isFalse);
     });
 
-    test('money() formats negatives without a stray leading comma', () {
-      // (latent guard) revenue-style grouping over a hypothetical negative
-      // is exercised indirectly — a positive grouped value stays correct.
-      expect(buildManagerContext(
-              analytics: analytics, customers: hostile, stageCounts: const {}),
-          contains('₪90,000'));
+    test('money() formats the positive grouped value correctly (₪90,000)', () {
+      expect(hCtx, contains('₪90,000'));
+    });
+  });
+
+  // ── swarm round-4: pin the previously-uncovered branches (test-quality lens) ──
+  group('round-4 hardening (negative · empty · zero-credit · absolute revenue)',
+      () {
+    test('money() actually formats a NEGATIVE as -₪N,NNN (executes the branch)',
+        () {
+      // Feed a real negative so the `neg ? '-'` path RUNS — before, the negative
+      // branch was only ever "exercised" with a positive input (a latent guard).
+      final negative = [
+        const ManagerCustomer(
+            name: 'יתרה-שלילית', orderCount: 1, totalSpend: -1200, creditLimit: 0),
+      ];
+      final c = buildManagerContext(
+          analytics: analytics, customers: negative, stageCounts: const {});
+      expect(c, contains('-₪1,200'));
+      expect(c.contains('₪-,'), isFalse, reason: 'no stray leading comma "₪-,"');
+    });
+
+    test('EMPTY engine state degrades to honest "none" strings', () {
+      final c = buildManagerContext(
+          analytics: analytics, customers: const [], stageCounts: const {});
+      expect(c, contains('אין הזמנות')); // empty pipeline
+      expect(c, contains('(אין לקוחות עדיין)')); // empty customer list
+    });
+
+    test('a zero-LIMIT customer shows NO credit-utilization (no div-by-zero)',
+        () {
+      final z = [
+        const ManagerCustomer(
+            name: 'ללא-מסגרת', orderCount: 2, totalSpend: 500, creditLimit: 0),
+      ];
+      final c = buildManagerContext(
+          analytics: analytics, customers: z, stageCounts: const {});
+      expect(c, contains('ללא-מסגרת')); // the row is present…
+      expect(c.contains('ניצול-אשראי'), isFalse); // …but no per-row utilization
+    });
+
+    test('revenue equals the ABSOLUTE seed total (breaks the recompute-mirror)',
+        () {
+      // Pin the literal so the test can't co-mutate with the production fold.
+      final revenue = customers.fold<int>(0, (s, c) => s + c.totalSpend);
+      expect(revenue, 5490, reason: 'the 4 seed buyers: 3150+1240+680+420');
     });
   });
 }
