@@ -80,6 +80,11 @@ void main() {
       expect(bySku('997091').imageFile, '997091.jpeg'); // ברך 90° — asset existed, was null
       expect(bySku('273226').imageFile, '273226.jpeg'); // צינור שחור DN40
     });
+    test('PDF-extracted images — correct crops pulled from Qondus catalog', () {
+      expect(bySku('777M1801').imageFile, '777M1801.jpg'); // bath faucet, was wrong photo
+      expect(bySku('77773001').imageFile, '77773001.jpg'); // pressure gauge
+      expect(bySku('78071545').imageFile, '78071545.jpg'); // brass float
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
