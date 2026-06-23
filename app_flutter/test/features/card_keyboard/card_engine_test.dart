@@ -188,4 +188,13 @@ void main() {
       expect(picked.last.value, 's19');
     });
   });
+
+  test('merge constant invariants (swarm R5): 2 ≤ floor ≤ maxPerAxis ≤ cap', () {
+    // The layout knobs are OWNER-REVIEW tunables; this pins the invariant so a
+    // bad tuning fails loudly in CI instead of silently mis-laying-out the row.
+    // floor ≥ 2: an axis needs ≥ 2 chips to offer a real choice (no lonely chip).
+    expect(kMergedAxisFloor, greaterThanOrEqualTo(2));
+    expect(kMergedAxisFloor, lessThanOrEqualTo(kMergedAxisMaxPerAxis));
+    expect(kMergedAxisMaxPerAxis, lessThanOrEqualTo(kMergedKeyCap));
+  });
 }

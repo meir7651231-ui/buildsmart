@@ -226,7 +226,12 @@ List<SignalChip> _mergedChips(
     final src = kHardSignals[rank];
     if (answered.contains(src.axisName)) continue; // each axis at most once
     final chips = src.chipsFor(pool);
-    if (chips.length < 2) continue; // a lone chip can't narrow (the > 1 gate)
+    // Skip an axis that can't provide the per-axis floor: a lone chip can't
+    // narrow, and keying this on kMergedAxisFloor (not a literal 2) makes the
+    // documented "≥ floor chips per represented axis" guarantee actually hold —
+    // a laid-out axis always has ≥ floor chips to give (swarm R5). Identical at
+    // the floor=2 default; an invariant test pins kMergedAxisFloor ≥ 2.
+    if (chips.length < kMergedAxisFloor) continue;
     // Material scores on the SEEDED subset with the EXACT predicate (§2): the
     // null carry-along is excluded from the histogram so copper/brass are not
     // inflated by the shared unknown. Every other axis scores on the full pool.
@@ -269,13 +274,15 @@ List<SignalChip> _mergedChips(
     final room = kMergedKeyCap - out.length;
     if (out.isNotEmpty && room < kMergedAxisFloor) break;
     final take = room < kMergedAxisMaxPerAxis ? room : kMergedAxisMaxPerAxis;
-    // SIZE is magnitude-ordered (ascending mm), so a positional take(take) would
-    // front-truncate and HIDE every larger size (build-plan §1.4 #11 forbids a
-    // tail-cut that hides sizes). Sample REPRESENTATIVE buckets across the sorted
-    // range instead — always including the smallest AND the largest. Other axes
-    // are not magnitude-ordered (word is frequency-ordered, where top-N IS the
-    // best pick), so they keep the natural first-N.
-    final taken = a.chips.first.axisId == 'size'
+    // SIZE and ANGLE are magnitude-ordered (size ascending mm; angle ascending
+    // degrees — its SizeToken.mm field IS the degree value), so a positional
+    // take(take) would front-truncate and HIDE the largest values — the tail-cut
+    // build-plan §1.4 #11 forbids (swarm R5: the size-only branch silently
+    // exposed angle to the very truncation it documents against). Sample
+    // REPRESENTATIVE buckets across the sorted range — always incl. smallest AND
+    // largest. WORD (frequency-ordered) and COLOUR (lexical) keep the natural
+    // first-N, where top-N IS the right pick.
+    final taken = const {'size', 'angle'}.contains(a.chips.first.axisId)
         ? representativeTake(a.chips, take)
         : a.chips.take(take).toList();
     out.addAll(taken);
