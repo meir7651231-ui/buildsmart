@@ -168,6 +168,34 @@ Canonical Preact source: `bs-dial.tsx:177-235` ↔ `index.html:4213-4216`; **`SY
 
 ---
 
+## 8.5 ⭐ EXPANDED VISION — `MANAGER-MASTER-PLAN.md` (branch nice-volta, 2026-06-23)
+> The owner's grand "mission-control" vision that SUPERSEDES the §8 G-list (G1-G9 = a subset of module M3). Per-module flags `kMgr*` (default OFF) · R9 inline · zero-regression · **does NOT block launch.** Full 105-step detail in that doc.
+
+**10 modules:**
+| M | module | rides on (exists) |
+|---|---|---|
+| M1 | 🫀 Live Cockpit (real-time pulse, sparklines, red-alerts) | ordersEngine + managerAnalytics |
+| **M2** | 🤖 **AI Co-Pilot ("ask your business")** — Claude over the data + graphs + proactive alerts + morning-brief + agentic | `functions/claude.ts` (built) |
+| M3 | 🎛️ God-Mode CRUD (catalog/brands/trees/categories/stores/fleet/settings — incl. the §8 G1-G6) | manager screen + catalog |
+| M4 | 💰 Money center (revenue/profit/credit-exposure/cashflow/VAT + AI forecast + PDF/Excel export) | orders+credit |
+| M5 | 👤 Customer-360 (per-contractor history + churn-risk-AI + LTV) | managerCustomers + chat |
+| M6 | 📦 Inventory/supplier intel (stock + shortage-forecast-AI + supplier-rank + reorder) | stock/store + catalog |
+| M7 | 👷 People & permissions (role-assign · presence · impersonation · approvals · audit-log) | role_assign + impersonate (built) |
+| M8 | 🗺️ Live ops map (couriers/deliveries/sites real-time) | GPS native |
+| M9 | 📣 Marketing engine (banners/promos/coupons → segmented push) | push |
+| M10 | 🩺 System health (1,539 tests · Crashlytics · connection/build status) | test_harness |
+
+**Already live (base poured):** M1/M7 partial · M2 infra · M3 partial (the 4 tabs + impersonation + role-assign + AI-credit).
+**Phasing:** P1 = cockpit(M1) + CRUD-edits(M3 G1-G6) + audit/RBAC(M7). P2 = Co-Pilot(M2) + money(M4) + 360(M5) + stock(M6) + mktg(M9). P3 = live-map(M8) + AI-forecasts + full-agentic.
+**❤️ heart-path (if one):** **M2 — the AI Co-Pilot** (the "wow"; Claude infra already built).
+**Build-plan steps 1-105** grouped A-L; step 8/18/34/50/… are zero-regression tests; steps 102-105 = analyze/CI/staged-rollout/docs. **DoD = 105 ✅, each module OFF=zero-regression, owner GA per module.**
+
+> ⚠️⚠️ **GOVERNANCE CONFLICT to reconcile (§0.5 ruling 2026-06-14 vs this plan 2026-06-23):**
+> The master-plan's **M7 step 82 "unified approval queue (workers + vacations + role-requests)"** and **M3 "employees" CRUD** put **HR on the manager** — which the **2026-06-14 ruling forbids** (workers→contractor, couriers→store; manager = oversight-only on HR/credit).
+> **Reconciliation (proposed, needs owner confirm):** keep on the manager only PLATFORM-admin CRUD — **stores/fleet-as-entities, catalog, users+roles, visibility, global settings** (these align with both docs). **RELOCATE** worker-task-approvals + worker/courier-vacation-approvals to the **contractor/store boards**; the manager's M7 shows **oversight/audit only** + the **two fault-overrides** (order-advance, price-edit). Credit-limit EDIT → STORE board (manager sees analytics). **Which doc wins on HR is an OPEN owner decision** — flagged, not assumed.
+
+---
+
 ## 9. File index (Flutter source of truth)
 `screens/manager_dashboard_screen.dart` (4 tabs) · `screens/manager_profile_screen.dart` · `screens/manager_role_assign_sheet.dart` · `screens/manager_screens_sheet.dart` · `screens/credit_explain_screen.dart` · `screens/role_requests_inbox_screen.dart` (reviewRoleRequest UI — NOT on manager) · `logic/manager_dashboard.dart` (analytics+seeds) · `state/manager_dashboard_state.dart` · `state/board_auth.dart` (owner/impersonate) · `state/orders_engine.dart:482-693` (advance routing + providers) · `data/repositories/backend.dart` (flags) · `data/repositories/customers_repository.dart` (read-only contract) · `data/board_accounts_local.dart:98` (owner allowlist) · `functions/src/{credit,orders,reviewRoleRequest}.ts` · `firestore.rules` (manager RBAC) · `test_harness/`.
 
