@@ -15,7 +15,7 @@
 - [x] **F1 ✅** — קונסול (את) + קוד (25a5daf). [x] בדיקת‑מכשיר — מד‑חיבור 🟢 על המכשיר
 - [x] `firebase deploy` ✅ — Functions + rules + indexes נפרסים אוטומטית ב‑CI (success @77df5eb)
 - [ ] **F4:** מפתח APNS (push ל‑iPhone) + Push capability ב‑Xcode — **או** להחליט אנדרואיד‑first
-- [ ] 🤖 **קונסול: `ANTHROPIC_API_KEY`** ב‑Secret Manager — **חובה** כדי שהעוזר‑החכם יעבוד (החלטת‑בעלים: פעיל)
+- [x] 🤖 **`ANTHROPIC_API_KEY` ✅** — המפתח בקונסול **והעוזר‑החכם עובד** (אישר‑בעלים 23/6)
 - [ ] קונסול: Crashlytics ON · רישום‑מפתחות App Check + אכיפה · מפתח VAPID (push‑web) · R2 secrets
 - [ ] **להדליק דגלים:** `USE_FIREBASE_BACKEND` · `UID_SCOPED_QUERIES` · `SERVER_CALLABLES` · `CLOUD_PHOTOS` · `APP_CHECK_PROD` · `kAiAssistant` · `kKbLiveMirror`
 - [ ] G5 התראות‑תקציב (Blaze — גם לכיסוי עלות‑AI) · G6 גיבוי Firestore
