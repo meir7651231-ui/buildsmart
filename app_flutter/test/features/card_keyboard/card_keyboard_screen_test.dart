@@ -11,6 +11,7 @@ import 'package:buildsmart/features/card_keyboard/card_engine.dart'
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,6 +46,11 @@ void main() {
       ),
     );
     await tester.pump();
+
+    // Build the semantics tree so the chip's axis announcement is queryable
+    // (swarm R8 a11y assertion below). Disposed at the END of the body — NOT via
+    // addTearDown, which runs after the framework's handle-leak check.
+    final semanticsHandle = tester.ensureSemantics();
 
     // Suppress the resolve sheet (read at tap-time, so no rebuild needed; no
     // heavy sheet deps in this test). The ON path is forced via the widget param.
@@ -83,6 +89,27 @@ void main() {
     final afterWord = state.verdict;
     if (afterWord is MergedKeys && afterWord.chips.isNotEmpty) {
       final chip = afterWord.chips.first;
+      // a11y (swarm R8 / §5 #23, WCAG 2.5.3): the merged chip announces
+      // '${axisName}: ${displayLabel}' so a screen-reader user knows WHICH axis it
+      // narrows — the axisName is no longer dropped from the Semantics tree.
+      if (chip.axisName != null) {
+        // a11y (swarm R8 / §5 #23, WCAG 2.5.3): the merged chip announces
+        // '${axisName}: ${displayLabel}' in the COMPILED semantics tree — so a
+        // screen-reader user knows WHICH axis it narrows. (Traversing the
+        // semantics owner is more robust here than find.bySemanticsLabel.)
+        final owner = tester.binding.pipelineOwner.semanticsOwner;
+        final labels = <String>[];
+        void visit(SemanticsNode n) {
+          if (n.label.isNotEmpty) labels.add(n.label);
+          n.visitChildren((c) {
+            visit(c);
+            return true;
+          });
+        }
+        if (owner?.rootSemanticsNode != null) visit(owner!.rootSemanticsNode!);
+        expect(labels, contains('${chip.axisName}: ${chip.displayLabel}'),
+            reason: 'merged chip announces its axis to a screen reader');
+      }
       final crumbsBefore = (state.crumbs as List).length;
       await tester.tap(find.text(chip.displayLabel).first);
       await tester.pumpAndSettle();
@@ -91,5 +118,7 @@ void main() {
       expect((state.crumbs as List).last, chip.displayLabel,
           reason: 'crumb is the chip displayLabel, never the predicate value');
     }
+
+    semanticsHandle.dispose();
   });
 }

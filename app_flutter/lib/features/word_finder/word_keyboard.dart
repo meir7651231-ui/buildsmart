@@ -83,6 +83,12 @@ class WordKeyboard extends StatelessWidget {
             // The trailing הכל/הקלדה utility row builds its own bare KbKeys and
             // never passes this, so it always stays clean.
             leadingImageAsset: word.imageAsset,
+            // Forward the optional a11y extras (swarm R8 / §5): a leading axis
+            // glyph + a Semantics override. Null on every word / product / utility
+            // key (the default), so those keys are byte-identical — only a merged
+            // card-keyboard chip sets them.
+            axisGlyph: word.axisGlyph,
+            semanticOverride: word.semanticLabel,
             onTap: () => onWordTap(word),
           ),
         ),

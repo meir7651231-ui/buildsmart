@@ -94,12 +94,25 @@ class BsKey extends StatelessWidget {
   // fall back to the plain text key.
   final String? leadingImageAsset;
 
+  /// Optional leading axis glyph (swarm R8 / §5 #22): a small icon before the
+  /// label so a merged chip's AXIS is distinguishable without colour (WCAG 1.4.1).
+  /// Null on every non-chip key → byte-identical. (Chips carry no thumbnail, so
+  /// this and [leadingImageAsset] are mutually exclusive in practice.)
+  final IconData? axisGlyph;
+
+  /// Optional Semantics label override (swarm R8 / §5 #23, WCAG 2.5.3): a merged
+  /// chip announces '${axisName}: ${displayLabel}'. Null → the raw [model.label]
+  /// (today's behaviour) for every other key.
+  final String? semanticOverride;
+
   const BsKey({
     super.key,
     required this.model,
     required this.onTap,
     this.isAccent = false,
     this.leadingImageAsset,
+    this.axisGlyph,
+    this.semanticOverride,
   });
 
   @override
@@ -119,6 +132,11 @@ class BsKey extends StatelessWidget {
         child: Semantics(
           button: true,
           label: _semanticLabel,
+          // When an axis-prefixed override is set (a merged chip), announce ONLY
+          // that clean label — exclude the child Text so a screen reader hears
+          // 'גודל: 1/2"' once, not a doubled 'גודל: 1/2" … 1/2"' (swarm R8). Null
+          // override ⇒ false ⇒ every other key is byte-identical.
+          excludeSemantics: semanticOverride != null,
           child: Container(
             // Owner: UNIFORM keyboard — every cell (keys · tools · nav chips ·
             // bottom row) is the SAME height with the SAME glyph; the exact
@@ -179,7 +197,21 @@ class BsKey extends StatelessWidget {
       ),
     );
     final asset = leadingImageAsset;
-    if (asset == null) return label;
+    if (asset == null) {
+      // A leading AXIS glyph (swarm R8 / §5 #22) when set — a small icon before
+      // the label so a merged chip's axis is distinguishable WITHOUT colour. Null
+      // on every non-chip key, so a plain key returns the bare label UNCHANGED.
+      final glyph = axisGlyph;
+      if (glyph == null) return label;
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(glyph, size: m.fontSize * 0.9, color: fg.withValues(alpha: 0.75)),
+          const SizedBox(width: BsTokens.spaceHair),
+          Flexible(child: label),
+        ],
+      );
+    }
     // Thumbnail pinned to the FAR (RTL) edge: the keyboard is LTR-ordered, so the
     // LAST child sits at the key's RIGHT edge. The label fills the rest via an
     // [Expanded] (the image is pushed hard to the right, not centered beside the
@@ -250,7 +282,10 @@ class BsKey extends StatelessWidget {
       case KeyKind.letter:
       case KeyKind.period:
       case KeyKind.punct:
-        return model.label;
+        // semanticOverride is null on every key EXCEPT a merged card-keyboard
+        // chip (which announces '${axisName}: ${displayLabel}', §5 #23) → every
+        // other key is byte-identical.
+        return semanticOverride ?? model.label;
     }
   }
 }

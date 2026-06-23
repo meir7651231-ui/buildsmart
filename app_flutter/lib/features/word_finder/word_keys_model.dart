@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 /// A single word suggestion shown on the `WordKeyboard`. [label] is the Hebrew
 /// word rendered on the key (plain text, no icon); [payload] is an optional
@@ -6,7 +6,13 @@ import 'package:flutter/foundation.dart';
 /// back when the key is tapped.
 @immutable
 class WordKey {
-  const WordKey(this.label, {this.payload, this.imageAsset});
+  const WordKey(
+    this.label, {
+    this.payload,
+    this.imageAsset,
+    this.semanticLabel,
+    this.axisGlyph,
+  });
 
   /// The Hebrew word shown on the key.
   final String label;
@@ -22,4 +28,16 @@ class WordKey {
   /// `BsKey.leadingImageAsset`, which draws a small rounded thumbnail BEFORE the
   /// text label (the text label is untouched, so text-based finds still work).
   final String? imageAsset;
+
+  /// Optional Semantics label OVERRIDE (swarm R8 / §5 #23, WCAG 2.5.3). The
+  /// unified card-keyboard sets this to '${axisName}: ${displayLabel}' on a merged
+  /// chip so a screen-reader user hears WHICH axis it narrows. Null (the default)
+  /// on every other key → the raw [label] is announced, exactly as before.
+  final String? semanticLabel;
+
+  /// Optional leading axis GLYPH (swarm R8 / §5 #22, WCAG 1.4.1). The unified
+  /// card-keyboard sets a per-axis icon on a merged chip so the axis is
+  /// distinguishable WITHOUT colour. Null (the default) on every other key → a
+  /// plain text key, byte-identical to before.
+  final IconData? axisGlyph;
 }

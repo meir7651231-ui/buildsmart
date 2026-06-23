@@ -227,6 +227,18 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   @visibleForTesting
   void popStepForTest() => _popStep();
 
+  /// Per-axis glyph for a merged chip (swarm R8 / §5 #22) — the axis is then
+  /// distinguishable WITHOUT colour (WCAG 1.4.1), the icon idiom #41 set for the
+  /// prediction chip.
+  static IconData _glyphForAxis(String axisId) => switch (axisId) {
+        'size' => Icons.straighten,
+        'angle' => Icons.architecture,
+        'color' => Icons.palette_outlined,
+        'word' => Icons.label_outline,
+        'material' => Icons.category_outlined,
+        _ => Icons.tag,
+      };
+
   /// Map a [CardVerdict] to the word-key list the keyboard renders.
   ///  • [CardAskWords]    → one 'word' key per opening word.
   ///  • [MergedKeys]      → one key per merged chip; payload carries the chip's
@@ -241,6 +253,9 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
             for (final c in chips)
               // The crumb shows displayLabel (swarm R2), the predicate keys on
               // value — both carried as typed fields (swarm R6: no '|'-packing).
+              // a11y (swarm R8 / §5): the chip announces '${axisName}: ${label}'
+              // (WCAG 2.5.3) + a per-axis glyph so the axis survives grayscale
+              // (WCAG 1.4.1).
               WordKey(
                 c.displayLabel,
                 payload: _ChipTap(
@@ -248,6 +263,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
                   value: c.value,
                   displayLabel: c.displayLabel,
                 ),
+                semanticLabel: c.axisName == null
+                    ? c.displayLabel
+                    : '${c.axisName}: ${c.displayLabel}',
+                axisGlyph: _glyphForAxis(c.axisId),
               ),
           ],
         CardShowProducts(:final products) => [
@@ -381,6 +400,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
               Expanded(
                 child: Semantics(
                   header: true,
+                  // Announce the new question/key-group on every verdict change
+                  // (swarm R8 / §5 #23 'live-region בשינוי-קבוצה') so an AT user
+                  // is told the merged keys swapped, not left on a stale node.
+                  liveRegion: true,
                   child: Text(
                     header,
                     textAlign: TextAlign.center,
