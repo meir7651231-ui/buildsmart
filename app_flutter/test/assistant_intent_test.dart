@@ -4,6 +4,7 @@
 // malformed or hallucinated reply can never trigger a wrong action. Pure — no
 // gateway, no widget pump (mirrors describe_to_cart_test).
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/logic/assistant_intent.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -78,6 +79,9 @@ void main() {
       expect(p, contains('checkBudget'));
       expect(p, contains(kCatalogProducts.first.categoryHe),
           reason: 'the closed category set is embedded for findProduct');
+      expect(p, contains('addToCart'), reason: 'Phase 2 action is offered');
+      expect(p, contains(kSmartProducts.first.key),
+          reason: 'the closed recipe-key set is embedded for addToCart');
       expect(p, contains('"action"'), reason: 'demands the JSON shape');
     });
 
@@ -89,6 +93,29 @@ void main() {
       expect(p, contains('turn_39'));
       expect(p, isNot(contains('turn_0')),
           reason: 'oldest turns drop out of the bounded window');
+    });
+  });
+
+  group('addToCart — the Phase 2 mutator is also closed-set-guarded', () {
+    test('a REAL recipe key stays addToCart (validated)', () {
+      final rk = kSmartProducts.first.key;
+      final i =
+          parseAssistantIntent('{"action":"addToCart","key":"$rk","say":""}');
+      expect(i.action, AssistantAction.addToCart);
+      expect(i.key, rk, reason: 'the validated recipe key is carried through');
+    });
+
+    test('an INVENTED recipe key downgrades to answer (no wrong add)', () {
+      final i = parseAssistantIntent(
+          '{"action":"addToCart","key":"ערכה-מומצאת-שלא-קיימת","say":"x"}');
+      expect(i.action, AssistantAction.answer,
+          reason: 'a recipe outside the real set must NOT add to the cart');
+    });
+
+    test('matchAssistantRecipeKey resolves a real key; junk → null', () {
+      final rk = kSmartProducts.first.key;
+      expect(matchAssistantRecipeKey(rk), rk);
+      expect(matchAssistantRecipeKey('זזזזז-לא-ערכה'), isNull);
     });
   });
 }
