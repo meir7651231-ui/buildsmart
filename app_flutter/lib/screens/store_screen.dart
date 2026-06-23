@@ -1269,6 +1269,7 @@ class _GridHubCard extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(10),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -3862,11 +3863,10 @@ class _OrderSheet extends ConsumerWidget {
     // short viewports (was a 3.6px RenderFlex overflow at the test viewport).
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
             Center(
               child: Container(
                 width: 36,
@@ -4084,7 +4084,6 @@ class _OrderSheet extends ConsumerWidget {
             ],
           ],
         ),
-      ),
     );
   }
 }

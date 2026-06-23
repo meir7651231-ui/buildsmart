@@ -28,5 +28,8 @@ void main() {
           'SKU ${p.sku}  finder=${finderGroupFor(p)!.label}  compat=$compat  kit=$must/$opt  siblings=$sibs');
       print('   ${p.nameHe}');
     }
+    // At least one catalog product must light up all four info strips, otherwise
+    // the product sheet's "all four" showcase has nothing to display.
+    expect(winners, isNotEmpty);
   });
 }

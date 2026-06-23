@@ -100,6 +100,8 @@ class PortalTileButton extends StatelessWidget {
             children: [
               Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -109,6 +111,8 @@ class PortalTileButton extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 sub,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: BsTokens.mutedLight,
                   fontSize: 12.5,

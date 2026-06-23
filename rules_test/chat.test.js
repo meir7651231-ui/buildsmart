@@ -168,6 +168,44 @@ describe('chatThreads · membership keys on participantUids (A9)', () => {
       }),
     );
   });
+
+  // ── branch (b) — A14 empty-thread stamp, scoped by ROLE (swarm#3 authz fix) ──
+  it('UPDATE branch(b): a PARTICIPANT-role user stamps an EMPTY thread (incl. self) → allowed', async () => {
+    await seed('chatThreads/th-2', {
+      participants: ['contractor', 'store'], // pre-migration: empty participantUids
+      participantUids: [],
+    });
+    await assertSucceeds(
+      updateDoc(doc(db('uid-carol', asContractor()), 'chatThreads/th-2'), {
+        participantUids: ['uid-carol'], // a contractor IS one of the thread's roles
+      }),
+    );
+  });
+
+  it('UPDATE branch(b): a NON-participant-role user (worker) CANNOT stamp an empty thread → denied', async () => {
+    await seed('chatThreads/th-2', {
+      participants: ['contractor', 'store'], // a worker is NOT a party to this thread
+      participantUids: [],
+    });
+    await assertFails(
+      // self-stamp, but the wrong role → denied (closes the cross-persona read gap)
+      updateDoc(doc(db('uid-mallory', { role: 'worker' }), 'chatThreads/th-2'), {
+        participantUids: ['uid-mallory'],
+      }),
+    );
+  });
+
+  it('UPDATE branch(b): stamping an empty thread WITHOUT including self → denied', async () => {
+    await seed('chatThreads/th-2', {
+      participants: ['contractor', 'store'],
+      participantUids: [],
+    });
+    await assertFails(
+      updateDoc(doc(db('uid-carol', asContractor()), 'chatThreads/th-2'), {
+        participantUids: ['uid-bob'], // stamping someone else, not self
+      }),
+    );
+  });
 });
 
 // ── chatMessages — scoped to the parent thread's participantUids ─────────────

@@ -51,6 +51,9 @@ class _FakeUsersSource implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  bool get isScoped => false;
 }
 
 RemoteDoc _user(String uid, {required String role}) =>
@@ -268,4 +271,7 @@ class _CountingSource implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  bool get isScoped => false;
 }

@@ -4,6 +4,18 @@
 
 ---
 
+## v6.71 — אודיט-נחיל #3 · 4 תיקוני-overflow בגרידים (layout-robustness) — 2026-06-23
+
+**שינויי-UI (lib/screens):** 4 תיקוני-חוסן-overflow מעדשת-ה-layout. **שינוי-התנהגות בקצוות-קיצון בלבד** (טקסט-ארוך/text-scaling 1.35x) — תצוגה רגילה ללא-שינוי.
+- `persona_portal.dart` `PortalTileButton` — `title` קיבל `maxLines:2`, `sub` קיבל `maxLines:1` + `ellipsis` (היו ללא-גבול → גלישה בתווית-ארוכה).
+- `departments_screen.dart` `_DeptTile` — `dept.name` קיבל `maxLines:2`+`ellipsis` (textAlign.center נשמר).
+- `store_screen.dart` `_GridHubCard` — ה-`Column` הפנימי קיבל `mainAxisSize:min` (ה-Texts כבר היו עם maxLines/ellipsis) → לא דוחף-גלישה בתא-קבוע.
+- `store_screen.dart` גיליון-הזמנה — הוסר `SingleChildScrollView` **פנימי-כפול** מיותר (אותו ציר; הפנימי בלע גלילה). נשאר scroll-view יחיד (אומת ע"י הסוכן: סוגריים מאוזנים).
+
+**אימות:** כל ה-widgets נשמרים verbatim; השינויים הם maxLines/ellipsis/mainAxisSize/הסרת-עטיפה-כפולה — **אפס שינוי בתצוגה הרגילה**, רק מניעת גלישה במצבי-קצה. הגלובלי `clamp(0.85,1.35)` של text-scale (main.dart) חוסם את משרעת-הסיכון.
+
+**שאר v6.71 לא-ויזואלי:** שרת (reviewRoleRequest/credit) · rules (chat-thread) · cache (seed-blank) · kb_golden · callable-timeout · 5 טסטים. analyze 0 · full-suite (kb_golden skipped).
+
 ## v6.70 — אודיט-עדשות-שונות · ai_finder → CustomScrollView (תוצאות עצלות) — 2026-06-23
 
 **שינוי-UI יחיד (lib/screens):** `ai_finder_screen.dart` — גוף-המסך עבר מ-`ListView(children:[…for…])` ל-

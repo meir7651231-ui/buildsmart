@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.70 — אודיט-עדשות-שונות (8 תיקונים): מיפוי-ערכה מדויק יותר (longest-key) · סגירת race בחיפוש-חכם/תיאור→סל · הגנת-הזרקה בסיבת-דחייה · cost-safety בשרת (rate-limit/timeout — דורש deploy) · רשימת-תוצאות עצלה · v6.70 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.71 — אודיט-נחיל-ליבה #3 (5 MED + 8 LOW): אישור-תפקיד אטומי + אשראי-מדויק (שרת) · בידוד-צ'אט ברמת-תפקיד (rules) · משתמש-חדש לא רואה דאטה-דמו · baseline-טסטים נוקה ל-0 · 4 תיקוני-overflow · v6.71 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

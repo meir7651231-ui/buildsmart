@@ -14,8 +14,10 @@ void main() {
     final from = kLipskeyCatalog.firstWhere((p) => p.sku == '77777641');
     final to = kLipskeyCatalog.firstWhere((p) => p.sku == '9106306310');
 
+    List<LipskeyCatalogProduct>? deepest;
     for (final depth in [3, 6, 10, 15, 20]) {
       final path = findShortestPath(from, to, maxDepth: depth);
+      deepest = path;
       print('maxDepth=$depth → ${path == null ? "no path" : "${path.length} hops"}');
       if (path != null) {
         for (var i = 0; i < path.length; i++) {
@@ -26,6 +28,11 @@ void main() {
         }
       }
     }
+    // Post-fix: brass + HDPE are both supply, joined by HDPE↔BSP adapters, so
+    // with the deepest budget (maxDepth=20) the cross-material chain must exist.
+    expect(deepest, isNotNull);
+    expect(deepest!.first.sku, '77777641');
+    expect(deepest.last.sku, '9106306310');
 
     // Also try a deliberately CRAZY long path: faucet to garden hose nozzle.
     print('\n--- Stress: faucet → garden tap ---');

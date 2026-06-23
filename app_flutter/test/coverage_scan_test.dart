@@ -19,6 +19,9 @@ void main() {
     for (final c in cats.take(15)) {
       print('   ${missing[c]}/${total[c]} חסר — "$c"');
     }
+    // The catalog must be non-empty and most of it should carry a VerifiedSpec.
+    expect(totalN, greaterThan(0));
+    expect(totalN - missN, greaterThan(0));
   });
 
   test('איים — connectorים שמגיעים למעט מאוד שכנים', () {
@@ -32,5 +35,8 @@ void main() {
     }
     print('\n[ISLANDS] connectorים מבודדים (deg=0): $isolated | דרגה נמוכה (deg=1): $lowDeg');
     for (final s in samples) print('   • $s');
+    // Guard the scan input: there must be spec'd connectors to analyse, else a
+    // regression that drops connector specs would silently report 0 islands.
+    expect(conn, isNotEmpty);
   });
 }

@@ -46,6 +46,9 @@ class _FakeUsersSink implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  bool get isScoped => false;
 }
 
 /// A recording fake [AuthGateway] — only its `createUserWithEmailPassword` /

@@ -125,6 +125,9 @@ class _FakeUsersSink implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  bool get isScoped => false;
 }
 
 /// F5 — a hand-rolled fake [LocalNotificationsGateway]: records init / the

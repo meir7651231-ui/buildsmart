@@ -69,6 +69,12 @@ abstract class RemoteCollectionSource {
 
   /// Delete the document [id]. Same guarded, background semantics as [set].
   Future<void> delete(String id);
+
+  /// Whether the live query is uid-SCOPED (an owner/participant filter) rather
+  /// than the whole collection. The base reads a first-EMPTY snapshot through it:
+  /// a scoped-empty means "this user genuinely has zero docs" → blank the demo
+  /// seed to honest-empty; an unscoped-empty means "fresh backend" → keep the seed.
+  bool get isScoped;
 }
 
 /// The REAL Firestore adapter. Resolves `FirebaseFirestore.instance` LAZILY —
@@ -130,6 +136,9 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) => _col.doc(id).delete();
+
+  @override
+  bool get isScoped => _scope != null;
 }
 
 /// The offline-first cache base. Generic over the domain model [T] (Order,
@@ -203,11 +212,19 @@ abstract class FirestoreCachedRepo<T> extends ChangeNotifier {
   }
 
   void _onSnapshot(List<RemoteDoc> docs) {
-    // First empty snapshot on a FRESH backend → let the subclass seed remote;
-    // keep showing the seeded cache (don't blank the app to empty).
     if (docs.isEmpty && !_firstSnapshotSeen) {
       _firstSnapshotSeen = true;
-      onFirstSnapshotEmpty();
+      // A uid-SCOPED source returning empty means THIS user genuinely has zero
+      // docs → blank the demo seed to honest-empty (never show another persona's
+      // seed as the signed-in user's own data once kUidScopedQueries is ON). An
+      // UNscoped (whole-collection) empty is a fresh backend → keep the seed and
+      // let the subclass seed remote (manager bootstrap), exactly as before.
+      if (_source.isScoped) {
+        _cache = <T>[];
+        notifyListeners();
+      } else {
+        onFirstSnapshotEmpty();
+      }
       return;
     }
     _firstSnapshotSeen = true;

@@ -66,6 +66,14 @@ class _FakeSource implements RemoteCollectionSource {
   @override
   Future<void> delete(String id) async => deletes.add(id);
 
+  /// Test-settable scope flag — when true the base treats a first-empty snapshot
+  /// as "this user genuinely has zero docs" (blank the seed) rather than a fresh
+  /// backend (keep the seed + fire the remote-seed hook).
+  bool scoped = false;
+
+  @override
+  bool get isScoped => scoped;
+
   Future<void> close() => _controller.close();
 }
 
@@ -259,6 +267,24 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(repo.firstEmptyCalls, 1); // not called again
       expect(repo.cached(), isEmpty);
+    });
+
+    test('SCOPED first-empty BLANKS the seed to honest-empty (no seed-hook)',
+        () async {
+      // A uid-SCOPED source returning empty = THIS user genuinely has zero docs,
+      // so the demo seed (another persona's data) must NOT be shown as the user's
+      // own — the base blanks it. (Latent bug fixed: once kUidScopedQueries is ON
+      // a brand-new user would otherwise see the seed orders as live data.)
+      final src = _FakeSource()..scoped = true;
+      final repo = _IntRepo(src)..attach();
+      addTearDown(src.close);
+      addTearDown(repo.dispose);
+
+      expect(repo.cached(), [1, 2, 3]); // born seeded
+      src.emit(const []); // first snapshot empty, but the source is SCOPED
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.cached(), isEmpty); // blanked to honest-empty (not the seed)
+      expect(repo.firstEmptyCalls, 0); // remote-seed hook NOT fired for scoped-empty
     });
 
     test('pushCacheToRemote writes every cached item without mutating cache',

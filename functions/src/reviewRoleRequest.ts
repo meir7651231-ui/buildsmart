@@ -104,9 +104,33 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
   const approverRole = APPROVER_FOR[requestedRole];
 
   const approved = decision === "approve";
+
+  // ATOMIC status flip (closes the concurrent-review race): re-read status inside a
+  // transaction and assert it is STILL pending before flipping. Only ONE reviewer
+  // can win the pending→decision write — a second concurrent reviewer (e.g. a deny
+  // racing an approve) now fails-precondition instead of both passing the gate and
+  // leaving status=denied while the role claim was already granted.
+  await db().runTransaction(async (tx) => {
+    const fresh = await tx.get(ref);
+    if (asString(fresh.get("status")) !== "pending") {
+      throw new HttpsError(
+        "failed-precondition",
+        "Request was already reviewed."
+      );
+    }
+    tx.update(ref, {
+      status: approved ? "approved" : "denied",
+      reviewedBy: reviewerUid,
+      reviewedByRole: approverRole,
+      reviewedAt: FieldValue.serverTimestamp(),
+    });
+  });
+
+  // Grant the claim ONLY after winning the flip (a lost approve never reaches here),
+  // and OUTSIDE the transaction — setCustomUserClaims is an Auth op, not Firestore-
+  // transactional, and a tx retry must never re-run it. Idempotent surface-replace,
+  // same contract as setRole; admin/manager are never granted here.
   if (approved) {
-    // Merge the operational role over the target's existing claims — same
-    // surface-replacement contract as setRole; admin/manager never granted here.
     const target = await getAuth().getUser(uid);
     const claims: Record<string, unknown> = { ...(target.customClaims ?? {}) };
     delete claims.role;
@@ -114,13 +138,6 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
     claims.role = requestedRole;
     await getAuth().setCustomUserClaims(uid, claims);
   }
-
-  await ref.update({
-    status: approved ? "approved" : "denied",
-    reviewedBy: reviewerUid,
-    reviewedByRole: approverRole,
-    reviewedAt: FieldValue.serverTimestamp(),
-  });
   logger.info("reviewRoleRequest", { uid, requestedRole, decision, reviewerUid });
 
   await writeAudit({

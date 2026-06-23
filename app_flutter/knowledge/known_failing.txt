@@ -13,9 +13,8 @@
 # תוקן: הבדיקה משתמשת ב-find.byIcon(Icons.close).last (חסין, בודק אותה התנהגות).
 # הוסר מה-baseline → known-failing ירד 2→1.
 
-# 2026-06-17: golden-test של צי-המקלדת (merge ~commit 9b3d01b) — לא שלי. `_loadIcons()`
-# קורא path קשיח של Windows: `C:/flutter/bin/cache/artifacts/material_fonts/
-# materialicons-regular.otf` → File.readAsBytes זורק ב-setUpAll על Linux (הקונטיינר
-# הזה + ה-CI). הפיצ'ר עצמו עובד; רק ה-golden setup שבור חוצה-פלטפורמה. לתיקון ע"י
-# צי-המקלדת (path חוצה-פלטפורמה דרך rootBundle/flutter cache, או skip כשהקובץ חסר).
-kb_golden_test.dart :: (setUpAll)
+# 2026-06-17→fixed 2026-06-23 (v6.71): kb_golden_test היה כושל ב-setUpAll (path קשיח
+# של Windows `C:/flutter/.../materialicons-regular.otf` שזרק על Linux/CI).
+# תוקן: resolver חוצה-פלטפורמה (FLUTTER_ROOT / נגזר מ-resolvedExecutable) + הגולדנים
+# מדלגים by-default (host-specific — font hinting/AA שונה בין OS); רצים בכוונה עם
+# RUN_GOLDENS=1 בהוסט-הייחוס. הוסר מה-baseline → known-failing 1→0 (הרשימה ריקה כעת).

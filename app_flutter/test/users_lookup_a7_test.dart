@@ -55,6 +55,9 @@ class _FakeUsersSource implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  bool get isScoped => false;
 }
 
 /// A small `users` directory: doc-id = auth.uid, fields mirror the welcome flow
