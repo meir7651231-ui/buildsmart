@@ -2772,3 +2772,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(MED · a11y/labels)** כפתורי-IconButton בלי tooltip → נוספו: catalog (אישור/סגירה/חזרה/נקה/השתמש-בחיפוש/הסר) · store (נקה/הסר-מהסל). unread-notif (`store_dashboard:2069`) צבע-בלבד → `Semantics(label:'לא נקרא')`.
 - **gate:** analyze 0 · product_journey (935-sheet HARD) + persona_fulfillment + store_notif ירוקים · screens→24/116. מנעול-החנות = ראי-נאמן ל-courier F-12 (אותו דפוס מוכח). אין lib/logic|data→אין 42/44.
 - **נדחה (תועד):** offline-queue MED (`offline_order_queue.dart:283` מוחק intent על-replay-כושל — **inert בפרודקשן**: probe מקובע `()=>true`, אפס callers; Firestore-SDK-persistence הוא הנשא בפועל) · i18n currency-grouping MED → סיבוב הבא · pluralization "1 פריטים" LOW = verbatim-מהלגאסי (parity).
+
+### #currency-single-source — אודיט-נחיל סיבוב-8 (i18n): ₪ מקובץ אחיד — 2026-06-23
+תיקון ה-MED מעדשת-ה-i18n (סיבוב-8): קיבוץ-אלפים של ₪ היה **לא-עקבי** — קטלוג/בית/קבלן הציגו "₪4200" בעוד עגלה/מנהל/תקציב/פיננסים הציגו "₪4,200" (אותו מוצר, שתי תצוגות).
+- **`lib/logic/money_format.dart` (חדש · 42/44):** `groupThousands(int)` פרימיטיב-יחיד + `formatNis`. 
+- **נותבו דרכו (15 אתרי-גולמי):** `formatCatalogPrice` (catalog_settings — כרטיס-המוצר הראשי) · catalog_screen (8: b.price/price/alt.price/c.total+product+accessories+labour/_total/acc.price×2) · smart_home (rec.price/order.sum) · contractor_tools (recPrice/altPrice/savings/offer.price/total). nullable → `!` היכן שגדור (analyze 0).
+- **gate:** `money_format_test` (5) + catalog_price_units (18%) + product_journey (935 HARD) ירוקים · analyze 0. screens→24/116 · money_format→42/44.
+- **נשאר (תועד · LOW):** 4 ה-helpers הפרטיים (`_price`/`_grouped`/`_thousands`/`_group`) מקבצים-נכון (פלט זהה ל-`groupThousands`); האצלתם ל-`groupThousands` = ניקוי-פנימי אפס-ערך-משתמש, נדחה (לא נוגעים בקוד-נכון-חי לפני launch).

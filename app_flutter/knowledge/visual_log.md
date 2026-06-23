@@ -1854,3 +1854,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי התנהגות (חנות):** double-tap מהיר על "הכן"/"מוכן" כבר לא מקפיץ 2 שלבים — מנעול-staleness כמו אצל השליח.
 **אימות (אוטומטי):** `product_journey` (935 sheets · large-text · narrow-phone — אפס overflow) + `persona_fulfillment` + `store_notif_widget` ירוקים · analyze 0.
 **הפיכות:** `git checkout lib/screens/catalog_screen.dart lib/screens/store_screen.dart lib/screens/store_dashboard_screen.dart`.
+
+## v6.85 — ₪ מקובץ אחיד: קטלוג/בית/קבלן עכשיו "₪4,200" (כמו העגלה) — 2026-06-23
+**שינוי נראה:** מחירי-₪ בני 4+ ספרות שהוצגו גולמיים ("₪4200") עכשיו מקובצים-בפסיק ("₪4,200") — כרטיס-המוצר בקטלוג, עלויות-קו ב-build-a-list, אביזרים, המלצות-בית, וגיליונות-הקבלן (המלצה/חלופה/חיסכון/הצעת-ספק). תואם לעגלה/מנהל/תקציב שכבר קיבצו. אפס שינוי-ערך — רק פסיק-אלפים.
+**אימות (אוטומטי):** `money_format_test` (5) + `catalog_price_units_settings` (19) + `product_journey` (935 sheets · large-text · narrow-phone — אפס overflow גם עם הפסיק) ירוקים · analyze 0.
+**הפיכות:** `git checkout lib/state/catalog_settings.dart lib/screens/catalog_screen.dart lib/screens/smart_home_screen.dart lib/screens/contractor_tools_sheets.dart` + מחיקת `lib/logic/money_format.dart`.

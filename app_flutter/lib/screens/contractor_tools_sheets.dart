@@ -10,6 +10,7 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/screens/alt_explain_screen.dart'
@@ -284,7 +285,7 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'המלצה: ${a.recName} · ₪${a.recPrice}',
+                        'המלצה: ${a.recName} · ₪${groupThousands(a.recPrice)}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF888888),
@@ -294,7 +295,7 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                         children: [
                           Expanded(
                             child: Text(
-                              'חלופה: ${a.altName} · ₪${a.altPrice}',
+                              'חלופה: ${a.altName} · ₪${groupThousands(a.altPrice)}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -312,7 +313,7 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              'חיסכון ₪${a.savings}',
+                              'חיסכון ₪${groupThousands(a.savings)}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -513,7 +514,7 @@ class _StoreChip extends StatelessWidget {
         border: best ? Border.all(color: BsTokens.brand) : null,
       ),
       child: Text(
-        '${best ? '✓ ' : ''}${offer.store} · ₪${offer.price}',
+        '${best ? '✓ ' : ''}${offer.store} · ₪${groupThousands(offer.price)}',
         style: TextStyle(
           fontSize: 12,
           fontWeight: best ? FontWeight.w700 : FontWeight.w500,
@@ -740,7 +741,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       ),
       const SizedBox(height: 2),
       Text(
-        '${lines.length} פריטים · ההצעה הזולה ₪$total',
+        '${lines.length} פריטים · ההצעה הזולה ₪${groupThousands(total)}',
         style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
       ),
       const SizedBox(height: 6),

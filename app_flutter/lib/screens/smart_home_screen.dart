@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart'
     show catalogRepositoryProvider;
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/supplier_data.dart'
     show SysOrder, kOrderStageLabel;
@@ -317,7 +318,8 @@ class _SmartTreeCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pal = _pal(context);
     final rec = p.brands.firstWhere((b) => b.rec, orElse: () => p.brands.first);
-    final priceLabel = rec.price == null ? 'מחיר לפי ספק' : '₪${rec.price}';
+    final priceLabel =
+        rec.price == null ? 'מחיר לפי ספק' : '₪${groupThousands(rec.price!)}';
     return Container(
       width: width,
       padding: const EdgeInsets.all(BsTokens.space3),
@@ -738,7 +740,7 @@ class _OrderCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: pal.muted, fontSize: 11)),
           const SizedBox(height: 2),
-          Text('₪${order.sum}',
+          Text('₪${groupThousands(order.sum)}',
               style: const TextStyle(
                 color: BsTokens.brandDark,
                 fontWeight: FontWeight.w800,

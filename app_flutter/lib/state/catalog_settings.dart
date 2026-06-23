@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -456,7 +457,9 @@ String formatCatalogPrice(
   String prefix = '',
 }) {
   final amount = priceWithVat(base, showVat: s.showVat);
-  return '$prefix${currencySymbol(s.currency)}$amount';
+  // Grouped via the single-source primitive — catalog cards now match the cart
+  // ("₪4,200", not "₪4200"). Symbol stays per-currency; sign N/A (prices ≥0).
+  return '$prefix${currencySymbol(s.currency)}${groupThousands(amount)}';
 }
 
 /// mm → inch (1″ = 25.4 mm). Returns null when [raw] has no parseable number.

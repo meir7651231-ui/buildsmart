@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:buildsmart/data/product_images.dart';
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
@@ -4406,7 +4407,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
               ),
             ),
             Text(
-              b.price != null ? '₪${b.price}' : 'לפי ספק',
+              b.price != null ? '₪${groupThousands(b.price!)}' : 'לפי ספק',
               style: TextStyle(
                 color: selected ? BsTokens.brand : const Color(0xFF888888),
                 fontSize: 16,
@@ -5443,7 +5444,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               ],
                             );
                           }),
-                        if (price != null) catRow('מחיר משוער', '~₪$price'),
+                        if (price != null)
+                          catRow('מחיר משוער', '~₪${groupThousands(price)}'),
                         // Roadmap step 45 — cheaper standard-comparable brand.
                         Builder(builder: (_) {
                           final alt = cheaperAlternativeBrand(p, _selectedBrand);
@@ -5451,7 +5453,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           return Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                                '💰 חלופה זולה יותר: ${alt.name} (~₪${alt.price})',
+                                '💰 חלופה זולה יותר: ${alt.name} (~₪${groupThousands(alt.price)})',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -5469,8 +5471,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             return Padding(
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
-                                  '🧮 עלות קו משוערת: ~₪${c.total}  '
-                                  '(מוצר ₪${c.product} · אביזרים ₪${c.accessories} · עבודה ₪${c.labour})',
+                                  '🧮 עלות קו משוערת: ~₪${groupThousands(c.total)}  '
+                                  '(מוצר ₪${groupThousands(c.product)} · אביזרים ₪${groupThousands(c.accessories)} · עבודה ₪${groupThousands(c.labour)})',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -6368,7 +6370,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           '${p.name} · ${brand.name} (+${selectedAcc.length} אביזרים) נוסף לסל 🛒');
                     },
                     child: Text(
-                      'הוסף לסל · ₪$_total',
+                      'הוסף לסל · ₪${groupThousands(_total)}',
                       style: TextStyle(
                         color: bsOnAccent(context),
                         fontSize: 15,
@@ -6862,7 +6864,7 @@ class _AccRow extends StatelessWidget {
               children: [
                 Text(
                   acc.price != null
-                      ? '₪${acc.price! * qty}'
+                      ? '₪${groupThousands(acc.price! * qty)}'
                       : 'לפי ספק',
                   style: TextStyle(
                     color: selected
@@ -7051,7 +7053,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                     ),
                     const Spacer(),
                     Text(
-                      '₪${acc.price}',
+                      '₪${groupThousands(acc.price!)}',
                       style: const TextStyle(
                         color: BsTokens.brand,
                         fontSize: 18,
