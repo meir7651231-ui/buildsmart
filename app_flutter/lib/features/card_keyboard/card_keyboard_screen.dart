@@ -16,7 +16,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
-    show SignalSource, WordSignal, kHardSignals;
+    show SignalSource, WordSignal, sourcesFor;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -190,7 +190,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     String axisId,
     String value,
   ) {
-    final SignalSource src = kHardSignals.firstWhere(
+    final SignalSource src = sourcesFor(widget.subtype).firstWhere(
       (s) => s.axisId == axisId,
       orElse: () => const WordSignal(),
     );
@@ -242,6 +242,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         'color' => Icons.palette_outlined,
         'word' => Icons.label_outline,
         'material' => Icons.category_outlined,
+        'facet' => Icons.tune, // curated 'אפשרות' axis (swarm R7)
         _ => Icons.tag,
       };
 
@@ -334,7 +335,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     }
 
     if (payload is _ChipTap) {
-      final src = kHardSignals.firstWhere(
+      final src = sourcesFor(widget.subtype).firstWhere(
         (s) => s.axisId == payload.axisId,
         orElse: () => const WordSignal(),
       );

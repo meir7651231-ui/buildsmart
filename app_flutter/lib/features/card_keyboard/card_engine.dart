@@ -21,7 +21,7 @@ library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
-    show kHardSignals;
+    show sourcesFor;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
@@ -164,7 +164,7 @@ CardVerdict mergedKeys(
   if (distinctCardCount(pool) <= kShowProductsThreshold) {
     return CardShowProducts(distinctProducts(pool));
   }
-  final chips = _mergedChips(pool, stack);
+  final chips = _mergedChips(pool, stack, subtype);
   if (chips.isEmpty) return CardShowProducts(distinctProducts(pool));
   return MergedKeys(chips);
 }
@@ -181,7 +181,7 @@ const int kMergedAxisMaxPerAxis = 4; // ≤ this many per axis (so several show)
 class _AxisScore {
   _AxisScore(this.rank, this.chips, this.sumSq, this.n);
 
-  /// Canonical axis order (the [kHardSignals] index) — the deterministic
+  /// Canonical axis order (the [sourcesFor] index) — the deterministic
   /// tie-break when two axes have an equal expRem.
   final int rank;
   final List<SignalChip> chips;
@@ -217,11 +217,15 @@ class _AxisScore {
 List<SignalChip> _mergedChips(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
+  String? subtype,
 ) {
   final answered = <String>{for (final s in stack) s.axisLabel};
   final scored = <_AxisScore>[];
-  for (var rank = 0; rank < kHardSignals.length; rank++) {
-    final src = kHardSignals[rank];
+  // The five hard axes PLUS, for a curated subtype, the 'אפשרות' facet axis
+  // (swarm R7 gap-close). The facet ranks among the others by decisiveness.
+  final sources = sourcesFor(subtype);
+  for (var rank = 0; rank < sources.length; rank++) {
+    final src = sources[rank];
     if (answered.contains(src.axisName)) continue; // each axis at most once
     final chips = src.chipsFor(pool);
     // Skip an axis that can't provide the per-axis floor: a lone chip can't

@@ -119,4 +119,37 @@ void main() {
       <String>['size', 'angle', 'color', 'word', 'material'],
     );
   });
+
+  group('curated facet axis (swarm R7 gap-close)', () {
+    test('sourcesFor: 5 hard axes for null/unknown subtype, +facet for curated',
+        () {
+      expect(sourcesFor(null).map((s) => s.axisId).toList(),
+          <String>['size', 'angle', 'color', 'word', 'material']);
+      expect(sourcesFor('not-a-subtype').map((s) => s.axisId).toList(),
+          <String>['size', 'angle', 'color', 'word', 'material']);
+      expect(sourcesFor('מכסים ורשתות').map((s) => s.axisId).toList(),
+          <String>['size', 'angle', 'color', 'word', 'material', 'facet']);
+    });
+
+    test('CuratedFacetSignal: chips are curated keywords present in the pool', () {
+      const facet = CuratedFacetSignal('מכסים ורשתות');
+      final pool = kDivePool
+          .where((p) => p.nameHe.contains('מכסה') || p.nameHe.contains('רשת'))
+          .toList();
+      final chips = facet.chipsFor(pool);
+      expect(chips, isNotEmpty, reason: 'cover/grate keywords are present');
+      expect(chips.every((c) => c.axisId == 'facet'), isTrue);
+      expect(chips.every((c) => c.axisName == 'אפשרות'), isTrue);
+      for (final c in chips) {
+        final hit = pool.firstWhere((p) => p.nameHe.contains(c.value));
+        expect(facet.matches(hit, c), isTrue,
+            reason: 'matches keeps a product whose name contains the keyword');
+      }
+    });
+
+    test('CuratedFacetSignal: null / unknown subtype → no chips', () {
+      expect(const CuratedFacetSignal(null).chipsFor(kDivePool), isEmpty);
+      expect(const CuratedFacetSignal('xyz').chipsFor(kDivePool), isEmpty);
+    });
+  });
 }

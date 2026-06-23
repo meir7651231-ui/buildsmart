@@ -24,7 +24,13 @@ import 'package:buildsmart/features/card_keyboard/card_engine.dart'
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
     show materialOf, materialsInPool;
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
-    show angleTokensIn, colorOptions, productHasChip, sizeTokensIn, wordOptions;
+    show
+        angleTokensIn,
+        colorOptions,
+        kFinderFacets,
+        productHasChip,
+        sizeTokensIn,
+        wordOptions;
 
 /// Below this fraction of products with a KNOWN material, the material axis is
 /// hidden — too sparse to be a useful split (build plan §2, #28). OWNER-REVIEW.
@@ -218,9 +224,49 @@ class MaterialSignal extends SignalSource {
   }
 }
 
+/// CURATED-FACET axis (swarm R7 gap-close) — the 'אפשרות' keyword splits a
+/// non-technical user understands (cover/grate, round/square, drain types) that
+/// resist auto size/word detection. Subtype-dependent: [kFinderFacets] maps a
+/// curated `subtype` to its keyword list; a chip is a keyword PRESENT in the
+/// pool's names, and [matches] keeps a product whose nameHe contains it — the
+/// SAME logic as the live finder's `narrowAxis` curated rung. Empty (skipped by
+/// the merge floor) when the subtype is null or carries no facets.
+class CuratedFacetSignal extends SignalSource {
+  const CuratedFacetSignal(this.subtype);
+
+  /// The curated sub-type whose [kFinderFacets] keywords this axis offers.
+  final String? subtype;
+
+  @override
+  String get axisId => 'facet';
+  @override
+  String get axisName => 'אפשרות';
+
+  @override
+  List<SignalChip> chipsFor(List<LipskeyCatalogProduct> pool) {
+    final curated = subtype == null ? null : kFinderFacets[subtype];
+    if (curated == null) return const <SignalChip>[];
+    return <SignalChip>[
+      for (final k in curated)
+        if (pool.any((p) => p.nameHe.contains(k)))
+          SignalChip(
+            axisId: axisId,
+            value: k,
+            displayLabel: k,
+            axisName: axisName,
+          ),
+    ];
+  }
+
+  @override
+  bool matches(LipskeyCatalogProduct p, SignalChip chip) =>
+      p.nameHe.contains(chip.value);
+}
+
 /// The five hard-axis sources in canonical order (size → angle → colour → word →
 /// material) — the same precedence the live finder's tie-break uses, with the
-/// new material axis last. The merge (Phase 2) iterates these.
+/// new material axis last. The merge iterates these PLUS, for a curated subtype,
+/// the [CuratedFacetSignal] (see [sourcesFor]).
 const List<SignalSource> kHardSignals = <SignalSource>[
   SizeSignal(),
   AngleSignal(),
@@ -228,3 +274,14 @@ const List<SignalSource> kHardSignals = <SignalSource>[
   WordSignal(),
   MaterialSignal(),
 ];
+
+/// The signal sources the merge considers for a [subtype]: the five hard axes,
+/// plus the [CuratedFacetSignal] when [subtype] is a curated one (swarm R7 —
+/// otherwise the 'אפשרות' facet narrowing the live finder offers was dropped).
+/// The facet ranks among the others by decisiveness; it carries no chips (and is
+/// skipped) for a null / non-curated subtype.
+List<SignalSource> sourcesFor(String? subtype) => <SignalSource>[
+      ...kHardSignals,
+      if (subtype != null && kFinderFacets.containsKey(subtype))
+        CuratedFacetSignal(subtype),
+    ];
