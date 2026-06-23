@@ -18,6 +18,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/prompt_sanitize.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/theme/tokens.dart';
@@ -34,8 +35,9 @@ List<String> finderCategories() {
 /// and demands ONLY a category (or NONE). It can't name a product.
 String aiFinderPrompt(String userText) {
   final cats = finderCategories().join('\n');
+  final safe = promptSafeText(userText, maxLen: 600); // cap free-text (cost/DoS)
   return 'קטגוריות-המוצרים הזמינות:\n$cats\n\n'
-      'הקבלן מחפש: "$userText".\n'
+      'הקבלן מחפש: "$safe".\n'
       'בחר את הקטגוריה האחת שהכי מתאימה לבקשה — מתוך הרשימה בלבד. '
       'החזר אך ורק את שם-הקטגוריה (שורה אחת, ללא טקסט נוסף). '
       'אם אף קטגוריה ברשימה לא מתאימה, החזר NONE.';
@@ -54,10 +56,15 @@ String? matchCategory(String aiReply) {
   for (final c in cats) {
     if (r == c) return c;
   }
+  // Longest contained match (a category may be a substring of a longer one);
+  // first-match could grab a shorter prefix category on a wrapped reply.
+  String? best;
   for (final c in cats) {
-    if (r.contains(c)) return c;
+    if (r.contains(c) && (best == null || c.length > best.length)) {
+      best = c;
+    }
   }
-  return null;
+  return best;
 }
 
 /// The REAL products in [cat] (never invented).
@@ -108,7 +115,11 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
   Future<void> _search() async {
     final gw = ref.read(claudeGatewayProvider);
     final text = _controller.text.trim();
-    if (gw == null || text.isEmpty) return;
+    // `|| _loading` closes a stale-response race: the keyboard's onSubmitted
+    // bypasses the button's loading-disable, so without this a re-submit while a
+    // request is in flight would fire a 2nd concurrent ask whose late reply could
+    // overwrite the newer query's result.
+    if (gw == null || text.isEmpty || _loading) return;
     FocusScope.of(context).unfocus();
     setState(() {
       _loading = true;
@@ -156,65 +167,95 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(BsTokens.space4),
-          children: [
-            if (!aiAvailable)
-              const Text('💡 החיפוש החכם דורש חיבור לשרת.',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 13))
-            else ...[
-              const Text('תאר במילים שלך מה אתה מחפש:',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _controller,
-                textInputAction: TextInputAction.search,
-                onSubmitted: (_) => _search(),
-                decoration: InputDecoration(
-                  hintText: 'לדוגמה: ברז למטבח / חיבור לצינור ביוב',
-                  filled: true,
-                  fillColor: BsTokens.cardLight,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(BsTokens.radiusCard)),
+        // CustomScrollView so the matched-category results render LAZILY via a
+        // SliverList.builder — the largest category is ~120 products and a plain
+        // `ListView(children:[…for…])` built every tile eagerly on each search.
+        // Padding is split to stay layout-equivalent to the old EdgeInsets.all:
+        // top+sides on the form sliver, sides on the results, a trailing space4.
+        body: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
+                  BsTokens.space4, 0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  if (!aiAvailable)
+                    const Text('💡 החיפוש החכם דורש חיבור לשרת.',
+                        style:
+                            TextStyle(color: BsTokens.mutedLight, fontSize: 13))
+                  else ...[
+                    const Text('תאר במילים שלך מה אתה מחפש:',
+                        style:
+                            TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _controller,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (_) => _search(),
+                      decoration: InputDecoration(
+                        hintText: 'לדוגמה: ברז למטבח / חיבור לצינור ביוב',
+                        filled: true,
+                        fillColor: BsTokens.cardLight,
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(BsTokens.radiusCard)),
+                      ),
+                    ),
+                    const SizedBox(height: BsTokens.space3),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _loading ? null : _search,
+                        icon: const Text('🔎'),
+                        label: const Text('מצא לי'),
+                      ),
+                    ),
+                    const SizedBox(height: BsTokens.space4),
+                    if (_loading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_failed)
+                      const Text('משהו השתבש — נסה שוב.',
+                          style:
+                              TextStyle(color: BsTokens.danger, fontSize: 14))
+                    else if (_category != null) ...[
+                      Text('📂 ${_category!}  ·  ${_products.length} מוצרים',
+                          style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800)),
+                      const SizedBox(height: BsTokens.space2),
+                    ] else if (_searched)
+                      const Text('לא זוהתה קטגוריה מתאימה — נסה לתאר אחרת.',
+                          style: TextStyle(
+                              color: BsTokens.mutedLight, fontSize: 14)),
+                  ],
+                ]),
+              ),
+            ),
+            // The category's products — lazy, only when a category resolved.
+            if (aiAvailable && !_loading && !_failed && _category != null)
+              SliverPadding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: BsTokens.space4),
+                sliver: SliverList.builder(
+                  itemCount: _products.length,
+                  itemBuilder: (context, i) {
+                    final p = _products[i];
+                    return ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(p.nameHe,
+                          style: const TextStyle(
+                              color: BsTokens.inkLight, fontSize: 14)),
+                      trailing: const Icon(Icons.chevron_left, size: 18),
+                      onTap: () => showLipskeyProductSheet(
+                          context, p, productsInCategory(_category!)),
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: BsTokens.space3),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _loading ? null : _search,
-                  icon: const Text('🔎'),
-                  label: const Text('מצא לי'),
-                ),
-              ),
-              const SizedBox(height: BsTokens.space4),
-              if (_loading)
-                const Center(child: CircularProgressIndicator())
-              else if (_failed)
-                const Text('משהו השתבש — נסה שוב.',
-                    style: TextStyle(color: BsTokens.danger, fontSize: 14))
-              else if (_category != null) ...[
-                Text('📂 ${_category!}  ·  ${_products.length} מוצרים',
-                    style: const TextStyle(
-                        color: BsTokens.inkLight,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800)),
-                const SizedBox(height: BsTokens.space2),
-                for (final p in _products)
-                  ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(p.nameHe,
-                        style: const TextStyle(
-                            color: BsTokens.inkLight, fontSize: 14)),
-                    trailing: const Icon(Icons.chevron_left, size: 18),
-                    onTap: () => showLipskeyProductSheet(
-                        context, p, productsInCategory(_category!)),
-                  ),
-              ] else if (_searched)
-                const Text('לא זוהתה קטגוריה מתאימה — נסה לתאר אחרת.',
-                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
-            ],
+            const SliverToBoxAdapter(
+                child: SizedBox(height: BsTokens.space4)),
           ],
         ),
       ),

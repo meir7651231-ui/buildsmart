@@ -18,6 +18,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
+import 'package:buildsmart/logic/prompt_sanitize.dart';
 
 /// The CLOSED action set the model must pick from. Read-only actions (Phase 1)
 /// + `addToCart` (Phase 2 — the sole mutator, and even it only PROPOSES; the
@@ -61,10 +62,15 @@ String? matchAssistantCategory(String reply) {
   for (final c in cats) {
     if (r == c) return c;
   }
+  // Longest contained match (a category name may be a substring of a longer one);
+  // first-match could grab a shorter prefix category on a wrapped reply.
+  String? best;
   for (final c in cats) {
-    if (r.contains(c)) return c;
+    if (r.contains(c) && (best == null || c.length > best.length)) {
+      best = c;
+    }
   }
-  return null;
+  return best;
 }
 
 /// Resolve a recipe reply to a REAL `kSmartProducts` key — exact then contained.
@@ -77,10 +83,15 @@ String? matchAssistantRecipeKey(String reply) {
   for (final p in kSmartProducts) {
     if (r == p.key) return p.key;
   }
+  // Longest contained key — keys collide by prefix (faucet⊂kitchenFaucet,
+  // basin⊂basinTrap), so first-match would propose the wrong kit on a wrapped reply.
+  String? best;
   for (final p in kSmartProducts) {
-    if (r.contains(p.key)) return p.key;
+    if (r.contains(p.key) && (best == null || p.key.length > best.length)) {
+      best = p.key;
+    }
   }
-  return null;
+  return best;
 }
 
 AssistantAction? _actionFromString(String s) {
@@ -119,11 +130,12 @@ String assistantIntentPrompt(List<IntentTurn> history, String userText) {
   if (recent.isNotEmpty) {
     b.writeln('השיחה עד כה:');
     for (final m in recent) {
-      b.writeln('${m.user ? "משתמש" : "עוזר"}: ${m.text}');
+      b.writeln(
+          '${m.user ? "משתמש" : "עוזר"}: ${promptSafeText(m.text, maxLen: 600)}');
     }
     b.writeln();
   }
-  b.writeln('המשתמש כתב: "$userText".');
+  b.writeln('המשתמש כתב: "${promptSafeText(userText, maxLen: 600)}".');
   b.writeln('בחר פעולה אחת מהרשימה הסגורה והחזר שורת-JSON אחת בלבד:');
   b.writeln('- "answer": ענה ישירות. שים את התשובה ב-say, key="".');
   b.writeln('- "findProduct": המשתמש מחפש מוצר. key = קטגוריה אחת מרשימת '

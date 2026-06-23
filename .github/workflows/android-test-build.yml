@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.69 — ליטוש (אודיט-נחיל גל-4, אחרון): סולם-התוצאה אוחד ל-widget משותף ב-8 מסכי-AI · תשובה-ריקה→נסה-שוב במקום ריק · ניגודיות-WCAG בשורת-הכשל · אפס שינוי-פריסה · v6.69 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.70 — אודיט-עדשות-שונות (8 תיקונים): מיפוי-ערכה מדויק יותר (longest-key) · סגירת race בחיפוש-חכם/תיאור→סל · הגנת-הזרקה בסיבת-דחייה · cost-safety בשרת (rate-limit/timeout — דורש deploy) · רשימת-תוצאות עצלה · v6.70 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

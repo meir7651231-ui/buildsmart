@@ -4,6 +4,22 @@
 
 ---
 
+## v6.70 — אודיט-עדשות-שונות · ai_finder → CustomScrollView (תוצאות עצלות) — 2026-06-23
+
+**שינוי-UI יחיד (lib/screens):** `ai_finder_screen.dart` — גוף-המסך עבר מ-`ListView(children:[…for…])` ל-
+`CustomScrollView` עם `SliverList.builder` לתוצאות (perf: עד ~120 tiles נבנו eager בכל חיפוש).
+
+**אימות-ויזואלי:** **רפקטור-מבנה בלבד — אפס שינוי-תצוגה מכוון.** ה-padding פוצל לשקילות מדויקת ל-
+`EdgeInsets.all(space4)` המקורי: ה-sliver-הראשון `fromLTRB(space4,space4,space4,0)` (טופס+סטטוס+כותרת-קטגוריה),
+ה-sliver-השני `symmetric(horizontal:space4)` (ה-tiles), ו-`SliverToBoxAdapter(SizedBox(space4))` סוגר את התחתית —
+top/sides/bottom = space4, והרווח כותרת↔tiles = ה-`SizedBox(space2)` הקיים. כל widget נשמר verbatim
+(טקסט-off, TextField, FilledButton, כותרת-📂, ה-ListTile עם chevron, מצב "לא זוהתה קטגוריה").
+
+**שאר השינויים — לא-ויזואליים:** matchers (לוגיקה), race-gates (`|| _loading`, התנהגות), sanitize (prompt),
+server (`claude.ts`). אין להם שינוי-מסך.
+
+**טסט:** full-suite baseline · analyze 0 errors.
+
 ## v6.69 — swarm-fixes גל-4 · de-dup סולם-התוצאה ב-8 מסכי-נרטיב — 2026-06-23
 
 **שינוי (lib/widgets + lib/screens):** 3 widgets חדשים ב-`ai_result_states.dart` (`AiOffState`/`AiLoadingState`/

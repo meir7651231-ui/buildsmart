@@ -14,6 +14,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/prompt_sanitize.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// The grounded prompt — hands the model a CLOSED set of reason-categories and
 /// asks it to phrase ONE politely; it may not invent facts about the person.
 String rejectReasonPrompt({required String role, required String name}) {
-  final who = name.trim().isEmpty ? 'המבקש' : name.trim();
+  // `name` is an attacker-controlled profile displayName, and this reply is shown
+  // as PROSE (no closed-set after it) — the one live injection lever. Collapse
+  // newlines + hard-cap so it can't carry an "ignore the above…" payload.
+  final who = name.trim().isEmpty
+      ? 'המבקש'
+      : promptSafeText(name, maxLen: 60, collapseWhitespace: true);
   return 'מנהל דוחה בקשה להצטרף כ-"$role" מאת $who.\n'
       'קטגוריות-סיבה מקובלות (בחר אחת בלבד ונסח אותה בעדינות):\n'
       '• מסמכים/אימות שטרם הושלמו\n'
