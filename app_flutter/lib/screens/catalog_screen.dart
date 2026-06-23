@@ -5132,20 +5132,25 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               return Tooltip(
                                 message:
                                     'נסח הצעה מקצועית עם AI — מוכן לשליחה ללקוח',
-                                child: GestureDetector(
-                                  onTap: () => Navigator.of(context).push(
-                                      QuotePolishScreen.route(
-                                          rawQuote:
-                                              quoteTextFor(p, _selectedBrand),
-                                          productName: p.name)),
-                                  child: const Padding(
-                                    padding:
-                                        EdgeInsetsDirectional.only(end: 8),
-                                    child: Text('✨ נסח',
-                                        style: TextStyle(
-                                            color: Color(0xFF6D28D9),
-                                            fontSize: 10.5,
-                                            fontWeight: FontWeight.w700)),
+                                // a11y (swarm): expose a button role to a11y.
+                                child: Semantics(
+                                  button: true,
+                                  label: 'נסח הצעה מקצועית',
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                        QuotePolishScreen.route(
+                                            rawQuote: quoteTextFor(
+                                                p, _selectedBrand),
+                                            productName: p.name)),
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsetsDirectional.only(end: 8),
+                                      child: Text('✨ נסח',
+                                          style: TextStyle(
+                                              color: Color(0xFF6D28D9),
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
                                   ),
                                 ),
                               );
@@ -5259,20 +5264,25 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 // part's REAL verified ends). gateway null → not
                                 // in the tree → byte-identical demo.
                                 if (aiOn)
-                                  GestureDetector(
-                                    onTap: () => Navigator.of(context).push(
-                                        AdapterExplainScreen.route(
-                                            productName: prod.nameHe,
-                                            sku: prod.sku)),
-                                    child: const Padding(
-                                      padding: EdgeInsets.only(top: 4),
-                                      child: Text('🔌 איך לגשר?',
-                                          style: TextStyle(
-                                              color: Color(0xFF1D4ED8),
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                              decoration:
-                                                  TextDecoration.underline)),
+                                  // a11y (swarm): expose a button role to a11y.
+                                  Semantics(
+                                    button: true,
+                                    label: 'הסבר איזה מתאם מגשר',
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.of(context).push(
+                                          AdapterExplainScreen.route(
+                                              productName: prod.nameHe,
+                                              sku: prod.sku)),
+                                      child: const Padding(
+                                        padding: EdgeInsets.only(top: 4),
+                                        child: Text('🔌 איך לגשר?',
+                                            style: TextStyle(
+                                                color: Color(0xFF1D4ED8),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w800,
+                                                decoration: TextDecoration
+                                                    .underline)),
+                                      ),
                                     ),
                                   ),
                               ],
