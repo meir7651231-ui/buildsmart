@@ -1301,3 +1301,10 @@
 - **טסט-נעיצה:** `test/honest_score_test.dart` — ערכה(186466) מוכנות<30 + שלמות≥55; רקורד(77381040) שניהם גבוה; חבק(77006080/77775289) install-tools לא-ריק + `compatibleProductsCount==0` (low-is-correct נעול).
 - **mutation-verify:** baseline **+5 ירוק** → הזרקתי `return (score:0,label:'חלקי')` בראש `dataCompletenessScore` (`// MUTATION`) → טסט **אדום `+0 -1`** ("listing NOT slandered" — שלמות צנחה מתחת 55) → שחזור → **+5 ירוק**, 0 שארית. analyze 0.
 - **בטיחות:** קוראי-`installToolsFor` = ציון + תצוגת-כרטיס בלבד (אומת ב-grep) → אין mate-שגוי במנוע-הניתוב. card_score+polyroll_score+lipskey_score+external_card_score+line_score+parity+product_journey(935) ירוקים.
+
+## #modes-from-name — מפרט-בשם לברזים/מזלפים (Qondus מוצה) — 2026-06-23
+- **בדיקת-מקור:** רנדור Qondus p10/p26 (pypdfium2) הראה קטלוג תמונתי — אין טבלת-מידה לאביזרים דקורטיביים. מעבר-חוזר=דד-אנד למידות. לקח: לרנדר+להסתכל על המקור לפני נחיל-חילוץ יקר.
+- **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** `scripts/fill_modes_from_name.py` — מהשם R8-verbatim: `dims['מצבים']` (\d+ מצבים) · `dims['אורך']` (קצר/ארוך) · `dims['סוג']` (טלסקופי/נשלף/מהקיר/כפול/יחיד/שולחני). הוחל ל-**62 מוצרים** שהיו רק-תיאור. **מפרט-אמיתי 80%→87%** (802/924). gate-117 מודר; ממזג למפת-dims קיימת; idempotent.
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `77701117` dims['מצבים']='5'; `77701204`='3'.
+- **mutation-verify:** baseline **+12 ירוק** → `77701117` `'מצבים':'5'`→`'9'` → **אדום `+10 -1`** ("spray-mode count") → שחזור → **+12 ירוק**, 0 שארית. analyze 0. parity+product_journey(935)+honest_score ירוקים.
+- **תקרה:** ~87% מהשם; דימות-בפועל דורש דפי-מפרט טכניים מהספק (#56) — קטלוג-התצוגה אינו מכיל אותם.

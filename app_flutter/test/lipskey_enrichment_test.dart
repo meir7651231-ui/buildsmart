@@ -55,6 +55,10 @@ void main() {
     test('pure-colour word in the name (never a material)', () {
       expect(bySku('116180').color, 'אפור'); // צינור הכנסה אפור
     });
+    test('spray-mode count from the name (Qondus photo-catalog had no table)', () {
+      expect(bySku('77701117').dims?['מצבים'], '5'); // מערכת אמבטיה 5 מצבים
+      expect(bySku('77701204').dims?['מצבים'], '3'); // מזלף 3 מצבים
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
