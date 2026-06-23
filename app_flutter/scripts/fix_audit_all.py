@@ -34,7 +34,9 @@ DIMS_REPLACE = {
 # — 3 from Qondus (78071545/77773001/777M1801), 9 from Lipskey (7 cisterns +
 # 116167 gully trap + 610918 round cap). Only these 5 remain nulled (their exact
 # SKU was not locatable in the available PDFs).
-IMAGE_NULL = {'196587', '118221', '120011', '186466', '686366'}
+# 118221 (45° DN40) + 116589 (90° 32/32) were later pointed at their twin
+# product's live image (116223.jpeg / 116689.jpeg) — same physical branch.
+IMAGE_NULL = {'196587', '120011', '186466', '686366'}
 NAME_FILL = {'77701150': "אנג\\'ל מקלח יד 5 מצבים"}
 
 s = open(F, encoding='utf-8').read()

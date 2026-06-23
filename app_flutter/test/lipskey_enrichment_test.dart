@@ -82,6 +82,10 @@ void main() {
       expect(bySku('116167').imageFile, '116167.jpeg'); // gully trap, p27
       expect(bySku('610918').imageFile, '610918.jpeg'); // round drainage cap, p33
     });
+    test('branch twins — same physical product reuses the twin live image', () {
+      expect(bySku('118221').imageFile, '116223.jpeg'); // 45° DN40 == 116223 (40/40/40)
+      expect(bySku('116589').imageFile, '116689.jpeg'); // 90° 32/32 == 116689
+    });
     test('image relink — assets present on R2 but unlinked are now wired', () {
       expect(bySku('997091').imageFile, '997091.jpeg'); // ברך 90° — asset existed, was null
       expect(bySku('273226').imageFile, '273226.jpeg'); // צינור שחור DN40

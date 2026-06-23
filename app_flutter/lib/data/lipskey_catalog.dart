@@ -2858,7 +2858,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 12,
     dims: {'זווית': '45°', 'מידה': 'DN40', 'תיאור': 'מסעף 45° DN40 עם תבריג · כולל 3 אומים ו-3 אטמים'},
-    imageFile: null,
+    imageFile: '116223.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '118222',
@@ -4180,7 +4180,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'זווית': '90°', 'DN': '32/32'},
-    imageFile: '116589.jpeg',
+    imageFile: '116689.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116682',
