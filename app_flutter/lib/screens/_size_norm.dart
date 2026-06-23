@@ -87,14 +87,19 @@ const Map<String, String> kInchPretty = {
   '5/8"': '⅝"',  '7/8"': '⅞"',
 };
 
-/// Inch label → millimetres (for sorting only — display stays verbatim).
+/// Inch label → millimetres (for sorting only — display stays verbatim). Covers
+/// the full eighth-inch sequence 1"–4" so compound whole+fraction bores
+/// (2⅜", 1⅜", 3½"…) tokenise instead of dropping to NO size token (swarm R4 —
+/// e.g. SKU 610708 'פקק שטוח 2⅜"' was invisible on the size axis). mm = inches ×
+/// 25.4; entries that never appear in the catalog are harmless dead keys.
 const Map<String, double> _kInchMm = {
   '⅛"': 3.175, '¼"': 6.35, '⅜"': 9.525,
   '½"': 12.7, '⅝"': 15.875, '¾"': 19.05, '⅞"': 22.225,
-  '1"': 25.4,
-  '1¼"': 31.75, '1½"': 38.1,
-  '2"': 50.8, '2½"': 63.5,
-  '3"': 76.2, '4"': 101.6, '6"': 152.4,
+  '1"': 25.4, '1⅛"': 28.575, '1¼"': 31.75, '1⅜"': 34.925, '1½"': 38.1,
+  '1⅝"': 41.275, '1¾"': 44.45, '1⅞"': 47.625,
+  '2"': 50.8, '2¼"': 57.15, '2⅜"': 60.325, '2½"': 63.5, '2¾"': 69.85,
+  '3"': 76.2, '3¼"': 82.55, '3½"': 88.9, '3¾"': 95.25,
+  '4"': 101.6, '6"': 152.4,
 };
 
 /// Size tokens (NO angles — angle has its own regex/axis).
@@ -211,10 +216,16 @@ List<SizeToken> tokensFromDims(Map<String, dynamic> dims) {
   final out = <SizeToken>[];
   final dnRaw = (dims['DN'] ?? dims['dn'] ?? dims['mm'])?.toString();
   if (dnRaw != null && dnRaw.trim().isNotEmpty) {
-    final n = double.tryParse(dnRaw.trim());
-    if (n != null) {
-      out.add(SizeToken(label: 'DN${n.toInt()}',
-          family: SizeFamily.dnDiameter, mm: n,),);
+    // A slash-pair like '110/50' is a reducer's two bores (swarm R4) — emit a DN
+    // token for EACH part so the product is findable by either, instead of
+    // dropping entirely (double.tryParse('110/50') is null). A plain '110' splits
+    // to a single part → one token, byte-identical to before.
+    for (final part in dnRaw.trim().split('/')) {
+      final n = double.tryParse(part.trim());
+      if (n != null) {
+        out.add(SizeToken(label: 'DN${n.toInt()}',
+            family: SizeFamily.dnDiameter, mm: n,),);
+      }
     }
   }
   final cm = double.tryParse(dims['L (cm)']?.toString() ?? '');

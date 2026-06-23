@@ -34,6 +34,25 @@ void main() {
       expect(labels, containsAll(['25 ס"מ', '30 ס"מ']));
     });
 
+    test('compound whole+fraction inch (2⅜") tokenises, not dropped (R4)', () {
+      final t = parseSizeTokens('פקק שטוח לתבריג 2⅜"');
+      expect(t.map((x) => x.label).toSet(), contains('2⅜"'),
+          reason: 'compound inch must yield a size token, not drop to nothing');
+      expect(t.firstWhere((x) => x.label == '2⅜"').family,
+          SizeFamily.inchDiameter);
+    });
+
+    test('slash-DN dims (110/50 reducer) → a DN token per bore (R4)', () {
+      expect(
+        tokensFromDims({'DN': '110/50'}).map((x) => x.label).toSet(),
+        containsAll(<String>['DN110', 'DN50']),
+        reason: 'a reducer is findable by either bore, not dropped',
+      );
+      // A plain DN value still yields exactly one token (byte-identical).
+      expect(tokensFromDims({'DN': '40'}).map((x) => x.label).toList(),
+          <String>['DN40']);
+    });
+
     test('long compound tokens are NOT silently dropped', () {
       // ½"×¾"×½" — older code's length<=12 cap would have hidden this.
       final t = parseSizeTokens('מסעף ½"×¾"×½"');
