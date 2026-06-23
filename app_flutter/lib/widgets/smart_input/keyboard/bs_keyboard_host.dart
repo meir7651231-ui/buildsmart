@@ -210,7 +210,10 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
     return SafeArea(
       top: false,
       child: Material(
-        color: BsTokens.surfaceMid,
+        // Light-orange seam fill (owner): this host shell sits BEHIND the
+        // BsKeyboard, so its colour is what shows in every seam between the
+        // opaque buttons (was surfaceMid grey, then transparent — now warm).
+        color: BsTokens.kbSeam,
         child: BsKeyboard(
           showSymbols: _showSymbols,
           english: _english,

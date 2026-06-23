@@ -58,7 +58,9 @@ class BsKey extends StatelessWidget {
           button: true,
           label: _semanticLabel,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 48),
+            // Owner: UNIFORM keyboard — every cell (keys · tools · nav chips ·
+            // bottom row) is the SAME height (44) with the SAME 20px glyph.
+            constraints: const BoxConstraints(minHeight: 44),
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space1),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
@@ -107,7 +109,8 @@ class BsKey extends StatelessWidget {
       model.label,
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontSize: 17,
+        // Bigger glyph (owner) — the KEY size (minHeight 48) is unchanged.
+        fontSize: 20,
         color: fg,
         fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
       ),
@@ -129,7 +132,7 @@ class BsKey extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 17,
+              fontSize: 20,
               color: fg,
               fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
             ),

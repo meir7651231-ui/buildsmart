@@ -171,7 +171,7 @@ void main() {
           reason: 'the search field hint shows');
 
       // The close down-chevron handle.
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget,
+      expect(find.byIcon(Icons.close), findsOneWidget,
           reason: 'the floating panel has a close affordance');
 
       // At least one opening prediction chip is present (real lexicon words).
@@ -235,7 +235,7 @@ void main() {
       expect(container.read(keyboardOverlayOpenProvider), isTrue,
           reason: 'seeded open');
 
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+      await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
 
       expect(container.read(keyboardOverlayOpenProvider), isFalse,
@@ -537,18 +537,17 @@ void main() {
       });
 
       testWidgets(
-          'the destination chip shows the nav glyph; a product word chip does NOT',
+          'destination and product-word chips both render (nav glyph removed)',
           (tester) async {
-        // FITTING PREDICTION (owner: "חיזוי מתאים"): after typing a destination
-        // term, the destination chip is visually distinct — a leading
-        // Icons.north_east nav glyph — while a query-narrowing product WORD chip
-        // stays plain. The floating keyboard feeds _destByChip.keys as the
-        // destinationChips, so only the destination chip is tinted.
+        // The leading Icons.north_east nav glyph was REMOVED from destination
+        // chips per owner request ("בלי חיצים"); the dest/word distinction now
+        // lives in the chip border/wash, not a glyph. This guards that both chip
+        // kinds still RENDER for a typed prefix, and that NO nav glyph survives.
         await pumpPanel(tester);
 
         // Empty field: the row is product WORDS only → no nav glyph anywhere.
         expect(find.byIcon(Icons.north_east), findsNothing,
-            reason: 'no destination chip (hence no glyph) on the empty field');
+            reason: 'no nav glyph on the empty field');
 
         // Type "מח" → surface the מחלקות destination chip.
         await tester.tap(find.text('מ'));
@@ -556,44 +555,11 @@ void main() {
         await tester.tap(find.text('ח'));
         await tester.pumpAndSettle();
         expect(find.text('מחלקות'), findsWidgets,
-            reason: 'sanity: the destination chip is present');
+            reason: 'the destination chip is present');
 
-        // The nav glyph is INSIDE the מחלקות chip (a descendant of the chip's
-        // own InkWell, which wraps both the glyph and the label).
-        final glyphInDest = find.descendant(
-          of: find.widgetWithText(InkWell, 'מחלקות'),
-          matching: find.byIcon(Icons.north_east),
-        );
-        expect(glyphInDest, findsOneWidget,
-            reason: 'the destination chip מחלקות shows the nav glyph');
-
-        // Now prove a PRODUCT WORD chip in the SAME row carries NO glyph. Pick a
-        // word the pure helpers say is on screen for "מח" and is NOT a
-        // destination label (so the floating keyboard left it plain).
-        final lexicon = buildWordLexicon(kDivePool);
-        final words = cardKeyboardPredictions('מח', kDivePool, lexicon);
-        final dests = matchDestinations('מח').map((d) => d.label).toSet();
-        var wordOnly = '';
-        for (final w in words) {
-          if (dests.contains(w)) continue;
-          if (find.text(w).evaluate().isNotEmpty) {
-            wordOnly = w;
-            break;
-          }
-        }
-
-        // Only assert the negative when such a rendered word chip exists (the
-        // reserved word slot makes this the normal case; guard keeps the test
-        // robust if the catalogue ever offers none for this prefix).
-        if (wordOnly.isNotEmpty) {
-          final glyphInWord = find.descendant(
-            of: find.widgetWithText(InkWell, wordOnly),
-            matching: find.byIcon(Icons.north_east),
-          );
-          expect(glyphInWord, findsNothing,
-              reason:
-                  'the product word chip "$wordOnly" must not show the nav glyph');
-        }
+        // The nav glyph is gone EVERYWHERE — the arrows were removed.
+        expect(find.byIcon(Icons.north_east), findsNothing,
+            reason: 'the nav glyph was removed from all chips');
       });
 
       testWidgets(
@@ -766,15 +732,11 @@ void main() {
         return container;
       }
 
-      /// True when [label] renders as a NAVIGABLE prediction chip — i.e. a
-      /// `_PredictionChip` InkWell that contains the `Icons.north_east` nav glyph.
-      /// This is exactly how the pure keyboard marks a destination/leaf chip, and
-      /// it distinguishes a CHIP from a same-text tool TILE (tiles carry no glyph)
-      /// or a product-word chip (also no glyph).
-      Finder navChip(String label) => find.descendant(
-            of: find.widgetWithText(InkWell, label),
-            matching: find.byIcon(Icons.north_east),
-          );
+      /// The prediction chip whose [label] is shown — its `_PredictionChip`
+      /// InkWell. (The nav glyph that used to distinguish a navigable chip was
+      /// REMOVED per owner request; in these empty-field tab-scoped rows every
+      /// chip IS a destination chip, so the InkWell-with-label is the nav chip.)
+      Finder navChip(String label) => find.widgetWithText(InkWell, label);
 
       // (a) AT THE LETTERS, the empty row = the CURRENT TAB's destination chips,
       // and flipping the tab swaps the whole set. The tab labels are NOT product
@@ -838,12 +800,13 @@ void main() {
         // the prediction row must NOT add a navigable 'מחלקות' chip (option 1).
         await tester.tap(find.byIcon(Icons.grid_view));
         await tester.pumpAndSettle();
+        // The drill shows the tool TILE in the body. 'מחלקות' appears EXACTLY
+        // once (the tile) — i.e. drilling did NOT also add a navigable 'מחלקות'
+        // prediction CHIP to the row (option 1). The nav glyph that used to mark
+        // a chip was removed, so we assert single-occurrence instead of "no
+        // glyph".
         expect(find.text('מחלקות'), findsOneWidget,
-            reason: 'the drill shows the tool TILE in the body (morph)');
-        expect(navChip('מחלקות'), findsNothing,
-            reason: 'option 1: drilling adds NO navigable prediction chip');
-        expect(navChip('מהירים'), findsNothing,
-            reason: 'no drilled branch chip in the row either');
+            reason: 'only the body tile — drilling adds no duplicate row chip');
       });
 
       // (c) The TYPED-query path is UNCHANGED by the empty-field rework: typing a
@@ -1143,14 +1106,11 @@ void main() {
         await tester.tap(find.text('ח'));
         await tester.pumpAndSettle();
 
-        // The destination chip surfaces WITH its nav glyph — identical to the
-        // pre-feature typed behaviour; the catalog mirror did not reorder it.
-        final glyphInDest = find.descendant(
-          of: find.widgetWithText(InkWell, 'מחלקות'),
-          matching: find.byIcon(Icons.north_east),
-        );
-        expect(glyphInDest, findsOneWidget,
-            reason: 'the typed destination chip is unchanged at tab 0 (no '
+        // The destination chip surfaces (the nav glyph was REMOVED per owner
+        // request, so we assert the CHIP renders, not a glyph); the catalog
+        // mirror did not reorder it.
+        expect(find.widgetWithText(InkWell, 'מחלקות'), findsWidgets,
+            reason: 'the typed destination chip is present at tab 0 (no '
                 'catalog-mirror reorder of the typed row)');
         // And the rendered chips match _buildRow('מח') exactly (those rendered).
         for (final c in expectedBuildRow('מח')) {

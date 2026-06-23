@@ -60,6 +60,8 @@ import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
 import 'package:buildsmart/screens/card_keyboard_sheet.dart'
     show cardKeyboardPredictions;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show keyboardDiveQueryProvider;
 import 'package:buildsmart/screens/chats_screen.dart'
     show ThreadLite, visibleThreadsProvider;
 import 'package:buildsmart/screens/keyboard_catalog_deriver.dart'
@@ -204,6 +206,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// mutually exclusive by the `_baseLayer == none` guard in the sync.
   KbToolLayer _baseLayer = KbToolLayer.none;
 
+  /// True while the user is TYPING: tapping the read-only search field enters
+  /// this mode, which suppresses the ambient live-mirror context base so the
+  /// alphabet (the letter keys) shows. Tapping the ▦ grid or ⚙️ gear toggle
+  /// leaves it, returning to the tab's contextual navigation tools.
+  bool _typing = false;
+
   /// The node-list currently shown (null while the stack is empty → letters).
   List<KbToolNode>? get _currentNodes => _stack.isEmpty ? null : _stack.last;
 
@@ -243,6 +251,18 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// so very_good_analysis's empty-block lint stays quiet).
   void _recompute() {
     if (!mounted) return;
+    // Live-mirror DIVE (owner): on the catalog tab the typed query filters the
+    // SCREEN underneath in real time — the screen dives WITH the keyboard,
+    // reusing the catalog's own [searchQueryProvider] → [searchResultsProvider].
+    // Gated to tab 0 (only the catalog reads this provider); off-tab typing
+    // leaves the screen untouched.
+    if (ref.read(mainTabProvider) == 0) {
+      // Live DIVE: the typed query drives the catalog's NATIVE narrowed product
+      // list (the app dives IN PLACE) — NOT a flat search panel. The engine that
+      // proved most reliable ([catalogProductMatchesQuery]) runs in
+      // [diveResultsProvider]; the catalog body swaps to it when this is set.
+      ref.read(keyboardDiveQueryProvider.notifier).state = _controller.text;
+    }
     setState(() {});
   }
 
@@ -433,6 +453,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // context base correctly from the then-current [base].
     if (_baseLayer != KbToolLayer.none) return;
 
+    // Typing mode (the user tapped the search field) suppresses the ambient
+    // context base so the LETTERS show — tear down any installed context base
+    // and stop re-installing it until the user taps back to the tools (▦ / ⚙️).
+    if (_typing) {
+      if (_lastDerivedBase != null) {
+        _stack.clear();
+        _lastDerivedBase = null;
+      }
+      return;
+    }
+
     final newLabels =
         base == null ? null : <String>[for (final n in base) n.label];
 
@@ -511,12 +542,22 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       run(ref, context);
       return;
     }
-    insertAtCaret(_controller, '$chip ');
+    // Separate the appended narrowing word from the preceding token with a
+    // space, so a multi-word query STAYS multi-token ("ברז" + "מכסה" → "ברז
+    // מכסה", never "ברזמכסה"). [catalogProductMatchesQuery] AND-matches each
+    // token (`tokens.every`), so every tap NARROWS step-by-step instead of
+    // dead-ending on a merged string that matches no product.
+    final existing = _controller.text;
+    final sep = existing.isEmpty || existing.endsWith(' ') ? '' : ' ';
+    insertAtCaret(_controller, '$sep$chip ');
   }
 
   /// Close the floating overlay (no route to pop — flip the provider instead).
   /// The ONLY explicit dismiss (the close-chevron + the send key).
   void _close() {
+    // Clear the live DIVE so the catalog returns to its home grid (a fresh dive
+    // every time the keyboard re-opens).
+    ref.read(keyboardDiveQueryProvider.notifier).state = '';
     ref.read(keyboardOverlayOpenProvider.notifier).state = false;
   }
 
@@ -530,6 +571,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// (or on a deeper BACK) the next build's [_syncContextToolBase] re-installs the
   /// then-current context base afresh. Null-safe no-op when the mirror is off.
   void _onGrid() => setState(() {
+        _typing = false;
         _lastDerivedBase = null;
         if (_baseLayer == KbToolLayer.home) {
           _stack.clear();
@@ -546,6 +588,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// KBD is already the base. Never closes the overlay. Clears [_lastDerivedBase]
   /// (a manual drill takes over the stack from any context base — see [_onGrid]).
   void _onGear() => setState(() {
+        _typing = false;
         _lastDerivedBase = null;
         if (_baseLayer == KbToolLayer.kbd) {
           _stack.clear();
@@ -826,21 +869,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     final nodes = _currentNodes;
 
     return Material(
-      color: const Color(0xFFFFFFFF),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      color: Colors.transparent,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       child: DecoratedBox(
+        // Light-orange seam fill (owner): the keyboard's gaps read as a warm
+        // light orange behind the opaque buttons — not see-through, not grey.
         decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            // Subtle lift so the floating keyboard reads as a layer above the
-            // (still full-size) screen underneath.
-            BoxShadow(
-              color: Color(0x1F000000),
-              blurRadius: 16,
-              offset: Offset(0, -4),
-            ),
-          ],
+          color: BsTokens.kbSeam,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: SafeArea(
           top: false,
@@ -850,21 +886,38 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               // CLOSE affordance — a down-chevron / handle that dismisses the
               // floating overlay (sets keyboardOverlayOpenProvider false). The
               // visible glyph stays small; a ≥48dp tap target wraps it (a11y).
-              Semantics(
-                button: true,
-                label: 'סגור מקלדת',
-                child: Tooltip(
-                  message: 'סגור',
-                  child: InkWell(
-                    onTap: _close,
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                    child: const SizedBox(
-                      width: 48,
-                      height: 28,
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 22,
-                        color: Color(0x66000000),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Semantics(
+                  button: true,
+                  label: 'סגור מקלדת',
+                  child: Tooltip(
+                    message: 'סגור',
+                    child: InkWell(
+                      onTap: _close,
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Center(
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFFFFF),
+                              shape: BoxShape.circle,
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(color: Color(0x33000000), blurRadius: 3),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 18,
+                              color: BsTokens.brand,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -881,11 +934,18 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                   controller: _controller,
                   focusNode: _focus,
                   readOnly: true,
+                  // Tapping the field enters typing mode → the alphabet replaces
+                  // the live-mirror tools so the user can type a search.
+                  onTap: () => setState(() => _typing = true),
                   textDirection: TextDirection.rtl,
                   decoration: const InputDecoration(
                     hintText: 'מה לחפש?',
                     border: OutlineInputBorder(),
                     isDense: true,
+                    // White typing row (owner): the search/typing field is white,
+                    // a clean input bar distinct from the orange keyboard around it.
+                    filled: true,
+                    fillColor: Color(0xFFFFFFFF),
                   ),
                 ),
               ),

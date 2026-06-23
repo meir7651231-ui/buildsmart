@@ -32,7 +32,9 @@ void main() {
     expect(letters, 27);
   });
 
-  test('Bottom row kinds are send, symbols, language, space, period, enter', () {
+  test('Bottom row kinds are send, symbols, language, space, enter', () {
+    // The period key was removed per owner request (a search/nav keyboard does
+    // not need a near-empty '.'); the bottom row is now five keys.
     expect(
       kBottomRow.map((k) => k.kind).toList(),
       <KeyKind>[
@@ -40,19 +42,15 @@ void main() {
         KeyKind.symbols,
         KeyKind.language,
         KeyKind.space,
-        KeyKind.period,
         KeyKind.enter,
       ],
     );
   });
 
-  test('Space outputs a space and is wide; period outputs a dot', () {
+  test('Space outputs a space and is wide', () {
     final space = kBottomRow.firstWhere((k) => k.kind == KeyKind.space);
     expect(space.effectiveOutput, ' ');
     expect(space.flex, greaterThan(1));
-
-    final period = kBottomRow.firstWhere((k) => k.kind == KeyKind.period);
-    expect(period.effectiveOutput, '.');
   });
 
   test('KeyKind has no shift member (Hebrew has no shift/caps)', () {
