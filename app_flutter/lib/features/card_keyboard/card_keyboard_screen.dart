@@ -17,6 +17,8 @@ import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, kHardSignals;
+import 'package:buildsmart/features/word_finder/distinct_label.dart'
+    show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
@@ -112,6 +114,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// step carries a pure predicate; the live pool keeps only products for which
   /// EVERY step's predicate holds.
   final List<NewbieStep> stack = <NewbieStep>[];
+
+  /// Re-entrancy debounce (swarm R9): blocks a double-tap glitch from pushing a
+  /// step twice or stacking two product sheets. Set on a tap, cleared next frame.
+  bool _busy = false;
 
   /// The flag, read ONCE at mount (build-plan §1.6's flag-race guard): a late
   /// `featureFlagsProvider` load must never swap the engine mid-dive.
@@ -269,12 +275,22 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
                 axisGlyph: _glyphForAxis(c.axisId),
               ),
           ],
-        CardShowProducts(:final products) => [
-            for (final p in products)
-              WordKey(quickLabel(p), payload: _ProductTap(p.sku)),
-          ],
+        CardShowProducts(:final products) => _productKeys(products),
         CardResolve() => const <WordKey>[],
       };
+
+  /// Product keys for a ShowProducts list, labelled by [distinctSelectionLabels]
+  /// (swarm R9) — the smallest plain-language distinction between same-named cards
+  /// (mirrors WordFinderScreen, tasks #11/#12), with its sku fallback so a blank
+  /// nameHe is never a blank key. quickLabel is the last-ditch fallback if a sku
+  /// is somehow absent from the map.
+  List<WordKey> _productKeys(List<LipskeyCatalogProduct> products) {
+    final labels = distinctSelectionLabels(products);
+    return [
+      for (final p in products)
+        WordKey(labels[p.sku] ?? quickLabel(p), payload: _ProductTap(p.sku)),
+    ];
+  }
 
   /// Header prompt for the current verdict (empty for resolve).
   String _headerFor(CardVerdict v) => switch (v) {
@@ -290,6 +306,12 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   ///    its axisId+value DATA; the crumb shows displayLabel);
   ///  • [_ProductTap] — resolve by sku and open the reach-product sheet.
   void _onWordTap(WordKey key) {
+    // Debounce re-entrant taps within ONE frame (swarm R9): a double-tap must not
+    // push a step twice or stack two sheets. Reset next frame — by then the new
+    // keys (or a sheet's modal barrier) absorb further taps.
+    if (_busy) return;
+    _busy = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _busy = false);
     final payload = key.payload;
 
     if (payload is _WordTap) {
