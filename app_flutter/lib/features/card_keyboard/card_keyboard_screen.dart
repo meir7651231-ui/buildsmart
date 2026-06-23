@@ -44,11 +44,23 @@ const String kCardMergedQuestion = 'מה מתאים?';
 /// The flag-gated unified card-keyboard screen. Holds the answered-step [stack];
 /// everything else (what to show, what a tap means) is the pure engine's job.
 class CardKeyboardScreen extends ConsumerStatefulWidget {
-  const CardKeyboardScreen({super.key, this.subtype});
+  const CardKeyboardScreen({
+    super.key,
+    this.subtype,
+    this.forceLiveForTest = false,
+  });
 
   /// Optional curated sub-type, passed straight through to [mergedKeys]. Usually
   /// null (the generic dive).
   final String? subtype;
+
+  /// @visibleForTesting — force the self-gate ON regardless of the flag. The flag
+  /// is NOT unit-seedable (read as a `late final` at mount, BEFORE the notifier's
+  /// async prefs `_load` completes — the wall feature_flags.dart documents for the
+  /// word-finder demo), so a behavioral test constructs the screen with this true
+  /// to exercise the ON path. Default false → production is purely flag-driven.
+  @visibleForTesting
+  final bool forceLiveForTest;
 
   @override
   ConsumerState<CardKeyboardScreen> createState() => _CardKeyboardScreenState();
@@ -217,8 +229,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // SELF-GATE: dark unless the flag is on (read once at mount).
-    if (!_live) return const SizedBox.shrink();
+    // SELF-GATE: dark unless the flag is on (read once at mount). A behavioral
+    // test forces the ON path via [widget.forceLiveForTest] (the flag isn't
+    // unit-seedable).
+    if (!_live && !widget.forceLiveForTest) return const SizedBox.shrink();
 
     final v = verdict;
     final keys = _keysFor(v);

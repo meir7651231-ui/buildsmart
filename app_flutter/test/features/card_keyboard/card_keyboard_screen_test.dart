@@ -6,6 +6,8 @@
 // engine-tested mergedKeys (Phases 0-3); a flag-ON widget/tap test is a follow-up
 // (it needs the flag seeded + a tap harness).
 
+import 'package:buildsmart/features/card_keyboard/card_engine.dart'
+    show CardAskWords;
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:flutter/material.dart';
@@ -31,5 +33,41 @@ void main() {
         reason: 'flag OFF: no opening header');
     expect(find.byType(WordKeyboard), findsNothing,
         reason: 'flag OFF: no keyboard rendered');
+  });
+
+  testWidgets('flag ON (forced) → opening renders; tapping a word seeds the dive',
+      (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(body: CardKeyboardScreen(forceLiveForTest: true)),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Suppress the resolve sheet (read at tap-time, so no rebuild needed; no
+    // heavy sheet deps in this test). The ON path is forced via the widget param.
+    final state = tester.state(find.byType(CardKeyboardScreen)) as dynamic;
+    state.openSheetOnResolve = false;
+
+    // Opening: the header + the word keyboard render.
+    expect(find.text('מה אתה מחפש?'), findsOneWidget,
+        reason: 'flag ON: the opening header shows');
+    expect(find.byType(WordKeyboard), findsOneWidget,
+        reason: 'flag ON: the keyboard renders the opening words');
+
+    // Tap the first opening word → the engine seeds the pool and the dive moves
+    // off the opening word question (its first answered step).
+    final opening = state.verdict as CardAskWords;
+    expect(opening.words, isNotEmpty, reason: 'sanity: opening words exist');
+    final firstWord = opening.words.first.word as String;
+    await tester.tap(find.text(firstWord).first);
+    await tester.pumpAndSettle();
+
+    expect((state.crumbs as List).contains(firstWord), isTrue,
+        reason: 'tapping a word pushes the first dive step');
+    expect(state.verdict, isNot(isA<CardAskWords>()),
+        reason: 'the dive moved off the opening word question');
   });
 }
