@@ -73,8 +73,14 @@ void main() {
     });
     test('audit fix v2 — typos corrected, wrong-product images nulled', () {
       expect(bySku('779096F').nameHe.contains('גרפיטי'), false); // typo → גרפיני
-      expect(bySku('152785').imageFile, null); // cistern showed a toilet-seat photo
+      expect(bySku('196587').imageFile, null); // floor-drain still has no real photo
       expect(bySku('186466').imageFile, null); // kit showed a stock drawing
+    });
+    test('Lipskey home-PDF extraction — cisterns/trap/cap pulled from catalog', () {
+      expect(bySku('152785').imageFile, '152785.jpeg'); // Titan cistern, p50
+      expect(bySku('178870').imageFile, '178870.jpeg'); // Bareket (shares model photo)
+      expect(bySku('116167').imageFile, '116167.jpeg'); // gully trap, p27
+      expect(bySku('610918').imageFile, '610918.jpeg'); // round drainage cap, p33
     });
     test('image relink — assets present on R2 but unlinked are now wired', () {
       expect(bySku('997091').imageFile, '997091.jpeg'); // ברך 90° — asset existed, was null

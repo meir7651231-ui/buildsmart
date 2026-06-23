@@ -1659,7 +1659,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬜',
     page: 33,
     dims: {'מידות': 'Ø113 / Ø95 / Ø98', 'תיאור': 'מכסה עגול עליון קבוע'},
-    imageFile: null,
+    imageFile: '610918.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '635737',
@@ -2439,7 +2439,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 50,
     qtyPallet: 60,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '35.5 ס"מ', 'רוחב': '43.5 ס"מ', 'עומק': '15.5 ס"מ'},
-    imageFile: null,
+    imageFile: '152785.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '152786',
@@ -2481,7 +2481,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 50,
     qtyPallet: 50,
     dims: {'תכולה': '4.5/9 ליטר', 'גובה': '35.5 ס"מ', 'רוחב': '44.5 ס"מ', 'עומק': '15.5 ס"מ'},
-    imageFile: null,
+    imageFile: '145629.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '145630',
@@ -2695,7 +2695,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '42.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '17 ס"מ'},
-    imageFile: null,
+    imageFile: '168525.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '169604',
@@ -2709,7 +2709,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '42.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '17 ס"מ'},
-    imageFile: null,
+    imageFile: '169604.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178864',
@@ -2723,7 +2723,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '41.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '11.5 ס"מ'},
-    imageFile: null,
+    imageFile: '178864.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178867',
@@ -2737,7 +2737,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '41.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '11.5 ס"מ'},
-    imageFile: null,
+    imageFile: '178867.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178870',
@@ -2751,7 +2751,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '41.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '11.5 ס"מ'},
-    imageFile: null,
+    imageFile: '178870.jpeg',
   ),
 
   // ── חלקים סניטריים — page 29 ─────────────────────────────────────────────────
@@ -4325,7 +4325,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 27,
     dims: {'DN': '40'},
-    imageFile: null,
+    imageFile: '116167.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116163',

@@ -30,10 +30,11 @@ DIMS_REPLACE = {
     '218127': ("'דגם': 'פקק 2\" שחור'", "'דגם': 'פקק 2.5\" שחור'"),
 }
 # wrong-product images (vision-confirmed) → null so a clean placeholder shows.
-# NOTE: 78071545/77773001/777M1801 were later RE-EXTRACTED from the Qondus PDF
-# (correct crops now in assets/), so they are no longer nulled here.
-IMAGE_NULL = {'152785', '145629', '168525', '169604', '178864', '178867', '178870',
-              '196587', '116167', '118221', '120011', '610918', '186466', '686366'}
+# NOTE: most were later RE-EXTRACTED from the source PDFs (Qondus + Lipskey home)
+# — 3 from Qondus (78071545/77773001/777M1801), 9 from Lipskey (7 cisterns +
+# 116167 gully trap + 610918 round cap). Only these 5 remain nulled (their exact
+# SKU was not locatable in the available PDFs).
+IMAGE_NULL = {'196587', '118221', '120011', '186466', '686366'}
 NAME_FILL = {'77701150': "אנג\\'ל מקלח יד 5 מצבים"}
 
 s = open(F, encoding='utf-8').read()
