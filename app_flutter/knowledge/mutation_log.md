@@ -1288,3 +1288,10 @@
 - **ההלפר החדש:** `matchAssistantRecipeKey` + ענף `addToCart` ב-`parseAssistantIntent` (`assistant_intent.dart`, logic/ → גייט 42/44). זה ה-mutator היחיד — אך גם הוא רק **מציע** ערכה; כתיבת-הסל קורית במסך מאחורי tap-אישור מפורש (G5). ה-load-bearing: addToCart עם מפתח-ערכה מחוץ ל-`kSmartProducts` → degrade ל-`answer` (אין הוספה שגויה).
 - **טסט-נעיצה:** `test/assistant_intent_test.dart` — "addToCart with an INVENTED recipe key downgrades to answer (no wrong add)" (+ matchAssistantRecipeKey real→key/junk→null).
 - **mutation-verify:** baseline **+12 ירוק** → הזרקתי הסרת ה-guard בענף addToCart (`return AssistantIntent(action: action, key: key, …)` במקום matchAssistantRecipeKey→downgrade, `// MUTATION`) → טסט **אדום `+11 -1`** (`INVENTED recipe key` בלבד → ה-intent חזר `addToCart` עם ערכה-מומצאת במקום `answer`; שאר 11 ירוקים) → שחזור → **+12 ירוק**, RESTORED-IDENTICAL (0 MUTATION markers). analyze 0. G5 (כתיבה רק ב-confirm tap) הוא מבני — ה-`smartCartProvider.add` היחיד יושב ב-`_confirmAdd`, ושום נתיב-מודל לא מגיע אליו.
+
+## #residual-rt — תיקון-מדד + מילוי-שארית R8 — 2026-06-23
+- **תיקון-כן:** מדד "dims 100%" של v6.57 היה מנופח (ספר בלוק-`dims` גם כשהכיל רק `'תיאור'`=השם). **המדד הנכון=מפרט-אמיתי** (מפתח≠תיאור): **79%**. לקח: למדוד `[k for k in dims if k!='תיאור']`, לא נוכחות-בלוק.
+- **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** `scripts/fill_residual_rt.py` הוסיף R8-verbatim **9 מידה** (אינטש/ס"מ שנכתבו בשם והוחמצו — הregex הקודם תפס מ"מ אך לא ס"מ/אינטש/`/`) + **9 color** (צבע-טהור בשם: אפור/לבן/שחור — לעולם לא חומר-גוף, R8-בטוח בכל קטגוריה). **מפרט-אמיתי 79%→80% · color 25%→26%.** gate-117 מודר (פחות מהמועמדים הוחל = כיוון-בטוח).
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `273089` dims['מידה']='2"'; `116180` color='אפור'.
+- **mutation-verify:** baseline **+11 ירוק** → `273089` `'מידה':'2"'`→`'9"'` → **אדום `+8 -1`** ("residual inch size") → שחזור → **+11 ירוק**. analyze 0 errors. parity+product_journey(935) ירוקים.
+- **התקרה תחת R8 ≈ 80%.** ~184 הנותרים (מושבי-אסלה לפי דגם · רשתות · ערכות) חסרי-מידה-בשם באמת — 100% אמיתי=דפי-מפרט מהספק (#56). **המדד אינו מוצג ב-UI**; השינוי בכרטיס-הפנימי בלבד.

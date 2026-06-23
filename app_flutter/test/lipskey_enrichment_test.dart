@@ -49,6 +49,12 @@ void main() {
     test('decorative finish from its own name (category-aware)', () {
       expect(bySku('77701205').color, 'זהב מוברש');
     });
+    test('residual inch size in the name (only-תיאור gap)', () {
+      expect(bySku('273089').dims?['מידה'], '2"'); // משפך אמריקאי
+    });
+    test('pure-colour word in the name (never a material)', () {
+      expect(bySku('116180').color, 'אפור'); // צינור הכנסה אפור
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
