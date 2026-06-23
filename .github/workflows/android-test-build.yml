@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.58 — איכות: תיקון baseline-test (worker_reports drill-down close) → known-failing 2→1 · כל 12 פיצ'רי-ה-AI ללא-שינוי · v6.58 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.59 — 💳 'הסבר אשראי' בלוח-המנהל: Claude מסביר מה ניצול-האשראי של הלקוח אומר לפני אישור הזמנה (על המספרים האמיתיים) · + כל 12 פיצ'רי-ה-AI · v6.59 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

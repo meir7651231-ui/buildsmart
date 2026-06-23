@@ -4,6 +4,23 @@
 
 ---
 
+## v6.59 — #ai-credit-explain · sheet-לקוח (מנהל): כפתור "💳 הסבר אשראי" — 2026-06-23
+
+**שינוי (lib/screens):** `manager_dashboard_screen.dart` — ב-`_CustomerDetailSheet`, מתחת לשורות-האשראי,
+נוסף `if (gateway != null)` עם "💳 הסבר אשראי" → `CreditExplainScreen`. `credit_explain_screen.dart` (חדש) —
+מציג את 4 המספרים האמיתיים (מסגרת/נוצל/יתרה/ניצול%) וקורא ל-Claude להסבר.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): ב-sheet הלקוח, מתחת לשורות-האשראי, מופיע "💳 הסבר אשראי";
+  לחיצה פותחת מסך עם המספרים האמיתיים בראש (loader → הסבר Claude מה הניצול אומר לפני אישור הזמנה). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → ה-sheet byte-identical
+  (שורות-האשראי + רשימת-ההזמנות בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 · `credit_explain_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.59).
+
+---
+
 ## v6.56 — #ai-assistant-agentic Phase 2 · "הוסף לסל" עם אישור בבועה — 2026-06-23
 
 **שינוי (lib/screens):** `ai_assistant_screen.dart` — בועת-עוזר עבור `addToCart` מציגה את הערכה (רשימת-פריטים אמיתית)

@@ -1,0 +1,210 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CreditExplainScreen — "💳 הסבר אשראי" (#ai-credit-explain): the AI explainer on
+// the manager's customer credit. The figures — credit limit, used, balance,
+// utilisation % — are all deterministic (mgrCustomerList / contractorCredit /
+// computeCredit over the live orders engine); Claude only EXPLAINS what the
+// utilisation means for approving the next order. The numbers are the engine's;
+// the model never invents one.
+//
+// ANTI-HALLUCINATION (grounded — explain-only): the prompt HANDS Claude the real
+// limit/used/balance/% and FORBIDS inventing or changing any number. A credit
+// call is a money decision, so the discipline is strict.
+//
+// Gated by `claudeGatewayProvider` (null unless useFirebaseBackend && kClaudeAi):
+// OFF → an honest "requires connection" state; the demo/test build is unchanged.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// The grounded prompt — hands the model the REAL credit figures and asks ONLY
+/// for a short read on the utilisation; every number must be used as-is.
+String creditExplainPrompt({
+  required String name,
+  required int creditLimit,
+  required int used,
+  required int balance,
+  required int pct,
+}) {
+  return 'לקוח: "$name".\n'
+      'מסגרת-אשראי: ₪$creditLimit · נוצל: ₪$used · יתרה: ₪$balance · '
+      'ניצול: $pct%.\n\n'
+      'הסבר למנהל ב-2–3 משפטים בעברית מה המשמעות של ניצול-האשראי הזה — האם הלקוח '
+      'קרוב לתקרה או פנוי, ומה כדאי לשקול לפני אישור הזמנה נוספת. השתמש אך ורק '
+      'במספרים שניתנו לך — אל תמציא, תשנה או תוסיף שום מספר.';
+}
+
+const String _kSystem =
+    'אתה יועץ-אשראי מנוסה למנהל-רכש. אתה מסביר בקצרה ובכנות מה משמעות ניצול-האשראי '
+    'של לקוח. השתמש אך ורק במספרים שניתנו לך; לעולם אל תמציא, תשנה או תוסיף מספר.';
+
+class CreditExplainScreen extends ConsumerStatefulWidget {
+  const CreditExplainScreen({
+    super.key,
+    required this.name,
+    required this.creditLimit,
+    required this.used,
+    required this.balance,
+    required this.pct,
+  });
+
+  final String name;
+  final int creditLimit;
+  final int used;
+  final int balance;
+  final int pct;
+
+  static Route<void> route({
+    required String name,
+    required int creditLimit,
+    required int used,
+    required int balance,
+    required int pct,
+  }) =>
+      MaterialPageRoute<void>(
+        builder: (_) => CreditExplainScreen(
+          name: name,
+          creditLimit: creditLimit,
+          used: used,
+          balance: balance,
+          pct: pct,
+        ),
+      );
+
+  @override
+  ConsumerState<CreditExplainScreen> createState() => _CreditExplainState();
+}
+
+class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
+  bool _loading = false;
+  bool _failed = false;
+  String? _explanation;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _explain());
+  }
+
+  Future<void> _explain() async {
+    final gw = ref.read(claudeGatewayProvider);
+    if (gw == null) return;
+    setState(() {
+      _loading = true;
+      _failed = false;
+      _explanation = null;
+    });
+    try {
+      final r = await gw.ask(
+        prompt: creditExplainPrompt(
+          name: widget.name,
+          creditLimit: widget.creditLimit,
+          used: widget.used,
+          balance: widget.balance,
+          pct: widget.pct,
+        ),
+        system: _kSystem,
+        maxTokens: 300,
+      );
+      if (mounted) {
+        setState(() {
+          _explanation = r.text.trim();
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final aiAvailable = ref.watch(claudeGatewayProvider) != null;
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.cardLight,
+          elevation: 0,
+          title: const Text('💳 הסבר אשראי',
+              style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18)),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          children: [
+            // ── The REAL credit figures (data, never the model). ──
+            Text(widget.name,
+                style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800)),
+            const SizedBox(height: BsTokens.space2),
+            _row('מסגרת', '₪${widget.creditLimit}'),
+            _row('נוצל', '₪${widget.used}'),
+            _row('יתרה', '₪${widget.balance}'),
+            _row('ניצול', '${widget.pct}%'),
+            const Divider(height: BsTokens.space5, color: Color(0xFFEEEEEE)),
+
+            if (!aiAvailable)
+              const Text('💡 ההסבר החכם דורש חיבור לשרת.',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 13))
+            else if (_loading)
+              const Center(child: CircularProgressIndicator())
+            else if (_failed)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('משהו השתבש — נסה שוב.',
+                      style: TextStyle(color: BsTokens.danger, fontSize: 14)),
+                  const SizedBox(height: BsTokens.space3),
+                  OutlinedButton.icon(
+                    onPressed: _explain,
+                    icon: const Text('🔄'),
+                    label: const Text('נסה שוב'),
+                  ),
+                ],
+              )
+            else if (_explanation != null)
+              Text(_explanation!,
+                  style: const TextStyle(
+                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+            const SizedBox(height: BsTokens.space4),
+            const Text('⚙️ המספרים מנתוני-המערכת; ה-AI רק מסביר אותם.',
+                style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(label,
+                  style: const TextStyle(
+                      color: BsTokens.mutedLight, fontSize: 13)),
+            ),
+            Text(value,
+                style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700)),
+          ],
+        ),
+      );
+}

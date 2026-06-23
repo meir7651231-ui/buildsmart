@@ -2615,3 +2615,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **G5 — mutation מאחורי tap בלבד:** ה-`smartCartProvider.add` היחיד יושב ב-`_confirmAdd`, שמופעל **רק** מלחיצת המשתמש על "🛒 הוסף N לסל" בבועה. עד האישור הערכה היא **הצעה בלבד** (`_confirmedKitTurns` עוקב לפי index). שום נתיב-מודל לא מגיע ל-add — ה-AI מציע, המשתמש מאשר, הקוד מבצע. הכתיבה = ה-`SmartCartLine` הוורבטים מ-describe→cart.
 - **anti-hallucination:** addToCart עם מפתח מחוץ ל-`kSmartProducts` → `answer` (אין הוספה שגויה); אם ה-recipe לא מרכיב פריטים → הודעת-שיחה, לא כפתור.
 - **gate:** analyze 0 errors/warnings · `assistant_intent_test` (+addToCart: real-key-stays · invented-key→answer · matchAssistantRecipeKey) + `ai_assistant_test` ירוקים · mutation-verify (#ai-assistant-agentic-p2, +12→+11-1→+12) · full-suite baseline. assistant_intent ב-logic → גייט 42/44; ai_assistant_screen ב-screens → גייט 24/116.
+
+### #ai-credit-explain — "💳 הסבר אשראי" ב-sheet הלקוח (מנהל · solo-wave) — 2026-06-23
+- **המהלך:** `credit_explain_screen.dart` (חדש) + נגיעה ב-`manager_dashboard_screen.dart`: ב-`_CustomerDetailSheet` (ConsumerWidget), מתחת לשורות-האשראי (מסגרת/נוצל/יתרה/אתרים), נוסף `if (claudeGatewayProvider != null) ...[` עם `OutlinedButton.icon` **"💳 הסבר אשראי"** → `CreditExplainScreen.route(name, creditLimit, used, balance, pct)`. +2 imports.
+- **הזרימה:** המספרים (מסגרת/נוצל/יתרה/ניצול%) דטרמיניסטיים — `mgrCustomerList`/`contractorCredit`/`computeCredit` מעל מנוע-ההזמנות החי. המסך מציג אותם, ו-Claude **רק מסביר** מה משמעות הניצול לפני אישור הזמנה נוספת.
+- **anti-hallucination (grounded, explain-only):** ה-prompt (`creditExplainPrompt`) מוסר את 4 המספרים ו**אוסר** להמציא/לשנות/להוסיף מספר — החלטת-אשראי = החלטת-כסף. המספרים על המסך = של המנוע.
+- **gating:** ה-`if (claudeGatewayProvider != null)` → ב-demo/no-AI הכפתור **לא קיים בעץ**, ה-sheet byte-identical (שורות-האשראי ללא-שינוי). המסך ב-null → "דורש חיבור".
+- **gate:** analyze 0 errors/warnings · `credit_explain_test` (4-figures verbatim · forbids-inventing guard) ירוק · full-suite baseline. credit_explain_screen + manager_dashboard_screen ב-screens → גייט 24/116.

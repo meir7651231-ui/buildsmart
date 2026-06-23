@@ -1,6 +1,8 @@
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 // A13 — the server-canonical credit seam: the repository provider + the
 // neutral CreditResult the `computeCredit` callable resolves through.
 import 'package:buildsmart/data/repositories/customers_local.dart'
@@ -10,6 +12,8 @@ import 'package:buildsmart/data/repositories/order_functions.dart'
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/credit_explain_screen.dart'
+    show CreditExplainScreen;
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
@@ -2065,6 +2069,28 @@ class _CustomerDetailSheet extends ConsumerWidget {
             row('נוצל', '₪${_grouped(liveTotalSpend)}'),
             row('יתרה זמינה', '₪${_grouped(balance)}'),
             row('אתרי בנייה', '$liveSites'),
+            // #ai-credit-explain — when AI is live, explain what this utilisation
+            // means before approving the next order. gateway null (demo) → not in
+            // the tree → the detail sheet is byte-identical.
+            if (ref.watch(claudeGatewayProvider) != null) ...[
+              const SizedBox(height: BsTokens.space3),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    CreditExplainScreen.route(
+                      name: c.name,
+                      creditLimit: creditLimit,
+                      used: liveTotalSpend,
+                      balance: balance,
+                      pct: livePct,
+                    ),
+                  ),
+                  icon: const Text('💳'),
+                  label: const Text('הסבר אשראי'),
+                ),
+              ),
+            ],
             if (orders.isNotEmpty) ...[
               const SizedBox(height: BsTokens.space4),
               Align(
