@@ -17,9 +17,18 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 
-/// The CLOSED action set the model must pick from (Phase 1 — all read-only).
-enum AssistantAction { answer, findProduct, summarizeOrders, checkBudget }
+/// The CLOSED action set the model must pick from. Read-only actions (Phase 1)
+/// + `addToCart` (Phase 2 — the sole mutator, and even it only PROPOSES; the
+/// cart write happens in the screen behind an explicit user confirmation tap).
+enum AssistantAction {
+  answer,
+  findProduct,
+  summarizeOrders,
+  checkBudget,
+  addToCart,
+}
 
 /// A validated intent: the action, an optional validated [key] (a real catalog
 /// category for findProduct), and the conversational [say] shown to the user.
@@ -58,6 +67,22 @@ String? matchAssistantCategory(String reply) {
   return null;
 }
 
+/// Resolve a recipe reply to a REAL `kSmartProducts` key — exact then contained.
+/// Returns null when the reply names no real recipe (the closed-set guard for
+/// `addToCart`; mirrors `matchRecipe`). The screen turns the key into the real
+/// kit and only writes the cart on the user's confirm tap.
+String? matchAssistantRecipeKey(String reply) {
+  final r = reply.trim();
+  if (r.isEmpty) return null;
+  for (final p in kSmartProducts) {
+    if (r == p.key) return p.key;
+  }
+  for (final p in kSmartProducts) {
+    if (r.contains(p.key)) return p.key;
+  }
+  return null;
+}
+
 AssistantAction? _actionFromString(String s) {
   switch (s) {
     case 'answer':
@@ -68,6 +93,8 @@ AssistantAction? _actionFromString(String s) {
       return AssistantAction.summarizeOrders;
     case 'checkBudget':
       return AssistantAction.checkBudget;
+    case 'addToCart':
+      return AssistantAction.addToCart;
     default:
       return null;
   }
@@ -86,6 +113,8 @@ String assistantIntentPrompt(List<IntentTurn> history, String userText) {
       ? history.sublist(history.length - kIntentHistoryWindow)
       : history;
   final cats = assistantCategories().join('\n');
+  final recipes =
+      [for (final r in kSmartProducts) '${r.key}=${r.name}'].join('\n');
   final b = StringBuffer();
   if (recent.isNotEmpty) {
     b.writeln('השיחה עד כה:');
@@ -97,17 +126,22 @@ String assistantIntentPrompt(List<IntentTurn> history, String userText) {
   b.writeln('המשתמש כתב: "$userText".');
   b.writeln('בחר פעולה אחת מהרשימה הסגורה והחזר שורת-JSON אחת בלבד:');
   b.writeln('- "answer": ענה ישירות. שים את התשובה ב-say, key="".');
-  b.writeln('- "findProduct": המשתמש מחפש מוצר. key = קטגוריה אחת מהרשימה למטה '
-      'בדיוק (שורה אחת).');
+  b.writeln('- "findProduct": המשתמש מחפש מוצר. key = קטגוריה אחת מרשימת '
+      'הקטגוריות למטה בדיוק (שורה אחת).');
   b.writeln('- "summarizeOrders": המשתמש שואל על ההזמנות/הרכש שלו.');
   b.writeln('- "checkBudget": המשתמש שואל על התקציב / כמה נשאר.');
+  b.writeln('- "addToCart": המשתמש מבקש להוסיף ערכה לסל. key = מפתח-ערכה אחד '
+      'מרשימת הערכות למטה בדיוק (החלק שלפני ה-=).');
   b.writeln();
   b.writeln('קטגוריות זמינות ל-findProduct:');
   b.writeln(cats);
   b.writeln();
+  b.writeln('ערכות זמינות ל-addToCart (מפתח=שם):');
+  b.writeln(recipes);
+  b.writeln();
   b.writeln('החזר אך ורק שורת-JSON אחת בפורמט: '
       '{"action":"...","key":"...","say":"..."}');
-  b.writeln('אם אף קטגוריה לא מתאימה ל-findProduct — השתמש ב-answer.');
+  b.writeln('אם אף קטגוריה/ערכה לא מתאימה — השתמש ב-answer.');
   return b.toString();
 }
 
@@ -147,6 +181,14 @@ AssistantIntent parseAssistantIntent(String raw) {
             say.isNotEmpty ? say : 'לא הבנתי איזה מוצר — נסה לתאר אחרת.');
       }
       return AssistantIntent(action: action, key: cat, say: say);
+    }
+    if (action == AssistantAction.addToCart) {
+      final recipe = matchAssistantRecipeKey(key); // closed-set validation
+      if (recipe == null) {
+        return AssistantIntent.answer(
+            say.isNotEmpty ? say : 'לא הבנתי איזו ערכה — נסה לתאר אחרת.');
+      }
+      return AssistantIntent(action: action, key: recipe, say: say);
     }
     // Read-only, no key needed.
     return AssistantIntent(action: action, say: say);

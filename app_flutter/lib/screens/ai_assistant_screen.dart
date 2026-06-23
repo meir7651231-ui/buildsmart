@@ -18,6 +18,8 @@
 // demo/test build is unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/lipskey_catalog.dart'
+    show LipskeyCatalogProduct;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/logic/ai_hub_logic.dart'
@@ -25,16 +27,28 @@ import 'package:buildsmart/logic/ai_hub_logic.dart'
 import 'package:buildsmart/logic/assistant_intent.dart';
 import 'package:buildsmart/screens/ai_finder_screen.dart'
     show productsInCategory;
+import 'package:buildsmart/screens/describe_to_cart_screen.dart'
+    show matchRecipe, resolvedKitProducts;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
+import 'package:buildsmart/state/smart_cart.dart'
+    show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A single conversation turn (kept local — never persisted to the chat engine).
+/// A bot turn may carry a [kit] — a PROPOSED add-to-cart (Phase 2). The kit is
+/// the REAL resolved products; the cart is written only when the user taps the
+/// confirm button on this turn (tracked by index in `_confirmedKitTurns`).
 class AssistantTurn {
-  const AssistantTurn({required this.user, required this.text});
+  const AssistantTurn({
+    required this.user,
+    required this.text,
+    this.kit = const [],
+  });
   final bool user; // true = the contractor, false = the assistant
   final String text;
+  final List<LipskeyCatalogProduct> kit;
 }
 
 /// The system prompt — this IS the grounding for an open assistant: domain-bound,
@@ -86,6 +100,9 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
   final List<AssistantTurn> _turns = [];
+  // Turn indices whose proposed add-to-cart the user has CONFIRMED — the only
+  // gate to the cart write. Until a turn is in here its kit is just a proposal.
+  final Set<int> _confirmedKitTurns = {};
   bool _loading = false;
 
   @override
@@ -127,13 +144,9 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
       if (!mounted) return;
       // Parse + closed-set-validate; a garbled/hallucinated reply degrades to a
       // plain answer (never acts wrongly). Then run the action over REAL engines.
-      final reply = _dispatchIntent(parseAssistantIntent(r.text));
+      final turn = _dispatchIntent(parseAssistantIntent(r.text));
       setState(() {
-        _turns.add(AssistantTurn(
-            user: false,
-            text: reply.isEmpty
-                ? 'לא הצלחתי לנסח תשובה — נסה לנסח אחרת.'
-                : reply));
+        _turns.add(turn);
         _loading = false;
       });
     } catch (_) {
@@ -147,25 +160,32 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
     _scrollToEnd();
   }
 
-  /// Run a VALIDATED intent over the REAL engines and format a Hebrew reply.
-  /// READ-ONLY — never mutates state (Phase 1). Every product/number comes from
-  /// the engines (kCatalogProducts via productsInCategory / computeAnalyticsInsights),
-  /// never the model; the model supplied only the validated key + the prose `say`.
-  String _dispatchIntent(AssistantIntent intent) {
+  /// Run a VALIDATED intent over the REAL engines and build the assistant's turn.
+  /// Every product/number comes from the engines (productsInCategory /
+  /// computeAnalyticsInsights / resolvedKitProducts — real SKUs), never the model;
+  /// the model supplied only the validated key + prose `say`. `addToCart` only
+  /// PROPOSES a kit (carried on the turn) — the cart write waits for the confirm tap.
+  AssistantTurn _dispatchIntent(AssistantIntent intent) {
     switch (intent.action) {
       case AssistantAction.answer:
-        return intent.say;
+        final say = intent.say.trim();
+        return AssistantTurn(
+            user: false,
+            text: say.isEmpty ? 'לא הצלחתי לנסח תשובה — נסה לנסח אחרת.' : say);
       case AssistantAction.findProduct:
         final products = productsInCategory(intent.key);
         final head = intent.say.isNotEmpty
             ? intent.say
             : 'מצאתי בקטגוריה "${intent.key}":';
         if (products.isEmpty) {
-          return '$head\n(אין מוצרים בקטגוריה הזו כרגע.)';
+          return AssistantTurn(
+              user: false, text: '$head\n(אין מוצרים בקטגוריה הזו כרגע.)');
         }
         final lines =
             [for (final p in products.take(8)) '• ${p.nameHe}'].join('\n');
-        return '$head\n📂 ${intent.key} · ${products.length} מוצרים\n$lines';
+        return AssistantTurn(
+            user: false,
+            text: '$head\n📂 ${intent.key} · ${products.length} מוצרים\n$lines');
       case AssistantAction.summarizeOrders:
         final insights =
             computeAnalyticsInsights(ref.read(ordersEngineProvider));
@@ -174,15 +194,62 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
             if (it.ic != '📊') '${it.ic} ${it.title}',
         ].join('\n');
         final head = intent.say.isNotEmpty ? intent.say : '📊 ההזמנות שלך:';
-        return rows.isEmpty ? '$head\n(אין הזמנות עדיין.)' : '$head\n$rows';
+        return AssistantTurn(
+            user: false,
+            text: rows.isEmpty ? '$head\n(אין הזמנות עדיין.)' : '$head\n$rows');
       case AssistantAction.checkBudget:
         final insights =
             computeAnalyticsInsights(ref.read(ordersEngineProvider));
         final budget = insights.where((it) => it.ic == '📊').toList();
         final head = intent.say.isNotEmpty ? intent.say : '📊 התקציב:';
-        if (budget.isEmpty) return '$head\n(אין נתוני תקציב.)';
-        return '$head\n${budget.map((it) => '${it.ic} ${it.title} · ${it.sub}').join('\n')}';
+        return AssistantTurn(
+            user: false,
+            text: budget.isEmpty
+                ? '$head\n(אין נתוני תקציב.)'
+                : '$head\n${budget.map((it) => '${it.ic} ${it.title} · ${it.sub}').join('\n')}');
+      case AssistantAction.addToCart:
+        final recipe = matchRecipe(intent.key);
+        final List<LipskeyCatalogProduct> products =
+            recipe == null ? const [] : resolvedKitProducts(recipe);
+        if (products.isEmpty) {
+          return AssistantTurn(
+              user: false,
+              text: intent.say.isNotEmpty
+                  ? intent.say
+                  : 'לא הצלחתי להרכיב את הערכה — נסה לתאר אחרת.');
+        }
+        final head =
+            intent.say.isNotEmpty ? intent.say : 'הרכבתי ערכה — להוסיף לסל?';
+        final lines =
+            [for (final p in products.take(8)) '• ${p.nameHe}'].join('\n');
+        return AssistantTurn(
+            user: false,
+            text: '$head\n${products.length} פריטים:\n$lines',
+            kit: products);
     }
+  }
+
+  /// The ONLY cart-write path — reachable solely by the user tapping confirm on a
+  /// proposed-kit turn (G5). Reuses describe→cart's exact SmartCartLine write.
+  void _confirmAdd(List<LipskeyCatalogProduct> kit, int turnIndex) {
+    final notifier = ref.read(smartCartProvider.notifier);
+    for (final p in kit) {
+      notifier.add(SmartCartLine(
+        productKey: 'lip:${p.sku}',
+        productName: p.nameHe,
+        productEmoji: p.typeEmoji,
+        brandName: p.brand,
+        brandPrice: 0,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+    setState(() => _confirmedKitTurns.add(turnIndex));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('נוספו ${kit.length} פריטים לסל ✓'),
+      duration: const Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
   }
 
   @override
@@ -223,7 +290,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
                             itemCount: _turns.length + (_loading ? 1 : 0),
                             itemBuilder: (context, i) {
                               if (i >= _turns.length) return _typingBubble();
-                              return _bubble(_turns[i]);
+                              return _bubble(_turns[i], i);
                             },
                           ),
                   ),
@@ -247,7 +314,8 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
                   style:
                       TextStyle(color: BsTokens.inkLight, fontSize: 15)),
               SizedBox(height: 6),
-              Text('לבניית סל או חיפוש מוצר — אפנה אותך לכלים החכמים באפליקציה.',
+              Text('אפשר גם לבקש: "תמצא לי ברז" · "מה מצב ההזמנות" · '
+                  '"כמה נשאר בתקציב" · "תוסיף ערכה לסל".',
                   textAlign: TextAlign.center,
                   style:
                       TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
@@ -256,8 +324,10 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
         ),
       );
 
-  Widget _bubble(AssistantTurn t) {
+  Widget _bubble(AssistantTurn t, int index) {
     final isUser = t.user;
+    final hasKit = !isUser && t.kit.isNotEmpty;
+    final confirmed = _confirmedKitTurns.contains(index);
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -269,11 +339,34 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
           color: isUser ? BsTokens.brand : BsTokens.cardLight,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Text(t.text,
-            style: TextStyle(
-                color: isUser ? Colors.white : BsTokens.inkLight,
-                fontSize: 14,
-                height: 1.4)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(t.text,
+                style: TextStyle(
+                    color: isUser ? Colors.white : BsTokens.inkLight,
+                    fontSize: 14,
+                    height: 1.4)),
+            // #ai-assistant-agentic Phase 2 — the cart write is gated behind THIS
+            // explicit tap (G5); until confirmed the kit is only a proposal.
+            if (hasKit) ...[
+              const SizedBox(height: 8),
+              if (confirmed)
+                const Text('✓ נוסף לסל',
+                    style: TextStyle(
+                        color: Color(0xFF0F766E),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800))
+              else
+                FilledButton.icon(
+                  onPressed: () => _confirmAdd(t.kit, index),
+                  icon: const Icon(Icons.add_shopping_cart, size: 18),
+                  label: Text('הוסף ${t.kit.length} לסל'),
+                ),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -4,6 +4,22 @@
 
 ---
 
+## v6.56 — #ai-assistant-agentic Phase 2 · "הוסף לסל" עם אישור בבועה — 2026-06-23
+
+**שינוי (lib/screens):** `ai_assistant_screen.dart` — בועת-עוזר עבור `addToCart` מציגה את הערכה (רשימת-פריטים אמיתית)
++ כפתור **"🛒 הוסף N לסל"**; לחיצה → `_confirmAdd` כותב לסל ומחליף ל-"✓ נוסף לסל". מצב-ריק עודכן (העוזר עכשיו *עושה*).
+
+**אימות (reasoning + קוד + טסטים):**
+- **AI דלוק** + "תוסיף ערכה לסל": המודל מחזיר `{"action":"addToCart","key":"<recipe>"}` → בועה עם הפריטים האמיתיים
+  + כפתור-אישור. **רק לחיצה** מוסיפה (G5 — ה-`smartCartProvider.add` היחיד ב-`_confirmAdd`); אחרי לחיצה → "✓ נוסף".
+- **מפתח-ערכה מומצא / JSON שבור** → `parseAssistantIntent` → `answer` → בועת-שיחה, **בלי כפתור** ובלי הוספה.
+- **AI כבוי** (gateway null): off-state קיים, ללא-שינוי. byte-identical.
+
+**תוצאה:** ✅ הוספה רק אחרי אישור-משתמש (אף נתיב-מודל לא כותב לסל לבד). `ai_assistant_test` הישן ירוק · analyze 0 ·
+mutation-verify (#ai-assistant-agentic-p2). צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.56).
+
+---
+
 ## v6.55 — #ai-assistant-agentic · העוזר לוקח פעולות (Phase 1 read-only) — 2026-06-22
 
 **שינוי (lib/screens):** `ai_assistant_screen.dart` — ה-`_send` שוכתב: במקום reply-טקסט, המודל מחזיר JSON-פעולה,
