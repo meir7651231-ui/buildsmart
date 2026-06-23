@@ -41,6 +41,13 @@ final WordLexicon cardKeyboardLexicon = buildWordLexicon(kDivePool);
 /// OWNER-REVIEW.
 const String kCardMergedQuestion = 'מה מתאים?';
 
+/// The answered-step axisLabel for the OPENING word (swarm R7). Deliberately NOT
+/// any [SignalSource.axisName] — so seeding the pool with the opening word does
+/// not mark the WORD axis answered, leaving it available for deeper in-merge word
+/// refinement ('ברז' → 'כדורי') per build-plan §1.3. The seed word itself never
+/// re-appears (wordOptions drops words shared across the whole pool).
+const String _kOpeningWordAxis = 'מילת-פתיחה';
+
 /// Typed tap payload (swarm R6): each [WordKey] carries a [_Tap] so the handler
 /// dispatches by TYPE. This replaces the earlier `'chip|axisId|displayLabel|value'`
 /// magic-string payload, which (a) was not pipe-safe — a `|` in the middle
@@ -161,6 +168,12 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   @visibleForTesting
   List<String> get crumbs => [for (final s in stack) s.crumbWord];
 
+  /// @visibleForTesting — the answered AXIS labels, in order (swarm R7: lets a
+  /// test assert the opening word does NOT answer the word axis, so the word axis
+  /// stays available for deeper in-merge refinement).
+  @visibleForTesting
+  List<String> get answeredAxes => [for (final s in stack) s.axisLabel];
+
   /// Reconstruct a merged chip's narrowing predicate from its `(axisId, value)`
   /// DATA (build-plan §2 #19 — the step is rebuilt from data, not a captured
   /// closure over a SignalChip, so it is replay-stable). Looks up the
@@ -265,10 +278,13 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         for (final p in resolveWord(payload.word, cardKeyboardLexicon)) p.sku,
       };
       _pushStep(NewbieStep(
-        // EXPLICIT coupling (swarm R1): the word axis's answered-label is the
-        // WordSignal's own axisName, so the merge's answered-axis exclusion
-        // matches the word axis BY CONSTRUCTION (no magic 'דגם' string).
-        axisLabel: const WordSignal().axisName,
+        // The opening word SEEDS the pool; it must NOT answer the word axis, so
+        // the merge can still offer DEEPER distinguishing words ('ברז' → 'כדורי')
+        // alongside size/material — word is one of the five merged axes (§1.3;
+        // swarm R5/R7 caught the opening burning it). A distinct seed label keeps
+        // the word axis UNanswered; a later merge WORD chip-tap answers
+        // WordSignal.axisName and closes it (so the dive still terminates).
+        axisLabel: _kOpeningWordAxis,
         chipLabel: payload.word,
         crumbWord: payload.word,
         predicate: (p) => skuSet.contains(p.sku),

@@ -70,6 +70,12 @@ void main() {
     expect(state.verdict, isNot(isA<CardAskWords>()),
         reason: 'the dive moved off the opening word question');
 
+    // The opening word must NOT burn the WORD axis (swarm R7): it seeds with a
+    // distinct axis label, so 'דגם' (WordSignal.axisName) is NOT answered and the
+    // merge can still offer deeper distinguishing words.
+    expect((state.answeredAxes as List).contains('דגם'), isFalse,
+        reason: 'opening word seeds, it does not answer the word axis');
+
     // If the dive landed on the merged row, tap the first merged chip → it must
     // decode the 'chip|axisId|displayLabel|value' payload, push a step, and add
     // the chip's VISIBLE displayLabel as the crumb (swarm R2 FIX C: the crumb is

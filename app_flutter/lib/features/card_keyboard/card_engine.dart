@@ -242,6 +242,7 @@ List<SignalChip> _mergedChips(
     final n = distinctCardCount(scoringPool);
     if (n == 0) continue; // div-0 guard; an empty scoring pool can't split
     var sumSq = 0;
+    var anySplit = false;
     for (final chip in chips) {
       final narrowed = scoringPool
           .where(
@@ -250,8 +251,14 @@ List<SignalChip> _mergedChips(
           )
           .toList();
       final nc = distinctCardCount(narrowed);
+      if (nc < n) anySplit = true; // this chip actually narrows the pool
       sumSq += nc * nc;
     }
+    // Skip an axis that can't narrow AT ALL — every chip keeps the full pool
+    // (e.g. multi-valued products that match every size chip). Laying it out
+    // would present a visible NO-OP tap; route past it to a more decisive axis
+    // or the convergence floor instead (swarm R7).
+    if (!anySplit) continue;
     scored.add(_AxisScore(rank, chips, sumSq, n));
   }
 
