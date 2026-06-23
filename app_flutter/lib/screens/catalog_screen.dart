@@ -118,6 +118,31 @@ const Map<String, List<String>> kSearchSynonyms = {
 String _normForSearch(String s) =>
     s.toLowerCase().replaceAll('״', '"').replaceAll('׳', "'");
 
+/// The seven one-letter Hebrew clitic prefixes (the מש״ה־וכל״ב set) that attach
+/// to the front of a word — הברז, באמבטיה, לדוד. A query token may sit one of
+/// these past a word start, so "דוד" still finds "הדוד".
+const String _kHebrewPrefixes = 'משהוכלב';
+
+/// Word-boundary-aware token match — the replacement for a raw `hay.contains`.
+/// [token] hits [hay] when it is the prefix of some whitespace-delimited word in
+/// [hay], or of that word past a single Hebrew clitic prefix. This keeps the
+/// prefix/plural hits a forgiving search needs ("ברז"→"ברזים", "דוד"→"הדוד")
+/// while dropping the mid-word substring false-positives a plain `contains`
+/// produced — so "דוד" no longer drags in "בידוד". Numeric/size tokens (1/2")
+/// keep working: they are whole space-delimited words, matched by the prefix arm.
+bool _tokenHitHe(String hay, String token) {
+  if (token.isEmpty) return false;
+  for (final w in hay.split(RegExp(r'\s+'))) {
+    if (w.startsWith(token)) return true;
+    if (w.length > token.length &&
+        _kHebrewPrefixes.contains(w[0]) &&
+        w.substring(1).startsWith(token)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /// Forgiving product match for the search bar: a non-technical user types plain
 /// words ("ברז מטבח", "ניקוז", "שירותים") and the app does the finding — without
 /// them knowing the catalogue's term. Matches across name + category + SKU +
@@ -135,13 +160,13 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
   // under SKU-coincidence noise. Word queries don't touch the SKU at all.
   if (q.length >= 5 && _normForSearch(p.sku).contains(q)) return true;
   final hay = _normForSearch('${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
-  if (hay.contains(q)) return true; // fast path: exact phrase
   final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
   bool hit(String t) {
-    if (hay.contains(t)) return true;
+    if (_tokenHitHe(hay, t)) return true;
     final alts = kSearchSynonyms[t];
-    return alts != null && alts.any((a) => hay.contains(_normForSearch(a)));
+    return alts != null &&
+        alts.any((a) => _tokenHitHe(hay, _normForSearch(a)));
   }
 
   return requireAll ? tokens.every(hit) : tokens.any(hit);
