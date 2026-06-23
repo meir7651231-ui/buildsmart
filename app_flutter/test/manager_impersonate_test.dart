@@ -63,4 +63,34 @@ void main() {
     n.returnFromImpersonation();
     expect(c.read(boardAuthProvider)?.role, BoardRole.manager);
   });
+
+  test('logout DURING impersonation returns to the manager (no stranded session)',
+      () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final n = c.read(boardAuthProvider.notifier);
+
+    expect(n.login(BoardRole.manager, 'admin', '5555'), isTrue);
+    n.impersonate(BoardRole.worker);
+    expect(n.isImpersonating, isTrue);
+
+    // The impersonated seed's OWN profile exposes a logout. Pressing it must NOT
+    // drop the (never-persisted) manager session — it ends the view instead, so
+    // the owner isn't logged out entirely on the next restart.
+    n.logout();
+    expect(c.read(boardAuthProvider)?.role, BoardRole.manager,
+        reason: 'logout while impersonating ends the view, keeps the manager');
+    expect(n.isImpersonating, isFalse);
+  });
+
+  test('logout OUTSIDE impersonation still fully clears the board session', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final n = c.read(boardAuthProvider.notifier);
+
+    n.login(BoardRole.manager, 'admin', '5555');
+    n.logout();
+    expect(c.read(boardAuthProvider), isNull,
+        reason: 'a normal logout is unchanged — full sign-out');
+  });
 }

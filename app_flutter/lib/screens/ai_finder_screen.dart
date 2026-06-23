@@ -246,8 +246,9 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       const Center(child: CircularProgressIndicator())
                     else if (_failed)
                       const Text('משהו השתבש — נסה שוב.',
+                          // dangerDark for WCAG AA (parity with shared AiFailedState)
                           style:
-                              TextStyle(color: BsTokens.danger, fontSize: 14))
+                              TextStyle(color: BsTokens.dangerDark, fontSize: 14))
                     else if (_resultTitle != null) ...[
                       Text('${_resultTitle!}  ·  ${_products.length} מוצרים',
                           style: const TextStyle(

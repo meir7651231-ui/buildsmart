@@ -355,6 +355,17 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
   /// Log out of the board — every gated board screen rebuilds into its gate.
   void logout() {
     _userTouched = true;
+    // A logout reached from INSIDE an impersonated board (the seed's own profile
+    // exposes one) must NOT strand the manager: impersonation was never persisted,
+    // so nulling here would drop the manager session and log the owner out entirely
+    // on restart. End the ephemeral impersonation back to the manager instead — a
+    // real logout is then available from the manager board.
+    if (_impersonationReturn != null) {
+      final saved = _impersonationReturn!;
+      _impersonationReturn = null;
+      state = saved;
+      return;
+    }
     state = null;
     _persist();
   }

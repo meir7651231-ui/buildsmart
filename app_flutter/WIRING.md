@@ -2746,3 +2746,15 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(LOW · honesty)** `manager_dashboard_screen.dart:386` — docstring טען "כל 5 ה-tiles live" בעוד 4/5 const-by-design → תוקן לדייק (רק 🚚 open-orders engine-live; קטלוג/אביזרים/זמין/חנויות = ports סטטיים).
 - **מאומת-תקין (11 קוראי-gw.ask):** reject_reason (name wrapped 60) · ai_finder/describe_to_cart/assistant (query wrapped 600 + closed-set) · quote_polish/business_summary/adapter/paired/alt/spec (catalog/system-data בלבד). **נדחה (LOW · inert):** toast בנתיב server-callable מציג שלב-ישן (kServerCallables כבוי בשילוח).
 - **gate:** analyze 0 · credit_explain(3)/daily_report(3)/ai_assistant(11) ירוקים · full-suite · screens → 24/116.
+
+### #manager-copilot-r6 — אודיט-נחיל סיבוב-6: אחי-ה-AI + impersonation (async · honesty · isolation · coverage) — 2026-06-23
+4 עדשות על האחים (לא-קו-פיילוט). **async-lifecycle (12 מסכים) — LENS CLEAN** (mounted-guards/dispose/double-submit מלאים בכולם). תוקנו:
+- **(LOW · honesty)** `spec_copilot_screen.dart:96` — reply ריק רינדר "🤖 " stub בלי retry (כל האחים מנתבים empty→failed) → `if(reply.isEmpty) _failed=true`. מחזיר retry.
+- **(LOW · contrast)** `ai_finder_screen.dart:250` + `describe_to_cart_screen.dart:208` — שורת-כשל `danger`→`dangerDark` (WCAG AA, parity עם AiFailedState המשותף).
+- **(MED · impersonation residue)** `board_auth.dart:356` — `logout()` מתוך board-מתחזה השאיר `_impersonationReturn` ואיפס את session-המנהל (לא-מתמיד) → ב-restart המנהל מנותק לגמרי. תוקן: logout בזמן impersonation **חוזר** לסשן-המנהל (impersonation אפמרי); logout רגיל ללא-שינוי. `manager_impersonate_test` +2.
+- **מאומת-תקין:** entry-gating של impersonation (רק מנהל), באנר "צופה כ", return-path, restart-safety — כולם תקינים.
+- **נדחה ל-build-ממוקד (תועד, HIGH/MED):**
+  - **(HIGH)** boards-מתחזים **interactive ולא read-only** (`manager_screens_sheet.dart:60` + `board_auth.dart:319`) — מנהל יכול לכתוב כ-seed (clockIn/submitTask/store-save/courier-deliver). תיקון = readOnly דרך 3 boards (worker/store/courier) — refactor רב-personas, אין choke-point יחיד ששומר scroll-לצפייה. בשילוח-הדמו הכתיבות מקומיות-בלבד (דגלים כבויים) → לא דליפת-backend, אבל ממשל-שגוי. = build-ממוקד אחרי הנחיל.
+  - **(MED)** role-switch/logout נגישים ב-worker-profile בזמן impersonation (חלק מה-readOnly לעיל).
+  - **(12×MED · test-coverage)** כל 12 אחי-ה-AI הם LOGIC-ONLY (prompt-builder נבדק; מסלולי-מסך success/empty/error/off לא) — אותו פער שנסגר לקו-פיילוט. כל אחד צריך `*_screen_behavior_test`. = סבב-בדיקות ייעודי.
+- **gate:** analyze 0 · spec_copilot/ai_finder/describe_to_cart + manager_impersonate(5)/board_auth(20) ירוקים · full-suite · screens→24/116 · state (לא 42/44).

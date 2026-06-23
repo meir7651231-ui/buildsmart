@@ -1835,3 +1835,10 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי לא-נראה (prompt-internal · אפס-UI):** הסבר-האשראי (`credit_explain`) ודוח-היום (`daily_report`) מנקים עכשיו את שם-הלקוח/כותרת-השליח לפני הזרקה ל-prompt (`promptSafeText` — קיפול-newline + cap) — הקשחת-הזרקה; אין שינוי במה שהמשתמש רואה. גם docstring בלוח-המנהל דויק (אין שינוי-UI).
 **אימות (אוטומטי, לא צילום):** `ai_assistant_test` 11 ירוק (הבועה עדיין מרונדרת) · `credit_explain_test` +1 (sanitize) · `daily_report_test` +1 (sanitize) · analyze 0.
 **הפיכות:** `git checkout lib/screens/ai_assistant_screen.dart` — מחזיר לבן-על-brand; `git checkout lib/screens/credit_explain_screen.dart lib/screens/daily_report_screen.dart` — מחזיר הזרקה-גולמית.
+
+## v6.82 — אחי-ה-AI ס6: הסבר-ספק עם retry כן + ניגודיות-כשל — 2026-06-23
+**שינוי נראה (lib/screens/spec_copilot_screen.dart):** כשהמודל מחזיר תשובה ריקה (200-empty), המסך מציג עכשיו את מצב-הכשל הכן עם כפתור "נסה שוב" — במקום כרטיס-"🤖 " ריק שתקע את המשתמש בלי דרך-לנסות-שוב. הוורדיקט הדטרמיניסטי (כן/לא מחזיק) ממשיך להופיע תמיד ממילא.
+**שינוי נראה (ai_finder + describe_to_cart):** שורת-הכשל "משהו השתבש — נסה שוב" עברה מ-`danger` ל-`dangerDark` — ניגודיות WCAG-AA זהה ל-AiFailedState המשותף (קריאה יותר).
+**שינוי לא-נראה (lib/state/board_auth.dart):** logout מתוך board-מתחזה כבר לא מנתק את המנהל לגמרי — חוזר לסשן-המנהל.
+**אימות (אוטומטי, לא צילום):** `manager_impersonate_test` +2 (logout בזמן/מחוץ-impersonation) · `board_auth_test` 20 · spec_copilot/ai_finder/describe_to_cart analyze 0. (סבב-בדיקות-מסך לאחים = ממתין, מתועד ב-WIRING.)
+**הפיכות:** `git checkout lib/screens/spec_copilot_screen.dart lib/screens/ai_finder_screen.dart lib/screens/describe_to_cart_screen.dart lib/state/board_auth.dart`.

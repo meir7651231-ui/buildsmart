@@ -95,7 +95,12 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
       );
       if (mounted && _temp == reqTemp) {
         setState(() {
-          _explanation = r.text.trim();
+          final reply = r.text.trim();
+          if (reply.isEmpty) {
+            _failed = true; // 200-empty → honest retry, not a bare "🤖 " stub
+          } else {
+            _explanation = reply;
+          }
           _loading = false;
         });
       }

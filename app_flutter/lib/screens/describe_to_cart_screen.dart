@@ -205,7 +205,8 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
                 const Center(child: CircularProgressIndicator())
               else if (_failed)
                 const Text('משהו השתבש — נסה שוב.',
-                    style: TextStyle(color: BsTokens.danger, fontSize: 14))
+                    // dangerDark for WCAG AA (parity with shared AiFailedState)
+                    style: TextStyle(color: BsTokens.dangerDark, fontSize: 14))
               else if (_recipe != null) ...[
                 Text('✓ ${_recipe!.name}',
                     style: const TextStyle(
