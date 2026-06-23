@@ -54,8 +54,10 @@ void main() {
   });
 
   test('KeyKind has no shift member (Hebrew has no shift/caps)', () {
-    // Guard: the frozen API must never grow a `shift` key. If this list ever
-    // changes, the layout contract has been broken.
+    // Guard: the frozen API must never grow a `shift` key (Hebrew has no caps).
+    // `gear` was added intentionally (the bottom-row keyboard-tools launcher that
+    // moved out of the strip in the owner mobile redesign) — it is a legitimate
+    // member, listed here; the real contract this guards is the ABSENCE of shift.
     expect(
       KeyKind.values.map((k) => k.name).toList(),
       <String>[
@@ -68,6 +70,7 @@ void main() {
         'send',
         'period',
         'punct',
+        'gear',
       ],
     );
     expect(KeyKind.values.any((k) => k.name == 'shift'), isFalse);

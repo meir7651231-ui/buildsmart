@@ -73,6 +73,18 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// Fired by the brand-orange send key.
   final VoidCallback onSend;
 
+  /// Close the floating overlay — wired to the strip's X (owner mobile redesign
+  /// moved the close into the strip). Null on every non-floating mount.
+  final VoidCallback? onClose;
+
+  /// The current query text, shown inside the strip's middle (the separate
+  /// search field was removed). Empty (default) → the strip shows a faint hint.
+  final String typedText;
+
+  /// Exit the tool view back to the letters — the floating keyboard wires this to
+  /// the dual-mode bottom key (reads "אבג" while tools are open). Null elsewhere.
+  final VoidCallback? onExitTools;
+
   /// Whether to render the flagged tool strip (grid/gear toggles + prediction
   /// row + tool layers). Off by default so every existing mount stays
   /// byte-identical; the MOUNT passes [kKeyboardToolStrip] (or its own flag)
@@ -154,6 +166,9 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     required this.controller,
     required this.focusNode,
     required this.onSend,
+    this.onClose,
+    this.typedText = '',
+    this.onExitTools,
     this.showToolStrip = false,
     this.predictions = const <String>[],
     this.destinationChips = const <String>{},
@@ -221,6 +236,11 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
           onBackspace: () => deleteBackward(widget.controller),
           onEnter: () => insertAtCaret(widget.controller, '\n'),
           onSend: widget.onSend,
+          // The X (strip) and the dual-mode bottom key (exit tools) — forwarded
+          // from the floating mount; null elsewhere, so other mounts unchanged.
+          onClose: widget.onClose,
+          typedText: widget.typedText,
+          onExitTools: widget.onExitTools,
           onToggleSymbols: () =>
               setState(() => _showSymbols = !_showSymbols),
           // Globe toggles Hebrew<->English, landing on the letters layer.

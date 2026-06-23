@@ -150,6 +150,11 @@ void main() {
             expect(keys, isEmpty);
             expect(backspaces + enters + sends + toggles, 0);
             languageKeys++;
+          case KeyKind.gear:
+            // The gear launcher only appears on the tool-strip (floating)
+            // keyboard, which these plain-keyboard tests never pump — so no
+            // gear key is rendered here. Present only for switch exhaustiveness.
+            break;
         }
       }
 
@@ -236,6 +241,11 @@ void main() {
             expect(keys, isEmpty);
             expect(backspaces + enters + sends + toggles, 0);
             languageKeys++;
+          case KeyKind.gear:
+            // The gear launcher only appears on the tool-strip (floating)
+            // keyboard, which these plain-keyboard tests never pump — so no
+            // gear key is rendered here. Present only for switch exhaustiveness.
+            break;
         }
       }
 
@@ -328,6 +338,11 @@ void main() {
             expect(keys, isEmpty);
             expect(backspaces + enters + sends + toggles, 0);
             languageKeys++;
+          case KeyKind.gear:
+            // The gear launcher only appears on the tool-strip (floating)
+            // keyboard, which these plain-keyboard tests never pump — so no
+            // gear key is rendered here. Present only for switch exhaustiveness.
+            break;
         }
       }
 

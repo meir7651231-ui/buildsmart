@@ -1,10 +1,15 @@
 import 'package:flutter/foundation.dart';
 
 /// What a [KbKey] does when tapped. `letter` inserts its text; the rest drive
-/// keyboard behaviour (delete, newline, space, layer switches, send) or insert
-/// punctuation. Hebrew has no shift/caps, so there is deliberately no `shift`
-/// member — see [hebrew_layout.dart].
-enum KeyKind { letter, backspace, enter, space, symbols, language, send, period, punct }
+/// keyboard behaviour (delete, newline, space, layer switches, send, the gear
+/// tool-launcher) or insert punctuation. Hebrew has no shift/caps, so there is
+/// deliberately no `shift` member — see [hebrew_layout.dart].
+///
+/// `gear` is the bottom-row keyboard-tools launcher (the ⚙️ that moved out of the
+/// strip on the floating card-keyboard, owner mobile redesign). It is injected
+/// into the bottom row ONLY when the tool strip is shown, so the plain chat
+/// keyboard never carries it and stays byte-identical.
+enum KeyKind { letter, backspace, enter, space, symbols, language, send, period, punct, gear }
 
 /// Immutable description of a single key on the on-screen keyboard. [label] is
 /// what the key shows; [kind] is what it does; [output] is the text inserted on

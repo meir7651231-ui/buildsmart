@@ -4,6 +4,65 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/key_models.dart';
 import 'package:flutter/material.dart';
 
+/// Per-cell RESPONSIVE sizing for the keyboard — the cell HEIGHT, glyph FONT
+/// size, and ICON size that every leaf cell ([BsKey] and the strip/tile widgets
+/// in bs_keyboard.dart) renders at. [BsKeyboard] computes one of these from the
+/// viewport width (mobile vs desktop) and supplies it via [BsKbScale]; each leaf
+/// reads it with [BsKbScale.of].
+///
+/// The default ([desktop]) is the historical 44 / 20 / 22, and it is ALSO the
+/// fallback [BsKbScale.of] returns when no [BsKbScale] is in scope (a leaf
+/// mounted in a direct widget test). So every existing direct mount and every
+/// desktop render stays byte-identical; only a narrow (phone) viewport shrinks.
+@immutable
+class KbCellMetrics {
+  const KbCellMetrics({
+    this.cellHeight = 44,
+    this.fontSize = 20,
+    this.iconSize = BsTokens.dialIconSize,
+  });
+
+  /// Minimum height of one cell (a key / tool tile / chip / toggle).
+  final double cellHeight;
+
+  /// Font size of the key/label glyph.
+  final double fontSize;
+
+  /// Size of an icon-kind glyph (send · globe · enter · tool icons · ▦ · ⚙️).
+  final double iconSize;
+
+  /// The historical desktop sizing — also the no-scope fallback.
+  static const KbCellMetrics desktop = KbCellMetrics();
+
+  @override
+  bool operator ==(Object other) =>
+      other is KbCellMetrics &&
+      other.cellHeight == cellHeight &&
+      other.fontSize == fontSize &&
+      other.iconSize == iconSize;
+
+  @override
+  int get hashCode => Object.hash(cellHeight, fontSize, iconSize);
+}
+
+/// Provides the responsive [KbCellMetrics] to the keyboard's leaf cells. A leaf
+/// reads its sizing with `BsKbScale.of(context)`; with no [BsKbScale] ancestor
+/// the call returns [KbCellMetrics.desktop], so an unscoped leaf is unchanged.
+class BsKbScale extends InheritedWidget {
+  const BsKbScale({required this.metrics, required super.child, super.key});
+
+  final KbCellMetrics metrics;
+
+  /// The nearest scope's metrics, or [KbCellMetrics.desktop] when none is in
+  /// scope (keeping direct/legacy mounts byte-identical).
+  static KbCellMetrics of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BsKbScale>()?.metrics ??
+      KbCellMetrics.desktop;
+
+  @override
+  bool updateShouldNotify(BsKbScale oldWidget) => metrics != oldWidget.metrics;
+}
+
 /// A single key on the custom Hebrew keyboard. Pure presentation: it renders a
 /// [KbKey] model and forwards taps via [onTap]. No controller / Riverpod / flag
 /// awareness lives here — layout & state are the caller's job.
@@ -47,6 +106,9 @@ class BsKey extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color fill = isAccent ? BsTokens.brand : Colors.white;
     final Color fg = isAccent ? bsOnAccent(context) : BsTokens.inkLight;
+    // RESPONSIVE sizing — desktop 44/20/22 (the const default when no scope),
+    // mobile shrinks via the [BsKbScale] that [BsKeyboard] installs.
+    final KbCellMetrics m = BsKbScale.of(context);
 
     return Material(
       color: fill,
@@ -59,8 +121,9 @@ class BsKey extends StatelessWidget {
           label: _semanticLabel,
           child: Container(
             // Owner: UNIFORM keyboard — every cell (keys · tools · nav chips ·
-            // bottom row) is the SAME height (44) with the SAME 20px glyph.
-            constraints: const BoxConstraints(minHeight: 44),
+            // bottom row) is the SAME height with the SAME glyph; the exact
+            // values are responsive (desktop 44/20, mobile 30/19 — owner spec).
+            constraints: BoxConstraints(minHeight: m.cellHeight),
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space1),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
@@ -71,7 +134,7 @@ class BsKey extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Center(child: _content(fg)),
+                Center(child: _content(fg, m)),
                 if (model.superscript != null)
                   Positioned(
                     top: BsTokens.spaceHair,
@@ -100,17 +163,17 @@ class BsKey extends StatelessWidget {
   /// runs FIRST, so an icon-kind key never takes a leading image. When the asset
   /// is null the original single-[Text] body is returned UNCHANGED (no Row, no
   /// wrapping) so every plain key in the app stays byte-identical.
-  Widget _content(Color fg) {
+  Widget _content(Color fg, KbCellMetrics m) {
     final IconData? icon = _iconFor(model.kind);
     if (icon != null) {
-      return Icon(icon, size: BsTokens.dialIconSize, color: fg);
+      return Icon(icon, size: m.iconSize, color: fg);
     }
     final label = Text(
       model.label,
       textAlign: TextAlign.center,
       style: TextStyle(
-        // Bigger glyph (owner) — the KEY size (minHeight 48) is unchanged.
-        fontSize: 20,
+        // Glyph size is responsive (desktop 20, mobile 19 — owner spec).
+        fontSize: m.fontSize,
         color: fg,
         fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
       ),
@@ -132,7 +195,7 @@ class BsKey extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: m.fontSize,
               color: fg,
               fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
             ),
@@ -156,6 +219,8 @@ class BsKey extends StatelessWidget {
         return Icons.send;
       case KeyKind.language:
         return Icons.language;
+      case KeyKind.gear:
+        return Icons.settings;
       case KeyKind.letter:
       case KeyKind.space:
       case KeyKind.symbols:
@@ -179,6 +244,8 @@ class BsKey extends StatelessWidget {
         return 'שפה';
       case KeyKind.space:
         return 'רווח';
+      case KeyKind.gear:
+        return 'כלי מקלדת';
       case KeyKind.symbols:
       case KeyKind.letter:
       case KeyKind.period:

@@ -684,6 +684,22 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
         if (_stack.isEmpty) _baseLayer = KbToolLayer.none;
       });
 
+  /// EXIT the tool view back to the LETTERS — the action of the dual-mode bottom
+  /// key (it reads "אבג" while a tool layer is open). Clears the whole drill
+  /// stack AND enters typing mode, so the letters show and STAY: the [_typing]
+  /// guard in [_syncContextToolBase] suppresses the ambient live-mirror context
+  /// base from re-installing until the user taps ▦/⚙️ again. This is the exact
+  /// mirror of the old design's "tap the search field to type" (which also set
+  /// [_typing] = true); with the field gone, this key is the way into typing
+  /// from a tool view. A second tap of ▦ (or ⚙️) clears [_typing] and reopens
+  /// the tools, so the path back to navigation is preserved.
+  void _exitTools() => setState(() {
+        _stack.clear();
+        _baseLayer = KbToolLayer.none;
+        _lastDerivedBase = null;
+        _typing = true;
+      });
+
   @override
   Widget build(BuildContext context) {
     // A floating panel (rounded-top Material + a subtle top shadow), NOT a modal
@@ -883,72 +899,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // CLOSE affordance — a down-chevron / handle that dismisses the
-              // floating overlay (sets keyboardOverlayOpenProvider false). The
-              // visible glyph stays small; a ≥48dp tap target wraps it (a11y).
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Semantics(
-                  button: true,
-                  label: 'סגור מקלדת',
-                  child: Tooltip(
-                    message: 'סגור',
-                    child: InkWell(
-                      onTap: _close,
-                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                      child: SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Center(
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFFFFF),
-                              shape: BoxShape.circle,
-                              boxShadow: <BoxShadow>[
-                                BoxShadow(color: Color(0x33000000), blurRadius: 3),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 18,
-                              color: BsTokens.brand,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // Read-only query field — the custom keyboard drives it, so the OS
-              // keyboard never appears. RTL for Hebrew product words.
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: BsTokens.space4,
-                  vertical: BsTokens.space2,
-                ),
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focus,
-                  readOnly: true,
-                  // Tapping the field enters typing mode → the alphabet replaces
-                  // the live-mirror tools so the user can type a search.
-                  onTap: () => setState(() => _typing = true),
-                  textDirection: TextDirection.rtl,
-                  decoration: const InputDecoration(
-                    hintText: 'מה לחפש?',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                    // White typing row (owner): the search/typing field is white,
-                    // a clean input bar distinct from the orange keyboard around it.
-                    filled: true,
-                    fillColor: Color(0xFFFFFFFF),
-                  ),
-                ),
-              ),
+              // X (close) + the separate search field were REMOVED here (owner
+              // mobile redesign): the X now lives at the LEADING edge of the tool
+              // strip (wired via [onClose] below) and the typed query shows
+              // INSIDE the strip (wired via [typedText]) — no own row, no field,
+              // reclaiming the vertical space that made the phone keyboard cover
+              // half the screen. Typing still drives [_controller] through the
+              // host's onKey → insertAtCaret (the field was only ever a display).
               // The assembled keyboard-with-tools, fed the LIVE finder chips AND
               // the morph drill state. When [nodes] is null the keyboard shows
               // its letters; otherwise it renders the current node-list as pure
@@ -958,6 +915,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 focusNode: _focus,
                 // 'done' — close the overlay (the field text is the search seed).
                 onSend: _close,
+                // X at the strip's leading edge closes the overlay; the typed
+                // query renders INSIDE the strip; and the dual-mode bottom key
+                // (reads "אבג" while a tool layer is open) exits back to the
+                // letters via [_exitTools].
+                onClose: _close,
+                typedText: _controller.text,
+                onExitTools: _exitTools,
                 showToolStrip: true,
                 // This IS a dedicated keyboard surface the user opened on
                 // purpose, so it shows the keyboard regardless of the opt-in
