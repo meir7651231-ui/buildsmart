@@ -319,11 +319,12 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Dark ink on BOTH bubbles — white-on-brand was ~2.7:1 (fails WCAG
+            // AA); dark-on-brand is ~6:1 and keeps the brand-colored user bubble
+            // (same fix already applied to the manager Co-Pilot bubble).
             Text(t.text,
-                style: TextStyle(
-                    color: isUser ? Colors.white : BsTokens.inkLight,
-                    fontSize: 14,
-                    height: 1.4)),
+                style: const TextStyle(
+                    color: BsTokens.inkLight, fontSize: 14, height: 1.4)),
             // #ai-assistant-agentic Phase 2 — the cart write is gated behind THIS
             // explicit tap (G5); until confirmed the kit is only a proposal.
             if (hasKit) ...[

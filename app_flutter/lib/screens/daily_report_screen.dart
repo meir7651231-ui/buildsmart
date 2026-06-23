@@ -18,6 +18,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// The grounded prompt — hands the model the REAL report lines and asks ONLY for
 /// a short narration; every number must be used as-is, none invented.
 String dailyReportPrompt(String title, List<String> reportLines) {
-  return '$title — הנתונים שנרשמו היום:\n${reportLines.join('\n')}\n\n'
+  // The title can carry a courier's Firebase displayName (free-text) — collapse
+  // newlines + cap so it can't smuggle an injection line ahead of the data.
+  final t = promptSafeText(title, maxLen: 80, collapseWhitespace: true);
+  return '$t — הנתונים שנרשמו היום:\n${reportLines.join('\n')}\n\n'
       'נסח מהם דוח-יום קצר וזורם בעברית (2–4 משפטים), מוכן לשליחה ללקוח/לחנות. '
       'השתמש אך ורק במספרים שניתנו לך — אל תמציא, תשנה או תוסיף שום מספר.';
 }

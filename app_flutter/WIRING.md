@@ -2737,3 +2737,12 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **`claude_gateway_test.dart` (+3):** ה-`FirebaseClaudeGateway` האמיתי (fake `FirebaseFunctions` מוזרק) — `FirebaseFunctionsException`→code verbatim · שגיאה-אחרת→`unavailable` · transport-תקוע→`.timeout(30s)` (ב-`fakeAsync`) →`unavailable`. החוזה: cloud_functions לא דולף, ה-UI לא נתלה.
 - **`manager_copilot_test.dart` (+4, חוזק):** money() **שלילי** באמת-מורץ (`-₪1,200`) · empty-state ('אין הזמנות'+'(אין לקוחות עדיין)') · zero-limit→בלי 'ניצול-אשראי' (אפס-div) · revenue==**5490** מוחלט (שובר את ה-recompute-mirror) · cap מאשר 400-הראשונים שורדים.
 - **gate:** analyze 0 · 3 קבצי-בדיקה ירוקים (7+10+7) · full-suite · אין lib נגוע → אין 24/42/44/116 (test-only).
+
+### #manager-copilot-r5 — אודיט-נחיל סיבוב-5: סריקת-AI-רוחבית (injection · grounding · RTL · manager-tabs) — 2026-06-23
+נחיל מורחב על **כל משטח-ה-AI** (13 קוראי-`gw.ask`) + הטאבים הלא-קו-פיילוט. **grounding — LENS CLEAN** (כל 13 הפיצ'רים אוסרים-להמציא + closed-set longest-match) · **AI-screens RTL/overflow — LENS CLEAN** (מחלקת-overflow-הכותרת של הקו-פיילוט לא חוזרת באחים) · **manager-tabs — 2 LOW בלבד** (אפס wrong-number/dead-control). תוקנו:
+- **(HIGH · injection)** `credit_explain_screen.dart:33` — שם-הלקוח (`c.name` = `Order.who`, חופשי בשליטת-קבלן) הוזרק **גולמי** ל-prompt בעוד התאום (`manager_copilot.dart:83`) כבר מנקה אותו → `promptSafeText(name, 40, collapseWhitespace)`. אותו וקטור-הזרקה בדיוק (sanitized-here/raw-there). reply = פרוזה חופשית בלי closed-set → מסוכן. test +1.
+- **(MED · a11y/contrast)** `ai_assistant_screen.dart:324` — בועת-משתמש לבן-על-brand (~2.7:1, נכשל WCAG AA) → טקסט-כהה `inkLight` (אותו תיקון כמו הקו-פיילוט ב-r1).
+- **(LOW · injection-defense)** `daily_report_screen.dart:30` — `title` (נושא `displayName` של שליח) נחתך ב-`promptSafeText(80, collapseWhitespace)` בבּילדר → מגן על כל הקוראים. test +1.
+- **(LOW · honesty)** `manager_dashboard_screen.dart:386` — docstring טען "כל 5 ה-tiles live" בעוד 4/5 const-by-design → תוקן לדייק (רק 🚚 open-orders engine-live; קטלוג/אביזרים/זמין/חנויות = ports סטטיים).
+- **מאומת-תקין (11 קוראי-gw.ask):** reject_reason (name wrapped 60) · ai_finder/describe_to_cart/assistant (query wrapped 600 + closed-set) · quote_polish/business_summary/adapter/paired/alt/spec (catalog/system-data בלבד). **נדחה (LOW · inert):** toast בנתיב server-callable מציג שלב-ישן (kServerCallables כבוי בשילוח).
+- **gate:** analyze 0 · credit_explain(3)/daily_report(3)/ai_assistant(11) ירוקים · full-suite · screens → 24/116.

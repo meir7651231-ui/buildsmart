@@ -383,14 +383,17 @@ class _ManagerToggle extends ConsumerWidget {
 /// The 📊 לוח בקרה tab body — a LIGHT scrollable cockpit over the LIVE shared
 /// orders engine. A faithful port of the legacy `renderMgrDashboard`
 /// (@index.html:12133) trimmed to this wave's two sections:
-///   • the 5 `mdMetric` tiles (@index.html:12160-12164) — every number derived
-///     by [managerAnalyticsProvider] over the engine's live orders, so they
-///     stay live (e.g. 🚚 open-orders recounts when an order is placed/advanced);
+///   • the 5 `mdMetric` tiles (@index.html:12160-12164) — read via
+///     [managerAnalyticsProvider]; 🚚 open-orders is engine-LIVE (recounts when an
+///     order is placed/advanced), while 📦 catalog / 🧰 accessories / ✅ available /
+///     🏪 stores are static-by-design ports of [kManagerCatalogCategories] /
+///     [kManagerStores] (real numbers that don't mutate at runtime);
 ///   • the order pipeline (@index.html:12177-12198) — a per-stage count across
 ///     the 6 [kManagerOrderFlow] stages, read straight off [ordersEngineProvider].
 ///
-/// Reading the providers (not the static `managerAnalytics` const) is what makes
-/// the tab LIVE: any role that mutates the engine reflows these numbers here.
+/// Reading the providers (not the static `managerAnalytics` const) is what keeps
+/// the LIVE figures — 🚚 open-orders + the pipeline — reflowing whenever any role
+/// mutates the engine.
 class _DashboardTab extends ConsumerWidget {
   const _DashboardTab();
 

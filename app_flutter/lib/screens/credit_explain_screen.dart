@@ -16,6 +16,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,12 @@ String creditExplainPrompt({
   required int balance,
   required int pct,
 }) {
-  return 'לקוח: "$name".\n'
+  // Sanitize the customer name: it derives from `Order.who` — contractor-typed
+  // free-text with no newline/length guard at the source — so collapse newlines
+  // + cap to defang an "ignore the above / new system:" injection. Same lever
+  // already guarded for the SAME field in manager_copilot.dart (was raw here).
+  final who = promptSafeText(name, maxLen: 40, collapseWhitespace: true);
+  return 'לקוח: "$who".\n'
       'מסגרת-אשראי: ₪$creditLimit · נוצל: ₪$used · יתרה: ₪$balance · '
       'ניצול: $pct%.\n\n'
       'הסבר למנהל ב-2–3 משפטים בעברית מה המשמעות של ניצול-האשראי הזה — האם הלקוח '

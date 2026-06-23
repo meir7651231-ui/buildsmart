@@ -1829,3 +1829,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה (a11y):** כותרות-ה-AppBar בקו-פיילוט (דו-שורתי) ובלוח-המנהל קיבלו `maxLines:1 + ellipsis` — בטקסט-מוגדל הן נחתכות-בנקודותיים במקום לגלוש מחוץ ל-toolbar. `_Typing` עבר ל-`EdgeInsetsDirectional` (אפס שינוי-מראה ב-RTL).
 **אימות (אוטומטי, לא צילום):** `catalog_price_units_settings_test` +2 (קבלן מציג "הפרופיל שלי" · מנהל מסתיר אותו ושומר 'תצוגה ומיון'+'מחירים ומטבע') = 18 ירוק · `manager_dashboard_screen_test` 30 ירוק (כותרת-AppBar עדיין מרונדרת) · analyze 0.
 **הפיכות:** `git checkout lib/screens/catalog_settings_screen.dart lib/screens/manager_dashboard_screen.dart lib/screens/manager_profile_screen.dart lib/screens/manager_copilot_screen.dart` — מחזיר את שורת-הפרופיל לכולם + כותרות בלי-ellipsis.
+
+## v6.81 — סריקת-AI-רוחבית ס5: ניגודיות-בועה בעוזר + הקשחת-הזרקה — 2026-06-23
+**שינוי נראה (lib/screens/ai_assistant_screen.dart):** בועת-המשתמש בעוזר-ה-AI — הטקסט עבר מלבן-על-brand (~2.7:1, נכשל WCAG AA) ל-**כהה `inkLight` (~6:1)**, בדיוק כמו התיקון שכבר נעשה בקו-פיילוט. הבועה נשארת brand-צבע; רק הטקסט קריא יותר.
+**שינוי לא-נראה (prompt-internal · אפס-UI):** הסבר-האשראי (`credit_explain`) ודוח-היום (`daily_report`) מנקים עכשיו את שם-הלקוח/כותרת-השליח לפני הזרקה ל-prompt (`promptSafeText` — קיפול-newline + cap) — הקשחת-הזרקה; אין שינוי במה שהמשתמש רואה. גם docstring בלוח-המנהל דויק (אין שינוי-UI).
+**אימות (אוטומטי, לא צילום):** `ai_assistant_test` 11 ירוק (הבועה עדיין מרונדרת) · `credit_explain_test` +1 (sanitize) · `daily_report_test` +1 (sanitize) · analyze 0.
+**הפיכות:** `git checkout lib/screens/ai_assistant_screen.dart` — מחזיר לבן-על-brand; `git checkout lib/screens/credit_explain_screen.dart lib/screens/daily_report_screen.dart` — מחזיר הזרקה-גולמית.
