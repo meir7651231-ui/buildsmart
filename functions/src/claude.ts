@@ -29,6 +29,13 @@ const anthropicKey = defineSecret("ANTHROPIC_API_KEY");
 // Default to the small/cheap model — the first features (grounded yes/no spec
 // reasoning) don't need Opus. A caller may override with a known model id.
 const kDefaultModel = "claude-haiku-4-5-20251001";
+// Allowlist (swarm/cost-safety): a caller may only pin a KNOWN model id — an
+// unknown/arbitrary string falls back to the cheap default, so a caller can't pin
+// an expensive model or pass garbage. Extend deliberately if a feature needs a tier.
+const kAllowedModels = new Set<string>([
+  kDefaultModel, // haiku 4.5 — the cheap default
+  "claude-sonnet-4-6", // the only stronger tier this app may opt into
+]);
 const kDefaultMaxTokens = 1024;
 const kMaxPromptChars = 8000;
 const kMaxTokensCap = 2048;
@@ -71,7 +78,7 @@ export const askClaude = onCall(
         ? data.system
         : undefined;
     const model =
-      typeof data.model === "string" && data.model.length > 0
+      typeof data.model === "string" && kAllowedModels.has(data.model)
         ? data.model
         : kDefaultModel;
     const maxTokens =

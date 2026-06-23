@@ -2655,3 +2655,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **MED (a11y):** `contractor_tools_sheets` כפתור "🤔 למה כדאי?" → ≥48dp (היה `Size(0,32)`+shrinkWrap).
 - **MED (spec_copilot):** טקסט-וורדיקט → `successDark`/`dangerDark` (WCAG AA) · מירוץ-טמפרטורה: `_temp` snapshot + drop-late-reply + ניקוי-spinner ב-onSelected.
 - **gate:** analyze 0 errors/warnings · `ai_assistant_test` (live grounding) + `spec_copilot_test` + `alt_explain_test` ירוקים · full-suite baseline. 3 screens ב-screens → גייט 24/116.
+
+### #swarm-fixes-w2 — model-allowlist (שרת) + a11y button-role בקטלוג — 2026-06-23
+- **(LOW · שרת)** `functions/src/claude.ts` — `model` עבר מ-passthrough-חופשי ל-`kAllowedModels` allowlist (haiku-default + sonnet); id לא-מוכר → default. חוסם נעיצת-מודל-יקר / זבל (cost-safety). tsc נקי.
+- **(LOW · a11y)** `catalog_screen.dart` — כפתורי "✨ נסח" + "🔌 איך לגשר?" עטופים ב-`Semantics(button: true, label)` → תפקיד-כפתור לקורא-מסך. ויזואלית byte-identical. גודל-היעד נשאר מוגבל ע"י עיצוב-השורה (משותף עם צ'יפים קיימים — דחוי).
+- **gate:** analyze 0 errors/warnings · full-suite baseline. catalog_screen ב-screens → גייט 24/116.
