@@ -57,13 +57,14 @@ String buildManagerContext({
       customers.fold<int>(0, (s, c) => s + c.orderCount);
 
   String money(int n) {
-    final s = n.toString();
+    final neg = n < 0;
+    final s = n.abs().toString(); // group over abs, re-apply sign (no "₪-,100")
     final b = StringBuffer();
     for (var i = 0; i < s.length; i++) {
       if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
       b.write(s[i]);
     }
-    return '₪$b';
+    return '${neg ? '-' : ''}₪$b';
   }
 
   // Pipeline line in canonical stage order, only stages with a count.
@@ -75,8 +76,12 @@ String buildManagerContext({
   // Top customers by spend (already sorted desc) — name, spend, orders, credit %.
   final top = [
     for (final c in customers.take(5))
-      '  - ${c.name}: ${money(c.totalSpend)} ב-${c.orderCount} הזמנות'
-          '${c.creditLimit > 0 ? ' (ניצול-אשראי ${((c.totalSpend / c.creditLimit) * 100).round()}%)' : ''}',
+      // Sanitize the name: it is contractor-controlled free-text flowing into the
+      // prompt — collapse newlines + cap so it can't inject a fake context line or
+      // an "ignore the above" payload (the same lever guarded in reject_reason).
+      // Credit % is clamped to 100 to match every dashboard surface (no "180%").
+      '  - ${promptSafeText(c.name, maxLen: 40, collapseWhitespace: true)}: ${money(c.totalSpend)} ב-${c.orderCount} הזמנות'
+          '${c.creditLimit > 0 ? ' (ניצול-אשראי ${((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100)}%)' : ''}',
   ].join('\n');
 
   final creditLimitTotal =
@@ -104,6 +109,7 @@ String managerCopilotPrompt(String context, String question) {
 String managerMorningBriefPrompt(String context) {
   return 'מצב-העסק כעת (נתוני-אמת):\n$context\n\n'
       'כתוב תדריך-בוקר קצר לבעלים: 3-4 נקודות-תבליט על מה שדורש תשומת-לב היום '
-      '(הזמנות תקועות/פתוחות, ניצול-אשראי גבוה, מגמת-מחזור, לקוח בולט). '
-      'אך ורק לפי הנתונים שלמעלה — בלי להמציא. פתח ב-"☀️ תדריך-בוקר:".';
+      '(הזמנות תקועות/פתוחות, ניצול-אשראי גבוה, לקוח בולט). '
+      'אך ורק לפי הנתונים שלמעלה — בלי להמציא (אין נתוני-עבר/מגמה). '
+      'פתח ב-"☀️ תדריך-בוקר:".';
 }

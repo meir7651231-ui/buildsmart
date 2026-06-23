@@ -1399,3 +1399,8 @@
 - **הלוגיקה (`lib/logic/manager_copilot.dart` → גייט 42/44):** `buildManagerContext` מקפל את נתוני-האמת (Σ-מחזור=Σspend · openOrders · per-stage · top-5 לקוחות · אשראי) לטקסט-עברית שמוזרק ל-Claude; ה-system אוסר-להמציא. כל מספר מהמנועים, לא מהמודל.
 - **טסט-נעיצה:** `manager_copilot_test` — context מכיל `פתוחות N`/`התקבלה 1`/הלקוח-המוביל-ראשון · revenue==Σspend (מחרוזת-₪) · system מכיל "אסור להמציא" · prompt עוטף ctx+שאלה+grounding · שאלה ארוכה capped ל-400 · brief מכיל "תדריך-בוקר".
 - **mutation-verify:** baseline ירוק → שינוי מחרוזת-הgrounding ל-"מותר להמציא" → הטסט (`forbids invention`) אדום → שחזור → ירוק. analyze 0. (screens-only שאר-הפיצ'ר; לוגיקה-זו נבדקת.)
+
+## #manager-copilot-r1 — אודיט-נחיל סיבוב-1: injection-sanitize + clamp + brief-no-trend — 2026-06-23
+- **הלוגיקה (`lib/logic/manager_copilot.dart` → גייט 42/44):** `buildManagerContext` — שם-הלקוח עבר ל-`promptSafeText(c.name, maxLen:40, collapseWhitespace:true)` (הזרקה HIGH); ניצול-אשראי `.clamp(0,100)`; `money()` מקבץ-על-abs. `managerMorningBriefPrompt` — הוסרה דרישת-"מגמת-מחזור" (אין נתוני-זמן → מנע-המצאה).
+- **טסט-נעיצה:** `manager_copilot_test` +4 — שם-עם-newline+payload נקטע/נקפל ב-context · over-limit→"100%" (לא 300%) · brief בלי "מגמת" · קיבוץ-₪ תקין.
+- **mutation-verify:** baseline 12 ירוק → הסרת-ה-`.clamp(0,100)` → הטסט (`credit utilization is CLAMPED`) אדום (`300%` חוזר) → שחזור → 12 ירוק. analyze 0.

@@ -248,11 +248,11 @@ class _Bubble extends StatelessWidget {
           color: turn.user ? BsTokens.brand : BsTokens.cardLight,
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         ),
+        // Dark ink on BOTH bubbles — white-on-brand was ~2.7:1 (fails WCAG AA);
+        // dark-on-brand is ~6:1 and keeps the brand-colored owner bubble.
         child: Text(turn.text,
-            style: TextStyle(
-                color: turn.user ? Colors.white : BsTokens.inkLight,
-                fontSize: 14,
-                height: 1.5)),
+            style: const TextStyle(
+                color: BsTokens.inkLight, fontSize: 14, height: 1.5)),
       ),
     );
   }
@@ -314,6 +314,7 @@ class _InputBar extends StatelessWidget {
             ),
             const SizedBox(width: BsTokens.space2),
             IconButton.filled(
+              tooltip: 'שלח', // a11y: screen-reader label for the send button
               onPressed: enabled ? onSend : null,
               icon: const Icon(Icons.arrow_upward_rounded),
             ),

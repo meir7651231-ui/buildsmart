@@ -2711,3 +2711,6 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **`manager_dashboard_screen.dart`:** `_CopilotHero` (כרטיס brand-gradient בראש `_DashboardTab`) → `ManagerCopilotScreen.route()`. **לא** AppBar-action (6th action גרם RenderFlex-overflow 18px — נבדק; ה-hero בולט יותר ממילא).
 - **ממשל:** מודיעין/פיקוח = תחום-המנהל · אפס-HR · additive · אפס-רגרסיה (מנהל-בלבד · off-state בלי-שרת).
 - **gate:** analyze 0 · `manager_copilot_test` (7: context-folding · grounding-system · prompt · cap · brief · suggestions) + `manager_copilot_screen_test` (off-state render) · 49 טסטי-מנהל ירוקים · full-suite. screens → 24/116.
+
+### #manager-copilot-r1 — אודיט-נחיל סיבוב-1 (7 תיקונים) — 2026-06-23
+נחיל-4-עדשות על הקו-פיילוט. **(HIGH)** הזרקת-`c.name` → `promptSafeText` ב-`buildManagerContext`. **(MED)** clamp ניצול-אשראי(0,100) · הסרת-"מגמת-מחזור" מהתדריך · `tooltip:'שלח'` · ניגודיות-בועה (טקסט-כהה). **(LOW)** `money()` שלילי · hero-subtitle full-white. concurrency נקי. `manager_copilot_test` 12 ירוק · analyze 0.

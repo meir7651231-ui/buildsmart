@@ -462,7 +462,7 @@ class _CopilotHero extends ConsumerWidget {
                           ? 'מה בוער? מי הלקוח הכי שווה? — אני עונה מהנתונים החיים'
                           : 'מודיעין-עסקי AI · דורש חיבור לשרת',
                       style: const TextStyle(
-                          color: Colors.white70, fontSize: 12.5),
+                          color: Colors.white, fontSize: 12.5), // full white — white70 on brand failed contrast
                     ),
                   ],
                 ),
