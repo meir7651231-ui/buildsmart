@@ -60,6 +60,23 @@ void main() {
           reason: 'seededFraction 0 < gate → axis hidden (#28)');
     });
 
+    test('coverage gate BOUNDARY: exactly 0.5 shows, just-below hides (per-pool)',
+        () {
+      // The gate is `seededFraction < kMaterialCoverageGate` (STRICT <), so a pool
+      // at EXACTLY 0.5 shows and one just below hides — and chipsFor recomputes it
+      // per pool (so material appears/disappears as a dive narrows). Swarm R3: the
+      // suite previously pinned only the 0.0 / 1.0 extremes, leaving the operator
+      // that IS the gate's whole contract unguarded.
+      final seeded = kDivePool.firstWhere((p) => materialOf(p) != null);
+      final unseeded =
+          kDivePool.where((p) => materialOf(p) == null).take(2).toList();
+      expect(unseeded.length, 2, reason: 'sanity: two unseeded products exist');
+      expect(const MaterialSignal().chipsFor([seeded, unseeded[0]]), isNotEmpty,
+          reason: 'seededFraction == 0.5 is NOT below the gate → axis SHOWS');
+      expect(const MaterialSignal().chipsFor([seeded, ...unseeded]), isEmpty,
+          reason: 'seededFraction 1/3 < gate → axis HIDES (recomputed per pool)');
+    });
+
     test('chips == materialsInPool when the gate passes', () {
       final seeded =
           kDivePool.where((p) => materialOf(p) != null).take(40).toList();
@@ -74,7 +91,8 @@ void main() {
       const copperChip =
           SignalChip(axisId: 'material', value: 'נחושת', displayLabel: 'נחושת');
       expect(const MaterialSignal().matches(unknown, copperChip), isTrue,
-          reason: 'a null material carries along (§2 — the ~42% are not lost)');
+          reason: 'a null material carries along (§2 — the unseeded majority '
+              'is not lost; swarm R3 corrected the stale "~42%" figure)');
 
       final copper = kDivePool
           .firstWhere((p) => materialOf(p) == 'נחושת', orElse: () => unknown);

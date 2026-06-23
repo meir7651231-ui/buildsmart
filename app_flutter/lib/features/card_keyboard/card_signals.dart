@@ -161,8 +161,11 @@ class WordSignal extends SignalSource {
 /// MATERIAL axis — the NEW 5th axis (build plan §2). `materialsInPool` chips,
 /// GATED so it shows only when ≥ [kMaterialCoverageGate] of the pool has a known
 /// material (#28). The predicate is NULL-TOLERANT: an unknown-material product
-/// rides ALONG (so the ~42% unseeded are not dropped); only the Phase-2 scoring
-/// excludes nulls so copper/brass counts are not inflated by the shared null.
+/// rides ALONG (so the unseeded MAJORITY is not dropped — materialOf detects a
+/// known material for only a minority of the union pool, and the exact share
+/// varies per narrowed pool; swarm R3 corrected an earlier "~42%" overstatement);
+/// only the Phase-2 scoring excludes nulls so copper/brass counts are not
+/// inflated by the shared null.
 class MaterialSignal extends SignalSource {
   const MaterialSignal();
   @override
