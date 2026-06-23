@@ -36,6 +36,10 @@ void main() {
       expect(bySku('77003023').color, 'ניקל');
       expect(bySku('77777311').dims?['מידה'], '1/2"');
     });
+    test('HDPE coupler dims from the page-75 tables (pass 3)', () {
+      expect(bySku('9101601610').dims?['מידה'], '16*16');
+      expect(bySku('9101601211').dims?['מידה'], '16*1/2"');
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {

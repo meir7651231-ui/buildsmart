@@ -1267,3 +1267,9 @@
 - **תיקון-מחיל (`scripts/apply_lipskey_enrich.py`):** מוצרי-AQUATEC כתובים ב**שורה-אחת** (`LipskeyCatalogProduct(...page:N...),`) — עוגן-ה-page-בשורה-נפרדת לא תפס אותם (0 הוחל). נוסף ענף שמזהה constructor-בשורה-אחת ומחיל את השדות **לפני ה-`),` הסוגר**. (אותה מחלקת-באג כמו 186666 הבודד.)
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — קבוצת Qondus, "connector dims/finish": `77003023` dims['מידה']='6"'+color='ניקל'; `77777311` dims['מידה']='1/2"'.
 - **mutation-verify:** baseline **+6 ירוק** → הזרקתי `'מידה': '6"'`→`'9"'` בשורת 77003023 → טסט **אדום `+4 -1`** ("connector dims/finish") → שחזור → **+6 ירוק**, 0 שארית. analyze 0. parity+product_journey(935)+twenty_products ירוקים.
+
+## #qondus-hdpe-pass3 — מחברי-HDPE מעמודים 75-78 (R8) — 2026-06-23
+- **הדאטה (`lib/data/lipskey_catalog.dart`, data/ → גייט 44):** מעבר-3 ממוקד על 16 עמודי-Qondus שדילגתי במעבר-2 (בעיקר HDPE 75-78). הוחל **164 dims (מידה) + 5 color** למצמדי-HDPE דלילים (`מצמד HDPE 16×16`, מצמד-הברגה-חיצונית…) — SKUs `91xxxxxxxx` שתואמים בול לקטלוג.
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — "HDPE coupler dims": `9101601610` dims['מידה']='16*16'; `9101601211`='16*1/2"'.
+- **mutation-verify:** baseline **+7 ירוק** → הזרקתי `'מידה': '16*16'`→`'99*99'` בשורת 9101601610 → טסט **אדום `+5 -1`** ("HDPE coupler dims") → שחזור → **+7 ירוק**, 0 שארית. analyze 0. parity+product_journey(935)+twenty_products ירוקים.
+- **לקח-כיסוי:** מעבר-2 דילג בטעות עמודי-HDPE 75-78 → 120 דלילים נשארו; תיקון = למפות **כל** עמודי-הדלילים לפני סבב, לא תת-קבוצה.
