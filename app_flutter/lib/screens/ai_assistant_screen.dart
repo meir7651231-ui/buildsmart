@@ -18,6 +18,7 @@
 // demo/test build is unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/fuzzy_search.dart' show fuzzySearchProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
@@ -109,7 +110,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
       if (!mounted) return;
       // Parse + closed-set-validate; a garbled/hallucinated reply degrades to a
       // plain answer (never acts wrongly). Then run the action over REAL engines.
-      final turn = _dispatchIntent(parseAssistantIntent(r.text));
+      final turn = _dispatchIntent(parseAssistantIntent(r.text), text);
       setState(() {
         _turns.add(turn);
         _loading = false;
@@ -130,7 +131,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
   /// computeAnalyticsInsights / resolvedKitProducts — real SKUs), never the model;
   /// the model supplied only the validated key + prose `say`. `addToCart` only
   /// PROPOSES a kit (carried on the turn) — the cart write waits for the confirm tap.
-  AssistantTurn _dispatchIntent(AssistantIntent intent) {
+  AssistantTurn _dispatchIntent(AssistantIntent intent, String userText) {
     switch (intent.action) {
       case AssistantAction.answer:
         final say = intent.say.trim();
@@ -138,19 +139,29 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
             user: false,
             text: say.isEmpty ? 'לא הצלחתי לנסח תשובה — נסה לנסח אחרת.' : say);
       case AssistantAction.findProduct:
-        final products = productsInCategory(intent.key);
+        // Literal-first (mirrors the finder): the user's words often name a
+        // color/size/material the single-category map can't reach ("שחור" →
+        // "נחושת"). Prefer real NAME-matches; only when there are none fall back
+        // to the model's category pick. Both are grounded (real catalog rows).
+        final literal = fuzzySearchProducts(userText);
+        final fromLiteral = literal.isNotEmpty;
+        final products = fromLiteral ? literal : productsInCategory(intent.key);
         final head = intent.say.isNotEmpty
             ? intent.say
-            : 'מצאתי בקטגוריה "${intent.key}":';
+            : (fromLiteral
+                ? 'מצאתי עבור "$userText":'
+                : 'מצאתי בקטגוריה "${intent.key}":');
         if (products.isEmpty) {
           return AssistantTurn(
-              user: false, text: '$head\n(אין מוצרים בקטגוריה הזו כרגע.)');
+              user: false, text: '$head\n(לא נמצאו מוצרים מתאימים כרגע.)');
         }
+        final label =
+            fromLiteral ? '🔎 "$userText"' : '📂 ${intent.key}';
         final lines =
             [for (final p in products.take(8)) '• ${p.nameHe}'].join('\n');
         return AssistantTurn(
             user: false,
-            text: '$head\n📂 ${intent.key} · ${products.length} מוצרים\n$lines');
+            text: '$head\n$label · ${products.length} מוצרים\n$lines');
       case AssistantAction.summarizeOrders:
         final insights =
             computeAnalyticsInsights(ref.read(ordersEngineProvider));
