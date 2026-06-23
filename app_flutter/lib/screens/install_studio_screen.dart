@@ -1382,9 +1382,21 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   String _formatDate(DateTime d) {
     final now = DateTime.now();
     final diff = now.difference(d);
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דקות';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
-    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    // Future timestamp (device clock rolled back after the save) or <1 min →
+    // "עכשיו", never "לפני -3 דקות". Singular Hebrew forms for 1 (דקה/שעה/אתמול).
+    if (diff.isNegative || diff.inMinutes < 1) return 'עכשיו';
+    if (diff.inMinutes < 60) {
+      final m = diff.inMinutes;
+      return m == 1 ? 'לפני דקה' : 'לפני $m דקות';
+    }
+    if (diff.inHours < 24) {
+      final h = diff.inHours;
+      return h == 1 ? 'לפני שעה' : 'לפני $h שעות';
+    }
+    if (diff.inDays < 7) {
+      final n = diff.inDays;
+      return n == 1 ? 'אתמול' : 'לפני $n ימים';
+    }
     return '${d.day}/${d.month}/${d.year}';
   }
 

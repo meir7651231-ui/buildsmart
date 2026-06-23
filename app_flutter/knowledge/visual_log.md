@@ -1869,3 +1869,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** כמעט-אפס. (1) צילום-מצלמה: ה-toast "📸 התמונה נקלטה" עכשיו **באמת מופיע** (קודם נשמט שקט כי נקרא על context שכבר-נסגר). (2) רישום-משתמש: רווחים-מיותרים בשם/קשר נחתכים. שאר השינויים פנימיים (שחרור-controllers בדיאלוגים — אפס שינוי-מראה).
 **אימות (אוטומטי):** analyze 0 · product_journey (935 sheets) + cart_stress/safety/bulk ירוקים.
 **הפיכות:** `git checkout` על 6 הקבצים (store/catalog/install_studio/lipskey_products/welcome/camera).
+
+## v6.88 — date: "עכשיו" + צורות-יחיד בזמן-יחסי (install-studio) — 2026-06-23
+**שינוי נראה:** ב-install-studio, חותמת-הזמן-היחסית של פרויקט שמור: timestamp-עתידי (שעון אחורה) כבר לא מציג "לפני -3 דקות" אלא "עכשיו"; ו-1 מציג צורת-יחיד ("לפני דקה" · "לפני שעה" · "אתמול") במקום "לפני 1 דקות". פורמט-תאריך מלא (>שבוע) ללא-שינוי.
+**אימות (אוטומטי):** analyze 0 · install_builder + full-suite ירוקים. (formatter טהור — אפס שינוי-מבני.)
+**הפיכות:** `git checkout lib/screens/install_studio_screen.dart`.

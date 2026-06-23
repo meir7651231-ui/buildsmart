@@ -2794,3 +2794,13 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(LOW · nav)** `camera_sheet._capture` — toast אחרי pop על context-מת (נשמט שקט) → `rootCtx` שנלכד-לפני-pop (אותו דפוס כמו `_onDetect`).
 - **נדחה (תועד · רציונל):** qty upper-clamp — **נבדק ונדחה**: עגלת-B2B-בנייה מזמינה לגיטימית >999 יח' (`cart_stress` מאשר qty=100000); Dart int לא-עולה-על-גדותיו בערכי price×qty ריאליים → ה"runaway" תיאורטי. נשאר ללא-חסם-עליון (חסם-תחתון qty<=0→הסרה נשמר). · checkout double-submit (LOW · synchronous+immediate-pop ממתן · תיקון=המרה-ל-stateful = churn).
 - **gate:** analyze 0 · cart_stress + product_journey (935 HARD) + cart_safety/bulk ירוקים · screens→24/116. אין lib/logic|data→אין 42/44.
+
+### #r10-finish — אודיט-נחיל סיבוב-10 (הסיבוב העשירי): crash-paths CLEAN + date-fix — 2026-06-23
+הסיבוב ה-10 (משלים ≥10). 4 עדשות-טריות (crash-paths · date/time · engine-concurrency · dead-code). **crash-paths — LENS CLEAN** (סריקה ממצה: כל `.first`/`.firstWhere`/`.reduce`/`[i]`/`map[k]!`/parse גדור). תוקן:
+- **(MED · date)** `install_studio_screen._formatDate` — timestamp-עתידי (שעון-מכשיר אחורה) הציג "לפני -3 דקות" → clamp ל-"עכשיו"; + צורות-יחיד עבריות (לפני דקה/שעה · אתמול · עכשיו ל-<דקה).
+- **gate:** analyze 0 · install_builder + full-suite. screens→24/116.
+- **נדחה (תועד · רציונל — כולם LOW/narrow/feature-wiring, אפס launch-blocker):**
+  - **dead-code (feature-wiring):** תוצאות-חיפוש מסוג `SearchType.screen` ('ספקים ומותגים'/'התראות'/'חנות') ב-`catalog_screen` רק-כותבות-query במקום לנווט → `SuppliersScreen`+`LipskeyBrandScreen` יתומים. זה **גַּף-בנייה** (צריך מיפוי entry→screen, כמו ניוד-HR Phase-0) — מתועד, לא patch.
+  - **engine-concurrency (2× LOW · failure-only):** `tasks_engine._saveRejectNote` partial-write לא-מסודר (side-map) · `persona_fulfillment.capturePod/captureSignature` rollback מוחק-כל-המפה ב-3 אתרים (דורש כשל-quota + כתיבה-מקבילה לעוד-הזמנה — נדיר-קיצוני, מסונכרן ב-load הבא).
+  - **dead-helpers (MED-cruft):** `install_engine.connectionMethodLabel`/`pipeConnectionDn` · `brand_history.countsFor/totalPicks` — אפס-callers (אולי-roadmap; הסרה נדחית כדי לא-למחוק WIP אפשרי).
+  - **10 providers אפס-ref** = roadmap-infra מתועד (לא-dead).
