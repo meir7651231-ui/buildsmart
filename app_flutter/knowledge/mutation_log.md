@@ -1333,3 +1333,10 @@
 - **false-positives שנדחו:** "דיור"=Dior brand · `{'תיאור'}`=dims נקי · 77701150 שם קיים (double-quoted).
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `779096F` שם בלי 'גרפיטי'; `152785`/`186466` imageFile=null.
 - **mutation-verify:** baseline **+16 ירוק** → `152785` imageFile null→'x.jpeg' → **אדום `+14 -1`** ("audit fix v2") → שחזור → **+16 ירוק**. analyze 0. parity+product_journey(935) ירוקים.
+
+## #image-relink — 19 assets ב-R2 שלא היו מקושרים — 2026-06-23
+- **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** 19 מוצרים עם `imageFile: null` שהקובץ שלהם קיים ב-`assets/lipskey/products/` **וגם ב-R2 (אומת curl 200×19)** — קושרו ל-`'<sku>.jpeg'`. גנריים-בטוחים (12 צינורות-שחורים) + אביזרים נדגמו ויזואלית (997091=ברך 90° ✓, 120311=רכיב-ניקוז שחור ✓).
+- **בטיחות gate-117:** 120311/186666 הם gate-117 → imageFile לא מוצמד ב-parity (אומת +289 ירוק).
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `997091`/`273226` imageFile != null.
+- **אימות:** enrichment +17 · parity+product_journey(935) ירוקים · analyze 0.
+- **הקשר:** העלאה ל-R2 דורשת מפתחות (docs/r2-upload-guide.md, שלב-בעלים); ה-19 כבר היו ב-R2 אז קישור=תיקון-חי. חילוץ-מ-PDF עבור החסרות-מ-R2 יצריך הרצת אותו סקריפט-העלאה.

@@ -76,6 +76,10 @@ void main() {
       expect(bySku('152785').imageFile, null); // cistern showed a toilet-seat photo
       expect(bySku('186466').imageFile, null); // kit showed a stock drawing
     });
+    test('image relink — assets present on R2 but unlinked are now wired', () {
+      expect(bySku('997091').imageFile, '997091.jpeg'); // ברך 90° — asset existed, was null
+      expect(bySku('273226').imageFile, '273226.jpeg'); // צינור שחור DN40
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
