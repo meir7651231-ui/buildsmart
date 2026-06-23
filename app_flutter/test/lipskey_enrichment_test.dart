@@ -67,6 +67,10 @@ void main() {
       expect(bySku('77775256').dims?['ייעוד'], 'למדיח'); // ברז ניל יציאה למדיח
       expect(bySku('77775255').dims?['תצורה'], 'כפול'); // ברז ניל כפול
     });
+    test('audit fix — unit error corrected, garbled dims removed', () {
+      expect(bySku('7777707C').dims?['מידה'], '200 מ"מ'); // was ס"מ (contradicted name)
+      expect(bySku('9106320031').dims?.containsKey('מידה'), false); // garbled "63*2 90" removed
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
