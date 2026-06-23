@@ -1842,3 +1842,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי לא-נראה (lib/state/board_auth.dart):** logout מתוך board-מתחזה כבר לא מנתק את המנהל לגמרי — חוזר לסשן-המנהל.
 **אימות (אוטומטי, לא צילום):** `manager_impersonate_test` +2 (logout בזמן/מחוץ-impersonation) · `board_auth_test` 20 · spec_copilot/ai_finder/describe_to_cart analyze 0. (סבב-בדיקות-מסך לאחים = ממתין, מתועד ב-WIRING.)
 **הפיכות:** `git checkout lib/screens/spec_copilot_screen.dart lib/screens/ai_finder_screen.dart lib/screens/describe_to_cart_screen.dart lib/state/board_auth.dart`.
+
+## v6.83 — מע״מ קטלוג 17%→18% (יישור לחיוב-הקופה · מקור-אמת-יחיד) — 2026-06-23
+**שינוי נראה:** מחירי-הקטלוג עם "כולל מע״מ" עלו ב~0.85% (17%→18%) — כי המחיר-המוצג עכשיו תואם בדיוק את מה שנגבה בקופה (שכבר חייבה 18%). דוגמה: מוצר ב-₪100 בסיס הציג ₪117, עכשיו ₪118 (=מה שהקופה גבתה ממילא). מסך-הניהול ממשיך להציג "שיעור מע״מ 18%" (עכשיו נגזר מאותו קבוע). **זה תיקון-נכונות:** קודם הקבלן ראה מחיר אחד בעיון ושילם יותר בקופה.
+**אימות (אוטומטי, לא צילום):** `catalog_price_units_settings_test` (18%) + 5 חבילות-עגלה (נשארו 18% ירוקות) + `manager_dashboard_screen_test` (שורת-מע״מ עדיין מרונדרת) = 122 ירוקים · analyze 0.
+**הפיכות:** `git checkout lib/state/catalog_settings.dart lib/screens/store_screen.dart lib/screens/manager_dashboard_screen.dart` — מחזיר ל-`kVatRate=0.17` ולפיצול 17/18.

@@ -424,8 +424,11 @@ final catalogProductSortProvider = StateProvider<ProductSort>(
 // text. The settings screen binds the controls; the catalog/product-card/sheet
 // call these so the toggle is honest (it really changes what the user sees).
 
-/// Israel statutory VAT rate (17%). [priceWithVat] multiplies by `1 + this`.
-const double kVatRate = 0.17;
+/// Israel statutory VAT rate (18% since 2025-01-01). [priceWithVat] multiplies
+/// by `1 + this`. SINGLE SOURCE OF TRUTH — the cart charge (`cartVat`) and the
+/// manager's displayed rate derive from this, so the browse price and the
+/// checkout charge can never disagree (was 0.17 here while the cart charged 18%).
+const double kVatRate = 0.18;
 
 /// Apply VAT to a base (pre-VAT) price when [showVat] is on. Pure rounding to
 /// the nearest shekel so the displayed integer matches what the card renders.

@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Proves the five price/display settings are (a) really persisted (WRITE +
 /// LOAD round-trip through the notifier) and (b) really respected by the
 /// consuming render path (the pure helpers the catalog/sheet call):
-///   • הצג מחירים כולל מע"מ  → priceWithVat (×1.17)
+///   • הצג מחירים כולל מע"מ  → priceWithVat (×1.18)
 ///   • מטבע                  → currencySymbol (₪ / $ / €, NO FX conversion)
 ///   • הצגת מחיר ליחידה       → showUnitPrice flag
 ///   • מערכת מידה            → CatalogUnit metric/imperial in formatDimValue
@@ -29,10 +29,11 @@ void main() {
   // ─── pure consuming behaviour ──────────────────────────────────────────────
   group('VAT price math (הצג מחירים כולל מע"מ)', () {
     test('VAT-inclusive price = base × 1.17, rounded', () {
-      // 100 → 117 is THE load-bearing assertion (mutation target).
-      expect(priceWithVat(100, showVat: true), 117);
-      expect(priceWithVat(280, showVat: true), 328); // 327.6 → 328
-      expect(priceWithVat(420, showVat: true), 491); // 491.4 → 491
+      // 100 → 118 is THE load-bearing assertion (mutation target). VAT is 18%
+      // (Israel statutory since 2025-01-01) — must match the cart charge.
+      expect(priceWithVat(100, showVat: true), 118);
+      expect(priceWithVat(280, showVat: true), 330); // 330.4 → 330
+      expect(priceWithVat(420, showVat: true), 496); // 495.6 → 496
     });
 
     test('VAT off leaves the base price untouched', () {
@@ -40,13 +41,13 @@ void main() {
       expect(priceWithVat(420, showVat: false), 420);
     });
 
-    test('kVatRate is the Israeli 17%', () {
-      expect(kVatRate, 0.17);
+    test('kVatRate is the Israeli 18% (statutory since 2025-01-01)', () {
+      expect(kVatRate, 0.18);
     });
 
     test('formatCatalogPrice composes prefix + symbol + VAT amount', () {
       const ils = CatalogSettings.defaults; // showVat true, ils
-      expect(formatCatalogPrice(100, ils, prefix: '~'), '~₪117');
+      expect(formatCatalogPrice(100, ils, prefix: '~'), '~₪118');
       final noVat = ils.copyWith(showVat: false);
       expect(formatCatalogPrice(100, noVat), '₪100');
     });

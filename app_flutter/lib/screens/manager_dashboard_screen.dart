@@ -24,6 +24,7 @@ import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -3188,8 +3189,10 @@ class _AppSettingsBody extends StatelessWidget {
   /// @legacy index.html:11963 `let creditLimit=50000;` (rendered toLocaleString).
   static const int _creditLimit = 50000;
 
-  /// @legacy index.html:11941 `const VAT_RATE = 0.18;` → 18%.
-  static const int _vatPercent = 18;
+  /// @legacy index.html:11941 `const VAT_RATE = 0.18;` → 18%. Derived from the
+  /// single-source [kVatRate] so the manager's displayed rate can't drift from
+  /// the catalog browse price / cart charge.
+  static int get _vatPercent => (kVatRate * 100).round();
 
   @override
   Widget build(BuildContext context) {
@@ -3201,9 +3204,9 @@ class _AppSettingsBody extends StatelessWidget {
           label: 'מסגרת אשראי לקבלן',
           value: '₪${_grouped(_creditLimit)}',
         ),
-        const _ManageRow(label: 'שיעור מע״מ', value: '$_vatPercent%'),
-        const _ManageHint(
-          'המע״מ קבוע לפי חוק (18%). תוספת האקספרס והאשראי נראים מיד בעגלת הקבלן.',
+        _ManageRow(label: 'שיעור מע״מ', value: '$_vatPercent%'),
+        _ManageHint(
+          'המע״מ קבוע לפי חוק ($_vatPercent%). תוספת האקספרס והאשראי נראים מיד בעגלת הקבלן.',
         ),
       ],
     );

@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/screens/order_notif_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
+import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/projects_engine.dart';
@@ -389,12 +390,13 @@ int deliveryFeeFor(CartDelivery d) => switch (d) {
 };
 
 /// VAT amount for a subtotal. When [vatInclusive] the VAT is already embedded
-/// in the prices (so it's the 18% portion of the gross); otherwise it's 18%
-/// added on top.
+/// in the prices (so it's the VAT portion of the gross); otherwise it's added
+/// on top. Derives from the single-source [kVatRate] so the cart CHARGE always
+/// matches the catalog's browse price (`priceWithVat`) — never a 17/18 split.
 int cartVat(int subtotal, {required bool vatInclusive}) =>
     vatInclusive
-        ? subtotal - (subtotal / 1.18).round()
-        : (subtotal * 0.18).round();
+        ? subtotal - (subtotal / (1 + kVatRate)).round()
+        : (subtotal * kVatRate).round();
 
 int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
     vatInclusive

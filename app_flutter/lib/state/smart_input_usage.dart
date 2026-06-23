@@ -41,11 +41,18 @@ class SmartInputUsageNotifier extends StateNotifier<SmartInputUsage> {
 
     final freqs = <String, int>{};
     if (freqRaw != null) {
-      final decoded = jsonDecode(freqRaw);
-      if (decoded is Map) {
-        decoded.forEach((k, v) {
-          if (v is num) freqs['$k'] = v.toInt();
-        });
+      // Guard the decode like every sibling store — a corrupt/truncated value
+      // must not throw out of this unawaited load (it would be swallowed by the
+      // global onError, but the usage signal would silently stay empty).
+      try {
+        final decoded = jsonDecode(freqRaw);
+        if (decoded is Map) {
+          decoded.forEach((k, v) {
+            if (v is num) freqs['$k'] = v.toInt();
+          });
+        }
+      } on Object catch (_) {
+        // corrupt frequencies → ignore; self-heals on the next pick
       }
     }
 

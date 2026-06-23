@@ -2758,3 +2758,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
   - **(MED)** role-switch/logout נגישים ב-worker-profile בזמן impersonation (חלק מה-readOnly לעיל).
   - **(12×MED · test-coverage)** כל 12 אחי-ה-AI הם LOGIC-ONLY (prompt-builder נבדק; מסלולי-מסך success/empty/error/off לא) — אותו פער שנסגר לקו-פיילוט. כל אחד צריך `*_screen_behavior_test`. = סבב-בדיקות ייעודי.
 - **gate:** analyze 0 · spec_copilot/ai_finder/describe_to_cart + manager_impersonate(5)/board_auth(20) ירוקים · full-suite · screens→24/116 · state (לא 42/44).
+
+### #vat-single-source — אודיט-נחיל סיבוב-7: מע״מ 17%↔18% מאוחד למקור-אמת-יחיד — 2026-06-23
+נחיל-4-עדשות (backend-authz · pricing/VAT · persistence · boards). **backend-authz · boards — CLEAN.** תוקנו:
+- **(HIGH · money)** הקטלוג הציג מע״מ 17% (`kVatRate=0.17`) בעוד העגלה/קופה חייבה 18% (`/1.18`) וה-מנהל פרסם 18% — **מחיר-עיון ≠ חיוב-בקופה** לאותו מוצר. ישראל = 18% חוקי מ-2025-01-01 (גם הלגאסי: `VAT_RATE=0.18`). תוקן: `kVatRate=0.18` (מקור-אמת-יחיד) · `cartVat` ב-`store_screen.dart` נגזר מ-`kVatRate` (זהה-מספרית, אך לא יוכל לסטות שוב) · `_vatPercent` ב-`manager_dashboard_screen.dart` נגזר מ-`kVatRate`. עכשיו עיון==קופה==מנהל, לנצח.
+- **(LOW · persistence)** `smart_input_usage.dart:44` — ה-`jsonDecode` היחיד בלי try/catch בכל הקוד-בסיס → עטוף ב-`try/on Object catch` כמו כל אח (ערך-תדירות פגום לא יזרוק מ-`_load` הלא-מומתן; self-heal בבחירה הבאה).
+- **טסט:** `catalog_price_units_settings_test` עודכן ל-18% (118/330/496 · `kVatRate==0.18` · `~₪118`). טסטי-העגלה (`gaps`/`state_deep`/`hard`/`cart_stress`/`cart_bulk`) **נשארו ירוקים** (כבר ציפו 18%). 122 ירוקים · analyze 0. screens → 24/116; `kVatRate`/`cartVat` נבדקים. אין lib/logic|data → אין 42/44.
