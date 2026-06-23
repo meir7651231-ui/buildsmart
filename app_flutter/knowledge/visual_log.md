@@ -4,6 +4,60 @@
 
 ---
 
+## v6.71 — אודיט-נחיל #3 · 4 תיקוני-overflow בגרידים (layout-robustness) — 2026-06-23
+
+**שינויי-UI (lib/screens):** 4 תיקוני-חוסן-overflow מעדשת-ה-layout. **שינוי-התנהגות בקצוות-קיצון בלבד** (טקסט-ארוך/text-scaling 1.35x) — תצוגה רגילה ללא-שינוי.
+- `persona_portal.dart` `PortalTileButton` — `title` קיבל `maxLines:2`, `sub` קיבל `maxLines:1` + `ellipsis` (היו ללא-גבול → גלישה בתווית-ארוכה).
+- `departments_screen.dart` `_DeptTile` — `dept.name` קיבל `maxLines:2`+`ellipsis` (textAlign.center נשמר).
+- `store_screen.dart` `_GridHubCard` — ה-`Column` הפנימי קיבל `mainAxisSize:min` (ה-Texts כבר היו עם maxLines/ellipsis) → לא דוחף-גלישה בתא-קבוע.
+- `store_screen.dart` גיליון-הזמנה — הוסר `SingleChildScrollView` **פנימי-כפול** מיותר (אותו ציר; הפנימי בלע גלילה). נשאר scroll-view יחיד (אומת ע"י הסוכן: סוגריים מאוזנים).
+
+**אימות:** כל ה-widgets נשמרים verbatim; השינויים הם maxLines/ellipsis/mainAxisSize/הסרת-עטיפה-כפולה — **אפס שינוי בתצוגה הרגילה**, רק מניעת גלישה במצבי-קצה. הגלובלי `clamp(0.85,1.35)` של text-scale (main.dart) חוסם את משרעת-הסיכון.
+
+**שאר v6.71 לא-ויזואלי:** שרת (reviewRoleRequest/credit) · rules (chat-thread) · cache (seed-blank) · kb_golden · callable-timeout · 5 טסטים. analyze 0 · full-suite (kb_golden skipped).
+
+## v6.70 — אודיט-עדשות-שונות · ai_finder → CustomScrollView (תוצאות עצלות) — 2026-06-23
+
+**שינוי-UI יחיד (lib/screens):** `ai_finder_screen.dart` — גוף-המסך עבר מ-`ListView(children:[…for…])` ל-
+`CustomScrollView` עם `SliverList.builder` לתוצאות (perf: עד ~120 tiles נבנו eager בכל חיפוש).
+
+**אימות-ויזואלי:** **רפקטור-מבנה בלבד — אפס שינוי-תצוגה מכוון.** ה-padding פוצל לשקילות מדויקת ל-
+`EdgeInsets.all(space4)` המקורי: ה-sliver-הראשון `fromLTRB(space4,space4,space4,0)` (טופס+סטטוס+כותרת-קטגוריה),
+ה-sliver-השני `symmetric(horizontal:space4)` (ה-tiles), ו-`SliverToBoxAdapter(SizedBox(space4))` סוגר את התחתית —
+top/sides/bottom = space4, והרווח כותרת↔tiles = ה-`SizedBox(space2)` הקיים. כל widget נשמר verbatim
+(טקסט-off, TextField, FilledButton, כותרת-📂, ה-ListTile עם chevron, מצב "לא זוהתה קטגוריה").
+
+**שאר השינויים — לא-ויזואליים:** matchers (לוגיקה), race-gates (`|| _loading`, התנהגות), sanitize (prompt),
+server (`claude.ts`). אין להם שינוי-מסך.
+
+**טסט:** full-suite baseline · analyze 0 errors.
+
+## v6.69 — swarm-fixes גל-4 · de-dup סולם-התוצאה ב-8 מסכי-נרטיב — 2026-06-23
+
+**שינוי (lib/widgets + lib/screens):** 3 widgets חדשים ב-`ai_result_states.dart` (`AiOffState`/`AiLoadingState`/
+`AiFailedState`) מחליפים את סולם-המצבים off/loading/failed שהיה משוכפל ב-8 מסכי-AI.
+
+**אימות-ויזואלי:**
+- **off/loading:** ה-widgets מרנדרים **בדיוק** אותם bytes כמו קודם (`Text(text, mutedLight/13)` · `Center(CircularProgressIndicator())`) — אומת ב-`ai_result_states_test` (צבע+גודל-גופן).
+- **failed:** זהה-מבנית, **למעט** צבע-הטקסט `danger`→`dangerDark` — שינוי-WCAG **מכוון** (AA על הרקע-הבהיר; `danger` 0xFFEF4444 נכשל). אומת ב-test (`color == dangerDark`, `!= danger`).
+- **שלב-התוצאה לא נגע** (per-screen, כולל ה-spreads עם כפתור-העתקה) → אפס שינוי-פריסה.
+- **token-drift:** `Color(0xFFEEEEEE)`/`0xFF9AA3B2`/`0xFFB91C1C` → `BsTokens.divider`/`mutedDark`/`dangerDark` — **ערכים זהים-לפיקסל** (אומת מול `tokens.dart`), אפס שינוי-צבע.
+
+**טסט:** `ai_result_states_test` 4/4 ירוק · full-suite `+3333 -1` (kb_golden הידוע) · analyze 0 errors.
+
+## v6.68 — swarm-fixes גל-3 · narrate-bridge refactor (סיכום-אתר) — 2026-06-23
+
+**שינוי (lib/screens):** `site_hub_screen.dart` — `_openSiteSummary` עבר מבניית-שורות-inline לקריאה ל-helper
+טהור `siteSummaryReportLines` (חולץ ל-`site_hub_state.dart`). **רפקטור בלבד — אפס שינוי-תצוגה.**
+
+**אימות:** ה-helper מחזיר **בדיוק** את אותן שורות שהיו inline (אותו פורמט, אותם פילטרי-סטטוס) — אומת ב-
+`narrate_bridge_test` (4 בדיקות) + הקריאה ב-`_openSiteSummary` מעבירה את אותם 3 ה-providers. הכפתור/המסך
+זהים ויזואלית; ההבדל היחיד הוא שהלוגיקה עכשיו בדיקה.
+
+**תוצאה:** ✅ אפס שינוי ויזואלי, כיסוי-טסט חדש לגשר-הקריטי. analyze 0 errors.
+
+---
+
 ## v6.65 — swarm-fixes גל-2 · a11y button-role בכרטיס-הקטלוג — 2026-06-23
 
 **שינוי (lib/screens):** `catalog_screen.dart` — כפתורי "✨ נסח" + "🔌 איך לגשר?" (GestureDetector חשופים) עטופים

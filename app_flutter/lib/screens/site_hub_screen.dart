@@ -696,22 +696,15 @@ class _SiteDiary extends ConsumerWidget {
   /// open/fixed snags + planned/done inspections) into a progress summary the
   /// contractor can send. The numbers are the engines'; Claude only phrases them.
   void _openSiteSummary(BuildContext context, WidgetRef ref) {
-    final diary = ref.read(siteDiaryProvider);
-    final snags = ref.read(siteSnagsProvider);
-    final inspections = ref.read(siteInspectionsProvider);
-    final openSnags = snags.where((s) => s.status == 'פתוח').length;
-    final fixedSnags = snags.where((s) => s.status == 'טופל').length;
-    final plannedInsp =
-        inspections.where((i) => i.status == 'מתוכננת').length;
-    final doneInsp = inspections.where((i) => i.status == 'בוצעה').length;
+    // Lines built by the pure, unit-tested `siteSummaryReportLines` (swarm:
+    // the status-string bridge is now guarded by narrate_bridge_test).
     Navigator.of(context).push(DailyReportScreen.route(
       title: 'סיכום אתר',
-      reportLines: [
-        '📓 רישומי-יומן: ${diary.length}',
-        if (diary.isNotEmpty) '📅 רישום אחרון: ${diary.first.text}',
-        '🔧 ליקויים: $openSnags פתוחים · $fixedSnags טופלו',
-        '🔍 ביקורות: $plannedInsp מתוכננות · $doneInsp בוצעו',
-      ],
+      reportLines: siteSummaryReportLines(
+        ref.read(siteDiaryProvider),
+        ref.read(siteSnagsProvider),
+        ref.read(siteInspectionsProvider),
+      ),
     ));
   }
 

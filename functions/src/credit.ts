@@ -73,15 +73,16 @@ export const computeCredit = onCall({ region: REGION }, async (request) => {
     .get();
   let used = 0;
   for (const doc of q.docs) {
-    // Harden `used`: recompute the order total from its `lines` (Σ line.price,
-    // qty is NOT a multiplier — see orderSum) instead of trusting the
-    // client-written `sum`. Legacy/seed docs carry no `lines` → fall back to the
-    // stored `sum` (finite numbers only).
-    const lines: unknown = doc.get("lines");
+    // `used` = Σ the contractor's COMMITTED order total — the stored `sum` (grand
+    // total incl. VAT + delivery + fixed items), exactly what the manager dashboard
+    // folds (Σ o.sum) and what the contractor agreed to at checkout. The bare
+    // `lines` totals (no VAT/delivery, fixed items absent) UNDERstate the debt and
+    // disagree with the displayed figure, so they are only a fallback for
+    // legacy/partial docs that carry no usable `sum`.
     const s: unknown = doc.get("sum");
-    used += Array.isArray(lines)
-      ? orderSum(lines)
-      : (typeof s === "number" && Number.isFinite(s) ? s : 0);
+    used += typeof s === "number" && Number.isFinite(s) && s > 0
+      ? Math.round(s)
+      : orderSum(doc.get("lines"));
   }
   const orderCount = q.size;
 

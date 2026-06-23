@@ -14,7 +14,9 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/prompt_sanitize.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +24,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// The grounded prompt — hands the model a CLOSED set of reason-categories and
 /// asks it to phrase ONE politely; it may not invent facts about the person.
 String rejectReasonPrompt({required String role, required String name}) {
-  final who = name.trim().isEmpty ? 'המבקש' : name.trim();
+  // `name` is an attacker-controlled profile displayName, and this reply is shown
+  // as PROSE (no closed-set after it) — the one live injection lever. Collapse
+  // newlines + hard-cap so it can't carry an "ignore the above…" payload.
+  final who = name.trim().isEmpty
+      ? 'המבקש'
+      : promptSafeText(name, maxLen: 60, collapseWhitespace: true);
   return 'מנהל דוחה בקשה להצטרף כ-"$role" מאת $who.\n'
       'קטגוריות-סיבה מקובלות (בחר אחת בלבד ונסח אותה בעדינות):\n'
       '• מסמכים/אימות שטרם הושלמו\n'
@@ -81,7 +88,12 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
       );
       if (mounted) {
         setState(() {
-          _draft = r.text.trim();
+          final reply = r.text.trim();
+          if (reply.isEmpty) {
+            _failed = true; // 200-empty → honest retry, not a blank box
+          } else {
+            _draft = reply;
+          }
           _loading = false;
         });
       }
@@ -132,27 +144,14 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
                     color: BsTokens.inkLight,
                     fontSize: 15,
                     fontWeight: FontWeight.w800)),
-            const Divider(height: BsTokens.space5, color: Color(0xFFEEEEEE)),
+            const Divider(height: BsTokens.space5, color: BsTokens.divider),
 
             if (!aiAvailable)
-              const Text('💡 ניסוח-הסיבה החכם דורש חיבור לשרת.',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 13))
+              const AiOffState('💡 ניסוח-הסיבה החכם דורש חיבור לשרת.')
             else if (_loading)
-              const Center(child: CircularProgressIndicator())
+              const AiLoadingState()
             else if (_failed)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('משהו השתבש — נסה שוב.',
-                      style: TextStyle(color: BsTokens.danger, fontSize: 14)),
-                  const SizedBox(height: BsTokens.space3),
-                  OutlinedButton.icon(
-                    onPressed: _draftReason,
-                    icon: const Text('🔄'),
-                    label: const Text('נסה שוב'),
-                  ),
-                ],
-              )
+              AiFailedState(onRetry: _draftReason)
             else if (_draft != null) ...[
               Text(_draft!,
                   style: const TextStyle(
@@ -171,7 +170,7 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
             const Text(
                 '⚙️ נוסח כללי ומכובד; ערוך לפי הצורך לפני שליחה. ה-AI לא ממציא '
                 'פרטים על המבקש.',
-                style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),
       ),

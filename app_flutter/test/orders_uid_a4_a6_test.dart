@@ -50,6 +50,9 @@ class _FakeSource implements RemoteCollectionSource {
   @override
   Future<void> delete(String id) async => deletes.add(id);
 
+  @override
+  bool get isScoped => false;
+
   Future<void> close() => _controller.close();
 }
 

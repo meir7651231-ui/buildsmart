@@ -31,6 +31,9 @@ class _FakeSource implements RemoteCollectionSource {
 
   @override
   Stream<List<RemoteDoc>> snapshots() => const Stream<List<RemoteDoc>>.empty();
+
+  @override
+  bool get isScoped => false;
 }
 
 void main() {

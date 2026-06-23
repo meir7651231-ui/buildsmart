@@ -1382,3 +1382,15 @@
 - **החלה:** הורדה (curl UA) → הקטנה 800px (flatten שקיפות ללבן) → דריסת assets באותו שם. שדרוג חדות פי-3.5 (152785 346→800). 686366 מולא+relink (4 relinks סה"כ).
 - **טסט:** `lipskey_enrichment_test` "official Lipski-site sweep". enrichment +21 · parity 277 ירוקים · analyze 0.
 - **⚠️ r2-upload ל-84 הקבצים לפני push** (R2 מחזיק ישן). כיסוי: ליפסקי בלבד; AQUATEC לא באתר. נותרו חסרי-תמונה: 196587 (מידה לא-מצולמת), 186466 (שונה מ-186666), 120011 (קושר-תאום).
+## #ai-grounding-hardening — אודיט-נחיל גל-5: longest-key + sanitize (לוגיקה) — 2026-06-23
+- **הרקע (אודיט-עדשות-שונות):** ה-fallback של ה-closed-set (`matchRecipe`/`matchAssistantRecipeKey`/`matchAssistantCategory`/`matchCategory`) החזיר את המפתח ה**ראשון** המוכל בתשובה. מפתחות מתנגשים בתחילית (`faucet`⊂`kitchenFaucet`, `basin`⊂`basinTrap`), אז תשובה עטופה (`"kitchenFaucet"`) פספסה exact והתאמת-contained תפסה את ה-prefix הקצר → **ערכה שגויה-אך-אמיתית**. תוקן ל-**longest-match**.
+- **הלוגיקה (`lib/logic/assistant_intent.dart` → גייט 42/44):** pass-2 בכל matcher בוחר את המפתח ה**ארוך-ביותר** המוכל. + helper חדש `promptSafeText` (`lib/logic/prompt_sanitize.dart`) שמנקה טקסט-לא-מהימן (קיפול-רווחים + cap-אורך) לפני הזרקה ל-prompt — חל על `displayName` ב-reject-reason (וקטור-הזרקה חי) ועל free-text (cap בלבד, closed-set מכיל).
+- **טסט-נעיצה:** `assistant_intent_test` (collision-guard עם ordered-pair finder — נועל short-before-long כך ש-first-match מובטח שגוי) · `describe_to_cart_test` (matchRecipe collision) · `prompt_sanitize_test` (cap/collapse/trim — 5 בדיקות).
+- **mutation-verify:** baseline `assistant_intent_test` **+13 ירוק** → `matchAssistantRecipeKey` longest→first-match → **אדום `+12 -1`** (הבדיקה collision-guard נפלה) → שחזור → **+13 ירוק**, 0 שארית. analyze 0 errors.
+
+## #seed-blank-on-scoped-empty — אודיט-נחיל #3: cache לא-מציג-seed-דמו תחת query-scoped — 2026-06-23
+- **הרקע (עדשת offline/sync):** `FirestoreCachedRepo._onSnapshot` ב-snapshot-ריק-ראשון שמר את ה-seed (לוגיקה ל-"backend טרי"). אבל תחת query **scoped** (uid), ריק = "למשתמש הזה אין מסמכים" — והמשתמש-החדש היה רואה את 4 הזמנות-הדמו (יוסי כהן/אבי מזרחי) כנתונים שלו ברגע ש-`kUidScopedQueries` נדלק.
+- **הלוגיקה (`lib/data/repositories/firestore_cached_repo.dart` → גייט 42/44):** `RemoteCollectionSource` קיבל `bool get isScoped` (ה-Firestore source מחזיר `_scope != null`); ב-`_onSnapshot`, snapshot-ריק-ראשון **תחת source scoped** מרוקן ל-`<T>[]` (honest-empty) במקום לשמור seed/לקרוא ל-hook. unscoped = ללא-שינוי (seed נשמר, hook נורה).
+- **טסט-נעיצה:** `firestore_cached_repo_test` — `'SCOPED first-empty BLANKS the seed to honest-empty (no seed-hook)'` (`scoped=true` + emit ריק → cache ריק, `firstEmptyCalls==0`); הטסט הקיים unscoped (seed נשמר + hook) עדיין ירוק.
+- **mutation-verify:** baseline ירוק → ביטול ענף-ה-`isScoped` (always keep-seed) → הטסט-החדש **אדום** (`cached()` היה `[1,2,3]` במקום ריק) → שחזור → ירוק. analyze 0 errors.
+- **גם (`lib/data/repositories/order_functions.dart`, LOW):** `advanceOrderStage`/`computeCredit` עטופים ב-`.timeout(30s)` → קריאה תקועה נכשלת-מהר ל-`_guard` במקום לתלות UI עד ~70s (inert: `kServerCallables` כבוי).

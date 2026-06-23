@@ -20,6 +20,32 @@ void main() {
     expect(matchRecipe(''), isNull);
   });
 
+  test('matchRecipe picks the LONGEST contained key (prefix-collision guard)', () {
+    // Find a real (short ⊂ long) pair where the SHORT key appears EARLIER in the
+    // list — so a first-match bug would provably grab the prefix, while
+    // longest-match must return the long key (e.g. faucet ⊂ kitchenFaucet).
+    String? shortK, longK;
+    final keys = [for (final r in kSmartProducts) r.key];
+    outer:
+    for (var i = 0; i < keys.length; i++) {
+      for (var j = 0; j < keys.length; j++) {
+        if (i < j &&
+            keys[j].length > keys[i].length &&
+            keys[j].contains(keys[i])) {
+          shortK = keys[i];
+          longK = keys[j];
+          break outer;
+        }
+      }
+    }
+    expect(longK, isNotNull,
+        reason: 'the catalog should contain an ordered prefix-collision pair');
+    // A wrapped reply naming the LONG key must resolve to it — first-match would
+    // have grabbed the earlier shorter contained key ($shortK) → wrong kit.
+    expect(matchRecipe('"$longK"')?.key, longK,
+        reason: 'longest contained key wins, not the earlier prefix $shortK');
+  });
+
   test('describeToCartPrompt grounds the model in the closed recipe set', () {
     final p = describeToCartPrompt('יש לי נזילה מתחת לכיור');
     expect(p, contains('יש לי נזילה מתחת לכיור'),

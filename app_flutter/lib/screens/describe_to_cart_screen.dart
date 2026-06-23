@@ -21,6 +21,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/data/smart_tree.dart' show SmartProduct, kSmartProducts;
 import 'package:buildsmart/features/word_finder/recipe_kit.dart'
     show KitMatch, assembleKit;
+import 'package:buildsmart/logic/prompt_sanitize.dart';
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
@@ -31,8 +32,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// demands it return ONLY a key (or NONE). It can't name a product.
 String describeToCartPrompt(String userText) {
   final list = kSmartProducts.map((r) => '${r.key} = ${r.name}').join('\n');
+  final safe = promptSafeText(userText, maxLen: 600); // cap free-text (cost/DoS)
   return 'רשימת-העבודות הזמינות (key = שם):\n$list\n\n'
-      'בקשת הקבלן: "$userText".\n'
+      'בקשת הקבלן: "$safe".\n'
       'בחר את ה-key של העבודה האחת שהכי מתאימה לבקשה — מתוך הרשימה בלבד. '
       'החזר אך ורק את ה-key (שורה אחת, ללא טקסט נוסף). '
       'אם שום עבודה ברשימה לא מתאימה, החזר NONE.';
@@ -51,10 +53,17 @@ SmartProduct? matchRecipe(String aiReply) {
   for (final r in kSmartProducts) {
     if (resp == r.key) return r;
   }
+  // Contained-key fallback (the model may wrap the key in quotes/prose). Pick the
+  // LONGEST containing key — many keys are prefixes of others (faucet⊂kitchenFaucet,
+  // basin⊂basinTrap), and first-match would grab the short prefix → the wrong kit.
+  SmartProduct? best;
   for (final r in kSmartProducts) {
-    if (resp.contains(r.key)) return r;
+    if (resp.contains(r.key) &&
+        (best == null || r.key.length > best.key.length)) {
+      best = r;
+    }
   }
-  return null;
+  return best;
 }
 
 /// The REAL products the recipe resolves to (bound lines only — never invented).
@@ -89,7 +98,10 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
   Future<void> _find() async {
     final gw = ref.read(claudeGatewayProvider);
     final text = _controller.text.trim();
-    if (gw == null || text.isEmpty) return;
+    // `|| _loading` closes a stale-response race: onSubmitted bypasses the button's
+    // loading-disable, so a re-submit mid-flight would fire a 2nd concurrent ask
+    // whose late reply could overwrite the newer query's result.
+    if (gw == null || text.isEmpty || _loading) return;
     FocusScope.of(context).unfocus();
     setState(() {
       _loading = true;

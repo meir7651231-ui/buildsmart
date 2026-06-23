@@ -246,6 +246,8 @@ class _DeptTile extends ConsumerWidget {
                 const SizedBox(height: BsTokens.space3),
                 Text(
                   dept.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,

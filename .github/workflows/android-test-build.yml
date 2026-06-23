@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.65 — ליטוש (אודיט-נחיל גל-2): אבטחת-עלות בשרת (model-allowlist) + a11y button-role בקטלוג · אפס שינוי-תצוגה · v6.65 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.72 — אבן-דרך מוכנות-launch: 3 נחילי-אודיט סגורים (21 ממצאים · 0 HIGH) · השרת+rules של v6.71 נפרסו ואומתו בפרודקשן (אישור-תפקיד אטומי · אשראי-מדויק · בידוד-צ'אט) · baseline 0 כשלים · v6.72 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

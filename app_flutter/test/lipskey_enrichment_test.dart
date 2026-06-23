@@ -72,7 +72,7 @@ void main() {
       expect(bySku('9106320031').dims?.containsKey('מידה'), false); // garbled "63*2 90" removed
     });
     test('audit fix v2 — typos corrected, wrong-product images nulled', () {
-      expect(bySku('779096F').nameHe.contains('גרפיטי'), false); // typo → גרפיני
+      expect(bySku('779096F').color, 'גרפיטי'); // Graphite finish — consistent name+color (was col-typo גרפיני)
       expect(bySku('196587').imageFile, null); // floor-drain still has no real photo
       expect(bySku('186466').imageFile, null); // kit showed a stock drawing
     });

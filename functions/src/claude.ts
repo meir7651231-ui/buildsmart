@@ -22,7 +22,7 @@ import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
-import { REGION } from "./common";
+import { db, REGION } from "./common";
 
 const anthropicKey = defineSecret("ANTHROPIC_API_KEY");
 
@@ -40,12 +40,66 @@ const kDefaultMaxTokens = 1024;
 const kMaxPromptChars = 8000;
 const kMaxTokensCap = 2048;
 
+// Cost-safety (audit גל-5): this proxy is a deliberately generic, auth-gated LLM
+// endpoint, so a single signed-in account could otherwise loop it to drain the
+// Anthropic budget. Two backstops: a hard concurrency cap (`maxInstances`, in the
+// onCall options) bounds the burst, and a per-uid fixed-window limiter (below)
+// bounds sustained volume. Per-request cost is already bounded (model allowlist +
+// 2048-token cap), so a generous window is fine — it only has to stop a runaway.
+const kRateWindowMs = 60_000; // 1-minute rolling window
+const kRateMaxPerWindow = 40; // generous for a human; a loop is thousands/min
+
+// Fail-fast (audit גל-5): the Anthropic SDK defaults to a 10-MINUTE timeout with
+// 2 retries — on a stuck upstream the callable would hang to the function ceiling
+// and the app would sit on a dead spinner. Bound it so a stall maps quickly to the
+// existing `internal`→retry path. Paired with `timeoutSeconds: 30` on the onCall.
+const kClientTimeoutMs = 25_000;
+
 // Lazy, cached client — NEVER constructed at module scope (the load-order rule
 // in common.ts; same lazy pattern as r2.ts `s3()`). The secret is only readable
 // inside a request that bound it.
 let cachedClient: Anthropic | null = null;
 function client(): Anthropic {
-  return (cachedClient ??= new Anthropic({ apiKey: anthropicKey.value() }));
+  return (cachedClient ??= new Anthropic({
+    apiKey: anthropicKey.value(),
+    timeout: kClientTimeoutMs,
+    maxRetries: 1,
+  }));
+}
+
+// Per-uid fixed-window rate limit, enforced in a Firestore transaction on
+// `_claudeRate/{uid}` (server-only — clients never read/write it; admin SDK
+// bypasses rules). Throws `resource-exhausted` once the window budget is spent.
+// A transient Firestore error FAILS OPEN (logs + allows): the abuse case is rare,
+// but an infra blip would otherwise block every real user.
+async function enforceRateLimit(uid: string): Promise<void> {
+  const ref = db().collection("_claudeRate").doc(uid);
+  try {
+    await db().runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const cur = snap.exists ? snap.data() : undefined;
+      const now = Date.now();
+      const windowStart =
+        typeof cur?.windowStart === "number" ? cur.windowStart : 0;
+      const count = typeof cur?.count === "number" ? cur.count : 0;
+      if (now - windowStart >= kRateWindowMs) {
+        tx.set(ref, { windowStart: now, count: 1 });
+        return;
+      }
+      if (count >= kRateMaxPerWindow) {
+        throw new HttpsError(
+          "resource-exhausted",
+          "Too many requests — try again shortly."
+        );
+      }
+      tx.set(ref, { windowStart, count: count + 1 }, { merge: true });
+    });
+  } catch (e) {
+    if (e instanceof HttpsError) throw e; // the real limit — propagate
+    logger.error("askClaude: rate-limit check failed (allowing)", {
+      error: String(e),
+    });
+  }
 }
 
 interface AskClaudeData {
@@ -56,11 +110,14 @@ interface AskClaudeData {
 }
 
 export const askClaude = onCall(
-  { region: REGION, secrets: [anthropicKey] },
+  // maxInstances caps concurrency → a hard ceiling on parallel spend; timeoutSeconds
+  // pairs with the SDK client timeout so a stuck upstream fails fast (audit גל-5).
+  { region: REGION, secrets: [anthropicKey], maxInstances: 10, timeoutSeconds: 30 },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign-in required.");
     }
+    await enforceRateLimit(request.auth.uid);
     const data = (request.data ?? {}) as AskClaudeData;
 
     const prompt = typeof data.prompt === "string" ? data.prompt.trim() : "";

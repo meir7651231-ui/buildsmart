@@ -160,7 +160,10 @@ class FirebaseOrderFunctionsGateway implements OrderFunctionsGateway {
       _guard(() async {
         final res = await _functions
             .httpsCallable('advanceOrderStage')
-            .call<dynamic>(<String, String>{'orderId': orderId});
+            .call<dynamic>(<String, String>{'orderId': orderId})
+            // Fail-fast: bound the wait so a stalled callable can't sit on the
+            // SDK's ~70s default; the timeout throws → _guard maps it gracefully.
+            .timeout(const Duration(seconds: 30));
         final m = _asMap(res.data);
         return AdvanceStageResult(
           orderId: _str(m['orderId']) ?? orderId,
@@ -171,9 +174,10 @@ class FirebaseOrderFunctionsGateway implements OrderFunctionsGateway {
 
   @override
   Future<CreditResult> computeCredit(String name) => _guard(() async {
-    final res = await _functions.httpsCallable('computeCredit').call<dynamic>(
-      <String, String>{'name': name},
-    );
+    final res = await _functions
+        .httpsCallable('computeCredit')
+        .call<dynamic>(<String, String>{'name': name})
+        .timeout(const Duration(seconds: 30)); // fail-fast (see advanceOrderStage)
     final m = _asMap(res.data);
     return CreditResult(
       name: _str(m['name']) ?? name,

@@ -93,6 +93,9 @@ class _FakeUsersSource implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  bool get isScoped => false;
 }
 
 void main() {

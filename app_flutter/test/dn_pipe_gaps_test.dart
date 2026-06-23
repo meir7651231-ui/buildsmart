@@ -53,7 +53,9 @@ void main() {
       print('  ❌ $k   $fitCount fittings   example: ${example.sku} ${example.nameHe}');
     }
 
-    // Not a fail — just a coverage report.
-    expect(true, isTrue);
+    // Coverage report — gaps may legitimately exist, so we don't assert it's
+    // empty. But the scan must have found compression-end fittings to classify;
+    // an empty map means specs/catalog regressed and the report is meaningless.
+    expect(fittingsByKey, isNotEmpty);
   });
 }

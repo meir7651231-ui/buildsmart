@@ -117,5 +117,32 @@ void main() {
       expect(matchAssistantRecipeKey(rk), rk);
       expect(matchAssistantRecipeKey('זזזזז-לא-ערכה'), isNull);
     });
+
+    test('matchAssistantRecipeKey picks the LONGEST contained key (collision guard)',
+        () {
+      // Find a real (short ⊂ long) pair where the SHORT key appears EARLIER in
+      // the list — so a first-match bug would provably grab the prefix, while
+      // longest-match must return the long key (e.g. faucet ⊂ kitchenFaucet).
+      String? shortK, longK;
+      final keys = [for (final p in kSmartProducts) p.key];
+      outer:
+      for (var i = 0; i < keys.length; i++) {
+        for (var j = 0; j < keys.length; j++) {
+          if (i < j &&
+              keys[j].length > keys[i].length &&
+              keys[j].contains(keys[i])) {
+            shortK = keys[i];
+            longK = keys[j];
+            break outer;
+          }
+        }
+      }
+      expect(longK, isNotNull,
+          reason: 'the catalog should contain an ordered prefix-collision pair');
+      // A wrapped reply naming the LONG key must resolve to it, not the prefix —
+      // first-match would propose the wrong kit ($shortK).
+      expect(matchAssistantRecipeKey('"$longK"'), longK,
+          reason: 'longest contained key wins, not the earlier prefix $shortK');
+    });
   });
 }
