@@ -4,6 +4,19 @@
 
 ---
 
+## v6.69 — swarm-fixes גל-4 · de-dup סולם-התוצאה ב-8 מסכי-נרטיב — 2026-06-23
+
+**שינוי (lib/widgets + lib/screens):** 3 widgets חדשים ב-`ai_result_states.dart` (`AiOffState`/`AiLoadingState`/
+`AiFailedState`) מחליפים את סולם-המצבים off/loading/failed שהיה משוכפל ב-8 מסכי-AI.
+
+**אימות-ויזואלי:**
+- **off/loading:** ה-widgets מרנדרים **בדיוק** אותם bytes כמו קודם (`Text(text, mutedLight/13)` · `Center(CircularProgressIndicator())`) — אומת ב-`ai_result_states_test` (צבע+גודל-גופן).
+- **failed:** זהה-מבנית, **למעט** צבע-הטקסט `danger`→`dangerDark` — שינוי-WCAG **מכוון** (AA על הרקע-הבהיר; `danger` 0xFFEF4444 נכשל). אומת ב-test (`color == dangerDark`, `!= danger`).
+- **שלב-התוצאה לא נגע** (per-screen, כולל ה-spreads עם כפתור-העתקה) → אפס שינוי-פריסה.
+- **token-drift:** `Color(0xFFEEEEEE)`/`0xFF9AA3B2`/`0xFFB91C1C` → `BsTokens.divider`/`mutedDark`/`dangerDark` — **ערכים זהים-לפיקסל** (אומת מול `tokens.dart`), אפס שינוי-צבע.
+
+**טסט:** `ai_result_states_test` 4/4 ירוק · full-suite `+3333 -1` (kb_golden הידוע) · analyze 0 errors.
+
 ## v6.68 — swarm-fixes גל-3 · narrate-bridge refactor (סיכום-אתר) — 2026-06-23
 
 **שינוי (lib/screens):** `site_hub_screen.dart` — `_openSiteSummary` עבר מבניית-שורות-inline לקריאה ל-helper

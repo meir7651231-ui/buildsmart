@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.68 — ליטוש (אודיט-נחיל גל-3): כיסוי-טסט לגשר סיכום-האתר (ספירות-הסטטוס ננעלו) · רפקטור, אפס שינוי-תצוגה · v6.68 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.69 — ליטוש (אודיט-נחיל גל-4, אחרון): סולם-התוצאה אוחד ל-widget משותף ב-8 מסכי-AI · תשובה-ריקה→נסה-שוב במקום ריק · ניגודיות-WCAG בשורת-הכשל · אפס שינוי-פריסה · v6.69 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

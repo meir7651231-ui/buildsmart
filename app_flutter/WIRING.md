@@ -2665,3 +2665,12 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(MED · coverage)** הגשר caller→prompt של סיכום-האתר היה לא-בדוק. חולץ בונה-השורות מ-`_openSiteSummary` ל-`siteSummaryReportLines(diary, snags, inspections)` ב-`site_hub_state.dart` (state/ → לא גייט-42/44). `_openSiteSummary` קורא ל-helper (ויזואלית זהה).
 - **טסט (`narrate_bridge_test`):** 4 בדיקות נועלות את הגשר-הקריטי — ספירות-הליקויים לפי `'פתוח'`/`'טופל'`, ביקורות לפי `'מתוכננת'`/`'בוצעה'`, ספירת-יומן + רישום-אחרון, ו-empty→אפסים-ללא-המצאה. typo במחרוזת-סטטוס היה מאפס ספירה בשקט — עכשיו נתפס.
 - **gate:** analyze 0 errors (4 warnings pre-existing ב-site_hub, לא שלי) · `narrate_bridge_test` ירוק · full-suite baseline. site_hub_screen ב-screens → גייט 24/116.
+
+### #swarm-fixes-w4 — de-dup סולם-התוצאה ב-8 מסכי-נרטיב + תשובה-ריקה + token-drift — 2026-06-23
+- **(tech-debt · de-dup)** סולם-התוצאה (`if (!aiAvailable) … else if (_loading) … else if (_failed) …`) היה משוכפל **מילולית** ב-8 מסכי-AI. חולץ ל-3 widgets ב-`lib/widgets/ai_result_states.dart`: `AiOffState(text)` · `AiLoadingState()` · `AiFailedState(onRetry:)`. 8 המסכים: `alt/paired/adapter/credit_explain_screen` · `business_summary_screen` · `quote_polish_screen` · `daily_report_screen` · `reject_reason_screen`.
+- **שלב-התוצאה נשאר per-screen** (`else if (_explanation/_summary/_polished/_report/_draft != null)` — 4 פשוטים `Text`, 3 spread עם כפתור-העתקה) → **אפס שינוי-פריסה** (לא נכנס ל-widget המשותף בכוונה, כדי לא לשנות `mainAxisSize`).
+- **(LOW · תשובה-ריקה)** הצלחת-fetch עם `r.text.trim()` ריק ציירה `Text("")` ריק (200-empty). עכשיו בכל 8 ה-handler מנתב reply-ריק ל-`_failed = true` → שורה כנה + נסה-שוב (משתמש-חוזר ב-`AiFailedState`).
+- **(LOW · WCAG)** שורת-הכשל "משהו השתבש — נסה שוב." עברה `BsTokens.danger`(0xFFEF4444)→`dangerDark`(0xFFB91C1C) — ניגודיות AA על הכרטיס-הבהיר, **פעם-אחת** ב-widget המשותף (חל על כל 8).
+- **(LOW · token-drift)** `Color(0xFFEEEEEE)`/`0xFF9AA3B2`/`0xFFB91C1C` → `BsTokens.divider`/`mutedDark`/`dangerDark` (ערכים זהים-לפיקסל → rename טהור).
+- **טסט (`ai_result_states_test`):** 4 בדיקות — `AiOffState` (mutedLight/13) · `AiLoadingState` (spinner) · `AiFailedState` (dangerDark + נסה-שוב, ו-onRetry נורה פעם-אחת בלחיצה).
+- **gate:** analyze 0 errors · full-suite `+3333 -1` (רק `kb_golden` הידוע) · `lib/widgets`+`lib/screens` → גייט 24/116 (לא 42/44). **כל ממצאי-הנחיל גל-1→4 סגורים.**

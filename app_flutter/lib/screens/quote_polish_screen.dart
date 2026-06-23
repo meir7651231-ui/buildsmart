@@ -17,6 +17,7 @@
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,7 +87,12 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
       );
       if (mounted) {
         setState(() {
-          _polished = r.text.trim();
+          final reply = r.text.trim();
+          if (reply.isEmpty) {
+            _failed = true; // 200-empty → honest retry, not a blank box
+          } else {
+            _polished = reply;
+          }
           _loading = false;
         });
       }
@@ -148,27 +154,14 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
                   style: const TextStyle(
                       color: BsTokens.mutedLight, fontSize: 12, height: 1.5)),
             ),
-            const Divider(height: BsTokens.space5, color: Color(0xFFEEEEEE)),
+            const Divider(height: BsTokens.space5, color: BsTokens.divider),
 
             if (!aiAvailable)
-              const Text('💡 הניסוח המקצועי דורש חיבור לשרת.',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 13))
+              const AiOffState('💡 הניסוח המקצועי דורש חיבור לשרת.')
             else if (_loading)
-              const Center(child: CircularProgressIndicator())
+              const AiLoadingState()
             else if (_failed)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('משהו השתבש — נסה שוב.',
-                      style: TextStyle(color: BsTokens.danger, fontSize: 14)),
-                  const SizedBox(height: BsTokens.space3),
-                  OutlinedButton.icon(
-                    onPressed: _polish,
-                    icon: const Text('🔄'),
-                    label: const Text('נסה שוב'),
-                  ),
-                ],
-              )
+              AiFailedState(onRetry: _polish)
             else if (_polished != null) ...[
               Text(_polished!,
                   style: const TextStyle(
@@ -185,7 +178,7 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
             ],
             const SizedBox(height: BsTokens.space4),
             const Text('⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח — לא משנה מחירים.',
-                style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),
       ),
