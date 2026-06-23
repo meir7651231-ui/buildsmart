@@ -94,6 +94,7 @@ void main() {
       expect(bySku('777M1801').imageFile, '777M1801.jpg'); // bath faucet, was wrong photo
       expect(bySku('77773001').imageFile, '77773001.jpg'); // pressure gauge
       expect(bySku('78071545').imageFile, '78071545.jpg'); // brass float
+      expect(bySku('77772412').imageFile, '77772412.jpeg'); // Dior wall spout, p18
     });
   });
 
