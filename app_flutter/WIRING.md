@@ -2622,3 +2622,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination (grounded, explain-only):** ה-prompt (`creditExplainPrompt`) מוסר את 4 המספרים ו**אוסר** להמציא/לשנות/להוסיף מספר — החלטת-אשראי = החלטת-כסף. המספרים על המסך = של המנוע.
 - **gating:** ה-`if (claudeGatewayProvider != null)` → ב-demo/no-AI הכפתור **לא קיים בעץ**, ה-sheet byte-identical (שורות-האשראי ללא-שינוי). המסך ב-null → "דורש חיבור".
 - **gate:** analyze 0 errors/warnings · `credit_explain_test` (4-figures verbatim · forbids-inventing guard) ירוק · full-suite baseline. credit_explain_screen + manager_dashboard_screen ב-screens → גייט 24/116.
+
+### #ai-daily-report — "✨ נסח דוח-יום" משותף (עובד + שליח · solo-wave) — 2026-06-23
+- **המהלך:** `daily_report_screen.dart` (חדש, **משותף**) + נגיעה ב-`worker_reports_tab.dart` ו-`courier_reports_tab.dart`: ליד כפתור "💬 שלח דוח יומי" הקיים נוסף `if (gateway != null)` עם **"✨ נסח דוח עם AI"** → `DailyReportScreen.route(title, reportLines)`. כל טאב בונה את ה-reportLines מאותם מספרים-חיים שה-chat-report משתמש בהם (`_openAiDailyReport`/`_openAiCourierReport`). +2 imports בכל טאב.
+- **הזרימה:** עובד — `tasksProvider` (אושרו/הוגשו/נדחו/בביצוע/בתור); שליח — `sysOrders`/`fulfillment`/`courierClock` (נמסרו-היום/סה"כ/פעילים/POD/ערך). המסך מציג את השורות, Claude **רק מנסח** דוח-יום זורם, כפתור "העתק לשליחה".
+- **anti-hallucination (grounded, narrate-only):** ה-prompt (`dailyReportPrompt`) מוסר את שורות-הדוח ו**אוסר** להמציא/לשנות/להוסיף מספר. המספרים = של המנועים.
+- **gating:** `if (claudeGatewayProvider != null)` בכל טאב → ב-demo הכפתור **לא בעץ**, שני הטאבים byte-identical (כפתור-השליחה הקיים ללא-שינוי). המסך ב-null → "דורש חיבור".
+- **gate:** analyze 0 errors (4 warnings pre-existing ב-courier_reports_tab, לא שלי) · `daily_report_test` (title+lines verbatim · forbids-inventing) ירוק · full-suite baseline. daily_report_screen + worker/courier_reports_tab ב-screens → גייט 24/116.

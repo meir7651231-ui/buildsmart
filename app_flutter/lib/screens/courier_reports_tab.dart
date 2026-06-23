@@ -40,8 +40,12 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/logic/calendar_days.dart';
+import 'package:buildsmart/screens/daily_report_screen.dart'
+    show DailyReportScreen;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
@@ -501,6 +505,20 @@ class CourierReportsTab extends ConsumerWidget {
             ),
           ),
         ),
+        // #ai-daily-report — when AI is live, narrate the SAME live delivery
+        // counts into a flowing report. gateway null → not in the tree → demo
+        // byte-identical.
+        if (ref.watch(claudeGatewayProvider) != null) ...[
+          const SizedBox(height: BsTokens.space2),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _openAiCourierReport(context, ref),
+              icon: const Text('✨'),
+              label: const Text('נסח דוח עם AI'),
+            ),
+          ),
+        ],
         const SizedBox(height: BsTokens.space2),
         const Text(
           'הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.',
@@ -509,6 +527,53 @@ class CourierReportsTab extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  /// #ai-daily-report — open the AI narrator over the SAME live delivery counts
+  /// the chat report uses (the numbers are the engine's; Claude only phrases).
+  void _openAiCourierReport(BuildContext context, WidgetRef ref) {
+    final s = ref.read(boardAuthProvider);
+    if (s == null || s.role != BoardRole.courier) {
+      showToast(context, 'אין שליח מחובר');
+      return;
+    }
+    final orders = ref.read(sysOrdersProvider);
+    final fulfillment = ref.read(fulfillmentProvider);
+    final clock = ref.read(courierClockProvider).asData?.value ??
+        const <String, CourierClockEntry>{};
+    final delivered =
+        orders.where((o) => o.stage == OrderStage.delivered).toList();
+    final mine = delivered
+        .where((o) => fulfillment[o.id]?.courierUser == s.username)
+        .toList();
+    final deliveredSum = mine.fold<int>(0, (a, o) => a + o.sum);
+    const activeStages = [
+      OrderStage.ready,
+      OrderStage.pickup,
+      OrderStage.transit,
+    ];
+    final active = orders.where((o) => activeStages.contains(o.stage)).length;
+    final podCount = orders
+        .where((o) =>
+            fulfillment[o.id]?.courierUser == s.username &&
+            (fulfillment[o.id]?.podCaptured ?? false))
+        .length;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final deliveredToday = mine.where((o) {
+      final d = clock[o.id]?.deliveredAt;
+      return d != null && DateTime(d.year, d.month, d.day) == today;
+    }).length;
+    Navigator.of(context).push(DailyReportScreen.route(
+      title: 'דוח-יום — שליח ${s.displayName}',
+      reportLines: [
+        '✅ נמסרו היום (נמדד): $deliveredToday',
+        '📦 סה״כ נמסרו על-ידי: ${mine.length}',
+        '🚚 משלוחים פעילים (כלל המערכת): $active',
+        '📸 POD שלי: $podCount',
+        '💰 ערך שנמסר: ${fMoney(deliveredSum)}',
+      ],
+    ));
   }
 
   /// Compose the live delivery counts into Hebrew text and post it into the

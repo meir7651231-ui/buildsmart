@@ -4,6 +4,23 @@
 
 ---
 
+## v6.60 — #ai-daily-report · טאבי-דוחות (עובד+שליח): כפתור "✨ נסח דוח עם AI" — 2026-06-23
+
+**שינוי (lib/screens):** `worker_reports_tab.dart` + `courier_reports_tab.dart` — ליד "💬 שלח דוח יומי" נוסף
+`if (gateway != null)` עם "✨ נסח דוח עם AI" → `DailyReportScreen` (חדש, משותף). כל טאב בונה reportLines
+מאותם מספרים-חיים שה-chat-report משתמש בהם.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): ליד כפתור-השליחה מופיע "✨ נסח דוח עם AI"; לחיצה פותחת מסך עם
+  שורות-הדוח האמיתיות (loader → נרטיב Claude) + "📋 העתק לשליחה". עובד=סטטוסי-משימות · שליח=מוני-מסירות.
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → שני הטאבים byte-identical
+  (כפתור "💬 שלח דוח יומי" הקיים בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים בשני הטאבים, אפס רגרסיה בדמו. analyze 0 errors · `daily_report_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.60).
+
+---
+
 ## v6.59 — #ai-credit-explain · sheet-לקוח (מנהל): כפתור "💳 הסבר אשראי" — 2026-06-23
 
 **שינוי (lib/screens):** `manager_dashboard_screen.dart` — ב-`_CustomerDetailSheet`, מתחת לשורות-האשראי,

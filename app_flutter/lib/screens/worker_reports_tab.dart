@@ -33,7 +33,11 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/logic/calendar_days.dart';
+import 'package:buildsmart/screens/daily_report_screen.dart'
+    show DailyReportScreen;
 import 'package:buildsmart/screens/worker_report_drilldowns.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -658,6 +662,19 @@ class WorkerReportsTab extends ConsumerWidget {
             ),
           ),
         ),
+        // #ai-daily-report — when AI is live, narrate the SAME live counts into a
+        // flowing report. gateway null (demo) → not in the tree → byte-identical.
+        if (ref.watch(claudeGatewayProvider) != null) ...[
+          const SizedBox(height: BsTokens.space2),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _openAiDailyReport(context, ref),
+              icon: const Text('✨'),
+              label: const Text('נסח דוח עם AI'),
+            ),
+          ),
+        ],
         const SizedBox(height: BsTokens.space2),
         const Text(
           'הדוח נשלח כהודעה אמיתית לשיחת הקבלן (טאב שיחות) — סיכום הסטטוסים הנוכחי, בלי המצאות.',
@@ -705,6 +722,24 @@ class WorkerReportsTab extends ConsumerWidget {
         .read(chatEngineProvider.notifier)
         .send(kContractorThreadId, BsRole.worker, text);
     showToast(context, '💬 הדוח נשלח לקבלן — מופיע בטאב שיחות');
+  }
+
+  /// #ai-daily-report — open the AI narrator over the SAME live status counts the
+  /// chat report uses (the numbers are the engine's; Claude only phrases them).
+  void _openAiDailyReport(BuildContext context, WidgetRef ref) {
+    final mine =
+        ref.read(tasksProvider).where((t) => t.worker == worker).toList();
+    int count(String s) => mine.where((t) => t.status == s).length;
+    Navigator.of(context).push(DailyReportScreen.route(
+      title: 'דוח-יום — ${workerShortName(worker)}',
+      reportLines: [
+        '✅ אושרו: ${count('done')}',
+        '📸 הוגשו וממתינות לאישור: ${count('review')}',
+        '↩️ נדחו לתיקון: ${count('rejected')}',
+        '🔨 בביצוע: ${count('active')}',
+        '⏳ בתור: ${count('pending')}',
+      ],
+    ));
   }
 }
 
