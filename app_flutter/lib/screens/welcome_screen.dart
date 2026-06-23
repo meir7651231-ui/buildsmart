@@ -128,7 +128,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
     ref
         .read(userProfileProvider.notifier)
-        .register(name: _name.text, contact: _contact.text);
+        .register(name: _name.text.trim(), contact: _contact.text.trim());
     _advance();
   }
 

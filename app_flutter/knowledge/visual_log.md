@@ -1864,3 +1864,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** אין. זהו תיקון-ביצועים פנימי בלבד — תוצאות-החיפוש, ההצעות וכרטיסי-הקטלוג נראים זהה לחלוטין. השיפור: פחות עבודת-CPU per-keystroke (RegExp לא-מתקמפל-מחדש; סריקת-ההצעות יצאה מ-build ל-provider).
 **אימות (אוטומטי):** 19 בדיקות-חיפוש ירוקות (אותו פלט) · analyze 0 · full-suite (incl. product_journey 935-sheet render — ללא-שינוי).
 **הפיכות:** `git checkout lib/screens/catalog_screen.dart`.
+
+## v6.87 — hygiene: disposal + trim + camera-toast-fix — שינוי-נראה מינימלי — 2026-06-23
+**שינוי נראה:** כמעט-אפס. (1) צילום-מצלמה: ה-toast "📸 התמונה נקלטה" עכשיו **באמת מופיע** (קודם נשמט שקט כי נקרא על context שכבר-נסגר). (2) רישום-משתמש: רווחים-מיותרים בשם/קשר נחתכים. שאר השינויים פנימיים (שחרור-controllers בדיאלוגים — אפס שינוי-מראה).
+**אימות (אוטומטי):** analyze 0 · product_journey (935 sheets) + cart_stress/safety/bulk ירוקים.
+**הפיכות:** `git checkout` על 6 הקבצים (store/catalog/install_studio/lipskey_products/welcome/camera).

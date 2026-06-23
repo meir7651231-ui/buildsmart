@@ -1790,7 +1790,7 @@ class _ProjectSelector extends ConsumerWidget {
               ),
             ],
           ),
-    );
+    ).whenComplete(() => controller.dispose());
   }
 }
 
@@ -2309,7 +2309,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
             ],
           ),
         ),
-  );
+  ).whenComplete(() => ctrl.dispose());
 }
 
 // ─── delivery selector ────────────────────────────────────────────────────────
@@ -3032,7 +3032,7 @@ class _CartActionsRow extends ConsumerWidget {
               ),
             ],
           ),
-    );
+    ).whenComplete(() => controller.dispose());
   }
 
   /// Re-add a saved [CartItem] to the live smart cart via the existing

@@ -1154,6 +1154,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    ctrl.dispose();
     if (name == null || name.isEmpty) return;
     await ref.read(savedProjectsProvider.notifier).save(
           name: name,
@@ -1371,6 +1372,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    ctrl.dispose();
     if (!mounted) return;
     if (name != null && name.isNotEmpty) {
       await ref.read(savedProjectsProvider.notifier).rename(p.id, name);
@@ -1687,7 +1689,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           ],
         ),
       ),
-    );
+    ).whenComplete(() => ctrl.dispose());
   }
   double _metersOf(String sku) => _meters[sku] ?? 2.0;
 

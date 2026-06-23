@@ -116,8 +116,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       if (dataUrl == null) return; // cancelled / unavailable — honest no-op
       final confirmed = await _confirmCapture(context, dataUrl);
       if (!confirmed || !mounted) return;
+      // Toast via the ROOT navigator's context (captured before the pop) — the
+      // same pattern as _onDetect; toasting on `context` after popping this
+      // screen reaches a defunct element and silently drops (no "נקלטה").
+      final rootCtx = Navigator.of(context, rootNavigator: true).context;
       Navigator.of(context).pop(dataUrl); // deliver the REAL capture
-      showToast(context, '📸 התמונה נקלטה');
+      showToast(rootCtx, '📸 התמונה נקלטה');
     } finally {
       if (mounted) setState(() => _capturing = false);
     }

@@ -631,6 +631,7 @@ class _StepBtn extends StatelessWidget {
 /// instead of tapping +/− N times. [onPick] receives the chosen 1–99.
 void showQtyWheel(BuildContext context, int current, void Function(int) onPick) {
   var sel = current < 1 ? 1 : (current > 99 ? 99 : current);
+  final wheelCtrl = FixedExtentScrollController(initialItem: sel - 1);
   showModalBottomSheet<void>(
     context: context,
     builder: (ctx) => StatefulBuilder(
@@ -648,7 +649,7 @@ void showQtyWheel(BuildContext context, int current, void Function(int) onPick) 
                 itemExtent: 44,
                 perspective: 0.004,
                 physics: const FixedExtentScrollPhysics(),
-                controller: FixedExtentScrollController(initialItem: sel - 1),
+                controller: wheelCtrl,
                 onSelectedItemChanged: (i) => setSheet(() => sel = i + 1),
                 childDelegate: ListWheelChildBuilderDelegate(
                   childCount: 99,
@@ -677,7 +678,7 @@ void showQtyWheel(BuildContext context, int current, void Function(int) onPick) 
         ),
       ),
     ),
-  );
+  ).whenComplete(() => wheelCtrl.dispose());
 }
 
 class _ProductRow extends ConsumerStatefulWidget {

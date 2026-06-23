@@ -2786,3 +2786,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(perf · PERF-H2)** `searchSuggestions(...)` רץ **בתוך `_SearchSuggestions.build()`** (סריקת-מילים O(catalog) per-keystroke) → חולץ ל-`searchSuggestionsProvider` (אחות ל-H1), מחושב פעם-אחת/query·scope·system. אותם guards (ריק עד ≥2 תווים בסקופ-מוצרים), אותו פלט.
 - **נדחה (תועד · רציונל):** debounce-חיפוש (ההתאמה כבר provider-ized + guard ≥2 + 935 צנוע; debounce נוגע ב-controller-sync/submit-flush בליבת-החיפוש החיה — סיכון>תועלת ללא device-profiling) · ResizeImage thumbnails (cache כבר חסום 700/~MB; resize per-slot צריך הקשר-תצוגה — סיכון-רגרסיה ויזואלית בליבה).
 - **gate:** 19 בדיקות-חיפוש (search_suggestions/match_boundary/fallback/sku_pollution/huliot) ירוקות · analyze 0. screens→24/116; אין lib/logic|data→אין 42/44.
+
+### #r9-hygiene — אודיט-נחיל סיבוב-9 (hygiene): disposal-idiom + trim + camera-toast — 2026-06-23
+שאר ממצאי R9 (אחרי v6.86 perf). תוקנו:
+- **(9× MED · disposal)** idiom אחיד: `TextEditingController`/`FixedExtentScrollController` מקומי-לפונקציה שמועבר ל-`showDialog`/`showModalBottomSheet` ולא-נזרק. תוקן ב-`store_screen` (×3) · `catalog_screen` (×3) · `install_studio_screen` (×3) · `lipskey_products_screen` (×1) — `.whenComplete(()=>ctrl.dispose())` ל-statement, dispose-אחרי-await ל-awaited (catalog `_rename` שוכתב dispose-after-await כדי לא-לשבור null-promotion). State-field controllers (כבר עם dispose) לא-נגעו.
+- **(LOW · input)** `welcome_screen._register` — שם/קשר נשמרו לא-trimmed → `.trim()`.
+- **(LOW · nav)** `camera_sheet._capture` — toast אחרי pop על context-מת (נשמט שקט) → `rootCtx` שנלכד-לפני-pop (אותו דפוס כמו `_onDetect`).
+- **נדחה (תועד · רציונל):** qty upper-clamp — **נבדק ונדחה**: עגלת-B2B-בנייה מזמינה לגיטימית >999 יח' (`cart_stress` מאשר qty=100000); Dart int לא-עולה-על-גדותיו בערכי price×qty ריאליים → ה"runaway" תיאורטי. נשאר ללא-חסם-עליון (חסם-תחתון qty<=0→הסרה נשמר). · checkout double-submit (LOW · synchronous+immediate-pop ממתן · תיקון=המרה-ל-stateful = churn).
+- **gate:** analyze 0 · cart_stress + product_journey (935 HARD) + cart_safety/bulk ירוקים · screens→24/116. אין lib/logic|data→אין 42/44.

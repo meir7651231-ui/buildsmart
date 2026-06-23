@@ -1137,7 +1137,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
           ),
         ],
       ),
-    );
+    ).whenComplete(() => controller.dispose());
   }
 
 }
@@ -1211,7 +1211,7 @@ void _showRenameDialog(
         ),
       ],
     ),
-  );
+  ).whenComplete(() => controller.dispose());
 }
 
 void _showItemPickerSheet(
@@ -1308,6 +1308,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
         ],
       ),
     );
+    controller.dispose();
     if (newName == null || newName.isEmpty || newName == _label) return;
 
     final list = List<String>.from(ref.read(catalogSectionsListProvider));
