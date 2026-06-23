@@ -2636,3 +2636,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination (grounded, narrate-only):** אותו `dailyReportPrompt` — מוסר את שורות-האתר ו**אוסר** להמציא/לשנות מספר. כיסוי-טסט דרך `daily_report_test` (ה-prompt משותף).
 - **gating:** `if (claudeGatewayProvider != null)` → ב-demo הכפתור **לא בעץ**, ה-יומן byte-identical.
 - **gate:** analyze 0 errors (4 warnings pre-existing dead-code ב-site_hub, לא שלי) · `daily_report_test` ירוק · full-suite baseline. site_hub_screen + daily_report_screen ב-screens → גייט 24/116.
+
+### #ai-reject-reason — "✨ נסח סיבת-דחייה" בבקשות-תפקיד (מנהל · solo-wave, אחרון) — 2026-06-23
+- **המהלך:** `reject_reason_screen.dart` (חדש) + נגיעה ב-`role_requests_inbox_screen.dart` (`_RequestCard`, Stateless): מתחת לשורת אישור/דחייה נוסף `Consumer` (inline) שמרנדר **"✨ נסח סיבת-דחייה"** → `RejectReasonScreen.route(role, name)`. +2 imports.
+- **שונה מהשאר — generative, לא narrate:** כאן ה-AI **מייצר טקסט** ולא מנסח נתון אמיתי, אז העיגון הוא **closed-set של קטגוריות-סיבה** (מסמכים/הדרכה/בדיקת-רקע/אין-מקום) שה-prompt מוסר, + **איסור להמציא עובדות ספציפיות** על האדם. ה-system מגביל לנוסח כללי-מכובד; המנהל עורך/מעתיק לפני שליחה (לא מחווט אוטומטית לדחייה).
+- **gating:** ה-`Consumer` בודק `claudeGatewayProvider == null → shrink` → ב-demo/no-AI **לא קיים בעץ**, הכרטיס byte-identical (אישור/דחייה בלבד).
+- **gate:** analyze 0 errors/warnings · `reject_reason_test` (role+person+closed-set · anti-invention guard) ירוק · full-suite baseline. reject_reason_screen + role_requests_inbox_screen ב-screens → גייט 24/116.

@@ -6,7 +6,11 @@
 // decisions land (an approved/denied doc leaves the pending query).
 
 import 'package:buildsmart/data/personas.dart';
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/screens/reject_reason_screen.dart'
+    show RejectReasonScreen;
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -197,6 +201,26 @@ class _RequestCard extends StatelessWidget {
                 ),
               ],
             ),
+          // #ai-reject-reason — when AI is live, draft a polite denial reason
+          // (closed-set categories) the manager can copy. gateway null (demo) →
+          // not in the tree → byte-identical.
+          Consumer(builder: (context, ref, _) {
+            if (ref.watch(claudeGatewayProvider) == null) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: BsTokens.space2),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                      RejectReasonScreen.route(role: role, name: name ?? '')),
+                  icon: const Text('✨'),
+                  label: const Text('נסח סיבת-דחייה'),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );

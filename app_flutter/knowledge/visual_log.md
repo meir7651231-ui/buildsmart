@@ -4,6 +4,22 @@
 
 ---
 
+## v6.62 — #ai-reject-reason · בקשות-תפקיד (מנהל): כפתור "✨ נסח סיבת-דחייה" — 2026-06-23
+
+**שינוי (lib/screens):** `role_requests_inbox_screen.dart` (`_RequestCard`) — מתחת לאישור/דחייה נוסף `Consumer`
+עם "✨ נסח סיבת-דחייה" → `RejectReasonScreen` (חדש). המסך מנסח נוסח-דחייה מנומס מ-closed-set קטגוריות.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): בכרטיס-בקשה, מתחת לאישור/דחייה, מופיע "✨ נסח סיבת-דחייה";
+  לחיצה פותחת מסך שמנסח נוסח-דחייה כללי-מכובד (loader → טקסט) + "📋 העתק". המנהל עורך/מעתיק.
+- **AI כבוי** (demo/web · gateway null): ה-`Consumer` מחזיר `SizedBox.shrink()` → הכפתור **לא בעץ** →
+  כרטיס-הבקשה byte-identical (כפתורי אישור/דחייה בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `reject_reason_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.62).
+
+---
+
 ## v6.61 — #ai-site-summary · יומן-אתר: כפתור "✨ סכם התקדמות עם AI" — 2026-06-23
 
 **שינוי (lib/screens):** `site_hub_screen.dart` (`_SiteDiary`) — אחרי "+ רישום יומן" נוסף `if (gateway != null)`
