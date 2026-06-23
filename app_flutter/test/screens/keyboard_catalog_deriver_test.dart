@@ -31,7 +31,12 @@
 
 import 'package:buildsmart/data/catalog_tree.dart' show CatalogNode;
 import 'package:buildsmart/screens/catalog_screen.dart'
-    show catalogFacetProvider, catalogTreePathProvider, smartTreeCatProvider;
+    show
+        catalogFacetProvider,
+        catalogTreePathProvider,
+        catalogTreeQueryProvider,
+        smartTreeCatProvider,
+        smartTreeQueryProvider;
 import 'package:buildsmart/screens/keyboard_catalog_deriver.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbHomeNodes;
@@ -370,47 +375,36 @@ void main() {
   });
 
   // ───────────────────────────────────────────────────────────────────────────
-  // (12) DEEPEST HONESTY — productLeaf emits facet chips but NO product-open chip;
-  // a smartLeaf chip is an honest `_comingSoon` (and does NOT mutate the path); a
-  // deadEnd is the back chip ONLY (the row is never blank).
+  // (12) DEEPEST HONESTY — a productLeaf emits NO node-kind chip (B1: the keyboard
+  // does NOT facet; brandIds are LATIN slugs that mis-filter / empty the screen
+  // list, so faceting is the SCREEN's job) — only back + breadcrumbs; a smartLeaf
+  // chip is an honest `_comingSoon` (and does NOT mutate the path); a deadEnd is
+  // the back chip ONLY (the row is never blank).
   // ───────────────────────────────────────────────────────────────────────────
   group('deepest-leaf honesty (scope wall)', () {
-    test('productLeaf: facet chips, NO product-open chip', () {
+    test('productLeaf: NO facet chip, NO product-open chip — back + crumbs only',
+        () {
       final ctx = deriveCatalogContext(
           _drillAt(const ['drainage', 'drainage.traps', 'drainage.traps.floor'],
               _tree()),
           tree: _tree(),
           productCats: _kProductCats);
-      // back + 2 ancestor crumbs + facet chips from brandIds (cap leaves room).
-      expect(ctx.row.chips.contains('ברנד-א'), isTrue,
-          reason: 'facet labels (brandIds) become chips at a product leaf');
-      // NO product-open chip (the deep finder #38 is out of scope).
+      // B1: the brandIds (ברנד-א/ברנד-ב/ברנד-ג) must NOT appear as facet chips —
+      // they are dishonest controls (a slug filters nothing / empties the list).
+      expect(ctx.row.chips.contains('ברנד-א'), isFalse,
+          reason: 'B1: brandIds are NOT emitted as facet chips (dishonest filter)');
+      expect(ctx.row.chips.contains('ברנד-ב'), isFalse,
+          reason: 'B1: no brand slug becomes a chip at a product leaf');
+      expect(ctx.row.chips.contains('ברנד-ג'), isFalse,
+          reason: 'B1: no brand slug becomes a chip at a product leaf');
+      // NO product-open chip either (the deep finder #38 is out of scope).
       expect(ctx.row.chips.any((c) => c.contains('פתיחת מוצר')), isFalse,
           reason: 'a product LEAF never emits a product-open chip (scope wall)');
+      // The product-leaf arm emits ONLY navigation: back + the 2 ancestor crumbs.
+      expect(ctx.row.chips, <String>['⬆️ חזרה', 'ניקוז וצנרת', 'סיפונים'],
+          reason: 'productLeaf emits only the back chip + breadcrumb chips (B1)');
       expect(ctx.row.destByChip, isEmpty,
-          reason: 'facet chips ride runByChip, not destByChip');
-    });
-
-    testWidgets('a facet chip appends to catalogFacetProvider', (tester) async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final r = await _pumpRunner(tester, container);
-
-      final ctx = deriveCatalogContext(
-          _drillAt(const ['drainage', 'drainage.traps', 'drainage.traps.floor'],
-              _tree()),
-          tree: _tree(),
-          productCats: _kProductCats);
-
-      expect(container.read(catalogFacetProvider), isEmpty);
-      final before = r.pushed.length;
-      ctx.row.runByChip['ברנד-א']!(r.ref, r.context);
-      await tester.pump();
-      expect(container.read(catalogFacetProvider), const <String>['ברנד-א'],
-          reason: 'tapping a facet chip appends it to catalogFacetProvider');
-      expect(r.pushed.length, before,
-          reason: 'a facet add keeps the overlay floating');
+          reason: 'a drill row carries no registry destinations (all runByChip)');
     });
 
     testWidgets(
@@ -466,20 +460,164 @@ void main() {
   });
 
   // ───────────────────────────────────────────────────────────────────────────
+  // (12b) CROSS-AXIS RESET (B2) — every navigating closure (back, breadcrumb,
+  // drill-in, smart-tree back) UNCONDITIONALLY resets the side-axes BEFORE its
+  // path/cat write, EXACTLY as the screen's openNode/jumpToTree/cancel/_back do
+  // (catalog_screen.dart:2782-2825, 3723-3725). The blocker this guards: a facet
+  // set via the screen's _FacetRow (or a scoped query) surviving a keyboard
+  // navigation → orphan crumbs, a foreign facetSel applied to the next leaf
+  // (wrong/empty list). We seed BOTH side-axes non-empty, fire the closure, and
+  // assert they are cleared (+ the path moved).
+  // ───────────────────────────────────────────────────────────────────────────
+  group('cross-axis reset on keyboard navigation (B2)', () {
+    testWidgets(
+        'BACK clears catalogFacet + catalogTreeQuery before popping the path',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final r = await _pumpRunner(tester, container);
+
+      // Drill to a PRODUCT leaf (floor) and seed BOTH side-axes non-empty, as the
+      // screen's _FacetRow / scoped search would.
+      final tree = _tree();
+      container.read(catalogTreePathProvider.notifier).state = <CatalogNode>[
+        tree[0], // drainage
+        tree[0].children[0], // drainage.traps
+        tree[0].children[0].children[0], // drainage.traps.floor (productLeaf)
+      ];
+      container.read(catalogFacetProvider.notifier).state =
+          const <String>['מחסומים'];
+      container.read(catalogTreeQueryProvider.notifier).state = 'פלדה';
+      final ctx = deriveCatalogContext(
+          _drillAt(const ['drainage', 'drainage.traps', 'drainage.traps.floor'],
+              tree),
+          tree: tree,
+          productCats: _kProductCats);
+
+      ctx.row.runByChip['⬆️ חזרה']!(r.ref, r.context);
+      await tester.pump();
+
+      expect(container.read(catalogFacetProvider), isEmpty,
+          reason: 'B2: back resets the facet selection before the path pop');
+      expect(container.read(catalogTreeQueryProvider), '',
+          reason: 'B2: back resets the scoped tree query before the path pop');
+      expect(<String>[for (final n in container.read(catalogTreePathProvider)) n.id],
+          const <String>['drainage', 'drainage.traps'],
+          reason: 'B2: back still pops one level off the live path');
+    });
+
+    testWidgets(
+        'a BREADCRUMB jump clears catalogFacet + catalogTreeQuery before the jump',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final r = await _pumpRunner(tester, container);
+
+      final tree = _tree();
+      container.read(catalogTreePathProvider.notifier).state = <CatalogNode>[
+        tree[0], // drainage
+        tree[0].children[0], // drainage.traps
+        tree[0].children[0].children[0], // drainage.traps.floor (productLeaf)
+      ];
+      container.read(catalogFacetProvider.notifier).state =
+          const <String>['מחסומים'];
+      container.read(catalogTreeQueryProvider.notifier).state = 'פלדה';
+      final ctx = deriveCatalogContext(
+          _drillAt(const ['drainage', 'drainage.traps', 'drainage.traps.floor'],
+              tree),
+          tree: tree,
+          productCats: _kProductCats);
+
+      // Jump to the FIRST ancestor crumb (i==0 → 'ניקוז וצנרת' → sublist(0,1)).
+      ctx.row.runByChip['ניקוז וצנרת']!(r.ref, r.context);
+      await tester.pump();
+
+      expect(container.read(catalogFacetProvider), isEmpty,
+          reason: 'B2: a breadcrumb jump resets the facet selection first');
+      expect(container.read(catalogTreeQueryProvider), '',
+          reason: 'B2: a breadcrumb jump resets the scoped tree query first');
+      expect(<String>[for (final n in container.read(catalogTreePathProvider)) n.id],
+          const <String>['drainage'],
+          reason: 'B2: the crumb still jumps the path to sublist(0, i+1)');
+    });
+
+    testWidgets(
+        'a drill-in child clears catalogFacet + catalogTreeQuery before the push',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final r = await _pumpRunner(tester, container);
+
+      final tree = _tree();
+      container.read(catalogTreePathProvider.notifier).state = <CatalogNode>[
+        tree[0], // drainage (branch)
+      ];
+      container.read(catalogFacetProvider.notifier).state =
+          const <String>['מחסומים'];
+      container.read(catalogTreeQueryProvider.notifier).state = 'פלדה';
+      final ctx = deriveCatalogContext(_drillAt(const ['drainage'], tree),
+          tree: tree, productCats: _kProductCats);
+
+      ctx.row.runByChip['📁 סיפונים']!(r.ref, r.context);
+      await tester.pump();
+
+      expect(container.read(catalogFacetProvider), isEmpty,
+          reason: 'B2: a drill-in resets the facet selection before the push');
+      expect(container.read(catalogTreeQueryProvider), '',
+          reason: 'B2: a drill-in resets the scoped tree query before the push');
+      expect(<String>[for (final n in container.read(catalogTreePathProvider)) n.id],
+          const <String>['drainage', 'drainage.traps'],
+          reason: 'B2: the child is still pushed onto the live path');
+    });
+
+    testWidgets(
+        'smart-tree BACK clears smartTreeQuery before nulling smartTreeCat',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final r = await _pumpRunner(tester, container);
+
+      // Inside a smart category with a typed search query (the screen's _back()
+      // clears the query THEN nulls the category — catalog_screen.dart:3723-3725).
+      container.read(smartTreeCatProvider.notifier).state = 'מחסומים';
+      container.read(smartTreeQueryProvider.notifier).state = 'פלדה';
+      final ctx = deriveCatalogContext(const CatalogSmartTree('מחסומים'),
+          tree: _tree());
+
+      ctx.row.runByChip['⬆️ חזרה']!(r.ref, r.context);
+      await tester.pump();
+
+      expect(container.read(smartTreeQueryProvider), '',
+          reason: 'B2: the smart-tree back clears the smart-tree query (mirror '
+              '_SmartTreeProductListState._back)');
+      expect(container.read(smartTreeCatProvider), isNull,
+          reason: 'B2: the smart-tree back still nulls the category (grid)');
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
   // (13) NON-UNIFORM DEPTH — classification comes from the RESOLVED node, never
   // path.length. A depth-2 productLeaf and a depth-3 productLeaf both classify as
   // productLeaf; a depth-3 branch classifies as a branch.
   // ───────────────────────────────────────────────────────────────────────────
   group('non-uniform depth: kind from the resolved node, not path.length', () {
-    test('depth-2 product leaf (pipes/pipes.pvc) emits facet chips', () {
-      // pipes.pvc is at depth 2 but is a PRODUCT leaf → facet chips, no children.
+    test('depth-2 product leaf (pipes/pipes.pvc): no children, no facet chips', () {
+      // pipes.pvc is at depth 2 but is a PRODUCT leaf → no child folder chips, and
+      // (B1) no facet chip either — its brand slug 'lipskey' is never emitted.
       final ctx = deriveCatalogContext(
           _drillAt(const ['pipes', 'pipes.pvc'], _tree()),
           tree: _tree(), productCats: _kProductCats);
-      expect(ctx.row.chips.contains('lipskey'), isTrue,
-          reason: 'a depth-2 product leaf classifies as productLeaf (facets)');
+      expect(ctx.row.chips.contains('lipskey'), isFalse,
+          reason: 'B1: a product leaf emits no facet chip (brand slug excluded)');
       expect(ctx.row.chips.any((c) => c.startsWith('📁')), isFalse,
           reason: 'a product leaf has no child (folder) chips');
+      // It still classifies as a productLeaf (back-first + its one ancestor crumb).
+      expect(ctx.row.chips, <String>['⬆️ חזרה', 'צנרת'],
+          reason: 'a depth-2 product leaf: back + its single ancestor crumb only');
     });
 
     test('depth-1 branch (drainage) emits child chips', () {

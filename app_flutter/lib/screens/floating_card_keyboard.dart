@@ -102,6 +102,18 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// The live set of product categories that actually have rows — lets the pure
+/// catalog deriver tell a product-leaf from a smart/dead leaf WITHOUT importing
+/// the product list at the tap site (mirrors `_TreeDrill`'s `p.categoryHe`
+/// test). Hoisted to a module-level lazy `final` (top-level vars are lazy — no
+/// `late` needed) so the ~928-element `kCatalogProducts` scan runs ONCE, not on
+/// every keystroke rebuild of the tab==0 branch (the scan's result is identical
+/// per build — the catalog is const — so recomputing it each build was pure
+/// waste while typing).
+final Set<String> _kCatalogProductCats = <String>{
+  for (final p in kCatalogProducts) p.categoryHe,
+};
+
 /// The persistent floating card-keyboard panel: a read-only field driven by the
 /// custom keyboard, with a LIVE prediction row recomputed from the field text on
 /// every change, AND the morph drill-stack navigator. Self-contained and
@@ -760,13 +772,9 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
       if (live) {
         final CatalogLocation loc = ref.watch(catalogLocationProvider);
-        // The live set of product categories that actually have rows — lets the
-        // pure deriver tell a product-leaf from a smart/dead leaf WITHOUT importing
-        // the product list itself (mirrors `_TreeDrill`'s `p.categoryHe` test).
-        final productCats = <String>{
-          for (final p in kCatalogProducts) p.categoryHe,
-        };
-        ctx = deriveCatalogContext(loc, productCats: productCats);
+        // The product-category set is the module-level [_kCatalogProductCats]
+        // (computed ONCE — the catalog is const), not rebuilt on every keystroke.
+        ctx = deriveCatalogContext(loc, productCats: _kCatalogProductCats);
       }
     }
 

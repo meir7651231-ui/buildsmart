@@ -65,10 +65,15 @@ List<LipskeyCatalogProduct> productsInCategory(String cat) =>
     kCatalogProducts.where((p) => p.categoryHe == cat).toList();
 
 class AiFinderScreen extends ConsumerStatefulWidget {
-  const AiFinderScreen({super.key});
+  const AiFinderScreen({super.key, this.initialQuery});
 
-  static Route<void> route() =>
-      MaterialPageRoute<void>(builder: (_) => const AiFinderScreen());
+  /// Pre-filled free-text (e.g. from a catalog search that found nothing) — the
+  /// screen auto-runs the search on open so an empty catalog result flows
+  /// straight into the AI finder.
+  final String? initialQuery;
+
+  static Route<void> route({String? initialQuery}) => MaterialPageRoute<void>(
+      builder: (_) => AiFinderScreen(initialQuery: initialQuery));
 
   @override
   ConsumerState<AiFinderScreen> createState() => _AiFinderState();
@@ -81,6 +86,18 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
   bool _searched = false;
   String? _category;
   List<LipskeyCatalogProduct> _products = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    final q = widget.initialQuery?.trim() ?? '';
+    if (q.isNotEmpty) {
+      _controller.text = q;
+      // Auto-search the pre-filled query once mounted (the gateway is read in
+      // _search; a no-AI build just no-ops and shows the "requires connection").
+      WidgetsBinding.instance.addPostFrameCallback((_) => _search());
+    }
+  }
 
   @override
   void dispose() {

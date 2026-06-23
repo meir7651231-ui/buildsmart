@@ -4,6 +4,149 @@
 
 ---
 
+## v6.55 — #ai-assistant-agentic · העוזר לוקח פעולות (Phase 1 read-only) — 2026-06-22
+
+**שינוי (lib/screens):** `ai_assistant_screen.dart` — ה-`_send` שוכתב: במקום reply-טקסט, המודל מחזיר JSON-פעולה,
+`parseAssistantIntent` מאמת, ו-`_dispatchIntent` מריץ מעל המנועים ומחזיר טקסט-בועה. **שום widget חדש** —
+אותן בועות-טקסט/typing/קלט כמו v6.51 (לכן אין צילום נדרש מעבר ל-widget-pump הקיים).
+
+**אימות (reasoning + קוד + טסטים):**
+- **AI דלוק:** "תמצא לי ברז" → המודל מחזיר `{"action":"findProduct","key":"<קטגוריה>"}` → בועה עם המוצרים האמיתיים
+  (`productsInCategory`). "מה מצב ההזמנות?" → `summarizeOrders` → בועה עם תובנות-אמת (`computeAnalyticsInsights`).
+  "כמה בתקציב?" → `checkBudget`. כל השאר → `answer` (שיחה רגילה, בדיוק כמו קודם).
+- **JSON שבור / קטגוריה מומצאת / action לא-מוכר** → `parseAssistantIntent` מחזיר `answer` → המשתמש מקבל תשובת-שיחה,
+  **לעולם לא פעולה שגויה** (G1/G2/G3 ב-`assistant_intent_test`, + mutation-verify).
+- **AI כבוי** (demo/web · gateway null): ה-off-state הקיים ("דורש חיבור"), ללא-שינוי. byte-identical.
+
+**תוצאה:** ✅ כל המצבים נכונים, `ai_assistant_test` הישן נשאר ירוק (הפונקציות הישנות נשמרו). analyze 0.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.55).
+
+---
+
+## v6.54 — #ai-business-summary · Analytics: כפתור "✨ סיכום בעברית" — 2026-06-22
+
+**שינוי (lib/screens):** `ai_hub_screen.dart` — בתוך מסך-ה-`_Analytics` (לא ברשימת-ה-tiles!), אחרי הערת-השרת,
+נוסף `if (gateway != null && insights.isNotEmpty)` עם `OutlinedButton.icon` "✨ סיכום בעברית" → `BusinessSummaryScreen`.
+`business_summary_screen.dart` (חדש) — מציג את שורות-התובנה האמיתיות (bullets) וקורא ל-Claude לסיכום-עסקי זורם.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`) + יש תובנות: בראש מסך-ה-Analytics (מעל כרטיסי-התובנה) מופיע
+  "✨ סיכום בעברית"; לחיצה פותחת מסך עם ה-bullets האמיתיים (loader → נרטיב של Claude). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → מסך-ה-Analytics byte-identical
+  (כרטיסי-התובנה בלבד, בדיוק כמו קודם). **לא נגעתי ברשימת-ה-tiles** → tile-position-tests נשארים ירוקים.
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `business_summary_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.54).
+
+---
+
+## v6.53 — #ai-quote-polish · קטלוג: כפתור "✨ נסח" ליד "📋 הצעה" — 2026-06-22
+
+**שינוי (lib/screens):** `catalog_screen.dart` — ליד כפתור "📋 הצעה" (העתק-גולמי) נוסף `Builder` gated עם "✨ נסח"
+→ `QuotePolishScreen`. `quote_polish_screen.dart` (חדש) — מציג את ההצעה הגולמית, קורא ל-Claude לניסוח מקצועי,
+ומאפשר "📋 העתק לשליחה".
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): ליד "📋 הצעה" מופיע "✨ נסח"; לחיצה פותחת מסך עם ההצעה-הגולמית
+  למעלה (loader → טקסט מנוסח של Claude) + כפתור העתקה. המספרים זהים לגולמי (rewrite-only). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`Builder` מחזיר `SizedBox.shrink()` → הכפתור **לא בעץ** →
+  שורת-הכפתורים בכרטיס byte-identical (רק "📋 הצעה" הגולמי, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `quote_polish_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.53).
+
+---
+
+## v6.52 — #ai-adapter-explain · קטלוג: לינק "🔌 איך לגשר?" מתחת לאזהרת-החיבור — 2026-06-22
+
+**שינוי (lib/screens):** `catalog_screen.dart` — ה-Builder של אזהרת-החיבור (step 29) הורחב מ-`Text` ל-`Column`:
+האזהרה "נדרש מתאם" + לינק **"🔌 איך לגשר?"** (רק כש-`aiOn`) → `AdapterExplainScreen`. `adapter_explain_screen.dart`
+(חדש) — מציג את הקצוות האמיתיים (chips מ-`kVerifiedSpecs[sku].ends`) + חומר, וקורא ל-Claude להסבר "למה + איזה מתאם".
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`) + אזהרת-חיבור פעילה: מתחת ל"נדרש מתאם" מופיע לינק "🔌 איך לגשר?";
+  לחיצה פותחת מסך עם ה-chips של הקצוות האמיתיים (loader → הסבר Claude ברמת סוג-מתאם). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`if (aiOn)` שקרי → הלינק **לא בעץ** → הכרטיס byte-identical
+  (אזהרת-החיבור עצמה ללא-שינוי; ה-`Column` עוטף רק את ה-`Text` הקיים).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `adapter_explain_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.52).
+
+---
+
+## v6.51 — #ai-assistant · "🤖 העוזר החכם" — צ'אט-AI מעוגן ב-AI hub — 2026-06-22
+
+**שינוי (lib/screens):** `ai_hub_screen.dart` — tile חדש "🤖 עוזר חכם" בסוף הגריד (tail — שומר index לטסטי-position) → `AiAssistantScreen`.
+`ai_assistant_screen.dart` (חדש) — מסך-צ'אט: בועות משתמש/עוזר, typing-indicator, שורת-קלט. כל הודעה →
+Claude (system מעוגן) → תשובה. **לא נוגע ב-sys_chat** (מנוע-הצ'אט בפרודקשן).
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): tile פותח את המסך; הקלדה+שליחה → בועת-משתמש (ימין) +
+  typing → בועת-עוזר (שמאל). שאלה "תבנה לי סל" → ה-system מפנה ל"תאר עבודה → סל", **לא** ממציא מוצרים.
+  כשל-רשת → בועת "משהו השתבש — נסה שוב". היסטוריה חסומה ל-12 תורות.
+- **AI כבוי** (demo/web · gateway null): המסך מציג "💡 העוזר החכם דורש חיבור לשרת" + קלט מושבת. ה-tile
+  עצמו תמיד גלוי (כמו describe→cart) — אין שינוי בדמו מעבר ל-tile החדש שמוביל ל-off-state כן.
+
+**תוצאה:** ✅ שני המצבים נכונים. analyze 0 errors/warnings · 6 טסטי-grounding + readiness 8-visible ירוקים.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.51).
+
+---
+
+## v6.50 — #ai-paired-explain · כרטיס-מוצר: כפתור "🧩 מה עוד צריך להתקנה?" — 2026-06-22
+
+**שינוי (lib/screens):** `lipskey_product_sheet.dart` — ליד "מתאים לתנאים שלי?" נוסף `Builder`+`Consumer`
+שמרנדר `OutlinedButton.icon` **"🧩 מה עוד צריך להתקנה?"** → `PairedExplainScreen.route(...)`.
+`paired_explain_screen.dart` (חדש) — מציג את המוצר + chips של סוגי-המוצרים המשלימים (data) וקורא ל-Claude
+ב-`initState` להסבר "למה כל סוג + אל תשכח".
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`) ויש סוגים-משלימים (`frequentlyPairedTypesFor(p).isNotEmpty`):
+  הכפתור מופיע מתחת ל-spec-copilot; לחיצה פותחת מסך עם ה-chips האמיתיים (loader → הסבר Claude). כשל → "נסה שוב".
+- **AI כבוי / אין סוגים** (demo/web · gateway null · רשימה ריקה): ה-`Builder`/`Consumer` מחזיר `SizedBox.shrink()`
+  → הכפתור **לא בעץ** → ה-sheet נשאר **byte-identical** (כולל מקרה ה-spec-copilot-בלבד שכבר קיים).
+
+**תוצאה:** ✅ שלושת המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors (4 warnings dead-code ישנים, לא שלי).
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.50).
+
+---
+
+## v6.49 — #ai-alt-explain · sheet החלופות: כפתור "🤔 למה כדאי?" לכל שורה — 2026-06-22
+
+**שינוי (lib/screens):** `contractor_tools_sheets.dart` — בכל שורת-חלופה ב-`_CheaperAlternativesSheet`
+נוסף `Consumer` שמרנדר `TextButton.icon` **"🤔 למה כדאי?"** מתחת לבאדג'-החיסכון → `AltExplainScreen.route(...)`.
+`alt_explain_screen.dart` (חדש) — מסך שמציג את ההחלפה האמיתית (שמות+מחירים+חיסכון מה-data) וקורא ל-Claude
+ב-`initState` להסבר ה-tradeoff.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): כל שורה בסheet מציגה את הכפתור; לחיצה פותחת את `AltExplainScreen`
+  עם המספרים האמיתיים בראש (loader → טקסט-הסבר של Claude). אם הקריאה נכשלת → "נסה שוב".
+- **AI כבוי** (demo/web, gateway null): ה-`Consumer` מחזיר `SizedBox.shrink()` → הכפתור **לא בעץ** → ה-sheet
+  נשאר **byte-identical** (שורת-מוצר + המלצה + חלופה + באדג'-חיסכון, בדיוק כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings. צילום על-מכשיר ע"י הבעלים
+בבילד הבא (v6.49).
+
+---
+
+## v6.48 — #ai-search-fallback · קטלוג: כפתור "נסה חיפוש חכם" במצב no-results — 2026-06-22
+
+**שינוי (lib/screens):** `catalog_screen.dart` — מצב "אין תוצאות" (`filtered.isEmpty && products.isEmpty`)
+הוחלף מ-`Text` בודד ל-`Column`: אותה הודעת "לא נמצאו תוצאות עבור …" + מתחתיה `OutlinedButton.icon`
+**"🗣️ נסה חיפוש חכם"** → `AiFinderScreen.route(initialQuery: query)`. `ai_finder_screen.dart` — `initialQuery`
+חדש + `initState` מריץ `_search()` ב-`addPostFrameCallback` (חיפוש-אוטומטי כשמגיעים עם שאילתה).
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): חיפוש ללא-תוצאות מציג טקסט + כפתור; לחיצה פותחת את ה-AI
+  finder עם השדה **כבר ממולא** והחיפוש רץ אוטומטית (loader → קטגוריה + מוצרים אמיתיים). הכפתור עטוף ב-
+  `if (query.isNotEmpty && gateway != null)`.
+- **AI כבוי** (demo/web, gateway null): ה-`if` נופל → הכפתור **לא בעץ** → ה-no-results נשאר **byte-identical**
+  ל-`Text` המקורי; `initialQuery` ברירת-מחדל null → `initState` no-op → המסך הידני ללא-שינוי.
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings. צילום על-מכשיר ע"י הבעלים
+בבילד הבא (v6.48).
+
+---
+
 ## 2026-06-17 — תיקון כניסת-בעלים: כפתור "כניסה עם Google" במסך הראשון
 
 **שינוי (lib/screens):** `welcome_screen.dart` — בנתיב-הקבלן (`boardRole == null`), כשמחובר

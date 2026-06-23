@@ -7,6 +7,10 @@ import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/screens/spec_copilot_screen.dart'
     show SpecCopilotScreen;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
+import 'package:buildsmart/screens/paired_explain_screen.dart'
+    show PairedExplainScreen;
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/score_band.dart';
@@ -861,6 +865,33 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         ),
                       ),
                     ],
+                    // #ai-paired-explain — "what else does this install need?"
+                    // Grounded on the real frequentlyPairedTypesFor(p) engine;
+                    // gateway null (demo) → not in the tree → byte-identical.
+                    Builder(builder: (context) {
+                      final pairedTypes = frequentlyPairedTypesFor(p);
+                      if (pairedTypes.isEmpty) return const SizedBox.shrink();
+                      return Consumer(builder: (context, ref, _) {
+                        if (ref.watch(claudeGatewayProvider) == null) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                  PairedExplainScreen.route(
+                                      product: p.nameHe, types: pairedTypes)),
+                              icon: const Text('🧩',
+                                  style: TextStyle(fontSize: 15)),
+                              label: const Text('מה עוד צריך להתקנה?',
+                                  style: TextStyle(fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                        );
+                      });
+                    }),
                   ],
                 ),
               ),

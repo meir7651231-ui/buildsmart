@@ -36,7 +36,11 @@ jobs:
         # for the buildsmart-il.com demo build ONLY (OWNER-REVIEW). Scoped here, so
         # the app / Android / preview builds stay default-off. Reversible: remove
         # the flag to hide the word-finder again.
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true
+        # --dart-define=KB_LIVE_MIRROR=true turns ON the live-mirror keyboard: the
+        # prediction row + tools mirror the current tab/drill across all 4 tabs
+        # (קטלוג/מחלקות/עדכונים/חנות). OWNER-REQUESTED live (22/6). Reversible:
+        # remove the flag to fall back to byte-identical (the mirror tree-shakes).
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true
 
       - name: Deploy to Firebase Hosting (live channel)
         uses: FirebaseExtended/action-hosting-deploy@v0

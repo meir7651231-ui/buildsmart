@@ -6,6 +6,8 @@ import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/fuzzy_search.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart'
     show catalogRepositoryProvider;
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -26,7 +28,12 @@ import 'package:buildsmart/features/word_finder/word_finder_home.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
+import 'package:buildsmart/screens/adapter_explain_screen.dart'
+    show AdapterExplainScreen;
+import 'package:buildsmart/screens/ai_finder_screen.dart' show AiFinderScreen;
 import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/quote_polish_screen.dart'
+    show QuotePolishScreen;
 import 'package:buildsmart/screens/smart_home_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
@@ -2114,12 +2121,31 @@ class _SearchResultsList extends ConsumerWidget {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            query.isNotEmpty
-                ? 'לא נמצאו תוצאות עבור "$query"'
-                : 'אין תוצאות ב$scope',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                query.isNotEmpty
+                    ? 'לא נמצאו תוצאות עבור "$query"'
+                    : 'אין תוצאות ב$scope',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+              ),
+              // #ai-search-fallback — when the deterministic search (AND→OR→fuzzy)
+              // finds NOTHING, offer the AI finder pre-seeded with the query
+              // (Claude → category → products). Gated on the gateway → hidden in
+              // demo/no-AI, so the build is byte-identical there.
+              if (query.isNotEmpty &&
+                  ref.watch(claudeGatewayProvider) != null) ...[
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context)
+                      .push(AiFinderScreen.route(initialQuery: query)),
+                  icon: const Text('🗣️'),
+                  label: const Text('נסה חיפוש חכם'),
+                ),
+              ],
+            ],
           ),
         ),
       );
@@ -5009,6 +5035,35 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 ),
                               ),
                             ),
+                            // #ai-quote-polish — when AI is live, turn the raw
+                            // quote into a professional customer message (every
+                            // number preserved). gateway null → not in the tree
+                            // → demo byte-identical.
+                            Builder(builder: (context) {
+                              if (ref.watch(claudeGatewayProvider) == null) {
+                                return const SizedBox.shrink();
+                              }
+                              return Tooltip(
+                                message:
+                                    'נסח הצעה מקצועית עם AI — מוכן לשליחה ללקוח',
+                                child: GestureDetector(
+                                  onTap: () => Navigator.of(context).push(
+                                      QuotePolishScreen.route(
+                                          rawQuote:
+                                              quoteTextFor(p, _selectedBrand),
+                                          productName: p.name)),
+                                  child: const Padding(
+                                    padding:
+                                        EdgeInsetsDirectional.only(end: 8),
+                                    child: Text('✨ נסח',
+                                        style: TextStyle(
+                                            color: Color(0xFF6D28D9),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
+                                ),
+                              );
+                            }),
                             Tooltip(
                               message: expert
                                   ? 'מצב מורחב — מציג את כל המפרט. טאפ לפישוט.'
@@ -5096,18 +5151,46 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 29 — physical-connection warning.
-                        Builder(builder: (_) {
+                        Builder(builder: (context) {
                           final warn = connectionWarningHe(prod);
                           if (warn == null) return const SizedBox.shrink();
+                          final aiOn =
+                              ref.watch(claudeGatewayProvider) != null;
                           return Padding(
                             padding: const EdgeInsets.only(top: 6),
-                            child: Text(warn,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Color(0xFFB91C1C),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(warn,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFFB91C1C),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                                // #ai-adapter-explain — when AI is live, explain
+                                // which adapter bridges the gap (grounded on the
+                                // part's REAL verified ends). gateway null → not
+                                // in the tree → byte-identical demo.
+                                if (aiOn)
+                                  GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                        AdapterExplainScreen.route(
+                                            productName: prod.nameHe,
+                                            sku: prod.sku)),
+                                    child: const Padding(
+                                      padding: EdgeInsets.only(top: 4),
+                                      child: Text('🔌 איך לגשר?',
+                                          style: TextStyle(
+                                              color: Color(0xFF1D4ED8),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                              decoration:
+                                                  TextDecoration.underline)),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           );
                         }),
                         // Roadmap step 28 — "your line so far": how this product

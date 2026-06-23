@@ -10,6 +10,10 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
+import 'package:buildsmart/screens/alt_explain_screen.dart'
+    show AltExplainScreen;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -317,6 +321,39 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                             ),
                           ),
                         ],
+                      ),
+                      // #ai-alt-explain — when AI is live, offer a grounded
+                      // "why is this worth it?" explainer for this real swap.
+                      // gateway null (demo) → not in the tree → byte-identical.
+                      Consumer(
+                        builder: (context, ref, _) {
+                          if (ref.watch(claudeGatewayProvider) == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                AltExplainScreen.route(
+                                  product: a.product,
+                                  recName: a.recName,
+                                  recPrice: a.recPrice,
+                                  altName: a.altName,
+                                  altPrice: a.altPrice,
+                                ),
+                              ),
+                              icon: const Text('🤔'),
+                              label: const Text('למה כדאי?'),
+                              style: TextButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                minimumSize: const Size(0, 32),
+                                tapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   );
