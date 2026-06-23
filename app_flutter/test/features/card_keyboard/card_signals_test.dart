@@ -16,12 +16,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('hard signals — chip parity with the live finder helpers', () {
-    test('size chips == sizeTokensIn labels (byte-parity, value==display)', () {
+    test('size chips: same SET as sizeTokensIn, re-sorted ASCENDING mm (R4)', () {
       final chips = const SizeSignal().chipsFor(kDivePool);
-      expect(
-        chips.map((c) => c.value).toList(),
-        sizeTokensIn(kDivePool).map((t) => t.label).toList(),
-      );
+      final tokens = sizeTokensIn(kDivePool);
+      // SET parity preserved (same labels as the live helper)...
+      expect(chips.map((c) => c.value).toSet(),
+          tokens.map((t) => t.label).toSet());
+      // ...but ordered by GLOBAL mm so the merge's representativeTake endpoints
+      // are the real physical min/max, not per-family (swarm R4).
+      final mmOf = {for (final t in tokens) t.label: t.mm};
+      final mms = [for (final c in chips) mmOf[c.value]!];
+      for (var i = 1; i < mms.length; i++) {
+        expect(mms[i] >= mms[i - 1], isTrue,
+            reason: 'size chips must be globally mm-ascending');
+      }
       expect(chips.every((c) => c.value == c.displayLabel), isTrue,
           reason: 'no cross-fold yet → value == displayLabel');
       expect(chips.every((c) => c.axisId == 'size'), isTrue);

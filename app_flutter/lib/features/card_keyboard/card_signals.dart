@@ -54,9 +54,17 @@ abstract class SignalSource {
   bool matches(LipskeyCatalogProduct p, SignalChip chip);
 }
 
-/// SIZE axis — the structural size tokens (`sizeTokensIn`). value==displayLabel
-/// (the already-spelling-canonical token label); predicate = `productHasChip`
-/// (no loose contains for digit-bearing labels). Byte-parity with the live axis.
+/// SIZE axis — the structural size tokens (`sizeTokensIn`), RE-SORTED by GLOBAL mm
+/// (swarm R4). The live `sizeTokensIn` groups by FAMILY first (inch→mm→cm), so its
+/// mm sequence resets per family — which breaks the merge's [representativeTake]
+/// "ascending mm, includes the largest" precondition (it samples by index). Sort
+/// by mm here (card-layer only; the live finder keeps the family grouping) so the
+/// merged size row is monotonic and its endpoints are the global mm extremes.
+/// (Cross-DIMENSION-TYPE coherence — a 4 m length still sorts past a 110 mm
+/// diameter — awaits the deferred canonicalSize per-family handling; swarm R4.)
+/// value==displayLabel (the spelling-canonical token label); predicate =
+/// `productHasChip`. Same chip SET as the live axis, just mm-ordered for the merge.
+/// (Cross-spelling folding DN15≡½" is the separate, still-deferred canonicalSize.)
 class SizeSignal extends SignalSource {
   const SizeSignal();
   @override
@@ -64,15 +72,21 @@ class SizeSignal extends SignalSource {
   @override
   String get axisName => 'גודל';
   @override
-  List<SignalChip> chipsFor(List<LipskeyCatalogProduct> pool) => <SignalChip>[
-        for (final t in sizeTokensIn(pool))
-          SignalChip(
-            axisId: axisId,
-            value: t.label,
-            displayLabel: t.label,
-            axisName: axisName,
-          ),
-      ];
+  List<SignalChip> chipsFor(List<LipskeyCatalogProduct> pool) {
+    final tokens = [...sizeTokensIn(pool)]..sort((a, b) {
+        final c = a.mm.compareTo(b.mm);
+        return c != 0 ? c : a.label.compareTo(b.label); // mm, then label (stable)
+      });
+    return <SignalChip>[
+      for (final t in tokens)
+        SignalChip(
+          axisId: axisId,
+          value: t.label,
+          displayLabel: t.label,
+          axisName: axisName,
+        ),
+    ];
+  }
   @override
   bool matches(LipskeyCatalogProduct p, SignalChip chip) =>
       productHasChip(p, chip.value);
