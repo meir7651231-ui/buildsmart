@@ -20,6 +20,10 @@
 library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/features/card_keyboard/card_signals.dart'
+    show kHardSignals;
+import 'package:buildsmart/features/word_finder/material_lexicon.dart'
+    show materialOf;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
@@ -162,23 +166,103 @@ CardVerdict mergedKeys(
   if (distinctCardCount(pool) <= kShowProductsThreshold) {
     return CardShowProducts(distinctProducts(pool));
   }
-  final chips = _mergedChips(pool, stack, lexicon, subtype);
+  final chips = _mergedChips(pool, stack);
   if (chips.isEmpty) return CardShowProducts(distinctProducts(pool));
   return MergedKeys(chips);
 }
 
-/// The merged key-set for the current turn (build plan §1.3).
+/// Merge tuning (build plan §1.4 #11). OWNER-REVIEW defaults.
+const int kMergedKeyCap = 10; // total chips in the merged row
+const int kMergedAxisFloor = 2; // ≥ this many per represented axis
+const int kMergedAxisMaxPerAxis = 4; // ≤ this many per axis (so several show)
+
+/// One scored candidate axis for the merge — its [chips] plus the INTEGER
+/// histogram `(sumSq, n)` that ranks it: the axis's expected-remaining cards
+/// `expRem = sumSq / n`, compared between axes by integer CROSS-MULTIPLY so no
+/// float is ever a sort key (build plan §1.3, the determinism guarantee).
+class _AxisScore {
+  _AxisScore(this.rank, this.chips, this.sumSq, this.n);
+
+  /// Canonical axis order (the [kHardSignals] index) — the deterministic
+  /// tie-break when two axes have an equal expRem.
+  final int rank;
+  final List<SignalChip> chips;
+
+  /// `Σ_chip distinctCardCount(narrowed)²` over the axis's chips.
+  final int sumSq;
+
+  /// `distinctCardCount(scoringPool)` — the denominator of expRem (> 0 here).
+  final int n;
+}
+
+/// The merged key-set for the current turn (build plan §1.3-1.4).
 ///
-/// PHASE 0 STUB: returns empty, so the ladder falls to the convergence floor.
-/// Phase 1 supplies the 5 hard signals; Phase 2 implements the scored merge
-/// (the axes weighted together, integer-deterministic comparator, top-K +
-/// per-axis floor); Phase 3 weaves the soft tilts. The signature already takes
-/// every input the merge needs so later phases fill the body without touching
-/// [mergedKeys] or its callers.
+/// PURE · SYNCHRONOUS · INTEGER-DETERMINISTIC. For each UNANSWERED hard axis
+/// with ≥ 2 chips it builds the integer histogram `(sumSq, n)` (material scores
+/// on the SEEDED subset with the exact predicate, §2; every other axis on the
+/// full pool), ranks the axes by `expRem = sumSq/n` ASCENDING via cross-multiply
+/// (lower = a more decisive split; zero float as a sort key → byte-stable under
+/// input shuffle, no NaN), then lays out the row best-axis-first with a per-axis
+/// floor (≥ [kMergedAxisFloor]) and caps (≤ [kMergedAxisMaxPerAxis] per axis,
+/// ≤ [kMergedKeyCap] total). Soft tilts (Phase 3) will re-weight BEFORE this
+/// top-K; here every chip is a hard-axis key (`soft == false`).
+///
+/// Returns empty when no unanswered axis can split the pool — [mergedKeys] then
+/// falls to the convergence floor ([CardShowProducts]).
 List<SignalChip> _mergedChips(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
-  WordLexicon lexicon,
-  String? subtype,
-) =>
-    const <SignalChip>[];
+) {
+  final answered = <String>{for (final s in stack) s.axisLabel};
+  final scored = <_AxisScore>[];
+  for (var rank = 0; rank < kHardSignals.length; rank++) {
+    final src = kHardSignals[rank];
+    if (answered.contains(src.axisName)) continue; // each axis at most once
+    final chips = src.chipsFor(pool);
+    if (chips.length < 2) continue; // a lone chip can't narrow (the > 1 gate)
+    // Material scores on the SEEDED subset with the EXACT predicate (§2): the
+    // null carry-along is excluded from the histogram so copper/brass are not
+    // inflated by the shared unknown. Every other axis scores on the full pool.
+    final isMaterial = src.axisId == 'material';
+    final scoringPool = isMaterial
+        ? pool.where((p) => materialOf(p) != null).toList()
+        : pool;
+    final n = distinctCardCount(scoringPool);
+    if (n == 0) continue; // div-0 guard; an empty scoring pool can't split
+    var sumSq = 0;
+    for (final chip in chips) {
+      final narrowed = scoringPool
+          .where(
+            (p) =>
+                isMaterial ? materialOf(p) == chip.value : src.matches(p, chip),
+          )
+          .toList();
+      final nc = distinctCardCount(narrowed);
+      sumSq += nc * nc;
+    }
+    scored.add(_AxisScore(rank, chips, sumSq, n));
+  }
+
+  // Rank axes by expRem = sumSq/n ASCENDING via INTEGER cross-multiply
+  // (a.sumSq·b.n vs b.sumSq·a.n) — no float sort key, so byte-stable under input
+  // shuffle (no ULP near-ties, no NaN). Tie-break: canonical axis order.
+  scored.sort((a, b) {
+    final lhs = a.sumSq * b.n;
+    final rhs = b.sumSq * a.n;
+    if (lhs != rhs) return lhs.compareTo(rhs);
+    return a.rank.compareTo(b.rank);
+  });
+
+  // Lay out the row best-axis-first: ≥ floor and ≤ maxPerAxis per represented
+  // axis, total ≤ cap. The floor guard stops once fewer than `floor` slots
+  // remain, so no lonely single-chip axis is appended.
+  final out = <SignalChip>[];
+  for (final a in scored) {
+    if (out.length >= kMergedKeyCap) break;
+    final room = kMergedKeyCap - out.length;
+    if (out.isNotEmpty && room < kMergedAxisFloor) break;
+    final take = room < kMergedAxisMaxPerAxis ? room : kMergedAxisMaxPerAxis;
+    out.addAll(a.chips.take(take));
+  }
+  return out;
+}

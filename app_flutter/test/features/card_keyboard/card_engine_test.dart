@@ -61,27 +61,57 @@ void main() {
       expect((v as CardShowProducts).products, isNotEmpty);
     });
 
-    test('large pool, merge stubbed → CardShowProducts floor (Phase 0)', () {
-      // The full pool has many distinct cards (> threshold), so the ladder
-      // reaches the merge rung. In Phase 0 the merge is stubbed to empty, so it
-      // falls to the convergence floor. Phase 2 makes this rung return
-      // MergedKeys — this expectation changes then.
+    test('large pool → MergedKeys (Phase 2 live merge: ranked row)', () {
       expect(
         distinctCardCount(kDivePool),
         greaterThan(kShowProductsThreshold),
       );
       final v = mergedKeys(kDivePool, [step()], lexicon, null);
-      expect(
-        v,
-        isA<CardShowProducts>(),
-        reason: 'Phase 0: empty merge → floor; Phase 2 → MergedKeys',
-      );
+      expect(v, isA<MergedKeys>(),
+          reason: 'Phase 2: the live merge produces chips for a large pool');
+      final chips = (v as MergedKeys).chips;
+      expect(chips, isNotEmpty);
+      expect(chips.length, lessThanOrEqualTo(kMergedKeyCap),
+          reason: 'capped at kMergedKeyCap');
+      expect(chips.every((c) => !c.soft), isTrue,
+          reason: 'every merged key is a hard-axis chip (soft re-weight only)');
+      // Per-axis FLOOR: each represented axis carries ≥ kMergedAxisFloor chips
+      // (no lonely single-chip axis is laid out).
+      final byAxis = <String, int>{};
+      for (final c in chips) {
+        byAxis[c.axisId] = (byAxis[c.axisId] ?? 0) + 1;
+      }
+      for (final e in byAxis.entries) {
+        expect(e.value, greaterThanOrEqualTo(kMergedAxisFloor),
+            reason: 'axis ${e.key} must carry ≥ floor chips');
+      }
     });
 
-    test('deterministic — same inputs, same verdict shape', () {
-      final a = mergedKeys(kDivePool, [step()], lexicon, null);
-      final b = mergedKeys(kDivePool, [step()], lexicon, null);
-      expect(a.runtimeType, b.runtimeType);
+    test('axis ranking is deterministic under input shuffle (stable axes)', () {
+      // Answer the WORD axis — wordOptions' equal-count tie-break is the only
+      // order-sensitive helper; the remaining axes (size/angle/colour/material)
+      // sort deterministically, so the merged row is byte-identical whether the
+      // pool is in natural or REVERSED order — proving the INTEGER comparator
+      // (not a float) drives the ranking (no ULP near-ties).
+      final s = NewbieStep(
+        axisLabel: 'דגם',
+        chipLabel: 'x',
+        predicate: (_) => true,
+        crumbWord: 'x',
+      );
+      final a = mergedKeys(kDivePool, [s], lexicon, null);
+      final b = mergedKeys(kDivePool.reversed.toList(), [s], lexicon, null);
+      expect(a, isA<MergedKeys>());
+      expect(b, isA<MergedKeys>());
+      String key(MergedKeys m) =>
+          m.chips.map((c) => '${c.axisId}:${c.value}').join('|');
+      expect(key(b as MergedKeys), key(a as MergedKeys),
+          reason: 'byte-stable merged row under pool reversal');
+    });
+
+    test('single product never throws', () {
+      final one = distinctProducts(kDivePool).take(1).toList();
+      expect(() => mergedKeys(one, [step()], lexicon, null), returnsNormally);
     });
   });
 
