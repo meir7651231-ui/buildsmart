@@ -20,6 +20,12 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/ai_hub_logic.dart'
+    show computeAnalyticsInsights;
+import 'package:buildsmart/logic/assistant_intent.dart';
+import 'package:buildsmart/screens/ai_finder_screen.dart'
+    show productsInCategory;
+import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,8 +109,9 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
     final text = _controller.text.trim();
     if (gw == null || text.isEmpty || _loading) return;
     FocusScope.of(context).unfocus();
-    // The history handed to the model EXCLUDES the message we're adding now.
-    final history = List<AssistantTurn>.of(_turns);
+    // The history handed to the model EXCLUDES the message we're adding now
+    // (decoupled records, not the widget model — the logic layer is pure).
+    final history = [for (final t in _turns) (user: t.user, text: t.text)];
     setState(() {
       _turns.add(AssistantTurn(user: true, text: text));
       _controller.clear();
@@ -113,16 +120,20 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
     _scrollToEnd();
     try {
       final r = await gw.ask(
-        prompt: assistantTurnPrompt(history, text),
-        system: assistantSystem,
-        maxTokens: 512,
+        prompt: assistantIntentPrompt(history, text),
+        system: assistantIntentSystem,
+        maxTokens: 256,
       );
       if (!mounted) return;
-      final reply = r.text.trim();
+      // Parse + closed-set-validate; a garbled/hallucinated reply degrades to a
+      // plain answer (never acts wrongly). Then run the action over REAL engines.
+      final reply = _dispatchIntent(parseAssistantIntent(r.text));
       setState(() {
         _turns.add(AssistantTurn(
             user: false,
-            text: reply.isEmpty ? 'לא הצלחתי לנסח תשובה — נסה לנסח אחרת.' : reply));
+            text: reply.isEmpty
+                ? 'לא הצלחתי לנסח תשובה — נסה לנסח אחרת.'
+                : reply));
         _loading = false;
       });
     } catch (_) {
@@ -134,6 +145,44 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
       });
     }
     _scrollToEnd();
+  }
+
+  /// Run a VALIDATED intent over the REAL engines and format a Hebrew reply.
+  /// READ-ONLY — never mutates state (Phase 1). Every product/number comes from
+  /// the engines (kCatalogProducts via productsInCategory / computeAnalyticsInsights),
+  /// never the model; the model supplied only the validated key + the prose `say`.
+  String _dispatchIntent(AssistantIntent intent) {
+    switch (intent.action) {
+      case AssistantAction.answer:
+        return intent.say;
+      case AssistantAction.findProduct:
+        final products = productsInCategory(intent.key);
+        final head = intent.say.isNotEmpty
+            ? intent.say
+            : 'מצאתי בקטגוריה "${intent.key}":';
+        if (products.isEmpty) {
+          return '$head\n(אין מוצרים בקטגוריה הזו כרגע.)';
+        }
+        final lines =
+            [for (final p in products.take(8)) '• ${p.nameHe}'].join('\n');
+        return '$head\n📂 ${intent.key} · ${products.length} מוצרים\n$lines';
+      case AssistantAction.summarizeOrders:
+        final insights =
+            computeAnalyticsInsights(ref.read(ordersEngineProvider));
+        final rows = [
+          for (final it in insights)
+            if (it.ic != '📊') '${it.ic} ${it.title}',
+        ].join('\n');
+        final head = intent.say.isNotEmpty ? intent.say : '📊 ההזמנות שלך:';
+        return rows.isEmpty ? '$head\n(אין הזמנות עדיין.)' : '$head\n$rows';
+      case AssistantAction.checkBudget:
+        final insights =
+            computeAnalyticsInsights(ref.read(ordersEngineProvider));
+        final budget = insights.where((it) => it.ic == '📊').toList();
+        final head = intent.say.isNotEmpty ? intent.say : '📊 התקציב:';
+        if (budget.isEmpty) return '$head\n(אין נתוני תקציב.)';
+        return '$head\n${budget.map((it) => '${it.ic} ${it.title} · ${it.sub}').join('\n')}';
+    }
   }
 
   @override

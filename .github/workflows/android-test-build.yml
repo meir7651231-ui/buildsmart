@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.54 — ✨ 'סיכום עסקי' ב-Analytics: Claude מנסח את מצב-העסק (הזמנות·חיסכון·תקציב) לסיכום קצר בעברית · + ✨ 'נסח הצעה' · 🔌 'איך לגשר' · 🤖 'העוזר החכם' · v6.54 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.55 — 🤖 העוזר החכם עכשיו *עושה*: 'תמצא לי ברז' / 'מה מצב ההזמנות' / 'כמה בתקציב' → הוא מבצע ומחזיר מהנתונים האמיתיים (לא רק מדבר) · + ✨ 'סיכום עסקי' · ✨ 'נסח הצעה' · 🔌 'איך לגשר' · v6.55 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78

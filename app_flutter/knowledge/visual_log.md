@@ -4,6 +4,25 @@
 
 ---
 
+## v6.55 — #ai-assistant-agentic · העוזר לוקח פעולות (Phase 1 read-only) — 2026-06-22
+
+**שינוי (lib/screens):** `ai_assistant_screen.dart` — ה-`_send` שוכתב: במקום reply-טקסט, המודל מחזיר JSON-פעולה,
+`parseAssistantIntent` מאמת, ו-`_dispatchIntent` מריץ מעל המנועים ומחזיר טקסט-בועה. **שום widget חדש** —
+אותן בועות-טקסט/typing/קלט כמו v6.51 (לכן אין צילום נדרש מעבר ל-widget-pump הקיים).
+
+**אימות (reasoning + קוד + טסטים):**
+- **AI דלוק:** "תמצא לי ברז" → המודל מחזיר `{"action":"findProduct","key":"<קטגוריה>"}` → בועה עם המוצרים האמיתיים
+  (`productsInCategory`). "מה מצב ההזמנות?" → `summarizeOrders` → בועה עם תובנות-אמת (`computeAnalyticsInsights`).
+  "כמה בתקציב?" → `checkBudget`. כל השאר → `answer` (שיחה רגילה, בדיוק כמו קודם).
+- **JSON שבור / קטגוריה מומצאת / action לא-מוכר** → `parseAssistantIntent` מחזיר `answer` → המשתמש מקבל תשובת-שיחה,
+  **לעולם לא פעולה שגויה** (G1/G2/G3 ב-`assistant_intent_test`, + mutation-verify).
+- **AI כבוי** (demo/web · gateway null): ה-off-state הקיים ("דורש חיבור"), ללא-שינוי. byte-identical.
+
+**תוצאה:** ✅ כל המצבים נכונים, `ai_assistant_test` הישן נשאר ירוק (הפונקציות הישנות נשמרו). analyze 0.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.55).
+
+---
+
 ## v6.54 — #ai-business-summary · Analytics: כפתור "✨ סיכום בעברית" — 2026-06-22
 
 **שינוי (lib/screens):** `ai_hub_screen.dart` — בתוך מסך-ה-`_Analytics` (לא ברשימת-ה-tiles!), אחרי הערת-השרת,
