@@ -2115,6 +2115,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'WC Connection',
     categoryEmoji: '🚽',
     page: 22,
+    dims: {'תיאור': 'ברך אסלה לבן עם אום'},
     imageFile: '140870.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2761,6 +2762,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Sanitary Parts',
     categoryEmoji: '🔧',
     page: 29,
+    dims: {'תיאור': 'ערכה אוניברסלית לתיקון ברז'},
     imageFile: '186466.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2799,6 +2801,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Screw-on Accessories',
     categoryEmoji: '🔩',
     page: 12,
+    dims: {'מידה': 'DN32', 'תיאור': 'מחבר כפול DN32 · כולל 2 אומים ו-2 אטמים'},
     imageFile: '196206.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2811,6 +2814,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Screw-on Accessories',
     categoryEmoji: '🔩',
     page: 12,
+    dims: {'מידה': 'DN40', 'תיאור': 'מחבר כפול DN40 · כולל 2 אומים ו-2 אטמים'},
     imageFile: '196172.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2823,6 +2827,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Screw-on Accessories',
     categoryEmoji: '🔩',
     page: 12,
+    dims: {'מידה': 'DN50', 'תיאור': 'מחבר כפול DN50 · כולל 2 אומים ו-2 אטמים'},
     imageFile: '196175.jpeg',
   ),
 
@@ -2850,6 +2855,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN40', 'תיאור': 'מסעף 45° DN40 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '118221.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2862,6 +2868,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN50', 'תיאור': 'מסעף 45° DN50 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '118222.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2874,6 +2881,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN75', 'תיאור': 'מסעף 45° DN75 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '118219.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2886,6 +2894,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN110', 'תיאור': 'מסעף 45° DN110 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '118220.jpeg',
   ),
 
@@ -2900,6 +2909,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN75', 'תיאור': 'מסעף 45° DN75 — צד ללא תבריג · כולל 2 אומים ו-2 אטמים'},
     imageFile: '192291.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2912,6 +2922,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN110', 'תיאור': 'מסעף 45° DN110 — צד ללא תבריג · כולל 2 אומים ו-2 אטמים'},
     imageFile: '192271.jpeg',
   ),
 
@@ -2926,6 +2937,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN32', 'תיאור': 'מסעף 90° DN32 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '110689.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2938,6 +2950,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN50', 'תיאור': 'מסעף 90° DN50 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '110682.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2950,6 +2963,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 12,
+    dims: {'מידה': 'DN75', 'תיאור': 'מסעף 90° DN75 עם תבריג · כולל 3 אומים ו-3 אטמים'},
     imageFile: '110681.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -4415,6 +4429,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
     page: 14,
+    dims: {'תיאור': 'ונטיל לכיור אמריקאי'},
     imageFile: '187700.jpeg',
   ),
 
@@ -4428,6 +4443,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 19,
+    dims: {'תיאור': 'דיור פיית מילוי מפאורת חדש'},
     imageFile: '777A5033.jpg',
     brand: 'AQUATEC',
   ),
@@ -4865,6 +4881,8 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 30,
+    color: 'ניקל',
+    dims: {'מידה': '200 מ"מ', 'תיאור': 'דיור ראש מקלחת מרובע ניקל 200 מ"מ'},
     imageFile: '7777710C.jpg',
     brand: 'AQUATEC',
   ),
@@ -4876,6 +4894,8 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 31,
+    color: 'ניקל',
+    dims: {'מידה': '250 מ"מ', 'תיאור': 'דיור ראש מקלחת מרובע ניקל 250 מ"מ'},
     imageFile: '7777711C.jpg',
     brand: 'AQUATEC',
   ),
@@ -4915,6 +4935,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 32,
+    color: 'שחור מט',
     dims: {'תיאור': 'ראש מזלף קוסמליה 3 מצבים שחור מט'},
     imageFile: '77701204.jpg',
     brand: 'AQUATEC',
@@ -4927,6 +4948,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 32,
+    color: 'זהב מוברש',
     dims: {'תיאור': 'ראש מזלף קוסמליה זהב מבריק'},
     imageFile: '77701205.jpg',
     brand: 'AQUATEC',
@@ -5821,6 +5843,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 46,
+    dims: {'מידה': '2"×3/8"', 'תיאור': 'בתא ברז ניל מפואר 1/2"×3/8"'},
     imageFile: '77777120A.jpg',
     brand: 'AQUATEC',
   ),
@@ -6183,6 +6206,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 55,
+    dims: {'מידה': '1/2"', 'תיאור': 'פקק פלסטיק 1/2" שחור ארוך'},
     imageFile: '77777777.jpg',
     brand: 'AQUATEC',
   ),
@@ -6598,15 +6622,15 @@ LipskeyCatalogProduct(sku: '77Z3398B', nameHe: 'מכסה נחושת מרובע 6
 LipskeyCatalogProduct(sku: '777Z3398', nameHe: 'מכסה נחושת מרובע 8"', nameEn: 'Brass Square Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3398B.jpg', brand: 'AQUATEC', color: 'נחושת', dims: {'מידה': '8"', 'תיאור': 'מכסה נחושת מרובע 8"'}),
 
   // ─── AQUATEC — רשתות/מכסים 6"/8" עגולים (page 63) ────────────────────────
-LipskeyCatalogProduct(sku: '77003025', nameHe: 'רשת ניקל עגול 6"', nameEn: 'Nickel Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003025.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'רשת ניקל עגול 6"'}),
-LipskeyCatalogProduct(sku: '77Z3401A', nameHe: 'רשת ניקל עגול 8"', nameEn: 'Nickel Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003025.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'רשת ניקל עגול 8"'}),
-LipskeyCatalogProduct(sku: '77Z3401B', nameHe: 'רשת נחושת עגול 6"', nameEn: 'Brass Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3401B.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'רשת נחושת עגול 6"'}),
-LipskeyCatalogProduct(sku: '777Z3401', nameHe: 'רשת נחושת עגול 8"', nameEn: 'Brass Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3401B.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'רשת נחושת עגול 8"'}),
-LipskeyCatalogProduct(sku: '77003024', nameHe: 'מכסה ניקל עגול 6"', nameEn: 'Nickel Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003024.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'מכסה ניקל עגול 6"'}),
-LipskeyCatalogProduct(sku: '77Z3400A', nameHe: 'מכסה ניקל עגול 8"', nameEn: 'Nickel Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003024.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'מכסה ניקל עגול 8"'}),
-LipskeyCatalogProduct(sku: '77Z3400B', nameHe: 'מכסה נחושת עגול 6"', nameEn: 'Brass Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3400B.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'מכסה נחושת עגול 6"'}),
-LipskeyCatalogProduct(sku: '777Z3400', nameHe: 'מכסה נחושת עגול 8"', nameEn: 'Brass Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3400B.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'מכסה נחושת עגול 8"'}),
-LipskeyCatalogProduct(sku: '777Z3402', nameHe: 'רשת גלי מונחת עגול 8"', nameEn: 'Wavy Flat Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '777Z3402.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77003025', nameHe: 'רשת ניקל עגול 6"', nameEn: 'Nickel Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003025.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'רשת ניקל עגול 6"'}, color: 'ניקל'),
+LipskeyCatalogProduct(sku: '77Z3401A', nameHe: 'רשת ניקל עגול 8"', nameEn: 'Nickel Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003025.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'רשת ניקל עגול 8"'}, color: 'ניקל'),
+LipskeyCatalogProduct(sku: '77Z3401B', nameHe: 'רשת נחושת עגול 6"', nameEn: 'Brass Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3401B.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'רשת נחושת עגול 6"'}, color: 'נחושת'),
+LipskeyCatalogProduct(sku: '777Z3401', nameHe: 'רשת נחושת עגול 8"', nameEn: 'Brass Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3401B.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'רשת נחושת עגול 8"'}, color: 'נחושת'),
+LipskeyCatalogProduct(sku: '77003024', nameHe: 'מכסה ניקל עגול 6"', nameEn: 'Nickel Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003024.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'מכסה ניקל עגול 6"'}, color: 'ניקל'),
+LipskeyCatalogProduct(sku: '77Z3400A', nameHe: 'מכסה ניקל עגול 8"', nameEn: 'Nickel Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003024.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'מכסה ניקל עגול 8"'}, color: 'ניקל'),
+LipskeyCatalogProduct(sku: '77Z3400B', nameHe: 'מכסה נחושת עגול 6"', nameEn: 'Brass Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3400B.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'מכסה נחושת עגול 6"'}, color: 'נחושת'),
+LipskeyCatalogProduct(sku: '777Z3400', nameHe: 'מכסה נחושת עגול 8"', nameEn: 'Brass Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3400B.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'מכסה נחושת עגול 8"'}, color: 'נחושת'),
+LipskeyCatalogProduct(sku: '777Z3402', nameHe: 'רשת גלי מונחת עגול 8"', nameEn: 'Wavy Flat Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '777Z3402.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'רשת גלי מונחת עגול 8"'}),
 
   // ─── AQUATEC — ברזי מעבר כדוריים (page 64) ────────────────────────────────
 LipskeyCatalogProduct(sku: '77777311', nameHe: 'ברז מעבר כדורי ח.פ 1/2"', nameEn: 'Ball Valve M×F 1/2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'ת.פ'}),
@@ -6861,7 +6885,7 @@ LipskeyCatalogProduct(sku: '9106320041', nameHe: 'הסתעפות HDPE הברגה
 
   // הסתעפות הברגה פנימית (Female Tee)
 LipskeyCatalogProduct(sku: '9101601240', nameHe: 'הסתעפות HDPE הברגה פנימית 16×1/2×16', nameEn: 'HDPE Female Tee 16×1/2"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC', dims: {'תיאור': 'הסתעפות הברגה פנימית', 'מידה': '16*1/2*16'}),
-LipskeyCatalogProduct(sku: '910603440', nameHe: 'הסתעפות HDPE הברגה פנימית 16×3/4×16', nameEn: 'HDPE Female Tee 16×3/4"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '910603440', nameHe: 'הסתעפות HDPE הברגה פנימית 16×3/4×16', nameEn: 'HDPE Female Tee 16×3/4"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC', dims: {'מידה': '16×3', 'תיאור': 'הסתעפות HDPE הברגה פנימית 16×3/4×16'}),
 LipskeyCatalogProduct(sku: '9102001240', nameHe: 'הסתעפות HDPE הברגה פנימית 20×1/2×20', nameEn: 'HDPE Female Tee 20×1/2"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC', dims: {'תיאור': 'הסתעפות הברגה פנימית', 'מידה': '20*1/2*20'}),
 LipskeyCatalogProduct(sku: '9102003440', nameHe: 'הסתעפות HDPE הברגה פנימית 20×3/4×20', nameEn: 'HDPE Female Tee 20×3/4"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC', dims: {'תיאור': 'הסתעפות הברגה פנימית', 'מידה': '20*3/4"*20'}),
 LipskeyCatalogProduct(sku: '9102501240', nameHe: 'הסתעפות HDPE הברגה פנימית 25×1/2×25', nameEn: 'HDPE Female Tee 25×1/2"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC', dims: {'תיאור': 'הסתעפות הברגה פנימית', 'מידה': '25*1/2*25'}),
@@ -6991,22 +7015,22 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   LipskeyCatalogProduct(sku: '77006030', nameHe: 'חבק תליה 1/2" בלי בידוד', nameEn: 'Hanging Clamp 1/2" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'חבק תליה בלי בידוד'}),
   LipskeyCatalogProduct(sku: '77006010', nameHe: 'חבק תליה 1/2" עם בידוד', nameEn: 'Hanging Clamp 1/2" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'חבק תליה עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006031', nameHe: 'חבק תליה 3/4" בלי בידוד', nameEn: 'Hanging Clamp 3/4" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'חבק תליה בלי בידוד'}),
-  LipskeyCatalogProduct(sku: 'Z.0001031', nameHe: 'חבק תליה 3/4" עם בידוד', nameEn: 'Hanging Clamp 3/4" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: 'Z.0001031', nameHe: 'חבק תליה 3/4" עם בידוד', nameEn: 'Hanging Clamp 3/4" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'חבק תליה 3/4" עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006032', nameHe: 'חבק תליה 1" בלי בידוד', nameEn: 'Hanging Clamp 1" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '1"', 'תיאור': 'חבק תליה בלי בידוד'}),
-  LipskeyCatalogProduct(sku: 'Z.0001032', nameHe: 'חבק תליה 1" עם בידוד', nameEn: 'Hanging Clamp 1" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: 'Z.0001032', nameHe: 'חבק תליה 1" עם בידוד', nameEn: 'Hanging Clamp 1" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '1"', 'תיאור': 'חבק תליה 1" עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006033', nameHe: 'חבק תליה 1¼" בלי בידוד', nameEn: 'Hanging Clamp 1¼" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '1 1/4"', 'תיאור': 'חבק תליה בלי בידוד'}),
-  LipskeyCatalogProduct(sku: 'Z.0001003', nameHe: 'חבק תליה 1¼" עם בידוד', nameEn: 'Hanging Clamp 1¼" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: 'Z.0001003', nameHe: 'חבק תליה 1¼" עם בידוד', nameEn: 'Hanging Clamp 1¼" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'תיאור': 'חבק תליה 1¼" עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006034', nameHe: 'חבק תליה 1½" בלי בידוד', nameEn: 'Hanging Clamp 1½" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '1 1/2"', 'תיאור': 'חבק תליה בלי בידוד'}),
-  LipskeyCatalogProduct(sku: 'Z.0001034', nameHe: 'חבק תליה 1½" עם בידוד', nameEn: 'Hanging Clamp 1½" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: 'Z.0001034', nameHe: 'חבק תליה 1½" עם בידוד', nameEn: 'Hanging Clamp 1½" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'תיאור': 'חבק תליה 1½" עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006035', nameHe: 'חבק תליה 2" בלי בידוד', nameEn: 'Hanging Clamp 2" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '2"', 'תיאור': 'חבק תליה בלי בידוד'}),
-  LipskeyCatalogProduct(sku: 'Z.0001035', nameHe: 'חבק תליה 2" עם בידוד', nameEn: 'Hanging Clamp 2" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: 'Z.0001035', nameHe: 'חבק תליה 2" עם בידוד', nameEn: 'Hanging Clamp 2" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006030.jpg', brand: 'AQUATEC', dims: {'מידה': '2"', 'תיאור': 'חבק תליה 2" עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006036', nameHe: 'חבק תליה 2½" בלי בידוד', nameEn: 'Hanging Clamp 2½" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '2 1/2"', 'תיאור': 'חבק תליה בלי בידוד'}),
   LipskeyCatalogProduct(sku: '77006016', nameHe: 'חבק תליה 2½" עם בידוד', nameEn: 'Hanging Clamp 2½" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '2 1/2"', 'תיאור': 'חבק תליה עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006037', nameHe: 'חבק תליה 3" בלי בידוד', nameEn: 'Hanging Clamp 3" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '3"', 'תיאור': 'חבק תליה בלי בידוד'}),
   LipskeyCatalogProduct(sku: '77006017', nameHe: 'חבק תליה 3" עם בידוד', nameEn: 'Hanging Clamp 3" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '3"', 'תיאור': 'חבק תליה עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006038', nameHe: 'חבק תליה 4" בלי בידוד', nameEn: 'Hanging Clamp 4" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '4"', 'תיאור': 'חבק תליה בלי בידוד'}),
-  LipskeyCatalogProduct(sku: 'Z.0001039', nameHe: 'חבק תליה 4" עם בידוד', nameEn: 'Hanging Clamp 4" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: 'Z.0001040', nameHe: 'חבק תליה 5" עם בידוד', nameEn: 'Hanging Clamp 5" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: 'Z.0001039', nameHe: 'חבק תליה 4" עם בידוד', nameEn: 'Hanging Clamp 4" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '4"', 'תיאור': 'חבק תליה 4" עם בידוד'}),
+  LipskeyCatalogProduct(sku: 'Z.0001040', nameHe: 'חבק תליה 5" עם בידוד', nameEn: 'Hanging Clamp 5" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '5"', 'תיאור': 'חבק תליה 5" עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006039', nameHe: 'חבק תליה 6" בלי בידוד', nameEn: 'Hanging Clamp 6" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'חבק תליה בלי בידוד'}),
   LipskeyCatalogProduct(sku: '77006019', nameHe: 'חבק תליה 6" עם בידוד', nameEn: 'Hanging Clamp 6" Insulated', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '6"', 'תיאור': 'חבק תליה עם בידוד'}),
   LipskeyCatalogProduct(sku: '77006040', nameHe: 'חבק תליה 8" בלי בידוד', nameEn: 'Hanging Clamp 8" No Insulation', categoryHe: 'חבקי תליה', categoryEn: 'Hanging Clamps', categoryEmoji: '🔩', page: 91, imageFile: '77006036.jpg', brand: 'AQUATEC', dims: {'מידה': '8"', 'תיאור': 'חבק תליה בלי בידוד'}),
@@ -7063,7 +7087,7 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   LipskeyCatalogProduct(sku: '77777114', nameHe: 'בתא ברז פרח מים ידית צד', nameEn: 'Bata Cold Water Faucet Side Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 14, imageFile: '77777114.jpg', brand: 'AQUATEC', dims: {'תיאור': 'בתא ברז פרח מים קרים ידית צד'}),
   LipskeyCatalogProduct(sku: '7777113A', nameHe: 'בתא ברז פרח מים קרים 45 ידית צד', nameEn: 'Bata Cold Water Faucet 45° Side Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7777113A.jpg', brand: 'AQUATEC', dims: {'תיאור': 'בתא ברז פרח מים קרים 45 ידית צד'}),
   LipskeyCatalogProduct(sku: '7777111A', nameHe: 'בתא ברז מהקיר מים קרים', nameEn: 'Bata Wall Cold Water Faucet', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7777111A.jpg', brand: 'AQUATEC', dims: {'תיאור': 'בתא ברז מהקיר מים קרים'}),
-  LipskeyCatalogProduct(sku: '7777112Y', nameHe: 'בתא ברז מהקיר מים קרים ידית צד', nameEn: 'Bata Wall Cold Water Faucet Side Handle', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 17, imageFile: '7777112Y.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7777112Y', nameHe: 'בתא ברז מהקיר מים קרים ידית צד', nameEn: 'Bata Wall Cold Water Faucet Side Handle', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 17, imageFile: '7777112Y.jpg', brand: 'AQUATEC', dims: {'תיאור': 'בתא ברז מהקיר מים קרים ידית צד'}),
   LipskeyCatalogProduct(sku: '77777112', nameHe: 'בתא ברז מהקיר מים קרים פיה 45', nameEn: 'Bata Wall Cold Water Faucet 45° Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 17, imageFile: '77777112.jpg', brand: 'AQUATEC', dims: {'תיאור': 'בתא ברז מהקיר מים קרים פיה 45'}),
 
   // ─── AQUATEC QONDUS — סדרת פולו + גליל (page 15) ────────────────────────
@@ -7083,13 +7107,13 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   // ─── AQUATEC QONDUS — פיות לברזים / אביזרי דיור (page 18) ───────────────
   LipskeyCatalogProduct(sku: '777A5034', nameHe: 'דיור פיית מילוי עם כפתור מפאורת', nameEn: 'Dior Deluxe Fill Spout with Button', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '777A5034.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור פיית מילוי עם כפתור מפאורת'}),
   LipskeyCatalogProduct(sku: '77772415', nameHe: 'דיור פיה לברז נחש מהקיר כבד ארוך', nameEn: 'Dior Heavy Snake Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772415.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור פיה לברז נחש מהקיר כבד ארוך'}),
-  LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: null, brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: null, brand: 'AQUATEC', dims: {'תיאור': 'דיור פיה לברז מהקיר ארוך'}),
   LipskeyCatalogProduct(sku: '77772410', nameHe: 'דיור פיה לברז פרח ארוך', nameEn: 'Dior Sink Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772410.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור פיה לברז פרח ארוך'}),
-  LipskeyCatalogProduct(sku: '997091', nameHe: 'ברך 90° - תבריג צד אחד', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: 'Screw-on Accessories', categoryEmoji: '🔩', page: 20, imageFile: null, brand: 'ליפסקי'),
-  LipskeyCatalogProduct(sku: '116565', nameHe: 'מסעף 45° - תבריג כפול', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: 'Screw-on Accessories', categoryEmoji: '🔩', page: 42, imageFile: null, brand: 'ליפסקי'),
-  LipskeyCatalogProduct(sku: '218051', nameHe: 'מצמד כפול', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: 'Insertion Accessories', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי'),
-  LipskeyCatalogProduct(sku: '115581', nameHe: 'מצרות תבריג', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: 'Insertion Accessories', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי'),
-  LipskeyCatalogProduct(sku: '116258', nameHe: 'מצרות תבריג', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: 'Insertion Accessories', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '997091', nameHe: 'ברך 90° - תבריג צד אחד', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: 'Screw-on Accessories', categoryEmoji: '🔩', page: 20, imageFile: null, brand: 'ליפסקי', dims: {'תיאור': 'ברך 90° - תבריג צד אחד'}),
+  LipskeyCatalogProduct(sku: '116565', nameHe: 'מסעף 45° - תבריג כפול', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: 'Screw-on Accessories', categoryEmoji: '🔩', page: 42, imageFile: null, brand: 'ליפסקי', dims: {'תיאור': 'מסעף 45° - תבריג כפול'}),
+  LipskeyCatalogProduct(sku: '218051', nameHe: 'מצמד כפול', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: 'Insertion Accessories', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי', dims: {'תיאור': 'מצמד כפול'}),
+  LipskeyCatalogProduct(sku: '115581', nameHe: 'מצרות תבריג', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: 'Insertion Accessories', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי', dims: {'תיאור': 'מצרות תבריג'}),
+  LipskeyCatalogProduct(sku: '116258', nameHe: 'מצרות תבריג', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: 'Insertion Accessories', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי', dims: {'תיאור': 'מצרות תבריג'}),
   // gate 117: 120311 = כובע אויר (venting cap), not a plug. Full PDF-parity entry.
   LipskeyCatalogProduct(sku: '120311', nameHe: 'כובע אויר 110', nameEn: 'Venting cap 110', qtyPack: 108, qtyPallet: 2160, categoryHe: 'פקקים וצינורות', categoryEn: 'Couplers & Pipes', categoryEmoji: '⚫', page: 45, dims: {'DN': '110'}, imageFile: null, brand: 'ליפסקי'),
   LipskeyCatalogProduct(sku: '273226', nameHe: 'צינור שחור DN40 L=100 ס"מ', nameEn: '', color: 'שחור', categoryHe: 'צינורות', categoryEn: 'Pipes', categoryEmoji: '📏', page: 47, dims: {'DN': '40', 'L (cm)': '100'}, imageFile: null, brand: 'ליפסקי'),
@@ -7108,5 +7132,5 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   // removed — full PDF-parity entries live above (page 50–52).
   // gate 117: placeholder stubs for 179613/186379/187134/195505/197222 removed —
   // full PDF-parity entries live in the main toilet-seat block (page 53–55).
-  LipskeyCatalogProduct(sku: '186666', nameHe: 'חלקים למוצרים סניטריים', nameEn: '', categoryHe: 'חלקים סניטריים', categoryEn: 'Sanitary Parts', categoryEmoji: '🔧', page: 56, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '186666', nameHe: 'חלקים למוצרים סניטריים', nameEn: '', categoryHe: 'חלקים סניטריים', categoryEn: 'Sanitary Parts', categoryEmoji: '🔧', page: 56, imageFile: null, brand: 'ליפסקי', dims: {'תיאור': 'חלקים למוצרים סניטריים'}),
 ];

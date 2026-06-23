@@ -42,6 +42,15 @@ void main() {
     });
   });
 
+  group('Name-parse enrichment (R8 — size/finish printed in the name)', () {
+    test('toilet-connector DN from its own name', () {
+      expect(bySku('196206').dims?['מידה'], 'DN32');
+    });
+    test('decorative finish from its own name (category-aware)', () {
+      expect(bySku('77701205').color, 'זהב מוברש');
+    });
+  });
+
   test('every enriched quantity is a positive integer (no garbled reads)', () {
     for (final p in kLipskeyCatalog) {
       if (p.qtyPack != null) {
