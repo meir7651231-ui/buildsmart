@@ -444,7 +444,14 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         if (v is CardShowProducts && v.products.isEmpty)
           _buildEmptyState()
         else if (keys.isNotEmpty)
-          WordKeyboard(words: keys, onWordTap: _onWordTap),
+          WordKeyboard(
+            words: keys,
+            onWordTap: _onWordTap,
+            // The unified flow navigates by back/restart only — no skip/type
+            // affordance — so hide WordKeyboard's default הכל/הקלדה utility row,
+            // which would otherwise render two dead no-op keys (swarm R10).
+            showUtilityRow: false,
+          ),
       ],
     );
   }
