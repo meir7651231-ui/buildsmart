@@ -2714,3 +2714,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 ### #manager-copilot-r1 — אודיט-נחיל סיבוב-1 (7 תיקונים) — 2026-06-23
 נחיל-4-עדשות על הקו-פיילוט. **(HIGH)** הזרקת-`c.name` → `promptSafeText` ב-`buildManagerContext`. **(MED)** clamp ניצול-אשראי(0,100) · הסרת-"מגמת-מחזור" מהתדריך · `tooltip:'שלח'` · ניגודיות-בועה (טקסט-כהה). **(LOW)** `money()` שלילי · hero-subtitle full-white. concurrency נקי. `manager_copilot_test` 12 ירוק · analyze 0.
+
+### #manager-copilot-r2 — אודיט-נחיל סיבוב-2: gateway-timeout + maxTokens-per-call — 2026-06-23
+נחיל-עדשות-שונות (error-handling · concurrency · governance · a11y) על הקו-פיילוט. concurrency/ממשל/Riverpod **נקיים**. תוקנו:
+- **(MED · error-handling)** `claude_functions.dart` — `ClaudeGateway.ask` בלי `.timeout()` בצד-לקוח → `.timeout(const Duration(seconds:30))` סביב ה-`.call(...)`; `on Object catch` הקיים ממפה timeout→`ClaudeException('unavailable')`. תאם ל-`order_functions.dart`. (lib/data → 42/44; נעוץ ב-`claude_gateway_test` חוזה-maxTokens.)
+- **(LOW · truncation)** `manager_copilot_screen.dart` — `_run` קיבל `{int maxTokens=420}`; `_morningBrief` מעביר `600` (תדריך-עברי ארוך, עדיין ≪ cap-שרת 2048). Q&A=420. (screens → 24/116.)
+- **נדחה (מתועד):** prompt-cache (`functions/src/claude.ts` `cache_control` — server-wide לכל-הקוראים, LOW) · fake-gateway screen-test למסלולי success/empty/catch (פער-כיסוי, אופציונלי).
+- **gate:** analyze 0 errors · `claude_gateway_test` (+maxTokens-forwarding) · `manager_copilot_test` 12 · 49 מנהל · full-suite.

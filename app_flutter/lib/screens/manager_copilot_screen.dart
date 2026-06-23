@@ -63,7 +63,7 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
     );
   }
 
-  Future<void> _run(String userLabel, String prompt) async {
+  Future<void> _run(String userLabel, String prompt, {int maxTokens = 420}) async {
     final gw = ref.read(claudeGatewayProvider);
     if (gw == null || _loading) return;
     FocusScope.of(context).unfocus();
@@ -76,7 +76,7 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
       final r = await gw.ask(
         prompt: prompt,
         system: managerCopilotSystem,
-        maxTokens: 420,
+        maxTokens: maxTokens,
       );
       if (!mounted) return;
       final text = r.text.trim();
@@ -104,8 +104,11 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
     _run(q, managerCopilotPrompt(_liveContext(), q));
   }
 
-  void _morningBrief() =>
-      _run('☀️ תדריך-בוקר', managerMorningBriefPrompt(_liveContext()));
+  // Brief = 3-4 Hebrew bullets; Hebrew tokenizes ~2-4× worse, so give it more room
+  // than a Q&A answer to avoid mid-sentence truncation (still ≪ the 2048 server cap).
+  void _morningBrief() => _run(
+      '☀️ תדריך-בוקר', managerMorningBriefPrompt(_liveContext()),
+      maxTokens: 600);
 
   void _scrollToEnd() => WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scroll.hasClients) {

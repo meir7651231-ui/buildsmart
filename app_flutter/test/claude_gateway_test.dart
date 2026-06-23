@@ -18,7 +18,8 @@ class _FakeClaude implements ClaudeGateway {
 
   final String reply;
   final ClaudeException? error;
-  final List<({String prompt, String? system, String? model})> calls = [];
+  final List<({String prompt, String? system, String? model, int? maxTokens})>
+      calls = [];
 
   @override
   Future<ClaudeResult> ask({
@@ -27,7 +28,8 @@ class _FakeClaude implements ClaudeGateway {
     String? model,
     int? maxTokens,
   }) async {
-    calls.add((prompt: prompt, system: system, model: model));
+    calls.add(
+        (prompt: prompt, system: system, model: model, maxTokens: maxTokens));
     if (error != null) throw error!;
     return ClaudeResult(text: reply, model: model ?? 'fake');
   }
@@ -54,6 +56,18 @@ void main() {
     expect(fake.calls.single.prompt, 'is 60C/6bar ok?');
     expect(fake.calls.single.system, 'spec…',
         reason: 'the grounded system prompt reaches the gateway verbatim');
+  });
+
+  test('a caller can pin maxTokens and it flows through the gateway contract',
+      () async {
+    // The morning-brief asks for more room than a Q&A answer (Hebrew tokenizes
+    // ~2-4× worse); this pins that the per-call cap reaches the seam verbatim
+    // and is NOT silently dropped on the way to the callable.
+    final fake = _FakeClaude(reply: 'תדריך');
+    await fake.ask(prompt: 'brief', maxTokens: 600);
+
+    expect(fake.calls.single.maxTokens, 600,
+        reason: 'a per-call maxTokens reaches the gateway, not the default cap');
   });
 
   test('a gateway failure surfaces as a neutral ClaudeException (honest, no fake)',

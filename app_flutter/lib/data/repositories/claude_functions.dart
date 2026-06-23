@@ -88,14 +88,20 @@ class FirebaseClaudeGateway implements ClaudeGateway {
     int? maxTokens,
   }) async {
     try {
-      final res = await _functions.httpsCallable('askClaude').call<dynamic>(
-        <String, dynamic>{
-          'prompt': prompt,
-          if (system != null) 'system': system,
-          if (model != null) 'model': model,
-          if (maxTokens != null) 'maxTokens': maxTokens,
-        },
-      );
+      final res = await _functions
+          .httpsCallable('askClaude')
+          .call<dynamic>(
+            <String, dynamic>{
+              'prompt': prompt,
+              if (system != null) 'system': system,
+              if (model != null) 'model': model,
+              if (maxTokens != null) 'maxTokens': maxTokens,
+            },
+          )
+          // Fail-fast: bound the wait so a stalled transport can't hang the UI on
+          // the SDK's ~70s default (mirrors order_functions). A timeout throws →
+          // mapped to ClaudeException below, surfacing a clean retryable error.
+          .timeout(const Duration(seconds: 30));
       final m = _asMap(res.data);
       return ClaudeResult(
         text: _str(m['text']) ?? '',

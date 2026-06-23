@@ -1817,3 +1817,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - כפתור-שלח: נוסף `tooltip: 'שלח'` (קורא-מסך).
 - כרטיס-hero בקוקפיט: כותרת-המשנה `white70`→`white` (ניגודיות על ה-gradient).
 **אימות:** שינויי-צבע/tooltip בלבד — אפס שינוי-מבני. 12 טסטי-copilot + 49 מנהל ירוקים · analyze 0.
+
+## v6.78 — קו-פיילוט ס2: תדריך-בוקר בלי-חיתוך + כשל-מהיר — 2026-06-23
+**שינוי נראה (lib/screens/manager_copilot_screen.dart):** התדריך-בוקר (☀️) קיבל יותר-מרווח-תווים (420→600) — בולטי-העברית כבר **לא נחתכים באמצע-משפט** (עברית מתקצבת ~2-4× גרוע מאנגלית). שאלות-ה-Q&A הרגילות נשארות 420 (תשובה תמציתית). אין שינוי-פריסה/צבע/widget — רק אורך-התשובה-המקסימלי.
+**שינוי-התנהגות (lib/data/repositories/claude_functions.dart):** קריאה תקועה לשרת נכשלת-מהר אחרי 30s (`.timeout`) עם בועת "משהו השתבש בחיבור — נסה שוב עוד רגע" במקום ספינר-תלוי עד ~70s. נראה רק במצב-תקלת-רשת.
+**אימות (אוטומטי, לא צילום):** `claude_gateway_test` (חוזה-maxTokens ירוק) + `manager_copilot_screen_test` (off-state) + 49 טסטי-מנהל ירוקים · analyze 0. שינוי inert בבילד-הדמו (`claudeGatewayProvider==null`); חי על App Tester.
+**הפיכות:** `git checkout lib/screens/manager_copilot_screen.dart lib/data/repositories/claude_functions.dart` — חוזר ל-cap-420-קבוע ול-`.call` ללא-timeout.
