@@ -82,6 +82,11 @@ void main() {
       expect(bySku('116167').imageFile, '116167.jpeg'); // gully trap, p27
       expect(bySku('610918').imageFile, '610918.jpeg'); // round drainage cap, p33
     });
+    test('official Lipski-site sweep — exact-SKU images linked (high-res)', () {
+      expect(bySku('686366').imageFile, '686366.jpeg'); // was imageless, now filled
+      expect(bySku('116573').imageFile, '116573.jpeg'); // 45° branch, official photo
+      expect(bySku('217861').imageFile, '217861.jpeg'); // American trap
+    });
     test('branch twins — same physical product reuses the twin live image', () {
       expect(bySku('118221').imageFile, '116223.jpeg'); // 45° DN40 == 116223 (40/40/40)
       expect(bySku('116589').imageFile, '116689.jpeg'); // 90° 32/32 == 116689

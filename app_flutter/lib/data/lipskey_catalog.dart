@@ -720,7 +720,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🚰',
     page: 12,
     dims: {'תצורה': 'בודד', 'הערה': '*קיים גם בשרשורי', 'תיאור': 'מחסום (סיפון) אמריקאי בודד 2" + כניסה / למדיח כלים (מס. 5)', 'צבע': 'לבן'},
-    imageFile: '172349.png',
+    imageFile: '172349.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '209447',
@@ -860,7 +860,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🚰',
     page: 14,
     dims: {'מק"ט': 'NO.172033', 'צבע': 'לבן', 'תיאור': 'זרוע קומפלט לאגנית 1.5"'},
-    imageFile: '172033.png',
+    imageFile: '172033.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178700',
@@ -888,7 +888,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🚰',
     page: 14,
     dims: {'מק"ט פיה': 'NO.645975', 'צבע': 'לבן', 'תיאור': 'צינור יציאה למדיח, שקית קומפלט (מתאימה לסיפון אמריקאי בלבד)'},
-    imageFile: '645975.png',
+    imageFile: '645975.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '615301',
@@ -2777,7 +2777,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 29,
     dims: {'תיאור': 'מצוף מילוי הידראולי משולב 3/8 - 1/2', 'מידה': '3/8 - 1/2'},
-    imageFile: null,
+    imageFile: '686366.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '642102',
