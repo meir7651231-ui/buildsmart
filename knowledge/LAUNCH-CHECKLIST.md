@@ -9,13 +9,16 @@
 - [ ] ⏰ **רישום עוסק/חברה** + יכולת חשבונית‑מס (תנאי לתשלום)
 - [ ] מילוי `[שם החברה]` בכל המסמכים (`legal_texts.dart`)
 
+> ✅ **עדכון 23/6 (אומת בקוד):** סנכרון הזמנות+צ׳אט (S2) · ✓✓ אמיתי (S3) · מד‑חיבור חי 🟢/🔴 (S4) — **סגורים.** מספרים‑מזויפים הוסתרו (P2) · ירוקים חוברו (P3) · **עוזר‑AI (Claude) נבנה+פעיל** (החלטת‑בעלים) · מקלדת‑חכמה נבנתה+הודלקה. הצי סימן **אבן‑דרך "מוכנות‑launch" (v6.72)**. הצעדים הפתוחים כאן = רובם **קונסול/החלטות שלך**.
+
 ## 🟧 שלב 1 — חיבור‑השרת לטלפון (פותח את הכל)
-- [x] **F1 ✅** — קונסול (את) + קוד (25a5daf: native options + gradle + plist). נותר: בדיקת‑מכשיר (את)
-- [ ] **F4:** מפתח APNS (push ל‑iPhone) + Push capability ב‑Xcode [את+agent]
-- [ ] `firebase deploy` — Functions + rules + indexes [agent/CI]
+- [x] **F1 ✅** — קונסול (את) + קוד (25a5daf). [x] בדיקת‑מכשיר — מד‑חיבור 🟢 על המכשיר
+- [x] `firebase deploy` ✅ — Functions + rules + indexes נפרסים אוטומטית ב‑CI (success @77df5eb)
+- [ ] **F4:** מפתח APNS (push ל‑iPhone) + Push capability ב‑Xcode — **או** להחליט אנדרואיד‑first
+- [ ] 🤖 **קונסול: `ANTHROPIC_API_KEY`** ב‑Secret Manager — **חובה** כדי שהעוזר‑החכם יעבוד (החלטת‑בעלים: פעיל)
 - [ ] קונסול: Crashlytics ON · רישום‑מפתחות App Check + אכיפה · מפתח VAPID (push‑web) · R2 secrets
-- [ ] **להדליק דגלים:** `USE_FIREBASE_BACKEND` · `UID_SCOPED_QUERIES` · `SERVER_CALLABLES` · `CLOUD_PHOTOS` · `APP_CHECK_PROD`
-- [ ] G5 התראות‑תקציב (Blaze) · G6 גיבוי Firestore
+- [ ] **להדליק דגלים:** `USE_FIREBASE_BACKEND` · `UID_SCOPED_QUERIES` · `SERVER_CALLABLES` · `CLOUD_PHOTOS` · `APP_CHECK_PROD` · `kAiAssistant` · `kKbLiveMirror`
+- [ ] G5 התראות‑תקציב (Blaze — גם לכיסוי עלות‑AI) · G6 גיבוי Firestore
 
 ## 🟨 שלב 2 — החלטות + דאטה
 - [ ] 💳 **תשלום:** לאשר "v1 בלי סליקה‑אונליין" (חשבונית+העברה) **או** לחבר ספק ישראלי (Grow/משולם)
