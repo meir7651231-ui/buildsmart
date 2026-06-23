@@ -18,8 +18,15 @@ void main() {
       final p = bySku('186466'); // ערכה אוניברסלית — no verified connection
       expect(cardReadinessScore(p).score < 30, isTrue,
           reason: 'cannot plumb with it → low install chip');
-      expect(dataCompletenessScore(p).score >= 55, isTrue,
-          reason: 'its catalog listing is complete → fair data chip');
+      // Data axis sits FAR above the install axis (52 vs 23) — the listing is
+      // basic-or-better and not dragged to zero by the connection-gating. (Was
+      // ≥55 'טוב'; dropped to 52 'בסיסי' after its misleading image was nulled
+      // + the origin search-hybrid changed finder grouping. Anti-slander intent
+      // is the divergence, asserted below.)
+      final data = dataCompletenessScore(p).score;
+      expect(data >= 50, isTrue, reason: 'listing basic-or-better → fair data chip');
+      expect(data > cardReadinessScore(p).score + 20, isTrue,
+          reason: 'data axis NOT slandered down to the install axis');
     });
     test('a real connecting fitting scores well on BOTH axes', () {
       final p = bySku('77381040');

@@ -35,7 +35,6 @@ import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
-import 'package:buildsmart/widgets/smart_input/caret.dart' show insertAtCaret;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -166,13 +165,14 @@ void main() {
       expect(find.byIcon(Icons.settings), findsOneWidget,
           reason: 'the gear toggle renders in the strip');
 
-      // The read-only query field with its hint.
-      expect(find.text('מה לחפש?'), findsOneWidget,
-          reason: 'the search field hint shows');
+      // The separate search FIELD was removed (owner mobile redesign) — typing
+      // now registers INSIDE the strip, so there is NO standalone TextField row.
+      expect(find.byType(TextField), findsNothing,
+          reason: 'the search field row was removed; typing shows in the strip');
 
-      // The close down-chevron handle.
+      // The close X — now at the strip's LEADING edge (moved out of its own row).
       expect(find.byIcon(Icons.close), findsOneWidget,
-          reason: 'the floating panel has a close affordance');
+          reason: 'the floating panel has a close affordance (in the strip)');
 
       // At least one opening prediction chip is present (real lexicon words).
       final lexicon = buildWordLexicon(kDivePool);
@@ -378,23 +378,26 @@ void main() {
     // caret-insert the prediction-word path uses. We assert that field-insert
     // behaviour directly on the panel's own controller — proving the wiring's
     // landing point works — without invoking the real mic plugin.
-    testWidgets('voice transcript sink: insertAtCaret lands text in the field',
+    testWidgets('typed text lands in the strip query display (no field)',
         (tester) async {
       await pumpPanel(tester);
 
-      // The floating panel owns exactly one TextField → one EditableText.
-      final controller =
-          tester.widget<EditableText>(find.byType(EditableText)).controller;
-      expect(controller.text, isEmpty, reason: 'field starts empty');
-
-      // This is EXACTLY what _startVoiceInput's onFinal runs with a transcript.
-      insertAtCaret(controller, 'ברז כדורי ');
+      // The separate search field was removed (owner mobile redesign); typed text
+      // now shows INSIDE the strip — the SAME [_controller] landing point the
+      // voice sink (_startVoiceInput → insertAtCaret) feeds. Type via the keyboard
+      // and assert the strip's query display reflects it. The single-letter KEYS
+      // are 'ב'/'ר'/'ז' alone, so a 'ברז' substring can only be the strip query.
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ז'));
       await tester.pumpAndSettle();
 
-      expect(controller.text, 'ברז כדורי ',
-          reason: 'the spoken transcript lands in the search field');
-      // And the live prediction-row listener recomputed without crashing.
-      expect(find.byType(BsKeyboard), findsOneWidget);
+      expect(find.textContaining('ברז'), findsWidgets,
+          reason: 'typed text registers in the strip (no separate field)');
+      expect(find.byType(BsKeyboard), findsOneWidget,
+          reason: 'the live recompute ran without crashing');
     });
 
     testWidgets(
@@ -626,15 +629,29 @@ void main() {
             reason: 'a section destination keeps the overlay floating');
       });
 
-      testWidgets('a product WORD chip still appends to the field (unchanged)',
+      testWidgets('a product WORD chip still appends to the strip query',
           (tester) async {
         final container = await pumpPanel(tester);
+
+        // The strip's typed-query display is the Text whose plain text ends with
+        // the brand caret '|' (the separate field was removed, owner redesign).
+        // '' when nothing is typed. The single-letter keys / word chips never end
+        // with '|', so this uniquely reads the query the keyboard is building.
+        String stripQuery() {
+          for (final t in tester.widgetList<Text>(find.byType(Text))) {
+            final s = t.textSpan?.toPlainText() ?? t.data;
+            if (s != null && s.endsWith('|')) {
+              return s.substring(0, s.length - 1);
+            }
+          }
+          return '';
+        }
 
         // Type "ב" → the row carries product words (e.g. 'ברז'-family) and NO
         // destination starts with bare "ב" as a leading label, so the first
         // chips are words. We tap a chip that is a product word (absent from the
-        // destination map) and assert the field GREW (append behaviour), the tab
-        // did NOT change, and the overlay stayed open.
+        // destination map) and assert the strip query GREW (append behaviour),
+        // the tab did NOT change, and the overlay stayed open.
         await tester.tap(find.text('ב'));
         await tester.pumpAndSettle();
 
@@ -655,23 +672,18 @@ void main() {
 
         if (wordOnly.isNotEmpty) {
           final tabBefore = container.read(mainTabProvider);
-
-          // Read the read-only field's live text via its EditableText controller
-          // (the floating panel owns exactly one TextField → one EditableText).
-          String fieldText() =>
-              tester.widget<EditableText>(find.byType(EditableText)).controller.text;
-          final before = fieldText();
+          final before = stripQuery();
 
           await tester.tap(find.text(wordOnly).first);
           await tester.pumpAndSettle();
 
-          // Word path: insertAtCaret appended "$wordOnly " → the field GREW and
-          // now contains the tapped word; navigation did NOT fire; overlay open.
-          final after = fieldText();
+          // Word path: insertAtCaret appended "$wordOnly " → the strip query GREW
+          // and now contains the tapped word; navigation did NOT fire; overlay open.
+          final after = stripQuery();
           expect(after.length, greaterThan(before.length),
-              reason: 'a product word appends to the field (grows it)');
+              reason: 'a product word appends to the strip query (grows it)');
           expect(after.contains(wordOnly), isTrue,
-              reason: 'the tapped product word "$wordOnly" reached the field');
+              reason: 'the tapped product word "$wordOnly" reached the query');
           expect(container.read(mainTabProvider), tabBefore,
               reason: 'tapping a product word must NOT navigate');
           expect(container.read(keyboardOverlayOpenProvider), isTrue,

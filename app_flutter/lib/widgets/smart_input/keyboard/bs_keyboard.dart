@@ -136,6 +136,23 @@ class BsKeyboard extends StatelessWidget {
   /// Fire the send action (the brand-orange send key).
   final VoidCallback onSend;
 
+  /// Close the floating overlay — the X that now lives at the LEADING (left) edge
+  /// of the tool strip (owner mobile redesign moved it out of the panel's own
+  /// row). Null on every non-floating mount, where the strip carries no X.
+  final VoidCallback? onClose;
+
+  /// The current query text, shown INSIDE the tool strip's middle. The separate
+  /// search field was removed (owner mobile redesign) — typing now registers in
+  /// the strip itself. Empty (default) → the strip shows a faint hint, no input
+  /// glyph, so the legacy strip (no typed text) reads as before.
+  final String typedText;
+
+  /// Exit the tool view back to the LETTERS — the action of the dual-mode bottom
+  /// key WHEN a tool layer is open (the key reads "אבג" then, "?123" on the
+  /// letters). Null on every non-floating mount, where that key stays the plain
+  /// `?123`/symbols toggle (byte-identical), since [tiles] is null there.
+  final VoidCallback? onExitTools;
+
   /// Toggle between the letter and `?123` symbols layers. The single
   /// layer-switch key — labelled `?123` on letters, `אבג` on symbols — routes
   /// here (there is no second toggle key).
@@ -222,6 +239,9 @@ class BsKeyboard extends StatelessWidget {
     required this.onBackspace,
     required this.onEnter,
     required this.onSend,
+    this.onClose,
+    this.typedText = '',
+    this.onExitTools,
     this.onToggleSymbols,
     this.onLanguage,
     this.showSymbols = false,
@@ -257,31 +277,54 @@ class BsKeyboard extends StatelessWidget {
       case KeyKind.send:
         onSend();
       case KeyKind.symbols:
-        onToggleSymbols?.call();
+        // DUAL-MODE bottom key (owner): while a tool layer is open ([tiles] non-
+        // null) the key reads "אבג" and EXITS the tools back to the letters;
+        // otherwise it is the plain "?123" symbols toggle. [tiles] is null on
+        // every non-floating mount, so this stays the symbols toggle there.
+        if (tiles != null) {
+          onExitTools?.call();
+        } else {
+          onToggleSymbols?.call();
+        }
       case KeyKind.language:
         onLanguage?.call();
+      case KeyKind.gear:
+        // The bottom-row keyboard-tools launcher (moved out of the strip, owner
+        // mobile redesign). Only present when [showToolStrip]; routes to the
+        // same gear callback the strip used to own.
+        onToolGear?.call();
     }
   }
 
   /// Builds one keyboard row: each key gets an [Expanded] sized by its
   /// [KbKey.flex], with small gaps between keys.
-  Widget _buildRow(List<KbKey> keys) {
+  Widget _buildRow(
+    List<KbKey> keys, {
+    required double gap,
+    required bool compact,
+  }) {
     final children = <Widget>[];
     for (var i = 0; i < keys.length; i++) {
-      if (i > 0) children.add(const SizedBox(width: BsTokens.space1));
+      if (i > 0) children.add(SizedBox(width: gap));
       final key = keys[i];
       // Two keys relabel at runtime by layer/language; tap routing still uses
       // the original key. (Runtime values → `final`, not const.)
-      //   • The layer-switch key: `?123` on the letter layer, and the
-      //     back-to-letters label matches the active language on the symbols
-      //     layer (`ABC` in English, `אבג` in Hebrew) — ONE toggle key (like
-      //     real keyboards), never two.
+      //   • The layer-switch key: `?123` on the letter layer; `אבג`/`ABC` on the
+      //     symbols layer (back to letters); AND `אבג`/`ABC` while a TOOL layer
+      //     is open ([tiles] non-null) — there it EXITS the tools back to the
+      //     letters (owner dual-mode key). [tiles] is null on every non-floating
+      //     mount, so this stays the plain `?123`↔`אבג` symbols toggle there.
       //   • The space bar: labelled for the active language (`English` /
       //     `עברית`), keeping its `' '` output and wide flex.
       final KbKey model;
       if (key.kind == KeyKind.symbols) {
         model = KbKey(
-          showSymbols ? (english ? 'ABC' : 'אבג') : '?123',
+          (showSymbols || tiles != null)
+              ? (english ? 'ABC' : 'אבג')
+              // A narrow phone key can't fit "?123" on one line (it wraps to
+              // three), so on a compact (mobile) keyboard the layer key reads the
+              // shorter "123" (owner mockup); desktop keeps the full "?123".
+              : (compact ? '123' : '?123'),
           kind: KeyKind.symbols,
         );
       } else if (key.kind == KeyKind.space) {
@@ -314,22 +357,27 @@ class BsKeyboard extends StatelessWidget {
   /// letter/symbol rows (the appended-backspace layout, byte-for-byte). When a
   /// tool layer is active it returns that layer's tool-tile rows instead — the
   /// letters/KeyKind routing are never touched in that case.
-  List<Widget> _mainRows() {
+  List<Widget> _mainRows({
+    required double rowGap,
+    required double toolGap,
+    required int tilesPerRow,
+    required bool compact,
+  }) {
     // MORPH path: a non-null [tiles] list replaces the whole grid with the
     // current drill node-list (pure tiles), with a leading BACK tile when asked.
     // Checked FIRST so it takes precedence over the legacy layers; when [tiles]
     // is null this whole branch is skipped and the historical render is exact.
     if (tiles != null) {
-      return _tileRows(tiles!);
+      return _tileRows(tiles!, gap: toolGap, perRow: tilesPerRow);
     }
 
     // Tool layers replace the letter grid (the existing layer mechanism, the
     // same idea as showSymbols). kBottomRow is added by build(), not here.
     switch (toolLayer) {
       case KbToolLayer.home:
-        return _toolRows(_kHomeTools);
+        return _toolRows(_kHomeTools, gap: toolGap);
       case KbToolLayer.kbd:
-        return _toolRows(_kKbdTools);
+        return _toolRows(_kKbdTools, gap: toolGap);
       case KbToolLayer.none:
         break;
     }
@@ -350,8 +398,8 @@ class BsKeyboard extends StatelessWidget {
 
     final rowWidgets = <Widget>[];
     for (final row in rows) {
-      rowWidgets.add(_buildRow(row));
-      rowWidgets.add(const SizedBox(height: BsTokens.space1));
+      rowWidgets.add(_buildRow(row, gap: rowGap, compact: compact));
+      rowWidgets.add(SizedBox(height: rowGap));
     }
     return rowWidgets;
   }
@@ -360,10 +408,10 @@ class BsKeyboard extends StatelessWidget {
   /// (each [Expanded]) with the same small inter-key gap the letter rows use,
   /// followed by a spacer to match the letter-row rhythm. Each tile DISPLAYS
   /// its [_ToolDef.label] but calls [onTool] with its typed [_ToolDef.id].
-  List<Widget> _toolRows(List<_ToolDef> defs) {
+  List<Widget> _toolRows(List<_ToolDef> defs, {required double gap}) {
     final children = <Widget>[];
     for (var i = 0; i < defs.length; i++) {
-      if (i > 0) children.add(const SizedBox(width: BsTokens.space1));
+      if (i > 0) children.add(SizedBox(width: gap));
       final def = defs[i];
       children.add(
         Expanded(
@@ -377,7 +425,7 @@ class BsKeyboard extends StatelessWidget {
     }
     return <Widget>[
       Row(children: children),
-      const SizedBox(height: BsTokens.space1),
+      SizedBox(height: gap),
     ];
   }
 
@@ -390,7 +438,11 @@ class BsKeyboard extends StatelessWidget {
   /// empty [Expanded]s so every tile keeps the same width as a full row's. Each
   /// tile DISPLAYS its [KbTile.label] and calls [onTile] with its [KbTile.id];
   /// the back tile calls [onBack].
-  List<Widget> _tileRows(List<KbTile> tiles) {
+  List<Widget> _tileRows(
+    List<KbTile> tiles, {
+    required double gap,
+    required int perRow,
+  }) {
     // Build the flat sequence of tile widgets (a leading back tile first).
     final cells = <Widget>[];
     if (showBack) {
@@ -404,18 +456,16 @@ class BsKeyboard extends StatelessWidget {
       );
     }
 
-    // Chunk into rows of [_kTilesPerRow], padding the last row with empty slots
-    // so widths stay uniform across rows.
+    // Chunk into rows of [perRow] (responsive: 2 on mobile, 4 on desktop),
+    // padding the last row with empty slots so widths stay uniform across rows.
     final rowWidgets = <Widget>[];
-    for (var start = 0; start < cells.length; start += _kTilesPerRow) {
+    for (var start = 0; start < cells.length; start += perRow) {
       final end =
-          (start + _kTilesPerRow) < cells.length
-              ? start + _kTilesPerRow
-              : cells.length;
+          (start + perRow) < cells.length ? start + perRow : cells.length;
       final rowCells = cells.sublist(start, end);
       final children = <Widget>[];
-      for (var i = 0; i < _kTilesPerRow; i++) {
-        if (i > 0) children.add(const SizedBox(width: BsTokens.space1));
+      for (var i = 0; i < perRow; i++) {
+        if (i > 0) children.add(SizedBox(width: gap));
         children.add(
           Expanded(
             child: i < rowCells.length ? rowCells[i] : const SizedBox.shrink(),
@@ -423,14 +473,44 @@ class BsKeyboard extends StatelessWidget {
         );
       }
       rowWidgets.add(Row(children: children));
-      rowWidgets.add(const SizedBox(height: BsTokens.space1));
+      rowWidgets.add(SizedBox(height: gap));
     }
     return rowWidgets;
   }
 
   @override
   Widget build(BuildContext context) {
-    final rowWidgets = <Widget>[
+    // RESPONSIVE METRICS (owner mobile redesign) — a narrow (phone) viewport
+    // shrinks the whole keyboard to the owner's tuned sizes; desktop keeps the
+    // historical 44/20. Width is read defensively (no MediaQuery → desktop), so
+    // a direct widget mount never throws and stays byte-identical.
+    final double width = MediaQuery.maybeSizeOf(context)?.width ?? 9999;
+    final bool mobile = width < 600;
+    // Typing surface (letters · strip · bottom row): owner 30 / 19, gap 2.
+    final KbCellMetrics typingScale = mobile
+        ? const KbCellMetrics(cellHeight: 30, fontSize: 19, iconSize: 18)
+        : KbCellMetrics.desktop;
+    // Tool surface (the tile grid): owner 30 / 16, gap 1, 2-per-row.
+    final KbCellMetrics toolScale = mobile
+        ? const KbCellMetrics(cellHeight: 30, fontSize: 16, iconSize: 18)
+        : KbCellMetrics.desktop;
+    final double rowGap = mobile ? 2 : BsTokens.space1;
+    final double toolGap = mobile ? 1 : BsTokens.space1;
+    final int tilesPerRow = mobile ? 2 : _kTilesPerRow;
+
+    // The MAIN area is either tool tiles (a morph drill / legacy tool layer) or
+    // the letters. Tools render at the smaller [toolScale] and are height-capped
+    // + scrollable so a deep drill never pushes the bottom row off-screen; the
+    // letters render at the ambient [typingScale] (the outer scope).
+    final bool mainIsTools = tiles != null || toolLayer != KbToolLayer.none;
+    final List<Widget> mainRows = _mainRows(
+      rowGap: rowGap,
+      toolGap: toolGap,
+      tilesPerRow: tilesPerRow,
+      compact: mobile,
+    );
+
+    final List<Widget> columnChildren = <Widget>[
       // FLAGGED strip above the layer rows. Off (the default) → nothing extra,
       // so the keyboard is byte-identical to before.
       if (showToolStrip) ...<Widget>[
@@ -438,42 +518,88 @@ class BsKeyboard extends StatelessWidget {
           toolLayer: toolLayer,
           predictions: predictions,
           destinationChips: destinationChips,
+          typedText: typedText,
+          onClose: onClose,
           onToolGrid: onToolGrid,
-          onToolGear: onToolGear,
           onPrediction: onPrediction,
+          gap: rowGap,
         ),
-        const SizedBox(height: BsTokens.space1),
+        SizedBox(height: rowGap),
       ],
-      // The MAIN area: a tool layer when one is active, else the existing
-      // letters/symbols layer — unchanged.
-      ..._mainRows(),
-      // The bottom action row (send · ?123 · globe · space · period · enter) —
-      // ALWAYS rendered, on every layer.
-      _buildRow(kBottomRow),
+      // The MAIN area: tool tiles (own scale + capped scroll) when active, else
+      // the existing letters/symbols layer at the ambient typing scale.
+      if (mainIsTools)
+        BsKbScale(
+          metrics: toolScale,
+          child: _cappedToolArea(mainRows, context),
+        )
+      else
+        ...mainRows,
+      // The bottom action row — ALWAYS rendered. The tool-strip (floating card)
+      // keyboard injects the GEAR launcher before enter (and its 123 key is the
+      // dual-mode key); the plain chat keyboard keeps [kBottomRow] unchanged, so
+      // it stays byte-identical.
+      _buildRow(showToolStrip ? _bottomRow() : kBottomRow,
+          gap: rowGap, compact: mobile),
     ];
 
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        // Light-orange seam fill (owner): only the keys keep their own (white)
-        // fill, so every gap between them reads as a warm light orange.
-        color: BsTokens.kbSeam,
-        child: Padding(
-          padding: const EdgeInsets.all(BsTokens.space1),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: rowWidgets,
+    return BsKbScale(
+      metrics: typingScale,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          // Light-orange seam fill (owner): only the keys keep their own (white)
+          // fill, so every gap between them reads as a warm light orange.
+          color: BsTokens.kbSeam,
+          child: Padding(
+            padding: EdgeInsets.all(rowGap),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: columnChildren,
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Bottom row for the tool-strip (floating card) keyboard: the historical
+  /// [kBottomRow] with the GEAR launcher injected just LEFT of the enter key
+  /// (owner moved ⚙️ here from the strip, beside עברית/enter). The plain keyboard
+  /// keeps [kBottomRow] unchanged — this is only used when [showToolStrip].
+  List<KbKey> _bottomRow() {
+    const gear = KbKey('gear', kind: KeyKind.gear);
+    final out = <KbKey>[];
+    for (final k in kBottomRow) {
+      if (k.kind == KeyKind.enter) out.add(gear); // gear sits left of enter
+      out.add(k);
+    }
+    return out;
+  }
+
+  /// Wraps the tool tiles in a height-capped, vertically-scrollable box so a
+  /// deep drill view never grows past ~⅓ of the screen and pushes the bottom
+  /// action row off — the strip + bottom row stay pinned, only the tiles scroll.
+  /// On desktop the cap is generous (rarely reached).
+  Widget _cappedToolArea(List<Widget> rows, BuildContext context) {
+    final double h = MediaQuery.maybeSizeOf(context)?.height ?? 9999;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: h * 0.34),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: rows,
         ),
       ),
     );
   }
 }
 
-/// The FLAGGED strip above the layer rows: a grid-layer toggle on the leading
-/// edge, the predictions in the middle (rendered as-is, NO horizontal scroll),
-/// and a keyboard-tools (gear) toggle on the trailing edge. Each toggle is
-/// accent-highlighted when its layer is the active one.
+/// The strip above the layer rows (owner mobile redesign): the X CLOSE on the
+/// LEADING (left) edge, the merged INPUT + predictions in the middle (the
+/// separate search field was removed — typing registers here), and the ▦ grid
+/// toggle on the TRAILING (right) edge (it moved here; the ⚙️ gear moved to the
+/// bottom row). The grid toggle is accent-highlighted when the tool layer is on.
 class _ToolStrip extends StatelessWidget {
   final KbToolLayer toolLayer;
   final List<String> predictions;
@@ -481,58 +607,159 @@ class _ToolStrip extends StatelessWidget {
   /// The subset of [predictions] that are navigable destinations (gets the nav
   /// glyph + brand accent). Empty → every chip renders as before.
   final Set<String> destinationChips;
+
+  /// The current query text shown in the strip's middle (replaces the field).
+  final String typedText;
+
+  /// The X close (leading edge). Null → no-op.
+  final VoidCallback? onClose;
   final VoidCallback? onToolGrid;
-  final VoidCallback? onToolGear;
   final ValueChanged<String>? onPrediction;
+
+  /// Responsive inter-cell gap (2 mobile / space1 desktop).
+  final double gap;
 
   const _ToolStrip({
     required this.toolLayer,
     required this.predictions,
     required this.destinationChips,
+    required this.typedText,
+    required this.onClose,
     required this.onToolGrid,
-    required this.onToolGear,
     required this.onPrediction,
+    required this.gap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
+        // LEADING (left): the X close — moved here from the panel's own row.
+        _StripToggle(
+          icon: Icons.close,
+          active: false,
+          onTap: onClose,
+          semanticLabel: 'סגור מקלדת',
+        ),
+        SizedBox(width: gap),
+        // MIDDLE: the merged input + predictions. Empty → a faint hint (no empty
+        // chip row); typing → the query (RTL, brand caret) then the chips.
+        Expanded(
+          child: _StripInput(
+            typedText: typedText,
+            predictions: predictions,
+            destinationChips: destinationChips,
+            onPrediction: onPrediction,
+            gap: gap,
+          ),
+        ),
+        SizedBox(width: gap),
+        // TRAILING (right): the ▦ grid toggle → tool mode (moved here from the
+        // left). Lit (brand fill) while the home tool layer is open.
         _StripToggle(
           icon: Icons.grid_view,
           active: toolLayer == KbToolLayer.home,
           onTap: onToolGrid,
           semanticLabel: 'מחלקות',
         ),
-        const SizedBox(width: BsTokens.space1),
-        // Predictions fill the middle. The given list is rendered as-is with no
-        // horizontal scroll — each chip is Expanded so a short list spreads and
-        // a long one shares the width evenly (and clips its own text if needed).
-        Expanded(
-          child: Row(
-            children: <Widget>[
-              for (var i = 0; i < predictions.length; i++) ...<Widget>[
-                if (i > 0) const SizedBox(width: BsTokens.space1),
-                Expanded(
-                  child: _PredictionChip(
-                    text: predictions[i],
-                    isDestination: destinationChips.contains(predictions[i]),
-                    onTap: () => onPrediction?.call(predictions[i]),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(width: BsTokens.space1),
-        _StripToggle(
-          icon: Icons.settings,
-          active: toolLayer == KbToolLayer.kbd,
-          onTap: onToolGear,
-          semanticLabel: 'כלי מקלדת',
-        ),
       ],
     );
+  }
+}
+
+/// The MIDDLE of the [_ToolStrip]: the merged input + prediction row. The
+/// separate search field was removed (owner mobile redesign) — the typed query
+/// shows HERE (RTL, plain inked text + a brand caret) with the prediction chips
+/// after it. When there is NO text AND NO chips it shows a faint hint instead of
+/// an empty chip row (owner: "חיזוי ריק — הסתר; הקלדה בחיזוי בלבד").
+class _StripInput extends StatelessWidget {
+  final String typedText;
+  final List<String> predictions;
+  final Set<String> destinationChips;
+  final ValueChanged<String>? onPrediction;
+  final double gap;
+
+  const _StripInput({
+    required this.typedText,
+    required this.predictions,
+    required this.destinationChips,
+    required this.onPrediction,
+    required this.gap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final KbCellMetrics m = BsKbScale.of(context);
+    final bool hasText = typedText.isNotEmpty;
+    final bool hasChips = predictions.isNotEmpty;
+
+    // EMPTY (no text, no chips): a faint hint at the row height — NOT an empty
+    // chip row. This is the owner's "hide the empty prediction row".
+    if (!hasText && !hasChips) {
+      return Container(
+        alignment: Alignment.centerRight,
+        constraints: BoxConstraints(minHeight: m.cellHeight),
+        padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
+        child: Text(
+          'מה לחפש?',
+          textDirection: TextDirection.rtl,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: m.fontSize,
+            color: BsTokens.inkLight.withValues(alpha: 0.45),
+          ),
+        ),
+      );
+    }
+
+    final children = <Widget>[];
+    // The typed query (RTL) + a brand caret — the "input", as plain inked text
+    // (distinct from the boxed chips). Flexible so it ellipsizes, never overflows.
+    if (hasText) {
+      children.add(
+        Flexible(
+          child: Container(
+            alignment: Alignment.centerRight,
+            constraints: BoxConstraints(minHeight: m.cellHeight),
+            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
+            child: Text.rich(
+              TextSpan(
+                children: <InlineSpan>[
+                  TextSpan(text: typedText),
+                  const TextSpan(
+                    text: '|',
+                    style: TextStyle(color: BsTokens.brand),
+                  ),
+                ],
+              ),
+              textDirection: TextDirection.rtl,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: m.fontSize,
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    // The prediction chips fill the remaining width (each Expanded), as before.
+    for (var i = 0; i < predictions.length; i++) {
+      if (children.isNotEmpty) children.add(SizedBox(width: gap));
+      children.add(
+        Expanded(
+          child: _PredictionChip(
+            text: predictions[i],
+            isDestination: destinationChips.contains(predictions[i]),
+            onTap: () => onPrediction?.call(predictions[i]),
+          ),
+        ),
+      );
+    }
+    return Row(children: children);
   }
 }
 
@@ -556,6 +783,7 @@ class _StripToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color fill = active ? BsTokens.brand : Colors.white;
     final Color fg = active ? bsOnAccent(context) : BsTokens.inkLight;
+    final KbCellMetrics m = BsKbScale.of(context);
     return Material(
       color: fill,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
@@ -567,12 +795,13 @@ class _StripToggle extends StatelessWidget {
           selected: active,
           label: semanticLabel,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+            constraints:
+                BoxConstraints(minHeight: m.cellHeight, minWidth: m.cellHeight),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
               border: active ? null : Border.all(color: BsTokens.divider),
             ),
-            child: Icon(icon, size: BsTokens.dialIconSize, color: fg),
+            child: Icon(icon, size: m.iconSize, color: fg),
           ),
         ),
       ),
@@ -609,6 +838,7 @@ class _PredictionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final KbCellMetrics m = BsKbScale.of(context);
     // The shared text label — identical styling in both branches, so a
     // destination chip and a word chip read the same except for the affordance.
     final label = Text(
@@ -616,9 +846,9 @@ class _PredictionChip extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        // Owner: uniform 20px text across the whole keyboard (was 15 on chips).
-        fontSize: 20,
+      style: TextStyle(
+        // Uniform with the keys; responsive (desktop 20, mobile 19 — owner spec).
+        fontSize: m.fontSize,
         color: BsTokens.inkLight,
         fontWeight: FontWeight.w500,
       ),
@@ -637,7 +867,7 @@ class _PredictionChip extends StatelessWidget {
             button: true,
             label: '$text (חיפוש)',
             child: Container(
-              constraints: const BoxConstraints(minHeight: 44),
+              constraints: BoxConstraints(minHeight: m.cellHeight),
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
               decoration: BoxDecoration(
@@ -665,7 +895,7 @@ class _PredictionChip extends StatelessWidget {
           button: true,
           label: '$text (ניווט)',
           child: Container(
-            constraints: const BoxConstraints(minHeight: 44),
+            constraints: BoxConstraints(minHeight: m.cellHeight),
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
             decoration: BoxDecoration(
@@ -707,6 +937,11 @@ class _ToolTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final KbCellMetrics m = BsKbScale.of(context);
+    // Vertical padding shrinks on mobile so the tile sits at the responsive
+    // cellHeight (30) instead of growing past it; desktop keeps space2 (the
+    // minHeight 44 dominates either way there, so desktop is byte-identical).
+    final double vpad = m.cellHeight >= 44 ? BsTokens.space2 : BsTokens.spaceHair;
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
@@ -717,9 +952,9 @@ class _ToolTile extends StatelessWidget {
           button: true,
           label: label,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 44),
-            padding: const EdgeInsets.symmetric(
-              vertical: BsTokens.space2,
+            constraints: BoxConstraints(minHeight: m.cellHeight),
+            padding: EdgeInsets.symmetric(
+              vertical: vpad,
               horizontal: BsTokens.space1,
             ),
             decoration: BoxDecoration(
@@ -733,7 +968,7 @@ class _ToolTile extends StatelessWidget {
               textDirection: TextDirection.rtl,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(icon, size: BsTokens.dialIconSize, color: BsTokens.inkLight),
+                Icon(icon, size: m.iconSize, color: BsTokens.inkLight),
                 const SizedBox(width: BsTokens.space1),
                 Flexible(
                   child: Text(
@@ -741,8 +976,8 @@ class _ToolTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.start,
-                    style: const TextStyle(
-                      fontSize: 20,
+                    style: TextStyle(
+                      fontSize: m.fontSize,
                       color: BsTokens.inkLight,
                       fontWeight: FontWeight.w500,
                     ),
@@ -768,6 +1003,8 @@ class _BackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final KbCellMetrics m = BsKbScale.of(context);
+    final double vpad = m.cellHeight >= 44 ? BsTokens.space2 : BsTokens.spaceHair;
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
@@ -778,9 +1015,9 @@ class _BackTile extends StatelessWidget {
           button: true,
           label: 'חזרה',
           child: Container(
-            constraints: const BoxConstraints(minHeight: 44),
-            padding: const EdgeInsets.symmetric(
-              vertical: BsTokens.space2,
+            constraints: BoxConstraints(minHeight: m.cellHeight),
+            padding: EdgeInsets.symmetric(
+              vertical: vpad,
               horizontal: BsTokens.space1,
             ),
             decoration: BoxDecoration(
@@ -793,18 +1030,18 @@ class _BackTile extends StatelessWidget {
               children: <Widget>[
                 Icon(
                   Icons.arrow_back,
-                  size: BsTokens.dialIconSize,
+                  size: m.iconSize,
                   color: BsTokens.brand,
                 ),
                 const SizedBox(width: BsTokens.space1),
-                const Flexible(
+                Flexible(
                   child: Text(
                     'חזרה',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.start,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: m.fontSize,
                       color: BsTokens.brand,
                       fontWeight: FontWeight.w500,
                     ),

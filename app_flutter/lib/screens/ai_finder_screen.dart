@@ -14,6 +14,7 @@
 // OFF → an honest "requires connection" state; the demo/test build is unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/fuzzy_search.dart' show fuzzySearchProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
@@ -91,7 +92,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
   bool _loading = false;
   bool _failed = false;
   bool _searched = false;
-  String? _category;
+  String? _resultTitle; // the header label for the current results (fuzzy or AI)
   List<LipskeyCatalogProduct> _products = const [];
 
   @override
@@ -113,19 +114,47 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
   }
 
   Future<void> _search() async {
-    final gw = ref.read(claudeGatewayProvider);
     final text = _controller.text.trim();
     // `|| _loading` closes a stale-response race: the keyboard's onSubmitted
-    // bypasses the button's loading-disable, so without this a re-submit while a
-    // request is in flight would fire a 2nd concurrent ask whose late reply could
-    // overwrite the newer query's result.
-    if (gw == null || text.isEmpty || _loading) return;
+    // bypasses the button's loading-disable, so a re-submit while a request is in
+    // flight could fire a 2nd concurrent ask whose late reply overwrites the newer.
+    if (text.isEmpty || _loading) return;
     FocusScope.of(context).unfocus();
+
+    // 1) LITERAL first — a deterministic search over the catalog product NAMES,
+    //    which carry color/size/material/type ("צינור שחור DN40"). Fully grounded,
+    //    NO model call. This is exactly what the single-category map could not do:
+    //    a color ("שחור" → the black pipes), a size ("1\"" → all 1-inch items), or
+    //    a generic word ("ברז" → all taps) — instead of forcing ONE, often-wrong,
+    //    category (e.g. "שחור" → "נחושת").
+    final literal = fuzzySearchProducts(text);
+    if (literal.isNotEmpty) {
+      setState(() {
+        _loading = false;
+        _failed = false;
+        _searched = true;
+        _resultTitle = '🔎 "$text"';
+        _products = literal;
+      });
+      return;
+    }
+
+    // 2) No literal name-match → AI semantic mapping for a natural-language request
+    //    ("משהו לחבר שני צינורות") → the single best real category (closed-set).
+    final gw = ref.read(claudeGatewayProvider);
+    if (gw == null) {
+      setState(() {
+        _searched = true;
+        _resultTitle = null;
+        _products = const [];
+      });
+      return;
+    }
     setState(() {
       _loading = true;
       _failed = false;
       _searched = true;
-      _category = null;
+      _resultTitle = null;
       _products = const [];
     });
     try {
@@ -137,16 +166,18 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
       final cat = matchCategory(r.text); // closed-set validation
       if (mounted) {
         setState(() {
-          _category = cat;
+          _resultTitle = cat == null ? null : '📂 $cat';
           _products = cat == null ? const [] : productsInCategory(cat);
           _loading = false;
         });
       }
     } catch (_) {
-      if (mounted) setState(() {
-        _failed = true;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -217,23 +248,23 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       const Text('משהו השתבש — נסה שוב.',
                           style:
                               TextStyle(color: BsTokens.danger, fontSize: 14))
-                    else if (_category != null) ...[
-                      Text('📂 ${_category!}  ·  ${_products.length} מוצרים',
+                    else if (_resultTitle != null) ...[
+                      Text('${_resultTitle!}  ·  ${_products.length} מוצרים',
                           style: const TextStyle(
                               color: BsTokens.inkLight,
                               fontSize: 15,
                               fontWeight: FontWeight.w800)),
                       const SizedBox(height: BsTokens.space2),
                     ] else if (_searched)
-                      const Text('לא זוהתה קטגוריה מתאימה — נסה לתאר אחרת.',
+                      const Text('לא נמצאו תוצאות — נסה מילים אחרות.',
                           style: TextStyle(
                               color: BsTokens.mutedLight, fontSize: 14)),
                   ],
                 ]),
               ),
             ),
-            // The category's products — lazy, only when a category resolved.
-            if (aiAvailable && !_loading && !_failed && _category != null)
+            // The result products — lazy, only when a search produced results.
+            if (aiAvailable && !_loading && !_failed && _resultTitle != null)
               SliverPadding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: BsTokens.space4),
@@ -248,8 +279,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                           style: const TextStyle(
                               color: BsTokens.inkLight, fontSize: 14)),
                       trailing: const Icon(Icons.chevron_left, size: 18),
-                      onTap: () => showLipskeyProductSheet(
-                          context, p, productsInCategory(_category!)),
+                      onTap: () => showLipskeyProductSheet(context, p, _products),
                     );
                   },
                 ),
