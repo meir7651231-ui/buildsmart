@@ -897,9 +897,26 @@ List<({String code, String scope})> israeliStandardsFor(
 /// derived purely from its verified-spec end types (thread → wrench+teflon,
 /// compression → adjustable wrench, press → press tool + cutter, drain → saw +
 /// solvent). De-duplicated and order-stable. Empty when [p] has no spec.
+/// Wall-mounted auxiliaries (pipe clamps / hangers / grab bars) have NO water-
+/// path connection, so they carry no verified spec — but they DO have real
+/// mounting tools and steps. Surfacing those by category gives their card honest
+/// install guidance (and lifts their install-readiness chip) without ever
+/// implying a false plumbing connection. NOT consumed by the install-studio
+/// routing engine (which uses verified specs), so no false mate can result.
+const kMountAuxCats = {'חבקי תליה', 'חבקי צינור', 'ידיות אחיזה'};
+
 List<String> installToolsFor(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) return const [];
+  if (spec == null) {
+    if (kMountAuxCats.contains(p.categoryHe)) {
+      return const [
+        '🔩 מקדחה + מקדח לקיר',
+        '🔩 דיבל + בורג מתאים',
+        '📏 פלס / סימון',
+      ];
+    }
+    return const [];
+  }
   final tools = <String>[];
   final seen = <String>{};
   void add(String t) {
@@ -993,7 +1010,15 @@ List<String> installToolsFor(LipskeyCatalogProduct p) {
 /// and material. De-duplicated, order-stable, empty without a spec.
 List<String> installTipsFor(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) return const [];
+  if (spec == null) {
+    if (kMountAuxCats.contains(p.categoryHe)) {
+      return const [
+        '📏 סמן את גובה/מרווח הקיבוע לפי קוטר הצינור',
+        '🔩 קדח, הכנס דיבל וקבע — ודא עיגון יציב בקיר',
+      ];
+    }
+    return const [];
+  }
   final tips = <String>[];
   final seen = <String>{};
   void add(String t) {
@@ -1334,6 +1359,32 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
       ? 'מצוין'
       : (score >= 55 ? 'טוב' : (score >= 30 ? 'בסיסי' : 'חלקי'));
   return (score: score, label: label, breadth: breadth, depth: depth);
+}
+
+/// Pure CATALOG-DATA completeness (0..100) — how full a product's *listing* is,
+/// using ONLY spec-free signals (dims richness, image, price, pack/pallet qty,
+/// variant family, finder). It deliberately does NOT look at kVerifiedSpecs or
+/// connectivity, so a richly-documented part that genuinely does NOT join the
+/// water system (a pipe clamp, grab bar, toilet seat, grate) reads HIGH here —
+/// the honest counterpart to its low install-readiness ([cardReadinessScore]).
+/// This is why the card shows TWO chips: "שלמות נתונים" (this) answers "is the
+/// listing complete?", while "מוכנות התקנה" answers "can I plumb with it?".
+/// Same 80/55/30 band fences/labels so both chips read consistently.
+({int score, String label}) dataCompletenessScore(LipskeyCatalogProduct p) {
+  final dims = p.dims?.length ?? 0;
+  var s = 0;
+  // Dimensional spec depth — the richest catalog signal.
+  s += dims >= 8 ? 40 : (dims >= 4 ? 30 : (dims >= 1 ? 18 : 0));
+  if ((p.imageFile ?? p.specImageFile) != null) s += 15; // has a product image
+  if (priceFor(p) != null) s += 12; // priced
+  if (p.qtyPack != null || p.qtyPallet != null) s += 12; // pack/pallet qty
+  if (variantSiblingsCountFor(p) > 1) s += 11; // part of a choosable family
+  if (finderGroupFor(p) != null) s += 10; // discoverable in the finder
+  if (s > 100) s = 100;
+  final label = s >= 80
+      ? 'מצוין'
+      : (s >= 55 ? 'טוב' : (s >= 30 ? 'בסיסי' : 'חלקי'));
+  return (score: s, label: label);
 }
 
 // ─── יצרן + מק"ט יצרן (Roadmap step 20) ─────────────────────────────────────

@@ -502,29 +502,41 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
-                          // Card-data readiness score — same metric the smart
-                          // card shows (📊), surfaced here too so internal-card
-                          // products (PPR/Lipskey) display how complete their
-                          // data is. Closes the gap where PPR scored ~95 but the
-                          // badge only lived on the smart card.
+                          // Two HONEST chips instead of one conflated "ציון
+                          // נתונים": cardReadinessScore is gated on the verified
+                          // CONNECTION spec, so it really measures install/
+                          // connection readiness — a non-connecting auxiliary
+                          // (clamp/seat/grate) is correctly low. The separate
+                          // dataCompletenessScore (spec-free) vindicates a part
+                          // whose LISTING is complete even when it never plumbs.
                           const SizedBox(height: 6),
                           Builder(builder: (_) {
                             final s = cardReadinessScore(p);
                             final c = scoreBandColors(s.score);
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: c.bg,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: c.border),
-                              ),
-                              child: Text('📊 ציון נתונים ${s.score} · ${s.label}',
-                                  style: TextStyle(
-                                      color: c.fg,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700)),
-                            );
+                            final d = dataCompletenessScore(p);
+                            final dc = scoreBandColors(d.score);
+                            Widget chip(
+                                    ScoreBandColors col, String text) =>
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: col.bg,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: col.border),
+                                  ),
+                                  child: Text(text,
+                                      style: TextStyle(
+                                          color: col.fg,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700)),
+                                );
+                            return Wrap(spacing: 6, runSpacing: 6, children: [
+                              chip(dc,
+                                  '📋 שלמות נתונים ${d.score}% · ${d.label}'),
+                              chip(c,
+                                  '🔧 מוכנות התקנה ${s.score} · ${s.label}'),
+                            ]);
                           }),
                           const SizedBox(height: 8),
                           _InteractiveChips(

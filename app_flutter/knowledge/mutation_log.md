@@ -1295,3 +1295,9 @@
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `273089` dims['מידה']='2"'; `116180` color='אפור'.
 - **mutation-verify:** baseline **+11 ירוק** → `273089` `'מידה':'2"'`→`'9"'` → **אדום `+8 -1`** ("residual inch size") → שחזור → **+11 ירוק**. analyze 0 errors. parity+product_journey(935) ירוקים.
 - **התקרה תחת R8 ≈ 80%.** ~184 הנותרים (מושבי-אסלה לפי דגם · רשתות · ערכות) חסרי-מידה-בשם באמת — 100% אמיתי=דפי-מפרט מהספק (#56). **המדד אינו מוצג ב-UI**; השינוי בכרטיס-הפנימי בלבד.
+
+## #honest-score — dataCompletenessScore + ציון דו-צירי — 2026-06-23
+- **ההלפר החדש:** `dataCompletenessScore(p)` ב-`lib/data/related_info.dart` (data/ → גייט 42/44) — ציון listing spec-FREE; + ענפי-קטגוריה ב-`installToolsFor`/`installTipsFor` ל-`kMountAuxCats` (חבקים/אומגות/ידיות).
+- **טסט-נעיצה:** `test/honest_score_test.dart` — ערכה(186466) מוכנות<30 + שלמות≥55; רקורד(77381040) שניהם גבוה; חבק(77006080/77775289) install-tools לא-ריק + `compatibleProductsCount==0` (low-is-correct נעול).
+- **mutation-verify:** baseline **+5 ירוק** → הזרקתי `return (score:0,label:'חלקי')` בראש `dataCompletenessScore` (`// MUTATION`) → טסט **אדום `+0 -1`** ("listing NOT slandered" — שלמות צנחה מתחת 55) → שחזור → **+5 ירוק**, 0 שארית. analyze 0.
+- **בטיחות:** קוראי-`installToolsFor` = ציון + תצוגת-כרטיס בלבד (אומת ב-grep) → אין mate-שגוי במנוע-הניתוב. card_score+polyroll_score+lipskey_score+external_card_score+line_score+parity+product_journey(935) ירוקים.

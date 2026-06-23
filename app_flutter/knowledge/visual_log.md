@@ -1632,3 +1632,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **תיקון-רינדור:** `_SpecRow` — ערך-מפרט ארוך (מידות/תיאור) היה גולש מימין (`Text` אחרי `Spacer`). תוקן ל-`Flexible(label)` + `Expanded(Text(value, textAlign:end))` — ערך ארוך **נגלל לשורה שנייה**, ערך קצר נשאר מיושר-ימין זהה.
 **אימות (אוטומטי, לא צילום):** `product_journey_test` → "HARD · all 935 sheets render at large text + narrow phone" **ירוק** — כל 935 הכרטיסים, כולל מוצרי-בית עם מידות-ארוכות, מרונדרים **ללא overflow** בפלאפון-צר+טקסט-גדול. זה האימות-הויזואלי המחמיר ביותר (הסביבה שגרמה ל-overflow לפני התיקון).
 **הפיכות:** `git checkout lib/screens/lipskey_product_sheet.dart` (מחזיר Spacer+Text) + שחזור `lipskey_catalog.dart` — חוזר לטבלה הדלילה.
+
+## v6.59 — שני שבבי-ציון כנים בכרטיס המוצר (במקום "ציון נתונים" המטעה)
+**שינוי:** מתחת לשם-המוצר, במקום שבב יחיד "📊 ציון נתונים N · label" — עכשיו `Wrap` של **שני שבבים**: "📋 שלמות נתונים X% · label" (שלמות-listing, spec-free) + "🔧 מוכנות התקנה N · label" (מוכנות-חיבור). כל שבב בצבע-band משלו (`scoreBandColors`).
+**למה:** השבב הישן נקרא "נתונים" אך מדד מוכנות-חיבור → אביזר שלא-מתחבר (חבק/ערכה/מושב) נראה כ"דאטה גרועה" 25 למרות listing מלא. השבב החדש מזכה אותו (ערכה: שלמות 67% · מוכנות 23).
+**אימות (אוטומטי, לא צילום):** `product_journey_test` → "HARD · all 935 sheets render at large text + narrow phone" **ירוק** — שני-השבבים ב-`Wrap(spacing:6,runSpacing:6)` נכנסים/נשברים-לשורה בלי overflow גם בפלאפון-צר+טקסט-גדול.
+**הפיכות:** `git checkout lib/screens/lipskey_product_sheet.dart lib/data/related_info.dart` — חוזר לשבב-יחיד.
