@@ -7,7 +7,7 @@
 // (it needs the flag seeded + a tap harness).
 
 import 'package:buildsmart/features/card_keyboard/card_engine.dart'
-    show CardAskWords;
+    show CardAskWords, MergedKeys;
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:flutter/material.dart';
@@ -69,5 +69,21 @@ void main() {
         reason: 'tapping a word pushes the first dive step');
     expect(state.verdict, isNot(isA<CardAskWords>()),
         reason: 'the dive moved off the opening word question');
+
+    // If the dive landed on the merged row, tap the first merged chip → it must
+    // decode the 'chip|axisId|displayLabel|value' payload, push a step, and add
+    // the chip's VISIBLE displayLabel as the crumb (swarm R2 FIX C: the crumb is
+    // displayLabel, never the predicate value).
+    final afterWord = state.verdict;
+    if (afterWord is MergedKeys && afterWord.chips.isNotEmpty) {
+      final chip = afterWord.chips.first;
+      final crumbsBefore = (state.crumbs as List).length;
+      await tester.tap(find.text(chip.displayLabel).first);
+      await tester.pumpAndSettle();
+      expect((state.crumbs as List).length, crumbsBefore + 1,
+          reason: 'tapping a merged chip pushes a step');
+      expect((state.crumbs as List).last, chip.displayLabel,
+          reason: 'crumb is the chip displayLabel, never the predicate value');
+    }
   });
 }

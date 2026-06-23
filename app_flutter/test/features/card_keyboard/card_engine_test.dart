@@ -6,6 +6,8 @@
 // Phase 0, so a large pool falls to the convergence floor ([CardShowProducts]) —
 // that expectation flips to [MergedKeys] in Phase 2.
 
+import 'dart:math' show Random;
+
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
@@ -87,26 +89,31 @@ void main() {
       }
     });
 
-    test('axis ranking is deterministic under input shuffle (stable axes)', () {
-      // Answer the WORD axis — wordOptions' equal-count tie-break is the only
-      // order-sensitive helper; the remaining axes (size/angle/colour/material)
-      // sort deterministically, so the merged row is byte-identical whether the
-      // pool is in natural or REVERSED order — proving the INTEGER comparator
-      // (not a float) drives the ranking (no ULP near-ties).
+    test('merged row is byte-stable under ARBITRARY pool shuffle (incl. word)',
+        () {
+      // The merged row must be identical regardless of pool order. The axis
+      // RANKING is order-free (integer cross-multiply over set-counts); the WORD
+      // axis — wordOptions' equal-count tie-break, the one order-sensitive helper
+      // — is now canonicalised by WordSignal.chipsFor (sku-sort), so the
+      // guarantee is TOTAL, not just under reversal (swarm R2). Answer SIZE so the
+      // WORD axis surfaces in the row, then drive several SEEDED shuffles.
       final s = NewbieStep(
-        axisLabel: 'דגם',
+        axisLabel: 'גודל',
         chipLabel: 'x',
         predicate: (_) => true,
         crumbWord: 'x',
       );
-      final a = mergedKeys(kDivePool, [s], lexicon, null);
-      final b = mergedKeys(kDivePool.reversed.toList(), [s], lexicon, null);
-      expect(a, isA<MergedKeys>());
-      expect(b, isA<MergedKeys>());
-      String key(MergedKeys m) =>
-          m.chips.map((c) => '${c.axisId}:${c.value}').join('|');
-      expect(key(b as MergedKeys), key(a as MergedKeys),
-          reason: 'byte-stable merged row under pool reversal');
+      String key(CardVerdict v) => v is MergedKeys
+          ? v.chips.map((c) => '${c.axisId}:${c.value}').join('|')
+          : v.runtimeType.toString();
+      final base = mergedKeys(kDivePool, [s], lexicon, null);
+      expect(base, isA<MergedKeys>());
+      final want = key(base);
+      for (final seed in [1, 7, 42, 99, 1234]) {
+        final shuffled = [...kDivePool]..shuffle(Random(seed));
+        expect(key(mergedKeys(shuffled, [s], lexicon, null)), want,
+            reason: 'byte-stable merged row under shuffle seed=$seed');
+      }
     });
 
     test('single product never throws', () {

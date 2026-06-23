@@ -209,7 +209,10 @@ class _AxisScore {
 /// realising Phase 3 will mean giving each [SignalChip] a computed per-chip
 /// weight and replacing the per-axis positional take with a per-axis scored
 /// top-K — a restructure of this loop, not just populating [SignalChip.infoGain]
-/// (today always 0). Until then chip order within an axis is the live helper's.
+/// (today always 0). Chip order within an axis is the live helper's; the word
+/// axis (the one helper with a pool-order-sensitive tie-break) is made
+/// order-independent by [WordSignal.chipsFor]'s canonical sku-sort (swarm R2),
+/// so the byte-stable-under-shuffle guarantee above is TOTAL, not just the rank.
 ///
 /// Returns empty when no unanswered axis can split the pool — [mergedKeys] then
 /// falls to the convergence floor ([CardShowProducts]).
@@ -284,9 +287,10 @@ List<SignalChip> _mergedChips(
 /// the first [count]. For a dense, magnitude-ordered axis (size, ascending mm)
 /// this surfaces the smallest AND the largest (and a spread between), never
 /// front-truncating away the big sizes (build-plan §1.4 #11). Both endpoints are
-/// always included; duplicate rounded indices are de-duplicated, so the result
-/// may be slightly shorter than [count] in degenerate cases but never longer,
-/// and never fewer than 2 when [chips] has ≥ 2 (the endpoints differ). Returns
+/// always included. In the regime the loop runs (count ≥ 2 AND chips.length >
+/// count) the rounded indices are strictly increasing, so the result is EXACTLY
+/// [count] and the dedup Set is a defensive no-op (swarm R2 — never longer, and
+/// never fewer than 2 when [chips] has ≥ 2, the endpoints differ). Returns
 /// [chips] unchanged when it already fits in [count]. PURE & deterministic.
 List<SignalChip> representativeTake(List<SignalChip> chips, int count) {
   if (count <= 1 || chips.length <= count) return chips.take(count).toList();

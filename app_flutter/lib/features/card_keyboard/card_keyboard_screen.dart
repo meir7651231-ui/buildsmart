@@ -83,20 +83,35 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   @visibleForTesting
   bool openSheetOnResolve = true;
 
-  /// The live pool: base products that satisfy EVERY answered step's predicate.
-  List<LipskeyCatalogProduct> get _pool {
+  /// Monotonic dive version — bumped on EVERY stack mutation (push/pop/restart),
+  /// so it changes in lockstep with the dive and (unlike stack.length) stays
+  /// unique even across a pop-then-different-push. The memo key.
+  int _diveVersion = 0;
+  int _memoVersion = -1;
+  late CardVerdict _memoVerdict;
+
+  /// Compute the pool + verdict ONCE per dive version (swarm R2 / build-plan §1.6:
+  /// the O(pool × chips × distinctCardCount) merge is the module's most expensive
+  /// op and must run once per keystroke, not the 2-3× a naive getter caused).
+  /// Both [verdict] and [build] read the memo, so a tap recomputes exactly once.
+  void _ensureMemo() {
+    if (_memoVersion == _diveVersion) return;
     var pool = kDivePool;
     for (final step in stack) {
       pool = pool.where(step.predicate).toList();
     }
-    return pool;
+    _memoVerdict = mergedKeys(pool, stack, cardKeyboardLexicon, widget.subtype);
+    _memoVersion = _diveVersion;
   }
 
   /// @visibleForTesting — the engine's verdict for the CURRENT state (the same
-  /// value [build] switches on, so a test asserts on it directly).
+  /// value [build] switches on, so a test asserts on it directly). MEMOIZED per
+  /// dive version, so repeated reads within one frame are O(1).
   @visibleForTesting
-  CardVerdict get verdict =>
-      mergedKeys(_pool, stack, cardKeyboardLexicon, widget.subtype);
+  CardVerdict get verdict {
+    _ensureMemo();
+    return _memoVerdict;
+  }
 
   /// @visibleForTesting — the answered breadcrumb words, in order.
   @visibleForTesting
@@ -124,7 +139,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// Push an answered step, recompute, and — if the engine now RESOLVEs — open
   /// the reach-product sheet (the flow's terminus, Phase 5).
   void _pushStep(NewbieStep step) {
-    setState(() => stack.add(step));
+    setState(() {
+      stack.add(step);
+      _diveVersion++;
+    });
     final v = verdict;
     if (v is CardResolve && openSheetOnResolve) {
       showLipskeyProductSheet(context, v.product, v.siblings);
@@ -134,12 +152,18 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// Pop the last answered step (the back affordance). A no-op on an empty stack.
   void _popStep() {
     if (stack.isEmpty) return;
-    setState(stack.removeLast);
+    setState(() {
+      stack.removeLast();
+      _diveVersion++;
+    });
   }
 
   /// Clear the whole dive back to the opening — the empty-state's restart (swarm
   /// R1: an over-narrowed pool must not dead-end with a bare header).
-  void _restart() => setState(stack.clear);
+  void _restart() => setState(() {
+        stack.clear();
+        _diveVersion++;
+      });
 
   /// @visibleForTesting — drive [_popStep] directly (the back control is hidden
   /// at an empty stack, so a "pop at empty is a safe no-op" test needs this).
@@ -158,7 +182,14 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
           ],
         MergedKeys(:final chips) => [
             for (final c in chips)
-              WordKey(c.displayLabel, payload: 'chip|${c.axisId}|${c.value}'),
+              // Carry displayLabel in the payload (swarm R2): the VISIBLE crumb
+              // must ALWAYS be displayLabel, never value — so when size folding
+              // lands (value='DN15', displayLabel='1/2"') the crumb stays '1/2"'.
+              // value is LAST so it may still safely contain a '|'.
+              WordKey(
+                c.displayLabel,
+                payload: 'chip|${c.axisId}|${c.displayLabel}|${c.value}',
+              ),
           ],
         CardShowProducts(:final products) => [
             for (final p in products) WordKey(quickLabel(p), payload: p.sku),
@@ -204,17 +235,21 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     if (payload is String && payload.startsWith('chip|')) {
       final parts = payload.split('|');
       final axisId = parts[1];
-      // value may (in principle) contain a '|'; re-join the remainder so the
-      // predicate keys on the exact chip value.
-      final value = parts.sublist(2).join('|');
+      final displayLabel = parts[2];
+      // value is LAST and may (in principle) contain a '|'; re-join the remainder
+      // so the predicate keys on the EXACT chip value.
+      final value = parts.sublist(3).join('|');
       final src = kHardSignals.firstWhere(
         (s) => s.axisId == axisId,
         orElse: () => const WordSignal(),
       );
       _pushStep(NewbieStep(
         axisLabel: src.axisName,
-        chipLabel: value,
-        crumbWord: value,
+        // The crumb + step label are the VISIBLE displayLabel (swarm R2), never
+        // the predicate `value` (which diverges once size folding lands); the
+        // predicate still keys on `value`.
+        chipLabel: displayLabel,
+        crumbWord: displayLabel,
         predicate: _predicateFor(axisId, value),
       ));
       return;

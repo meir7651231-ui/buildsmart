@@ -134,15 +134,25 @@ class WordSignal extends SignalSource {
   @override
   String get axisName => 'דגם';
   @override
-  List<SignalChip> chipsFor(List<LipskeyCatalogProduct> pool) => <SignalChip>[
-        for (final w in wordOptions(pool))
-          SignalChip(
-            axisId: axisId,
-            value: w,
-            displayLabel: w,
-            axisName: axisName,
-          ),
-      ];
+  List<SignalChip> chipsFor(List<LipskeyCatalogProduct> pool) {
+    // DETERMINISM (swarm R2): wordOptions' equal-count tie-break + take(12) follow
+    // the pool's iteration order (a LinkedHashMap + a non-stable sort over
+    // pool-order entries), so a re-ordered pool could yield a DIFFERENT word set.
+    // Feed it a CANONICAL (sku-sorted) pool so the word axis is order-independent
+    // like the other four — the live wordOptions is untouched and the count-desc
+    // ranking is preserved (only the equal-count tie-break is now sku-stable).
+    final canonical = [...pool]..sort((a, b) => a.sku.compareTo(b.sku));
+    return <SignalChip>[
+      for (final w in wordOptions(canonical))
+        SignalChip(
+          axisId: axisId,
+          value: w,
+          displayLabel: w,
+          axisName: axisName,
+        ),
+    ];
+  }
+
   @override
   bool matches(LipskeyCatalogProduct p, SignalChip chip) =>
       productHasChip(p, chip.value);
