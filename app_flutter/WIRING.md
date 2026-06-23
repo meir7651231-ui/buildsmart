@@ -2721,3 +2721,12 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(LOW · truncation)** `manager_copilot_screen.dart` — `_run` קיבל `{int maxTokens=420}`; `_morningBrief` מעביר `600` (תדריך-עברי ארוך, עדיין ≪ cap-שרת 2048). Q&A=420. (screens → 24/116.)
 - **נדחה (מתועד):** prompt-cache (`functions/src/claude.ts` `cache_control` — server-wide לכל-הקוראים, LOW) · fake-gateway screen-test למסלולי success/empty/catch (פער-כיסוי, אופציונלי).
 - **gate:** analyze 0 errors · `claude_gateway_test` (+maxTokens-forwarding) · `manager_copilot_test` 12 · 49 מנהל · full-suite.
+
+### #manager-copilot-r3 — אודיט-נחיל סיבוב-3: a11y/RTL + S0 ממשל (כפתור-הגדרות) — 2026-06-23
+נחיל-עדשות-שונות (RTL/overflow/a11y · numeric · Riverpod-lifecycle · wiring/governance). **Riverpod — LENS CLEAN** (disposal/mounted/read-vs-watch מלאים). **Numeric — נקי** (כל חלוקה גדורה · `revenue==Σspend` מחזיק · clamps נכונים; `money()` שלילי = אי-התאמה-קוסמטית בלתי-נגישה, תועד כלא-תקלה). תוקנו:
+- **(MED · a11y/overflow)** `manager_copilot_screen.dart` — כותרת-AppBar (Column דו-שורתי) בלי `maxLines/overflow` → גלישה-אנכית ב-textScaler גדול → `maxLines:1, overflow:ellipsis` לשתי השורות.
+- **(LOW · RTL)** `manager_copilot_screen.dart` — `_Typing` השתמש ב-`EdgeInsets.only(right:)` פיזי → `EdgeInsetsDirectional.only(start:)` (אותו מראה ב-RTL, מתהפך נכון ב-LTR).
+- **(LOW · a11y)** `manager_dashboard_screen.dart` — כותרת-AppBar בלי ellipsis → `maxLines:1, overflow:ellipsis`.
+- **(HIGH · governance S0)** `catalog_settings_screen.dart` — כפתור-ההגדרות של המנהל פתח את ה-`CatalogSettingsScreen` המשותף **כולל** שורת-הפרופיל-של-הקבלן (→ `ProfileScreen`) = דליפת-persona. תוקן: param `showProfileRow` (ברירת-מחדל `true`). 3 קוראי-קבלן (home_shell · keyboard×2) ללא-שינוי; 2 קוראי-מנהל (dashboard:194 · profile:208) מעבירים `false` → המנהל מקבל את אותו No-Code admin (תצוגה/אזור/מחירים/ספקים/AI — תחומו לפי-ממשל) **בלי** שורת-הפרופיל. זה ה-S0-step מ-`MANAGER-BUILD-PLAN.md` (שורה 18) / ממשל #84.
+- טסט: `catalog_price_units_settings_test` +2 (קבלן→מציג · מנהל→מסתיר+שומר admin) = 18 ירוק. `manager_dashboard_screen_test` 30 · `manager_copilot_screen_test` · analyze 0. screens → 24/116.
+- **נדחה ל-Phase-0 build (תועד, לא תקלת-קו-פיילוט):** עדשת-ה-wiring אישרה שעדיין-חיים — `manager_dashboard_screen.dart:2346-2375` (👷 אישורי-עובדים approve/reject) + `:2382-2395` (🏖️ חופשות worker+courier) + `vacation_requests.dart:20,282` (ניתוב-החלטה למנהל). אלה ניוד-HR רב-personas (worker→קבלן · courier→חנות) = Phase-0 בתוכנית-הבנייה (שורה 43), refactor-גדול שדורש בניית משטחי-קליטה — לא in-round patch.

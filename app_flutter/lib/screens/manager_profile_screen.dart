@@ -204,8 +204,11 @@ class _ManagerProfileBody extends ConsumerWidget {
                 ),
                 trailing:
                     const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-                onTap: () =>
-                    Navigator.of(context).push(CatalogSettingsScreen.route()),
+                onTap: () => Navigator.of(context).push(
+                  // Manager = platform-admin: same No-Code admin WITHOUT the
+                  // contractor profile row (governance S0 fix).
+                  CatalogSettingsScreen.route(showProfileRow: false),
+                ),
               ),
               const Divider(height: 1, color: Color(0xFFF0F0F0)),
               ListTile(

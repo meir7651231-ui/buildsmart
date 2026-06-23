@@ -92,6 +92,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'מרכז השליטה',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: BsTokens.inkLight,
                         fontWeight: FontWeight.w800,
@@ -101,6 +103,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                     SizedBox(height: 2),
                     Text(
                       'מנהל המערכת',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: BsTokens.mutedLight,
                         fontSize: 13,
@@ -185,9 +189,11 @@ class ManagerDashboardScreen extends ConsumerWidget {
                   color: BsTokens.mutedLight,
                 ),
                 onPressed:
-                    () => Navigator.of(
-                      context,
-                    ).push(CatalogSettingsScreen.route()),
+                    () => Navigator.of(context).push(
+                      // Manager = platform-admin: the No-Code catalog/app admin
+                      // WITHOUT the contractor profile row (governance S0 fix).
+                      CatalogSettingsScreen.route(showProfileRow: false),
+                    ),
               ),
             ),
             // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").

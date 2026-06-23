@@ -244,4 +244,43 @@ void main() {
       expect(c.read(catalogSettingsProvider).unit, CatalogUnit.imperial);
     });
   });
+
+  // ─── S0 governance fix — manager (platform-admin) opens this WITHOUT the ─────
+  //     contractor profile row (MANAGER-BUILD-PLAN.md S0 / governance #84).
+  group('S0 — manager hides the contractor profile row, keeps the No-Code admin',
+      () {
+    Future<void> pumpWith(WidgetTester t, {required bool showProfileRow}) async {
+      SharedPreferences.setMockInitialValues({});
+      await t.binding.setSurfaceSize(const Size(440, 1400));
+      addTearDown(() => t.binding.setSurfaceSize(null));
+      await t.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            locale: const Locale('he'),
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: CatalogSettingsScreen(showProfileRow: showProfileRow),
+            ),
+          ),
+        ),
+      );
+      for (var i = 0; i < 6; i++) {
+        await t.pump(const Duration(milliseconds: 80));
+      }
+    }
+
+    testWidgets('contractor (default) SHOWS "הפרופיל שלי"', (t) async {
+      await pumpWith(t, showProfileRow: true);
+      expect(find.text('הפרופיל שלי'), findsOneWidget);
+    });
+
+    testWidgets('manager (showProfileRow:false) HIDES the profile row', (t) async {
+      await pumpWith(t, showProfileRow: false);
+      expect(find.text('הפרופיל שלי'), findsNothing,
+          reason: 'a platform-admin must not land in a contractor profile (#84)');
+      // …yet the global catalog/app config the manager OWNS is still present.
+      expect(find.text('תצוגה ומיון'), findsOneWidget);
+      expect(find.text('מחירים ומטבע'), findsOneWidget);
+    });
+  });
 }

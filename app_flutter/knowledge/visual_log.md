@@ -1823,3 +1823,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי-התנהגות (lib/data/repositories/claude_functions.dart):** קריאה תקועה לשרת נכשלת-מהר אחרי 30s (`.timeout`) עם בועת "משהו השתבש בחיבור — נסה שוב עוד רגע" במקום ספינר-תלוי עד ~70s. נראה רק במצב-תקלת-רשת.
 **אימות (אוטומטי, לא צילום):** `claude_gateway_test` (חוזה-maxTokens ירוק) + `manager_copilot_screen_test` (off-state) + 49 טסטי-מנהל ירוקים · analyze 0. שינוי inert בבילד-הדמו (`claudeGatewayProvider==null`); חי על App Tester.
 **הפיכות:** `git checkout lib/screens/manager_copilot_screen.dart lib/data/repositories/claude_functions.dart` — חוזר ל-cap-420-קבוע ול-`.call` ללא-timeout.
+
+## v6.79 — קו-פיילוט ס3: a11y-כותרת + S0 ממשל (מנהל בלי שורת-פרופיל-קבלן) — 2026-06-23
+**שינוי נראה (S0 · governance):** כפתור-ההגדרות בלוח-המנהל ובפרופיל-המנהל פותח עכשיו את הגדרות-ה-No-Code **בלי** שורת "👤 הפרופיל שלי" שבראש (שהובילה לפרופיל-הקבלן). המנהל רואה את אותן קטגוריות-הגדרה גלובליות (תצוגה/התראות/אזור/חיפוש/מחירים/יחידות/ספקים/AI/נגישות/מידע) — תחומו כ-platform-admin — אך **לא** את שורת-הפרופיל-האישית. הקבלן (home/keyboard) ללא-שינוי — עדיין רואה אותה.
+**שינוי נראה (a11y):** כותרות-ה-AppBar בקו-פיילוט (דו-שורתי) ובלוח-המנהל קיבלו `maxLines:1 + ellipsis` — בטקסט-מוגדל הן נחתכות-בנקודותיים במקום לגלוש מחוץ ל-toolbar. `_Typing` עבר ל-`EdgeInsetsDirectional` (אפס שינוי-מראה ב-RTL).
+**אימות (אוטומטי, לא צילום):** `catalog_price_units_settings_test` +2 (קבלן מציג "הפרופיל שלי" · מנהל מסתיר אותו ושומר 'תצוגה ומיון'+'מחירים ומטבע') = 18 ירוק · `manager_dashboard_screen_test` 30 ירוק (כותרת-AppBar עדיין מרונדרת) · analyze 0.
+**הפיכות:** `git checkout lib/screens/catalog_settings_screen.dart lib/screens/manager_dashboard_screen.dart lib/screens/manager_profile_screen.dart lib/screens/manager_copilot_screen.dart` — מחזיר את שורת-הפרופיל לכולם + כותרות בלי-ellipsis.

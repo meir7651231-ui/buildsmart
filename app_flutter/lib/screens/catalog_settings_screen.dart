@@ -15,10 +15,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Full-screen Catalog settings — 9 categories, ~40 leaves.
 /// All 23 fields persisted via [catalogSettingsProvider].
 class CatalogSettingsScreen extends ConsumerWidget {
-  const CatalogSettingsScreen({super.key});
+  const CatalogSettingsScreen({super.key, this.showProfileRow = true});
 
-  static Route<void> route() =>
-      MaterialPageRoute<void>(builder: (_) => const CatalogSettingsScreen());
+  /// Whether to show the personal "הפרופיל שלי" row (→ contractor [ProfileScreen]).
+  /// Contractors see it (default true); the MANAGER opens the SAME No-Code
+  /// catalog/app admin WITHOUT it — a platform-admin must not land in a
+  /// contractor's profile context (governance #84: manager ≠ a contractor
+  /// persona). The S0 settings-button fix from MANAGER-BUILD-PLAN.md.
+  final bool showProfileRow;
+
+  static Route<void> route({bool showProfileRow = true}) =>
+      MaterialPageRoute<void>(
+        builder: (_) => CatalogSettingsScreen(showProfileRow: showProfileRow),
+      );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,19 +54,22 @@ class CatalogSettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        children: const [
-          _ProfileRow(),
-          _ThemeSection(),
-          _NotificationsSection(),
-          _RegionSection(),
-          _SearchSection(),
-          _PricesSection(),
-          _UnitsSection(),
-          _SuppliersSection(),
-          _AiSection(),
-          _AccessibilitySection(),
-          _InfoSection(),
-          SizedBox(height: 24),
+        children: [
+          // Personal profile row — hidden for the manager (platform-admin),
+          // shown for contractors (default). The rest is global No-Code config
+          // the manager legitimately owns (theme/region/prices/suppliers/AI/…).
+          if (showProfileRow) const _ProfileRow(),
+          const _ThemeSection(),
+          const _NotificationsSection(),
+          const _RegionSection(),
+          const _SearchSection(),
+          const _PricesSection(),
+          const _UnitsSection(),
+          const _SuppliersSection(),
+          const _AiSection(),
+          const _AccessibilitySection(),
+          const _InfoSection(),
+          const SizedBox(height: 24),
         ],
       ),
     );

@@ -132,12 +132,18 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // maxLines+ellipsis: at large text-scale a 2-line title can exceed
+              // the toolbar height → clip/overflow; cap each line to one row.
               Text('🤖 קו-פיילוט',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       color: BsTokens.inkLight,
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
               Text('שאל את העסק שלך',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
             ],
           ),
@@ -267,7 +273,10 @@ class _Typing extends StatelessWidget {
   Widget build(BuildContext context) => const Align(
         alignment: Alignment.centerLeft,
         child: Padding(
-          padding: EdgeInsets.only(bottom: BsTokens.space3, right: BsTokens.space3),
+          // Directional: the typing dots sit on the assistant (leading) side —
+          // `start` keeps the same visual inset under RTL and also flips for LTR.
+          padding: EdgeInsetsDirectional.only(
+              bottom: BsTokens.space3, start: BsTokens.space3),
           child: SizedBox(
               width: 22,
               height: 22,
