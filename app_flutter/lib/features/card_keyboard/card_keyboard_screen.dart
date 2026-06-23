@@ -41,6 +41,40 @@ final WordLexicon cardKeyboardLexicon = buildWordLexicon(kDivePool);
 /// OWNER-REVIEW.
 const String kCardMergedQuestion = 'מה מתאים?';
 
+/// Typed tap payload (swarm R6): each [WordKey] carries a [_Tap] so the handler
+/// dispatches by TYPE. This replaces the earlier `'chip|axisId|displayLabel|value'`
+/// magic-string payload, which (a) was not pipe-safe — a `|` in the middle
+/// displayLabel field corrupted the decode — and (b) shared the String slot with
+/// the product sku, so a sku reading 'word' or starting 'chip|' could mis-route.
+/// A typed payload makes mis-routing impossible by construction.
+sealed class _Tap {
+  const _Tap();
+}
+
+/// An opening word → seed the pool with the products it names.
+class _WordTap extends _Tap {
+  const _WordTap(this.word);
+  final String word;
+}
+
+/// A merged chip → narrow by (axisId, value); the crumb shows displayLabel.
+class _ChipTap extends _Tap {
+  const _ChipTap({
+    required this.axisId,
+    required this.value,
+    required this.displayLabel,
+  });
+  final String axisId;
+  final String value;
+  final String displayLabel;
+}
+
+/// A product key → resolve by sku and open the reach-product sheet.
+class _ProductTap extends _Tap {
+  const _ProductTap(this.sku);
+  final String sku;
+}
+
 /// The flag-gated unified card-keyboard screen. Holds the answered-step [stack];
 /// everything else (what to show, what a tap means) is the pure engine's job.
 class CardKeyboardScreen extends ConsumerStatefulWidget {
@@ -113,6 +147,16 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     return _memoVerdict;
   }
 
+  @override
+  void didUpdateWidget(CardKeyboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The memo is keyed on _diveVersion (bumped by stack mutations); widget.subtype
+    // ALSO feeds mergedKeys, so a parent that rebuilds the screen with a DIFFERENT
+    // subtype must invalidate the memo too — else the next verdict read is stale
+    // (swarm R6). Bump the version on a subtype change.
+    if (widget.subtype != oldWidget.subtype) _diveVersion++;
+  }
+
   /// @visibleForTesting — the answered breadcrumb words, in order.
   @visibleForTesting
   List<String> get crumbs => [for (final s in stack) s.crumbWord];
@@ -178,21 +222,24 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   ///  • [CardResolve]     → no keys (the sheet is opened on resolve).
   List<WordKey> _keysFor(CardVerdict v) => switch (v) {
         CardAskWords(:final words) => [
-            for (final e in words) WordKey(e.word, payload: 'word'),
+            for (final e in words) WordKey(e.word, payload: _WordTap(e.word)),
           ],
         MergedKeys(:final chips) => [
             for (final c in chips)
-              // Carry displayLabel in the payload (swarm R2): the VISIBLE crumb
-              // must ALWAYS be displayLabel, never value — so when size folding
-              // lands (value='DN15', displayLabel='1/2"') the crumb stays '1/2"'.
-              // value is LAST so it may still safely contain a '|'.
+              // The crumb shows displayLabel (swarm R2), the predicate keys on
+              // value — both carried as typed fields (swarm R6: no '|'-packing).
               WordKey(
                 c.displayLabel,
-                payload: 'chip|${c.axisId}|${c.displayLabel}|${c.value}',
+                payload: _ChipTap(
+                  axisId: c.axisId,
+                  value: c.value,
+                  displayLabel: c.displayLabel,
+                ),
               ),
           ],
         CardShowProducts(:final products) => [
-            for (final p in products) WordKey(quickLabel(p), payload: p.sku),
+            for (final p in products)
+              WordKey(quickLabel(p), payload: _ProductTap(p.sku)),
           ],
         CardResolve() => const <WordKey>[],
       };
@@ -205,63 +252,55 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         CardResolve() => '',
       };
 
-  /// Handle a tapped word key, dispatched by its [WordKey.payload]:
-  ///  • `'word'`        — seed the pool with the products the word names;
-  ///  • `'chip|axis|v'` — narrow by the tapped merged chip (rebuild the predicate
-  ///    from the axisId+value data);
-  ///  • otherwise       — a PRODUCT key whose payload is the product's sku → open
-  ///    the reach-product sheet (resolved by sku, never the non-unique label).
+  /// Handle a tapped word key, dispatched by its typed [WordKey.payload]:
+  ///  • [_WordTap]    — seed the pool with the products the word names;
+  ///  • [_ChipTap]    — narrow by the tapped merged chip (predicate rebuilt from
+  ///    its axisId+value DATA; the crumb shows displayLabel);
+  ///  • [_ProductTap] — resolve by sku and open the reach-product sheet.
   void _onWordTap(WordKey key) {
     final payload = key.payload;
 
-    if (payload == 'word') {
+    if (payload is _WordTap) {
       final skuSet = <String>{
-        for (final p in resolveWord(key.label, cardKeyboardLexicon)) p.sku,
+        for (final p in resolveWord(payload.word, cardKeyboardLexicon)) p.sku,
       };
       _pushStep(NewbieStep(
         // EXPLICIT coupling (swarm R1): the word axis's answered-label is the
-        // WordSignal's own axisName — not a magic 'דגם' string — so the merge's
-        // answered-axis exclusion (axisName ∈ stack.axisLabels) matches the word
-        // axis BY CONSTRUCTION, and a rename of WordSignal.axisName can't silently
-        // break "ask each axis at most once".
+        // WordSignal's own axisName, so the merge's answered-axis exclusion
+        // matches the word axis BY CONSTRUCTION (no magic 'דגם' string).
         axisLabel: const WordSignal().axisName,
-        chipLabel: key.label,
-        crumbWord: key.label,
+        chipLabel: payload.word,
+        crumbWord: payload.word,
         predicate: (p) => skuSet.contains(p.sku),
       ));
       return;
     }
 
-    if (payload is String && payload.startsWith('chip|')) {
-      final parts = payload.split('|');
-      final axisId = parts[1];
-      final displayLabel = parts[2];
-      // value is LAST and may (in principle) contain a '|'; re-join the remainder
-      // so the predicate keys on the EXACT chip value.
-      final value = parts.sublist(3).join('|');
+    if (payload is _ChipTap) {
       final src = kHardSignals.firstWhere(
-        (s) => s.axisId == axisId,
+        (s) => s.axisId == payload.axisId,
         orElse: () => const WordSignal(),
       );
       _pushStep(NewbieStep(
         axisLabel: src.axisName,
         // The crumb + step label are the VISIBLE displayLabel (swarm R2), never
-        // the predicate `value` (which diverges once size folding lands); the
-        // predicate still keys on `value`.
-        chipLabel: displayLabel,
-        crumbWord: displayLabel,
-        predicate: _predicateFor(axisId, value),
+        // the predicate `value` (which diverges once size folding lands).
+        chipLabel: payload.displayLabel,
+        crumbWord: payload.displayLabel,
+        predicate: _predicateFor(payload.axisId, payload.value),
       ));
       return;
     }
 
-    // A product key (payload = sku) → resolve within the current ShowProducts
-    // list and open the existing sheet (same sku-keyed add-path, no new route).
+    if (payload is! _ProductTap) return; // null / unknown payload — ignore.
+
+    // A product key → resolve within the current ShowProducts list and open the
+    // existing sheet (same sku-keyed add-path, no new route).
     final v = verdict;
     if (v is! CardShowProducts) return; // defensive — state moved under us
     LipskeyCatalogProduct? picked;
     for (final p in v.products) {
-      if (p.sku == payload) {
+      if (p.sku == payload.sku) {
         picked = p;
         break;
       }
