@@ -348,3 +348,24 @@ const List<SitePhotoPair> kSitePhotoPairs = [
   SitePhotoPair(area: 'מטבח — דירה 4', before: '🧱', after: '🍳'),
   SitePhotoPair(area: 'סלון — קומה 3', before: '🪵', after: '🛋️'),
 ];
+
+/// #ai-site-summary — the REAL report lines for the AI site-progress narrator,
+/// extracted from the screen so the status-string bridge (`'פתוח'`/`'טופל'` ·
+/// `'מתוכננת'`/`'בוצעה'` — a typo would silently zero a count) is unit-testable.
+/// Pure: counts derive only from the live engine lists; Claude only phrases these.
+List<String> siteSummaryReportLines(
+  List<DiaryEntry> diary,
+  List<SiteSnag> snags,
+  List<SiteInspection> inspections,
+) {
+  final openSnags = snags.where((s) => s.status == 'פתוח').length;
+  final fixedSnags = snags.where((s) => s.status == 'טופל').length;
+  final plannedInsp = inspections.where((i) => i.status == 'מתוכננת').length;
+  final doneInsp = inspections.where((i) => i.status == 'בוצעה').length;
+  return [
+    '📓 רישומי-יומן: ${diary.length}',
+    if (diary.isNotEmpty) '📅 רישום אחרון: ${diary.first.text}',
+    '🔧 ליקויים: $openSnags פתוחים · $fixedSnags טופלו',
+    '🔍 ביקורות: $plannedInsp מתוכננות · $doneInsp בוצעו',
+  ];
+}

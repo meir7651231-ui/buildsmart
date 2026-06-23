@@ -4,6 +4,19 @@
 
 ---
 
+## v6.68 — swarm-fixes גל-3 · narrate-bridge refactor (סיכום-אתר) — 2026-06-23
+
+**שינוי (lib/screens):** `site_hub_screen.dart` — `_openSiteSummary` עבר מבניית-שורות-inline לקריאה ל-helper
+טהור `siteSummaryReportLines` (חולץ ל-`site_hub_state.dart`). **רפקטור בלבד — אפס שינוי-תצוגה.**
+
+**אימות:** ה-helper מחזיר **בדיוק** את אותן שורות שהיו inline (אותו פורמט, אותם פילטרי-סטטוס) — אומת ב-
+`narrate_bridge_test` (4 בדיקות) + הקריאה ב-`_openSiteSummary` מעבירה את אותם 3 ה-providers. הכפתור/המסך
+זהים ויזואלית; ההבדל היחיד הוא שהלוגיקה עכשיו בדיקה.
+
+**תוצאה:** ✅ אפס שינוי ויזואלי, כיסוי-טסט חדש לגשר-הקריטי. analyze 0 errors.
+
+---
+
 ## v6.65 — swarm-fixes גל-2 · a11y button-role בכרטיס-הקטלוג — 2026-06-23
 
 **שינוי (lib/screens):** `catalog_screen.dart` — כפתורי "✨ נסח" + "🔌 איך לגשר?" (GestureDetector חשופים) עטופים

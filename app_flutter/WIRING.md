@@ -2660,3 +2660,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **(LOW · שרת)** `functions/src/claude.ts` — `model` עבר מ-passthrough-חופשי ל-`kAllowedModels` allowlist (haiku-default + sonnet); id לא-מוכר → default. חוסם נעיצת-מודל-יקר / זבל (cost-safety). tsc נקי.
 - **(LOW · a11y)** `catalog_screen.dart` — כפתורי "✨ נסח" + "🔌 איך לגשר?" עטופים ב-`Semantics(button: true, label)` → תפקיד-כפתור לקורא-מסך. ויזואלית byte-identical. גודל-היעד נשאר מוגבל ע"י עיצוב-השורה (משותף עם צ'יפים קיימים — דחוי).
 - **gate:** analyze 0 errors/warnings · full-suite baseline. catalog_screen ב-screens → גייט 24/116.
+
+### #swarm-fixes-w3 — narrate-bridge test (סיכום-אתר) — 2026-06-23
+- **(MED · coverage)** הגשר caller→prompt של סיכום-האתר היה לא-בדוק. חולץ בונה-השורות מ-`_openSiteSummary` ל-`siteSummaryReportLines(diary, snags, inspections)` ב-`site_hub_state.dart` (state/ → לא גייט-42/44). `_openSiteSummary` קורא ל-helper (ויזואלית זהה).
+- **טסט (`narrate_bridge_test`):** 4 בדיקות נועלות את הגשר-הקריטי — ספירות-הליקויים לפי `'פתוח'`/`'טופל'`, ביקורות לפי `'מתוכננת'`/`'בוצעה'`, ספירת-יומן + רישום-אחרון, ו-empty→אפסים-ללא-המצאה. typo במחרוזת-סטטוס היה מאפס ספירה בשקט — עכשיו נתפס.
+- **gate:** analyze 0 errors (4 warnings pre-existing ב-site_hub, לא שלי) · `narrate_bridge_test` ירוק · full-suite baseline. site_hub_screen ב-screens → גייט 24/116.
