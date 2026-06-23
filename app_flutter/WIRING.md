@@ -2779,3 +2779,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **נותבו דרכו (15 אתרי-גולמי):** `formatCatalogPrice` (catalog_settings — כרטיס-המוצר הראשי) · catalog_screen (8: b.price/price/alt.price/c.total+product+accessories+labour/_total/acc.price×2) · smart_home (rec.price/order.sum) · contractor_tools (recPrice/altPrice/savings/offer.price/total). nullable → `!` היכן שגדור (analyze 0).
 - **gate:** `money_format_test` (5) + catalog_price_units (18%) + product_journey (935 HARD) ירוקים · analyze 0. screens→24/116 · money_format→42/44.
 - **נשאר (תועד · LOW):** 4 ה-helpers הפרטיים (`_price`/`_grouped`/`_thousands`/`_group`) מקבצים-נכון (פלט זהה ל-`groupThousands`); האצלתם ל-`groupThousands` = ניקוי-פנימי אפס-ערך-משתמש, נדחה (לא נוגעים בקוד-נכון-חי לפני launch).
+
+### #r9-catalog-perf — אודיט-נחיל סיבוב-9 (perf): hoist-RegExp + PERF-H2 suggestions-provider — 2026-06-23
+נחיל-4-עדשות (memory/disposal · performance · navigation · input). **בדיקת-אמת:** 2 מ-3 ה-HIGH של עדשת-הביצועים היו **stale** — הם כבר תוקנו: `searchResultsProvider` (PERF-H1, ההתאמה מחושבת ב-provider לא ב-build) + `categorySummaryProvider` (PERF-H3, סיכומי-קטגוריה ממומואזים פעם-אחת/system; `_CatalogRow` עושה map-lookup). תוקן הנותר:
+- **(perf · multiplier)** `catalog_screen.dart` — `RegExp(r'\s+')` נוצר-מחדש per-product per-keystroke ב-`_tokenHitHe`/match/relevance (O(catalog) loops) → hoisted ל-top-level `final _wsSplit`. אפס שינוי-התנהגות.
+- **(perf · PERF-H2)** `searchSuggestions(...)` רץ **בתוך `_SearchSuggestions.build()`** (סריקת-מילים O(catalog) per-keystroke) → חולץ ל-`searchSuggestionsProvider` (אחות ל-H1), מחושב פעם-אחת/query·scope·system. אותם guards (ריק עד ≥2 תווים בסקופ-מוצרים), אותו פלט.
+- **נדחה (תועד · רציונל):** debounce-חיפוש (ההתאמה כבר provider-ized + guard ≥2 + 935 צנוע; debounce נוגע ב-controller-sync/submit-flush בליבת-החיפוש החיה — סיכון>תועלת ללא device-profiling) · ResizeImage thumbnails (cache כבר חסום 700/~MB; resize per-slot צריך הקשר-תצוגה — סיכון-רגרסיה ויזואלית בליבה).
+- **gate:** 19 בדיקות-חיפוש (search_suggestions/match_boundary/fallback/sku_pollution/huliot) ירוקות · analyze 0. screens→24/116; אין lib/logic|data→אין 42/44.

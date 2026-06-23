@@ -1859,3 +1859,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** מחירי-₪ בני 4+ ספרות שהוצגו גולמיים ("₪4200") עכשיו מקובצים-בפסיק ("₪4,200") — כרטיס-המוצר בקטלוג, עלויות-קו ב-build-a-list, אביזרים, המלצות-בית, וגיליונות-הקבלן (המלצה/חלופה/חיסכון/הצעת-ספק). תואם לעגלה/מנהל/תקציב שכבר קיבצו. אפס שינוי-ערך — רק פסיק-אלפים.
 **אימות (אוטומטי):** `money_format_test` (5) + `catalog_price_units_settings` (19) + `product_journey` (935 sheets · large-text · narrow-phone — אפס overflow גם עם הפסיק) ירוקים · analyze 0.
 **הפיכות:** `git checkout lib/state/catalog_settings.dart lib/screens/catalog_screen.dart lib/screens/smart_home_screen.dart lib/screens/contractor_tools_sheets.dart` + מחיקת `lib/logic/money_format.dart`.
+
+## v6.86 — perf קטלוג (hoist-RegExp + suggestions-provider) — אפס שינוי ויזואלי — 2026-06-23
+**שינוי נראה:** אין. זהו תיקון-ביצועים פנימי בלבד — תוצאות-החיפוש, ההצעות וכרטיסי-הקטלוג נראים זהה לחלוטין. השיפור: פחות עבודת-CPU per-keystroke (RegExp לא-מתקמפל-מחדש; סריקת-ההצעות יצאה מ-build ל-provider).
+**אימות (אוטומטי):** 19 בדיקות-חיפוש ירוקות (אותו פלט) · analyze 0 · full-suite (incl. product_journey 935-sheet render — ללא-שינוי).
+**הפיכות:** `git checkout lib/screens/catalog_screen.dart`.

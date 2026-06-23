@@ -119,6 +119,11 @@ const Map<String, List<String>> kSearchSynonyms = {
 String _normForSearch(String s) =>
     s.toLowerCase().replaceAll('״', '"').replaceAll('׳', "'");
 
+/// Whitespace splitter — hoisted to a top-level `final` so it is compiled ONCE,
+/// not re-compiled per product per keystroke (it ran inside the O(catalog) match
+/// + relevance loops). Pure perf; identical behaviour.
+final RegExp _wsSplit = RegExp(r'\s+');
+
 /// The seven one-letter Hebrew clitic prefixes (the מש״ה־וכל״ב set) that attach
 /// to the front of a word — הברז, באמבטיה, לדוד. A query token may sit one of
 /// these past a word start, so "דוד" still finds "הדוד".
@@ -133,7 +138,7 @@ const String _kHebrewPrefixes = 'משהוכלב';
 /// keep working: they are whole space-delimited words, matched by the prefix arm.
 bool _tokenHitHe(String hay, String token) {
   if (token.isEmpty) return false;
-  for (final w in hay.split(RegExp(r'\s+'))) {
+  for (final w in hay.split(_wsSplit)) {
     if (w.startsWith(token)) return true;
     if (w.length > token.length &&
         _kHebrewPrefixes.contains(w[0]) &&
@@ -161,7 +166,7 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
   // under SKU-coincidence noise. Word queries don't touch the SKU at all.
   if (q.length >= 5 && _normForSearch(p.sku).contains(q)) return true;
   final hay = _normForSearch('${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
-  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  final tokens = q.split(_wsSplit).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
   bool hit(String t) {
     if (_tokenHitHe(hay, t)) return true;
@@ -185,7 +190,7 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   final color = _normForSearch(p.color ?? '');
   var score = 0;
   if (name.contains(q)) score += 100; // whole query in the name
-  for (final t in q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty)) {
+  for (final t in q.split(_wsSplit).where((t) => t.isNotEmpty)) {
     if (name.contains(t)) {
       score += 20;
     } else if (cat.contains(t)) {
@@ -380,6 +385,20 @@ final searchResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
           filterBySystem(filterByImage(matchProducts(), imageOnly), systemFilter))
       .take(40)
       .toList();
+});
+
+/// PERF-H2 (sibling of H1): the as-you-type suggestion words, computed in a
+/// derived provider instead of inside `_SearchSuggestions.build()` — so the
+/// O(catalog) word-frequency scan reruns only when query/scope/system change,
+/// not on every unrelated rebuild of the search panel. Same output + same guards
+/// (empty until ≥2 chars in a product scope) as the previous inline call.
+final searchSuggestionsProvider = Provider<List<String>>((ref) {
+  final query = ref.watch(searchQueryProvider);
+  final scope = ref.watch(searchScopeProvider);
+  final system = ref.watch(catalogSystemFilterProvider);
+  final productScope = scope == 'הכל' || scope == 'מוצרים';
+  if (!productScope || query.trim().length < 2) return const [];
+  return searchSuggestions(query, system: system);
 });
 
 /// The keyboard's live DIVE query — set by the floating card-keyboard on every
@@ -2125,12 +2144,9 @@ class _SearchSuggestions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query = ref.watch(searchQueryProvider);
-    final scope = ref.watch(searchScopeProvider);
-    final system = ref.watch(catalogSystemFilterProvider);
-    final productScope = scope == 'הכל' || scope == 'מוצרים';
-    if (!productScope || query.trim().length < 2) return const SizedBox.shrink();
-    final sugg = searchSuggestions(query, system: system);
+    // PERF-H2: the O(catalog) suggestion scan now lives in a provider (computed
+    // once per query/scope/system change), not here in build().
+    final sugg = ref.watch(searchSuggestionsProvider);
     if (sugg.isEmpty) return const SizedBox.shrink();
     return Container(
       decoration: const BoxDecoration(
