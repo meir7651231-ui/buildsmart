@@ -4,6 +4,23 @@
 
 ---
 
+## v6.61 — #ai-site-summary · יומן-אתר: כפתור "✨ סכם התקדמות עם AI" — 2026-06-23
+
+**שינוי (lib/screens):** `site_hub_screen.dart` (`_SiteDiary`) — אחרי "+ רישום יומן" נוסף `if (gateway != null)`
+עם "✨ סכם התקדמות עם AI" → `_openSiteSummary` (קורא diary+snags+inspections) → `DailyReportScreen` (reuse;
+ה-AppBar הוכלל ל-"✨ ניסוח חכם").
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): בראש יומן-האתר מופיע "✨ סכם התקדמות"; לחיצה פותחת מסך עם
+  שורות-האתר האמיתיות (רישומי-יומן · ליקויים · ביקורות) → נרטיב Claude + "העתק לשליחה".
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → יומן-האתר byte-identical
+  (כפתור "+ רישום יומן" + הרשומות בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors · `daily_report_test` (ה-prompt המשותף) ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.61).
+
+---
+
 ## v6.60 — #ai-daily-report · טאבי-דוחות (עובד+שליח): כפתור "✨ נסח דוח עם AI" — 2026-06-23
 
 **שינוי (lib/screens):** `worker_reports_tab.dart` + `courier_reports_tab.dart` — ליד "💬 שלח דוח יומי" נוסף

@@ -2629,3 +2629,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **anti-hallucination (grounded, narrate-only):** ה-prompt (`dailyReportPrompt`) מוסר את שורות-הדוח ו**אוסר** להמציא/לשנות/להוסיף מספר. המספרים = של המנועים.
 - **gating:** `if (claudeGatewayProvider != null)` בכל טאב → ב-demo הכפתור **לא בעץ**, שני הטאבים byte-identical (כפתור-השליחה הקיים ללא-שינוי). המסך ב-null → "דורש חיבור".
 - **gate:** analyze 0 errors (4 warnings pre-existing ב-courier_reports_tab, לא שלי) · `daily_report_test` (title+lines verbatim · forbids-inventing) ירוק · full-suite baseline. daily_report_screen + worker/courier_reports_tab ב-screens → גייט 24/116.
+
+### #ai-site-summary — "✨ סכם התקדמות" ב-יומן-האתר (קבלן · solo-wave) — 2026-06-23
+- **המהלך:** נגיעה ב-`site_hub_screen.dart` (`_SiteDiary`, ConsumerWidget) + הכללת ה-AppBar של `daily_report_screen.dart` ("✨ דוח-יום"→"✨ ניסוח חכם", reuse). ב-`_SiteDiary` נוסף `if (gateway != null)` עם `_CaPrimary` **"✨ סכם התקדמות עם AI"** → `_openSiteSummary` שקורא את 3 המנועים (`siteDiaryProvider`/`siteSnagsProvider`/`siteInspectionsProvider`) ובונה reportLines → `DailyReportScreen.route('סיכום אתר', lines)`. +2 imports.
+- **הזרימה:** המספרים (רישומי-יומן · ליקויים פתוחים/טופלו · ביקורות מתוכננות/בוצעו) דטרמיניסטיים מ-3 ה-providers החיים. המסך מציג אותם, Claude **רק מנסח** סיכום-התקדמות (reuse של DailyReportScreen).
+- **anti-hallucination (grounded, narrate-only):** אותו `dailyReportPrompt` — מוסר את שורות-האתר ו**אוסר** להמציא/לשנות מספר. כיסוי-טסט דרך `daily_report_test` (ה-prompt משותף).
+- **gating:** `if (claudeGatewayProvider != null)` → ב-demo הכפתור **לא בעץ**, ה-יומן byte-identical.
+- **gate:** analyze 0 errors (4 warnings pre-existing dead-code ב-site_hub, לא שלי) · `daily_report_test` ירוק · full-suite baseline. site_hub_screen + daily_report_screen ב-screens → גייט 24/116.

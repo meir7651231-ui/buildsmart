@@ -120,7 +120,7 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('✨ דוח-יום',
+          title: const Text('✨ ניסוח חכם',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,

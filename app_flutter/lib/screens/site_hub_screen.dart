@@ -28,8 +28,12 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart' show caToday, kSafetyTips;
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/claude_functions.dart'
+    show claudeGatewayProvider;
 import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
 import 'package:buildsmart/screens/contractor_hr_sheet.dart';
+import 'package:buildsmart/screens/daily_report_screen.dart'
+    show DailyReportScreen;
 import 'package:buildsmart/screens/defects_sheet.dart';
 import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
@@ -651,6 +655,16 @@ class _SiteDiary extends ConsumerWidget {
           label: '+ רישום יומן להיום',
           onTap: () => _add(context, ref),
         ),
+        // #ai-site-summary — when AI is live, narrate the site's logged state
+        // (diary + snags + inspections) into a progress summary. gateway null
+        // (demo) → not in the tree → byte-identical.
+        if (ref.watch(claudeGatewayProvider) != null) ...[
+          const SizedBox(height: 8),
+          _CaPrimary(
+            label: '✨ סכם התקדמות עם AI',
+            onTap: () => _openSiteSummary(context, ref),
+          ),
+        ],
         const SizedBox(height: 12),
         if (diary.isEmpty)
           const _CaEmpty('אין רישומים ביומן')
@@ -676,6 +690,29 @@ class _SiteDiary extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// #ai-site-summary — narrate the site's REAL logged state (diary count +
+  /// open/fixed snags + planned/done inspections) into a progress summary the
+  /// contractor can send. The numbers are the engines'; Claude only phrases them.
+  void _openSiteSummary(BuildContext context, WidgetRef ref) {
+    final diary = ref.read(siteDiaryProvider);
+    final snags = ref.read(siteSnagsProvider);
+    final inspections = ref.read(siteInspectionsProvider);
+    final openSnags = snags.where((s) => s.status == 'פתוח').length;
+    final fixedSnags = snags.where((s) => s.status == 'טופל').length;
+    final plannedInsp =
+        inspections.where((i) => i.status == 'מתוכננת').length;
+    final doneInsp = inspections.where((i) => i.status == 'בוצעה').length;
+    Navigator.of(context).push(DailyReportScreen.route(
+      title: 'סיכום אתר',
+      reportLines: [
+        '📓 רישומי-יומן: ${diary.length}',
+        if (diary.isNotEmpty) '📅 רישום אחרון: ${diary.first.text}',
+        '🔧 ליקויים: $openSnags פתוחים · $fixedSnags טופלו',
+        '🔍 ביקורות: $plannedInsp מתוכננות · $doneInsp בוצעו',
+      ],
+    ));
   }
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
