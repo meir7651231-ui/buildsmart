@@ -177,9 +177,12 @@ class WordSignal extends SignalSource {
 /// material (#28). The predicate is NULL-TOLERANT: an unknown-material product
 /// rides ALONG (so the unseeded MAJORITY is not dropped — materialOf detects a
 /// known material for only a minority of the union pool, and the exact share
-/// varies per narrowed pool; swarm R3 corrected an earlier "~42%" overstatement);
-/// only the Phase-2 scoring excludes nulls so copper/brass counts are not
-/// inflated by the shared null.
+/// varies per narrowed pool; swarm R3 corrected an earlier "~42%" overstatement).
+/// The merge scores material the SAME way as every other axis — on the FULL pool
+/// with THIS carry-along predicate — so the unknowns it keeps are counted
+/// honestly and material is no longer over-ranked (swarm R3: scoring it on the
+/// seeded subset with an exact predicate deflated its denominator AND hid the
+/// carry-along, ranking it first even when another axis split the pool more).
 class MaterialSignal extends SignalSource {
   const MaterialSignal();
   @override

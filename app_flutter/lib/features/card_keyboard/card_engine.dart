@@ -22,8 +22,6 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show kHardSignals;
-import 'package:buildsmart/features/word_finder/material_lexicon.dart'
-    show materialOf;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
@@ -232,24 +230,21 @@ List<SignalChip> _mergedChips(
     // a laid-out axis always has ≥ floor chips to give (swarm R5). Identical at
     // the floor=2 default; an invariant test pins kMergedAxisFloor ≥ 2.
     if (chips.length < kMergedAxisFloor) continue;
-    // Material scores on the SEEDED subset with the EXACT predicate (§2): the
-    // null carry-along is excluded from the histogram so copper/brass are not
-    // inflated by the shared unknown. Every other axis scores on the full pool.
-    final isMaterial = src.axisId == 'material';
-    final scoringPool = isMaterial
-        ? pool.where((p) => materialOf(p) != null).toList()
-        : pool;
-    final n = distinctCardCount(scoringPool);
-    if (n == 0) continue; // div-0 guard; an empty scoring pool can't split
+    // EVERY axis — material INCLUDED (swarm R3 fix) — is scored on the FULL pool
+    // with its OWN tap predicate (src.matches), so an axis's measured decisiveness
+    // is EXACTLY what tapping a chip delivers, and all axes share one denominator
+    // n = distinctCardCount(pool) (so expRem is commensurable across axes). For
+    // material this COUNTS the null carry-along the tap keeps (a copper tap holds
+    // copper + unknown-material) — the honest post-tap pool. §2's earlier
+    // seeded-subset + exact-predicate scoring systematically OVER-ranked material:
+    // a smaller seeded M deflated its expRem, and excluding the carry-along it
+    // actually keeps understated the remaining cards (two compounding R3 HIGHs).
+    final n = distinctCardCount(pool);
+    if (n == 0) continue; // div-0 guard; an empty pool can't split
     var sumSq = 0;
     var anySplit = false;
     for (final chip in chips) {
-      final narrowed = scoringPool
-          .where(
-            (p) =>
-                isMaterial ? materialOf(p) == chip.value : src.matches(p, chip),
-          )
-          .toList();
+      final narrowed = pool.where((p) => src.matches(p, chip)).toList();
       final nc = distinctCardCount(narrowed);
       if (nc < n) anySplit = true; // this chip actually narrows the pool
       sumSq += nc * nc;
