@@ -113,6 +113,16 @@ void main() {
       final one = distinctProducts(kDivePool).take(1).toList();
       expect(() => mergedKeys(one, [step()], lexicon, null), returnsNormally);
     });
+
+    test('empty pool → CardShowProducts(empty) — the dead-end the screen guards',
+        () {
+      // An over-narrowed (empty) pool: rung-3 returns CardShowProducts with an
+      // empty list (swarm R1 — the screen now renders an empty-state for it
+      // instead of a bare header).
+      final v = mergedKeys([], [step()], lexicon, null);
+      expect(v, isA<CardShowProducts>());
+      expect((v as CardShowProducts).products, isEmpty);
+    });
   });
 
   group('SignalChip', () {

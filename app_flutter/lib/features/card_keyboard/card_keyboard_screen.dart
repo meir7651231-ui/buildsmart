@@ -137,6 +137,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     setState(stack.removeLast);
   }
 
+  /// Clear the whole dive back to the opening — the empty-state's restart (swarm
+  /// R1: an over-narrowed pool must not dead-end with a bare header).
+  void _restart() => setState(stack.clear);
+
   /// @visibleForTesting — drive [_popStep] directly (the back control is hidden
   /// at an empty stack, so a "pop at empty is a safe no-op" test needs this).
   @visibleForTesting
@@ -184,7 +188,12 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         for (final p in resolveWord(key.label, cardKeyboardLexicon)) p.sku,
       };
       _pushStep(NewbieStep(
-        axisLabel: 'דגם',
+        // EXPLICIT coupling (swarm R1): the word axis's answered-label is the
+        // WordSignal's own axisName — not a magic 'דגם' string — so the merge's
+        // answered-axis exclusion (axisName ∈ stack.axisLabels) matches the word
+        // axis BY CONSTRUCTION, and a rename of WordSignal.axisName can't silently
+        // break "ask each axis at most once".
+        axisLabel: const WordSignal().axisName,
         chipLabel: key.label,
         crumbWord: key.label,
         predicate: (p) => skuSet.contains(p.sku),
@@ -226,6 +235,30 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
       showLipskeyProductSheet(context, picked, v.products);
     }
   }
+
+  /// Neutral empty-state for an over-narrowed (empty) pool — a message + a
+  /// restart, mirroring WordFinderScreen._buildEmptyState (swarm R1: the
+  /// CardShowProducts([]) floor must not render a bare header with no forward
+  /// path). Rarely reached via taps (chips are pool-derived), but defensive.
+  Widget _buildEmptyState() => Padding(
+        padding: const EdgeInsets.all(BsTokens.space3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'לא נמצא מוצר מתאים — נסה שוב',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: BsTokens.space2),
+            TextButton(onPressed: _restart, child: const Text('התחל מחדש')),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -273,7 +306,9 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
             ],
           ),
         ),
-        if (keys.isNotEmpty)
+        if (v is CardShowProducts && v.products.isEmpty)
+          _buildEmptyState()
+        else if (keys.isNotEmpty)
           WordKeyboard(words: keys, onWordTap: _onWordTap),
       ],
     );
