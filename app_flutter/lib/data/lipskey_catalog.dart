@@ -1578,7 +1578,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 16,
     dims: {'מאפיין': 'תיקני', 'DN': '130/50'},
-    imageFile: '196587.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '116638',
@@ -1659,7 +1659,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬜',
     page: 33,
     dims: {'מידות': 'Ø113 / Ø95 / Ø98', 'תיאור': 'מכסה עגול עליון קבוע'},
-    imageFile: '610918.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '635737',
@@ -1828,7 +1828,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '⚫',
     page: 37,
-    dims: {'דגם': 'פקק 2" שחור', 'R': '2.5"', 'M': '20.2', 'L': '35', 'D2': '49.5', 'D1': '79.6', 'תיאור': 'פקק למאסף ולמחסום רצפה+ אטם', 'מידה': '50'},
+    dims: {'דגם': 'פקק 2.5" שחור', 'R': '2.5"', 'M': '20.2', 'L': '35', 'D2': '49.5', 'D1': '79.6', 'תיאור': 'פקק למאסף ולמחסום רצפה+ אטם', 'מידה': '50'},
     imageFile: '218127.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -1840,7 +1840,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '⚫',
     page: 37,
-    dims: {'דגם': 'פקק 2.5" שחור', 'R': '2"', 'M': '18.5', 'L': '35', 'D2': '38.5', 'D1': '68.4', 'תיאור': 'פקק למאסף ולמחסום רצפה+ אטם', 'מידה': '50'},
+    dims: {'דגם': 'פקק 2" שחור', 'R': '2"', 'M': '18.5', 'L': '35', 'D2': '38.5', 'D1': '68.4', 'תיאור': 'פקק למאסף ולמחסום רצפה+ אטם', 'מידה': '50'},
     imageFile: '218126.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -2147,7 +2147,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
-    imageFile: '120011.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '124533',
@@ -2439,7 +2439,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 50,
     qtyPallet: 60,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '35.5 ס"מ', 'רוחב': '43.5 ס"מ', 'עומק': '15.5 ס"מ'},
-    imageFile: '152785.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '152786',
@@ -2481,7 +2481,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 50,
     qtyPallet: 50,
     dims: {'תכולה': '4.5/9 ליטר', 'גובה': '35.5 ס"מ', 'רוחב': '44.5 ס"מ', 'עומק': '15.5 ס"מ'},
-    imageFile: '145629.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '145630',
@@ -2695,7 +2695,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '42.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '17 ס"מ'},
-    imageFile: '168525.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '169604',
@@ -2709,7 +2709,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '42.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '17 ס"מ'},
-    imageFile: '169604.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '178864',
@@ -2723,7 +2723,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '41.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '11.5 ס"מ'},
-    imageFile: '178864.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '178867',
@@ -2737,7 +2737,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '41.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '11.5 ס"מ'},
-    imageFile: '178867.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '178870',
@@ -2751,7 +2751,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     page: 52,
     qtyPallet: 56,
     dims: {'תכולה': '3/6 ליטר', 'גובה': '41.5 ס"מ', 'רוחב': '37 ס"מ', 'עומק': '11.5 ס"מ'},
-    imageFile: '178870.jpeg',
+    imageFile: null,
   ),
 
   // ── חלקים סניטריים — page 29 ─────────────────────────────────────────────────
@@ -2765,7 +2765,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 29,
     dims: {'תיאור': 'ערכה אוניברסלית לתיקון ברז'},
-    imageFile: '186466.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '686366',
@@ -2776,8 +2776,8 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Sanitary Parts',
     categoryEmoji: '🔧',
     page: 29,
-    dims: {'תיאור': 'מצוף מילוי הידראולי משולב 3/8 - 2/1', 'מידה': '3/8 - 2/1'},
-    imageFile: '686366.jpeg',
+    dims: {'תיאור': 'מצוף מילוי הידראולי משולב 3/8 - 1/2', 'מידה': '3/8 - 1/2'},
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '642102',
@@ -2858,7 +2858,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 12,
     dims: {'זווית': '45°', 'מידה': 'DN40', 'תיאור': 'מסעף 45° DN40 עם תבריג · כולל 3 אומים ו-3 אטמים'},
-    imageFile: '118221.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '118222',
@@ -3116,7 +3116,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'WC Connection',
     categoryEmoji: '🚽',
     page: 22,
-    dims: {'תיאור': 'ברך אסלה לבן עם אטם'},
+    dims: {'תיאור': 'ברך אסלה פרגמון עם אטם'},
     imageFile: '164873.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -4325,7 +4325,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 27,
     dims: {'DN': '40'},
-    imageFile: '116167.jpeg',
+    imageFile: null,
   ),
   LipskeyCatalogProduct(
     sku: '116163',
@@ -4442,13 +4442,13 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // דיורים — עמ' 19
   LipskeyCatalogProduct(
     sku: '777A5033',
-    nameHe: 'דיור פיית מילוי מפאורת חדש',
+    nameHe: 'דיור פיית מילוי מפוארת חדש',
     nameEn: 'New Ornate Fill Mouth Spacer',
     categoryHe: 'דיורים ופיות',
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 19,
-    dims: {'תיאור': 'דיור פיית מילוי מפאורת חדש'},
+    dims: {'תיאור': 'דיור פיית מילוי מפוארת חדש'},
     imageFile: '777A5033.jpg',
     brand: 'AQUATEC',
   ),
@@ -5848,7 +5848,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 46,
-    dims: {'מידה': '2"×3/8"', 'תיאור': 'בתא ברז ניל מפואר 1/2"×3/8"'},
+    dims: {'מידה': '1/2"×3/8"', 'תיאור': 'בתא ברז ניל מפואר 1/2"×3/8"'},
     imageFile: '77777120A.jpg',
     brand: 'AQUATEC',
   ),
@@ -6081,7 +6081,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '77777010',
-    nameHe: 'אטם מנגית אקסנטר 4',
+    nameHe: 'אטם מגניט אקסנטר 4',
     nameEn: 'Excenter Seal Gasket 4',
     categoryHe: 'אביזרי אסלה',
     categoryEn: 'Toilet Accessories',
@@ -6230,7 +6230,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '77772606',
-    nameHe: 'למד+רוזטה ושתומים לסוללה',
+    nameHe: 'למד+רוזטה ושסתום לסוללה',
     nameEn: 'L-Fitting + Rosette and Fittings for Mixer',
     categoryHe: 'אביזרי חיבור',
     categoryEn: 'Connection Accessories',
@@ -6616,7 +6616,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ─── AQUATEC — מכסים ורשתות עגולים ניקל/נחושת (page 62) ──────────────────
 LipskeyCatalogProduct(sku: '777Z3080', nameHe: 'מכסה ניקל עגול 4"', nameEn: 'Nickel Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '777Z3080.jpg', brand: 'AQUATEC', color: 'ניקל', dims: {'מידה': '4"', 'תיאור': 'מכסה ניקל עגול 4"'}),
 LipskeyCatalogProduct(sku: '77Z3080A', nameHe: 'מכסה נחושת עגול 4"', nameEn: 'Brass Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3080A.jpg', brand: 'AQUATEC', color: 'נחושת', dims: {'חומר': 'נחושת', 'מידה': '4"', 'תיאור': 'מכסה נחושת עגול 4"'}),
-LipskeyCatalogProduct(sku: '777Z3063', nameHe: 'מכסה ניקל מונח עגול 4"', nameEn: 'Nickel Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '777Z3080.jpg', brand: 'AQUATEC', color: 'ניקל', dims: {'מידה': '4"', 'תיאור': 'מכסה ניקל מונע עגול 4"'}),
+LipskeyCatalogProduct(sku: '777Z3063', nameHe: 'מכסה ניקל מונח עגול 4"', nameEn: 'Nickel Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '777Z3080.jpg', brand: 'AQUATEC', color: 'ניקל', dims: {'מידה': '4"', 'תיאור': 'מכסה ניקל מונח עגול 4"'}),
 LipskeyCatalogProduct(sku: '777Z3067', nameHe: 'מכסה נחושת מונח עגול 4"', nameEn: 'Brass Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3080A.jpg', brand: 'AQUATEC', color: 'נחושת', dims: {'חומר': 'נחושת', 'מידה': '4"', 'תיאור': 'מכסה נחושת מונח עגול 4"'}),
 LipskeyCatalogProduct(sku: '77003023', nameHe: 'רשת ניקל מרובעת 6"', nameEn: 'Nickel Square Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77003023.jpg', brand: 'AQUATEC', color: 'ניקל', dims: {'מידה': '6"', 'תיאור': 'רשת ניקל מרובעת 6"'}),
 LipskeyCatalogProduct(sku: '77Z3399A', nameHe: 'רשת ניקל מרובעת 8"', nameEn: 'Nickel Square Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77003023.jpg', brand: 'AQUATEC', color: 'ניקל', dims: {'מידה': '8"', 'תיאור': 'רשת ניקל מרובעת 8"'}),
@@ -6698,12 +6698,12 @@ LipskeyCatalogProduct(sku: '77777704', nameHe: 'מאריך נחושת כבד ת�
 LipskeyCatalogProduct(sku: '77777705', nameHe: 'מאריך נחושת כבד תקני 30 מ"מ', nameEn: 'Heavy Brass Extension 30mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC', dims: {'מאפיין': 'תקני', 'חומר': 'נחושת', 'מידה': '30 מ"מ', 'תיאור': 'מאריך נחושת כבד תקני'}),
 LipskeyCatalogProduct(sku: '77777706', nameHe: 'מאריך נחושת כבד תקני 40 מ"מ', nameEn: 'Heavy Brass Extension 40mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC', dims: {'מאפיין': 'תקני', 'חומר': 'נחושת', 'מידה': '40 מ"מ', 'תיאור': 'מאריך נחושת כבד תקני'}),
 LipskeyCatalogProduct(sku: '77777707', nameHe: 'מאריך נחושת כבד תקני 50 מ"מ', nameEn: 'Heavy Brass Extension 50mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC', dims: {'מאפיין': 'תקני', 'חומר': 'נחושת', 'מידה': '50 מ"מ', 'תיאור': 'מאריך נחושת כבד תקני'}),
-LipskeyCatalogProduct(sku: '77777755', nameHe: 'מאריך חרוט ניקל 20 ס"מ', nameEn: 'Tapered Nickel Extension 20cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '20 ס"מ', 'תיאור': 'מאריך חרום ניקל'}),
-LipskeyCatalogProduct(sku: '77777756', nameHe: 'מאריך חרוט ניקל 25 ס"מ', nameEn: 'Tapered Nickel Extension 25cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '25 ס"מ', 'תיאור': 'מאריך חרום ניקל'}),
-LipskeyCatalogProduct(sku: '77777708', nameHe: 'מאריך חרוט ניקל 30 ס"מ', nameEn: 'Tapered Nickel Extension 30cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '30 ס"מ', 'תיאור': 'מאריך חרום ניקל'}),
-LipskeyCatalogProduct(sku: '77777709', nameHe: 'מאריך חרוט ניקל 40 ס"מ', nameEn: 'Tapered Nickel Extension 40cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '40 ס"מ', 'תיאור': 'מאריך חרום ניקל'}),
-LipskeyCatalogProduct(sku: '77777710', nameHe: 'מאריך חרוט ניקל 50 ס"מ', nameEn: 'Tapered Nickel Extension 50cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '50 ס"מ', 'תיאור': 'מאריך חרום ניקל'}),
-LipskeyCatalogProduct(sku: '77777100', nameHe: 'מאריך חרוט ניקל 100 ס"מ', nameEn: 'Tapered Nickel Extension 100cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '100 ס"מ', 'תיאור': 'מאריך חרום ניקל'}),
+LipskeyCatalogProduct(sku: '77777755', nameHe: 'מאריך חרוט ניקל 20 ס"מ', nameEn: 'Tapered Nickel Extension 20cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '20 ס"מ', 'תיאור': 'מאריך חרוט ניקל'}),
+LipskeyCatalogProduct(sku: '77777756', nameHe: 'מאריך חרוט ניקל 25 ס"מ', nameEn: 'Tapered Nickel Extension 25cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '25 ס"מ', 'תיאור': 'מאריך חרוט ניקל'}),
+LipskeyCatalogProduct(sku: '77777708', nameHe: 'מאריך חרוט ניקל 30 ס"מ', nameEn: 'Tapered Nickel Extension 30cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '30 ס"מ', 'תיאור': 'מאריך חרוט ניקל'}),
+LipskeyCatalogProduct(sku: '77777709', nameHe: 'מאריך חרוט ניקל 40 ס"מ', nameEn: 'Tapered Nickel Extension 40cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '40 ס"מ', 'תיאור': 'מאריך חרוט ניקל'}),
+LipskeyCatalogProduct(sku: '77777710', nameHe: 'מאריך חרוט ניקל 50 ס"מ', nameEn: 'Tapered Nickel Extension 50cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '50 ס"מ', 'תיאור': 'מאריך חרוט ניקל'}),
+LipskeyCatalogProduct(sku: '77777100', nameHe: 'מאריך חרוט ניקל 100 ס"מ', nameEn: 'Tapered Nickel Extension 100cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC', dims: {'מידה': '100 ס"מ', 'תיאור': 'מאריך חרוט ניקל'}),
 LipskeyCatalogProduct(sku: '77004401', nameHe: 'אל חזור כלפה 1/2"', nameEn: 'Flap Check Valve 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'אל חוזר כלפה'}),
 LipskeyCatalogProduct(sku: '77004402', nameHe: 'אל חזור כלפה 3/4"', nameEn: 'Flap Check Valve 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'אל חוזר כלפה'}),
 LipskeyCatalogProduct(sku: '77004403', nameHe: 'אל חזור כלפה 1"', nameEn: 'Flap Check Valve 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC', dims: {'מידה': '1"', 'תיאור': 'אל חוזר כלפה'}),
@@ -6763,8 +6763,8 @@ LipskeyCatalogProduct(sku: '77000030', nameHe: 'צינור קפיצי 15 מטר 
   // ─── AQUATEC — אקדחי אצבע ומחברים (page 74) ──────────────────────────────
 LipskeyCatalogProduct(sku: '77980000', nameHe: 'אקדח אצבע עם 4 חלקים לגינה', nameEn: 'Finger Spray Gun with 4 Parts', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77980000.jpg', brand: 'AQUATEC', dims: {'ייעוד': 'לגינה', 'תיאור': 'אקדח אצבע עם 4 חלקים לגינה'}),
 LipskeyCatalogProduct(sku: '77980001', nameHe: 'אקדח אצבע', nameEn: 'Finger Spray Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77980001.jpg', brand: 'AQUATEC', dims: {'תיאור': 'אקדח אצבע'}),
-LipskeyCatalogProduct(sku: '77000010', nameHe: 'מחבר מוהיר 1/2"', nameEn: 'Quick Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000010.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'מחבר מהיר'}),
-LipskeyCatalogProduct(sku: '77000011', nameHe: 'מחבר מוהיר 3/4"', nameEn: 'Quick Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000010.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'מחבר מהיר'}),
+LipskeyCatalogProduct(sku: '77000010', nameHe: 'מחבר מהיר 1/2"', nameEn: 'Quick Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000010.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'מחבר מהיר'}),
+LipskeyCatalogProduct(sku: '77000011', nameHe: 'מחבר מהיר 3/4"', nameEn: 'Quick Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000010.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'מחבר מהיר'}),
 LipskeyCatalogProduct(sku: '77000012', nameHe: 'רקורד לברז גן 1"-3/4"', nameEn: 'Garden Tap Union 1"-3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000012.jpg', brand: 'AQUATEC', dims: {'מידה': '1"-3/4"', 'תיאור': 'רקורד לברז קן 3/4"-1'}),
 LipskeyCatalogProduct(sku: '77000013', nameHe: 'מחבר תיקון 1/2"', nameEn: 'Repair Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000013.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'מחבר תיקון'}),
 LipskeyCatalogProduct(sku: '77000024', nameHe: 'מחבר תיקון 3/4"', nameEn: 'Repair Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000013.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'מחבר תיקון'}),
@@ -7051,24 +7051,24 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   LipskeyCatalogProduct(sku: '77777481', nameHe: 'מצוף נחושת 1/2"', nameEn: 'Brass Float Valve 1/2"', categoryHe: 'מצופים', categoryEn: 'Float Valves', categoryEmoji: '🔵', page: 92, imageFile: '77777481.jpg', brand: 'AQUATEC', dims: {'חומר': 'נחושת', 'מידה': '1/2"', 'תיאור': 'מצוף נחושת'}),
   LipskeyCatalogProduct(sku: '77777482', nameHe: 'מצוף נחושת 3/4"', nameEn: 'Brass Float Valve 3/4"', categoryHe: 'מצופים', categoryEn: 'Float Valves', categoryEmoji: '🔵', page: 92, imageFile: '77777481.jpg', brand: 'AQUATEC', dims: {'חומר': 'נחושת', 'מידה': '3/4"', 'תיאור': 'מצוף נחושת'}),
   LipskeyCatalogProduct(sku: '77777483', nameHe: 'מצוף נחושת 1"', nameEn: 'Brass Float Valve 1"', categoryHe: 'מצופים', categoryEn: 'Float Valves', categoryEmoji: '🔵', page: 92, imageFile: '77777483.jpg', brand: 'AQUATEC', dims: {'חומר': 'נחושת', 'מידה': '1"', 'תיאור': 'מצוף נחושת'}),
-  LipskeyCatalogProduct(sku: '78071545', nameHe: 'מצוף נחושת 2 תקני', nameEn: 'Brass Float Valve Dual Standard', categoryHe: 'מצופים', categoryEn: 'Float Valves', categoryEmoji: '🔵', page: 92, imageFile: '78071545.jpg', brand: 'AQUATEC', dims: {'מאפיין': '2 תקני', 'חומר': 'נחושת', 'תיאור': 'מצוף נחושת 2 תקני'}),
-  LipskeyCatalogProduct(sku: '77773001', nameHe: 'שעון למקטין לחץ', nameEn: 'Pressure Gauge for Reducer', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77773001.jpg', brand: 'AQUATEC', dims: {'תיאור': 'שעון למקסטין לחץ'}),
+  LipskeyCatalogProduct(sku: '78071545', nameHe: 'מצוף נחושת 2 תקני', nameEn: 'Brass Float Valve Dual Standard', categoryHe: 'מצופים', categoryEn: 'Float Valves', categoryEmoji: '🔵', page: 92, imageFile: null, brand: 'AQUATEC', dims: {'מאפיין': '2 תקני', 'חומר': 'נחושת', 'תיאור': 'מצוף נחושת 2 תקני'}),
+  LipskeyCatalogProduct(sku: '77773001', nameHe: 'שעון למקטין לחץ', nameEn: 'Pressure Gauge for Reducer', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: null, brand: 'AQUATEC', dims: {'תיאור': 'שעון למקטין לחץ'}),
   LipskeyCatalogProduct(sku: '77004410', nameHe: 'משחרר אוויר 1/2" אוטומטי', nameEn: 'Automatic Air Vent 1/2"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77004410.jpg', brand: 'AQUATEC', dims: {'מאפיין': 'אוטומטי', 'מידה': '1/2"', 'תיאור': 'משחרר אוויר 1/2 אוטומטי'}),
-  LipskeyCatalogProduct(sku: '77772011', nameHe: 'מקטין לחץ + שעון לחץ 1/2"', nameEn: 'Pressure Reducer + Gauge 1/2"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77772011.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'מקסטין לחץ + שעון לחץ'}),
-  LipskeyCatalogProduct(sku: '77772012', nameHe: 'מקטין לחץ + שעון לחץ 3/4"', nameEn: 'Pressure Reducer + Gauge 3/4"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77772011.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'מקסטין לחץ + שעון לחץ'}),
+  LipskeyCatalogProduct(sku: '77772011', nameHe: 'מקטין לחץ + שעון לחץ 1/2"', nameEn: 'Pressure Reducer + Gauge 1/2"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77772011.jpg', brand: 'AQUATEC', dims: {'מידה': '1/2"', 'תיאור': 'מקטין לחץ + שעון לחץ'}),
+  LipskeyCatalogProduct(sku: '77772012', nameHe: 'מקטין לחץ + שעון לחץ 3/4"', nameEn: 'Pressure Reducer + Gauge 3/4"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77772011.jpg', brand: 'AQUATEC', dims: {'מידה': '3/4"', 'תיאור': 'מקטין לחץ + שעון לחץ'}),
 
   // ─── AQUATEC QONDUS — סדרת קיסר (pages 6-7) ─────────────────────────────
   LipskeyCatalogProduct(sku: '779096G', nameHe: 'קיסר ברז נשלף למטבח זהב מוברש', nameEn: 'Kaiser Pull-Out Kitchen Faucet Brushed Gold', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 6, imageFile: '779096G.jpg', brand: 'AQUATEC', color: 'זהב מוברש', dims: {'ייעוד': 'למטבח', 'סוג': 'נשלף', 'תיאור': 'קיסר ברז נשלף למטבח זהב מוברש'}),
   LipskeyCatalogProduct(sku: '779096B', nameHe: 'קיסר ברז נשלף למטבח שחור מט', nameEn: 'Kaiser Pull-Out Kitchen Faucet Matte Black', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 6, imageFile: '779096B.jpg', brand: 'AQUATEC', color: 'שחור מט', dims: {'ייעוד': 'למטבח', 'סוג': 'נשלף', 'תיאור': 'קיסר ברז נשלף למטבח שחור מט'}),
   LipskeyCatalogProduct(sku: '779096C', nameHe: 'קיסר ברז נשלף למטבח ניקל', nameEn: 'Kaiser Pull-Out Kitchen Faucet Nickel', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096C.jpg', brand: 'AQUATEC', color: 'ניקל', dims: {'ייעוד': 'למטבח', 'סוג': 'נשלף', 'תיאור': 'קיסר ברז נשלף למטבח ניקל'}),
   LipskeyCatalogProduct(sku: '779096S', nameHe: 'קיסר ברז נשלף למטבח ניקל מוברש', nameEn: 'Kaiser Pull-Out Kitchen Faucet Brushed Nickel', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096S.jpg', brand: 'AQUATEC', color: 'ניקל מוברש', dims: {'ייעוד': 'למטבח', 'סוג': 'נשלף', 'תיאור': 'קיסר ברז נשלף למטבח ניקל מוברש'}),
-  LipskeyCatalogProduct(sku: '779096F', nameHe: 'קיסר ברז נשלף למטבח גרפיטי', nameEn: 'Kaiser Pull-Out Kitchen Faucet Graphite', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096F.jpg', brand: 'AQUATEC', color: 'גרפיני', dims: {'ייעוד': 'למטבח', 'סוג': 'נשלף', 'תיאור': 'קיסר ברז נשלף למטבח גרפיני'}),
+  LipskeyCatalogProduct(sku: '779096F', nameHe: 'קיסר ברז נשלף למטבח גרפיני', nameEn: 'Kaiser Pull-Out Kitchen Faucet Graphite', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096F.jpg', brand: 'AQUATEC', color: 'גרפיני', dims: {'ייעוד': 'למטבח', 'סוג': 'נשלף', 'תיאור': 'קיסר ברז נשלף למטבח גרפיני'}),
 
   // ─── AQUATEC QONDUS — סדרת דיור (pages 10-11) ────────────────────────────
   LipskeyCatalogProduct(sku: '777M2203', nameHe: 'דיור ברז פרח ברבור קצר', nameEn: 'Dior Swan Neck Faucet Short', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2203.jpg', brand: 'AQUATEC', dims: {'אורך': 'קצר', 'תיאור': 'דיור ברז פרח ברבור קצר'}),
   LipskeyCatalogProduct(sku: '777M2204', nameHe: 'דיור ברז פרח ברבור ארוך', nameEn: 'Dior Swan Neck Faucet Long', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2204.jpg', brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'תיאור': 'דיור ברז פרח ברבור ארוך'}),
-  LipskeyCatalogProduct(sku: '777M2206', nameHe: 'דיור ברז מהקיר קצר', nameEn: 'Dior Wall Faucet Short', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2206.jpg', brand: 'AQUATEC', dims: {'אורך': 'קצר', 'סוג': 'מהקיר', 'תיאור': 'דיור ברז סהקיר קצר'}),
-  LipskeyCatalogProduct(sku: '777M2207', nameHe: 'דיור ברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Long', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2207.jpg', brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'סוג': 'מהקיר', 'תיאור': 'דיור ברז סהקיר ארוך'}),
+  LipskeyCatalogProduct(sku: '777M2206', nameHe: 'דיור ברז מהקיר קצר', nameEn: 'Dior Wall Faucet Short', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2206.jpg', brand: 'AQUATEC', dims: {'אורך': 'קצר', 'סוג': 'מהקיר', 'תיאור': 'דיור ברז מהקיר קצר'}),
+  LipskeyCatalogProduct(sku: '777M2207', nameHe: 'דיור ברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Long', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2207.jpg', brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'סוג': 'מהקיר', 'תיאור': 'דיור ברז מהקיר ארוך'}),
   LipskeyCatalogProduct(sku: '777M2201', nameHe: 'דיור ברז אמבטיה עם מזלף', nameEn: 'Dior Bath Faucet with Handshower', categoryHe: 'ברזי אמבטיה', categoryEn: 'Bath Faucets', categoryEmoji: '🛁', page: 11, imageFile: '777M2201.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור ברז אמבטיה עם מזלף'}),
   LipskeyCatalogProduct(sku: '777M2208', nameHe: 'דיור ברז מקלחת עם מזלף', nameEn: 'Dior Shower Faucet with Handshower', categoryHe: 'ברזי מקלחת', categoryEn: 'Shower Faucets', categoryEmoji: '🚿', page: 11, imageFile: '777M2208.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור ברז מקלחת עם מזלף'}),
   LipskeyCatalogProduct(sku: '777M2216', nameHe: 'דיור ברז מהקיר קצר פיית נחש', nameEn: 'Dior Wall Faucet Short Snake Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 11, imageFile: '777M2216.jpg', brand: 'AQUATEC', dims: {'אורך': 'קצר', 'סוג': 'מהקיר', 'תיאור': 'דיור ברז מהקיר קצר פיית נחש'}),
@@ -7081,12 +7081,12 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   LipskeyCatalogProduct(sku: '777M1717', nameHe: 'איביזה ברז מהקיר פיה ארוכה', nameEn: 'Ibiza Wall Faucet Long Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M1717.jpg', brand: 'AQUATEC', dims: {'סוג': 'מהקיר', 'תיאור': 'איביזה ברז מהקיר פיה ארוכה'}),
   LipskeyCatalogProduct(sku: '777M2162', nameHe: 'איביזה ברז פרח שטוח קצר', nameEn: 'Ibiza Flat Spout Faucet Short', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M2162.jpg', brand: 'AQUATEC', dims: {'אורך': 'קצר', 'תיאור': 'איביזה ברז פרח שטוח קצר'}),
   LipskeyCatalogProduct(sku: '777M2168', nameHe: 'איביזה ברז פרח שטוח ארוך', nameEn: 'Ibiza Flat Spout Faucet Long', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M2168.jpg', brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'תיאור': 'איביזה ברז פרח שטוח ארוך'}),
-  LipskeyCatalogProduct(sku: '777M1801', nameHe: 'איביזה ברז אמבטיה', nameEn: 'Ibiza Bath Faucet', categoryHe: 'ברזי אמבטיה', categoryEn: 'Bath Faucets', categoryEmoji: '🛁', page: 13, imageFile: '777M1801.jpg', brand: 'AQUATEC', dims: {'תיאור': 'איביזה ברז אמבטיה'}),
+  LipskeyCatalogProduct(sku: '777M1801', nameHe: 'איביזה ברז אמבטיה', nameEn: 'Ibiza Bath Faucet', categoryHe: 'ברזי אמבטיה', categoryEn: 'Bath Faucets', categoryEmoji: '🛁', page: 13, imageFile: null, brand: 'AQUATEC', dims: {'תיאור': 'איביזה ברז אמבטיה'}),
   LipskeyCatalogProduct(sku: '777M1808', nameHe: 'איביזה ברז מקלחת', nameEn: 'Ibiza Shower Faucet', categoryHe: 'ברזי מקלחת', categoryEn: 'Shower Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M1808.jpg', brand: 'AQUATEC', dims: {'תיאור': 'איביזה ברז מקלחת'}),
-  LipskeyCatalogProduct(sku: '7772364D', nameHe: 'איביזה סוללה מהקיר פיה קשת יצוקה', nameEn: 'Ibiza Wall-Mount Cast Arc Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7772364D.jpg', brand: 'AQUATEC', dims: {'סוג': 'מהקיר', 'תיאור': 'אביזיה סוללה מהקיר פיה קשת יצוקה'}),
+  LipskeyCatalogProduct(sku: '7772364D', nameHe: 'איביזה סוללה מהקיר פיה קשת יצוקה', nameEn: 'Ibiza Wall-Mount Cast Arc Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7772364D.jpg', brand: 'AQUATEC', dims: {'סוג': 'מהקיר', 'תיאור': 'איביזה סוללה מהקיר פיה קשת יצוקה'}),
 
   // ─── AQUATEC QONDUS — סדרת ויגה + דיור ידית מקס (page 13) ───────────────
-  LipskeyCatalogProduct(sku: '777M1114', nameHe: 'ויגה סוללה פיה עליונה ידית מקס', nameEn: 'Vega Top Spout Max Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M1114.jpg', brand: 'AQUATEC', dims: {'תיאור': 'וינה סוללה פיה עליונה ידית מקס'}),
+  LipskeyCatalogProduct(sku: '777M1114', nameHe: 'ויגה סוללה פיה עליונה ידית מקס', nameEn: 'Vega Top Spout Max Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M1114.jpg', brand: 'AQUATEC', dims: {'תיאור': 'ויגה סוללה פיה עליונה ידית מקס'}),
   LipskeyCatalogProduct(sku: '777M2414', nameHe: 'דיור ברז מהקיר ידית מקס פיה ארוכה', nameEn: 'Dior Wall Faucet Max Handle Long Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M2414.jpg', brand: 'AQUATEC', dims: {'סוג': 'מהקיר', 'תיאור': 'דיור ברז מהקיר ידית מקס צד פיה ארוכה'}),
 
   // ─── AQUATEC QONDUS — סדרת בתא (pages 14, 17) ────────────────────────────
@@ -7111,7 +7111,7 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   LipskeyCatalogProduct(sku: '77777335', nameHe: 'דלתא ברז פרח פיה עגולה', nameEn: 'Delta Faucet Round Spout', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 17, imageFile: '77777335.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דלתא ברז פרח פיה עגולה'}),
 
   // ─── AQUATEC QONDUS — פיות לברזים / אביזרי דיור (page 18) ───────────────
-  LipskeyCatalogProduct(sku: '777A5034', nameHe: 'דיור פיית מילוי עם כפתור מפאורת', nameEn: 'Dior Deluxe Fill Spout with Button', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '777A5034.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור פיית מילוי עם כפתור מפאורת'}),
+  LipskeyCatalogProduct(sku: '777A5034', nameHe: 'דיור פיית מילוי עם כפתור מפוארת', nameEn: 'Dior Deluxe Fill Spout with Button', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '777A5034.jpg', brand: 'AQUATEC', dims: {'תיאור': 'דיור פיית מילוי עם כפתור מפוארת'}),
   LipskeyCatalogProduct(sku: '77772415', nameHe: 'דיור פיה לברז נחש מהקיר כבד ארוך', nameEn: 'Dior Heavy Snake Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772415.jpg', brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'סוג': 'מהקיר', 'תיאור': 'דיור פיה לברז נחש מהקיר כבד ארוך'}),
   LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: null, brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'סוג': 'מהקיר', 'תיאור': 'דיור פיה לברז מהקיר ארוך'}),
   LipskeyCatalogProduct(sku: '77772410', nameHe: 'דיור פיה לברז פרח ארוך', nameEn: 'Dior Sink Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772410.jpg', brand: 'AQUATEC', dims: {'אורך': 'ארוך', 'תיאור': 'דיור פיה לברז פרח ארוך'}),

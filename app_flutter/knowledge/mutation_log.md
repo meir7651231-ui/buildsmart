@@ -1326,3 +1326,10 @@
 - **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** `scripts/fix_audit_dims.py` — ודאיים-R8 בלבד: 2 שגיאות-יחידות (ראש-מקלחת dims['מידה'] ס"מ→מ"מ, השם סתר) + הסרת 6 מידות-HDPE משובשות (`50*114`/`63*2 90` — חילוץ-שם שלי נשבר; הגודל נשמר בשם/'תיאור'). שמרני: לא נגעתי בטעויות-כתיב-מקור (R8), אי-התאמות-תמונה (נכס), false-positives.
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `7777707C` dims['מידה']='200 מ"מ'; `9106320031` ללא מפתח 'מידה'.
 - **mutation-verify:** baseline **+15 ירוק** → `7777707C` `'200 מ"מ'`→`'200 ס"מ'` → **אדום `+13 -1`** ("audit fix") → שחזור (הרצת-fix) → **+15 ירוק**. analyze 0. parity+product_journey(935) ירוקים.
+
+## #audit-fix-v2 — טיפו + dims + תמונות-שגויות — 2026-06-23
+- **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** `scripts/fix_audit_all.py` — 23 טיפו (scoped per-SKU block, name+תיאור) · 3 dims (77777120A מידה; 218126/218127 דגם-swap) · 17 imageFile→null (תמונות vision-confirmed שגויות-מוצר; placeholder עדיף). כל edit מאומת (old חייב להתקיים → אחרת no-op).
+- **בטיחות gate-117:** טיפו רק על SKUs לא-מוצמדים · imageFile לא מוצמד ב-parity · 'דגם' לא מוצמד. אומת: parity +289 ירוק.
+- **false-positives שנדחו:** "דיור"=Dior brand · `{'תיאור'}`=dims נקי · 77701150 שם קיים (double-quoted).
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `779096F` שם בלי 'גרפיטי'; `152785`/`186466` imageFile=null.
+- **mutation-verify:** baseline **+16 ירוק** → `152785` imageFile null→'x.jpeg' → **אדום `+14 -1`** ("audit fix v2") → שחזור → **+16 ירוק**. analyze 0. parity+product_journey(935) ירוקים.

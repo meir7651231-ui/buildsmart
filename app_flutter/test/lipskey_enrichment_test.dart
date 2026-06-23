@@ -71,6 +71,11 @@ void main() {
       expect(bySku('7777707C').dims?['מידה'], '200 מ"מ'); // was ס"מ (contradicted name)
       expect(bySku('9106320031').dims?.containsKey('מידה'), false); // garbled "63*2 90" removed
     });
+    test('audit fix v2 — typos corrected, wrong-product images nulled', () {
+      expect(bySku('779096F').nameHe.contains('גרפיטי'), false); // typo → גרפיני
+      expect(bySku('152785').imageFile, null); // cistern showed a toilet-seat photo
+      expect(bySku('186466').imageFile, null); // kit showed a stock drawing
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
