@@ -2622,3 +2622,29 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **`kMountAuxCats` (חבקי תליה/חבקי צינור/ידיות אחיזה):** `installToolsFor`/`installTipsFor` מחזירים כלי+שלבי-הרכבה לפי קטגוריה כש-spec=null. **קוראי-installTools = ציון+תצוגת-כרטיס בלבד (אומת), אפס ניתוב-מנוע** → אין mate-שגוי. מעלה מוכנות-חבק 25→37.
 - **R8:** לא הומצא חיבור. נחיל הציע spec-חיבור לחבקים → נדחה (חבק=מחבק צינור, ה-1/2" קוטר לא תבריג). low-is-correct ננעל ב-`honest_score_test` (`compatibleProductsCount('77006080')==0`).
 - **גייט:** analyze 0 · `honest_score_test` (mutation-verified: dataCompletenessScore→0 שובר "listing NOT slandered") · card_score+polyroll_score+lipskey_score+external_card_score+line_score ירוקים (שינוי-חבק לא שבר הצמדה) · product_journey(935) ירוק (2-שבבים ב-Wrap בלי overflow).
+### #ai-credit-explain — "💳 הסבר אשראי" ב-sheet הלקוח (מנהל · solo-wave) — 2026-06-23
+- **המהלך:** `credit_explain_screen.dart` (חדש) + נגיעה ב-`manager_dashboard_screen.dart`: ב-`_CustomerDetailSheet` (ConsumerWidget), מתחת לשורות-האשראי (מסגרת/נוצל/יתרה/אתרים), נוסף `if (claudeGatewayProvider != null) ...[` עם `OutlinedButton.icon` **"💳 הסבר אשראי"** → `CreditExplainScreen.route(name, creditLimit, used, balance, pct)`. +2 imports.
+- **הזרימה:** המספרים (מסגרת/נוצל/יתרה/ניצול%) דטרמיניסטיים — `mgrCustomerList`/`contractorCredit`/`computeCredit` מעל מנוע-ההזמנות החי. המסך מציג אותם, ו-Claude **רק מסביר** מה משמעות הניצול לפני אישור הזמנה נוספת.
+- **anti-hallucination (grounded, explain-only):** ה-prompt (`creditExplainPrompt`) מוסר את 4 המספרים ו**אוסר** להמציא/לשנות/להוסיף מספר — החלטת-אשראי = החלטת-כסף. המספרים על המסך = של המנוע.
+- **gating:** ה-`if (claudeGatewayProvider != null)` → ב-demo/no-AI הכפתור **לא קיים בעץ**, ה-sheet byte-identical (שורות-האשראי ללא-שינוי). המסך ב-null → "דורש חיבור".
+- **gate:** analyze 0 errors/warnings · `credit_explain_test` (4-figures verbatim · forbids-inventing guard) ירוק · full-suite baseline. credit_explain_screen + manager_dashboard_screen ב-screens → גייט 24/116.
+
+### #ai-daily-report — "✨ נסח דוח-יום" משותף (עובד + שליח · solo-wave) — 2026-06-23
+- **המהלך:** `daily_report_screen.dart` (חדש, **משותף**) + נגיעה ב-`worker_reports_tab.dart` ו-`courier_reports_tab.dart`: ליד כפתור "💬 שלח דוח יומי" הקיים נוסף `if (gateway != null)` עם **"✨ נסח דוח עם AI"** → `DailyReportScreen.route(title, reportLines)`. כל טאב בונה את ה-reportLines מאותם מספרים-חיים שה-chat-report משתמש בהם (`_openAiDailyReport`/`_openAiCourierReport`). +2 imports בכל טאב.
+- **הזרימה:** עובד — `tasksProvider` (אושרו/הוגשו/נדחו/בביצוע/בתור); שליח — `sysOrders`/`fulfillment`/`courierClock` (נמסרו-היום/סה"כ/פעילים/POD/ערך). המסך מציג את השורות, Claude **רק מנסח** דוח-יום זורם, כפתור "העתק לשליחה".
+- **anti-hallucination (grounded, narrate-only):** ה-prompt (`dailyReportPrompt`) מוסר את שורות-הדוח ו**אוסר** להמציא/לשנות/להוסיף מספר. המספרים = של המנועים.
+- **gating:** `if (claudeGatewayProvider != null)` בכל טאב → ב-demo הכפתור **לא בעץ**, שני הטאבים byte-identical (כפתור-השליחה הקיים ללא-שינוי). המסך ב-null → "דורש חיבור".
+- **gate:** analyze 0 errors (4 warnings pre-existing ב-courier_reports_tab, לא שלי) · `daily_report_test` (title+lines verbatim · forbids-inventing) ירוק · full-suite baseline. daily_report_screen + worker/courier_reports_tab ב-screens → גייט 24/116.
+
+### #ai-site-summary — "✨ סכם התקדמות" ב-יומן-האתר (קבלן · solo-wave) — 2026-06-23
+- **המהלך:** נגיעה ב-`site_hub_screen.dart` (`_SiteDiary`, ConsumerWidget) + הכללת ה-AppBar של `daily_report_screen.dart` ("✨ דוח-יום"→"✨ ניסוח חכם", reuse). ב-`_SiteDiary` נוסף `if (gateway != null)` עם `_CaPrimary` **"✨ סכם התקדמות עם AI"** → `_openSiteSummary` שקורא את 3 המנועים (`siteDiaryProvider`/`siteSnagsProvider`/`siteInspectionsProvider`) ובונה reportLines → `DailyReportScreen.route('סיכום אתר', lines)`. +2 imports.
+- **הזרימה:** המספרים (רישומי-יומן · ליקויים פתוחים/טופלו · ביקורות מתוכננות/בוצעו) דטרמיניסטיים מ-3 ה-providers החיים. המסך מציג אותם, Claude **רק מנסח** סיכום-התקדמות (reuse של DailyReportScreen).
+- **anti-hallucination (grounded, narrate-only):** אותו `dailyReportPrompt` — מוסר את שורות-האתר ו**אוסר** להמציא/לשנות מספר. כיסוי-טסט דרך `daily_report_test` (ה-prompt משותף).
+- **gating:** `if (claudeGatewayProvider != null)` → ב-demo הכפתור **לא בעץ**, ה-יומן byte-identical.
+- **gate:** analyze 0 errors (4 warnings pre-existing dead-code ב-site_hub, לא שלי) · `daily_report_test` ירוק · full-suite baseline. site_hub_screen + daily_report_screen ב-screens → גייט 24/116.
+
+### #ai-reject-reason — "✨ נסח סיבת-דחייה" בבקשות-תפקיד (מנהל · solo-wave, אחרון) — 2026-06-23
+- **המהלך:** `reject_reason_screen.dart` (חדש) + נגיעה ב-`role_requests_inbox_screen.dart` (`_RequestCard`, Stateless): מתחת לשורת אישור/דחייה נוסף `Consumer` (inline) שמרנדר **"✨ נסח סיבת-דחייה"** → `RejectReasonScreen.route(role, name)`. +2 imports.
+- **שונה מהשאר — generative, לא narrate:** כאן ה-AI **מייצר טקסט** ולא מנסח נתון אמיתי, אז העיגון הוא **closed-set של קטגוריות-סיבה** (מסמכים/הדרכה/בדיקת-רקע/אין-מקום) שה-prompt מוסר, + **איסור להמציא עובדות ספציפיות** על האדם. ה-system מגביל לנוסח כללי-מכובד; המנהל עורך/מעתיק לפני שליחה (לא מחווט אוטומטית לדחייה).
+- **gating:** ה-`Consumer` בודק `claudeGatewayProvider == null → shrink` → ב-demo/no-AI **לא קיים בעץ**, הכרטיס byte-identical (אישור/דחייה בלבד).
+- **gate:** analyze 0 errors/warnings · `reject_reason_test` (role+person+closed-set · anti-invention guard) ירוק · full-suite baseline. reject_reason_screen + role_requests_inbox_screen ב-screens → גייט 24/116.

@@ -455,7 +455,9 @@ class BsKeyboard extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
-        color: BsTokens.surfaceMid,
+        // Light-orange seam fill (owner): only the keys keep their own (white)
+        // fill, so every gap between them reads as a warm light orange.
+        color: BsTokens.kbSeam,
         child: Padding(
           padding: const EdgeInsets.all(BsTokens.space1),
           child: Column(
@@ -565,7 +567,7 @@ class _StripToggle extends StatelessWidget {
           selected: active,
           label: semanticLabel,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+            constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
               border: active ? null : Border.all(color: BsTokens.divider),
@@ -615,7 +617,8 @@ class _PredictionChip extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.center,
       style: const TextStyle(
-        fontSize: 15,
+        // Owner: uniform 20px text across the whole keyboard (was 15 on chips).
+        fontSize: 20,
         color: BsTokens.inkLight,
         fontWeight: FontWeight.w500,
       ),
@@ -634,7 +637,7 @@ class _PredictionChip extends StatelessWidget {
             button: true,
             label: '$text (חיפוש)',
             child: Container(
-              constraints: const BoxConstraints(minHeight: 48),
+              constraints: const BoxConstraints(minHeight: 44),
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
               decoration: BoxDecoration(
@@ -662,7 +665,7 @@ class _PredictionChip extends StatelessWidget {
           button: true,
           label: '$text (ניווט)',
           child: Container(
-            constraints: const BoxConstraints(minHeight: 48),
+            constraints: const BoxConstraints(minHeight: 44),
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space2),
             decoration: BoxDecoration(
@@ -676,12 +679,6 @@ class _PredictionChip extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Icon(
-                  Icons.north_east,
-                  size: 14,
-                  color: BsTokens.brand,
-                ),
-                const SizedBox(width: BsTokens.spaceHair),
                 Flexible(child: label),
               ],
             ),
@@ -720,7 +717,7 @@ class _ToolTile extends StatelessWidget {
           button: true,
           label: label,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 56),
+            constraints: const BoxConstraints(minHeight: 44),
             padding: const EdgeInsets.symmetric(
               vertical: BsTokens.space2,
               horizontal: BsTokens.space1,
@@ -729,21 +726,26 @@ class _ToolTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
               border: Border.all(color: BsTokens.divider),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
+              // Owner: the symbol/emoji sits on the SIDE with the phrase beside
+              // it (RTL → icon on the right, label to its left), and the label is
+              // bigger — a horizontal tile, not the old stacked icon-over-label.
+              textDirection: TextDirection.rtl,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(icon, size: BsTokens.dialIconSize, color: BsTokens.inkLight),
-                const SizedBox(height: BsTokens.spaceHair),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: BsTokens.typeMicro,
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(width: BsTokens.space1),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.start,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -776,7 +778,7 @@ class _BackTile extends StatelessWidget {
           button: true,
           label: 'חזרה',
           child: Container(
-            constraints: const BoxConstraints(minHeight: 56),
+            constraints: const BoxConstraints(minHeight: 44),
             padding: const EdgeInsets.symmetric(
               vertical: BsTokens.space2,
               horizontal: BsTokens.space1,
@@ -785,8 +787,8 @@ class _BackTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(BsTokens.radiusCard / 2),
               border: Border.all(color: BsTokens.brand),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
+              textDirection: TextDirection.rtl,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(
@@ -794,16 +796,18 @@ class _BackTile extends StatelessWidget {
                   size: BsTokens.dialIconSize,
                   color: BsTokens.brand,
                 ),
-                const SizedBox(height: BsTokens.spaceHair),
-                const Text(
-                  'חזרה',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: BsTokens.typeMicro,
-                    color: BsTokens.brand,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(width: BsTokens.space1),
+                const Flexible(
+                  child: Text(
+                    'חזרה',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: BsTokens.brand,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],

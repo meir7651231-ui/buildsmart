@@ -4,6 +4,73 @@
 
 ---
 
+## v6.62 — #ai-reject-reason · בקשות-תפקיד (מנהל): כפתור "✨ נסח סיבת-דחייה" — 2026-06-23
+
+**שינוי (lib/screens):** `role_requests_inbox_screen.dart` (`_RequestCard`) — מתחת לאישור/דחייה נוסף `Consumer`
+עם "✨ נסח סיבת-דחייה" → `RejectReasonScreen` (חדש). המסך מנסח נוסח-דחייה מנומס מ-closed-set קטגוריות.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): בכרטיס-בקשה, מתחת לאישור/דחייה, מופיע "✨ נסח סיבת-דחייה";
+  לחיצה פותחת מסך שמנסח נוסח-דחייה כללי-מכובד (loader → טקסט) + "📋 העתק". המנהל עורך/מעתיק.
+- **AI כבוי** (demo/web · gateway null): ה-`Consumer` מחזיר `SizedBox.shrink()` → הכפתור **לא בעץ** →
+  כרטיס-הבקשה byte-identical (כפתורי אישור/דחייה בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors/warnings · `reject_reason_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.62).
+
+---
+
+## v6.61 — #ai-site-summary · יומן-אתר: כפתור "✨ סכם התקדמות עם AI" — 2026-06-23
+
+**שינוי (lib/screens):** `site_hub_screen.dart` (`_SiteDiary`) — אחרי "+ רישום יומן" נוסף `if (gateway != null)`
+עם "✨ סכם התקדמות עם AI" → `_openSiteSummary` (קורא diary+snags+inspections) → `DailyReportScreen` (reuse;
+ה-AppBar הוכלל ל-"✨ ניסוח חכם").
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): בראש יומן-האתר מופיע "✨ סכם התקדמות"; לחיצה פותחת מסך עם
+  שורות-האתר האמיתיות (רישומי-יומן · ליקויים · ביקורות) → נרטיב Claude + "העתק לשליחה".
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → יומן-האתר byte-identical
+  (כפתור "+ רישום יומן" + הרשומות בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 errors · `daily_report_test` (ה-prompt המשותף) ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.61).
+
+---
+
+## v6.60 — #ai-daily-report · טאבי-דוחות (עובד+שליח): כפתור "✨ נסח דוח עם AI" — 2026-06-23
+
+**שינוי (lib/screens):** `worker_reports_tab.dart` + `courier_reports_tab.dart` — ליד "💬 שלח דוח יומי" נוסף
+`if (gateway != null)` עם "✨ נסח דוח עם AI" → `DailyReportScreen` (חדש, משותף). כל טאב בונה reportLines
+מאותם מספרים-חיים שה-chat-report משתמש בהם.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): ליד כפתור-השליחה מופיע "✨ נסח דוח עם AI"; לחיצה פותחת מסך עם
+  שורות-הדוח האמיתיות (loader → נרטיב Claude) + "📋 העתק לשליחה". עובד=סטטוסי-משימות · שליח=מוני-מסירות.
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → שני הטאבים byte-identical
+  (כפתור "💬 שלח דוח יומי" הקיים בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים בשני הטאבים, אפס רגרסיה בדמו. analyze 0 errors · `daily_report_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.60).
+
+---
+
+## v6.59 — #ai-credit-explain · sheet-לקוח (מנהל): כפתור "💳 הסבר אשראי" — 2026-06-23
+
+**שינוי (lib/screens):** `manager_dashboard_screen.dart` — ב-`_CustomerDetailSheet`, מתחת לשורות-האשראי,
+נוסף `if (gateway != null)` עם "💳 הסבר אשראי" → `CreditExplainScreen`. `credit_explain_screen.dart` (חדש) —
+מציג את 4 המספרים האמיתיים (מסגרת/נוצל/יתרה/ניצול%) וקורא ל-Claude להסבר.
+
+**אימות (reasoning + קוד — אין מכשיר כאן):**
+- **AI דלוק** (`claudeGatewayProvider != null`): ב-sheet הלקוח, מתחת לשורות-האשראי, מופיע "💳 הסבר אשראי";
+  לחיצה פותחת מסך עם המספרים האמיתיים בראש (loader → הסבר Claude מה הניצול אומר לפני אישור הזמנה). כשל → "נסה שוב".
+- **AI כבוי** (demo/web · gateway null): ה-`if` שקרי → הכפתור **לא בעץ** → ה-sheet byte-identical
+  (שורות-האשראי + רשימת-ההזמנות בלבד, כמו קודם).
+
+**תוצאה:** ✅ שני המצבים נכונים, אפס רגרסיה בדמו. analyze 0 · `credit_explain_test` ירוק.
+צילום על-מכשיר ע"י הבעלים בבילד הבא (v6.59).
+
+---
+
 ## v6.56 — #ai-assistant-agentic Phase 2 · "הוסף לסל" עם אישור בבועה — 2026-06-23
 
 **שינוי (lib/screens):** `ai_assistant_screen.dart` — בועת-עוזר עבור `addToCart` מציגה את הערכה (רשימת-פריטים אמיתית)

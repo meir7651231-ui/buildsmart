@@ -356,6 +356,37 @@ final searchResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
       .toList();
 });
 
+/// The keyboard's live DIVE query — set by the floating card-keyboard on every
+/// keystroke (catalog tab). Drives [diveResultsProvider]; the catalog body then
+/// shows those products NATIVELY — the app DIVES, with NO search panel/chrome.
+final keyboardDiveQueryProvider = StateProvider<String>((_) => '');
+
+/// The products the live DIVE shows: the matcher proven most reliable in the
+/// engine probe ([catalogProductMatchesQuery] — the SAME one the search uses),
+/// driven by the keyboard's query. AND-tokens → OR → fuzzy; system-filtered +
+/// sorted; capped at 40. Empty until the query reaches 2 chars.
+final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
+  final query = ref.watch(keyboardDiveQueryProvider).trim();
+  if (query.length < 2) return const [];
+  final sort = ref.watch(catalogProductSortProvider);
+  final systemFilter = ref.watch(catalogSystemFilterProvider);
+  var matched = kCatalogProducts
+      .where((p) => catalogProductMatchesQuery(p, query))
+      .toList();
+  if (matched.isEmpty) {
+    matched = kCatalogProducts
+        .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
+        .toList();
+  }
+  if (matched.isEmpty) matched = fuzzySearchProducts(query, limit: 40);
+  final filtered = filterBySystem(matched, systemFilter);
+  final ordered = sort == ProductSort.byOrder
+      ? ([...filtered]..sort((a, b) =>
+          searchRelevance(b, query).compareTo(searchRelevance(a, query))))
+      : sortCatalogProducts(filtered, sort);
+  return ordered.take(40).toList();
+});
+
 /// Pure: keep only products that have an image when [imageOnly] is set.
 List<LipskeyCatalogProduct> filterByImage(
     List<LipskeyCatalogProduct> list, bool imageOnly) {
@@ -576,6 +607,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     });
 
     final searchOpen = ref.watch(searchPanelOpenProvider);
+    // Live DIVE (owner): when the floating keyboard has a query, the catalog
+    // body shows the NATIVE narrowed product list — the app dives in place
+    // (no search panel). Yields to an explicitly-opened search panel.
+    final diveActive = ref.watch(keyboardDiveQueryProvider).trim().length >= 2;
     final showFull = _headerVisible || searchOpen;
 
     return Column(
@@ -585,7 +620,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child: showFull
+            child: showFull && !diveActive
                 ? const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [_SearchBar()],
@@ -595,6 +630,8 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         ),
         if (searchOpen)
           const Expanded(child: _SearchPanel())
+        else if (diveActive)
+          const Expanded(child: _DiveResultsView())
         else ...[
           ClipRect(
             child: AnimatedSize(
@@ -1670,6 +1707,30 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
         ),
       ),
     );
+  }
+}
+
+/// The live DIVE view (owner): the catalog body when the floating keyboard has
+/// a query — the engine-narrowed products in the NATIVE product list. The app
+/// dives in place; no search panel, no search chrome.
+class _DiveResultsView extends ConsumerWidget {
+  const _DiveResultsView();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(diveResultsProvider);
+    if (products.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(BsTokens.space4),
+          child: Text(
+            'אין מוצרים תואמים',
+            style: TextStyle(color: BsTokens.mutedLight),
+          ),
+        ),
+      );
+    }
+    return LipskeyProductsList(products: products);
   }
 }
 

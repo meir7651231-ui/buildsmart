@@ -78,6 +78,11 @@ class BsTokens {
   static const Color warnBright = Color(0xFFF2A516); // bright amber badge
   static const Color divider = Color(0xFFEEEEEE); // ×39 raw
   static const Color surfaceMid = Color(0xFFF5F5F5); // ×70 raw
+  // Light tint of the brand orange (== brand #FF7A18 @ ~33% over white) — the
+  // floating card-keyboard's seam/background fill: the app's OWN orange,
+  // lightened so the white buttons read clearly on top (owner: a colour that
+  // matches the app, derived from the brand — not an arbitrary peach).
+  static const Color kbSeam = Color(0xFFFFD3B3);
 
   // Chat-specific text colors (light background, high-contrast).
   static const Color chatText = Color(0xFF111111);

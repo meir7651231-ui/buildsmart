@@ -75,8 +75,10 @@ void main() {
     expect(find.text('התקנת קו מים חם — חדר רחצה'), findsWidgets,
         reason: 'the seeded done task (id 1) is listed as real content');
 
-    // The sheet has an explicit ≥48dp close (sheet rule) — tapping it dismisses.
-    await tester.tap(find.bySemanticsLabel('סגור').first);
+    // The sheet has an explicit ≥48dp close (sheet rule) — tapping its ✕ icon
+    // dismisses. (The button also carries a `Semantics(label: 'סגור')` for a11y;
+    // we tap the icon directly, which is robust without an enabled semantics tree.)
+    await tester.tap(find.byIcon(Icons.close).last);
     await tester.pumpAndSettle();
     expect(find.text('🎯 אישור-ראשון — פירוט'), findsNothing,
         reason: 'the close button dismisses the drill-down');

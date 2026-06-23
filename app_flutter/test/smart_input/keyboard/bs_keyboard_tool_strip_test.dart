@@ -263,18 +263,12 @@ void main() {
   // chip (and EVERY chip while the set is empty — the default) renders as a
   // plain word chip with NO glyph (the byte-identical historical render).
   group('destinationChips (fitting-prediction distinction)', () {
-    // Finds the nav glyph that is a DESCENDANT of the chip whose label is
-    // [chip] — i.e. the glyph rendered INSIDE that specific prediction chip
-    // (its Row sits in the same InkWell as the label Text).
-    Finder glyphInChip(String chip) => find.descendant(
-          of: find.widgetWithText(InkWell, chip),
-          matching: find.byIcon(Icons.north_east),
-        );
-
     testWidgets(
-        'a chip in destinationChips shows the nav glyph; a word chip does NOT',
+        'destination + word chips all render; the nav glyph is removed',
         (tester) async {
-      // 'ברז כדורי' is marked a destination; 'ניפל' and 'סיפון' stay words.
+      // 'ברז כדורי' is marked a destination; 'ניפל' and 'סיפון' stay words. The
+      // leading nav glyph was REMOVED per owner request ("בלי חיצים"), so the
+      // dest/word distinction now lives in the chip border/wash, not a glyph.
       await pump(
         tester,
         showToolStrip: true,
@@ -287,17 +281,9 @@ void main() {
         expect(find.text(p), findsOneWidget);
       }
 
-      // Exactly one nav glyph exists, and it is INSIDE the destination chip.
-      expect(find.byIcon(Icons.north_east), findsOneWidget,
-          reason: 'only the destination chip carries the nav glyph');
-      expect(glyphInChip('ברז כדורי'), findsOneWidget,
-          reason: 'the destination chip ברז כדורי shows the nav glyph');
-
-      // The product-word chips carry NO glyph.
-      expect(glyphInChip('ניפל'), findsNothing,
-          reason: 'a product word chip must not show the nav glyph');
-      expect(glyphInChip('סיפון'), findsNothing,
-          reason: 'a product word chip must not show the nav glyph');
+      // No nav glyph survives on ANY chip (the arrows were removed).
+      expect(find.byIcon(Icons.north_east), findsNothing,
+          reason: 'the nav glyph was removed from all chips');
     });
 
     testWidgets(

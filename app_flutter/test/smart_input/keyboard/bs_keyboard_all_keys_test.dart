@@ -154,7 +154,8 @@ void main() {
       }
 
       // COVERAGE — the union of text outputs we collected covers every letter
-      // plus the punctuation/space/period bottom-row text keys.
+      // plus the maqaf/geresh/space bottom-row text keys. (The period key was
+      // removed per owner request, so the LETTERS layer no longer emits '.'.)
       expect(
         textOutputs.containsAll(expectedLetters),
         isTrue,
@@ -165,7 +166,6 @@ void main() {
       expect(textOutputs.contains('־'), isTrue, reason: 'maqaf missing');
       expect(textOutputs.contains('׳'), isTrue, reason: 'geresh missing');
       expect(textOutputs.contains(' '), isTrue, reason: 'space missing');
-      expect(textOutputs.contains('.'), isTrue, reason: 'period missing');
 
       // Exactly one of each tool key on this layer.
       expect(backspaceKeys, 1, reason: 'exactly one backspace key');
@@ -332,7 +332,8 @@ void main() {
       }
 
       // COVERAGE — every one of the 26 English letters was inserted via onKey,
-      // plus the bottom-row text keys (space ' ' and period '.').
+      // plus the space ' ' bottom-row text key. (The period key was removed per
+      // owner request, so no layer's bottom row emits '.' anymore.)
       expect(
         textOutputs.containsAll(expectedEnglishLetters),
         isTrue,
@@ -345,7 +346,6 @@ void main() {
         reason: 'expected 26 English letters',
       );
       expect(textOutputs.contains(' '), isTrue, reason: 'space missing');
-      expect(textOutputs.contains('.'), isTrue, reason: 'period missing');
 
       // Exactly one of each tool key on this layer. On the English letter layer
       // the layer-switch key is the '?123' symbols toggle.

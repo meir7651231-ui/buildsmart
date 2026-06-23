@@ -52,13 +52,14 @@ const List<List<KbKey>> kHebrewRows = <List<KbKey>>[
 ];
 
 /// The bottom row, authored left-to-right: send, the `?123` layer switch, the
-/// language globe, the wide space bar (labelled `עברית`), period, and enter.
+/// language globe, the wide space bar (labelled `עברית`), and enter. (The period
+/// key was removed per owner request — a near-empty '.' a search/nav keyboard
+/// does not need; restore the KbKey below if it is ever wanted again.)
 const List<KbKey> kBottomRow = <KbKey>[
   KbKey('שלח', kind: KeyKind.send),
   KbKey('?123', kind: KeyKind.symbols),
   KbKey('globe', kind: KeyKind.language),
   KbKey('עברית', kind: KeyKind.space, output: ' ', flex: 4),
-  KbKey('.', kind: KeyKind.period, output: '.'),
   KbKey('↵', kind: KeyKind.enter),
 ];
 

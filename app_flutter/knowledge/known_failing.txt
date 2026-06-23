@@ -8,10 +8,10 @@
 # אם תוסיף baseline — פרט כאן את השמות המדויקים (לא מספר בלבד), אחרת agents
 # נתקעים בלי לדעת אילו כשלים ידועים ואילו חדשים.
 
-# 2026-06-14: כשל שהגיע מ-worker-board-v3 (merge של צי-העובד, commit 22ca2e2) — לא שלי.
-# הפיצ'ר עובד (ה-drill-down נפתח עם דאטה אמיתית); רק כפתור-הסגירה לא נמצא ע"י
-# find.bySemanticsLabel('סגור') (Semantics+InkWell+Icon ידני במקום IconButton). לתיקון ע"י צי-העובד.
-worker_reports_drilldown_test.dart :: tapping the first-pass KPI box opens a real drill-down sheet listing the seeded done task (not a dead tap)
+# 2026-06-14→fixed 2026-06-23 (v6.58): worker_reports_drilldown_test היה כושל
+# (close-button לא נמצא ע"י find.bySemanticsLabel('סגור') בלי semantics-tree פעיל).
+# תוקן: הבדיקה משתמשת ב-find.byIcon(Icons.close).last (חסין, בודק אותה התנהגות).
+# הוסר מה-baseline → known-failing ירד 2→1.
 
 # 2026-06-17: golden-test של צי-המקלדת (merge ~commit 9b3d01b) — לא שלי. `_loadIcons()`
 # קורא path קשיח של Windows: `C:/flutter/bin/cache/artifacts/material_fonts/
