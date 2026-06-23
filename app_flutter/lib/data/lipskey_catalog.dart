@@ -2147,7 +2147,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
-    imageFile: null,
+    imageFile: '120311.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '124533',

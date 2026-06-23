@@ -85,6 +85,7 @@ void main() {
     test('branch twins — same physical product reuses the twin live image', () {
       expect(bySku('118221').imageFile, '116223.jpeg'); // 45° DN40 == 116223 (40/40/40)
       expect(bySku('116589').imageFile, '116689.jpeg'); // 90° 32/32 == 116689
+      expect(bySku('120011').imageFile, '120311.jpeg'); // air cap DN110 == 120311
     });
     test('image relink — assets present on R2 but unlinked are now wired', () {
       expect(bySku('997091').imageFile, '997091.jpeg'); // ברך 90° — asset existed, was null
