@@ -336,3 +336,63 @@ Layered, defense-in-depth. **The model is structurally incapable of most damage 
 **Touched (additive only):** `lib/data/repositories/backend.dart` (+`kStudioCoEditor`) · `lib/screens/manager_dashboard_screen.dart` (+Studio cockpit hero, ~`:420`, manager-only) · `WIRING.md` (#24) · `knowledge/GATE_REGISTRY.md` + `.githooks/pre-commit` (+gate #118) · `STATUS.md`/`ROADMAP.md` (#92/#93).
 **Reused unchanged:** `claude_functions.dart` (the gateway), `functions/src/claude.ts` (the proxy + limits), `prompt_sanitize.dart`, `ai_result_states.dart`, the `BsRole`/`BoardRole` enums, the propose→confirm idiom.
 **Coordinated (NOT built here):** Pillar 1's `ElementRegistry` + draft `apply/revertLast` + wrapper render; Pillar 5's backend/rate-limit.
+
+---
+
+## 🔧 תיקוני Red-Team R1 (מחייב — מחליף סעיפים סותרים)
+
+> מקור: `RED-TEAM-R1.md` (סבב-1, 2026-06-23). הסעיפים כאן **גוברים** על כל ניסוח קודם במסמך זה.
+> כל פריט: *מה משתנה · §-מוחלף · שלב מושפע.* התמה המרכזית של R1 ל-P4: **התפר P1↔P4 תת-מוגדר** ו-**אכיפת-הבטיחות חייבת לרוץ בשרת** — ה-client הוא advisory בלבד.
+
+### R1-1 · אכיפה-בשרת — `validateSafe` רץ **שוב** ב-`publishConfig` (C10 · R1 §36-37)
+**מה משתנה:** `validateSafe` ב-`edit_safety.dart` הוא **advisory-בלבד ועקיף** בצד ה-client. כל חמשת הבדיקות — **role-floor · action-legality · critical-lock · contrast · batch-ceiling** — חייבות **לרוץ מחדש בשרת בתוך `publishConfig`** (טריטוריית P5/P1). client שעבר אינו ערובה; פרסום שלא עבר את האימות-בשרת **נדחה** (fail-closed). ה-diff שנשלח לפרסום מאומת-מחדש מול אותו רישום-קפוא (R1-2), לא מול מצב-client.
+**§-מוחלף:** §7.7 ("Draft-only … client proposes, server/owner-gate sanctions") — מורחב: לא רק *write* עובר לשרת אלא **כל לוגיקת-ה-validateSafe**. §3.2 שורת-הפרסום (`Pillar1.draft.apply`) מקבלת שכבת-אימות-שרת לפני שידור. §12 ("preview vs applied vs published") — published = **אחרי אימות-שרת חוזר**, לא רק auth+טרנזקציה.
+**שלב מושפע:** Phase 3 (NL co-editor) + תיאום P5/P1 ב-Phase 0 (חוזה `publishConfig`). gate חדש **#119 = P4 AI-grounded-config** (R1 §62; לא #118 — ראה R1-fix-gate למטה).
+
+### R1-2 · תלות-רישום מפורשת + fail-closed (A1 · R1 §14-15)
+**מה משתנה:** כל closed-set ש-P4 מקרקע מולו — `editableProps`/`allowedActions`/`allowedValues`/`kImmutable`/`kRoleFloor`/`ElementKind` — חייב להיות **מוצהר ב-`ElementDescriptor` של P1 ב-Phase-0**. כיום `ElementDescriptor` = `axes`/`critical`/`personas` בלבד → `validateSafe` יוצא **ירוק-ריק (vacuous)** ומאשר הכל. עד ש-P1 מרחיב את החוזה ומקפיא אותו (לפני step-30), **`validateSafe` כשהשדה חסר = fail-closed** (חוסם, לא מאשר). חוזה-הרישום **קפוא** לפני הקפאת-ה-seams.
+**§-מוחלף:** §2 (חוזה-הרישום) — מסומן כעת כ-**תלות-Phase-0-חוסמת**, לא הנחה. §7.1 ("Closed-set grounding") — מובהר: grounding ריק = drop-all, לא pass-all. §12 שורת "Pillar 1 interface churn" — מוסיף את התנאי שהרישום-המורחב קפוא-לפני-בנייה.
+**שלב מושפע:** Phase 0 (BLOCKING) — Deliverable: `ElementDescriptor` מורחב + frozen-interface-doc. בלי זה Phase 1 לא מתחיל.
+
+### R1-3 · מודל-פרסונה יחיד — `roleProvider` (String?), לא `BsRole` (A2 · R1 §16-17)
+**מה משתנה:** מקור-האמת-היחיד לפרסונה = **`roleProvider` (String?, null = קבלן)**, החי. `SetVisible` עובד מול `roleProvider`, **לא** מול `BsRole`. ה-enums (`BsRole`/`BoardRole`) הם **מיפוי-תצוגה דרך adapter** בלבד, לא מקור-אמת. הרצפה "הסתר מכל הפרסונות" (R1-5/role-floor) מוגדרת **מעל מפת-הפרסונה-האמיתית** של `roleProvider` (כולל קבלן=null), לא מעל ה-enum החלקי שמשמיט קבלן → אחרת עריכה פר-קבלן = "נשמר, כלום לא קורה".
+**§-מוחלף:** §1.6 ("Visibility is keyed by `BsRole`") + §3.3 חתימת `SetVisible{role: BsRole?}` → **`SetVisible{roleProvider: String?, visible}`** (null=קבלן). §7.3 (role-floor) מחושב מעל מפת-`roleProvider`. דוגמת "תסתיר מהשליחים" = `שליח → roleProvider token` (closed-set מהרישום), לא enum.
+**שלב מושפע:** Phase 1 (`config_op.dart` חתימת-op) + Phase 0 (adapter `roleProvider`↔enum מוסכם מול P1).
+
+### R1-4 · draft-op-API — `applyOps`+undo של P1, לא apply משלנו (A3 · R1 §18-19)
+**מה משתנה:** P4 כותב **אך ורק** דרך ה-API מבוסס-op של P1: **`applyOps(List<ConfigOp>)` + undo-stack של P1**. אנחנו **לא ממציאים** `apply` משלנו. `editDraft(id, CfgNode Fn)` הוא primitive-פנימי של P1 — לא נוגעים בו. ה-op-stack שלנו ל-UI הוא **מראה (mirror)** בלבד; מקור-האמת = ה-undo-stack של P1.
+**§-מוחלף:** §3.2 שורת `Pillar1.draft.apply(applied)` → **`Pillar1.applyOps(applied)`**; שורת `[undo] → Pillar1.draft.revertLast()` → **undo דרך undo-stack של P1**. §1.8/§13 ("draft `apply/revertLast`") → **`applyOps`+undo-stack**.
+**שלב מושפע:** Phase 0 (חוזה ה-API מוסכם+קפוא מול P1) + Phase 2/3 (קריאות-הכתיבה).
+
+### R1-5 · nav מוגבל ל-~38 מסכי-no-arg; typed-arg out-of-v1 ומוצהר (B8 · R1 §30-31)
+**מה משתנה:** `nav.screen` תקף **רק ל-~38 מסכי-no-arg**. 11 המסכים עם typed-args **אינם נתמכים ב-v1** — הם דורשים **arg-builders פר-מסך** שאינם קיימים, ולכן **out-of-v1 ומוצהרים מפורשות**. `matchScreenId` מקרקע מול ה-closed-set של מסכי-ה-no-arg בלבד; מסך-typed-arg = drop (degrade), לא ניחוש-arg.
+**§-מוחלף:** §4 שורת `nav.screen` ("target screen picked from a closed screen-id set") + §4 הערה "`nav.screen` target is itself a closed set" — מצומצם ל-**38 no-arg בלבד**; נוספת הצהרת out-of-v1 ל-11 typed-arg + הפניה ל-arg-builders עתידיים.
+**שלב מושפע:** Phase 1 (`action_catalog.dart` — רשימת מסכי-ה-no-arg). test #6 מאמת ש-typed-arg-screen → drop.
+
+### R1-6 · legal-but-harmful — floor `criticalBusiness` + contrast **בתוך** `validateSafe` (C/AI#6 · R1 §35,37)
+**מה משתנה:** מעבר ל-nav/auth-immutability (§7.2) קיים floor חדש **`criticalBusiness`**: פעולות **חוקיות-אך-מזיקות** נחסמות גם הן — **אי-אפשר להסתיר מחיר**, **אי-אפשר לשנות/להסתיר "אשר הזמנה"**, **אי-אפשר ליצור כשל-ניגודיות (contrast-fail)**. ה-**contrast-check רץ בתוך `validateSafe`** (לא רק לינט-CI): `SetProp(color)`/`SetText` שמוריד ניגודיות מתחת WCAG-AA על element קריטי → blocked עם נימוק-עברית. `criticalBusiness` הוא חלק מחמשת-הבדיקות שרצות-שוב-בשרת (R1-1).
+**§-מוחלף:** §7.2 (nav/auth immutability) — מורחב ב-floor `criticalBusiness` נפרד. §7.4 (prop/value) — contrast-check נכנס פנימה ל-`validateSafe`, לא נשען על ה-gate של #61/#64. §10 שורת WCAG-AA — מועברת מ-"לינט" ל-runtime-validation.
+**שלב מושפע:** Phase 1 (`edit_safety.dart` — בדיקת-ניגודיות + `kCriticalBusiness` מהרישום). test #3 מוסיף assertion ל-hide-price/approve-order/contrast.
+
+### R1-7 · Stage-A closed-set scope + "מעורפל→שאל" + scope ב-preview (AI#5 · R1 §12 תמה-A)
+**מה משתנה:** מסַווג-ה-scope (Stage A, §9.1) **חייב** להחזיר **closed-set token מהרישום** (לא string חופשי על אזור). utterance **מעורפל → "שאל הבהרה"** (לא ניחוש-scope). ה-scope-שזוהה **מוצג ב-preview** לאישור-היעד: *"מתוך: לשונית רכש"* / *"מתוך: כל הכפתורים"* — כדי שהבעלים יאשר שהמערכת כיוונה לאזור-הנכון לפני שמסתכלים על השינויים.
+**§-מוחלף:** §9.1 (Two-stage grounding) — Stage A מוגדר כעת כ-closed-set-classifier עם ענף "ambiguous→clarify", לא חלוקת-טקסט-חופשי. §3.2 (runtime flow) — `summarizeDiff` כולל שורת-scope בראש ה-preview. §3.3 שורת ה-`scope` token — מקורקעת מפורשות ל-closed scope-set מהרישום.
+**שלב מושפע:** Phase 3 (`edit_prompt.dart` Stage-A) + `diff_preview.dart` (שורת-scope). test #2 מאמת scope closed-set + ambiguous-path.
+
+### R1-8 · batch session-budget מצטבר + guard ">K% מהרישום" (AI#8 · R1 §44 מעקות)
+**מה משתנה:** `kStudioMaxBatch` (§7.6) הוא per-utterance בלבד — לא מספיק. נוסף **תקציב-מצטבר לכל draft/session** (`kStudioSessionBudget` — סך-ה-ops המצטבר על-פני utterances באותו draft) + **guard מבני**: אם ה-diff המצטבר **נוגע ב->K% מהרישום** (`kStudioMaxRegistryFraction`, למשל 25%) → blocked עם "השינוי נרחב מדי לסשן". זה מעקה-עלות (R1 §44) וגם foot-gun-guard מול "שכתב-הכל". התקרה-המצטברת נאכפת **גם בשרת ב-`publishConfig`** (R1-1).
+**§-מוחלף:** §7.6 (Batch ceiling) — מורחב מ-per-op ל-**per-session + registry-fraction**. §9 (cost) — שורת "rewrite ALL" מקבלת תקרת-סשן, לא רק batched-call. §12 שורת "Broadcast rewrites whole app" — מוסיף את ה-session-budget.
+**שלב מושפע:** Phase 1 (`edit_safety.dart` — counters מצטברים) + Phase 5 (תיאום P5 על התקרה-בשרת). test #3 מוסיף over-session-budget + over-fraction.
+
+### R1-9 · `SetProp(color)` — subset-טוקנים פר-element-kind (AI#7 · R1 תמה-C)
+**מה משתנה:** `SetProp(color)` **לא** מקבל כל `BsTokens`/כל פלטת-המותג — אלא **subset-טוקנים מוגבל פר-element-kind**. כפתור, badge, טקסט-קריטי וכו' — לכל אחד ה-subset-החוקי-שלו דרך `allowedValues(id,'color')` (שמקורקע ב-`editableProps` של הרישום, R1-2). "ירוק" על כפתור-רגיל ≠ token-חוקי על element קריטי אם ה-subset-שלו אוסר. מונע יצירת contrast-fail (R1-6) דרך טוקן-לגיטימי-אך-לא-מתאים.
+**§-מוחלף:** §3.3 הערת `SetProp(color)`. §7.4 ("a closed palette") — מובהר: הפלטה **לא גלובלית** אלא **פר-element-kind**, חיתוך של `BsTokens`. §5 ("label/text props") — נשאר; הצבע מצומצם.
+**שלב מושפע:** Phase 1 (`registry_view.dart` `allowedValues` פר-kind) + R1-2 (הרישום מצהיר את ה-subsets). test #1 מאמת color out-of-subset-for-kind → drop.
+
+### R1-10 · זיהוי JSON קטוע (truncation) → "לא הצלחתי", לא preview-חלקי (AI#10 · R1 תמה-AI)
+**מה משתנה:** `parseConfigEdit` חייב **לזהות תשובת-JSON קטועה** — `finish_reason` שאינו `stop`/`end_turn` (truncated by `maxTokens`), או `}` חסר / סוגריים לא-מאוזנים — ולהחזיר **"לא הצלחתי לבנות את השינוי, נסה שוב"** במקום לבנות **preview-חלקי** מ-ops חלקיים. תשובה-קטועה ≠ ops-תקפים-חלקית; היא נדחית כיחידה. זה מעבר ל-malformed-tolerance הקיים (שמטפל ב-non-JSON) — כאן הסכנה היא JSON-**תקף-תחבירית-אך-קטוע** שנפרס חלקית.
+**§-מוחלף:** §3.2 (200-empty→honest retry) — מורחב לכלול truncated→honest-fail. §3.3/§7.1 — `parseConfigEdit` מוסיף truncation-guard לפני ולידציית-שדות. §10 test #1 שורת "Malformed / partial" — מובהר ש-**truncated-valid-JSON** הוא מקרה-בדיקה נפרד (לא רק non-JSON).
+**שלב מושפע:** Phase 1 (`edit_intent.dart` truncation-detect; ה-gateway כבר מחזיר model/text — נצרף finish-signal דרך P5). test #1 מוסיף truncated-JSON → empty+fail.
+
+### תיאום-gate (R1 §61-62)
+**`#118` שמור ל-P1** (config-registry: `id ⊆ registry`). gate-ה-grounding של P4 = **`#119` = P4 AI-grounded-config** (P3 analytics-PII = #120). §10 ("New gate #118") ו-§11 Phase-3 ("gate #118 registered") — **מתוקנים ל-#119**. שלוש השורות נרשמות מראש ב-`GATE_REGISTRY.md` (P1 בבנייה).

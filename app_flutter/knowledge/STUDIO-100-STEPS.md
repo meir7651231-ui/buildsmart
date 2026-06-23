@@ -1,5 +1,8 @@
 # 🏗️ BuildSmart Studio — תוכנית-הבנייה ב-100 שלבים (1→100, לא 99)
 
+> 🚨 **100 = טקסונומיית-משימות, לא אומדן-מאמץ/commits. ריאלי ≈ 150–180 commits.** (Red-Team B9.)
+> 5 השלבים המסומנים `⚠️ אפי` למטה מתפצלים כל-אחד למספר sub-commits; ראה `studio-plan/RED-TEAM-R1.md`.
+
 > פירוק מוסכם של `STUDIO-BUILD-PLAN.md` ל-**בדיוק 100 שלבים** ע"י נחיל-פירוק (5 סוכנים, 2026-06-23),
 > כל אחד מקורקע ב-file:line. הפירוט המלא לכל בלוק: `studio-plan/steps/0N-steps.md`.
 > כל שלב: מגודר (`kStudio*`/`kMgr*` default OFF) · אפס-רגרסיה · עובר 100-שערים (analyze 0 + suite) · עברית/RTL/a11y · ממשל-#84 · server-ready.
@@ -44,7 +47,7 @@
 26. סט-ids-קריטיים + ולידטור-פרסום (אי-אפשר להסתיר קריטי)
 27. reset-3-scopes + whitelist-התנהגות + ולידציה-בכתיבה
 28. חבילת-בטיחות (קריטי-לא-נסתר · tokens חסומים · ניגודיות · reset)
-29. פריסת-אימוץ-תוכן מסך-מסך + codemod לחילוץ-רישום
+29. פריסת-אימוץ-תוכן מסך-מסך + codemod לחילוץ-רישום  ⚠️ אפי — מפוצל ל-N sub-commits (אימוץ ~532 ליטרלים, רב-commits)
 30. הקפאת 4 ה-seams לעמודים + עדכון ידע (WIRING/GATE/MAP)
 
 ## 🟡 פאזה 3 · בונה-התחומים ("חשמלאי מחר")  [עמוד-2 · שלבים 31–50]
@@ -56,8 +59,8 @@
 34. חנות-תחומים-authored (deltas בלבד, SharedPreferences)
 35. adapter `TradeProduct.toLegacy()`→`LipskeyCatalogProduct`
 36. גנרטור: consts → מסמך-תחום-אינסטלציה + קטגוריות/מוצרים
-37. commit ל-seed כולל `CompatibilityRules` מ-891 ה-specs
-38. **🔑 אבן-פינה — assert seed ≡ const זהה-בייט/סמנטיקה**
+37. commit ל-seed כולל `CompatibilityRules` מ-891 ה-specs  ⚠️ אפי — מפוצל ל-N sub-commits (גזירת-891 + seed)
+38. **🔑 אבן-פינה — assert seed ≡ const answer-equivalent מול fixtures קיימים** (`compat_50_samples`/`catalog_regression`)  ⚠️ אפי — מפוצל ל-N sub-commits (answer-equivalent seed)
 39. מנוע תחום-אגנוסטי טהור: canConnect/completion/coherence
 40. parity-resolver — מנוע על-המטריצה מול התשובות-הישנות
 41. עטיפת-מנוע מאחורי דגל, ענף-אינסטלציה נשמר
@@ -68,7 +71,7 @@
 46. עורכי מוצרים + אביזרים
 47. סטודיו חוקי-חיבור + גיליון-פרסום
 48. ייבוא: תבנית + מיפוי-עמודות + dry-run + commit גדור
-49. הפשטת פיזיקת-install-studio + brand-ladders ב-seams גדורים
+49. הפשטת פיזיקת-install-studio + brand-ladders ב-seams גדורים  ⚠️ אפי — מפוצל ל-N sub-commits (refactor install-studio + brand-ladders)
 50. **✅ קבלת "חשמלאי" מקצה-לקצה — קטלוג+סטודיו עובדים**
 
 ## 🟡 פאזה 4 · קנה-מידה + שרת + פרסום-לכולם  [עמוד-5 · שלבים 51–68]
@@ -86,7 +89,7 @@
 60. collection `catalogProducts/{sku}` + browse מדף
 61. importer-seed default-OFF לקטלוג + עץ-bundled
 62. seam `SearchRepository`; local עוטף `fuzzySearchProducts` verbatim
-63. חיפוש-שרת + `onCatalogProductWrite` token-indexer
+63. חיפוש-שרת + `onCatalogProductWrite` token-indexer  ⚠️ אפי — מפוצל ל-N sub-commits (חיפוש-שרת + indexer + parity)
 64. data-cache מדף-קטלוג + `CATALOG_BASE_URL` (תאום דפוס-התמונות)
 65. בלוקי-rules §5: owner-write/world-read config+catalog, analytics append-only
 66. מעקות-עלות: `maxInstances:10` + מונים-מבוזרים + rollup יומי
@@ -109,7 +112,7 @@
 79. `summarizeDiff` — preview עברית (broadcast/blocked)
 80. דגל `kStudioCoEditor` + provider (enabled × ai)
 81. כניסת-hero מנהל-בלבד + shell + off-states
-82. בונה-ידני בלי-מודל: אלמנט→prop/visibility/component/action→preview→confirm→undo
+82. בונה-ידני בלי-מודל: אלמנט→prop/visibility/component/action→preview→confirm→undo  ⚠️ אפי 82–84 — מפוצל ל-N sub-commits (3 מסכי-מנהל)
 83. חיווט pane-NL: `gateway.ask`→parse→safe→preview→confirm + off-state כן
 84. מודל-חוקים סגור + `parseRule` + מסך-חוקים ידני/NL
 85. שער-#118 + נעיצות-injection + audit-#84 + עדכון-docs
@@ -140,3 +143,25 @@
 - **תלות-מפתח:** עמוד-1 (1–30) הוא היסוד — 31–100 נבנים עליו (רישום + עץ-קונפיג + seams). עמוד-5 (51–68) הוא שכבת-הקיום שמשרתת את כולם.
 - **תנאי-סף לפאזה-6:** שלב-86 (פרטיות) חייב לפני הפעלת-אנליטיקה.
 - כל שלב = commit עצמאי, גדור, אפס-רגרסיה, עובר-שערים, ניתן-למשלוח.
+
+---
+
+## ➕ שלבים-חסרים (Red-Team R1) — להשתלב בפאזות
+
+> 12 שלבים שהעדשה ה-8 (פערי-שלמות) + תמות C/E חשפו כחסרים מ-100 הבסיס. **תוספתי** ל-100 (לא מחליף),
+> משולב לתוך הפאזה היעד. מקור: `studio-plan/RED-TEAM-R1.md` §E + תיקוני-gate. ספירת-הבסיס נשארת **בדיוק 100**.
+
+| # | שלב חסר | פאזה-יעד | מקור Red-Team |
+|---|---------|----------|---------------|
+| **M1** | concurrency: publish עם compare-and-set (expected-version) + "מנהל אחר עורך" detection | פאזה-4 (P5, סביב 56–58) | E#14 |
+| **M2** | export/import/backup JSON מלא + restore-from-file של קונפיג/תחומים | פאזה-1 (P1) | E#15 |
+| **M3** | archive + ניקוי-יתומים (orphan-cleanup) של תחום/מוצר — tombstone + fan-out + migrate-map | פאזה-2 + פאזה-4 (P2/P5) | E#16 |
+| **M4** | staged-rollout (canary/אחוזים) + preview-כמשתמש-אמיתי לפני שידור | פאזה-4 (P5) | E#17 |
+| **M5** | `Trade.schemaVersion` + `migrate()` לתחומים-authored | פאזה-3 (P2) | E#18 |
+| **M6** | edit-mode perf-gate על מסך-צפוף (תקציב-rebuild) | פאזה-1 (P1) | E#18 |
+| **M7** | onboarding/first-run לבעלים (היכרות עם הסטודיו) | פאזה-1 (P1) | E#18 |
+| **M8** | undo first-class — tree / find-replace / theme | פאזה-1 (P1) | E#18 |
+| **M9** | E2E חוצה-עמודים + UAT-בעלים | פאזה-6 / שלב-100 | E#18 |
+| **M10** | a11y לקונכיית-הסטודיו עצמה (RTL/textScaler/contrast למסכי-הניהול) | פאזה-1 (P1) | E#18 |
+| **M11** | אובזרבביליות-שימוש-בסטודיו (telemetry על פעולות-עריכה/פרסום) | פאזה-3 (P3) | E#18 |
+| **M12** | i18n/bidi של תוכן-authored — או הצהרת **Hebrew-only** מפורשת | פאזה-1 (P1) | E#18 |

@@ -381,3 +381,96 @@ Every commit on this pillar must pass, in order:
 
 ### One-paragraph north star
 Publish is a **pointer flip** over **immutable sharded snapshots**, fanned out by a **single tiny listener** per client and reconciled by the **cache base's existing LWW**; the 10Ks-product catalog becomes a **per-SKU collection** browsed by **cursor pagination** and searched by **token-array + the existing fuzzy ranker**, with a **bundled starter subset** keeping the offline demo byte-identical; analytics are **append-only, owner-read-only, auto-id-scattered with daily rollups**; and **every** new capability ships behind a **default-OFF flag** on the proven `backend.dart` seam, so the flags-OFF build never changes a byte until the owner says go.
+
+---
+
+## 🔧 תיקוני Red-Team R1 (מחייב — מחליף סעיפים סותרים)
+
+> מקור: `knowledge/studio-plan/RED-TEAM-R1.md` (תמות C/D/E + הכרעות-התיקון). כל פריט כאן **גובר** על הסעיף-המקורי שצוין. הניסוח בגוף-המסמך מעלה הוא ה-vision; **הסעיף הזה הוא החוזה-המחייב לבנייה.** עיקרון-על: כל טענת-עלות, כל מעקה ושער-בטיחות מקורקעים בקוד-החי (`functions/`, `firestore.rules`) — לא ב-prose-אופטימי.
+
+### R1-1 · עלות כנה — טבלת-$/חודש מפורשת עם egress + rollup-reads + counter-writes (מחליף §6 הטבלה + הסעיף "Analytics … ≈ $0.45/day")
+**§-מוחלף:** §6 (טבלת-העלות + שורת-האנליטיקה "$0.45/day") · **שלב מושפע:** Phase 3 (flip) + שער-עלות לפני cutover.
+
+ה-§6 המקורי מודד **רק** את ה-write-של-האירועים (250K writes ≈ $0.45/יום) ו**משמיט** שלושה מקורות-עלות אמיתיים שהנחיל חשף: **egress** של פרסום-הסנאפשוט, **rollup-reads** של ה-dashboard, ו**counter-writes** של ה-distributed-counters. הטענה "$0.45/day" היא העלות-התחתונה של רכיב-אחד בלבד — לא העלות-הכוללת. להחליף בטבלת low/high מלאה (תמחור Firestore: reads $0.06/100K · writes $0.18/100K · egress $0.18/GiB · free-tier 50K read / 20K write / יום):
+
+| רכיב | low (חודשי) | high (חודשי) | בסיס-החישוב |
+|---|---|---|---|
+| **egress — פרסום** | ~$3 (10 פרסומים) | ~$99 (150 פרסומים) | עץ 3MB gzip × 5,000 משתמשים = ~15GiB/פרסום × $0.18/GiB ≈ **$0.66/פרסום** (תואם D13). low=10/חודש · high=5/יום×30 |
+| **egress — cold-start re-pull** | ~$5 | ~$30 | רק על version-bump; משתמש מושך סנאפשוט פעם-אחת-לגרסה אז cache. תלוי-תדירות-פרסום |
+| **analyticsEvents writes** | ~$3 | ~$14 | 5,000×50 אירועים/יום = 250K writes/יום × $0.18/100K ≈ $0.45/יום → ~$13.5/חודש |
+| **counter-writes (distributed)** | ~$2 | ~$11 | מטריקות-חמות; כל view = increment ל-shard אקראי (`analyticsCounters/{m}/shards/{0..9}`). high≈ 200K inc/יום |
+| **rollup-reads (scheduled fn)** | ~$1 | ~$8 | ה-rollup קורא raw-events פעם-ביום לגלגול; ה-owner קורא `analyticsDaily/{day}` = doc-אחד/יום (זה הזול) |
+| **presenceSummary reads** | ~$1 | ~$5 | ה-owner קורא doc-summary מגולגל (ראה R1-3), לא listener-לכל-מחובר |
+| **catalog paged reads** | ~$2 | ~$7 | 40/scroll × sessions; cached |
+| **סך-הכל מוערך** | **~$17/חודש** | **~$144/חודש** | הקצה-העליון **$144**, לא $0.45 — מספר ה-$0.45 הוא רכיב-יחיד מטעה |
+
+- **Cloud-Billing-cap קשיח (לא רק alert):** מעבר ל-budget-alert הרך, להגדיר **תקרה-קשיחה** — Cloud Billing budget מחובר ל-Pub/Sub שמפעיל פונקציה שמכבה את חיוב-הפרויקט (`billingAccountName=''`) או מורידה את `STUDIO_LIVE` מעל-סף. ה-alert לבדו לא עוצר הוצאה; ה-cap עוצר. (`STUDIO_LIVE` default-OFF נשאר ה-kill-switch הראשון.)
+
+### R1-2 · מעקות-פרסום — rate-limit/budget אמיתי על `publishConfig`, לא רק `maxInstances` (מחליף §6 guardrail #4 + §3.2 + §9 risk #1)
+**§-מוחלף:** §6 guardrail #4 ("Callable concurrency caps … on `publishConfig`") · §3.2 · §9 risk #1 · **שלב מושפע:** `functions/src/studio.ts` (`publishConfig`).
+
+הטענה ש-`maxInstances:10` חוסם תדירות-פרסום **שגויה** — `maxInstances` חוסם **concurrency** (כמה ריצות-במקביל), לא **frequency** (כמה פרסומים-ביום). מנהל לבדו יכול ללחוץ "פרסם" 50 פעמים ברצף סדרתי וכל אחת תעבור (כל egress ≈ $0.66). הנחיל מדד 10–50 פרסומים/יום → $6–33/יום egress ללא-מעקה. נדרש מעקה-תדירות אמיתי:
+- **rate-limit פר-owner** ב-`publishConfig`, **מבוסס על אותו `enforceRateLimit`-pattern של `claude.ts:75`** (טרנזקציית-Firestore על `_publishRate/{uid}`, fixed-window, fail-open) — למשל ≤N פרסומים/שעה + ≤M/יום. חורג → `resource-exhausted` ידידותי.
+- **coalescing + "stage-many-publish-once" UX:** המנהל **צובר** עריכות ל-draft (כמה-שהוא רוצה, זה זול — כתיבות-shard owner-only) ו**מפרסם פעם-אחת** בסוף. ה-UI מציג מונה-שינויים-ב-draft + "פרסם הכל" יחיד; **אין** auto-publish-on-edit. זה הופך 50-עריכות → פרסום-אחד → egress-אחד.
+- **publish-budget רך:** סופר פרסומים-היום ומזהיר את ה-owner ("פרסמת 12 פעמים היום, כל פרסום מגיע ל-5,000 מכשירים") לפני שמרשה עוד — מעקה-מודעות מעל מעקה-קשיח.
+- `maxInstances` נשאר (תקרת-burst נכונה), אבל **מתועד מפורש** שהוא חוסם concurrency-לא-frequency; ה-rate-limit הוא מה שחוסם spend-מצטבר.
+
+### R1-3 · presence בלי read-storm — owner קורא summary מגולגל-שרת, לא listener-לכל-מחובר (מחליף §1.3 presence-read + §3.4 + §5 presence-rule + §6 presence-row)
+**§-מוחלף:** §1.3 ("Owner's 'מי מחובר' view = `where('online','==',true)`") · §3.4 · §5 presence-rule · §6 presence-row · §9 risk #7 · **שלב מושפע:** `functions/src/analytics.ts` (rollup) + `firestore.rules`.
+
+ה-§1.3/§3.4 המקוריים נותנים ל-owner **listener על `where('online','==',true)`** — בקצה-עליון אלפי-מחוברים = read-storm ($11/משמרת ב-D13: כל heartbeat שמשנה doc גורר re-read לכל-המאזינים). להחליף ב-rollup-שרת:
+- **`presenceSummary/current` — doc-יחיד מגולגל-שרת.** scheduled-fn (כל ~30–60 שניות) סופר `where('online','==',true)` **בשרת** (Admin SDK) וכותב `{ count:int, byRole:{contractor:N,courier:M,…}, sample:[…≤50 uids], updatedAt }`. ה-owner קורא **doc-אחד** (read אחד ל-poll), **לא** מאזין לכל-doc-presence. (תואם D13: "presence דרך `presenceSummary` מגולגל-שרת, לא listener על כל-המחוברים".)
+- **cap/paginate על raw-presence:** אם ה-owner חייב את הרשימה-המלאה (drill-down), זו **paged query** (`limit(50)` + cursor), **לא** listener-מתמשך. ה-`sample` ב-summary מספיק לרוב-המקרים; הרשימה-המלאה היא pull-מפורש.
+- **rule:** `presence/{uid}` נשאר self-write; **קריאת-raw לכל-ה-presence מוסרת מ-owner-listener** — ה-owner קורא `presenceSummary/current` (rollup, Admin-SDK-write, `allow read: if isManager(); allow write: if false`). raw-presence-read נשאר owner אבל **כ-paged-query מוגבל**, לא stream. (תואם R1 C-11: presence-read מוגבל, default-OFF + TTL.)
+- ה-TTL-sweep (§3.4) נשאר; ה-summary פשוט קורא את ה-state-הנקי-אחרי-sweep.
+
+### R1-4 · concurrency — `publishConfig` עם compare-and-set (expected-version) + זיהוי "מנהל אחר עורך" (מחליף §3.2 + §1.1 draft-isolation + §9 — חדש)
+**§-מוחלף/מורחב:** §3.2 (`publishConfig` transaction) · §1.1 draft-isolation · §9 (risk חדש) · **שלב מושפע:** `functions/src/studio.ts` + draft-UX. **(תמה E14.)**
+
+ה-§3.2 המקורי מאמת auth+טרנזקציה אבל **לא** מגן מפני שני-מנהלים שעורכים-במקביל — publish של מנהל-א **דורס** את מנהל-ב לכל-המשתמשים (E14). להוסיף compare-and-set:
+- **expected-version ב-`publishConfig`:** הקריאה נושאת `expectedBaseVersion` (הגרסה שעליה ה-draft נבנה). בטרנזקציה: אם `studioConfig/published.version != expectedBaseVersion` → **לדחות** עם `failed-precondition` ("פורסמה גרסה חדשה בזמן שערכת — רענן ומזג"), **לא** לדרוס. זה compare-and-set אטומי על מצביע-הפרסום.
+- **`studioConfig/draft` נושא `draftOwnerUid` + `lockedAt`:** כשמנהל פותח עריכה, ה-UI קורא את ה-draft-pointer; אם `draftOwnerUid != me && now-lockedAt < TTL` → להציג **"מנהל אחר (X) עורך כעת"** (advisory-lock רך, לא נעילה-קשיחה — TTL פג-תוקף מונע draft-תקוע). מנהל-ב יכול עדיין-לכפות אבל מתריעים.
+- ה-draft-isolation של §1.1 (`draft-<uid>`) משתנה: או **draft משותף-יחיד** עם owner-lock (פשוט יותר ל-coalescing R1-2), או draft-per-uid עם merge-מפורש בפרסום. R1 בוחר **draft-משותף + expected-version-CAS** כי זה מתיישר עם coalescing ("stage-many-publish-once").
+- audit מתעד `before:{version:N-1, expectedBase}` + `after:{version:N}` כדי שדריסה-שנמנעה תהיה traceable (`audit.ts:45`).
+
+### R1-5 · dual-control — פרסום-לכולם דורש `isOwnerEmail` או dual-control + revert-SLA + re-check live allow-flag (מחליף §3.2 "manager/admin-only" + §5 RBAC-notes + §10 gate #11)
+**§-מוחלף:** §3.2 ("auth-gated, manager/admin-only") · §5 RBAC-notes (governance #84) · §10 gate #11 · §9 risk #9 · **שלב מושפע:** `functions/src/studio.ts` + `firestore.rules`. **(תמה C12.)**
+
+ה-§3.2 המקורי שם publish מאחורי `isManager()` בלבד — אבל manager-claim = **publish-לכולם בלי dual-control** ב-supply-chain-in-app (C12); claim-יחיד שנפרץ/שגוי משדר-לכולם. נדרש שער-כפול:
+- **`isOwnerEmail` או dual-control:** פרסום-לכולם דורש **או** `request.auth.token.email == OWNER_EMAIL` (gate חדש — `isOwnerEmail`, **לא קיים היום בקוד**; להוסיף ל-`functions/src/common.ts` + helper מקביל ב-`firestore.rules`) **או** dual-control: שני-מנהלים-נפרדים מאשרים (manager-א מגיש `publishRequest`, manager-ב-שונה מאשר → אז `publishConfig` מבצע). מנהל-יחיד לבדו **לא** משדר-לכולם.
+- **re-check live allow-flag (לא רק claim):** `publishConfig` **קורא-מחדש את דגל-ההרשאה-החי בשרת** ברגע-הביצוע — בודק doc/claim-חי (`studioConfig/publishAllow` או claim-טרי דרך `getIdTokenResult`), **לא** מסתמך רק על ה-claim-ב-token (שמתעדכן עד שעה, §9 risk #9). זה מאפשר **revocation מיידי**: owner שמסיר הרשאה — הפרסום-הבא נחסם תוך-שניות, לא תוך-שעה.
+- **revert-SLA:** rollback = re-point ל-`v(N-1)` (כתיבה-אחת, §3.3). ה-SLA מתועד: פרסום-שגוי ניתן-לביטול תוך **< דקה** ע"י owner (כפתור "החזר לגרסה קודמת" שקורא `publishConfig` עם הגרסה-הקודמת). הסנאפשוטים immutable → revert תמיד-בטוח.
+- `revertIllegalConfigWrite` (§3.2) נשאר ה-defense-in-depth מול כתיבה-ישירה-עוקפת-callable.
+
+### R1-6 · price scoped — `catalogProducts.price` בשדה role-scoped / sub-doc; קטלוג-ציבורי ללא-מחיר אלא-אם claim מתיר (מחליף §1.2 schema price-field + §5 catalog-read rule)
+**§-מוחלף:** §1.2 (`catalogProducts/{sku}` שדה `price:int?` inline) · §5 (`match /catalogProducts/{sku} { allow read: if isSignedIn() }`) · **שלב מושפע:** schema + `firestore.rules` + `_firebase` mapper. **(תמה C12.)**
+
+ה-§1.2/§5 המקוריים שמים `price` **inline** במסמך-המוצר עם `allow read: if isSignedIn()` — כלומר **כל חנות-מתחרה רשומה רואה את כל-המחירים** (C12: "catalogProducts חושף price למתחרים"). זו דליפה מסחרית. להפריד מחיר:
+- **`price` יוצא מ-doc-המוצר-הציבורי** אל **sub-doc role-scoped:** `catalogProducts/{sku}/pricing/{audience}` (או שדה תחת `catalogPricing/{sku}` נפרד). ה-doc-המוצר-הציבורי (nameHe/dims/imageFile/…) נשאר `allow read: if isSignedIn()`; ה-מחיר נקרא **רק** אם `isManager()` **או** claim-תפקיד-קונה מתיר (למשל `hasRole('contractor')` רואה מחיר-קבלן, חנות-מתחרה לא רואה כלום). 
+- **rule:** `match /catalogProducts/{sku}/pricing/{aud} { allow read: if isManager() || hasRole(aud); allow write: if isManager(); }` — קטלוג-ציבורי ללא-מחיר by default; חשיפת-מחיר מותנית-claim.
+- ה-`_firebase` mapper (§1.2, "adds new fields") **לא** ממפה price ל-doc-הראשי; ה-search-token-index (R1-7) **לא** כולל price. ה-UI מושך מחיר ב-get-נפרד רק כשה-claim מתיר.
+
+### R1-7 · search parity כן — token-index רק מ-`nameHe` (כמו ה-fuzzy היום) + token-frequency-map; למחוק "ranking identical" (מחליף §2.3 שלב-1/שלב-2 + §10 gate #8 + §9 risk #3)
+**§-מוחלף:** §2.3 (token-index מ-`nameHe+nameEn+brand+sku` + "ranking identical") · §2.1 seam-note · §10 gate #8 · §9 risk #3 · **שלב מושפע:** `functions/src/catalog.ts` (`onCatalogProductWrite`). **(תמה D.)**
+
+ה-§2.3 המקורי בונה `nameTokens` מ-`nameHe+nameEn+brand+sku` ואז טוען "ranking identical" ל-fuzzy-החי — **אבל ה-fuzzy-החי (`fuzzy_search.dart:16`) מתאים רק מול `nameHe`** (`contains` ב-`nameHe` בלבד). אם ה-token-index כולל גם en/brand/sku, ה-candidate-set **שונה** מה-fuzzy → התוצאות **לא** זהות. הטענה "ranking identical" over-claim. שתי דרכים-לגיטימיות (R1 בוחר את הראשונה):
+- **(נבחר) tokenize `nameHe`-בלבד** — בדיוק כמו ה-fuzzy היום. אז Layer-B מצמצם 10K→עשרות מאותו-מרחב-התאמה, ו-`fuzzySearchProducts` מדרג client-side → **answer-equivalent מול fixtures** (לא "byte/ranking identical" — להחליף את הניסוח ל-"answer-equivalent מול `catalog_regression` fixtures", תואם תמה-B). en/brand/sku מצטרפים **רק** אם משדרגים-במקביל גם את ה-ranker (חלופה-ב, out-of-v1).
+- **token-frequency map ל-"rarest-token":** §2.3 שלב-2 בוחר "rarest token" ל-multi-word query אבל **לא מגדיר איך** יודעים מי-הנדיר. להוסיף `catalogTokenFreq/{token} { count:int }` (מתוחזק ב-`onCatalogProductWrite` — increment/decrement פר-token). ה-client/שרת בוחר את ה-token עם ה-`count` הנמוך-ביותר ל-`arrayContains` → candidate-set מינימלי → reads מינימליים. בלי המפה, "rarest" הוא ניחוש.
+- §10 gate #8 ("Layer-A == Layer-B top-N identical") מתעדכן: **"top-N answer-equivalent מול fixture-set"** (לא "identical ordering"), כי tokenize-nameHe-בלבד מבטיח אותו-מרחב אבל ה-golden נמדד מול fixtures לא מול הבטחת-byte.
+
+### R1-8 · גיבוי — export/import JSON מלא של config+trades + restore-from-file (שלב חדש, מעבר ל-ring-30)
+**§-מוחלף/מוסף:** §8 (Migration — שלב חדש) · §1.1/§1.2 (snapshots הם ring-30 בלבד) · **שלב מושפע:** `functions/src/studio.ts` (export/import callables) + Studio-UX. **(תמה E15.)**
+
+כל-העסק היום ב-Firestore עם **ring-30 בלבד** (snapshots immutable אבל אין-ייצוא — אובדן-פרויקט/מחיקה-בטעות = אובדן-קונפיג). E15 דורש גיבוי-אמיתי:
+- **export מלא:** callable `exportStudioConfig` (owner-only, `isOwnerEmail`/manager) שמרכיב **JSON-יחיד** של כל ה-config-tree-הנוכחי (snapshot `vN` deserialized) + `catalogTrades` + `catalogCategories` + (אופ') `catalogProducts` → מחזיר/מעלה ל-R2 (אותו `getUploadUrl`-pattern, `r2.ts:127`) או download-ישיר ב-client. כולל `schema:int` + `version` + `checksum` כדי שייבוא יוכל-לאמת.
+- **import/restore-from-file:** callable `importStudioConfig` שמקבל JSON-מיוצא, **מאמת checksum+schema**, ומבצע **publish-as-new-version** (לא דורס-snapshot — יוצר `v(N+1)` מהקובץ, אז flip-pointer דרך אותו מסלול-CAS של R1-4). restore = ייבוא-קובץ → פרסום-גרסה-חדשה → reversible.
+- זה **מעבר ל-ring-30:** הקובץ חי **מחוץ** ל-Firestore (R2/דיסק-של-owner), אז מחיקת-פרויקט-שלם לא מאבדת אותו.
+
+### R1-9 · archive fan-out — מחיקת-מוצר/תחום מנקה search-index + מסמנת tombstone; orders/carts מטופלים (מחליף §1.2 "active:bool" + §8 reconciliation + §9 — חדש)
+**§-מוחלף/מורחב:** §1.2 (`active:bool` לבדו) · §8 reconciliation · §9 (risk חדש) · **שלב מושפע:** `functions/src/catalog.ts` (`onCatalogProductWrite` archive-branch). **(תמה E16.)**
+
+ה-§1.2 המקורי שם `active:bool` אבל **לא** מגדיר מה-קורה ל-`nameTokens`/`catalogTokenFreq`/הזמנות-קיימות כשמוצר-נמחק → יתומים (E16: "מחיקת-תחום/מוצר משאירה יתומים — overrides · rules · search-index · orders/carts"). מודל tombstone + fan-out:
+- **tombstone, לא delete-קשיח:** מחיקת-מוצר = `active:false` + `tombstone:true` + `tombstonedAt`. ה-doc **נשאר** (הזמנות-היסטוריות שמצביעות עליו עדיין-resolvable דרך `productForSku`), אבל מוסתר מ-browse/search.
+- **fan-out ב-`onCatalogProductWrite` (archive-branch):** כשמוצר עובר ל-tombstone — (א) **מנקה search-index:** `nameTokens` מנוקה + `catalogTokenFreq` מ-decremented פר-token (R1-7), כך שלא יוחזר בחיפוש; (ב) `catalogTrades.productCount` מ-decremented; (ג) מחיקת-**תחום** שלם → tombstone-cascade לכל מוצריו (paged, batched — אותו `purgeMultiPartyReferences`-pattern של `deleteAccount.ts:40`, batches-של-400, capped-rounds).
+- **orders/carts מטופלים:** הזמנות-קיימות שמצביעות על ה-SKU **נשארות** (כמו ה-deleteAccount-SCOPE: לא דורסים נתוני-עבר) — ה-snapshot-של-המחיר/שם בהזמנה כבר-מקובע; carts-פעילים שמכילים מוצר-tombstoned מסומנים ("פריט אינו זמין") ב-resolve, לא-נמחקים-בשקט. migrate-map ל-id-שנמחק (E16) = `catalogProducts/{sku}.replacedBy:sku?` כדי שניתן-להפנות לחלופה.
+- **erasure-presence-gap (C12, השלמה ל-`deleteAccount.ts`):** באותה-רוח, ה-erasure-הקיים (`deleteAccount.ts:35`) מנקה orders/chat/customers אבל **משמיט `presence/{uid}` ו-`displayName`** (C12). להוסיף ל-`purgeMultiPartyReferences`: מחיקת `presence/{uid}` + סקראב `users/{uid}.displayName` (ה-doc-עצמו כבר נמחק ב-step-1, אבל אם נשמר mirror — לנקות) + סקראב `displayName` מ-`roleRequests` (`firestore.rules:477`). + טסט-שלמות-erasure שמאמת ש-presence/displayName אכן-נוקו.

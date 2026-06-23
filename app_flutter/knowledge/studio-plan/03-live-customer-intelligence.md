@@ -433,3 +433,168 @@ flutter build web --release     # Gate 33 — builds clean
 - Per tap: 1 list prepend (O(1) amortized w/ trim) + 1 no-op (demo) / 1 enqueue-append (live). No `await`, no rebuild (bus uses `read`).
 - Live write amplification: batched to ≤ `kBatchSize` per `WriteBatch`, flush ≤ every `kFlushInterval` or on pause → bounded ~6 writes/min/active user; heartbeat 1 write/20 s. Sampling caps the rest.
 - No `watch` on the bus → tracking causes **zero widget rebuilds**; the live feed UI rebuilds only on the manager screen (which is already watching its providers).
+
+---
+
+## 🔧 תיקוני Red-Team R1 (מחייב — מחליף סעיפים סותרים)
+
+> מקור: `knowledge/studio-plan/RED-TEAM-R1.md` (תמה C פריטים 11–12 · תמה E פריט 18 · תיקוני-gate · אכיפת-#84).
+> כל פריט להלן **גובר** על הניסוח המקורי בגוף-המסמך כשהם סותרים. הסעיף נכתב לפני תחילת-הבנייה
+> ומחליף את התיאורים הרכים ("💡", "flip של שורה אחת", "default OFF עד שתעודכן המדיניות") בדלתאות
+> קונקרטיות הניתנות-לבנייה. עברית מקורקעת מול קוד (`file:line`).
+
+### R1-1 · פרטיות default-DENY — `privAnalytics=false` + opt-in + gate לפי גרסת-מדיניות (C11)
+
+**הבעיה (R1 #11):** היום `privAnalytics` ברירת-מחדל **`true`** (`app_settings.dart:105`), והפענוח מ-persist
+הוא `priv['analytics'] != false` (`:236`) → **absent = true**. כלומר ה-forward נדלק כברירת-מחדל וגם
+לכל משתמש ישן שמעולם לא ראה מסך-הסכמה. זה סותר את העמדה-החוקית המוצהרת (`legal_texts.dart:4-13`,
+תיקון 13). gate-bool צף לא מבחין בין "הסכים למדיניות v1" ל-"מדיניות עודכנה ל-v2 ועוד לא הסכים מחדש".
+
+**מה משתנה:**
+1. **ברירת-מחדל הפוכה ל-DENY.** `AppSettings.defaults.privAnalytics` → **`false`** (היה `true`,
+   `app_settings.dart:105`). הפענוח `fromJson` → `priv['analytics'] == true` (absent / null / כל-דבר-אחר
+   = **false**) במקום `!= false` (`:236`). אין forward עד opt-in **מפורש** במסך-ההסכמה.
+2. **gate לפי גרסת-מדיניות, לא bool צף.** מוסיפים שדה `consentedPolicyVersion` (`int`, default `0`)
+   ל-`AppSettings` (לצד `privAnalytics`, `app_settings.dart:82-85` + `copyWith :129` + `toJson :189` +
+   `fromJson :236`). קבוע `kCurrentPolicyVersion` (`int`) מנוהל ליד-טקסט-המדיניות (`legal_texts.dart`).
+   ה-forward-gate ב-`IntelSink`/`presence` (step 3, §2.1) הופך מ-`privAnalytics == true` ל:
+   **`consentedPolicyVersion >= kCurrentPolicyVersion && useFirebaseBackend`**.
+   העלאת `kCurrentPolicyVersion` (שינוי-מדיניות עתידי) **מאפסת הסכמה דה-פקטו** עד re-opt-in — בדיוק
+   הדרישה של תיקון 13 ל-"הסכמה מדעת ומעודכנת". `privAnalytics` נשאר ה-toggle הגלוי; ההסכמה-בתוקף =
+   צמד (toggle ON **וגם** גרסה-מעודכנת).
+3. **שלב-86 = build-step אמיתי, לא "💡".** מה שתואר ב-§7.2 כ-"flip של שורה אחת" הופך ל**שלב-בנייה
+   מלא**: (א) מסך/דיאלוג-הסכמה שמציג את טקסט-המדיניות (`legal_texts.dart`), (ב) על "אני מסכים"
+   כותב `privAnalytics=true` **וגם** `consentedPolicyVersion=kCurrentPolicyVersion` בטרנזקציה אחת,
+   (ג) טסט שמוודא: ללא-מעבר-במסך → forward inert; אחרי-הסכמה → forward enabled; אחרי-bump-גרסה →
+   forward inert-שוב. ה-local ring buffer (step 1) נשאר on-device תמיד ללא תלות בהסכמה (אין שידור).
+
+**§-מוחלף:** §7.1 ("gated on `privAnalytics == true`") · §7.2 ("Default OFF … Flip is a one-line policy
+decision") · §10 risk #4 · טבלת-§9 Phase-A "consent gate".
+**שלב מושפע:** שלב-86 (privacy-gate; היום מתואר כקיים ב-RED-TEAM §"מה מחזיק" — מתחזק ל-build-step) ·
+Phase A (§9).
+
+### R1-2 · presence consent נפרד — `privPresence` default-OFF + TTL קצר + בסיס-חוקי (C11)
+
+**הבעיה (R1 #11):** presence ("איפה הלקוח עכשיו") הוא **מעקב-מיקום-בהקשר** חודרני בהרבה מ-funnel-אנליטיקה,
+ובמסמך-המקורי הוא חוסה תחת אותו `privAnalytics` (§4.3 → "`write: actorKey==uid`" בלי הסכמה-נפרדת). הסכמה
+אחת-לכל אינה מידתית.
+
+**מה משתנה:**
+1. **toggle נפרד `privPresence`.** שדה `bool` חדש ב-`AppSettings` (לצד `privAnalytics`,
+   `app_settings.dart:82-85` + כל-ארבעת-המקומות כמו R1-1), **default `false`**. כתיבת `presence/{...}`
+   ב-`session_tracker` (§4.1) נשמרת מאחורי gate **עצמאי**:
+   `privPresence == true && consentedPolicyVersion >= kCurrentPolicyVersion && useFirebaseBackend`.
+   כיבוי-presence **לא** מכבה funnel-אנליטיקה ולהפך — שני הסכמות מתועדות בנפרד.
+2. **TTL קצר על presence.** doc-ה-`presence/{actorKey}` נושא `expireAt = serverTs + kPresenceTtl`
+   (`kPresenceTtl` קצר, סדר-גודל **דקות** — לא 30–90 יום של `events/`); Firestore-TTL מוחק אוטומטית
+   (אכיפה ב-Pillar 5). presence הוא חי-בלבד, לא היסטוריית-תנועה. `session_end` (background/idle/logout,
+   §4.1) **מוחק** את ה-doc מיידית, לא מסתמך רק על TTL.
+3. **בסיס-חוקי + מידתיות מתועד.** ליד `legal_texts.dart` נוסף נימוק קצר: מטרה (תמיכת-לקוח בזמן-אמת),
+   מינימיזציה (רק `screen`+`lastBeat`, ללא קואורדינטות-GPS — `privLocation` נשאר נפרד ו-DEAD,
+   `app_settings.dart:83`), TTL-דקות, ו-opt-in-נפרד. זהו ה"בסיס-חוקי/מידתיות" שתיקון 13 דורש.
+4. **presence-read = לקוחות בלבד.** ראה R1-5 — presence נכתב/נקרא **רק** עבור actors-לקוחות, לא צוות.
+
+**§-מוחלף:** §4 (מודל presence — מוסיף toggle+TTL) · §4.1 (heartbeat write) · §4.3 ("Gate & inertness" —
+gate מתפצל מ-`privAnalytics` ל-`privPresence`) · §7.1.
+**שלב מושפע:** Phase D (§9 — session tracker + presence) · שלב-86.
+
+### R1-3 · erasure שלם — `actorKey` + `uid` + `presence/{uid}` + שורות-displayName (C12)
+
+**הבעיה (R1 #12):** §7.4 מתאר מחיקה כ-"single `where('actorKey',==).delete()` sweep" — אבל זה **מפספס**:
+(א) doc-ה-`presence/{uid}` (אם מפתח-presence הוא uid ולא actorKey), (ב) אירועים שנכתבו עם `actorKey`=anon
+**לפני** ה-stitch ל-uid (§6.2 — anon→uid), (ג) שורות שנשאו `displayName` בלבד (מצטרפות-בשם ב-§5.3).
+
+**מה משתנה:** "מחיקת-נושא" (תיקון 13 §13/§14) = **טאטוא רב-מפתחי** ב-Cloud-Function (Pillar 5),
+שמוחק את **כל** הבאים עבור נושא-נתון:
+- `events/` ב-`where('actorKey', whereIn: [uid, ...allKnownAnonKeysForUid])` — כולל מפתחות-anon
+  שקדמו ל-stitch (ה-stitch של §6.2 חייב לכן **לתעד את מיפוי anon→uid בצד-השרת** כדי שהמחיקה תוכל
+  לאחות אותם; בלי זה אירועי-pre-login הם יתומים בלתי-נמחקים).
+- `presence/{uid}` **וגם** `presence/{actorKey}` לכל מפתח רלוונטי.
+- `sessions/` (אם קיים, §8) באותו תנאי-`whereIn`.
+- **שורות displayName-only** — מנוקות/מאופסות (`displayName → ''`) גם כשאין `actorKey` תואם, כי
+  הן עדיין PII מצטרף-בשם (§5.3, `Order.who` join).
+- **טסט-שלמות-מחיקה** (חובה): seed אירועי-anon + אירועי-uid + presence + שורת-displayName → הרצת
+  ה-sweep → assert **אפס** שאריות בכל הקולקציות עבור הנושא (כולל presence ו-pre-stitch-anon).
+  זהו טסט חדש מעל הטסטים של §11.
+
+**§-מוחלף:** §7.4 ("single `where('actorKey',==).delete()`") · §6.2 (stitch חייב לתעד מיפוי שרת-צד) ·
+§10 risk #4 · §11 (מוסיף טסט-שלמות-מחיקה).
+**שלב מושפע:** Phase F (§9 — manager reads/backend) · שלב-86 · תיאום Pillar 5.
+
+### R1-4 · צמצום displayName על-החוט — key by `actorKey`, resolve-name owner-side (PII)
+
+**הבעיה:** §1.2 / wire-doc (§1.2 line 99) שולח `displayName` **בכל אירוע** על-החוט ובכל doc ב-`events/`,
+מה שמשכפל PII (שם-לקוח) באלפי-רשומות ומרחיב משטח-החשיפה + נטל-המחיקה (R1-3).
+
+**מה משתנה:**
+1. **על-החוט: `actorKey` בלבד.** doc-ה-`events/{autoId}` (§1.2) **משמיט** את `displayName` כברירת-מחדל;
+   המפתח-היחיד הוא `actorKey`. השדה `displayName` ב-`IntelEvent` (§1.2 טבלה) נשאר **in-memory-בלבד**
+   (ל-local ring buffer + live-feed דמו), ולא נכתב ל-Firestore.
+2. **resolve-name בצד-הבעלים בלבד.** ה-join-בשם ל-`managerCustomersProvider` (§3.3, §5.3) נעשה
+   **owner-side**: ה-UI של המנהל מתרגם `actorKey → displayName` דרך מקור-שמות שכבר-מורשה-למנהל
+   (שורות-`orders`/`customers` הקיימות, `orders_engine.dart:693-700`), ולא דרך שם-מוטבע-באירוע.
+   כך השם לעולם לא נוסע בערוץ-האנליטיקה; הוא נפתר רק היכן שכבר מותר (מסך-המנהל).
+3. אם join-בשם בלתי-אפשרי ל-actor מסוים (anon ללא הזמנה) — מוצג `actorKey`-מקוצר/אנונימי, לא שם.
+
+**§-מוחלף:** §1.2 (טבלת-`IntelEvent` + wire-doc line 99 — `displayName` יורד מהחוט) · §3.3 · §5.3 ·
+§6.2 · §10 risk #5 (זהות עדיין דו-ערכית, אך ההצטרפות owner-side).
+**שלב מושפע:** Phase A (סכמת-אירוע) · Phase E/F (resolve owner-side).
+
+### R1-5 · אכיפת-#84 — read = `isManager()`, אך ללא הרחבת-פיקוח על צוות; presence = לקוחות בלבד
+
+**הבעיה:** §4.3 / §5.4 / §7.5 ממסגרים את ה-read כ-`role==manager` גנרי. אך #84 (גבול-הפיקוח) דורש
+ש-presence/analytics **לא** יהפכו לכלי-מעקב-התנהגותי על צוות (worker/courier). presence-read במסמך
+אינו מבחין בין actor-לקוח ל-actor-צוות.
+
+**מה משתנה:**
+1. **read-gate = `isManager()`** (לא bool-תפקיד גולמי) — מתואם לאכיפה ב-#84; הכלל ב-rules
+   (`read: isManager()`) ב-Pillar 5.
+2. **presence = actors-לקוחות בלבד.** כתיבת `presence/{...}` (§4.1) מותנית ב-actor שהוא **לקוח**
+   (לא `worker`/`courier`). מודל-הפרסונה הוא `roleProvider` (String?, null=קבלן/לקוח — מקור-האמת
+   היחיד שנקבע ב-RED-TEAM תמה A #2). actor-צוות **לא** כותב presence ולא נקרא ב-"מי מחובר כעת" (§5.2).
+   הרחבת-פיקוח-על-צוות = **מעבר ל-#84**, מחוץ-לתחום-Pillar-3.
+3. **תיעוד-גבול מפורש.** במסמך-זה ובכללי-Pillar-5: "read=`isManager()` נועד לראות **לקוחות** בזמן-אמת;
+   הוא **אינו** מרחיב פיקוח-התנהגותי על צוות-העובדים". זהו תנאי-עיצוב, לא רק הערה.
+
+**§-מוחלף:** §4.3 ("`read: role==manager`") · §5.2 ("מי מחובר כעת") · §5.4 (`presenceProvider`) ·
+§7.5 ("Manager-only visibility").
+**שלב מושפע:** Phase D/E/F · תיאום #84 + Pillar 5 rules.
+
+### R1-6 · gate-מספר — P3 = **120** (לא 118), analytics-PII
+
+**הבעיה (R1 תיקוני-gate):** §11 (line 404) ו-§8 (line 360 דרך §11) תופסים gate **118** ל-P3.
+התנגשות-gate-118: P1/P3/P4 כולם תפסו 118. ההכרעה-האחידה: **118 = P1 config-registry** ·
+**119 = P4 AI-grounded-config** · **120 = P3 analytics-PII**.
+
+**מה משתנה:** הגייט שגורף `lib/state/intel/` לאיתור prop-key של PII/raw-text (§7.3) נרשם כ-**gate 120**
+(לא 118). לרשום מראש ב-`GATE_REGISTRY.md` את 3-השורות (118/119/120) לפני בנייה; "next free" →
+121 אחרי הקצאת-השלישייה. עדכון §11 (line 404: "We add one new gate (118)" → "gate 120") ו-§8.
+
+**§-מוחלף:** §11 (line 404, מספר-הגייט 118→120) · §8 (אזכור-עקיף).
+**שלב מושפע:** כל-הקומיטים (pre-commit hook) · `GATE_REGISTRY.md`.
+
+### R1-7 · שלב-חסר (תמה E #18) — אובזרבביליות לשימוש-בסטודיו עצמו (רפלקסיבי)
+
+**הבעיה (R1 #18):** התוכנית מודדת את **הלקוח** אך לא את **השימוש-בסטודיו עצמו** (קונכיית-הניהול/העריכה).
+"אובזרבביליות לשימוש-בסטודיו" נרשם כ-MED חסר. עדשת-המודיעין צריכה להיות **רפלקסיבית** — לחול גם על
+מי-שמפעיל את הסטודיו.
+
+**מה משתנה:** שלב חדש (Phase E-bis / סמוך ל-Phase E) — instrumentation של אירועי-סטודיו-פנימיים דרך
+**אותו `IntelBus`** (§2.1), תחת אותם-מעקות (consent/minimization/erasure של R1-1..4):
+- `studio_edit_session` `{dur_s, ops}` — אורך וגודל-סשן-עריכה (open→publish/discard).
+- `studio_ai_op_blocked` `{reason}` — פעולת-AI שנחסמה ע"י anti-hallucination / role-floor /
+   validateSafe (RED-TEAM §"מה מחזיק" closed-set-drop) — אות לשיפור-UX/grounding.
+- `studio_draft_abandon` `{age_s, dirty_ops}` — draft שננטש ללא publish (מקביל ל-cart-abandon, §3.2).
+
+actors-אלה הם **בעלים/מנהלים** (לא לקוחות), ולכן presence-עליהם **אינו** נכתב (R1-5 — presence=לקוחות);
+זו אובזרבביליות-מוצר על תהליך-העריכה, לא פיקוח-נוכחות. הדטקטורים (§3) חלים זהה (abandon/blocked-loop).
+
+**§-חדש:** מרחיב §1.1 (taxonomy — בלוק "Studio-self" חדש) · §3.2 (detector ל-draft-abandon) · §9
+(Phase E-bis) · §10 (אין risk חדש — חוסה תחת אותם-מעקות).
+**שלב מושפע:** Phase E (§9) + שלב-חדש בתוך טקסונומיית-100-השלבים (RED-TEAM תמה E).
+
+> **סיכום-מחייב:** ברירות-המחדל לפרטיות הן **DENY** (`privAnalytics=false`, `privPresence=false`),
+> ההסכמה-בתוקף נקבעת לפי **`consentedPolicyVersion >= kCurrentPolicyVersion`** (לא bool צף),
+> presence הוא opt-in-נפרד · TTL-דקות · **לקוחות-בלבד**, מחיקה-שלמה מטאטאת `uid`+anon+presence+שם
+> (עם טסט-שלמות), `displayName` **לא** נוסע על-החוט (resolve owner-side), gate-PII = **120**,
+> ועדשת-המודיעין חלה גם **רפלקסיבית** על השימוש-בסטודיו. כל אלה גוברים על הניסוח-הרך בגוף-המסמך.

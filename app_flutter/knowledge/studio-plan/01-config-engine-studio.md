@@ -807,3 +807,239 @@ edit-handles incrementally; a compile-time `ElementRegistry` makes the Studio li
 history·rollback) + an app-wide owner-only edit-mode overlay drive it; and a single
 `ConfigSink` seam keeps the whole thing local-now / Firestore-when-on so Pillars
 2–5 plug into one substrate.
+
+---
+
+## 🔧 תיקוני Red-Team R1 (מחייב — מחליף סעיפים סותרים)
+
+> מקור-הסמכות: `studio-plan/RED-TEAM-R1.md` (2026-06-23, 9 עדשות). הסעיף הזה
+> **גובר** על כל ניסוח קודם במסמך שסותר אותו. כל פריט אומר: **מה משתנה · איזה §
+> נדרס · איזה שלב מושפע**. עקרון-על: התשתית של P1 (רישום-מורחב + מודל-פרסונה-יחיד
+> + draft-op-API) **מוקפאת ב-Phase-0 לפני הקפאת-ה-seams (לפני שלב-30)**; כל
+> over-claim על "byte-identical" יורד; חמישה שלבים-חסרים שחלים על P1 נוספים.
+
+### R1-A1 · רישום מורחב — `ElementDescriptor` הופך לחוזה-האכיפה (נדרס §4 · §2.4-ConfigDoc.schemaVersion · שלבים A1–A2, gate-118)
+**הבעיה (A.1):** P4 מקרקע `validateSafe` מול `editableProps`/`allowedActions`/
+`allowedValues`/`kImmutable`/`kRoleFloor`/`ElementKind`, אבל §4 מצהיר רק
+`axes`/`critical`/`personas` → כל ולידציה **ירוקה-ריקה (vacuous)**: אין מול מה
+לאמת, והשרת (P5) לא יכול לאכוף role-floor/action-legality.
+
+**מה משתנה — `ElementDescriptor` החדש (מחליף את הבלוק ב-§4 כולו):**
+```dart
+class ElementDescriptor {
+  final String id;
+  final String screen;
+  final String area;
+  final String labelHe;
+  final ElementKind kind;          // ← חדש: button|text|list|image|container|nav|input…
+  final Set<CfgAxis> axes;         // (נשאר)
+  final Set<String> editableProps; // ← חדש: אילו props ניתנים-לעריכה ('text','colorToken','order'…)
+  final Set<String> allowedActions;// ← חדש: אילו kinds מותרים על האלמנט הזה ('navigate','noop'…)
+  final List<String> Function(String prop)? allowedValues; // ← חדש: סגירת-קבוצה לכל prop (closed-set)
+  final bool kImmutable;           // ← חדש: אסור-לעריכה לחלוטין (גובר על axes)
+  final String? kRoleFloor;        // ← חדש: רצפת-תפקיד מינ' לעריכה (roleProvider-string; null=כולם)
+  final bool critical;             // (נשאר) נראות-נעולה
+  final Set<String>? personas;     // ⚠️ סוג השתנה ל-Set<String>? — ראה R1-A2 (לא Set<BoardRole>)
+}
+```
+**fail-closed כשחסר:** אם descriptor חסר `editableProps`/`allowedActions`/`kind`
+— האלמנט נחשב **לא-ניתן-לעריכה** (deny), לא "פתוח כברירת-מחדל". `validateSafe`
+דוחה כל op על prop שלא ב-`editableProps`, kind שלא ב-`allowedActions`, וערך שלא
+ב-`allowedValues(prop)`. `kImmutable==true` דוחה כל op. `kRoleFloor` נאכף גם
+client (advisory) וגם server (מקור-אמת — תיאום עם P5/§8.6).
+**Phase-0 freeze:** החוזה הזה (כל ששת השדות) נכתב ונבדק **לפני שלב-30** (הקפאת-
+ה-seam של P4), כי P4/P2/P3 כולם מקרקעים מולו. שלב A1 (`ElementDescriptor`+JSON)
+ושלב A2 (`ConfigDoc.schemaVersion` + `migrate`) מורחבים בהתאם; gate-118 מאמת לא
+רק `id ⊆ registry` אלא גם **שלמות-descriptor** (כל row מצהיר את ששת השדות, אחרת
+fail). מבחן חדש ב-`registry_contract_test.dart` (§12).
+
+### R1-A2 · מודל-פרסונה יחיד — `roleProvider` (String?) הוא מקור-האמת (נדרס §2.6 · §4.personas · §5.2 · §13-Pillar3/4 · שלבים A6, C13, C14)
+**הבעיה (A.2):** שלושה מודלים סותרים — חי=`roleProvider` (String?, null=קבלן) ·
+§2.6/§4 משתמשים ב-`BoardRole` enum (**אין בו קבלן** — זה role-הלוח, לא פרסונת-
+לקוח) · P4=`BsRole`. עריכה פר-קבלן לא-ניתנת-למיפתוח → "נשמר, כלום לא קורה".
+
+**מה משתנה:**
+1. **מקור-אמת יחיד = `roleProvider` (`String?`, `null` = קבלן).** כל שכבת-פרסונה,
+   כל מפתח ב-`ConfigLayer.persona`, כל `kRoleFloor`, וכל persona-selector — לפי
+   המחרוזת הזו. **מחליף את §2.6** שבו `viewerRoleProvider` החזיר `BoardRole`:
+   ```dart
+   // §2.6 read-path — מתוקן:
+   final resolvedNodeProvider = Provider.family<CfgNode, String>((ref, id) {
+     final doc  = ref.watch(configStoreProvider);
+     final role = ref.watch(roleProvider);    // String? — null=קבלן (מקור-אמת יחיד)
+     final live = ref.watch(editModeProvider).previewDraft;
+     return mergeNode(id, doc, role, includeDraft: live);
+   });
+   ```
+2. **`ConfigLayer.persona` מ-key לפי String** (לא enum): `Map<String, Map<String,
+   CfgNode>> persona` כאשר ה-key = ערך-`roleProvider` ('contractor'/'supplier'/
+   'courier'/'worker'/'manager'…; קבלן יכול להיות מפתח מפורש 'contractor' או
+   ה-fallback של `null`). **מחליף את §2.4 `ConfigLayer.persona` ואת §1 ("BoardRole"
+   ב-merge-diagram).**
+3. **`ElementDescriptor.personas` הופך ל-`Set<String>?`** (R1-A1) — מסונכרן.
+4. **adapter יחיד ממפה enums→string:** `BoardRole`/`BsRole` **לעולם לא משמשים
+   כ-key-פרסונה**; הם נכנסים דרך `roleKeyOf(BoardRole)` / `roleKeyOf(BsRole)`
+   ב-`config_merge.dart` (או קובץ-adapter ייעודי). **מחליף כל מקום ש-§5.2/§13
+   הניחו `BoardRole` כמפתח.**
+**שלבים:** A6 (read-path) משתנה ל-`roleProvider`; C13 (persona-selector) מציג את
+חמש המחרוזות (כולל קבלן-כ-null מפורש); C14 (inspector per-persona) כותב
+`persona[roleKey][id]`. מבחן ב-`config_merge_test.dart`: persona-string מנצח
+global, ו-`null`-role (קבלן) פותר נכון.
+
+### R1-A3 · draft-op-API — `applyOps` + undo-stack ראשון-במעלה (נדרס §2.5 · §7 · §13-Pillar4 · שלבים A4, C15)
+**הבעיה (A.3):** P4 מצפה `draft.apply(List<ConfigOp>)` + `revertLast()`/redo; §2.5
+חושף רק `editDraft(id, CfgNode Fn)` — לא תואם, ואין undo-stack בכלל.
+
+**מה משתנה — `ConfigStore` מרחיב את ה-API (מחליף את חתימת §2.5):**
+```dart
+// מודל-op חדש (lib/state/studio/config_op.dart):
+sealed class ConfigOp {                  // diff אטומי על הטיוטה
+  // SetProp(id, prop, value?) | ClearNode(id) | Reorder(parentId, ids) | SetPersona(id, roleKey, op)
+}
+class ConfigStore extends StateNotifier<ConfigDoc> {
+  void applyOps(List<ConfigOp> ops);     // ← API ציבורי: P4 + find&replace + tree כותבים דרכו
+  void revertLast();                     // ← undo (pop מ-undo-stack)
+  void redo();                           // ← redo (re-push)
+  CfgNode _editDraft(String id, CfgNode Function(CfgNode) f, {String? persona}); // ← primitive פנימי בלבד
+}
+```
+- `applyOps` הוא **השער היחיד** לכתיבה-לטיוטה: כל op נדחף ל-`undoStack`, מאומת
+  מול ה-descriptor (R1-A1) **לפני** החלה (fail-closed), ו-`_editDraft` יורד
+  להיות מימוש-פנימי שלא נחשף ל-P4. **מחליף את §2.5 + §13-Pillar4** ("writes via
+  `ConfigStore.editDraft`" → "writes via `ConfigStore.applyOps`").
+- **undo-stack ראשון-במעלה** (גם תיאום עם R1-E-undo למטה): bounded (≥50 ops),
+  נמחק ב-publish/discard, לא נשמר ל-prefs (in-session). חושף `canUndo`/`canRedo`.
+**שלבים:** A4 (`ConfigStore`) מוסיף `applyOps`/`revertLast`/`redo` + `ConfigOp`;
+C15 (publish/discard) מנקה את ה-stack. `config_store_test.dart` מאמת
+applyOps→undo→redo round-trip + דחיית-op לא-חוקי.
+
+### R1-B7 · `CfgText` עוטפן נאמן — מעביר את כל פרמטרי-ה-`Text` (נדרס §3.1 · שלב B8)
+**הבעיה (B.7):** §3.1 בונה `Text(...)` עם `style`+`semanticsLabel` בלבד ומפיל
+`maxLines`/`overflow`/`textAlign`/`softWrap`/`textDirection`/`textScaler`/
+`maxLines` → רגרסיות-חיתוך/יישור/אליפסיס **גם כשהמנוע OFF** (כי ה-call-site
+שהמיר `Text('x', maxLines:2, overflow:ellipsis)` ל-`CfgText` מאבד את הפרמטרים).
+
+**מה משתנה — `CfgText` חייב לקבל ולהעביר את כל פרמטרי-ה-`Text` (מחליף §3.1):**
+```dart
+class CfgText extends ConsumerWidget {
+  const CfgText(this.id, this.fallback, {
+    this.style, this.semanticsLabel,
+    this.maxLines, this.overflow, this.textAlign, this.softWrap,
+    this.textDirection, this.textScaler, this.strutStyle, this.locale,
+    this.textWidthBasis, this.selectionColor, super.key,
+  });
+  // …build: Text(effText, style: eff, semanticsLabel: …,
+  //   maxLines: maxLines, overflow: overflow, textAlign: textAlign,
+  //   softWrap: softWrap, textDirection: textDirection, textScaler: textScaler, …)
+}
+```
+- **שימור composition:** היכן שהמקור היה `Text.rich`/`RichText`/`Text` עם
+  `TextSpan` — `CfgText` **לא חל** (ראה R1-B6: out-of-v1); ההמרה המכנית מותרת
+  רק על `Text('ליטרל', …)` פשוט, וכל פרמטר קיים מועתק 1:1.
+- **gate חדש ב-`cfg_wrappers_test.dart`:** snapshot שמוודא `CfgText` עם
+  `maxLines:1, overflow:ellipsis` מתנהג זהה ל-`Text` המקורי (OFF). **מחליף את
+  טענת-§14.1** "same widget tree" — כעת מאומת פר-פרמטר, לא רק על-טקסט.
+**שלב:** B8 (`CfgText`) מורחב; ה-codemod של §9.5/Phase-E חייב להעתיק את פרמטרי-
+ה-`Text` הקיימים אל ה-`CfgText` המוצע (לא רק את הליטרל).
+
+### R1-B6 · היקף-תוכן כן — ציר-תוכן-v1 = ~532 אתרי-`Text('ליטרל')` בלבד (נדרס §0-adoption-cost · §9 · §3.1 · שלבים B10, E22–E23)
+**הבעיה (B.6):** §0 מצהיר "2,361 `Text(` call-sites" כאילו כולם ברי-המרה. בפועל:
+~532 בלבד הם `Text('ליטרל-עברי')`; **721 הם `const Text(...)`** (המרה ל-`CfgText`
+הורסת את ה-`const` → rebuilds מיותרים); השאר **מחושב/interpolated/`Text.rich`**
+(אין fallback-ליטרל יציב, gate-61/64 לא תקף).
+
+**מה משתנה:**
+1. **ציר-תוכן-v1 מוגדר מחדש = ~532 הליטרלים הסטטיים בלבד.** **מחליף את §0
+   ("2,361") ואת §9** ("the 2,361-`Text` problem" → "the ~532-literal content
+   axis; 2,361 הוא ספירת-`Text(` גסה, לא היקף-ההמרה").
+2. **const-loss מתועד + נמדד:** כל המרה של `const Text` → `CfgText` (לא-const)
+   נרשמת, וב-Phase-E נמדד **מדד-ביצועים** (rebuild-count/frame-time על מסך-צפוף,
+   ראה R1-E-perf) לפני/אחרי. אם מסך חוצה-סף — האלמנט נשאר `const Text` ולא מאומץ
+   ב-v1. **מחליף את §9.6** ("adoption commits are visually inert" → "...וגם
+   perf-neutral; const-loss נמדד פר-מסך-צפוף").
+3. **מחושב/interpolated/`Text.rich` = templating נפרד, מחוץ-ל-v1.** `CfgText`
+   לא חל עליהם (תיאום R1-B7). מנגנון-templating (placeholders ב-string מאומת)
+   נדחה ל-vNext ומוצהר מפורשות כ-out-of-scope. **מחליף כל רמיזה ב-§3.1/§9 שכל
+   `Text` ניתן-להמרה.**
+**שלבים:** B10 (pilot) נשאר ~10 ליטרלים; E22 (auto-extract) סורק רק
+`Text\('<ליטרל>'` (לא const, לא interpolation); E23 (roll adoption) מוגבל ל-~532
++ מדידת const-loss פר-section.
+
+### R1-B4 · "byte-identical" יורד → "answer-equivalent מול fixtures + golden-render" (נדרס §0 · §1 · §6 · §10 · §11 · §12 · §14 · §16 · כל-המסמך)
+**הבעיה (B.4):** "byte-identical" מופיע לאורך-המסמך כערובת-אפס-רגרסיה. אבל
+מבנה-Widget אינו "בייטים", ו-golden/visual-diff הוא ההוכחה האמיתית. הטענה
+over-claim ולא-מדידה.
+
+**מה משתנה — מחק "byte-identical" מכל P1, החלף ב-"answer-equivalent":**
+1. **ניסוח-תקני חדש (מחליף בכל מופע — §0/§1/§6/§10/§11/§12/§14/§16/essence):**
+   > "עם `kStudioFlag` OFF + doc-ריק, האפליקציה **answer-equivalent** למצב-היום:
+   > כל `Cfg*` מחזיר את ה-fallback, מאומת מול **fixtures** (אותו טקסט/נראות/סדר)
+   > **ו-golden-render** (אותו פיקסל על מסכי-הפיילוט). לא 'byte-identical'."
+2. **§14 (Zero-regression proof) משוכתב:** סעיף 14.1 ("Read path collapses to
+   identity") + 14.5 ("Adoption commits are visually inert") מנוסחים מחדש כ-
+   **golden-equivalent** (gate-116 visual_log = ההוכחה), לא "same bytes". הוכחת-ה-
+   CI (14.6) מוסיפה golden-render לפיילוט.
+3. **§12 מוסיף `golden_off_equivalence_test.dart`** (או מרחיב `zero_regression_
+   test.dart`): מרנדר מסך-פיילוט עם flag-OFF ומשווה golden מול ה-baseline-לפני-
+   המנוע. **מחליף את ההסתמכות על §14 הטקסטואלי.**
+**שלבים:** A6/B11/C17 — כל gate-אפס-רגרסיה מתנסח answer-equivalent; Phase-B מוסיף
+golden לפיילוט; Phase-E מרחיב golden ל-sections המאומצים.
+
+### R1-E · שלבים-חסרים שחלים על P1 (חמישה — נוספים ל-§15 ול-§16)
+פערי-השלמות מהעדשה-ה-8 שנופלים בתחום-P1. כל אחד הוא **שלב חדש** (ממוספר בהמשך
+ל-Phase-D/E) עם gate משלו.
+
+**R1-E-undo · undo first-class גם ל-tree/find-replace/theme (נדרס §5.4 · §5.5 · §7 · שלב חדש D-undo)**
+היום undo קיים רק כ-rollback פר-publish (§7) ו-`resetDraftNode` פר-אלמנט (§2.5);
+**אין undo לפעולות-טיוטה רב-אלמנטיות** (find&replace מחליף 80 hits — אין "בטל
+הכל"; theme-edit אין "חזור"; reorder בעץ אין "בטל"). **מחליף §5.4/§5.5/§7**:
+כל פעולת-Studio (tree-reorder · find&replace-batch · theme-edit) עוברת דרך
+`applyOps` (R1-A3) → נכנסת ל-undo-stack → כפתור "בטל"/"חזור" גלובלי ב-top-bar
+(§5.1). שלב D-undo: חיווט ה-undo-stack לכל שלוש הקונכיות + מבחן
+`undo_stack_test.dart`.
+
+**R1-E-a11y · a11y-gate לקונכיית-הסטודיו עצמה (panes/inspector/chat) (נדרס §5 · §12 · שלב חדש D-a11y)**
+§5.4 בודק contrast רק על **פלט-המשתמש** (theme-editor); הקונכייה של הסטודיו
+(tree/inspector/find&replace/theme-panes, וה-chat-panel של P4 המורכב ב-Pane-B)
+**עצמה לא נבדקת** ל-a11y (טאץ'-טארגטים, contrast, semantics, focus-order, RTL).
+שלב D-a11y חדש: `studio_shell_a11y_test.dart` מריץ את אותה לוגיקת-contrast
+(`a11y_contrast_theme_test`) + בדיקת-semantics על מסכי-הסטודיו; gate פר-commit
+על קונכיית-הסטודיו. **מרחיב §12** (מעבר ל-overlay/inspector שכבר נבדקים ל-RTL).
+
+**R1-E-onboarding · onboarding/first-run לבעלים-הלא-מתכנת (נדרס §5 · §6 · שלב חדש D-onboarding)**
+המסמך מניח בעלים שמבין "draft/publish/persona/critical-id"; אין מסך-first-run.
+שלב D-onboarding חדש: בכניסה-ראשונה ל-Studio (flag-state נשמר ב-prefs כמו
+`feature_flags`) — סבב-הסבר קצר (3–4 צעדים, RTL, עברית-verbatim) "זו טיוטה ·
+ככה מפרסמים · ככה מבטלים · מה נעול". מוצג פעם-אחת, ניתן-לפתיחה-מחדש מ-top-bar.
+**מרחיב §5/§6** (entry-point של edit-mode).
+
+**R1-E-perf · edit-mode perf-gate על מסך-צפוף (catalog/manager) (נדרס §0-mega-screens · §11 · §16 · שלב חדש E-perf)**
+§11 טוען "O(1) reads" אבל לא מודד edit-mode על המסכים-הצפופים (`catalog_screen.
+dart` ~330KB, `manager_dashboard_screen.dart` 136KB) כש-`EditHandle` עוטף מאות
+אלמנטים + const-loss (R1-B6). שלב E-perf חדש: מדידת frame-time/jank עם edit-mode
+ON על catalog+manager (סף מוגדר), gate שחוסם אם חוצה-סף. **מחליף את §11
+("O(1)/virtualised" כטענה-בלבד) ואת שורת-§16 "Perf at 100K ids"** — כעת מדוד,
+לא מוצהר. תוצאת-המדידה מזינה את החלטת-ה-const-loss של R1-B6.
+
+**R1-E-export · export/import JSON של הקונפיג (גיבוי) (נדרס §7 · §2.5 · §10 · שלב חדש E-export)**
+היום כל-העסק ב-prefs/Firestore + ring-30 בלבד (§7) — **אין גיבוי חיצוני**; אובדן-
+מכשיר/מחיקת-prefs = אובדן-קונפיג. שלב E-export חדש (תיאום עם R1-E15 הכללי):
+`ConfigStore.exportJson()` → קובץ (כל `ConfigDoc.toJson` כולל history) +
+`importJson(String)` → restore-from-file (עם validate מול schemaVersion+migrate,
+fail-closed על doc פגום). UI ב-Pane-D (§5.5, ליד version-history). **מרחיב §7
+ו-§2.5**; `config_store_test.dart` מוסיף export→import round-trip. (Pillar-5
+מוסיף אחר-כך גיבוי-שרת; זה הגיבוי-הלוקאלי המיידי.)
+
+### סיכום-דלתות לטבלת-השלבים (§15) ולסיכונים (§16)
+- **§15 Phase-0 (חדש, לפני Phase-A-freeze):** הקפאת-חוזה-`ElementDescriptor`
+  המורחב (R1-A1) + `roleProvider`-כמקור-יחיד (R1-A2) + `applyOps`-API (R1-A3)
+  **לפני שלב-30**.
+- **§15 שלבים-מורחבים:** A1/A2/A4/A6 (descriptor+op+role), B8/B10 (CfgText נאמן +
+  היקף-532), C13–C15/C17 (persona-string + applyOps + golden-equivalence).
+- **§15 שלבים-חדשים:** D-undo · D-a11y · D-onboarding · E-perf · E-export.
+- **§16 סיכונים-מתוקנים:** "byte-identical" → "answer-equivalent + golden" ·
+  "O(1)/100K" → "perf-gate מדוד על catalog/manager" · נוסף סיכון "אובדן-קונפיג →
+  export/import" ו-"validateSafe ריק → descriptor fail-closed".
+- **gate-118 מורחב:** `id ⊆ registry` **+ שלמות-descriptor (ששת השדות)** +
+  golden-OFF-equivalence; 119=AI-grounded (ע4), 120=analytics-PII (ע3) — כבר
+  שמורים ב-`GATE_REGISTRY.md`.

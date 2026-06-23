@@ -39,7 +39,19 @@
 4. **פרטיות/חוק (ע3):** היום `legal_texts` מצהיר "על-המכשיר-בלבד, ללא אנליטיקה". מודיעין-הלקוחות **חוסם-עצמית default-OFF עד עדכון מדיניות-פרטיות**.
 5. **ממשל #84 נאכף לרוחב:** עריכה/פרסום = owner/manager-claim בלבד · רצפת-נראות פר-פרסונה (אי-אפשר להסתיר ניווט/התחברות) · אשראי/HR קריאה-בלבד.
 6. **אפס-הזיה (ע4):** ה-AI רק **נוקב בשמות** מהסט-הסגור של הרישום; ה-Dart בונה את ה-diff ומאמת כל שדה.
-7. **אבן-הפינה של אפס-רגרסיה:** ע1=`StudioOverlay` שורה-אחת-inert · ע2=seed-אינסטלציה **זהה-בייט** ל-const · ע5=דגלים-OFF=זהה-בייט.
+7. **אבן-הפינה של אפס-רגרסיה:** ע1=`StudioOverlay` שורה-אחת-inert · ע2=seed-אינסטלציה **answer-equivalent** ל-const מול fixtures קיימים (`compat_50_samples`/`catalog_regression`; `kCatalogProducts` הוא `final` — אין בייטים) · ע5=דגלי-קומפילציה-OFF=byte-identical (מאומת 8×).
+
+> ### 🔒 הכרעות-החוצות שנקבעו (Red-Team R1 — **מחויבות**, לא הצעות)
+> אלו ההכרעות הקנוניות שכל leaf-doc חייב לכבד. מקור-מלא: `studio-plan/RED-TEAM-R1.md`.
+> 8. **מודל-פרסונה יחיד:** מקור-אמת = `roleProvider` (`String?`, **null = קבלן**). כל רצפת-נראות/רצפת-תפקיד מפותחת לפיו; `BoardRole`/`BsRole` enums ממופים ב-adapter בלבד. (A#2)
+> 9. **רישום-מורחב (חוזה Phase-0):** `ElementDescriptor` של P1 מורחב לכל `editableProps`/`allowedActions`/`allowedValues`/`kImmutable`/`kRoleFloor`/`ElementKind` — **קפוא לפני שלב-30**, `validateSafe` fail-closed כשחסר. (A#1)
+> 10. **draft-op-API:** P1 חושף `applyOps(List<ConfigOp>)` + undo-stack; `editDraft(id, Fn)` נשאר primitive פנימי. (A#3)
+> 11. **אכיפה-בשרת:** `publishConfig` **מריץ מחדש את כל `validateSafe` בשרת** (role-floor · action-legality · critical-lock · contrast · batch-ceiling); client = advisory בלבד. (C#10)
+> 12. **privacy default-deny:** `privAnalytics` default **false** + opt-in מפורש; gate דורש `consentedPolicyVersion >= current`; `privPresence` נפרד default-OFF + TTL + בסיס-חוקי; presence-read = actors-לקוחות בלבד. (C#11)
+> 13. **publish dual-control:** `publishConfig` דורש `isOwnerEmail` או dual-control + rate-limit + revert-SLA; price בשדה role-scoped; erasure על `actorKey`+`uid`+presence. (C#12)
+> 14. **"byte-identical → answer-equivalent":** טענת-seed≡const מוחלפת ב-**answer-equivalent מול fixtures**; "byte-identical" נשמר **רק** לדגל-קומפילציה-OFF (מאומת). (B#4)
+> 15. **אומדן ריאלי ~150–180 commits:** "100" = טקסונומיית-משימות, לא effort-estimate; 5 ענקים (29/37-38/49/63/82-84) מפוצלים ל-sub-commits. (B#9)
+> 📌 **תיקוני-Red-Team פר-עמוד** חיים בכל מסמך `studio-plan/0N` תחת `🔧 תיקוני Red-Team R1`; הרשומה-החוצה המלאה (9 עדשות, ~30 HIGH) ב-`studio-plan/RED-TEAM-R1.md`.
 
 ---
 
@@ -57,7 +69,7 @@
 אימוץ העוטפנים על המסכים המרכזיים (2,361 ה-`Text(` בהדרגה) → **"לערוך כל טקסט" אמיתי**.
 
 ### 🟡 פאזה 3 — בונה-התחומים (ע2)
-סכמה מוכללת + **seed-אינסטלציה זהה-בייט** (אבן-הפינה) + 8 מסכי-אבטחה עברית + `connection_resolver`. **בסוף:** "חשמלאי מחר" עובד.
+סכמה מוכללת + **seed-אינסטלציה answer-equivalent** (אבן-הפינה, מול fixtures קיימים) + 8 מסכי-אבטחה עברית + `connection_resolver`. **בסוף:** "חשמלאי מחר" עובד.
 
 ### 🟡 פאזה 4 — שרת + פרסום-לכולם + קנה-מידה (ע5)
 מודל-Firestore + publish-pointer + חיפוש-בקנה-מידה + rules + הגירה local→server. **בסוף:** "פרסם" → כל המשתמשים רואים תוך שניות · 10K מוצרים חלק.
@@ -74,7 +86,7 @@
 גידור פר-מודול default-OFF → אפס-רגרסיה לכל הפרסונות · server-ready (כתיבה ל-provider משותף) · עברית-verbatim · נגישות (RTL/textScaler/contrast) · grounded אפס-הזיה · ממשל-#84 · `analyze 0` + suite + knowledge-protocol + APK.
 
 ## 5. DoD — "100%"
-✅ פאזה-0 חיה (עריכת-טקסט-חיה) · ✅ סטודיו + טיוטה/פרסום/גרסאות · ✅ כיסוי-תוכן מלא · ✅ בונה-תחומים ("חשמלאי" מקצה-לקצה) + אינסטלציה זהה-בייט · ✅ פרסום-לכולם + 10K מוצרים בביצועים · ✅ עורך-AI מקורקע · ✅ מודיעין-לקוחות (אחרי-פרטיות) · ✅ כל מודול OFF=אפס-רגרסיה מאומת · ✅ ממשל-#84 · ✅ analyze 0 + suite + APK · ✅ אישור-בעלים פר-מודול ל-GA.
+✅ פאזה-0 חיה (עריכת-טקסט-חיה) · ✅ סטודיו + טיוטה/פרסום/גרסאות · ✅ כיסוי-תוכן מלא · ✅ בונה-תחומים ("חשמלאי" מקצה-לקצה) + אינסטלציה answer-equivalent (מול fixtures) · ✅ פרסום-לכולם + 10K מוצרים בביצועים · ✅ עורך-AI מקורקע · ✅ מודיעין-לקוחות (אחרי-פרטיות) · ✅ כל מודול OFF=אפס-רגרסיה מאומת · ✅ ממשל-#84 · ✅ analyze 0 + suite + APK · ✅ אישור-בעלים פר-מודול ל-GA.
 
 ---
 
