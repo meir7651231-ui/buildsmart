@@ -1,5 +1,8 @@
 # Pillar 4 — AI Co-Editor + Behavior / Component Builder
 
+> ⚠️ קנוני = מקטע 🔧 תיקוני Red-Team R1 (בסוף) + RED-TEAM-R1/R2.md. ה-appendix גובר.
+> כל ניסוח בגוף שסותר את ה-appendix או את שני מסמכי ה-Red-Team — בטל; ה-appendix וה-R1/R2 הם מקור-האמת.
+
 > **Branch:** `claude/whats-happening-LyY9G` · **Project:** `app_flutter/` (Flutter 3.29 · Dart 3.7 · Riverpod)
 > **Status:** BUILD PLAN (grounded on the live code as of 2026-06-23). Nothing here is implemented yet.
 > **Owner of THIS pillar:** the NL→config-diff bridge · the action-catalog · the component-palette · the rules/automation engine · preview/confirm/undo · safety/validation.

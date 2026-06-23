@@ -1,5 +1,8 @@
 # Pillar #5 — Scale, Data Architecture, Backend & Publish-to-All
 
+> ⚠️ קנוני = מקטע 🔧 תיקוני Red-Team R1 (בסוף) + `RED-TEAM-R1.md`/`RED-TEAM-R2.md`. ה-appendix גובר.
+> כל ניסוח בגוף שמתנגש (publish-LWW, price world-readable, presence live-listener) — ה-appendix מכריע.
+
 > **The integrating layer.** Pillars 1–4 (Studio config engine · domain/trade builder · live customer intelligence · AI) decide *what* the platform does. **This pillar owns how all of it PERSISTS, SYNCS, SEARCHES, SECURES and SCALES** — to **tens of thousands of products and thousands of customers** — without breaking the flags-OFF offline demo.
 >
 > **Branch:** `claude/whats-happening-LyY9G`. **Region:** `me-west1` (Tel Aviv), matching the Firestore DB + `kAuthFunctionsRegion` + every existing function (`functions/src/common.ts:17`).

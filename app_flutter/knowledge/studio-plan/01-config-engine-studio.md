@@ -1,5 +1,7 @@
 # Pillar 1 — The No-Code Config Engine + Studio Shell
 
+> ⚠️ קנוני = מקטע 🔧 תיקוני Red-Team R1 (בסוף) + RED-TEAM-R1/R2.md. הגוף עודכן-חלקית; ה-appendix גובר.
+
 > **The foundation everything else builds on.** A single layered, persisted config
 > tree keyed by stable element-ids, thin editable-wrapper widgets that existing
 > widgets adopt incrementally, an element registry, the Studio control-center, an

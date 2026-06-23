@@ -1,4 +1,7 @@
 # Pillar #2 — The No-Code Domain / Vertical Builder
+
+> ⚠️ קנוני = מקטע 🔧 תיקוני Red-Team R1 (בסוף) + RED-TEAM-R1/R2.md. ה-appendix גובר.
+
 ### "תוסיף חשמלאי מחר, בעצמי" — a grounded, phased Flutter build-plan
 
 > **Scope owner:** the **Trade → Category → Attribute/Variant → Product → Accessory → CompatibilityRule data model** + the Hebrew **no-code authoring UX** for it + the **migration of the existing plumbing catalog** into that model with **zero regression** + **bulk import** + the **trade-agnostic connection-planning engine**.

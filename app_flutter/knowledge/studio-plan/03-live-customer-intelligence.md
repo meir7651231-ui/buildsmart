@@ -1,5 +1,7 @@
 # Pillar 3 — Live Customer Intelligence / Analytics
 
+> ⚠️ קנוני = מקטע 🔧 תיקוני Red-Team R1 (בסוף) + RED-TEAM-R1/R2.md. ה-appendix גובר.
+
 > **Build-plan · branch `claude/whats-happening-LyY9G` · `app_flutter/` (Flutter 3.29 · Riverpod).**
 > Owner-facing goal (Hebrew, manager screen): for **every customer, in real time** — what they
 > click, where they get stuck, where they are **now**, plus a per-customer journey, segments,
