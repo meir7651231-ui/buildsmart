@@ -103,5 +103,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.56 — 🤖 העוזר עכשיו גם מוסיף לסל: 'תוסיף ערכה לסל' → מציע ערכה אמיתית ואתה מאשר בלחיצה · + 'תמצא ברז' / 'מה ההזמנות' / 'כמה בתקציב' · ✨ 'סיכום עסקי' · ✨ 'נסח הצעה' · v6.56 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 v6.58 — איכות: תיקון baseline-test (worker_reports drill-down close) → known-failing 2→1 · כל 12 פיצ'רי-ה-AI ללא-שינוי · v6.58 במסך הבית · build #${{ github.run_number }}" \
             --project buildsmart-b0b78
