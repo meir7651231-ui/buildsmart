@@ -1847,3 +1847,10 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** מחירי-הקטלוג עם "כולל מע״מ" עלו ב~0.85% (17%→18%) — כי המחיר-המוצג עכשיו תואם בדיוק את מה שנגבה בקופה (שכבר חייבה 18%). דוגמה: מוצר ב-₪100 בסיס הציג ₪117, עכשיו ₪118 (=מה שהקופה גבתה ממילא). מסך-הניהול ממשיך להציג "שיעור מע״מ 18%" (עכשיו נגזר מאותו קבוע). **זה תיקון-נכונות:** קודם הקבלן ראה מחיר אחד בעיון ושילם יותר בקופה.
 **אימות (אוטומטי, לא צילום):** `catalog_price_units_settings_test` (18%) + 5 חבילות-עגלה (נשארו 18% ירוקות) + `manager_dashboard_screen_test` (שורת-מע״מ עדיין מרונדרת) = 122 ירוקים · analyze 0.
 **הפיכות:** `git checkout lib/state/catalog_settings.dart lib/screens/store_screen.dart lib/screens/manager_dashboard_screen.dart` — מחזיר ל-`kVatRate=0.17` ולפיצול 17/18.
+
+## v6.84 — a11y: ניגודיות-AA + tooltips + מנעול-double-tap בחנות — 2026-06-23
+**שינוי נראה (ניגודיות):** טקסט-אפור בהיר שנכשל WCAG-AA הוכהה — שבבי-פילטר לא-פעילים בחנות (#AAAAAA→#595959), כותרת-מותג ותווית-תאימות בקטלוג. עכשיו קריא לבעלי-ראייה-חלשה.
+**שינוי נראה (a11y, לא-ויזואלי לרואים):** כפתורי-אייקון (אישור/סגירה/חזרה/נקה/הסר-מהסל/...) קיבלו tooltip → קורא-מסך מכריז עליהם; חיווי "לא-נקרא" בהתראות-החנות קיבל `Semantics` (קודם צבע-בלבד).
+**שינוי התנהגות (חנות):** double-tap מהיר על "הכן"/"מוכן" כבר לא מקפיץ 2 שלבים — מנעול-staleness כמו אצל השליח.
+**אימות (אוטומטי):** `product_journey` (935 sheets · large-text · narrow-phone — אפס overflow) + `persona_fulfillment` + `store_notif_widget` ירוקים · analyze 0.
+**הפיכות:** `git checkout lib/screens/catalog_screen.dart lib/screens/store_screen.dart lib/screens/store_dashboard_screen.dart`.

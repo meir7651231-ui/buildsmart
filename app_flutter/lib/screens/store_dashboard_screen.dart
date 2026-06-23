@@ -694,6 +694,19 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   }
 
   void _advance(SysOrder o) {
+    // F-12 staleness guard (mirrors courier_dashboard `_advance`): a rapid
+    // double-tap lands on a rebuilt button still carrying the OLD stage — no-op
+    // unless the live engine still agrees with the stage the card was built on,
+    // so one gesture can't silently advance two stages.
+    SysOrder? current;
+    for (final x in ref.read(sysOrdersProvider)) {
+      if (x.id == o.id) {
+        current = x;
+        break;
+      }
+    }
+    if (current == null || current.stage != o.stage) return;
+
     // The store now owns the hand-off too (ready→pickup, "מסור לשליח"); the
     // courier takes over from `pickup` (two-step hand-off).
     ref.read(sysOrdersProvider.notifier).storeAdvance(o.id);
@@ -2067,17 +2080,22 @@ class _StoreNotifRow extends StatelessWidget {
                 ),
               ),
               if (!notif.read)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: BsTokens.space2,
-                    top: 6,
-                  ),
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: BsTokens.brand,
-                      shape: BoxShape.circle,
+                // a11y: the unread state was color-only (orange dot) → label it
+                // so a screen reader announces it, not just sighted users.
+                Semantics(
+                  label: 'לא נקרא',
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: BsTokens.space2,
+                      top: 6,
+                    ),
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: BsTokens.brand,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
                 ),

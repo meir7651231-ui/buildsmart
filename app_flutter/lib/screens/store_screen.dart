@@ -606,6 +606,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
               query.isEmpty
                   ? null
                   : IconButton(
+                    tooltip: 'נקה',
                     icon: const Icon(
                       Icons.close,
                       color: Color(0xFF888888),
@@ -727,7 +728,7 @@ class _Pill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
+              color: active ? bsOnAccent(context) : const Color(0xFF595959),
               fontSize: 13,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -1817,7 +1818,7 @@ class _ProjectChip extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
+            color: active ? bsOnAccent(context) : const Color(0xFF595959),
             fontSize: 13,
             fontWeight: active ? FontWeight.w600 : FontWeight.w400,
           ),
@@ -1907,6 +1908,7 @@ class _SmartCartRow extends ConsumerWidget {
                 ),
               ),
               IconButton(
+                tooltip: 'הסר מהסל',
                 icon: const Icon(
                   Icons.close,
                   color: Color(0xFF666666),
@@ -2604,7 +2606,7 @@ class _PaymentChip extends StatelessWidget {
             Text(
               option.label,
               style: TextStyle(
-                color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
+                color: active ? bsOnAccent(context) : const Color(0xFF595959),
                 fontSize: 13,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w400,
               ),

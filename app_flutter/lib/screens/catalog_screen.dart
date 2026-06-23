@@ -907,6 +907,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
+                  tooltip: 'אישור',
                   icon: const Icon(Icons.check, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -919,6 +920,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: 'סגירה',
                   icon: const Icon(Icons.close, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -1628,6 +1630,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
             // Leading: back arrow when panel open, search icon otherwise.
             if (open)
               IconButton(
+                tooltip: 'חזרה',
                 icon: const Icon(
                   Icons.arrow_back,
                   color: Color(0xFF888888),
@@ -1718,6 +1721,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
             // Clear button — shown when there is text.
             if (hasText)
               IconButton(
+                tooltip: 'נקה',
                 icon: const Icon(
                   Icons.close,
                   color: Color(0xFF888888),
@@ -2091,6 +2095,7 @@ class _RecentSearchesList extends ConsumerWidget {
                   style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 ),
                 trailing: IconButton(
+                  tooltip: 'השתמש בחיפוש זה',
                   icon: const Icon(
                     Icons.north_west,
                     color: Color(0xFF888888),
@@ -5910,7 +5915,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                            color: Color(0xFF999999),
+                                            color: Color(0xFF595959),
                                             fontSize: 10,
                                             height: 1.25)),
                                   ),
@@ -7150,7 +7155,7 @@ class _FavProductRow extends ConsumerWidget {
           style: const TextStyle(
               color: BsTokens.inkLight, fontSize: 13, fontWeight: FontWeight.w600)),
       subtitle: Text(product.brand,
-          style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
+          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11)),
       onTap: () => showLipskeyProductSheet(
           context,
           product,
@@ -7220,6 +7225,7 @@ class _RecentSearchesSection extends ConsumerWidget {
                     style: const TextStyle(
                         color: BsTokens.inkLight, fontSize: 14)),
                 trailing: IconButton(
+                  tooltip: 'הסר',
                   icon: const Icon(Icons.close,
                       color: Color(0xFF9AA3B2), size: 18),
                   onPressed: () =>
