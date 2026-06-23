@@ -1314,3 +1314,9 @@
 - **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** `scripts/fill_material_from_name.py` — `dims['חומר']` מחומר-מבני בשם (נחושת/נירוסטה/פליז/פלסטיק), 100% verbatim. הוחל ל-**64 מוצרים**. מודר: גימורים (כרום≠חומר) ותת-רכיב ("ציר פלסטיק"=ציר, לא גוף). gate-117 מודר; ממזג ל-dims; idempotent.
 - **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `77777481` dims['חומר']='נחושת' (מצוף נחושת).
 - **mutation-verify:** baseline **+13 ירוק** → `77777481` `'חומר':'נחושת'`→`'זהב'` → **אדום `+11 -1`** ("structural material") → שחזור → **+13 ירוק**. analyze 0. parity+product_journey(935) ירוקים.
+
+## #attribute-fleet — נחיל קבוצה-קבוצה: אטריביוטים מהשמות — 2026-06-23
+- **הנחיל:** Workflow קנוני, 68 קבוצות × (גלאי+עדשת-R8/מנוע+עדשת-שלמות)=204 סוכנים. כל סוכן קרא שמות-קבוצה מ-`cat_data.json` והציע אטריביוטים verbatim; עדשות אישרו.
+- **הדאטה (`lib/data/lipskey_catalog.dart` → גייט 44):** `scripts/fill_attrs_from_fleet.py` (קלט `knowledge/_fleet_attrs.json`) — מפתחות זווית/יציאות/תצורה/מאפיין/ייעוד. **שער-R8 קשיח: כל ערך חייב להופיע מילולית ב-nameHe** (defence-in-depth, חוסם הזיות-סוכן). 262→256 הוחלו. **לא מחריג gate-117** (parity per-key — מפתח-חדש בטוח, אומת).
+- **טסט-נעיצה:** `test/lipskey_enrichment_test.dart` — `116207` dims['זווית']='45°' (gate-117!); `77775256` ייעוד='למדיח'; `77775255` תצורה='כפול'.
+- **mutation-verify:** baseline **+14 ירוק** → `116207` `'זווית':'45°'`→`'99°'` → **אדום `+12 -1`** ("attribute fleet") → שחזור → **+14 ירוק**. analyze 0. parity +277 (כולל gate-117+זווית) + product_journey(935) ירוקים **בנפרד** (משולב=קריסת-isolate חולפת מוכרת).

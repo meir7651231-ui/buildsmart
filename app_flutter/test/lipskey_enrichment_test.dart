@@ -62,6 +62,11 @@ void main() {
     test('structural material from the name (100%-certain, brand-agnostic)', () {
       expect(bySku('77777481').dims?['חומר'], 'נחושת'); // מצוף נחושת
     });
+    test('attribute fleet — angle/config/application from the name', () {
+      expect(bySku('116207').dims?['זווית'], '45°'); // ברך 45° (gate-117 SKU, new key safe)
+      expect(bySku('77775256').dims?['ייעוד'], 'למדיח'); // ברז ניל יציאה למדיח
+      expect(bySku('77775255').dims?['תצורה'], 'כפול'); // ברז ניל כפול
+    });
   });
 
   test('every enriched quantity is a positive integer (no garbled reads)', () {
