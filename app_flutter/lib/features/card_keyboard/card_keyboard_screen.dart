@@ -199,9 +199,23 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     return (p) => src.matches(p, chip);
   }
 
+  /// Single re-entrancy claim shared by EVERY action surface — word/chip/product
+  /// taps today, and the future text/voice/AI seeds, all route through [_pushStep]
+  /// or the product-sheet open. Returns false if a tap this frame already claimed,
+  /// so a double-tap or a same-frame multi-surface race can't push twice / stack
+  /// two sheets (round-2 blocker-1: the guard used to wrap ONLY _onWordTap). Resets
+  /// next frame — by then the new keys / the sheet's modal barrier absorb taps.
+  bool _claim() {
+    if (_busy) return false;
+    _busy = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _busy = false);
+    return true;
+  }
+
   /// Push an answered step, recompute, and — if the engine now RESOLVEs — open
   /// the reach-product sheet (the flow's terminus, Phase 5).
   void _pushStep(NewbieStep step) {
+    if (!_claim()) return;
     setState(() {
       stack.add(step);
       _diveVersion++;
@@ -307,12 +321,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   ///    its axisId+value DATA; the crumb shows displayLabel);
   ///  • [_ProductTap] — resolve by sku and open the reach-product sheet.
   void _onWordTap(WordKey key) {
-    // Debounce re-entrant taps within ONE frame (swarm R9): a double-tap must not
-    // push a step twice or stack two sheets. Reset next frame — by then the new
-    // keys (or a sheet's modal barrier) absorb further taps.
-    if (_busy) return;
-    _busy = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _busy = false);
+    // The re-entrancy claim now lives on _pushStep + the product-sheet open (the
+    // action choke points), so word/chip/product taps AND the future text/voice/AI
+    // seeds share ONE guard (round-2 blocker-1). The pre-push resolve below is
+    // cheap + idempotent, so it needs no guard of its own.
     final payload = key.payload;
 
     if (payload is _WordTap) {
@@ -363,7 +375,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         break;
       }
     }
-    if (picked != null && openSheetOnResolve) {
+    if (picked != null && openSheetOnResolve && _claim()) {
       showLipskeyProductSheet(context, picked, v.products);
     }
   }
