@@ -7,13 +7,17 @@
 // Edges are TAGGED by EdgeKind so the <=4 census and the on-screen rail verify and
 // render the SAME edge set. Pure; nothing reads it until the hop UI (P8) wires it.
 //
-// Step 4 = skeleton. Step 5 = compat edges (crossesSystem-gated). Step 6 (this) =
-// variant edges (per-family clique). Steps 7-8 add kit / category.
+// Step 4 = skeleton. Step 5 = compat (crossesSystem-gated). Step 6 = variant
+// (per-family clique). Step 7 (this) = kit (recipe co-membership, crossesSystem-
+// gated). Step 8 adds category.
 
 import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show WaterSystem, kVerifiedSpecs;
 import 'package:buildsmart/data/related_info.dart' show compatibleProductsFor;
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/data/variant_families.dart' show allVariantFamilies;
+import 'package:buildsmart/features/word_finder/recipe_kit.dart'
+    show KitMatch, assembleKit;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show divePoolBySku;
 
@@ -49,12 +53,13 @@ class HopGraph {
   /// An EMPTY-edge graph over every reach-universe sku — the skeleton.
   factory HopGraph.skeleton() => HopGraph._(_emptyAdj());
 
-  /// The populated graph. Steps 5-6 add compat + variant edges; steps 7-8 add kit /
+  /// The populated graph. Steps 5-7 add compat + variant + kit edges; step 8 adds
   /// category. Built once by the hop UI / census.
   factory HopGraph.build() {
     final adj = _emptyAdj();
     _addCompatEdges(adj);
     _addVariantEdges(adj);
+    _addKitEdges(adj);
     return HopGraph._(adj);
   }
 
@@ -104,6 +109,32 @@ void _addVariantEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
       for (final b in skus) {
         if (a == b || !adj.containsKey(b)) continue;
         adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.variant);
+      }
+    }
+  }
+}
+
+/// Step 7 — kit edges: products that resolve into the SAME recipe kit are co-members
+/// (every resolved line connects to every other). Only RESOLVED lines count
+/// (KitMatch.curated / auto / swarm — a real bound product); ambiguous/none lines
+/// carry no product. crossesSystem-gated (a kit can't span supply<->drainage), real
+/// nodes only.
+void _addKitEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
+  for (final recipe in kSmartProducts) {
+    final skus = <String>[
+      for (final line in assembleKit(recipe))
+        if (line.product != null &&
+            (line.match == KitMatch.curated ||
+                line.match == KitMatch.auto ||
+                line.match == KitMatch.swarm))
+          line.product!.sku,
+    ];
+    for (final a in skus) {
+      if (!adj.containsKey(a)) continue;
+      for (final b in skus) {
+        if (a == b || !adj.containsKey(b)) continue;
+        if (crossesSystem(a, b)) continue; // a kit can't straddle water systems
+        adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.kit);
       }
     }
   }
