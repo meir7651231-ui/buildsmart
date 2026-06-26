@@ -76,6 +76,46 @@ class HopGraph {
   /// The edge kinds on the directed edge [a] -> [b] (empty if no edge).
   Set<EdgeKind> kindsBetween(String a, String b) =>
       _adj[a]?[b] ?? const <EdgeKind>{};
+
+  /// All skus reachable from [src] within [maxHops] directed edges (BFS; excludes
+  /// [src]). The feasible building block for the <=4 contract — single-source, not
+  /// the round-3 |U|^2 all-pairs that could never finish in CI.
+  Set<String> reachWithin(String src, int maxHops) {
+    final seen = <String>{src};
+    var frontier = <String>{src};
+    for (var d = 0; d < maxHops; d++) {
+      final next = <String>{};
+      for (final s in frontier) {
+        for (final n in neighborsOf(s)) {
+          if (seen.add(n)) next.add(n);
+        }
+      }
+      if (next.isEmpty) break;
+      frontier = next;
+    }
+    return seen..remove(src);
+  }
+
+  /// Directed hop distance [a] -> [b] over the rail, or null if it exceeds
+  /// [maxHops]. Single-source BFS with early-exit — the feasible per-pair check the
+  /// <=4 census runs (round-3 fix: replaces the infeasible all-pairs matrix).
+  int? hopsBetween(String a, String b, {int maxHops = 4}) {
+    if (a == b) return 0;
+    final seen = <String>{a};
+    var frontier = <String>{a};
+    for (var d = 1; d <= maxHops; d++) {
+      final next = <String>{};
+      for (final s in frontier) {
+        for (final n in neighborsOf(s)) {
+          if (n == b) return d;
+          if (seen.add(n)) next.add(n);
+        }
+      }
+      if (next.isEmpty) break;
+      frontier = next;
+    }
+    return null;
+  }
 }
 
 HopGraph _buildPopulated() {
