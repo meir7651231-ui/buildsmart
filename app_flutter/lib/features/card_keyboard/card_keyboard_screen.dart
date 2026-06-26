@@ -29,6 +29,7 @@ import 'package:buildsmart/features/word_finder/word_keys_model.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -410,6 +411,15 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     // test forces the ON path via [widget.forceLiveForTest] (the flag isn't
     // unit-seedable).
     if (!_live && !widget.forceLiveForTest) return const SizedBox.shrink();
+
+    // Identity isolation (round-2 blocker-2): the dive `stack` is widget-State, not
+    // a uid-keyed provider, so a mid-dive employer/identity switch would leave A's
+    // pool rendering under B. Wipe the dive whenever the active uid changes — the
+    // live auth A->B path that auth_state's signOut-only cache-clear misses.
+    // Registered only on the ON path, so flag-OFF stays byte-identical.
+    ref.listen<String?>(currentUidProvider, (prev, next) {
+      if (prev != next && stack.isNotEmpty) _restart();
+    });
 
     final v = verdict;
     final keys = _keysFor(v);
