@@ -8,8 +8,11 @@
 // render the SAME edge set. Pure; nothing reads it until the hop UI (P8) wires it.
 //
 // Step 4 = skeleton. Step 5 = compat (crossesSystem-gated). Step 6 = variant
-// (per-family clique). Step 7 (this) = kit (recipe co-membership, crossesSystem-
-// gated). Step 8 adds category.
+// (per-family clique). Step 7 = kit (recipe co-membership, crossesSystem-gated).
+// Step 8 (this) = category (same-categoryHe clique within one water system — the
+// isolation-prevention fallback rail). HopGraph.build() is MEMOISED: the graph is a
+// pure function of const catalog data, so it is constructed exactly once (round-3
+// scale finding — the build is the module's most expensive op).
 
 import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show WaterSystem, kVerifiedSpecs;
@@ -43,6 +46,9 @@ bool crossesSystem(String aSku, String bSku) {
       (only(a, WaterSystem.drainage) && only(b, WaterSystem.supply));
 }
 
+/// The single memoised populated graph (built once — see file header).
+HopGraph? _builtHopGraph;
+
 /// Pure DIRECTED product graph. Nodes == divePoolBySku.keys; adjacency is
 /// per-source so a directed all-pairs BFS over [neighborsOf] matches the asymmetric
 /// on-screen rail (round-2 blocker: an undirected backbone bound does not transfer
@@ -53,15 +59,9 @@ class HopGraph {
   /// An EMPTY-edge graph over every reach-universe sku — the skeleton.
   factory HopGraph.skeleton() => HopGraph._(_emptyAdj());
 
-  /// The populated graph. Steps 5-7 add compat + variant + kit edges; step 8 adds
-  /// category. Built once by the hop UI / census.
-  factory HopGraph.build() {
-    final adj = _emptyAdj();
-    _addCompatEdges(adj);
-    _addVariantEdges(adj);
-    _addKitEdges(adj);
-    return HopGraph._(adj);
-  }
+  /// The fully-populated graph (compat + variant + kit + category edges). MEMOISED:
+  /// built once per isolate, then cached.
+  factory HopGraph.build() => _builtHopGraph ??= _buildPopulated();
 
   /// sku -> (neighbour sku -> the kinds of the directed edge source->neighbour).
   final Map<String, Map<String, Set<EdgeKind>>> _adj;
@@ -76,6 +76,15 @@ class HopGraph {
   /// The edge kinds on the directed edge [a] -> [b] (empty if no edge).
   Set<EdgeKind> kindsBetween(String a, String b) =>
       _adj[a]?[b] ?? const <EdgeKind>{};
+}
+
+HopGraph _buildPopulated() {
+  final adj = _emptyAdj();
+  _addCompatEdges(adj);
+  _addVariantEdges(adj);
+  _addKitEdges(adj);
+  _addCategoryEdges(adj);
+  return HopGraph._(adj);
 }
 
 Map<String, Map<String, Set<EdgeKind>>> _emptyAdj() => {
@@ -135,6 +144,31 @@ void _addKitEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
         if (a == b || !adj.containsKey(b)) continue;
         if (crossesSystem(a, b)) continue; // a kit can't straddle water systems
         adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.kit);
+      }
+    }
+  }
+}
+
+/// Step 8 — category edges: the isolation-prevention fallback rail. Within each
+/// RAW categoryHe (NOT finderGroupFor, which is null outside ~6 groups) every
+/// product is a directed neighbour of every same-category product, EXCEPT a pair
+/// that straddles water systems (a category like 'אל חזור' mixes supply check
+/// valves + sewage backflow — never bridge those). Real nodes only; uncategorised
+/// products are skipped. Guarantees every categorised product with a same-system
+/// peer has >=1 category edge.
+void _addCategoryEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
+  final byCat = <String, List<String>>{};
+  for (final entry in divePoolBySku.entries) {
+    final cat = entry.value.categoryHe;
+    if (cat.isEmpty) continue;
+    (byCat[cat] ??= <String>[]).add(entry.key);
+  }
+  for (final skus in byCat.values) {
+    for (final a in skus) {
+      for (final b in skus) {
+        if (a == b) continue;
+        if (crossesSystem(a, b)) continue; // category can mix systems; don't bridge
+        adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.category);
       }
     }
   }
