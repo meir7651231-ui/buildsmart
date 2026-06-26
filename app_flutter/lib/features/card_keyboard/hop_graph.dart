@@ -7,13 +7,13 @@
 // Edges are TAGGED by EdgeKind so the <=4 census and the on-screen rail verify and
 // render the SAME edge set. Pure; nothing reads it until the hop UI (P8) wires it.
 //
-// Step 4 = skeleton. Step 5 (this) = compat edges, FILTERED through crossesSystem so
-// a hop can never smuggle a physically-incompatible supply<->drainage jump
-// (round-3 blocker-4). Steps 6-8 add variant / kit / category.
+// Step 4 = skeleton. Step 5 = compat edges (crossesSystem-gated). Step 6 (this) =
+// variant edges (per-family clique). Steps 7-8 add kit / category.
 
 import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show WaterSystem, kVerifiedSpecs;
 import 'package:buildsmart/data/related_info.dart' show compatibleProductsFor;
+import 'package:buildsmart/data/variant_families.dart' show allVariantFamilies;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show divePoolBySku;
 
@@ -49,11 +49,12 @@ class HopGraph {
   /// An EMPTY-edge graph over every reach-universe sku — the skeleton.
   factory HopGraph.skeleton() => HopGraph._(_emptyAdj());
 
-  /// The populated graph. Step 5 adds compat edges; steps 6-8 add variant / kit /
+  /// The populated graph. Steps 5-6 add compat + variant edges; steps 7-8 add kit /
   /// category. Built once by the hop UI / census.
   factory HopGraph.build() {
     final adj = _emptyAdj();
     _addCompatEdges(adj);
+    _addVariantEdges(adj);
     return HopGraph._(adj);
   }
 
@@ -87,6 +88,23 @@ void _addCompatEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
       if (m == sku || !adj.containsKey(m)) continue; // no self-loop / real node only
       if (crossesSystem(sku, m)) continue; // never bridge supply<->drainage
       adj[sku]!.putIfAbsent(m, () => <EdgeKind>{}).add(EdgeKind.compat);
+    }
+  }
+}
+
+/// Step 6 — variant edges: within each variant family every member is a directed
+/// neighbour of every other (a real-product clique). Variants share one frame on
+/// one water system, so no crossesSystem filter is needed. Members outside the node
+/// set are skipped.
+void _addVariantEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
+  for (final fam in allVariantFamilies()) {
+    final skus = [for (final p in fam.products) p.sku];
+    for (final a in skus) {
+      if (!adj.containsKey(a)) continue;
+      for (final b in skus) {
+        if (a == b || !adj.containsKey(b)) continue;
+        adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.variant);
+      }
     }
   }
 }
