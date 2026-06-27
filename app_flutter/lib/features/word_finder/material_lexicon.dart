@@ -88,6 +88,31 @@ String? materialOf(LipskeyCatalogProduct p) {
   return kCategoryMaterial[p.categoryHe];
 }
 
+/// Like [materialOf] but, when the name/category text heuristic finds nothing,
+/// falls back to the product's declared `dims['חומר']` (mapped through
+/// [kMaterials]) BEFORE the category override — recovering the ~64 dims-only
+/// materials (e.g. copper press fittings whose name omits 'נחושת'). The
+/// UNIFIED-finder material axis uses THIS; the LIVE word_finder keeps calling
+/// [materialOf] verbatim, so the live material axis stays byte-identical.
+/// Precedence text > dims > category. PURE & deterministic.
+String? materialOfEnriched(LipskeyCatalogProduct p) {
+  final haystack = '${p.nameHe} ${p.categoryHe}';
+  for (final entry in kMaterials.entries) {
+    for (final term in entry.value) {
+      if (haystack.contains(term)) return entry.key;
+    }
+  }
+  final dim = p.dims?['חומר'];
+  if (dim is String && dim.isNotEmpty) {
+    for (final entry in kMaterials.entries) {
+      if (entry.key == dim || entry.value.any(dim.contains)) {
+        return entry.key;
+      }
+    }
+  }
+  return kCategoryMaterial[p.categoryHe];
+}
+
 /// The [kMaterials] keys (IN [kMaterials] ORDER) that have at least one product
 /// in [pool]. The order is preserved so the UI can offer the materials in the
 /// owner's display order; a material with zero products in the pool is omitted.
