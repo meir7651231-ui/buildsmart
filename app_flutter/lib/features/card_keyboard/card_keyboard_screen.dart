@@ -12,6 +12,8 @@
 // per-keystroke, so a late prefs load can't swap the engine mid-dive). Lands dark
 // until the owner-gated cut-over (Phase 6).
 
+import 'dart:async' show Timer;
+
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
@@ -24,6 +26,8 @@ import 'package:buildsmart/features/word_finder/distinct_label.dart'
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
+import 'package:buildsmart/features/word_finder/synonym_bridge.dart'
+    show resolveQuery;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show NewbieStep, kPickProductQuestion, resolveWord;
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
@@ -97,6 +101,7 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
     super.key,
     this.subtype,
     this.forceLiveForTest = false,
+    this.debounceMs = 250,
   });
 
   /// Optional curated sub-type, passed straight through to [mergedKeys]. Usually
@@ -111,6 +116,11 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
   @visibleForTesting
   final bool forceLiveForTest;
 
+  /// @visibleForTesting — the opening text-query debounce in milliseconds (250 in
+  /// production); a test injects 0 so a typed query resolves on the next pump.
+  @visibleForTesting
+  final int debounceMs;
+
   @override
   ConsumerState<CardKeyboardScreen> createState() => _CardKeyboardScreenState();
 }
@@ -124,6 +134,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// Re-entrancy debounce (swarm R9): blocks a double-tap glitch from pushing a
   /// step twice or stacking two product sheets. Set on a tap, cleared next frame.
   bool _busy = false;
+
+  /// The opening text-query debounce timer (P4.56), cancelled on each keystroke
+  /// and in [dispose] so a settled query never fires after the screen is gone.
+  Timer? _debounce;
 
   /// The flag, read ONCE at mount (build-plan §1.6's flag-race guard): a late
   /// `featureFlagsProvider` load must never swap the engine mid-dive.
@@ -237,6 +251,33 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         showLipskeyProductSheet(context, v.product, v.siblings);
       }
     }
+  }
+
+  /// P4.56: a typed/spoken opening query → (debounced) [resolveQuery] → a seed
+  /// step, the SAME way a word tap seeds — but routed through resolveQuery's
+  /// material-aware funnel (so 'נחושת' lands on copper, not the whole pool). Empty
+  /// text keeps the surface; a fast burst cancels the prior timer so only the last
+  /// query resolves.
+  void _onOpeningQuery(String text) {
+    _debounce?.cancel();
+    final q = text.trim();
+    if (q.isEmpty) return;
+    _debounce = Timer(Duration(milliseconds: widget.debounceMs), () {
+      if (!mounted) return;
+      final skuSet = resolveQuery(q, cardKeyboardLexicon).toSet();
+      _pushStep(NewbieStep(
+        axisLabel: _kOpeningWordAxis,
+        chipLabel: q,
+        crumbWord: q,
+        predicate: (p) => skuSet.contains(p.sku),
+      ));
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 
   /// Pop the last answered step (the back affordance). A no-op on an empty stack.
@@ -489,7 +530,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
           OpeningSurface(
             wordKeys: keys,
             onWordTap: _onWordTap,
-            onQuery: (_) {},
+            onQuery: _onOpeningQuery,
             showMic: !kIsWeb,
             onMic: () {},
           )
