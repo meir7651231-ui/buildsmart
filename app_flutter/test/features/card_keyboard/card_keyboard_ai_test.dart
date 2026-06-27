@@ -3,9 +3,13 @@
 // via `as dynamic`, the pattern of the other card_keyboard widget tests.
 // ignore_for_file: avoid_dynamic_calls, cascade_invocations, unnecessary_cast
 
+import 'package:buildsmart/features/card_keyboard/card_engine.dart'
+    show CardResolve, CardShowProducts;
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
 import 'package:buildsmart/features/word_finder/ai_interpret.dart'
     show AiInterpret;
+import 'package:buildsmart/features/word_finder/word_keyboard.dart'
+    show WordKeyboard;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,5 +74,33 @@ void main() {
     await submit(t, 'אני צריך נחושת'); // literal fallback strips filler -> נחושת
     expect(state.crumbs as List, contains('נחושת'),
         reason: 'a failed gateway must degrade to literal, never dead-end');
+  });
+
+  testWidgets('AI submit reaches a product end-to-end (the 4th mouth)',
+      (t) async {
+    // The full AI path on the real screen: a sentence -> AI seed -> chip taps ->
+    // a product. Composes P5.60 (submit->seed) with P4.59 (seed->product).
+    final state = await pumpScreen(t, ai: (_) async => 'נחושת');
+    await submit(t, 'אני מחפש משהו מנחושת'); // -> seeds the copper pool
+
+    var terminal = false;
+    for (var i = 0; i < 8 && !terminal; i++) {
+      final v = state.verdict;
+      if (v is CardResolve || v is CardShowProducts) {
+        terminal = true;
+        break;
+      }
+      final label = v.chips.first.displayLabel as String;
+      final key = find.descendant(
+        of: find.byType(WordKeyboard),
+        matching: find.text(label),
+      );
+      expect(key, findsWidgets, reason: 'chip "$label" is on screen');
+      await t.tap(key.first);
+      await t.pumpAndSettle();
+    }
+
+    expect(terminal, isTrue,
+        reason: 'the AI mouth reached a product end-to-end');
   });
 }
