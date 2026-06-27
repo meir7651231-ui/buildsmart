@@ -63,7 +63,7 @@ class OpeningSurface extends StatelessWidget {
                             textDirection: TextDirection.rtl,
                             textInputAction: TextInputAction.search,
                             decoration: const InputDecoration(
-                              hintText: 'מה אתה מחפש?',
+                              hintText: 'הקלד או דבר…',
                               border: OutlineInputBorder(),
                               isDense: true,
                             ),

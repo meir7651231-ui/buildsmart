@@ -17,6 +17,8 @@ import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, sourcesFor;
+import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
+    show OpeningSurface;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -34,6 +36,7 @@ import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/recently_viewed.dart'
     show recentlyViewedProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -125,7 +128,8 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// The flag, read ONCE at mount (build-plan §1.6's flag-race guard): a late
   /// `featureFlagsProvider` load must never swap the engine mid-dive.
   late final bool _live =
-      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag);
+      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag) ||
+          ref.read(featureFlagsProvider).contains(kUnifiedFinderFlag);
 
   /// @visibleForTesting — when false, reaching a [CardResolve] does NOT auto-open
   /// the product sheet (so a behavioral test need not supply the sheet's heavy
@@ -479,6 +483,16 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         ),
         if (v is CardShowProducts && v.products.isEmpty)
           _buildEmptyState()
+        else if (v is CardAskWords)
+          // P3.53: the opening IS the single surface — text + word grid + mic in
+          // ONE flow, no mode buttons. onQuery/onMic are wired in P4 (#56/#57).
+          OpeningSurface(
+            wordKeys: keys,
+            onWordTap: _onWordTap,
+            onQuery: (_) {},
+            showMic: !kIsWeb,
+            onMic: () {},
+          )
         else if (keys.isNotEmpty)
           WordKeyboard(
             words: keys,
