@@ -5,6 +5,8 @@
 // == the screen's _predicateFor), so the simulated dive == the real dive.
 // ignore_for_file: avoid_print
 
+import 'dart:math' show Random;
+
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
@@ -102,5 +104,41 @@ void main() {
         reason: 'the census must sample real mouths, not vacuously pass');
     expect(overBudget, isEmpty,
         reason: 'mouths exceeding the <=$kMaxQuestions contract: $overBudget');
+  });
+
+  test('fuzz: 200 deterministic-random seeds always resolve within budget', () {
+    final rnd = Random(20260628); // seeded -> reproducible
+    final words = wordsByFrequency(lex).toList();
+    final mats = kMaterials.keys.toList();
+    var ran = 0;
+    var maxDepth = 0;
+    for (var i = 0; i < 200; i++) {
+      final List<LipskeyCatalogProduct> seed;
+      if (i.isEven) {
+        final w = words[rnd.nextInt(words.length)];
+        seed = [
+          for (final s in w.skus)
+            if (divePoolBySku[s] != null) divePoolBySku[s]!,
+        ];
+      } else {
+        final m = mats[rnd.nextInt(mats.length)];
+        seed = [
+          for (final s in resolveQuery(m, lex))
+            if (divePoolBySku[s] != null) divePoolBySku[s]!,
+        ];
+      }
+      if (seed.isEmpty) continue;
+      ran++;
+      final r = dive(seed);
+      // Robustness: every seed reaches a real terminal — never a runaway
+      // ('cap-exceeded') and never a post-seed 'askWords?!' bad state.
+      expect(r.terminal, anyOf(equals('resolve'), startsWith('show')),
+          reason: 'seed #$i bad terminal: ${r.terminal}');
+      expect(r.depth, lessThanOrEqualTo(kMaxQuestions),
+          reason: 'seed #$i depth ${r.depth} exceeds <=$kMaxQuestions');
+      if (r.depth > maxDepth) maxDepth = r.depth;
+    }
+    print('FUZZ: $ran/200 seeds ran · max depth $maxDepth');
+    expect(ran, greaterThan(150), reason: 'most random seeds resolve to a pool');
   });
 }
