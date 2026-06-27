@@ -19,6 +19,7 @@ class OpeningSurface extends StatelessWidget {
     this.onMic,
     this.showMic = false,
     this.onVoiceUnavailable,
+    this.onSubmit,
   });
 
   /// The opening word suggestions (the grid input method).
@@ -27,8 +28,14 @@ class OpeningSurface extends StatelessWidget {
   /// Tapped a word in the grid.
   final void Function(WordKey) onWordTap;
 
-  /// Typed or submitted free text — the screen debounces + resolves it.
+  /// Typed free text (live, per keystroke) — the screen debounces + resolves it
+  /// as keywords (the literal path).
   final void Function(String) onQuery;
+
+  /// Submitted free text (enter / "find me") — routed through the AI interpreter
+  /// when provided, else the literal [onQuery]. ONE surface, no mode chooser: live
+  /// typing is the literal keyword path, SUBMIT is the semantic (AI) path.
+  final void Function(String)? onSubmit;
 
   /// Tapped the mic (voice input). Null falls back to [onVoiceUnavailable].
   final VoidCallback? onMic;
@@ -68,7 +75,7 @@ class OpeningSurface extends StatelessWidget {
                               isDense: true,
                             ),
                             onChanged: onQuery,
-                            onSubmitted: onQuery,
+                            onSubmitted: onSubmit ?? onQuery,
                           ),
                         ),
                         if (showMic) ...[

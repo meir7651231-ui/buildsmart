@@ -21,6 +21,8 @@ import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, sourcesFor;
 import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
     show OpeningSurface;
+import 'package:buildsmart/features/word_finder/ai_interpret.dart'
+    show AiInterpret, defaultAiInterpret;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -123,6 +125,7 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
     this.forceLiveForTest = false,
     this.debounceMs = 250,
     this.voiceListen,
+    this.aiInterpret,
   });
 
   /// Optional curated sub-type, passed straight through to [mergedKeys]. Usually
@@ -146,6 +149,12 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
   /// `VoiceService.instance.listen`). A test injects a fake transcript source.
   @visibleForTesting
   final VoiceListen? voiceListen;
+
+  /// @visibleForTesting — the AI seam (the submit / "find me" path); null in
+  /// production (routes to [defaultAiInterpret], the offline interpreter). A test
+  /// or an online gateway injects a different interpreter.
+  @visibleForTesting
+  final AiInterpret? aiInterpret;
 
   @override
   ConsumerState<CardKeyboardScreen> createState() => _CardKeyboardScreenState();
@@ -325,6 +334,16 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         const SnackBar(content: Text(kVoiceUnavailableMsg)),
       );
     }
+  }
+
+  /// P5.60: submitted free text ("find me") → the AI interpreter → the SAME funnel
+  /// as typing. Offline this is literal keyword extraction (defaultAiInterpret); an
+  /// injected gateway upgrades it to semantic. Either way the result seeds the dive
+  /// through [_onOpeningQuery] → resolveQuery.
+  Future<void> _onAiQuery(String text) async {
+    final interpret = widget.aiInterpret ?? defaultAiInterpret;
+    final q = await interpret(text);
+    if (mounted) _onOpeningQuery(q);
   }
 
   @override
@@ -584,6 +603,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
             wordKeys: keys,
             onWordTap: _onWordTap,
             onQuery: _onOpeningQuery,
+            onSubmit: _onAiQuery,
             showMic: !kIsWeb,
             onMic: _onMic,
           )
