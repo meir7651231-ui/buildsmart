@@ -70,7 +70,8 @@ class SignalChip {
   final String? axisName;
 
   /// Ranking magnitude — a DISPLAY / coarse tier ONLY, never the sort key (the
-  /// comparator uses an exact integer rational; §1.3).
+  /// comparator uses an exact integer rational; §1.3). EXCLUDED from ==/hashCode
+  /// (P2.46): a double's NaN/ULP makes a value type fragile in sets + goldens.
   final double infoGain;
 
   /// Always false for an EMITTED key: soft signals (recipe/connections) only
@@ -85,12 +86,11 @@ class SignalChip {
       other.value == value &&
       other.displayLabel == displayLabel &&
       other.axisName == axisName &&
-      other.infoGain == infoGain &&
       other.soft == soft;
 
   @override
   int get hashCode =>
-      Object.hash(axisId, value, displayLabel, axisName, infoGain, soft);
+      Object.hash(axisId, value, displayLabel, axisName, soft);
 }
 
 /// What the unified engine returns at one turn of the dive. Sealed with exactly
