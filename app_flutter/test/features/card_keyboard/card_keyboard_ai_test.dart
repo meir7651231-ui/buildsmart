@@ -58,4 +58,17 @@ void main() {
     await submit(t, 'אני צריך נחושת');
     expect(state.crumbs as List, contains('נחושת'));
   });
+
+  testWidgets('a throwing gateway degrades to the literal interpreter',
+      (t) async {
+    // The injected "online" AI fails (ClaudeException / no network). The mouth must
+    // NOT dead-end or fabricate — it falls back to the offline literal path (P5.47).
+    final state = await pumpScreen(
+      t,
+      ai: (_) async => throw Exception('gateway down'),
+    );
+    await submit(t, 'אני צריך נחושת'); // literal fallback strips filler -> נחושת
+    expect(state.crumbs as List, contains('נחושת'),
+        reason: 'a failed gateway must degrade to literal, never dead-end');
+  });
 }

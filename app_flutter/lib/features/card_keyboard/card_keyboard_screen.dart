@@ -22,7 +22,7 @@ import 'package:buildsmart/features/card_keyboard/card_signals.dart'
 import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
     show OpeningSurface;
 import 'package:buildsmart/features/word_finder/ai_interpret.dart'
-    show AiInterpret, defaultAiInterpret;
+    show AiInterpret, aiLiteralInterpret, defaultAiInterpret;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -342,7 +342,15 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// through [_onOpeningQuery] → resolveQuery.
   Future<void> _onAiQuery(String text) async {
     final interpret = widget.aiInterpret ?? defaultAiInterpret;
-    final q = await interpret(text);
+    String q;
+    try {
+      q = await interpret(text);
+    } on Object catch (_) {
+      // A gateway failure (ClaudeException, no network…) must NEVER dead-end or
+      // fabricate: the gateway re-throws rather than inventing, and the mouth
+      // absorbs it here by degrading to the offline literal floor (P5.47).
+      q = aiLiteralInterpret(text);
+    }
     if (mounted) _onOpeningQuery(q);
   }
 
