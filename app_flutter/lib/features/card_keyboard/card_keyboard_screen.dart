@@ -35,6 +35,7 @@ import 'package:buildsmart/features/word_finder/word_keys_model.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/recently_viewed.dart'
@@ -94,6 +95,25 @@ class _ProductTap extends _Tap {
   final String sku;
 }
 
+/// The voice seam (P4.57): the screen calls this to start a listening session.
+/// [onFinal] receives the transcript, [onError] an honest failure reason; a
+/// false return means the platform has no speech support at all. Production uses
+/// `VoiceService.instance.listen` ([_realVoiceListen]); a test injects a fake.
+typedef VoiceListen = Future<bool> Function({
+  required void Function(String text) onFinal,
+  void Function(String reason)? onError,
+});
+
+Future<bool> _realVoiceListen({
+  required void Function(String text) onFinal,
+  void Function(String reason)? onError,
+}) =>
+    VoiceService.instance.listen(onFinal: onFinal, onError: onError);
+
+/// P4.57 honest voice messages (top-level so a test can assert on them).
+const String kVoiceUnavailableMsg = 'הקלדה קולית אינה זמינה במכשיר הזה';
+const String kVoiceErrorMsg = 'לא הצלחתי לשמוע — נסה שוב';
+
 /// The flag-gated unified card-keyboard screen. Holds the answered-step [stack];
 /// everything else (what to show, what a tap means) is the pure engine's job.
 class CardKeyboardScreen extends ConsumerStatefulWidget {
@@ -102,6 +122,7 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
     this.subtype,
     this.forceLiveForTest = false,
     this.debounceMs = 250,
+    this.voiceListen,
   });
 
   /// Optional curated sub-type, passed straight through to [mergedKeys]. Usually
@@ -120,6 +141,11 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
   /// production); a test injects 0 so a typed query resolves on the next pump.
   @visibleForTesting
   final int debounceMs;
+
+  /// @visibleForTesting — the voice seam; null in production (routes to
+  /// `VoiceService.instance.listen`). A test injects a fake transcript source.
+  @visibleForTesting
+  final VoiceListen? voiceListen;
 
   @override
   ConsumerState<CardKeyboardScreen> createState() => _CardKeyboardScreenState();
@@ -272,6 +298,33 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         predicate: (p) => skuSet.contains(p.sku),
       ));
     });
+  }
+
+  /// P4.57: the mic → a voice session → the transcript routed through the SAME
+  /// funnel as typing ([_onOpeningQuery] → resolveQuery, so spoken 'נחושת' lands
+  /// on copper too). An unsupported platform (listen returns false) or an engine
+  /// error surfaces an honest message instead of a dead mic.
+  Future<void> _onMic() async {
+    // Capture the messenger BEFORE the await so no context crosses the async gap.
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final listen = widget.voiceListen ?? _realVoiceListen;
+    final supported = await listen(
+      onFinal: (text) {
+        if (mounted) _onOpeningQuery(text);
+      },
+      onError: (_) {
+        if (mounted) {
+          messenger?.showSnackBar(
+            const SnackBar(content: Text(kVoiceErrorMsg)),
+          );
+        }
+      },
+    );
+    if (!supported && mounted) {
+      messenger?.showSnackBar(
+        const SnackBar(content: Text(kVoiceUnavailableMsg)),
+      );
+    }
   }
 
   @override
@@ -532,7 +585,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
             onWordTap: _onWordTap,
             onQuery: _onOpeningQuery,
             showMic: !kIsWeb,
-            onMic: () {},
+            onMic: _onMic,
           )
         else if (keys.isNotEmpty)
           WordKeyboard(
