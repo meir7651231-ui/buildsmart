@@ -46,3 +46,18 @@ const Set<String> kReachAllowlist = <String>{};
 /// CONSTRUCTION and only real colours remain — rather than a hand-maintained
 /// blocklist that silently leaks a new finish (round-2 / round-3 colour-leak).
 const bool kColorExclusionsAreComplementOfAllowlist = true;
+
+/// The opening is ONE surface with multiple INPUT METHODS (word grid + text +
+/// mic), NOT a chooser of separate "mouths"/modes — the user starts typing or
+/// tapping, never picks a tool first (the monster contract). OWNER-REVIEW: flip
+/// to false to restore a multi-mode chooser.
+const bool kOpeningSurfaceIsSingleMouth = true;
+
+/// At most this many DECISION GROUPS on screen 1 (the opening): one — the first
+/// screen never makes the user choose between tools/modes. OWNER-REVIEW.
+const int kMaxScreen1Decisions = 1;
+
+/// The <=6 census enumerates only the LIVE opening inputs (a dead AI/voice
+/// engine is excluded), so the contract is proven over what the user can
+/// ACTUALLY use, not a phantom input. OWNER-REVIEW: flip to count all inputs.
+const bool kCensusInputsAreCapabilityGated = true;
