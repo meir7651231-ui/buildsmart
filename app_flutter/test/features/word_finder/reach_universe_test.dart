@@ -15,8 +15,11 @@ void main() {
     // Same fold as distinctCardCount -> equal by construction (content invariant).
     expect(kReachUniverse.length, distinctCardCount(kDivePool));
     expect(reachUniverseSize(), kReachUniverse.length);
-    // A LOWER-BOUND band (not an equality pin) so ingestion drift cannot red-gate.
+    // A BAND (not an equality pin) so ingestion drift can't red-gate, but a
+    // catalog explosion/corruption (or a legit big ingestion) does.
     expect(kReachUniverse.length, greaterThanOrEqualTo(kReachLowerBound));
+    expect(kReachUniverse.length, lessThanOrEqualTo(kReachUpperBound),
+        reason: 'a census above the band = a catalog anomaly; regen + bump');
     // No silent shrink to the 30-cap foot-gun (round-2/3 blocker).
     expect(kReachUniverse.length, greaterThan(kShowProductsCap));
     // Hot-water family (synthetic HW- skus) is included — kDivePool fixes the

@@ -28,6 +28,13 @@ const bool kMaterialIsGatedCoAxis = true;
 /// (plus a content invariant). Conservative floor for the ~900-distinct-card pool.
 const int kReachLowerBound = 800;
 
+/// The maximum distinct-card count — the UPPER half of the reach band. A census
+/// above this signals a catalog explosion/corruption (or a legit big ingestion
+/// that must regen + bump the band, #56), so it RED-gates rather than passing
+/// silently. Measured ~1339; loose enough for normal drift, tight enough to catch
+/// an anomaly. Bumped by the ingestion regen handshake (step 36).
+const int kReachUpperBound = 1600;
+
 /// The <=6 / <=4 contract proves over 100% of kReachUniverse with NO tolerated
 /// exceptions: this allowlist is EMPTY by construction, and any entry is a RED gate,
 /// not a quiet pass. Real debt (if ever) lives in a SEPARATELY-named list the gate
