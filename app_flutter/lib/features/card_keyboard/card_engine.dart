@@ -25,6 +25,7 @@ import 'package:buildsmart/features/card_keyboard/card_signals.dart'
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
+        collapseKeyOf,
         distinctCardCount,
         distinctProducts,
         kFirstQuestion,
@@ -33,7 +34,7 @@ import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
         wordsByFrequency;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordEntry, WordLexicon;
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
 
 /// One MERGED key the keyboard shows — a single tappable chip that narrows the
 /// pool by one `(axis, value)`, plus how it renders. (Model v4, build plan
@@ -167,6 +168,39 @@ CardVerdict mergedKeys(
   final chips = _mergedChips(pool, stack, subtype);
   if (chips.isEmpty) return CardShowProducts(distinctProducts(pool));
   return MergedKeys(chips);
+}
+
+/// Census-only memo toggle (P0.5). OFF in production so the live [mergedKeys]
+/// call sites are byte-identical; the <=6/<=4 census flips it on to share one
+/// merge computation across raw pools that collapse to the same card-set.
+const bool kCensusMemoEnabled = false;
+
+final Map<String, CardVerdict> _mergedKeysMemo = <String, CardVerdict>{};
+
+/// @visibleForTesting — clears the census memo between runs / tests.
+@visibleForTesting
+void clearMergedKeysMemo() => _mergedKeysMemo.clear();
+
+/// @visibleForTesting — [mergedKeys] with a CENSUS-ONLY memo keyed on the
+/// collapsed card-set + the answered-axis set + subtype (the full determinant of
+/// the merge). Two raw pools that collapse to the same cards under the same
+/// answered axes share one computation. Behind [enabled] (default
+/// [kCensusMemoEnabled] = false) → a transparent pass-through in production.
+@visibleForTesting
+CardVerdict mergedKeysMemoized(
+  List<LipskeyCatalogProduct> pool,
+  List<NewbieStep> stack,
+  WordLexicon lexicon,
+  String? subtype, {
+  bool enabled = kCensusMemoEnabled,
+}) {
+  if (!enabled) return mergedKeys(pool, stack, lexicon, subtype);
+  final poolSig = (pool.map(collapseKeyOf).toSet().toList()..sort()).join('|');
+  final axesSig =
+      (stack.map((s) => s.axisLabel).toSet().toList()..sort()).join(',');
+  final key = '$poolSig##$axesSig##$subtype';
+  return _mergedKeysMemo.putIfAbsent(
+      key, () => mergedKeys(pool, stack, lexicon, subtype));
 }
 
 /// Merge tuning (build plan §1.4 #11). OWNER-REVIEW defaults.
