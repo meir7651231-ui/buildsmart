@@ -31,6 +31,8 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/feature_flags.dart';
+import 'package:buildsmart/state/recently_viewed.dart'
+    show recentlyViewedProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -222,8 +224,14 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
       _diveVersion++;
     });
     final v = verdict;
-    if (v is CardResolve && openSheetOnResolve) {
-      showLipskeyProductSheet(context, v.product, v.siblings);
+    if (v is CardResolve) {
+      // Dual-write (P2.47): record the reached product in recently-viewed,
+      // independent of whether the sheet opens. Idempotent. The screen is
+      // flag-gated, so flag-OFF never reaches here (catalog stays sole writer).
+      ref.read(recentlyViewedProvider.notifier).touch(v.product.sku);
+      if (openSheetOnResolve) {
+        showLipskeyProductSheet(context, v.product, v.siblings);
+      }
     }
   }
 
@@ -376,8 +384,13 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         break;
       }
     }
-    if (picked != null && openSheetOnResolve && _claim()) {
-      showLipskeyProductSheet(context, picked, v.products);
+    if (picked != null) {
+      // Dual-write (P2.47): the resolved sku enters recently-viewed regardless
+      // of the sheet/debounce. Idempotent; flag-gated by the screen mount.
+      ref.read(recentlyViewedProvider.notifier).touch(picked.sku);
+      if (openSheetOnResolve && _claim()) {
+        showLipskeyProductSheet(context, picked, v.products);
+      }
     }
   }
 
