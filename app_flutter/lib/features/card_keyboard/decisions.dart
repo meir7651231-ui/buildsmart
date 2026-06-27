@@ -61,3 +61,14 @@ const int kMaxScreen1Decisions = 1;
 /// engine is excluded), so the contract is proven over what the user can
 /// ACTUALLY use, not a phantom input. OWNER-REVIEW: flip to count all inputs.
 const bool kCensusInputsAreCapabilityGated = true;
+
+/// The LOCKED contract ceiling — at most this many questions (decisions) from the
+/// opening to ANY product (the "<=6" half of the <=6/<=4 contract). The census
+/// (P4.58) proves every sampled mouth resolves within this budget. OWNER-REVIEW:
+/// the monster's reason-to-exist; never raise it to make a slow path pass — fix
+/// the path. Counts the opening choice as question 1.
+const int kMaxQuestions = 6;
+
+/// The other half of the contract — at most this many hops BETWEEN two products
+/// (the "<=4"). Proven by the hop-graph rails (P6-P11). OWNER-REVIEW.
+const int kMaxHopsBetweenProducts = 4;
