@@ -124,6 +124,16 @@ List<String> materialsInPool(List<LipskeyCatalogProduct> pool) {
   ];
 }
 
+/// Like [materialsInPool] but folds in the dims-declared materials via
+/// [materialOfEnriched]. The UNIFIED-finder material axis uses this so its chips
+/// cover the dims-only products too; the live [materialsInPool] is untouched.
+List<String> materialsInPoolEnriched(List<LipskeyCatalogProduct> pool) {
+  return [
+    for (final material in kMaterials.keys)
+      if (pool.any((p) => materialOfEnriched(p) == material)) material,
+  ];
+}
+
 /// Every product in [pool] whose [materialOf] equals [material], in pool order.
 /// PURE & deterministic.
 List<LipskeyCatalogProduct> productsOfMaterial(

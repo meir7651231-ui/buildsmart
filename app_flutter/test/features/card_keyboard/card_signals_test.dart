@@ -9,7 +9,7 @@ import 'package:buildsmart/features/card_keyboard/card_engine.dart'
 import 'package:buildsmart/features/card_keyboard/card_signals.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
-    show materialOf, materialsInPool;
+    show materialOfEnriched, materialsInPoolEnriched;
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show angleTokensIn, colorOptions, sizeTokensIn, wordOptions;
 import 'package:flutter_test/flutter_test.dart';
@@ -54,62 +54,67 @@ void main() {
     });
   });
 
-  group('material axis — coverage gate + null-tolerant predicate', () {
-    test('coverage gate: all-unseeded pool → no chips; all-seeded → chips', () {
-      final seeded =
-          kDivePool.where((p) => materialOf(p) != null).take(20).toList();
-      final unseeded =
-          kDivePool.where((p) => materialOf(p) == null).take(20).toList();
-      expect(seeded, isNotEmpty, reason: 'sanity: some products carry material');
-      expect(unseeded, isNotEmpty, reason: 'sanity: some carry none');
-      expect(const MaterialSignal().chipsFor(seeded), isNotEmpty,
-          reason: 'seededFraction 1.0 ≥ gate → material chips');
-      expect(const MaterialSignal().chipsFor(unseeded), isEmpty,
-          reason: 'seededFraction 0 < gate → axis hidden (#28)');
+  group('material axis — gated CO-EQUAL (>1 split + coverage floor)', () {
+    final copper = kDivePool
+        .where((p) => materialOfEnriched(p) == 'נחושת')
+        .take(8)
+        .toList();
+    final ppr = kDivePool
+        .where((p) => materialOfEnriched(p) == 'PPR')
+        .take(8)
+        .toList();
+    final unknown = kDivePool
+        .where((p) => materialOfEnriched(p) == null)
+        .take(12)
+        .toList();
+
+    test('a single-material pool yields no chips (cannot split)', () {
+      expect(copper, isNotEmpty, reason: 'sanity: copper products exist');
+      expect(materialsInPoolEnriched(copper), ['נחושת'],
+          reason: 'sanity: an all-copper pool has exactly one material');
+      expect(const MaterialSignal().chipsFor(copper), isEmpty,
+          reason: 'one material cannot narrow → the gated co-axis hides it');
     });
 
-    test('coverage gate BOUNDARY: exactly 0.5 shows, just-below hides (per-pool)',
-        () {
-      // The gate is `seededFraction < kMaterialCoverageGate` (STRICT <), so a pool
-      // at EXACTLY 0.5 shows and one just below hides — and chipsFor recomputes it
-      // per pool (so material appears/disappears as a dive narrows). Swarm R3: the
-      // suite previously pinned only the 0.0 / 1.0 extremes, leaving the operator
-      // that IS the gate's whole contract unguarded.
-      final seeded = kDivePool.firstWhere((p) => materialOf(p) != null);
-      final unseeded =
-          kDivePool.where((p) => materialOf(p) == null).take(2).toList();
-      expect(unseeded.length, 2, reason: 'sanity: two unseeded products exist');
-      expect(const MaterialSignal().chipsFor([seeded, unseeded[0]]), isNotEmpty,
-          reason: 'seededFraction == 0.5 is NOT below the gate → axis SHOWS');
-      expect(const MaterialSignal().chipsFor([seeded, ...unseeded]), isEmpty,
-          reason: 'seededFraction 1/3 < gate → axis HIDES (recomputed per pool)');
+    test('a multi-material pool above the floor yields chips', () {
+      final pool = [...copper.take(5), ...ppr.take(5)];
+      expect(materialsInPoolEnriched(pool).length, greaterThan(1),
+          reason: 'sanity: two materials present');
+      expect(const MaterialSignal().chipsFor(pool), isNotEmpty,
+          reason: '>1 material + full coverage → it splits → chips');
     });
 
-    test('chips == materialsInPool when the gate passes', () {
-      final seeded =
-          kDivePool.where((p) => materialOf(p) != null).take(40).toList();
+    test('below the coverage floor: no chips even with >1 material', () {
+      final pool = [...unknown, ...copper.take(2), ...ppr.take(2)];
+      expect(materialsInPoolEnriched(pool).length, greaterThan(1),
+          reason: 'sanity: two known materials present');
+      expect(MaterialSignal.seededFraction(pool),
+          lessThan(kMaterialCoverageGate),
+          reason: 'sanity: a mostly-unknown pool is below the floor');
+      expect(const MaterialSignal().chipsFor(pool), isEmpty,
+          reason: 'coverage below the floor → hidden despite splitting');
+    });
+
+    test('chips == materialsInPoolEnriched when the gate passes', () {
+      final pool = [...copper.take(5), ...ppr.take(5)];
       expect(
-        const MaterialSignal().chipsFor(seeded).map((c) => c.value).toList(),
-        materialsInPool(seeded),
+        const MaterialSignal().chipsFor(pool).map((c) => c.value).toList(),
+        materialsInPoolEnriched(pool),
       );
     });
 
-    test('predicate is null-tolerant: unknown-material product rides along', () {
-      final unknown = kDivePool.firstWhere((p) => materialOf(p) == null);
+    test('predicate is null-tolerant: a truly-unknown product rides along', () {
+      final u = kDivePool.firstWhere((p) => materialOfEnriched(p) == null);
       const copperChip =
           SignalChip(axisId: 'material', value: 'נחושת', displayLabel: 'נחושת');
-      expect(const MaterialSignal().matches(unknown, copperChip), isTrue,
-          reason: 'a null material carries along (§2 — the unseeded majority '
-              'is not lost; swarm R3 corrected the stale "~42%" figure)');
+      expect(const MaterialSignal().matches(u, copperChip), isTrue,
+          reason: 'a null (unknown) material carries along (§2)');
 
-      final copper = kDivePool
-          .firstWhere((p) => materialOf(p) == 'נחושת', orElse: () => unknown);
-      if (materialOf(copper) == 'נחושת') {
-        const steelChip =
-            SignalChip(axisId: 'material', value: 'פלדה', displayLabel: 'פלדה');
-        expect(const MaterialSignal().matches(copper, steelChip), isFalse,
-            reason: 'a KNOWN material only matches its own value (or null)');
-      }
+      final c = kDivePool.firstWhere((p) => materialOfEnriched(p) == 'נחושת');
+      const pprChip =
+          SignalChip(axisId: 'material', value: 'PPR', displayLabel: 'PPR');
+      expect(const MaterialSignal().matches(c, pprChip), isFalse,
+          reason: 'a KNOWN material matches only its own value (or null)');
     });
   });
 
