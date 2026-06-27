@@ -1,6 +1,11 @@
+import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
     show kMaterials;
 import 'package:buildsmart/features/word_finder/synonym_bridge.dart';
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show divePoolBySku;
+import 'package:buildsmart/features/word_finder/word_lexicon.dart'
+    show buildWordLexicon;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -34,5 +39,39 @@ void main() {
   test('idempotent', () {
     final once = normalizeQuery('copper פליז מרפק');
     expect(normalizeQuery(once), once);
+  });
+
+  group('resolveQuery (P4.55 — the copper text-search fix)', () {
+    final lex = buildWordLexicon(kDivePool);
+
+    test('a material token resolves to its SUBSET, not the whole pool', () {
+      final copper = resolveQuery('נחושת', lex);
+      expect(copper, isNotEmpty);
+      expect(copper.length, lessThan(kDivePool.length),
+          reason: 'נחושת routes to productsOfMaterial, never dumps the pool');
+      // copper == פליז == 'נחושת' all land on the same copper subset
+      expect(resolveQuery('copper', lex).toSet(), copper.toSet());
+      expect(resolveQuery('פליז', lex).toSet(), copper.toSet());
+    });
+
+    test('AND-intersect: a repeated material token is itself', () {
+      expect(resolveQuery('נחושת נחושת', lex).toSet(),
+          resolveQuery('נחושת', lex).toSet());
+    });
+
+    test('non-intersecting terms fall back to UNION (never dead-end)', () {
+      expect(resolveQuery('נחושת HDPE', lex), isNotEmpty,
+          reason: 'an empty AND must not dead-end');
+    });
+
+    test('a two-term query is never a dead-end', () {
+      expect(resolveQuery('ברז נחושת', lex), isNotEmpty);
+    });
+
+    test('every resolved sku is in divePoolBySku', () {
+      for (final sku in resolveQuery('ברז נחושת', lex)) {
+        expect(divePoolBySku.containsKey(sku), isTrue);
+      }
+    });
   });
 }

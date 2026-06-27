@@ -5,6 +5,14 @@
 // regex (so 'PP' never fires inside 'PPR'), HEBREW aliases by WHOLE-TOKEN equality
 // (Dart \b is ASCII-only, so it can't bound a Hebrew word). PURE — no IO.
 
+import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
+import 'package:buildsmart/features/word_finder/material_lexicon.dart'
+    show kMaterials, productsOfMaterial;
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show resolveWord;
+import 'package:buildsmart/features/word_finder/word_lexicon.dart'
+    show WordLexicon;
+
 /// Latin aliases (ASCII keys) → canonical, matched with a `\b` word-boundary.
 const Map<String, String> _kLatinQuerySynonyms = {
   'copper': 'נחושת',
@@ -46,4 +54,34 @@ String normalizeQuery(String raw) {
       .map((t) => _kHebrewQuerySynonyms[t] ?? t)
       .toList();
   return tokens.join(' ');
+}
+
+/// Resolves a free-text [raw] query to an ORDERED list of skus. Each token routes
+/// independently: a [kMaterials] key goes through [productsOfMaterial] (the COPPER
+/// FIX — [resolveWord] is empty for 'נחושת' and would otherwise dump the whole
+/// pool), every other token through [resolveWord]. The per-token sku sets are
+/// AND-intersected; an empty intersection falls back to their UNION so the dive
+/// never dead-ends. Ordered by pool order. Pure.
+List<String> resolveQuery(String raw, WordLexicon lexicon) {
+  final tokens = normalizeQuery(raw)
+      .split(RegExp(r'\s+'))
+      .where((t) => t.isNotEmpty)
+      .toList();
+  if (tokens.isEmpty) return const <String>[];
+
+  final perToken = <Set<String>>[];
+  for (final tok in tokens) {
+    final products = kMaterials.containsKey(tok)
+        ? productsOfMaterial(kDivePool, tok)
+        : resolveWord(tok, lexicon);
+    perToken.add({for (final p in products) p.sku});
+  }
+
+  var hits = perToken.first;
+  for (final s in perToken.skip(1)) {
+    hits = hits.intersection(s);
+  }
+  if (hits.isEmpty) hits = {for (final s in perToken) ...s};
+
+  return [for (final p in kDivePool) if (hits.contains(p.sku)) p.sku];
 }
