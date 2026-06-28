@@ -17,6 +17,8 @@ import 'dart:async' show Timer;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
+import 'package:buildsmart/features/card_keyboard/card_picks.dart'
+    show CardPick, cardPicksProvider;
 import 'package:buildsmart/features/card_keyboard/card_seed.dart'
     show CardSeed, kCategoryMouth, kJobMouth, kMaterialMouth, kWordMouth;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
@@ -301,6 +303,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
       // independent of whether the sheet opens. Idempotent. The screen is
       // flag-gated, so flag-OFF never reaches here (catalog stays sole writer).
       ref.read(recentlyViewedProvider.notifier).touch(v.product.sku);
+      // P10.96: record the converged product as a line pick (the terminus IS the choice).
+      ref.read(cardPicksProvider.notifier).addPick(
+            CardPick(sku: v.product.sku, label: v.product.nameHe),
+          );
       if (openSheetOnResolve) {
         showLipskeyProductSheet(context, v.product, v.siblings);
       }
@@ -542,6 +548,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
       // Dual-write (P2.47): the resolved sku enters recently-viewed regardless
       // of the sheet/debounce. Idempotent; flag-gated by the screen mount.
       ref.read(recentlyViewedProvider.notifier).touch(picked.sku);
+      // P10.96: record the picked product as a line pick.
+      ref.read(cardPicksProvider.notifier).addPick(
+            CardPick(sku: picked.sku, label: picked.nameHe),
+          );
       if (openSheetOnResolve && _claim()) {
         showLipskeyProductSheet(context, picked, v.products);
       }
