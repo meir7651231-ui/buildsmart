@@ -16,9 +16,12 @@ import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
+    show kCardKeyboardFlag;
 import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +33,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 void showLipskeyProductSheet(
   BuildContext context,
   LipskeyCatalogProduct product,
-  List<LipskeyCatalogProduct> categoryProducts,
-) {
+  List<LipskeyCatalogProduct> categoryProducts, {
+  bool forceLive = false,
+  List<LipskeyCatalogProduct> hopSeedForTest = const <LipskeyCatalogProduct>[],
+}) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -43,6 +48,8 @@ void showLipskeyProductSheet(
       // whole card). Fall back to the product itself so it always renders.
       categoryProducts:
           categoryProducts.isEmpty ? [product] : categoryProducts,
+      forceLive: forceLive,
+      hopSeedForTest: hopSeedForTest,
     ),
   );
 }
@@ -105,10 +112,21 @@ class LipskeyProductSheet extends ConsumerStatefulWidget {
     super.key,
     required this.product,
     required this.categoryProducts,
+    this.forceLive = false,
+    this.hopSeedForTest = const <LipskeyCatalogProduct>[],
   });
 
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> categoryProducts;
+
+  /// P8.74 — test seam: force the flag-ON hop UI without the feature flag (parallels
+  /// CardKeyboardScreen.forceLiveForTest). Production stays flag-gated → OFF.
+  final bool forceLive;
+
+  /// P8.75 — test seam: pre-seed the hop back-stack so a test can exercise the back
+  /// control deterministically. Production opens with an empty stack.
+  @visibleForTesting
+  final List<LipskeyCatalogProduct> hopSeedForTest;
 
   @override
   ConsumerState<LipskeyProductSheet> createState() =>
@@ -344,11 +362,23 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   LipskeyCatalogProduct get _current =>
       _hops.current ?? widget.categoryProducts[_selectedIdx];
 
+  /// P8.74 — the hop UI (back control + related rail) is live when the feature flag
+  /// is on, or forced in a test. OFF in production today → byte-identical.
+  bool get _live =>
+      widget.forceLive ||
+      ref.watch(featureFlagsProvider).contains(kCardKeyboardFlag);
+
+  /// P8.75 — pop one hop (return to the previous product).
+  void _hopBack() => setState(_hops.back);
+
   @override
   void initState() {
     super.initState();
     _selectedIdx =
         widget.categoryProducts.indexOf(widget.product).clamp(0, widget.categoryProducts.length - 1);
+    for (final seed in widget.hopSeedForTest) {
+      _hops.push(seed);
+    }
     _accSelected = {
       for (var i = 0; i < (_accs.length); i++) i: false,
     };
@@ -542,6 +572,19 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             ]);
                           }),
                           const SizedBox(height: 8),
+                          if (_live && _hops.canGoBack)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: ActionChip(
+                                  key: const Key('hopBackChip'),
+                                  avatar: const Icon(Icons.undo, size: 16),
+                                  label: const Text('חזרה למוצר הקודם'),
+                                  onPressed: _hopBack,
+                                ),
+                              ),
+                            ),
                           _InteractiveChips(
                             product: p,
                             openPickerKey: _openPickerKey,
