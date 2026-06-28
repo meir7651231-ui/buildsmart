@@ -17,7 +17,7 @@ import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
-    show kCardKeyboardFlag;
+    show kCardKeyboardFlag, kUnifiedFinderFlag;
 import 'package:buildsmart/features/card_keyboard/card_picks.dart'
     show CardPick, cardPicksProvider;
 import 'package:buildsmart/features/card_keyboard/hop_graph.dart'
@@ -372,9 +372,13 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
 
   /// P8.74 — the hop UI (back control + related rail) is live when the feature flag
   /// is on, or forced in a test. OFF in production today → byte-identical.
-  bool get _live =>
-      widget.forceLive ||
-      ref.watch(featureFlagsProvider).contains(kCardKeyboardFlag);
+  ///
+  /// Swarm-review (high): read ONCE at first access (late final), NOT ref.watch — so a late
+  /// async featureFlags load can never swap the engine mid-dive — and honour BOTH unified-
+  /// finder flags exactly like CardKeyboardScreen._live. Flag-OFF both are false → identical.
+  late final bool _live = widget.forceLive ||
+      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag) ||
+      ref.read(featureFlagsProvider).contains(kUnifiedFinderFlag);
 
   /// P8.75 — pop one hop (return to the previous product).
   void _hopBack() => setState(_hops.back);
