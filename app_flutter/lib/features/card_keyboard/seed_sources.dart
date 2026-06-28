@@ -4,6 +4,8 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/card_keyboard/card_seed.dart';
+import 'package:buildsmart/features/word_finder/material_lexicon.dart'
+    show materialOfEnriched, materialsInPoolEnriched;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show kFirstWordCount, wordsByFrequency;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
@@ -33,3 +35,24 @@ bool Function(LipskeyCatalogProduct) _admitsSkus(List<String> skus) {
   final set = skus.toSet();
   return (p) => set.contains(p.sku);
 }
+
+/// Material mouth (P6.53): one CardSeed per material present in [pool] (the ENRICHED
+/// census — dims-typed materials count too). Each admits the products of that
+/// material; נחושת FOLDS brass (materialOfEnriched maps פליז → נחושת). GATE-EXEMPT:
+/// a seed source, NOT the coverage-gated material AXIS (MaterialSignal) — this seeds,
+/// it does not ask.
+List<CardSeed> materialSeeds(List<LipskeyCatalogProduct> pool) {
+  return [
+    for (final m in materialsInPoolEnriched(pool))
+      CardSeed(
+        mouthId: kMaterialMouth,
+        displayLabel: m,
+        seedAxisLabel: kMaterialSeedAxis,
+        seedPredicate: _admitsMaterial(m),
+      ),
+  ];
+}
+
+/// A predicate admitting exactly the products whose enriched material is [material].
+bool Function(LipskeyCatalogProduct) _admitsMaterial(String material) =>
+    (p) => materialOfEnriched(p) == material;
