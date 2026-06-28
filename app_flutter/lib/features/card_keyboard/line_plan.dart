@@ -5,6 +5,7 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/card_keyboard/card_picks.dart' show CardPick;
+import 'package:buildsmart/features/card_keyboard/hop_graph.dart' show HopGraph;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show divePoolBySku;
 import 'package:buildsmart/logic/install_engine.dart'
@@ -35,4 +36,27 @@ InstallationPlan planLineFromPicks(
     tempC: tempC,
     autoCompliance: autoCompliance,
   );
+}
+
+/// P10.97 — the 'between products' rail for a scan list: the top related products to jump
+/// to that are NOT already shown, drawn from the canonical hop graph (rankedNeighborsOf of
+/// the [shown] products, most-related first), deduped and capped at [budget]. Lets the user
+/// pivot from a "choose from N" list to a nearby option without restarting the dive.
+List<LipskeyCatalogProduct> betweenRailFor(
+  List<LipskeyCatalogProduct> shown, {
+  int budget = 6,
+}) {
+  final g = HopGraph.build();
+  final shownSkus = {for (final p in shown) p.sku};
+  final seen = <String>{};
+  final out = <LipskeyCatalogProduct>[];
+  for (final p in shown) {
+    for (final n in g.rankedNeighborsOf(p.sku)) {
+      if (shownSkus.contains(n) || !seen.add(n)) continue;
+      final prod = divePoolBySku[n];
+      if (prod != null) out.add(prod);
+      if (out.length >= budget) return out;
+    }
+  }
+  return out;
 }
