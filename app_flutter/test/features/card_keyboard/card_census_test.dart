@@ -34,6 +34,7 @@ void main() {
   ({int depth, String terminal}) dive(
     List<LipskeyCatalogProduct> seed, {
     int cap = 12,
+    bool adversarial = false,
   }) {
     var pool = seed;
     final stack = <NewbieStep>[
@@ -55,7 +56,25 @@ void main() {
       if (v is! MergedKeys) {
         return (depth: cap + 1, terminal: 'askWords?!'); // unreachable post-seed
       }
-      final c = v.chips.first;
+      // Greedy follows the top chip (best narrowing). ADVERSARIAL follows the chip that
+      // narrows LEAST (widest resulting pool) — the worst case that holds the pool largest,
+      // maximising both depth and the forced terminal list, so the <=6 gate is proven under
+      // stress rather than only on the engine's best-effort path.
+      var c = v.chips.first;
+      if (adversarial) {
+        var widest = -1;
+        for (final ch in v.chips) {
+          final s = sourcesFor(null).firstWhere(
+            (x) => x.axisId == ch.axisId,
+            orElse: () => const WordSignal(),
+          );
+          final size = pool.where((p) => s.matches(p, ch)).length;
+          if (size > widest) {
+            widest = size;
+            c = ch;
+          }
+        }
+      }
       final src = sourcesFor(null).firstWhere(
         (s) => s.axisId == c.axisId,
         orElse: () => const WordSignal(),
@@ -107,6 +126,32 @@ void main() {
         reason: 'the census must sample real mouths, not vacuously pass');
     expect(overBudget, isEmpty,
         reason: 'mouths exceeding the <=$kMaxQuestions contract: $overBudget');
+  });
+
+  test('ADVERSARIAL worst-case dive (widest chip each turn) holds <=$kMaxQuestions, terminal scannable',
+      () {
+    final overBudget = <String, int>{};
+    var worstShow = 0;
+    String? worstAt;
+    mouths.forEach((label, pool) {
+      final r = dive(pool, adversarial: true);
+      if (r.depth > kMaxQuestions) overBudget[label] = r.depth;
+      if (r.terminal.startsWith('show(')) {
+        final n = int.parse(r.terminal.substring(5, r.terminal.length - 1));
+        if (n > worstShow) {
+          worstShow = n;
+          worstAt = label;
+        }
+      }
+    });
+    print('ADVERSARIAL: ${mouths.length} mouths · worst forced terminal '
+        'show($worstShow) at $worstAt');
+    expect(overBudget, isEmpty,
+        reason: 'even the WORST (widest-first) path must hold <=$kMaxQuestions: '
+            '$overBudget');
+    expect(worstShow, lessThanOrEqualTo(40),
+        reason: 'the worst forced scan-list must stay scannable; '
+            'got show($worstShow) at $worstAt');
   });
 
   test('fuzz: 200 deterministic-random seeds always resolve within budget', () {
