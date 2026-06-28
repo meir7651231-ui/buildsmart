@@ -31,6 +31,16 @@ import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
 /// physical connection only" — a category edge is allowed but tagged as such).
 enum EdgeKind { compat, variant, kit, category, hub }
 
+/// Rail ordering (P8.77): the most MEANINGFUL edge kind first, the isolation-fallback
+/// hub last — so the on-screen 'related' rail surfaces real relations before the hub.
+const Map<EdgeKind, int> _kEdgeKindRank = {
+  EdgeKind.variant: 0,
+  EdgeKind.kit: 1,
+  EdgeKind.compat: 2,
+  EdgeKind.category: 3,
+  EdgeKind.hub: 4,
+};
+
 /// True if [aSku] and [bSku] sit on OPPOSITE water systems (one only-supply, the
 /// other only-drainage) — they cannot directly connect, so a hop edge must never
 /// bridge them (round-3 blocker-4). Mirrors gapAdviceHe's crossSystem guard
@@ -78,6 +88,26 @@ class HopGraph {
   /// The edge kinds on the directed edge [a] -> [b] (empty if no edge).
   Set<EdgeKind> kindsBetween(String a, String b) =>
       _adj[a]?[b] ?? const <EdgeKind>{};
+
+  /// The neighbours of [sku] for the on-screen 'related' rail (P8.77), ordered by the
+  /// BEST (lowest-rank) edge kind: variant > kit > compat > category > hub. So the rail
+  /// surfaces real relations first and the isolation-fallback hub last. A PERMUTATION
+  /// of [neighborsOf] (same set, reordered) — so the <=4 census over the graph transfers
+  /// to the rail verbatim. NEVER empty for an in-graph sku (the hub guarantees >=1).
+  /// Stable tie-break by sku so the order is byte-deterministic.
+  List<String> rankedNeighborsOf(String sku) {
+    final neighbours = _adj[sku];
+    if (neighbours == null) return const <String>[];
+    int best(Set<EdgeKind> kinds) =>
+        kinds.map((k) => _kEdgeKindRank[k]!).reduce((a, b) => a < b ? a : b);
+    final entries = neighbours.entries.toList()
+      ..sort((a, b) {
+        final ra = best(a.value);
+        final rb = best(b.value);
+        return ra != rb ? ra.compareTo(rb) : a.key.compareTo(b.key);
+      });
+    return [for (final e in entries) e.key];
+  }
 
   /// All skus reachable from [src] within [maxHops] directed edges (BFS; excludes
   /// [src]). The feasible building block for the <=4 contract — single-source, not
