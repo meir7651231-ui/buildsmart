@@ -10,12 +10,20 @@ import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
 import 'package:buildsmart/logic/install_engine.dart'
     show InstallationPlan, buildInstallation;
 
+/// The two temperature modes the line's temp chip offers (P10.94): cold supply/drainage
+/// vs hot water. They flow straight to [buildInstallation], which picks hot-rated materials
+/// and tighter clearances for the hot mode.
+const int kLineColdTempC = 20;
+const int kLineHotTempC = 60;
+
 /// Plan ONE installation line from the user's [picks] by resolving each pick's sku to its
-/// product and delegating to [buildInstallation]. A thin adapter: the line-builder IS the
-/// proven install engine.
+/// product and delegating to [buildInstallation]. [tempC] (the temp chip) and
+/// [autoCompliance] (the compliance checklist) flow straight through to the engine — the
+/// install_studio capability, absorbed. A thin adapter: the line-builder IS the proven
+/// install engine.
 InstallationPlan planLineFromPicks(
   List<CardPick> picks, {
-  int tempC = 20,
+  int tempC = kLineColdTempC,
   bool autoCompliance = false,
 }) {
   final anchors = picks
