@@ -9,10 +9,13 @@ import 'dart:math' show Random;
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
+import 'package:buildsmart/features/card_keyboard/card_seed.dart' show CardSeed;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show WordSignal, sourcesFor;
 import 'package:buildsmart/features/card_keyboard/decisions.dart'
     show kMaxQuestions;
+import 'package:buildsmart/features/card_keyboard/seed_sources.dart'
+    show categorySeeds, materialSeeds;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
     show kMaterials;
@@ -140,5 +143,37 @@ void main() {
     }
     print('FUZZ: $ran/200 seeds ran · max depth $maxDepth');
     expect(ran, greaterThan(150), reason: 'most random seeds resolve to a pool');
+  });
+
+  // P6.60: the BROWSE census — a ZERO-typing user taps a category or material seed
+  // and still reaches a product within the contract. Every category bucket covers
+  // 100% of the universe (P6.55), so this proves EVERY card is browse-reachable <=6.
+  group('browse census (P6.60 — every bucket resolves <=kMaxQuestions, no text)',
+      () {
+    void censusOver(String label, List<CardSeed> seeds) {
+      final overBudget = <String, int>{};
+      final hist = <int, int>{};
+      for (final seed in seeds) {
+        final pool = kDivePool.where(seed.seedPredicate).toList();
+        if (pool.isEmpty) continue;
+        final r = dive(pool);
+        hist[r.depth] = (hist[r.depth] ?? 0) + 1;
+        if (r.depth > kMaxQuestions) overBudget[seed.displayLabel] = r.depth;
+      }
+      final sortedHist =
+          (hist.keys.toList()..sort()).map((k) => '$k:${hist[k]}').join(' ');
+      print('BROWSE $label: depth(questions) $sortedHist');
+      if (overBudget.isNotEmpty) print('OVER ($label): $overBudget');
+      expect(overBudget, isEmpty,
+          reason: '$label buckets over <=$kMaxQuestions: $overBudget');
+    }
+
+    test('every CATEGORY bucket resolves within the contract', () {
+      censusOver('category', categorySeeds(kDivePool));
+    });
+
+    test('every MATERIAL bucket resolves within the contract', () {
+      censusOver('material', materialSeeds(kDivePool));
+    });
   });
 }
