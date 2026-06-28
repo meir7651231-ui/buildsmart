@@ -21,7 +21,7 @@ library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
-    show sourcesFor;
+    show SignalSource, sourcesFor;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
@@ -273,38 +273,8 @@ List<SignalChip> _mergedChips(
   for (var rank = 0; rank < sources.length; rank++) {
     final src = sources[rank];
     if (answered.contains(src.axisName)) continue; // each axis at most once
-    final chips = src.chipsFor(pool);
-    // Skip an axis that can't provide the per-axis floor: a lone chip can't
-    // narrow, and keying this on kMergedAxisFloor (not a literal 2) makes the
-    // documented "≥ floor chips per represented axis" guarantee actually hold —
-    // a laid-out axis always has ≥ floor chips to give (swarm R5). Identical at
-    // the floor=2 default; an invariant test pins kMergedAxisFloor ≥ 2.
-    if (chips.length < kMergedAxisFloor) continue;
-    // EVERY axis — material INCLUDED (swarm R3 fix) — is scored on the FULL pool
-    // with its OWN tap predicate (src.matches), so an axis's measured decisiveness
-    // is EXACTLY what tapping a chip delivers, and all axes share one denominator
-    // n = distinctCardCount(pool) (so expRem is commensurable across axes). For
-    // material this COUNTS the null carry-along the tap keeps (a copper tap holds
-    // copper + unknown-material) — the honest post-tap pool. §2's earlier
-    // seeded-subset + exact-predicate scoring systematically OVER-ranked material:
-    // a smaller seeded M deflated its expRem, and excluding the carry-along it
-    // actually keeps understated the remaining cards (two compounding R3 HIGHs).
-    final n = distinctCardCount(pool);
-    if (n == 0) continue; // div-0 guard; an empty pool can't split
-    var sumSq = 0;
-    var anySplit = false;
-    for (final chip in chips) {
-      final narrowed = pool.where((p) => src.matches(p, chip)).toList();
-      final nc = distinctCardCount(narrowed);
-      if (nc < n) anySplit = true; // this chip actually narrows the pool
-      sumSq += nc * nc;
-    }
-    // Skip an axis that can't narrow AT ALL — every chip keeps the full pool
-    // (e.g. multi-valued products that match every size chip). Laying it out
-    // would present a visible NO-OP tap; route past it to a more decisive axis
-    // or the convergence floor instead (swarm R7).
-    if (!anySplit) continue;
-    scored.add(_AxisScore(rank, chips, sumSq, n));
+    final score = _scoreAxis(rank, src, pool);
+    if (score != null) scored.add(score);
   }
 
   // Rank axes by expRem = sumSq/n ASCENDING via INTEGER cross-multiply
@@ -348,6 +318,38 @@ List<SignalChip> _mergedChips(
     }
   }
   return out;
+}
+
+/// Scores one axis [src] over [pool] for the merged row (P7.65 — extracted from
+/// [_mergedChips], behavior-identical). Returns null when the axis can't be laid
+/// out: fewer than [kMergedAxisFloor] chips, an empty pool, or NO chip narrows it.
+///
+/// EVERY axis — material INCLUDED (swarm R3 fix) — is scored on the FULL pool with
+/// its OWN tap predicate (src.matches), so an axis's measured decisiveness is EXACTLY
+/// what tapping a chip delivers, and all axes share one denominator
+/// n = distinctCardCount(pool) (expRem commensurable across axes). For material this
+/// COUNTS the null carry-along the tap keeps (a copper tap holds copper +
+/// unknown-material) — the honest post-tap pool; material is NOT a special branch.
+_AxisScore? _scoreAxis(
+  int rank,
+  SignalSource src,
+  List<LipskeyCatalogProduct> pool,
+) {
+  final chips = src.chipsFor(pool);
+  if (chips.length < kMergedAxisFloor) return null;
+  final n = distinctCardCount(pool);
+  if (n == 0) return null; // div-0 guard; an empty pool can't split
+  var sumSq = 0;
+  var anySplit = false;
+  for (final chip in chips) {
+    final nc =
+        distinctCardCount(pool.where((p) => src.matches(p, chip)).toList());
+    if (nc < n) anySplit = true; // this chip actually narrows the pool
+    sumSq += nc * nc;
+  }
+  // No chip narrows AT ALL → laying it out would be a visible NO-OP tap; skip.
+  if (!anySplit) return null;
+  return _AxisScore(rank, chips, sumSq, n);
 }
 
 /// Pick [count] chips spread EVENLY across [chips] — representative buckets, NOT
