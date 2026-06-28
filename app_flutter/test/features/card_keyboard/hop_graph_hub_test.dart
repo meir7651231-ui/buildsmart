@@ -17,19 +17,26 @@ void main() {
         reason: 'the hub backbone must leave zero isolated products');
   });
 
-  test('every sampled source reaches the WHOLE universe within 4 hops', () {
+  test('EVERY source reaches the WHOLE universe within 4 hops (exhaustive)', () {
+    // Swarm-review (high): was a ~30-source STRIDE sample, so a regression that isolated a
+    // non-sampled node would pass green. Single-source BFS over the whole node-set is cheap
+    // here, so we wash ALL of them and pin the true worst source — no blind spots.
     final g = HopGraph.build();
     final nodes = divePoolBySku.keys.toList();
     final target = nodes.length - 1; // everything except the source
-    final stride = (nodes.length / 30).ceil();
     var worst = target;
-    for (var i = 0; i < nodes.length; i += stride) {
-      final reach = g.reachWithin(nodes[i], 4).length;
-      if (reach < worst) worst = reach;
-      expect(reach, target,
-          reason: '${nodes[i]} reaches $reach/$target within 4 hops');
+    String? worstNode;
+    for (final s in nodes) {
+      final reach = g.reachWithin(s, 4).length;
+      if (reach < worst) {
+        worst = reach;
+        worstNode = s;
+      }
     }
-    print('HUB: ${nodes.length} nodes, worst-source reachWithin4 = $worst '
-        '(== $target means full <=4 connectivity)');
+    expect(worst, target,
+        reason: 'worst source $worstNode reaches $worst/$target within 4 hops — '
+            'one unreachable node breaks the <=4 contract');
+    print('HUB: ${nodes.length} nodes, EXHAUSTIVE worst-source reachWithin4 = '
+        '$worst (== $target means full <=4 connectivity)');
   });
 }
