@@ -5,6 +5,8 @@
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/card_seed.dart';
+import 'package:buildsmart/features/word_finder/category_groups.dart'
+    show groupOf;
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
     show materialOfEnriched, materialsInPoolEnriched;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
@@ -78,3 +80,24 @@ List<CardSeed> jobSeeds() {
       ),
   ];
 }
+
+/// Category/emoji mouth (P6.55): one CardSeed per category group present in [pool].
+/// [groupOf] is TOTAL — every product maps to a group, falling back to 'אחר' — so the
+/// buckets COVER 100% of the universe with ZERO orphan, and are disjoint (groupOf is
+/// a function). emoji is null until a group→emoji map lands. mouthId=kCategoryMouth.
+List<CardSeed> categorySeeds(List<LipskeyCatalogProduct> pool) {
+  final groups = pool.map(groupOf).toSet().toList()..sort();
+  return [
+    for (final g in groups)
+      CardSeed(
+        mouthId: kCategoryMouth,
+        displayLabel: g,
+        seedAxisLabel: kCategorySeedAxis,
+        seedPredicate: _admitsGroup(g),
+      ),
+  ];
+}
+
+/// A predicate admitting exactly the products in category group [group].
+bool Function(LipskeyCatalogProduct) _admitsGroup(String group) =>
+    (p) => groupOf(p) == group;

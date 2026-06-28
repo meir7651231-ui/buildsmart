@@ -88,4 +88,35 @@ void main() {
           reason: 'recipes resolve to real catalog skus, never invented');
     });
   });
+
+  group('categorySeeds (P6.55)', () {
+    test('the buckets cover 100% of the pool — ZERO orphan', () {
+      final covered = <String>{};
+      for (final s in categorySeeds(kDivePool)) {
+        for (final p in kDivePool.where(s.seedPredicate)) {
+          covered.add(p.sku);
+        }
+      }
+      expect(covered, kDivePool.map((p) => p.sku).toSet(),
+          reason: 'every card must land in some bucket (incl. אחר)');
+    });
+
+    test('buckets are disjoint — a card is in exactly one group', () {
+      final counts = <String, int>{};
+      for (final s in categorySeeds(kDivePool)) {
+        for (final p in kDivePool.where(s.seedPredicate)) {
+          counts[p.sku] = (counts[p.sku] ?? 0) + 1;
+        }
+      }
+      expect(counts.values.every((c) => c == 1), isTrue,
+          reason: 'groupOf is a function -> exactly one bucket per card');
+    });
+
+    test('every category seed carries the category mouth id + axis sentinel', () {
+      for (final s in categorySeeds(kDivePool)) {
+        expect(s.mouthId, kCategoryMouth);
+        expect(s.seedAxisLabel, kCategorySeedAxis);
+      }
+    });
+  });
 }
