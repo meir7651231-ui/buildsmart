@@ -64,12 +64,36 @@ void main() {
         }
       }
       if (keep == null) {
-        // No target-keeping chip: the dive would no-op to the gate, which shows
-        // THIS pool — the target is still in it, resolved within the contract.
-        return (
-          depth: kMaxQuestions,
-          reached: pool.any((p) => collapseKeyOf(p) == key),
-        );
+        // No target-keeping chip: advance with NO-OP steps (which never narrow the pool)
+        // until the engine itself emits a terminal — then assert the ENGINE'S REAL output
+        // contains the target, rather than ASSUMING the gate shows the raw pool. (Swarm-
+        // review: the engine returns distinctProducts(pool) UNtruncated, so this is exact —
+        // there is no cap that could drop the target.)
+        var s = stack;
+        var d = depth;
+        for (var k = 0; k < kMaxQuestions + 2; k++) {
+          final vv = mergedKeys(pool, s, lex, null);
+          if (vv is CardResolve) {
+            return (depth: d, reached: collapseKeyOf(vv.product) == key);
+          }
+          if (vv is CardShowProducts) {
+            return (
+              depth: d + 1,
+              reached: vv.products.any((p) => collapseKeyOf(p) == key),
+            );
+          }
+          s = [
+            ...s,
+            NewbieStep(
+              axisLabel: '_noop$k',
+              chipLabel: 'noop',
+              crumbWord: 'noop',
+              predicate: (_) => true,
+            ),
+          ];
+          d++;
+        }
+        return (depth: 99, reached: false);
       }
       final c = keep;
       final src = keepSrc!;

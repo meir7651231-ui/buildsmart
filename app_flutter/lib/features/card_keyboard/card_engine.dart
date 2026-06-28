@@ -191,17 +191,23 @@ CardVerdict mergedKeys(
     return CardResolve(pool.first, pool);
   }
   if (distinctCardCount(pool) <= kShowProductsThreshold) {
-    return CardShowProducts(distinctProducts(pool));
+    return CardShowProducts(distinctProducts(pool, cap: pool.length));
   }
   // P7.67: the HARD ≤6 gate. By the last allowed turn (kMaxDiveTurns − 1 answered
   // steps) STOP asking and show the scan-list, so the dive can NEVER exceed
   // kMaxDiveTurns. Inert in practice (the census proves max depth 4) — a STRUCTURAL
   // ≤6 guarantee that does not depend on the ranking staying decisive.
+  //
+  // Swarm-review fix: the card-engine ShowProducts lists are UNcapped (cap: pool.length).
+  // The default kShowProductsCap (30, the LIVE finder's view limit) would silently DROP
+  // cards beyond #30 at a forced gate — making them UNREACHABLE and breaking the ≤6
+  // contract (the rigorous brain-contract test caught this). Reachability outranks a shorter
+  // scan; the adversarial census measures the worst forced list at 38, not a runaway.
   if (stack.length >= kMaxDiveTurns - 1) {
-    return CardShowProducts(distinctProducts(pool));
+    return CardShowProducts(distinctProducts(pool, cap: pool.length));
   }
   final chips = _mergedChips(pool, stack, subtype, historySkus);
-  if (chips.isEmpty) return CardShowProducts(distinctProducts(pool));
+  if (chips.isEmpty) return CardShowProducts(distinctProducts(pool, cap: pool.length));
   return MergedKeys(chips);
 }
 
