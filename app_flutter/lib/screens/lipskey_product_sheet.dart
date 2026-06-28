@@ -538,6 +538,14 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (plan.items.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                                'לא נמצאו פריטים לפתרון — בחר מוצרים אחרים לקו',
+                                style: TextStyle(
+                                    fontSize: 13, color: Color(0xFF888888))),
+                          ),
                         for (final item in plan.items)
                           Text('• ${item.nameHe}  ×${plan.qtyOf(item.sku)}',
                               style: const TextStyle(fontSize: 13)),
@@ -558,11 +566,17 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                   width: double.infinity,
                   child: FilledButton(
                     key: const Key('addLineToCartButton'),
-                    onPressed: () {
-                      _addLineToCart(plan.items);
-                      Navigator.of(modalCtx).pop();
-                    },
-                    child: const Text('הוסף הכל לסל'),
+                    // Swarm-review: an empty plan must NOT 'add 0 to cart' and silently
+                    // wipe the picks — disable the button so a fully-unresolvable line is a
+                    // visible no-op, not a fake success toast.
+                    onPressed: plan.items.isEmpty
+                        ? null
+                        : () {
+                            _addLineToCart(plan.items);
+                            Navigator.of(modalCtx).pop();
+                          },
+                    child: Text(
+                        plan.items.isEmpty ? 'אין פריטים לסל' : 'הוסף הכל לסל'),
                   ),
                 ),
               ],
