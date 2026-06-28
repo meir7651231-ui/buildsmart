@@ -9,8 +9,8 @@ void main() {
     expect(g.nodes.toSet(), divePoolBySku.keys.toSet());
   });
 
-  test('EdgeKind has exactly the 4 navigational kinds', () {
-    expect(EdgeKind.values.length, 4);
+  test('EdgeKind has exactly the 5 navigational kinds (incl. the P8.73 hub)', () {
+    expect(EdgeKind.values.length, 5);
     expect(
       EdgeKind.values,
       containsAll(<EdgeKind>[
@@ -18,11 +18,12 @@ void main() {
         EdgeKind.variant,
         EdgeKind.kit,
         EdgeKind.category,
+        EdgeKind.hub,
       ]),
     );
   });
 
-  test('the skeleton has no edges (the <=4 claim is not asserted yet)', () {
+  test('the skeleton has no edges (the populated graph carries them)', () {
     final g = HopGraph.skeleton();
     final a = divePoolBySku.keys.first;
     final b = divePoolBySku.keys.elementAt(1);

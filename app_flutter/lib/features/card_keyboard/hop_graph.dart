@@ -19,6 +19,8 @@ import 'package:buildsmart/data/lipskey_verified_connections.dart'
 import 'package:buildsmart/data/related_info.dart' show compatibleProductsFor;
 import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/data/variant_families.dart' show allVariantFamilies;
+import 'package:buildsmart/features/word_finder/category_groups.dart'
+    show groupOf;
 import 'package:buildsmart/features/word_finder/recipe_kit.dart'
     show KitMatch, assembleKit;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
@@ -27,7 +29,7 @@ import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
 /// The kind of a navigational edge between two real products. The <=4 graph is the
 /// UNION of these (round-2/3: honestly "navigational adjacency", not "verified
 /// physical connection only" — a category edge is allowed but tagged as such).
-enum EdgeKind { compat, variant, kit, category }
+enum EdgeKind { compat, variant, kit, category, hub }
 
 /// True if [aSku] and [bSku] sit on OPPOSITE water systems (one only-supply, the
 /// other only-drainage) — they cannot directly connect, so a hop edge must never
@@ -124,6 +126,7 @@ HopGraph _buildPopulated() {
   _addVariantEdges(adj);
   _addKitEdges(adj);
   _addCategoryEdges(adj);
+  _addHubEdges(adj);
   return HopGraph._(adj);
 }
 
@@ -210,6 +213,41 @@ void _addCategoryEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
         if (crossesSystem(a, b)) continue; // category can mix systems; don't bridge
         adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.category);
       }
+    }
+  }
+}
+
+/// Step 73 — the hub-clique backbone: the <=4 GUARANTEE. One real-product
+/// representative per category group ([groupOf]); every product gets a BIDIRECTIONAL
+/// hub edge to its group's rep, and the reps form a clique. So any two products are
+/// <=3 directed hops (A -> repA -> repB -> B) BY CONSTRUCTION — no isolated node,
+/// diameter <=3. The reps are clickable REAL products (no virtual nodes; round-1
+/// blocker #4 holds); hub edges are the isolation-prevention fallback the rail shows
+/// LAST, after the meaningful compat/variant/kit edges.
+void _addHubEdges(Map<String, Map<String, Set<EdgeKind>>> adj) {
+  void biLink(String a, String b) {
+    if (a == b) return;
+    adj[a]!.putIfAbsent(b, () => <EdgeKind>{}).add(EdgeKind.hub);
+    adj[b]!.putIfAbsent(a, () => <EdgeKind>{}).add(EdgeKind.hub);
+  }
+
+  // One rep per group — the first sku encountered (deterministic over the const
+  // divePoolBySku order).
+  final repOf = <String, String>{};
+  for (final sku in adj.keys) {
+    repOf.putIfAbsent(groupOf(divePoolBySku[sku]!), () => sku);
+  }
+
+  // Every product <-> its group's rep (so no product is isolated).
+  for (final sku in adj.keys) {
+    biLink(sku, repOf[groupOf(divePoolBySku[sku]!)]!);
+  }
+
+  // The rep-clique (reps pairwise) — bounds rep-to-rep at 1 hop.
+  final reps = repOf.values.toList();
+  for (var i = 0; i < reps.length; i++) {
+    for (var j = i + 1; j < reps.length; j++) {
+      biLink(reps[i], reps[j]);
     }
   }
 }
