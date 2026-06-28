@@ -56,6 +56,7 @@ class SignalChip {
     this.axisName,
     this.infoGain = 0,
     this.soft = false,
+    this.isDestination = false,
   });
 
   /// The predicate FAMILY: `'size' | 'angle' | 'color' | 'word' | 'material'`.
@@ -87,6 +88,11 @@ class SignalChip {
   /// (§1.5 invariant, asserted in Phase 3's tests).
   final bool soft;
 
+  /// True for a near-convergence chip that lands DIRECTLY on a single product (a
+  /// destination, #41) rather than narrowing further — a RENDER-ONLY accent, never
+  /// routing, EXCLUDED from ==/hashCode (like [infoGain]). False on a wide pool.
+  final bool isDestination;
+
   @override
   bool operator ==(Object other) =>
       other is SignalChip &&
@@ -103,13 +109,15 @@ class SignalChip {
   /// A copy with [infoGain] populated (P7.64). infoGain is a DISPLAY tier only and
   /// is excluded from ==/hashCode, so re-stamping never changes a chip's identity,
   /// the row's order, or any golden/set keyed on chips.
-  SignalChip withInfoGain(double gain) => SignalChip(
+  SignalChip withInfoGain(double gain, {bool isDestination = false}) =>
+      SignalChip(
         axisId: axisId,
         value: value,
         displayLabel: displayLabel,
         axisName: axisName,
         infoGain: gain,
         soft: soft,
+        isDestination: isDestination,
       );
 }
 
@@ -354,7 +362,10 @@ List<SignalChip> _mergedChips(
     for (final c in taken) {
       final nc =
           distinctCardCount(pool.where((p) => src.matches(p, c)).toList());
-      out.add(c.withInfoGain((a.n - nc).toDouble()));
+      out.add(c.withInfoGain(
+        (a.n - nc).toDouble(),
+        isDestination: anchor != null && nc <= 1,
+      ));
     }
   }
   return out;
