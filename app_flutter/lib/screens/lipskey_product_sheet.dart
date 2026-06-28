@@ -18,7 +18,8 @@ import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
     show kCardKeyboardFlag;
-import 'package:buildsmart/features/card_keyboard/hop_graph.dart' show HopGraph;
+import 'package:buildsmart/features/card_keyboard/hop_graph.dart'
+    show EdgeKind, HopGraph;
 import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show divePoolBySku;
@@ -418,6 +419,55 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     );
   }
 
+  /// P9.89 — the 'what connects to this' rail: the current product's hop-graph
+  /// neighbours reached by a compat or kit edge (the same canonical graph as the related
+  /// rail, filtered to physical-connection edges) as tappable in-place hops. Flag-gated.
+  Widget _hopConnectRail(LipskeyCatalogProduct p) {
+    final g = HopGraph.build();
+    final connects = g
+        .rankedNeighborsOf(p.sku)
+        .where((s) {
+          final kinds = g.kindsBetween(p.sku, s);
+          return kinds.contains(EdgeKind.compat) ||
+              kinds.contains(EdgeKind.kit);
+        })
+        .map((s) => divePoolBySku[s])
+        .whereType<LipskeyCatalogProduct>()
+        .take(8)
+        .toList();
+    if (connects.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('hopConnectRail'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('🔌 מה מתחבר לזה',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final n in connects)
+                ActionChip(
+                  key: Key('hopConnectChip_${n.sku}'),
+                  label: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(n.nameHe,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  onPressed: () => _switchByChip(n),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   /// P8.78 — the hop path breadcrumb: every product in the path as a tappable crumb
   /// (home → … → current). Tapping a crumb jumps back to it (popTo); tapping home
   /// clears to the opening variant. Built only when live and the path is non-empty.
@@ -683,6 +733,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                               ),
                             ),
                           if (_live) _hopRail(p),
+                          if (_live) _hopConnectRail(p),
                           _InteractiveChips(
                             product: p,
                             openPickerKey: _openPickerKey,
