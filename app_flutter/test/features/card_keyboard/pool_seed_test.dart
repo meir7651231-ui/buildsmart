@@ -2,7 +2,7 @@ import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show sourcesFor;
 import 'package:buildsmart/features/card_keyboard/pool_seed.dart';
 import 'package:buildsmart/features/card_keyboard/seed_sources.dart'
-    show materialSeeds, wordSeeds;
+    show categorySeeds, materialSeeds, wordSeeds;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show buildWordLexicon;
@@ -39,5 +39,36 @@ void main() {
     for (final p in seedPool(seed, kDivePool)) {
       expect(poolSkus.contains(p.sku), isTrue);
     }
+  });
+
+  group('seedFrom* (P7.63 — all seeders over one pool)', () {
+    test('seedFromText: a known query seeds, all-unknown -> null', () {
+      expect(seedFromText('נחושת', lex), isNotNull);
+      expect(seedFromText('qwertyxyz zxcvbnm', lex), isNull,
+          reason: 'all-unknown must be null, not a false dead-end');
+    });
+
+    test('seedFromText: a multi-word query UNIONS non-intersecting terms', () {
+      final seed = seedFromText('נחושת HDPE', lex);
+      expect(seed, isNotNull);
+      expect(seedPool(seed!, kDivePool), isNotEmpty,
+          reason: 'copper UNION hdpe — never a dead-end');
+    });
+
+    test('seedFromMaterial / seedFromFacet resolve known buckets, else null', () {
+      expect(seedFromMaterial('נחושת'), isNotNull);
+      expect(seedFromMaterial('שיש'), isNull); // not a material
+      final aGroup = categorySeeds(kDivePool).first.displayLabel;
+      expect(seedFromFacet(aGroup), isNotNull);
+      expect(seedFromFacet('__no_such_group__'), isNull);
+    });
+
+    test('seedFromSkus: empty -> null, non-empty -> a grounded seed', () {
+      expect(seedFromSkus(<String>{}, 'x'), isNull);
+      final anySku = kDivePool.first.sku;
+      final seed = seedFromSkus({anySku}, 'related');
+      expect(seed, isNotNull);
+      expect(seedPool(seed!, kDivePool).map((p) => p.sku), contains(anySku));
+    });
   });
 }
