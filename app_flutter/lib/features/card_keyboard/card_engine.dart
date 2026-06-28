@@ -92,6 +92,18 @@ class SignalChip {
   @override
   int get hashCode =>
       Object.hash(axisId, value, displayLabel, axisName, soft);
+
+  /// A copy with [infoGain] populated (P7.64). infoGain is a DISPLAY tier only and
+  /// is excluded from ==/hashCode, so re-stamping never changes a chip's identity,
+  /// the row's order, or any golden/set keyed on chips.
+  SignalChip withInfoGain(double gain) => SignalChip(
+        axisId: axisId,
+        value: value,
+        displayLabel: displayLabel,
+        axisName: axisName,
+        infoGain: gain,
+        soft: soft,
+      );
 }
 
 /// What the unified engine returns at one turn of the dive. Sealed with exactly
@@ -325,7 +337,15 @@ List<SignalChip> _mergedChips(
     final taken = const {'size', 'angle'}.contains(a.chips.first.axisId)
         ? representativeTake(a.chips, take)
         : a.chips.take(take).toList();
-    out.addAll(taken);
+    // P7.64: stamp infoGain = n − distinctCardCount(narrowed) on each emitted chip.
+    // infoGain is excluded from ==/hashCode, so this leaves the row ORDER untouched
+    // (a display tier the rank reads; the sort key is still the integer expRem).
+    final src = sources[a.rank];
+    for (final c in taken) {
+      final nc =
+          distinctCardCount(pool.where((p) => src.matches(p, c)).toList());
+      out.add(c.withInfoGain((a.n - nc).toDouble()));
+    }
   }
   return out;
 }
