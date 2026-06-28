@@ -40,10 +40,7 @@ jobs:
         # prediction row + tools mirror the current tab/drill across all 4 tabs
         # (קטלוג/מחלקות/עדכונים/חנות). OWNER-REQUESTED live (22/6). Reversible:
         # remove the flag to fall back to byte-identical (the mirror tree-shakes).
-        # --dart-define=ENABLE_CARD_KEYBOARD=true is the CUT-OVER (owner-confirmed
-        # "merge and go live"): turns the unified card-keyboard (#38) ON for
-        # buildsmart-il.com. Reversible: remove the flag + redeploy → back to off.
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=ENABLE_CARD_KEYBOARD=true --dart-define=KB_LIVE_MIRROR=true
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true
 
       - name: Deploy to Firebase Hosting (live channel)
         uses: FirebaseExtended/action-hosting-deploy@v0

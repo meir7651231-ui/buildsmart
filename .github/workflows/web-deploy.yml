@@ -56,9 +56,7 @@ jobs:
         # deploy wins could ship a flag-OFF build with the demo features hidden.
         # --dart-define=KB_LIVE_MIRROR=true: the live-mirror keyboard — MUST match
         # firebase-hosting.yml (same race). OWNER-REQUESTED live (22/6), reversible.
-        # --dart-define=ENABLE_CARD_KEYBOARD=true — the cut-over, MUST match
-        # firebase-hosting.yml (same race): the unified card-keyboard ON live. Reversible.
-        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=ENABLE_CARD_KEYBOARD=true --dart-define=KB_LIVE_MIRROR=true
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true
 
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
