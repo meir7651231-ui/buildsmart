@@ -24,6 +24,8 @@ class OpeningSurface extends StatelessWidget {
     this.mouthTabs = const [],
     this.activeMouth,
     this.onMouthTap,
+    this.onToggleMore,
+    this.moreExpanded = false,
   });
 
   /// The opening word suggestions (the grid input method).
@@ -60,6 +62,13 @@ class OpeningSurface extends StatelessWidget {
 
   /// Tapped a mouth tab — the screen swaps the grid's seeds, no step pushed.
   final void Function(String)? onMouthTap;
+
+  /// Toggle the word mouth's grid between the top-kFirstWordCount and the full long
+  /// tail ('עוד…'/'פחות'). Null hides the toggle (non-word mouths). Never seeds.
+  final VoidCallback? onToggleMore;
+
+  /// Whether the word grid is currently expanded (drives the toggle's label).
+  final bool moreExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +132,14 @@ class OpeningSurface extends StatelessWidget {
                       onWordTap: onWordTap,
                       showUtilityRow: false,
                     ),
+                    if (onToggleMore != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: onToggleMore,
+                          child: Text(moreExpanded ? 'פחות' : 'עוד…'),
+                        ),
+                      ),
                   ],
                 ),
               ),

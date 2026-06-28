@@ -188,6 +188,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     (id: kCategoryMouth, label: 'קטגוריה'),
   ];
 
+  /// P6.59: whether the WORD mouth's grid shows the full long tail ('עוד…') vs the
+  /// top-kFirstWordCount. Toggling it only re-renders the grid; it never seeds.
+  bool _wordsExpanded = false;
+
   /// The opening text-query debounce timer (P4.56), cancelled on each keystroke
   /// and in [dispose] so a settled query never fires after the screen is gone.
   Timer? _debounce;
@@ -424,7 +428,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         kMaterialMouth => materialSeeds(kDivePool),
         kJobMouth => jobSeeds(),
         kCategoryMouth => categorySeeds(kDivePool),
-        _ => wordSeeds(cardKeyboardLexicon),
+        _ => wordSeeds(cardKeyboardLexicon, expanded: _wordsExpanded),
       };
 
   List<WordKey> _keysFor(CardVerdict v) => switch (v) {
@@ -483,6 +487,9 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     if (mouth == _activeMouth) return;
     setState(() => _activeMouth = mouth);
   }
+
+  /// P6.59: expand/collapse the word mouth's grid ('עוד…'/'פחות'). Never seeds.
+  void _onToggleWords() => setState(() => _wordsExpanded = !_wordsExpanded);
 
   /// Handle a tapped word key, dispatched by its typed [WordKey.payload]:
   ///  • [_SeedTap]    — seed the pool with a click-mouth CardSeed's predicate;
@@ -649,6 +656,8 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
             mouthTabs: _kMouthTabs,
             activeMouth: _activeMouth,
             onMouthTap: _onMouthTap,
+            onToggleMore: _activeMouth == kWordMouth ? _onToggleWords : null,
+            moreExpanded: _wordsExpanded,
           )
         else if (keys.isNotEmpty)
           WordKeyboard(
