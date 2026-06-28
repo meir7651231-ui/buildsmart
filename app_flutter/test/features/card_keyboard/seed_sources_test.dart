@@ -1,3 +1,5 @@
+import 'dart:math' show Random;
+
 import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/card_seed.dart';
 import 'package:buildsmart/features/card_keyboard/seed_sources.dart';
@@ -117,6 +119,55 @@ void main() {
         expect(s.mouthId, kCategoryMouth);
         expect(s.seedAxisLabel, kCategorySeedAxis);
       }
+    });
+  });
+
+  group('seed source invariants (P6.61 — fuzz)', () {
+    List<String> labels(List<CardSeed> s) => [for (final x in s) x.displayLabel];
+
+    test('material/category seeds are SHUFFLE-STABLE (input order irrelevant)',
+        () {
+      final shuffled = List.of(kDivePool)..shuffle(Random(7));
+      expect(labels(materialSeeds(shuffled)).toSet(),
+          labels(materialSeeds(kDivePool)).toSet());
+      // categorySeeds sorts its groups, so even the order is identical
+      expect(labels(categorySeeds(shuffled)), labels(categorySeeds(kDivePool)));
+    });
+
+    test('all four sources are PURE — a second call is equivalent', () {
+      expect(labels(wordSeeds(lex)), labels(wordSeeds(lex)));
+      expect(labels(materialSeeds(kDivePool)), labels(materialSeeds(kDivePool)));
+      expect(labels(jobSeeds()), labels(jobSeeds()));
+      expect(labels(categorySeeds(kDivePool)), labels(categorySeeds(kDivePool)));
+    });
+
+    test('every seed admits ONLY pool products (no orphan / invention)', () {
+      final poolSkus = kDivePool.map((p) => p.sku).toSet();
+      final all = [
+        ...wordSeeds(lex),
+        ...materialSeeds(kDivePool),
+        ...jobSeeds(),
+        ...categorySeeds(kDivePool),
+      ];
+      for (final seed in all) {
+        for (final p in kDivePool.where(seed.seedPredicate)) {
+          expect(poolSkus.contains(p.sku), isTrue);
+        }
+      }
+    });
+
+    test('each source stamps its own mouth id + axis sentinel', () {
+      void check(List<CardSeed> seeds, String mouth, String axis) {
+        for (final s in seeds) {
+          expect(s.mouthId, mouth);
+          expect(s.seedAxisLabel, axis);
+        }
+      }
+
+      check(wordSeeds(lex), kWordMouth, kWordSeedAxis);
+      check(materialSeeds(kDivePool), kMaterialMouth, kMaterialSeedAxis);
+      check(jobSeeds(), kJobMouth, kJobSeedAxis);
+      check(categorySeeds(kDivePool), kCategoryMouth, kCategorySeedAxis);
     });
   });
 }
