@@ -1,0 +1,434 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// BuildSmart Studio · Pillar 1 · Step 6 — the config store (op-based draft/publish).
+//
+//   • [ConfigOp]    — a sealed family of single-axis edits (SetText/SetEmoji/
+//                     SetHidden/SetOrder/SetStyle/SetAction). P1 OWNS the base +
+//                     applyOps; Pillar-4 PRODUCES ops into the draft (R1-A3 · R2-#4).
+//   • [ConfigSink]  — the persistence/sync seam (Pillar-5 swap point). v1 ships
+//                     [LocalPrefsSink] (SharedPreferences, key 'bs.studio-config.v1').
+//   • [ConfigStore] — `StateNotifier<ConfigDoc>`. PUBLIC API is op-based:
+//                     `applyOps` (+ `undo`/`redo`), `resetDraftNode`, `discardDraft`,
+//                     `publish`, `rollback`. `editDraft(id, fn)` is an INTERNAL
+//                     primitive — applyOps is built on it and is the seam Pillar-4
+//                     calls (NEVER editDraft directly).
+//
+// Immutable throughout: every mutation builds a NEW ConfigDoc via `copyWith` (never
+// mutates a Map in place — else Riverpod wouldn't notify). undo/redo hold sparse
+// DRAFT-LAYER snapshots (the draft is only edits → light; not heavy full-doc copies).
+// publish: field-merge draft onto published → prune empties → snapshot to history
+// (cap [kHistoryCap]) → clear draft → `_sink.save`. rollback is forward-only (re-publish
+// an old snapshot as a NEW version, §7). `_load` decodes off-thread (`compute`, R2-#8).
+//
+// No consumer yet (resolvedNodeProvider arrives step 7) ⇒ an empty doc persists
+// nothing new ⇒ inert / answer-equivalent under kStudioFlag OFF. Canonical:
+// studio-plan/01 §2.5 + the step-6 leaf (+ R1/R2).
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart' show compute;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'config_doc.dart';
+import 'config_merge.dart' show mergeAction, mergeStyle;
+import 'config_node.dart';
+
+// ─── ConfigOp — the sealed edit family ───────────────────────────────────────
+
+/// A single-axis edit targeting element [id]. `apply` returns the new node (a
+/// null value CLEARS that axis → inherit). P1 owns this base; Pillar-4 produces ops.
+sealed class ConfigOp {
+  const ConfigOp(this.id);
+  final String id;
+
+  /// Apply this op onto [n], returning the new node (other axes preserved).
+  CfgNode apply(CfgNode n);
+
+  Map<String, dynamic> toJson();
+}
+
+final class SetText extends ConfigOp {
+  const SetText(super.id, this.text);
+  final String? text;
+  @override
+  CfgNode apply(CfgNode n) => CfgNode(
+        text: text,
+        emoji: n.emoji,
+        hidden: n.hidden,
+        order: n.order,
+        style: n.style,
+        action: n.action,
+        extra: n.extra,
+      );
+  @override
+  Map<String, dynamic> toJson() =>
+      {'op': 'setText', 'id': id, if (text != null) 'text': text};
+}
+
+final class SetEmoji extends ConfigOp {
+  const SetEmoji(super.id, this.emoji);
+  final String? emoji;
+  @override
+  CfgNode apply(CfgNode n) => CfgNode(
+        text: n.text,
+        emoji: emoji,
+        hidden: n.hidden,
+        order: n.order,
+        style: n.style,
+        action: n.action,
+        extra: n.extra,
+      );
+  @override
+  Map<String, dynamic> toJson() =>
+      {'op': 'setEmoji', 'id': id, if (emoji != null) 'emoji': emoji};
+}
+
+final class SetHidden extends ConfigOp {
+  const SetHidden(super.id, this.hidden);
+  final bool? hidden;
+  @override
+  CfgNode apply(CfgNode n) => CfgNode(
+        text: n.text,
+        emoji: n.emoji,
+        hidden: hidden,
+        order: n.order,
+        style: n.style,
+        action: n.action,
+        extra: n.extra,
+      );
+  @override
+  Map<String, dynamic> toJson() =>
+      {'op': 'setHidden', 'id': id, if (hidden != null) 'hidden': hidden};
+}
+
+final class SetOrder extends ConfigOp {
+  const SetOrder(super.id, this.order);
+  final int? order;
+  @override
+  CfgNode apply(CfgNode n) => CfgNode(
+        text: n.text,
+        emoji: n.emoji,
+        hidden: n.hidden,
+        order: order,
+        style: n.style,
+        action: n.action,
+        extra: n.extra,
+      );
+  @override
+  Map<String, dynamic> toJson() =>
+      {'op': 'setOrder', 'id': id, if (order != null) 'order': order};
+}
+
+final class SetStyle extends ConfigOp {
+  const SetStyle(super.id, this.style);
+  final CfgStyle? style;
+  @override
+  CfgNode apply(CfgNode n) => CfgNode(
+        text: n.text,
+        emoji: n.emoji,
+        hidden: n.hidden,
+        order: n.order,
+        style: style,
+        action: n.action,
+        extra: n.extra,
+      );
+  @override
+  Map<String, dynamic> toJson() =>
+      {'op': 'setStyle', 'id': id, if (style != null) 'style': style!.toJson()};
+}
+
+final class SetAction extends ConfigOp {
+  const SetAction(super.id, this.action);
+  final CfgAction? action;
+  @override
+  CfgNode apply(CfgNode n) => CfgNode(
+        text: n.text,
+        emoji: n.emoji,
+        hidden: n.hidden,
+        order: n.order,
+        style: n.style,
+        action: action,
+        extra: n.extra,
+      );
+  @override
+  Map<String, dynamic> toJson() => {
+        'op': 'setAction',
+        'id': id,
+        if (action != null) 'action': action!.toJson(),
+      };
+}
+
+// ─── ConfigSink — persistence/sync seam (Pillar-5 swaps this) ─────────────────
+
+abstract class ConfigSink {
+  Future<void> save(ConfigDoc doc);
+
+  /// Loaded doc, or null when nothing is persisted yet.
+  Future<ConfigDoc?> load();
+
+  /// Optional live stream (Pillar-5 server push). Null for the local sink.
+  Stream<ConfigDoc>? watch() => null;
+}
+
+/// Default local sink — SharedPreferences, decode off-thread (R2-#8). Mirrors the
+/// `catalog_settings.dart` load/persist idiom (try/on Object catch, never throws).
+class LocalPrefsSink implements ConfigSink {
+  static const _key = 'bs.studio-config.v1';
+
+  @override
+  Future<void> save(ConfigDoc doc) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (doc.isEmpty) {
+        await prefs.remove(_key); // empty ⇒ store nothing (stays inert)
+        return;
+      }
+      await prefs.setString(_key, jsonEncode(doc.toJson()));
+    } on Object catch (_) {
+      // best-effort persist; never throw out of a UI edit.
+    }
+  }
+
+  @override
+  Future<ConfigDoc?> load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      if (raw == null || raw.isEmpty) return null;
+      final map = await compute(_decodeJsonMap, raw); // off-thread cold-start
+      return ConfigDoc.fromJson(map);
+    } on Object catch (_) {
+      return null; // corrupt → fall back to empty/last-good (R2 error-recovery)
+    }
+  }
+
+  @override
+  Stream<ConfigDoc>? watch() => null;
+}
+
+/// Top-level so it can run in a `compute` isolate (R2-#8: keep cold-start off the
+/// UI thread at 10K ids).
+Map<String, dynamic> _decodeJsonMap(String raw) {
+  final d = jsonDecode(raw);
+  return d is Map ? d.map((k, v) => MapEntry(k.toString(), v)) : const {};
+}
+
+// ─── ConfigStore ─────────────────────────────────────────────────────────────
+
+class ConfigStore extends StateNotifier<ConfigDoc> {
+  ConfigStore(this._sink) : super(ConfigDoc.empty) {
+    _load();
+  }
+
+  final ConfigSink _sink;
+  final List<ConfigLayer> _undo = [];
+  final List<ConfigLayer> _redo = [];
+
+  bool get canUndo => _undo.isNotEmpty;
+  bool get canRedo => _redo.isNotEmpty;
+
+  Future<void> _load() async {
+    final loaded = await _sink.load();
+    if (loaded != null && mounted) state = loaded;
+  }
+
+  // ── PUBLIC op-based API (the seam Pillar-4 uses) ──
+
+  /// Apply a batch of edits to the draft as ONE undoable step (R1-A3).
+  void applyOps(List<ConfigOp> ops, {String? persona}) {
+    if (ops.isEmpty) return;
+    _undo.add(state.draft); // sparse draft snapshot (light)
+    _redo.clear();
+    var d = state.draft;
+    for (final op in ops) {
+      d = _withNode(d, op.id, op.apply(_nodeIn(d, op.id, persona)), persona);
+    }
+    state = state.copyWith(draft: d);
+    _save();
+  }
+
+  void undo() {
+    if (_undo.isEmpty) return;
+    _redo.add(state.draft);
+    state = state.copyWith(draft: _undo.removeLast());
+    _save();
+  }
+
+  void redo() {
+    if (_redo.isEmpty) return;
+    _undo.add(state.draft);
+    state = state.copyWith(draft: _redo.removeLast());
+    _save();
+  }
+
+  /// Reset one id's draft override back to inherit (does not affect undo of others).
+  void resetDraftNode(String id, {String? persona}) {
+    _undo.add(state.draft);
+    _redo.clear();
+    state = state.copyWith(
+      draft: _withNode(state.draft, id, CfgNode.identity, persona),
+    );
+    _save();
+  }
+
+  /// Drop all draft edits (published stays live).
+  void discardDraft() {
+    if (state.draft.isEmpty) return;
+    _undo.add(state.draft);
+    _redo.clear();
+    state = state.copyWith(draft: ConfigLayer.empty);
+    _save();
+  }
+
+  /// Promote the draft to live: field-merge onto published, prune empties, snapshot
+  /// the new published to history (cap), clear draft. byEmail feeds the audit (#84).
+  void publish({String note = '', String byEmail = '', int nowMs = 0}) {
+    final ts = nowMs;
+    final newPublished = _promote(state.published, state.draft);
+    final version = ConfigVersion(
+      id: ts,
+      snapshot: newPublished,
+      publishedAtMs: ts,
+      note: note,
+      byEmail: byEmail,
+    );
+    state = ConfigDoc(
+      published: newPublished,
+      draft: ConfigLayer.empty,
+      history: [version, ...state.history].take(kHistoryCap).toList(),
+      schemaVersion: state.schemaVersion,
+    );
+    _undo.clear();
+    _redo.clear();
+    _save();
+  }
+
+  /// Forward-only rollback: re-publish an old version's snapshot as a NEW version
+  /// (never destroys history). Returns false if the version id is unknown.
+  bool rollback(int versionId, {String byEmail = '', int nowMs = 0}) {
+    final v = state.history.where((x) => x.id == versionId).firstOrNull;
+    if (v == null) return false;
+    final ts = nowMs;
+    final version = ConfigVersion(
+      id: ts,
+      snapshot: v.snapshot,
+      publishedAtMs: ts,
+      note: 'שחזור גרסה ${v.id}',
+      byEmail: byEmail,
+    );
+    state = ConfigDoc(
+      published: v.snapshot,
+      draft: ConfigLayer.empty,
+      history: [version, ...state.history].take(kHistoryCap).toList(),
+      schemaVersion: state.schemaVersion,
+    );
+    _undo.clear();
+    _redo.clear();
+    _save();
+    return true;
+  }
+
+  // ── internal primitive (NOT the public seam) ──
+
+  /// The single-node draft edit primitive. `applyOps` is built on this; Pillar-4
+  /// must go through `applyOps`, never here (R1-A3).
+  void editDraft(String id, CfgNode Function(CfgNode) fn, {String? persona}) {
+    _undo.add(state.draft);
+    _redo.clear();
+    final next = fn(_nodeIn(state.draft, id, persona));
+    state = state.copyWith(draft: _withNode(state.draft, id, next, persona));
+    _save();
+  }
+
+  CfgNode _nodeIn(ConfigLayer d, String id, String? persona) => persona == null
+      ? (d.global[id] ?? CfgNode.identity)
+      : (d.persona[persona]?[id] ?? CfgNode.identity);
+
+  void _save() => _sink.save(state);
+}
+
+// ─── pure layer helpers ──────────────────────────────────────────────────────
+
+/// Return [d] with [id]'s node set to [next] (or removed when [next] is empty),
+/// in the global layer or the given [persona] layer. Always a NEW layer.
+ConfigLayer _withNode(ConfigLayer d, String id, CfgNode next, String? persona) {
+  if (persona == null) {
+    final g = {...d.global};
+    if (next.isEmpty) {
+      g.remove(id);
+    } else {
+      g[id] = next;
+    }
+    return d.copyWith(global: g);
+  }
+  final p = {...d.persona};
+  final inner = {...(p[persona] ?? const {})};
+  if (next.isEmpty) {
+    inner.remove(id);
+  } else {
+    inner[id] = next;
+  }
+  if (inner.isEmpty) {
+    p.remove(persona);
+  } else {
+    p[persona] = inner;
+  }
+  return d.copyWith(persona: p);
+}
+
+/// Field-merge draft onto published, pruning empties — the published-promotion.
+ConfigLayer _promote(ConfigLayer pub, ConfigLayer draft) {
+  final g = {...pub.global};
+  draft.global.forEach((id, dn) {
+    final merged = _overlayNode(g[id], dn);
+    if (merged.isEmpty) {
+      g.remove(id);
+    } else {
+      g[id] = merged;
+    }
+  });
+  final p = {
+    for (final e in pub.persona.entries) e.key: {...e.value},
+  };
+  draft.persona.forEach((role, m) {
+    final inner = {...(p[role] ?? const {})};
+    m.forEach((id, dn) {
+      final merged = _overlayNode(inner[id], dn);
+      if (merged.isEmpty) {
+        inner.remove(id);
+      } else {
+        inner[id] = merged;
+      }
+    });
+    if (inner.isEmpty) {
+      p.remove(role);
+    } else {
+      p[role] = inner;
+    }
+  });
+  return ConfigLayer(global: g, persona: p, structure: pub.structure);
+}
+
+CfgNode _overlayNode(CfgNode? base, CfgNode over) {
+  if (base == null) return over;
+  return CfgNode(
+    text: over.text ?? base.text,
+    emoji: over.emoji ?? base.emoji,
+    hidden: over.hidden ?? base.hidden,
+    order: over.order ?? base.order,
+    style: mergeStyle(base.style, over.style),
+    action: mergeAction(base.action, over.action),
+    extra: {...base.extra, ...over.extra},
+  );
+}
+
+// ─── providers ───────────────────────────────────────────────────────────────
+
+/// The persistence/sync seam — Pillar-5 overrides this with a Firestore sink.
+final configSinkProvider = Provider<ConfigSink>((ref) => LocalPrefsSink());
+
+final configStoreProvider =
+    StateNotifierProvider<ConfigStore, ConfigDoc>((ref) {
+  return ConfigStore(ref.watch(configSinkProvider));
+});
