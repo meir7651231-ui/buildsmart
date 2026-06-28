@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/card_seed.dart';
 import 'package:buildsmart/features/card_keyboard/seed_sources.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -68,6 +69,23 @@ void main() {
       expect(labels, contains('נחושת'));
       expect(labels, isNot(contains('פליז')),
           reason: 'פליז folds into נחושת, never its own material seed');
+    });
+  });
+
+  group('jobSeeds (P6.54)', () {
+    test('one seed per smart product (recipe)', () {
+      final seeds = jobSeeds();
+      expect(seeds.length, kSmartProducts.length);
+      for (final s in seeds) {
+        expect(s.mouthId, kJobMouth);
+        expect(s.seedAxisLabel, kJobSeedAxis);
+      }
+    });
+
+    test('some job seeds admit real pool products (bound kit skus)', () {
+      final resolving = jobSeeds().where((s) => kDivePool.any(s.seedPredicate));
+      expect(resolving, isNotEmpty,
+          reason: 'recipes resolve to real catalog skus, never invented');
     });
   });
 }

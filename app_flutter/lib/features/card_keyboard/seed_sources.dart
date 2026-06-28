@@ -3,6 +3,7 @@
 // identically and a tap seeds the dive (P6.58). PURE; nothing wired here.
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/card_seed.dart';
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
     show materialOfEnriched, materialsInPoolEnriched;
@@ -56,3 +57,24 @@ List<CardSeed> materialSeeds(List<LipskeyCatalogProduct> pool) {
 /// A predicate admitting exactly the products whose enriched material is [material].
 bool Function(LipskeyCatalogProduct) _admitsMaterial(String material) =>
     (p) => materialOfEnriched(p) == material;
+
+/// Job mouth (P6.54): one CardSeed per recipe in [kSmartProducts] (the "by the job"
+/// on-ramp). Each admits the recipe's REAL catalog SKUs — the brand + accessory skus
+/// it references, never invented — and carries the recipe emoji. mouthId=kJobMouth.
+List<CardSeed> jobSeeds() {
+  return [
+    for (final recipe in kSmartProducts)
+      CardSeed(
+        mouthId: kJobMouth,
+        displayLabel: recipe.name,
+        emoji: recipe.emoji,
+        seedAxisLabel: kJobSeedAxis,
+        seedPredicate: _admitsSkus([
+          for (final b in recipe.brands)
+            if (b.sku != null) b.sku!,
+          for (final a in recipe.acc)
+            if (a.sku != null) a.sku!,
+        ]),
+      ),
+  ];
+}
