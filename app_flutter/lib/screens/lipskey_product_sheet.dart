@@ -18,9 +18,13 @@ import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
     show kCardKeyboardFlag;
+import 'package:buildsmart/features/card_keyboard/card_picks.dart'
+    show CardPick, cardPicksProvider;
 import 'package:buildsmart/features/card_keyboard/hop_graph.dart'
     show EdgeKind, HopGraph;
 import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
+import 'package:buildsmart/features/card_keyboard/line_plan.dart'
+    show planLineFromPicks;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show divePoolBySku;
 import 'package:buildsmart/logic/install_kit.dart';
@@ -468,6 +472,127 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     );
   }
 
+  /// P10.98 — the line controls: 'add to line' records the current product as a pick;
+  /// 'complete line (N)' appears once >=2 are picked and opens the BOM. Flag-gated.
+  Widget _lineControls(LipskeyCatalogProduct p) {
+    final picks = ref.watch(cardPicksProvider);
+    return Padding(
+      key: const Key('lineControls'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ActionChip(
+            key: const Key('addToLineChip'),
+            avatar: const Icon(Icons.add, size: 16),
+            label: const Text('הוסף לקו'),
+            onPressed: () => _addCurrentToLine(p),
+          ),
+          if (picks.length >= 2)
+            ActionChip(
+              key: const Key('completeLineChip'),
+              avatar: const Icon(Icons.checklist, size: 16),
+              label: Text('השלם קו (${picks.length})'),
+              onPressed: () => _showLineBom(picks),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _addCurrentToLine(LipskeyCatalogProduct p) {
+    ref.read(cardPicksProvider.notifier).addPick(
+          CardPick(sku: p.sku, label: p.nameHe),
+        );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('נוסף לקו ✓'),
+      duration: Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  void _showLineBom(List<CardPick> picks) {
+    final plan = planLineFromPicks(picks);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (modalCtx) => Directionality(
+        key: const Key('lineBomSheet'),
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('📋 רשימת חומרים — קו',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final item in plan.items)
+                          Text('• ${item.nameHe}  ×${plan.qtyOf(item.sku)}',
+                              style: const TextStyle(fontSize: 13)),
+                        if (plan.gaps.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                                '⚠️ ${plan.gaps.length} פערים — דורש השלמה',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Color(0xFF888888))),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    key: const Key('addLineToCartButton'),
+                    onPressed: () {
+                      _addLineToCart(plan.items);
+                      Navigator.of(modalCtx).pop();
+                    },
+                    child: const Text('הוסף הכל לסל'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _addLineToCart(List<LipskeyCatalogProduct> items) {
+    final notifier = ref.read(smartCartProvider.notifier);
+    for (final part in items) {
+      notifier.add(SmartCartLine(
+        productKey: 'lip:${part.sku}',
+        productName: part.nameHe,
+        productEmoji: part.typeEmoji,
+        brandName: part.brand,
+        brandPrice: 0,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+    ref.read(cardPicksProvider.notifier).clear();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('נוספו ${items.length} פריטי-קו לסל ✓'),
+      duration: const Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
   /// P8.78 — the hop path breadcrumb: every product in the path as a tappable crumb
   /// (home → … → current). Tapping a crumb jumps back to it (popTo); tapping home
   /// clears to the opening variant. Built only when live and the path is non-empty.
@@ -734,6 +859,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             ),
                           if (_live) _hopRail(p),
                           if (_live) _hopConnectRail(p),
+                          if (_live) _lineControls(p),
                           _InteractiveChips(
                             product: p,
                             openPickerKey: _openPickerKey,
