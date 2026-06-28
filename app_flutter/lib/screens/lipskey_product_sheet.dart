@@ -16,6 +16,7 @@ import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -118,7 +119,9 @@ enum _Unit { single, pack, pallet }
 
 class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late int _selectedIdx;
-  LipskeyCatalogProduct? _chipOverride;
+  // P8.75: the product back-stack (replaces a single override) — a 'back' returns to
+  // the PREVIOUS hopped product, not all the way to the opening variant.
+  final HopStack<LipskeyCatalogProduct> _hops = HopStack<LipskeyCatalogProduct>();
   String? _openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
   int? _activeStage;
   late Map<int, bool> _accSelected;
@@ -339,7 +342,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   List<LipskeyCatStage> get _stages =>
       lipskeyStagesFor(_current.sku, _current.categoryHe);
   LipskeyCatalogProduct get _current =>
-      _chipOverride ?? widget.categoryProducts[_selectedIdx];
+      _hops.current ?? widget.categoryProducts[_selectedIdx];
 
   @override
   void initState() {
@@ -354,7 +357,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   void _selectVariant(int i) {
     setState(() {
       _selectedIdx = i;
-      _chipOverride = null;
+      _hops.clear();
       _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
@@ -363,7 +366,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
 
   void _switchByChip(LipskeyCatalogProduct q) {
     setState(() {
-      _chipOverride = q;
+      _hops.push(q);
       _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
