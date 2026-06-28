@@ -2817,3 +2817,6 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 ### #studio-s4 — סטודיו · הדגל-הראשי `kStudioFlag` (עמוד-1 · שלב-4) — 2026-06-23
 **`lib/state/studio/studio_flags.dart` (חדש):** `const kStudioFlag = bool.fromEnvironment('STUDIO')` **default-OFF** (משכפל invariant של `backend.dart:12` — flip=השינוי-היחיד, OFF=answer-equivalent) + `const kStudioFlagName='kStudio'` ל-runtime-set. אפס-צרכן עדיין. `studio_flags_test` 2 ירוקים (נועץ default-OFF) · analyze 0.
+
+### #studio-s5 — סטודיו · הכרה ב-`kStudio` כדגל-runtime (עמוד-1 · שלב-5) — 2026-06-23
+**EDIT `lib/state/feature_flags.dart`:** doc-comment-מדיניות ליד `kKbLiveMirrorFlag` — `kStudio` מוכר כדגל-runtime אך **בכוונה לא** ב-`_forcedOnFlags` (הסט נשאר כפי-שהיה) → OFF-לכולם, בילד-רגיל answer-equivalent; הנתיב היחיד = owner-staged `enable('kStudio')`. `studio_flags_test` +1 (FeatureFlagsNotifier טרי לא מכיל kStudio) = 3 ירוקים · analyze 0 · DoD-grep: kStudio∉_forcedOnFlags.

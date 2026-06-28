@@ -31,6 +31,15 @@ const bool kEnableCardKeyboardDemo =
 /// path. Naming it here keeps callers from stringly-typing the flag.
 const String kKbLiveMirrorFlag = 'kKbLiveMirror';
 
+// ── No-Code Studio master gate (studio plan, steps 4–5) ──────────────────────
+// The Studio's runtime flag-name is `kStudioFlagName` ('kStudio', in
+// `state/studio/studio_flags.dart`), with the compile-time twin `kStudioFlag`
+// (`bool.fromEnvironment('STUDIO')`). Like [kKbLiveMirrorFlag], 'kStudio' is
+// INTENTIONALLY absent from [FeatureFlagsNotifier._forcedOnFlags] below — the only
+// runtime path is the owner-staged `enable('kStudio')`, so a normal build stays
+// default-OFF / answer-equivalent. (studio_flags_test pins it absent from a fresh
+// notifier.) OWNER-REVIEW: the Studio is owner-gated — never force-enable 'kStudio'.
+
 /// Feature-flag infrastructure (ROADMAP step 10).
 ///
 /// A persisted `Set<String>` of *enabled* flag names. The set survives a refresh
