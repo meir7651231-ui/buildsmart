@@ -2808,3 +2808,6 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 ### #studio-s1 — סטודיו No-Code · value-objects של מנוע-הקונפיג (עמוד-1 · שלב-1) — 2026-06-23
 תחילת בניית הסטודיו (`STUDIO-100-STEPS` שלב-1). **`lib/state/studio/config_node.dart` (חדש):** `CfgNode`/`CfgStyle`/`CfgAction` — value-objects אימutable + JSON-סלחני (toJson sparse משמיט-nulls · fromJson שומר מפתח-לא-מוכר ב-`extra` · enum-fallback בלי-throw · fontScale clamp 0.8–1.6 · int→double · ==/hashCode ידני, בלי equatable/uuid — גייט 60). טהור, **אפס-wiring, אפס-צרכן → inert** (`kStudioFlag` ייווצר בשלב-4; עד אז אין מי שקורא → answer-equivalent ביבילד). canonical: `studio-plan/01` §2.1–2.3 + R1/R2.
 - **gate:** `config_node_test` 15 ירוקים · analyze 0 · lib/state → גייט 24 (לא 42/44). שלב-הבא: `ConfigDoc` (שלב-2).
+
+### #studio-s2 — סטודיו · מסמך-הקונפיג השכבתי (עמוד-1 · שלב-2) — 2026-06-23
+**`lib/state/studio/config_doc.dart` (חדש):** `ConfigLayer` (global · persona[roleKey] · structure-שמור-ל-Pillar-2) · `ConfigVersion` (snapshot מלא, rollback-מדויק) · `ConfigDoc` (published⊕draft⊕history-ring-cap-30⊕schemaVersion). `ConfigDoc.empty`=inert · `migrate()` forward-compat (חוסר-schema⇒v1) · cast-סלחני ל-persona map-of-maps · `draftNodeCount` ל-badge. consts: `kHistoryCap=30`/`kSchemaVersion=1`. אפס-צרכן→inert. `config_doc_test` 8 ירוקים · analyze 0.
