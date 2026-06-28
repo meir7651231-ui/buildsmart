@@ -2804,3 +2804,7 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
   - **engine-concurrency (2× LOW · failure-only):** `tasks_engine._saveRejectNote` partial-write לא-מסודר (side-map) · `persona_fulfillment.capturePod/captureSignature` rollback מוחק-כל-המפה ב-3 אתרים (דורש כשל-quota + כתיבה-מקבילה לעוד-הזמנה — נדיר-קיצוני, מסונכרן ב-load הבא).
   - **dead-helpers (MED-cruft):** `install_engine.connectionMethodLabel`/`pipeConnectionDn` · `brand_history.countsFor/totalPicks` — אפס-callers (אולי-roadmap; הסרה נדחית כדי לא-למחוק WIP אפשרי).
   - **10 providers אפס-ref** = roadmap-infra מתועד (לא-dead).
+
+### #studio-s1 — סטודיו No-Code · value-objects של מנוע-הקונפיג (עמוד-1 · שלב-1) — 2026-06-23
+תחילת בניית הסטודיו (`STUDIO-100-STEPS` שלב-1). **`lib/state/studio/config_node.dart` (חדש):** `CfgNode`/`CfgStyle`/`CfgAction` — value-objects אימutable + JSON-סלחני (toJson sparse משמיט-nulls · fromJson שומר מפתח-לא-מוכר ב-`extra` · enum-fallback בלי-throw · fontScale clamp 0.8–1.6 · int→double · ==/hashCode ידני, בלי equatable/uuid — גייט 60). טהור, **אפס-wiring, אפס-צרכן → inert** (`kStudioFlag` ייווצר בשלב-4; עד אז אין מי שקורא → answer-equivalent ביבילד). canonical: `studio-plan/01` §2.1–2.3 + R1/R2.
+- **gate:** `config_node_test` 15 ירוקים · analyze 0 · lib/state → גייט 24 (לא 42/44). שלב-הבא: `ConfigDoc` (שלב-2).
