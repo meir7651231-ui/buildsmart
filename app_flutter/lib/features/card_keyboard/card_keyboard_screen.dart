@@ -23,6 +23,8 @@ import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, sourcesFor;
 import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
     show OpeningSurface;
+import 'package:buildsmart/features/card_keyboard/pool_seed.dart'
+    show seedFromText, seedStep;
 import 'package:buildsmart/features/card_keyboard/seed_sources.dart'
     show categorySeeds, jobSeeds, materialSeeds, wordSeeds;
 import 'package:buildsmart/features/word_finder/ai_interpret.dart'
@@ -32,8 +34,6 @@ import 'package:buildsmart/features/word_finder/distinct_label.dart'
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
-import 'package:buildsmart/features/word_finder/synonym_bridge.dart'
-    show resolveQuery;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show NewbieStep, kPickProductQuestion;
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
@@ -59,13 +59,6 @@ final WordLexicon cardKeyboardLexicon = buildWordLexicon(kDivePool);
 /// Header prompt shown when the merged engine is asking for a merged narrowing.
 /// OWNER-REVIEW.
 const String kCardMergedQuestion = 'מה מתאים?';
-
-/// The answered-step axisLabel for the OPENING word (swarm R7). Deliberately NOT
-/// any [SignalSource.axisName] — so seeding the pool with the opening word does
-/// not mark the WORD axis answered, leaving it available for deeper in-merge word
-/// refinement ('ברז' → 'כדורי') per build-plan §1.3. The seed word itself never
-/// re-appears (wordOptions drops words shared across the whole pool).
-const String _kOpeningWordAxis = 'מילת-פתיחה';
 
 /// Typed tap payload (swarm R6): each [WordKey] carries a [_Tap] so the handler
 /// dispatches by TYPE. This replaces the earlier `'chip|axisId|displayLabel|value'`
@@ -310,24 +303,19 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     }
   }
 
-  /// P4.56: a typed/spoken opening query → (debounced) [resolveQuery] → a seed
-  /// step, the SAME way a word tap seeds — but routed through resolveQuery's
-  /// material-aware funnel (so 'נחושת' lands on copper, not the whole pool). Empty
-  /// text keeps the surface; a fast burst cancels the prior timer so only the last
-  /// query resolves.
+  /// P4.56 + P7.68: a typed/spoken opening query → (debounced) seedFromText → the
+  /// unified seedStep (kOpeningSeedAxis), the SAME funnel every mouth uses. Empty
+  /// text — or an all-unknown query (seedFromText returns null) — keeps the surface
+  /// (no false dead-end); a fast burst cancels the prior timer so only the last
+  /// query seeds.
   void _onOpeningQuery(String text) {
     _debounce?.cancel();
     final q = text.trim();
     if (q.isEmpty) return;
     _debounce = Timer(Duration(milliseconds: widget.debounceMs), () {
       if (!mounted) return;
-      final skuSet = resolveQuery(q, cardKeyboardLexicon).toSet();
-      _pushStep(NewbieStep(
-        axisLabel: _kOpeningWordAxis,
-        chipLabel: q,
-        crumbWord: q,
-        predicate: (p) => skuSet.contains(p.sku),
-      ));
+      final seed = seedFromText(q, cardKeyboardLexicon);
+      if (seed != null) _pushStep(seedStep(seed));
     });
   }
 
@@ -505,17 +493,11 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
 
     if (payload is _SeedTap) {
       // Every click-mouth seed (word/material/job/category) routes through ONE
-      // path: push a step with the seed's predicate + its per-mouth axis SENTINEL.
-      // The sentinel is NOT a signal axisName, so the merge can still offer DEEPER
-      // distinguishing words/size/material — the opening must not burn the word axis
-      // (§1.3; swarm R5/R7). A later merge chip answers the real axis + closes it.
-      final seed = payload.seed;
-      _pushStep(NewbieStep(
-        axisLabel: seed.seedAxisLabel,
-        chipLabel: seed.displayLabel,
-        crumbWord: seed.displayLabel,
-        predicate: seed.seedPredicate,
-      ));
+      // funnel: seedStep stamps kOpeningSeedAxis (a non-signal sentinel), so the
+      // merge can still offer DEEPER distinguishing words/size/material — the opening
+      // must not burn the word axis (§1.3; swarm R5/R7). A later merge chip answers
+      // the real axis + closes it. (P7.68: was a per-mouth NewbieStep.)
+      _pushStep(seedStep(payload.seed));
       return;
     }
 
