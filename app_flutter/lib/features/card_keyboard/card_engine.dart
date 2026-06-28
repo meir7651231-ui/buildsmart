@@ -22,6 +22,8 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, sourcesFor;
+import 'package:buildsmart/features/card_keyboard/decisions.dart'
+    show kMaxDiveTurns;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
@@ -175,6 +177,13 @@ CardVerdict mergedKeys(
     return CardResolve(pool.first, pool);
   }
   if (distinctCardCount(pool) <= kShowProductsThreshold) {
+    return CardShowProducts(distinctProducts(pool));
+  }
+  // P7.67: the HARD ≤6 gate. By the last allowed turn (kMaxDiveTurns − 1 answered
+  // steps) STOP asking and show the scan-list, so the dive can NEVER exceed
+  // kMaxDiveTurns. Inert in practice (the census proves max depth 4) — a STRUCTURAL
+  // ≤6 guarantee that does not depend on the ranking staying decisive.
+  if (stack.length >= kMaxDiveTurns - 1) {
     return CardShowProducts(distinctProducts(pool));
   }
   final chips = _mergedChips(pool, stack, subtype);

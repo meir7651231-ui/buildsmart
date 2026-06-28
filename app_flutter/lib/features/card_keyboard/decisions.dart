@@ -72,3 +72,9 @@ const int kMaxQuestions = 6;
 /// The other half of the contract — at most this many hops BETWEEN two products
 /// (the "<=4"). Proven by the hop-graph rails (P6-P11). OWNER-REVIEW.
 const int kMaxHopsBetweenProducts = 4;
+
+/// The engine's HARD turn gate (P7.67): by turn (kMaxDiveTurns − 1 answered steps)
+/// the dive STOPS asking and shows the scan-list, so it can NEVER exceed this. The
+/// SAME ceiling as [kMaxQuestions] — one contract, two vantage points (the census
+/// counts questions, the engine counts turns). OWNER-REVIEW.
+const int kMaxDiveTurns = kMaxQuestions;
