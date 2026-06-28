@@ -442,6 +442,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
                     ? c.displayLabel
                     : '${c.axisName}: ${c.displayLabel}',
                 axisGlyph: _glyphForAxis(c.axisId),
+                // P9.87: forward the engine's #41 destination accent to the key seam —
+                // additive, no new buttons. False on a wide pool (no near-convergence
+                // anchor), so the live row stays byte-identical.
+                isDestination: c.isDestination,
               ),
           ],
         CardShowProducts(:final products) => _productKeys(products),
