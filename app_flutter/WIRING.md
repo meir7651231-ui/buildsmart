@@ -2811,3 +2811,6 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 ### #studio-s2 — סטודיו · מסמך-הקונפיג השכבתי (עמוד-1 · שלב-2) — 2026-06-23
 **`lib/state/studio/config_doc.dart` (חדש):** `ConfigLayer` (global · persona[roleKey] · structure-שמור-ל-Pillar-2) · `ConfigVersion` (snapshot מלא, rollback-מדויק) · `ConfigDoc` (published⊕draft⊕history-ring-cap-30⊕schemaVersion). `ConfigDoc.empty`=inert · `migrate()` forward-compat (חוסר-schema⇒v1) · cast-סלחני ל-persona map-of-maps · `draftNodeCount` ל-badge. consts: `kHistoryCap=30`/`kSchemaVersion=1`. אפס-צרכן→inert. `config_doc_test` 8 ירוקים · analyze 0.
+
+### #studio-s3 — סטודיו · ליבת-המיזוג `mergeNode` (עמוד-1 · שלב-3) — 2026-06-23
+**`lib/state/studio/config_merge.dart` (חדש, טהור — אפס Flutter):** `mergeNode(id, doc, roleKey, {includeDraft, criticalIds})` ממזג `identity ⊕ published.global ⊕ published.persona[roleKey] ⊕ draft` (draft רק ב-includeDraft), most-specific-wins per-axis. `CfgStyle`/`CfgAction` ממוזגים **שדה-אחר-שדה** (טיוטת-fontScale שומרת colorToken — R1/R2-#5). `roleKeyOf(null)=='contractor'` קנוני (R1-A2, אסור null-key). critical-id ⇒ hidden מתעלם (criticalIds מוזרק, לא-import → טהור). **doc-ריק⇒identity = הוכחת אפס-הרגרסיה לכל wrapper ב-OFF.** `config_merge_test` 8 ירוקים (טבלה) · analyze 0.
