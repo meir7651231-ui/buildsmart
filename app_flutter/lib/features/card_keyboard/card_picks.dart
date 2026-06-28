@@ -3,6 +3,10 @@
 // (P10.98 wraps the existing buildInstallation). Identity-scoped state lives in Riverpod;
 // the model + the dedup/order rules are pure and unit-tested.
 
+import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
+    show kCardKeyboardFlag;
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
+import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,6 +50,14 @@ class CardPicksNotifier extends StateNotifier<List<CardPick>> {
 }
 
 final cardPicksProvider =
-    StateNotifierProvider<CardPicksNotifier, List<CardPick>>(
-  (ref) => CardPicksNotifier(),
-);
+    StateNotifierProvider<CardPicksNotifier, List<CardPick>>((ref) {
+  // IDENTITY SCOPING (swarm review — critical): when the unified finder is on, REBUILD on
+  // a uid change so a SHARED fleet tablet never carries employee A's line basket into
+  // employee B's session — the fresh notifier starts empty. Mirrors recentlyViewedProvider.
+  // Flag-OFF the basket is never populated (the line UI is flag-gated), so this is inert
+  // and byte-identical to before.
+  if (ref.watch(featureFlagsProvider).contains(kCardKeyboardFlag)) {
+    ref.watch(currentUidProvider);
+  }
+  return CardPicksNotifier();
+});
