@@ -17,10 +17,13 @@ import 'dart:async' show Timer;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
+import 'package:buildsmart/features/card_keyboard/card_seed.dart' show CardSeed;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, sourcesFor;
 import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
     show OpeningSurface;
+import 'package:buildsmart/features/card_keyboard/seed_sources.dart'
+    show wordSeeds;
 import 'package:buildsmart/features/word_finder/ai_interpret.dart'
     show AiInterpret, aiLiteralInterpret, defaultAiInterpret;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
@@ -31,7 +34,7 @@ import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
 import 'package:buildsmart/features/word_finder/synonym_bridge.dart'
     show resolveQuery;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
-    show NewbieStep, kPickProductQuestion, resolveWord;
+    show NewbieStep, kPickProductQuestion;
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:buildsmart/features/word_finder/word_keys_model.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
@@ -73,10 +76,10 @@ sealed class _Tap {
   const _Tap();
 }
 
-/// An opening word → seed the pool with the products it names.
-class _WordTap extends _Tap {
-  const _WordTap(this.word);
-  final String word;
+/// A click-mouth seed (word/material/job/category) → seed the pool with its CardSeed.
+class _SeedTap extends _Tap {
+  const _SeedTap(this.seed);
+  final CardSeed seed;
 }
 
 /// A merged chip → narrow by (axisId, value); the crumb shows displayLabel.
@@ -401,8 +404,9 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   ///  • [CardShowProducts]→ one product key per distinct card (payload = its sku).
   ///  • [CardResolve]     → no keys (the sheet is opened on resolve).
   List<WordKey> _keysFor(CardVerdict v) => switch (v) {
-        CardAskWords(:final words) => [
-            for (final e in words) WordKey(e.word, payload: _WordTap(e.word)),
+        CardAskWords() => [
+            for (final seed in wordSeeds(cardKeyboardLexicon))
+              WordKey(seed.displayLabel, payload: _SeedTap(seed)),
           ],
         MergedKeys(:final chips) => [
             for (final c in chips)
@@ -450,7 +454,7 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
       };
 
   /// Handle a tapped word key, dispatched by its typed [WordKey.payload]:
-  ///  • [_WordTap]    — seed the pool with the products the word names;
+  ///  • [_SeedTap]    — seed the pool with a click-mouth CardSeed's predicate;
   ///  • [_ChipTap]    — narrow by the tapped merged chip (predicate rebuilt from
   ///    its axisId+value DATA; the crumb shows displayLabel);
   ///  • [_ProductTap] — resolve by sku and open the reach-product sheet.
@@ -461,21 +465,18 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     // cheap + idempotent, so it needs no guard of its own.
     final payload = key.payload;
 
-    if (payload is _WordTap) {
-      final skuSet = <String>{
-        for (final p in resolveWord(payload.word, cardKeyboardLexicon)) p.sku,
-      };
+    if (payload is _SeedTap) {
+      // Every click-mouth seed (word/material/job/category) routes through ONE
+      // path: push a step with the seed's predicate + its per-mouth axis SENTINEL.
+      // The sentinel is NOT a signal axisName, so the merge can still offer DEEPER
+      // distinguishing words/size/material — the opening must not burn the word axis
+      // (§1.3; swarm R5/R7). A later merge chip answers the real axis + closes it.
+      final seed = payload.seed;
       _pushStep(NewbieStep(
-        // The opening word SEEDS the pool; it must NOT answer the word axis, so
-        // the merge can still offer DEEPER distinguishing words ('ברז' → 'כדורי')
-        // alongside size/material — word is one of the five merged axes (§1.3;
-        // swarm R5/R7 caught the opening burning it). A distinct seed label keeps
-        // the word axis UNanswered; a later merge WORD chip-tap answers
-        // WordSignal.axisName and closes it (so the dive still terminates).
-        axisLabel: _kOpeningWordAxis,
-        chipLabel: payload.word,
-        crumbWord: payload.word,
-        predicate: (p) => skuSet.contains(p.sku),
+        axisLabel: seed.seedAxisLabel,
+        chipLabel: seed.displayLabel,
+        crumbWord: seed.displayLabel,
+        predicate: seed.seedPredicate,
       ));
       return;
     }
