@@ -19,10 +19,11 @@ const double kSoftConnectionBump = 0.25;
 const double kSoftRecipeBump = 0.20;
 const double kSoftHistoryBump = 0.15;
 
-/// The widest a pool can be and still have a dominant soft anchor. Above this the pool is
-/// too broad for soft signals to mean anything: [softAnchor] returns null and softTilt
-/// stays inert, so the wide-open card keeps its hard-signal order byte-for-byte.
-const int kNearConvergence = 8;
+/// The widest a pool can be and still have a dominant soft anchor. Set just above the
+/// chip→products threshold (kShowProductsThreshold=12) so soft signals fire only in the
+/// last few chip-screens before convergence; a broader pool yields a null anchor and
+/// softTilt stays inert, keeping the wide-open card byte-identical to its hard order.
+const int kNearConvergence = 20;
 
 /// A soft re-ranking multiplier for a chip from the soft anchors it matches. 1.0 (inert)
 /// when it matches none; never exceeds [kMaxSoftTilt]. Soft signals only reorder WITHIN an

@@ -20,16 +20,21 @@
 library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/related_info.dart' show compatibleProductsFor;
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, sourcesFor;
 import 'package:buildsmart/features/card_keyboard/decisions.dart'
     show kMaxDiveTurns;
+import 'package:buildsmart/features/card_keyboard/soft_signals.dart'
+    show kitSkusFor, softAnchor, softTilt;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
         collapseKeyOf,
         distinctCardCount,
         distinctProducts,
+        divePoolBySku,
         kFirstQuestion,
         kFirstWordCount,
         kShowProductsThreshold,
@@ -279,6 +284,26 @@ List<SignalChip> _mergedChips(
   // The five hard axes PLUS, for a curated subtype, the 'אפשרות' facet axis
   // (swarm R7 gap-close). The facet ranks among the others by decisiveness.
   final sources = sourcesFor(subtype);
+  // P9.84: soft re-ranking inputs. Only NEAR convergence (softAnchor non-null) do soft
+  // signals tilt the within-axis order; a wide pool yields a null anchor, so every chip
+  // tilts by 1.0 and the row stays byte-identical to the hard-signal order. The mate sets
+  // (compat + recipe co-members of the anchor) are built once, and only when narrow.
+  final anchor = softAnchor(pool);
+  final connMates = <String>{};
+  final recipeMates = <String>{};
+  if (anchor != null) {
+    for (final aSku in anchor) {
+      final ap = divePoolBySku[aSku];
+      if (ap == null) continue;
+      for (final mate in compatibleProductsFor(ap)) {
+        connMates.add(mate.sku);
+      }
+    }
+    for (final recipe in kSmartProducts) {
+      final kit = kitSkusFor(recipe);
+      if (kit.any(anchor.contains)) recipeMates.addAll(kit);
+    }
+  }
   for (var rank = 0; rank < sources.length; rank++) {
     final src = sources[rank];
     if (answered.contains(src.axisName)) continue; // each axis at most once
@@ -313,13 +338,19 @@ List<SignalChip> _mergedChips(
     // REPRESENTATIVE buckets across the sorted range — always incl. smallest AND
     // largest. WORD (frequency-ordered) and COLOUR (lexical) keep the natural
     // first-N, where top-N IS the right pick.
-    final taken = const {'size', 'angle'}.contains(a.chips.first.axisId)
-        ? representativeTake(a.chips, take)
-        : a.chips.take(take).toList();
+    final src = sources[a.rank];
+    // P9.84: soft tilt re-orders WITHIN a non-magnitude axis near convergence; size/angle
+    // keep their magnitude order, and a null anchor (wide pool) leaves orders untouched.
+    final isMagnitude = const {'size', 'angle'}.contains(a.chips.first.axisId);
+    final ordered = (anchor == null || isMagnitude)
+        ? a.chips
+        : _softTiltSorted(a.chips, src, pool, connMates, recipeMates);
+    final taken = isMagnitude
+        ? representativeTake(ordered, take)
+        : ordered.take(take).toList();
     // P7.64: stamp infoGain = n − distinctCardCount(narrowed) on each emitted chip.
     // infoGain is excluded from ==/hashCode, so this leaves the row ORDER untouched
     // (a display tier the rank reads; the sort key is still the integer expRem).
-    final src = sources[a.rank];
     for (final c in taken) {
       final nc =
           distinctCardCount(pool.where((p) => src.matches(p, c)).toList());
@@ -327,6 +358,33 @@ List<SignalChip> _mergedChips(
     }
   }
   return out;
+}
+
+/// Stable-sorts [chips] by DESCENDING soft tilt (P9.84). Ties keep the live helper's
+/// original order, so an all-inert row (anchorless, or no chip touching a mate) is
+/// byte-identical. A chip's tilt comes from whether ITS products in [pool] touch the
+/// anchor's connection mates ([connMates]) or recipe co-members ([recipeMates]).
+List<SignalChip> _softTiltSorted(
+  List<SignalChip> chips,
+  SignalSource src,
+  List<LipskeyCatalogProduct> pool,
+  Set<String> connMates,
+  Set<String> recipeMates,
+) {
+  double tiltOf(SignalChip c) {
+    final prods = pool.where((p) => src.matches(p, c));
+    return softTilt(
+      connection: prods.any((p) => connMates.contains(p.sku)),
+      recipe: prods.any((p) => recipeMates.contains(p.sku)),
+    );
+  }
+
+  final ranked = [
+    for (var i = 0; i < chips.length; i++)
+      (index: i, chip: chips[i], tilt: tiltOf(chips[i])),
+  ]..sort((x, y) =>
+      x.tilt != y.tilt ? y.tilt.compareTo(x.tilt) : x.index.compareTo(y.index));
+  return [for (final e in ranked) e.chip];
 }
 
 /// Scores one axis [src] over [pool] for the merged row (P7.65 — extracted from
