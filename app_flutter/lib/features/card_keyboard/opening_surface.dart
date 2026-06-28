@@ -6,10 +6,11 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
 /// The SINGLE opening surface of the unified finder (P3 step 52). ONE flow with
-/// THREE input methods — type in the [TextField], tap a word in the
-/// [WordKeyboard], or speak via the mic — and ZERO mode buttons: the user never
-/// picks a tool first (kOpeningSurfaceIsSingleMouth). The mic renders only when
-/// [showMic]. Pure presentation — every callback is supplied by the screen.
+/// input methods — type in the [TextField], tap a seed in the [WordKeyboard], or
+/// speak via the mic — and EQUAL click-mouth tabs ([mouthTabs]) that only swap WHICH
+/// seeds the grid shows (word/material/job/category): all the SAME finder, never a
+/// tool chooser (kOpeningSurfaceIsSingleMouth). The mic renders only when [showMic].
+/// Pure presentation — every callback is supplied by the screen.
 class OpeningSurface extends StatelessWidget {
   const OpeningSurface({
     required this.wordKeys,
@@ -20,6 +21,9 @@ class OpeningSurface extends StatelessWidget {
     this.showMic = false,
     this.onVoiceUnavailable,
     this.onSubmit,
+    this.mouthTabs = const [],
+    this.activeMouth,
+    this.onMouthTap,
   });
 
   /// The opening word suggestions (the grid input method).
@@ -45,6 +49,17 @@ class OpeningSurface extends StatelessWidget {
 
   /// Tapped the mic while voice is unavailable (an honest message).
   final VoidCallback? onVoiceUnavailable;
+
+  /// The click-mouth tabs (word/material/job/category) shown ABOVE the grid at the
+  /// opening — EQUAL seed VIEWS of the one finder, NOT a tool chooser. Empty hides
+  /// the row (byte-identical default).
+  final List<({String id, String label})> mouthTabs;
+
+  /// The selected mouth id (one of [mouthTabs]'s ids); null when no tabs.
+  final String? activeMouth;
+
+  /// Tapped a mouth tab — the screen swaps the grid's seeds, no step pushed.
+  final void Function(String)? onMouthTap;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +104,20 @@ class OpeningSurface extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: BsTokens.space2),
+                    if (mouthTabs.isNotEmpty) ...[
+                      Wrap(
+                        spacing: BsTokens.space1,
+                        children: [
+                          for (final tab in mouthTabs)
+                            ChoiceChip(
+                              label: Text(tab.label),
+                              selected: tab.id == activeMouth,
+                              onSelected: (_) => onMouthTap?.call(tab.id),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: BsTokens.space2),
+                    ],
                     WordKeyboard(
                       words: wordKeys,
                       onWordTap: onWordTap,

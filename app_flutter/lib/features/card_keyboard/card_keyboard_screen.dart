@@ -17,13 +17,14 @@ import 'dart:async' show Timer;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
-import 'package:buildsmart/features/card_keyboard/card_seed.dart' show CardSeed;
+import 'package:buildsmart/features/card_keyboard/card_seed.dart'
+    show CardSeed, kCategoryMouth, kJobMouth, kMaterialMouth, kWordMouth;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, sourcesFor;
 import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
     show OpeningSurface;
 import 'package:buildsmart/features/card_keyboard/seed_sources.dart'
-    show wordSeeds;
+    show categorySeeds, jobSeeds, materialSeeds, wordSeeds;
 import 'package:buildsmart/features/word_finder/ai_interpret.dart'
     show AiInterpret, aiLiteralInterpret, defaultAiInterpret;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
@@ -172,6 +173,20 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// Re-entrancy debounce (swarm R9): blocks a double-tap glitch from pushing a
   /// step twice or stacking two product sheets. Set on a tap, cleared next frame.
   bool _busy = false;
+
+  /// P6.57: the active click-mouth at the opening — which seed source the grid
+  /// shows (word/material/job/category). Switching it (a mouth tab) only swaps the
+  /// seeds, never pushes a step; a seed then leaves the opening.
+  String _activeMouth = kWordMouth;
+
+  /// The EQUAL click-mouth tabs (NOT a tool chooser — same finder, different seed
+  /// view). Order is stable.
+  static const List<({String id, String label})> _kMouthTabs = [
+    (id: kWordMouth, label: 'מילים'),
+    (id: kMaterialMouth, label: 'חומר'),
+    (id: kJobMouth, label: 'עבודה'),
+    (id: kCategoryMouth, label: 'קטגוריה'),
+  ];
 
   /// The opening text-query debounce timer (P4.56), cancelled on each keystroke
   /// and in [dispose] so a settled query never fires after the screen is gone.
@@ -403,9 +418,18 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   ///    axisId+value (the narrowing data) so the tap rebuilds the step from data.
   ///  • [CardShowProducts]→ one product key per distinct card (payload = its sku).
   ///  • [CardResolve]     → no keys (the sheet is opened on resolve).
+  /// The CardSeeds the opening grid shows for [mouth] (P6.58) — each click mouth's
+  /// source over the union pool; word uses the lexicon's top-kFirstWordCount.
+  List<CardSeed> _seedsForMouth(String mouth) => switch (mouth) {
+        kMaterialMouth => materialSeeds(kDivePool),
+        kJobMouth => jobSeeds(),
+        kCategoryMouth => categorySeeds(kDivePool),
+        _ => wordSeeds(cardKeyboardLexicon),
+      };
+
   List<WordKey> _keysFor(CardVerdict v) => switch (v) {
         CardAskWords() => [
-            for (final seed in wordSeeds(cardKeyboardLexicon))
+            for (final seed in _seedsForMouth(_activeMouth))
               WordKey(seed.displayLabel, payload: _SeedTap(seed)),
           ],
         MergedKeys(:final chips) => [
@@ -452,6 +476,13 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         CardShowProducts() => kPickProductQuestion,
         CardResolve() => '',
       };
+
+  /// P6.57: switch the active click-mouth — swap the opening grid's seed source,
+  /// never push a step (a mouth change is not a dive answer). No-op if unchanged.
+  void _onMouthTap(String mouth) {
+    if (mouth == _activeMouth) return;
+    setState(() => _activeMouth = mouth);
+  }
 
   /// Handle a tapped word key, dispatched by its typed [WordKey.payload]:
   ///  • [_SeedTap]    — seed the pool with a click-mouth CardSeed's predicate;
@@ -615,6 +646,9 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
             onSubmit: _onAiQuery,
             showMic: !kIsWeb,
             onMic: _onMic,
+            mouthTabs: _kMouthTabs,
+            activeMouth: _activeMouth,
+            onMouthTap: _onMouthTap,
           )
         else if (keys.isNotEmpty)
           WordKeyboard(
