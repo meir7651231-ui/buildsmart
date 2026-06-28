@@ -32,6 +32,14 @@ class HopStack<T> {
     if (_stack.isNotEmpty) _stack.removeLast();
   }
 
+  /// Pop back to the hop at [index] (it becomes [current]); deeper hops are dropped.
+  /// No-op if [index] is out of range — the path is left unchanged. Used by the
+  /// breadcrumb to jump back to any earlier product in the path.
+  void popTo(int index) {
+    if (index < 0 || index >= _stack.length) return;
+    _stack.removeRange(index + 1, _stack.length);
+  }
+
   /// Reset to the opening variant (empties the path).
   void clear() => _stack.clear();
 }

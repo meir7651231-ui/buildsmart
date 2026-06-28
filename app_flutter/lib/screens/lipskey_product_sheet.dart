@@ -418,6 +418,55 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     );
   }
 
+  /// P8.78 — the hop path breadcrumb: every product in the path as a tappable crumb
+  /// (home → … → current). Tapping a crumb jumps back to it (popTo); tapping home
+  /// clears to the opening variant. Built only when live and the path is non-empty.
+  Widget _hopBreadcrumb() {
+    final crumbs = _hops.path;
+    return Padding(
+      key: const Key('hopBreadcrumb'),
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 2,
+        runSpacing: 2,
+        children: [
+          InkWell(
+            key: const Key('hopCrumb_home'),
+            onTap: () => setState(_hops.clear),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Icon(Icons.home_outlined, size: 14),
+            ),
+          ),
+          for (var i = 0; i < crumbs.length; i++) ...[
+            const Icon(Icons.chevron_left, size: 14),
+            InkWell(
+              key: Key('hopCrumb_$i'),
+              onTap: () => setState(() {
+                _hops.popTo(i);
+              }),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 90),
+                child: Text(
+                  crumbs[i].nameHe,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: i == crumbs.length - 1
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -619,6 +668,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             ]);
                           }),
                           const SizedBox(height: 8),
+                          if (_live && _hops.canGoBack) _hopBreadcrumb(),
                           if (_live && _hops.canGoBack)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8),

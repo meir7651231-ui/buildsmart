@@ -47,4 +47,23 @@ void main() {
     expect(s.path, [1, 2]);
     expect(() => s.path.add(3), throwsUnsupportedError);
   });
+
+  test('popTo truncates the path to that hop (deeper hops dropped)', () {
+    final s = HopStack<String>()
+      ..push('A')
+      ..push('B')
+      ..push('C')
+      ..popTo(0);
+    expect(s.current, 'A');
+    expect(s.path, ['A']);
+  });
+
+  test('popTo is a no-op on an out-of-range index', () {
+    final s = HopStack<String>()
+      ..push('A')
+      ..push('B')
+      ..popTo(5)
+      ..popTo(-1);
+    expect(s.path, ['A', 'B']);
+  });
 }
