@@ -18,7 +18,10 @@ import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
     show kCardKeyboardFlag;
+import 'package:buildsmart/features/card_keyboard/hop_graph.dart' show HopGraph;
 import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show divePoolBySku;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
@@ -371,6 +374,50 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   /// P8.75 — pop one hop (return to the previous product).
   void _hopBack() => setState(_hops.back);
 
+  /// P8.77 — the flag-gated 'related' rail: the hop-graph neighbours of the current
+  /// product as tappable chips (most meaningful first — variant > kit > compat >
+  /// category > hub), each tap an in-place hop. Bounded so the rail stays scannable;
+  /// never empty for an in-graph product (the hub guarantees >=1 neighbour).
+  Widget _hopRail(LipskeyCatalogProduct p) {
+    final neighbours = HopGraph.build()
+        .rankedNeighborsOf(p.sku)
+        .map((s) => divePoolBySku[s])
+        .whereType<LipskeyCatalogProduct>()
+        .take(10)
+        .toList();
+    if (neighbours.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('hopRail'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('🔗 קשור',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final n in neighbours)
+                ActionChip(
+                  key: Key('hopRailChip_${n.sku}'),
+                  label: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(n.nameHe,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  onPressed: () => _switchByChip(n),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -585,6 +632,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                 ),
                               ),
                             ),
+                          if (_live) _hopRail(p),
                           _InteractiveChips(
                             product: p,
                             openPickerKey: _openPickerKey,
