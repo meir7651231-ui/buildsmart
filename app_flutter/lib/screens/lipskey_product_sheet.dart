@@ -385,8 +385,17 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   /// category > hub), each tap an in-place hop. Bounded so the rail stays scannable;
   /// never empty for an in-graph product (the hub guarantees >=1 neighbour).
   Widget _hopRail(LipskeyCatalogProduct p) {
-    final neighbours = HopGraph.build()
+    final g = HopGraph.build();
+    final neighbours = g
         .rankedNeighborsOf(p.sku)
+        .where((s) {
+          // De-dup (swarm-review): the compat/kit neighbours are the '🔌 מה מתחבר לזה'
+          // rail; keep THIS '🔗 קשור' rail to the OTHER relations (variant/category/hub)
+          // so no product appears in both rows.
+          final kinds = g.kindsBetween(p.sku, s);
+          return !(kinds.contains(EdgeKind.compat) ||
+              kinds.contains(EdgeKind.kit));
+        })
         .map((s) => divePoolBySku[s])
         .whereType<LipskeyCatalogProduct>()
         .take(10)

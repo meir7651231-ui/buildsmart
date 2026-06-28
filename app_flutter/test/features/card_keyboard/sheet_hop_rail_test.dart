@@ -71,4 +71,25 @@ void main() {
     // a hop happened → the back control appears
     expect(backChip, findsOneWidget);
   });
+
+  testWidgets('forceLive: the two rails are DISJOINT (de-dup, no double-listing)',
+      (tester) async {
+    await pump(tester, forceLive: true);
+    Set<String> skusOf(String prefix) => tester
+        .widgetList<ActionChip>(find.byWidgetPredicate((w) {
+          final k = w.key;
+          return w is ActionChip &&
+              k is ValueKey<String> &&
+              k.value.startsWith(prefix);
+        }))
+        .map((c) => (c.key! as ValueKey<String>).value.substring(prefix.length))
+        .toSet();
+    final related = skusOf('hopRailChip_');
+    final connect = skusOf('hopConnectChip_');
+    expect(related, isNotEmpty,
+        reason: 'the hub guarantees the related rail is non-empty');
+    expect(related.intersection(connect), isEmpty,
+        reason: 'a product must not appear in BOTH rails — '
+            'compat/kit neighbours live only in the connect rail');
+  });
 }
