@@ -2814,3 +2814,6 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 ### #studio-s3 — סטודיו · ליבת-המיזוג `mergeNode` (עמוד-1 · שלב-3) — 2026-06-23
 **`lib/state/studio/config_merge.dart` (חדש, טהור — אפס Flutter):** `mergeNode(id, doc, roleKey, {includeDraft, criticalIds})` ממזג `identity ⊕ published.global ⊕ published.persona[roleKey] ⊕ draft` (draft רק ב-includeDraft), most-specific-wins per-axis. `CfgStyle`/`CfgAction` ממוזגים **שדה-אחר-שדה** (טיוטת-fontScale שומרת colorToken — R1/R2-#5). `roleKeyOf(null)=='contractor'` קנוני (R1-A2, אסור null-key). critical-id ⇒ hidden מתעלם (criticalIds מוזרק, לא-import → טהור). **doc-ריק⇒identity = הוכחת אפס-הרגרסיה לכל wrapper ב-OFF.** `config_merge_test` 8 ירוקים (טבלה) · analyze 0.
+
+### #studio-s4 — סטודיו · הדגל-הראשי `kStudioFlag` (עמוד-1 · שלב-4) — 2026-06-23
+**`lib/state/studio/studio_flags.dart` (חדש):** `const kStudioFlag = bool.fromEnvironment('STUDIO')` **default-OFF** (משכפל invariant של `backend.dart:12` — flip=השינוי-היחיד, OFF=answer-equivalent) + `const kStudioFlagName='kStudio'` ל-runtime-set. אפס-צרכן עדיין. `studio_flags_test` 2 ירוקים (נועץ default-OFF) · analyze 0.
