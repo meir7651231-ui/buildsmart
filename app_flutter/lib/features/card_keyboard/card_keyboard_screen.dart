@@ -218,7 +218,11 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     for (final step in stack) {
       pool = pool.where(step.predicate).toList();
     }
-    _memoVerdict = mergedKeys(pool, stack, cardKeyboardLexicon, widget.subtype);
+    // P9.88: feed the identity-scoped recently-viewed history to the soft layer. The
+    // provider namespaces by uid when the flag is on (no cross-employee leak); empty
+    // history tilts nothing, so the row is unchanged.
+    _memoVerdict = mergedKeys(pool, stack, cardKeyboardLexicon, widget.subtype,
+        historySkus: ref.read(recentlyViewedProvider).toSet());
     _memoVersion = _diveVersion;
   }
 

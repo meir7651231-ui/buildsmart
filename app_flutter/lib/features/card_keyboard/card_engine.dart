@@ -178,8 +178,9 @@ CardVerdict mergedKeys(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
   WordLexicon lexicon,
-  String? subtype,
-) {
+  String? subtype, {
+  Set<String> historySkus = const <String>{},
+}) {
   if (stack.isEmpty) {
     return CardAskWords(
       kFirstQuestion,
@@ -199,7 +200,7 @@ CardVerdict mergedKeys(
   if (stack.length >= kMaxDiveTurns - 1) {
     return CardShowProducts(distinctProducts(pool));
   }
-  final chips = _mergedChips(pool, stack, subtype);
+  final chips = _mergedChips(pool, stack, subtype, historySkus);
   if (chips.isEmpty) return CardShowProducts(distinctProducts(pool));
   return MergedKeys(chips);
 }
@@ -286,6 +287,7 @@ List<SignalChip> _mergedChips(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
   String? subtype,
+  Set<String> historySkus,
 ) {
   final answered = <String>{for (final s in stack) s.axisLabel};
   final scored = <_AxisScore>[];
@@ -352,7 +354,8 @@ List<SignalChip> _mergedChips(
     final isMagnitude = const {'size', 'angle'}.contains(a.chips.first.axisId);
     final ordered = (anchor == null || isMagnitude)
         ? a.chips
-        : _softTiltSorted(a.chips, src, pool, connMates, recipeMates);
+        : _softTiltSorted(
+            a.chips, src, pool, connMates, recipeMates, historySkus);
     final taken = isMagnitude
         ? representativeTake(ordered, take)
         : ordered.take(take).toList();
@@ -381,12 +384,14 @@ List<SignalChip> _softTiltSorted(
   List<LipskeyCatalogProduct> pool,
   Set<String> connMates,
   Set<String> recipeMates,
+  Set<String> historySkus,
 ) {
   double tiltOf(SignalChip c) {
     final prods = pool.where((p) => src.matches(p, c));
     return softTilt(
       connection: prods.any((p) => connMates.contains(p.sku)),
       recipe: prods.any((p) => recipeMates.contains(p.sku)),
+      history: prods.any((p) => historySkus.contains(p.sku)),
     );
   }
 
