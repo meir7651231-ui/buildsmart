@@ -12,6 +12,7 @@ class WordKey {
     this.imageAsset,
     this.semanticLabel,
     this.axisGlyph,
+    this.isDestination = false,
   });
 
   /// The Hebrew word shown on the key.
@@ -40,4 +41,10 @@ class WordKey {
   /// distinguishable WITHOUT colour. Null (the default) on every other key → a
   /// plain text key, byte-identical to before.
   final IconData? axisGlyph;
+
+  /// Optional DESTINATION accent (P9.86, #41). When true, `WordKeyboard` draws a small
+  /// trailing north-east arrow marking a key that lands DIRECTLY on a product (a
+  /// destination, not a further filter). False (the default) on every word / chip /
+  /// utility key → a plain key, byte-identical to before.
+  final bool isDestination;
 }
