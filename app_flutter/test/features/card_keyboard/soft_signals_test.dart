@@ -2,9 +2,12 @@
 // pool-size gate that keeps it inert until convergence), and kitSkusFor (resolved kit
 // members for the recipe anchor). All pure — tested in isolation.
 
+import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/soft_signals.dart';
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show distinctCardCount;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -34,14 +37,9 @@ void main() {
     });
   });
 
-  group('softAnchor', () {
+  group('softAnchor (gated on distinctCardCount, not raw row count)', () {
     test('the full universe is wide → no anchor (softTilt stays inert)', () {
       expect(softAnchor(kDivePool), isNull);
-    });
-
-    test('a near-convergence pool yields its skus as the anchor', () {
-      final pool = kDivePool.take(2).toList();
-      expect(softAnchor(pool), {pool[0].sku, pool[1].sku});
     });
 
     test('a single (converged) or empty pool has no anchor', () {
@@ -49,9 +47,29 @@ void main() {
       expect(softAnchor(const []), isNull);
     });
 
-    test('the near-convergence boundary is inclusive then drops off', () {
-      expect(softAnchor(kDivePool.take(kNearConvergence).toList()), isNotNull);
-      expect(softAnchor(kDivePool.take(kNearConvergence + 1).toList()), isNull);
+    test('engages EXACTLY on the distinctCardCount window [2, kNearConvergence]',
+        () {
+      for (final k in [0, 1, 2, 4, 8, 16, 24, 40, 80, kDivePool.length]) {
+        final pool = kDivePool.take(k).toList();
+        final n = distinctCardCount(pool);
+        final inWindow = n >= 2 && n <= kNearConvergence;
+        expect(softAnchor(pool) != null, inWindow,
+            reason: 'take=$k → distinctCardCount=$n, window [2,$kNearConvergence]');
+      }
+    });
+
+    test('when engaged, the anchor is every sku in the pool', () {
+      var pool = <LipskeyCatalogProduct>[];
+      for (var k = 2; k <= kDivePool.length; k++) {
+        final p = kDivePool.take(k).toList();
+        final n = distinctCardCount(p);
+        if (n >= 2 && n <= kNearConvergence) {
+          pool = p;
+          break;
+        }
+      }
+      expect(pool, isNotEmpty, reason: 'a near-convergence pool must exist');
+      expect(softAnchor(pool), {for (final p in pool) p.sku});
     });
   });
 

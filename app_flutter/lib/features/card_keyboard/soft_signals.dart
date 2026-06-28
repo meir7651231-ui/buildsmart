@@ -9,6 +9,8 @@ import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct
 import 'package:buildsmart/data/smart_tree.dart' show SmartProduct;
 import 'package:buildsmart/features/word_finder/recipe_kit.dart'
     show KitMatch, assembleKit;
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show distinctCardCount;
 
 /// The strongest a soft tilt can get (every anchor matched).
 const double kMaxSoftTilt = 1.6;
@@ -40,12 +42,20 @@ double softTilt({
   return tilt > kMaxSoftTilt ? kMaxSoftTilt : tilt;
 }
 
-/// The soft anchor of [pool] near convergence: the pool's own skus when it is small enough
-/// that a dominant theme exists (2..[kNearConvergence]), else null. softTilt checks a
-/// chip's connection/recipe relations AGAINST this set; a wide pool → null → inert. The
-/// full universe is the widest pool, so `softAnchor(kDivePool) == null`.
+/// The soft anchor of [pool] near convergence: the pool's own skus when its DISTINCT-CARD
+/// count is small enough that a dominant theme exists (2..[kNearConvergence]), else null.
+///
+/// Swarm-review (high): the gate measures `distinctCardCount(pool)` — the SAME metric as
+/// kShowProductsThreshold — NOT the raw row count. A variant-heavy family (e.g. 60 catalog
+/// rows but 14 distinct cards) is ONE near-convergence theme, not a wide pool; the old
+/// `pool.length` gate silently disabled the entire soft layer (and the #41 destination
+/// accent) for exactly those normal multi-variant pools.
+///
+/// softTilt checks a chip's connection/recipe relations AGAINST this set; a wide pool → null
+/// → inert. The full universe is the widest pool, so `softAnchor(kDivePool) == null`.
 Set<String>? softAnchor(List<LipskeyCatalogProduct> pool) {
-  if (pool.length < 2 || pool.length > kNearConvergence) return null;
+  final cards = distinctCardCount(pool);
+  if (cards < 2 || cards > kNearConvergence) return null;
   return {for (final p in pool) p.sku};
 }
 
