@@ -5045,11 +5045,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       children: [
                         Row(
                           children: [
-                            const Text('📦 נתוני קטלוג',
-                                style: TextStyle(
-                                    color: Color(0xFF888888),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600)),
+                            const CfgText(
+                              'catalog.detail.dataHeader',
+                              '📦 נתוני קטלוג',
+                              style: TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             // Roadmap step 30 — card data readiness score
                             // (polish E — colorised by band 🟢/🟡/🔴).
@@ -5606,11 +5610,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   border: Border.all(
                                       color: BsTokens.brand.withAlpha(90)),
                                 ),
-                                child: const Text('🔧 בנה לי קו (BOM)',
-                                    style: TextStyle(
-                                        color: BsTokens.brand,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700)),
+                                child: const CfgText(
+                                  'catalog.action.buildBom',
+                                  '🔧 בנה לי קו (BOM)',
+                                  style: TextStyle(
+                                    color: BsTokens.brand,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -5785,11 +5793,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFC7D2FE)),
                                       ),
-                                      child: const Text('➕ הוסף לפרויקט',
-                                          style: TextStyle(
-                                              color: Color(0xFF4338CA),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700)),
+                                      child: const CfgText(
+                                        'catalog.action.addToProject',
+                                        '➕ הוסף לפרויקט',
+                                        style: TextStyle(
+                                          color: Color(0xFF4338CA),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   ),
@@ -6192,11 +6204,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                 color:
                                                     const Color(0xFFC4B5FD)),
                                           ),
-                                          child: const Text('💾 שמור גרסה',
-                                              style: TextStyle(
-                                                  color: Color(0xFF5B21B6),
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w700)),
+                                          child: const CfgText(
+                                            'catalog.action.saveVersion',
+                                            '💾 שמור גרסה',
+                                            style: TextStyle(
+                                              color: Color(0xFF5B21B6),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       ),

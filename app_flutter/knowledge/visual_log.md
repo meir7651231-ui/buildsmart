@@ -1999,3 +1999,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס (answer-equivalent).** Batch-9 — עוד 5 ליטרלי-קטלוג סטטיים → CfgText: 'מוצר' (תג-כרטיס)·'תבניות:' (תווית)·'מתי לבחור איזה מותג' (כותרת)·'נצפו לאחרונה' (כותרת)·'נקה הכל' (כפתור) → `catalog.{card.productBadge/templates.label/detail.brandGuide/detail.recentlyViewed/search.clearAll}`. ליטרל+style fallback (const נשמר). +5 registry rows. **10 תוויות-קטלוג ניתנות-לעריכה.**
 **אימות (אוטומטי):** `gate_118_test` (ids⊆registry) · `registry_contract` 8 · `zero_regression` 28 · analyze 0.
 **הפיכות:** `CfgText→Text` (5) + הסר 5 registry rows.
+
+## studio-s29-b10 — Phase E אימוץ-תוכן (CfgText): כפתורי-פעולה בקטלוג — שינוי-נראה: אפס — 2026-06-29
+**שינוי נראה:** **אפס (answer-equivalent).** Batch-10 — 4 ליטרלים עם emoji-לגאסי בקטלוג → CfgText: '📦 נתוני קטלוג' (כותרת)·'🔧 בנה לי קו (BOM)'·'➕ הוסף לפרויקט'·'💾 שמור גרסה' (כפתורי-פעולה) → `catalog.detail.dataHeader`·`catalog.action.{buildBom/addToProject/saveVersion}`. ה-emoji כבר-לגאסי (אין emoji חדש → gate-64 בטוח). ליטרל+style fallback (const נשמר). +4 registry rows. **14 תוויות-קטלוג ניתנות-לעריכה.**
+**אימות (אוטומטי):** `gate_118_test` (ids⊆registry) · `registry_contract` 8 · `zero_regression` 28 · analyze 0.
+**הפיכות:** `CfgText→Text` (4) + הסר 4 registry rows.

@@ -230,6 +230,43 @@ const List<ElementDescriptor> kElementRegistry = [
     editableProps: {EditAxis.text, EditAxis.style},
     wired: true,
   ),
+  // catalog action buttons + data header (s29-b10).
+  ElementDescriptor(
+    id: 'catalog.detail.dataHeader',
+    screen: 'catalog',
+    area: 'detail',
+    labelHe: 'כותרת: נתוני קטלוג',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.action.buildBom',
+    screen: 'catalog',
+    area: 'action',
+    labelHe: 'כפתור: בנה לי קו (BOM)',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.action.addToProject',
+    screen: 'catalog',
+    area: 'action',
+    labelHe: 'כפתור: הוסף לפרויקט',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.action.saveVersion',
+    screen: 'catalog',
+    area: 'action',
+    labelHe: 'כפתור: שמור גרסה',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
   // ── Critical/protected set (step 26) — navigation + auth the owner may RENAME but
   // never hide or re-route. `kImmutable:true` is the canonical critical flag (R1-A1);
   // declared here (wired:false) so the merge defence + publish validator protect them
