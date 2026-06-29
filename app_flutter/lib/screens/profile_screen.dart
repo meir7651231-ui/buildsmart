@@ -9,6 +9,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -259,7 +260,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding:
                       const EdgeInsets.symmetric(vertical: BsTokens.space3),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    borderRadius: BorderRadius.circular(cfgRadius(context)),
                   ),
                 ),
                 child: Text(
@@ -342,7 +343,7 @@ class _HeaderCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
       child: Row(
@@ -492,19 +493,19 @@ class _Field extends StatelessWidget {
               vertical: BsTokens.space3,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               borderSide: const BorderSide(color: BsTokens.danger),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               borderSide:
                   const BorderSide(color: BsTokens.danger, width: 1.5),
             ),
@@ -534,9 +535,9 @@ class _LinkRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: BsTokens.cardLight,
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(
@@ -544,7 +545,7 @@ class _LinkRow extends StatelessWidget {
             vertical: BsTokens.space4,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
           child: Semantics(

@@ -24,6 +24,7 @@ import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
@@ -678,7 +679,7 @@ class _CourierDashboardScreenState
           color: BsTokens.cardLight,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: ExpansionTile(
             tilePadding: const EdgeInsets.symmetric(
@@ -962,7 +963,7 @@ class _CourierJobCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         // #76 — "הקש לפרטים" אמיתי: InkWell על כל הכרטיס פותח את גיליון הפירוט.
@@ -971,7 +972,7 @@ class _CourierJobCard extends StatelessWidget {
           body:
               'הקשה על הכרטיס פותחת את גיליון פירוט המשלוח: רשימת הפריטים, לקוח, כתובת, סכום ומסלול ההזמנה, עם קיצורי קידום ו-POD.',
           child: InkWell(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(BsTokens.space4),
@@ -1211,7 +1212,7 @@ class _FlatCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F000000),
@@ -1500,9 +1501,9 @@ class _CourierNotifRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: notif.read ? BsTokens.cardLight : const Color(0xFFFFF8F2),
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 48),
@@ -1583,7 +1584,7 @@ class _Stat extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0F000000),

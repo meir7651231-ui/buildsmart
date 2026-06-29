@@ -11,6 +11,7 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_project_engine.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
                 padding: const EdgeInsets.all(BsTokens.space4),
                 decoration: BoxDecoration(
                   color: BsTokens.cardLight,
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                 ),
                 child: const Column(
                   children: [
@@ -184,7 +185,7 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
                 for (var i = 0; i < stages.length; i++)
                   Material(
                     color: const Color(0xFFF7F8FA),
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    borderRadius: BorderRadius.circular(cfgRadius(context)),
                     child: InkWell(
                       borderRadius:
                           BorderRadius.circular(BsTokens.radiusCard),
@@ -248,7 +249,7 @@ class _Hero extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
               color: Color(0x14000000), blurRadius: 10, offset: Offset(0, 2)),
@@ -289,7 +290,7 @@ class _ProjectDone extends StatelessWidget {
         padding: const EdgeInsets.all(BsTokens.space4),
         decoration: BoxDecoration(
           color: const Color(0xFFE9F7EE),
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
         ),
         child: const Text('🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!',
             textAlign: TextAlign.center,
@@ -330,13 +331,13 @@ class _StageCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
         color: isDone ? const Color(0xFFF1FAF3) : BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: Column(
           children: [
             InkWell(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               onTap: onToggleExpand,
               child: Padding(
                 padding: const EdgeInsets.all(BsTokens.space4),

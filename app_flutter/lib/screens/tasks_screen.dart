@@ -22,10 +22,10 @@ import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
-import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart'
     show pendingApprovalTasksProvider, pendingProposalsProvider;
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
@@ -379,11 +379,11 @@ class _LogButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: onTap,
           child: const Padding(
             padding: EdgeInsets.all(BsTokens.space4),
@@ -408,12 +408,12 @@ class _NewTaskButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: BsTokens.brand,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
           key: const ValueKey('task-new'),
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(BsTokens.space4),
@@ -451,7 +451,7 @@ class _ApprovalCard extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: BsTokens.space2),
         child: Material(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           elevation: 1,
           shadowColor: Colors.black26,
           child: Padding(
@@ -524,7 +524,7 @@ class _ProposalCard extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: BsTokens.space2),
         child: Material(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           elevation: 1,
           shadowColor: Colors.black26,
           child: Padding(
@@ -640,12 +640,12 @@ class _Card extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
           key: ValueKey('task-${task.id}'),
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(BsTokens.space4),
@@ -1041,6 +1041,7 @@ class _WorkLogSheet extends ConsumerWidget {
     );
   }
 
+  // (context-less helper — keeps the fixed radius; adopt when context is threaded.)
   Widget _logDay(WorkLogDay day) {
     final doneCount = day.items.where((i) => i.status == 'done').length;
     return Container(

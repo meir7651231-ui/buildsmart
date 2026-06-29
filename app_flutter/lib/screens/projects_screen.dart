@@ -19,6 +19,7 @@ import 'package:buildsmart/screens/tasks_screen.dart';
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -209,12 +210,12 @@ class _SiteCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: isActive
                 ? Border.all(color: BsTokens.brand, width: 1.5)
                 : null,
@@ -376,9 +377,9 @@ class _StatusSheet extends ConsumerWidget {
                 color: isActive
                     ? const Color(0xFFE9F7EE)
                     : const Color(0xFFF2F3F5),
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   onTap: () {
                     Navigator.of(context).pop();
                     if (!isActive) {
@@ -414,9 +415,9 @@ class _StatusSheet extends ConsumerWidget {
               // details — tap to edit
               Material(
                 color: const Color(0xFFF7F8FA),
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   onTap: () {
                     Navigator.of(context).pop();
                     showModalBottomSheet<void>(
@@ -494,6 +495,7 @@ class _StatusSheet extends ConsumerWidget {
                 fontSize: 13)),
       ]);
 
+  // (context-less helper — keeps the fixed radius; adopt when context is threaded.)
   Widget _kvTile(String label) => Container(
         margin: const EdgeInsets.only(bottom: BsTokens.space2),
         padding: const EdgeInsets.all(BsTokens.space3),
