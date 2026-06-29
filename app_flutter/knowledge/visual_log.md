@@ -1879,3 +1879,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס.** `EditHandle.maybe(ref, id, child:)` עוטף רכיב באפשר-עריכה **רק** ב-edit-mode (שמצריך `kStudioFlag`/runtime + owner+manager — כבוי כברירת-מחדל). מחוץ ל-edit-mode (כלומר תמיד, בבילד הרגיל) הוא מחזיר את ה-`child` **מילולית** — אפס widgets נוספים, אפס שינוי-פיקסל. רק ב-edit-mode (בעלים בלבד): מתאר-מסגרת brand (1.5px, `Positioned.fill` — לא משנה layout) + תג `StudioEditTarget(id)` (`MetaData`) ל-hit-test מרכזי בשלב-13 (R2-#3 — לא GestureDetector פר-wrapper).
 **אימות (אוטומטי):** `cfg_wrappers_test` 2 ירוקים (OFF = child verbatim, `MetaData` findsNothing · ON = tag+outline) · analyze 0. **אין מסך אמיתי שצורך אותו עדיין** (אימוץ-פיילוט בשלב-14) ⇒ אפס שינוי גלוי למשתמש כרגע.
 **הפיכות:** `git rm lib/widgets/studio/edit_handle.dart` (אין צרכן).
+
+## studio-s10 — CfgText (עוטפן-תוכן עריך) — שינוי-נראה: אפס (מגודר) — 2026-06-29
+**שינוי נראה:** **אפס.** `CfgText(id, fallback)` הוא drop-in ל-`Text(fallback)`. עם doc ריק (kStudioFlag כבוי) ה-node המ-resolved הוא identity ⇒ מרנדר את ה-literal העברי **מילולית**, אותו style/align/maxLines כמו Text גולמי. **אין מסך שצורך אותו עדיין** (אימוץ-פיילוט בשלב-14) ⇒ אפס שינוי גלוי. רק עם override מפורסם (בעלים): טקסט/אמוג'י/style-לפי-token חלים; ב-edit-mode עטוף ב-EditHandle.
+**אימות (אוטומטי):** `cfg_wrappers_test` +4 ל-CfgText (empty⇒verbatim+RTL+style-null · text-override · emoji-prepend · token-color=brand) = 6 ירוקים בקובץ · analyze 0.
+**הפיכות:** `git rm lib/widgets/studio/cfg_text.dart` (אין צרכן).
