@@ -127,6 +127,17 @@ const List<ElementDescriptor> kElementRegistry = [
     editableProps: {EditAxis.text, EditAxis.style},
     wired: true,
   ),
+  // ── Phase-E content adoption (step 29) — high-value screen literals wrapped as
+  // CfgText, the literal kept as the fallback (OFF ⇒ verbatim). Append-only.
+  ElementDescriptor(
+    id: 'manager.cockpit.copilot.title',
+    screen: 'manager',
+    area: 'cockpit',
+    labelHe: 'כותרת קו-פיילוט',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
   // ── Critical/protected set (step 26) — navigation + auth the owner may RENAME but
   // never hide or re-route. `kImmutable:true` is the canonical critical flag (R1-A1);
   // declared here (wired:false) so the merge defence + publish validator protect them

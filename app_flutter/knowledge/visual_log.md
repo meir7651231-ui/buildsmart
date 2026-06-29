@@ -1954,3 +1954,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **מינימלי, בתוך הסטודיו המגודר.** (א) צ'יפים של ה-panes קיבלו `tooltip` עם שם מלא (קורא-מסך/hover). (ב) סליידרים (radius/fontScale) קיבלו `semanticFormatterCallback` עברי. (ג) שורת before→after במצא-והחלף עטופה ב-`Semantics(label:'מ־…ל־…')` + `ExcludeSemantics` (קורא-מסך שומע ישן/חדש, לא רק קו-חוצה ויזואלי). (ד) SnackBar במצא-והחלף מדווח כעת ספירה **כנה** (`applied` מ-applyOps, לא ops.length) + "(N נדחו — טקסט ארוך/לא תקין)" כשהוולידטור דחה. (ה) מספרי-ניגודיות עטופים LTR-isolate (`⁦…⁩`). (ו) publish מעביר `criticalIds` ⇒ sanitize רץ בפרודקשן.
 **אימות (אוטומטי):** `find_replace_test` 4 (+over-length-dropped) · `theme_pane` 4 · `studio_screen` 11 — כולם ירוקים · analyze 0 (אפס warnings — תווי-isolate כ-escapes).
 **הפיכות:** `git revert` של r2-fix-2.
+
+## studio-s29-b1 — Phase E אימוץ-תוכן: קוקפיט copilot-title → CfgText — שינוי-נראה: אפס — 2026-06-29
+**שינוי נראה:** **אפס (answer-equivalent).** Batch-1 של אימוץ-התוכן: `const Text('שאל את העסק שלך', …)` בקוקפיט (hero קו-פיילוט) → `const CfgText('manager.cockpit.copilot.title', 'שאל את העסק שלך', …)`. הליטרל נשאר fallback ⇒ doc-ריק/OFF מציג אותו verbatim עם אותו style (CfgText = wrapper-זהות מוכח, EditHandle.maybe מחזיר child כשלא-עורכים). `const` נשמר (ל-CfgText יש const-ctor). id נוסף ל-registry (append-only, wired:true, לא-kImmutable — תוכן ולא ניווט).
+**אימות (אוטומטי):** `gate_118_test` (id מאומץ ⊆ registry) · `registry_contract`/`descriptor_contract` (8+3) · `zero_regression` 31 — כולם ירוקים · analyze 0.
+**הפיכות:** `CfgText→Text` חזרה + הסר את שורת ה-registry.
