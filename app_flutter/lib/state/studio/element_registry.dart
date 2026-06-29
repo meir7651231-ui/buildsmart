@@ -26,6 +26,11 @@ enum EditAxis { text, emoji, hidden, order, style, action }
 enum ElementKind { text, container, list, action, theme }
 
 /// The contract for one editable element.
+///
+/// ⚠️ FROZEN (step 12.5 · seam-freeze before step 30) — Pillars 2/4/5 ground their
+/// `validateSafe` on the six governance fields below. Changing/removing a field
+/// needs a schema migration + an update to `descriptor_contract_test`; do NOT edit
+/// the shape casually.
 @immutable
 class ElementDescriptor {
   const ElementDescriptor({
