@@ -8,6 +8,7 @@
 // Studio is inactive ⇒ zero behavior change until then. Panes are placeholders here.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/screens/studio/panes/inspector_pane.dart';
 import 'package:buildsmart/screens/studio/panes/tree_pane.dart';
 import 'package:buildsmart/screens/studio/studio_top_bar.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart' show studioCanEditProvider;
@@ -93,7 +94,7 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
                 index: _pane,
                 children: [
                   const TreePane(),
-                  _PanePlaceholder(title: _segments[1].$3),
+                  const InspectorPane(),
                   _PanePlaceholder(title: _segments[2].$3),
                   _PanePlaceholder(title: _segments[3].$3),
                 ],

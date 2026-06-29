@@ -1919,3 +1919,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (המסך עדיין לא-נגיש עד s20). Pane A — עץ screen→area→element מ-`elementRegistryProvider`, **וירטואלי** (`ListView.builder` על flattened-rows, לא nested ExpansionTile — scale). חיפוש לפי labelHe/id + dropdown persona (scope) + tap→בחירה (`studioSelectedIdProvider`, ל-inspector s19). read-only.
 **אימות (אוטומטי):** `tree_pane_test` 4 ירוקים (lists · search-filter · tap-selects · persona-scope) · `studio_screen` 4 (לא נשבר) · analyze 0.
 **הפיכות:** `git rm` tree_pane.dart + studio_nav.dart, החזר placeholder ל-pane 0.
+
+## studio-s19 — קונכיית-הסטודיו: Pane B המפקח — שינוי-נראה: אפס (לא-נגיש) — 2026-06-29
+**שינוי נראה:** **אפס** (המסך עדיין לא-נגיש עד s20). Pane B — מפקח-עריכה לאלמנט הנבחר (`studioSelectedIdProvider`). לפי `descriptor.editableProps`: תוכן (TextField טקסט + אמוג'י, controller מקומי decoupled — R2-#2) · נראות (Switch, נעול אם `kImmutable`) · תצוגה-חיה + 'אפס רכיב' (`resetDraftNode`). כל עריכה → draft דרך `applyOps` (**לא חי עד "פרסם לכולם"**). v1 עורך global. style→s24, behavior→Pillar-4.
+**אימות (אוטומטי):** `inspector_pane_test` 4 ירוקים (no-selection · fail-closed · text→draft · reset) · analyze 0.
+**הפיכות:** `git rm inspector_pane.dart`, החזר placeholder ל-pane 1.
