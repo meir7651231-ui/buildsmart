@@ -3065,3 +3065,10 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **5 CompatibilityRules** — methodLabelHe **בייט-זהה ל-`install_engine.connectionMethodLabel`:90** (קריטי לקיסטון): bspMale↔bspFemale 'תבריג + PTFE' · pexPress 'Press / טבעת כיווץ' · copperPress 'Press / O-ring' · drainOpening 'כיסוי ניקוז' · hdpe 'אום הידוק (compression)' (התווית של pipeSharedWith:105, לא ה-direct-mate המת). sizeMatch=exactSame · onMismatch=critical.
 - **1 CompletionRule גלווני** — incompatibleMaterialGroups=['copper-group','iron-group'] + dielectric whyHe + critical (type-fields ריקים בכוונה: גלווני מבוסס-חומר, לא-type; resolver@40 יקרא material).
 - **gate:** `plumbing_seed_test` +5 = **12 ירוקים** (890 specs · 6+2 · sample-rule לפי תווית · גלווני · determinism) · analyze 0 errors · grep 0 live-consumers (store ריק, read-path לא-נגוע). הבא: **Step 38 — KEYSTONE** (trade_seed_equivalence_test).
+
+### #pillar2-s38 — KEYSTONE: seed answer-equivalent ל-מנוע החי — **חלק ב׳ נסגר** — 2026-06-29
+**הפיבוט.** `test/trade_seed_equivalence_test.dart` מוכיח שה-seed (s36/s37) מייצר **בדיוק אותן תשובות** כמו מנוע-האינסטלציה הקשיח — resolver-דק שנבנה *רק* מ-`seed.productSpecs`+`seed.compatRules` משחזר את `install_engine.connectionMethodLabel` בייט-בבייט על כל הקטלוג המאומת:
+- **TEST 1 (הקיסטון):** לכל sku ב-(kVerifiedSpecs ∩ kCatalogProducts) × probe-לכל-EndType — `seedMethod(s,p) == connectionMethodLabel(prod[s],prod[p])`. שומרי-לא-ריקנות: skus≠∅ · ≥5/6 EndTypes · ראה ≥1 תווית-מלאה *ו*≥1 ריקה (מימוש מול non-mate). HW-* (מים-חמים, ב-`kCompatCatalog`) מדולגים נכון (לא ב-kCatalogProducts), ומכוסים ב-TEST 2/3 דרך הזרע.
+- **TEST 2 (אפס אובדן-מידע):** כל 890 ה-VerifiedSpecs מוקרנים נאמנה — material · maxTempC · ends (`connectorTypeId='plumbing.conn.<EndType.name>'` + size).
+- **TEST 3 (גלווני):** materialGroupId לכל spec (נחושת/פליז→copper-group · פלדה/נירוסטה→iron-group · benign→null) + ה-CompletionRule מזווג copper↔iron · שומרי sawCopper/sawIron.
+- **gate:** 3 ירוקים · analyze 0 (קומפל+רץ) · הבנאי כתב נאמן (אפס assertions מוחלשים), המנצח קרא+הריץ. **🎉 חלק ב׳ (35-38) נסגר: "אינסטלציה = עוד תחום-נתונים", answers-wise מוכח.** הבא: Step 39 (resolver wiring מאחורי flag).
