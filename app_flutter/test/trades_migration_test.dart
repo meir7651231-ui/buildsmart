@@ -39,4 +39,41 @@ void main() {
     final cur = {'schemaVersion': kTradesDocVersion, 'trades': <dynamic>[]};
     expect(TradesStoreNotifier.migrate(cur)['schemaVersion'], kTradesDocVersion);
   });
+
+  group('schemaVersion is parsed tolerantly (no throws)', () {
+    // A minimal valid shape: one authored trade, version as the STRING "1".
+    Map<String, dynamic> minimal(Object version) => {
+          'schemaVersion': version,
+          'trades': [
+            {
+              'id': 't1',
+              'nameHe': 'אינסטלציה',
+              'emoji': '🔧',
+              'color': 1,
+              'personaId': 'p',
+            },
+          ],
+        };
+
+    test('a String "1" is tolerated → migrate + fromJson yield v1', () {
+      final persisted = minimal('1');
+      // Neither step throws on the String version…
+      final migrated = TradesStoreNotifier.migrate(persisted);
+      final doc = TradesDoc.fromJson(migrated);
+      // …and the String "1" coerces to the int 1.
+      expect(doc.schemaVersion, 1);
+      expect(doc.trades.single.id, 't1'); // data preserved
+    });
+
+    test('a non-numeric String falls back to the current version', () {
+      final persisted = minimal('abc');
+      // fromJson on its own must not throw — it falls back to the current version.
+      final docDirect = TradesDoc.fromJson(persisted);
+      expect(docDirect.schemaVersion, kTradesDocVersion);
+      // migrate also tolerates the garbage version and stamps it to v1.
+      final migrated = TradesStoreNotifier.migrate(persisted);
+      expect(migrated['schemaVersion'], 1);
+      expect(TradesDoc.fromJson(migrated).schemaVersion, 1);
+    });
+  });
 }

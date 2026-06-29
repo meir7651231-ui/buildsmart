@@ -27,14 +27,21 @@ const String kLegacySpecImageFileAttr = '__specImageFile';
 /// Build the data-driven [TradeProduct] from a legacy [LipskeyCatalogProduct].
 /// `dims` is preserved 1:1; the legacy-only fields are stashed in `attributes` so
 /// [TradeProductLegacy.toLegacy] reconstructs the product byte-for-byte.
+///
+/// When [categoryId] is supplied (e.g. the plumbing seed resolves it from the
+/// catalog tree so it points at a real [TradeCategory]) it is used verbatim;
+/// otherwise the legacy-derived `'$tradeId.${p.categoryHe}'` is kept. `toLegacy`
+/// reconstructs `categoryHe` from the stashed attribute, not from `categoryId`,
+/// so the round-trip stays byte-faithful regardless of this argument.
 TradeProduct tradeProductFromLegacy(
   LipskeyCatalogProduct p, {
   String tradeId = 'plumbing',
+  String? categoryId,
 }) =>
     TradeProduct(
       id: p.sku,
       tradeId: tradeId,
-      categoryId: '$tradeId.${p.categoryHe}',
+      categoryId: categoryId ?? '$tradeId.${p.categoryHe}',
       brandId: p.brand,
       nameHe: p.nameHe,
       nameEn: p.nameEn,

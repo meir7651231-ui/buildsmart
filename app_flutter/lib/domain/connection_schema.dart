@@ -34,8 +34,9 @@ List<String> _strList(Object? v) =>
     v is List ? v.whereType<String>().toList() : const [];
 List<String>? _strListOrNull(Object? v) =>
     v is List ? v.whereType<String>().toList() : null;
-Map<String, num> _numMap(Object? v) =>
-    v is Map ? {for (final e in v.entries) '${e.key}': e.value as num} : const {};
+Map<String, num> _numMap(Object? v) => v is Map
+    ? {for (final e in v.entries) if (e.value is num) '${e.key}': e.value as num}
+    : const {};
 List<List<String>>? _sizeTable(Object? v) => v is List
     ? v
         .whereType<List<dynamic>>()

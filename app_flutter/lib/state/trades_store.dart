@@ -30,6 +30,15 @@ List<T> _list<T>(Object? v, T Function(Map<String, dynamic>) from) => v is List
         .toList()
     : const [];
 
+int _schemaVer(Object? v, int fallback) {
+  if (v is num) return v.toInt();
+  if (v is String) {
+    final p = int.tryParse(v);
+    if (p != null) return p;
+  }
+  return fallback;
+}
+
 /// The owner's authored deltas across the whole trade model. Immutable; round-trips
 /// through JSON (the server seam). `TradesDoc.empty` is the byte-identical start.
 @immutable
@@ -61,7 +70,7 @@ class TradesDoc {
         productSpecs: _list(j['productSpecs'], ProductConnectorSpec.fromJson),
         compatRules: _list(j['compatRules'], CompatibilityRule.fromJson),
         completionRules: _list(j['completionRules'], CompletionRule.fromJson),
-        schemaVersion: (j['schemaVersion'] as num?)?.toInt() ?? kTradesDocVersion,
+        schemaVersion: _schemaVer(j['schemaVersion'], kTradesDocVersion),
       );
 
   static const TradesDoc empty = TradesDoc();
@@ -180,7 +189,7 @@ class TradesStoreNotifier extends StateNotifier<TradesDoc> {
   @visibleForTesting
   static Map<String, dynamic> migrate(Map<String, dynamic> json) {
     var j = json;
-    final from = (j['schemaVersion'] as num?)?.toInt() ?? 0;
+    final from = _schemaVer(j['schemaVersion'], 0);
     if (from < 1) {
       // v0 (unversioned legacy) → v1: stamp the version. (No field moved yet.)
       j = {...j, 'schemaVersion': 1};

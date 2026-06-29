@@ -42,4 +42,44 @@ void main() {
       }
     }
   });
+
+  test('every category reference resolves (no dangling FKs)', () {
+    final seed = buildPlumbingSeed();
+    final catIds = seed.categories.map((c) => c.id).toSet();
+    for (final p in seed.products) {
+      expect(
+        catIds,
+        contains(p.categoryId),
+        reason: 'product ${p.id} → dangling categoryId ${p.categoryId}',
+      );
+    }
+    for (final f in seed.fixtures) {
+      expect(
+        catIds,
+        contains(f.categoryId),
+        reason: 'fixture ${f.id} → dangling categoryId ${f.categoryId}',
+      );
+    }
+    for (final a in seed.accessories) {
+      expect(
+        catIds,
+        contains(a.appliesToCategoryId),
+        reason: 'accessory ${a.id} → dangling appliesToCategoryId '
+            '${a.appliesToCategoryId}',
+      );
+    }
+  });
+
+  test('the _uncategorized fallback category exists', () {
+    final seed = buildPlumbingSeed();
+    expect(
+      seed.categories.any((c) => c.id == 'plumbing.cat._uncategorized'),
+      isTrue,
+    );
+  });
+
+  test('products distribute across real categories (non-vacuous linkage)', () {
+    final seed = buildPlumbingSeed();
+    expect(seed.products.map((p) => p.categoryId).toSet().length, greaterThan(1));
+  });
 }
