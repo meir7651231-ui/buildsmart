@@ -1894,3 +1894,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** off-gate (הבילד הרגיל) = **אפס** — `StudioOverlay` מחזיר `SizedBox.shrink` (inert, אפס pointer-area, בדיוק כמו `ConnectionIndicator`; עם `kStudioFlag` const-OFF נעלם ב-tree-shaking). on-gate (בעלים + דגל פעיל + edit-mode) = באנר עליון "✏️ מצב עריכה" + כפתור "צא". שורה אחת **additive** ב-`main.dart` ליד `ConnectionIndicator`.
 **אימות (אוטומטי):** `zero_regression_test` +2 (off⇒SizedBox/ללא-באנר · on⇒באנר) = 14 ירוקים · analyze 0 בקבצים החדשים (ב-main.dart 6 infos קיימים-מראש — לא מהשינוי).
 **הפיכות:** הסר את שורת `const StudioOverlay()` מ-main.dart + `git rm studio_overlay.dart`.
+
+## studio-s14 — אימוץ פיילוט: 5 כותרות KPI בקוקפיט — שינוי-נראה: אפס (OFF) — 2026-06-29
+**שינוי נראה:** **אפס** (OFF = answer-equivalent + golden). 5 כותרות ה-KPI בלוח-הבקרה של המנהל (הזמנות פתוחות · מוצרים בקטלוג · אביזרים נלווים · זמינים כעת · חנויות פעילות) עברו מ-`Text(label,…)` ל-`CfgText(id, label,…)` — **אותו style/maxLines/overflow בדיוק.** עם doc ריק (kStudioFlag כבוי) ⇒ אותו פיקסל. `_MetricTile` קיבל `cfgId`; 5 descriptors (wired:true) נוספו ל-registry.
+**אימות (אוטומטי):** `registry_contract_test` +1 (5 pilot-ids ⊆ registry) = 7 · `descriptor_contract` 3 · analyze 0 (5 infos קיימים-מראש ב-mega-file, לא מהשינוי). revert = `CfgText→Text` טהור.
+**הפיכות:** `git checkout lib/screens/manager_dashboard_screen.dart` + הסר 5 descriptors מ-`element_registry.dart`.

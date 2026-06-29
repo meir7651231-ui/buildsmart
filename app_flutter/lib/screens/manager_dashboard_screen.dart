@@ -37,6 +37,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -502,26 +503,31 @@ class _MetricGrid extends StatelessWidget {
         emoji: '🚚',
         value: '${analytics.openOrders}',
         label: 'הזמנות פתוחות',
+        cfgId: 'manager.cockpit.kpi.openOrders',
       ),
       _MetricTile(
         emoji: '📦',
         value: '${analytics.catalogCount}',
         label: 'מוצרים בקטלוג',
+        cfgId: 'manager.cockpit.kpi.products',
       ),
       _MetricTile(
         emoji: '🧰',
         value: '${analytics.accessoryCount}',
         label: 'אביזרים נלווים',
+        cfgId: 'manager.cockpit.kpi.accessories',
       ),
       _MetricTile(
         emoji: '✅',
         value: '${analytics.availableCount}',
         label: 'זמינים כעת',
+        cfgId: 'manager.cockpit.kpi.available',
       ),
       _MetricTile(
         emoji: '🏪',
         value: analytics.storesLabel,
         label: 'חנויות פעילות',
+        cfgId: 'manager.cockpit.kpi.stores',
       ),
     ];
 
@@ -547,11 +553,15 @@ class _MetricTile extends StatelessWidget {
     required this.emoji,
     required this.value,
     required this.label,
+    required this.cfgId,
   });
 
   final String emoji;
   final String value;
   final String label;
+
+  /// Studio element id for the editable label (step 14 pilot).
+  final String cfgId;
 
   @override
   Widget build(BuildContext context) {
@@ -583,7 +593,10 @@ class _MetricTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
+            // Step-14 pilot: the KPI label is studio-editable. Empty doc ⇒ the
+            // literal `label` verbatim with this exact style ⇒ golden-identical.
+            CfgText(
+              cfgId,
               label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

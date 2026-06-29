@@ -61,4 +61,21 @@ void main() {
       kElementRegistry.length + 1,
     );
   });
+
+  test('step-14 pilot ids are all registered (UI ⊆ registry)', () {
+    const pilotIds = [
+      'manager.cockpit.kpi.openOrders',
+      'manager.cockpit.kpi.products',
+      'manager.cockpit.kpi.accessories',
+      'manager.cockpit.kpi.available',
+      'manager.cockpit.kpi.stores',
+    ];
+    for (final id in pilotIds) {
+      expect(
+        findDescriptor(kElementRegistry, id),
+        isNotNull,
+        reason: '$id is adopted in the UI but missing from the registry',
+      );
+    }
+  });
 }
