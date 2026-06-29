@@ -127,6 +127,54 @@ const List<ElementDescriptor> kElementRegistry = [
     editableProps: {EditAxis.text, EditAxis.style},
     wired: true,
   ),
+  // ── Critical/protected set (step 26) — navigation + auth the owner may RENAME but
+  // never hide or re-route. `kImmutable:true` is the canonical critical flag (R1-A1);
+  // declared here (wired:false) so the merge defence + publish validator protect them
+  // even before a widget adopts them (defence-in-depth — §8.1).
+  ElementDescriptor(
+    id: 'auth.login.cta',
+    screen: 'welcome',
+    area: 'auth',
+    labelHe: 'כניסה (מסך פתיחה)',
+    kind: ElementKind.action,
+    editableProps: {EditAxis.text},
+    kImmutable: true,
+  ),
+  ElementDescriptor(
+    id: 'auth.logout',
+    screen: 'app',
+    area: 'auth',
+    labelHe: 'התנתקות',
+    kind: ElementKind.action,
+    editableProps: {EditAxis.text},
+    kImmutable: true,
+  ),
+  ElementDescriptor(
+    id: 'nav.bottombar',
+    screen: 'app',
+    area: 'nav',
+    labelHe: 'סרגל ניווט תחתון',
+    kind: ElementKind.container,
+    kImmutable: true,
+  ),
+  ElementDescriptor(
+    id: 'manager.entry',
+    screen: 'app',
+    area: 'nav',
+    labelHe: 'כניסת מנהל',
+    kind: ElementKind.action,
+    editableProps: {EditAxis.text},
+    kImmutable: true,
+  ),
+  ElementDescriptor(
+    id: 'studio.exit',
+    screen: 'studio',
+    area: 'chrome',
+    labelHe: 'יציאה מהסטודיו',
+    kind: ElementKind.action,
+    editableProps: {EditAxis.text},
+    kImmutable: true,
+  ),
 ];
 
 /// Pillar-2 (the no-code domain builder) overrides this to append domain elements.
@@ -137,6 +185,17 @@ final domainElementsProvider =
 /// The full registry = built-ins ⊕ domain elements.
 final elementRegistryProvider = Provider<List<ElementDescriptor>>(
   (ref) => [...kElementRegistry, ...ref.watch(domainElementsProvider)],
+);
+
+/// The critical/immutable set — every registered id flagged `kImmutable` (R1-A1).
+/// SINGLE source for both the merge defence (resolve drops a hide/reroute on these)
+/// and the publish validator, so the two can never drift (gate-118 · step 26).
+final criticalIdsProvider = Provider<Set<String>>(
+  (ref) => ref
+      .watch(elementRegistryProvider)
+      .where((d) => d.kImmutable)
+      .map((d) => d.id)
+      .toSet(),
 );
 
 /// FAIL-CLOSED lookup: returns null for an id not in [all] (the inspector then

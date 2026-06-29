@@ -78,7 +78,7 @@ void main() {
     });
   });
 
-  group('mergeNode — critical-id can never be hidden', () {
+  group('mergeNode — critical-id can never be hidden or rerouted', () {
     test('hidden is cleared for an injected critical id', () {
       const doc = ConfigDoc(
         published: ConfigLayer(global: {'nav.home': CfgNode(hidden: true)}),
@@ -92,6 +92,23 @@ void main() {
       expect(n.hidden, isNull); // critical → hidden ignored
       // …but a non-critical id keeps its hidden.
       expect(mergeNode('nav.home', doc, 'contractor').hidden, isTrue);
+    });
+
+    test('action (reroute) is cleared for a critical id (R2-#26 תוספת-ב)', () {
+      const doc = ConfigDoc(
+        published: ConfigLayer(
+          global: {'nav.home': CfgNode(action: CfgAction(kind: 'navigate'))},
+        ),
+      );
+      final n = mergeNode(
+        'nav.home',
+        doc,
+        'contractor',
+        criticalIds: {'nav.home'},
+      );
+      expect(n.action, isNull); // critical → reroute ignored
+      // …but a non-critical id keeps its action.
+      expect(mergeNode('nav.home', doc, 'contractor').action, isNotNull);
     });
   });
 

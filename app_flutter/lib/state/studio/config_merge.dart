@@ -74,15 +74,16 @@ CfgNode mergeNodeSlices(
     out = _overlay(out, draftPersona);
   }
 
-  // Critical/immutable elements can never be hidden (defence-in-depth; the inspector
-  // + publish-validator enforce the same — steps 26/27). Clear `hidden` if set.
-  if (out.hidden != null && criticalIds.contains(id)) {
+  // Critical/immutable elements can never be hidden OR action-rerouted (defence-in-
+  // depth; the inspector lock + publish-validator enforce the same — steps 26/27).
+  // Drop a `hidden`/`action` override if one ever slips into the doc for a critical id
+  // (e.g. via a future AI editor / Pillar-2) — §8.1 (R2-#26 תוספת-ב: reroute too).
+  if (criticalIds.contains(id) && (out.hidden != null || out.action != null)) {
     out = CfgNode(
       text: out.text,
       emoji: out.emoji,
       order: out.order,
       style: out.style,
-      action: out.action,
       extra: out.extra,
     );
   }

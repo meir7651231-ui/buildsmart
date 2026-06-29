@@ -37,6 +37,7 @@ import 'config_merge.dart'
     show mergeAction, mergeNodeSlices, mergeStyle, roleKeyOf;
 import 'config_node.dart';
 import 'edit_mode.dart' show editModeProvider;
+import 'element_registry.dart' show criticalIdsProvider;
 
 // ─── ConfigOp — the sealed edit family ───────────────────────────────────────
 
@@ -300,10 +301,20 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
 
   /// Promote the draft to live: field-merge onto published, prune empties, snapshot
   /// the new published to history (cap), clear draft. byEmail feeds the audit (#84).
-  void publish({String note = '', String byEmail = '', int nowMs = 0}) {
-    if (state.draft.isEmpty) return; // nothing to publish — no spurious version
+  bool publish({
+    String note = '',
+    String byEmail = '',
+    int nowMs = 0,
+    Set<String> criticalIds = const {},
+  }) {
+    if (state.draft.isEmpty) return false; // nothing to publish — no spurious version
+    // Publish-validator (#26): strip any hide/reroute of a critical id BEFORE it goes
+    // live (the merge already neutralizes it at resolve — this keeps `published` clean
+    // too). What remains is the legal part of the draft.
+    final cleanDraft = _sanitizeCritical(state.draft, criticalIds);
+    if (cleanDraft.isEmpty) return false; // the draft was ONLY illegal critical edits
     final vid = _nextVersionId(nowMs);
-    final newPublished = _promote(state.published, state.draft);
+    final newPublished = _promote(state.published, cleanDraft);
     final version = ConfigVersion(
       id: vid,
       snapshot: newPublished,
@@ -320,7 +331,49 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
     _undo.clear();
     _redo.clear();
     _save();
+    return true;
   }
+
+  /// The critical ids whose DRAFT illegally hides or reroutes them (global or any
+  /// persona) — the publish-validator's report, for an inline owner warning (#26).
+  Set<String> criticalViolations(Set<String> criticalIds) {
+    final out = <String>{};
+    for (final id in criticalIds) {
+      if (_violates(state.draft.global[id])) out.add(id);
+      for (final layer in state.draft.persona.values) {
+        if (_violates(layer[id])) out.add(id);
+      }
+    }
+    return out;
+  }
+
+  static bool _violates(CfgNode? n) =>
+      n != null && (n.hidden != null || n.action != null);
+
+  /// [draft] with every critical id's `hidden`/`action` override removed (global +
+  /// persona). A node emptied by the strip is dropped. Pure; returns a NEW layer.
+  ConfigLayer _sanitizeCritical(ConfigLayer draft, Set<String> criticalIds) {
+    if (criticalIds.isEmpty) return draft;
+    var out = draft;
+    for (final id in criticalIds) {
+      if (_violates(out.global[id])) {
+        out = _withNode(out, id, _stripGuard(out.global[id]!), null);
+      }
+      for (final persona in out.persona.keys.toList()) {
+        final n = out.persona[persona]?[id];
+        if (_violates(n)) out = _withNode(out, id, _stripGuard(n!), persona);
+      }
+    }
+    return out;
+  }
+
+  static CfgNode _stripGuard(CfgNode n) => CfgNode(
+        text: n.text,
+        emoji: n.emoji,
+        order: n.order,
+        style: n.style,
+        extra: n.extra,
+      );
 
   /// Forward-only rollback: re-publish an old version's snapshot as a NEW version
   /// (never destroys history). Returns false if the version id is unknown.
@@ -493,6 +546,7 @@ final resolvedNodeProvider =
       configStoreProvider.select((d) => d.draft.persona[roleKey]?[id]),
     ),
     includeDraft: includeDraft,
+    criticalIds: ref.watch(criticalIdsProvider),
   );
 });
 
