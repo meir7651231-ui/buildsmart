@@ -1,0 +1,129 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// BuildSmart Studio · Pillar 1 · Step 16 — the Studio control-center shell.
+//
+// Four panes via IndexedStack: 🗂️ עץ (tree, s18) · 🛠️ מפקח (inspector, s19) ·
+// 🎨 עיצוב (theme, s24) · 🕘 גרסאות (history, s21). RTL + a light scaffold + white
+// AppBar (cloned from manager_dashboard chrome). Reached only from the manager row
+// (s20); `route()` is kStudioFlag-guarded so even a deep-link can't enter when the
+// Studio is inactive ⇒ zero behavior change until then. Panes are placeholders here.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'package:buildsmart/state/studio/edit_mode.dart' show studioActiveProvider;
+import 'package:buildsmart/theme/tokens.dart' show BsTokens;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// The Studio control center (shell only in s16).
+class StudioScreen extends ConsumerStatefulWidget {
+  const StudioScreen({super.key});
+
+  /// kStudioFlag-guarded route — returns null when the Studio isn't active, so a
+  /// stray deep-link / call can never open it off-gate.
+  static Route<void>? route(WidgetRef ref) => ref.read(studioActiveProvider)
+      ? MaterialPageRoute<void>(builder: (_) => const StudioScreen())
+      : null;
+
+  @override
+  ConsumerState<StudioScreen> createState() => _StudioScreenState();
+}
+
+class _StudioScreenState extends ConsumerState<StudioScreen> {
+  int _pane = 0;
+
+  static const _segments = <(String, String, String)>[
+    ('🗂️', 'עץ', 'עץ הרכיבים'),
+    ('🛠️', 'מפקח', 'מפקח העריכה'),
+    ('🎨', 'עיצוב', 'ערכת נושא'),
+    ('🕘', 'גרסאות', 'היסטוריית גרסאות'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.cardLight,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: const Text(
+            '🎨 סטודיו',
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close, color: BsTokens.inkLight),
+              tooltip: 'סגור',
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(BsTokens.space3),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (var i = 0; i < _segments.length; i++)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 8),
+                        child: ChoiceChip(
+                          selected: _pane == i,
+                          label: Text('${_segments[i].$1} ${_segments[i].$2}'),
+                          onSelected: (_) => setState(() => _pane = i),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: IndexedStack(
+                index: _pane,
+                children: [
+                  for (final s in _segments) _PanePlaceholder(title: s.$3),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PanePlaceholder extends StatelessWidget {
+  const _PanePlaceholder({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: BsTokens.typeTitleSm,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: BsTokens.space2),
+          const Text(
+            'נבנה בשלבים הקרובים',
+            style: TextStyle(color: BsTokens.mutedLight),
+          ),
+        ],
+      ),
+    );
+  }
+}

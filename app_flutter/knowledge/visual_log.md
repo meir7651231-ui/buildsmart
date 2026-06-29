@@ -1899,3 +1899,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (OFF = answer-equivalent + golden). 5 כותרות ה-KPI בלוח-הבקרה של המנהל (הזמנות פתוחות · מוצרים בקטלוג · אביזרים נלווים · זמינים כעת · חנויות פעילות) עברו מ-`Text(label,…)` ל-`CfgText(id, label,…)` — **אותו style/maxLines/overflow בדיוק.** עם doc ריק (kStudioFlag כבוי) ⇒ אותו פיקסל. `_MetricTile` קיבל `cfgId`; 5 descriptors (wired:true) נוספו ל-registry.
 **אימות (אוטומטי):** `registry_contract_test` +1 (5 pilot-ids ⊆ registry) = 7 · `descriptor_contract` 3 · analyze 0 (5 infos קיימים-מראש ב-mega-file, לא מהשינוי). revert = `CfgText→Text` טהור.
 **הפיכות:** `git checkout lib/screens/manager_dashboard_screen.dart` + הסר 5 descriptors מ-`element_registry.dart`.
+
+## studio-s16 — קונכיית-הסטודיו: שלד המסך — שינוי-נראה: אפס (לא-נגיש) — 2026-06-29
+**שינוי נראה:** **אפס.** `lib/screens/studio/studio_screen.dart` — מסך-הסטודיו (RTL + scaffold בהיר + AppBar לבן + 4 panes ב-`IndexedStack` עם placeholders + ChoiceChips למעבר). **בלתי-נגיש** — `route()` גדור ב-`studioActiveProvider` (מחזיר null כש-OFF), והכניסה מהמנהל מחווטת רק ב-s20. אין נתיב למסך ⇒ אפס שינוי גלוי.
+**אימות (אוטומטי):** `studio_screen_test` 2 ירוקים (RTL + AppBar לבן · route()==null כש-inactive / !=null כש-active) · analyze 0.
+**הפיכות:** `git rm -r lib/screens/studio/` (אין נתיב/צרכן).

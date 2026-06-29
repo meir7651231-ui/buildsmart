@@ -2877,3 +2877,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 ### #studio-s15 — סטודיו · סיכום zero-regression (Pillar-1 gate) (עמוד-1 · שלב-15) — 2026-06-29
 **EDIT `test/studio/zero_regression_test.dart`:** הוכחת אפס-הרגרסיה הקנונית של Pillar-1 — לולאה **פרמטרית** על כל roleKey ([null/contractor/store/courier/worker/manager]): doc-ריק + Studio כבוי ⇒ `resolvedNodeProvider('any.id')` == `CfgNode.identity` ⇒ כל wrapper מרנדר fallback מילולי. מצטרף ל-overlay==SizedBox (s13) + cannot-flip-#84 (s8) באותו קובץ.
 - **`zero_regression_test` = ה-gate של Pillar-1** (frozen-seam): כל תוספת ב-Pillars 2–5 חייבת לעבור אותו. 20 ירוקים · analyze 0 · test-only. **✅ Phase A+B (שלבים 1–15) הושלמו.** הבא: **Phase C — s16: קונכיית-הסטודיו (`studio_screen` shell — IndexedStack panes + chrome RTL, גדור kStudioFlag).**
+
+### #studio-s16 — סטודיו · שלד קונכיית-הסטודיו (Phase C) (עמוד-2 · שלב-16) — 2026-06-29
+**`lib/screens/studio/studio_screen.dart` (חדש):** `StudioScreen` (ConsumerStatefulWidget) — RTL + `Scaffold(bgLight)` + `AppBar(cardLight, elevation:0, no-leading)` + 4 panes ב-`IndexedStack` (עץ/מפקח/עיצוב/גרסאות — placeholders) + ChoiceChips למעבר-pane. `static route(WidgetRef)→Route?` **גדור ב-`studioActiveProvider`** (null כש-OFF ⇒ אין deep-link). chrome מועתק מ-manager_dashboard.
+- **בלתי-נגיש עד s20** (אין כניסה מחווטת) ⇒ אפס-התנהגות. panes אמיתיים: s18 (tree) · s19 (inspector) · s21 (history) · s24 (theme).
+- **gate:** `studio_screen_test` 2 ירוקים (RTL+AppBar לבן · route-guard) · analyze **0** · lib/screens → גייט 116 (visual_log, שינוי-נראה אפס) + 24. **Phase C החלה.** הבא: s17 (top-bar: badge-טיוטה · פרסם לכולם · בטל · toggle-עריכה).
