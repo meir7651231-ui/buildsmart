@@ -70,6 +70,19 @@ void main() {
       expect(fs, isA<double>());
     });
 
+    test('a non-numeric fontScale is tolerated (→ null, never throws)', () {
+      expect(CfgStyle.fromJson({'fontScale': 'big'}).fontScale, isNull);
+      expect(CfgStyle.fromJson({'fontScale': true}).fontScale, isNull);
+      // a bad value must NOT poison the whole node decode (else the sink would
+      // discard the entire persisted doc).
+      expect(
+        CfgNode.fromJson(const {
+          'style': {'fontScale': 'big'},
+        }).style?.fontScale,
+        isNull,
+      );
+    });
+
     test('empty style ⇒ isEmpty and is dropped from the parent node JSON', () {
       expect(const CfgStyle().isEmpty, isTrue);
       expect(const CfgNode(style: CfgStyle()).toJson(), <String, dynamic>{});

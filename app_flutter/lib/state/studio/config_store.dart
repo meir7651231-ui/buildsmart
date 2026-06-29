@@ -233,7 +233,12 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
 
   Future<void> _load() async {
     final loaded = await _sink.load();
-    if (loaded != null && mounted) state = loaded;
+    // Adopt the persisted doc ONLY if no edit raced ahead of the async load
+    // (pristine: still the empty seed, nothing on the undo stack) — else a draft
+    // made during the load window would be silently clobbered (lost update).
+    if (loaded != null && mounted && state == ConfigDoc.empty && _undo.isEmpty) {
+      state = loaded;
+    }
   }
 
   // ── PUBLIC op-based API (the seam Pillar-4 uses) ──
@@ -241,12 +246,13 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   /// Apply a batch of edits to the draft as ONE undoable step (R1-A3).
   void applyOps(List<ConfigOp> ops, {String? persona}) {
     if (ops.isEmpty) return;
-    _undo.add(state.draft); // sparse draft snapshot (light)
-    _redo.clear();
     var d = state.draft;
     for (final op in ops) {
       d = _withNode(d, op.id, op.apply(_nodeIn(d, op.id, persona)), persona);
     }
+    if (d == state.draft) return; // no-op batch — no phantom undo frame / notify
+    _undo.add(state.draft); // sparse draft snapshot (light)
+    _redo.clear();
     state = state.copyWith(draft: d);
     _save();
   }
@@ -284,15 +290,23 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
     _save();
   }
 
+  /// A strictly-increasing version id (the rollback key): never collides even on a
+  /// same-millisecond publish or a caller relying on the default `nowMs`.
+  int _nextVersionId(int nowMs) {
+    final last = state.history.isEmpty ? 0 : state.history.first.id;
+    return nowMs > last ? nowMs : last + 1;
+  }
+
   /// Promote the draft to live: field-merge onto published, prune empties, snapshot
   /// the new published to history (cap), clear draft. byEmail feeds the audit (#84).
   void publish({String note = '', String byEmail = '', int nowMs = 0}) {
-    final ts = nowMs;
+    if (state.draft.isEmpty) return; // nothing to publish — no spurious version
+    final vid = _nextVersionId(nowMs);
     final newPublished = _promote(state.published, state.draft);
     final version = ConfigVersion(
-      id: ts,
+      id: vid,
       snapshot: newPublished,
-      publishedAtMs: ts,
+      publishedAtMs: nowMs,
       note: note,
       byEmail: byEmail,
     );
@@ -312,11 +326,11 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   bool rollback(int versionId, {String byEmail = '', int nowMs = 0}) {
     final v = state.history.where((x) => x.id == versionId).firstOrNull;
     if (v == null) return false;
-    final ts = nowMs;
+    final vid = _nextVersionId(nowMs);
     final version = ConfigVersion(
-      id: ts,
+      id: vid,
       snapshot: v.snapshot,
-      publishedAtMs: ts,
+      publishedAtMs: nowMs,
       note: 'שחזור גרסה ${v.id}',
       byEmail: byEmail,
     );
@@ -337,10 +351,12 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   /// The single-node draft edit primitive. `applyOps` is built on this; Pillar-4
   /// must go through `applyOps`, never here (R1-A3).
   void editDraft(String id, CfgNode Function(CfgNode) fn, {String? persona}) {
+    final next = fn(_nodeIn(state.draft, id, persona));
+    final d = _withNode(state.draft, id, next, persona);
+    if (d == state.draft) return; // no-op edit — no phantom undo frame / notify
     _undo.add(state.draft);
     _redo.clear();
-    final next = fn(_nodeIn(state.draft, id, persona));
-    state = state.copyWith(draft: _withNode(state.draft, id, next, persona));
+    state = state.copyWith(draft: d);
     _save();
   }
 

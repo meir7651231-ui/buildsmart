@@ -48,7 +48,10 @@ T? _enumByName<T extends Enum>(List<T> values, Object? raw) {
 /// Coerce a JSON number to a clamped font-scale (trouble (ד): JSON `int`→`double`).
 /// Defensive clamp 0.8..1.6 so a corrupt stored value can't break layout.
 double? _clampScale(Object? raw) {
-  final v = (raw as num?)?.toDouble();
+  // `is num` (not `as num?`) — a forward-version / corrupt doc may store fontScale
+  // as a String/bool/list; tolerate it (→ null) instead of throwing, which would
+  // otherwise propagate up and make LocalPrefsSink discard the ENTIRE document.
+  final v = (raw is num) ? raw.toDouble() : null;
   return v == null ? null : v.clamp(0.8, 1.6).toDouble();
 }
 

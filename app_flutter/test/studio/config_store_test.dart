@@ -55,6 +55,15 @@ void main() {
       s.applyOps([const SetText('a', '2')]);
       expect(s.canRedo, isFalse); // redo invalidated by a fresh edit
     });
+
+    test('a no-op applyOps adds NO undo frame (no phantom step)', () {
+      final s = store();
+      s.applyOps([const SetText('a', '1')]); // one real step
+      s.applyOps([const SetText('a', '1')]); // same value ⇒ no-op, no push
+      s.undo();
+      expect(s.state.draft.global, isEmpty); // the ONE real step undone fully
+      expect(s.canUndo, isFalse); // no leftover phantom frame
+    });
   });
 
   group('publish', () {
@@ -83,6 +92,23 @@ void main() {
       final st = s.state.published.global['h']!.style!;
       expect(st.fontScale, 1.4); // new
       expect(st.colorToken, 'brand'); // preserved (field-merge)
+    });
+
+    test('publishing an empty draft is a no-op (no spurious version)', () {
+      final s = store();
+      s.publish(nowMs: 1); // nothing staged
+      expect(s.state.history, isEmpty);
+      expect(s.state.published.global, isEmpty);
+    });
+
+    test('same-nowMs publishes still get DISTINCT version ids (monotonic)', () {
+      final s = store();
+      s.applyOps([const SetText('a', '1')]);
+      s.publish(nowMs: 5);
+      s.applyOps([const SetText('b', '2')]);
+      s.publish(nowMs: 5); // same ms — must not collide
+      final ids = s.state.history.map((v) => v.id).toList();
+      expect(ids.toSet().length, ids.length); // all unique
     });
   });
 
