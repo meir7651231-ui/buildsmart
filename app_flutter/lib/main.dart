@@ -13,6 +13,7 @@ import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
+import 'package:buildsmart/widgets/studio/studio_overlay.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -393,6 +394,11 @@ class BuildSmartApp extends ConsumerWidget {
                   // the diag/{uid} isFromCache probe. Positioned below the debug
                   // badge in debug; owns the top in release.
                   const ConnectionIndicator(),
+                  // No-Code Studio edit-mode overlay — inert (SizedBox.shrink)
+                  // unless the owner has the Studio ACTIVE and is in edit-mode;
+                  // exactly the ConnectionIndicator always-mounted-inert pattern,
+                  // so a normal build is answer-equivalent.
+                  const StudioOverlay(),
                 ],
               ),
             ),

@@ -8,6 +8,8 @@
 // (Step 15 will EXTEND this file with the Cfg* wrapper zero-regression cases.)
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart';
+import 'package:buildsmart/widgets/studio/studio_overlay.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -148,6 +150,56 @@ void main() {
         ..exitEdit();
       expect(n.auditLog.map((e) => e.action), ['enter', 'exit']);
       expect(n.auditLog.first.email, owner);
+    });
+  });
+
+  group('StudioOverlay — inert off-gate (#13)', () {
+    testWidgets('off-gate ⇒ SizedBox.shrink, no banner (answer-equivalent)', (
+      tester,
+    ) async {
+      final c = ProviderContainer(
+        overrides: [
+          studioActiveProvider.overrideWithValue(false),
+          studioOwnerEmailProvider.overrideWithValue(null),
+          studioInManagerContextProvider.overrideWithValue(false),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const Directionality(
+            textDirection: TextDirection.rtl,
+            child: StudioOverlay(),
+          ),
+        ),
+      );
+      expect(find.byType(StudioOverlay), findsOneWidget);
+      expect(find.text('צא'), findsNothing); // no edit banner off-gate
+    });
+
+    testWidgets('on-gate (owner+manager+active, editing) ⇒ the edit banner', (
+      tester,
+    ) async {
+      final c = ProviderContainer(
+        overrides: [
+          studioActiveProvider.overrideWithValue(true),
+          studioOwnerEmailProvider.overrideWithValue(owner),
+          studioInManagerContextProvider.overrideWithValue(true),
+        ],
+      );
+      addTearDown(c.dispose);
+      c.read(editModeProvider.notifier).enterEdit();
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(
+            home: Stack(children: [StudioOverlay()]),
+          ),
+        ),
+      );
+      expect(find.text('✏️ מצב עריכה'), findsOneWidget);
+      expect(find.text('צא'), findsOneWidget);
     });
   });
 }

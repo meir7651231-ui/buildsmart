@@ -1889,3 +1889,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס.** ארבעה עוטפנים נוספים, כולם drop-in: **ללא override ⇒ ה-child מילולית.** `CfgVisible` (הסתרה; ב-edit-mode ghost+badge "מוסתר" כדי שאפשר יהיה לשחזר), `CfgBox` (רקע/padding לפי token), `CfgList` (סדר לפי `order`), `cfgAction` (resolver — v1 fallthrough ל-onTap המקורי). **אין מסך שצורך אותם עדיין** (אימוץ-פיילוט שלב-14) ⇒ אפס שינוי גלוי.
 **אימות (אוטומטי):** `cfg_wrappers_test` 16 ירוקים (no-override⇒verbatim לכל wrapper · hidden+editing⇒ghost · order-resort · action-fallthrough) · analyze 0.
 **הפיכות:** `git rm` על 4 הקבצים (אין צרכן).
+
+## studio-s13 — StudioOverlay (באנר מצב-עריכה) — שינוי-נראה: אפס off-gate — 2026-06-29
+**שינוי נראה:** off-gate (הבילד הרגיל) = **אפס** — `StudioOverlay` מחזיר `SizedBox.shrink` (inert, אפס pointer-area, בדיוק כמו `ConnectionIndicator`; עם `kStudioFlag` const-OFF נעלם ב-tree-shaking). on-gate (בעלים + דגל פעיל + edit-mode) = באנר עליון "✏️ מצב עריכה" + כפתור "צא". שורה אחת **additive** ב-`main.dart` ליד `ConnectionIndicator`.
+**אימות (אוטומטי):** `zero_regression_test` +2 (off⇒SizedBox/ללא-באנר · on⇒באנר) = 14 ירוקים · analyze 0 בקבצים החדשים (ב-main.dart 6 infos קיימים-מראש — לא מהשינוי).
+**הפיכות:** הסר את שורת `const StudioOverlay()` מ-main.dart + `git rm studio_overlay.dart`.
