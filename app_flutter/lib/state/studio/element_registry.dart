@@ -267,6 +267,34 @@ const List<ElementDescriptor> kElementRegistry = [
     editableProps: {EditAxis.text, EditAxis.style},
     wired: true,
   ),
+  // catalog product-chip actions (s29-b11) — completes catalog static-text adoption.
+  ElementDescriptor(
+    id: 'catalog.action.proposal',
+    screen: 'catalog',
+    area: 'action',
+    labelHe: 'כפתור: הצעה',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.action.draft',
+    screen: 'catalog',
+    area: 'action',
+    labelHe: 'כפתור: נסח',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.action.howToBridge',
+    screen: 'catalog',
+    area: 'action',
+    labelHe: 'כפתור: איך לגשר?',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
   // ── Critical/protected set (step 26) — navigation + auth the owner may RENAME but
   // never hide or re-route. `kImmutable:true` is the canonical critical flag (R1-A1);
   // declared here (wired:false) so the merge defence + publish validator protect them

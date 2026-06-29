@@ -5177,11 +5177,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 },
                                 child: const Padding(
                                   padding: EdgeInsetsDirectional.only(end: 8),
-                                  child: Text('📋 הצעה',
-                                      style: TextStyle(
-                                          color: Color(0xFF0F766E),
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w700)),
+                                  child: const CfgText(
+                                    'catalog.action.proposal',
+                                    '📋 הצעה',
+                                    style: TextStyle(
+                                      color: Color(0xFF0F766E),
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -5209,11 +5213,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     child: const Padding(
                                       padding:
                                           EdgeInsetsDirectional.only(end: 8),
-                                      child: Text('✨ נסח',
-                                          style: TextStyle(
-                                              color: Color(0xFF6D28D9),
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w700)),
+                                      child: const CfgText(
+                                        'catalog.action.draft',
+                                        '✨ נסח',
+                                        style: TextStyle(
+                                          color: Color(0xFF6D28D9),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -5339,13 +5347,16 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                               sku: prod.sku)),
                                       child: const Padding(
                                         padding: EdgeInsets.only(top: 4),
-                                        child: Text('🔌 איך לגשר?',
-                                            style: TextStyle(
-                                                color: Color(0xFF1D4ED8),
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w800,
-                                                decoration: TextDecoration
-                                                    .underline)),
+                                        child: const CfgText(
+                                          'catalog.action.howToBridge',
+                                          '🔌 איך לגשר?',
+                                          style: TextStyle(
+                                            color: Color(0xFF1D4ED8),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),

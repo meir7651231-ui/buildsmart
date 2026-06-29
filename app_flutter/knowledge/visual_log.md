@@ -2004,3 +2004,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס (answer-equivalent).** Batch-10 — 4 ליטרלים עם emoji-לגאסי בקטלוג → CfgText: '📦 נתוני קטלוג' (כותרת)·'🔧 בנה לי קו (BOM)'·'➕ הוסף לפרויקט'·'💾 שמור גרסה' (כפתורי-פעולה) → `catalog.detail.dataHeader`·`catalog.action.{buildBom/addToProject/saveVersion}`. ה-emoji כבר-לגאסי (אין emoji חדש → gate-64 בטוח). ליטרל+style fallback (const נשמר). +4 registry rows. **14 תוויות-קטלוג ניתנות-לעריכה.**
 **אימות (אוטומטי):** `gate_118_test` (ids⊆registry) · `registry_contract` 8 · `zero_regression` 28 · analyze 0.
 **הפיכות:** `CfgText→Text` (4) + הסר 4 registry rows.
+
+## studio-s29-b11 — Phase E אימוץ-תוכן (CfgText): כפתורי-צ'יפ בקטלוג — שינוי-נראה: אפס — 2026-06-29
+**שינוי נראה:** **אפס (answer-equivalent).** Batch-11 — 3 כפתורי-צ'יפ בקטלוג → CfgText: '📋 הצעה'·'✨ נסח'·'🔌 איך לגשר?' → `catalog.action.{proposal/draft/howToBridge}`. (היו `Text(` לא-const עם args-const ⇒ עטפתי כ-`const CfgText`, analyze אישר.) +3 registry rows. **17 תוויות-קטלוג ניתנות-לעריכה — אימוץ-הטקסט-הסטטי בקטלוג הושלם מהותית.** הנותר בקטלוג = interpolated/`Text.rich` (out-of-v1).
+**אימות (אוטומטי):** `gate_118_test` (ids⊆registry) · `zero_regression` · analyze 0.
+**הפיכות:** `CfgText→Text` (3) + הסר 3 registry rows.
