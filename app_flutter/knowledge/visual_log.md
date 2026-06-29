@@ -1884,3 +1884,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס.** `CfgText(id, fallback)` הוא drop-in ל-`Text(fallback)`. עם doc ריק (kStudioFlag כבוי) ה-node המ-resolved הוא identity ⇒ מרנדר את ה-literal העברי **מילולית**, אותו style/align/maxLines כמו Text גולמי. **אין מסך שצורך אותו עדיין** (אימוץ-פיילוט בשלב-14) ⇒ אפס שינוי גלוי. רק עם override מפורסם (בעלים): טקסט/אמוג'י/style-לפי-token חלים; ב-edit-mode עטוף ב-EditHandle.
 **אימות (אוטומטי):** `cfg_wrappers_test` +4 ל-CfgText (empty⇒verbatim+RTL+style-null · text-override · emoji-prepend · token-color=brand) = 6 ירוקים בקובץ · analyze 0.
 **הפיכות:** `git rm lib/widgets/studio/cfg_text.dart` (אין צרכן).
+
+## studio-s11 — CfgVisible/CfgBox/CfgList/CfgAction — שינוי-נראה: אפס (מגודר) — 2026-06-29
+**שינוי נראה:** **אפס.** ארבעה עוטפנים נוספים, כולם drop-in: **ללא override ⇒ ה-child מילולית.** `CfgVisible` (הסתרה; ב-edit-mode ghost+badge "מוסתר" כדי שאפשר יהיה לשחזר), `CfgBox` (רקע/padding לפי token), `CfgList` (סדר לפי `order`), `cfgAction` (resolver — v1 fallthrough ל-onTap המקורי). **אין מסך שצורך אותם עדיין** (אימוץ-פיילוט שלב-14) ⇒ אפס שינוי גלוי.
+**אימות (אוטומטי):** `cfg_wrappers_test` 16 ירוקים (no-override⇒verbatim לכל wrapper · hidden+editing⇒ghost · order-resort · action-fallthrough) · analyze 0.
+**הפיכות:** `git rm` על 4 הקבצים (אין צרכן).

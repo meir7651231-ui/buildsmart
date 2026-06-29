@@ -2846,3 +2846,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 **`lib/widgets/studio/cfg_text.dart` (חדש):** `CfgText(id, fallback, {style, textAlign, maxLines, overflow, softWrap})` — `ConsumerWidget`, drop-in ל-`Text`. `n=resolvedNodeProvider(id)`; `txt=n.text??fallback`; emoji-prepend אם `n.emoji`; `applyCfgTextStyle(context, style, n.style)`; עטוף ב-`EditHandle.maybe`. **doc-ריק/ללא-override ⇒ `Text(fallback, style: style)` מילולי** — חוזה אפס-הרגרסיה (gates 61/64).
 - **`applyCfgTextStyle`:** override==null ⇒ מחזיר `callSite` **בדיוק** (identity מוכח בטסט). עם override: ממזג tokens מעל `DefaultTextStyle`+callSite — `cfgColorFromToken`/`cfgWeightFromToken`/`cfgSizeFromToken` (vocab תואם-עורך-נושא שלב-24) + `fontScale` כופל. token לא-מוכר ⇒ מתעלם (שומר base).
 - **gate:** `cfg_wrappers_test` +4 (empty⇒verbatim+RTL+style-null · text-override · emoji-prepend · token-color=brand) = 6 ירוקים · analyze **0** · lib/widgets → גייט 116 (visual_log) + 24. הבא: `CfgVisible`/`CfgList`/`CfgBox`/`CfgAction` (שלב-11).
+
+### #studio-s11 — סטודיו · CfgVisible/CfgBox/CfgList/CfgAction (עמוד-1 · שלב-11) — 2026-06-29
+**4 קבצים חדשים ב-`lib/widgets/studio/`** — כולם drop-in, **ללא override ⇒ child מילולית** (אפס-רגרסיה):
+- `cfg_visible.dart` — `CfgVisible(id, {child, critical})`: `hidden=!critical&&(n.hidden??false)`. לא-מוסתר⇒child · מוסתר+לא-עורך⇒`SizedBox.shrink` · מוסתר+edit⇒ghost(`Opacity .35`)+badge "מוסתר" (כדי לשחזר — pitfall a).
+- `cfg_box.dart` — `CfgBox(id, {child})`: `bgToken`→`ColoredBox`, `pad`(`EdgeKey`)→`Padding` (`cfgEdgeFromKey` none/sm/md/lg → BsTokens spaces). ללא style⇒child. עטוף ב-`EditHandle`.
+- `cfg_list.dart` — `CfgList({items:[CfgListItem(id,child)], builder})`: מיון **יציב** לפי `n.order` (חסר⇒index ⇒ ללא override=סדר-הצהרה). ה-`builder` מחזיק את ה-container (layout של הקורא נשמר). drag-reorder ידחה ל-write-path של ה-inspector.
+- `cfg_action.dart` — `cfgAction(ref, id, fallback)→VoidCallback?`: v1 תמיד `fallback` (registry-הפעולות = Pillar-4); seam לאימוץ call-sites כבר עכשיו, fallthrough בטוח (kind לא-מוכר לא בולע tap — pitfall d).
+- **gate:** `cfg_wrappers_test` 16 ירוקים (no-override⇒verbatim לכל ה-4 · ghost · resort · fallthrough) · analyze **0** · lib/widgets → 116+24. **פאזה-B — עוטפנים (9–11) הושלמו.** הבא: `ElementRegistry` (12) + `StudioOverlay` (13).
