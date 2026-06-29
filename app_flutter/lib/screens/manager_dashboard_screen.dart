@@ -583,7 +583,7 @@ class _MetricTile extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           border: Border.all(color: const Color(0xFFEDEDED)),
         ),
         child: Column(
@@ -666,7 +666,7 @@ class _OrderPipeline extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
       child: Column(
@@ -981,7 +981,7 @@ class _OrderSummary extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
       child: Row(
@@ -1095,14 +1095,14 @@ class _OrderRow extends StatelessWidget {
             'קבלן/אתר/סטטוס ופעולת קידום שלב.',
         child: Material(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             onTap: onTap,
             child: Container(
               padding: const EdgeInsets.all(BsTokens.space4),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 border: Border.all(color: const Color(0xFFEDEDED)),
               ),
               child: Column(
@@ -1787,7 +1787,7 @@ class _CustomerSummary extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
       child: Row(
@@ -1917,14 +1917,14 @@ class _CustomerCard extends ConsumerWidget {
             'בנייה ורשימת ההזמנות שלו. תצוגה בלבד.',
         child: Material(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             onTap: onTap,
             child: Container(
               padding: const EdgeInsets.all(BsTokens.space4),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 border: Border.all(color: const Color(0xFFEDEDED)),
               ),
               child: Column(
@@ -2536,7 +2536,7 @@ class _ManageIntro extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: BsTokens.brand.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
       child: const Text(
         '🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.',
@@ -2584,7 +2584,7 @@ class _ManageSection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEDEDED)),
       ),
       child: Column(
@@ -2605,9 +2605,9 @@ class _ManageSection extends StatelessWidget {
                   'תפקידים.',
               child: Material(
                 color: Colors.transparent,
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   onTap: onTap,
                   child: Padding(
                     padding: const EdgeInsets.all(BsTokens.space4),

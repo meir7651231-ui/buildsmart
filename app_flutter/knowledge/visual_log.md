@@ -1964,3 +1964,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס בברירת-מחדל.** Batch-2 (אימוץ-radius): שני אתרי `BorderRadius.circular(BsTokens.radiusCard)` בכרטיס `_CopilotHero` (InkWell + BoxDecoration, שניהם non-const, `context` זמין) → `BorderRadius.circular(cfgRadius(context))`. `cfgRadius` default = radiusCard = 20 = נוכחי ⇒ פיקסל-זהה. **כשהבעלים יזיז את ה-radius-slider ויפרסם — פינות-הכרטיס ישתנו חי** (מתחיל לסגור את ה-deferred מ-r2-fix-3). ללא registry (קורא theme גלובלי, לא id פר-אלמנט).
 **אימות (אוטומטי):** `config_theme_test` 12 (+cfgRadius: override⇒8 · fallback⇒radiusCard, דרך `Theme` מפורש כדי לעקוף את אנימציית-ה-theme של MaterialApp) · `zero_regression` 16 — ירוקים · analyze 0.
 **הפיכות:** `cfgRadius(context)→BsTokens.radiusCard` חזרה (2 אתרים).
+
+## studio-s29-b3 — Phase E אימוץ-עיצוב: כל קוקפיט-המנהל → cfgRadius — שינוי-נראה: אפס (default) — 2026-06-29
+**שינוי נראה:** **אפס בברירת-מחדל.** Batch-3: כל 14 אתרי `BorderRadius.circular(BsTokens.radiusCard)` שנותרו ב-`manager_dashboard_screen.dart` → `cfgRadius(context)` (replace_all; כולם non-const + `context` זמין — אומת ע"י analyze נקי, שתופס const/missing-context מיידית). סך-הכל 16 אתרים בקובץ עכשיו עם cfgRadius. **כל כרטיסי לוח-המנהל (KPI · הזמנות · קופי-פיילוט · ...) מגיבים עכשיו ל-radius-slider חי.** `Radius.circular(radiusCard)` ב-const RoundedRectangleBorder (922/1734 · גליונות-תחתית) נשארו — const, מחוץ ל-pattern. cfgRadius default=20 ⇒ פיקסל-זהה.
+**אימות (אוטומטי):** `zero_regression` 16 · `config_theme_test` 12 · `gate_118` · `a11y_contrast_theme_test` 5 — כולם ירוקים · analyze 0 (תופס כל const/context-error — נקי ⇒ כל 14 חוקיים).
+**הפיכות:** replace_all חזרה `cfgRadius(context)→BsTokens.radiusCard`.
