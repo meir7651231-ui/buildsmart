@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/config_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -64,6 +65,9 @@ class AppTheme {
           onAccent: highContrast ? BsTokens.inkLight : Colors.white,
           success: highContrast ? BsTokens.successDark : BsTokens.success,
         ),
+        // Owner-overridable app theme; defaults = BsTokens ⇒ inert until step 24
+        // wires the published theme + the live editor.
+        CfgTheme.fallback,
       ],
     );
   }
