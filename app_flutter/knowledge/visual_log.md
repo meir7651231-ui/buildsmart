@@ -1914,3 +1914,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (המסך עדיין לא-נגיש). תוצאת נחיל-ביקורת היסוד: publish/discard/route עברו להיגדר ב-`studioCanEditProvider` (owner∧manager∧active) ולא רק ב-draft-count/active — לא ניתן לפרסם/לפתוח את הסטודיו כלא-בעלים גם אם הוא ירונדר (defence-in-depth). + EdgeInsetsDirectional ב-_PublishSheet.
 **אימות (אוטומטי):** כל חבילת studio (100 בדיקות) ירוקה — כולל route-null-ל-non-owner + publish-disabled-for-non-owner-even-with-draft · analyze 0.
 **הפיכות:** `git revert` של קומיט ה-audit-r1-A.
+
+## studio-s18 — קונכיית-הסטודיו: Pane A עץ-הרכיבים — שינוי-נראה: אפס (לא-נגיש) — 2026-06-29
+**שינוי נראה:** **אפס** (המסך עדיין לא-נגיש עד s20). Pane A — עץ screen→area→element מ-`elementRegistryProvider`, **וירטואלי** (`ListView.builder` על flattened-rows, לא nested ExpansionTile — scale). חיפוש לפי labelHe/id + dropdown persona (scope) + tap→בחירה (`studioSelectedIdProvider`, ל-inspector s19). read-only.
+**אימות (אוטומטי):** `tree_pane_test` 4 ירוקים (lists · search-filter · tap-selects · persona-scope) · `studio_screen` 4 (לא נשבר) · analyze 0.
+**הפיכות:** `git rm` tree_pane.dart + studio_nav.dart, החזר placeholder ל-pane 0.

@@ -8,6 +8,7 @@
 // Studio is inactive ⇒ zero behavior change until then. Panes are placeholders here.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/screens/studio/panes/tree_pane.dart';
 import 'package:buildsmart/screens/studio/studio_top_bar.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart' show studioCanEditProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
@@ -91,7 +92,10 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
               child: IndexedStack(
                 index: _pane,
                 children: [
-                  for (final s in _segments) _PanePlaceholder(title: s.$3),
+                  const TreePane(),
+                  _PanePlaceholder(title: _segments[1].$3),
+                  _PanePlaceholder(title: _segments[2].$3),
+                  _PanePlaceholder(title: _segments[3].$3),
                 ],
               ),
             ),
