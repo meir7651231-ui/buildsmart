@@ -1909,3 +1909,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (המסך עדיין בלתי-נגיש עד s20). top-bar למסך-הסטודיו: badge "טיוטה · N שינויים" · מתג "מצב עריכה" · "בטל טיוטה" · "פרסם לכולם" (כבוי כש-N=0). פרסום → bottom-sheet אישור-היקף (R2-#13): "ישפיע על כל המשתמשים — N" + שדה-note inline + dropdown "צפה כפי ש-<פרסונה>" (מספר-שינויים-לפי-roleKey) + פרסם/ביטול → `publish(note, byEmail=owner)`. discard → אישור → discardDraft.
 **אימות (אוטומטי):** `studio_screen_test` +1 (publish כבוי על draft ריק → פעיל עם draft + badge) = 3 ירוקים · analyze 0.
 **הפיכות:** `git rm lib/screens/studio/studio_top_bar.dart` + הסר `const StudioTopBar()` מ-studio_screen.
+
+## studio-audit-r1-A — הקשחת ממשל #84 (publish/route owner-gated) — שינוי-נראה: אפס — 2026-06-29
+**שינוי נראה:** **אפס** (המסך עדיין לא-נגיש). תוצאת נחיל-ביקורת היסוד: publish/discard/route עברו להיגדר ב-`studioCanEditProvider` (owner∧manager∧active) ולא רק ב-draft-count/active — לא ניתן לפרסם/לפתוח את הסטודיו כלא-בעלים גם אם הוא ירונדר (defence-in-depth). + EdgeInsetsDirectional ב-_PublishSheet.
+**אימות (אוטומטי):** כל חבילת studio (100 בדיקות) ירוקה — כולל route-null-ל-non-owner + publish-disabled-for-non-owner-even-with-draft · analyze 0.
+**הפיכות:** `git revert` של קומיט ה-audit-r1-A.

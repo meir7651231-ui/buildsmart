@@ -11,7 +11,7 @@
 import 'package:buildsmart/state/studio/config_store.dart'
     show configStoreProvider;
 import 'package:buildsmart/state/studio/edit_mode.dart'
-    show editModeProvider, studioOwnerEmailProvider;
+    show editModeProvider, studioCanEditProvider, studioOwnerEmailProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +33,10 @@ class StudioTopBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final count = ref.watch(configStoreProvider.select((d) => d.draftNodeCount));
     final editing = ref.watch(editModeProvider.select((s) => s.isEditing));
+    // #84 — every mutating control is gated on the owner gate (not just the draft
+    // count), so publish/discard can never fire for a non-owner even if the bar
+    // somehow renders (defence-in-depth, not only the route guard).
+    final canEdit = ref.watch(studioCanEditProvider);
     return Material(
       color: BsTokens.cardLight,
       child: Padding(
@@ -45,7 +49,9 @@ class StudioTopBar extends ConsumerWidget {
             _DraftBadge(count: count),
             const Spacer(),
             TextButton.icon(
-              onPressed: () => ref.read(editModeProvider.notifier).toggleEdit(),
+              onPressed: !canEdit
+                  ? null
+                  : () => ref.read(editModeProvider.notifier).toggleEdit(),
               icon: Icon(
                 editing ? Icons.edit_off_outlined : Icons.edit_outlined,
                 size: 18,
@@ -54,8 +60,9 @@ class StudioTopBar extends ConsumerWidget {
             ),
             const SizedBox(width: 4),
             TextButton(
-              onPressed:
-                  count == 0 ? null : () => _confirmDiscard(context, ref, count),
+              onPressed: (!canEdit || count == 0)
+                  ? null
+                  : () => _confirmDiscard(context, ref, count),
               child: const Text('בטל טיוטה'),
             ),
             const SizedBox(width: 4),
@@ -64,8 +71,9 @@ class StudioTopBar extends ConsumerWidget {
                 backgroundColor: BsTokens.brand,
                 foregroundColor: Colors.white,
               ),
-              onPressed:
-                  count == 0 ? null : () => _openPublish(context, count),
+              onPressed: (!canEdit || count == 0)
+                  ? null
+                  : () => _openPublish(context, count),
               child: const Text('פרסם לכולם'),
             ),
           ],
@@ -206,9 +214,9 @@ class _PublishSheetState extends ConsumerState<_PublishSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-        left: BsTokens.space4,
-        right: BsTokens.space4,
+      padding: EdgeInsetsDirectional.only(
+        start: BsTokens.space4,
+        end: BsTokens.space4,
         top: BsTokens.space4,
         bottom: MediaQuery.of(context).viewInsets.bottom + BsTokens.space4,
       ),

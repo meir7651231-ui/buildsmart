@@ -71,6 +71,18 @@ final studioInManagerContextProvider = Provider<bool>((ref) {
   return boardRole == BoardRole.manager || persona == 'manager';
 });
 
+/// The #84 gate as a reactive provider — true iff the viewer MAY edit AND publish:
+/// Studio active ∧ the real owner ∧ a manager context. The SINGLE source of truth
+/// for the [EditModeController] gate, the publish/discard controls, and the Studio
+/// route — so the owner-only guarantee can never be lost by a control that forgets
+/// to re-check (defence-in-depth: don't gate one button while leaving another open).
+final studioCanEditProvider = Provider<bool>(
+  (ref) =>
+      ref.watch(studioActiveProvider) &&
+      isOwnerEmail(ref.watch(studioOwnerEmailProvider)) &&
+      ref.watch(studioInManagerContextProvider),
+);
+
 /// Auto-exit guard (footgun defence, spec 8.10): the owner must not be left in
 /// edit-mode in front of a customer. Wired to an inactivity timer in a later step.
 const int kEditModeAutoExitMinutes = 10;
@@ -144,11 +156,9 @@ class EditModeController extends StateNotifier<EditModeState> {
   /// Read-only #84 audit trail of enter/exit events (in-memory, v1).
   List<EditAudit> get auditLog => List.unmodifiable(_audit);
 
-  /// All three gate conditions, evaluated fresh (point-in-time) on every flip.
-  bool get _gateOpen =>
-      _ref.read(studioActiveProvider) &&
-      isOwnerEmail(_ref.read(studioOwnerEmailProvider)) &&
-      _ref.read(studioInManagerContextProvider);
+  /// All three gate conditions, evaluated fresh (point-in-time) on every flip —
+  /// the single reactive [studioCanEditProvider].
+  bool get _gateOpen => _ref.read(studioCanEditProvider);
 
   /// True iff the current identity MAY edit — exposed for the manager UI (step 20)
   /// so the "🎨 סטודיו" toggle renders for the owner only.
@@ -201,21 +211,11 @@ class EditModeController extends StateNotifier<EditModeState> {
   }
 }
 
-/// The edit-mode controller. Listens to the THREE gate inputs and revalidates on
-/// any change, so edit-mode dies immediately on logout / persona-or-board switch /
-/// flag-off (#84).
+/// The edit-mode controller. Revalidates whenever [studioCanEditProvider] flips, so
+/// edit-mode dies immediately on logout / persona-or-board switch / flag-off (#84).
 final editModeProvider =
     StateNotifierProvider<EditModeController, EditModeState>((ref) {
   final controller = EditModeController(ref);
-  ref
-    ..listen<bool>(studioActiveProvider, (_, __) => controller.revalidate())
-    ..listen<String?>(
-      studioOwnerEmailProvider,
-      (_, __) => controller.revalidate(),
-    )
-    ..listen<bool>(
-      studioInManagerContextProvider,
-      (_, __) => controller.revalidate(),
-    );
+  ref.listen<bool>(studioCanEditProvider, (_, __) => controller.revalidate());
   return controller;
 });

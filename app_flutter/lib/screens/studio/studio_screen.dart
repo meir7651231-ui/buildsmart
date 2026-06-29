@@ -9,7 +9,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/screens/studio/studio_top_bar.dart';
-import 'package:buildsmart/state/studio/edit_mode.dart' show studioActiveProvider;
+import 'package:buildsmart/state/studio/edit_mode.dart' show studioCanEditProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,9 +18,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class StudioScreen extends ConsumerStatefulWidget {
   const StudioScreen({super.key});
 
-  /// kStudioFlag-guarded route — returns null when the Studio isn't active, so a
-  /// stray deep-link / call can never open it off-gate.
-  static Route<void>? route(WidgetRef ref) => ref.read(studioActiveProvider)
+  /// Owner-gated route — returns null unless the viewer MAY edit (Studio active ∧
+  /// real owner ∧ manager context, via [studioCanEditProvider]), so a stray
+  /// deep-link / call can never open the Studio for a non-owner (#84 defence — the
+  /// route guard no longer relies only on the flag being active).
+  static Route<void>? route(WidgetRef ref) => ref.read(studioCanEditProvider)
       ? MaterialPageRoute<void>(builder: (_) => const StudioScreen())
       : null;
 

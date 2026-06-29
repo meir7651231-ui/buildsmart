@@ -1,8 +1,8 @@
-// Pins the Studio shell + top-bar (#studio · Pillar 1 · steps 16–17): RTL chrome +
-// white AppBar; the kStudioFlag-guarded route (null when inactive — no deep-link in);
-// and the top-bar's publish gate (disabled on an empty draft, enabled once a draft
-// exists, with a live change-count badge). The gate + sink are overridden, so no
-// auth/prefs are touched. The screen stays unreachable until step 20.
+// Pins the Studio shell + top-bar (#studio · Pillar 1 · steps 16–17 + #84 fix):
+// RTL chrome + white AppBar; the OWNER-gated route (null unless studioCanEdit); and
+// the top-bar's gates — publish is enabled only with a draft AND owner rights, and
+// stays disabled for a non-owner even when a draft exists. Gate + sink overridden,
+// so no auth/prefs. The screen stays unreachable until step 20.
 import 'package:buildsmart/screens/studio/studio_screen.dart';
 import 'package:buildsmart/state/studio/config_doc.dart';
 import 'package:buildsmart/state/studio/config_store.dart';
@@ -22,13 +22,11 @@ class _FakeSink implements ConfigSink {
 }
 
 void main() {
-  ProviderContainer store() {
+  ProviderContainer store({bool canEdit = true}) {
     final c = ProviderContainer(
       overrides: [
         configSinkProvider.overrideWithValue(_FakeSink()),
-        studioActiveProvider.overrideWithValue(false),
-        studioOwnerEmailProvider.overrideWithValue(null),
-        studioInManagerContextProvider.overrideWithValue(false),
+        studioCanEditProvider.overrideWithValue(canEdit),
       ],
     );
     addTearDown(c.dispose);
@@ -59,13 +57,13 @@ void main() {
     );
   });
 
-  testWidgets('route() is kStudioFlag-guarded (null when inactive)', (
+  testWidgets('route() is owner-gated — null unless studioCanEdit (#84)', (
     tester,
   ) async {
     Route<void>? offRoute;
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [studioActiveProvider.overrideWithValue(false)],
+        overrides: [studioCanEditProvider.overrideWithValue(false)],
         child: MaterialApp(
           home: Consumer(
             builder: (_, ref, __) {
@@ -81,7 +79,7 @@ void main() {
     Route<void>? onRoute;
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [studioActiveProvider.overrideWithValue(true)],
+        overrides: [studioCanEditProvider.overrideWithValue(true)],
         child: MaterialApp(
           home: Consumer(
             builder: (_, ref, __) {
@@ -115,5 +113,23 @@ void main() {
 
     expect(tester.widget<ElevatedButton>(publish).onPressed, isNotNull); // draft
     expect(find.text('טיוטה · 1 שינויים'), findsOneWidget);
+  });
+
+  testWidgets('top-bar: publish stays disabled for a non-owner even with a draft '
+      '(#84)', (tester) async {
+    final c = store(canEdit: false);
+    c.read(configStoreProvider.notifier).applyOps([const SetText('x', 'y')]);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(home: StudioScreen()),
+      ),
+    );
+
+    // A draft exists, but the owner gate is closed ⇒ publish + discard disabled.
+    final publish = find.widgetWithText(ElevatedButton, 'פרסם לכולם');
+    expect(tester.widget<ElevatedButton>(publish).onPressed, isNull);
+    final discard = find.widgetWithText(TextButton, 'בטל טיוטה');
+    expect(tester.widget<TextButton>(discard).onPressed, isNull);
   });
 }
