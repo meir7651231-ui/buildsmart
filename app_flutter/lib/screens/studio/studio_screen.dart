@@ -10,6 +10,7 @@
 
 import 'package:buildsmart/screens/studio/panes/history_pane.dart';
 import 'package:buildsmart/screens/studio/panes/inspector_pane.dart';
+import 'package:buildsmart/screens/studio/panes/theme_pane.dart';
 import 'package:buildsmart/screens/studio/panes/tree_pane.dart';
 import 'package:buildsmart/screens/studio/studio_top_bar.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart' show studioCanEditProvider;
@@ -93,46 +94,16 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
             Expanded(
               child: IndexedStack(
                 index: _pane,
-                children: [
-                  const TreePane(),
-                  const InspectorPane(),
-                  _PanePlaceholder(title: _segments[2].$3),
-                  const HistoryPane(),
+                children: const [
+                  TreePane(),
+                  InspectorPane(),
+                  ThemePane(),
+                  HistoryPane(),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _PanePlaceholder extends StatelessWidget {
-  const _PanePlaceholder({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontSize: BsTokens.typeTitleSm,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: BsTokens.space2),
-          const Text(
-            'נבנה בשלבים הקרובים',
-            style: TextStyle(color: BsTokens.mutedLight),
-          ),
-        ],
       ),
     );
   }

@@ -1939,3 +1939,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס בבילד רגיל** (`configThemeProvider` = fallback = BsTokens ⇒ scheme.primary/FAB זהים). חוברה תשתית theme-override: `configThemeProvider` (draft⊕published `structure['theme']` → CfgTheme), `setThemeDraft`, `_promote` ממזג structure, `draftNodeCount` סופר theme-draft, ו-main.dart מזריק את ה-CfgTheme ל-`AppTheme.light/dark(cfg:)` (seed/primary/FAB = cfg.brand). **כשהבעלים יפרסם override של brand — כל האפליקציה תשקף אותו חי.** עורך-ה-UI = s24b.
 **אימות (אוטומטי):** `config_theme_wiring_test` 4 + `config_theme_test` 6 + כל חבילת studio + `a11y_contrast_theme_test` — הכל ירוק · analyze 0 (infos קיימים-מראש).
 **הפיכות:** `git revert` של s24a.
+
+## studio-s24b — Pane C: עורך ערכת-נושא — שינוי-נראה: אפס (מגודר) — 2026-06-29
+**שינוי נראה:** **אפס** (בתוך הסטודיו המגודר; non-owner לא מגיע). Pane C — עורך-עיצוב חי: בורר-צבע-מותג (Wrap של 8 swatches מוגדרים-מראש, ללא dep חיצוני) · Slider עיגול-פינות (0–28) · Slider גודל-גופן (0.8–1.6) · תצוגה-חיה (כרטיס+כותרת+גוף+כפתור, קורא cfg ישירות) · כפתור אפס (`setThemeDraft(CfgTheme.fallback)`). כל שינוי → draft דרך `setThemeDraft` (**לא חי עד "פרסם לכולם"**). בדיקת-AA: ניגודיות brand מול לבן <4.5 ⇒ אזהרה מיידעת (לא חוסמת). מחובר pane 2 (במקום placeholder).
+**אימות (אוטומטי):** `theme_pane_test` 4 ירוקים (2-sliders+swatches · tap⇒draft-live+publishable · warning toggles · reset⇒fallback) · `studio_screen` + `zero_regression` לא נשברו · analyze 0.
+**הפיכות:** `git rm theme_pane.dart`, החזר `_PanePlaceholder` ל-pane 2 ב-studio_screen.
