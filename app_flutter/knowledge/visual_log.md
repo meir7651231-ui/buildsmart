@@ -1934,3 +1934,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (בתוך הסטודיו המגודר). Pane D — רשימת `ConfigVersion` (note · byEmail · זמן) חדש-לישן; "שחזר" → אישור → rollback **forward-only** (snapshot מתפרסם כגרסה חדשה, ההיסטוריה נשמרת). ריק → placeholder. מחובר pane 3.
 **אימות (אוטומטי):** `history_pane_test` 3 ירוקים (empty · shows-version · restore-forward) · `studio_screen` 4 (לא נשבר) · analyze 0.
 **הפיכות:** `git rm history_pane.dart`, החזר placeholder ל-pane 3.
+
+## studio-s24a — חיווט config→theme (תצוגה-חיה כלל-אפליקציה) — שינוי-נראה: אפס (ברירת-מחדל) — 2026-06-29
+**שינוי נראה:** **אפס בבילד רגיל** (`configThemeProvider` = fallback = BsTokens ⇒ scheme.primary/FAB זהים). חוברה תשתית theme-override: `configThemeProvider` (draft⊕published `structure['theme']` → CfgTheme), `setThemeDraft`, `_promote` ממזג structure, `draftNodeCount` סופר theme-draft, ו-main.dart מזריק את ה-CfgTheme ל-`AppTheme.light/dark(cfg:)` (seed/primary/FAB = cfg.brand). **כשהבעלים יפרסם override של brand — כל האפליקציה תשקף אותו חי.** עורך-ה-UI = s24b.
+**אימות (אוטומטי):** `config_theme_wiring_test` 4 + `config_theme_test` 6 + כל חבילת studio + `a11y_contrast_theme_test` — הכל ירוק · analyze 0 (infos קיימים-מראש).
+**הפיכות:** `git revert` של s24a.

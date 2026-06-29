@@ -30,6 +30,7 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../theme/config_theme.dart' show CfgTheme;
 import '../auth_state.dart' show roleProvider;
 import 'config_doc.dart';
 import 'config_merge.dart'
@@ -360,6 +361,18 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
     _save();
   }
 
+  /// Stage an app-theme override into the draft (step 24). Lives in the global
+  /// structure layer (not a node); publish promotes it like any draft.
+  void setThemeDraft(CfgTheme theme) {
+    final next =
+        state.draft.copyWith(structure: {...state.draft.structure, 'theme': theme.toJson()});
+    if (next == state.draft) return; // no-op
+    _undo.add(state.draft);
+    _redo.clear();
+    state = state.copyWith(draft: next);
+    _save();
+  }
+
   CfgNode _nodeIn(ConfigLayer d, String id, String? persona) => persona == null
       ? (d.global[id] ?? CfgNode.identity)
       : (d.persona[persona]?[id] ?? CfgNode.identity);
@@ -426,7 +439,11 @@ ConfigLayer _promote(ConfigLayer pub, ConfigLayer draft) {
       p[role] = inner;
     }
   });
-  return ConfigLayer(global: g, persona: p, structure: pub.structure);
+  return ConfigLayer(
+    global: g,
+    persona: p,
+    structure: {...pub.structure, ...draft.structure}, // promote theme etc.
+  );
 }
 
 CfgNode _overlayNode(CfgNode? base, CfgNode over) {
@@ -477,4 +494,19 @@ final resolvedNodeProvider =
     ),
     includeDraft: includeDraft,
   );
+});
+
+/// The effective app theme — the owner's draft theme (live preview) over the
+/// published theme, else the inert defaults. doc-empty ⇒ CfgTheme.fallback ⇒ the
+/// app is byte-identical (zero-regression). main.dart injects this into AppTheme.
+final configThemeProvider = Provider<CfgTheme>((ref) {
+  final draftTheme =
+      ref.watch(configStoreProvider.select((d) => d.draft.structure['theme']));
+  final pubTheme = ref.watch(
+    configStoreProvider.select((d) => d.published.structure['theme']),
+  );
+  final m = draftTheme ?? pubTheme;
+  return m is Map
+      ? CfgTheme.fromJson(Map<String, dynamic>.from(m))
+      : CfgTheme.fallback;
 });

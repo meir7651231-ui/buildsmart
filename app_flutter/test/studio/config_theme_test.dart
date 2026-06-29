@@ -50,6 +50,17 @@ void main() {
     expect(ext!.brand, BsTokens.brand); // defaults ⇒ identical look
   });
 
+  test('toJson/fromJson round-trips; garbage ⇒ defaults (never throws)', () {
+    const t = CfgTheme(brand: Color(0xFF010203), radius: 8, fontScale: 1.3);
+    final back = CfgTheme.fromJson(t.toJson());
+    expect(back.brand, const Color(0xFF010203));
+    expect(back.radius, 8);
+    expect(back.fontScale, 1.3);
+    final bad = CfgTheme.fromJson(const {'brand': 'nope', 'radius': 'x'});
+    expect(bad.brand, BsTokens.brand);
+    expect(bad.radius, BsTokens.radiusCard);
+  });
+
   testWidgets('cfgBrand falls back to BsTokens when the extension is absent', (
     tester,
   ) async {

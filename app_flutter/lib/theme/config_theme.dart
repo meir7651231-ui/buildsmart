@@ -25,6 +25,19 @@ class CfgTheme extends ThemeExtension<CfgTheme> {
     this.fontScale = 1.0,
   });
 
+  /// Tolerant decode from the config structure layer (unknown/garbage ⇒ defaults).
+  factory CfgTheme.fromJson(Map<String, dynamic> j) => CfgTheme(
+        brand: _color(j['brand'], BsTokens.brand),
+        surface: _color(j['surface'], BsTokens.cardLight),
+        ink: _color(j['ink'], BsTokens.inkLight),
+        radius: (j['radius'] is num)
+            ? (j['radius'] as num).toDouble()
+            : BsTokens.radiusCard,
+        fontScale: (j['fontScale'] is num)
+            ? (j['fontScale'] as num).toDouble().clamp(0.8, 1.6)
+            : 1.0,
+      );
+
   final Color brand;
   final Color surface;
   final Color ink;
@@ -61,6 +74,18 @@ class CfgTheme extends ThemeExtension<CfgTheme> {
       fontScale: fontScale + (other.fontScale - fontScale) * t,
     );
   }
+
+  /// JSON for the config structure layer (Color → ARGB int).
+  Map<String, dynamic> toJson() => {
+        'brand': brand.toARGB32(),
+        'surface': surface.toARGB32(),
+        'ink': ink.toARGB32(),
+        'radius': radius,
+        'fontScale': fontScale,
+      };
+
+  static Color _color(Object? v, Color fallback) =>
+      v is int ? Color(v) : fallback;
 }
 
 /// Brand color — owner override, else [BsTokens.brand].

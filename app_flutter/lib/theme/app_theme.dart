@@ -7,17 +7,27 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData dark({bool highContrast = false}) =>
-      _build(Brightness.dark, highContrast: highContrast);
-  static ThemeData light({bool highContrast = false}) =>
-      _build(Brightness.light, highContrast: highContrast);
+  static ThemeData dark({
+    bool highContrast = false,
+    CfgTheme cfg = CfgTheme.fallback,
+  }) =>
+      _build(Brightness.dark, highContrast: highContrast, cfg: cfg);
+  static ThemeData light({
+    bool highContrast = false,
+    CfgTheme cfg = CfgTheme.fallback,
+  }) =>
+      _build(Brightness.light, highContrast: highContrast, cfg: cfg);
 
-  static ThemeData _build(Brightness b, {bool highContrast = false}) {
+  static ThemeData _build(
+    Brightness b, {
+    bool highContrast = false,
+    CfgTheme cfg = CfgTheme.fallback,
+  }) {
     final isDark = b == Brightness.dark;
     final scheme = ColorScheme.fromSeed(
-      seedColor: BsTokens.brand,
+      seedColor: cfg.brand,
       brightness: b,
-      primary: BsTokens.brand,
+      primary: cfg.brand,
       surface: isDark ? BsTokens.cardDark : Colors.white,
     );
     // High contrast pushes body text to pure black/white and darkens dividers.
@@ -53,7 +63,7 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: BsTokens.brand,
+        backgroundColor: cfg.brand,
         foregroundColor: highContrast ? BsTokens.inkLight : Colors.white,
         elevation: 6,
       ),
@@ -65,9 +75,9 @@ class AppTheme {
           onAccent: highContrast ? BsTokens.inkLight : Colors.white,
           success: highContrast ? BsTokens.successDark : BsTokens.success,
         ),
-        // Owner-overridable app theme; defaults = BsTokens ⇒ inert until step 24
-        // wires the published theme + the live editor.
-        CfgTheme.fallback,
+        // Owner-overridable app theme — injected from configThemeProvider by
+        // main.dart; defaults = BsTokens ⇒ inert when there is no override.
+        cfg,
       ],
     );
   }

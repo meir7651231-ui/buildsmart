@@ -10,6 +10,8 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
+import 'package:buildsmart/state/studio/config_store.dart'
+    show configThemeProvider;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
@@ -331,6 +333,9 @@ class BuildSmartApp extends ConsumerWidget {
       CatalogTextSize.large => 1.15,
     };
     final highContrast = catalogSettings.highContrast;
+    // No-Code Studio app theme — inert (CfgTheme.fallback = BsTokens) until the
+    // owner publishes a theme override; then the whole app reflects it live.
+    final cfgTheme = ref.watch(configThemeProvider);
     final locale = switch (settings.lang) {
       BsLang.he => const Locale('he', 'IL'),
       BsLang.ar => const Locale('ar'),
@@ -341,8 +346,8 @@ class BuildSmartApp extends ConsumerWidget {
       // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
       scaffoldMessengerKey: bsMessengerKey,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(highContrast: highContrast),
-      darkTheme: AppTheme.dark(highContrast: highContrast),
+      theme: AppTheme.light(highContrast: highContrast, cfg: cfgTheme),
+      darkTheme: AppTheme.dark(highContrast: highContrast, cfg: cfgTheme),
       themeMode:
           settings.theme == BsTheme.dark ? ThemeMode.dark : ThemeMode.light,
       locale: locale,

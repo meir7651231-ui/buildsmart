@@ -172,7 +172,8 @@ class ConfigDoc {
   /// a recompute.
   int get draftNodeCount =>
       draft.global.length +
-      draft.persona.values.fold<int>(0, (s, m) => s + m.length);
+      draft.persona.values.fold<int>(0, (s, m) => s + m.length) +
+      draft.structure.length; // a theme-only draft (structure['theme']) counts too
 
   ConfigDoc copyWith({
     ConfigLayer? published,
