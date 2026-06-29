@@ -19,6 +19,7 @@ import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -171,7 +172,7 @@ class _MiniTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final pal = _pal(context);
     return InkWell(
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       onTap: onTap,
       child: Semantics(
         button: true,
@@ -181,7 +182,7 @@ class _MiniTile extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: pal.card,
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               border: Border.all(color: pal.border),
             ),
             child: Column(
@@ -325,7 +326,7 @@ class _SmartTreeCard extends ConsumerWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: pal.card,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: pal.border),
       ),
       child: Column(
@@ -338,7 +339,7 @@ class _SmartTreeCard extends ConsumerWidget {
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: pal.box,
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
               ),
               child: rec.imageAsset != null
                   ? productImage(
@@ -429,7 +430,7 @@ class _WorkPath extends ConsumerWidget {
               gradient: const LinearGradient(
                 colors: [Color(0xFF1F6F6B), Color(0xFF155350)],
               ),
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,14 +512,14 @@ class _QuickTools extends ConsumerWidget {
           const _SectionTitle('כלים מהירים'),
           for (final r in rows)
             InkWell(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               onTap: r.tap,
               child: Container(
                 margin: const EdgeInsets.only(bottom: BsTokens.space2),
                 padding: const EdgeInsets.all(BsTokens.space3),
                 decoration: BoxDecoration(
                   color: pal.card,
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   border: Border.all(color: pal.border),
                 ),
                 child: Row(
@@ -561,7 +562,7 @@ class _InstallStudioHero extends ConsumerWidget {
     final pal = _pal(context);
     return _Pad(
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const InstallStudioScreen()),
         ),
@@ -569,7 +570,7 @@ class _InstallStudioHero extends ConsumerWidget {
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
             color: const Color(0x1AFF7A18),
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0x33FF7A18)),
           ),
           child: Row(
@@ -711,7 +712,7 @@ class _OrderCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: pal.card,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: pal.border),
       ),
       child: Column(
@@ -779,7 +780,7 @@ class _EmptyCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: pal.card,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: pal.border),
       ),
       child: Text(

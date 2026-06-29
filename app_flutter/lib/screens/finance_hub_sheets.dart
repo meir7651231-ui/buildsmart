@@ -37,6 +37,7 @@ import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/finance_hub_state.dart';
 import 'package:buildsmart/state/pdf_print_seam.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -209,7 +210,7 @@ class _FinRows extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE6E8EC)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
@@ -252,7 +253,7 @@ class _FinCallout extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: const Color(0xFFEAF5F4),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFCDE7E4)),
       ),
       child: Column(
@@ -403,14 +404,14 @@ class _FinTileButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: const Color(0xFFF6F7F9),
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         child: Container(
           padding: const EdgeInsets.all(BsTokens.space3),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0xFFE6E8EC)),
           ),
           child: Column(
@@ -565,14 +566,14 @@ class _PayOpt extends StatelessWidget {
             : 'התשלום מתבצע ${term.days} יום מקבלת החשבונית';
     return Material(
       color: on ? const Color(0xFFEAF5F4) : const Color(0xFFF6F7F9),
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         child: Container(
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(
               color: on ? _kBrandTeal : const Color(0xFFE6E8EC),
               width: on ? 1.5 : 1,
@@ -652,7 +653,7 @@ class _SubRow extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE6E8EC)),
       ),
       child: Column(
@@ -785,7 +786,7 @@ class _ApprovalCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE6E8EC)),
       ),
       child: Column(
@@ -993,7 +994,7 @@ class _ThrRow extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: hit ? const Color(0xFFFFF3E0) : const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: hit ? const Color(0xFFFFCC80) : const Color(0xFFE6E8EC),
         ),
@@ -1224,7 +1225,7 @@ class _PenaltyCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE6E8EC)),
       ),
       child: Column(
@@ -1613,7 +1614,7 @@ class _FxCalcState extends State<_FxCalc> {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE6E8EC)),
       ),
       child: Column(

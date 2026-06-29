@@ -1974,3 +1974,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס בברירת-מחדל.** Batch-4: כל 24 אתרי `BorderRadius.circular(BsTokens.radiusCard)` ב-`store_dashboard_screen.dart` → `cfgRadius(context)` (replace_all + import). אומת ע"י analyze נקי (תופס const/missing-context). **כל כרטיסי לוח-הספק (24) מגיבים עכשיו ל-radius-slider.** cfgRadius default=20 ⇒ פיקסל-זהה.
 **אימות (אוטומטי):** analyze 0 (כל 24 חוקיים) · `config_theme_test` 12 · `a11y_contrast_theme_test` 5 — ירוקים.
 **הפיכות:** replace_all חזרה.
+
+## studio-s29-b5 — Phase E אימוץ-עיצוב: 4 מסכים (finance/worker/smart-home/rewards) → cfgRadius — שינוי-נראה: אפס (default) — 2026-06-29
+**שינוי נראה:** **אפס בברירת-מחדל.** Batch-5 (יעיל — 4 מסכים ב-commit אחד): cfgRadius adoption ב-`finance_hub_sheets`(13) · `worker_app_screen`(11) · `smart_home_screen`(11) · `rewards_hub_screen`(11) = **46 אתרים**. כל אחד: import + replace_all, אומת ע"י analyze נקי. **כרטיסי 4 מסכים-נוספים מגיבים עכשיו ל-radius-slider.** cfgRadius default=20 ⇒ פיקסל-זהה.
+**אימות (אוטומטי):** analyze 0 (כל 46 חוקיים) · `config_theme_test` 12 · `a11y_contrast_theme_test` 5 — ירוקים.
+**הפיכות:** replace_all חזרה (4 קבצים).

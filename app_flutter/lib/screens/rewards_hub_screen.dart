@@ -1,5 +1,6 @@
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -308,7 +309,7 @@ class _Referral extends StatelessWidget {
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
             color: BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
           child: Column(
@@ -502,7 +503,7 @@ class _CoinBanner extends StatelessWidget {
         gradient: const LinearGradient(
           colors: [Color(0xFFFFF3E0), Color(0xFFFFE0B2)],
         ),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFFFCC80)),
       ),
       child: Row(
@@ -548,14 +549,14 @@ class _FinTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: BsTokens.cardLight,
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(BsTokens.space3),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
           child: Column(
@@ -596,7 +597,7 @@ class _CaCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: overdue ? const Color(0xFFE57373) : const Color(0xFFEEEEEE),
         ),
@@ -766,7 +767,7 @@ class _LbRow extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: me ? const Color(0xFFFFF3E0) : BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: me ? const Color(0xFFFFB74D) : const Color(0xFFEEEEEE),
         ),
@@ -811,7 +812,7 @@ class _BadgeRow extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: badge.earned ? const Color(0xFFE8F5E9) : BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: badge.earned ? const Color(0xFFA5D6A7) : const Color(0xFFEEEEEE),
         ),
@@ -862,7 +863,7 @@ class _VipCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: current ? const Color(0xFFFFF3E0) : BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: current
               ? BsTokens.brand
@@ -898,7 +899,7 @@ class _Callout extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
       child: Row(
@@ -957,7 +958,7 @@ class _ServerNote extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
       child: Text(text,
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12)),

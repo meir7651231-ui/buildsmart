@@ -26,6 +26,7 @@ import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -671,7 +672,7 @@ class _WeekStripCard extends ConsumerWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -779,7 +780,7 @@ class _DayChip extends StatelessWidget {
       label: 'יום $label $dayNum${isToday ? ' · היום' : ''}',
       excludeSemantics: true,
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 56),
@@ -884,7 +885,7 @@ class _DayAttendanceCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -935,7 +936,7 @@ class _DayAttendanceCard extends StatelessWidget {
               label: hasLocation ? 'פתח ניווט למיקום העבודה' : 'אין מיקום שמור',
               excludeSemantics: true,
               child: InkWell(
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 onTap: hasLocation ? onOpenLocation : null,
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 48),
@@ -945,7 +946,7 @@ class _DayAttendanceCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF5F6FA),
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    borderRadius: BorderRadius.circular(cfgRadius(context)),
                   ),
                   child: Row(
                     children: [
@@ -998,9 +999,9 @@ class _DayAttendanceCard extends StatelessWidget {
                 excludeSemantics: true,
                 child: Material(
                   color: clockColor,
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    borderRadius: BorderRadius.circular(cfgRadius(context)),
                     onTap: onClock,
                     child: Container(
                       constraints: const BoxConstraints(minHeight: 56),
@@ -1026,7 +1027,7 @@ class _DayAttendanceCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: const Color(0xFFE9EAEC),
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
               ),
               child: const Text(
                 '✓ נרשמה נוכחות להיום',
@@ -1180,7 +1181,7 @@ class _SummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -1445,12 +1446,12 @@ class _TaskCard extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
           // #71: any task card opens its detail sheet (steps/הוראות/תמונה).
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: () => showWorkerTaskDetailSheet(context, taskId: task.id),
           child: Padding(
             padding: const EdgeInsets.all(BsTokens.space4),
