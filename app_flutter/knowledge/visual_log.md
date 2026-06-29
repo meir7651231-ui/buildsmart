@@ -1904,3 +1904,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס.** `lib/screens/studio/studio_screen.dart` — מסך-הסטודיו (RTL + scaffold בהיר + AppBar לבן + 4 panes ב-`IndexedStack` עם placeholders + ChoiceChips למעבר). **בלתי-נגיש** — `route()` גדור ב-`studioActiveProvider` (מחזיר null כש-OFF), והכניסה מהמנהל מחווטת רק ב-s20. אין נתיב למסך ⇒ אפס שינוי גלוי.
 **אימות (אוטומטי):** `studio_screen_test` 2 ירוקים (RTL + AppBar לבן · route()==null כש-inactive / !=null כש-active) · analyze 0.
 **הפיכות:** `git rm -r lib/screens/studio/` (אין נתיב/צרכן).
+
+## studio-s17 — קונכיית-הסטודיו: top-bar (פרסם/בטל/עריכה) — שינוי-נראה: אפס (לא-נגיש) — 2026-06-29
+**שינוי נראה:** **אפס** (המסך עדיין בלתי-נגיש עד s20). top-bar למסך-הסטודיו: badge "טיוטה · N שינויים" · מתג "מצב עריכה" · "בטל טיוטה" · "פרסם לכולם" (כבוי כש-N=0). פרסום → bottom-sheet אישור-היקף (R2-#13): "ישפיע על כל המשתמשים — N" + שדה-note inline + dropdown "צפה כפי ש-<פרסונה>" (מספר-שינויים-לפי-roleKey) + פרסם/ביטול → `publish(note, byEmail=owner)`. discard → אישור → discardDraft.
+**אימות (אוטומטי):** `studio_screen_test` +1 (publish כבוי על draft ריק → פעיל עם draft + badge) = 3 ירוקים · analyze 0.
+**הפיכות:** `git rm lib/screens/studio/studio_top_bar.dart` + הסר `const StudioTopBar()` מ-studio_screen.

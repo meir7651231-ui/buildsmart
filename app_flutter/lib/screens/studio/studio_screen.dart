@@ -8,6 +8,7 @@
 // Studio is inactive ⇒ zero behavior change until then. Panes are placeholders here.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/screens/studio/studio_top_bar.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart' show studioActiveProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
@@ -64,6 +65,7 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
         ),
         body: Column(
           children: [
+            const StudioTopBar(),
             Padding(
               padding: const EdgeInsets.all(BsTokens.space3),
               child: SingleChildScrollView(

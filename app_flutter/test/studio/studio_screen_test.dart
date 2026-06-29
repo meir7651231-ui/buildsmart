@@ -1,17 +1,46 @@
-// Pins the Studio shell (#studio · Pillar 1 · step 16): RTL chrome, a white AppBar,
-// and the kStudioFlag-guarded route (null when the Studio is inactive — no deep-link
-// in off-gate). The screen is unreachable until step 20 wires the manager entry.
+// Pins the Studio shell + top-bar (#studio · Pillar 1 · steps 16–17): RTL chrome +
+// white AppBar; the kStudioFlag-guarded route (null when inactive — no deep-link in);
+// and the top-bar's publish gate (disabled on an empty draft, enabled once a draft
+// exists, with a live change-count badge). The gate + sink are overridden, so no
+// auth/prefs are touched. The screen stays unreachable until step 20.
 import 'package:buildsmart/screens/studio/studio_screen.dart';
+import 'package:buildsmart/state/studio/config_doc.dart';
+import 'package:buildsmart/state/studio/config_store.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _FakeSink implements ConfigSink {
+  @override
+  Future<void> save(ConfigDoc doc) async {}
+  @override
+  Future<ConfigDoc?> load() async => null;
+  @override
+  Stream<ConfigDoc>? watch() => null;
+}
+
 void main() {
+  ProviderContainer store() {
+    final c = ProviderContainer(
+      overrides: [
+        configSinkProvider.overrideWithValue(_FakeSink()),
+        studioActiveProvider.overrideWithValue(false),
+        studioOwnerEmailProvider.overrideWithValue(null),
+        studioInManagerContextProvider.overrideWithValue(false),
+      ],
+    );
+    addTearDown(c.dispose);
+    return c;
+  }
+
   testWidgets('builds in RTL with a white AppBar', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: StudioScreen())),
+      UncontrolledProviderScope(
+        container: store(),
+        child: const MaterialApp(home: StudioScreen()),
+      ),
     );
 
     expect(find.byType(StudioScreen), findsOneWidget);
@@ -64,5 +93,27 @@ void main() {
       ),
     );
     expect(onRoute, isNotNull);
+  });
+
+  testWidgets('top-bar: publish disabled on empty draft, enabled with a draft', (
+    tester,
+  ) async {
+    final c = store();
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(home: StudioScreen()),
+      ),
+    );
+
+    final publish = find.widgetWithText(ElevatedButton, 'פרסם לכולם');
+    expect(tester.widget<ElevatedButton>(publish).onPressed, isNull); // empty
+    expect(find.text('אין שינויים'), findsOneWidget);
+
+    c.read(configStoreProvider.notifier).applyOps([const SetText('x', 'y')]);
+    await tester.pump();
+
+    expect(tester.widget<ElevatedButton>(publish).onPressed, isNotNull); // draft
+    expect(find.text('טיוטה · 1 שינויים'), findsOneWidget);
   });
 }
