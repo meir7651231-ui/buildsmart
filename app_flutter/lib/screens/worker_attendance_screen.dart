@@ -8,6 +8,7 @@ import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -348,7 +349,7 @@ class _ClockCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -394,9 +395,9 @@ class _ClockCard extends StatelessWidget {
             excludeSemantics: true,
             child: Material(
               color: color,
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               child: InkWell(
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 onTap: onTap,
                 child: Container(
                   // Big primary target — comfortably above the 48dp floor.
@@ -542,7 +543,7 @@ class _CalendarCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -766,7 +767,7 @@ class _DayDetailSheet extends StatelessWidget {
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(
             color: BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

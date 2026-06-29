@@ -7,6 +7,7 @@ import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -208,11 +209,11 @@ class _DeptTile extends ConsumerWidget {
     final fg = dept.live ? BsTokens.brand : BsTokens.mutedLight;
     return Material(
       color: theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       elevation: 1,
       shadowColor: Colors.black26,
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: () {
           if (!dept.live) {
             showToast(context, 'בקרוב');
@@ -308,7 +309,7 @@ class _DeptScopeBar extends ConsumerWidget {
             InkWell(
               onTap: () =>
                   ref.read(deptFlatProductsProvider.notifier).state = !flat,
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               // ≥48dp tap target (a11y) — the visible label is unchanged.
               child: ConstrainedBox(
                 constraints:
@@ -345,7 +346,7 @@ class _DeptScopeBar extends ConsumerWidget {
                 ref.read(catalogSystemFilterProvider.notifier).state = null;
                 ref.read(catalogTreePathProvider.notifier).state = const [];
               },
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
               // ≥48dp tap target (a11y) — the visible label is unchanged.
               child: ConstrainedBox(
                 constraints:
@@ -450,11 +451,11 @@ class _CatGroupRow extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: () =>
               ref.read(catalogTreePathProvider.notifier).state = [node],
           child: Padding(

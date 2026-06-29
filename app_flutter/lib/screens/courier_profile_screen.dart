@@ -32,6 +32,7 @@ import 'package:buildsmart/state/courier_profile_store.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
@@ -209,7 +210,7 @@ class CourierProfileBody extends ConsumerWidget {
           padding: const EdgeInsets.all(BsTokens.space3),
           decoration: BoxDecoration(
             color: BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: Text(
             'סה״כ ערך שנמסר על-ידי: ${fMoney(stats.sum)}',
@@ -237,7 +238,7 @@ class CourierProfileBody extends ConsumerWidget {
           color: BsTokens.cardLight,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: Column(
             children: [
@@ -375,7 +376,7 @@ class _CourierIdentityCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F000000),
@@ -534,7 +535,7 @@ class _CourierPersonalAreaCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F000000),
@@ -1056,7 +1057,7 @@ class _PStat extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0F000000),

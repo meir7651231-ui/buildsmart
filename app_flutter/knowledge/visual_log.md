@@ -1984,3 +1984,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס בברירת-מחדל.** Batch-6: cfgRadius adoption ב-`tasks_screen`(8)·`profile_screen`(9)·`smart_project_screen`(6)·`projects_screen`(6)·`courier_dashboard_screen`(7) = **36 אתרים**. **2 אתרים ב-helpers חסרי-context** (`_kvTile`/`_logDay`) הושארו ב-radiusCard קבוע (analyze תפס אותם — יאומצו כש-context יושחל). **הוסר import מת** (`under_construction` ב-tasks_screen — אומת לא-בשימוש). cfgRadius default=20 ⇒ פיקסל-זהה.
 **אימות (אוטומטי):** analyze 0 (errors+warnings) · `config_theme_test` 12 · `a11y_contrast_theme_test` 5 — ירוקים.
 **הפיכות:** replace_all חזרה (5 קבצים) + החזר import.
+
+## studio-s29-b7 — Phase E אימוץ-עיצוב: 5 מסכים (store_profile/departments/worker_attendance/courier_profile/ai_hub) → cfgRadius — שינוי-נראה: אפס (default) — 2026-06-29
+**שינוי נראה:** **אפס בברירת-מחדל.** Batch-7: cfgRadius ב-`store_profile`(6)·`departments`(6)·`worker_attendance`(5)·`courier_profile`(5)·`ai_hub`(5) = **27 אתרים**. `courier_portal_tab`+`persona_portal` **הוחזרו לגמרי** (helpers חסרי-context — analyze תפס 3 אתרים → נדחים ל-context-threading; net-zero, לא ב-commit). cfgRadius default=20 ⇒ פיקסל-זהה. **16 מסכים מאומצים-radius.**
+**אימות (אוטומטי):** analyze 0 (errors+warnings) · `config_theme_test` 12 · `a11y_contrast_theme_test` 5 — ירוקים.
+**הפיכות:** replace_all חזרה (5 קבצים).

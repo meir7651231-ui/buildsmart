@@ -25,6 +25,7 @@ import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/state/under_construction.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -652,14 +653,14 @@ class AiFinTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: BsTokens.cardLight,
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(BsTokens.space3),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
           child: Column(
@@ -699,7 +700,7 @@ class AiCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(
           color: overdue ? const Color(0xFFE57373) : const Color(0xFFEEEEEE),
         ),
@@ -847,7 +848,7 @@ class AiServerNote extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
       child: Text(text,
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
