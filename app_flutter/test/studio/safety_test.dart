@@ -11,6 +11,11 @@ import 'package:buildsmart/state/studio/config_node.dart' show CfgAction;
 import 'package:buildsmart/state/studio/config_store.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart';
 import 'package:buildsmart/state/studio/element_registry.dart';
+import 'package:buildsmart/theme/config_theme.dart';
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart'
+    show cfgColorFromToken, cfgSizeFromToken, cfgWeightFromToken;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,6 +29,15 @@ class _FakeSink implements ConfigSink {
 }
 
 const _critical = 'nav.bottombar';
+
+/// WCAG contrast ratio between two colors (lighter+0.05)/(darker+0.05).
+double _contrast(Color a, Color b) {
+  final la = a.computeLuminance();
+  final lb = b.computeLuminance();
+  final hi = la > lb ? la : lb;
+  final lo = la > lb ? lb : la;
+  return (hi + 0.05) / (lo + 0.05);
+}
 
 void main() {
   final owner = kOwnerEmails.first;
@@ -144,5 +158,47 @@ void main() {
       c.read(configStoreProvider).published.global['cart.cta']?.text,
       'מקורי', // recovered — reset was non-destructive
     );
+  });
+
+  // ── step 28: the consolidated safety contract — style tokens stay inside the
+  // BsTokens palette (no arbitrary value can ever resolve), and the default theme
+  // is readable. Tests-only; the resolution is already bounded-by-construction.
+
+  group('safety: style tokens are bounded to BsTokens (never arbitrary)', () {
+    test('color tokens resolve to BsTokens; arbitrary ⇒ null (ignored)', () {
+      expect(cfgColorFromToken('brand'), BsTokens.brand);
+      expect(cfgColorFromToken('danger'), BsTokens.danger);
+      expect(cfgColorFromToken('ink'), BsTokens.inkLight);
+      for (final bad in ['#ff0000', 'rgb(255,0,0)', 'javascript:alert(1)', '', 'BRAND']) {
+        expect(cfgColorFromToken(bad), isNull, reason: 'arbitrary "$bad" must not resolve');
+      }
+    });
+
+    test('weight tokens resolve; arbitrary ⇒ null', () {
+      expect(cfgWeightFromToken('bold'), FontWeight.w700);
+      expect(cfgWeightFromToken('w600'), FontWeight.w600);
+      for (final bad in ['900', 'heavy', '']) {
+        expect(cfgWeightFromToken(bad), isNull);
+      }
+    });
+
+    test('size tokens resolve to the BsTokens scale; arbitrary ⇒ null', () {
+      expect(cfgSizeFromToken('lg'), BsTokens.typeSubhead);
+      expect(cfgSizeFromToken('sm'), BsTokens.typeLabel);
+      for (final bad in ['99', 'huge', '']) {
+        expect(cfgSizeFromToken(bad), isNull);
+      }
+    });
+  });
+
+  group('safety: the default theme is readable', () {
+    test('ink-on-surface clears WCAG AA (≥ 4.5:1)', () {
+      // brand-on-white is intentionally below AA (the theme editor warns) — the
+      // contract here is that body text on the surface is always readable.
+      expect(
+        _contrast(CfgTheme.fallback.ink, CfgTheme.fallback.surface),
+        greaterThanOrEqualTo(4.5),
+      );
+    });
   });
 }
