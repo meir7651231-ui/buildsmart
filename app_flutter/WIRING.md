@@ -3011,4 +3011,18 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 - **gate:** `seam_contract_test` ירוק (compile-guard ל-5 החתימות) · FROZEN markers ב-5 ה-seams בקוד · `config_store`/`zero_regression`/כל החבילה ירוקים · analyze 0. lib/state → גייט 24. **🎉 עמוד-1 (מנוע-העריכה + הסטודיו, שלבים 1-30) הושלם — seams קפואים.** הבא: עמודים 2-5 (בונה-תחומים · מודיעין-לקוחות · עורך-AI · ענן/scale) — או המשך אימוץ-תוכן ב-s29 לפי בחירת-הבעלים.
 - **codemod `tool/studio_extract_ids.dart`** — נדחה: `tool/` תחת very_good_analysis (avoid_print וכו') ⇒ חיכוך; אימוץ ידני per-section עובד. ייבנה כש-batch גדול יצדיק.
+
+---
+
+## עמוד-2 — בונה-התחומים (Domain/Vertical Builder · שלבים 31-50) — התחיל 2026-06-29
+**מטרה:** "תוסיף חשמלאי מחר, בעצמי" — לקדם את מודל-נתוני-האינסטלציה הקשיח (Trade→Category→Attribute/Variant→Product→Accessory→CompatibilityRule) ל-document מחובר-בעלים, persisted, server-ready. **אינסטלציה לא-נגעת (zero-regression); תחומים-חדשים בלבד.** חלק א׳ (31-34) = schema+flags+store, **additive טהור, read-path לא-נגוע.**
+
+### #pillar2-s31 — 3 דגלי trade default-OFF — 2026-06-29
+**NEW `lib/state/trade_builder_flags.dart`:** 3 string-consts (idiom של `kKbLiveMirrorFlag`):
+- `kTradeBuilderFlag = 'kTradeBuilder'` — UX יצירת-תחום (entry ~step 44+)
+- `kTradeStudioFlag = 'kTradeStudio'` — עריכה-חיה inline של תחום מחובר (~step 46+)
+- `kTradeImportFlag = 'kTradeImport'` — pipeline ייבוא-בכמות (~step 48+)
+
+כולם נצרכים דרך `featureFlagsProvider.isOn(<flag>)`, **default-OFF** (נעדרים מ-prefs ומ-`_forcedOnFlags`). **אף branch חי לא קורא אותם עדיין** (אומת ב-grep: 0 refs ב-lib/ מחוץ לקובץ-consts) ⇒ build רגיל byte-identical.
+- **gate:** `trade_builder_flags_test` 2 ירוקים (3 default-OFF + לא-force-enabled golden · owner-stage `enable` מדליק אחד) · `feature_flags_test` 6 (לא-נשבר) · analyze 0 · grep 0-refs. lib/state → גייט 24. הבא: Step 32 (`lib/domain/trade_schema.dart`).
 - הבא: batches נוספים (קוקפיט→home_shell→catalog) + **אימוץ `cfgRadius(context)` בכרטיסים** שיפעיל את ה-radius-slider החי (סוגר את ה-deferred של r2-fix-3). דחוף רק על 'תדחוף'.
