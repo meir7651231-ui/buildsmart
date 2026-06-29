@@ -29,22 +29,49 @@ String roleKeyOf(String? role) =>
     (role == null || role.isEmpty) ? 'contractor' : role;
 
 /// The resolved override for [id] under [roleKey]. Empty doc ⇒ `CfgNode.identity`
-/// (no override) — the load-bearing zero-regression contract.
+/// (no override) — the load-bearing zero-regression contract. Thin wrapper that
+/// picks this id's four layer slices out of [doc] and folds them via
+/// [mergeNodeSlices].
 CfgNode mergeNode(
   String id,
   ConfigDoc doc,
   String roleKey, {
   bool includeDraft = false,
   Set<String> criticalIds = const {},
+}) =>
+    mergeNodeSlices(
+      id,
+      publishedGlobal: doc.published.global[id],
+      publishedPersona: doc.published.persona[roleKey]?[id],
+      draftGlobal: doc.draft.global[id],
+      draftPersona: doc.draft.persona[roleKey]?[id],
+      includeDraft: includeDraft,
+      criticalIds: criticalIds,
+    );
+
+/// Fold one element's ALREADY-SELECTED layer slices — the seam
+/// `resolvedNodeProvider` (step 7) uses so it can `.select` only THIS id's four
+/// entries (R2-#1) instead of watching the whole doc. Same fold as [mergeNode]:
+///     identity ⊕ publishedGlobal ⊕ publishedPersona
+///              ⊕ (draftGlobal ⊕ draftPersona, only when [includeDraft])
+/// Most-specific non-null wins per-axis; a [criticalIds] member can never resolve
+/// to hidden. Empty slices ⇒ `CfgNode.identity` ⇒ the wrapper renders verbatim.
+CfgNode mergeNodeSlices(
+  String id, {
+  CfgNode? publishedGlobal,
+  CfgNode? publishedPersona,
+  CfgNode? draftGlobal,
+  CfgNode? draftPersona,
+  bool includeDraft = false,
+  Set<String> criticalIds = const {},
 }) {
   // Least → most specific. Draft layers participate only when previewing (owner).
-  final draftPersona = includeDraft ? doc.draft.persona[roleKey] : null;
-  CfgNode out = CfgNode.identity;
-  out = _overlay(out, doc.published.global[id]);
-  out = _overlay(out, doc.published.persona[roleKey]?[id]);
+  var out = CfgNode.identity;
+  out = _overlay(out, publishedGlobal);
+  out = _overlay(out, publishedPersona);
   if (includeDraft) {
-    out = _overlay(out, doc.draft.global[id]);
-    out = _overlay(out, draftPersona?[id]);
+    out = _overlay(out, draftGlobal);
+    out = _overlay(out, draftPersona);
   }
 
   // Critical/immutable elements can never be hidden (defence-in-depth; the inspector

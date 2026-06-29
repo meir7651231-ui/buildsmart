@@ -30,9 +30,12 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../auth_state.dart' show roleProvider;
 import 'config_doc.dart';
-import 'config_merge.dart' show mergeAction, mergeStyle;
+import 'config_merge.dart'
+    show mergeAction, mergeNodeSlices, mergeStyle, roleKeyOf;
 import 'config_node.dart';
+import 'edit_mode.dart' show editModeProvider;
 
 // ─── ConfigOp — the sealed edit family ───────────────────────────────────────
 
@@ -431,4 +434,31 @@ final configSinkProvider = Provider<ConfigSink>((ref) => LocalPrefsSink());
 final configStoreProvider =
     StateNotifierProvider<ConfigStore, ConfigDoc>((ref) {
   return ConfigStore(ref.watch(configSinkProvider));
+});
+
+/// The effective [CfgNode] for [id] under the viewer's persona, including the
+/// owner's unpublished draft WHILE previewing. R2-#1: watches ONLY this id's four
+/// layer slices (via `.select`), so an edit/publish touching a DIFFERENT id never
+/// rebuilds this provider. Empty doc + not previewing ⇒ `CfgNode.identity` ⇒ every
+/// wrapper renders its verbatim fallback (the zero-regression root). `autoDispose`
+/// frees ids no widget is watching (memory at 100k+ ids, §11).
+final resolvedNodeProvider =
+    Provider.autoDispose.family<CfgNode, String>((ref, id) {
+  final roleKey = roleKeyOf(ref.watch(roleProvider));
+  final includeDraft =
+      ref.watch(editModeProvider.select((s) => s.previewDraft));
+  return mergeNodeSlices(
+    id,
+    publishedGlobal:
+        ref.watch(configStoreProvider.select((d) => d.published.global[id])),
+    publishedPersona: ref.watch(
+      configStoreProvider.select((d) => d.published.persona[roleKey]?[id]),
+    ),
+    draftGlobal:
+        ref.watch(configStoreProvider.select((d) => d.draft.global[id])),
+    draftPersona: ref.watch(
+      configStoreProvider.select((d) => d.draft.persona[roleKey]?[id]),
+    ),
+    includeDraft: includeDraft,
+  );
 });
