@@ -7,6 +7,7 @@
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/studio/config_doc.dart';
+import 'package:buildsmart/state/studio/config_node.dart' show CfgAction;
 import 'package:buildsmart/state/studio/config_store.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart';
 import 'package:buildsmart/state/studio/element_registry.dart';
@@ -93,5 +94,55 @@ void main() {
     expect(c.read(configStoreProvider).published.global[_critical]?.hidden, isTrue);
     // …yet the model layer still resolves it visible (defence-in-depth).
     expect(c.read(resolvedNodeProvider(_critical)).hidden, isNull);
+  });
+
+  // ── step 27: write-validator + behavior whitelist + 3rd reset scope ──────────
+
+  test('write-validator: text over the length cap is dropped', () {
+    final c = make();
+    final n = c.read(configStoreProvider.notifier)
+      ..applyOps([SetText('cart.cta', 'א' * (kCfgMaxTextLen + 1))]);
+    expect(c.read(configStoreProvider).draft.global['cart.cta'], isNull); // refused
+    n.applyOps(const [SetText('cart.cta', 'קנה')]); // a legal-length edit is kept
+    expect(c.read(configStoreProvider).draft.global['cart.cta']?.text, 'קנה');
+  });
+
+  test('write-validator: a bidi-control (LTR-injection) is refused', () {
+    final c = make();
+    // U+202E (RLO) via fromCharCode — a raw control char in the literal would itself
+    // trip the analyzer (text_direction_code_point_in_literal).
+    final injected = 'שלום${String.fromCharCode(0x202E)}evil';
+    c.read(configStoreProvider.notifier).applyOps([SetText('cart.cta', injected)]);
+    expect(c.read(configStoreProvider).draft.global['cart.cta'], isNull);
+  });
+
+  test('behavior whitelist: an unauthorized action kind is dropped', () {
+    final c = make();
+    final n = c.read(configStoreProvider.notifier)
+      ..applyOps(const [SetAction('cart.cta', CfgAction(kind: 'launchUrl'))]);
+    expect(c.read(configStoreProvider).draft.global['cart.cta'], isNull); // refused
+    n.applyOps(const [SetAction('cart.cta', CfgAction(kind: 'noop'))]); // whitelisted
+    expect(c.read(configStoreProvider).draft.global['cart.cta']?.action?.kind, 'noop');
+  });
+
+  test('cfgActionRegistry whitelists exactly noop + navigate (v1)', () {
+    expect(make().read(cfgActionRegistryProvider), {'noop', 'navigate'});
+  });
+
+  test('resetAll wipes everything but stays recoverable via history', () {
+    final c = make();
+    final n = c.read(configStoreProvider.notifier)
+      ..applyOps(const [SetText('cart.cta', 'מקורי')])
+      ..publish(nowMs: 1);
+    expect(c.read(configStoreProvider).published.global['cart.cta']?.text, 'מקורי');
+
+    expect(n.resetAll(nowMs: 2), isTrue);
+    expect(c.read(configStoreProvider).published.isEmpty, isTrue); // wiped
+
+    n.rollback(1, nowMs: 3); // the pre-reset version
+    expect(
+      c.read(configStoreProvider).published.global['cart.cta']?.text,
+      'מקורי', // recovered — reset was non-destructive
+    );
   });
 }

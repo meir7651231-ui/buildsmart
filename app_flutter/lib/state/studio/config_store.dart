@@ -164,6 +164,69 @@ final class SetAction extends ConfigOp {
       };
 }
 
+// ─── Write-time validation + behavior whitelist (step 27) ────────────────────
+
+/// Max characters for an owner text override (R9-inline cap — §27 תוספת-ב).
+const int kCfgMaxTextLen = 80;
+
+/// The whitelist of allowed [CfgAction] kinds (gate 51 — no external URLs). v1: a
+/// safe `noop` + a route-guarded `navigate`; Pillar-4 (behavior builder) registers
+/// more. SINGLE source for the write-validator + the behavior layer.
+const Set<String> kCfgAllowedActionKinds = {'noop', 'navigate'};
+
+/// The behavior whitelist as a provider (mirrors `criticalIdsProvider`).
+final cfgActionRegistryProvider =
+    Provider<Set<String>>((_) => kCfgAllowedActionKinds);
+
+/// Validate ONE op at write-time. Returns a Hebrew R9-inline error, or null when the
+/// op is safe to apply. Self-contained checks (length / bidi-control) always run;
+/// critical-hide needs [criticalIds]; action-kind is gated by [allowedKinds]. Pure —
+/// the inspector/find-replace can call it to show a specific message before applyOps.
+String? cfgOpError(
+  ConfigOp op, {
+  Set<String> criticalIds = const {},
+  Set<String> allowedKinds = kCfgAllowedActionKinds,
+}) {
+  switch (op) {
+    case SetText(:final text):
+      if (text == null) return null;
+      if (text.length > kCfgMaxTextLen) {
+        return 'טקסט ארוך מדי — מקס $kCfgMaxTextLen תווים';
+      }
+      if (_hasBidiControl(text)) {
+        return 'הטקסט מכיל תווי-כיווניות שאינם נתמכים';
+      }
+      return null;
+    case SetEmoji(:final emoji):
+      if (emoji != null && emoji.length > 12) return 'אמוג׳י לא תקין';
+      return null;
+    case SetHidden(:final hidden):
+      if ((hidden ?? false) && criticalIds.contains(op.id)) {
+        return 'רכיב קריטי — לא ניתן להסתרה';
+      }
+      return null;
+    case SetAction(:final action):
+      if (action != null && !allowedKinds.contains(action.kind)) {
+        return 'פעולה לא מורשית: ${action.kind}';
+      }
+      return null;
+    case SetOrder():
+    case SetStyle():
+      return null;
+  }
+}
+
+/// True if [s] carries a Unicode bidi-control / override char (LRM/RLM, LRE…RLO,
+/// LRI…PDI) — the "LTR-injection" the validator refuses (gate 65). Plain Latin is
+/// fine (the bidi algorithm handles it); only the explicit overrides are dangerous.
+bool _hasBidiControl(String s) => s.runes.any(
+      (r) =>
+          r == 0x200E ||
+          r == 0x200F ||
+          (r >= 0x202A && r <= 0x202E) ||
+          (r >= 0x2066 && r <= 0x2069),
+    );
+
 // ─── ConfigSink — persistence/sync seam (Pillar-5 swaps this) ─────────────────
 
 abstract class ConfigSink {
@@ -246,10 +309,20 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   // ── PUBLIC op-based API (the seam Pillar-4 uses) ──
 
   /// Apply a batch of edits to the draft as ONE undoable step (R1-A3).
-  void applyOps(List<ConfigOp> ops, {String? persona}) {
+  void applyOps(
+    List<ConfigOp> ops, {
+    String? persona,
+    Set<String> criticalIds = const {},
+  }) {
     if (ops.isEmpty) return;
     var d = state.draft;
     for (final op in ops) {
+      // Write-validator (#27): silently drop an op that fails (length / bidi / a
+      // critical-hide / an unauthorized action-kind). The caller pre-checks via
+      // `cfgOpError` to show the specific R9-inline reason. criticalIds defaults
+      // empty ⇒ critical-hide is enforced only when passed (merge neutralizes it
+      // at resolve regardless — the publish-validator strips it before going live).
+      if (cfgOpError(op, criticalIds: criticalIds) != null) continue;
       d = _withNode(d, op.id, op.apply(_nodeIn(d, op.id, persona)), persona);
     }
     if (d == state.draft) return; // no-op batch — no phantom undo frame / notify
@@ -290,6 +363,33 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
     _redo.clear();
     state = state.copyWith(draft: ConfigLayer.empty);
     _save();
+  }
+
+  /// Reset EVERYTHING to the code baseline (#27 — the widest of the 3 reset scopes:
+  /// per-element `resetDraftNode` · draft `discardDraft` · all `resetAll`). Publishes
+  /// an EMPTY layer as a NEW version, so it is fully recoverable via `rollback`
+  /// (history is never destroyed). Returns false when there is nothing live to reset.
+  bool resetAll({String byEmail = '', int nowMs = 0}) {
+    if (state.published.isEmpty && state.draft.isEmpty) return false;
+    final vid = _nextVersionId(nowMs);
+    const empty = ConfigLayer.empty;
+    final version = ConfigVersion(
+      id: vid,
+      snapshot: empty,
+      publishedAtMs: nowMs,
+      note: 'איפוס לברירת-מחדל',
+      byEmail: byEmail,
+    );
+    state = ConfigDoc(
+      published: empty,
+      draft: ConfigLayer.empty,
+      history: [version, ...state.history].take(kHistoryCap).toList(),
+      schemaVersion: state.schemaVersion,
+    );
+    _undo.clear();
+    _redo.clear();
+    _save();
+    return true;
   }
 
   /// A strictly-increasing version id (the rollback key): never collides even on a
