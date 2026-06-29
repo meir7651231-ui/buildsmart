@@ -1874,3 +1874,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** ב-install-studio, חותמת-הזמן-היחסית של פרויקט שמור: timestamp-עתידי (שעון אחורה) כבר לא מציג "לפני -3 דקות" אלא "עכשיו"; ו-1 מציג צורת-יחיד ("לפני דקה" · "לפני שעה" · "אתמול") במקום "לפני 1 דקות". פורמט-תאריך מלא (>שבוע) ללא-שינוי.
 **אימות (אוטומטי):** analyze 0 · install_builder + full-suite ירוקים. (formatter טהור — אפס שינוי-מבני.)
 **הפיכות:** `git checkout lib/screens/install_studio_screen.dart`.
+
+## studio-s9 — EditHandle (אפשר-עריכה-במקום) — שינוי-נראה: אפס (מגודר) — 2026-06-29
+**שינוי נראה:** **אפס.** `EditHandle.maybe(ref, id, child:)` עוטף רכיב באפשר-עריכה **רק** ב-edit-mode (שמצריך `kStudioFlag`/runtime + owner+manager — כבוי כברירת-מחדל). מחוץ ל-edit-mode (כלומר תמיד, בבילד הרגיל) הוא מחזיר את ה-`child` **מילולית** — אפס widgets נוספים, אפס שינוי-פיקסל. רק ב-edit-mode (בעלים בלבד): מתאר-מסגרת brand (1.5px, `Positioned.fill` — לא משנה layout) + תג `StudioEditTarget(id)` (`MetaData`) ל-hit-test מרכזי בשלב-13 (R2-#3 — לא GestureDetector פר-wrapper).
+**אימות (אוטומטי):** `cfg_wrappers_test` 2 ירוקים (OFF = child verbatim, `MetaData` findsNothing · ON = tag+outline) · analyze 0. **אין מסך אמיתי שצורך אותו עדיין** (אימוץ-פיילוט בשלב-14) ⇒ אפס שינוי גלוי למשתמש כרגע.
+**הפיכות:** `git rm lib/widgets/studio/edit_handle.dart` (אין צרכן).
