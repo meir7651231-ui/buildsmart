@@ -1929,3 +1929,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס לכל המשתמשים** (`StudioEntryCard` = `SizedBox.shrink` ל-non-owner; הקוקפיט זהה byte-for-byte). **לבעלים-מנהל בלבד** (signed-in owner email): כרטיס "🎨 סטודיו (בטא)" חדש בראש לוח-הבקרה, אחרי הקו-פיילוט. לחיצה → מפעילה את דגל-הריצה `kStudio` + פותחת את מסך-הסטודיו (route גדור-בעלים). **זו הפעם הראשונה שהסטודיו נגיש end-to-end: הבעלים פותח → עץ → בוחר → מפקח → מקליד → "פרסם לכולם" → חי.**
 **אימות (אוטומטי):** `studio_entry_test` 3 ירוקים (hidden ל-non-owner · visible לבעלים · tap מפעיל+פותח) · **כל חבילת studio 115 ירוקים** · analyze 0 (5 infos קיימים-מראש ב-mega-file).
 **הפיכות:** הסר `const StudioEntryCard()` מהקוקפיט + `git rm studio_entry.dart`.
+
+## studio-s21 — קונכיית-הסטודיו: Pane D היסטוריית-גרסאות — שינוי-נראה: אפס (מגודר) — 2026-06-29
+**שינוי נראה:** **אפס** (בתוך הסטודיו המגודר). Pane D — רשימת `ConfigVersion` (note · byEmail · זמן) חדש-לישן; "שחזר" → אישור → rollback **forward-only** (snapshot מתפרסם כגרסה חדשה, ההיסטוריה נשמרת). ריק → placeholder. מחובר pane 3.
+**אימות (אוטומטי):** `history_pane_test` 3 ירוקים (empty · shows-version · restore-forward) · `studio_screen` 4 (לא נשבר) · analyze 0.
+**הפיכות:** `git rm history_pane.dart`, החזר placeholder ל-pane 3.
