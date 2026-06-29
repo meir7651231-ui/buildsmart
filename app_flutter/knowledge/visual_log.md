@@ -1959,3 +1959,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס (answer-equivalent).** Batch-1 של אימוץ-התוכן: `const Text('שאל את העסק שלך', …)` בקוקפיט (hero קו-פיילוט) → `const CfgText('manager.cockpit.copilot.title', 'שאל את העסק שלך', …)`. הליטרל נשאר fallback ⇒ doc-ריק/OFF מציג אותו verbatim עם אותו style (CfgText = wrapper-זהות מוכח, EditHandle.maybe מחזיר child כשלא-עורכים). `const` נשמר (ל-CfgText יש const-ctor). id נוסף ל-registry (append-only, wired:true, לא-kImmutable — תוכן ולא ניווט).
 **אימות (אוטומטי):** `gate_118_test` (id מאומץ ⊆ registry) · `registry_contract`/`descriptor_contract` (8+3) · `zero_regression` 31 — כולם ירוקים · analyze 0.
 **הפיכות:** `CfgText→Text` חזרה + הסר את שורת ה-registry.
+
+## studio-s29-b2 — Phase E אימוץ-עיצוב: cfgRadius בכרטיס קו-פיילוט — שינוי-נראה: אפס (default) — 2026-06-29
+**שינוי נראה:** **אפס בברירת-מחדל.** Batch-2 (אימוץ-radius): שני אתרי `BorderRadius.circular(BsTokens.radiusCard)` בכרטיס `_CopilotHero` (InkWell + BoxDecoration, שניהם non-const, `context` זמין) → `BorderRadius.circular(cfgRadius(context))`. `cfgRadius` default = radiusCard = 20 = נוכחי ⇒ פיקסל-זהה. **כשהבעלים יזיז את ה-radius-slider ויפרסם — פינות-הכרטיס ישתנו חי** (מתחיל לסגור את ה-deferred מ-r2-fix-3). ללא registry (קורא theme גלובלי, לא id פר-אלמנט).
+**אימות (אוטומטי):** `config_theme_test` 12 (+cfgRadius: override⇒8 · fallback⇒radiusCard, דרך `Theme` מפורש כדי לעקוף את אנימציית-ה-theme של MaterialApp) · `zero_regression` 16 — ירוקים · analyze 0.
+**הפיכות:** `cfgRadius(context)→BsTokens.radiusCard` חזרה (2 אתרים).

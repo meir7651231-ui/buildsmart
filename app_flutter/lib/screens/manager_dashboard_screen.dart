@@ -34,6 +34,7 @@ import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
@@ -444,7 +445,7 @@ class _CopilotHero extends ConsumerWidget {
       button: true,
       label: 'קו-פיילוט — שאל את העסק שלך',
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: () =>
             Navigator.of(context).push(ManagerCopilotScreen.route()),
         child: Container(
@@ -455,7 +456,7 @@ class _CopilotHero extends ConsumerWidget {
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
             ),
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
           ),
           child: Row(
             children: [

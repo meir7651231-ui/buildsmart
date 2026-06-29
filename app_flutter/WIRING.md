@@ -2973,7 +2973,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 ### #studio-s29 — סטודיו · Phase E: אימוץ-תוכן section-by-section (עמוד-2 · שלב-29) — 2026-06-29
 **גלגול-adoption (`Text('ליטרל')`→`CfgText`) על מסכים-בעלי-ערך, batch נפרד לכל section; הליטרל נשאר fallback ⇒ OFF=answer-equivalent. היקף-הציר ~532 ליטרלים סטטיים (R1-B6) — עבודה מתמשכת רב-commits.**
-- **batch-1 (קוקפיט · copilot hero):** `manager_dashboard_screen.dart` — `const Text('שאל את העסק שלך')` → `const CfgText('manager.cockpit.copilot.title', …)` (const נשמר). +שורת registry (append-only, wired, לא-kImmutable). רק `Text('ליטרל')` סטטי; conditional/interpolated/`Text.rich` = out-of-v1.
+- **batch-1 (קוקפיט · copilot hero · תוכן):** `manager_dashboard_screen.dart` — `const Text('שאל את העסק שלך')` → `const CfgText('manager.cockpit.copilot.title', …)` (const נשמר). +שורת registry (append-only, wired, לא-kImmutable). רק `Text('ליטרל')` סטטי; conditional/interpolated/`Text.rich` = out-of-v1.
+- **batch-2 (קוקפיט · copilot hero · עיצוב):** 2× `BorderRadius.circular(BsTokens.radiusCard)` בכרטיס `_CopilotHero` → `cfgRadius(context)` (non-const, context זמין). default=radiusCard=20 ⇒ אפס-רגרסיה; override-בעלים ⇒ פינות חיות. **מתחיל להפעיל את ה-radius-slider** (deferred מ-r2-fix-3). ללא registry (theme גלובלי). gate: `config_theme_test` 12 (+cfgRadius override/fallback) · `zero_regression` 16 · analyze 0.
 - **gate:** `gate_118_test` (סורק lib/ ל-`CfgText('id'` → ⊆ registry — מאמת אוטומטית כל אימוץ) · `registry_contract`/`descriptor_contract`/`zero_regression` ירוקים · analyze 0 · `visual_log` אפס-diff. lib/screens → גייט 24+116.
 - **codemod `tool/studio_extract_ids.dart`** — נדחה: `tool/` תחת very_good_analysis (avoid_print וכו') ⇒ חיכוך; אימוץ ידני per-section עובד. ייבנה כש-batch גדול יצדיק.
 - הבא: batches נוספים (קוקפיט→home_shell→catalog) + **אימוץ `cfgRadius(context)` בכרטיסים** שיפעיל את ה-radius-slider החי (סוגר את ה-deferred של r2-fix-3). דחוף רק על 'תדחוף'.

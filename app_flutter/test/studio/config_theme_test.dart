@@ -84,4 +84,38 @@ void main() {
     expect(combinedTextScale(1, 1, 1.6), 1.35); // clamped up (RTL-safe ceiling)
     expect(combinedTextScale(1, 1, 0.8), 0.85); // clamped down
   });
+
+  testWidgets('cfgRadius: default = radiusCard (zero-reg); override flows through', (
+    tester,
+  ) async {
+    late double overridden;
+    late double fallback;
+    // Explicit Theme (not MaterialApp.theme) so the override applies instantly —
+    // MaterialApp ANIMATES theme changes, which would catch the radius lerp mid-flight.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: [
+            Theme(
+              data: ThemeData(extensions: const [CfgTheme(radius: 8)]),
+              child: Builder(
+                builder: (c) {
+                  overridden = cfgRadius(c);
+                  return const SizedBox();
+                },
+              ),
+            ),
+            Builder(
+              builder: (c) {
+                fallback = cfgRadius(c); // no CfgTheme ext ⇒ radiusCard
+                return const SizedBox();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(overridden, 8); // owner radius override reaches the adopted card
+    expect(fallback, BsTokens.radiusCard); // default ⇒ identity (zero-reg)
+  });
 }
