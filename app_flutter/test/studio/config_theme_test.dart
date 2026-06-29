@@ -77,4 +77,11 @@ void main() {
     );
     expect(c, BsTokens.brand);
   });
+
+  test('combinedTextScale folds the owner fontScale (identity at 1.0; clamped)', () {
+    expect(combinedTextScale(1, 1, 1), 1.0); // all-default ⇒ identity (zero-reg)
+    expect(combinedTextScale(1, 1, 1.2), greaterThan(1.0)); // owner scale reaches it
+    expect(combinedTextScale(1, 1, 1.6), 1.35); // clamped up (RTL-safe ceiling)
+    expect(combinedTextScale(1, 1, 0.8), 0.85); // clamped down
+  });
 }

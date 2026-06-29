@@ -109,3 +109,10 @@ double cfgRadius(BuildContext context) =>
 /// Global font scale — owner override, else 1.0.
 double cfgFontScale(BuildContext context) =>
     Theme.of(context).extension<CfgTheme>()?.fontScale ?? 1.0;
+
+/// Fold the in-app text-size pref, the OS Dynamic-Type scale, and the owner's
+/// CfgTheme [ownerFontScale] into one clamped scaler (the range keeps RTL layouts
+/// intact). At all-1.0 it returns 1.0 ⇒ the owner's font-scale slider is identity
+/// until they move it (zero-regression). Pure, so the fold is unit-pinned.
+double combinedTextScale(double inApp, double os, double ownerFontScale) =>
+    (inApp * os * ownerFontScale).clamp(0.85, 1.35).toDouble();

@@ -13,6 +13,7 @@ import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show combinedTextScale;
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
 import 'package:buildsmart/widgets/studio/studio_overlay.dart';
@@ -366,7 +367,9 @@ class BuildSmartApp extends ConsumerWidget {
         // Respect the OS Dynamic-Type setting (previously discarded) folded with
         // the in-app size preference, clamped so RTL layouts stay intact.
         final osScale = mq.textScaler.scale(100) / 100;
-        final combined = (textScale * osScale).clamp(0.85, 1.35).toDouble();
+        // Fold in the owner's CfgTheme font-scale (#studio) — 1.0 by default ⇒ no
+        // change until the owner moves the theme-editor slider (round-2 fix).
+        final combined = combinedTextScale(textScale, osScale, cfgTheme.fontScale);
         return MediaQuery(
           data: mq.copyWith(
             textScaler: TextScaler.linear(combined),
