@@ -3057,3 +3057,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **Fix B** — `trades_store.dart` `_schemaVer()` סובלני: `schemaVersion` כ-String ("1"→1 · לא-מספרי→fallback) לא זורק יותר (guard-ה-prefs-המושחת שב לעבוד).
 - **Fix A** — `connection_schema.dart` `_numMap` guard `if (e.value is num)` (envelope עם ערך לא-num לא מפיל decode).
 - **gate:** הבדיקות המושפעות +23 ירוקים (plumbing_seed +3: no-dangling-FKs · _uncategorized · non-vacuous · trades_migration +2: String-tolerance · adapter round-trip byte-for-byte) · analyze 0 errors · grep 0 live-consumers. הבא: Step 37.
+
+### #pillar2-s37 — connections seed (connectorTypes·systems·specs·rules מ-890 VerifiedSpecs) — 2026-06-29
+**הרחיב הנחיל (בנאי+בודק), המנצח אימת byte+gate.** `buildPlumbingSeed()` ממלא עכשיו גם 5 רשימות-חיבור מ-`kVerifiedSpecs` (**890** byte-מאומת — לא 891 כפי שתועד בהנחיה; הבנאי נקשר ל-`.length` אז ה-seed תקין, והבדיקה תוקנה ל-890):
+- **6 ConnectorTypes** (לכל EndType: id `plumbing.conn.<e.name>` · sizeValues distinct-sorted · systemId נגזר מ-`ConnectorEnd.system`) · **2 SystemDefs** (`plumbing.sys.supply`='אספקה' כחול · `.drainage`='ניקוז' אפור).
+- **890 ProductConnectorSpecs** (לכל VerifiedSpec: ends→ProductEnd(connTypeId,size) · materialId · ratingHe=pressureRating · envelope{maxTempC} · materialGroupId=`_galvanicGroup(material)`; pexType נדחה — envelope הוא `Map<String,num>`).
+- **5 CompatibilityRules** — methodLabelHe **בייט-זהה ל-`install_engine.connectionMethodLabel`:90** (קריטי לקיסטון): bspMale↔bspFemale 'תבריג + PTFE' · pexPress 'Press / טבעת כיווץ' · copperPress 'Press / O-ring' · drainOpening 'כיסוי ניקוז' · hdpe 'אום הידוק (compression)' (התווית של pipeSharedWith:105, לא ה-direct-mate המת). sizeMatch=exactSame · onMismatch=critical.
+- **1 CompletionRule גלווני** — incompatibleMaterialGroups=['copper-group','iron-group'] + dielectric whyHe + critical (type-fields ריקים בכוונה: גלווני מבוסס-חומר, לא-type; resolver@40 יקרא material).
+- **gate:** `plumbing_seed_test` +5 = **12 ירוקים** (890 specs · 6+2 · sample-rule לפי תווית · גלווני · determinism) · analyze 0 errors · grep 0 live-consumers (store ריק, read-path לא-נגוע). הבא: **Step 38 — KEYSTONE** (trade_seed_equivalence_test).

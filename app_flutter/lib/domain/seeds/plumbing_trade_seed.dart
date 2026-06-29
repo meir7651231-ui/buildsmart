@@ -18,8 +18,10 @@
 
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/domain/connection_schema.dart';
 import 'package:buildsmart/domain/trade_product_adapter.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/state/trades_store.dart';
@@ -28,6 +30,31 @@ import 'package:buildsmart/state/trades_store.dart';
 const String kPlumbingTradeId = 'plumbing';
 
 String _categoryId(String key) => '$kPlumbingTradeId.cat.$key';
+
+// ── connection-seed helpers (step 37) ─────────────────────────────────────────
+// Stable id schemes for the authored connection model derived from the 891
+// VerifiedSpecs. Keep them deterministic — two buildPlumbingSeed() calls must
+// stay byte-equal.
+String _systemId(WaterSystem s) => '$kPlumbingTradeId.sys.${s.name}';
+
+String _connTypeId(EndType e) => '$kPlumbingTradeId.conn.${e.name}';
+
+/// The galvanic material group of a plumbing material, or null when the material
+/// is galvanically benign (HDPE/PEX/PVC/…). Mirrors install_engine.dart:117
+/// `_galvanicallyDissimilar`: copper-group (נחושת/פליז) vs iron-group
+/// (פלדה/נירוסטה). A dielectric union is required only between the two groups.
+String? _galvanicGroup(String m) {
+  const copper = {'נחושת', 'פליז'};
+  const iron = {'פלדה', 'נירוסטה'};
+  if (copper.contains(m)) return 'copper-group';
+  if (iron.contains(m)) return 'iron-group';
+  return null;
+}
+
+/// The plumbing system an [EndType] belongs to — derived from the verified
+/// physics in [ConnectorEnd.system] (size-independent switch on the type), so it
+/// can never drift from the engine's mapping.
+WaterSystem _systemOfEndType(EndType e) => ConnectorEnd(e, '').system;
 
 /// Fallback category for any reference that resolves to nothing — guarantees every
 /// product/fixture/accessory still points at a real [TradeCategory] (FK integrity).
@@ -218,13 +245,139 @@ List<SmartFixture> plumbingFixtures() {
     ..sort((a, b) => a.id.compareTo(b.id));
 }
 
+// ── step 37 — the authored connection model (seeded from the VerifiedSpecs) ────
+
+/// The two plumbing systems (supply / drainage), sorted by id. These mirror
+/// [WaterSystem]; the resolver pins a line to exactly one.
+List<SystemDef> plumbingSystems() => <SystemDef>[
+      SystemDef(
+        id: '$kPlumbingTradeId.sys.supply',
+        tradeId: kPlumbingTradeId,
+        nameHe: 'אספקה',
+        color: 0xFF2196F3,
+      ),
+      SystemDef(
+        id: '$kPlumbingTradeId.sys.drainage',
+        tradeId: kPlumbingTradeId,
+        nameHe: 'ניקוז',
+        color: 0xFF9E9E9E,
+      ),
+    ]..sort((a, b) => a.id.compareTo(b.id));
+
+/// One [ConnectorType] per [EndType], sorted by id. `sizeValues` is the sorted,
+/// distinct set of sizes seen for that end-type across ALL [kVerifiedSpecs].
+/// `nameHe` is a NEW descriptive label (the physics never reads it). `systemId`
+/// is derived from the verified [ConnectorEnd.system] mapping.
+List<ConnectorType> plumbingConnectorTypes() {
+  const nameHe = <EndType, String>{
+    EndType.hdpeCompression: 'הידוק HDPE',
+    EndType.pexPress: 'PEX פרס',
+    EndType.copperPress: 'נחושת פרס',
+    EndType.bspMale: 'תבריג זכר (BSP)',
+    EndType.bspFemale: 'תבריג נקבה (BSP)',
+    EndType.drainOpening: 'פתח ניקוז',
+  };
+  // Collect the distinct sizes per end-type across every verified spec.
+  final sizesByType = <EndType, Set<String>>{
+    for (final e in EndType.values) e: <String>{},
+  };
+  for (final spec in kVerifiedSpecs.values) {
+    for (final end in spec.ends) {
+      sizesByType[end.type]!.add(end.size);
+    }
+  }
+  return <ConnectorType>[
+    for (final e in EndType.values)
+      ConnectorType(
+        id: _connTypeId(e),
+        tradeId: kPlumbingTradeId,
+        nameHe: nameHe[e]!,
+        sizeValues: sizesByType[e]!.toList()..sort(),
+        systemId: _systemId(_systemOfEndType(e)),
+      ),
+  ]..sort((a, b) => a.id.compareTo(b.id));
+}
+
+/// One [ProductConnectorSpec] per [kVerifiedSpecs] entry, sorted by sku. The
+/// material's galvanic group (R1-3) is derived via [_galvanicGroup]. `pexType`
+/// is deferred in v1 — `envelope` is Map<String,num> so it cannot carry the
+/// String, and we deliberately do NOT fold it into `ratingHe`.
+List<ProductConnectorSpec> plumbingProductSpecs() => <ProductConnectorSpec>[
+      for (final spec in kVerifiedSpecs.values)
+        ProductConnectorSpec(
+          productSku: spec.sku,
+          tradeId: kPlumbingTradeId,
+          ends: [
+            for (final e in spec.ends)
+              ProductEnd(
+                connectorTypeId: _connTypeId(e.type),
+                sizeValue: e.size,
+              ),
+          ],
+          materialId: spec.material,
+          ratingHe: spec.pressureRating,
+          envelope: {'maxTempC': spec.maxTempC},
+          materialGroupId: _galvanicGroup(spec.material),
+        ),
+    ]..sort((a, b) => a.productSku.compareTo(b.productSku));
+
+/// The 5 same-type joint rules, sorted by id. `methodLabelHe` is KEYSTONE-CRITICAL
+/// — each value is byte-identical to install_engine.dart `connectionMethodLabel`
+/// (the engine's label for that joint type). A size mismatch on these is a hard
+/// (critical) error.
+List<CompatibilityRule> plumbingCompatRules() {
+  const pairs = <(EndType, EndType, String)>[
+    (EndType.bspMale, EndType.bspFemale, 'תבריג + PTFE'),
+    (EndType.pexPress, EndType.pexPress, 'Press / טבעת כיווץ'),
+    (EndType.copperPress, EndType.copperPress, 'Press / O-ring'),
+    (EndType.drainOpening, EndType.drainOpening, 'כיסוי ניקוז'),
+    (EndType.hdpeCompression, EndType.hdpeCompression, 'אום הידוק (compression)'),
+  ];
+  return <CompatibilityRule>[
+    for (final (a, b, label) in pairs)
+      CompatibilityRule(
+        id: '$kPlumbingTradeId.rule.${a.name}__${b.name}',
+        tradeId: kPlumbingTradeId,
+        aTypeId: _connTypeId(a),
+        bTypeId: _connTypeId(b),
+        sizeMatch: SizeMatch.exactSame,
+        methodLabelHe: label,
+        onMismatch: RuleSeverity.critical,
+      ),
+  ]..sort((a, b) => a.id.compareTo(b.id));
+}
+
+/// The single galvanic completion rule. whenInLineHasTypeId/requireTypeId are ''
+/// on purpose — galvanic corrosion is MATERIAL-based, not connector-type-
+/// triggered; the resolver (step 40) reads [incompatibleMaterialGroups] (the two
+/// dissimilar metal groups) rather than a type trigger.
+List<CompletionRule> plumbingCompletionRules() => <CompletionRule>[
+      CompletionRule(
+        id: '$kPlumbingTradeId.completion.galvanic',
+        tradeId: kPlumbingTradeId,
+        whenInLineHasTypeId: '',
+        requireTypeId: '',
+        whyHe:
+            'מתכות לא-דומות (נחושת/פליז ↔ פלדה/נירוסטה) באותו קו דורשות מתאם דיאלקטרי למניעת קורוזיה גלוונית',
+        incompatibleMaterialGroups: ['copper-group', 'iron-group'],
+        requiredInterposerWhyHe:
+            'מתאם דיאלקטרי (ניתוק גלווני בין קבוצות-מתכת לא-דומות)',
+        severity: RuleSeverity.critical,
+      ),
+    ];
+
 /// Build the full plumbing [TradesDoc] from the live consts — deterministic, so two
-/// calls are equal. Connection types/specs/rules (from the 891 VerifiedSpecs) arrive
-/// at step 37.
+/// calls are equal. The authored connection model (connector types / systems /
+/// product specs / compat + completion rules) is seeded from the 891 VerifiedSpecs.
 TradesDoc buildPlumbingSeed() => TradesDoc(
       trades: [plumbingTrade()],
       categories: plumbingCategories(),
       products: plumbingProducts(),
       accessories: plumbingAccessories(),
       fixtures: plumbingFixtures(),
+      connectorTypes: plumbingConnectorTypes(),
+      systems: plumbingSystems(),
+      productSpecs: plumbingProductSpecs(),
+      compatRules: plumbingCompatRules(),
+      completionRules: plumbingCompletionRules(),
     );

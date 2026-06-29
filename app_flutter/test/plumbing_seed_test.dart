@@ -4,6 +4,7 @@
 // the catalog SKU (byte-faithful via the step-35 adapter). The store stays empty —
 // this seed is not wired into any read-path until step 39.
 import 'package:buildsmart/data/brands.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/domain/seeds/plumbing_trade_seed.dart';
@@ -81,5 +82,48 @@ void main() {
   test('products distribute across real categories (non-vacuous linkage)', () {
     final seed = buildPlumbingSeed();
     expect(seed.products.map((p) => p.categoryId).toSet().length, greaterThan(1));
+  });
+
+  // ── step 37: the seed also carries connection data from the 890 VerifiedSpecs ──
+
+  test('seed carries the 890 product connector specs', () {
+    final seed = buildPlumbingSeed();
+    expect(kVerifiedSpecs.length, 890); // pins the source count (byte-verified)
+    expect(seed.productSpecs, hasLength(kVerifiedSpecs.length));
+  });
+
+  test('seed has 6 connector types and 2 systems', () {
+    final seed = buildPlumbingSeed();
+    expect(seed.connectorTypes, hasLength(6));
+    expect(seed.systems, hasLength(2));
+  });
+
+  test('a sample mating rule is present (bspMale↔bspFemale ⇒ תבריג + PTFE)', () {
+    // Assert by the byte-exact method label — decoupled from the builder's rule
+    // ids and the SizeMatch enum value.
+    final seed = buildPlumbingSeed();
+    expect(
+      seed.compatRules.any((r) => r.methodLabelHe == 'תבריג + PTFE'),
+      isTrue,
+    );
+  });
+
+  test('the galvanic completion rule is present (copper-group ⇎ iron-group)', () {
+    final seed = buildPlumbingSeed();
+    expect(
+      seed.completionRules.any(
+        (c) =>
+            (c.incompatibleMaterialGroups
+                ?.toSet()
+                .containsAll({'copper-group', 'iron-group'})) ??
+            false,
+      ),
+      isTrue,
+    );
+  });
+
+  test('connection data is deterministic (two builds equal)', () {
+    expect(buildPlumbingSeed().productSpecs, buildPlumbingSeed().productSpecs);
+    expect(buildPlumbingSeed().compatRules, buildPlumbingSeed().compatRules);
   });
 }
