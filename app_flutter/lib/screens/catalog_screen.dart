@@ -2353,11 +2353,15 @@ class _SearchResultsList extends ConsumerWidget {
                     color: const Color(0xFF1c1409),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text('מוצר',
-                      style: TextStyle(
-                          color: Color(0xFFFF7A18),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600)),
+                  child: const CfgText(
+                    'catalog.card.productBadge',
+                    'מוצר',
+                    style: TextStyle(
+                      color: Color(0xFFFF7A18),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -5825,11 +5829,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   spacing: 6,
                                   runSpacing: 6,
                                   children: [
-                                    const Text('תבניות:',
-                                        style: TextStyle(
-                                            color: Color(0xFF94A3B8),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600)),
+                                    const CfgText(
+                                      'catalog.templates.label',
+                                      'תבניות:',
+                                      style: TextStyle(
+                                        color: Color(0xFF94A3B8),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                     for (final t in projectTemplates())
                                       GestureDetector(
                                         onTap: () {
@@ -6257,11 +6265,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('מתי לבחור איזה מותג',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.brandGuide',
+                                'מתי לבחור איזה מותג',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final g in guide)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
@@ -6288,11 +6300,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('נצפו לאחרונה',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.recentlyViewed',
+                                'נצפו לאחרונה',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final sku in recent)
                                 Builder(builder: (_) {
                                   // T6.3: SKU→catalog lookup via the repository.
@@ -7276,9 +7292,11 @@ class _RecentSearchesSection extends ConsumerWidget {
                   if (!ok || !context.mounted) return;
                   ref.read(recentSearchesProvider.notifier).clear();
                 },
-                child: const Text('נקה הכל',
-                    style:
-                        TextStyle(color: BsTokens.brand, fontSize: 13)),
+                child: const CfgText(
+                  'catalog.search.clearAll',
+                  'נקה הכל',
+                  style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                ),
               ),
             ],
           ),

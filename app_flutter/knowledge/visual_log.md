@@ -1994,3 +1994,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס (answer-equivalent).** Batch-8 — **ציר-התוכן (לב s29)**: 5 כותרות-סקשן סטטיות בעמוד פרטי-המוצר ב-`catalog_screen.dart` (mega-file, section-by-section) → CfgText: 'תקינות נדרשת'·'מה הקו צריך לחיבור'·'בדיקת קבלה (סיום התקנה)'·'תקן ישראלי רלוונטי'·'טעויות נפוצות וטיפים' → `catalog.detail.{requiredStandards/connectionNeeds/acceptanceCheck/israeliStandard/commonMistakes}`. הליטרל+style נשמרים fallback (const נשמר). +5 שורות registry (append-only, wired, content). **הבעלים יכול עכשיו לערוך את כותרות פרטי-המוצר.** רק static `Text('ליטרל')`; interpolated/`for-in` בסביבה לא נגעו.
 **אימות (אוטומטי):** `gate_118_test` (5 ids ⊆ registry) · `registry_contract` 8 · `zero_regression` 28 · analyze 0.
 **הפיכות:** `CfgText→Text` (5) + הסר 5 registry rows + import.
+
+## studio-s29-b9 — Phase E אימוץ-תוכן (CfgText): עוד 5 תוויות-קטלוג — שינוי-נראה: אפס — 2026-06-29
+**שינוי נראה:** **אפס (answer-equivalent).** Batch-9 — עוד 5 ליטרלי-קטלוג סטטיים → CfgText: 'מוצר' (תג-כרטיס)·'תבניות:' (תווית)·'מתי לבחור איזה מותג' (כותרת)·'נצפו לאחרונה' (כותרת)·'נקה הכל' (כפתור) → `catalog.{card.productBadge/templates.label/detail.brandGuide/detail.recentlyViewed/search.clearAll}`. ליטרל+style fallback (const נשמר). +5 registry rows. **10 תוויות-קטלוג ניתנות-לעריכה.**
+**אימות (אוטומטי):** `gate_118_test` (ids⊆registry) · `registry_contract` 8 · `zero_regression` 28 · analyze 0.
+**הפיכות:** `CfgText→Text` (5) + הסר 5 registry rows.
