@@ -10,9 +10,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/state/studio/config_store.dart'
-    show ConfigOp, SetText, configStoreProvider;
+    show ConfigOp, SetText, cfgOpError, configStoreProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
-    show EditAxis, ElementDescriptor, elementRegistryProvider;
+    show EditAxis, ElementDescriptor, criticalIdsProvider, elementRegistryProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,25 +123,33 @@ class _FindReplacePaneState extends ConsumerState<FindReplacePane> {
                           'רכיב קריטי — קריאה בלבד',
                           style: TextStyle(color: BsTokens.mutedLight),
                         )
-                      : Text.rich(
-                          TextSpan(
-                            children: [
+                      // The strike-through old / bold new is a VISUAL cue; a
+                      // screen reader gets a spoken "מ־… ל־…" instead (the bare
+                      // glyphs alone wouldn't convey old vs new). [round-2 a11y]
+                      : Semantics(
+                          label: 'מ־${h.text} ל־${after.isEmpty ? 'ריק' : after}',
+                          child: ExcludeSemantics(
+                            child: Text.rich(
                               TextSpan(
-                                text: h.text,
-                                style: const TextStyle(
-                                  color: BsTokens.mutedLight,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
+                                children: [
+                                  TextSpan(
+                                    text: h.text,
+                                    style: const TextStyle(
+                                      color: BsTokens.mutedLight,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                  const TextSpan(text: '  ←  '),
+                                  TextSpan(
+                                    text: after.isEmpty ? '(ריק)' : after,
+                                    style: const TextStyle(
+                                      color: BsTokens.inkLight,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const TextSpan(text: '  ←  '),
-                              TextSpan(
-                                text: after.isEmpty ? '(ריק)' : after,
-                                style: const TextStyle(
-                                  color: BsTokens.inkLight,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                 );
@@ -166,21 +174,31 @@ class _FindReplacePaneState extends ConsumerState<FindReplacePane> {
   }
 
   void _apply(List<_Hit> hits, String query, String replacement) {
+    final critical = ref.read(criticalIdsProvider);
     final ops = <ConfigOp>[];
+    var dropped = 0;
     for (final h in hits) {
       if (!_selected(h)) continue;
       final next = h.text.replaceAll(query, replacement);
-      ops.add(SetText(h.d.id, next.isEmpty ? null : next));
+      final op = SetText(h.d.id, next.isEmpty ? null : next);
+      // Pre-validate so a too-long / bidi result is reported, not silently lost.
+      if (cfgOpError(op, criticalIds: critical) != null) {
+        dropped++;
+        continue;
+      }
+      ops.add(op);
     }
-    if (ops.isEmpty) return;
-    // ONE batch ⇒ a single undo frame; draft-only (never publish).
-    ref.read(configStoreProvider.notifier).applyOps(ops);
+    if (ops.isEmpty && dropped == 0) return;
+    // ONE batch ⇒ a single undo frame; draft-only (never publish). `applied` is the
+    // count that ACTUALLY changed the draft — reported honestly (round-2 fix).
+    final applied =
+        ref.read(configStoreProvider.notifier).applyOps(ops, criticalIds: critical);
+    final msg = StringBuffer(
+      'הוחלפו $applied — בטיוטה. "פרסם לכולם" כדי לשדר לכל המשתמשים.',
+    );
+    if (dropped > 0) msg.write(' ($dropped נדחו — טקסט ארוך/לא תקין)');
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'הוחלפו ${ops.length} — בטיוטה. "פרסם לכולם" כדי לשדר לכל המשתמשים.',
-        ),
-      ),
+      SnackBar(content: Text(msg.toString())),
     );
     setState(() {
       _find.clear();

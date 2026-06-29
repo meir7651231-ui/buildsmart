@@ -70,6 +70,8 @@ class ThemePane extends ConsumerWidget {
           max: 28,
           divisions: 28,
           label: cfg.radius.round().toString(),
+          // Screen reader hears the control name + value, not a bare number. [a11y]
+          semanticFormatterCallback: (v) => 'עיגול פינות ${v.round()}',
           onChanged: (v) => notifier.setThemeDraft(cfg.copyWith(radius: v)),
         ),
         const SizedBox(height: BsTokens.space3),
@@ -80,6 +82,8 @@ class ThemePane extends ConsumerWidget {
           max: 1.6,
           divisions: 16,
           label: '×${cfg.fontScale.toStringAsFixed(2)}',
+          semanticFormatterCallback: (v) =>
+              'גודל גופן פי ${v.toStringAsFixed(2)}',
           onChanged: (v) => notifier.setThemeDraft(cfg.copyWith(fontScale: v)),
         ),
         const Divider(height: BsTokens.space6),
@@ -181,7 +185,11 @@ class _ContrastWarning extends StatelessWidget {
             const SizedBox(width: BsTokens.space2),
             Expanded(
               child: Text(
-                'ניגודיות מול לבן: ${ratio.toStringAsFixed(1)} (מתחת ל-4.5). '
+                // LTR-isolate the numeric runs (LRI U+2066 … PDI U+2069) so they
+                // don't reorder in the RTL sentence — escapes, since a raw isolate
+                // char would itself trip the analyzer. [round-2 a11y]
+                'ניגודיות מול לבן: \u2066${ratio.toStringAsFixed(1)}\u2069 '
+                '(מתחת ל-\u20664.5\u2069). '
                 'טקסט לבן על הצבע הזה עלול להיות קשה לקריאה.',
                 style: const TextStyle(
                   color: Color(0xFF7A3E00),

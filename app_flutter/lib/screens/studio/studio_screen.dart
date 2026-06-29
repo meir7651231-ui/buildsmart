@@ -85,6 +85,9 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
                         padding: const EdgeInsetsDirectional.only(end: 8),
                         child: ChoiceChip(
                           selected: _pane == i,
+                          // Full descriptive name for screen readers / hover — the
+                          // visible label is only emoji + a short word. [round-2 a11y]
+                          tooltip: _segments[i].$3,
                           label: Text('${_segments[i].$1} ${_segments[i].$2}'),
                           onSelected: (_) => setState(() => _pane = i),
                         ),

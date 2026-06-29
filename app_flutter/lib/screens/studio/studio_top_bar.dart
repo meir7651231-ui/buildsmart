@@ -12,6 +12,8 @@ import 'package:buildsmart/state/studio/config_store.dart'
     show configStoreProvider;
 import 'package:buildsmart/state/studio/edit_mode.dart'
     show editModeProvider, studioCanEditProvider, studioOwnerEmailProvider;
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show criticalIdsProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -207,6 +209,9 @@ class _PublishSheetState extends ConsumerState<_PublishSheet> {
           note: note.isEmpty ? 'עריכה ידנית' : note,
           byEmail: ref.read(studioOwnerEmailProvider) ?? '',
           nowMs: DateTime.now().millisecondsSinceEpoch,
+          // Run the publish-validator in prod so a critical hide/reroute is stripped
+          // before it ever reaches `published` (round-2 fix — keeps published clean).
+          criticalIds: ref.read(criticalIdsProvider),
         );
     Navigator.of(context).pop();
   }

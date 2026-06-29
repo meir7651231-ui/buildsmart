@@ -1949,3 +1949,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (בתוך הסטודיו המגודר; non-owner לא מגיע). pane 5 חדש ('🔎 מצא והחלף') — שדה-מצא + שדה-החלף → רשימת-hits (כל אחד checkbox + `labelHe` + "לפני ← אחרי") על שכבת-ה-overrides (draft⊕published, **לא** labelHe). "החלף בנבחרים (N)" → `applyOps` batch-יחיד = undo-יחיד, ל-**draft בלבד** (published לא נגע). `kImmutable` = קריאה-בלבד. אזהרת >50. SnackBar-אישור + ניקוי. מחובר segment-5 ב-studio_screen.
 **אימות (אוטומטי):** `find_replace_test` 3 ירוקים (preview-by-labelHe + replace→draft-only/published-untouched · single-undo · kImmutable-read-only) · `studio_screen` (5 panes) + `zero_regression` לא נשברו · analyze 0.
 **הפיכות:** `git rm find_replace_pane.dart`, הסר segment-5 + ילד-5 מ-studio_screen.
+
+## studio-r2-fix-2 — תיקוני נחיל round-2 (panes: a11y + find-replace כנה) — שינוי-נראה: מינימלי (מגודר) — 2026-06-29
+**שינוי נראה:** **מינימלי, בתוך הסטודיו המגודר.** (א) צ'יפים של ה-panes קיבלו `tooltip` עם שם מלא (קורא-מסך/hover). (ב) סליידרים (radius/fontScale) קיבלו `semanticFormatterCallback` עברי. (ג) שורת before→after במצא-והחלף עטופה ב-`Semantics(label:'מ־…ל־…')` + `ExcludeSemantics` (קורא-מסך שומע ישן/חדש, לא רק קו-חוצה ויזואלי). (ד) SnackBar במצא-והחלף מדווח כעת ספירה **כנה** (`applied` מ-applyOps, לא ops.length) + "(N נדחו — טקסט ארוך/לא תקין)" כשהוולידטור דחה. (ה) מספרי-ניגודיות עטופים LTR-isolate (`⁦…⁩`). (ו) publish מעביר `criticalIds` ⇒ sanitize רץ בפרודקשן.
+**אימות (אוטומטי):** `find_replace_test` 4 (+over-length-dropped) · `theme_pane` 4 · `studio_screen` 11 — כולם ירוקים · analyze 0 (אפס warnings — תווי-isolate כ-escapes).
+**הפיכות:** `git revert` של r2-fix-2.

@@ -122,4 +122,27 @@ void main() {
     expect(find.text('רכיב קריטי — קריאה בלבד'), findsOneWidget); // …but locked
     expect(find.text('החלף בנבחרים (0)'), findsOneWidget); // 0 selectable ⇒ disabled
   });
+
+  testWidgets('an over-length replace is reported as dropped, not silent success', (
+    tester,
+  ) async {
+    final c = make();
+    // 78 chars (valid); replacing each 'א' with 'בב' would push it past the 80 cap.
+    c.read(configStoreProvider.notifier).applyOps([SetText(_openOrders, 'א' * 78)]);
+    await mount(tester, c);
+
+    await tester.enterText(find.byType(TextField).first, 'א');
+    await tester.enterText(find.byType(TextField).at(1), 'בב');
+    await tester.pump();
+    await tester.tap(find.text('החלף בנבחרים (1)'));
+    await tester.pump();
+
+    // The op is refused by the write-validator → draft unchanged + "נדחו" surfaced
+    // (no false "הוחלפו 1").
+    expect(c.read(configStoreProvider).draft.global[_openOrders]?.text, 'א' * 78);
+    expect(find.textContaining('נדחו'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+  });
 }
