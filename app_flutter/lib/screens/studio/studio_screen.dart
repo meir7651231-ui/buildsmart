@@ -8,6 +8,7 @@
 // Studio is inactive ⇒ zero behavior change until then. Panes are placeholders here.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart';
 import 'package:buildsmart/screens/studio/panes/history_pane.dart';
 import 'package:buildsmart/screens/studio/panes/inspector_pane.dart';
 import 'package:buildsmart/screens/studio/panes/theme_pane.dart';
@@ -41,6 +42,7 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
     ('🗂️', 'עץ', 'עץ הרכיבים'),
     ('🛠️', 'מפקח', 'מפקח העריכה'),
     ('🎨', 'עיצוב', 'ערכת נושא'),
+    ('🔎', 'מצא והחלף', 'מצא והחלף'),
     ('🕘', 'גרסאות', 'היסטוריית גרסאות'),
   ];
 
@@ -98,6 +100,7 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
                   TreePane(),
                   InspectorPane(),
                   ThemePane(),
+                  FindReplacePane(),
                   HistoryPane(),
                 ],
               ),
