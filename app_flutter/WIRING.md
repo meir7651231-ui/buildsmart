@@ -2958,3 +2958,14 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **theme-קריא:** ניגודיות `CfgTheme.fallback.ink` על `surface` ≥ 4.5 (AA). (brand-על-לבן ~2.6 < 4.5 בכוונה — ה-theme-pane מזהיר; הגוף תמיד-קריא.)
 - **deferred:** golden/pixel-test (תוספת-ב) — שביר ב-headless (fonts); אפס-רגרסיה כבר מוכח ב-`config_theme_test` (defaults==BsTokens) + `config_theme_wiring_test` (primary==brand) · safety-contract ב-`knowledge_protocol_test` (תוספת-א) — דילוג למניעת-coupling · דחיית style-token לא-מוכר ב-write — לא-נדרש (resolve כבר inert=בטוח; היה כופה layering state→widgets).
 - **gate:** `safety_test` 13 ירוקים (9 + 4: color/weight/size-bounded + ink-on-surface-AA) · `a11y_contrast_theme_test` עדיין-עובר (5) · **כל חבילת studio 150 ירוקים** · analyze **0**. **🎉 Phase C+D הושלמו** (s16–28). הבא: s29-30 (Phase E — content-adoption + finalize/seam-freeze) + **נחיל-ביקורת round-2** (מכסה C+D). דחוף רק על 'תדחוף'.
+
+### #studio-round2 — נחיל-ביקורת round-2 (גבול Phase C+D) + תיקונים — 2026-06-29
+**8 auditor-agents במקביל (lens אחד כל אחד) על כל משטח C+D.** verdict: **אין bypass חי · אין רגרסיה · #84 אטום · persistence/merge/contrast תקינים.** הפערים = defence-in-depth + correctness + a11y. תיקונים ב-batches:
+- **r2-fix-1 (lib/state + lib/theme — store/theme hardening):**
+  - `resetDraftNode` קיבל no-op guard (היה דוחף undo-פנטום + מוחק redo + notify מיותר על רכיב-pristine — כפתור "אפס רכיב" תמיד-פעיל) [auditor-store M3].
+  - `applyOps` מחזיר כעת `int` = מס' ה-ops שבאמת שינו את הטיוטה (validated ∧ לא no-op) — כדי ש-find-replace ידווח ספירה כנה במקום `ops.length` (ops שנדחו/no-op לא נספרים) [auditor-find-replace H3 · auditor-store H2].
+  - `CfgTheme` clamp ל-`radius` (fromJson 0–64 + copyWith) ו-`fontScale` (copyWith 0.8–1.6) — radius היה לא-חסום (1e9/שלילי משחית BorderRadius כלל-אפליקציה דרך doc מושחת/Pillar-5) [auditor-safety L1 · auditor-theme].
+  - **gate:** `safety_test` 16 (+3) · config_store/config_theme/find_replace לא נשברו · analyze 0. lib/state+theme → גייט 24.
+- **r2-fix-2 (panes — בהמשך):** publish מעביר criticalIds (sanitize בפרודקשן) · find-replace pre-check `cfgOpError` + ספירה כנה + a11y cue · theme_pane slider-semantics + LTR-isolate למספר · studio_screen chip-tooltips.
+- **r2-fix-3 (theme apply-side — בהמשך):** חיווט `fontScale` (+`radius` אם בטוח) ל-live ThemeData/MediaQuery — כרגע ה-sliders preview-only [auditor-theme HIGH].
+- **DEFERRED (מתועד):** "ניקוי published-override" ברמת-רכיב (צריך tombstone-model — מעבר ל-ops/merge/promote/json; revert היום דרך rollback/resetAll) · `criticalViolations` wiring ל-publish-sheet (אזהרת-בעלים inline) · surface/ink live (לא חשופים בעורך) · auto-exit Timer (#84 כבר נופל על שינוי-הקשר).

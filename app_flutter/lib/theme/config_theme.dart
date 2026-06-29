@@ -31,7 +31,7 @@ class CfgTheme extends ThemeExtension<CfgTheme> {
         surface: _color(j['surface'], BsTokens.cardLight),
         ink: _color(j['ink'], BsTokens.inkLight),
         radius: (j['radius'] is num)
-            ? (j['radius'] as num).toDouble()
+            ? (j['radius'] as num).toDouble().clamp(0.0, 64.0)
             : BsTokens.radiusCard,
         fontScale: (j['fontScale'] is num)
             ? (j['fontScale'] as num).toDouble().clamp(0.8, 1.6)
@@ -59,8 +59,10 @@ class CfgTheme extends ThemeExtension<CfgTheme> {
         brand: brand ?? this.brand,
         surface: surface ?? this.surface,
         ink: ink ?? this.ink,
-        radius: radius ?? this.radius,
-        fontScale: fontScale ?? this.fontScale,
+        // Defensive clamp at the choke-point: any owner/programmatic radius or
+        // fontScale stays in a sane range even if a caller passes out-of-bounds.
+        radius: (radius ?? this.radius).clamp(0.0, 64.0),
+        fontScale: (fontScale ?? this.fontScale).clamp(0.8, 1.6),
       );
 
   @override

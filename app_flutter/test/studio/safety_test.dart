@@ -201,4 +201,38 @@ void main() {
       );
     });
   });
+
+  // ── round-2 audit fixes (store/theme hardening) ──────────────────────────────
+
+  group('round-2: store + theme hardening', () {
+    test('resetDraftNode is a no-op on an already-pristine node', () {
+      final c = make();
+      final n = c.read(configStoreProvider.notifier);
+      n.resetDraftNode('cart.cta'); // nothing to reset
+      expect(n.canUndo, isFalse); // no phantom undo frame pushed
+      n.applyOps(const [SetText('cart.cta', 'X')]);
+      expect(c.read(configStoreProvider).draft.global['cart.cta']?.text, 'X');
+      n.resetDraftNode('cart.cta'); // real revert
+      expect(c.read(configStoreProvider).draft.global['cart.cta'], isNull);
+    });
+
+    test('applyOps returns the count of ops that actually changed the draft', () {
+      final c = make();
+      final n = c.read(configStoreProvider.notifier);
+      final applied = n.applyOps([
+        const SetText('cart.cta', 'קנה'), // valid change
+        const SetText('manager.cockpit.kpi.openOrders', 'הזמנות'), // valid change
+        SetText('manager.cockpit.kpi.products', 'א' * (kCfgMaxTextLen + 1)), // dropped
+      ]);
+      expect(applied, 2); // the over-length op is not counted as applied
+      expect(n.applyOps(const [SetText('no.such.id', null)]), 0); // no-op clear ⇒ 0
+    });
+
+    test('CfgTheme clamps radius (fromJson + copyWith) and fontScale', () {
+      expect(CfgTheme.fromJson(const {'radius': 1000000}).radius, 64.0);
+      expect(CfgTheme.fromJson(const {'radius': -5}).radius, 0.0);
+      expect(CfgTheme.fallback.copyWith(radius: 999).radius, 64.0);
+      expect(CfgTheme.fallback.copyWith(fontScale: 9).fontScale, 1.6);
+    });
+  });
 }

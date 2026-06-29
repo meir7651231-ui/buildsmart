@@ -309,13 +309,18 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   // ── PUBLIC op-based API (the seam Pillar-4 uses) ──
 
   /// Apply a batch of edits to the draft as ONE undoable step (R1-A3).
-  void applyOps(
+  /// Apply a batch; returns the number of ops that ACTUALLY changed the draft
+  /// (validated AND not a no-op). The caller (find-replace) reports this real count
+  /// instead of `ops.length`, so a silently-dropped/no-op op is never miscounted as
+  /// a success (round-2 audit fix).
+  int applyOps(
     List<ConfigOp> ops, {
     String? persona,
     Set<String> criticalIds = const {},
   }) {
-    if (ops.isEmpty) return;
+    if (ops.isEmpty) return 0;
     var d = state.draft;
+    var applied = 0;
     for (final op in ops) {
       // Write-validator (#27): silently drop an op that fails (length / bidi / a
       // critical-hide / an unauthorized action-kind). The caller pre-checks via
@@ -323,13 +328,16 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
       // empty ⇒ critical-hide is enforced only when passed (merge neutralizes it
       // at resolve regardless — the publish-validator strips it before going live).
       if (cfgOpError(op, criticalIds: criticalIds) != null) continue;
+      final before = d;
       d = _withNode(d, op.id, op.apply(_nodeIn(d, op.id, persona)), persona);
+      if (d != before) applied++; // this op contributed a real change
     }
-    if (d == state.draft) return; // no-op batch — no phantom undo frame / notify
+    if (d == state.draft) return 0; // no-op batch — no phantom undo frame / notify
     _undo.add(state.draft); // sparse draft snapshot (light)
     _redo.clear();
     state = state.copyWith(draft: d);
     _save();
+    return applied;
   }
 
   void undo() {
@@ -348,11 +356,11 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
 
   /// Reset one id's draft override back to inherit (does not affect undo of others).
   void resetDraftNode(String id, {String? persona}) {
+    final next = _withNode(state.draft, id, CfgNode.identity, persona);
+    if (next == state.draft) return; // already pristine — no phantom frame / notify
     _undo.add(state.draft);
     _redo.clear();
-    state = state.copyWith(
-      draft: _withNode(state.draft, id, CfgNode.identity, persona),
-    );
+    state = state.copyWith(draft: next);
     _save();
   }
 
