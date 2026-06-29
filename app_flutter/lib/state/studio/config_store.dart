@@ -174,6 +174,8 @@ const int kCfgMaxTextLen = 80;
 /// more. SINGLE source for the write-validator + the behavior layer.
 const Set<String> kCfgAllowedActionKinds = {'noop', 'navigate'};
 
+/// SEAM 5 — FROZEN (step 30): the Pillar-4 behavior whitelist. Pillars 2-5 depend
+/// on this signature; pinned by `test/studio/seam_contract_test.dart`.
 /// The behavior whitelist as a provider (mirrors `criticalIdsProvider`).
 final cfgActionRegistryProvider =
     Provider<Set<String>>((_) => kCfgAllowedActionKinds);
@@ -228,6 +230,7 @@ bool _hasBidiControl(String s) => s.runes.any(
     );
 
 // ─── ConfigSink — persistence/sync seam (Pillar-5 swaps this) ─────────────────
+// SEAM 1 — FROZEN (step 30): Pillars 2-5 depend on this; pinned by seam_contract_test.
 
 abstract class ConfigSink {
   Future<void> save(ConfigDoc doc);
@@ -313,6 +316,9 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   /// (validated AND not a no-op). The caller (find-replace) reports this real count
   /// instead of `ops.length`, so a silently-dropped/no-op op is never miscounted as
   /// a success (round-2 audit fix).
+  ///
+  /// SEAM 2 — FROZEN (step 30): Pillar-4 produces ops here. `editDraft` stays a
+  /// PRIVATE primitive (never a seam — R1-A3). Pinned by seam_contract_test.
   int applyOps(
     List<ConfigOp> ops, {
     String? persona,
@@ -409,6 +415,8 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
 
   /// Promote the draft to live: field-merge onto published, prune empties, snapshot
   /// the new published to history (cap), clear draft. byEmail feeds the audit (#84).
+  ///
+  /// SEAM 3 — FROZEN (step 30): the promote-to-live boundary. Pinned by seam_contract_test.
   bool publish({
     String note = '',
     String byEmail = '',

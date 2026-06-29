@@ -350,6 +350,9 @@ const List<ElementDescriptor> kElementRegistry = [
 final domainElementsProvider =
     Provider<List<ElementDescriptor>>((_) => const []);
 
+/// SEAM 4 — FROZEN (step 30): Pillar-2 appends domain rows via
+/// [domainElementsProvider]; the 6-field [ElementDescriptor] froze at step 12.5.
+/// Pinned by `test/studio/seam_contract_test.dart`.
 /// The full registry = built-ins ⊕ domain elements.
 final elementRegistryProvider = Provider<List<ElementDescriptor>>(
   (ref) => [...kElementRegistry, ...ref.watch(domainElementsProvider)],

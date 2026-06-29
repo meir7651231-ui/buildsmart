@@ -2987,5 +2987,28 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **סטטוס s29 (אימוץ):** **radius** = 16 מסכים (~140 אתרים) · **text** = 17 תוויות-קטלוג (המסך הלקוחי הראשי). זו כיסוי-partial מייצג (s29 = ongoing/partial לפי הספק). **נקודת-החלטה:** המשך אימוץ-sparse במסכים נוספים · radius-tail (context-threading) · או התקדמות ל-s30 (finalize/freeze Pillar-1). 45 commits מקומיים, 0 נדחפו.
 - **שיטה (radius adoption per-screen):** הוסף `import config_theme show cfgRadius` → `replace_all 'BorderRadius.circular(BsTokens.radiusCard)'→'…(cfgRadius(context))'` → `flutter analyze` (תופס מיידית כל const/missing-context — נקי=כל-האתרים-חוקיים) → test → commit. מטרות-עשירות נותרו: finance_hub_sheets(13)·worker_app(11)·smart_home(11)·rewards_hub(11)·tasks/profile(9)·...
 - **gate:** `gate_118_test` (סורק lib/ ל-`CfgText('id'` → ⊆ registry — מאמת אוטומטית כל אימוץ) · `registry_contract`/`descriptor_contract`/`zero_regression` ירוקים · analyze 0 · `visual_log` אפס-diff. lib/screens → גייט 24+116.
+
+### #studio-s30 — סטודיו · Finalize + הקפאת 4(+1) pillar-seams (§13) — סיום עמוד-1 — 2026-06-29
+**docs + seam-freeze (אין שינוי-התנהגות). זה סוגר את Pillar-1 — המנוע מוקפא לקראת עמודים 2-5.**
+
+**§13 — ה-seams המוקפאים (FROZEN · Pillars 2-5 בונים עליהם · נעולים ב-`test/studio/seam_contract_test.dart` = compile-guard):**
+
+| # | Seam | חתימה (קפואה) | file:line | מי תלוי |
+|---|------|----------------|-----------|---------|
+| 1 | `ConfigSink` | `save(ConfigDoc)→Future<void>` · `load()→Future<ConfigDoc?>` · `watch()→Stream<ConfigDoc>?` | `config_store.dart:232` | Pillar-5 (server/sync) |
+| 2 | `applyOps` + `undo`/`redo` | `int applyOps(List<ConfigOp>, {String? persona, Set<String> criticalIds})` | `config_store.dart:316` | Pillar-4 (מייצר ops). **`editDraft`=primitive פרטי, לא-seam** |
+| 3 | `publish` | `bool publish({String note, String byEmail, int nowMs, Set<String> criticalIds})` | `config_store.dart:412` | promote-to-live |
+| 4 | `elementRegistryProvider` + 6-field `ElementDescriptor` (קפא ב-12.5) + `criticalIdsProvider` | `Provider<List<ElementDescriptor>>` | `element_registry.dart:354` | Pillar-2 (מוסיף דרך `domainElementsProvider`) |
+| 5 | `cfgActionRegistryProvider` | `Provider<Set<String>>` | `config_store.dart:178` | Pillar-4 (whitelist התנהגות) |
+
+**owner-sign-off checklist — תנאים מפורשים ל-flip `kStudioFlag` ON ל-GA (תוספת-ב):**
+- [ ] full 100-gate ירוק (analyze 0 · suite · build web · knowledge_protocol 94)
+- [ ] `zero_regression`/`config_theme`/a11y ירוקים · OFF=answer-equivalent מאומת
+- [x] נחיל-ביקורת round-2 (8 עדשות) — אפס-bypass/רגרסיה, #84 אטום, פערים תוקנו
+- [ ] perf 10K-id (virtualised tree משלב 18 — resolvedNode autoDispose.family O(1)/id)
+- [ ] אישור-בעלים מפורש (`MANAGER-BUILD-PLAN.md:17`) — default OFF עד אז
+- [x] seam_contract_test ירוק (5 seams קפואים)
+
+- **gate:** `seam_contract_test` ירוק (compile-guard ל-5 החתימות) · FROZEN markers ב-5 ה-seams בקוד · `config_store`/`zero_regression`/כל החבילה ירוקים · analyze 0. lib/state → גייט 24. **🎉 עמוד-1 (מנוע-העריכה + הסטודיו, שלבים 1-30) הושלם — seams קפואים.** הבא: עמודים 2-5 (בונה-תחומים · מודיעין-לקוחות · עורך-AI · ענן/scale) — או המשך אימוץ-תוכן ב-s29 לפי בחירת-הבעלים.
 - **codemod `tool/studio_extract_ids.dart`** — נדחה: `tool/` תחת very_good_analysis (avoid_print וכו') ⇒ חיכוך; אימוץ ידני per-section עובד. ייבנה כש-batch גדול יצדיק.
 - הבא: batches נוספים (קוקפיט→home_shell→catalog) + **אימוץ `cfgRadius(context)` בכרטיסים** שיפעיל את ה-radius-slider החי (סוגר את ה-deferred של r2-fix-3). דחוף רק על 'תדחוף'.
