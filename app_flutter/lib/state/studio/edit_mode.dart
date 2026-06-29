@@ -71,16 +71,24 @@ final studioInManagerContextProvider = Provider<bool>((ref) {
   return boardRole == BoardRole.manager || persona == 'manager';
 });
 
-/// The #84 gate as a reactive provider — true iff the viewer MAY edit AND publish:
-/// Studio active ∧ the real owner ∧ a manager context. The SINGLE source of truth
-/// for the [EditModeController] gate, the publish/discard controls, and the Studio
-/// route — so the owner-only guarantee can never be lost by a control that forgets
-/// to re-check (defence-in-depth: don't gate one button while leaving another open).
-final studioCanEditProvider = Provider<bool>(
+/// The real owner ∧ a manager context — REGARDLESS of the flag. This is the gate
+/// for SHOWING the Studio entry (s20), which stages the flag on tap. Splitting it
+/// out lets the owner reach the entry before the flag is active, while still
+/// keeping non-owners out (isOwnerEmail is un-spoofable).
+final studioOwnerManagerProvider = Provider<bool>(
   (ref) =>
-      ref.watch(studioActiveProvider) &&
       isOwnerEmail(ref.watch(studioOwnerEmailProvider)) &&
       ref.watch(studioInManagerContextProvider),
+);
+
+/// The #84 gate as a reactive provider — true iff the viewer MAY edit AND publish:
+/// Studio active ∧ owner ∧ manager. The SINGLE source of truth for the
+/// [EditModeController] gate, the publish/discard controls, and the Studio route —
+/// so the owner-only guarantee can never be lost by a control that forgets to
+/// re-check (defence-in-depth: don't gate one button while leaving another open).
+final studioCanEditProvider = Provider<bool>(
+  (ref) =>
+      ref.watch(studioActiveProvider) && ref.watch(studioOwnerManagerProvider),
 );
 
 /// Auto-exit guard (footgun defence, spec 8.10): the owner must not be left in

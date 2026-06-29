@@ -1924,3 +1924,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס** (המסך עדיין לא-נגיש עד s20). Pane B — מפקח-עריכה לאלמנט הנבחר (`studioSelectedIdProvider`). לפי `descriptor.editableProps`: תוכן (TextField טקסט + אמוג'י, controller מקומי decoupled — R2-#2) · נראות (Switch, נעול אם `kImmutable`) · תצוגה-חיה + 'אפס רכיב' (`resetDraftNode`). כל עריכה → draft דרך `applyOps` (**לא חי עד "פרסם לכולם"**). v1 עורך global. style→s24, behavior→Pillar-4.
 **אימות (אוטומטי):** `inspector_pane_test` 4 ירוקים (no-selection · fail-closed · text→draft · reset) · analyze 0.
 **הפיכות:** `git rm inspector_pane.dart`, החזר placeholder ל-pane 1.
+
+## studio-s20 — הכניסה ⭐: שורת "🎨 סטודיו" אצל המנהל — אפס לכולם · כרטיס-חדש לבעלים — 2026-06-29
+**שינוי נראה:** **אפס לכל המשתמשים** (`StudioEntryCard` = `SizedBox.shrink` ל-non-owner; הקוקפיט זהה byte-for-byte). **לבעלים-מנהל בלבד** (signed-in owner email): כרטיס "🎨 סטודיו (בטא)" חדש בראש לוח-הבקרה, אחרי הקו-פיילוט. לחיצה → מפעילה את דגל-הריצה `kStudio` + פותחת את מסך-הסטודיו (route גדור-בעלים). **זו הפעם הראשונה שהסטודיו נגיש end-to-end: הבעלים פותח → עץ → בוחר → מפקח → מקליד → "פרסם לכולם" → חי.**
+**אימות (אוטומטי):** `studio_entry_test` 3 ירוקים (hidden ל-non-owner · visible לבעלים · tap מפעיל+פותח) · **כל חבילת studio 115 ירוקים** · analyze 0 (5 infos קיימים-מראש ב-mega-file).
+**הפיכות:** הסר `const StudioEntryCard()` מהקוקפיט + `git rm studio_entry.dart`.

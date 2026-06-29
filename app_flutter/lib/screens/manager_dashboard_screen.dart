@@ -18,6 +18,7 @@ import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
+import 'package:buildsmart/screens/studio/studio_entry.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 // #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
 // of the approval: the worker sheet and this dashboard).
@@ -420,6 +421,9 @@ class _DashboardTab extends ConsumerWidget {
       children: [
         const _CopilotHero(),
         const SizedBox(height: BsTokens.space4),
+        // Owner-only Studio entry — SizedBox.shrink for everyone else, so the
+        // cockpit is unchanged unless the signed-in owner-manager is looking.
+        const StudioEntryCard(),
         _MetricGrid(analytics: analytics),
         const SizedBox(height: BsTokens.space5),
         _OrderPipeline(byStage: byStage),
