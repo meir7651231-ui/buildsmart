@@ -1989,3 +1989,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס בברירת-מחדל.** Batch-7: cfgRadius ב-`store_profile`(6)·`departments`(6)·`worker_attendance`(5)·`courier_profile`(5)·`ai_hub`(5) = **27 אתרים**. `courier_portal_tab`+`persona_portal` **הוחזרו לגמרי** (helpers חסרי-context — analyze תפס 3 אתרים → נדחים ל-context-threading; net-zero, לא ב-commit). cfgRadius default=20 ⇒ פיקסל-זהה. **16 מסכים מאומצים-radius.**
 **אימות (אוטומטי):** analyze 0 (errors+warnings) · `config_theme_test` 12 · `a11y_contrast_theme_test` 5 — ירוקים.
 **הפיכות:** replace_all חזרה (5 קבצים).
+
+## studio-s29-b8 — Phase E אימוץ-תוכן (CfgText): כותרות פרטי-מוצר בקטלוג — שינוי-נראה: אפס — 2026-06-29
+**שינוי נראה:** **אפס (answer-equivalent).** Batch-8 — **ציר-התוכן (לב s29)**: 5 כותרות-סקשן סטטיות בעמוד פרטי-המוצר ב-`catalog_screen.dart` (mega-file, section-by-section) → CfgText: 'תקינות נדרשת'·'מה הקו צריך לחיבור'·'בדיקת קבלה (סיום התקנה)'·'תקן ישראלי רלוונטי'·'טעויות נפוצות וטיפים' → `catalog.detail.{requiredStandards/connectionNeeds/acceptanceCheck/israeliStandard/commonMistakes}`. הליטרל+style נשמרים fallback (const נשמר). +5 שורות registry (append-only, wired, content). **הבעלים יכול עכשיו לערוך את כותרות פרטי-המוצר.** רק static `Text('ליטרל')`; interpolated/`for-in` בסביבה לא נגעו.
+**אימות (אוטומטי):** `gate_118_test` (5 ids ⊆ registry) · `registry_contract` 8 · `zero_regression` 28 · analyze 0.
+**הפיכות:** `CfgText→Text` (5) + הסר 5 registry rows + import.

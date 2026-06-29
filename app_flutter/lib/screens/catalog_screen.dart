@@ -69,6 +69,7 @@ import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart' show CfgText;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5943,11 +5944,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('תקינות נדרשת',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.requiredStandards',
+                                'תקינות נדרשת',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final t in triggers) ...[
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
@@ -5983,11 +5988,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 6),
-                                const Text('מה הקו צריך לחיבור',
-                                    style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
+                                const CfgText(
+                                  'catalog.detail.connectionNeeds',
+                                  'מה הקו צריך לחיבור',
+                                  style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 for (final n in needs)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
@@ -6010,11 +6019,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 6),
-                                const Text('בדיקת קבלה (סיום התקנה)',
-                                    style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
+                                const CfgText(
+                                  'catalog.detail.acceptanceCheck',
+                                  'בדיקת קבלה (סיום התקנה)',
+                                  style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 for (final c in checks)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
@@ -6037,11 +6050,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 6),
-                              const Text('תקן ישראלי רלוונטי',
-                                  style: TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              const CfgText(
+                                'catalog.detail.israeliStandard',
+                                'תקן ישראלי רלוונטי',
+                                style: TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               for (final s in stds)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
@@ -6074,11 +6091,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 6),
-                                const Text('טעויות נפוצות וטיפים',
-                                    style: TextStyle(
-                                        color: Color(0xFF888888),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
+                                const CfgText(
+                                  'catalog.detail.commonMistakes',
+                                  'טעויות נפוצות וטיפים',
+                                  style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 for (final t in tips)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),

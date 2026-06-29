@@ -138,6 +138,52 @@ const List<ElementDescriptor> kElementRegistry = [
     editableProps: {EditAxis.text, EditAxis.style},
     wired: true,
   ),
+  // catalog product-detail section headers (s29-b8).
+  ElementDescriptor(
+    id: 'catalog.detail.requiredStandards',
+    screen: 'catalog',
+    area: 'detail',
+    labelHe: 'כותרת: תקינות נדרשת',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.detail.connectionNeeds',
+    screen: 'catalog',
+    area: 'detail',
+    labelHe: 'כותרת: מה הקו צריך לחיבור',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.detail.acceptanceCheck',
+    screen: 'catalog',
+    area: 'detail',
+    labelHe: 'כותרת: בדיקת קבלה',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.detail.israeliStandard',
+    screen: 'catalog',
+    area: 'detail',
+    labelHe: 'כותרת: תקן ישראלי רלוונטי',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
+    id: 'catalog.detail.commonMistakes',
+    screen: 'catalog',
+    area: 'detail',
+    labelHe: 'כותרת: טעויות נפוצות וטיפים',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
   // ── Critical/protected set (step 26) — navigation + auth the owner may RENAME but
   // never hide or re-route. `kImmutable:true` is the canonical critical flag (R1-A1);
   // declared here (wired:false) so the merge defence + publish validator protect them
