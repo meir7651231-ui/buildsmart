@@ -7,11 +7,24 @@
 //
 // (Step 15 will EXTEND this file with the Cfg* wrapper zero-regression cases.)
 import 'package:buildsmart/data/board_accounts_local.dart';
+import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/studio/config_doc.dart';
+import 'package:buildsmart/state/studio/config_node.dart';
+import 'package:buildsmart/state/studio/config_store.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart';
 import 'package:buildsmart/widgets/studio/studio_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _FakeSink implements ConfigSink {
+  @override
+  Future<void> save(ConfigDoc doc) async {}
+  @override
+  Future<ConfigDoc?> load() async => null;
+  @override
+  Stream<ConfigDoc>? watch() => null;
+}
 
 void main() {
   final owner = kOwnerEmails.first; // the real allowlisted owner email
@@ -201,5 +214,34 @@ void main() {
       expect(find.text('✏️ מצב עריכה'), findsOneWidget);
       expect(find.text('צא'), findsOneWidget);
     });
+  });
+
+  // The canonical Pillar-1 zero-regression proof: with an empty doc + Studio off,
+  // resolvedNodeProvider == CfgNode.identity for EVERY persona (incl. the canonical
+  // contractor=roleKeyOf(null)) ⇒ every wrapper renders its verbatim fallback. A
+  // parametrized loop so a future persona is covered automatically.
+  group('empty doc ⇒ identity for every persona (#15)', () {
+    for (final role in const <String?>[
+      null,
+      'contractor',
+      'store',
+      'courier',
+      'worker',
+      'manager',
+    ]) {
+      test('roleKey ${role ?? "null(=contractor)"}: resolved == identity', () {
+        final c = ProviderContainer(
+          overrides: [
+            configSinkProvider.overrideWithValue(_FakeSink()),
+            roleProvider.overrideWithValue(role),
+            studioActiveProvider.overrideWithValue(false),
+            studioOwnerEmailProvider.overrideWithValue(null),
+            studioInManagerContextProvider.overrideWithValue(false),
+          ],
+        );
+        addTearDown(c.dispose);
+        expect(c.read(resolvedNodeProvider('any.id')), CfgNode.identity);
+      });
+    }
   });
 }
