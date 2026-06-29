@@ -27,6 +27,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
@@ -524,7 +525,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
 
         // Stock alert.
         InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: () => setState(() => _tab = 1),
           child: _FlatCard(
             child: Text(
@@ -584,7 +585,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               padding: const EdgeInsets.symmetric(vertical: 14),
               side: const BorderSide(color: Color(0xFFE0E0E0)),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
               ),
             ),
             child: const Text(
@@ -1119,11 +1120,11 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                 filled: true,
                 fillColor: BsTokens.bgLight,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
               ),
@@ -1141,11 +1142,11 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                 filled: true,
                 fillColor: BsTokens.bgLight,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  borderRadius: BorderRadius.circular(cfgRadius(context)),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
               ),
@@ -1754,11 +1755,11 @@ class _ProfileFieldState extends State<_ProfileField> {
           filled: true,
           fillColor: BsTokens.cardLight,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
             borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
           ),
         ),
@@ -1788,13 +1789,13 @@ class _LogoPreview extends ConsumerWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
       child:
           provider != null
               ? ClipRRect(
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
                 child: Image(
                   image: ResizeImage(
                     provider,
@@ -2032,9 +2033,9 @@ class _StoreNotifRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: notif.read ? BsTokens.cardLight : const Color(0xFFFFF8F2),
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 48),
@@ -2130,9 +2131,9 @@ class _ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(BsTokens.space4),
@@ -2199,7 +2200,7 @@ class _FlatCard extends StatelessWidget {
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F000000),
@@ -2226,7 +2227,7 @@ class _Stat extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
         decoration: BoxDecoration(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0F000000),
@@ -2267,9 +2268,9 @@ class _BigButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: const Color(0xFFFFF0E3),
-      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
@@ -2382,11 +2383,11 @@ class _StoreOrderCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: onOpenPick,
           child: Padding(
             padding: const EdgeInsets.all(BsTokens.space4),
@@ -2587,11 +2588,11 @@ class _DeliveredCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
         color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
         elevation: 1,
         shadowColor: Colors.black26,
         child: InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(BsTokens.space4),
@@ -2664,7 +2665,7 @@ class _DeliveredCard extends StatelessWidget {
                         hasPod
                             ? const Color(0xFFEAF6EE)
                             : const Color(0xFFF2F3F5),
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    borderRadius: BorderRadius.circular(cfgRadius(context)),
                     border: Border.all(
                       color:
                           hasPod
@@ -2773,7 +2774,7 @@ class _StockRow extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0F000000),

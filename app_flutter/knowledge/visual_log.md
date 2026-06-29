@@ -1969,3 +1969,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס בברירת-מחדל.** Batch-3: כל 14 אתרי `BorderRadius.circular(BsTokens.radiusCard)` שנותרו ב-`manager_dashboard_screen.dart` → `cfgRadius(context)` (replace_all; כולם non-const + `context` זמין — אומת ע"י analyze נקי, שתופס const/missing-context מיידית). סך-הכל 16 אתרים בקובץ עכשיו עם cfgRadius. **כל כרטיסי לוח-המנהל (KPI · הזמנות · קופי-פיילוט · ...) מגיבים עכשיו ל-radius-slider חי.** `Radius.circular(radiusCard)` ב-const RoundedRectangleBorder (922/1734 · גליונות-תחתית) נשארו — const, מחוץ ל-pattern. cfgRadius default=20 ⇒ פיקסל-זהה.
 **אימות (אוטומטי):** `zero_regression` 16 · `config_theme_test` 12 · `gate_118` · `a11y_contrast_theme_test` 5 — כולם ירוקים · analyze 0 (תופס כל const/context-error — נקי ⇒ כל 14 חוקיים).
 **הפיכות:** replace_all חזרה `cfgRadius(context)→BsTokens.radiusCard`.
+
+## studio-s29-b4 — Phase E אימוץ-עיצוב: לוח-ספק (store_dashboard) → cfgRadius — שינוי-נראה: אפס (default) — 2026-06-29
+**שינוי נראה:** **אפס בברירת-מחדל.** Batch-4: כל 24 אתרי `BorderRadius.circular(BsTokens.radiusCard)` ב-`store_dashboard_screen.dart` → `cfgRadius(context)` (replace_all + import). אומת ע"י analyze נקי (תופס const/missing-context). **כל כרטיסי לוח-הספק (24) מגיבים עכשיו ל-radius-slider.** cfgRadius default=20 ⇒ פיקסל-זהה.
+**אימות (אוטומטי):** analyze 0 (כל 24 חוקיים) · `config_theme_test` 12 · `a11y_contrast_theme_test` 5 — ירוקים.
+**הפיכות:** replace_all חזרה.
