@@ -24,6 +24,8 @@
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart' show ChatsArchiveScreen;
+import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
+    show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
@@ -626,3 +628,121 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
       ];
   }
 }
+
+// ─── PUSHED-ROUTE screen tool node-lists ([KbScreen] adopters) ────────────────
+//
+// These are the FIRST screens to ADOPT [KbScreen] (lib/state/keyboard_screen_tools.dart),
+// proving the stack-aware mirror end-to-end: each wraps its body in
+// `KbScreen(tools: <one of these factories>, child: <its Scaffold>)`, so while the
+// route is front-most under [kKbGlobal] the floating ▦ grid shows ITS tools and
+// reverts to the parent's on pop. Each factory returns the screen's OWN relevant
+// actions, reusing verified openers (route pushes / provider writes) — never a
+// broken nav. They are top-level `()` factories (not const — the leaf actions are
+// non-const closures), mirroring [kbHomeNodes]/[kbStoreNodes]; an adopter must
+// build its list ONCE (e.g. a `static final`) so [KbScreen]'s identity-compare
+// (didUpdateWidget) never churns the registration.
+
+/// המלאי שלי ([StockScreen]) tools: 📥 בקשות חומר (its AppBar action) + ⚙ הגדרות
+/// חנות (the store-settings route). Keep-floating: the first opens a sheet, the
+/// second pushes a route (the keyboard reappears on pop).
+List<KbToolNode> kbStockNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.inbox_outlined,
+        label: 'בקשות חומר',
+        action: (ref, context) =>
+            showContractorMaterialRequestsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings,
+        label: 'הגדרות חנות',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreSettingsScreen.route()),
+      ),
+    ];
+
+/// 🤖 בינה ([AIHubScreen]) tools: 🔍 מאתר + 🌳 עץ חכם (the two catalog entry
+/// points that make sense from the AI hub), via the SAME [runKeyboardTool] seam
+/// the home tiles use, so the destination stays identical.
+List<KbToolNode> kbAiHubNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.gps_fixed,
+        label: 'מאתר',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_tree,
+        label: 'עץ חכם',
+        action: (ref, context) =>
+            runKeyboardTool(ref, context, KbTool.smartTree),
+      ),
+    ];
+
+/// ⚙️ הגדרות ([CatalogSettingsScreen]) tools: 🔔 הגדרות התראות + 🛍️ הגדרות חנות —
+/// the two sibling settings routes, each pushed over (keyboard reappears on pop).
+List<KbToolNode> kbCatalogSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.notifications_outlined,
+        label: 'הגדרות התראות',
+        action: (ref, context) =>
+            Navigator.of(context).push(NotifSettingsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.storefront_outlined,
+        label: 'הגדרות חנות',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreSettingsScreen.route()),
+      ),
+    ];
+
+/// 🔔 הגדרות התראות ([NotifSettingsScreen]) tools: ✅ סמן הכל כנקרא (the same
+/// public action the notifications overflow runs) + ⚙ הגדרות (the catalog
+/// settings route).
+List<KbToolNode> kbNotifSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.done_all,
+        label: 'סמן הכל כנקרא',
+        action: (ref, context) => markAllNotifsRead(ref),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(CatalogSettingsScreen.route()),
+      ),
+    ];
+
+/// 🛍️ הגדרות חנות ([StoreSettingsScreen]) tools: 📦 הזמנות (jump to the store
+/// orders section, the SAME pairing the store menu uses) + 💰 כספים
+/// ([openFinanceHub]). Keep-floating: a section jump swaps the screen underneath,
+/// a sheet pushes over.
+List<KbToolNode> kbStoreSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.receipt_long,
+        label: 'הזמנות',
+        action: (ref, context) {
+          ref.read(mainTabProvider.notifier).state = 3;
+          ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+        },
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'כספים',
+        action: (ref, context) => openFinanceHub(context),
+      ),
+    ];
+
+/// 🗄️ ארכיון שיחות ([ChatsArchiveScreen]) tools: ➕ שיחה חדשה (honest "בקרוב"
+/// until the real opener is exposed) + 🔍 חיפוש שיחות (likewise) — mirroring the
+/// chats overflow's deferred items.
+List<KbToolNode> kbChatsArchiveNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.add_comment_outlined,
+        label: 'שיחה חדשה',
+        action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.search,
+        label: 'חיפוש שיחות',
+        action: (ref, context) => _toolSoon(context, 'חיפוש שיחות'),
+      ),
+    ];

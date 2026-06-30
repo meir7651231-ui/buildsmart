@@ -344,8 +344,13 @@ class BuildSmartApp extends ConsumerWidget {
       scaffoldMessengerKey: bsMessengerKey,
       // Root navigator key — lets the app-global floating keyboard (kKbGlobal)
       // push routes / open sheets from above the Navigator (see _navContext in
-      // floating_card_keyboard.dart). Null-effect for every other caller.
-      navigatorKey: bsNavigatorKey,
+      // floating_card_keyboard.dart). GATED on the flag so it tree-shakes when off,
+      // exactly like every other kKbGlobal touchpoint: with [kKbGlobal] const-false
+      // dart2js folds this ternary to `null` (= the default keyless root Navigator,
+      // the pre-monster behaviour), restoring provable byte-identity. Only the
+      // ASSIGNMENT is gated; `bsNavigatorKey`'s top-level declaration in toast.dart
+      // stays unconditional (an inert `final` global until something reads it).
+      navigatorKey: kKbGlobal ? bsNavigatorKey : null,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(highContrast: highContrast),
       darkTheme: AppTheme.dark(highContrast: highContrast),

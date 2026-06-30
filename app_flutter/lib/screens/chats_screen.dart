@@ -2,10 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/screens/camera_sheet.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbChatsArchiveNodes;
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -60,25 +64,33 @@ bool _isCouriersOnly(ChatThread t) =>
 /// The chip set per audience (contract §3): worker → הכל/קבלן/מנהל/בוט ·
 /// courier → הכל/חנות/לקוח/שליחים/בוט. Null = contractor (the legacy chips).
 List<_AudienceChip>? _audienceChipsFor(String audience) => switch (audience) {
-      'worker' => [
-          _AudienceChip('הכל', (_) => true),
-          _AudienceChip('👷 קבלן',
-              (t) => !t.isBot && t.participants.contains(BsRole.contractor)),
-          _AudienceChip('🎧 תמיכה',
-              (t) => !t.isBot && t.participants.contains(BsRole.manager)),
-          _AudienceChip('🤖 בוט', (t) => t.isBot),
-        ],
-      'courier' => [
-          _AudienceChip('הכל', (_) => true),
-          _AudienceChip('🏪 חנות',
-              (t) => !t.isBot && t.participants.contains(BsRole.store)),
-          _AudienceChip('👷 לקוח',
-              (t) => !t.isBot && t.participants.contains(BsRole.contractor)),
-          _AudienceChip('🛵 שליחים', _isCouriersOnly),
-          _AudienceChip('🤖 בוט', (t) => t.isBot),
-        ],
-      _ => null,
-    };
+  'worker' => [
+    _AudienceChip('הכל', (_) => true),
+    _AudienceChip(
+      '👷 קבלן',
+      (t) => !t.isBot && t.participants.contains(BsRole.contractor),
+    ),
+    _AudienceChip(
+      '🎧 תמיכה',
+      (t) => !t.isBot && t.participants.contains(BsRole.manager),
+    ),
+    _AudienceChip('🤖 בוט', (t) => t.isBot),
+  ],
+  'courier' => [
+    _AudienceChip('הכל', (_) => true),
+    _AudienceChip(
+      '🏪 חנות',
+      (t) => !t.isBot && t.participants.contains(BsRole.store),
+    ),
+    _AudienceChip(
+      '👷 לקוח',
+      (t) => !t.isBot && t.participants.contains(BsRole.contractor),
+    ),
+    _AudienceChip('🛵 שליחים', _isCouriersOnly),
+    _AudienceChip('🤖 בוט', (t) => t.isBot),
+  ],
+  _ => null,
+};
 
 /// Which threads a [persona] viewing the [audience] list may see (contract §3
 /// + the §2.5 isolation): the 'contractor' (default) view is the participant
@@ -143,13 +155,13 @@ String _hhmm(DateTime ts) =>
 /// Real per-chat unread: incoming messages (not from the reading persona)
 /// whose timestamp is newer than the thread's persisted lastReadAt
 /// (0 = never opened → all incoming messages count).
-int _unreadCount(ChatThread t, BsRole persona, int lastReadMs) => t.messages
-    .where(
-      (m) =>
-          m.fromRole != persona &&
-          m.ts.millisecondsSinceEpoch > lastReadMs,
-    )
-    .length;
+int _unreadCount(ChatThread t, BsRole persona, int lastReadMs) =>
+    t.messages
+        .where(
+          (m) =>
+              m.fromRole != persona && m.ts.millisecondsSinceEpoch > lastReadMs,
+        )
+        .length;
 
 /// Per-viewer thread title. The worker-board threads are named from the
 /// WORKER's point of view ('קבלן' / 'מנהל' — `kWorkerChatThreads`,
@@ -194,8 +206,7 @@ bool showOnlinePresence(ChatLastSeen p) => p != ChatLastSeen.nobody;
 /// [visibleThreadsProvider] read for the name/subtitle filter (the sixth link
 /// of the visible-thread chain).
 final updatesChatSearchProvider = StateProvider<String>((_) => '');
-final _chatFilterProvider =
-    StateProvider<_ChatFilter>((_) => _ChatFilter.all);
+final _chatFilterProvider = StateProvider<_ChatFilter>((_) => _ChatFilter.all);
 
 /// A keyboard-consumable projection of ONE visible chat thread: the engine
 /// [id] (what a conversation chip dispatches into [updatesChatOpenProvider])
@@ -229,12 +240,15 @@ final visibleThreadsProvider = Provider<List<ThreadLite>>((ref) {
   // legacy נציגים/ספקים path (filter, below) is what actually narrows here.
   final audienceChips = _audienceChipsFor(audience);
   final chipRaw = ref.watch(_audienceChipIndexProvider);
-  final audienceChip = audienceChips == null
-      ? null
-      : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
+  final audienceChip =
+      audienceChips == null
+          ? null
+          : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
 
   final views = [
-    for (final t in ref.watch(chatEngineProvider).where(
+    for (final t in ref
+        .watch(chatEngineProvider)
+        .where(
           (t) =>
               _visibleToAudience(t, persona, audience) &&
               (audienceChip == null || audienceChip.matches(t)),
@@ -348,7 +362,9 @@ Map<String, List<String>> _readIdBuckets(SharedPreferences prefs, String key) {
   try {
     final legacy = prefs.getStringList(key);
     if (legacy != null) return {'contractor': legacy};
-  } on Object catch (_) {/* corrupt — start empty */}
+  } on Object catch (_) {
+    /* corrupt — start empty */
+  }
   return {};
 }
 
@@ -368,7 +384,9 @@ class _ChatArchivedNotifier extends StateNotifier<Set<String>> {
       if (!mounted) return;
       final mine = _readIdBuckets(prefs, _kArchiveKey)[username];
       if (mine != null) state = mine.toSet();
-    } on Object catch (_) {/* keep empty */}
+    } on Object catch (_) {
+      /* keep empty */
+    }
   }
 
   Future<void> _persist() async {
@@ -379,7 +397,9 @@ class _ChatArchivedNotifier extends StateNotifier<Set<String>> {
       final buckets = _readIdBuckets(prefs, _kArchiveKey);
       buckets[username] = state.toList();
       await prefs.setString(_kArchiveKey, jsonEncode(buckets));
-    } on Object catch (_) {/* best-effort */}
+    } on Object catch (_) {
+      /* best-effort */
+    }
   }
 
   void archive(String id) {
@@ -395,8 +415,8 @@ class _ChatArchivedNotifier extends StateNotifier<Set<String>> {
 
 final chatArchivedIdsProvider =
     StateNotifierProvider<_ChatArchivedNotifier, Set<String>>(
-  (ref) => _ChatArchivedNotifier(_chatBucketUser(ref)),
-);
+      (ref) => _ChatArchivedNotifier(_chatBucketUser(ref)),
+    );
 
 const String _kMuteKey = 'bs.chat-muted.v1';
 
@@ -414,7 +434,9 @@ class _ChatMutedNotifier extends StateNotifier<Set<String>> {
       if (!mounted) return;
       final mine = _readIdBuckets(prefs, _kMuteKey)[username];
       if (mine != null) state = mine.toSet();
-    } on Object catch (_) {/* keep empty */}
+    } on Object catch (_) {
+      /* keep empty */
+    }
   }
 
   Future<void> _persist() async {
@@ -424,7 +446,9 @@ class _ChatMutedNotifier extends StateNotifier<Set<String>> {
       final buckets = _readIdBuckets(prefs, _kMuteKey);
       buckets[username] = state.toList();
       await prefs.setString(_kMuteKey, jsonEncode(buckets));
-    } on Object catch (_) {/* best-effort */}
+    } on Object catch (_) {
+      /* best-effort */
+    }
   }
 
   void setAll(Set<String> ids) {
@@ -435,8 +459,8 @@ class _ChatMutedNotifier extends StateNotifier<Set<String>> {
 
 final chatMutedIdsProvider =
     StateNotifierProvider<_ChatMutedNotifier, Set<String>>(
-  (ref) => _ChatMutedNotifier(_chatBucketUser(ref)),
-);
+      (ref) => _ChatMutedNotifier(_chatBucketUser(ref)),
+    );
 
 const String _kLastReadKey = 'bs.chat-lastread.v1';
 
@@ -491,7 +515,9 @@ class _ChatLastReadNotifier extends StateNotifier<Map<String, int>> {
       if (!mounted) return;
       final mine = _readLastReadBuckets(prefs)[username];
       if (mine != null) state = mine;
-    } on Object catch (_) {/* keep empty */}
+    } on Object catch (_) {
+      /* keep empty */
+    }
   }
 
   Future<void> _persist() async {
@@ -501,23 +527,22 @@ class _ChatLastReadNotifier extends StateNotifier<Map<String, int>> {
       final buckets = _readLastReadBuckets(prefs);
       buckets[username] = state;
       await prefs.setString(_kLastReadKey, jsonEncode(buckets));
-    } on Object catch (_) {/* best-effort */}
+    } on Object catch (_) {
+      /* best-effort */
+    }
   }
 
   /// Marks [threadId] read as of [at] (defaults to now).
   void markRead(String threadId, {DateTime? at}) {
-    state = {
-      ...state,
-      threadId: (at ?? DateTime.now()).millisecondsSinceEpoch,
-    };
+    state = {...state, threadId: (at ?? DateTime.now()).millisecondsSinceEpoch};
     unawaited(_persist());
   }
 }
 
 final chatLastReadProvider =
     StateNotifierProvider<_ChatLastReadNotifier, Map<String, int>>(
-  (ref) => _ChatLastReadNotifier(_chatBucketUser(ref)),
-);
+      (ref) => _ChatLastReadNotifier(_chatBucketUser(ref)),
+    );
 
 const String _kHistoryClearedKey = 'bs.chat-history-cleared.v1';
 
@@ -546,7 +571,9 @@ Map<String, bool> _readClearedBuckets(SharedPreferences prefs) {
   try {
     final legacy = prefs.getBool(_kHistoryClearedKey);
     if (legacy != null) return {'contractor': legacy};
-  } on Object catch (_) {/* corrupt — start empty */}
+  } on Object catch (_) {
+    /* corrupt — start empty */
+  }
   return {};
 }
 
@@ -569,7 +596,9 @@ class _ChatHistoryClearedNotifier extends StateNotifier<bool> {
       final prefs = await SharedPreferences.getInstance();
       if (!mounted) return;
       state = _readClearedBuckets(prefs)[username] ?? false;
-    } on Object catch (_) {/* keep false */}
+    } on Object catch (_) {
+      /* keep false */
+    }
   }
 
   Future<void> _persist() async {
@@ -580,7 +609,9 @@ class _ChatHistoryClearedNotifier extends StateNotifier<bool> {
       final buckets = _readClearedBuckets(prefs);
       buckets[username] = state;
       await prefs.setString(_kHistoryClearedKey, jsonEncode(buckets));
-    } on Object catch (_) {/* best-effort */}
+    } on Object catch (_) {
+      /* best-effort */
+    }
   }
 
   void clearAll() {
@@ -591,13 +622,14 @@ class _ChatHistoryClearedNotifier extends StateNotifier<bool> {
 
 final chatHistoryClearedProvider =
     StateNotifierProvider<_ChatHistoryClearedNotifier, bool>(
-  (ref) => _ChatHistoryClearedNotifier(_chatBucketUser(ref)),
-);
+      (ref) => _ChatHistoryClearedNotifier(_chatBucketUser(ref)),
+    );
 
 /// All thread ids — used by "השתק הכל". Reads the live shared engine (every
 /// persona's threads) rather than the retired static seed.
-Set<String> _allThreadIds(WidgetRef ref) =>
-    {for (final t in ref.read(chatEngineProvider)) t.id};
+Set<String> _allThreadIds(WidgetRef ref) => {
+  for (final t in ref.read(chatEngineProvider)) t.id,
+};
 
 /// True when every conversation is muted.
 bool allChatsMuted(WidgetRef ref) {
@@ -613,30 +645,26 @@ void toggleMuteAllChats(WidgetRef ref) {
 
 // ─── data ─────────────────────────────────────────────────────────────────────
 
-typedef _Thread = ({
-  String id,
-  String avatar,
-  String name,
-  String subtitle,
-  String time,
-  _Direction direction,
-  bool isBot,
-  int unread,
-  bool isOnline,
-  _ThreadCategory category,
-});
+typedef _Thread =
+    ({
+      String id,
+      String avatar,
+      String name,
+      String subtitle,
+      String time,
+      _Direction direction,
+      bool isBot,
+      int unread,
+      bool isOnline,
+      _ThreadCategory category,
+    });
 
 // #chat-delivery-status — the row carries the HONEST per-message [status] (drives
 // the check-mark: 🕐/✓/✓✓/❌) and the message [id] (the "נסה שוב" retry targets
 // it on the engine). Session-local rows (the detached chat) are always `sent`
 // and carry an empty id — they have no server write to confirm or retry.
-typedef _Message = ({
-  String text,
-  bool isMe,
-  String time,
-  MsgStatus status,
-  String id,
-});
+typedef _Message =
+    ({String text, bool isMe, String time, MsgStatus status, String id});
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
@@ -735,20 +763,21 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     Navigator.of(context)
         .push(
           MaterialPageRoute<void>(
-            builder: (_) => _ChatPage(
-              view: (
-                thread: view.thread,
-                threadId: view.threadId,
-                persona: view.persona,
-              ),
-            ),
+            builder:
+                (_) => _ChatPage(
+                  view: (
+                    thread: view.thread,
+                    threadId: view.threadId,
+                    persona: view.persona,
+                  ),
+                ),
           ),
         )
         .then((_) {
-      // On pop, return the keyboard to the chats-list state (idempotent — the
-      // provider was already nulled on open).
-      if (mounted) ref.read(updatesChatOpenProvider.notifier).state = null;
-    });
+          // On pop, return the keyboard to the chats-list state (idempotent — the
+          // provider was already nulled on open).
+          if (mounted) ref.read(updatesChatOpenProvider.notifier).state = null;
+        });
   }
 
   @override
@@ -773,15 +802,16 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child: _headerVisible
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const _SearchBar(),
-                      _FilterChipsRow(audience: widget.audience),
-                    ],
-                  )
-                : const SizedBox.shrink(),
+            child:
+                _headerVisible
+                    ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _SearchBar(),
+                        _FilterChipsRow(audience: widget.audience),
+                      ],
+                    )
+                    : const SizedBox.shrink(),
           ),
         ),
         Expanded(
@@ -802,9 +832,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     // with its own "שיחות" AppBar + a back button that only pops to its
     // dashboard.
     if (!_standalone) {
-      return _inHomeShell
-          ? body
-          : ColoredBox(color: Colors.white, child: body);
+      return _inHomeShell ? body : ColoredBox(color: Colors.white, child: body);
     }
     return Scaffold(
       backgroundColor: Colors.white,
@@ -856,16 +884,17 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final hasText =
-        ref.watch(updatesChatSearchProvider.select((q) => q.isNotEmpty));
+    final hasText = ref.watch(
+      updatesChatSearchProvider.select((q) => q.isNotEmpty),
+    );
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: TextField(
         controller: _controller,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
-        onChanged: (v) =>
-            ref.read(updatesChatSearchProvider.notifier).state = v,
+        onChanged:
+            (v) => ref.read(updatesChatSearchProvider.notifier).state = v,
         decoration: InputDecoration(
           hintText: 'חיפוש שיחות...',
           hintStyle: const TextStyle(color: Color(0xFF888888)),
@@ -874,20 +903,21 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
             color: Color(0xFF888888),
             size: 20,
           ),
-          suffixIcon: hasText
-              ? IconButton(
-                  tooltip: 'נקה חיפוש',
-                  icon: const Icon(
-                    Icons.close,
-                    color: Color(0xFF888888),
-                    size: 18,
-                  ),
-                  onPressed: () {
-                    _controller.clear();
-                    ref.read(updatesChatSearchProvider.notifier).state = '';
-                  },
-                )
-              : null,
+          suffixIcon:
+              hasText
+                  ? IconButton(
+                    tooltip: 'נקה חיפוש',
+                    icon: const Icon(
+                      Icons.close,
+                      color: Color(0xFF888888),
+                      size: 18,
+                    ),
+                    onPressed: () {
+                      _controller.clear();
+                      ref.read(updatesChatSearchProvider.notifier).state = '';
+                    },
+                  )
+                  : null,
           filled: true,
           fillColor: const Color(0xFFF5F5F5),
           contentPadding: const EdgeInsets.symmetric(
@@ -940,9 +970,10 @@ class _FilterChipsRow extends ConsumerWidget {
                 _Pill(
                   label: audienceChips[i].label,
                   active: selected == i,
-                  onTap: () => ref
-                      .read(_audienceChipIndexProvider.notifier)
-                      .state = i,
+                  onTap:
+                      () =>
+                          ref.read(_audienceChipIndexProvider.notifier).state =
+                              i,
                 ),
               ],
             ],
@@ -993,11 +1024,7 @@ class _FilterChipsRow extends ConsumerWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
+  const _Pill({required this.label, required this.active, required this.onTap});
 
   final String label;
   final bool active;
@@ -1051,11 +1078,14 @@ class _ThreadList extends ConsumerWidget {
     // [ChatThread] — before adapting to the legacy `_Thread` view-model.
     final audienceChips = _audienceChipsFor(audience);
     final chipRaw = ref.watch(_audienceChipIndexProvider);
-    final audienceChip = audienceChips == null
-        ? null
-        : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
+    final audienceChip =
+        audienceChips == null
+            ? null
+            : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
     final views = [
-      for (final t in ref.watch(chatEngineProvider).where(
+      for (final t in ref
+          .watch(chatEngineProvider)
+          .where(
             (t) =>
                 _visibleToAudience(t, persona, audience) &&
                 (audienceChip == null || audienceChip.matches(t)),
@@ -1063,17 +1093,18 @@ class _ThreadList extends ConsumerWidget {
         _viewOf(t, persona, lastRead),
     ];
 
-    final threads = views
-        .where(
-          (v) => _threadPassesListFilters(
-            v.thread,
-            audience: audience,
-            filter: filter,
-            archivedIds: archivedIds,
-            query: query,
-          ),
-        )
-        .toList();
+    final threads =
+        views
+            .where(
+              (v) => _threadPassesListFilters(
+                v.thread,
+                audience: audience,
+                filter: filter,
+                archivedIds: archivedIds,
+                query: query,
+              ),
+            )
+            .toList();
 
     if (threads.isEmpty) {
       return const Center(
@@ -1102,8 +1133,9 @@ class _ThreadList extends ConsumerWidget {
 
     return ListView.separated(
       itemCount: threads.length,
-      separatorBuilder: (_, __) =>
-          const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
       itemBuilder: (context, i) => _DismissibleThread(view: threads[i]),
     );
   }
@@ -1171,28 +1203,34 @@ class _ThreadRow extends ConsumerWidget {
     final missed = thread.direction == _Direction.missed;
     final isUnread = thread.unread > 0;
     final muted = ref.watch(
-        chatMutedIdsProvider.select((ids) => ids.contains(thread.id)));
-    final showOnline = thread.isOnline &&
+      chatMutedIdsProvider.select((ids) => ids.contains(thread.id)),
+    );
+    final showOnline =
+        thread.isOnline &&
         showOnlinePresence(
-            ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)));
+          ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)),
+        );
     final nameColor = missed ? BsTokens.brand : BsTokens.inkLight;
-    final arrowIcon = thread.direction == _Direction.outgoing
-        ? Icons.north_east_rounded
-        : Icons.south_west_rounded;
+    final arrowIcon =
+        thread.direction == _Direction.outgoing
+            ? Icons.north_east_rounded
+            : Icons.south_west_rounded;
     final arrowColor = missed ? BsTokens.brand : const Color(0xFF4CAF50);
 
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => _ChatPage(
-            view: (
-              thread: thread,
-              threadId: view.threadId,
-              persona: view.persona,
+      onTap:
+          () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder:
+                  (_) => _ChatPage(
+                    view: (
+                      thread: thread,
+                      threadId: view.threadId,
+                      persona: view.persona,
+                    ),
+                  ),
             ),
           ),
-        ),
-      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -1204,13 +1242,15 @@ class _ThreadRow extends ConsumerWidget {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: thread.isBot
-                        ? BsTokens.brand.withValues(alpha: 0.15)
-                        : const Color(0xFFF5F5F5),
+                    color:
+                        thread.isBot
+                            ? BsTokens.brand.withValues(alpha: 0.15)
+                            : const Color(0xFFF5F5F5),
                     shape: BoxShape.circle,
-                    border: missed
-                        ? Border.all(color: BsTokens.brand, width: 1.5)
-                        : null,
+                    border:
+                        missed
+                            ? Border.all(color: BsTokens.brand, width: 1.5)
+                            : null,
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -1228,10 +1268,7 @@ class _ThreadRow extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFF4CAF50),
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                       ),
                     ),
                   ),
@@ -1261,8 +1298,11 @@ class _ThreadRow extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (muted) ...[
-                            const Icon(Icons.notifications_off,
-                                color: Color(0xFF999999), size: 14),
+                            const Icon(
+                              Icons.notifications_off,
+                              color: Color(0xFF999999),
+                              size: 14,
+                            ),
                             const SizedBox(width: 4),
                           ],
                           Icon(arrowIcon, color: arrowColor, size: 13),
@@ -1270,13 +1310,13 @@ class _ThreadRow extends ConsumerWidget {
                           Text(
                             thread.time,
                             style: TextStyle(
-                              color: isUnread
-                                  ? BsTokens.brand
-                                  : const Color(0xFF888888),
+                              color:
+                                  isUnread
+                                      ? BsTokens.brand
+                                      : const Color(0xFF888888),
                               fontSize: 12,
-                              fontWeight: isUnread
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              fontWeight:
+                                  isUnread ? FontWeight.w600 : FontWeight.w400,
                             ),
                           ),
                         ],
@@ -1290,13 +1330,13 @@ class _ThreadRow extends ConsumerWidget {
                         child: Text(
                           thread.subtitle,
                           style: TextStyle(
-                            color: isUnread
-                                ? const Color(0xFF444444)
-                                : const Color(0xFF888888),
+                            color:
+                                isUnread
+                                    ? const Color(0xFF444444)
+                                    : const Color(0xFF888888),
                             fontSize: 12,
-                            fontWeight: isUnread
-                                ? FontWeight.w500
-                                : FontWeight.w400,
+                            fontWeight:
+                                isUnread ? FontWeight.w500 : FontWeight.w400,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -1306,11 +1346,14 @@ class _ThreadRow extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: muted
-                                ? const Color(0xFFBDBDBD)
-                                : BsTokens.brand,
+                            color:
+                                muted
+                                    ? const Color(0xFFBDBDBD)
+                                    : BsTokens.brand,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -1363,9 +1406,10 @@ void openNewChatWith(
   Navigator.of(context).push(
     MaterialPageRoute<void>(
       // No threadId → detached/local (legacy "שיחה חדשה" behavior).
-      builder: (_) => _ChatPage(
-        view: (thread: thread, threadId: null, persona: BsRole.contractor),
-      ),
+      builder:
+          (_) => _ChatPage(
+            view: (thread: thread, threadId: null, persona: BsRole.contractor),
+          ),
     ),
   );
 }
@@ -1438,20 +1482,21 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         time: _thread.time,
         status: MsgStatus.sent, // #chat-delivery-status — local row, single ✓
         id: '',
-      ),);
+      ));
     } else if (ref.read(chatSettingsProvider).greetingEnabled) {
       // Greeting message for a fresh, empty conversation.
       final chatSettings = ref.read(chatSettingsProvider);
-      final greetText = chatSettings.greetingMessage.isNotEmpty
-          ? chatSettings.greetingMessage
-          : 'שלום! 👋 איך אפשר לעזור?';
+      final greetText =
+          chatSettings.greetingMessage.isNotEmpty
+              ? chatSettings.greetingMessage
+              : 'שלום! 👋 איך אפשר לעזור?';
       _localMessages.add((
         text: greetText,
         isMe: false,
         time: _nowTime(),
         status: MsgStatus.sent, // #chat-delivery-status — local row, single ✓
         id: '',
-      ),);
+      ));
     }
   }
 
@@ -1525,7 +1570,9 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
           .send(_threadId!, _persona, text, fromUid: fromUid);
       // The bot reply (if any) lands synchronously at now+1ms and is read
       // on-screen — mark read just past it so the badge stays honest.
-      ref.read(chatLastReadProvider.notifier).markRead(
+      ref
+          .read(chatLastReadProvider.notifier)
+          .markRead(
             _threadId!,
             at: DateTime.now().add(const Duration(milliseconds: 5)),
           );
@@ -1581,7 +1628,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
           time: _nowTime(),
           status: MsgStatus.sent, // #chat-delivery-status — local row, single ✓
           id: '',
-        ),);
+        ));
         _replyIdx++;
       });
       // New-message alert: a haptic when an incoming (bot) message arrives, gated
@@ -1605,57 +1652,61 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetCtx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.black12,
-                    borderRadius: BorderRadius.circular(2),
+      builder:
+          (sheetCtx) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  ListTile(
+                    leading: Icon(
+                      muted
+                          ? Icons.notifications_active_outlined
+                          : Icons.notifications_off_outlined,
+                      color: Colors.black54,
+                    ),
+                    title: Text(muted ? 'בטל השתקה' : 'השתק שיחה'),
+                    onTap: () => Navigator.pop(sheetCtx, 'mute'),
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.archive_outlined,
+                      color: Colors.black54,
+                    ),
+                    title: const Text('העבר לארכיון'),
+                    onTap: () => Navigator.pop(sheetCtx, 'archive'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.search, color: Colors.black54),
+                    title: const Text('חיפוש בשיחה'),
+                    // Honest: in-thread search has no backing index in the demo.
+                    enabled: false,
+                    onTap: null,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.block, color: Colors.black54),
+                    title: const Text('חסום איש קשר'),
+                    // Honest: blocking requires a server contact list (not in demo).
+                    enabled: false,
+                    onTap: null,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: Icon(
-                  muted ? Icons.notifications_active_outlined
-                        : Icons.notifications_off_outlined,
-                  color: Colors.black54,
-                ),
-                title: Text(muted ? 'בטל השתקה' : 'השתק שיחה'),
-                onTap: () => Navigator.pop(sheetCtx, 'mute'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.archive_outlined,
-                    color: Colors.black54),
-                title: const Text('העבר לארכיון'),
-                onTap: () => Navigator.pop(sheetCtx, 'archive'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.search, color: Colors.black54),
-                title: const Text('חיפוש בשיחה'),
-                // Honest: in-thread search has no backing index in the demo.
-                enabled: false,
-                onTap: null,
-              ),
-              ListTile(
-                leading: const Icon(Icons.block, color: Colors.black54),
-                title: const Text('חסום איש קשר'),
-                // Honest: blocking requires a server contact list (not in demo).
-                enabled: false,
-                onTap: null,
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
     if (!context.mounted || action == null) return;
     if (action == 'mute') {
@@ -1677,9 +1728,11 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final showOnline = _thread.isOnline &&
+    final showOnline =
+        _thread.isOnline &&
         showOnlinePresence(
-            ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)));
+          ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)),
+        );
     // Engine-backed: live messages from the shared store (cross-persona);
     // detached: the session-local list. Both render through the same UI below.
     var messages = _engineBacked ? _engineMessages() : _localMessages;
@@ -1755,10 +1808,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                   if (showOnline)
                     const Text(
                       'פעיל כעת',
-                      style: TextStyle(
-                        color: Color(0xFF4CAF50),
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: Color(0xFF4CAF50), fontSize: 11),
                     ),
                 ],
               ),
@@ -1777,9 +1827,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
           // app holds; chat threads carry no per-contact number). Hidden when
           // the profile has no phone, so the bar never shows a dead button.
           ContactActions(
-            phone: ref.watch(
-              userProfileProvider.select((p) => p.contact),
-            ),
+            phone: ref.watch(userProfileProvider.select((p) => p.contact)),
             iconColor: Colors.black54,
             compact: true,
           ),
@@ -1806,11 +1854,12 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                   // message's write through the engine (delegates to the
                   // Firestore repo's retry). Only engine-backed threads with a
                   // real id can fail/retry; null otherwise → no retry affordance.
-                  onRetry: (_engineBacked && m.id.isNotEmpty)
-                      ? () => ref
-                          .read(chatEngineProvider.notifier)
-                          .retry(_threadId!, m.id)
-                      : null,
+                  onRetry:
+                      (_engineBacked && m.id.isNotEmpty)
+                          ? () => ref
+                              .read(chatEngineProvider.notifier)
+                              .retry(_threadId!, m.id)
+                          : null,
                 );
               },
             ),
@@ -1890,12 +1939,10 @@ class _Bubble extends ConsumerWidget {
           borderRadius: BorderRadiusDirectional.only(
             topStart: const Radius.circular(16),
             topEnd: const Radius.circular(16),
-            bottomStart: msg.isMe
-                ? const Radius.circular(4)
-                : const Radius.circular(16),
-            bottomEnd: msg.isMe
-                ? const Radius.circular(16)
-                : const Radius.circular(4),
+            bottomStart:
+                msg.isMe ? const Radius.circular(4) : const Radius.circular(16),
+            bottomEnd:
+                msg.isMe ? const Radius.circular(16) : const Radius.circular(4),
           ),
           boxShadow: const [
             BoxShadow(
@@ -2130,19 +2177,20 @@ class _PrivacyNotice extends StatelessWidget {
 void _showVoiceUnavailable(BuildContext context) {
   showDialog<void>(
     context: context,
-    builder: (dialogCtx) => AlertDialog(
-      title: const Text('הקלטת קול'),
-      content: const Text(
-        'הקלטת הודעות קוליות אינה זמינה בגרסת הדמו.',
-        textAlign: TextAlign.right,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogCtx),
-          child: const Text('הבנתי'),
+    builder:
+        (dialogCtx) => AlertDialog(
+          title: const Text('הקלטת קול'),
+          content: const Text(
+            'הקלטת הודעות קוליות אינה זמינה בגרסת הדמו.',
+            textAlign: TextAlign.right,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('הבנתי'),
+            ),
+          ],
         ),
-      ],
-    ),
   );
 }
 
@@ -2156,66 +2204,101 @@ void _showAttachSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (sheetCtx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.circular(2),
+    builder:
+        (sheetCtx) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(
+                    Icons.photo_camera_outlined,
+                    color: BsTokens.brand,
+                  ),
+                  title: const Text('מצלמה'),
+                  onTap: () {
+                    Navigator.pop(sheetCtx);
+                    openCameraSheet(context);
+                  },
+                ),
+                // Backend-blocked attachment kinds (document / location). Hidden for
+                // Apple review (kHideUnderConstruction) so no "לא זמין בדמו"
+                // placeholder shows; the rows stay in code (reversible).
+                if (!kHideUnderConstruction) ...[
+                  const ListTile(
+                    leading: Icon(
+                      Icons.insert_drive_file_outlined,
+                      color: Colors.black38,
+                    ),
+                    title: Text('מסמך'),
+                    subtitle: Text('לא זמין בדמו'),
+                    enabled: false,
+                  ),
+                  const ListTile(
+                    leading: Icon(
+                      Icons.location_on_outlined,
+                      color: Colors.black38,
+                    ),
+                    title: Text('מיקום'),
+                    subtitle: Text('לא זמין בדמו'),
+                    enabled: false,
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined,
-                  color: BsTokens.brand),
-              title: const Text('מצלמה'),
-              onTap: () {
-                Navigator.pop(sheetCtx);
-                openCameraSheet(context);
-              },
-            ),
-            // Backend-blocked attachment kinds (document / location). Hidden for
-            // Apple review (kHideUnderConstruction) so no "לא זמין בדמו"
-            // placeholder shows; the rows stay in code (reversible).
-            if (!kHideUnderConstruction) ...[
-              const ListTile(
-                leading: Icon(Icons.insert_drive_file_outlined,
-                    color: Colors.black38),
-                title: Text('מסמך'),
-                subtitle: Text('לא זמין בדמו'),
-                enabled: false,
-              ),
-              const ListTile(
-                leading:
-                    Icon(Icons.location_on_outlined, color: Colors.black38),
-                title: Text('מיקום'),
-                subtitle: Text('לא זמין בדמו'),
-                enabled: false,
-              ),
-            ],
-          ],
+          ),
         ),
-      ),
-    ),
   );
 }
 
 /// Common chat emojis. Tapping inserts the glyph at the caret in [controller]
 /// — a real, fully-working client-side flow (no backend needed).
 const List<String> _kChatEmojis = [
-  '😀', '😁', '😂', '🙂', '😉', '😍', '😘', '😎',
-  '🤔', '👍', '👏', '🙏', '💪', '🔥', '✅', '❌',
-  '🎉', '❤️', '👀', '🚗', '🚚', '🏗️', '🔧', '📦',
-  '📐', '🧱', '🪛', '⏰', '💰', '📋', '⚠️', '😅',
+  '😀',
+  '😁',
+  '😂',
+  '🙂',
+  '😉',
+  '😍',
+  '😘',
+  '😎',
+  '🤔',
+  '👍',
+  '👏',
+  '🙏',
+  '💪',
+  '🔥',
+  '✅',
+  '❌',
+  '🎉',
+  '❤️',
+  '👀',
+  '🚗',
+  '🚚',
+  '🏗️',
+  '🔧',
+  '📦',
+  '📐',
+  '🧱',
+  '🪛',
+  '⏰',
+  '💰',
+  '📋',
+  '⚠️',
+  '😅',
 ];
 
 void _showEmojiPicker(BuildContext context, TextEditingController controller) {
@@ -2225,43 +2308,44 @@ void _showEmojiPicker(BuildContext context, TextEditingController controller) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (sheetCtx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 14),
-            GridView.count(
-              crossAxisCount: 8,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+    builder:
+        (sheetCtx) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (final e in _kChatEmojis)
-                  InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () {
-                      _insertText(controller, e);
-                      Navigator.pop(sheetCtx);
-                    },
-                    child: Center(
-                      child: Text(e, style: const TextStyle(fontSize: 24)),
-                    ),
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
+                const SizedBox(height: 14),
+                GridView.count(
+                  crossAxisCount: 8,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    for (final e in _kChatEmojis)
+                      InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () {
+                          _insertText(controller, e);
+                          Navigator.pop(sheetCtx);
+                        },
+                        child: Center(
+                          child: Text(e, style: const TextStyle(fontSize: 24)),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
   );
 }
 
@@ -2271,8 +2355,9 @@ void _insertText(TextEditingController controller, String text) {
   final sel = value.selection;
   if (!sel.isValid) {
     controller.text = value.text + text;
-    controller.selection =
-        TextSelection.collapsed(offset: controller.text.length);
+    controller.selection = TextSelection.collapsed(
+      offset: controller.text.length,
+    );
     return;
   }
   final newText = value.text.replaceRange(sel.start, sel.end, text);
@@ -2310,9 +2395,7 @@ class _InputBar extends ConsumerWidget {
                 return _CircleFab(
                   icon: hasText ? Icons.send : Icons.mic,
                   semanticLabel: hasText ? 'שלח הודעה' : 'הקלטת הודעה קולית',
-                  onTap: hasText
-                      ? onSend
-                      : () => _showVoiceUnavailable(ctx),
+                  onTap: hasText ? onSend : () => _showVoiceUnavailable(ctx),
                 );
               },
             ),
@@ -2332,8 +2415,10 @@ class _InputBar extends ConsumerWidget {
                       tooltip: 'מצלמה',
                       padding: const EdgeInsets.all(10),
                       // ≥48dp tap target (a11y) — glyph unchanged.
-                      constraints:
-                          const BoxConstraints(minWidth: 48, minHeight: 48),
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
+                      ),
                       icon: const Icon(
                         Icons.camera_alt_outlined,
                         color: Color(0xFF777777),
@@ -2346,8 +2431,10 @@ class _InputBar extends ConsumerWidget {
                       tooltip: 'צירוף',
                       padding: const EdgeInsets.all(10),
                       // ≥48dp tap target (a11y) — glyph unchanged.
-                      constraints:
-                          const BoxConstraints(minWidth: 48, minHeight: 48),
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
+                      ),
                       icon: const Icon(
                         Icons.attach_file,
                         color: Color(0xFF777777),
@@ -2387,8 +2474,10 @@ class _InputBar extends ConsumerWidget {
                       tooltip: 'אימוג׳י',
                       padding: const EdgeInsets.all(10),
                       // ≥48dp tap target (a11y) — glyph unchanged.
-                      constraints:
-                          const BoxConstraints(minWidth: 48, minHeight: 48),
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
+                      ),
                       icon: const Icon(
                         Icons.emoji_emotions_outlined,
                         color: Color(0xFF777777),
@@ -2460,6 +2549,10 @@ class ChatsArchiveScreen extends ConsumerWidget {
         builder: (_) => ChatsArchiveScreen(persona: persona),
       );
 
+  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
+  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
+  static final List<KbToolNode> _kbNodes = kbChatsArchiveNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final archivedIds = ref.watch(chatArchivedIdsProvider);
@@ -2470,7 +2563,10 @@ class ChatsArchiveScreen extends ConsumerWidget {
           _viewOf(t, persona, lastRead),
     ];
 
-    return Scaffold(
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
+    // Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -2490,37 +2586,46 @@ class ChatsArchiveScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: archived.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.archive_outlined,
-                      size: 48, color: Color(0xFFBBBBBB)),
-                  SizedBox(height: 12),
-                  Text(
-                    'אין שיחות בארכיון',
-                    style: TextStyle(
-                      color: BsTokens.inkLight,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+      body:
+          archived.isEmpty
+              ? const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.archive_outlined,
+                      size: 48,
+                      color: Color(0xFFBBBBBB),
                     ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'החלק שיחה שמאלה כדי לארכב אותה',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-                  ),
-                ],
+                    SizedBox(height: 12),
+                    Text(
+                      'אין שיחות בארכיון',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'החלק שיחה שמאלה כדי לארכב אותה',
+                      style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                    ),
+                  ],
+                ),
+              )
+              : ListView.separated(
+                itemCount: archived.length,
+                separatorBuilder:
+                    (_, __) => const Divider(
+                      height: 1,
+                      indent: 76,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                itemBuilder: (_, i) => _ArchivedRow(view: archived[i]),
               ),
-            )
-          : ListView.separated(
-              itemCount: archived.length,
-              separatorBuilder: (_, __) => const Divider(
-                  height: 1, indent: 76, color: Color(0xFFEEEEEE)),
-              itemBuilder: (_, i) => _ArchivedRow(view: archived[i]),
-            ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 
@@ -2538,9 +2643,10 @@ class _ArchivedRow extends ConsumerWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: thread.isBot
-              ? BsTokens.brand.withValues(alpha: 0.15)
-              : const Color(0xFFF5F5F5),
+          color:
+              thread.isBot
+                  ? BsTokens.brand.withValues(alpha: 0.15)
+                  : const Color(0xFFF5F5F5),
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
@@ -2568,17 +2674,19 @@ class _ArchivedRow extends ConsumerWidget {
           showToast(context, 'השיחה שוחזרה');
         },
       ),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => _ChatPage(
-            view: (
-              thread: thread,
-              threadId: view.threadId,
-              persona: view.persona,
+      onTap:
+          () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder:
+                  (_) => _ChatPage(
+                    view: (
+                      thread: thread,
+                      threadId: view.threadId,
+                      persona: view.persona,
+                    ),
+                  ),
             ),
           ),
-        ),
-      ),
     );
   }
 }

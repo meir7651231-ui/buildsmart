@@ -1,8 +1,12 @@
 import 'package:buildsmart/screens/home_content_reorder.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbCatalogSettingsNodes;
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/under_construction.dart';
@@ -29,9 +33,16 @@ class CatalogSettingsScreen extends ConsumerWidget {
         builder: (_) => CatalogSettingsScreen(showProfileRow: showProfileRow),
       );
 
+  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
+  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
+  static final List<KbToolNode> _kbNodes = kbCatalogSettingsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
+    // Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
@@ -73,6 +84,7 @@ class CatalogSettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
@@ -125,9 +137,7 @@ class _ProfileRow extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       color: const Color(0xFFFFFFFF),
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: const Text('👤', style: TextStyle(fontSize: 22)),
@@ -215,8 +225,7 @@ class _ThemeSection extends ConsumerWidget {
           min: 1,
           max: 4,
           suffix: '',
-          onChanged: (v) =>
-              catalogN.update((s) => s.copyWith(gridColumns: v)),
+          onChanged: (v) => catalogN.update((s) => s.copyWith(gridColumns: v)),
         ),
         _RadioGroupRow<CatalogImageSize>(
           label: 'גודל תמונות',
@@ -239,8 +248,7 @@ class _ThemeSection extends ConsumerWidget {
               labelFontSize: 18,
             ),
           ],
-          onChanged: (v) =>
-              catalogN.update((s) => s.copyWith(imageSize: v)),
+          onChanged: (v) => catalogN.update((s) => s.copyWith(imageSize: v)),
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
@@ -248,8 +256,7 @@ class _ThemeSection extends ConsumerWidget {
           title: const Text('סידור מסך הבית'),
           subtitle: const Text('גרור לשנות את סדר המקטעים בבית'),
           trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-          onTap: () =>
-              Navigator.of(context).push(HomeContentReorder.route()),
+          onTap: () => Navigator.of(context).push(HomeContentReorder.route()),
         ),
       ],
     );
@@ -286,26 +293,26 @@ class _NotificationsSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ירידת מחיר במועדפים',
           value: catalog.notifPriceDrop,
-          onChanged: (v) =>
-              catalogN.update((s) => s.copyWith(notifPriceDrop: v)),
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifPriceDrop: v)),
         ),
         _SwitchRow(
           label: 'חזר למלאי',
           value: catalog.notifBackInStock,
-          onChanged: (v) =>
-              catalogN.update((s) => s.copyWith(notifBackInStock: v)),
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifBackInStock: v)),
         ),
         _SwitchRow(
           label: 'מלאי נמוך',
           value: catalog.notifLowStock,
-          onChanged: (v) =>
-              catalogN.update((s) => s.copyWith(notifLowStock: v)),
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifLowStock: v)),
         ),
         _SwitchRow(
           label: 'מוצרים חדשים בקטגוריה',
           value: catalog.notifNewProducts,
-          onChanged: (v) =>
-              catalogN.update((s) => s.copyWith(notifNewProducts: v)),
+          onChanged:
+              (v) => catalogN.update((s) => s.copyWith(notifNewProducts: v)),
         ),
       ],
     );
@@ -478,7 +485,10 @@ class _UnitsSection extends ConsumerWidget {
           value: settings.unit,
           options: const [
             _RadioOption(value: CatalogUnit.metric, label: 'מטרי (מ"מ / ס"מ)'),
-            _RadioOption(value: CatalogUnit.imperial, label: 'אימפריאלי (אינץ\')'),
+            _RadioOption(
+              value: CatalogUnit.imperial,
+              label: 'אימפריאלי (אינץ\')',
+            ),
           ],
           onChanged: (v) => notifier.update((s) => s.copyWith(unit: v)),
         ),
@@ -490,19 +500,33 @@ class _UnitsSection extends ConsumerWidget {
           label: 'פורמט מידות בכרטיס מוצר',
           value: settings.decimalFormat,
           options: const [
-            _RadioOption(value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
-            _RadioOption(value: CatalogDecimalFormat.fraction, label: 'שבר (1½)'),
+            _RadioOption(
+              value: CatalogDecimalFormat.decimal,
+              label: 'עשרוני (1.5)',
+            ),
+            _RadioOption(
+              value: CatalogDecimalFormat.fraction,
+              label: 'שבר (1½)',
+            ),
           ],
-          onChanged: (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
+          onChanged:
+              (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
         ),
         _RadioGroupRow<CatalogDecimalFormat>(
           label: 'פורמט הצגה',
           value: settings.decimalFormat,
           options: const [
-            _RadioOption(value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
-            _RadioOption(value: CatalogDecimalFormat.fraction, label: 'שבר (1½)'),
+            _RadioOption(
+              value: CatalogDecimalFormat.decimal,
+              label: 'עשרוני (1.5)',
+            ),
+            _RadioOption(
+              value: CatalogDecimalFormat.fraction,
+              label: 'שבר (1½)',
+            ),
           ],
-          onChanged: (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
+          onChanged:
+              (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
         ),
       ],
     );
@@ -537,8 +561,7 @@ class _SuppliersSection extends ConsumerWidget {
           min: 5,
           max: 300,
           suffix: ' ק"מ',
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(maxDistance: v)),
+          onChanged: (v) => notifier.update((s) => s.copyWith(maxDistance: v)),
         ),
         _RadioGroupRow<CatalogMinRating>(
           label: 'דירוג מינימלי',
@@ -549,14 +572,13 @@ class _SuppliersSection extends ConsumerWidget {
             _RadioOption(value: CatalogMinRating.four, label: '4+'),
             _RadioOption(value: CatalogMinRating.five, label: '5'),
           ],
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(minRating: v)),
+          onChanged: (v) => notifier.update((s) => s.copyWith(minRating: v)),
         ),
         _SwitchRow(
           label: 'ספקים מקומיים בלבד',
           value: settings.localSuppliersOnly,
-          onChanged: (v) =>
-              notifier.update((s) => s.copyWith(localSuppliersOnly: v)),
+          onChanged:
+              (v) => notifier.update((s) => s.copyWith(localSuppliersOnly: v)),
         ),
         // 🌐 server-ready seams — need per-supplier identity (none in local data
         // yet); the picker activates when a supplier feed exists.
@@ -659,8 +681,10 @@ class _InfoSection extends StatelessWidget {
             style: TextStyle(color: BsTokens.inkLight),
           ),
           trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-          onTap: () => Navigator.of(context)
-              .push(LegalScreen.route(initialTab: LegalTab.terms)),
+          onTap:
+              () => Navigator.of(
+                context,
+              ).push(LegalScreen.route(initialTab: LegalTab.terms)),
         ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -669,8 +693,10 @@ class _InfoSection extends StatelessWidget {
             style: TextStyle(color: BsTokens.inkLight),
           ),
           trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-          onTap: () => Navigator.of(context)
-              .push(LegalScreen.route(initialTab: LegalTab.privacy)),
+          onTap:
+              () => Navigator.of(
+                context,
+              ).push(LegalScreen.route(initialTab: LegalTab.privacy)),
         ),
       ],
     );
@@ -696,9 +722,10 @@ class _SectionTile extends StatelessWidget {
   // For Apple review (kHideUnderConstruction) we render only the functional
   // rows; the _PlaceholderRow tiles stay defined in code (reversible) but are
   // hidden from the visible list.
-  List<Widget> get _visibleChildren => kHideUnderConstruction
-      ? children.where((w) => w is! _PlaceholderRow).toList()
-      : children;
+  List<Widget> get _visibleChildren =>
+      kHideUnderConstruction
+          ? children.where((w) => w is! _PlaceholderRow).toList()
+          : children;
 
   @override
   Widget build(BuildContext context) {
@@ -710,9 +737,7 @@ class _SectionTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       color: const Color(0xFFFFFFFF),
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -813,12 +838,13 @@ class _RadioGroupRow<T> extends StatelessWidget {
           return RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             // Optional leading icon (e.g. grid/list view glyph) — null = no icon.
-            secondary: o.icon == null
-                ? null
-                : Icon(
-                    o.icon,
-                    color: enabled ? BsTokens.inkLight : BsTokens.mutedLight,
-                  ),
+            secondary:
+                o.icon == null
+                    ? null
+                    : Icon(
+                      o.icon,
+                      color: enabled ? BsTokens.inkLight : BsTokens.mutedLight,
+                    ),
             title: Row(
               children: [
                 Flexible(
@@ -836,10 +862,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text(
                     'בקרוב',
-                    style: TextStyle(
-                      color: BsTokens.mutedLight,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                   ),
                 ],
               ],
@@ -847,11 +870,12 @@ class _RadioGroupRow<T> extends StatelessWidget {
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
-            onChanged: enabled
-                ? (v) {
-                    if (v != null) onChanged(v);
-                  }
-                : null,
+            onChanged:
+                enabled
+                    ? (v) {
+                      if (v != null) onChanged(v);
+                    }
+                    : null,
           );
         }),
       ],

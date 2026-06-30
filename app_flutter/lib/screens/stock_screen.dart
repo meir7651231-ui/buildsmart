@@ -15,6 +15,10 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';
 import 'package:buildsmart/screens/contractor_material_requests_sheet.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbStockNodes;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -37,7 +41,7 @@ class StockNotifier extends StateNotifier<Map<String, String>> {
   /// mutable state) [repo] is left null and the move stays the in-memory flip
   /// below — byte-identical to today (and to a direct `StockNotifier(seed)`).
   StockNotifier([Map<String, String>? seed, FirebaseStockRepository? repo])
-      : super(Map<String, String>.from(seed ?? kStockDemo)) {
+    : super(Map<String, String>.from(seed ?? kStockDemo)) {
     if (repo != null) _bindRemote(repo);
   }
 
@@ -87,15 +91,14 @@ class StockNotifier extends StateNotifier<Map<String, String>> {
     }
     final cur = state[name];
     if (cur == null) return;
-    state = {
-      ...state,
-      name: cur == 'warehouse' ? 'site' : 'warehouse',
-    };
+    state = {...state, name: cur == 'warehouse' ? 'site' : 'warehouse'};
   }
 }
 
-final stockProvider =
-    StateNotifierProvider<StockNotifier, Map<String, String>>((ref) {
+final stockProvider = StateNotifierProvider<
+  StockNotifier,
+  Map<String, String>
+>((ref) {
   final repo = ref.read(stockRepositoryProvider);
   // Source the seed through the repository (the local impl exposes it). Any
   // non-local impl falls back to the const seed — identical 11-row map either way.
@@ -139,23 +142,32 @@ class StockScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const StockScreen());
 
+  /// STABLE tool list for the floating-keyboard mirror ([KbScreen]). Built ONCE
+  /// (a `static final`) so [KbScreen]'s identity-compare never re-registers it on
+  /// a rebuild. Tree-shaken with the whole [KbScreen] path when the global-keyboard
+  /// flag is off.
+  static final List<KbToolNode> _kbNodes = kbStockNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tab = ref.watch(stockTabProvider);
     final stock = ref.watch(stockProvider);
-    final items = stock.entries
-        .where((e) => e.value == tab)
-        .map((e) => e.key)
-        .toList();
+    final items =
+        stock.entries.where((e) => e.value == tab).map((e) => e.key).toList();
 
-    return Scaffold(
+    // KbScreen: while this route is front-most under [kKbGlobal], the floating ▦
+    // grid mirrors THIS screen's tools ([_kbNodes]); on pop the parent's tools
+    // return. Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black54),
-        title: const Text('המלאי שלי',
-            style: TextStyle(color: _ink, fontWeight: FontWeight.w700)),
+        title: const Text(
+          'המלאי שלי',
+          style: TextStyle(color: _ink, fontWeight: FontWeight.w700),
+        ),
         actions: [
           // 📥 בקשות חומר — the contractor's inbox of worker material requests
           // (Wave E3b). Read-only on stock; this opens a separate request queue.
@@ -173,9 +185,14 @@ class StockScreen extends ConsumerWidget {
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text('📦 המלאי שלי',
-                  style: TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w700, color: _ink)),
+              child: Text(
+                '📦 המלאי שלי',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: _ink,
+                ),
+              ),
             ),
           ),
           // tabs (stock-tabs)
@@ -186,144 +203,159 @@ class StockScreen extends ConsumerWidget {
                 _StockTab(
                   label: '🏬 המחסן',
                   on: tab == 'warehouse',
-                  onTap: () => ref.read(stockTabProvider.notifier).state =
-                      'warehouse',
+                  onTap:
+                      () =>
+                          ref.read(stockTabProvider.notifier).state =
+                              'warehouse',
                 ),
                 const SizedBox(width: 8),
                 _StockTab(
                   label: '🏗️ האתר',
                   on: tab == 'site',
-                  onTap: () =>
-                      ref.read(stockTabProvider.notifier).state = 'site',
+                  onTap:
+                      () => ref.read(stockTabProvider.notifier).state = 'site',
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: items.isEmpty
-                ? _Empty(tab: tab)
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: items.length,
-                    itemBuilder: (_, i) {
-                      final nm = items[i];
-                      return _StockRow(
-                        name: nm,
-                        info: _accInfo[nm] ?? (img: '📦', why: ''),
-                        warehouse: tab == 'warehouse',
-                        onMove: () {
-                          ref.read(stockProvider.notifier).move(nm);
-                          showToast(context, 'הפריט הועבר');
-                        },
-                      );
-                    },
-                  ),
+            child:
+                items.isEmpty
+                    ? _Empty(tab: tab)
+                    : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: items.length,
+                      itemBuilder: (_, i) {
+                        final nm = items[i];
+                        return _StockRow(
+                          name: nm,
+                          info: _accInfo[nm] ?? (img: '📦', why: ''),
+                          warehouse: tab == 'warehouse',
+                          onMove: () {
+                            ref.read(stockProvider.notifier).move(nm);
+                            showToast(context, 'הפריט הועבר');
+                          },
+                        );
+                      },
+                    ),
           ),
           // hint (stock-hint)
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, 20),
             child: Text(
-                '💡 כשתסמן פריט כ"במחסן" או "באתר" בעץ המוצרים — הוא יופיע כאן.',
-                style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+              '💡 כשתסמן פריט כ"במחסן" או "באתר" בעץ המוצרים — הוא יופיע כאן.',
+              style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
+            ),
           ),
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 
 class _StockTab extends StatelessWidget {
-  const _StockTab(
-      {required this.label, required this.on, required this.onTap});
+  const _StockTab({required this.label, required this.on, required this.onTap});
   final String label;
   final bool on;
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Expanded(
-        child: InkWell(
+    child: InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: on ? BsTokens.brand : Colors.white,
           borderRadius: BorderRadius.circular(999),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: on ? BsTokens.brand : Colors.white,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                  color: on ? BsTokens.brand : const Color(0xFFEAEAEA)),
-            ),
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: on ? bsOnAccent(context) : _ink)),
+          border: Border.all(
+            color: on ? BsTokens.brand : const Color(0xFFEAEAEA),
           ),
         ),
-      );
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: on ? bsOnAccent(context) : _ink,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _StockRow extends StatelessWidget {
-  const _StockRow(
-      {required this.name,
-      required this.info,
-      required this.warehouse,
-      required this.onMove});
+  const _StockRow({
+    required this.name,
+    required this.info,
+    required this.warehouse,
+    required this.onMove,
+  });
   final String name;
   final ({String img, String why}) info;
   final bool warehouse;
   final VoidCallback onMove;
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEAEAEA)),
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: const Color(0xFFEAEAEA)),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F6FA),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(info.img, style: const TextStyle(fontSize: 22)),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F6FA),
-                borderRadius: BorderRadius.circular(10),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _ink,
+                ),
               ),
-              child: Text(info.img, style: const TextStyle(fontSize: 22)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _ink)),
-                  if (info.why.isNotEmpty)
-                    Text(info.why,
-                        style: const TextStyle(fontSize: 12, color: _muted)),
-                ],
-              ),
-            ),
-            OutlinedButton(
-              onPressed: onMove,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: BsTokens.brand,
-                side: const BorderSide(color: BsTokens.brand),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              ),
-              child: Text(warehouse ? '↦ לאתר' : '↤ למחסן',
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w700)),
-            ),
-          ],
+              if (info.why.isNotEmpty)
+                Text(
+                  info.why,
+                  style: const TextStyle(fontSize: 12, color: _muted),
+                ),
+            ],
+          ),
         ),
-      );
+        OutlinedButton(
+          onPressed: onMove,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: BsTokens.brand,
+            side: const BorderSide(color: BsTokens.brand),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          ),
+          child: Text(
+            warehouse ? '↦ לאתר' : '↤ למחסן',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Empty extends StatelessWidget {
@@ -338,17 +370,25 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(warehouse ? '🏬' : '🏗️',
-                style: const TextStyle(fontSize: 48)),
+            Text(
+              warehouse ? '🏬' : '🏗️',
+              style: const TextStyle(fontSize: 48),
+            ),
             const SizedBox(height: 12),
-            Text(warehouse ? 'המחסן ריק' : 'אין פריטים באתר',
-                style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w700, color: _ink)),
+            Text(
+              warehouse ? 'המחסן ריק' : 'אין פריטים באתר',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: _ink,
+              ),
+            ),
             const SizedBox(height: 6),
             Text(
-                'סמן פריטים כ"${warehouse ? 'במחסן' : 'באתר'}" בעץ המוצרים והם יופיעו כאן',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: _muted)),
+              'סמן פריטים כ"${warehouse ? 'במחסן' : 'באתר'}" בעץ המוצרים והם יופיעו כאן',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: _muted),
+            ),
           ],
         ),
       ),
