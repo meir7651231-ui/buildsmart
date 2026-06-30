@@ -75,7 +75,13 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
 import 'package:buildsmart/screens/keyboard_store_deriver.dart'
     show deriveStoreContext;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
-    show KbToolNode, kbHomeNodes, kbKbdNodes, kbTabToolNodes, kbTilesFor;
+    show
+        KbToolNode,
+        kbHomeNodes,
+        kbKbdNodes,
+        kbScreenMenuNodes,
+        kbTabToolNodes,
+        kbTilesFor;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
@@ -639,9 +645,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           _stack.clear();
           _baseLayer = KbToolLayer.none;
         } else {
+          // Owner button-spec v2 (#4): ⚙ opens the CURRENT screen's ⋮ overflow
+          // menu; the legacy fixed kbd tools when the flag is off (byte-identical).
           _stack
             ..clear()
-            ..add(kbKbdNodes());
+            ..add(kKbButtonsV2
+                ? kbScreenMenuNodes(ref.read(mainTabProvider), ref)
+                : kbKbdNodes());
           _baseLayer = KbToolLayer.kbd;
         }
       });

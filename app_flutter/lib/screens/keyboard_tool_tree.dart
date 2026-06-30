@@ -23,6 +23,7 @@
 
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/chats_screen.dart' show ChatsArchiveScreen;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
@@ -38,6 +39,10 @@ import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
+import 'package:buildsmart/screens/store_settings_screen.dart'
+    show StoreSettingsScreen;
+import 'package:buildsmart/screens/updates_screen.dart'
+    show updatesSubTabProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
@@ -481,3 +486,98 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) => switch (tab) {
       3 => kbStoreNodes(ref.read(storeSectionProvider)),
       _ => kbHomeNodes(),
     };
+
+/// Owner button-spec v2 (#4): the CURRENT screen's ⋮ overflow menu as keyboard
+/// tools — what the floating ⚙ opens. Mirrors HomeShell's per-tab AppBar overflow
+/// popups (`_CatalogMenuButton` / `_NotificationsMenuButton` / `_ChatsMenuButton`
+/// / `_StoreMenuButton`). Navigation + mark-read items reuse the SAME public
+/// openers/actions those menus run; the confirm-gated destructive items
+/// (נקה הכל / השתק הכל) and the private new-chat sheet ship as honest "בקרוב"
+/// until exposed (the established deferral — never a confirmless/broken action).
+/// tab 2 (עדכונים) reads [updatesSubTabProvider] to mirror the התראות-vs-שיחות
+/// split; tabs 0 + 1 share the catalog overflow.
+List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
+  switch (tab) {
+    case 2:
+      if (ref.read(updatesSubTabProvider) == 1) {
+        // שיחות (chats) overflow — mirrors _ChatsMenuButton.
+        return <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.add_comment_outlined,
+            label: 'שיחה חדשה',
+            action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.archive_outlined,
+            label: 'ארכיון שיחות',
+            action: (ref, context) =>
+                Navigator.of(context).push(ChatsArchiveScreen.route()),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.notifications_off_outlined,
+            label: 'השתק הכל',
+            action: (ref, context) => _toolSoon(context, 'השתק הכל'),
+          ),
+        ];
+      }
+      // התראות (notifications) overflow — mirrors _NotificationsMenuButton.
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.done_all,
+          label: 'סמן הכל כנקרא',
+          action: (ref, context) => markAllNotifsRead(ref),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.clear_all,
+          label: 'נקה הכל',
+          action: (ref, context) => _toolSoon(context, 'נקה הכל'),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.settings,
+          label: 'הגדרות התראות',
+          action: (ref, context) =>
+              Navigator.of(context).push(NotifSettingsScreen.route()),
+        ),
+      ];
+    case 3:
+      // חנות (store) overflow — mirrors _StoreMenuButton (שירותים is gated by
+      // kHideUnderConstruction in the AppBar, so omitted here for v1).
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.shopping_cart_outlined,
+          label: 'הסל שלי',
+          action: (ref, context) =>
+              ref.read(storeSectionProvider.notifier).state = StoreSection.cart,
+        ),
+        KbToolNode.leaf(
+          icon: Icons.receipt_long,
+          label: 'הזמנות',
+          action: (ref, context) => ref
+              .read(storeSectionProvider.notifier)
+              .state = StoreSection.orders,
+        ),
+        KbToolNode.leaf(
+          icon: Icons.settings,
+          label: 'הגדרות',
+          action: (ref, context) =>
+              Navigator.of(context).push(StoreSettingsScreen.route()),
+        ),
+      ];
+    default:
+      // בית + מחלקות (catalog/departments) overflow — mirrors _CatalogMenuButton.
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.smart_toy,
+          label: 'בינה מלאכותית ואוטומציה',
+          action: (ref, context) =>
+              Navigator.of(context).push(AIHubScreen.route()),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.settings,
+          label: 'הגדרות',
+          action: (ref, context) =>
+              Navigator.of(context).push(CatalogSettingsScreen.route()),
+        ),
+      ];
+  }
+}
