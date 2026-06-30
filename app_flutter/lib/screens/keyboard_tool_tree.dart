@@ -467,3 +467,17 @@ List<KbToolNode> kbDeptNodes() => <KbToolNode>[
         action: (ref, context) => _toolSoon(context, 'מסלול עבודה'),
       ),
     ];
+
+/// Owner button-spec v2 (#2): the CURRENT tab's tool node-list — what the floating
+/// ▦ (and the #6 buttons-mode) opens. tab 0 (בית) keeps the home tools
+/// (byte-identical to the legacy ▦); tab 1 (מחלקות) → [kbDeptNodes]; tab 2
+/// (עדכונים) → [kbUpdatesNotifNodes]; tab 3 (חנות) → [kbStoreNodes] for the live
+/// [storeSectionProvider]. Centralised HERE (the per-tab node-lists + the
+/// store-section provider are already imported) so the floating mount calls ONE
+/// function and needs no extra imports. Reads the store section via [ref].
+List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) => switch (tab) {
+      1 => kbDeptNodes(),
+      2 => kbUpdatesNotifNodes(),
+      3 => kbStoreNodes(ref.read(storeSectionProvider)),
+      _ => kbHomeNodes(),
+    };

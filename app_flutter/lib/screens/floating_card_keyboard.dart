@@ -75,7 +75,7 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
 import 'package:buildsmart/screens/keyboard_store_deriver.dart'
     show deriveStoreContext;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
-    show KbToolNode, kbHomeNodes, kbKbdNodes, kbTilesFor;
+    show KbToolNode, kbHomeNodes, kbKbdNodes, kbTabToolNodes, kbTilesFor;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
@@ -606,7 +606,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           _lastDerivedBase = null;
           _stack
             ..clear()
-            ..add(kbHomeNodes());
+            ..add(kbTabToolNodes(ref.read(mainTabProvider), ref));
           _baseLayer = KbToolLayer.home;
         }
       });
@@ -618,9 +618,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           _stack.clear();
           _baseLayer = KbToolLayer.none;
         } else {
+          // Owner button-spec v2 (#2): ▦ opens the CURRENT tab's tools; the
+          // legacy fixed home set when the flag is off (byte-identical).
           _stack
             ..clear()
-            ..add(kbHomeNodes());
+            ..add(kKbButtonsV2
+                ? kbTabToolNodes(ref.read(mainTabProvider), ref)
+                : kbHomeNodes());
           _baseLayer = KbToolLayer.home;
         }
       });
