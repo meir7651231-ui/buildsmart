@@ -174,6 +174,18 @@ void _openDepartment(WidgetRef ref, String name) {
 /// is verified against real code (see file header); ambiguous or not-cleanly-
 /// reachable targets are intentionally LEFT OUT (deferred) rather than wired to
 /// a broken nav.
+/// Memoized label→destination map backing `kbDestinationByLabel` — built once
+/// from `kbDestinations`, read-only thereafter (owner button-spec #2).
+Map<String, KbDestination>? _byLabelCache;
+
+/// Look up a destination by its exact `label` (memoized). Lets the keyboard tool
+/// tree reuse a destination's verified opener instead of re-implementing it;
+/// returns null for an unknown label (the caller skips it).
+KbDestination? kbDestinationByLabel(String label) =>
+    (_byLabelCache ??= <String, KbDestination>{
+      for (final d in kbDestinations()) d.label: d,
+    })[label];
+
 List<KbDestination>? _kbDestinationsCache;
 /// Memoized: the registry is built ONCE then reused — avoids re-allocating the
 /// full list + every `run` closure on each keystroke (matchDestinations and the

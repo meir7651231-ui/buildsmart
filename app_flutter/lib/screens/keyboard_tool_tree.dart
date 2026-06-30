@@ -27,6 +27,8 @@ import 'package:buildsmart/screens/chats_screen.dart' show ChatsArchiveScreen;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
+import 'package:buildsmart/screens/keyboard_destinations.dart'
+    show kbDestinationByLabel;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
 import 'package:buildsmart/screens/notif_settings_screen.dart'
@@ -473,19 +475,62 @@ List<KbToolNode> kbDeptNodes() => <KbToolNode>[
       ),
     ];
 
-/// Owner button-spec v2 (#2): the CURRENT tab's tool node-list — what the floating
-/// ▦ (and the #6 buttons-mode) opens. tab 0 (בית) keeps the home tools
-/// (byte-identical to the legacy ▦); tab 1 (מחלקות) → [kbDeptNodes]; tab 2
-/// (עדכונים) → [kbUpdatesNotifNodes]; tab 3 (חנות) → [kbStoreNodes] for the live
-/// [storeSectionProvider]. Centralised HERE (the per-tab node-lists + the
-/// store-section provider are already imported) so the floating mount calls ONE
-/// function and needs no extra imports. Reads the store section via [ref].
-List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) => switch (tab) {
-      1 => kbDeptNodes(),
-      2 => kbUpdatesNotifNodes(),
-      3 => kbStoreNodes(ref.read(storeSectionProvider)),
-      _ => kbHomeNodes(),
-    };
+/// Wrap a navigable destination [label] ([kbDestinationByLabel]) as a tool leaf
+/// with [icon] — reusing that destination's verified opener. Null when the label
+/// is not a known destination, so the caller can skip it (defensive).
+KbToolNode? _destNode(String label, IconData icon) {
+  final d = kbDestinationByLabel(label);
+  if (d == null) return null;
+  return KbToolNode.leaf(icon: icon, label: label, action: d.run);
+}
+
+/// Owner button-spec v2 (#2): the CURRENT tab's tool node-list — the FULL set of
+/// the screen's navigable items (not a curated subset), each wired to the SAME
+/// opener the screen's own pill/tile uses (via [kbDestinationByLabel]). Labels not
+/// in the registry are skipped (defensive). tab 0 (בית) = the catalog section
+/// pills · tab 1 (מחלקות) = the live departments + עץ-חכם/מאתר · tab 2 (עדכונים) =
+/// the two sub-tabs · tab 3 (חנות) = the store sections + כספים. [ref] is accepted
+/// for parity with the other node-list factories (future per-tab live reads).
+List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
+  const lists = <int, List<(String, IconData)>>{
+    0: <(String, IconData)>[
+      ('מאתר', Icons.gps_fixed),
+      ('עץ חכם', Icons.account_tree),
+      ('קטגוריות', Icons.grid_view),
+      ('וריאנטים', Icons.tune),
+      ('תכנון חיבור', Icons.cable),
+      ('חיפושים אחרונים', Icons.history),
+      ('מועדפים', Icons.star_border),
+    ],
+    1: <(String, IconData)>[
+      ('אינסטלציה', Icons.plumbing),
+      ('ברזים וסניטריים', Icons.water_drop_outlined),
+      ('כלי עבודה ידני', Icons.handyman),
+      ('כלי עבודה חשמלי', Icons.bolt),
+      ('עץ חכם', Icons.account_tree),
+      ('מאתר', Icons.gps_fixed),
+    ],
+    2: <(String, IconData)>[
+      ('התראות', Icons.notifications_outlined),
+      ('שיחות', Icons.chat_bubble_outline),
+    ],
+    3: <(String, IconData)>[
+      ('הסל שלי', Icons.shopping_cart_outlined),
+      ('ההזמנות שלי', Icons.receipt_long),
+      ('שירותים', Icons.home_repair_service_outlined),
+      ('כספים', Icons.account_balance_wallet_outlined),
+    ],
+  };
+  final picks = lists[tab] ?? lists[0]!;
+  final out = <KbToolNode>[];
+  for (final (label, icon) in picks) {
+    final node = _destNode(label, icon);
+    if (node != null) out.add(node);
+  }
+  // Never leave ▦ empty: if nothing resolved (registry shape changed), fall back
+  // to the legacy home tools.
+  return out.isEmpty ? kbHomeNodes() : out;
+}
 
 /// Owner button-spec v2 (#4): the CURRENT screen's ⋮ overflow menu as keyboard
 /// tools — what the floating ⚙ opens. Mirrors HomeShell's per-tab AppBar overflow
