@@ -10,3 +10,9 @@
 /// never reached and the live word_finder is byte-identical. The owner-gated
 /// cut-over (build plan Phase 6) is what eventually turns it on.
 const String kCardKeyboardFlag = 'kCardKeyboard';
+
+/// Feature-flag name for the FULL unified finder (the P3+ opening surface +
+/// text / voice / AI inputs). The card-keyboard screen self-gates on EITHER this
+/// or [kCardKeyboardFlag], so the cut-over can flip ONE clearly-named flag. OFF
+/// by default → byte-identical, exactly like [kCardKeyboardFlag].
+const String kUnifiedFinderFlag = 'kUnifiedFinder';

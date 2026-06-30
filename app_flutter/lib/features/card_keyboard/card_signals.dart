@@ -21,8 +21,10 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart'
     show SignalChip;
+import 'package:buildsmart/features/card_keyboard/decisions.dart'
+    show kMaterialIsGatedCoAxis;
 import 'package:buildsmart/features/word_finder/material_lexicon.dart'
-    show materialOf, materialsInPool;
+    show materialOfEnriched, materialsInPoolEnriched;
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show
         angleTokensIn,
@@ -178,9 +180,9 @@ class WordSignal extends SignalSource {
       productHasChip(p, chip.value);
 }
 
-/// MATERIAL axis — the NEW 5th axis (build plan §2). `materialsInPool` chips,
-/// GATED so it shows only when ≥ [kMaterialCoverageGate] of the pool has a known
-/// material (#28). The predicate is NULL-TOLERANT: an unknown-material product
+/// MATERIAL axis — the NEW 5th axis (build plan §2). `materialsInPoolEnriched`
+/// chips, a GATED CO-EQUAL axis (kMaterialIsGatedCoAxis): shown only when it can
+/// SPLIT the pool (>1 material) AND ≥ [kMaterialCoverageGate] coverage (#28). The predicate is NULL-TOLERANT: an unknown-material product
 /// rides ALONG (so the unseeded MAJORITY is not dropped — materialOf detects a
 /// known material for only a minority of the union pool, and the exact share
 /// varies per narrowed pool; swarm R3 corrected an earlier "~42%" overstatement).
@@ -196,18 +198,26 @@ class MaterialSignal extends SignalSource {
   @override
   String get axisName => 'חומר';
 
-  /// Fraction of [pool] with a known [materialOf] — drives the coverage gate.
+  /// Fraction of [pool] with a known [materialOfEnriched] — drives the gate.
   static double seededFraction(List<LipskeyCatalogProduct> pool) {
     if (pool.isEmpty) return 0;
-    final seeded = pool.where((p) => materialOf(p) != null).length;
+    final seeded = pool.where((p) => materialOfEnriched(p) != null).length;
     return seeded / pool.length;
   }
 
   @override
   List<SignalChip> chipsFor(List<LipskeyCatalogProduct> pool) {
-    if (seededFraction(pool) < kMaterialCoverageGate) return const <SignalChip>[];
+    final materials = materialsInPoolEnriched(pool);
+    // GATED CO-EQUAL (kMaterialIsGatedCoAxis): chips ONLY when material can SPLIT
+    // the pool (>1 distinct material) AND coverage clears the floor — a lone
+    // material can't narrow, so the merge never forces it first.
+    if (kMaterialIsGatedCoAxis &&
+        (materials.length < 2 ||
+            seededFraction(pool) < kMaterialCoverageGate)) {
+      return const <SignalChip>[];
+    }
     return <SignalChip>[
-      for (final m in materialsInPool(pool))
+      for (final m in materials)
         SignalChip(
           axisId: axisId,
           value: m,
@@ -219,7 +229,7 @@ class MaterialSignal extends SignalSource {
 
   @override
   bool matches(LipskeyCatalogProduct p, SignalChip chip) {
-    final m = materialOf(p);
+    final m = materialOfEnriched(p);
     return m == chip.value || m == null; // null carries along (§2)
   }
 }

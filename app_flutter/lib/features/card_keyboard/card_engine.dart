@@ -20,20 +20,28 @@
 library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/related_info.dart' show compatibleProductsFor;
+import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
-    show sourcesFor;
+    show SignalSource, sourcesFor;
+import 'package:buildsmart/features/card_keyboard/decisions.dart'
+    show kMaxDiveTurns;
+import 'package:buildsmart/features/card_keyboard/soft_signals.dart'
+    show kitSkusFor, softAnchor, softTilt;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
     show
         NewbieStep,
+        collapseKeyOf,
         distinctCardCount,
         distinctProducts,
+        divePoolBySku,
         kFirstQuestion,
         kFirstWordCount,
         kShowProductsThreshold,
         wordsByFrequency;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordEntry, WordLexicon;
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
 
 /// One MERGED key the keyboard shows — a single tappable chip that narrows the
 /// pool by one `(axis, value)`, plus how it renders. (Model v4, build plan
@@ -48,6 +56,7 @@ class SignalChip {
     this.axisName,
     this.infoGain = 0,
     this.soft = false,
+    this.isDestination = false,
   });
 
   /// The predicate FAMILY: `'size' | 'angle' | 'color' | 'word' | 'material'`.
@@ -70,13 +79,19 @@ class SignalChip {
   final String? axisName;
 
   /// Ranking magnitude — a DISPLAY / coarse tier ONLY, never the sort key (the
-  /// comparator uses an exact integer rational; §1.3).
+  /// comparator uses an exact integer rational; §1.3). EXCLUDED from ==/hashCode
+  /// (P2.46): a double's NaN/ULP makes a value type fragile in sets + goldens.
   final double infoGain;
 
   /// Always false for an EMITTED key: soft signals (recipe/connections) only
   /// re-weight an existing hard-axis chip — they never produce a standalone key
   /// (§1.5 invariant, asserted in Phase 3's tests).
   final bool soft;
+
+  /// True for a near-convergence chip that lands DIRECTLY on a single product (a
+  /// destination, #41) rather than narrowing further — a RENDER-ONLY accent, never
+  /// routing, EXCLUDED from ==/hashCode (like [infoGain]). False on a wide pool.
+  final bool isDestination;
 
   @override
   bool operator ==(Object other) =>
@@ -85,12 +100,25 @@ class SignalChip {
       other.value == value &&
       other.displayLabel == displayLabel &&
       other.axisName == axisName &&
-      other.infoGain == infoGain &&
       other.soft == soft;
 
   @override
   int get hashCode =>
-      Object.hash(axisId, value, displayLabel, axisName, infoGain, soft);
+      Object.hash(axisId, value, displayLabel, axisName, soft);
+
+  /// A copy with [infoGain] populated (P7.64). infoGain is a DISPLAY tier only and
+  /// is excluded from ==/hashCode, so re-stamping never changes a chip's identity,
+  /// the row's order, or any golden/set keyed on chips.
+  SignalChip withInfoGain(double gain, {bool isDestination = false}) =>
+      SignalChip(
+        axisId: axisId,
+        value: value,
+        displayLabel: displayLabel,
+        axisName: axisName,
+        infoGain: gain,
+        soft: soft,
+        isDestination: isDestination,
+      );
 }
 
 /// What the unified engine returns at one turn of the dive. Sealed with exactly
@@ -150,8 +178,9 @@ CardVerdict mergedKeys(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
   WordLexicon lexicon,
-  String? subtype,
-) {
+  String? subtype, {
+  Set<String> historySkus = const <String>{},
+}) {
   if (stack.isEmpty) {
     return CardAskWords(
       kFirstQuestion,
@@ -162,11 +191,57 @@ CardVerdict mergedKeys(
     return CardResolve(pool.first, pool);
   }
   if (distinctCardCount(pool) <= kShowProductsThreshold) {
-    return CardShowProducts(distinctProducts(pool));
+    return CardShowProducts(distinctProducts(pool, cap: pool.length));
   }
-  final chips = _mergedChips(pool, stack, subtype);
-  if (chips.isEmpty) return CardShowProducts(distinctProducts(pool));
+  // P7.67: the HARD ≤6 gate. By the last allowed turn (kMaxDiveTurns − 1 answered
+  // steps) STOP asking and show the scan-list, so the dive can NEVER exceed
+  // kMaxDiveTurns. Inert in practice (the census proves max depth 4) — a STRUCTURAL
+  // ≤6 guarantee that does not depend on the ranking staying decisive.
+  //
+  // Swarm-review fix: the card-engine ShowProducts lists are UNcapped (cap: pool.length).
+  // The default kShowProductsCap (30, the LIVE finder's view limit) would silently DROP
+  // cards beyond #30 at a forced gate — making them UNREACHABLE and breaking the ≤6
+  // contract (the rigorous brain-contract test caught this). Reachability outranks a shorter
+  // scan; the adversarial census measures the worst forced list at 38, not a runaway.
+  if (stack.length >= kMaxDiveTurns - 1) {
+    return CardShowProducts(distinctProducts(pool, cap: pool.length));
+  }
+  final chips = _mergedChips(pool, stack, subtype, historySkus);
+  if (chips.isEmpty) return CardShowProducts(distinctProducts(pool, cap: pool.length));
   return MergedKeys(chips);
+}
+
+/// Census-only memo toggle (P0.5). OFF in production so the live [mergedKeys]
+/// call sites are byte-identical; the <=6/<=4 census flips it on to share one
+/// merge computation across raw pools that collapse to the same card-set.
+const bool kCensusMemoEnabled = false;
+
+final Map<String, CardVerdict> _mergedKeysMemo = <String, CardVerdict>{};
+
+/// @visibleForTesting — clears the census memo between runs / tests.
+@visibleForTesting
+void clearMergedKeysMemo() => _mergedKeysMemo.clear();
+
+/// @visibleForTesting — [mergedKeys] with a CENSUS-ONLY memo keyed on the
+/// collapsed card-set + the answered-axis set + subtype (the full determinant of
+/// the merge). Two raw pools that collapse to the same cards under the same
+/// answered axes share one computation. Behind [enabled] (default
+/// [kCensusMemoEnabled] = false) → a transparent pass-through in production.
+@visibleForTesting
+CardVerdict mergedKeysMemoized(
+  List<LipskeyCatalogProduct> pool,
+  List<NewbieStep> stack,
+  WordLexicon lexicon,
+  String? subtype, {
+  bool enabled = kCensusMemoEnabled,
+}) {
+  if (!enabled) return mergedKeys(pool, stack, lexicon, subtype);
+  final poolSig = (pool.map(collapseKeyOf).toSet().toList()..sort()).join('|');
+  final axesSig =
+      (stack.map((s) => s.axisLabel).toSet().toList()..sort()).join(',');
+  final key = '$poolSig##$axesSig##$subtype';
+  return _mergedKeysMemo.putIfAbsent(
+      key, () => mergedKeys(pool, stack, lexicon, subtype));
 }
 
 /// Merge tuning (build plan §1.4 #11). OWNER-REVIEW defaults.
@@ -218,47 +293,38 @@ List<SignalChip> _mergedChips(
   List<LipskeyCatalogProduct> pool,
   List<NewbieStep> stack,
   String? subtype,
+  Set<String> historySkus,
 ) {
   final answered = <String>{for (final s in stack) s.axisLabel};
   final scored = <_AxisScore>[];
   // The five hard axes PLUS, for a curated subtype, the 'אפשרות' facet axis
   // (swarm R7 gap-close). The facet ranks among the others by decisiveness.
   final sources = sourcesFor(subtype);
+  // P9.84: soft re-ranking inputs. Only NEAR convergence (softAnchor non-null) do soft
+  // signals tilt the within-axis order; a wide pool yields a null anchor, so every chip
+  // tilts by 1.0 and the row stays byte-identical to the hard-signal order. The mate sets
+  // (compat + recipe co-members of the anchor) are built once, and only when narrow.
+  final anchor = softAnchor(pool);
+  final connMates = <String>{};
+  final recipeMates = <String>{};
+  if (anchor != null) {
+    for (final aSku in anchor) {
+      final ap = divePoolBySku[aSku];
+      if (ap == null) continue;
+      for (final mate in compatibleProductsFor(ap)) {
+        connMates.add(mate.sku);
+      }
+    }
+    for (final recipe in kSmartProducts) {
+      final kit = kitSkusFor(recipe);
+      if (kit.any(anchor.contains)) recipeMates.addAll(kit);
+    }
+  }
   for (var rank = 0; rank < sources.length; rank++) {
     final src = sources[rank];
     if (answered.contains(src.axisName)) continue; // each axis at most once
-    final chips = src.chipsFor(pool);
-    // Skip an axis that can't provide the per-axis floor: a lone chip can't
-    // narrow, and keying this on kMergedAxisFloor (not a literal 2) makes the
-    // documented "≥ floor chips per represented axis" guarantee actually hold —
-    // a laid-out axis always has ≥ floor chips to give (swarm R5). Identical at
-    // the floor=2 default; an invariant test pins kMergedAxisFloor ≥ 2.
-    if (chips.length < kMergedAxisFloor) continue;
-    // EVERY axis — material INCLUDED (swarm R3 fix) — is scored on the FULL pool
-    // with its OWN tap predicate (src.matches), so an axis's measured decisiveness
-    // is EXACTLY what tapping a chip delivers, and all axes share one denominator
-    // n = distinctCardCount(pool) (so expRem is commensurable across axes). For
-    // material this COUNTS the null carry-along the tap keeps (a copper tap holds
-    // copper + unknown-material) — the honest post-tap pool. §2's earlier
-    // seeded-subset + exact-predicate scoring systematically OVER-ranked material:
-    // a smaller seeded M deflated its expRem, and excluding the carry-along it
-    // actually keeps understated the remaining cards (two compounding R3 HIGHs).
-    final n = distinctCardCount(pool);
-    if (n == 0) continue; // div-0 guard; an empty pool can't split
-    var sumSq = 0;
-    var anySplit = false;
-    for (final chip in chips) {
-      final narrowed = pool.where((p) => src.matches(p, chip)).toList();
-      final nc = distinctCardCount(narrowed);
-      if (nc < n) anySplit = true; // this chip actually narrows the pool
-      sumSq += nc * nc;
-    }
-    // Skip an axis that can't narrow AT ALL — every chip keeps the full pool
-    // (e.g. multi-valued products that match every size chip). Laying it out
-    // would present a visible NO-OP tap; route past it to a more decisive axis
-    // or the convergence floor instead (swarm R7).
-    if (!anySplit) continue;
-    scored.add(_AxisScore(rank, chips, sumSq, n));
+    final score = _scoreAxis(rank, src, pool);
+    if (score != null) scored.add(score);
   }
 
   // Rank axes by expRem = sumSq/n ASCENDING via INTEGER cross-multiply
@@ -288,12 +354,91 @@ List<SignalChip> _mergedChips(
     // REPRESENTATIVE buckets across the sorted range — always incl. smallest AND
     // largest. WORD (frequency-ordered) and COLOUR (lexical) keep the natural
     // first-N, where top-N IS the right pick.
-    final taken = const {'size', 'angle'}.contains(a.chips.first.axisId)
-        ? representativeTake(a.chips, take)
-        : a.chips.take(take).toList();
-    out.addAll(taken);
+    final src = sources[a.rank];
+    // P9.84: soft tilt re-orders WITHIN a non-magnitude axis near convergence; size/angle
+    // keep their magnitude order, and a null anchor (wide pool) leaves orders untouched.
+    final isMagnitude = const {'size', 'angle'}.contains(a.chips.first.axisId);
+    final ordered = (anchor == null || isMagnitude)
+        ? a.chips
+        : _softTiltSorted(
+            a.chips, src, pool, connMates, recipeMates, historySkus);
+    final taken = isMagnitude
+        ? representativeTake(ordered, take)
+        : ordered.take(take).toList();
+    // P7.64: stamp infoGain = n − distinctCardCount(narrowed) on each emitted chip.
+    // infoGain is excluded from ==/hashCode, so this leaves the row ORDER untouched
+    // (a display tier the rank reads; the sort key is still the integer expRem).
+    for (final c in taken) {
+      final nc =
+          distinctCardCount(pool.where((p) => src.matches(p, c)).toList());
+      out.add(c.withInfoGain(
+        (a.n - nc).toDouble(),
+        isDestination: anchor != null && nc <= 1,
+      ));
+    }
   }
   return out;
+}
+
+/// Stable-sorts [chips] by DESCENDING soft tilt (P9.84). Ties keep the live helper's
+/// original order, so an all-inert row (anchorless, or no chip touching a mate) is
+/// byte-identical. A chip's tilt comes from whether ITS products in [pool] touch the
+/// anchor's connection mates ([connMates]) or recipe co-members ([recipeMates]).
+List<SignalChip> _softTiltSorted(
+  List<SignalChip> chips,
+  SignalSource src,
+  List<LipskeyCatalogProduct> pool,
+  Set<String> connMates,
+  Set<String> recipeMates,
+  Set<String> historySkus,
+) {
+  double tiltOf(SignalChip c) {
+    final prods = pool.where((p) => src.matches(p, c));
+    return softTilt(
+      connection: prods.any((p) => connMates.contains(p.sku)),
+      recipe: prods.any((p) => recipeMates.contains(p.sku)),
+      history: prods.any((p) => historySkus.contains(p.sku)),
+    );
+  }
+
+  final ranked = [
+    for (var i = 0; i < chips.length; i++)
+      (index: i, chip: chips[i], tilt: tiltOf(chips[i])),
+  ]..sort((x, y) =>
+      x.tilt != y.tilt ? y.tilt.compareTo(x.tilt) : x.index.compareTo(y.index));
+  return [for (final e in ranked) e.chip];
+}
+
+/// Scores one axis [src] over [pool] for the merged row (P7.65 — extracted from
+/// [_mergedChips], behavior-identical). Returns null when the axis can't be laid
+/// out: fewer than [kMergedAxisFloor] chips, an empty pool, or NO chip narrows it.
+///
+/// EVERY axis — material INCLUDED (swarm R3 fix) — is scored on the FULL pool with
+/// its OWN tap predicate (src.matches), so an axis's measured decisiveness is EXACTLY
+/// what tapping a chip delivers, and all axes share one denominator
+/// n = distinctCardCount(pool) (expRem commensurable across axes). For material this
+/// COUNTS the null carry-along the tap keeps (a copper tap holds copper +
+/// unknown-material) — the honest post-tap pool; material is NOT a special branch.
+_AxisScore? _scoreAxis(
+  int rank,
+  SignalSource src,
+  List<LipskeyCatalogProduct> pool,
+) {
+  final chips = src.chipsFor(pool);
+  if (chips.length < kMergedAxisFloor) return null;
+  final n = distinctCardCount(pool);
+  if (n == 0) return null; // div-0 guard; an empty pool can't split
+  var sumSq = 0;
+  var anySplit = false;
+  for (final chip in chips) {
+    final nc =
+        distinctCardCount(pool.where((p) => src.matches(p, chip)).toList());
+    if (nc < n) anySplit = true; // this chip actually narrows the pool
+    sumSq += nc * nc;
+  }
+  // No chip narrows AT ALL → laying it out would be a visible NO-OP tap; skip.
+  if (!anySplit) return null;
+  return _AxisScore(rank, chips, sumSq, n);
 }
 
 /// Pick [count] chips spread EVENLY across [chips] — representative buckets, NOT

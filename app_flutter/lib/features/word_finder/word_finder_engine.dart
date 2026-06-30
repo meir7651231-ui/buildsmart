@@ -223,6 +223,40 @@ final Map<String, LipskeyCatalogProduct> _divePoolBySku = {
   for (final p in kDivePool) p.sku: p,
 };
 
+// ── Unified-finder P0 contracts (build-plan v3, step 2 + the step-9 collapse-key
+// publicize, hoisted here so the universe folds on the public key). PURELY
+// ADDITIVE: new public symbols only; the private _divePoolBySku / _collapseKey and
+// their existing callsites are untouched, so the live word-finder is byte-identical
+// and nothing here runs unless a unified-finder census/graph calls it. ───────────
+
+/// Public sku->product index over [kDivePool] — exposes the existing private map so
+/// the <=6/<=4 censuses + hop-graph get O(1) sku lookup (round-2/3: _divePoolBySku
+/// was private and divePoolIndex carried only booleans).
+Map<String, LipskeyCatalogProduct> get divePoolBySku => _divePoolBySku;
+
+/// Public variant-collapse key — the SAME fold [distinctCardCount] uses, exposed so
+/// a census can group by CARD across files without the private symbol.
+String collapseKeyOf(LipskeyCatalogProduct p) => _collapseKey(p);
+
+/// The reach universe: ONE representative product per distinct CARD of [kDivePool],
+/// built UNCAPPED — no `.take`/`.sublist`/cap (the round-2/3 foot-gun where a
+/// default-capped distinctProducts silently shrank the universe to 30). Folds by
+/// [collapseKeyOf], so `kReachUniverse.length == distinctCardCount(kDivePool)`.
+/// THE single denominator every <=6 census counts against.
+final List<LipskeyCatalogProduct> kReachUniverse = _buildReachUniverse();
+
+List<LipskeyCatalogProduct> _buildReachUniverse() {
+  final seen = <String>{};
+  final out = <LipskeyCatalogProduct>[];
+  for (final p in kDivePool) {
+    if (seen.add(_collapseKey(p))) out.add(p); // first member of each card wins
+  }
+  return out;
+}
+
+/// Distinct-card count of the reach universe (== [kReachUniverse].length).
+int reachUniverseSize() => kReachUniverse.length;
+
 /// Matches runs of whitespace — used by [_collapseKey] to fold the gaps left by
 /// removed size/angle/colour tokens. PERF: hoisted to a top-level final so it is
 /// compiled ONCE, not re-`RegExp(...)`-constructed on every [_collapseKey] call.

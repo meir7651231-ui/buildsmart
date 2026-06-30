@@ -16,8 +16,20 @@ import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart'
+    show kCardKeyboardFlag, kUnifiedFinderFlag;
+import 'package:buildsmart/features/card_keyboard/card_picks.dart'
+    show CardPick, cardPicksProvider;
+import 'package:buildsmart/features/card_keyboard/hop_graph.dart'
+    show EdgeKind, HopGraph;
+import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
+import 'package:buildsmart/features/card_keyboard/line_plan.dart'
+    show planLineFromPicks;
+import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
+    show divePoolBySku;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +41,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 void showLipskeyProductSheet(
   BuildContext context,
   LipskeyCatalogProduct product,
-  List<LipskeyCatalogProduct> categoryProducts,
-) {
+  List<LipskeyCatalogProduct> categoryProducts, {
+  bool forceLive = false,
+  List<LipskeyCatalogProduct> hopSeedForTest = const <LipskeyCatalogProduct>[],
+}) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -42,6 +56,8 @@ void showLipskeyProductSheet(
       // whole card). Fall back to the product itself so it always renders.
       categoryProducts:
           categoryProducts.isEmpty ? [product] : categoryProducts,
+      forceLive: forceLive,
+      hopSeedForTest: hopSeedForTest,
     ),
   );
 }
@@ -104,10 +120,21 @@ class LipskeyProductSheet extends ConsumerStatefulWidget {
     super.key,
     required this.product,
     required this.categoryProducts,
+    this.forceLive = false,
+    this.hopSeedForTest = const <LipskeyCatalogProduct>[],
   });
 
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> categoryProducts;
+
+  /// P8.74 — test seam: force the flag-ON hop UI without the feature flag (parallels
+  /// CardKeyboardScreen.forceLiveForTest). Production stays flag-gated → OFF.
+  final bool forceLive;
+
+  /// P8.75 — test seam: pre-seed the hop back-stack so a test can exercise the back
+  /// control deterministically. Production opens with an empty stack.
+  @visibleForTesting
+  final List<LipskeyCatalogProduct> hopSeedForTest;
 
   @override
   ConsumerState<LipskeyProductSheet> createState() =>
@@ -118,7 +145,9 @@ enum _Unit { single, pack, pallet }
 
 class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late int _selectedIdx;
-  LipskeyCatalogProduct? _chipOverride;
+  // P8.75: the product back-stack (replaces a single override) — a 'back' returns to
+  // the PREVIOUS hopped product, not all the way to the opening variant.
+  final HopStack<LipskeyCatalogProduct> _hops = HopStack<LipskeyCatalogProduct>();
   String? _openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
   int? _activeStage;
   late Map<int, bool> _accSelected;
@@ -174,9 +203,6 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     });
     return atomic;
   }
-
-  /// Readable size tokens for the section subtitle.
-  List<String> _sizeTokens(String name) => _connectionSizes(name);
 
   /// Material of a product, inferred from name/category (צעד 62).
   static String _material(LipskeyCatalogProduct p) {
@@ -339,31 +365,323 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   List<LipskeyCatStage> get _stages =>
       lipskeyStagesFor(_current.sku, _current.categoryHe);
   LipskeyCatalogProduct get _current =>
-      _chipOverride ?? widget.categoryProducts[_selectedIdx];
+      _hops.current ?? widget.categoryProducts[_selectedIdx];
+
+  /// P8.74 — the hop UI (back control + related rail) is live when the feature flag
+  /// is on, or forced in a test. OFF in production today → byte-identical.
+  ///
+  /// Swarm-review (high): read ONCE at first access (late final), NOT ref.watch — so a late
+  /// async featureFlags load can never swap the engine mid-dive — and honour BOTH unified-
+  /// finder flags exactly like CardKeyboardScreen._live. Flag-OFF both are false → identical.
+  late final bool _live = widget.forceLive ||
+      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag) ||
+      ref.read(featureFlagsProvider).contains(kUnifiedFinderFlag);
+
+  /// P8.75 — pop one hop (return to the previous product).
+  void _hopBack() => setState(_hops.back);
+
+  /// P8.77 — the flag-gated 'related' rail: the hop-graph neighbours of the current
+  /// product as tappable chips (most meaningful first — variant > kit > compat >
+  /// category > hub), each tap an in-place hop. Bounded so the rail stays scannable;
+  /// never empty for an in-graph product (the hub guarantees >=1 neighbour).
+  Widget _hopRail(LipskeyCatalogProduct p) {
+    final g = HopGraph.build();
+    final neighbours = g
+        .rankedNeighborsOf(p.sku)
+        .where((s) {
+          // De-dup (swarm-review): the compat/kit neighbours are the '🔌 מה מתחבר לזה'
+          // rail; keep THIS '🔗 קשור' rail to the OTHER relations (variant/category/hub)
+          // so no product appears in both rows.
+          final kinds = g.kindsBetween(p.sku, s);
+          return !(kinds.contains(EdgeKind.compat) ||
+              kinds.contains(EdgeKind.kit));
+        })
+        .map((s) => divePoolBySku[s])
+        .whereType<LipskeyCatalogProduct>()
+        .take(10)
+        .toList();
+    if (neighbours.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('hopRail'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('🔗 קשור',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final n in neighbours)
+                ActionChip(
+                  key: Key('hopRailChip_${n.sku}'),
+                  label: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(n.nameHe,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  onPressed: () => _switchByChip(n),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// P9.89 — the 'what connects to this' rail: the current product's hop-graph
+  /// neighbours reached by a compat or kit edge (the same canonical graph as the related
+  /// rail, filtered to physical-connection edges) as tappable in-place hops. Flag-gated.
+  Widget _hopConnectRail(LipskeyCatalogProduct p) {
+    final g = HopGraph.build();
+    final connects = g
+        .rankedNeighborsOf(p.sku)
+        .where((s) {
+          final kinds = g.kindsBetween(p.sku, s);
+          return kinds.contains(EdgeKind.compat) ||
+              kinds.contains(EdgeKind.kit);
+        })
+        .map((s) => divePoolBySku[s])
+        .whereType<LipskeyCatalogProduct>()
+        .take(8)
+        .toList();
+    if (connects.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('hopConnectRail'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('🔌 מה מתחבר לזה',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final n in connects)
+                ActionChip(
+                  key: Key('hopConnectChip_${n.sku}'),
+                  label: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 160),
+                    child: Text(n.nameHe,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12)),
+                  ),
+                  onPressed: () => _switchByChip(n),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// P10.98 — the line controls: 'add to line' records the current product as a pick;
+  /// 'complete line (N)' appears once >=2 are picked and opens the BOM. Flag-gated.
+  Widget _lineControls(LipskeyCatalogProduct p) {
+    final picks = ref.watch(cardPicksProvider);
+    return Padding(
+      key: const Key('lineControls'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ActionChip(
+            key: const Key('addToLineChip'),
+            avatar: const Icon(Icons.add, size: 16),
+            label: const Text('הוסף לקו'),
+            onPressed: () => _addCurrentToLine(p),
+          ),
+          if (picks.length >= 2)
+            ActionChip(
+              key: const Key('completeLineChip'),
+              avatar: const Icon(Icons.checklist, size: 16),
+              label: Text('השלם קו (${picks.length})'),
+              onPressed: () => _showLineBom(picks),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _addCurrentToLine(LipskeyCatalogProduct p) {
+    ref.read(cardPicksProvider.notifier).addPick(
+          CardPick(sku: p.sku, label: p.nameHe),
+        );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('נוסף לקו ✓'),
+      duration: Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  void _showLineBom(List<CardPick> picks) {
+    final plan = planLineFromPicks(picks);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (modalCtx) => Directionality(
+        key: const Key('lineBomSheet'),
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('📋 רשימת חומרים — קו',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (plan.items.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                                'לא נמצאו פריטים לפתרון — בחר מוצרים אחרים לקו',
+                                style: TextStyle(
+                                    fontSize: 13, color: Color(0xFF888888))),
+                          ),
+                        for (final item in plan.items)
+                          Text('• ${item.nameHe}  ×${plan.qtyOf(item.sku)}',
+                              style: const TextStyle(fontSize: 13)),
+                        if (plan.gaps.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                                '⚠️ ${plan.gaps.length} פערים — דורש השלמה',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Color(0xFF888888))),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    key: const Key('addLineToCartButton'),
+                    // Swarm-review: an empty plan must NOT 'add 0 to cart' and silently
+                    // wipe the picks — disable the button so a fully-unresolvable line is a
+                    // visible no-op, not a fake success toast.
+                    onPressed: plan.items.isEmpty
+                        ? null
+                        : () {
+                            _addLineToCart(plan.items);
+                            Navigator.of(modalCtx).pop();
+                          },
+                    child: Text(
+                        plan.items.isEmpty ? 'אין פריטים לסל' : 'הוסף הכל לסל'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _addLineToCart(List<LipskeyCatalogProduct> items) {
+    final notifier = ref.read(smartCartProvider.notifier);
+    for (final part in items) {
+      notifier.add(SmartCartLine(
+        productKey: 'lip:${part.sku}',
+        productName: part.nameHe,
+        productEmoji: part.typeEmoji,
+        brandName: part.brand,
+        brandPrice: 0,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+    ref.read(cardPicksProvider.notifier).clear();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('נוספו ${items.length} פריטי-קו לסל ✓'),
+      duration: const Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  /// P8.78 — the hop path breadcrumb: every product in the path as a tappable crumb
+  /// (home → … → current). Tapping a crumb jumps back to it (popTo); tapping home
+  /// clears to the opening variant. Built only when live and the path is non-empty.
+  Widget _hopBreadcrumb() {
+    final crumbs = _hops.path;
+    return Padding(
+      key: const Key('hopBreadcrumb'),
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 2,
+        runSpacing: 2,
+        children: [
+          InkWell(
+            key: const Key('hopCrumb_home'),
+            onTap: () => setState(_hops.clear),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Icon(Icons.home_outlined, size: 14),
+            ),
+          ),
+          for (var i = 0; i < crumbs.length; i++) ...[
+            const Icon(Icons.chevron_left, size: 14),
+            InkWell(
+              key: Key('hopCrumb_$i'),
+              onTap: () => setState(() {
+                _hops.popTo(i);
+              }),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 90),
+                child: Text(
+                  crumbs[i].nameHe,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: i == crumbs.length - 1
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _selectedIdx =
         widget.categoryProducts.indexOf(widget.product).clamp(0, widget.categoryProducts.length - 1);
+    for (final seed in widget.hopSeedForTest) {
+      _hops.push(seed);
+    }
     _accSelected = {
       for (var i = 0; i < (_accs.length); i++) i: false,
     };
   }
 
-  void _selectVariant(int i) {
-    setState(() {
-      _selectedIdx = i;
-      _chipOverride = null;
-      _openPickerKey = null;
-      _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
-      _activeStage = null;
-    });
-  }
-
   void _switchByChip(LipskeyCatalogProduct q) {
     setState(() {
-      _chipOverride = q;
+      _hops.push(q);
       _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
@@ -539,6 +857,23 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             ]);
                           }),
                           const SizedBox(height: 8),
+                          if (_live && _hops.canGoBack) _hopBreadcrumb(),
+                          if (_live && _hops.canGoBack)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: ActionChip(
+                                  key: const Key('hopBackChip'),
+                                  avatar: const Icon(Icons.undo, size: 16),
+                                  label: const Text('חזרה למוצר הקודם'),
+                                  onPressed: _hopBack,
+                                ),
+                              ),
+                            ),
+                          if (_live) _hopRail(p),
+                          if (_live) _hopConnectRail(p),
+                          if (_live) _lineControls(p),
                           _InteractiveChips(
                             product: p,
                             openPickerKey: _openPickerKey,
@@ -1482,198 +1817,6 @@ class _SpecSideState extends State<_SpecSide> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Variant selector ──────────────────────────────────────────────────────────
-class _VariantSelector extends StatelessWidget {
-  const _VariantSelector({
-    required this.products,
-    required this.selectedIdx,
-    required this.onSelect,
-  });
-
-  final List<LipskeyCatalogProduct> products;
-  final int selectedIdx;
-  final void Function(int) onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 96,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (_, i) {
-          final p = products[i];
-          final selected = i == selectedIdx;
-          return GestureDetector(
-            onTap: () => onSelect(i),
-            child: Container(
-              width: 80,
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFF3D5A80).withOpacity(0.3)
-                    : const Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: selected
-                      ? const Color(0xFF64FFDA)
-                      : const Color(0xFF3D5A80).withOpacity(0.3),
-                  width: selected ? 1.5 : 0.8,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: productImage(
-                        p.imageAsset ?? p.specImageAsset,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Text(
-                            p.typeEmoji,
-                            style: const TextStyle(fontSize: 24),
-                            textAlign: TextAlign.center)),
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('#${p.sku}',
-                        style: TextStyle(
-                            color: selected
-                                ? const Color(0xFF64FFDA)
-                                : const Color(0xFF888888),
-                            fontSize: 9,
-                            fontFamily: 'monospace'),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ── Accessory row ─────────────────────────────────────────────────────────────
-class _AccRow extends StatelessWidget {
-  const _AccRow({
-    required this.acc,
-    required this.selected,
-    required this.onToggle,
-  });
-
-  final LipskeyCatAcc acc;
-  final bool selected;
-  final void Function(bool) onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-      child: GestureDetector(
-        onTap: () => onToggle(!selected),
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: selected
-                ? const Color(0xFF3D5A80).withOpacity(0.2)
-                : const Color(0xFFFFFFFF),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected
-                  ? const Color(0xFF64FFDA).withOpacity(0.5)
-                  : const Color(0xFFEEEEEE),
-              width: 0.8,
-            ),
-          ),
-          child: Row(
-            children: [
-              Text(acc.emoji,
-                  style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(acc.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: BsTokens.inkLight,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                        const SizedBox(width: 6),
-                        if (acc.must)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF6B35)
-                                  .withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                  color: const Color(0xFFFF6B35),
-                                  width: 0.6),
-                            ),
-                            child: const Text('חובה',
-                                style: TextStyle(
-                                    color: Color(0xFFFF6B35),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(acc.why,
-                        style: const TextStyle(
-                            color: Color(0xFF888888), fontSize: 11)),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (acc.price != null)
-                    Text('₪${acc.price}',
-                        style: const TextStyle(
-                            color: Color(0xFF64FFDA),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700))
-                  else
-                    const Text('—',
-                        style: TextStyle(
-                            color: Color(0xFF888888), fontSize: 13)),
-                  const SizedBox(height: 4),
-                  Icon(
-                    selected
-                        ? Icons.check_circle
-                        : Icons.add_circle_outline,
-                    color: selected
-                        ? const Color(0xFF64FFDA)
-                        : Colors.black12,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );

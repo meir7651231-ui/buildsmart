@@ -12,25 +12,44 @@
 // per-keystroke, so a late prefs load can't swap the engine mid-dive). Lands dark
 // until the owner-gated cut-over (Phase 6).
 
+import 'dart:async' show Timer;
+
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/card_keyboard/card_engine.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
+import 'package:buildsmart/features/card_keyboard/card_picks.dart'
+    show CardPick, cardPicksProvider;
+import 'package:buildsmart/features/card_keyboard/card_seed.dart'
+    show CardSeed, kCategoryMouth, kJobMouth, kMaterialMouth, kWordMouth;
 import 'package:buildsmart/features/card_keyboard/card_signals.dart'
     show SignalSource, WordSignal, sourcesFor;
+import 'package:buildsmart/features/card_keyboard/opening_surface.dart'
+    show OpeningSurface;
+import 'package:buildsmart/features/card_keyboard/pool_seed.dart'
+    show seedFromText, seedStep;
+import 'package:buildsmart/features/card_keyboard/seed_sources.dart'
+    show categorySeeds, jobSeeds, materialSeeds, wordSeeds;
+import 'package:buildsmart/features/word_finder/ai_interpret.dart'
+    show AiInterpret, aiLiteralInterpret, defaultAiInterpret;
 import 'package:buildsmart/features/word_finder/distinct_label.dart'
     show distinctSelectionLabels;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/quick_pad_engine.dart'
     show quickLabel;
 import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
-    show NewbieStep, kPickProductQuestion, resolveWord;
+    show NewbieStep, kPickProductQuestion;
 import 'package:buildsmart/features/word_finder/word_keyboard.dart';
 import 'package:buildsmart/features/word_finder/word_keys_model.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/services/voice.dart' show VoiceService;
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/feature_flags.dart';
+import 'package:buildsmart/state/recently_viewed.dart'
+    show recentlyViewedProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,13 +62,6 @@ final WordLexicon cardKeyboardLexicon = buildWordLexicon(kDivePool);
 /// OWNER-REVIEW.
 const String kCardMergedQuestion = 'מה מתאים?';
 
-/// The answered-step axisLabel for the OPENING word (swarm R7). Deliberately NOT
-/// any [SignalSource.axisName] — so seeding the pool with the opening word does
-/// not mark the WORD axis answered, leaving it available for deeper in-merge word
-/// refinement ('ברז' → 'כדורי') per build-plan §1.3. The seed word itself never
-/// re-appears (wordOptions drops words shared across the whole pool).
-const String _kOpeningWordAxis = 'מילת-פתיחה';
-
 /// Typed tap payload (swarm R6): each [WordKey] carries a [_Tap] so the handler
 /// dispatches by TYPE. This replaces the earlier `'chip|axisId|displayLabel|value'`
 /// magic-string payload, which (a) was not pipe-safe — a `|` in the middle
@@ -60,10 +72,10 @@ sealed class _Tap {
   const _Tap();
 }
 
-/// An opening word → seed the pool with the products it names.
-class _WordTap extends _Tap {
-  const _WordTap(this.word);
-  final String word;
+/// A click-mouth seed (word/material/job/category) → seed the pool with its CardSeed.
+class _SeedTap extends _Tap {
+  const _SeedTap(this.seed);
+  final CardSeed seed;
 }
 
 /// A merged chip → narrow by (axisId, value); the crumb shows displayLabel.
@@ -84,6 +96,25 @@ class _ProductTap extends _Tap {
   final String sku;
 }
 
+/// The voice seam (P4.57): the screen calls this to start a listening session.
+/// [onFinal] receives the transcript, [onError] an honest failure reason; a
+/// false return means the platform has no speech support at all. Production uses
+/// `VoiceService.instance.listen` ([_realVoiceListen]); a test injects a fake.
+typedef VoiceListen = Future<bool> Function({
+  required void Function(String text) onFinal,
+  void Function(String reason)? onError,
+});
+
+Future<bool> _realVoiceListen({
+  required void Function(String text) onFinal,
+  void Function(String reason)? onError,
+}) =>
+    VoiceService.instance.listen(onFinal: onFinal, onError: onError);
+
+/// P4.57 honest voice messages (top-level so a test can assert on them).
+const String kVoiceUnavailableMsg = 'הקלדה קולית אינה זמינה במכשיר הזה';
+const String kVoiceErrorMsg = 'לא הצלחתי לשמוע — נסה שוב';
+
 /// The flag-gated unified card-keyboard screen. Holds the answered-step [stack];
 /// everything else (what to show, what a tap means) is the pure engine's job.
 class CardKeyboardScreen extends ConsumerStatefulWidget {
@@ -91,6 +122,9 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
     super.key,
     this.subtype,
     this.forceLiveForTest = false,
+    this.debounceMs = 250,
+    this.voiceListen,
+    this.aiInterpret,
   });
 
   /// Optional curated sub-type, passed straight through to [mergedKeys]. Usually
@@ -104,6 +138,22 @@ class CardKeyboardScreen extends ConsumerStatefulWidget {
   /// to exercise the ON path. Default false → production is purely flag-driven.
   @visibleForTesting
   final bool forceLiveForTest;
+
+  /// @visibleForTesting — the opening text-query debounce in milliseconds (250 in
+  /// production); a test injects 0 so a typed query resolves on the next pump.
+  @visibleForTesting
+  final int debounceMs;
+
+  /// @visibleForTesting — the voice seam; null in production (routes to
+  /// `VoiceService.instance.listen`). A test injects a fake transcript source.
+  @visibleForTesting
+  final VoiceListen? voiceListen;
+
+  /// @visibleForTesting — the AI seam (the submit / "find me" path); null in
+  /// production (routes to [defaultAiInterpret], the offline interpreter). A test
+  /// or an online gateway injects a different interpreter.
+  @visibleForTesting
+  final AiInterpret? aiInterpret;
 
   @override
   ConsumerState<CardKeyboardScreen> createState() => _CardKeyboardScreenState();
@@ -119,10 +169,33 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   /// step twice or stacking two product sheets. Set on a tap, cleared next frame.
   bool _busy = false;
 
+  /// P6.57: the active click-mouth at the opening — which seed source the grid
+  /// shows (word/material/job/category). Switching it (a mouth tab) only swaps the
+  /// seeds, never pushes a step; a seed then leaves the opening.
+  String _activeMouth = kWordMouth;
+
+  /// The EQUAL click-mouth tabs (NOT a tool chooser — same finder, different seed
+  /// view). Order is stable.
+  static const List<({String id, String label})> _kMouthTabs = [
+    (id: kWordMouth, label: 'מילים'),
+    (id: kMaterialMouth, label: 'חומר'),
+    (id: kJobMouth, label: 'עבודה'),
+    (id: kCategoryMouth, label: 'קטגוריה'),
+  ];
+
+  /// P6.59: whether the WORD mouth's grid shows the full long tail ('עוד…') vs the
+  /// top-kFirstWordCount. Toggling it only re-renders the grid; it never seeds.
+  bool _wordsExpanded = false;
+
+  /// The opening text-query debounce timer (P4.56), cancelled on each keystroke
+  /// and in [dispose] so a settled query never fires after the screen is gone.
+  Timer? _debounce;
+
   /// The flag, read ONCE at mount (build-plan §1.6's flag-race guard): a late
   /// `featureFlagsProvider` load must never swap the engine mid-dive.
   late final bool _live =
-      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag);
+      ref.read(featureFlagsProvider).contains(kCardKeyboardFlag) ||
+          ref.read(featureFlagsProvider).contains(kUnifiedFinderFlag);
 
   /// @visibleForTesting — when false, reaching a [CardResolve] does NOT auto-open
   /// the product sheet (so a behavioral test need not supply the sheet's heavy
@@ -147,7 +220,11 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     for (final step in stack) {
       pool = pool.where(step.predicate).toList();
     }
-    _memoVerdict = mergedKeys(pool, stack, cardKeyboardLexicon, widget.subtype);
+    // P9.88: feed the identity-scoped recently-viewed history to the soft layer. The
+    // provider namespaces by uid when the flag is on (no cross-employee leak); empty
+    // history tilts nothing, so the row is unchanged.
+    _memoVerdict = mergedKeys(pool, stack, cardKeyboardLexicon, widget.subtype,
+        historySkus: ref.read(recentlyViewedProvider).toSet());
     _memoVersion = _diveVersion;
   }
 
@@ -199,17 +276,108 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     return (p) => src.matches(p, chip);
   }
 
+  /// Single re-entrancy claim shared by EVERY action surface — word/chip/product
+  /// taps today, and the future text/voice/AI seeds, all route through [_pushStep]
+  /// or the product-sheet open. Returns false if a tap this frame already claimed,
+  /// so a double-tap or a same-frame multi-surface race can't push twice / stack
+  /// two sheets (round-2 blocker-1: the guard used to wrap ONLY _onWordTap). Resets
+  /// next frame — by then the new keys / the sheet's modal barrier absorb taps.
+  bool _claim() {
+    if (_busy) return false;
+    _busy = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _busy = false);
+    return true;
+  }
+
   /// Push an answered step, recompute, and — if the engine now RESOLVEs — open
   /// the reach-product sheet (the flow's terminus, Phase 5).
   void _pushStep(NewbieStep step) {
+    if (!_claim()) return;
     setState(() {
       stack.add(step);
       _diveVersion++;
     });
     final v = verdict;
-    if (v is CardResolve && openSheetOnResolve) {
-      showLipskeyProductSheet(context, v.product, v.siblings);
+    if (v is CardResolve) {
+      // Dual-write (P2.47): record the reached product in recently-viewed,
+      // independent of whether the sheet opens. Idempotent. The screen is
+      // flag-gated, so flag-OFF never reaches here (catalog stays sole writer).
+      ref.read(recentlyViewedProvider.notifier).touch(v.product.sku);
+      // P10.96: record the converged product as a line pick (the terminus IS the choice).
+      ref.read(cardPicksProvider.notifier).addPick(
+            CardPick(sku: v.product.sku, label: v.product.nameHe),
+          );
+      if (openSheetOnResolve) {
+        showLipskeyProductSheet(context, v.product, v.siblings);
+      }
     }
+  }
+
+  /// P4.56 + P7.68: a typed/spoken opening query → (debounced) seedFromText → the
+  /// unified seedStep (kOpeningSeedAxis), the SAME funnel every mouth uses. Empty
+  /// text — or an all-unknown query (seedFromText returns null) — keeps the surface
+  /// (no false dead-end); a fast burst cancels the prior timer so only the last
+  /// query seeds.
+  void _onOpeningQuery(String text) {
+    _debounce?.cancel();
+    final q = text.trim();
+    if (q.isEmpty) return;
+    _debounce = Timer(Duration(milliseconds: widget.debounceMs), () {
+      if (!mounted) return;
+      final seed = seedFromText(q, cardKeyboardLexicon);
+      if (seed != null) _pushStep(seedStep(seed));
+    });
+  }
+
+  /// P4.57: the mic → a voice session → the transcript routed through the SAME
+  /// funnel as typing ([_onOpeningQuery] → resolveQuery, so spoken 'נחושת' lands
+  /// on copper too). An unsupported platform (listen returns false) or an engine
+  /// error surfaces an honest message instead of a dead mic.
+  Future<void> _onMic() async {
+    // Capture the messenger BEFORE the await so no context crosses the async gap.
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final listen = widget.voiceListen ?? _realVoiceListen;
+    final supported = await listen(
+      onFinal: (text) {
+        if (mounted) _onOpeningQuery(text);
+      },
+      onError: (_) {
+        if (mounted) {
+          messenger?.showSnackBar(
+            const SnackBar(content: Text(kVoiceErrorMsg)),
+          );
+        }
+      },
+    );
+    if (!supported && mounted) {
+      messenger?.showSnackBar(
+        const SnackBar(content: Text(kVoiceUnavailableMsg)),
+      );
+    }
+  }
+
+  /// P5.60: submitted free text ("find me") → the AI interpreter → the SAME funnel
+  /// as typing. Offline this is literal keyword extraction (defaultAiInterpret); an
+  /// injected gateway upgrades it to semantic. Either way the result seeds the dive
+  /// through [_onOpeningQuery] → resolveQuery.
+  Future<void> _onAiQuery(String text) async {
+    final interpret = widget.aiInterpret ?? defaultAiInterpret;
+    String q;
+    try {
+      q = await interpret(text);
+    } on Object catch (_) {
+      // A gateway failure (ClaudeException, no network…) must NEVER dead-end or
+      // fabricate: the gateway re-throws rather than inventing, and the mouth
+      // absorbs it here by degrading to the offline literal floor (P5.47).
+      q = aiLiteralInterpret(text);
+    }
+    if (mounted) _onOpeningQuery(q);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 
   /// Pop the last answered step (the back affordance). A no-op on an empty stack.
@@ -252,9 +420,19 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
   ///    axisId+value (the narrowing data) so the tap rebuilds the step from data.
   ///  • [CardShowProducts]→ one product key per distinct card (payload = its sku).
   ///  • [CardResolve]     → no keys (the sheet is opened on resolve).
+  /// The CardSeeds the opening grid shows for [mouth] (P6.58) — each click mouth's
+  /// source over the union pool; word uses the lexicon's top-kFirstWordCount.
+  List<CardSeed> _seedsForMouth(String mouth) => switch (mouth) {
+        kMaterialMouth => materialSeeds(kDivePool),
+        kJobMouth => jobSeeds(),
+        kCategoryMouth => categorySeeds(kDivePool),
+        _ => wordSeeds(cardKeyboardLexicon, expanded: _wordsExpanded),
+      };
+
   List<WordKey> _keysFor(CardVerdict v) => switch (v) {
-        CardAskWords(:final words) => [
-            for (final e in words) WordKey(e.word, payload: _WordTap(e.word)),
+        CardAskWords() => [
+            for (final seed in _seedsForMouth(_activeMouth))
+              WordKey(seed.displayLabel, payload: _SeedTap(seed)),
           ],
         MergedKeys(:final chips) => [
             for (final c in chips)
@@ -274,6 +452,10 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
                     ? c.displayLabel
                     : '${c.axisName}: ${c.displayLabel}',
                 axisGlyph: _glyphForAxis(c.axisId),
+                // P9.87: forward the engine's #41 destination accent to the key seam —
+                // additive, no new buttons. False on a wide pool (no near-convergence
+                // anchor), so the live row stays byte-identical.
+                isDestination: c.isDestination,
               ),
           ],
         CardShowProducts(:final products) => _productKeys(products),
@@ -301,36 +483,35 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         CardResolve() => '',
       };
 
+  /// P6.57: switch the active click-mouth — swap the opening grid's seed source,
+  /// never push a step (a mouth change is not a dive answer). No-op if unchanged.
+  void _onMouthTap(String mouth) {
+    if (mouth == _activeMouth) return;
+    setState(() => _activeMouth = mouth);
+  }
+
+  /// P6.59: expand/collapse the word mouth's grid ('עוד…'/'פחות'). Never seeds.
+  void _onToggleWords() => setState(() => _wordsExpanded = !_wordsExpanded);
+
   /// Handle a tapped word key, dispatched by its typed [WordKey.payload]:
-  ///  • [_WordTap]    — seed the pool with the products the word names;
+  ///  • [_SeedTap]    — seed the pool with a click-mouth CardSeed's predicate;
   ///  • [_ChipTap]    — narrow by the tapped merged chip (predicate rebuilt from
   ///    its axisId+value DATA; the crumb shows displayLabel);
   ///  • [_ProductTap] — resolve by sku and open the reach-product sheet.
   void _onWordTap(WordKey key) {
-    // Debounce re-entrant taps within ONE frame (swarm R9): a double-tap must not
-    // push a step twice or stack two sheets. Reset next frame — by then the new
-    // keys (or a sheet's modal barrier) absorb further taps.
-    if (_busy) return;
-    _busy = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _busy = false);
+    // The re-entrancy claim now lives on _pushStep + the product-sheet open (the
+    // action choke points), so word/chip/product taps AND the future text/voice/AI
+    // seeds share ONE guard (round-2 blocker-1). The pre-push resolve below is
+    // cheap + idempotent, so it needs no guard of its own.
     final payload = key.payload;
 
-    if (payload is _WordTap) {
-      final skuSet = <String>{
-        for (final p in resolveWord(payload.word, cardKeyboardLexicon)) p.sku,
-      };
-      _pushStep(NewbieStep(
-        // The opening word SEEDS the pool; it must NOT answer the word axis, so
-        // the merge can still offer DEEPER distinguishing words ('ברז' → 'כדורי')
-        // alongside size/material — word is one of the five merged axes (§1.3;
-        // swarm R5/R7 caught the opening burning it). A distinct seed label keeps
-        // the word axis UNanswered; a later merge WORD chip-tap answers
-        // WordSignal.axisName and closes it (so the dive still terminates).
-        axisLabel: _kOpeningWordAxis,
-        chipLabel: payload.word,
-        crumbWord: payload.word,
-        predicate: (p) => skuSet.contains(p.sku),
-      ));
+    if (payload is _SeedTap) {
+      // Every click-mouth seed (word/material/job/category) routes through ONE
+      // funnel: seedStep stamps kOpeningSeedAxis (a non-signal sentinel), so the
+      // merge can still offer DEEPER distinguishing words/size/material — the opening
+      // must not burn the word axis (§1.3; swarm R5/R7). A later merge chip answers
+      // the real axis + closes it. (P7.68: was a per-mouth NewbieStep.)
+      _pushStep(seedStep(payload.seed));
       return;
     }
 
@@ -363,8 +544,17 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         break;
       }
     }
-    if (picked != null && openSheetOnResolve) {
-      showLipskeyProductSheet(context, picked, v.products);
+    if (picked != null) {
+      // Dual-write (P2.47): the resolved sku enters recently-viewed regardless
+      // of the sheet/debounce. Idempotent; flag-gated by the screen mount.
+      ref.read(recentlyViewedProvider.notifier).touch(picked.sku);
+      // P10.96: record the picked product as a line pick.
+      ref.read(cardPicksProvider.notifier).addPick(
+            CardPick(sku: picked.sku, label: picked.nameHe),
+          );
+      if (openSheetOnResolve && _claim()) {
+        showLipskeyProductSheet(context, picked, v.products);
+      }
     }
   }
 
@@ -398,6 +588,15 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
     // test forces the ON path via [widget.forceLiveForTest] (the flag isn't
     // unit-seedable).
     if (!_live && !widget.forceLiveForTest) return const SizedBox.shrink();
+
+    // Identity isolation (round-2 blocker-2): the dive `stack` is widget-State, not
+    // a uid-keyed provider, so a mid-dive employer/identity switch would leave A's
+    // pool rendering under B. Wipe the dive whenever the active uid changes — the
+    // live auth A->B path that auth_state's signOut-only cache-clear misses.
+    // Registered only on the ON path, so flag-OFF stays byte-identical.
+    ref.listen<String?>(currentUidProvider, (prev, next) {
+      if (prev != next && stack.isNotEmpty) _restart();
+    });
 
     final v = verdict;
     final keys = _keysFor(v);
@@ -444,6 +643,22 @@ class _CardKeyboardScreenState extends ConsumerState<CardKeyboardScreen> {
         ),
         if (v is CardShowProducts && v.products.isEmpty)
           _buildEmptyState()
+        else if (v is CardAskWords)
+          // P3.53: the opening IS the single surface — text + word grid + mic in
+          // ONE flow, no mode buttons. onQuery/onMic are wired in P4 (#56/#57).
+          OpeningSurface(
+            wordKeys: keys,
+            onWordTap: _onWordTap,
+            onQuery: _onOpeningQuery,
+            onSubmit: _onAiQuery,
+            showMic: !kIsWeb,
+            onMic: _onMic,
+            mouthTabs: _kMouthTabs,
+            activeMouth: _activeMouth,
+            onMouthTap: _onMouthTap,
+            onToggleMore: _activeMouth == kWordMouth ? _onToggleWords : null,
+            moreExpanded: _wordsExpanded,
+          )
         else if (keys.isNotEmpty)
           WordKeyboard(
             words: keys,

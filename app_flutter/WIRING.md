@@ -3072,3 +3072,6 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **TEST 2 (אפס אובדן-מידע):** כל 890 ה-VerifiedSpecs מוקרנים נאמנה — material · maxTempC · ends (`connectorTypeId='plumbing.conn.<EndType.name>'` + size).
 - **TEST 3 (גלווני):** materialGroupId לכל spec (נחושת/פליז→copper-group · פלדה/נירוסטה→iron-group · benign→null) + ה-CompletionRule מזווג copper↔iron · שומרי sawCopper/sawIron.
 - **gate:** 3 ירוקים · analyze 0 (קומפל+רץ) · הבנאי כתב נאמן (אפס assertions מוחלשים), המנצח קרא+הריץ. **🎉 חלק ב׳ (35-38) נסגר: "אינסטלציה = עוד תחום-נתונים", answers-wise מוכח.** הבא: Step 39 (resolver wiring מאחורי flag).
+
+### #merge — איחוד קו Studio/עמוד-2 עם workstream המקלדת/חיפוש (origin) — 2026-06-29
+מיזוג נקי (אפס קונפליקטים) של 95 commits מ-`origin/whats-happening` (card-keyboard/finder/line-convergence) עם קו Studio+עמוד-2 (56 commits) — שני קווים שהתפצלו מ-`decc48b`, קבצים מנותקים. **`card_soft.dart` + הבדיקה שלו שומרו** (הצוות-האחר מחקם כ-dead-code; שומרתי כדי לא להפעיל שער 89 — ינוקה ב-PR מאוחר). **אפס-עקיפה** — כל 100 השערים רצים על commit-המיזוג. הזרע של עמוד-2 עדיין רדום (grep 0 live-consumers).

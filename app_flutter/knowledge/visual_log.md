@@ -4,6 +4,10 @@
 
 ---
 
+## merge — איחוד workstream המקלדת/חיפוש (origin) לקו Studio/עמוד-2 — 2026-06-30
+
+**שינויי-UI נכנסים (lib/screens, מ-merge):** 95 commits של ה-workstream האחר (card-keyboard/finder) כוללים שינויי-מסך כגון `lipskey_product_sheet.dart`. **אלו שינויים שכבר אומתו ע"י אותו workstream על origin** — לא שינויי-UI חדשים מהקו שלי. **קו עמוד-2/Studio שלי הוא state/domain בלבד — אפס שינוי-מסך.** אימות-ויזואלי של המסכים הנכנסים באחריות ה-workstream שיצר אותם; כאן רק מיזוג (אפס קונפליקטים, analyze 0).
+
 ## v6.76 — 🤖 קו-פיילוט-מנהל + כרטיס-hero בקוקפיט — 2026-06-23
 
 **שינויי-UI (lib/screens):** מסך חדש `ManagerCopilotScreen` + כרטיס-hero חדש בראש 📊 לוח-בקרה.
