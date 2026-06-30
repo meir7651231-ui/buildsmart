@@ -14,6 +14,14 @@
 // with the flag OFF the shell is byte-identical to before the go-live.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// FLAG — "keyboard on every screen" (owner: extend the floating keyboard beyond
+/// the 4 HomeShell tabs). When ON, the keyboard is mounted as an APP-GLOBAL
+/// overlay (above the Navigator, in `main.dart`) so it floats over pushed
+/// full-screen routes too; HomeShell then SKIPS its own mount (no double). OFF by
+/// default → the keyboard mounts only in HomeShell as today (byte-identical).
+/// Flip via `--dart-define=KB_GLOBAL=true`.
+const bool kKbGlobal = bool.fromEnvironment('KB_GLOBAL');
+
 /// Whether the floating card-keyboard overlay is currently shown.
 ///
 /// Defaults to `false` (closed). Toggled by the keyboard FAB (open) and the

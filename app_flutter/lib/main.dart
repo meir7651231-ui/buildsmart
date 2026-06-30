@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/firebase_options.dart';
+import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -393,6 +395,11 @@ class BuildSmartApp extends ConsumerWidget {
                   // the diag/{uid} isFromCache probe. Positioned below the debug
                   // badge in debug; owns the top in release.
                   const ConnectionIndicator(),
+                  // 🃏 "keyboard on every screen" (kKbGlobal): the floating
+                  // keyboard mounted ABOVE the Navigator so it floats over pushed
+                  // routes too. Omitted when the flag is off → HomeShell mounts it
+                  // as today (byte-identical).
+                  if (kKbGlobal) const _GlobalKeyboardOverlay(),
                 ],
               ),
             ),
@@ -400,6 +407,27 @@ class BuildSmartApp extends ConsumerWidget {
         );
       },
       home: const OnboardingGate(),
+    );
+  }
+}
+
+/// App-global mount for the floating keyboard ("keyboard on every screen",
+/// [kKbGlobal]). Lives in [BuildSmartApp]'s builder Stack — ABOVE the Navigator —
+/// so the keyboard floats over pushed full-screen routes too, not only the
+/// HomeShell tabs. Watches [keyboardOverlayOpenProvider] itself (only THIS
+/// rebuilds on open/close, not the whole MaterialApp); renders nothing when
+/// closed. Uses a bottom [Align] (not [Positioned]) so it is a valid
+/// non-positioned Stack child. Added to the tree only when [kKbGlobal] is on (the
+/// collection-if in the builder tree-shakes it away otherwise → flag-OFF identity).
+class _GlobalKeyboardOverlay extends ConsumerWidget {
+  const _GlobalKeyboardOverlay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(keyboardOverlayOpenProvider)) return const SizedBox.shrink();
+    return const Align(
+      alignment: Alignment.bottomCenter,
+      child: SafeArea(top: false, child: FloatingCardKeyboard()),
     );
   }
 }

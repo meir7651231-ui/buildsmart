@@ -104,7 +104,11 @@ class HomeShell extends ConsumerWidget {
           // a real keyboard, so the screen underneath stays FULL (the IndexedStack
           // is never wrapped/resized/scaled/dimmed). Gated by kKeyboardToolStrip,
           // so with the flag OFF this collapses away (shell byte-identical).
-          if (kKeyboardToolStrip && ref.watch(keyboardOverlayOpenProvider))
+          // kKbGlobal ON → the keyboard mounts app-globally (main.dart) instead,
+          // so HomeShell SKIPS its own mount here (no double); OFF → mounts here.
+          if (kKeyboardToolStrip &&
+              !kKbGlobal &&
+              ref.watch(keyboardOverlayOpenProvider))
             const Positioned(
               left: 0,
               right: 0,
