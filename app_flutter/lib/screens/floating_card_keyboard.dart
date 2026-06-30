@@ -577,6 +577,40 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// clears [_lastDerivedBase] (the stack is no longer the context's): on close
   /// (or on a deeper BACK) the next build's [_syncContextToolBase] re-installs the
   /// then-current context base afresh. Null-safe no-op when the mirror is off.
+  /// Owner button-spec v2 (#6): the floating globe's cycle language state —
+  /// false = Hebrew letters, true = English letters. The THIRD state (buttons-
+  /// mode) is represented by the tool stack, not this bool. Consulted only when
+  /// [kKbButtonsV2] is on (passed to the host as `englishOverride`).
+  bool _kbEnglish = false;
+
+  /// Owner button-spec v2 (#6): the globe key's 3-way cycle —
+  /// עברית → אנגלית → buttons-mode → עברית. "Showing buttons" is derived from the
+  /// live stack (single source of truth — no separate counter to desync):
+  ///   • showing buttons (a base/stack is open) → back to Hebrew letters
+  ///   • Hebrew letters → English letters
+  ///   • English letters → buttons-mode (push the tools view)
+  /// Wired ONLY under [kKbButtonsV2]; otherwise the host's plain He↔En toggle runs.
+  void _onKbCycle() => setState(() {
+        if (_stack.isNotEmpty || _baseLayer != KbToolLayer.none) {
+          _stack.clear();
+          _baseLayer = KbToolLayer.none;
+          _lastDerivedBase = null;
+          _kbEnglish = false;
+          _typing = true;
+        } else if (!_kbEnglish) {
+          _kbEnglish = true;
+          _typing = true;
+        } else {
+          _kbEnglish = false;
+          _typing = false;
+          _lastDerivedBase = null;
+          _stack
+            ..clear()
+            ..add(kbHomeNodes());
+          _baseLayer = KbToolLayer.home;
+        }
+      });
+
   void _onGrid() => setState(() {
         _typing = false;
         _lastDerivedBase = null;
@@ -949,6 +983,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 // --dart-define=KB_BUTTONS_V2=true, which is the whole point.
                 // ignore: avoid_redundant_argument_values
                 symbolsAlwaysToggles: kKbButtonsV2,
+                // Owner button-spec v2 (#6): the floating globe runs the 3-way
+                // cycle (עברית → אנגלית → buttons-mode); null when the flag is
+                // off → the host's plain He↔En toggle runs (byte-identical).
+                // ignore: avoid_redundant_argument_values
+                englishOverride: kKbButtonsV2 ? _kbEnglish : null,
+                // Same flag-gated override as above; const-folds to the default
+                // null in a plain build (it becomes the cycle with the define).
+                // ignore: avoid_redundant_argument_values
+                onLanguageOverride: kKbButtonsV2 ? _onKbCycle : null,
                 // This IS a dedicated keyboard surface the user opened on
                 // purpose, so it shows the keyboard regardless of the opt-in
                 // kSmartInput feature flag (off by default in production).

@@ -100,6 +100,18 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// floating mount passes [kKbButtonsV2]. Default false → byte-identical.
   final bool symbolsAlwaysToggles;
 
+  /// Override for the He/En letter layer (owner button-spec v2, #6). When
+  /// non-null it REPLACES the host's internal `_english` so the floating mount
+  /// can drive the language as part of its 3-way globe cycle. Null (every other
+  /// mount) → the host owns `_english` as before (byte-identical).
+  final bool? englishOverride;
+
+  /// Override for the globe key (owner button-spec v2, #6). When non-null the
+  /// globe runs THIS instead of the host's internal He↔En toggle — the floating
+  /// mount supplies its 3-way cycle (עברית → אנגלית → buttons-mode). Null
+  /// elsewhere → the host's own toggle runs (byte-identical).
+  final VoidCallback? onLanguageOverride;
+
   /// Whether to render the flagged tool strip (grid/gear toggles + prediction
   /// row + tool layers). Off by default so every existing mount stays
   /// byte-identical; the MOUNT passes [kKeyboardToolStrip] (or its own flag)
@@ -185,6 +197,8 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     this.typedText = '',
     this.onExitTools,
     this.symbolsAlwaysToggles = false,
+    this.englishOverride,
+    this.onLanguageOverride,
     this.showToolStrip = false,
     this.predictions = const <String>[],
     this.destinationChips = const <String>{},
@@ -247,7 +261,7 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
         color: BsTokens.kbSeam,
         child: BsKeyboard(
           showSymbols: _showSymbols,
-          english: _english,
+          english: widget.englishOverride ?? _english,
           onKey: (ch) => insertAtCaret(widget.controller, ch),
           onBackspace: () => deleteBackward(widget.controller),
           onEnter: () => insertAtCaret(widget.controller, '\n'),
@@ -260,11 +274,14 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
           onToggleSymbols: () =>
               setState(() => _showSymbols = !_showSymbols),
           symbolsAlwaysToggles: widget.symbolsAlwaysToggles,
-          // Globe toggles Hebrew<->English, landing on the letters layer.
-          onLanguage: () => setState(() {
-            _english = !_english;
-            _showSymbols = false;
-          }),
+          // Globe — owner button-spec v2 (#6): the floating mount overrides this
+          // with its 3-way cycle (עברית → אנגלית → buttons-mode); every other
+          // mount keeps the plain He↔English toggle (byte-identical).
+          onLanguage: widget.onLanguageOverride ??
+              () => setState(() {
+                    _english = !_english;
+                    _showSymbols = false;
+                  }),
           // FLAGGED tool surface — controlled by the MOUNT via [showToolStrip].
           // When false (every current mount), this is a no-op overlay that
           // leaves the live keyboard unchanged. The prediction row now carries
