@@ -55,6 +55,8 @@
 // product opening-words ONLY (no destinations), unchanged.
 
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
+    show FindKeyboardPanel;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
@@ -211,6 +213,11 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// alphabet (the letter keys) shows. Tapping the ▦ grid or ⚙️ gear toggle
   /// leaves it, returning to the tab's contextual navigation tools.
   bool _typing = false;
+
+  /// FIND-MODE — when true, the keyboard body is replaced by [FindKeyboardPanel]
+  /// (the in-keyboard product-finder). Entered by the 'מאתר' tool; the panel's
+  /// onExit clears this. Default false ⇒ the keyboard stays byte-identical.
+  bool _findMode = false;
 
   /// The node-list currently shown (null while the stack is empty → letters).
   List<KbToolNode>? get _currentNodes => _stack.isEmpty ? null : _stack.last;
@@ -609,6 +616,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     final nodes = _currentNodes;
     if (nodes == null || id < 0 || id >= nodes.length) return;
     final node = nodes[id];
+    // FIND-MODE entry: the 'מאתר' tool opens the in-keyboard product-finder
+    // (FindKeyboardPanel replaces the keyboard body) instead of navigating to
+    // the finder screen. Gated to the exact 'מאתר' label, so every other tool
+    // dispatches byte-identically.
+    if (node.label == 'מאתר') {
+      setState(() => _findMode = true);
+      return;
+    }
     if (node.isBranch) {
       setState(() => _stack.add(node.children));
     } else if (node.isVoiceInput) {
@@ -910,6 +925,11 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               // the morph drill state. When [nodes] is null the keyboard shows
               // its letters; otherwise it renders the current node-list as pure
               // tiles (with a BACK tile once the stack is deeper than its base).
+              if (_findMode)
+                FindKeyboardPanel(
+                  onExit: () => setState(() => _findMode = false),
+                )
+              else
               BsKeyboardHost(
                 controller: _controller,
                 focusNode: _focus,
