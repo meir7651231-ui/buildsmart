@@ -93,7 +93,7 @@ import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kKbLiveMirrorFlag;
 import 'package:buildsmart/state/keyboard_overlay.dart'
-    show keyboardOverlayOpenProvider;
+    show kKbGlobal, keyboardOverlayOpenProvider;
 import 'package:buildsmart/state/orders_engine.dart'
     show Order, ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
@@ -108,6 +108,7 @@ import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbToolLayer;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show BsKeyboardHost, kKbButtonsV2, kKbLiveMirror;
+import 'package:buildsmart/widgets/toast.dart' show bsNavigatorKey;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -547,12 +548,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     }
     final dest = _destByChip[chip];
     if (dest != null) {
-      dest.run(ref, context);
+      dest.run(ref, _navContext);
       return;
     }
     final run = _runByChip[chip];
     if (run != null) {
-      run(ref, context);
+      run(ref, _navContext);
       return;
     }
     // Separate the appended narrowing word from the preceding token with a
@@ -689,9 +690,19 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       // the keyboard keeps floating; leaf actions that push a full route push
       // over everything (the keyboard reappears when that route pops). Neither
       // closes the overlay.
-      node.action?.call(ref, context);
+      node.action?.call(ref, _navContext);
     }
   }
+
+  /// The context the keyboard dispatches NAV actions through. When mounted as the
+  /// app-global overlay ([kKbGlobal]) the keyboard's own context sits ABOVE the
+  /// Navigator, so `Navigator.of` would miss it; it routes through the Navigator's
+  /// OVERLAY context instead (a Navigator descendant → push + sheets resolve).
+  /// Falls back to the widget's own [context] (the HomeShell mount, or before the
+  /// navigator is ready) — so flag-OFF stays byte-identical.
+  BuildContext get _navContext =>
+      (kKbGlobal ? bsNavigatorKey.currentState?.overlay?.context : null) ??
+      context;
 
   /// STEP D — start a voice-to-text session that drops the final transcript into
   /// the search field. Async + crash-safe: the [VoiceService.listen] callbacks

@@ -15,7 +15,8 @@ import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
-import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
+import 'package:buildsmart/widgets/toast.dart'
+    show bsMessengerKey, bsNavigatorKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -341,6 +342,10 @@ class BuildSmartApp extends ConsumerWidget {
       title: 'BuildSmart',
       // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
       scaffoldMessengerKey: bsMessengerKey,
+      // Root navigator key — lets the app-global floating keyboard (kKbGlobal)
+      // push routes / open sheets from above the Navigator (see _navContext in
+      // floating_card_keyboard.dart). Null-effect for every other caller.
+      navigatorKey: bsNavigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(highContrast: highContrast),
       darkTheme: AppTheme.dark(highContrast: highContrast),
