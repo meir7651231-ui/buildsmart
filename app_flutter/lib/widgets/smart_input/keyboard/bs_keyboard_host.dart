@@ -60,6 +60,16 @@ const bool kKeyboardToolStrip = true;
 /// path enables it and BOTH default OFF.
 const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR');
 
+/// FLAG — owner button-spec v2 (see New folder/KEYBOARD-BUTTON-SPEC.md): buttons
+/// 2/4/6/7 take their owner-defined behaviour —
+///   • 2 (▦)  → opens the CURRENT TAB's tools (not a fixed home set)
+///   • 4 (⚙)  → opens the CURRENT SCREEN's ⋮ overflow menu (each screen its own)
+///   • 6 (🌐) → 3-way cycle עברית → אנגלית → buttons-mode (the "words keyboard")
+///   • 7      → the layer key toggles letters↔numbers ONLY (never "exit tools")
+/// OFF by default → byte-identical; flip on for a demo build via
+/// `--dart-define=KB_BUTTONS_V2=true`. Same foldable idiom as the flags above.
+const bool kKbButtonsV2 = bool.fromEnvironment('KB_BUTTONS_V2');
+
 /// Bottom-docked host that shows the custom [BsKeyboard] when (and only when)
 /// [useCustomKeyboard] is true, and forwards its taps onto [controller].
 class BsKeyboardHost extends ConsumerStatefulWidget {
@@ -84,6 +94,11 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// Exit the tool view back to the letters — the floating keyboard wires this to
   /// the dual-mode bottom key (reads "אבג" while tools are open). Null elsewhere.
   final VoidCallback? onExitTools;
+
+  /// When true, the layer-switch key toggles letters↔numbers ONLY (never doubles
+  /// as "exit tools"). Forwarded to [BsKeyboard]. Owner button-spec v2 (#7); the
+  /// floating mount passes [kKbButtonsV2]. Default false → byte-identical.
+  final bool symbolsAlwaysToggles;
 
   /// Whether to render the flagged tool strip (grid/gear toggles + prediction
   /// row + tool layers). Off by default so every existing mount stays
@@ -169,6 +184,7 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     this.onClose,
     this.typedText = '',
     this.onExitTools,
+    this.symbolsAlwaysToggles = false,
     this.showToolStrip = false,
     this.predictions = const <String>[],
     this.destinationChips = const <String>{},
@@ -243,6 +259,7 @@ class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
           onExitTools: widget.onExitTools,
           onToggleSymbols: () =>
               setState(() => _showSymbols = !_showSymbols),
+          symbolsAlwaysToggles: widget.symbolsAlwaysToggles,
           // Globe toggles Hebrew<->English, landing on the letters layer.
           onLanguage: () => setState(() {
             _english = !_english;

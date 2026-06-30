@@ -101,7 +101,7 @@ import 'package:buildsmart/widgets/smart_input/caret.dart' show insertAtCaret;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbToolLayer;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
-    show BsKeyboardHost, kKbLiveMirror;
+    show BsKeyboardHost, kKbButtonsV2, kKbLiveMirror;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -943,6 +943,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 typedText: _controller.text,
                 onExitTools: _exitTools,
                 showToolStrip: true,
+                // Owner button-spec v2 (#7): the layer key toggles letters↔
+                // numbers only (never "exit tools"). The flag is const-false in
+                // a plain build (= the default, hence "redundant") and true with
+                // --dart-define=KB_BUTTONS_V2=true, which is the whole point.
+                // ignore: avoid_redundant_argument_values
+                symbolsAlwaysToggles: kKbButtonsV2,
                 // This IS a dedicated keyboard surface the user opened on
                 // purpose, so it shows the keyboard regardless of the opt-in
                 // kSmartInput feature flag (off by default in production).
