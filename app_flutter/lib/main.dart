@@ -374,6 +374,44 @@ class BuildSmartApp extends ConsumerWidget {
         // the in-app size preference, clamped so RTL layouts stay intact.
         final osScale = mq.textScaler.scale(100) / 100;
         final combined = (textScale * osScale).clamp(0.85, 1.35).toDouble();
+        // App-content stack, built once so it can be conditionally wrapped for
+        // focus traversal below.
+        Widget appContent = Stack(
+          children: [
+            child ?? const SizedBox(),
+            // OWNER POLICY: the launch-diagnostic badge is dev-only — gated by
+            // kDebugMode so a release/web build shows NOTHING (see
+            // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
+            // (release self-test for the cross-device-sync investigation).
+            ...debugOverlayChildren(isDebug: kDebugMode),
+            // ALWAYS-ON live connection pill (🟢 מחובר / 🔴 מנותק · מצב דמו) —
+            // overlays every screen. Inert on the demo/test path
+            // (connectionStatusProvider is a constant `demo` there); on the live
+            // backend it recomputes from connectivity + auth + the diag/{uid}
+            // isFromCache probe. Positioned below the debug badge in debug; owns
+            // the top in release.
+            const ConnectionIndicator(),
+            // 🃏 "keyboard on every screen" (kKbGlobal): the floating keyboard
+            // mounted ABOVE the Navigator so it floats over pushed routes too.
+            // Omitted when the flag is off → HomeShell mounts it as today
+            // (byte-identical).
+            if (kKbGlobal) const _GlobalKeyboardOverlay(),
+          ],
+        );
+        // KB_GLOBAL focus-traversal robustness (flag-gated → flag-OFF
+        // byte-identical): the global keyboard overlay + the app's many
+        // `autofocus: true` fields drive Flutter-web's view-focus handler through
+        // the default ReadingOrderTraversalPolicy, which sorts focusables by
+        // geometry and throws a caught (non-fatal, but console-noisy) "RenderBox
+        // was not laid out" when an overlay node has not been laid out that frame.
+        // WidgetOrderTraversalPolicy sorts by widget-tree order (no geometry) and
+        // sidesteps it. Only under the flag, so flag-OFF stays byte-identical.
+        if (kKbGlobal) {
+          appContent = FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: appContent,
+          );
+        }
         return MediaQuery(
           data: mq.copyWith(
             textScaler: TextScaler.linear(combined),
@@ -391,28 +429,7 @@ class BuildSmartApp extends ConsumerWidget {
             // gate.
             child: _AutoLogout(
               timeout: settings.sessionTimeout,
-              child: Stack(
-                children: [
-                  child ?? const SizedBox(),
-                  // OWNER POLICY: the launch-diagnostic badge is dev-only — gated
-                  // by kDebugMode so a release/web build shows NOTHING (see
-                  // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
-                  // (release self-test for the cross-device-sync investigation).
-                  ...debugOverlayChildren(isDebug: kDebugMode),
-                  // ALWAYS-ON live connection pill (🟢 מחובר / 🔴 מנותק · מצב
-                  // דמו) — overlays every screen. Inert on the demo/test path
-                  // (connectionStatusProvider is a constant `demo` there); on
-                  // the live backend it recomputes from connectivity + auth +
-                  // the diag/{uid} isFromCache probe. Positioned below the debug
-                  // badge in debug; owns the top in release.
-                  const ConnectionIndicator(),
-                  // 🃏 "keyboard on every screen" (kKbGlobal): the floating
-                  // keyboard mounted ABOVE the Navigator so it floats over pushed
-                  // routes too. Omitted when the flag is off → HomeShell mounts it
-                  // as today (byte-identical).
-                  if (kKbGlobal) const _GlobalKeyboardOverlay(),
-                ],
-              ),
+              child: appContent,
             ),
           ),
         );
