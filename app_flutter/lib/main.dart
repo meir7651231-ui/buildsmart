@@ -13,6 +13,7 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
 import 'package:buildsmart/widgets/toast.dart'
@@ -434,7 +435,27 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(keyboardOverlayOpenProvider)) return const SizedBox.shrink();
+    // Closed -> a global open-FAB (mirrors the home FAB but above the Navigator,
+    // so it is reachable on EVERY route). Open -> the floating keyboard itself.
+    if (!ref.watch(keyboardOverlayOpenProvider)) {
+      return Align(
+        alignment: AlignmentDirectional.bottomStart,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: FloatingActionButton(
+              heroTag: 'keyboard-fab-global',
+              onPressed: () =>
+                  ref.read(keyboardOverlayOpenProvider.notifier).state = true,
+              backgroundColor: BsTokens.brand,
+              foregroundColor: Colors.white,
+              tooltip: 'מקלדת חכמה',
+              child: const Icon(Icons.keyboard),
+            ),
+          ),
+        ),
+      );
+    }
     return const Align(
       alignment: Alignment.bottomCenter,
       child: SafeArea(top: false, child: FloatingCardKeyboard()),

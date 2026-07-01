@@ -619,11 +619,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           final screenTools = kKbGlobal
               ? currentScreenTools(ref.read(keyboardScreenToolsProvider))
               : null;
-          _stack
-            ..clear()
-            ..add(screenTools ??
-                kbTabToolNodes(ref.read(mainTabProvider), ref));
-          _baseLayer = KbToolLayer.home;
+          final nodes = _frontTools(
+            screenTools,
+            () => kbTabToolNodes(ref.read(mainTabProvider), ref),
+          );
+          _stack.clear();
+          if (nodes != null) _stack.add(nodes);
+          _baseLayer = nodes != null ? KbToolLayer.home : KbToolLayer.none;
         }
       });
 
@@ -660,13 +662,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           // is on; the legacy fixed home set only when BOTH are off (byte-identical,
           // since `screenTools` is null off-flag and `kKbGlobal||kKbButtonsV2` is
           // then const-false).
-          _stack
-            ..clear()
-            ..add(screenTools ??
-                (kKbGlobal || kKbButtonsV2
-                    ? kbTabToolNodes(ref.read(mainTabProvider), ref)
-                    : kbHomeNodes()));
-          _baseLayer = KbToolLayer.home;
+          final nodes = _frontTools(
+            screenTools,
+            () => kKbGlobal || kKbButtonsV2
+                ? kbTabToolNodes(ref.read(mainTabProvider), ref)
+                : kbHomeNodes(),
+          );
+          _stack.clear();
+          if (nodes != null) _stack.add(nodes);
+          _baseLayer = nodes != null ? KbToolLayer.home : KbToolLayer.none;
         }
       });
 
@@ -698,13 +702,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               : null;
           // Owner button-spec v2 (#4): ⚙ opens the CURRENT screen's ⋮ overflow
           // menu; the legacy fixed kbd tools when the flag is off (byte-identical).
-          _stack
-            ..clear()
-            ..add(screenTools ??
-                (kKbButtonsV2
-                    ? kbScreenMenuNodes(ref.read(mainTabProvider), ref)
-                    : kbKbdNodes()));
-          _baseLayer = KbToolLayer.kbd;
+          final nodes = _frontTools(
+            screenTools,
+            () => kKbButtonsV2
+                ? kbScreenMenuNodes(ref.read(mainTabProvider), ref)
+                : kbKbdNodes(),
+          );
+          _stack.clear();
+          if (nodes != null) _stack.add(nodes);
+          _baseLayer = nodes != null ? KbToolLayer.kbd : KbToolLayer.none;
         }
       });
 
@@ -754,6 +760,25 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   BuildContext get _navContext =>
       (kKbGlobal ? bsNavigatorKey.currentState?.overlay?.context : null) ??
       context;
+
+  /// The tool node-list for the CURRENT front surface, per the owner rule: a
+  /// PUSHED route shows its OWN `KbScreen` tools or NOTHING — never the tab
+  /// tools. [screenTools] = the front pushed route's tools (null if it didn't
+  /// adopt KbScreen); [tabNodes] builds the tab-root tools.
+  ///   * screenTools != null            -> the pushed route's own tools.
+  ///   * else at a TAB ROOT (!canPop()) -> tabNodes().
+  ///   * else (pushed but UNWIRED)      -> null => the letters (NO tab fallback).
+  /// With kKbGlobal const-false the `!kKbGlobal ||` disjunct folds to true, the
+  /// canPop() read tree-shakes, and this returns tabNodes() exactly as before.
+  List<KbToolNode>? _frontTools(
+    List<KbToolNode>? screenTools,
+    List<KbToolNode> Function() tabNodes,
+  ) {
+    if (screenTools != null) return screenTools;
+    final atTabRoot =
+        !kKbGlobal || bsNavigatorKey.currentState?.canPop() != true;
+    return atTabRoot ? tabNodes() : null;
+  }
 
   /// STEP D — start a voice-to-text session that drops the final transcript into
   /// the search field. Async + crash-safe: the [VoiceService.listen] callbacks
@@ -1019,6 +1044,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     final routeBase = kKbGlobal
         ? currentScreenTools(ref.watch(keyboardScreenToolsProvider))
         : null;
+    // OWNER RULE: a pushed route shows its OWN tools or NOTHING — never the
+    // tab-derived ambient base. kKbGlobal const-false => routePushed folds to
+    // false => tabBase == ctx?.toolBase (byte-identical).
+    final routePushed =
+        kKbGlobal && (bsNavigatorKey.currentState?.canPop() ?? false);
+    final tabBase = routePushed ? null : ctx?.toolBase;
 
     // TOOL-BASE sync (LIVE-MIRROR, plan seam 5) — install the route-stack base (or
     // the deriver's toolBase) as the drill-stack base via a PLAIN in-build field
@@ -1030,7 +1061,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     //
     // FIND-MODE gate: while the finder panel is shown the hidden tool stack must not
     // be churned (the panel replaces the keyboard body), so skip the sync entirely.
-    if (!_findMode) _syncContextToolBase(ctx?.toolBase, routeBase: routeBase);
+    if (!_findMode) _syncContextToolBase(tabBase, routeBase: routeBase);
 
     // Read the current node-list AFTER the context-base sync so the tiles (and
     // [showBack]) reflect a base installed this frame (no one-frame lag). Null →

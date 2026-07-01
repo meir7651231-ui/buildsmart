@@ -36,6 +36,8 @@
 // tree-shake. The keyboard's `_onGrid` reads this provider ONLY under the same
 // flag (see floating_card_keyboard.dart), so flag-OFF dispatch is unchanged.
 
+import 'dart:async';
+
 import 'package:buildsmart/screens/keyboard_tool_tree.dart' show KbToolNode;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:flutter/widgets.dart';
@@ -183,6 +185,16 @@ class _KbScreenState extends ConsumerState<KbScreen> {
   /// never mutated, so dispose can always remove exactly this entry.
   final Object _token = Object();
 
+  /// The tool-stack notifier, captured in [initState] while `ref` is valid, so
+  /// [dispose] can pop this screen's entry WITHOUT touching `ref`. A
+  /// ConsumerState's `ref` THROWS once the element unmounts (Riverpod's
+  /// `_assertNotDisposed`) — which is exactly when [dispose] runs — so reading
+  /// the provider there silently threw BEFORE removeToken ran and left the token
+  /// on the stack (the stale-tools bug). The notifier lives in the root
+  /// container, which outlives the route, so the captured reference stays valid.
+  /// Null until the post-frame push; only ever set under [kKbGlobal].
+  KeyboardScreenToolsNotifier? _notifier;
+
   @override
   void initState() {
     super.initState();
@@ -196,9 +208,13 @@ class _KbScreenState extends ConsumerState<KbScreen> {
     // because a screen can be popped within the same frame it was pushed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref
-          .read(keyboardScreenToolsProvider.notifier)
-          .push(KbScreenToolsEntry(_token, widget.tools));
+      // Capture the notifier NOW (ref is valid) so dispose can pop WITHOUT ref.
+      // NB: assign to the field then call on the LOCAL — `_notifier = x..push()`
+      // would parse as `(_notifier = x)..push()` (cascade is lowest-precedence),
+      // invoking push on the nullable FIELD's static type.
+      final notifier = ref.read(keyboardScreenToolsProvider.notifier);
+      _notifier = notifier;
+      notifier.push(KbScreenToolsEntry(_token, widget.tools));
     });
   }
 
@@ -212,20 +228,39 @@ class _KbScreenState extends ConsumerState<KbScreen> {
     // closures are never structurally equal and we only care about a genuine
     // new list.
     if (!identical(oldWidget.tools, widget.tools)) {
-      ref
-          .read(keyboardScreenToolsProvider.notifier)
-          .push(KbScreenToolsEntry(_token, widget.tools));
+      // Read + call on the LOCAL (ref is valid during didUpdateWidget), exactly
+      // like initState — never `_notifier = read..push()` (cascade binds to the
+      // assignment ⇒ the field's nullable static type) nor `(_notifier ??=
+      // …).push` (a non-promotable field keeps its nullable type).
+      final notifier = ref.read(keyboardScreenToolsProvider.notifier);
+      _notifier = notifier;
+      notifier.push(KbScreenToolsEntry(_token, widget.tools));
     }
   }
 
   @override
   void dispose() {
-    // Pop OUR entry by token (LIFO-safe under any transition interleaving). Safe
-    // even if this State never pushed (flag off, or popped before the post-frame
-    // ran): removeToken is idempotent. `ref` is still readable in dispose for a
-    // ConsumerState (the ProviderScope outlives the route).
+    // Pop OUR entry via the CAPTURED notifier — NEVER `ref`, which is already
+    // dead here (a ConsumerState's ref throws post-unmount, so the old
+    // `ref.read` threw before removeToken ever ran → stale tools).
+    //
+    // DEFER via microtask: Riverpod forbids modifying a provider SYNCHRONOUSLY
+    // inside a widget lifecycle callback (dispose runs within the unmount/build
+    // phase → the `_debugCanModifyProviders` assert, whose StateNotifier-listener
+    // error propagates as a thrown exception). A microtask runs right after the
+    // current build phase, when provider mutation is allowed again. The root
+    // container outlives the route, so the captured notifier stays valid; the
+    // `mounted` guard avoids mutating an already-disposed notifier, and
+    // removeToken is by-token + idempotent, so deferral can never drop the wrong
+    // entry or double-remove. LIFO-correct under any transition interleaving.
     if (kKbGlobal) {
-      ref.read(keyboardScreenToolsProvider.notifier).removeToken(_token);
+      final notifier = _notifier;
+      if (notifier != null) {
+        final token = _token;
+        Future.microtask(() {
+          if (notifier.mounted) notifier.removeToken(token);
+        });
+      }
     }
     super.dispose();
   }
