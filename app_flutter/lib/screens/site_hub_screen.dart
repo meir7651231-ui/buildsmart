@@ -578,7 +578,11 @@ class _SiteLocations extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🏢 מיקומים',
-      kbTools: kbSiteHubTools,
+      // DIVE: this screen's OWN keyboard tree — a 3-level browse into the site
+      // hierarchy (קומה → דירה → חדר), built inline from the const [kSiteTree].
+      // Room leaves are browse endpoints (a location, not an action) → NO-OP.
+      // `kKbGlobal ?` gate keeps flag-off byte-identical (tree not built when off).
+      kbTools: kKbGlobal ? _kbTree() : null,
       icon: '🏢',
       title: 'קומה · דירה · חדר',
       sub: 'מבנה האתר ההיררכי — לשיוך משימות למיקום מדויק.',
@@ -587,6 +591,31 @@ class _SiteLocations extends StatelessWidget {
       ],
     );
   }
+
+  /// The keyboard DIVE tree for this screen: floor → apartment → room. Each room
+  /// is a browse leaf with a NO-OP action (it names a location, nothing to run).
+  List<KbToolNode> _kbTree() => <KbToolNode>[
+        for (final f in kSiteTree)
+          KbToolNode.branch(
+            icon: Icons.apartment_outlined,
+            label: f.floor,
+            children: <KbToolNode>[
+              for (final a in f.apts)
+                KbToolNode.branch(
+                  icon: Icons.meeting_room_outlined,
+                  label: a.n,
+                  children: <KbToolNode>[
+                    for (final r in a.rooms)
+                      KbToolNode.leaf(
+                        icon: Icons.crop_square_outlined,
+                        label: r,
+                        action: (ref, context) {},
+                      ),
+                  ],
+                ),
+            ],
+          ),
+      ];
 
   Widget _floor(SiteFloor f) {
     return Container(
@@ -679,7 +708,19 @@ class _SiteDiary extends ConsumerWidget {
     final diary = ref.watch(siteDiaryProvider);
     return _SiteScaffold(
       appTitle: '📓 יומן',
-      kbTools: kbSiteHubTools,
+      // DIVE: this screen's OWN keyboard tree. A single leaf that runs the SAME
+      // add-diary flow the '+ רישום יומן להיום' button uses (prompt → notifier.
+      // add), so the keyboard authors a real entry. `kKbGlobal ?` gate keeps
+      // flag-off byte-identical (tree not built when off).
+      kbTools: kKbGlobal
+          ? <KbToolNode>[
+              KbToolNode.leaf(
+                icon: Icons.note_add_outlined,
+                label: 'הוסף רשומה',
+                action: (ref, context) => _add(context, ref),
+              ),
+            ]
+          : null,
       icon: '📓',
       title: 'יומן עבודה דיגיטלי',
       sub: 'תיעוד יומי של ההתקדמות, כוח האדם והאירועים באתר.',
@@ -1083,7 +1124,28 @@ class _SiteInspect extends ConsumerWidget {
     final list = ref.watch(siteInspectionsProvider);
     return _SiteScaffold(
       appTitle: '🔍 ביקורות',
-      kbTools: kbSiteHubTools,
+      // DIVE: this screen's OWN keyboard tree — one branch per live inspection,
+      // each holding a leaf that runs the REAL complete action (the SAME
+      // notifier.complete(id) the card's 'סמן כבוצעה' button runs). Built from
+      // the watched `list`. `kKbGlobal ?` gate keeps flag-off byte-identical.
+      kbTools: kKbGlobal
+          ? <KbToolNode>[
+              for (final ins in list)
+                KbToolNode.branch(
+                  icon: Icons.fact_check_outlined,
+                  label: ins.what,
+                  children: <KbToolNode>[
+                    KbToolNode.leaf(
+                      icon: Icons.check_circle_outline,
+                      label: 'סמן שהושלם',
+                      action: (ref, context) => ref
+                          .read(siteInspectionsProvider.notifier)
+                          .complete(ins.id),
+                    ),
+                  ],
+                ),
+            ]
+          : null,
       icon: '🔍',
       title: 'ביקורות מפקח',
       sub: 'תזכורות לביקורות מפקח ורשויות.',
