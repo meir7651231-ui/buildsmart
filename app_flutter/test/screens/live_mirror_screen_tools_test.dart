@@ -109,6 +109,9 @@ void main() {
       await expectRenders(kbAiFinderNodes(), 'מאתר'); // AiFinderScreen
       await expectRenders(kbWorkerProfileNodes(), 'נוכחות'); // WorkerProfile
       await expectRenders(kbManagerDashboardNodes(), 'קו-פיילוט'); // ManagerDash
+      await expectRenders(kbWorkerSettingsNodes(), 'תנאי שימוש');
+      await expectRenders(kbManagerProfileNodes(), 'מעבר בין מסכים');
+      await expectRenders(kbCourierDashboardNodes(), 'פרופיל');
     });
   });
 }

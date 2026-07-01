@@ -10,8 +10,12 @@
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbManagerProfileNodes;
 import 'package:buildsmart/screens/manager_screens_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -25,9 +29,11 @@ class ManagerProfileScreen extends StatelessWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const ManagerProfileScreen());
 
+  static final List<KbToolNode> _kbNodes = kbManagerProfileNodes();
+
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -46,6 +52,7 @@ class ManagerProfileScreen extends StatelessWidget {
         body: const SafeArea(child: _ManagerProfileBody()),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

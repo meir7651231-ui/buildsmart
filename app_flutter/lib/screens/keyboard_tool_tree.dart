@@ -29,13 +29,23 @@ import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
     show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
+import 'package:buildsmart/screens/courier_dashboard_screen.dart'
+    show showCourierNotifsSheet;
+import 'package:buildsmart/screens/courier_profile_screen.dart'
+    show CourierProfileScreen;
+import 'package:buildsmart/screens/courier_settings_screen.dart'
+    show CourierSettingsScreen;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show kbDestinationByLabel;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
+import 'package:buildsmart/screens/legal_screen.dart'
+    show LegalScreen, LegalTab;
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
+import 'package:buildsmart/screens/manager_screens_sheet.dart'
+    show showManagerScreensSheet;
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/notifications_screen.dart'
@@ -827,5 +837,64 @@ List<KbToolNode> kbManagerDashboardNodes() => <KbToolNode>[
         action: (ref, context) => Navigator.of(context).push(
           CatalogSettingsScreen.route(showProfileRow: false),
         ),
+      ),
+    ];
+
+/// WorkerSettingsScreen tools: התראות · תנאי שימוש · מדיניות פרטיות.
+List<KbToolNode> kbWorkerSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.notifications_outlined,
+        label: 'התראות',
+        action: (ref, context) =>
+            Navigator.of(context).push(NotifSettingsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'תנאי שימוש',
+        action: (ref, context) =>
+            Navigator.of(context).push(LegalScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.privacy_tip_outlined,
+        label: 'מדיניות פרטיות',
+        action: (ref, context) => Navigator.of(context)
+            .push(LegalScreen.route(initialTab: LegalTab.privacy)),
+      ),
+    ];
+
+/// ManagerProfileScreen tools: הגדרות · מעבר בין מסכים.
+List<KbToolNode> kbManagerProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) => Navigator.of(context).push(
+          CatalogSettingsScreen.route(showProfileRow: false),
+        ),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.desktop_windows_outlined,
+        label: 'מעבר בין מסכים',
+        action: (ref, context) => showManagerScreensSheet(context),
+      ),
+    ];
+
+/// CourierDashboardScreen tools: התראות · פרופיל · הגדרות.
+List<KbToolNode> kbCourierDashboardNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.notifications_outlined,
+        label: 'התראות',
+        action: (ref, context) => showCourierNotifsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.person_outline,
+        label: 'פרופיל',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierProfileScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierSettingsScreen.route()),
       ),
     ];
