@@ -578,6 +578,7 @@ class _SiteLocations extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🏢 מיקומים',
+      kbTools: kbSiteHubTools,
       icon: '🏢',
       title: 'קומה · דירה · חדר',
       sub: 'מבנה האתר ההיררכי — לשיוך משימות למיקום מדויק.',
@@ -678,6 +679,7 @@ class _SiteDiary extends ConsumerWidget {
     final diary = ref.watch(siteDiaryProvider);
     return _SiteScaffold(
       appTitle: '📓 יומן',
+      kbTools: kbSiteHubTools,
       icon: '📓',
       title: 'יומן עבודה דיגיטלי',
       sub: 'תיעוד יומי של ההתקדמות, כוח האדם והאירועים באתר.',
@@ -771,6 +773,7 @@ class _SiteSafetyState extends State<_SiteSafety> {
     final tip = kSafetyTips[DateTime.now().day % kSafetyTips.length];
     return _SiteScaffold(
       appTitle: '🦺 בטיחות',
+      kbTools: kbSiteHubTools,
       icon: '🦺',
       title: 'התראות בטיחות',
       sub: 'תדריך בטיחות יומי — חובה לפני תחילת העבודה.',
@@ -889,6 +892,7 @@ class _SiteDeps extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🔗 תלויות',
+      kbTools: kbSiteHubTools,
       icon: '🔗',
       title: 'תלויות חומרים בין משימות',
       sub: 'משימה לא יכולה להתחיל לפני שהמשימות התלויות הושלמו.',
@@ -968,6 +972,7 @@ class _SitePhotosState extends State<_SitePhotos> {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '📸 צילום',
+      kbTools: kbSiteHubTools,
       icon: '📸',
       title: 'צילום לפני / אחרי',
       sub: 'תיעוד ויזואלי של ההתקדמות — השוואת מצב לפני ואחרי.',
@@ -1078,6 +1083,7 @@ class _SiteInspect extends ConsumerWidget {
     final list = ref.watch(siteInspectionsProvider);
     return _SiteScaffold(
       appTitle: '🔍 ביקורות',
+      kbTools: kbSiteHubTools,
       icon: '🔍',
       title: 'ביקורות מפקח',
       sub: 'תזכורות לביקורות מפקח ורשויות.',
@@ -1148,6 +1154,7 @@ class _SiteArchive extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🗄️ ארכיון',
+      kbTools: kbSiteHubTools,
       icon: '🗄️',
       title: 'ארכיון פרויקטים',
       sub: 'פרויקטים שהושלמו — לעיון והפקת לקחים.',
