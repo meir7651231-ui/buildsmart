@@ -41,6 +41,7 @@ class ProductFavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     List<String>? list;
     try {
       list = prefs.getStringList(_key);
@@ -56,6 +57,7 @@ class ProductFavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     await prefs.setStringList(_key, state.toList());
   }
 
