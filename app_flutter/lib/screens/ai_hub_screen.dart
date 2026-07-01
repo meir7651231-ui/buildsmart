@@ -18,7 +18,7 @@ import 'package:buildsmart/screens/describe_to_cart_screen.dart'
     show DescribeToCartScreen;
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
-    show KbToolNode, kbAiHubNodes;
+    show KbToolNode;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/services/voice.dart';
@@ -61,9 +61,8 @@ class AIHubScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const AIHubScreen());
 
-  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
-  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
-  static final List<KbToolNode> _kbNodes = kbAiHubNodes();
+  // Keyboard tools are built LIVE in _kbTree() from _visibleTiles (see build) —
+  // one leaf per visible hub feature, mirroring the on-screen grid.
 
   /// 10 tiles — the 9 VERBATIM proto `items` (@21124-21134) + the AI
   /// describe→cart feature (#ai-describe-to-cart) at the head.
@@ -147,6 +146,56 @@ class AIHubScreen extends ConsumerWidget {
     }
   }
 
+  /// Material-icon glyph for a hub tile id (the on-screen tiles use emoji; the
+  /// floating-keyboard tiles need IconData).
+  IconData _kbIcon(String id) => switch (id) {
+        'describe' => Icons.record_voice_over_outlined,
+        'stock' => Icons.inventory_2_outlined,
+        'barcode' => Icons.qr_code_scanner,
+        'voice' => Icons.mic_none_outlined,
+        'alt' => Icons.lightbulb_outline,
+        'plan' => Icons.picture_as_pdf_outlined,
+        'analytics' => Icons.analytics_outlined,
+        'assistant' => Icons.smart_toy_outlined,
+        '3way' => Icons.link,
+        'weather' => Icons.cloud_outlined,
+        'wear' => Icons.handyman_outlined,
+        _ => Icons.auto_awesome_outlined,
+      };
+
+  /// Run a hub tile by id — the SAME dispatch as the on-screen grid's onTap, so
+  /// a keyboard tool and its tile do exactly the same thing.
+  void _runTile(BuildContext context, WidgetRef ref, String id) {
+    switch (id) {
+      case 'describe':
+        Navigator.of(context).push(DescribeToCartScreen.route());
+      case 'assistant':
+        Navigator.of(context).push(AiAssistantScreen.route());
+      case 'barcode':
+        _runBarcode(context, ref);
+      case 'voice':
+        _runVoice(context, ref);
+      case 'alt':
+        openCheaperAlternativesSheet(context);
+      case 'plan':
+        openScanPlanSheet(context);
+      default:
+        Navigator.of(context).push(_AIFeatureScreen.route(id));
+    }
+  }
+
+  /// LIVE-MIRROR: the floating keyboard's tools for the AI hub — one leaf per
+  /// VISIBLE tile (same set + dispatch as the grid), so the keyboard mirrors the
+  /// hub's REAL features instead of only the 2 catalog entries.
+  List<KbToolNode> _kbTree() => <KbToolNode>[
+        for (final t in _visibleTiles)
+          KbToolNode.leaf(
+            icon: _kbIcon(t.id),
+            label: t.t,
+            action: (ref, context) => _runTile(context, ref, t.id),
+          ),
+      ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // The cart FAB rides above this PUSHED route too — visible only when the
@@ -225,7 +274,7 @@ class AIHubScreen extends ConsumerWidget {
         ),
       ),
     );
-    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
+    return kKbGlobal ? KbScreen(tools: _kbTree(), child: body) : body;
   }
 }
 
