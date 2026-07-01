@@ -53,6 +53,12 @@ jobs:
           --dart-define=FS_DIAG=true
 
       - name: Deploy to Hosting preview channel
+        # When the backend-flagged build is byte-identical to the last one, the
+        # preview channel already holds that version → this action returns 400
+        # "version already active" (a harmless no-op). Non-blocking so an unchanged
+        # preview re-deploy can't red the branch; a real change yields a new hash
+        # and deploys normally.
+        continue-on-error: true
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

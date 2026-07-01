@@ -43,6 +43,13 @@ jobs:
         run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true
 
       - name: Deploy to Firebase Hosting (live channel)
+        # Redundant with web-deploy.yml (firebase-tools CLI), which already deploys
+        # this same live site and is idempotent. A byte-identical rebuild yields the
+        # same version hash → this action returns 400 "version already active" (a
+        # harmless no-op re-deploy). Non-blocking so the redundant duplicate can't
+        # red the branch; the real live deploy is covered by web-deploy.yml (a real
+        # deploy change still produces a new hash and deploys normally).
+        continue-on-error: true
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

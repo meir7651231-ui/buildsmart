@@ -1,4 +1,4 @@
-﻿import java.util.Properties
+import java.util.Properties
 import java.io.FileInputStream
 plugins {
     id("com.android.application")
@@ -20,7 +20,9 @@ android {
     kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
     defaultConfig {
         applicationId = "com.buildsmart.buildsmart"
-        minSdk = flutter.minSdkVersion
+        // cloud_functions (+ modern Firebase plugins) require Android minSdk 23;
+        // Flutter's default (21) fails processReleaseMainManifest at manifest merge.
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
