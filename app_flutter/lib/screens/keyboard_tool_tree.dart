@@ -22,6 +22,7 @@
 // widget stays screen-agnostic.
 
 import 'package:buildsmart/screens/ai_hub_screen.dart';
+import 'package:buildsmart/screens/budget_screen.dart' show BudgetScreen;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
     show ChatsArchiveScreen, ChatsScreen;
@@ -41,6 +42,7 @@ import 'package:buildsmart/screens/courier_profile_screen.dart'
     show CourierProfileScreen;
 import 'package:buildsmart/screens/courier_settings_screen.dart'
     show CourierSettingsScreen;
+import 'package:buildsmart/screens/defects_sheet.dart' show showDefectsSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show kbDestinationByLabel;
@@ -48,6 +50,8 @@ import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
 import 'package:buildsmart/screens/legal_screen.dart'
     show LegalScreen, LegalTab;
+import 'package:buildsmart/screens/lipskey_brand_screen.dart'
+    show LipskeyBrandScreen;
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_screens_sheet.dart'
@@ -58,7 +62,14 @@ import 'package:buildsmart/screens/notifications_screen.dart'
     show markAllNotifsRead;
 import 'package:buildsmart/screens/order_notif_sheet.dart'
     show showOrderNotifSheet;
+import 'package:buildsmart/screens/rewards_hub_screen.dart'
+    show RewardsHubScreen;
+import 'package:buildsmart/screens/role_picker_sheet.dart' show showRolePicker;
+import 'package:buildsmart/screens/role_request_sheet.dart'
+    show showRoleRequestSheet;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
+import 'package:buildsmart/screens/smart_project_screen.dart'
+    show SmartProjectScreen;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
 import 'package:buildsmart/screens/store_dashboard_screen.dart'
     show SupplierSettingsScreen;
@@ -70,6 +81,9 @@ import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
 import 'package:buildsmart/screens/store_settings_screen.dart'
     show StoreSettingsScreen;
+import 'package:buildsmart/screens/tasks_gantt_sheet.dart'
+    show showTasksGanttSheet;
+import 'package:buildsmart/screens/tasks_screen.dart' show TasksScreen;
 import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
 import 'package:buildsmart/screens/worker_attendance_screen.dart';
@@ -77,6 +91,10 @@ import 'package:buildsmart/screens/worker_forms_screen.dart';
 import 'package:buildsmart/screens/worker_payslips_sheet.dart'
     show showWorkerPayslipsSheet;
 import 'package:buildsmart/screens/worker_safety_screen.dart';
+import 'package:buildsmart/screens/worker_settings_screen.dart'
+    show WorkerSettingsScreen;
+import 'package:buildsmart/screens/worker_task_board_screen.dart'
+    show WorkerTaskBoardScreen;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
@@ -988,5 +1006,83 @@ List<KbToolNode> kbStoreProfileNodes() => <KbToolNode>[
         label: 'הגדרות ספק',
         action: (ref, context) =>
             Navigator.of(context).push(SupplierSettingsScreen.route()),
+      ),
+    ];
+
+/// ProjectsScreen tools: תקציב · משימות · פרויקט חכם.
+List<KbToolNode> kbProjectsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'תקציב',
+        action: (ref, context) =>
+            Navigator.of(context).push(BudgetScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.assignment_outlined,
+        label: 'משימות',
+        action: (ref, context) =>
+            Navigator.of(context).push(TasksScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_tree_outlined,
+        label: 'פרויקט חכם',
+        action: (ref, context) =>
+            Navigator.of(context).push(SmartProjectScreen.route()),
+      ),
+    ];
+
+/// SuppliersScreen tools: ליפסקי ברקן.
+List<KbToolNode> kbSuppliersNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.factory_outlined,
+        label: 'ליפסקי ברקן',
+        action: (ref, context) =>
+            Navigator.of(context).push(LipskeyBrandScreen.route()),
+      ),
+    ];
+
+/// ProfileScreen tools: מועדון · החלפת תפקיד · בקשת תפקיד.
+List<KbToolNode> kbProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.emoji_events_outlined,
+        label: 'מועדון',
+        action: (ref, context) =>
+            Navigator.of(context).push(RewardsHubScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.swap_horiz,
+        label: 'החלפת תפקיד',
+        action: (ref, context) => showRolePicker(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'בקשת תפקיד',
+        action: (ref, context) => showRoleRequestSheet(context),
+      ),
+    ];
+
+/// WorkerAppScreen tools: לוח משימות · גאנט משימות · ליקויים · הגדרות.
+List<KbToolNode> kbWorkerAppNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.dashboard_outlined,
+        label: 'לוח משימות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerTaskBoardScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.timeline,
+        label: 'גאנט משימות',
+        action: (ref, context) => showTasksGanttSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.report_problem_outlined,
+        label: 'ליקויים',
+        action: (ref, context) => showDefectsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerSettingsScreen.route()),
       ),
     ];

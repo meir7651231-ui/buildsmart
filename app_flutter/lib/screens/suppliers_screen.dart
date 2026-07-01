@@ -1,5 +1,9 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbSuppliersNodes;
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:flutter/material.dart';
 
 class SuppliersScreen extends StatelessWidget {
@@ -8,9 +12,11 @@ class SuppliersScreen extends StatelessWidget {
   static Route<void> route() =>
       MaterialPageRoute(builder: (_) => const SuppliersScreen());
 
+  static final List<KbToolNode> _kbNodes = kbSuppliersNodes();
+
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
@@ -38,6 +44,7 @@ class SuppliersScreen extends StatelessWidget {
         ),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

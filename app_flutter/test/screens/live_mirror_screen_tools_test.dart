@@ -116,6 +116,10 @@ void main() {
       await expectRenders(kbCourierSettingsNodes(), 'מדיניות פרטיות');
       await expectRenders(kbStoreDashboardNodes(), 'אזור אישי');
       await expectRenders(kbStoreProfileNodes(), 'תעודות עסק');
+      await expectRenders(kbProjectsNodes(), 'תקציב');
+      await expectRenders(kbSuppliersNodes(), 'ליפסקי ברקן');
+      await expectRenders(kbProfileNodes(), 'החלפת תפקיד');
+      await expectRenders(kbWorkerAppNodes(), 'ליקויים');
     });
   });
 }

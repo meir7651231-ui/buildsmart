@@ -4,6 +4,8 @@ import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/defects_sheet.dart';
 import 'package:buildsmart/screens/docs_readiness_gate.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbWorkerAppNodes;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
@@ -21,6 +23,8 @@ import 'package:buildsmart/services/geo.dart';
 import 'package:buildsmart/services/nav_launch.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -62,6 +66,8 @@ class WorkerAppScreen extends ConsumerStatefulWidget {
 
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const WorkerAppScreen());
+
+  static final List<KbToolNode> _kbNodes = kbWorkerAppNodes();
 
   @override
   ConsumerState<WorkerAppScreen> createState() => _WorkerAppScreenState();
@@ -123,7 +129,7 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
       });
     }
 
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -247,6 +253,9 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
         ),
       ),
     );
+    return kKbGlobal
+        ? KbScreen(tools: WorkerAppScreen._kbNodes, child: body)
+        : body;
   }
 
   /// WORKER submit — "שלח לאישור", routed through the ONE shared proof-photo
