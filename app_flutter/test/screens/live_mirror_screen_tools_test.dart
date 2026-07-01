@@ -112,6 +112,10 @@ void main() {
       await expectRenders(kbWorkerSettingsNodes(), 'תנאי שימוש');
       await expectRenders(kbManagerProfileNodes(), 'מעבר בין מסכים');
       await expectRenders(kbCourierDashboardNodes(), 'פרופיל');
+      await expectRenders(kbCourierProfileNodes(), 'תעודות נהג');
+      await expectRenders(kbCourierSettingsNodes(), 'מדיניות פרטיות');
+      await expectRenders(kbStoreDashboardNodes(), 'אזור אישי');
+      await expectRenders(kbStoreProfileNodes(), 'תעודות עסק');
     });
   });
 }

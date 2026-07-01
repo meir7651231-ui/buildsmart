@@ -13,11 +13,15 @@
 // האחים); ערבית/אנגלית נשארות "בקרוב" כמו במסך הקיים (task #53 — בלי לזייף
 // החלפת שפה).
 
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbCourierSettingsNodes;
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -34,6 +38,8 @@ class CourierSettingsScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const CourierSettingsScreen());
 
+  static final List<KbToolNode> _kbNodes = kbCourierSettingsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 🔒 BOARD GATE (חוק הלוחות, כלל 4 — "מבחוץ לא רואים כלום") — F-4: בלי
@@ -45,7 +51,7 @@ class CourierSettingsScreen extends ConsumerWidget {
       return const WelcomeScreen(boardRole: BoardRole.courier);
     }
 
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
@@ -76,6 +82,7 @@ class CourierSettingsScreen extends ConsumerWidget {
         ),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

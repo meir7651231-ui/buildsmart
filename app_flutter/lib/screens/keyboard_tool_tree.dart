@@ -29,8 +29,14 @@ import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
     show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
+import 'package:buildsmart/screens/courier_attendance_screen.dart'
+    show CourierAttendanceScreen;
+import 'package:buildsmart/screens/courier_certs_screen.dart'
+    show CourierCertsScreen;
 import 'package:buildsmart/screens/courier_dashboard_screen.dart'
     show showCourierNotifsSheet;
+import 'package:buildsmart/screens/courier_forms_screen.dart'
+    show CourierFormsScreen;
 import 'package:buildsmart/screens/courier_profile_screen.dart'
     show CourierProfileScreen;
 import 'package:buildsmart/screens/courier_settings_screen.dart'
@@ -54,6 +60,12 @@ import 'package:buildsmart/screens/order_notif_sheet.dart'
     show showOrderNotifSheet;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
+import 'package:buildsmart/screens/store_dashboard_screen.dart'
+    show SupplierSettingsScreen;
+import 'package:buildsmart/screens/store_documents_sheet.dart'
+    show showStoreDocumentsSheet;
+import 'package:buildsmart/screens/store_profile_screen.dart'
+    show StoreCertsScreen, StoreProfileScreen;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
 import 'package:buildsmart/screens/store_settings_screen.dart'
@@ -896,5 +908,85 @@ List<KbToolNode> kbCourierDashboardNodes() => <KbToolNode>[
         label: 'הגדרות',
         action: (ref, context) =>
             Navigator.of(context).push(CourierSettingsScreen.route()),
+      ),
+    ];
+
+/// CourierProfileScreen tools: נוכחות · טפסים · תעודות נהג · תלושי שכר.
+List<KbToolNode> kbCourierProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.access_time,
+        label: 'נוכחות',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierAttendanceScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'טפסים',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierFormsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'תעודות נהג',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierCertsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.payments_outlined,
+        label: 'תלושי שכר',
+        action: (ref, context) => showWorkerPayslipsSheet(context),
+      ),
+    ];
+
+/// CourierSettingsScreen tools: תנאי שימוש · מדיניות פרטיות.
+List<KbToolNode> kbCourierSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'תנאי שימוש',
+        action: (ref, context) =>
+            Navigator.of(context).push(LegalScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.privacy_tip_outlined,
+        label: 'מדיניות פרטיות',
+        action: (ref, context) => Navigator.of(context)
+            .push(LegalScreen.route(initialTab: LegalTab.privacy)),
+      ),
+    ];
+
+/// StoreDashboardScreen tools: אזור אישי · הגדרות.
+List<KbToolNode> kbStoreDashboardNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.person_outline,
+        label: 'אזור אישי',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreProfileScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(SupplierSettingsScreen.route()),
+      ),
+    ];
+
+/// StoreProfileScreen tools: תעודות עסק · מסמכים · הגדרות ספק.
+List<KbToolNode> kbStoreProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'תעודות עסק',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreCertsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.receipt_long_outlined,
+        label: 'מסמכים',
+        action: (ref, context) => showStoreDocumentsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות ספק',
+        action: (ref, context) =>
+            Navigator.of(context).push(SupplierSettingsScreen.route()),
       ),
     ];
