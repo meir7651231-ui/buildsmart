@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -86,15 +87,25 @@ class FeatureFlagsNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final list = prefs.getStringList(_key);
     final loaded = list?.toSet() ?? <String>{};
     // Build-time forced flags always win — even over a returning visitor's
     // saved prefs — so the demo deploy reliably shows the feature.
-    state = {...loaded, ..._forcedOnFlags};
+    final next = {...loaded, ..._forcedOnFlags};
+    // Emit ONLY on a real content change. `state = {...}` always makes a fresh
+    // Set identity; when the content is unchanged (e.g. empty→empty) Riverpod
+    // still sees a "change" and rebuilds every dependent provider. That
+    // spuriously recreated productFavoritesProvider mid-flight and clobbered a
+    // just-toggled SKU (the load-race the guard tests assert against). No-op
+    // when equal → no needless rebuild.
+    if (setEquals(next, state)) return;
+    state = next;
   }
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     await prefs.setStringList(_key, state.toList());
   }
 
