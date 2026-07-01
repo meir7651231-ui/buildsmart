@@ -35,8 +35,11 @@ import 'package:buildsmart/screens/contractor_hr_sheet.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart'
     show DailyReportScreen;
 import 'package:buildsmart/screens/defects_sheet.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/site_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -87,6 +90,25 @@ void _push(BuildContext context, Widget screen) {
   );
 }
 
+/// The site-management hub's OWN keyboard tools (live-mirror): its 12 tiles, so
+/// the floating keyboard MIRRORS "ניהול אתר" instead of the tab fallback. Built
+/// ONCE (stable list identity → KbScreen never re-pushes on rebuild). Actions
+/// reuse the same open-functions the tiles use, via the tool-dispatch context.
+final List<KbToolNode> kbSiteHubTools = <KbToolNode>[
+  KbToolNode.leaf(icon: Icons.assignment_outlined, label: 'משימות', action: (ref, context) => openTasks(context)),
+  KbToolNode.leaf(icon: Icons.calendar_month_outlined, label: 'גאנט', action: (ref, context) => _openGantt(context)),
+  KbToolNode.leaf(icon: Icons.report_problem_outlined, label: 'ליקויים', action: (ref, context) => _openDefects(context)),
+  KbToolNode.leaf(icon: Icons.apartment_outlined, label: 'מיקומים', action: (ref, context) => openSiteLocations(context)),
+  KbToolNode.leaf(icon: Icons.location_on_outlined, label: 'נוכחות', action: (ref, context) => _openAttend(context)),
+  KbToolNode.leaf(icon: Icons.event_busy_outlined, label: 'חופשות', action: (ref, context) => _openHr(context)),
+  KbToolNode.leaf(icon: Icons.menu_book_outlined, label: 'יומן', action: (ref, context) => openSiteDiary(context)),
+  KbToolNode.leaf(icon: Icons.health_and_safety_outlined, label: 'בטיחות', action: (ref, context) => openSiteSafety(context)),
+  KbToolNode.leaf(icon: Icons.link_outlined, label: 'תלויות', action: (ref, context) => openSiteDeps(context)),
+  KbToolNode.leaf(icon: Icons.photo_camera_outlined, label: 'צילום', action: (ref, context) => openSitePhotos(context)),
+  KbToolNode.leaf(icon: Icons.fact_check_outlined, label: 'ביקורות', action: (ref, context) => openSiteInspect(context)),
+  KbToolNode.leaf(icon: Icons.archive_outlined, label: 'ארכיון', action: (ref, context) => openSiteArchive(context)),
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared shell — RTL scaffold + md-head, matching the courier/store style.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,6 +120,7 @@ class _SiteScaffold extends StatelessWidget {
     required this.title,
     required this.sub,
     required this.children,
+    this.kbTools,
   });
 
   final String appTitle; // appbar title
@@ -105,10 +128,11 @@ class _SiteScaffold extends StatelessWidget {
   final String title; // md-title
   final String sub; // md-sub
   final List<Widget> children;
+  final List<KbToolNode>? kbTools; // live-mirror tools (null → pass-through)
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -150,6 +174,12 @@ class _SiteScaffold extends StatelessWidget {
         ),
       ),
     );
+    // LIVE-MIRROR: when a screen supplies kbTools, show them on the floating
+    // keyboard under KB_GLOBAL. Flag-off (or no tools) → pass-through, identical.
+    if (kKbGlobal && kbTools != null) {
+      return KbScreen(tools: kbTools!, child: body);
+    }
+    return body;
   }
 }
 
@@ -459,6 +489,7 @@ class _SiteHubGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🏗️ ניהול אתר',
+      kbTools: kbSiteHubTools,
       icon: '🏗️',
       title: 'ניהול אתר הבנייה',
       sub: 'כל כלי הניהול של אתר הבנייה במקום אחד.',
