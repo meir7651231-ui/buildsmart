@@ -16,10 +16,13 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
 // LIVE review queue projection for the parallel contractor-approval surface.
 // apple-readiness (merge): the _TaskSheet photo uses the shared taskPhotoWidget.
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/under_construction.dart';
@@ -43,6 +46,38 @@ String _wk(int i) => kWorkers[(i >= 0 && i < kWorkers.length) ? i : 0];
 void openTasks(BuildContext context) =>
     Navigator.of(context).push(TasksScreen.route());
 
+/// Actions the mounted [TasksScreen] publishes so the floating keyboard's tools
+/// can drive it (new task / work log). Null while the screen is not mounted.
+class TasksScreenHooks {
+  const TasksScreenHooks({required this.newTask, required this.workLog});
+  final VoidCallback newTask;
+  final VoidCallback workLog;
+}
+
+/// Set by [TasksScreen] while mounted (a post-frame publish); read by
+/// [kbTasksNodes]. A plain hook registry so the keyboard tools reach the board's
+/// dock actions without the screen exposing its State. Null (no-op) unmounted.
+final tasksScreenActionsProvider = StateProvider<TasksScreenHooks?>((_) => null);
+
+/// The tasks board's OWN keyboard tools (live-mirror): author a task + open the
+/// daily work log — its two primary dock actions — so the floating keyboard
+/// MIRRORS this screen instead of falling back to the tab tools. Actions route
+/// through [tasksScreenActionsProvider]; a null registry no-ops.
+List<KbToolNode> kbTasksNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.add_task,
+        label: 'משימה חדשה',
+        action: (ref, context) =>
+            ref.read(tasksScreenActionsProvider)?.newTask(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.event_note_outlined,
+        label: 'יומן עבודה',
+        action: (ref, context) =>
+            ref.read(tasksScreenActionsProvider)?.workLog(),
+      ),
+    ];
+
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -56,10 +91,35 @@ class TasksScreen extends ConsumerStatefulWidget {
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   int _worker = 0; // proto `activeWorker=0`
 
+  /// This screen's own keyboard tools (live-mirror), built ONCE so the stable
+  /// list identity keeps KbScreen from re-pushing on every rebuild.
+  late final List<KbToolNode> _kbTools = kbTasksNodes();
+
+  @override
+  void initState() {
+    super.initState();
+    // Publish the board's dock actions so the floating keyboard's tools drive it
+    // (new task / work log). Post-frame (a provider write during the parent
+    // build is illegal); mounted-guarded; kKbGlobal-gated → flag-off inert.
+    if (kKbGlobal) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(tasksScreenActionsProvider.notifier).state = TasksScreenHooks(
+          newTask: () {
+            if (mounted) _openAuthor(context);
+          },
+          workLog: () {
+            if (mounted) _openWorkLog(context);
+          },
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -93,6 +153,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         ),
       ),
     );
+    // LIVE-MIRROR: under KB_GLOBAL the keyboard shows THIS board's tools
+    // (new task / work log), not the tab fallback. Flag-off → pass-through,
+    // byte-identical.
+    return kKbGlobal ? KbScreen(tools: _kbTools, child: body) : body;
   }
 
   // ── MANAGER view (proto :8068-8081) ──────────────────────────────────────
