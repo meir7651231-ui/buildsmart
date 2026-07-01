@@ -23,7 +23,8 @@
 
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
-import 'package:buildsmart/screens/chats_screen.dart' show ChatsArchiveScreen;
+import 'package:buildsmart/screens/chats_screen.dart'
+    show ChatsArchiveScreen, ChatsScreen;
 import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
     show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
@@ -33,6 +34,8 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
     show kbDestinationByLabel;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
+import 'package:buildsmart/screens/manager_copilot_screen.dart';
+import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/notifications_screen.dart'
@@ -47,7 +50,13 @@ import 'package:buildsmart/screens/store_settings_screen.dart'
     show StoreSettingsScreen;
 import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
+import 'package:buildsmart/screens/worker_attendance_screen.dart';
+import 'package:buildsmart/screens/worker_forms_screen.dart';
+import 'package:buildsmart/screens/worker_payslips_sheet.dart'
+    show showWorkerPayslipsSheet;
+import 'package:buildsmart/screens/worker_safety_screen.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
 import 'package:flutter/material.dart';
@@ -744,5 +753,79 @@ List<KbToolNode> kbChatsArchiveNodes() => <KbToolNode>[
         icon: Icons.search,
         label: 'חיפוש שיחות',
         action: (ref, context) => _toolSoon(context, 'חיפוש שיחות'),
+      ),
+    ];
+
+/// AiFinderScreen tools: מאתר + עץ חכם (runKeyboardTool seam, like kbAiHubNodes).
+List<KbToolNode> kbAiFinderNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.gps_fixed,
+        label: 'מאתר',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_tree,
+        label: 'עץ חכם',
+        action: (ref, context) =>
+            runKeyboardTool(ref, context, KbTool.smartTree),
+      ),
+    ];
+
+/// WorkerProfileScreen tools: נוכחות · טפסים · תיק בטיחות · תלושי שכר.
+List<KbToolNode> kbWorkerProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.access_time,
+        label: 'נוכחות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerAttendanceScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'טפסים',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerFormsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.verified_user_outlined,
+        label: 'תיק בטיחות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerSafetyScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.payments_outlined,
+        label: 'תלושי שכר',
+        action: (ref, context) => showWorkerPayslipsSheet(context),
+      ),
+    ];
+
+/// ManagerDashboardScreen tools: קו-פיילוט · שיחות · אזור אישי · הגדרות.
+List<KbToolNode> kbManagerDashboardNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.smart_toy,
+        label: 'קו-פיילוט',
+        action: (ref, context) =>
+            Navigator.of(context).push(ManagerCopilotScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.chat_bubble_outline,
+        label: 'שיחות',
+        action: (ref, context) => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const ChatsScreen(persona: BsRole.manager),
+          ),
+        ),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.person_outline,
+        label: 'אזור אישי',
+        action: (ref, context) =>
+            Navigator.of(context).push(ManagerProfileScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) => Navigator.of(context).push(
+          CatalogSettingsScreen.route(showProfileRow: false),
+        ),
       ),
     ];

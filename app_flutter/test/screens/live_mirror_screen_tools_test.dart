@@ -96,5 +96,19 @@ void main() {
       expect(find.text('בקשות חומר'), findsOneWidget); // stock tool now shows
       expect(find.text('מאתר'), findsNothing); // AI-hub tool no longer shows
     });
+
+    testWidgets('each newly-wired screen renders ITS distinctive tool',
+        (tester) async {
+      Future<void> expectRenders(List<KbToolNode> tools, String label) async {
+        final n = KeyboardScreenToolsNotifier()
+          ..push(KbScreenToolsEntry(Object(), tools));
+        await pumpGridForStack(tester, n.state);
+        expect(find.text(label), findsOneWidget);
+      }
+
+      await expectRenders(kbAiFinderNodes(), 'מאתר'); // AiFinderScreen
+      await expectRenders(kbWorkerProfileNodes(), 'נוכחות'); // WorkerProfile
+      await expectRenders(kbManagerDashboardNodes(), 'קו-פיילוט'); // ManagerDash
+    });
   });
 }

@@ -15,13 +15,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/fuzzy_search.dart' show fuzzySearchProducts;
-import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
+import 'package:buildsmart/data/lipskey_catalog.dart'
+    show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/logic/prompt_sanitize.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbAiFinderNodes;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +41,10 @@ List<String> finderCategories() {
 /// and demands ONLY a category (or NONE). It can't name a product.
 String aiFinderPrompt(String userText) {
   final cats = finderCategories().join('\n');
-  final safe = promptSafeText(userText, maxLen: 600); // cap free-text (cost/DoS)
+  final safe = promptSafeText(
+    userText,
+    maxLen: 600,
+  ); // cap free-text (cost/DoS)
   return 'קטגוריות-המוצרים הזמינות:\n$cats\n\n'
       'הקבלן מחפש: "$safe".\n'
       'בחר את הקטגוריה האחת שהכי מתאימה לבקשה — מתוך הרשימה בלבד. '
@@ -81,7 +89,10 @@ class AiFinderScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
 
   static Route<void> route({String? initialQuery}) => MaterialPageRoute<void>(
-      builder: (_) => AiFinderScreen(initialQuery: initialQuery));
+    builder: (_) => AiFinderScreen(initialQuery: initialQuery),
+  );
+
+  static final List<KbToolNode> _kbNodes = kbAiFinderNodes();
 
   @override
   ConsumerState<AiFinderScreen> createState() => _AiFinderState();
@@ -92,7 +103,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
   bool _loading = false;
   bool _failed = false;
   bool _searched = false;
-  String? _resultTitle; // the header label for the current results (fuzzy or AI)
+  String?
+  _resultTitle; // the header label for the current results (fuzzy or AI)
   List<LipskeyCatalogProduct> _products = const [];
 
   @override
@@ -185,18 +197,21 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
   Widget build(BuildContext context) {
     final aiAvailable = ref.watch(claudeGatewayProvider) != null;
 
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('🗣️ חיפוש חכם',
-              style: TextStyle(
-                  color: BsTokens.inkLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18)),
+          title: const Text(
+            '🗣️ חיפוש חכם',
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
         ),
         // CustomScrollView so the matched-category results render LAZILY via a
         // SliverList.builder — the largest category is ~120 products and a plain
@@ -206,18 +221,30 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
         body: CustomScrollView(
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
-                  BsTokens.space4, 0),
+              padding: const EdgeInsets.fromLTRB(
+                BsTokens.space4,
+                BsTokens.space4,
+                BsTokens.space4,
+                0,
+              ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   if (!aiAvailable)
-                    const Text('💡 החיפוש החכם דורש חיבור לשרת.',
-                        style:
-                            TextStyle(color: BsTokens.mutedLight, fontSize: 13))
+                    const Text(
+                      '💡 החיפוש החכם דורש חיבור לשרת.',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 13,
+                      ),
+                    )
                   else ...[
-                    const Text('תאר במילים שלך מה אתה מחפש:',
-                        style:
-                            TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+                    const Text(
+                      'תאר במילים שלך מה אתה מחפש:',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _controller,
@@ -228,8 +255,10 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                         filled: true,
                         fillColor: BsTokens.cardLight,
                         border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(BsTokens.radiusCard)),
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusCard,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: BsTokens.space3),
@@ -245,21 +274,32 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                     if (_loading)
                       const Center(child: CircularProgressIndicator())
                     else if (_failed)
-                      const Text('משהו השתבש — נסה שוב.',
-                          // dangerDark for WCAG AA (parity with shared AiFailedState)
-                          style:
-                              TextStyle(color: BsTokens.dangerDark, fontSize: 14))
+                      const Text(
+                        'משהו השתבש — נסה שוב.',
+                        // dangerDark for WCAG AA (parity with shared AiFailedState)
+                        style: TextStyle(
+                          color: BsTokens.dangerDark,
+                          fontSize: 14,
+                        ),
+                      )
                     else if (_resultTitle != null) ...[
-                      Text('${_resultTitle!}  ·  ${_products.length} מוצרים',
-                          style: const TextStyle(
-                              color: BsTokens.inkLight,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800)),
+                      Text(
+                        '${_resultTitle!}  ·  ${_products.length} מוצרים',
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       const SizedBox(height: BsTokens.space2),
                     ] else if (_searched)
-                      const Text('לא נמצאו תוצאות — נסה מילים אחרות.',
-                          style: TextStyle(
-                              color: BsTokens.mutedLight, fontSize: 14)),
+                      const Text(
+                        'לא נמצאו תוצאות — נסה מילים אחרות.',
+                        style: TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 14,
+                        ),
+                      ),
                   ],
                 ]),
               ),
@@ -267,8 +307,9 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
             // The result products — lazy, only when a search produced results.
             if (aiAvailable && !_loading && !_failed && _resultTitle != null)
               SliverPadding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: BsTokens.space4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space4,
+                ),
                 sliver: SliverList.builder(
                   itemCount: _products.length,
                   itemBuilder: (context, i) {
@@ -276,20 +317,27 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                     return ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text(p.nameHe,
-                          style: const TextStyle(
-                              color: BsTokens.inkLight, fontSize: 14)),
+                      title: Text(
+                        p.nameHe,
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 14,
+                        ),
+                      ),
                       trailing: const Icon(Icons.chevron_left, size: 18),
-                      onTap: () => showLipskeyProductSheet(context, p, _products),
+                      onTap:
+                          () => showLipskeyProductSheet(context, p, _products),
                     );
                   },
                 ),
               ),
-            const SliverToBoxAdapter(
-                child: SizedBox(height: BsTokens.space4)),
+            const SliverToBoxAdapter(child: SizedBox(height: BsTokens.space4)),
           ],
         ),
       ),
     );
+    return kKbGlobal
+        ? KbScreen(tools: AiFinderScreen._kbNodes, child: body)
+        : body;
   }
 }

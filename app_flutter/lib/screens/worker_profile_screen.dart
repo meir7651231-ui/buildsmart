@@ -1,5 +1,7 @@
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbWorkerProfileNodes;
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_attendance_screen.dart';
@@ -9,6 +11,8 @@ import 'package:buildsmart/screens/worker_safety_screen.dart';
 import 'package:buildsmart/screens/worker_settings_screen.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
@@ -77,6 +81,8 @@ class WorkerProfileScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const WorkerProfileScreen());
 
+  static final List<KbToolNode> _kbNodes = kbWorkerProfileNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 🔒 BOARD GATE (חוק: מבחוץ לא רואים כלום) — this is a worker-board screen:
@@ -110,7 +116,7 @@ class WorkerProfileScreen extends ConsumerWidget {
       profile,
     );
 
-    final body = ListView(
+    final content = ListView(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
         BsTokens.space4,
@@ -134,6 +140,9 @@ class WorkerProfileScreen extends ConsumerWidget {
         _ActionsCard(session: session),
       ],
     );
+
+    final body =
+        kKbGlobal ? KbScreen(tools: _kbNodes, child: content) : content;
 
     if (embedded) return body;
     return Scaffold(
