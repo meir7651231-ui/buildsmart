@@ -46,38 +46,6 @@ String _wk(int i) => kWorkers[(i >= 0 && i < kWorkers.length) ? i : 0];
 void openTasks(BuildContext context) =>
     Navigator.of(context).push(TasksScreen.route());
 
-/// Actions the mounted [TasksScreen] publishes so the floating keyboard's tools
-/// can drive it (new task / work log). Null while the screen is not mounted.
-class TasksScreenHooks {
-  const TasksScreenHooks({required this.newTask, required this.workLog});
-  final VoidCallback newTask;
-  final VoidCallback workLog;
-}
-
-/// Set by [TasksScreen] while mounted (a post-frame publish); read by
-/// [kbTasksNodes]. A plain hook registry so the keyboard tools reach the board's
-/// dock actions without the screen exposing its State. Null (no-op) unmounted.
-final tasksScreenActionsProvider = StateProvider<TasksScreenHooks?>((_) => null);
-
-/// The tasks board's OWN keyboard tools (live-mirror): author a task + open the
-/// daily work log — its two primary dock actions — so the floating keyboard
-/// MIRRORS this screen instead of falling back to the tab tools. Actions route
-/// through [tasksScreenActionsProvider]; a null registry no-ops.
-List<KbToolNode> kbTasksNodes() => <KbToolNode>[
-      KbToolNode.leaf(
-        icon: Icons.add_task,
-        label: 'משימה חדשה',
-        action: (ref, context) =>
-            ref.read(tasksScreenActionsProvider)?.newTask(),
-      ),
-      KbToolNode.leaf(
-        icon: Icons.event_note_outlined,
-        label: 'יומן עבודה',
-        action: (ref, context) =>
-            ref.read(tasksScreenActionsProvider)?.workLog(),
-      ),
-    ];
-
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -91,29 +59,49 @@ class TasksScreen extends ConsumerStatefulWidget {
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   int _worker = 0; // proto `activeWorker=0`
 
-  /// This screen's own keyboard tools (live-mirror), built ONCE so the stable
-  /// list identity keeps KbScreen from re-pushing on every rebuild.
-  late final List<KbToolNode> _kbTools = kbTasksNodes();
-
-  @override
-  void initState() {
-    super.initState();
-    // Publish the board's dock actions so the floating keyboard's tools drive it
-    // (new task / work log). Post-frame (a provider write during the parent
-    // build is illegal); mounted-guarded; kKbGlobal-gated → flag-off inert.
-    if (kKbGlobal) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(tasksScreenActionsProvider.notifier).state = TasksScreenHooks(
-          newTask: () {
-            if (mounted) _openAuthor(context);
-          },
-          workLog: () {
-            if (mounted) _openWorkLog(context);
-          },
+  /// LIVE-MIRROR dive tree: the board's own tools + a BRANCH per non-empty
+  /// status that drills into the ACTUAL tasks (tap a task → its detail). Built
+  /// fresh each build so it reflects the live task list.
+  List<KbToolNode> _buildKbTree(List<TaskItem> tasks) {
+    final review = tasks.where((t) => t.status == 'review').toList();
+    final active = tasks
+        .where((t) => t.status == 'active' || t.status == 'rejected')
+        .toList();
+    final pending = tasks.where((t) => t.status == 'pending').toList();
+    final done = tasks.where((t) => t.status == 'done').toList();
+    KbToolNode taskLeaf(TaskItem t) => KbToolNode.leaf(
+          icon: Icons.description_outlined,
+          label: t.name,
+          // _open takes (TaskItem) and uses the STATE's own context; call it
+          // with the live task, NOT the action's context param.
+          action: (ref, context) => _open(t),
         );
-      });
-    }
+    KbToolNode statusBranch(String label, IconData icon, List<TaskItem> ts) =>
+        KbToolNode.branch(
+          icon: icon,
+          label: '$label (${ts.length})',
+          children: [for (final t in ts) taskLeaf(t)],
+        );
+    return <KbToolNode>[
+      KbToolNode.leaf(
+          icon: Icons.add_task,
+          label: 'משימה חדשה',
+          // _openAuthor takes (BuildContext) = the State context (mounted).
+          action: (ref, context) => _openAuthor(this.context)),
+      KbToolNode.leaf(
+          icon: Icons.event_note_outlined,
+          label: 'יומן עבודה',
+          // _openWorkLog takes (BuildContext) = the State context (mounted).
+          action: (ref, context) => _openWorkLog(this.context)),
+      if (review.isNotEmpty)
+        statusBranch('ממתין לאישור', Icons.inventory_2_outlined, review),
+      if (active.isNotEmpty)
+        statusBranch('בביצוע', Icons.build_outlined, active),
+      if (pending.isNotEmpty)
+        statusBranch('ממתינות', Icons.hourglass_empty, pending),
+      if (done.isNotEmpty)
+        statusBranch('הושלמו', Icons.check_circle_outline, done),
+    ];
   }
 
   @override
@@ -153,10 +141,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         ),
       ),
     );
-    // LIVE-MIRROR: under KB_GLOBAL the keyboard shows THIS board's tools
-    // (new task / work log), not the tab fallback. Flag-off → pass-through,
-    // byte-identical.
-    return kKbGlobal ? KbScreen(tools: _kbTools, child: body) : body;
+    // LIVE-MIRROR: under KB_GLOBAL the keyboard shows THIS board's DIVE tree
+    // (new task / work log + a branch per non-empty status that drills into the
+    // real tasks), not the tab fallback. Flag-off → pass-through, byte-identical
+    // (the gate short-circuits before _buildKbTree runs).
+    return kKbGlobal ? KbScreen(tools: _buildKbTree(tasks), child: body) : body;
   }
 
   // ── MANAGER view (proto :8068-8081) ──────────────────────────────────────
