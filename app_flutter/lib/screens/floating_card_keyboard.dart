@@ -613,7 +613,22 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           _baseLayer = KbToolLayer.none;
           _lastDerivedBase = null;
           _kbEnglish = false;
-          _typing = true;
+          // FINDER-FRONT (owner spec #6): from the tools (buttons-mode) the globe
+          // cycles to the FINDER (the "מקלדת המילים" — the 3rd face) rather than
+          // to the letters: re-arm the lead (_finderOff=false, _typing=false) so
+          // the finder shows. Elsewhere (v2 buttons, no finder) it returns to the
+          // Hebrew letters. kFinderFront const-false folds finderCap false ⇒ just
+          // `_typing = true` (byte-identical; the ref.reads tree-shake).
+          final finderCap = kFinderFront &&
+              ref.read(mainTabProvider) == 0 &&
+              catalogLeadsWithFinder(ref.read(catalogLocationProvider));
+          if (finderCap) {
+            _findMode = false;
+            _finderOff = false;
+            _typing = false;
+          } else {
+            _typing = true;
+          }
         } else if (!_kbEnglish) {
           _kbEnglish = true;
           _typing = true;
@@ -868,100 +883,20 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
         _typing = true;
       });
 
-  // ── FINDER-FRONT (kFinderFront) mode switch ────────────────────────────────
-  // The three faces of the keyboard on a browse/landing surface: מוכר (the
-  // product-finder, leading), אותיות (emergency letters), כלים (navigation
-  // tools). All three helpers are reached ONLY from [_finderSwitchBar], which is
-  // built ONLY under `leadWithFinder` (⇒ under the kFinderFront const), so they
-  // fold away entirely when the flag is off (byte-identical).
+  // ── FINDER-FRONT (kFinderFront): the finder IS the globe's "buttons-mode" ────
+  // Per the owner button-spec #6, the floating globe cycles the keyboard's faces
+  // (עברית → אנגלית → מקלדת-המילים) — and the "מקלדת המילים" (words) face IS the
+  // finder. So switching is the GLOBE ([_onKbCycle]) + the finder's own 'אבג',
+  // with NO extra bar. This one helper is the finder's 'אבג' → the letters.
 
-  /// Leave the auto-led finder for the emergency LETTERS: dismiss the lead
-  /// ([_finderOff]) and enter typing mode so the alphabet shows.
+  /// The finder's 'אבג': leave the finder for the Hebrew letters. Dismisses the
+  /// lead ([_finderOff]) and enters typing mode. From the letters the globe then
+  /// cycles אנגלית → כלים → back to the finder (see [_onKbCycle]).
   void _finderToLetters() => setState(() {
         _findMode = false;
         _finderOff = true;
         _typing = true;
       });
-
-  /// Leave the auto-led finder for the navigation TOOLS: dismiss the lead, then
-  /// open the current tab's tool grid — exactly as tapping ▦ from the letters.
-  void _finderToTools() {
-    setState(() {
-      _findMode = false;
-      _finderOff = true;
-    });
-    _onGrid();
-  }
-
-  /// Return to the finder (the seller) from the letters / tools: clear the
-  /// dismissal + any typing/tool state so the finder re-leads THIS surface.
-  void _finderToSeller() => setState(() {
-        _findMode = false;
-        _finderOff = false;
-        _typing = false;
-        _stack.clear();
-        _baseLayer = KbToolLayer.none;
-        _lastDerivedBase = null;
-      });
-
-  /// The always-visible finder-front mode-switch bar (owner request 3/7): three
-  /// plain-text faces, NO icons. [מוכר] is the active finder; [אותיות] / [כלים]
-  /// switch to the letters / the navigation tools.
-  Widget _finderSwitchBar(String active) {
-    final cs = Theme.of(context).colorScheme;
-    // The active face is a no-op (already here); the other two switch to it.
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-      child: Row(
-        children: [
-          _finderModeBtn(cs, 'מוכר',
-              active: active == 'מוכר',
-              onTap: active == 'מוכר' ? null : _finderToSeller),
-          const SizedBox(width: 6),
-          _finderModeBtn(cs, 'אותיות',
-              active: active == 'אותיות',
-              onTap: active == 'אותיות' ? null : _finderToLetters),
-          const SizedBox(width: 6),
-          _finderModeBtn(cs, 'כלים',
-              active: active == 'כלים',
-              onTap: active == 'כלים' ? null : _finderToTools),
-        ],
-      ),
-    );
-  }
-
-  Widget _finderModeBtn(ColorScheme cs, String label,
-      {bool active = false, VoidCallback? onTap}) {
-    return Expanded(
-      child: Material(
-        color: active ? cs.primary : cs.surface,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: active ? cs.primary : cs.outlineVariant,
-                width: active ? 0 : 0.5,
-              ),
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: active ? Colors.white : cs.onSurface,
-                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1276,15 +1211,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 // --dart-define=KB_BUTTONS_V2=true, which is the whole point.
                 // ignore: avoid_redundant_argument_values
                 symbolsAlwaysToggles: kKbButtonsV2,
-                // Owner button-spec v2 (#6): the floating globe runs the 3-way
-                // cycle (עברית → אנגלית → buttons-mode); null when the flag is
-                // off → the host's plain He↔En toggle runs (byte-identical).
-                // ignore: avoid_redundant_argument_values
-                englishOverride: kKbButtonsV2 ? _kbEnglish : null,
-                // Same flag-gated override as above; const-folds to the default
-                // null in a plain build (it becomes the cycle with the define).
-                // ignore: avoid_redundant_argument_values
-                onLanguageOverride: kKbButtonsV2 ? _onKbCycle : null,
+                // Owner button-spec #6: the floating globe runs the 3-way cycle
+                // עברית → אנגלית → מקלדת-המילים (which, under finder-front, IS the
+                // FINDER). Enabled under the v2 buttons OR finder-front; null (⇒
+                // the host's plain He↔En toggle) when BOTH are off, so a plain
+                // build is byte-identical (kFinderFront folds finderCapable false).
+                englishOverride:
+                    kKbButtonsV2 || finderCapable ? _kbEnglish : null,
+                onLanguageOverride:
+                    kKbButtonsV2 || finderCapable ? _onKbCycle : null,
                 // This IS a dedicated keyboard surface the user opened on
                 // purpose, so it shows the keyboard regardless of the opt-in
                 // kSmartInput feature flag (off by default in production).
@@ -1320,17 +1255,6 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 onToolGrid: _onGrid,
                 onToolGear: _onGear,
               ),
-              // MODE-SWITCH BAR — rides EVERY finder-capable face (finder /
-              // letters / tools), so 'מוכר' is always one tap back from the
-              // letters or the tools. Gated on [finderCapable] (⇒ the kFinderFront
-              // const), so it folds out and the build stays byte-identical when
-              // the flag is off. The active face is highlighted.
-              if (finderCapable)
-                _finderSwitchBar(
-                  leadWithFinder
-                      ? 'מוכר'
-                      : (_stack.isNotEmpty ? 'כלים' : 'אותיות'),
-                ),
             ],
           ),
         ),
