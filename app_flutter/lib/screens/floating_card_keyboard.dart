@@ -218,6 +218,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   /// onExit clears this. Default false ⇒ the keyboard stays byte-identical.
   bool _findMode = false;
 
+  /// FINDER-FRONT (kFinderFront) dismissal: set when the user leaves the auto-led
+  /// finder via the mode-switch bar (→ letters or → tools), so the finder stops
+  /// leading THIS catalog surface until they navigate (a tab change clears it,
+  /// re-arming the lead). Only ever set under kFinderFront, so it folds to a
+  /// const-false read when the flag is off (byte-identical).
+  bool _finderOff = false;
+
   /// The node-list currently shown (null while the stack is empty → letters).
   List<KbToolNode>? get _currentNodes => _stack.isEmpty ? null : _stack.last;
 
@@ -861,6 +868,83 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
         _typing = true;
       });
 
+  // ── FINDER-FRONT (kFinderFront) mode switch ────────────────────────────────
+  // The three faces of the keyboard on a browse/landing surface: מוכר (the
+  // product-finder, leading), אותיות (emergency letters), כלים (navigation
+  // tools). All three helpers are reached ONLY from [_finderSwitchBar], which is
+  // built ONLY under `leadWithFinder` (⇒ under the kFinderFront const), so they
+  // fold away entirely when the flag is off (byte-identical).
+
+  /// Leave the auto-led finder for the emergency LETTERS: dismiss the lead
+  /// ([_finderOff]) and enter typing mode so the alphabet shows.
+  void _finderToLetters() => setState(() {
+        _findMode = false;
+        _finderOff = true;
+        _typing = true;
+      });
+
+  /// Leave the auto-led finder for the navigation TOOLS: dismiss the lead, then
+  /// open the current tab's tool grid — exactly as tapping ▦ from the letters.
+  void _finderToTools() {
+    setState(() {
+      _findMode = false;
+      _finderOff = true;
+    });
+    _onGrid();
+  }
+
+  /// The always-visible finder-front mode-switch bar (owner request 3/7): three
+  /// plain-text faces, NO icons. [מוכר] is the active finder; [אותיות] / [כלים]
+  /// switch to the letters / the navigation tools.
+  Widget _finderSwitchBar() {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+      child: Row(
+        children: [
+          _finderModeBtn(cs, 'מוכר', active: true),
+          const SizedBox(width: 6),
+          _finderModeBtn(cs, 'אותיות', onTap: _finderToLetters),
+          const SizedBox(width: 6),
+          _finderModeBtn(cs, 'כלים', onTap: _finderToTools),
+        ],
+      ),
+    );
+  }
+
+  Widget _finderModeBtn(ColorScheme cs, String label,
+      {bool active = false, VoidCallback? onTap}) {
+    return Expanded(
+      child: Material(
+        color: active ? cs.primary : cs.surface,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: active ? cs.primary : cs.outlineVariant,
+                width: active ? 0 : 0.5,
+              ),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: active ? Colors.white : cs.onSurface,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // A floating panel (rounded-top Material + a subtle top shadow), NOT a modal
@@ -884,11 +968,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // modes is active — keeping the kKbLiveMirror-OFF / kKbButtonsV2-OFF paths
     // byte-identical (same-tab typing is untouched; only a tab CHANGE fires this).
     ref.listen<int>(mainTabProvider, (_, __) {
-      if (_typing || _kbEnglish || _findMode) {
+      if (_typing || _kbEnglish || _findMode || _finderOff) {
         setState(() {
           _typing = false;
           _kbEnglish = false;
           _findMode = false;
+          // Re-arm the finder-front lead on navigation (folds to a no-op write
+          // when kFinderFront is off — _finderOff is only ever set true there).
+          _finderOff = false;
         });
       }
     });
@@ -1021,10 +1108,11 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       if (live || kFinderFront) {
         final CatalogLocation loc = ref.watch(catalogLocationProvider);
         // The salesperson leads on a browse/landing surface (home / smart-tree
-        // grid) — unless the user dropped to emergency typing ([_typing], which a
-        // tab change clears, re-arming the lead). Everywhere the user is already
-        // browsing a concrete list the mirror leads (catalogLeadsWithFinder false).
-        if (kFinderFront && !_typing && catalogLeadsWithFinder(loc)) {
+        // grid) — unless the user left it via the mode-switch bar ([_finderOff],
+        // which a tab change clears, re-arming the lead). Everywhere the user is
+        // already browsing a concrete list the mirror leads (catalogLeadsWithFinder
+        // false).
+        if (kFinderFront && !_finderOff && catalogLeadsWithFinder(loc)) {
           leadWithFinder = true;
         }
         if (live) {
@@ -1132,19 +1220,25 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               // its letters; otherwise it renders the current node-list as pure
               // tiles (with a BACK tile once the stack is deeper than its base).
               if (_findMode || leadWithFinder)
-                FindKeyboardPanel(
-                  // Exit to the emergency letters. When the finder is AUTO-leading
-                  // (leadWithFinder — kFinderFront only), also raise [_typing] so
-                  // the lead is SUPPRESSED until the user navigates (a tab change
-                  // re-arms it); otherwise it would immediately re-lead and the
-                  // letters would be unreachable. When kFinderFront is off,
-                  // leadWithFinder folds to false ⇒ only `_findMode = false` runs
-                  // (byte-identical to the manual מאתר-tool exit).
-                  onExit: () => setState(() {
-                    _findMode = false;
-                    if (leadWithFinder) _typing = true;
-                  }),
-                )
+                (leadWithFinder
+                    // FINDER-FRONT: the finder leads with an always-visible
+                    // mode-switch bar beneath it (מוכר / אותיות / כלים). The
+                    // panel's own 'אבג' and the bar's 'אותיות' both go to the
+                    // letters via [_finderToLetters]; 'כלים' opens the nav tools.
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FindKeyboardPanel(onExit: _finderToLetters),
+                          _finderSwitchBar(),
+                        ],
+                      )
+                    // Manual מאתר-tool find-mode — and the ONLY branch when
+                    // kFinderFront is off (leadWithFinder folds false), so this is
+                    // byte-identical: the panel alone, its 'אבג' clears find-mode
+                    // back to the keyboard.
+                    : FindKeyboardPanel(
+                        onExit: () => setState(() => _findMode = false),
+                      ))
               else
               BsKeyboardHost(
                 controller: _controller,
