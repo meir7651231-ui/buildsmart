@@ -893,20 +893,38 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     _onGrid();
   }
 
+  /// Return to the finder (the seller) from the letters / tools: clear the
+  /// dismissal + any typing/tool state so the finder re-leads THIS surface.
+  void _finderToSeller() => setState(() {
+        _findMode = false;
+        _finderOff = false;
+        _typing = false;
+        _stack.clear();
+        _baseLayer = KbToolLayer.none;
+        _lastDerivedBase = null;
+      });
+
   /// The always-visible finder-front mode-switch bar (owner request 3/7): three
   /// plain-text faces, NO icons. [מוכר] is the active finder; [אותיות] / [כלים]
   /// switch to the letters / the navigation tools.
-  Widget _finderSwitchBar() {
+  Widget _finderSwitchBar(String active) {
     final cs = Theme.of(context).colorScheme;
+    // The active face is a no-op (already here); the other two switch to it.
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       child: Row(
         children: [
-          _finderModeBtn(cs, 'מוכר', active: true),
+          _finderModeBtn(cs, 'מוכר',
+              active: active == 'מוכר',
+              onTap: active == 'מוכר' ? null : _finderToSeller),
           const SizedBox(width: 6),
-          _finderModeBtn(cs, 'אותיות', onTap: _finderToLetters),
+          _finderModeBtn(cs, 'אותיות',
+              active: active == 'אותיות',
+              onTap: active == 'אותיות' ? null : _finderToLetters),
           const SizedBox(width: 6),
-          _finderModeBtn(cs, 'כלים', onTap: _finderToTools),
+          _finderModeBtn(cs, 'כלים',
+              active: active == 'כלים',
+              onTap: active == 'כלים' ? null : _finderToTools),
         ],
       ),
     );
@@ -1011,6 +1029,11 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // when the flag is off it stays false and every use of it folds away — the
     // whole finder-front path is byte-identical.
     bool leadWithFinder = false;
+    // Whether this surface CAN lead with the finder (home / smart-tree grid) —
+    // regardless of whether it currently does ([leadWithFinder] adds !_finderOff).
+    // Drives the mode-switch bar, which rides EVERY face (finder / letters /
+    // tools) so 'מוכר' is always one tap away. Also gated on the const ⇒ folds.
+    bool finderCapable = false;
     if (tab == 1) {
       // PARALLEL מחלקות mirror — the same two-tier gate as the tab-2/3 blocks
       // below, just for the departments tab. It is the HEAD of the `else if` chain
@@ -1107,13 +1130,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       // whole finder-front path is byte-identical when the flag is off.
       if (live || kFinderFront) {
         final CatalogLocation loc = ref.watch(catalogLocationProvider);
-        // The salesperson leads on a browse/landing surface (home / smart-tree
-        // grid) — unless the user left it via the mode-switch bar ([_finderOff],
-        // which a tab change clears, re-arming the lead). Everywhere the user is
-        // already browsing a concrete list the mirror leads (catalogLeadsWithFinder
-        // false).
-        if (kFinderFront && !_finderOff && catalogLeadsWithFinder(loc)) {
-          leadWithFinder = true;
+        // This surface CAN lead with the finder (home / smart-tree grid). It
+        // actually leads unless the user left it via the mode-switch bar
+        // ([_finderOff], cleared on a tab change → re-arms). When it can lead, the
+        // switch bar (מוכר / אותיות / כלים) rides EVERY face so the user can always
+        // return to the seller. Elsewhere (a concrete list) the mirror leads.
+        if (kFinderFront && catalogLeadsWithFinder(loc)) {
+          finderCapable = true;
+          if (!_finderOff) leadWithFinder = true;
         }
         if (live) {
           // The product-category set is the module-level [_kCatalogProductCats]
@@ -1219,23 +1243,16 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               // the morph drill state. When [nodes] is null the keyboard shows
               // its letters; otherwise it renders the current node-list as pure
               // tiles (with a BACK tile once the stack is deeper than its base).
+              // KEYBOARD BODY — the finder (seller) leads on a finder-capable
+              // browse surface; otherwise the normal letters/tools keyboard. The
+              // mode-switch bar (added below as a SIBLING) rides EVERY
+              // finder-capable face, so 'מוכר' is always one tap away.
               if (_findMode || leadWithFinder)
                 (leadWithFinder
-                    // FINDER-FRONT: the finder leads with an always-visible
-                    // mode-switch bar beneath it (מוכר / אותיות / כלים). The
-                    // panel's own 'אבג' and the bar's 'אותיות' both go to the
-                    // letters via [_finderToLetters]; 'כלים' opens the nav tools.
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          FindKeyboardPanel(onExit: _finderToLetters),
-                          _finderSwitchBar(),
-                        ],
-                      )
+                    ? FindKeyboardPanel(onExit: _finderToLetters)
                     // Manual מאתר-tool find-mode — and the ONLY branch when
                     // kFinderFront is off (leadWithFinder folds false), so this is
-                    // byte-identical: the panel alone, its 'אבג' clears find-mode
-                    // back to the keyboard.
+                    // byte-identical: the panel's 'אבג' clears find-mode.
                     : FindKeyboardPanel(
                         onExit: () => setState(() => _findMode = false),
                       ))
@@ -1303,6 +1320,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
                 onToolGrid: _onGrid,
                 onToolGear: _onGear,
               ),
+              // MODE-SWITCH BAR — rides EVERY finder-capable face (finder /
+              // letters / tools), so 'מוכר' is always one tap back from the
+              // letters or the tools. Gated on [finderCapable] (⇒ the kFinderFront
+              // const), so it folds out and the build stays byte-identical when
+              // the flag is off. The active face is highlighted.
+              if (finderCapable)
+                _finderSwitchBar(
+                  leadWithFinder
+                      ? 'מוכר'
+                      : (_stack.isNotEmpty ? 'כלים' : 'אותיות'),
+                ),
             ],
           ),
         ),
