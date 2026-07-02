@@ -81,7 +81,13 @@ final productFavoritesProvider =
   // Scope the favorites by identity ONLY when the unified finder is on (round-2
   // blocker-5); flag-OFF keeps today's single global key → byte-identical, and the
   // uid is not even watched, so production behaviour is unchanged.
-  final scoped = ref.watch(featureFlagsProvider).contains(kCardKeyboardFlag);
+  // `.select` so this notifier REBUILDS only when the scoping actually flips
+  // (flag toggled / uid changed), NOT on every equal featureFlagsProvider
+  // re-emit — which would spin up a fresh notifier mid-flight and clobber a
+  // just-made toggle (see state_loadrace_guards_test).
+  final scoped = ref.watch(
+    featureFlagsProvider.select((f) => f.contains(kCardKeyboardFlag)),
+  );
   final uid = scoped ? ref.watch(currentUidProvider) : null;
   return ProductFavoritesNotifier(uid);
 });
