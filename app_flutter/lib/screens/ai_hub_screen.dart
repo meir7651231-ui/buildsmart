@@ -61,8 +61,8 @@ class AIHubScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const AIHubScreen());
 
-  // Keyboard tools are built LIVE in _kbTree() from _visibleTiles (see build) —
-  // one leaf per visible hub feature, mirroring the on-screen grid.
+  // Keyboard tools are built ONCE in [_kbNodes] from _visibleTiles — one leaf per
+  // visible hub feature, mirroring the on-screen grid.
 
   /// 10 tiles — the 9 VERBATIM proto `items` (@21124-21134) + the AI
   /// describe→cart feature (#ai-describe-to-cart) at the head.
@@ -110,8 +110,9 @@ class AIHubScreen extends ConsumerWidget {
   ];
 
   /// REAL barcode — scan, push the code into the live catalog search, land on
-  /// the catalog tab. Mirrors catalog_screen.dart:1721-1726.
-  Future<void> _runBarcode(BuildContext context, WidgetRef ref) async {
+  /// the catalog tab. Mirrors catalog_screen.dart:1721-1726. `static` (uses only
+  /// its [context]/[ref] args) so the build-once [_kbNodes] dispatch can reach it.
+  static Future<void> _runBarcode(BuildContext context, WidgetRef ref) async {
     final code = await openBarcodeScanner(context);
     if (code == null || code.isEmpty || !context.mounted) return;
     // #barcode-plus — a scanned SKU opens the product card directly; search
@@ -127,8 +128,9 @@ class AIHubScreen extends ConsumerWidget {
   }
 
   /// REAL voice — listen, push the transcript into the live catalog search.
-  /// Mirrors catalog_screen.dart:1701-1716.
-  Future<void> _runVoice(BuildContext context, WidgetRef ref) async {
+  /// Mirrors catalog_screen.dart:1701-1716. `static` (uses only its
+  /// [context]/[ref] args) so the build-once [_kbNodes] dispatch can reach it.
+  static Future<void> _runVoice(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     final ok = await VoiceService.instance.listen(
       onFinal: (t) {
@@ -147,8 +149,9 @@ class AIHubScreen extends ConsumerWidget {
   }
 
   /// Material-icon glyph for a hub tile id (the on-screen tiles use emoji; the
-  /// floating-keyboard tiles need IconData).
-  IconData _kbIcon(String id) => switch (id) {
+  /// floating-keyboard tiles need IconData). `static` (pure switch on [id], no
+  /// instance state) so the build-once [_kbNodes] can reference it.
+  static IconData _kbIcon(String id) => switch (id) {
         'describe' => Icons.record_voice_over_outlined,
         'stock' => Icons.inventory_2_outlined,
         'barcode' => Icons.qr_code_scanner,
@@ -164,8 +167,9 @@ class AIHubScreen extends ConsumerWidget {
       };
 
   /// Run a hub tile by id — the SAME dispatch as the on-screen grid's onTap, so
-  /// a keyboard tool and its tile do exactly the same thing.
-  void _runTile(BuildContext context, WidgetRef ref, String id) {
+  /// a keyboard tool and its tile do exactly the same thing. `static` (uses only
+  /// its [context]/[ref]/[id] args) so the build-once [_kbNodes] can reference it.
+  static void _runTile(BuildContext context, WidgetRef ref, String id) {
     switch (id) {
       case 'describe':
         Navigator.of(context).push(DescribeToCartScreen.route());
@@ -187,14 +191,20 @@ class AIHubScreen extends ConsumerWidget {
   /// LIVE-MIRROR: the floating keyboard's tools for the AI hub — one leaf per
   /// VISIBLE tile (same set + dispatch as the grid), so the keyboard mirrors the
   /// hub's REAL features instead of only the 2 catalog entries.
-  List<KbToolNode> _kbTree() => <KbToolNode>[
-        for (final t in _visibleTiles)
-          KbToolNode.leaf(
-            icon: _kbIcon(t.id),
-            label: t.t,
-            action: (ref, context) => _runTile(context, ref, t.id),
-          ),
-      ];
+  ///
+  /// STABLE list built ONCE (a `static final`, matching stock_screen.dart:149) so
+  /// [KbScreen]'s identity-compare (didUpdateWidget's `identical`) never re-registers
+  /// it on a rebuild — the tile set is fixed at class-load (from the const-driven
+  /// [_visibleTiles]), so a fresh list per build only churned the registration.
+  /// Tree-shaken with the whole [KbScreen] path when [kKbGlobal] is off.
+  static final List<KbToolNode> _kbNodes = <KbToolNode>[
+    for (final t in _visibleTiles)
+      KbToolNode.leaf(
+        icon: _kbIcon(t.id),
+        label: t.t,
+        action: (ref, context) => _runTile(context, ref, t.id),
+      ),
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -274,7 +284,7 @@ class AIHubScreen extends ConsumerWidget {
         ),
       ),
     );
-    return kKbGlobal ? KbScreen(tools: _kbTree(), child: body) : body;
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

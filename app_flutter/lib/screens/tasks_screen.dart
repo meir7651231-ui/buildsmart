@@ -72,9 +72,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     KbToolNode taskLeaf(TaskItem t) => KbToolNode.leaf(
           icon: Icons.description_outlined,
           label: t.name,
-          // _open takes (TaskItem) and uses the STATE's own context; call it
-          // with the live task, NOT the action's context param.
-          action: (ref, context) => _open(t),
+          // _open takes (TaskItem, BuildContext) — pass the action's OWN
+          // context (the floating keyboard's, always mounted), not the State's,
+          // which is defunct once this screen is popped while the keyboard
+          // floats. The live task `t` is captured for the sheet.
+          action: (ref, context) => _open(t, context),
         );
     KbToolNode statusBranch(String label, IconData icon, List<TaskItem> ts) =>
         KbToolNode.branch(
@@ -86,13 +88,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       KbToolNode.leaf(
           icon: Icons.add_task,
           label: 'משימה חדשה',
-          // _openAuthor takes (BuildContext) = the State context (mounted).
-          action: (ref, context) => _openAuthor(this.context)),
+          // _openAuthor takes (BuildContext) — pass the action's OWN context
+          // (the floating keyboard's, always mounted), not the State's, which
+          // is defunct once this screen is popped while the keyboard floats.
+          action: (ref, context) => _openAuthor(context)),
       KbToolNode.leaf(
           icon: Icons.event_note_outlined,
           label: 'יומן עבודה',
-          // _openWorkLog takes (BuildContext) = the State context (mounted).
-          action: (ref, context) => _openWorkLog(this.context)),
+          // _openWorkLog takes (BuildContext) — pass the action's OWN context
+          // (the floating keyboard's, always mounted), not the State's, which
+          // is defunct once this screen is popped while the keyboard floats.
+          action: (ref, context) => _openWorkLog(context)),
       if (review.isNotEmpty)
         statusBranch('ממתין לאישור', Icons.inventory_2_outlined, review),
       if (active.isNotEmpty)
@@ -325,9 +331,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     ];
   }
 
-  void _open(TaskItem t) {
+  // [ctx] is the context to host the sheet in. The keyboard-tool leaf passes
+  // its OWN (floating, always-mounted) context so the sheet opens even after
+  // THIS screen was popped while the keyboard floats; the on-screen card taps
+  // (_Group.onTap tear-off) omit it and fall back to the State's own context,
+  // unchanged. Optional-positional keeps the `void Function(TaskItem)` tear-off
+  // assignable to _Group.onTap.
+  void _open(TaskItem t, [BuildContext? ctx]) {
     showModalBottomSheet<void>(
-      context: context,
+      context: ctx ?? context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       // CONTRACTOR-ONLY board → the detail sheet always runs as the manager

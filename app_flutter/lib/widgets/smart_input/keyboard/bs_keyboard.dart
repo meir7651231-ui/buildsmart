@@ -769,7 +769,7 @@ class _StripInput extends StatelessWidget {
         ),
       );
     }
-    return Row(children: children);
+    return Row(textDirection: TextDirection.rtl, children: children);
   }
 }
 

@@ -28,7 +28,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// no manual refresh. The visible '🔄 בדוק שוב' button simply re-reads (a no-op
 /// when nothing changed) so the affordance is explicit too.
 class DocsReadinessGate extends ConsumerWidget {
-  const DocsReadinessGate({
+  DocsReadinessGate({
     super.key,
     required this.role,
     required this.readiness,
@@ -181,12 +181,16 @@ class DocsReadinessGate extends ConsumerWidget {
     );
     // #101 keyboard mirror: the gate's own fix-it actions live on the grid
     // too. `kKbGlobal ?` keeps flag-off byte-identical (KbScreen unbuilt off).
-    return kKbGlobal ? KbScreen(tools: _kbTools(), child: body) : body;
+    return kKbGlobal ? KbScreen(tools: _kbTools, child: body) : body;
   }
+
+  /// This gate's own keyboard tools (live-mirror), built ONCE so the stable
+  /// list identity keeps KbScreen from re-pushing on every rebuild.
+  late final List<KbToolNode> _kbTools = _buildTools();
 
   /// The gate's fix-it actions, mirrored into the floating grid. Same targets
   /// as the on-screen [_GateButton]s / [_RecheckButton], picked by [role].
-  List<KbToolNode> _kbTools() {
+  List<KbToolNode> _buildTools() {
     if (role == BoardRole.worker) {
       return <KbToolNode>[
         KbToolNode.leaf(

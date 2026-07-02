@@ -625,7 +625,16 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
           );
           _stack.clear();
           if (nodes != null) _stack.add(nodes);
-          _baseLayer = nodes != null ? KbToolLayer.home : KbToolLayer.none;
+          // AMBIENT (not [KbToolLayer.home]): leave `_baseLayer` at `none` so the
+          // installed nodes are a CONTEXT base, exactly like [_syncContextToolBase]
+          // installs one (see its doc: a context base is ambient, `_baseLayer`
+          // stays `none`). This lets the sync's `_baseLayer == none` guard re-run
+          // on a tab/route change and RE-MIRROR the new screen while buttons-mode
+          // is still active — instead of `.home` pinning a stale base that blocks
+          // the sync. (Globe-cycle still dismisses via the first `_onKbCycle`
+          // branch.) `_lastDerivedBase` was cleared just above, so the next build
+          // installs the current context base cleanly.
+          _baseLayer = KbToolLayer.none;
         }
       });
 
