@@ -5,7 +5,7 @@
 // (_FavProductRow → showLipskeyProductSheet). This test seeds a favorite,
 // taps the tile, and asserts the LipskeyProductSheet opens.
 
-import 'package:buildsmart/data/lipskey_catalog.dart' show kLipskeyCatalog;
+import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show LipskeyProductSheet;
 import 'package:buildsmart/screens/smart_home_screen.dart' show SmartHomeBody;
@@ -27,9 +27,17 @@ void main() {
   testWidgets('tapping a favorite tile opens the product sheet', (t) async {
     await _loadFonts();
     SharedPreferences.setMockInitialValues({});
+    // Tall surface so the whole lazy home ListView (incl. the bottom מועדפים
+    // section + its ★ tile) builds — no fragile scroll finder needed.
+    t.view.physicalSize = const Size(1200, 5000);
+    t.view.devicePixelRatio = 1.0;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
 
-    // A real catalog product to favorite.
-    final product = kLipskeyCatalog.first;
+    // A real catalog product to favorite — seeded from the SAME source the
+    // favorites grid reads (catalogRepositoryProvider -> kCatalogProducts), so
+    // the toggled SKU is guaranteed present and its ★ tile renders.
+    final product = kCatalogProducts.first;
 
     late ProviderContainer container;
     await t.pumpWidget(
@@ -56,19 +64,10 @@ void main() {
     // No sheet yet.
     expect(find.byType(LipskeyProductSheet), findsNothing);
 
-    // The favorites section sits at the very bottom of the home body's lazy
-    // ListView (Key('catalog-list')) — scroll THAT list until the star-icon
-    // favorite tile builds and is in view.
-    final listScroll = find.descendant(
-      of: find.byKey(const Key('catalog-list')),
-      matching: find.byType(Scrollable),
-    );
-    await t.scrollUntilVisible(
-      find.byIcon(Icons.star),
-      250,
-      scrollable: listScroll.first,
-    );
-    await t.pumpAndSettle();
+    // The favorites section renders at the bottom of the tall list; its ★ tile
+    // is built and findable without scrolling.
+    expect(find.byKey(const Key('catalog-list')), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsWidgets);
 
     // Tap the favorite tile (the star-icon mini tile carrying this product).
     final tile = find.ancestor(
