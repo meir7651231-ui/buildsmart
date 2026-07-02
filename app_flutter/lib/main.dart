@@ -405,7 +405,27 @@ class BuildSmartApp extends ConsumerWidget {
             // mounted ABOVE the Navigator so it floats over pushed routes too.
             // Omitted when the flag is off → HomeShell mounts it as today
             // (byte-identical).
-            if (kKbGlobal) const _GlobalKeyboardOverlay(),
+            //
+            // Hosted in its OWN Overlay: this subtree is a Stack SIBLING of the
+            // app's Navigator, so on its own it has NO Overlay ancestor. Its
+            // interactive widgets — the FAB's Tooltip (shown on web mouse-hover),
+            // the keyboard's text-selection handles/magnifier, any dropdown —
+            // call Overlay.of() and would otherwise throw "No Overlay widget
+            // found" and freeze the screen (the crash the flag-ON cut-over hit).
+            // Positioned.fill + a single non-opaque initial entry: pointer events
+            // fall through the transparent regions to the app below (the screen
+            // stays independent & interactive — keyboard-is-navigation-OS), while
+            // route pushes keep going through the root bsNavigatorKey.
+            if (kKbGlobal)
+              Positioned.fill(
+                child: Overlay(
+                  initialEntries: [
+                    OverlayEntry(
+                      builder: (_) => const _GlobalKeyboardOverlay(),
+                    ),
+                  ],
+                ),
+              ),
           ],
         );
         // KB_GLOBAL focus-traversal robustness (flag-gated → flag-OFF
