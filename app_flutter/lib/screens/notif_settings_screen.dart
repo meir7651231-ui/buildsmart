@@ -1,3 +1,7 @@
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbNotifSettingsNodes;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -14,9 +18,16 @@ class NotifSettingsScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const NotifSettingsScreen());
 
+  /// STABLE [KbScreen] tool list — built once so the floating-keyboard mirror
+  /// never re-registers on rebuild. Tree-shaken with the [KbScreen] path off-flag.
+  static final List<KbToolNode> _kbNodes = kbNotifSettingsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS screen's tools ([_kbNodes]); reverts on pop.
+    // Pure pass-through (byte-identical) when the flag is off.
+    final Widget body = Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
@@ -54,6 +65,7 @@ class NotifSettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
@@ -804,13 +816,15 @@ class _SectionTile extends StatelessWidget {
 
   // Count only functional rows — exclude "בבנייה" placeholders and rows
   // that require a server connection (honestly disabled in this build).
-  int get _activeCount => children.where((w) => !_isUnderConstruction(w)).length;
+  int get _activeCount =>
+      children.where((w) => !_isUnderConstruction(w)).length;
 
   // For Apple review (kHideUnderConstruction) we render only the functional
   // rows; the placeholder rows stay defined in code (reversible) but are hidden.
-  List<Widget> get _visibleChildren => kHideUnderConstruction
-      ? children.where((w) => !_isUnderConstruction(w)).toList()
-      : children;
+  List<Widget> get _visibleChildren =>
+      kHideUnderConstruction
+          ? children.where((w) => !_isUnderConstruction(w)).toList()
+          : children;
 
   @override
   Widget build(BuildContext context) {
@@ -824,9 +838,7 @@ class _SectionTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       color: const Color(0xFFFFFFFF),
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -865,15 +877,19 @@ class _SectionTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          subtitle: underConstruction
-              ? const Padding(
-                  padding: EdgeInsets.only(top: 2),
-                  child: Text(
-                    'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
-                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-                  ),
-                )
-              : null,
+          subtitle:
+              underConstruction
+                  ? const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Text(
+                      'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )
+                  : null,
           children: _visibleChildren,
         ),
       ),
@@ -911,16 +927,17 @@ class _SwitchRow extends StatelessWidget implements _Inert {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
-      subtitle: requiresServer
-          ? const Text(
-              'דורש חיבור שרת — לא זמין בגרסה זו',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            )
-          : underConstruction
+      subtitle:
+          requiresServer
               ? const Text(
-                  'בבנייה — עדיין לא משפיע',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-                )
+                'דורש חיבור שרת — לא זמין בגרסה זו',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              )
+              : underConstruction
+              ? const Text(
+                'בבנייה — עדיין לא משפיע',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              )
               : null,
       value: value,
       activeColor: BsTokens.brand,

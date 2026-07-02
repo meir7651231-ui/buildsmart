@@ -14,6 +14,8 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart'
     show CreditExplainScreen;
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbManagerDashboardNodes;
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
@@ -26,6 +28,8 @@ import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -63,6 +67,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const ManagerDashboardScreen());
 
+  static final List<KbToolNode> _kbNodes = kbManagerDashboardNodes();
+
   /// Number of top tabs (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול);
   /// kept in lockstep with [_kManagerTabs] (asserted in the screen's test).
   static const int tabCount = 4;
@@ -78,163 +84,160 @@ class ManagerDashboardScreen extends ConsumerWidget {
     }
     final active = ref.watch(managerTabProvider);
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
-        appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          titleSpacing: BsTokens.space4,
-          title: const Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'מרכז השליטה',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 20,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'מנהל המערכת',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: BsTokens.mutedLight,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _LivePill(),
-            ],
-          ),
-          actions: [
-            // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
-            // themselves in a bubble (the 💡 + ✕ stay tappable to toggle/exit).
-            // (The 🤖 Co-Pilot entry is the cockpit HERO card — not an AppBar
-            // action — to keep the 5-action bar from overflowing on narrow widths.)
-            const HelpToggleButton(),
-            // Each persona reaches profile + settings from its OWN dashboard
-            // (product-owner: separately per role). Three muted AppBar actions
-            // sit before the '‹ יציאה' exit; tooltips double as Semantics
-            // labels for a11y. RTL: actions lay out leading→trailing, so this
-            // reads 💡 · 💬 שיחות · profile · settings · exit from the right.
-            //
-            // 🔒 ISOLATION (SPEC §2.5): the chat action ONLY pushes the manager's
-            // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
-            // returns to THIS manager dashboard; no route to home_shell, the role
-            // picker, or any other persona's board.
-            //
-            // The default ('contractor') thread list admits worker-audience
-            // threads the manager participates in (`_visibleToAudience`,
-            // chats_screen.dart) — so 'th-worker-manager' (the worker's 'מנהל'
-            // thread, rendered here as 'עובד — רן') is readable, not write-only.
-            HelpTarget(
-              title: 'שיחות',
-              body:
-                  'פותח את מרכז השיחות של מנהל המערכת — קריאה ומענה לשרשורי '
-                  'הצ׳אט מול עובדים, קבלנים, חנויות ושליחים. נפתח כמסך עצמאי '
-                  'וחוזר אחורה ללוח; אינו מתנתק ואינו מחליף תפקיד.',
-              child: IconButton(
-                tooltip: 'שיחות',
-                icon: const Icon(
-                  Icons.chat_bubble_outline,
-                  color: BsTokens.mutedLight,
-                ),
-                onPressed:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder:
-                            (_) => const ChatsScreen(persona: BsRole.manager),
-                      ),
-                    ),
-              ),
-            ),
-            HelpTarget(
-              title: 'אזור אישי',
-              body:
-                  'פותח את האזור האישי של מנהל המערכת: פרטי החשבון, סטטיסטיקת '
-                  'הזמנות חיה, ומעבר להגדרות ולהחלפת תפקיד מוגנת בקוד.',
-              child: IconButton(
-                tooltip: 'פרופיל',
-                icon: const Icon(
-                  Icons.person_outline,
-                  color: BsTokens.mutedLight,
-                ),
-                // #20 — the manager's OWN profile (session + role-switch +
-                // logout), not the contractor's ProfileScreen.
-                onPressed:
-                    () => Navigator.of(
-                      context,
-                    ).push(ManagerProfileScreen.route()),
-              ),
-            ),
-            HelpTarget(
-              title: 'הגדרות הקטלוג',
-              body:
-                  'פותח את הגדרות הקטלוג והאפליקציה — שליטת No-Code על '
-                  'הפרמטרים שכל הקבלנים רואים.',
-              child: IconButton(
-                tooltip: 'הגדרות',
-                icon: const Icon(
-                  Icons.settings_outlined,
-                  color: BsTokens.mutedLight,
-                ),
-                onPressed:
-                    () => Navigator.of(context).push(
-                      // Manager = platform-admin: the No-Code catalog/app admin
-                      // WITHOUT the contractor profile row (governance S0 fix).
-                      CatalogSettingsScreen.route(showProfileRow: false),
-                    ),
-              ),
-            ),
-            // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").
-            // ה-session נשאר קבוע; אין כפתור logout. '‹ יציאה' למטה היא
-            // ניווט-בלבד (Navigator.maybePop) — חוזרת אחורה בלי לנקות את ה-session.
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(
-                '‹ יציאה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        body: Column(
+    final Widget scaffold = Scaffold(
+      backgroundColor: BsTokens.bgLight,
+      appBar: AppBar(
+        backgroundColor: BsTokens.cardLight,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: BsTokens.space4,
+        title: const Row(
           children: [
-            _ManagerToggle(active: active),
             Expanded(
-              child: IndexedStack(
-                index: active,
-                children: const [
-                  // The manager screen is now COMPLETE — every tab is real, NO
-                  // "בקרוב" placeholder remains. 📊 לוח בקרה (M2) — the dashboard
-                  // cockpit, live over the shared orders engine. 🚚 הזמנות (M3) —
-                  // the live order list + the manager's god-mode stage-advance.
-                  // 👥 לקוחות (M4) — the live customer list + credit. 🛠️ ניהול
-                  // (M5) — the 5 management tools (the FINAL tab).
-                  _DashboardTab(),
-                  _OrdersTab(),
-                  _CustomersTab(),
-                  _ManageTab(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'מרכז השליטה',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'מנהל המערכת',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                  ),
                 ],
               ),
             ),
+            _LivePill(),
           ],
         ),
+        actions: [
+          // #31 — 💡 enters "מצב היכרות"; the wrapped controls then explain
+          // themselves in a bubble (the 💡 + ✕ stay tappable to toggle/exit).
+          // (The 🤖 Co-Pilot entry is the cockpit HERO card — not an AppBar
+          // action — to keep the 5-action bar from overflowing on narrow widths.)
+          const HelpToggleButton(),
+          // Each persona reaches profile + settings from its OWN dashboard
+          // (product-owner: separately per role). Three muted AppBar actions
+          // sit before the '‹ יציאה' exit; tooltips double as Semantics
+          // labels for a11y. RTL: actions lay out leading→trailing, so this
+          // reads 💡 · 💬 שיחות · profile · settings · exit from the right.
+          //
+          // 🔒 ISOLATION (SPEC §2.5): the chat action ONLY pushes the manager's
+          // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
+          // returns to THIS manager dashboard; no route to home_shell, the role
+          // picker, or any other persona's board.
+          //
+          // The default ('contractor') thread list admits worker-audience
+          // threads the manager participates in (`_visibleToAudience`,
+          // chats_screen.dart) — so 'th-worker-manager' (the worker's 'מנהל'
+          // thread, rendered here as 'עובד — רן') is readable, not write-only.
+          HelpTarget(
+            title: 'שיחות',
+            body:
+                'פותח את מרכז השיחות של מנהל המערכת — קריאה ומענה לשרשורי '
+                'הצ׳אט מול עובדים, קבלנים, חנויות ושליחים. נפתח כמסך עצמאי '
+                'וחוזר אחורה ללוח; אינו מתנתק ואינו מחליף תפקיד.',
+            child: IconButton(
+              tooltip: 'שיחות',
+              icon: const Icon(
+                Icons.chat_bubble_outline,
+                color: BsTokens.mutedLight,
+              ),
+              onPressed:
+                  () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder:
+                          (_) => const ChatsScreen(persona: BsRole.manager),
+                    ),
+                  ),
+            ),
+          ),
+          HelpTarget(
+            title: 'אזור אישי',
+            body:
+                'פותח את האזור האישי של מנהל המערכת: פרטי החשבון, סטטיסטיקת '
+                'הזמנות חיה, ומעבר להגדרות ולהחלפת תפקיד מוגנת בקוד.',
+            child: IconButton(
+              tooltip: 'פרופיל',
+              icon: const Icon(
+                Icons.person_outline,
+                color: BsTokens.mutedLight,
+              ),
+              // #20 — the manager's OWN profile (session + role-switch +
+              // logout), not the contractor's ProfileScreen.
+              onPressed:
+                  () =>
+                      Navigator.of(context).push(ManagerProfileScreen.route()),
+            ),
+          ),
+          HelpTarget(
+            title: 'הגדרות הקטלוג',
+            body:
+                'פותח את הגדרות הקטלוג והאפליקציה — שליטת No-Code על '
+                'הפרמטרים שכל הקבלנים רואים.',
+            child: IconButton(
+              tooltip: 'הגדרות',
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: BsTokens.mutedLight,
+              ),
+              onPressed:
+                  () => Navigator.of(context).push(
+                    // Manager = platform-admin: the No-Code catalog/app admin
+                    // WITHOUT the contractor profile row (governance S0 fix).
+                    CatalogSettingsScreen.route(showProfileRow: false),
+                  ),
+            ),
+          ),
+          // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").
+          // ה-session נשאר קבוע; אין כפתור logout. '‹ יציאה' למטה היא
+          // ניווט-בלבד (Navigator.maybePop) — חוזרת אחורה בלי לנקות את ה-session.
+          TextButton(
+            onPressed: () => Navigator.of(context).maybePop(),
+            child: const Text(
+              '‹ יציאה',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            ),
+          ),
+        ],
       ),
+      body: Column(
+        children: [
+          _ManagerToggle(active: active),
+          Expanded(
+            child: IndexedStack(
+              index: active,
+              children: const [
+                // The manager screen is now COMPLETE — every tab is real, NO
+                // "בקרוב" placeholder remains. 📊 לוח בקרה (M2) — the dashboard
+                // cockpit, live over the shared orders engine. 🚚 הזמנות (M3) —
+                // the live order list + the manager's god-mode stage-advance.
+                // 👥 לקוחות (M4) — the live customer list + credit. 🛠️ ניהול
+                // (M5) — the 5 management tools (the FINAL tab).
+                _DashboardTab(),
+                _OrdersTab(),
+                _CustomersTab(),
+                _ManageTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: kKbGlobal ? KbScreen(tools: _kbNodes, child: scaffold) : scaffold,
     );
   }
 }
@@ -482,7 +485,9 @@ class _CopilotHero extends ConsumerWidget {
                           ? 'מה בוער? מי הלקוח הכי שווה? — אני עונה מהנתונים החיים'
                           : 'מודיעין-עסקי AI · דורש חיבור לשרת',
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 12.5), // full white — white70 on brand failed contrast
+                        color: Colors.white,
+                        fontSize: 12.5,
+                      ), // full white — white70 on brand failed contrast
                     ),
                   ],
                 ),
@@ -1656,7 +1661,8 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     // S-connect: the fleet ceiling is the LIVE computeCredit sum (byte-identical
     // OFF == Σ c.creditLimit, the proven invariant); fall back to the seed sum
     // while it resolves so the % never flickers.
-    final totalCredit = ref.watch(fleetCreditProvider).valueOrNull ??
+    final totalCredit =
+        ref.watch(fleetCreditProvider).valueOrNull ??
         views.fold<int>(0, (s, v) => s + v.customer.creditLimit);
     final fleetPct =
         totalCredit == 0
@@ -1897,10 +1903,11 @@ class _CustomerCard extends ConsumerWidget {
     // ceiling before — only the detail sheet was wired (C1/A13).
     final liveLimit =
         ref.watch(customerCreditProvider(c.name)).valueOrNull?.creditLimit ??
-            c.creditLimit;
-    final pct = liveLimit == 0
-        ? 0
-        : ((c.totalSpend / liveLimit) * 100).round().clamp(0, 100);
+        c.creditLimit;
+    final pct =
+        liveLimit == 0
+            ? 0
+            : ((c.totalSpend / liveLimit) * 100).round().clamp(0, 100);
     final status = pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
     final statusLabel = _kCustomerStatusLabel[status] ?? status;
     final statusColor = _kCustomerStatusColor[status] ?? BsTokens.brand;
@@ -2173,15 +2180,16 @@ class _CustomerDetailSheet extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    CreditExplainScreen.route(
-                      name: c.name,
-                      creditLimit: creditLimit,
-                      used: liveTotalSpend,
-                      balance: balance,
-                      pct: livePct,
-                    ),
-                  ),
+                  onPressed:
+                      () => Navigator.of(context).push(
+                        CreditExplainScreen.route(
+                          name: c.name,
+                          creditLimit: creditLimit,
+                          used: liveTotalSpend,
+                          balance: balance,
+                          pct: livePct,
+                        ),
+                      ),
                   icon: const Text('💳'),
                   label: const Text('הסבר אשראי'),
                 ),

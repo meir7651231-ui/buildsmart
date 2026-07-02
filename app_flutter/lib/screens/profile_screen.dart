@@ -1,4 +1,6 @@
 import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbProfileNodes;
 import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
@@ -6,6 +8,8 @@ import 'package:buildsmart/screens/role_request_sheet.dart';
 import 'package:buildsmart/screens/role_requests_inbox_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -30,6 +34,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const ProfileScreen());
+
+  static final List<KbToolNode> _kbNodes = kbProfileNodes();
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -174,7 +180,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final auth = ref.watch(authStateProvider);
     final hasAuthGateway = ref.watch(authGatewayProvider) != null;
     final roleLocked = ref.watch(roleSwitchLockedProvider);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -326,6 +332,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: ProfileScreen._kbNodes, child: body) : body;
   }
 }
 

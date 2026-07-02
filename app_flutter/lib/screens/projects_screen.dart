@@ -14,8 +14,12 @@
 // swap as a wire hook — see the build report WIRE notes.
 
 import 'package:buildsmart/screens/budget_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbProjectsNodes;
 import 'package:buildsmart/screens/smart_project_screen.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -35,10 +39,12 @@ class ProjectsScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const ProjectsScreen());
 
+  static final List<KbToolNode> _kbNodes = kbProjectsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(projectsProvider);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -144,6 +150,7 @@ class ProjectsScreen extends ConsumerWidget {
         ),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 
   // switchProject — proto :7584. Stash the outgoing live cart + load the

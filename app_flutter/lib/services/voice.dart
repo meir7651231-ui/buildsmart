@@ -21,19 +21,30 @@ class VoiceService {
 
   Future<bool> _ensureInitialized() async {
     if (_initialized) return true;
-    return _initialized = await _engine.initialize(
-      // Engine errors (mic permission, network, no-match…) end the active
-      // session honestly — no more silent `(_) {}` swallow.
-      onError: (e) => _failSession(e.errorMsg),
-      onStatus: (status) {
-        // The plugin reports BOTH 'done' and 'doneNoResult' as 'done' to this
-        // listener (speech_to_text 7.x rewrites the status) — so a 'done'
-        // that arrives without any final result is the no-result case.
-        if (status == 'done' && !_sessionGotResult) {
-          _failSession('no-result');
-        }
-      },
-    );
+    // web-safety — the speech plugin can throw at the PLATFORM BOUNDARY: a
+    // `MissingPluginException` on a web build where the STT plugin isn't
+    // registered, or a `PlatformException` mid-handshake. The engine raises it
+    // on a JS-interop microtask that BYPASSES our error zone, so an unguarded
+    // throw here surfaces as an UNCAUGHT async error that can derail an
+    // unrelated flow. Catch it and degrade to "no speech on this platform"
+    // (`false`) — the honest, non-fatal signal callers already handle.
+    try {
+      return _initialized = await _engine.initialize(
+        // Engine errors (mic permission, network, no-match…) end the active
+        // session honestly — no more silent `(_) {}` swallow.
+        onError: (e) => _failSession(e.errorMsg),
+        onStatus: (status) {
+          // The plugin reports BOTH 'done' and 'doneNoResult' as 'done' to this
+          // listener (speech_to_text 7.x rewrites the status) — so a 'done'
+          // that arrives without any final result is the no-result case.
+          if (status == 'done' && !_sessionGotResult) {
+            _failSession('no-result');
+          }
+        },
+      );
+    } on Object {
+      return false;
+    }
   }
 
   /// Routes a failure to the ACTIVE session's [listen]-onError exactly once;
@@ -64,28 +75,45 @@ class VoiceService {
     _sessionActive = true;
     _sessionGotResult = false;
     _sessionOnError = onError;
-    await _engine.listen(
-      onResult: (r) {
-        if (r.finalResult) {
-          _sessionGotResult = true;
-          _sessionActive = false;
-          _sessionOnError = null;
-          onFinal(r.recognizedWords);
-        }
-      },
-      listenOptions: stt.SpeechListenOptions(
-        partialResults: false,
-        cancelOnError: true,
-        localeId: localeId,
-      ),
-    );
+    // Same platform-boundary guard as init: starting a session can throw on web
+    // (MissingPluginException) AFTER a successful initialize. Clear the
+    // half-open session and report `false` rather than leaking the throw.
+    try {
+      await _engine.listen(
+        onResult: (r) {
+          if (r.finalResult) {
+            _sessionGotResult = true;
+            _sessionActive = false;
+            _sessionOnError = null;
+            onFinal(r.recognizedWords);
+          }
+        },
+        listenOptions: stt.SpeechListenOptions(
+          partialResults: false,
+          cancelOnError: true,
+          localeId: localeId,
+        ),
+      );
+    } on Object {
+      _sessionActive = false;
+      _sessionOnError = null;
+      return false;
+    }
     return true;
   }
 
   /// Stops the active session. A manual stop is NOT an error by itself: the
   /// engine may still deliver the final transcript right after; if it
   /// doesn't, the no-result path above routes through [listen]'s onError.
-  Future<void> stop() => _engine.stop();
+  Future<void> stop() async {
+    // A manual stop with no live engine/session (or on a platform without the
+    // plugin) must never throw — same web-safety discipline as the rest.
+    try {
+      await _engine.stop();
+    } on Object {
+      // nothing to stop — ignore
+    }
+  }
 
   /// Web Speech API has known stability issues in some browsers; surface
   /// a flag callers can use to render a degraded UI on web.

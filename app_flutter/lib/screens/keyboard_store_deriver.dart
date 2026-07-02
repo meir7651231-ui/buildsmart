@@ -26,11 +26,12 @@
 // persistence) is IDENTICAL for both tabs — one adapter, two derivers. This file
 // adds NO new carrier types; it only adds the store-flavored arms.
 //
-// THE THIRD DISPATCH PATH (same as עדכונים). Dynamic cart/order/service chips
-// belong to NEITHER of the keyboard's two existing dispatch maps
-// (`_drillIndexByChip` / `_destByChip`), so they ride the THIRD map `_runByChip`
-// (chip -> `void Function(WidgetRef, BuildContext)`) the keyboard checks BEFORE
-// the product-word fallback. The entry SECTION chips at the root (הסל שלי /
+// THE SECOND DISPATCH PATH (same as עדכונים). Dynamic cart/order/service chips
+// are not static registry destinations, so they belong to NEITHER the keyboard's
+// `_destByChip` map nor the product-word fallback; they ride the SECOND map
+// `_runByChip` (chip -> `void Function(WidgetRef, BuildContext)`) the keyboard
+// checks after `_destByChip` and before the product-word fallback. The entry
+// SECTION chips at the root (הסל שלי /
 // ההזמנות שלי / שירותים) stay REAL [KbDestination]s in `destByChip` (they reuse
 // the registry's existing store-section runs), so only the truly-dynamic per-item
 // chips use `runByChip`. The maps are pairwise-disjoint BY CONSTRUCTION here

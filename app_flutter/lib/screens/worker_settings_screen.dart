@@ -1,9 +1,13 @@
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbWorkerSettingsNodes;
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +28,8 @@ class WorkerSettingsScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const WorkerSettingsScreen());
 
+  static final List<KbToolNode> _kbNodes = kbWorkerSettingsNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 🔒 BOARD GATE (חוק: מבחוץ לא רואים כלום) — this is a worker-board screen:
@@ -33,7 +39,7 @@ class WorkerSettingsScreen extends ConsumerWidget {
       return WelcomeScreen(boardRole: BoardRole.worker);
     }
 
-    return Scaffold(
+    final Widget body = Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
@@ -64,6 +70,7 @@ class WorkerSettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

@@ -29,12 +29,13 @@
 // sees `List<String>` chips + `Set<String>` destinations — this file imports
 // NOTHING into the pure keyboard.
 //
-// THE THIRD DISPATCH PATH. Dynamic conversation/notification chips belong to
-// NEITHER of the keyboard's two existing dispatch maps (`_drillIndexByChip` /
-// `_destByChip`), so the keyboard adds a THIRD map `_runByChip` (chip ->
-// `void Function(WidgetRef, BuildContext)`) checked BEFORE the product-word
-// fallback. This deriver is what POPULATES that map: the 6 notif type chips set
-// `notifSectionProvider`; each conversation chip sets `updatesChatOpenProvider`.
+// THE SECOND DISPATCH PATH. Dynamic conversation/notification chips are not static
+// registry destinations, so they belong to NEITHER the keyboard's `_destByChip`
+// map nor the product-word fallback; the keyboard adds a SECOND map `_runByChip`
+// (chip -> `void Function(WidgetRef, BuildContext)`) checked AFTER `_destByChip`
+// and BEFORE the product-word fallback. This deriver is what POPULATES that map:
+// the 6 notif type chips set `notifSectionProvider`; each conversation chip sets
+// `updatesChatOpenProvider`.
 // The entry section chips (שיחות/התראות) stay REAL [KbDestination]s in
 // `destByChip` (they reuse the registry's existing `_openUpdatesSub` runs), so
 // only the truly-dynamic per-item chips use `runByChip`. The three maps are
@@ -67,18 +68,17 @@ const int _kUpdatesRowCap = 5;
 typedef KbRunByChip = void Function(WidgetRef ref, BuildContext context);
 
 /// A PUBLIC, leaf-ownable mirror of the floating keyboard's private `_PredRow`:
-/// the prediction-row [chips] plus the THREE dispatch surfaces the keyboard
-/// needs. The keyboard adapts this into its own `_PredRow` in `_rowFor` (a
-/// field-for-field copy); it carries no `drillIndexByChip` because the deriver
-/// never drills (the עדכונים row is tab/data chips, never tool-tile chips).
+/// the prediction-row [chips] plus the TWO dispatch surfaces the keyboard needs.
+/// The keyboard adapts this into its own `_PredRow` in `_rowFor` (a field-for-field
+/// copy).
 ///
 ///   • [chips] — the row labels, already ordered + de-duped + capped by the
 ///     producing arm.
 ///   • [destByChip] — chip -> [KbDestination] for the entry SECTION chips
-///     (שיחות/התראות): dispatch (ii) runs the registry's nav action.
+///     (שיחות/התראות): dispatch (i) runs the registry's nav action.
 ///   • [runByChip] — chip -> [KbRunByChip] for the truly-dynamic chips
-///     (conversation-open / notif-type): dispatch (iii), the NEW map the keyboard
-///     checks before the product-word fallback.
+///     (conversation-open / notif-type): dispatch (ii), the map the keyboard
+///     checks after [destByChip] and before the product-word fallback.
 ///   • [destinationChips] — the subset of [chips] that get the nav glyph in the
 ///     pure keyboard. Defaults to (destByChip ∪ runByChip) keys: every עדכונים
 ///     chip is a one-tap nav target (a section, a type filter, or a conversation
@@ -103,10 +103,9 @@ class KbPredRow {
         _destinationChips = destinationChips == null
             ? null
             : Set<String>.unmodifiable(destinationChips) {
-    // DISPATCH DISJOINTNESS (plan, lenses): the dispatch maps the keyboard checks
-    // in order must be pairwise-disjoint so the fall-through stays STRUCTURAL, not
-    // coincidental. The deriver never drills (no drillIndexByChip), so the only
-    // pair that can collide is destByChip vs runByChip — assert it empty.
+    // DISPATCH DISJOINTNESS (plan, lenses): the two dispatch maps the keyboard
+    // checks in order must be disjoint so the fall-through stays STRUCTURAL, not
+    // coincidental — assert destByChip vs runByChip share no key.
     assert(
       destByChip.keys.toSet().intersection(runByChip.keys.toSet()).isEmpty,
       'KbPredRow: destByChip and runByChip key-sets must be disjoint '

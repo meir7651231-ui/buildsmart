@@ -16,10 +16,13 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
 // LIVE review queue projection for the parallel contractor-approval surface.
 // apple-readiness (merge): the _TaskSheet photo uses the shared taskPhotoWidget.
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart'
@@ -56,10 +59,61 @@ class TasksScreen extends ConsumerStatefulWidget {
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   int _worker = 0; // proto `activeWorker=0`
 
+  /// LIVE-MIRROR dive tree: the board's own tools + a BRANCH per non-empty
+  /// status that drills into the ACTUAL tasks (tap a task → its detail). Built
+  /// fresh each build so it reflects the live task list.
+  List<KbToolNode> _buildKbTree(List<TaskItem> tasks) {
+    final review = tasks.where((t) => t.status == 'review').toList();
+    final active = tasks
+        .where((t) => t.status == 'active' || t.status == 'rejected')
+        .toList();
+    final pending = tasks.where((t) => t.status == 'pending').toList();
+    final done = tasks.where((t) => t.status == 'done').toList();
+    KbToolNode taskLeaf(TaskItem t) => KbToolNode.leaf(
+          icon: Icons.description_outlined,
+          label: t.name,
+          // _open takes (TaskItem, BuildContext) — pass the action's OWN
+          // context (the floating keyboard's, always mounted), not the State's,
+          // which is defunct once this screen is popped while the keyboard
+          // floats. The live task `t` is captured for the sheet.
+          action: (ref, context) => _open(t, context),
+        );
+    KbToolNode statusBranch(String label, IconData icon, List<TaskItem> ts) =>
+        KbToolNode.branch(
+          icon: icon,
+          label: '$label (${ts.length})',
+          children: [for (final t in ts) taskLeaf(t)],
+        );
+    return <KbToolNode>[
+      KbToolNode.leaf(
+          icon: Icons.add_task,
+          label: 'משימה חדשה',
+          // _openAuthor takes (BuildContext) — pass the action's OWN context
+          // (the floating keyboard's, always mounted), not the State's, which
+          // is defunct once this screen is popped while the keyboard floats.
+          action: (ref, context) => _openAuthor(context)),
+      KbToolNode.leaf(
+          icon: Icons.event_note_outlined,
+          label: 'יומן עבודה',
+          // _openWorkLog takes (BuildContext) — pass the action's OWN context
+          // (the floating keyboard's, always mounted), not the State's, which
+          // is defunct once this screen is popped while the keyboard floats.
+          action: (ref, context) => _openWorkLog(context)),
+      if (review.isNotEmpty)
+        statusBranch('ממתין לאישור', Icons.inventory_2_outlined, review),
+      if (active.isNotEmpty)
+        statusBranch('בביצוע', Icons.build_outlined, active),
+      if (pending.isNotEmpty)
+        statusBranch('ממתינות', Icons.hourglass_empty, pending),
+      if (done.isNotEmpty)
+        statusBranch('הושלמו', Icons.check_circle_outline, done),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -93,6 +147,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         ),
       ),
     );
+    // LIVE-MIRROR: under KB_GLOBAL the keyboard shows THIS board's DIVE tree
+    // (new task / work log + a branch per non-empty status that drills into the
+    // real tasks), not the tab fallback. Flag-off → pass-through, byte-identical
+    // (the gate short-circuits before _buildKbTree runs).
+    return kKbGlobal ? KbScreen(tools: _buildKbTree(tasks), child: body) : body;
   }
 
   // ── MANAGER view (proto :8068-8081) ──────────────────────────────────────
@@ -272,9 +331,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     ];
   }
 
-  void _open(TaskItem t) {
+  // [ctx] is the context to host the sheet in. The keyboard-tool leaf passes
+  // its OWN (floating, always-mounted) context so the sheet opens even after
+  // THIS screen was popped while the keyboard floats; the on-screen card taps
+  // (_Group.onTap tear-off) omit it and fall back to the State's own context,
+  // unchanged. Optional-positional keeps the `void Function(TaskItem)` tear-off
+  // assignable to _Group.onTap.
+  void _open(TaskItem t, [BuildContext? ctx]) {
     showModalBottomSheet<void>(
-      context: context,
+      context: ctx ?? context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       // CONTRACTOR-ONLY board → the detail sheet always runs as the manager

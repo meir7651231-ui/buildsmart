@@ -23,12 +23,16 @@ import 'package:buildsmart/screens/courier_attendance_screen.dart';
 import 'package:buildsmart/screens/courier_certs_screen.dart';
 import 'package:buildsmart/screens/courier_forms_screen.dart';
 import 'package:buildsmart/screens/courier_settings_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbCourierProfileNodes;
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_payslips_sheet.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_profile_store.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -50,6 +54,8 @@ class CourierProfileScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const CourierProfileScreen());
 
+  static final List<KbToolNode> _kbNodes = kbCourierProfileNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 🔒 BOARD GATE (חוק: מבחוץ לא רואים כלום) — אחרי logout/החלפת-תפקיד
@@ -59,7 +65,7 @@ class CourierProfileScreen extends ConsumerWidget {
       return const WelcomeScreen(boardRole: BoardRole.courier);
     }
 
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -80,6 +86,7 @@ class CourierProfileScreen extends ConsumerWidget {
         body: const SafeArea(child: CourierProfileBody(standalone: true)),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

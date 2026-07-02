@@ -10,6 +10,8 @@ import 'package:buildsmart/screens/courier_profile_screen.dart';
 import 'package:buildsmart/screens/courier_reports_tab.dart';
 import 'package:buildsmart/screens/courier_settings_screen.dart';
 import 'package:buildsmart/screens/docs_readiness_gate.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbCourierDashboardNodes;
 import 'package:buildsmart/screens/persona_pod_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_notifs_sheet.dart'
@@ -18,6 +20,8 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/courier_profile_store.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
@@ -90,6 +94,8 @@ class CourierDashboardScreen extends ConsumerStatefulWidget {
 
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const CourierDashboardScreen());
+
+  static final List<KbToolNode> _kbNodes = kbCourierDashboardNodes();
 
   @override
   ConsumerState<CourierDashboardScreen> createState() =>
@@ -242,7 +248,7 @@ class _CourierDashboardScreenState
     final vehicle = _vehicle;
     if (vehicle == null) return _vehicleGate(preferred);
 
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -325,6 +331,9 @@ class _CourierDashboardScreenState
         ),
       ),
     );
+    return kKbGlobal
+        ? KbScreen(tools: CourierDashboardScreen._kbNodes, child: body)
+        : body;
   }
 
   /// F-30 — "סוג רכב מועדף" מפרופיל-השליח (#86.1) של ה-username המחובר,

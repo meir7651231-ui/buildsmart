@@ -15,7 +15,10 @@ import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
 import 'package:buildsmart/logic/price_estimate.dart';
 import 'package:buildsmart/screens/audit_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/saved_projects.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/widgets/chain_diagram.dart';
@@ -210,6 +213,58 @@ String _productHint(LipskeyCatalogProduct p) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+/// Action hooks the mounted [InstallStudioScreen] publishes so the floating
+/// keyboard's own tools can drive it against the live chain/temp providers.
+class InstallStudioHooks {
+  const InstallStudioHooks({
+    required this.createList,
+    required this.addPart,
+    required this.openProjects,
+  });
+  final VoidCallback createList;
+  final VoidCallback addPart;
+  final VoidCallback openProjects;
+}
+
+/// Set by [InstallStudioScreen] while mounted (a post-frame publish); read by
+/// [kbInstallStudioNodes]. A plain hook registry so the keyboard tools reach the
+/// studio's own dock buttons without the screen exposing its State. Null (no-op)
+/// while the screen is not mounted.
+final installStudioActionsProvider =
+    StateProvider<InstallStudioHooks?>((_) => null);
+
+/// The studio's OWN keyboard tools (live-mirror): the same actions as its
+/// on-screen dock — build the shopping list, add a part, open saved projects —
+/// plus a jump to the audit. So the floating keyboard MIRRORS this screen
+/// instead of falling back to the catalog tools. Actions route through
+/// [installStudioActionsProvider]; a null registry no-ops.
+List<KbToolNode> kbInstallStudioNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.bolt,
+        label: 'רשימת קנייה',
+        action: (ref, context) =>
+            ref.read(installStudioActionsProvider)?.createList(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.add,
+        label: 'הוסף חלק',
+        action: (ref, context) =>
+            ref.read(installStudioActionsProvider)?.addPart(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.folder_open_outlined,
+        label: 'פרויקטים',
+        action: (ref, context) =>
+            ref.read(installStudioActionsProvider)?.openProjects(),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.science_outlined,
+        label: 'אודיט',
+        action: (ref, context) => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const AuditScreen())),
+      ),
+    ];
+
 class InstallStudioScreen extends ConsumerStatefulWidget {
   const InstallStudioScreen({super.key});
   @override
@@ -224,6 +279,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   bool _showTutorial = false;
   final TextEditingController _describeCtrl = TextEditingController();
 
+  /// This screen's own keyboard tools (live-mirror), built ONCE so the stable
+  /// list identity keeps KbScreen from re-pushing on every rebuild.
+  late final List<KbToolNode> _kbTools = kbInstallStudioNodes();
+
   @override
   void initState() {
     super.initState();
@@ -234,6 +293,29 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       _flow.repeat();
     }
     _checkFirstVisit();
+    // Publish this screen's dock actions so the floating keyboard's tools drive
+    // it (list / add / projects) against the live chain/temp providers. Post-
+    // frame (a provider write during the parent build is illegal); each hook is
+    // mounted-guarded so a late tap after unmount is a no-op.
+    if (kKbGlobal) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(installStudioActionsProvider.notifier).state =
+            InstallStudioHooks(
+          createList: () {
+            if (mounted) {
+              _assemble(ref.read(chainProvider), ref.read(lineMaxTempProvider));
+            }
+          },
+          addPart: () {
+            if (mounted) _openPicker(ref.read(lineMaxTempProvider));
+          },
+          openProjects: () {
+            if (mounted) _openProjects();
+          },
+        );
+      });
+    }
   }
 
   Future<void> _checkFirstVisit() async {
@@ -331,7 +413,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   Widget build(BuildContext context) {
     final chain = ref.watch(chainProvider);
     final temp = ref.watch(lineMaxTempProvider);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: _void0,
@@ -375,6 +457,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    // LIVE-MIRROR: under KB_GLOBAL this screen shows ITS OWN keyboard tools
+    // (list / add / projects / audit), not the catalog fallback. Flag-off →
+    // pass-through, byte-identical.
+    return kKbGlobal ? KbScreen(tools: _kbTools, child: body) : body;
   }
 
   // ── header: title + live system legend ──────────────────────────────────────

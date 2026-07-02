@@ -7,6 +7,13 @@ import 'package:flutter/material.dart';
 final GlobalKey<ScaffoldMessengerState> bsMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
+/// Root [Navigator] key — handed to `MaterialApp.navigatorKey` in main.dart. Lets
+/// the APP-GLOBAL floating keyboard (mounted ABOVE the Navigator under kKbGlobal)
+/// reach the live Navigator: the keyboard's own context sits above the Navigator,
+/// so it routes nav actions through this key's OVERLAY context instead (a
+/// Navigator descendant, where `Navigator.of` + sheets resolve).
+final GlobalKey<NavigatorState> bsNavigatorKey = GlobalKey<NavigatorState>();
+
 /// Toast helper — equivalent of app/src/store/toast-store.ts showToast().
 /// Brief, bottom-of-screen notification that fades on its own.
 void showToast(

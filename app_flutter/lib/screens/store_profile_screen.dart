@@ -24,12 +24,16 @@
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbStoreProfileNodes;
 import 'package:buildsmart/screens/store_dashboard_screen.dart'
     show SupplierSettingsScreen;
 import 'package:buildsmart/screens/store_documents_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/store_profile_store.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -51,6 +55,8 @@ class StoreProfileScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const StoreProfileScreen());
 
+  static final List<KbToolNode> _kbNodes = kbStoreProfileNodes();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 🔒 BOARD GATE (חוק: מבחוץ לא רואים כלום) — אחרי logout/החלפת-תפקיד
@@ -60,7 +66,7 @@ class StoreProfileScreen extends ConsumerWidget {
       return const WelcomeScreen(boardRole: BoardRole.store);
     }
 
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -79,6 +85,7 @@ class StoreProfileScreen extends ConsumerWidget {
         body: const SafeArea(child: StoreProfileBody(standalone: true)),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 

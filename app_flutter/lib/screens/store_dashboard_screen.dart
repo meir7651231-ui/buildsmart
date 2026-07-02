@@ -11,6 +11,8 @@ import 'package:buildsmart/data/repositories/orders_local.dart'
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode, kbStoreDashboardNodes;
 import 'package:buildsmart/screens/persona_picking_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
 import 'package:buildsmart/screens/store_profile_screen.dart';
@@ -19,6 +21,8 @@ import 'package:buildsmart/screens/worker_notifs_sheet.dart'
     show workerNotifAgo;
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/store_profile_store.dart';
 import 'package:buildsmart/state/store_stock.dart';
@@ -85,6 +89,8 @@ class StoreDashboardScreen extends ConsumerStatefulWidget {
 
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const StoreDashboardScreen());
+
+  static final List<KbToolNode> _kbNodes = kbStoreDashboardNodes();
 
   @override
   ConsumerState<StoreDashboardScreen> createState() =>
@@ -175,7 +181,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             : (session.displayName.trim().isNotEmpty
                 ? session.displayName.trim()
                 : _store.name);
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -367,6 +373,9 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         ),
       ),
     );
+    return kKbGlobal
+        ? KbScreen(tools: StoreDashboardScreen._kbNodes, child: body)
+        : body;
   }
 
   /// #21 — explicit board logout (the '‹ יציאה' TextButton only pops the

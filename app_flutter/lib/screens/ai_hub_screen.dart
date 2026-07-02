@@ -7,7 +7,8 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/data/task_skus_local.dart' show catalogSiblingsFor;
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
-import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show searchQueryProvider;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/ai_assistant_screen.dart'
     show AiAssistantScreen;
@@ -16,11 +17,15 @@ import 'package:buildsmart/screens/business_summary_screen.dart'
 import 'package:buildsmart/screens/describe_to_cart_screen.dart'
     show DescribeToCartScreen;
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
+import 'package:buildsmart/screens/keyboard_tool_tree.dart'
+    show KbToolNode;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/services/weather.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
@@ -57,6 +62,9 @@ class AIHubScreen extends ConsumerWidget {
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const AIHubScreen());
 
+  // Keyboard tools are built ONCE in [_kbNodes] from _visibleTiles — one leaf per
+  // visible hub feature, mirroring the on-screen grid.
+
   /// 10 tiles — the 9 VERBATIM proto `items` (@21124-21134) + the AI
   /// describe→cart feature (#ai-describe-to-cart) at the head.
   static const List<({String id, String ic, String t, String s})> _tiles = [
@@ -90,17 +98,22 @@ class AIHubScreen extends ConsumerWidget {
   /// (backend-blocked) ones for Apple review.
   static List<({String id, String ic, String t, String s})> get _visibleTiles =>
       kHideUnderConstruction
-          ? [for (final t in _tiles) if (!_deferredToolIds.contains(t.id)) t]
+          ? [
+            for (final t in _tiles)
+              if (!_deferredToolIds.contains(t.id)) t,
+          ]
           : _tiles;
 
   /// The tool ids actually rendered on the hub grid this build — the single
   /// source of truth tests assert against (no fragile widget pump needed).
-  static List<String> get visibleToolIds =>
-      [for (final t in _visibleTiles) t.id];
+  static List<String> get visibleToolIds => [
+    for (final t in _visibleTiles) t.id,
+  ];
 
   /// REAL barcode — scan, push the code into the live catalog search, land on
-  /// the catalog tab. Mirrors catalog_screen.dart:1721-1726.
-  Future<void> _runBarcode(BuildContext context, WidgetRef ref) async {
+  /// the catalog tab. Mirrors catalog_screen.dart:1721-1726. `static` (uses only
+  /// its [context]/[ref] args) so the build-once [_kbNodes] dispatch can reach it.
+  static Future<void> _runBarcode(BuildContext context, WidgetRef ref) async {
     final code = await openBarcodeScanner(context);
     if (code == null || code.isEmpty || !context.mounted) return;
     // #barcode-plus — a scanned SKU opens the product card directly; search
@@ -116,8 +129,9 @@ class AIHubScreen extends ConsumerWidget {
   }
 
   /// REAL voice — listen, push the transcript into the live catalog search.
-  /// Mirrors catalog_screen.dart:1701-1716.
-  Future<void> _runVoice(BuildContext context, WidgetRef ref) async {
+  /// Mirrors catalog_screen.dart:1701-1716. `static` (uses only its
+  /// [context]/[ref] args) so the build-once [_kbNodes] dispatch can reach it.
+  static Future<void> _runVoice(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     final ok = await VoiceService.instance.listen(
       onFinal: (t) {
@@ -135,15 +149,77 @@ class AIHubScreen extends ConsumerWidget {
     }
   }
 
+  /// Material-icon glyph for a hub tile id (the on-screen tiles use emoji; the
+  /// floating-keyboard tiles need IconData). `static` (pure switch on [id], no
+  /// instance state) so the build-once [_kbNodes] can reference it.
+  static IconData _kbIcon(String id) => switch (id) {
+        'describe' => Icons.record_voice_over_outlined,
+        'stock' => Icons.inventory_2_outlined,
+        'barcode' => Icons.qr_code_scanner,
+        'voice' => Icons.mic_none_outlined,
+        'alt' => Icons.lightbulb_outline,
+        'plan' => Icons.picture_as_pdf_outlined,
+        'analytics' => Icons.analytics_outlined,
+        'assistant' => Icons.smart_toy_outlined,
+        '3way' => Icons.link,
+        'weather' => Icons.cloud_outlined,
+        'wear' => Icons.handyman_outlined,
+        _ => Icons.auto_awesome_outlined,
+      };
+
+  /// Run a hub tile by id — the SAME dispatch as the on-screen grid's onTap, so
+  /// a keyboard tool and its tile do exactly the same thing. `static` (uses only
+  /// its [context]/[ref]/[id] args) so the build-once [_kbNodes] can reference it.
+  static void _runTile(BuildContext context, WidgetRef ref, String id) {
+    switch (id) {
+      case 'describe':
+        Navigator.of(context).push(DescribeToCartScreen.route());
+      case 'assistant':
+        Navigator.of(context).push(AiAssistantScreen.route());
+      case 'barcode':
+        _runBarcode(context, ref);
+      case 'voice':
+        _runVoice(context, ref);
+      case 'alt':
+        openCheaperAlternativesSheet(context);
+      case 'plan':
+        openScanPlanSheet(context);
+      default:
+        Navigator.of(context).push(_AIFeatureScreen.route(id));
+    }
+  }
+
+  /// LIVE-MIRROR: the floating keyboard's tools for the AI hub — one leaf per
+  /// VISIBLE tile (same set + dispatch as the grid), so the keyboard mirrors the
+  /// hub's REAL features instead of only the 2 catalog entries.
+  ///
+  /// STABLE list built ONCE (a `static final`, matching stock_screen.dart:149) so
+  /// [KbScreen]'s identity-compare (didUpdateWidget's `identical`) never re-registers
+  /// it on a rebuild — the tile set is fixed at class-load (from the const-driven
+  /// [_visibleTiles]), so a fresh list per build only churned the registration.
+  /// Tree-shaken with the whole [KbScreen] path when [kKbGlobal] is off.
+  static final List<KbToolNode> _kbNodes = <KbToolNode>[
+    for (final t in _visibleTiles)
+      KbToolNode.leaf(
+        icon: _kbIcon(t.id),
+        label: t.t,
+        action: (ref, context) => _runTile(context, ref, t.id),
+      ),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // The cart FAB rides above this PUSHED route too — visible only when the
     // cart has items, so adding from a tool (e.g. plan-scan) gives immediate
     // feedback here without yanking the user to the Store tab. popFirst: true →
     // tapping pops the hub, then lands on the cart tab underneath.
-    final cartHasItems =
-        ref.watch(smartCartProvider.select((lines) => lines.isNotEmpty));
-    return Directionality(
+    final cartHasItems = ref.watch(
+      smartCartProvider.select((lines) => lines.isNotEmpty),
+    );
+    // KbScreen: while this pushed route is front-most under [kKbGlobal], the
+    // floating ▦ grid mirrors THIS hub's tools ([_kbNodes]); reverts on pop. Pure
+    // pass-through (byte-identical) when the flag is off.
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -181,11 +257,11 @@ class AIHubScreen extends ConsumerWidget {
                     onTap: () {
                       switch (t.id) {
                         case 'describe':
-                          Navigator.of(context)
-                              .push(DescribeToCartScreen.route());
+                          Navigator.of(
+                            context,
+                          ).push(DescribeToCartScreen.route());
                         case 'assistant':
-                          Navigator.of(context)
-                              .push(AiAssistantScreen.route());
+                          Navigator.of(context).push(AiAssistantScreen.route());
                         case 'barcode':
                           _runBarcode(context, ref);
                         case 'voice':
@@ -197,8 +273,9 @@ class AIHubScreen extends ConsumerWidget {
                           // Canonical R9 modal sheet (no duplicate full screen).
                           openScanPlanSheet(context);
                         default:
-                          Navigator.of(context)
-                              .push(_AIFeatureScreen.route(t.id));
+                          Navigator.of(
+                            context,
+                          ).push(_AIFeatureScreen.route(t.id));
                       }
                     },
                   ),
@@ -208,6 +285,7 @@ class AIHubScreen extends ConsumerWidget {
         ),
       ),
     );
+    return kKbGlobal ? KbScreen(tools: _kbNodes, child: body) : body;
   }
 }
 
@@ -232,8 +310,9 @@ class _AIFeatureScreen extends ConsumerWidget {
     };
     // Same cart FAB as the hub — this sub-view is also a PUSHED route, so
     // popFirst pops back toward the home shell before landing on the cart tab.
-    final cartHasItems =
-        ref.watch(smartCartProvider.select((lines) => lines.isNotEmpty));
+    final cartHasItems = ref.watch(
+      smartCartProvider.select((lines) => lines.isNotEmpty),
+    );
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -279,13 +358,15 @@ class _PredictStock extends ConsumerWidget {
         ),
         const SizedBox(height: BsTokens.space3),
         const AiServerNote(
-            '🧮 מחושב מתוך היסטוריית ההזמנות והעגלה החיה — קצב צריכה ומלאי נוכחי'),
+          '🧮 מחושב מתוך היסטוריית ההזמנות והעגלה החיה — קצב צריכה ומלאי נוכחי',
+        ),
         const SizedBox(height: BsTokens.space2),
         if (preds.isEmpty)
           const AiCard(
             overdue: false,
             child: AiCardSub(
-                'אין עדיין היסטוריית צריכה — בצע הזמנות כדי לקבל חיזוי מלאי'),
+              'אין עדיין היסטוריית צריכה — בצע הזמנות כדי לקבל חיזוי מלאי',
+            ),
           )
         else
           for (final p in preds)
@@ -309,7 +390,9 @@ class _PredictStock extends ConsumerWidget {
                         // REAL: add one unit of the running-out product to the
                         // live cart, rebuilt from the genuine captured order-line
                         // fields the forecast carries (name · emoji · unit price).
-                        ref.read(smartCartProvider.notifier).add(
+                        ref
+                            .read(smartCartProvider.notifier)
+                            .add(
                               SmartCartLine(
                                 productKey: 'ai-restock:${p.name}',
                                 productName: p.name,
@@ -354,7 +437,8 @@ class _ThreeWay extends StatelessWidget {
         ),
         const SizedBox(height: BsTokens.space3),
         const AiServerNote(
-            '⚙️ בפרודקשן: דורש תעודות משלוח וחשבוניות מהספק (מסמכים חיצוניים)'),
+          '⚙️ בפרודקשן: דורש תעודות משלוח וחשבוניות מהספק (מסמכים חיצוניים)',
+        ),
         const SizedBox(height: BsTokens.space2),
         for (final d in kThreeWayDocs)
           AiCard(
@@ -370,25 +454,33 @@ class _ThreeWay extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _ThreeCol(label: 'הזמנה', value: fMoney(d.order), bad: false),
                     _ThreeCol(
-                        label: 'תעודה',
-                        value: fMoney(d.delivery),
-                        bad: d.delivery != d.order),
+                      label: 'הזמנה',
+                      value: fMoney(d.order),
+                      bad: false,
+                    ),
                     _ThreeCol(
-                        label: 'חשבונית',
-                        value: fMoney(d.invoice),
-                        bad: d.invoice != d.order),
+                      label: 'תעודה',
+                      value: fMoney(d.delivery),
+                      bad: d.delivery != d.order,
+                    ),
+                    _ThreeCol(
+                      label: 'חשבונית',
+                      value: fMoney(d.invoice),
+                      bad: d.invoice != d.order,
+                    ),
                   ],
                 ),
                 if (!d.match) ...[
                   const SizedBox(height: 8),
-                  const Text('נדרשת בדיקה — הסכומים אינם זהים',
-                      style: TextStyle(
-                        color: Color(0xFFC62828),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      )),
+                  const Text(
+                    'נדרשת בדיקה — הסכומים אינם זהים',
+                    style: TextStyle(
+                      color: Color(0xFFC62828),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -399,7 +491,11 @@ class _ThreeWay extends StatelessWidget {
 }
 
 class _ThreeCol extends StatelessWidget {
-  const _ThreeCol({required this.label, required this.value, required this.bad});
+  const _ThreeCol({
+    required this.label,
+    required this.value,
+    required this.bad,
+  });
 
   final String label;
   final String value;
@@ -410,15 +506,19 @@ class _ThreeCol extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text(label,
-              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+          ),
           const SizedBox(height: 2),
-          Text(value,
-              style: TextStyle(
-                color: bad ? const Color(0xFFC62828) : BsTokens.inkLight,
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-              )),
+          Text(
+            value,
+            style: TextStyle(
+              color: bad ? const Color(0xFFC62828) : BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     );
@@ -452,7 +552,10 @@ class _Weather extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AiCardTop(
-                    title: '${d.ic} ${d.day}', pill: d.temp, danger: d.warn),
+                  title: '${d.ic} ${d.day}',
+                  pill: d.temp,
+                  danger: d.warn,
+                ),
                 const SizedBox(height: 4),
                 AiCardSub(d.note),
               ],
@@ -487,21 +590,24 @@ class _Wear extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AiCardTop(
-                    title: '${g.ic} ${g.name}',
-                    pill: '${g.pct}%',
-                    danger: g.worn),
+                  title: '${g.ic} ${g.name}',
+                  pill: '${g.pct}%',
+                  danger: g.worn,
+                ),
                 const SizedBox(height: 4),
                 AiCardSub('${g.hours} / ${g.life} שעות עבודה'),
                 const SizedBox(height: 6),
                 AiBar(pct: g.pct.clamp(0, 100), danger: g.worn),
                 if (g.worn) ...[
                   const SizedBox(height: 8),
-                  const Text('מומלץ לתזמן תחזוקה',
-                      style: TextStyle(
-                        color: Color(0xFFC62828),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      )),
+                  const Text(
+                    'מומלץ לתזמן תחזוקה',
+                    style: TextStyle(
+                      color: Color(0xFFC62828),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -532,20 +638,26 @@ class _Analytics extends ConsumerWidget {
         ),
         const SizedBox(height: BsTokens.space3),
         const AiServerNote(
-            '🧮 מחושב מנתוני אמת — מנוע ההזמנות, התקציב והשוואת המחירים בקטלוג'),
+          '🧮 מחושב מנתוני אמת — מנוע ההזמנות, התקציב והשוואת המחירים בקטלוג',
+        ),
         const SizedBox(height: BsTokens.space2),
         // #ai-business-summary — when AI is live, narrate the REAL computed
         // insights into a short Hebrew business check-in. gateway null (demo)
         // → not in the tree → the analytics view is byte-identical.
-        if (ref.watch(claudeGatewayProvider) != null && insights.isNotEmpty) ...[
+        if (ref.watch(claudeGatewayProvider) != null &&
+            insights.isNotEmpty) ...[
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                BusinessSummaryScreen.route(insightLines: [
-                  for (final it in insights) '${it.ic} ${it.title} — ${it.sub}',
-                ]),
-              ),
+              onPressed:
+                  () => Navigator.of(context).push(
+                    BusinessSummaryScreen.route(
+                      insightLines: [
+                        for (final it in insights)
+                          '${it.ic} ${it.title} — ${it.sub}',
+                      ],
+                    ),
+                  ),
               icon: const Text('✨'),
               label: const Text('סיכום בעברית'),
             ),
@@ -558,12 +670,14 @@ class _Analytics extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('${it.ic} ${it.title}',
-                    style: const TextStyle(
-                      color: BsTokens.inkLight,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    )),
+                Text(
+                  '${it.ic} ${it.title}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 AiCardSub(it.sub),
               ],
@@ -579,28 +693,28 @@ class _Analytics extends ConsumerWidget {
 // ════════════════════════════════════════════════════════════════════════════
 
 PreferredSizeWidget aiAppBar(BuildContext context, String title) => AppBar(
-      backgroundColor: BsTokens.cardLight,
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      titleSpacing: BsTokens.space4,
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: BsTokens.inkLight,
-          fontWeight: FontWeight.w800,
-          fontSize: 20,
-        ),
+  backgroundColor: BsTokens.cardLight,
+  elevation: 0,
+  automaticallyImplyLeading: false,
+  titleSpacing: BsTokens.space4,
+  title: Text(
+    title,
+    style: const TextStyle(
+      color: BsTokens.inkLight,
+      fontWeight: FontWeight.w800,
+      fontSize: 20,
+    ),
+  ),
+  actions: [
+    TextButton(
+      onPressed: () => Navigator.of(context).maybePop(),
+      child: const Text(
+        '‹ חזרה',
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).maybePop(),
-          child: const Text(
-            '‹ חזרה',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
-          ),
-        ),
-      ],
-    );
+    ),
+  ],
+);
 
 class AiMdHead extends StatelessWidget {
   const AiMdHead({
@@ -621,15 +735,19 @@ class AiMdHead extends StatelessWidget {
       children: [
         Text(ic, style: const TextStyle(fontSize: 30)),
         const SizedBox(height: 4),
-        Text(title,
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w800,
-              fontSize: 20,
-            )),
+        Text(
+          title,
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(sub,
-            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+        Text(
+          sub,
+          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        ),
       ],
     );
   }
@@ -669,16 +787,22 @@ class AiFinTile extends StatelessWidget {
             children: [
               Text(ic, style: const TextStyle(fontSize: 26)),
               const SizedBox(height: 6),
-              Text(title,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  )),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(sub,
-                  style: const TextStyle(
-                      color: BsTokens.mutedLight, fontSize: 12)),
+              Text(
+                sub,
+                style: const TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
         ),
@@ -728,12 +852,14 @@ class AiCardTop extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(title,
-              style: const TextStyle(
-                color: BsTokens.inkLight,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              )),
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
         ),
         const SizedBox(width: BsTokens.space2),
         Container(
@@ -742,12 +868,14 @@ class AiCardTop extends StatelessWidget {
             color: danger ? const Color(0xFFFFEBEE) : const Color(0xFFF1F1F1),
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           ),
-          child: Text(pill,
-              style: TextStyle(
-                color: danger ? const Color(0xFFC62828) : BsTokens.inkLight,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              )),
+          child: Text(
+            pill,
+            style: TextStyle(
+              color: danger ? const Color(0xFFC62828) : BsTokens.inkLight,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
         ),
       ],
     );
@@ -760,8 +888,10 @@ class AiCardSub extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Text(text,
-      style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13));
+  Widget build(BuildContext context) => Text(
+    text,
+    style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+  );
 }
 
 class AiBar extends StatelessWidget {
@@ -829,9 +959,13 @@ class AiPrimary extends StatelessWidget {
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           ),
         ),
-        child: Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.w800, color: Colors.white)),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
@@ -850,8 +984,10 @@ class AiServerNote extends StatelessWidget {
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
-      child: Text(text,
-          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
+      child: Text(
+        text,
+        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+      ),
     );
   }
 }

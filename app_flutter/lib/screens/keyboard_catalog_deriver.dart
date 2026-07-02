@@ -28,13 +28,10 @@
 // persistence) is IDENTICAL for all four tabs — one adapter, four derivers. This
 // file adds NO new carrier types; it only adds the catalog-flavored arms.
 //
-// THE THREE DISPATCH PATHS (same shape as the other tabs, with one catalog
-// nuance):
-//   • `_drillIndexByChip` — the keyboard's OWN tool-`_stack` drill map. The
-//     catalog mirror NEVER touches it: catalog navigation rides the SCREEN's
-//     `catalogTreePathProvider`, not the keyboard's tool stack (the dual-stack
-//     trap). So [KbPredRow] always leaves it const-empty here, on EVERY arm (a
-//     unit test asserts `{}` per arm).
+// THE TWO DISPATCH PATHS (same shape as the other tabs, with one catalog nuance).
+// NOTE: catalog navigation rides the SCREEN's `catalogTreePathProvider`, NOT any
+// keyboard tool stack (the dual-stack trap), so every catalog chip dispatches
+// through one of the two maps below — there is no tool-tile/drill chip here.
 //   • `destByChip` — the entry SECTION chips at the home/landing surface
 //     (קטגוריות / עץ חכם / מועדפים / …) are REAL registry [KbDestination]s
 //     (reusing keyboard_destinations.dart's `_openCatalogSection` runs by label),
@@ -48,7 +45,7 @@
 //     resetting the side-axes before the path write, mirroring the screen — B2),
 //     the smart-tree category setters, and the honest 'בקרוב' coming-soon leaves.
 //     The keyboard emits NO facet setters (B1 — faceting is the screen's job).
-//     The maps are pairwise-disjoint BY CONSTRUCTION (asserted in the reused
+//     The two maps are disjoint BY CONSTRUCTION (asserted in the reused
 //     [KbPredRow] ctor).
 //
 // HONESTY (review #20 — the dead-no-op blocker): a chip whose tap merely

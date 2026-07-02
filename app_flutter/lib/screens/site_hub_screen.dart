@@ -35,8 +35,11 @@ import 'package:buildsmart/screens/contractor_hr_sheet.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart'
     show DailyReportScreen;
 import 'package:buildsmart/screens/defects_sheet.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/site_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -87,6 +90,25 @@ void _push(BuildContext context, Widget screen) {
   );
 }
 
+/// The site-management hub's OWN keyboard tools (live-mirror): its 12 tiles, so
+/// the floating keyboard MIRRORS "ניהול אתר" instead of the tab fallback. Built
+/// ONCE (stable list identity → KbScreen never re-pushes on rebuild). Actions
+/// reuse the same open-functions the tiles use, via the tool-dispatch context.
+final List<KbToolNode> kbSiteHubTools = <KbToolNode>[
+  KbToolNode.leaf(icon: Icons.assignment_outlined, label: 'משימות', action: (ref, context) => openTasks(context)),
+  KbToolNode.leaf(icon: Icons.calendar_month_outlined, label: 'גאנט', action: (ref, context) => _openGantt(context)),
+  KbToolNode.leaf(icon: Icons.report_problem_outlined, label: 'ליקויים', action: (ref, context) => _openDefects(context)),
+  KbToolNode.leaf(icon: Icons.apartment_outlined, label: 'מיקומים', action: (ref, context) => openSiteLocations(context)),
+  KbToolNode.leaf(icon: Icons.location_on_outlined, label: 'נוכחות', action: (ref, context) => _openAttend(context)),
+  KbToolNode.leaf(icon: Icons.event_busy_outlined, label: 'חופשות', action: (ref, context) => _openHr(context)),
+  KbToolNode.leaf(icon: Icons.menu_book_outlined, label: 'יומן', action: (ref, context) => openSiteDiary(context)),
+  KbToolNode.leaf(icon: Icons.health_and_safety_outlined, label: 'בטיחות', action: (ref, context) => openSiteSafety(context)),
+  KbToolNode.leaf(icon: Icons.link_outlined, label: 'תלויות', action: (ref, context) => openSiteDeps(context)),
+  KbToolNode.leaf(icon: Icons.photo_camera_outlined, label: 'צילום', action: (ref, context) => openSitePhotos(context)),
+  KbToolNode.leaf(icon: Icons.fact_check_outlined, label: 'ביקורות', action: (ref, context) => openSiteInspect(context)),
+  KbToolNode.leaf(icon: Icons.archive_outlined, label: 'ארכיון', action: (ref, context) => openSiteArchive(context)),
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared shell — RTL scaffold + md-head, matching the courier/store style.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,6 +120,7 @@ class _SiteScaffold extends StatelessWidget {
     required this.title,
     required this.sub,
     required this.children,
+    this.kbTools,
   });
 
   final String appTitle; // appbar title
@@ -105,10 +128,11 @@ class _SiteScaffold extends StatelessWidget {
   final String title; // md-title
   final String sub; // md-sub
   final List<Widget> children;
+  final List<KbToolNode>? kbTools; // live-mirror tools (null → pass-through)
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -150,6 +174,12 @@ class _SiteScaffold extends StatelessWidget {
         ),
       ),
     );
+    // LIVE-MIRROR: when a screen supplies kbTools, show them on the floating
+    // keyboard under KB_GLOBAL. Flag-off (or no tools) → pass-through, identical.
+    if (kKbGlobal && kbTools != null) {
+      return KbScreen(tools: kbTools!, child: body);
+    }
+    return body;
   }
 }
 
@@ -459,6 +489,7 @@ class _SiteHubGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🏗️ ניהול אתר',
+      kbTools: kbSiteHubTools,
       icon: '🏗️',
       title: 'ניהול אתר הבנייה',
       sub: 'כל כלי הניהול של אתר הבנייה במקום אחד.',
@@ -547,6 +578,11 @@ class _SiteLocations extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🏢 מיקומים',
+      // DIVE: this screen's OWN keyboard tree — a 3-level browse into the site
+      // hierarchy (קומה → דירה → חדר), built inline from the const [kSiteTree].
+      // Room leaves are browse endpoints (a location, not an action) → NO-OP.
+      // `kKbGlobal ?` gate keeps flag-off byte-identical (tree not built when off).
+      kbTools: kKbGlobal ? _kbTree() : null,
       icon: '🏢',
       title: 'קומה · דירה · חדר',
       sub: 'מבנה האתר ההיררכי — לשיוך משימות למיקום מדויק.',
@@ -555,6 +591,31 @@ class _SiteLocations extends StatelessWidget {
       ],
     );
   }
+
+  /// The keyboard DIVE tree for this screen: floor → apartment → room. Each room
+  /// is a browse leaf with a NO-OP action (it names a location, nothing to run).
+  List<KbToolNode> _kbTree() => <KbToolNode>[
+        for (final f in kSiteTree)
+          KbToolNode.branch(
+            icon: Icons.apartment_outlined,
+            label: f.floor,
+            children: <KbToolNode>[
+              for (final a in f.apts)
+                KbToolNode.branch(
+                  icon: Icons.meeting_room_outlined,
+                  label: a.n,
+                  children: <KbToolNode>[
+                    for (final r in a.rooms)
+                      KbToolNode.leaf(
+                        icon: Icons.crop_square_outlined,
+                        label: r,
+                        action: (ref, context) {},
+                      ),
+                  ],
+                ),
+            ],
+          ),
+      ];
 
   Widget _floor(SiteFloor f) {
     return Container(
@@ -647,6 +708,19 @@ class _SiteDiary extends ConsumerWidget {
     final diary = ref.watch(siteDiaryProvider);
     return _SiteScaffold(
       appTitle: '📓 יומן',
+      // DIVE: this screen's OWN keyboard tree. A single leaf that runs the SAME
+      // add-diary flow the '+ רישום יומן להיום' button uses (prompt → notifier.
+      // add), so the keyboard authors a real entry. `kKbGlobal ?` gate keeps
+      // flag-off byte-identical (tree not built when off).
+      kbTools: kKbGlobal
+          ? <KbToolNode>[
+              KbToolNode.leaf(
+                icon: Icons.note_add_outlined,
+                label: 'הוסף רשומה',
+                action: (ref, context) => _add(context, ref),
+              ),
+            ]
+          : null,
       icon: '📓',
       title: 'יומן עבודה דיגיטלי',
       sub: 'תיעוד יומי של ההתקדמות, כוח האדם והאירועים באתר.',
@@ -740,6 +814,7 @@ class _SiteSafetyState extends State<_SiteSafety> {
     final tip = kSafetyTips[DateTime.now().day % kSafetyTips.length];
     return _SiteScaffold(
       appTitle: '🦺 בטיחות',
+      kbTools: kbSiteHubTools,
       icon: '🦺',
       title: 'התראות בטיחות',
       sub: 'תדריך בטיחות יומי — חובה לפני תחילת העבודה.',
@@ -858,6 +933,7 @@ class _SiteDeps extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🔗 תלויות',
+      kbTools: kbSiteHubTools,
       icon: '🔗',
       title: 'תלויות חומרים בין משימות',
       sub: 'משימה לא יכולה להתחיל לפני שהמשימות התלויות הושלמו.',
@@ -937,6 +1013,7 @@ class _SitePhotosState extends State<_SitePhotos> {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '📸 צילום',
+      kbTools: kbSiteHubTools,
       icon: '📸',
       title: 'צילום לפני / אחרי',
       sub: 'תיעוד ויזואלי של ההתקדמות — השוואת מצב לפני ואחרי.',
@@ -1047,6 +1124,28 @@ class _SiteInspect extends ConsumerWidget {
     final list = ref.watch(siteInspectionsProvider);
     return _SiteScaffold(
       appTitle: '🔍 ביקורות',
+      // DIVE: this screen's OWN keyboard tree — one branch per live inspection,
+      // each holding a leaf that runs the REAL complete action (the SAME
+      // notifier.complete(id) the card's 'סמן כבוצעה' button runs). Built from
+      // the watched `list`. `kKbGlobal ?` gate keeps flag-off byte-identical.
+      kbTools: kKbGlobal
+          ? <KbToolNode>[
+              for (final ins in list)
+                KbToolNode.branch(
+                  icon: Icons.fact_check_outlined,
+                  label: ins.what,
+                  children: <KbToolNode>[
+                    KbToolNode.leaf(
+                      icon: Icons.check_circle_outline,
+                      label: 'סמן שהושלם',
+                      action: (ref, context) => ref
+                          .read(siteInspectionsProvider.notifier)
+                          .complete(ins.id),
+                    ),
+                  ],
+                ),
+            ]
+          : null,
       icon: '🔍',
       title: 'ביקורות מפקח',
       sub: 'תזכורות לביקורות מפקח ורשויות.',
@@ -1117,6 +1216,7 @@ class _SiteArchive extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SiteScaffold(
       appTitle: '🗄️ ארכיון',
+      kbTools: kbSiteHubTools,
       icon: '🗄️',
       title: 'ארכיון פרויקטים',
       sub: 'פרויקטים שהושלמו — לעיון והפקת לקחים.',

@@ -22,23 +22,81 @@
 // widget stays screen-agnostic.
 
 import 'package:buildsmart/screens/ai_hub_screen.dart';
+import 'package:buildsmart/screens/budget_screen.dart' show BudgetScreen;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/chats_screen.dart'
+    show ChatsArchiveScreen, ChatsScreen;
+import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
+    show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openCheaperAlternativesSheet, openPriceCompareSheet, openScanPlanSheet;
+import 'package:buildsmart/screens/courier_attendance_screen.dart'
+    show CourierAttendanceScreen;
+import 'package:buildsmart/screens/courier_certs_screen.dart'
+    show CourierCertsScreen;
+import 'package:buildsmart/screens/courier_dashboard_screen.dart'
+    show showCourierNotifsSheet;
+import 'package:buildsmart/screens/courier_forms_screen.dart'
+    show CourierFormsScreen;
+import 'package:buildsmart/screens/courier_profile_screen.dart'
+    show CourierProfileScreen;
+import 'package:buildsmart/screens/courier_settings_screen.dart'
+    show CourierSettingsScreen;
+import 'package:buildsmart/screens/defects_sheet.dart' show showDefectsSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
+import 'package:buildsmart/screens/keyboard_destinations.dart'
+    show kbDestinationByLabel;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
+import 'package:buildsmart/screens/legal_screen.dart'
+    show LegalScreen, LegalTab;
+import 'package:buildsmart/screens/lipskey_brand_screen.dart'
+    show LipskeyBrandScreen;
+import 'package:buildsmart/screens/manager_copilot_screen.dart';
+import 'package:buildsmart/screens/manager_profile_screen.dart';
+import 'package:buildsmart/screens/manager_screens_sheet.dart'
+    show showManagerScreensSheet;
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/notifications_screen.dart'
     show markAllNotifsRead;
 import 'package:buildsmart/screens/order_notif_sheet.dart'
     show showOrderNotifSheet;
+import 'package:buildsmart/screens/rewards_hub_screen.dart'
+    show RewardsHubScreen;
+import 'package:buildsmart/screens/role_picker_sheet.dart' show showRolePicker;
+import 'package:buildsmart/screens/role_request_sheet.dart'
+    show showRoleRequestSheet;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
+import 'package:buildsmart/screens/smart_project_screen.dart'
+    show SmartProjectScreen;
 import 'package:buildsmart/screens/stock_screen.dart' show StockScreen;
+import 'package:buildsmart/screens/store_dashboard_screen.dart'
+    show SupplierSettingsScreen;
+import 'package:buildsmart/screens/store_documents_sheet.dart'
+    show showStoreDocumentsSheet;
+import 'package:buildsmart/screens/store_profile_screen.dart'
+    show StoreCertsScreen, StoreProfileScreen;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
+import 'package:buildsmart/screens/store_settings_screen.dart'
+    show StoreSettingsScreen;
+import 'package:buildsmart/screens/tasks_gantt_sheet.dart'
+    show showTasksGanttSheet;
+import 'package:buildsmart/screens/tasks_screen.dart' show TasksScreen;
+import 'package:buildsmart/screens/updates_screen.dart'
+    show updatesSubTabProvider;
+import 'package:buildsmart/screens/worker_attendance_screen.dart';
+import 'package:buildsmart/screens/worker_forms_screen.dart';
+import 'package:buildsmart/screens/worker_payslips_sheet.dart'
+    show showWorkerPayslipsSheet;
+import 'package:buildsmart/screens/worker_safety_screen.dart';
+import 'package:buildsmart/screens/worker_settings_screen.dart'
+    show WorkerSettingsScreen;
+import 'package:buildsmart/screens/worker_task_board_screen.dart'
+    show WorkerTaskBoardScreen;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
 import 'package:flutter/material.dart';
@@ -465,5 +523,566 @@ List<KbToolNode> kbDeptNodes() => <KbToolNode>[
         icon: Icons.route,
         label: 'מסלול עבודה',
         action: (ref, context) => _toolSoon(context, 'מסלול עבודה'),
+      ),
+    ];
+
+/// Wrap a navigable destination [label] ([kbDestinationByLabel]) as a tool leaf
+/// with [icon] — reusing that destination's verified opener. Null when the label
+/// is not a known destination, so the caller can skip it (defensive).
+KbToolNode? _destNode(String label, IconData icon) {
+  final d = kbDestinationByLabel(label);
+  if (d == null) return null;
+  return KbToolNode.leaf(icon: icon, label: label, action: d.run);
+}
+
+/// Owner button-spec v2 (#2): the CURRENT tab's tool node-list — the FULL set of
+/// the screen's navigable items (not a curated subset), each wired to the SAME
+/// opener the screen's own pill/tile uses (via [kbDestinationByLabel]). Labels not
+/// in the registry are skipped (defensive). tab 0 (בית) = the catalog section
+/// pills · tab 1 (מחלקות) = the live departments + עץ-חכם/מאתר · tab 2 (עדכונים) =
+/// the two sub-tabs · tab 3 (חנות) = the store sections + כספים. [ref] is accepted
+/// for parity with the other node-list factories (future per-tab live reads).
+List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
+  const lists = <int, List<(String, IconData)>>{
+    0: <(String, IconData)>[
+      ('מאתר', Icons.gps_fixed),
+      ('עץ חכם', Icons.account_tree),
+      ('קטגוריות', Icons.grid_view),
+      ('וריאנטים', Icons.tune),
+      ('תכנון חיבור', Icons.cable),
+      ('חיפושים אחרונים', Icons.history),
+      ('מועדפים', Icons.star_border),
+    ],
+    1: <(String, IconData)>[
+      ('אינסטלציה', Icons.plumbing),
+      ('ברזים וסניטריים', Icons.water_drop_outlined),
+      ('כלי עבודה ידני', Icons.handyman),
+      ('כלי עבודה חשמלי', Icons.bolt),
+      ('עץ חכם', Icons.account_tree),
+      ('מאתר', Icons.gps_fixed),
+    ],
+    2: <(String, IconData)>[
+      ('התראות', Icons.notifications_outlined),
+      ('שיחות', Icons.chat_bubble_outline),
+    ],
+    3: <(String, IconData)>[
+      ('הסל שלי', Icons.shopping_cart_outlined),
+      ('ההזמנות שלי', Icons.receipt_long),
+      ('שירותים', Icons.home_repair_service_outlined),
+      ('כספים', Icons.account_balance_wallet_outlined),
+    ],
+  };
+  final picks = lists[tab] ?? lists[0]!;
+  final out = <KbToolNode>[];
+  for (final (label, icon) in picks) {
+    final node = _destNode(label, icon);
+    if (node != null) out.add(node);
+  }
+  // Never leave ▦ empty: if nothing resolved (registry shape changed), fall back
+  // to the legacy home tools.
+  return out.isEmpty ? kbHomeNodes() : out;
+}
+
+/// Owner button-spec v2 (#4): the CURRENT screen's ⋮ overflow menu as keyboard
+/// tools — what the floating ⚙ opens. Mirrors HomeShell's per-tab AppBar overflow
+/// popups (`_CatalogMenuButton` / `_NotificationsMenuButton` / `_ChatsMenuButton`
+/// / `_StoreMenuButton`). Navigation + mark-read items reuse the SAME public
+/// openers/actions those menus run; the confirm-gated destructive items
+/// (נקה הכל / השתק הכל) and the private new-chat sheet ship as honest "בקרוב"
+/// until exposed (the established deferral — never a confirmless/broken action).
+/// tab 2 (עדכונים) reads [updatesSubTabProvider] to mirror the התראות-vs-שיחות
+/// split; tabs 0 + 1 share the catalog overflow.
+List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
+  switch (tab) {
+    case 2:
+      if (ref.read(updatesSubTabProvider) == 1) {
+        // שיחות (chats) overflow — mirrors _ChatsMenuButton.
+        return <KbToolNode>[
+          KbToolNode.leaf(
+            icon: Icons.add_comment_outlined,
+            label: 'שיחה חדשה',
+            action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.archive_outlined,
+            label: 'ארכיון שיחות',
+            action: (ref, context) =>
+                Navigator.of(context).push(ChatsArchiveScreen.route()),
+          ),
+          KbToolNode.leaf(
+            icon: Icons.notifications_off_outlined,
+            label: 'השתק הכל',
+            action: (ref, context) => _toolSoon(context, 'השתק הכל'),
+          ),
+        ];
+      }
+      // התראות (notifications) overflow — mirrors _NotificationsMenuButton.
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.done_all,
+          label: 'סמן הכל כנקרא',
+          action: (ref, context) => markAllNotifsRead(ref),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.clear_all,
+          label: 'נקה הכל',
+          action: (ref, context) => _toolSoon(context, 'נקה הכל'),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.settings,
+          label: 'הגדרות התראות',
+          action: (ref, context) =>
+              Navigator.of(context).push(NotifSettingsScreen.route()),
+        ),
+      ];
+    case 3:
+      // חנות (store) overflow — mirrors _StoreMenuButton (שירותים is gated by
+      // kHideUnderConstruction in the AppBar, so omitted here for v1).
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.shopping_cart_outlined,
+          label: 'הסל שלי',
+          action: (ref, context) =>
+              ref.read(storeSectionProvider.notifier).state = StoreSection.cart,
+        ),
+        KbToolNode.leaf(
+          icon: Icons.receipt_long,
+          label: 'הזמנות',
+          action: (ref, context) => ref
+              .read(storeSectionProvider.notifier)
+              .state = StoreSection.orders,
+        ),
+        KbToolNode.leaf(
+          icon: Icons.settings,
+          label: 'הגדרות',
+          action: (ref, context) =>
+              Navigator.of(context).push(StoreSettingsScreen.route()),
+        ),
+      ];
+    default:
+      // בית + מחלקות (catalog/departments) overflow — mirrors _CatalogMenuButton.
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.smart_toy,
+          label: 'בינה מלאכותית ואוטומציה',
+          action: (ref, context) =>
+              Navigator.of(context).push(AIHubScreen.route()),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.settings,
+          label: 'הגדרות',
+          action: (ref, context) =>
+              Navigator.of(context).push(CatalogSettingsScreen.route()),
+        ),
+      ];
+  }
+}
+
+// ─── PUSHED-ROUTE screen tool node-lists ([KbScreen] adopters) ────────────────
+//
+// These are the FIRST screens to ADOPT [KbScreen] (lib/state/keyboard_screen_tools.dart),
+// proving the stack-aware mirror end-to-end: each wraps its body in
+// `KbScreen(tools: <one of these factories>, child: <its Scaffold>)`, so while the
+// route is front-most under [kKbGlobal] the floating ▦ grid shows ITS tools and
+// reverts to the parent's on pop. Each factory returns the screen's OWN relevant
+// actions, reusing verified openers (route pushes / provider writes) — never a
+// broken nav. They are top-level `()` factories (not const — the leaf actions are
+// non-const closures), mirroring [kbHomeNodes]/[kbStoreNodes]; an adopter must
+// build its list ONCE (e.g. a `static final`) so [KbScreen]'s identity-compare
+// (didUpdateWidget) never churns the registration.
+
+/// המלאי שלי ([StockScreen]) tools: 📥 בקשות חומר (its AppBar action) + ⚙ הגדרות
+/// חנות (the store-settings route). Keep-floating: the first opens a sheet, the
+/// second pushes a route (the keyboard reappears on pop).
+List<KbToolNode> kbStockNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.inbox_outlined,
+        label: 'בקשות חומר',
+        action: (ref, context) =>
+            showContractorMaterialRequestsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings,
+        label: 'הגדרות חנות',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreSettingsScreen.route()),
+      ),
+    ];
+
+/// 🤖 בינה ([AIHubScreen]) tools: 🔍 מאתר + 🌳 עץ חכם (the two catalog entry
+/// points that make sense from the AI hub), via the SAME [runKeyboardTool] seam
+/// the home tiles use, so the destination stays identical.
+List<KbToolNode> kbAiHubNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.gps_fixed,
+        label: 'מאתר',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_tree,
+        label: 'עץ חכם',
+        action: (ref, context) =>
+            runKeyboardTool(ref, context, KbTool.smartTree),
+      ),
+    ];
+
+/// ⚙️ הגדרות ([CatalogSettingsScreen]) tools: 🔔 הגדרות התראות + 🛍️ הגדרות חנות —
+/// the two sibling settings routes, each pushed over (keyboard reappears on pop).
+List<KbToolNode> kbCatalogSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.notifications_outlined,
+        label: 'הגדרות התראות',
+        action: (ref, context) =>
+            Navigator.of(context).push(NotifSettingsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.storefront_outlined,
+        label: 'הגדרות חנות',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreSettingsScreen.route()),
+      ),
+    ];
+
+/// 🔔 הגדרות התראות ([NotifSettingsScreen]) tools: ✅ סמן הכל כנקרא (the same
+/// public action the notifications overflow runs) + ⚙ הגדרות (the catalog
+/// settings route).
+List<KbToolNode> kbNotifSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.done_all,
+        label: 'סמן הכל כנקרא',
+        action: (ref, context) => markAllNotifsRead(ref),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(CatalogSettingsScreen.route()),
+      ),
+    ];
+
+/// 🛍️ הגדרות חנות ([StoreSettingsScreen]) tools: 📦 הזמנות (jump to the store
+/// orders section, the SAME pairing the store menu uses) + 💰 כספים
+/// ([openFinanceHub]). Keep-floating: a section jump swaps the screen underneath,
+/// a sheet pushes over.
+List<KbToolNode> kbStoreSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.receipt_long,
+        label: 'הזמנות',
+        action: (ref, context) {
+          ref.read(mainTabProvider.notifier).state = 3;
+          ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+        },
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'כספים',
+        action: (ref, context) => openFinanceHub(context),
+      ),
+    ];
+
+/// 🗄️ ארכיון שיחות ([ChatsArchiveScreen]) tools: ➕ שיחה חדשה (honest "בקרוב"
+/// until the real opener is exposed) + 🔍 חיפוש שיחות (likewise) — mirroring the
+/// chats overflow's deferred items.
+List<KbToolNode> kbChatsArchiveNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.add_comment_outlined,
+        label: 'שיחה חדשה',
+        action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.search,
+        label: 'חיפוש שיחות',
+        action: (ref, context) => _toolSoon(context, 'חיפוש שיחות'),
+      ),
+    ];
+
+/// AiFinderScreen tools: מאתר + עץ חכם (runKeyboardTool seam, like kbAiHubNodes).
+List<KbToolNode> kbAiFinderNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.gps_fixed,
+        label: 'מאתר',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_tree,
+        label: 'עץ חכם',
+        action: (ref, context) =>
+            runKeyboardTool(ref, context, KbTool.smartTree),
+      ),
+    ];
+
+/// WorkerProfileScreen tools: נוכחות · טפסים · תיק בטיחות · תלושי שכר.
+List<KbToolNode> kbWorkerProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.access_time,
+        label: 'נוכחות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerAttendanceScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'טפסים',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerFormsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.verified_user_outlined,
+        label: 'תיק בטיחות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerSafetyScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.payments_outlined,
+        label: 'תלושי שכר',
+        action: (ref, context) => showWorkerPayslipsSheet(context),
+      ),
+    ];
+
+/// ManagerDashboardScreen tools: קו-פיילוט · שיחות · אזור אישי · הגדרות.
+List<KbToolNode> kbManagerDashboardNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.smart_toy,
+        label: 'קו-פיילוט',
+        action: (ref, context) =>
+            Navigator.of(context).push(ManagerCopilotScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.chat_bubble_outline,
+        label: 'שיחות',
+        action: (ref, context) => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const ChatsScreen(persona: BsRole.manager),
+          ),
+        ),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.person_outline,
+        label: 'אזור אישי',
+        action: (ref, context) =>
+            Navigator.of(context).push(ManagerProfileScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) => Navigator.of(context).push(
+          CatalogSettingsScreen.route(showProfileRow: false),
+        ),
+      ),
+    ];
+
+/// WorkerSettingsScreen tools: התראות · תנאי שימוש · מדיניות פרטיות.
+List<KbToolNode> kbWorkerSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.notifications_outlined,
+        label: 'התראות',
+        action: (ref, context) =>
+            Navigator.of(context).push(NotifSettingsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'תנאי שימוש',
+        action: (ref, context) =>
+            Navigator.of(context).push(LegalScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.privacy_tip_outlined,
+        label: 'מדיניות פרטיות',
+        action: (ref, context) => Navigator.of(context)
+            .push(LegalScreen.route(initialTab: LegalTab.privacy)),
+      ),
+    ];
+
+/// ManagerProfileScreen tools: הגדרות · מעבר בין מסכים.
+List<KbToolNode> kbManagerProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) => Navigator.of(context).push(
+          CatalogSettingsScreen.route(showProfileRow: false),
+        ),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.desktop_windows_outlined,
+        label: 'מעבר בין מסכים',
+        action: (ref, context) => showManagerScreensSheet(context),
+      ),
+    ];
+
+/// CourierDashboardScreen tools: התראות · פרופיל · הגדרות.
+List<KbToolNode> kbCourierDashboardNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.notifications_outlined,
+        label: 'התראות',
+        action: (ref, context) => showCourierNotifsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.person_outline,
+        label: 'פרופיל',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierProfileScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierSettingsScreen.route()),
+      ),
+    ];
+
+/// CourierProfileScreen tools: נוכחות · טפסים · תעודות נהג · תלושי שכר.
+List<KbToolNode> kbCourierProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.access_time,
+        label: 'נוכחות',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierAttendanceScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'טפסים',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierFormsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'תעודות נהג',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierCertsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.payments_outlined,
+        label: 'תלושי שכר',
+        action: (ref, context) => showWorkerPayslipsSheet(context),
+      ),
+    ];
+
+/// CourierSettingsScreen tools: תנאי שימוש · מדיניות פרטיות.
+List<KbToolNode> kbCourierSettingsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.description_outlined,
+        label: 'תנאי שימוש',
+        action: (ref, context) =>
+            Navigator.of(context).push(LegalScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.privacy_tip_outlined,
+        label: 'מדיניות פרטיות',
+        action: (ref, context) => Navigator.of(context)
+            .push(LegalScreen.route(initialTab: LegalTab.privacy)),
+      ),
+    ];
+
+/// StoreDashboardScreen tools: אזור אישי · הגדרות.
+List<KbToolNode> kbStoreDashboardNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.person_outline,
+        label: 'אזור אישי',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreProfileScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(SupplierSettingsScreen.route()),
+      ),
+    ];
+
+/// StoreProfileScreen tools: תעודות עסק · מסמכים · הגדרות ספק.
+List<KbToolNode> kbStoreProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'תעודות עסק',
+        action: (ref, context) =>
+            Navigator.of(context).push(StoreCertsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.receipt_long_outlined,
+        label: 'מסמכים',
+        action: (ref, context) => showStoreDocumentsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות ספק',
+        action: (ref, context) =>
+            Navigator.of(context).push(SupplierSettingsScreen.route()),
+      ),
+    ];
+
+/// ProjectsScreen tools: תקציב · משימות · פרויקט חכם.
+List<KbToolNode> kbProjectsNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.account_balance_wallet_outlined,
+        label: 'תקציב',
+        action: (ref, context) =>
+            Navigator.of(context).push(BudgetScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.assignment_outlined,
+        label: 'משימות',
+        action: (ref, context) =>
+            Navigator.of(context).push(TasksScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.account_tree_outlined,
+        label: 'פרויקט חכם',
+        action: (ref, context) =>
+            Navigator.of(context).push(SmartProjectScreen.route()),
+      ),
+    ];
+
+/// SuppliersScreen tools: ליפסקי ברקן.
+List<KbToolNode> kbSuppliersNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.factory_outlined,
+        label: 'ליפסקי ברקן',
+        action: (ref, context) =>
+            Navigator.of(context).push(LipskeyBrandScreen.route()),
+      ),
+    ];
+
+/// ProfileScreen tools: מועדון · החלפת תפקיד · בקשת תפקיד.
+List<KbToolNode> kbProfileNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.emoji_events_outlined,
+        label: 'מועדון',
+        action: (ref, context) =>
+            Navigator.of(context).push(RewardsHubScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.swap_horiz,
+        label: 'החלפת תפקיד',
+        action: (ref, context) => showRolePicker(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'בקשת תפקיד',
+        action: (ref, context) => showRoleRequestSheet(context),
+      ),
+    ];
+
+/// WorkerAppScreen tools: לוח משימות · גאנט משימות · ליקויים · הגדרות.
+List<KbToolNode> kbWorkerAppNodes() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.dashboard_outlined,
+        label: 'לוח משימות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerTaskBoardScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.timeline,
+        label: 'גאנט משימות',
+        action: (ref, context) => showTasksGanttSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.report_problem_outlined,
+        label: 'ליקויים',
+        action: (ref, context) => showDefectsSheet(context),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.settings_outlined,
+        label: 'הגדרות',
+        action: (ref, context) =>
+            Navigator.of(context).push(WorkerSettingsScreen.route()),
       ),
     ];

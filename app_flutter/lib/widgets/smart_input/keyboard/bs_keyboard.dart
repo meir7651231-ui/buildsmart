@@ -158,6 +158,13 @@ class BsKeyboard extends StatelessWidget {
   /// here (there is no second toggle key).
   final VoidCallback? onToggleSymbols;
 
+  /// When true, the layer-switch key ALWAYS toggles letters↔symbols — even while
+  /// a tool layer is open (it stops doubling as "exit tools"). Owner button-spec
+  /// v2 (#7 = letters↔numbers ONLY); the floating mount passes its
+  /// `KB_BUTTONS_V2` flag. Default false → byte-identical (the key still exits
+  /// tools when [tiles] is non-null, the legacy dual-mode behaviour).
+  final bool symbolsAlwaysToggles;
+
   /// Switch input language (the globe key).
   final VoidCallback? onLanguage;
 
@@ -243,6 +250,7 @@ class BsKeyboard extends StatelessWidget {
     this.typedText = '',
     this.onExitTools,
     this.onToggleSymbols,
+    this.symbolsAlwaysToggles = false,
     this.onLanguage,
     this.showSymbols = false,
     this.english = false,
@@ -281,7 +289,9 @@ class BsKeyboard extends StatelessWidget {
         // null) the key reads "אבג" and EXITS the tools back to the letters;
         // otherwise it is the plain "?123" symbols toggle. [tiles] is null on
         // every non-floating mount, so this stays the symbols toggle there.
-        if (tiles != null) {
+        // Owner button-spec v2 (#7): with [symbolsAlwaysToggles] the key ONLY
+        // toggles letters↔numbers; "exit tools" moves to BACK / the ▦ toggle.
+        if (tiles != null && !symbolsAlwaysToggles) {
           onExitTools?.call();
         } else {
           onToggleSymbols?.call();
@@ -319,7 +329,7 @@ class BsKeyboard extends StatelessWidget {
       final KbKey model;
       if (key.kind == KeyKind.symbols) {
         model = KbKey(
-          (showSymbols || tiles != null)
+          (showSymbols || (tiles != null && !symbolsAlwaysToggles))
               ? (english ? 'ABC' : 'אבג')
               // A narrow phone key can't fit "?123" on one line (it wraps to
               // three), so on a compact (mobile) keyboard the layer key reads the
@@ -759,7 +769,7 @@ class _StripInput extends StatelessWidget {
         ),
       );
     }
-    return Row(children: children);
+    return Row(textDirection: TextDirection.rtl, children: children);
   }
 }
 

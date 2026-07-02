@@ -3,21 +3,25 @@ import 'dart:async';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/firebase_options.dart';
+import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show combinedTextScale;
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
 import 'package:buildsmart/widgets/studio/studio_overlay.dart';
-import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
+import 'package:buildsmart/widgets/toast.dart'
+    show bsMessengerKey, bsNavigatorKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -346,6 +350,15 @@ class BuildSmartApp extends ConsumerWidget {
       title: 'BuildSmart',
       // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
       scaffoldMessengerKey: bsMessengerKey,
+      // Root navigator key — lets the app-global floating keyboard (kKbGlobal)
+      // push routes / open sheets from above the Navigator (see _navContext in
+      // floating_card_keyboard.dart). GATED on the flag so it tree-shakes when off,
+      // exactly like every other kKbGlobal touchpoint: with [kKbGlobal] const-false
+      // dart2js folds this ternary to `null` (= the default keyless root Navigator,
+      // the pre-monster behaviour), restoring provable byte-identity. Only the
+      // ASSIGNMENT is gated; `bsNavigatorKey`'s top-level declaration in toast.dart
+      // stays unconditional (an inert `final` global until something reads it).
+      navigatorKey: kKbGlobal ? bsNavigatorKey : null,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(highContrast: highContrast, cfg: cfgTheme),
       darkTheme: AppTheme.dark(highContrast: highContrast, cfg: cfgTheme),
@@ -370,6 +383,42 @@ class BuildSmartApp extends ConsumerWidget {
         // Fold in the owner's CfgTheme font-scale (#studio) — 1.0 by default ⇒ no
         // change until the owner moves the theme-editor slider (round-2 fix).
         final combined = combinedTextScale(textScale, osScale, cfgTheme.fontScale);
+        // App-content stack, built once so it can be conditionally wrapped for
+        // focus traversal below. Carries BOTH the No-Code Studio overlay (live)
+        // and the global keyboard overlay (kKbGlobal).
+        Widget appContent = Stack(
+          children: [
+            child ?? const SizedBox(),
+            // OWNER POLICY: the launch-diagnostic badge is dev-only — gated by
+            // kDebugMode so a release/web build shows NOTHING (see
+            // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
+            // (release self-test for the cross-device-sync investigation).
+            ...debugOverlayChildren(isDebug: kDebugMode),
+            // ALWAYS-ON live connection pill (🟢 מחובר / 🔴 מנותק · מצב דמו) —
+            // overlays every screen. Inert on the demo/test path.
+            const ConnectionIndicator(),
+            // No-Code Studio edit-mode overlay — inert (SizedBox.shrink) unless
+            // the owner has the Studio ACTIVE and is in edit-mode; same
+            // always-mounted-inert pattern as ConnectionIndicator.
+            const StudioOverlay(),
+            // 🃏 "keyboard on every screen" (kKbGlobal): the floating keyboard
+            // mounted ABOVE the Navigator so it floats over pushed routes too.
+            // Omitted when the flag is off → HomeShell mounts it as today
+            // (byte-identical).
+            if (kKbGlobal) const _GlobalKeyboardOverlay(),
+          ],
+        );
+        // KB_GLOBAL focus-traversal robustness (flag-gated → flag-OFF
+        // byte-identical): WidgetOrderTraversalPolicy sorts by widget-tree order
+        // (no geometry) and sidesteps a caught "RenderBox was not laid out" that
+        // the default ReadingOrderTraversalPolicy throws for the overlay + the
+        // app's many autofocus fields. Only under the flag, so flag-OFF identical.
+        if (kKbGlobal) {
+          appContent = FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: appContent,
+          );
+        }
         return MediaQuery(
           data: mq.copyWith(
             textScaler: TextScaler.linear(combined),
@@ -387,33 +436,53 @@ class BuildSmartApp extends ConsumerWidget {
             // gate.
             child: _AutoLogout(
               timeout: settings.sessionTimeout,
-              child: Stack(
-                children: [
-                  child ?? const SizedBox(),
-                  // OWNER POLICY: the launch-diagnostic badge is dev-only — gated
-                  // by kDebugMode so a release/web build shows NOTHING (see
-                  // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
-                  // (release self-test for the cross-device-sync investigation).
-                  ...debugOverlayChildren(isDebug: kDebugMode),
-                  // ALWAYS-ON live connection pill (🟢 מחובר / 🔴 מנותק · מצב
-                  // דמו) — overlays every screen. Inert on the demo/test path
-                  // (connectionStatusProvider is a constant `demo` there); on
-                  // the live backend it recomputes from connectivity + auth +
-                  // the diag/{uid} isFromCache probe. Positioned below the debug
-                  // badge in debug; owns the top in release.
-                  const ConnectionIndicator(),
-                  // No-Code Studio edit-mode overlay — inert (SizedBox.shrink)
-                  // unless the owner has the Studio ACTIVE and is in edit-mode;
-                  // exactly the ConnectionIndicator always-mounted-inert pattern,
-                  // so a normal build is answer-equivalent.
-                  const StudioOverlay(),
-                ],
-              ),
+              child: appContent,
             ),
           ),
         );
       },
       home: const OnboardingGate(),
+    );
+  }
+}
+
+/// App-global mount for the floating keyboard ("keyboard on every screen",
+/// [kKbGlobal]). Lives in [BuildSmartApp]'s builder Stack — ABOVE the Navigator —
+/// so the keyboard floats over pushed full-screen routes too, not only the
+/// HomeShell tabs. Watches [keyboardOverlayOpenProvider] itself (only THIS
+/// rebuilds on open/close, not the whole MaterialApp); renders nothing when
+/// closed. Uses a bottom [Align] (not [Positioned]) so it is a valid
+/// non-positioned Stack child. Added to the tree only when [kKbGlobal] is on (the
+/// collection-if in the builder tree-shakes it away otherwise → flag-OFF identity).
+class _GlobalKeyboardOverlay extends ConsumerWidget {
+  const _GlobalKeyboardOverlay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Closed -> a global open-FAB (mirrors the home FAB but above the Navigator,
+    // so it is reachable on EVERY route). Open -> the floating keyboard itself.
+    if (!ref.watch(keyboardOverlayOpenProvider)) {
+      return Align(
+        alignment: AlignmentDirectional.bottomStart,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: FloatingActionButton(
+              heroTag: 'keyboard-fab-global',
+              onPressed: () =>
+                  ref.read(keyboardOverlayOpenProvider.notifier).state = true,
+              backgroundColor: BsTokens.brand,
+              foregroundColor: Colors.white,
+              tooltip: 'מקלדת חכמה',
+              child: const Icon(Icons.keyboard),
+            ),
+          ),
+        ),
+      );
+    }
+    return const Align(
+      alignment: Alignment.bottomCenter,
+      child: SafeArea(top: false, child: FloatingCardKeyboard()),
     );
   }
 }
