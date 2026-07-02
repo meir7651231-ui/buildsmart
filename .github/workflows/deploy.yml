@@ -62,7 +62,9 @@ jobs:
 
       - name: Flutter test (GATE — blocks build on any failure)
         working-directory: app_flutter
-        run: flutter test --reporter=compact
+        # --concurrency=2 caps parallel test isolates so the CI gate can't OOM on
+        # the larger merged suite (a local default-concurrency run exhausted RAM).
+        run: flutter test --reporter=compact --concurrency=2
 
       - name: Build Flutter web
         working-directory: app_flutter
