@@ -68,9 +68,7 @@ jobs:
 
       - name: Build Flutter web
         working-directory: app_flutter
-        # KB_GLOBAL cut-over: the unified "keyboard on every screen" goes live
-        # (the contractor board — swarm-audited, GATE-PASS, verified merged).
-        run: flutter build web --release --base-href "/buildsmart/flutter/" --dart-define=KB_GLOBAL=true
+        run: flutter build web --release --base-href "/buildsmart/flutter/"
 
       - name: Stage Flutter under /flutter/
         run: |
