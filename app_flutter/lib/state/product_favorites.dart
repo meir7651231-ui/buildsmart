@@ -56,6 +56,10 @@ class ProductFavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
+    // The notifier can be disposed during this async gap (test teardown / scope
+    // rebuild); reading `state` after dispose throws a StateError. Guard it — in
+    // production the notifier outlives the write, so this stays a no-op there.
+    if (!mounted) return;
     await prefs.setStringList(_key, state.toList());
   }
 
