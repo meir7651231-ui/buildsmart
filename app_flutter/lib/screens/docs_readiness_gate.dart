@@ -1,8 +1,11 @@
 import 'package:buildsmart/screens/courier_certs_screen.dart';
+import 'package:buildsmart/screens/keyboard_tool_tree.dart';
 import 'package:buildsmart/screens/worker_forms_screen.dart';
 import 'package:buildsmart/screens/worker_safety_screen.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +45,7 @@ class DocsReadinessGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isWorker = role == BoardRole.worker;
-    return Directionality(
+    final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
@@ -176,6 +179,60 @@ class DocsReadinessGate extends ConsumerWidget {
         ),
       ),
     );
+    // #101 keyboard mirror: the gate's own fix-it actions live on the grid
+    // too. `kKbGlobal ?` keeps flag-off byte-identical (KbScreen unbuilt off).
+    return kKbGlobal ? KbScreen(tools: _kbTools(), child: body) : body;
+  }
+
+  /// The gate's fix-it actions, mirrored into the floating grid. Same targets
+  /// as the on-screen [_GateButton]s / [_RecheckButton], picked by [role].
+  List<KbToolNode> _kbTools() {
+    if (role == BoardRole.worker) {
+      return <KbToolNode>[
+        KbToolNode.leaf(
+          icon: Icons.description_outlined,
+          label: 'טופס 101',
+          action: (ref, context) =>
+              Navigator.of(context).push(WorkerFormsScreen.route()),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.health_and_safety_outlined,
+          label: 'תיק בטיחות',
+          action: (ref, context) =>
+              Navigator.of(context).push(WorkerSafetyScreen.route()),
+        ),
+        KbToolNode.leaf(
+          icon: Icons.refresh,
+          label: 'בדוק שוב',
+          action: (ref, context) => _recheck(ref),
+        ),
+      ];
+    }
+    return <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.badge_outlined,
+        label: 'תעודות נהג',
+        action: (ref, context) =>
+            Navigator.of(context).push(CourierCertsScreen.route()),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.refresh,
+        label: 'בדוק שוב',
+        action: (ref, context) => _recheck(ref),
+      ),
+    ];
+  }
+
+  /// Re-read the readiness provider (explicit '🔄 בדוק שוב') — mirrors
+  /// [_RecheckButton]; a harmless no-op when nothing changed.
+  void _recheck(WidgetRef ref) {
+    final s = ref.read(boardAuthProvider);
+    if (s == null) return;
+    if (role == BoardRole.worker) {
+      ref.invalidate(workerDocsReadyProvider(s.username));
+    } else {
+      ref.invalidate(courierDocsReadyProvider(s.username));
+    }
   }
 }
 
