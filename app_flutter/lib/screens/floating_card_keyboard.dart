@@ -84,6 +84,8 @@ import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
 import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/catalog_location.dart'
     show CatalogLocation, catalogLocationProvider;
+import 'package:buildsmart/state/finder_front.dart'
+    show catalogLeadsWithFinder, kFinderFront;
 import 'package:buildsmart/state/dept_location.dart'
     show DeptLocation, deptLocationProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
@@ -916,6 +918,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // single location (+ live-data) snapshot, so the two halves can never disagree.
     // `ctx.row` feeds [_rowFor]; `ctx.toolBase` feeds [_syncContextToolBase] below.
     KbUpdatesContext? ctx;
+    // FINDER-FRONT (kFinderFront): does the finder ("the salesperson") LEAD this
+    // open instead of the mirror row? Set true only on a קטלוג browse/landing
+    // location (the tab==0 branch below). Gated on the [kFinderFront] const, so
+    // when the flag is off it stays false and every use of it folds away — the
+    // whole finder-front path is byte-identical.
+    bool leadWithFinder = false;
     if (tab == 1) {
       // PARALLEL מחלקות mirror — the same two-tier gate as the tab-2/3 blocks
       // below, just for the departments tab. It is the HEAD of the `else if` chain
@@ -1004,11 +1012,26 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
       // one-Set-contains cost of the no-rebuild toggle).
       final live = kKbLiveMirror ||
           ref.watch(featureFlagsProvider).contains(kKbLiveMirrorFlag);
-      if (live) {
+      // kFinderFront ALSO needs the קטלוג location — to decide whether the finder
+      // (the salesperson) LEADS on this browse/landing surface. Read it when
+      // EITHER flag wants it; with kFinderFront const-false the `|| kFinderFront`
+      // folds to `|| false` (⇒ the read stays inside `if (live)`, unchanged) and
+      // the lead block below tree-shakes (⇒ leadWithFinder stays false), so the
+      // whole finder-front path is byte-identical when the flag is off.
+      if (live || kFinderFront) {
         final CatalogLocation loc = ref.watch(catalogLocationProvider);
-        // The product-category set is the module-level [_kCatalogProductCats]
-        // (computed ONCE — the catalog is const), not rebuilt on every keystroke.
-        ctx = deriveCatalogContext(loc, productCats: _kCatalogProductCats);
+        // The salesperson leads on a browse/landing surface (home / smart-tree
+        // grid) — unless the user dropped to emergency typing ([_typing], which a
+        // tab change clears, re-arming the lead). Everywhere the user is already
+        // browsing a concrete list the mirror leads (catalogLeadsWithFinder false).
+        if (kFinderFront && !_typing && catalogLeadsWithFinder(loc)) {
+          leadWithFinder = true;
+        }
+        if (live) {
+          // The product-category set is the module-level [_kCatalogProductCats]
+          // (computed ONCE — the catalog is const), not rebuilt on every keystroke.
+          ctx = deriveCatalogContext(loc, productCats: _kCatalogProductCats);
+        }
       }
     }
 
@@ -1068,9 +1091,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
     // when no manual grid/gear drill is open and only when the base actually changed
     // (so it never re-installs every frame and never clobbers a manual drill).
     //
-    // FIND-MODE gate: while the finder panel is shown the hidden tool stack must not
-    // be churned (the panel replaces the keyboard body), so skip the sync entirely.
-    if (!_findMode) _syncContextToolBase(tabBase, routeBase: routeBase);
+    // FIND-MODE / FINDER-FRONT gate: while the finder panel is shown — manually
+    // (the מאתר tool) OR auto-leading on a browse surface (kFinderFront) — the
+    // hidden tool stack must not be churned (the panel replaces the keyboard
+    // body), so skip the sync entirely. [leadWithFinder] folds to false when
+    // kFinderFront is off, so this stays byte-identical there.
+    if (!_findMode && !leadWithFinder) {
+      _syncContextToolBase(tabBase, routeBase: routeBase);
+    }
 
     // Read the current node-list AFTER the context-base sync so the tiles (and
     // [showBack]) reflect a base installed this frame (no one-frame lag). Null →
@@ -1103,9 +1131,19 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               // the morph drill state. When [nodes] is null the keyboard shows
               // its letters; otherwise it renders the current node-list as pure
               // tiles (with a BACK tile once the stack is deeper than its base).
-              if (_findMode)
+              if (_findMode || leadWithFinder)
                 FindKeyboardPanel(
-                  onExit: () => setState(() => _findMode = false),
+                  // Exit to the emergency letters. When the finder is AUTO-leading
+                  // (leadWithFinder — kFinderFront only), also raise [_typing] so
+                  // the lead is SUPPRESSED until the user navigates (a tab change
+                  // re-arms it); otherwise it would immediately re-lead and the
+                  // letters would be unreachable. When kFinderFront is off,
+                  // leadWithFinder folds to false ⇒ only `_findMode = false` runs
+                  // (byte-identical to the manual מאתר-tool exit).
+                  onExit: () => setState(() {
+                    _findMode = false;
+                    if (leadWithFinder) _typing = true;
+                  }),
                 )
               else
               BsKeyboardHost(
