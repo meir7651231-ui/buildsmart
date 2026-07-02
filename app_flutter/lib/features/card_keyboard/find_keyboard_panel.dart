@@ -30,11 +30,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// The find-mode keyboard body. Self-contained: owns the dive [FindSession] and
 /// rebuilds the grid + the prediction row from its verdict after every tap.
 class FindKeyboardPanel extends ConsumerStatefulWidget {
-  const FindKeyboardPanel({super.key, this.onExit});
+  const FindKeyboardPanel({super.key, this.onExit, this.onOpenProduct});
 
   /// Leave find-mode (the 'אבג' key) — the host clears its find flag so the
   /// normal keyboard returns. Null on a standalone mount.
   final VoidCallback? onExit;
+
+  /// Opens the product sheet through a CALLER-supplied context. The floating host
+  /// passes a callback that opens the sheet via its ROOT-navigator context, so
+  /// the sheet works under KB_GLOBAL where this panel sits ABOVE the app Navigator
+  /// (else showModalBottomSheet → Navigator.of() throws 'No Navigator found' — the
+  /// finder product-tap crash the Android/KB_GLOBAL audit found). Null → the
+  /// panel's own context (a standalone/manual mount that IS under a Navigator).
+  final void Function(
+    LipskeyCatalogProduct product,
+    List<LipskeyCatalogProduct> siblings,
+  )? onOpenProduct;
 
   @override
   ConsumerState<FindKeyboardPanel> createState() => _FindKeyboardPanelState();
@@ -52,7 +63,13 @@ class _FindKeyboardPanelState extends ConsumerState<FindKeyboardPanel> {
     LipskeyCatalogProduct product,
     List<LipskeyCatalogProduct> siblings,
   ) {
-    showLipskeyProductSheet(context, product, siblings);
+    final open = widget.onOpenProduct;
+    if (open != null) {
+      // The host opens the sheet via its ROOT-navigator context (KB_GLOBAL-safe).
+      open(product, siblings);
+    } else {
+      showLipskeyProductSheet(context, product, siblings);
+    }
   }
 
   @override
@@ -71,7 +88,15 @@ class _FindKeyboardPanelState extends ConsumerState<FindKeyboardPanel> {
             const SizedBox(height: 8),
             _topRow(cs, v),
             const SizedBox(height: 8),
-            _grid(cs, v),
+            // Cap the key grid at ~34% of the screen height and SCROLL it, so a
+            // large verdict (up to ~38 product keys) never overflows off the top
+            // of a short / landscape phone with unreachable keys (Android audit).
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.34,
+              ),
+              child: SingleChildScrollView(child: _grid(cs, v)),
+            ),
           ],
         ),
       ),
@@ -195,11 +220,17 @@ class _FindKeyboardPanelState extends ConsumerState<FindKeyboardPanel> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
+          // 48dp min touch target (Android audit) + a max width so a long Hebrew
+          // product name ellipsizes instead of overflowing the Wrap line.
+          constraints: BoxConstraints(
+            minHeight: 48,
+            maxWidth: MediaQuery.of(context).size.width * 0.82,
+          ),
+          alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-                color: border, width: product ? 2 : 0.5),
+            border: Border.all(color: border, width: product ? 2 : 0.5),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -208,12 +239,16 @@ class _FindKeyboardPanelState extends ConsumerState<FindKeyboardPanel> {
                 Icon(Icons.inventory_2_outlined, size: 16, color: cs.primary),
                 const SizedBox(width: 6),
               ],
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: product ? cs.primary : cs.onSurface,
-                  fontWeight: product ? FontWeight.w500 : FontWeight.w400,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: product ? cs.primary : cs.onSurface,
+                    fontWeight: product ? FontWeight.w500 : FontWeight.w400,
+                  ),
                 ),
               ),
             ],

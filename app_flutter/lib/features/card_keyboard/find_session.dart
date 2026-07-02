@@ -64,20 +64,40 @@ class FindSession {
   /// prediction row (one chip per step, [NewbieStep.crumbWord]).
   final List<NewbieStep> stack = <NewbieStep>[];
 
-  /// kDivePool narrowed by every answered step's predicate. Pure recompute —
-  /// cheap next to the merge, and the engine memoises the heavy work downstream.
+  // Memoised pool + verdict for the CURRENT stack (Android jank fix): the pool
+  // filter is O(stack × ~900) and mergedKeys re-derives the signal spread over
+  // that pool — both are PURE functions of the answered stack, so compute them
+  // ONCE per step and reuse until the next push/pop/reset dirties the cache. The
+  // panel reads `verdict` on EVERY build (keyboard open / resize / orientation
+  // frames all rebuild with an UNCHANGED stack), so without this each animation
+  // frame refiltered ~900 products + re-merged the signal spread. Output is
+  // byte-identical to the un-memoised getter → golden / byte-identity safe.
+  List<LipskeyCatalogProduct>? _poolCache;
+  CardVerdict? _verdictCache;
+
+  void _invalidate() {
+    _poolCache = null;
+    _verdictCache = null;
+  }
+
+  /// kDivePool narrowed by every answered step's predicate. Memoised per stack
+  /// (recomputed only after a [pushChip] / [pushWord] / [pop] / [reset]).
   List<LipskeyCatalogProduct> get pool {
+    final cached = _poolCache;
+    if (cached != null) return cached;
     var p = kDivePool;
     for (final s in stack) {
       p = p.where(s.predicate).toList();
     }
-    return p;
+    return _poolCache = p;
   }
 
   /// The engine's verdict for the current state — what the keyboard renders:
   /// `MergedKeys` → chips-as-keys · `CardShowProducts` → product keys ·
-  /// `CardResolve` → open the sheet · `CardAskWords` → opening words.
-  CardVerdict get verdict => mergedKeys(pool, stack, _lexicon, subtype);
+  /// `CardResolve` → open the sheet · `CardAskWords` → opening words. Memoised
+  /// per stack (invalidated by every mutator below).
+  CardVerdict get verdict =>
+      _verdictCache ??= mergedKeys(pool, stack, _lexicon, subtype);
 
   /// The answered path, in order — the chips shown in the prediction row.
   List<String> get selection => [for (final s in stack) s.crumbWord];
@@ -96,6 +116,7 @@ class FindSession {
       crumbWord: chip.displayLabel,
       predicate: findPredicateFor(chip.axisId, chip.value, subtype),
     ));
+    _invalidate();
   }
 
   /// Open the dive from a plain word (the opening mouth) — routes through the
@@ -106,14 +127,20 @@ class FindSession {
     final seed = seedFromText(word, _lexicon);
     if (seed == null) return false;
     stack.add(seedStep(seed));
+    _invalidate();
     return true;
   }
 
   /// Undo the last answered step (the BACK key). No-op on an empty stack.
   void pop() {
-    if (stack.isNotEmpty) stack.removeLast();
+    if (stack.isEmpty) return;
+    stack.removeLast();
+    _invalidate();
   }
 
   /// Restart the dive (back to the opening words).
-  void reset() => stack.clear();
+  void reset() {
+    stack.clear();
+    _invalidate();
+  }
 }

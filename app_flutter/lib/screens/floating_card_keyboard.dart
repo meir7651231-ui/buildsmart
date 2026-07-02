@@ -51,6 +51,8 @@
 // (appended). The empty field at tab 0 still shows product opening-words ONLY (no
 // destinations), unchanged.
 
+import 'package:buildsmart/data/lipskey_catalog.dart'
+    show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
     show FindKeyboardPanel;
@@ -81,16 +83,18 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart'
         kbTilesFor;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
+import 'package:buildsmart/screens/lipskey_product_sheet.dart'
+    show showLipskeyProductSheet;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/catalog_location.dart'
     show CatalogLocation, catalogLocationProvider;
-import 'package:buildsmart/state/finder_front.dart'
-    show catalogLeadsWithFinder, kFinderFront;
 import 'package:buildsmart/state/dept_location.dart'
     show DeptLocation, deptLocationProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kKbLiveMirrorFlag;
+import 'package:buildsmart/state/finder_front.dart'
+    show catalogLeadsWithFinder, kFinderFront;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show kKbGlobal, keyboardOverlayOpenProvider;
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
@@ -160,7 +164,8 @@ late final Map<String, KbDestination> _kbDestinationByLabel =
   for (final d in kbDestinations()) d.label: d,
 };
 
-class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
+class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
+    with WidgetsBindingObserver {
   late final TextEditingController _controller;
   late final FocusNode _focus;
 
@@ -242,6 +247,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
   @override
   void initState() {
     super.initState();
+    // ANDROID hardware / gesture BACK (audit fix): register as a binding observer
+    // so [didPopRoute] fires on a system back request. The keyboard lives in an
+    // Overlay ABOVE the app Navigator (KB_GLOBAL) / a sibling Positioned in the
+    // body Stack — NOT a route — so PopScope never sees it, and the app is a
+    // classic MaterialApp (no Router), so BackButtonListener would throw. An
+    // observer is the Overlay-safe, Router-free hook; it is registered ONLY while
+    // this widget (⇒ the open keyboard) is mounted, so BACK behaves normally once
+    // the keyboard is closed.
+    WidgetsBinding.instance.addObserver(this);
     _controller = TextEditingController();
     _focus = FocusNode();
     _lexicon = buildWordLexicon(kDivePool);
@@ -525,6 +539,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller
       ..removeListener(_recompute)
       ..dispose();
@@ -898,6 +913,53 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
         _typing = true;
       });
 
+  /// Open a finder product's sheet via the ROOT-navigator context ([_navContext]),
+  /// so it works under KB_GLOBAL where the finder panel sits ABOVE the app
+  /// Navigator (the audit's product-tap crash fix — showModalBottomSheet needs a
+  /// Navigator ancestor). In a plain build [_navContext] is just `context`, so the
+  /// manual מאתר finder is unaffected.
+  void _openFinderProduct(
+    LipskeyCatalogProduct product,
+    List<LipskeyCatalogProduct> siblings,
+  ) =>
+      showLipskeyProductSheet(_navContext, product, siblings);
+
+  /// ANDROID hardware / gesture BACK while the keyboard is open (audit fix): step
+  /// OUT of the current face instead of backgrounding / exiting the app — pop a
+  /// tool drill, then the finder → letters, then close the keyboard. Returns true
+  /// (handled) so the request never falls through to the app while the keyboard is
+  /// up; once [_close] runs this observer is removed ([dispose]), so the NEXT back
+  /// propagates normally. This observer is registered ([initState]) only while the
+  /// keyboard is open. On web the same hook fires for the browser back button.
+  @override
+  Future<bool> didPopRoute() async {
+    // Defer to the Navigator FIRST: if a route is stacked over the app — a pushed
+    // screen, or the product sheet the finder itself opens via [_navContext] —
+    // BACK belongs to THAT route, not the keyboard underneath. This observer is
+    // registered AFTER the app Navigator, so it is consulted FIRST; returning
+    // false lets the request fall through to the Navigator's own observer, which
+    // pops the top route. Only when nothing is poppable (a bare tab root) do we
+    // own BACK and unwind the keyboard's own faces below.
+    final nav =
+        kKbGlobal ? bsNavigatorKey.currentState : Navigator.maybeOf(context);
+    if (nav?.canPop() ?? false) return false;
+    if (_stack.isNotEmpty || _baseLayer != KbToolLayer.none) {
+      _onBack();
+      return true;
+    }
+    final finderShowing = _findMode ||
+        (kFinderFront &&
+            !_finderOff &&
+            ref.read(mainTabProvider) == 0 &&
+            catalogLeadsWithFinder(ref.read(catalogLocationProvider)));
+    if (finderShowing) {
+      _finderToLetters();
+      return true;
+    }
+    _close();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     // A floating panel (rounded-top Material + a subtle top shadow), NOT a modal
@@ -1184,12 +1246,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard> {
               // finder-capable face, so 'מוכר' is always one tap away.
               if (_findMode || leadWithFinder)
                 (leadWithFinder
-                    ? FindKeyboardPanel(onExit: _finderToLetters)
-                    // Manual מאתר-tool find-mode — and the ONLY branch when
-                    // kFinderFront is off (leadWithFinder folds false), so this is
-                    // byte-identical: the panel's 'אבג' clears find-mode.
+                    ? FindKeyboardPanel(
+                        onExit: _finderToLetters,
+                        onOpenProduct: _openFinderProduct,
+                      )
+                    // Manual מאתר-tool find-mode (also the only branch when
+                    // kFinderFront is off): the panel's 'אבג' clears find-mode.
+                    // onOpenProduct opens the sheet via the root-navigator context
+                    // (KB_GLOBAL-safe — the audit's finder product-tap crash fix).
                     : FindKeyboardPanel(
                         onExit: () => setState(() => _findMode = false),
+                        onOpenProduct: _openFinderProduct,
                       ))
               else
               BsKeyboardHost(
