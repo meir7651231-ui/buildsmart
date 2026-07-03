@@ -19,7 +19,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
     'KB_GLOBAL floating keyboard renders + Android BACK closes it (real device)',
@@ -59,12 +59,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // (1) It RENDERS on Android — capture the proof screenshot.
+      // (1) It RENDERS on Android.
       expect(find.byType(BsKeyboard), findsOneWidget,
           reason: 'the floating keyboard renders on the Android emulator');
-      await binding.convertFlutterSurfaceToImage();
-      await tester.pumpAndSettle();
-      await binding.takeScreenshot('android-keyboard-open');
 
       // (2) The REAL Android system BACK (popRoute over the platform channel, the
       // exact message the OS sends) steps OUT of the keyboard — closes it, does
