@@ -21,7 +21,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
     'KB_GLOBAL floating keyboard renders on a real Android emulator',
@@ -64,6 +64,18 @@ void main() {
       // The KB_GLOBAL keyboard built + rendered on genuine Android hardware.
       expect(find.byType(BsKeyboard), findsOneWidget,
           reason: 'the KB_GLOBAL floating keyboard renders on the Android emulator');
+
+      // Best-effort on-device screenshot (uploaded as a CI artifact so the
+      // keyboard-on-real-Android is VISIBLE). Guarded: surface->image conversion
+      // can no-op on a headless swiftshader GPU, and a missing shot must NOT fail
+      // the render proof above.
+      try {
+        await binding.convertFlutterSurfaceToImage();
+        await tester.pumpAndSettle();
+        await binding.takeScreenshot('android-keyboard');
+      } on Object catch (_) {
+        // Screenshot is best-effort; the render assertion above is the proof.
+      }
     },
   );
 }

@@ -76,3 +76,13 @@ jobs:
           # "No pubspec.yaml file found"). flutter drive targets ONE integration test
           # on the device (avoids `flutter test`'s integration+unit mix error).
           script: cd app_flutter && flutter drive --driver=test_driver/integration_test.dart --target=integration_test/keyboard_android_test.dart --dart-define=KB_GLOBAL=true --dart-define=KB_LIVE_MIRROR=true --dart-define=ENABLE_WORD_FINDER=true
+
+      # The on-device screenshot of the keyboard (best-effort — see the test).
+      # Download it from the run's Artifacts to SEE the keyboard on real Android.
+      - name: Upload the on-device keyboard screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-keyboard-screenshot
+          path: app_flutter/screenshots/**
+          if-no-files-found: warn
