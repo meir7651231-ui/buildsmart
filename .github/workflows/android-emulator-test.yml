@@ -52,14 +52,15 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run keyboard test on a real Android emulator (API 34, Pixel 5)
+      - name: Run keyboard test on a real Android emulator (API 34)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
           target: google_apis
-          profile: pixel_5
+          force-avd-creation: false
           disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -camera-back none
           script: |
             cd app_flutter
             flutter drive \
