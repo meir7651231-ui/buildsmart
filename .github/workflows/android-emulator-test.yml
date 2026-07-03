@@ -44,6 +44,12 @@ jobs:
         working-directory: app_flutter
         run: flutter pub get
 
+      # version.g.dart is gitignored + generated at build time — every other
+      # workflow runs this before building; without it the debug build fails with
+      # "reading 'lib/version.g.dart': No such file or directory".
+      - name: Generate version.g.dart (gitignored)
+        run: bash scripts/gen_version.sh
+
       # KVM hardware acceleration — GitHub's ubuntu runners expose nested virt,
       # so the x86_64 AVD boots fast (the exact thing the dev laptop cannot do).
       - name: Enable KVM
