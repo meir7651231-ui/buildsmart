@@ -64,18 +64,9 @@ jobs:
           force-avd-creation: false
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -camera-back none -memory 2048
-          script: |
-            cd app_flutter
-            set +e
-            # flutter drive targets ONE integration test on the device — avoids
-            # `flutter test`'s "integration + unit cannot run in one invocation".
-            # The driver just waits (no screenshot), so it runs clean on the AVD.
-            flutter drive \
-              --driver=test_driver/integration_test.dart \
-              --target=integration_test/keyboard_android_test.dart \
-              --dart-define=KB_GLOBAL=true \
-              --dart-define=KB_LIVE_MIRROR=true \
-              --dart-define=ENABLE_WORD_FINDER=true 2>&1 | tee /tmp/ft.log
-            code=${PIPESTATUS[0]}
-            [ "$code" -eq 0 ] || tail -30 /tmp/ft.log | while IFS= read -r l; do echo "::error::$l"; done
-            exit $code
+          # The emulator-runner runs each script LINE as a separate `sh -c`, so a
+          # bare `cd` on its own line does NOT persist to the next line. Chain cd +
+          # flutter drive on ONE line with && so flutter runs from app_flutter (else
+          # "No pubspec.yaml file found"). flutter drive targets ONE integration test
+          # on the device (avoids `flutter test`'s integration+unit mix error).
+          script: cd app_flutter && flutter drive --driver=test_driver/integration_test.dart --target=integration_test/keyboard_android_test.dart --dart-define=KB_GLOBAL=true --dart-define=KB_LIVE_MIRROR=true --dart-define=ENABLE_WORD_FINDER=true
