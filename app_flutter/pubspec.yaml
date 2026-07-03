@@ -120,6 +120,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # on-device integration tests — the Android-emulator CI (keyboard smoke + BACK)
+  integration_test:
+    sdk: flutter
+
   # strictest analyzer preset
   very_good_analysis: ^7.0.0
 
