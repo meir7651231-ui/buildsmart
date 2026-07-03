@@ -63,7 +63,13 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -camera-back none
           script: |
             cd app_flutter
+            set +e
             flutter test integration_test/keyboard_android_test.dart \
               --dart-define=KB_GLOBAL=true \
               --dart-define=KB_LIVE_MIRROR=true \
-              --dart-define=ENABLE_WORD_FINDER=true
+              --dart-define=ENABLE_WORD_FINDER=true 2>&1 | tee /tmp/ft.log
+            code=${PIPESTATUS[0]}
+            # Surface the real failure as annotations (the raw CI log needs auth
+            # to read; annotations are public), so a failing run self-diagnoses.
+            [ "$code" -eq 0 ] || tail -25 /tmp/ft.log | while IFS= read -r l; do echo "::error::$l"; done
+            exit $code
