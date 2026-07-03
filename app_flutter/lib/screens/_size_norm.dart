@@ -358,6 +358,7 @@ List<String> wallTokens(String name) {
     out.add(m.group(1)!);
   }
   final list = out.toList()
-    ..sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+    ..sort((a, b) => (double.tryParse(a) ?? double.infinity)
+        .compareTo(double.tryParse(b) ?? double.infinity));
   return list;
 }

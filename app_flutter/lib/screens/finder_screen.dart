@@ -462,7 +462,8 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       all.addAll(wallTokens(p.nameHe));
     }
     final out = all.toList()
-      ..sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+      ..sort((a, b) => (double.tryParse(a) ?? double.infinity)
+          .compareTo(double.tryParse(b) ?? double.infinity));
     return out;
   }
 
