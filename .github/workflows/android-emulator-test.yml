@@ -1,11 +1,17 @@
-name: Android emulator — keyboard smoke + BACK (real AVD)
+name: Android emulator — full keyboard journey (real AVD)
 
 # Runs the KB_GLOBAL floating keyboard on a REAL Android emulator in the cloud
 # (local emulation is impossible on the dev box — no hardware virtualization).
-# The integration test proves, on genuine Android: (1) the keyboard RENDERS,
-# (2) the OS BACK closes it instead of exiting the app (the audit's didPopRoute
-# fix, confirmed on-device). A GREEN run = both hold on real Android. Trigger
-# manually (Run workflow) or on integration-test / workflow changes.
+# The integration test drives the WHOLE keyboard on genuine Android and proves,
+# step by step: (1) it RENDERS (strip + chips), (2) TYPING Hebrew builds the query
+# and recomputes the live predictions, (3) the ▦ tool grid OPENS the home tools,
+# (4) tapping a tool NAVIGATES the screen underneath while the keyboard keeps
+# FLOATING, (5) the ⚙ gear drills a branch in place. Each step captures an
+# on-device screenshot (uploaded as an artifact — download them to SEE the keyboard
+# working on real Android). Hardware BACK is asserted in the deterministic VM test
+# (test/screens/android_back_test.dart), not here — see the note atop
+# integration_test/keyboard_android_test.dart. A GREEN run = the full journey holds
+# on real Android. Trigger manually (Run workflow) or on integration-test changes.
 
 on:
   workflow_dispatch:
