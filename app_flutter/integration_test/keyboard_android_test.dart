@@ -5,11 +5,25 @@
 // Scope is deliberately the on-device RENDER smoke. The Android hardware-BACK
 // handling is verified deterministically in the VM test test/screens/
 // android_back_test.dart (it drives the exact `popRoute` platform message the OS
-// sends). We do NOT re-assert BACK here: under `flutter drive` /
-// IntegrationTestWidgetsFlutterBinding the integration-test driver owns the
-// `flutter/navigation` channel, so a simulated BACK is swallowed before it reaches
-// the keyboard's didPopRoute observer — an on-device test artifact, not app
-// behavior. Run via `flutter drive` + test_driver/integration_test.dart.
+// sends, and asserts the keyboard closes). We do NOT re-assert BACK here because
+// the SAME simulated `popRoute` that passes in the VM binding flakes under this
+// one: IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
+// (real wall-clock + real engine), while the VM uses AutomatedTestWidgetsFlutter-
+// Binding (deterministic FakeAsync). `didPopRoute` is async and only unmounts the
+// keyboard on a follow-up frame after it flips keyboardOverlayOpenProvider; that
+// settles deterministically under FakeAsync but races real-time frame scheduling
+// under the live binding, so the assertion can catch the pre-close frame. It is a
+// harness-timing artifact, NOT app behavior: in the real app BACK closes the
+// keyboard (it lives in a sibling Overlay, never a pushed route, so on a home tab
+// bsNavigatorKey.canPop()==false and didPopRoute falls through to _close()).
+// NOTE: an earlier revision of this comment blamed the flake on the driver
+// "owning the flutter/navigation channel" — that mechanism was not substantiated
+// (nothing in integration_test/flutter_driver registers a handler on that channel;
+// handlePlatformMessage dispatches straight to the binding's inbound handler). To
+// prove BACK on-device would need a real `adb shell input keyevent 4` bridged from
+// the test; the driver `handler:` hook that would carry it does not exist in the
+// pinned Flutter 3.44 integrationDriver, so that is deferred, not wired here.
+// Run via `flutter drive` + test_driver/integration_test.dart.
 
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
