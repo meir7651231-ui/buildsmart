@@ -552,6 +552,9 @@ class BsKeyboard extends StatelessWidget {
           onToolGrid: onToolGrid,
           onPrediction: onPrediction,
           gap: rowGap,
+          // OWNER (B): while the tool tiles lead, collapse the empty "מה לחפש?"
+          // hint above them.
+          suppressEmptyHint: mainIsTools,
         ),
         SizedBox(height: rowGap),
       ],
@@ -648,6 +651,10 @@ class _ToolStrip extends StatelessWidget {
   /// Responsive inter-cell gap (2 mobile / space1 desktop).
   final double gap;
 
+  /// OWNER (B): forwarded to [_StripInput] — collapse the empty hint while the
+  /// tool tiles are showing. Default false → byte-identical.
+  final bool suppressEmptyHint;
+
   const _ToolStrip({
     required this.toolLayer,
     required this.predictions,
@@ -657,6 +664,7 @@ class _ToolStrip extends StatelessWidget {
     required this.onToolGrid,
     required this.onPrediction,
     required this.gap,
+    this.suppressEmptyHint = false,
   });
 
   @override
@@ -680,6 +688,7 @@ class _ToolStrip extends StatelessWidget {
             destinationChips: destinationChips,
             onPrediction: onPrediction,
             gap: gap,
+            suppressEmptyHint: suppressEmptyHint,
           ),
         ),
         SizedBox(width: gap),
@@ -708,12 +717,18 @@ class _StripInput extends StatelessWidget {
   final ValueChanged<String>? onPrediction;
   final double gap;
 
+  /// OWNER (B): while the tool tiles lead (drilled / a tool layer open), collapse
+  /// the empty-state "מה לחפש?" hint so it does not sit above them. Only affects
+  /// the EMPTY case (no query, no chips); default false → byte-identical.
+  final bool suppressEmptyHint;
+
   const _StripInput({
     required this.typedText,
     required this.predictions,
     required this.destinationChips,
     required this.onPrediction,
     required this.gap,
+    this.suppressEmptyHint = false,
   });
 
   @override
@@ -723,8 +738,10 @@ class _StripInput extends StatelessWidget {
     final bool hasChips = predictions.isNotEmpty;
 
     // EMPTY (no text, no chips): a faint hint at the row height — NOT an empty
-    // chip row. This is the owner's "hide the empty prediction row".
+    // chip row. This is the owner's "hide the empty prediction row". OWNER (B):
+    // while the tool tiles lead, drop the hint entirely so it isn't above them.
     if (!hasText && !hasChips) {
+      if (suppressEmptyHint) return const SizedBox.shrink();
       return Container(
         alignment: Alignment.centerRight,
         constraints: BoxConstraints(minHeight: m.cellHeight),
