@@ -913,6 +913,23 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
         if (_stack.isEmpty) _baseLayer = KbToolLayer.none;
       });
 
+  /// BACK on a pushed ROUTE (kKbGlobal, owner "המקלדת היא הנווט — צולל קדימה
+  /// ואחורה"): with a MANUAL drill open (grid/gear base, or any deeper level)
+  /// BACK still pops that drill level FIRST ([_onBack]); once only the AMBIENT
+  /// route mirror remains (`_baseLayer == none` && stack depth ≤ 1) BACK dives
+  /// back OUT of the screen by popping the route, then re-mirrors the revealed
+  /// parent once the pop settles (see the timer below) — the "dive forward AND
+  /// back, screens don't pile up" the owner asked for. Referenced ONLY under
+  /// `kKbGlobal ?` in [build], so a flag-off build never tears this off ⇒
+  /// byte-identical.
+  void _onBackOrPop() {
+    if (_baseLayer != KbToolLayer.none || _stack.length > 1) {
+      _onBack();
+      return;
+    }
+    bsNavigatorKey.currentState?.maybePop();
+  }
+
   /// EXIT the tool view back to the LETTERS — the action of the dual-mode bottom
   /// key (it reads "אבג" while a tool layer is open). Clears the whole drill
   /// stack AND enters typing mode, so the letters show and STAY: the [_typing]
@@ -1353,16 +1370,22 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
                 //
                 // A LIVE-MIRROR context base ([_syncContextToolBase]) is AMBIENT
                 // and always depth-1 (its nodes are all leaves — no branches), so
-                // it carries NO back tile (`_baseLayer == none` && `length == 1`):
-                // it is replaced by switching context, not dismissed by BACK, so
-                // BACK never strands the ambient base. When the flag is off the
-                // stack is non-empty ONLY via a manual base (which sets
-                // `_baseLayer != none`), so this is byte-identical to the prior
-                // `_stack.isNotEmpty` there.
+                // a TAB base carries NO back tile (`_baseLayer == none` &&
+                // `length == 1`): it is replaced by switching tab, not dismissed.
+                // EXCEPTION (owner "המקלדת היא הנווט — צולל קדימה ואחורה"): when the
+                // ambient base mirrors a PUSHED ROUTE ([routePushed]), BACK shows
+                // and dives back OUT by popping the route ([_onBackOrPop], which also
+                // re-mirrors the parent once the pop settles). When the flag is off
+                // [routePushed] folds to false and both fold to the prior manual-only
+                // `_stack`/`_baseLayer` forms, so this is byte-identical there.
                 tiles: tileList,
                 onTile: _onTile,
-                showBack: _baseLayer != KbToolLayer.none || _stack.length > 1,
-                onBack: _onBack,
+                showBack: kKbGlobal
+                    ? (_baseLayer != KbToolLayer.none ||
+                        _stack.length > 1 ||
+                        routePushed)
+                    : (_baseLayer != KbToolLayer.none || _stack.length > 1),
+                onBack: kKbGlobal ? _onBackOrPop : _onBack,
                 activeLayer: _baseLayer,
                 onToolGrid: _onGrid,
                 onToolGear: _onGear,
