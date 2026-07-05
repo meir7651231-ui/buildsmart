@@ -832,6 +832,33 @@ void main() {
             reason: 'only the body tile — drilling adds no duplicate row chip');
       });
 
+      // (b2) OWNER dedup: on tab 1 the prediction row mirrors the 4 departments;
+      // drilling ▦ ALSO renders them as body tiles. Those duplicate chips are
+      // dropped so each department appears EXACTLY ONCE (the tile). Without the
+      // dedup, find.text would match twice (the chip AND the tile).
+      testWidgets(
+          'tab 1 + drilled (grid) → the mirrored department chips are deduped '
+          '(each department shows once, as the body tile)', (tester) async {
+        await pumpPanelOnTab(tester, 1); // tab 1, empty field → the 4 departments.
+        const depts = [
+          'אינסטלציה',
+          'ברזים וסניטריים',
+          'כלי עבודה ידני',
+          'כלי עבודה חשמלי',
+        ];
+        for (final l in depts) {
+          expect(find.text(l), findsOneWidget,
+              reason: 'before drilling: "$l" shows once as the prediction chip');
+        }
+        await tester.tap(find.byIcon(Icons.grid_view));
+        await tester.pumpAndSettle();
+        for (final l in depts) {
+          expect(find.text(l), findsOneWidget,
+              reason: 'drilled: "$l" appears once (the body tile); the duplicate '
+                  'prediction chip is deduped');
+        }
+      });
+
       // (c) The TYPED-query path is UNCHANGED by the empty-field rework: typing a
       // destination term still surfaces the merged destination chip with its nav
       // glyph (guards that adding the context branches did not regress branch 1).

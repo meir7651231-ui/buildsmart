@@ -1213,6 +1213,20 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // [showBack]) reflect a base installed this frame (no one-frame lag). Null →
     // the keyboard shows its letters; otherwise the synced node-list as tiles.
     final nodes = _currentNodes;
+    // OWNER (dedup): on a live-mirror tab, drilling ▦ renders the SAME items as
+    // tiles that the prediction chips already show (e.g. מחלקות → the department
+    // list appears both as chips AND as drilled tiles). Drop any chip whose label
+    // is already a visible tile so each item shows ONCE. Chips that are NOT tiles
+    // (a shallower/other drill, product words, the store pills) stay untouched, and
+    // with no tiles (nodes == null → the letters/finder face, and every flag-off
+    // surface) nothing is dropped — so those paths are byte-identical.
+    final tileList = nodes == null ? null : kbTilesFor(nodes);
+    final tileLabels = tileList == null
+        ? const <String>{}
+        : <String>{for (final t in tileList) t.label};
+    final dedupedChips = tileLabels.isEmpty
+        ? row.chips
+        : <String>[for (final c in row.chips) if (!tileLabels.contains(c)) c];
 
     return Material(
       color: Colors.transparent,
@@ -1291,7 +1305,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
                 // purpose, so it shows the keyboard regardless of the opt-in
                 // kSmartInput feature flag (off by default in production).
                 forceShow: true,
-                predictions: row.chips,
+                predictions: dedupedChips,
                 // The chips that are NAVIGABLE (get the nav glyph + brand accent
                 // in the pure keyboard): typed/tab destination chips AND LIVE-MIRROR
                 // dynamic chips. Product WORDS are absent, so they stay plain — the
@@ -1314,7 +1328,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
                 // stack is non-empty ONLY via a manual base (which sets
                 // `_baseLayer != none`), so this is byte-identical to the prior
                 // `_stack.isNotEmpty` there.
-                tiles: nodes == null ? null : kbTilesFor(nodes),
+                tiles: tileList,
                 onTile: _onTile,
                 showBack: _baseLayer != KbToolLayer.none || _stack.length > 1,
                 onBack: _onBack,
