@@ -1798,18 +1798,107 @@ class _DiveResultsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(diveResultsProvider);
-    if (products.isEmpty) {
+    // OWNER (A slice 3 — unify "so it searches those too"): the ONE keyboard search
+    // finds CATEGORIES + SCREENS as well, not just products — exactly what the old
+    // search bar did via [kVisibleSearchIndex]. The non-product index matches lead
+    // (capped, compact), then the engine-narrowed products fill the rest.
+    final query = ref.watch(keyboardDiveQueryProvider).trim();
+    final entries = query.isEmpty
+        ? const <SearchEntry>[]
+        : kVisibleSearchIndex.where((e) => e.matches(query)).take(4).toList();
+
+    if (products.isEmpty && entries.isEmpty) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(BsTokens.space4),
           child: Text(
-            'אין מוצרים תואמים',
+            'אין תוצאות תואמות',
             style: TextStyle(color: BsTokens.mutedLight),
           ),
         ),
       );
     }
-    return LipskeyProductsList(products: products);
+    return Column(
+      children: <Widget>[
+        for (final e in entries) _DiveEntryTile(entry: e),
+        if (entries.isNotEmpty)
+          const Divider(height: 1, color: Color(0xFFF5F5F5)),
+        Expanded(
+          child: products.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(BsTokens.space4),
+                    child: Text(
+                      'אין מוצרים תואמים',
+                      style: TextStyle(color: BsTokens.mutedLight),
+                    ),
+                  ),
+                )
+              : LipskeyProductsList(products: products),
+        ),
+      ],
+    );
+  }
+}
+
+/// A single non-product search hit (category / screen / setting) inside the live
+/// DIVE (owner A slice 3). Mirrors the old search list's entry tile: a legal leaf
+/// navigates to its screen; every other entry NARROWS the dive to its title (the
+/// dive's [keyboardDiveQueryProvider], the analogue of the old search bar setting
+/// [searchQueryProvider]).
+class _DiveEntryTile extends ConsumerWidget {
+  const _DiveEntryTile({required this.entry});
+
+  final SearchEntry entry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      dense: true,
+      leading: Text(entry.emoji, style: const TextStyle(fontSize: 20)),
+      title: Text(
+        entry.title,
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+      ),
+      subtitle: entry.breadcrumb.isNotEmpty
+          ? Text(
+              entry.breadcrumb,
+              style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          entry.typeLabel,
+          style: const TextStyle(
+            color: Color(0xFF888888),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      onTap: () {
+        if (entry.title == 'תנאי שימוש' || entry.title == 'מדיניות פרטיות') {
+          Navigator.of(context).push(
+            LegalScreen.route(
+              initialTab: entry.title == 'תנאי שימוש'
+                  ? LegalTab.terms
+                  : LegalTab.privacy,
+            ),
+          );
+          return;
+        }
+        // Narrow the LIVE dive to this hit (the dive-query analogue of the old
+        // search bar's searchQueryProvider = entry.title).
+        ref.read(keyboardDiveQueryProvider.notifier).state = entry.title;
+      },
+    );
   }
 }
 
