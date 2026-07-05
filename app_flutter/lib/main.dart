@@ -474,6 +474,13 @@ class BuildSmartApp extends ConsumerWidget {
 /// closed. Uses a bottom [Align] (not [Positioned]) so it is a valid
 /// non-positioned Stack child. Added to the tree only when [kKbGlobal] is on (the
 /// collection-if in the builder tree-shakes it away otherwise → flag-OFF identity).
+/// The HomeShell bottom-nav bar height (home_shell.dart `_BottomNav` SizedBox).
+/// OWNER FIX: the global keyboard overlay lives ABOVE the Navigator, so its
+/// SafeArea clears the OS inset but NOT the HomeShell nav tabs — the FAB sat too
+/// low and the open keyboard covered the בית/מחלקות/עדכונים/חנות tabs. Lifting the
+/// FAB + keyboard by this much clears the nav so it stays visible + tappable.
+const double _kHomeNavHeight = 58;
+
 class _GlobalKeyboardOverlay extends ConsumerWidget {
   const _GlobalKeyboardOverlay();
 
@@ -486,7 +493,7 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
         alignment: AlignmentDirectional.bottomStart,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, _kHomeNavHeight + 16),
             child: FloatingActionButton(
               heroTag: 'keyboard-fab-global',
               onPressed: () =>
@@ -502,7 +509,13 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
     }
     return const Align(
       alignment: Alignment.bottomCenter,
-      child: SafeArea(top: false, child: FloatingCardKeyboard()),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: _kHomeNavHeight),
+          child: FloatingCardKeyboard(),
+        ),
+      ),
     );
   }
 }
