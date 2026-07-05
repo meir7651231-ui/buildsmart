@@ -581,6 +581,12 @@ void main() {
 
         // Tap the destination chip. מחלקות runs runKeyboardTool(departments),
         // which sets mainTabProvider = 1 (DepartmentsScreen in the IndexedStack).
+        // The prediction row now caps at 4 visible chips + horizontal scroll (owner
+        // readability change), so a chip past the fourth must be scrolled into view
+        // before it is hittable — the real user scrolls the row; ensureVisible does
+        // the same in the test.
+        await tester.ensureVisible(find.text('מחלקות').first);
+        await tester.pumpAndSettle();
         await tester.tap(find.text('מחלקות').first);
         await tester.pumpAndSettle();
 

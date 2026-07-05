@@ -756,15 +756,46 @@ class _StripInput extends StatelessWidget {
         ),
       );
     }
-    // The prediction chips fill the remaining width (each Expanded), as before.
-    for (var i = 0; i < predictions.length; i++) {
-      if (children.isNotEmpty) children.add(SizedBox(width: gap));
+    // The prediction chips. OWNER (readability): show at MOST 4 chips at once,
+    // each WIDE ENOUGH to read its full label — chip 5+ scroll horizontally,
+    // instead of squeezing every chip into an ever-narrower Expanded share (which
+    // truncated the labels to "…"). A fixed per-chip width sized so exactly
+    // min(count, 4) fill the strip pushes the overflow into a horizontal scroll.
+    if (hasChips) {
+      if (hasText) children.add(SizedBox(width: gap));
       children.add(
         Expanded(
-          child: _PredictionChip(
-            text: predictions[i],
-            isDestination: destinationChips.contains(predictions[i]),
-            onTap: () => onPrediction?.call(predictions[i]),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const maxVisible = 4;
+              final visible = predictions.length < maxVisible
+                  ? predictions.length
+                  : maxVisible;
+              // Width of one chip so [visible] of them + the gaps between fill the
+              // strip exactly; any chip past the fourth then overflows into scroll.
+              final chipW =
+                  (constraints.maxWidth - gap * (visible - 1)) / visible;
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: <Widget>[
+                    for (var i = 0; i < predictions.length; i++) ...<Widget>[
+                      if (i > 0) SizedBox(width: gap),
+                      SizedBox(
+                        width: chipW,
+                        child: _PredictionChip(
+                          text: predictions[i],
+                          isDestination:
+                              destinationChips.contains(predictions[i]),
+                          onTap: () => onPrediction?.call(predictions[i]),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
         ),
       );
