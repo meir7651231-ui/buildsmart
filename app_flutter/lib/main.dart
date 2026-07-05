@@ -10,6 +10,8 @@ import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/keyboard_screen_tools.dart'
+    show keyboardScreenToolsProvider;
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
@@ -486,6 +488,15 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // OWNER FIX (nav-clearance, REACTIVE): lift by the HomeShell nav height ONLY
+    // when NO route is pushed above HomeShell — a pushed full-screen route (e.g.
+    // משימות) has no bottom nav, so lifting there would leave a gap that shows the
+    // screen content BELOW the keyboard. Watch the screen-tools stack so this
+    // rebuilds on route push/pop; read canPop() fresh for the current depth.
+    ref.watch(keyboardScreenToolsProvider);
+    final routePushed = bsNavigatorKey.currentState?.canPop() ?? false;
+    final navOffset = routePushed ? 0.0 : _kHomeNavHeight;
+
     // Closed -> a global open-FAB (mirrors the home FAB but above the Navigator,
     // so it is reachable on EVERY route). Open -> the floating keyboard itself.
     if (!ref.watch(keyboardOverlayOpenProvider)) {
@@ -493,7 +504,7 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
         alignment: AlignmentDirectional.bottomStart,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, _kHomeNavHeight + 16),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, navOffset + 16),
             child: FloatingActionButton(
               heroTag: 'keyboard-fab-global',
               onPressed: () =>
@@ -507,13 +518,13 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
         ),
       );
     }
-    return const Align(
+    return Align(
       alignment: Alignment.bottomCenter,
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.only(bottom: _kHomeNavHeight),
-          child: FloatingCardKeyboard(),
+          padding: EdgeInsets.only(bottom: navOffset),
+          child: const FloatingCardKeyboard(),
         ),
       ),
     );
