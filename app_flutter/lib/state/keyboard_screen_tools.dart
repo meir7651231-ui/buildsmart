@@ -234,7 +234,21 @@ class _KbScreenState extends ConsumerState<KbScreen> {
       // …).push` (a non-promotable field keeps its nullable type).
       final notifier = ref.read(keyboardScreenToolsProvider.notifier);
       _notifier = notifier;
-      notifier.push(KbScreenToolsEntry(_token, widget.tools));
+      final entry = KbScreenToolsEntry(_token, widget.tools);
+      // DEFER via microtask (mirrors [initState]'s post-frame push). didUpdateWidget
+      // runs DURING the parent's build (updateChild → update → didUpdateWidget), so
+      // pushing SYNCHRONOUSLY modifies [keyboardScreenToolsProvider] mid-build — an
+      // illegal provider mutation: debug throws `_debugCanModifyProviders`, and in
+      // RELEASE (assert stripped) it fires listener notifications inside `buildScope`
+      // that CORRUPT the floating keyboard's rebuild scheduling — after which a later
+      // route pop no longer rebuilds it and the mirror STRANDS on the popped screen's
+      // tools. This bit any screen whose `tools` list changes identity each build
+      // (e.g. TasksScreen's live-count tree). The microtask runs right after this
+      // build, when provider mutation is allowed; the `mounted` guards keep it
+      // drop-safe if the screen unmounts first (dispose's own removeToken wins).
+      Future.microtask(() {
+        if (mounted && notifier.mounted) notifier.push(entry);
+      });
     }
   }
 
