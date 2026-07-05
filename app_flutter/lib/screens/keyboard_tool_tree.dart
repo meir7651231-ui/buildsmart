@@ -545,6 +545,10 @@ KbToolNode? _destNode(String label, IconData icon) {
 List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
   const lists = <int, List<(String, IconData)>>{
     0: <(String, IconData)>[
+      // OWNER: 'בית' leads the catalog tab-0 tiles so returning to the smart-home
+      // section is one tap in the keyboard (its section pill is being deleted from
+      // the screen). Wired via the SAME 'בית' destination the pill/bottom-nav use.
+      ('בית', Icons.home_outlined),
       ('מאתר', Icons.gps_fixed),
       ('עץ חכם', Icons.account_tree),
       ('קטגוריות', Icons.grid_view),
