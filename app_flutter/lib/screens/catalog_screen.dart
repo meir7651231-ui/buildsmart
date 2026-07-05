@@ -61,7 +61,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart'
-    show keyboardOverlayOpenProvider;
+    show keyboardOverlayOpenProvider, keyboardSearchModeProvider;
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -1623,8 +1623,10 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
     if (_focusNode.hasFocus) {
       // OWNER (A / unify — "all keyboards the same size"): the search runs through
       // the FLOATING keyboard now (its live dive narrows the catalog), not a
-      // separate panel + OS keyboard. Open the floating keyboard instead of the
-      // panel; the field is readOnly so the OS keyboard never appears.
+      // separate panel + OS keyboard. Signal search mode (slice 2 → the keyboard
+      // leads with the LETTERS, ready to type), then open it. The field is readOnly
+      // so the OS keyboard never appears.
+      ref.read(keyboardSearchModeProvider.notifier).state = true;
       ref.read(keyboardOverlayOpenProvider.notifier).state = true;
     }
   }

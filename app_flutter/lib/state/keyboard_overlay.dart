@@ -36,3 +36,9 @@ const bool kKbGlobal = bool.fromEnvironment('KB_GLOBAL');
 /// panel's down-chevron close handle (closed). Watched by `HomeShell` to mount
 /// or omit the floating panel; only consulted while `kKeyboardToolStrip` is true.
 final keyboardOverlayOpenProvider = StateProvider<bool>((_) => false);
+
+/// OWNER (A / unify): true when the overlay was opened by tapping the SEARCH bar
+/// (vs the nav keyboard FAB). The floating keyboard reads this once on open to
+/// lead with the LETTERS (typing mode) instead of the tool mirror — you tapped
+/// "search", so it is ready to type. One-shot: the keyboard resets it to false.
+final keyboardSearchModeProvider = StateProvider<bool>((_) => false);

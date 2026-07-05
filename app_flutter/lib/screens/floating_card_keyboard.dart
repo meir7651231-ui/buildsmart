@@ -96,7 +96,7 @@ import 'package:buildsmart/state/feature_flags.dart'
 import 'package:buildsmart/state/finder_front.dart'
     show catalogLeadsWithFinder, kFinderFront;
 import 'package:buildsmart/state/keyboard_overlay.dart'
-    show kKbGlobal, keyboardOverlayOpenProvider;
+    show kKbGlobal, keyboardOverlayOpenProvider, keyboardSearchModeProvider;
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show currentScreenTools, keyboardScreenToolsProvider;
 import 'package:buildsmart/state/orders_engine.dart'
@@ -267,6 +267,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // The listener stays a pure repaint trigger so the text-conditional in build
     // re-evaluates on every keystroke (see [_recompute]).
     _controller.addListener(_recompute);
+    // OWNER (A slice 2 — unify): when the overlay was opened by tapping the SEARCH
+    // bar, LEAD with the letters (typing mode), ready to type, instead of the tool
+    // mirror — you tapped "search". One-shot: consume the flag after reading it.
+    if (ref.read(keyboardSearchModeProvider)) {
+      _typing = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(keyboardSearchModeProvider.notifier).state = false;
+        }
+      });
+    }
   }
 
   /// REPAINT trigger on every field-text change: [build] is the single source of
