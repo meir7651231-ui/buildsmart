@@ -85,6 +85,8 @@ import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/screens/notifications_screen.dart'
+    show notifSearchQueryProvider;
 import 'package:buildsmart/screens/store_screen.dart'
     show storeSearchQueryProvider;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
@@ -308,6 +310,10 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     if (frontIsHomeShell) {
       if (tab == 0) {
         ref.read(keyboardDiveQueryProvider.notifier).state = _controller.text;
+      } else if (tab == 2) {
+        // UPDATES tab — the query drives the notifications' own filter (owner: same
+        // treatment — its search bar is deleted, the keyboard IS the notif search).
+        ref.read(notifSearchQueryProvider.notifier).state = _controller.text;
       } else if (tab == 3) {
         // STORE tab — the query drives the store's own filter (orders + products).
         ref.read(storeSearchQueryProvider.notifier).state = _controller.text;

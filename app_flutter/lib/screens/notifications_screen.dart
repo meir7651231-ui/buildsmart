@@ -506,7 +506,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             child: _headerVisible
                 ? const Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [_Header(), _NotifSearchBar(), _SectionChipsRow()],
+                    children: [_Header(), _SectionChipsRow()],
                   )
                 : const SizedBox.shrink(),
           ),
@@ -606,86 +606,6 @@ class _Header extends ConsumerWidget {
   }
 }
 
-// ─── search bar ──────────────────────────────────────────────────────────────
-
-class _NotifSearchBar extends ConsumerStatefulWidget {
-  const _NotifSearchBar();
-
-  @override
-  ConsumerState<_NotifSearchBar> createState() => _NotifSearchBarState();
-}
-
-class _NotifSearchBarState extends ConsumerState<_NotifSearchBar> {
-  late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final hasText =
-        ref.watch(notifSearchQueryProvider.select((q) => q.isNotEmpty));
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-      child: TextField(
-        controller: _controller,
-        textDirection: TextDirection.rtl,
-        onChanged: (v) =>
-            ref.read(notifSearchQueryProvider.notifier).state = v,
-        decoration: InputDecoration(
-          hintText: 'חיפוש התראות...',
-          hintStyle: const TextStyle(color: Color(0xFF888888)),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Color(0xFF888888),
-            size: 20,
-          ),
-          suffixIcon: hasText
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.close,
-                    color: Color(0xFF888888),
-                    size: 18,
-                  ),
-                  tooltip: 'נקה חיפוש',
-                  onPressed: () {
-                    _controller.clear();
-                    ref.read(notifSearchQueryProvider.notifier).state = '';
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: const Color(0xFFF5F5F5),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // ─── section chips ───────────────────────────────────────────────────────────
 
