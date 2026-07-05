@@ -3075,3 +3075,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
 ### #merge — איחוד קו Studio/עמוד-2 עם workstream המקלדת/חיפוש (origin) — 2026-06-29
 מיזוג נקי (אפס קונפליקטים) של 95 commits מ-`origin/whats-happening` (card-keyboard/finder/line-convergence) עם קו Studio+עמוד-2 (56 commits) — שני קווים שהתפצלו מ-`decc48b`, קבצים מנותקים. **`card_soft.dart` + הבדיקה שלו שומרו** (הצוות-האחר מחקם כ-dead-code; שומרתי כדי לא להפעיל שער 89 — ינוקה ב-PR מאוחר). **אפס-עקיפה** — כל 100 השערים רצים על commit-המיזוג. הזרע של עמוד-2 עדיין רדום (grep 0 live-consumers).
+
+### #pillar2-s39 — connection_resolver: מנוע-חוקים טהור, trade-agnostic (ללא UI) — 2026-07-06
+**חלק ג׳ נפתח (39-41): המנוע מפסיק "לדעת פיזיקה" ומתחיל להעריך חוקים מחוברים.** NEW `lib/domain/connection_resolver.dart` (בנאי-נחיל) + `test/connection_resolver_unit_test.dart` (בודק-נחיל, 8 בדיקות) — **התכנסו על החוזה בניסיון ראשון** (אפס תיקוני-יישוב):
+- **`normalizeSize`** — strip `"` + trim, כך ש-`'1/2'`≡`'1/2"'` (מלכודת-הצפי של התוכנית §3) — בכל השוואת-size.
+- **`ConnectionResolver(rules, connectorTypes, systems, completionRules)`** + memo `(aType|aSize|bType|bSize)` (§6). **`canConnect(a,b)`→`ConnectResult{mates, methodLabelHe, severity, rule}`** — סדר דטרמיניסטי (a.ends חיצוני · b.ends פנימי · חוקים בסדר-רשימה · first-match-wins, מכליל את `connectionMethodLabel`:90); rule = ה-back-ref של `explain()` (תוספת-א). טבלת-הכרעה: matched→(true,label,null,rule) · size-miss→(false,'',onMismatch,rule) · no-rule→(false,'',null,null) — "לא מתחבר" שקט, לא exception (§4).
+- **SizeMatch מלא:** exactSame (מנורמל) · anyToAny · tableLookup (שורות `[aSize,bSize]` באוריינטציית-הכלל; התאמה-הפוכה בודקת `[y,x]` — מתועד).
+- **`completion(line)`→`List<CompletionIssue>`** — שתי צורות: MATERIAL (גלווני: ≥2 קבוצות-מהרשימה בקו → whyHe=requiredInterposerWhyHe??whyHe, offendingSkus) + TYPE (trigger-type בלי require-type). **`systemCoherence(line)`→`SystemCoherence{coherent, offendingSystem, offendingSku}`** — מצביע על האלמנט החורג (תוספת-ב).
+- **DoD:** analyze 0 errors · 8/8 ירוקים · **grep 0 call-sites חיים** (שום קוד חי לא מייבא — החיווט המגודר הוא s41) · דטרמיניסטי. הבא: **Step 40 — G-resolver parity** (resolver על המטריצה המוזרעת ≡ תשובות kVerifiedSpecs).
