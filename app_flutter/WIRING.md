@@ -3083,3 +3083,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **SizeMatch מלא:** exactSame (מנורמל) · anyToAny · tableLookup (שורות `[aSize,bSize]` באוריינטציית-הכלל; התאמה-הפוכה בודקת `[y,x]` — מתועד).
 - **`completion(line)`→`List<CompletionIssue>`** — שתי צורות: MATERIAL (גלווני: ≥2 קבוצות-מהרשימה בקו → whyHe=requiredInterposerWhyHe??whyHe, offendingSkus) + TYPE (trigger-type בלי require-type). **`systemCoherence(line)`→`SystemCoherence{coherent, offendingSystem, offendingSku}`** — מצביע על האלמנט החורג (תוספת-ב).
 - **DoD:** analyze 0 errors · 8/8 ירוקים · **grep 0 call-sites חיים** (שום קוד חי לא מייבא — החיווט המגודר הוא s41) · דטרמיניסטי. הבא: **Step 40 — G-resolver parity** (resolver על המטריצה המוזרעת ≡ תשובות kVerifiedSpecs).
+
+### #pillar2-s40 — G-resolver parity: ה-resolver האמיתי ≡ המנוע החי — שער-הכניסה ל-41 — 2026-07-06
+**NEW `test/connection_resolver_parity_test.dart` (בנאי-נחיל) — 4/4 ירוק בריצה ראשונה.** ההבדל מהקיסטון (s38): שם resolver-דק *בתוך הבדיקה*; כאן **ה-`ConnectionResolver` האמיתי מ-s39**, מוזן `seed.compatRules/connectorTypes/systems/completionRules` — ההוכחה שקוד-הייצור עצמו משחזר את המנוע:
+- **TEST 1 (G-resolver):** סוויפ-הקיסטון המלא — (kVerifiedSpecs ∩ kCatalogProducts ≈ 812 skus) × probe-לכל-EndType (~4.9K זוגות): `r.methodLabelHe == connectionMethodLabel(...)` **וגם** `r.mates == engineLabel.isNotEmpty`. שומרי-לא-ריקנות כמו בקיסטון.
+- **TEST 2 (זוגיות-פיזיקה גולמית):** ≤3 skus לכל EndType מכלל kVerifiedSpecs (גם HW-*, לא רק הקטלוג) — כל זוג-מסודר: `resolver.mates == (directMatesWith || pipeSharedWith)`. שומרים: >20 זוגות · גם true וגם false.
+- **TEST 3 (גלווני):** copper+iron → issue critical עם whyHe (המתאם הדיאלקטרי) + offendingSkus; copper+benign / copper+copper → ריק (tripwire להוספות-seed עתידיות).
+- **TEST 4 (קוהרנטיות):** supply+drainage → לא-קוהרנטי, offendingSku=הניקוז, offendingSystem=`plumbing.sys.drainage`.
+- **ערוץ-סטייה שתועד ולא רוכך:** ה-resolver מנרמל sizes (`normalizeSize`) והמנוע משווה גולמי — הזוגיות מוכיחה שאין אי-עקביות-size בנתונים בפועל. **gate:** analyze 0 · 4/4 · הפינים הישנים (compat_50_samples · full_compliance_audit) לא-נגועים. **G-resolver ירוק = מותר לחווט (s41).**
