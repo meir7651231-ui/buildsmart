@@ -586,7 +586,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     // Live DIVE (owner): when the floating keyboard has a query, the catalog
     // body shows the NATIVE narrowed product list — the app dives in place.
     final diveActive = ref.watch(keyboardDiveQueryProvider).trim().length >= 2;
-    final showFull = _headerVisible;
 
     return Column(
       children: [
@@ -595,204 +594,17 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         // live dive narrows the catalog underneath). No separate search chrome.
         if (diveActive)
           const Expanded(child: _DiveResultsView())
-        else ...[
-          ClipRect(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: showFull
-                  ? const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [_SectionChipsRow()],
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ),
+        else
+          // OWNER: the section-pill row is deleted — its lists + all their options
+          // now live in the keyboard (tab-0 chips + the 'רשימות' manager chip). The
+          // catalog body fills the space directly.
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
               child: _CatalogBody(scrollCtrl: _scrollCtrl),
             ),
           ),
-        ],
       ],
-    );
-  }
-}
-
-// Horizontal pill tabs — הכל + dynamic user sections + [+] button.
-// Short-tap activates the section.
-// Long-press on a non-הכל chip shows ניהול/מחיקה popup.
-// Plus button opens the management sheet.
-class _SectionChipsRow extends ConsumerWidget {
-  const _SectionChipsRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final active   = ref.watch(catalogSectionProvider);
-    final sections = ref.watch(catalogSectionsListProvider);
-    final hidden   = ref.watch(hiddenCatalogSectionsProvider);
-    // OWNER-REVIEW · kWordFinder seam — render the 'מאתר חכם' pill ONLY when the
-    // flag is on. OFF (default) → no extra pill, byte-identical chips row.
-    final wordFinderOn =
-        ref.watch(featureFlagsProvider).contains(kWordFinderFlag);
-    // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — the 'מקלדת חכמה' pill renders
-    // ONLY when the flag is on. OFF (default) → no extra pill, byte-identical.
-    final cardKeyboardOn =
-        ref.watch(featureFlagsProvider).contains(kCardKeyboardFlag);
-
-    void activate(String label) =>
-        ref.read(catalogSectionProvider.notifier).state = label;
-
-    void deleteSection(String label) {
-      final list = List<String>.from(ref.read(catalogSectionsListProvider))
-        ..remove(label);
-      ref.read(catalogSectionsListProvider.notifier).state = list;
-      if (active == label) activate('בית');
-    }
-
-    void hideSection(String label) {
-      ref.read(hiddenCatalogSectionsProvider.notifier).hide(label);
-      if (active == label) activate('בית');
-    }
-
-    Future<void> showLongPressMenu(BuildContext ctx, String label) async {
-      final w = MediaQuery.of(ctx).size.width;
-      final top = MediaQuery.of(ctx).padding.top;
-      final choice = await showMenu<String>(
-        context: ctx,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        position: RelativeRect.fromLTRB(w * 0.1, top + 140, w * 0.1, 0),
-        items: [
-          const PopupMenuItem<String>(
-            value: 'manage',
-            child: Row(
-              children: [
-                Icon(Icons.list, color: Colors.black54, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'ניהול רשימות',
-                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'rename',
-            child: Row(
-              children: [
-                Icon(
-                  Icons.drive_file_rename_outline,
-                  color: Colors.black54,
-                  size: 20,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'שינוי שם',
-                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'hide',
-            child: Row(
-              children: [
-                Icon(Icons.visibility_off_outlined,
-                    color: Colors.black54, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'הסתרת רשימה',
-                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  'מחיקת רשומה',
-                  style: TextStyle(color: Colors.redAccent, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-      if (!ctx.mounted) return;
-      if (choice == 'manage') _openManageSheet(ctx, ref);
-      if (choice == 'rename') {
-        final list = ref.read(catalogSectionsListProvider);
-        final idx = list.indexOf(label);
-        if (idx != -1) _showRenameDialog(ctx, ref, idx, label);
-      }
-      if (choice == 'hide') hideSection(label);
-      if (choice == 'delete') {
-        final ok = await confirmDestructive(
-          ctx,
-          title: 'מחיקת רשימה?',
-          message: 'הרשימה "$label" תימחק לצמיתות.',
-          confirmLabel: 'מחק',
-        );
-        if (ok && ctx.mounted) deleteSection(label);
-      }
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // בית — fixed home (smart-home tiles), no long-press menu
-            _SectionPill(
-              label: 'בית',
-              active: active == 'בית',
-              onTap: () => activate('בית'),
-            ),
-            for (final s in sections.where((s) => !hidden.contains(s))) ...[
-              const SizedBox(width: 8),
-              _SectionPill(
-                label: s,
-                active: active == s,
-                onTap: () => activate(s),
-                onLongPress: () => showLongPressMenu(context, s),
-              ),
-            ],
-            // OWNER-REVIEW · kWordFinder seam — flag-gated 'מאתר חכם' pill.
-            // Visible only when kWordFinderFlag is on; like 'בית' it carries no
-            // long-press manage menu (it is not a user-defined list).
-            if (wordFinderOn) ...[
-              const SizedBox(width: 8),
-              _SectionPill(
-                label: 'מאתר חכם',
-                active: active == 'מאתר חכם',
-                onTap: () => activate('מאתר חכם'),
-              ),
-            ],
-            // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — flag-gated 'מקלדת חכמה'
-            // pill BESIDE 'מאתר חכם'. Visible only when kCardKeyboard is on.
-            if (cardKeyboardOn) ...[
-              const SizedBox(width: 8),
-              _SectionPill(
-                label: 'מקלדת חכמה',
-                active: active == 'מקלדת חכמה',
-                onTap: () => activate('מקלדת חכמה'),
-              ),
-            ],
-            const SizedBox(width: 8),
-            _AddPill(onTap: () => _openManageSheet(context, ref)),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -1443,88 +1255,6 @@ IconData _sectionIcon(String label) => switch (label) {
       'תכנון חיבור'     => Icons.handyman,
       _                 => Icons.list_alt_outlined,
     };
-
-class _SectionPill extends StatelessWidget {
-  const _SectionPill({
-    required this.label,
-    required this.active,
-    required this.onTap,
-    this.onLongPress,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: active ? BsTokens.brand : Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: active
-            ? BorderSide.none
-            : const BorderSide(color: Color(0xFFC8C8CE), width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: active ? bsOnAccent(context) : const Color(0xFF6E6E73),
-              fontSize: 13,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AddPill extends StatelessWidget {
-  const _AddPill({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'נהל קטגוריות',
-      child: Semantics(
-        button: true,
-        label: 'נהל קטגוריות',
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
-          // ≥48dp tap target (a11y): the hit area is 48dp while the visible
-          // bordered pill keeps its original compact size.
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            child: Center(
-              child: Material(
-                color: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: const BorderSide(color: Color(0xFFC8C8CE), width: 1),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// The live DIVE view (owner): the catalog body when the floating keyboard has
 /// a query — the engine-narrowed products in the NATIVE product list. The app
