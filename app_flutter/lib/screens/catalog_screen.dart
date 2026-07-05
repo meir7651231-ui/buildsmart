@@ -60,6 +60,8 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
+import 'package:buildsmart/state/keyboard_overlay.dart'
+    show keyboardOverlayOpenProvider;
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -1619,7 +1621,11 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
   void _onFocusChange() {
     if (_focusNode.hasFocus) {
-      ref.read(searchPanelOpenProvider.notifier).state = true;
+      // OWNER (A / unify — "all keyboards the same size"): the search runs through
+      // the FLOATING keyboard now (its live dive narrows the catalog), not a
+      // separate panel + OS keyboard. Open the floating keyboard instead of the
+      // panel; the field is readOnly so the OS keyboard never appears.
+      ref.read(keyboardOverlayOpenProvider.notifier).state = true;
     }
   }
 
@@ -1736,6 +1742,10 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
+                // OWNER (A / unify): readOnly → no OS keyboard; tapping the field
+                // opens the FLOATING keyboard (see [_onFocusChange]), so every
+                // keyboard in the app is the SAME one, at the SAME size.
+                readOnly: true,
                 textInputAction: TextInputAction.search,
                 onChanged: (v) =>
                     ref.read(searchQueryProvider.notifier).state = v,
