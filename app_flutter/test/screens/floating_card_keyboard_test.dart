@@ -25,7 +25,7 @@ import 'package:buildsmart/features/word_finder/dive_pool.dart';
 import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/card_keyboard_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart'
-    show catalogSectionProvider;
+    show catalogSectionProvider, keyboardDiveQueryProvider;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show matchDestinations;
@@ -409,6 +409,46 @@ void main() {
           reason: 'typed text registers in the strip (no separate field)');
       expect(find.byType(BsKeyboard), findsOneWidget,
           reason: 'the live recompute ran without crashing');
+    });
+
+    testWidgets(
+        'tapping the חיפוש tool clears the field and returns to the letters',
+        (tester) async {
+      // OWNER: the 🔍 חיפוש KBD tool is a "fresh search" key — it CLEARS whatever
+      // was typed and drops straight back to the letters (typing mode), ready for a
+      // new query. Type first, open the KBD tools (gear), tap חיפוש, then assert
+      // BOTH halves: the strip query is gone AND a letter-layer key is back.
+      const hebrewLetter = 'ק';
+      final container = await pumpPanel(tester);
+
+      // Type 'ברז' → the strip shows it (and, on the catalog tab, the dive query).
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ז'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('ברז'), findsWidgets,
+          reason: 'the typed query shows in the strip before חיפוש');
+
+      // Open the KBD tools (gear) → the חיפוש leaf is present, then tap it.
+      await tester.tap(find.byIcon(Icons.settings));
+      await tester.pumpAndSettle();
+      expect(find.text('חיפוש'), findsOneWidget,
+          reason: 'the gear toggle revealed the חיפוש tool');
+      await tester.tap(find.text('חיפוש'));
+      await tester.pumpAndSettle();
+
+      // (1) the field/strip query is CLEARED …
+      expect(find.textContaining('ברז'), findsNothing,
+          reason: 'tapping חיפוש clears the typed query from the strip');
+      expect(container.read(keyboardDiveQueryProvider), '',
+          reason: 'the live dive query resets to empty');
+      // (2) … and the LETTERS keyboard is back (the KBD tools are gone).
+      expect(find.text(hebrewLetter), findsOneWidget,
+          reason: 'חיפוש returns to the letters (typing mode)');
+      expect(find.text('חיפוש'), findsNothing,
+          reason: 'the KBD tools are gone once back at the letters');
     });
 
     testWidgets(

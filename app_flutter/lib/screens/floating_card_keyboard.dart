@@ -789,6 +789,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
       setState(() => _findMode = true);
       return;
     }
+    // SEARCH tool (owner): tapping 'חיפוש' CLEARS the field and drops straight to
+    // the LETTERS (typing mode) for a fresh search. Like 'מאתר', this needs THIS
+    // widget's own controller + typing state — the node's generic (ref, context)
+    // action can't reach them — so it is intercepted here. Clearing the field fires
+    // [_recompute] → the live DIVE query resets to '' (the search bar clears);
+    // [_exitTools] tears the tool stack down and enters typing mode → the letters.
+    if (node.label == 'חיפוש') {
+      _controller.clear();
+      _exitTools();
+      return;
+    }
     if (node.isBranch) {
       setState(() => _stack.add(node.children));
     } else if (node.isVoiceInput) {
