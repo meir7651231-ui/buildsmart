@@ -85,6 +85,8 @@ import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbRunByChip, KbUpdatesContext, deriveUpdatesContext;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/screens/store_screen.dart'
+    show storeSearchQueryProvider;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/catalog_location.dart'
     show CatalogLocation, catalogLocationProvider;
@@ -289,25 +291,26 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   /// so very_good_analysis's empty-block lint stays quiet).
   void _recompute() {
     if (!mounted) return;
-    // Live-mirror DIVE (owner): on the catalog tab the typed query filters the
-    // SCREEN underneath in real time — the screen dives WITH the keyboard, via
-    // the catalog's [keyboardDiveQueryProvider] → [diveResultsProvider].
-    // Gated to tab 0 (only the catalog reads this provider); off-tab typing
-    // leaves the screen untouched.
-    if (ref.read(mainTabProvider) == 0) {
-      // Live DIVE: the typed query drives the catalog's NATIVE narrowed product
-      // list (the app dives IN PLACE) — NOT a flat search panel. The engine that
-      // proved most reliable ([catalogProductMatchesQuery]) runs in
-      // [diveResultsProvider]; the catalog body swaps to it when this is set.
-      //
-      // kKbGlobal gate: when the keyboard floats over a PUSHED route (above
-      // HomeShell) the catalog underneath is NOT visible, so diving it would write
-      // a query the user can't see take effect. Only write when no route is pushed
-      // above HomeShell (`canPop() == false`). With [kKbGlobal] const-false the `||`
-      // short-circuits TRUE at compile time and the `bsNavigatorKey` read tree-
-      // shakes, so the write is exactly the prior unconditional line (byte-identical).
-      if (!kKbGlobal || bsNavigatorKey.currentState?.canPop() == false) {
+    // Live-mirror DIVE (owner): the typed query filters the FRONT HomeShell tab in
+    // real time — the screen dives WITH the keyboard. Catalog (tab 0) → the
+    // [keyboardDiveQueryProvider] → [diveResultsProvider]; STORE (tab 3) → the
+    // store's own [storeSearchQueryProvider] (owner: the keyboard IS the store
+    // search there too — its bar was deleted). Same front-surface guard for both.
+    final tab = ref.read(mainTabProvider);
+    // kKbGlobal gate: when the keyboard floats over a PUSHED route (above
+    // HomeShell) the tab underneath is NOT visible, so filtering it would write a
+    // query the user can't see take effect. Only write when no route is pushed
+    // above HomeShell (`canPop() == false`). With [kKbGlobal] const-false the `||`
+    // short-circuits TRUE at compile time and the `bsNavigatorKey` read tree-shakes,
+    // so the write is exactly the prior unconditional line (byte-identical).
+    final frontIsHomeShell =
+        !kKbGlobal || bsNavigatorKey.currentState?.canPop() == false;
+    if (frontIsHomeShell) {
+      if (tab == 0) {
         ref.read(keyboardDiveQueryProvider.notifier).state = _controller.text;
+      } else if (tab == 3) {
+        // STORE tab — the query drives the store's own filter (orders + products).
+        ref.read(storeSearchQueryProvider.notifier).state = _controller.text;
       }
     }
     setState(() {});

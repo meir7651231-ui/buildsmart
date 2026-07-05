@@ -30,7 +30,7 @@ import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show matchDestinations;
 import 'package:buildsmart/screens/store_screen.dart'
-    show StoreSection, storeSectionProvider;
+    show StoreSection, storeSearchQueryProvider, storeSectionProvider;
 import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
@@ -449,6 +449,27 @@ void main() {
           reason: 'חיפוש returns to the letters (typing mode)');
       expect(find.text('חיפוש'), findsNothing,
           reason: 'the KBD tools are gone once back at the letters');
+    });
+
+    testWidgets('on the STORE tab (3) typing drives the store search query',
+        (tester) async {
+      // OWNER (store unify): the store's own search BAR was deleted — on the
+      // STORE tab the floating keyboard IS the store search. Typing there drives
+      // storeSearchQueryProvider (the store's own orders+products filter), NOT
+      // the catalog dive — the keyboard's search target swaps with the tab.
+      final container = await pumpPanel(tester);
+      container.read(mainTabProvider.notifier).state = 3; // 3 = חנות (store)
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(storeSearchQueryProvider), 'בר',
+          reason: 'store-tab typing drives the store filter query');
+      expect(container.read(keyboardDiveQueryProvider), isEmpty,
+          reason: 'the catalog dive stays untouched on the store tab');
     });
 
     testWidgets(

@@ -473,7 +473,10 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
                     ? const Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _SearchBar(),
+                        // OWNER: the store's search BAR is deleted — the floating
+                        // keyboard IS the store search now (on the store tab the
+                        // typed query drives storeSearchQueryProvider, filtering the
+                        // orders + products live). No separate search field remains.
                         CategorySuggestionStrip(),
                         _SectionChipsRow(),
                         _SummaryRow(),
@@ -562,79 +565,6 @@ class _SummaryChip extends StatelessWidget {
           color: color,
           fontSize: 11,
           fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-// ─── search bar ──────────────────────────────────────────────────────────────
-
-class _SearchBar extends ConsumerStatefulWidget {
-  const _SearchBar();
-
-  @override
-  ConsumerState<_SearchBar> createState() => _SearchBarState();
-}
-
-class _SearchBarState extends ConsumerState<_SearchBar> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final query = ref.watch(storeSearchQueryProvider);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: TextField(
-        controller: _controller,
-        onChanged: (v) => ref.read(storeSearchQueryProvider.notifier).state = v,
-        decoration: InputDecoration(
-          hintText: 'חיפוש הזמנות ומוצרים...',
-          hintStyle: const TextStyle(color: Color(0xFF888888)),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Color(0xFF888888),
-            size: 20,
-          ),
-          suffixIcon:
-              query.isEmpty
-                  ? null
-                  : IconButton(
-                    tooltip: 'נקה',
-                    icon: const Icon(
-                      Icons.close,
-                      color: Color(0xFF888888),
-                      size: 18,
-                    ),
-                    onPressed: () {
-                      _controller.clear();
-                      ref.read(storeSearchQueryProvider.notifier).state = '';
-                    },
-                  ),
-          filled: true,
-          fillColor: const Color(0xFFF5F5F5),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
-          ),
         ),
       ),
     );
