@@ -240,14 +240,21 @@ class _FindKeyboardPanelState extends ConsumerState<FindKeyboardPanel> {
                 const SizedBox(width: 6),
               ],
               Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: product ? cs.primary : cs.onSurface,
-                    fontWeight: product ? FontWeight.w500 : FontWeight.w400,
+                // OWNER (readability): scale an over-long finder-dive chip label
+                // DOWN to fit rather than truncating it to "…", so every product /
+                // word chip in the finder stays fully readable.
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: product ? cs.primary : cs.onSurface,
+                      fontWeight: product ? FontWeight.w500 : FontWeight.w400,
+                    ),
                   ),
                 ),
               ),
