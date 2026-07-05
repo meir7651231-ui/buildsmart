@@ -240,21 +240,16 @@ class _FindKeyboardPanelState extends ConsumerState<FindKeyboardPanel> {
                 const SizedBox(width: 6),
               ],
               Flexible(
-                // OWNER (readability): scale an over-long finder-dive chip label
-                // DOWN to fit rather than truncating it to "…", so every product /
-                // word chip in the finder stays fully readable.
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: product ? cs.primary : cs.onSurface,
-                      fontWeight: product ? FontWeight.w500 : FontWeight.w400,
-                    ),
+                // OWNER (uniform font): keep the chip label at the SAME font as the
+                // other keys — never shrink it. A long product / word label WRAPS to
+                // a second line rather than rendering smaller than its neighbours.
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: product ? cs.primary : cs.onSurface,
+                    fontWeight: product ? FontWeight.w500 : FontWeight.w400,
                   ),
                 ),
               ),

@@ -216,25 +216,21 @@ class BsKey extends StatelessWidget {
     // LAST child sits at the key's RIGHT edge. The label fills the rest via an
     // [Expanded] (the image is pushed hard to the right, not centered beside the
     // text). The label stays a plain [Text] (so text-based finds keep matching);
-    // OWNER (readability): it is SCALED DOWN to fit (FittedBox.scaleDown) so a long
-    // product name on a finder selection key stays fully readable instead of
-    // truncating to a 2-line "…".
+    // OWNER (uniform font): keep the label at the SAME key font — never shrink it.
+    // A long product name WRAPS to a second line beside the thumbnail rather than
+    // rendering in a smaller font than the other keys.
     // OWNER-REVIEW: thumbnail anchored to the right edge.
     return Row(
       children: [
         Expanded(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              model.label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              softWrap: false,
-              style: TextStyle(
-                fontSize: m.fontSize,
-                color: fg,
-                fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
-              ),
+          child: Text(
+            model.label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            style: TextStyle(
+              fontSize: m.fontSize,
+              color: fg,
+              fontWeight: isAccent ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
         ),

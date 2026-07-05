@@ -756,11 +756,11 @@ class _StripInput extends StatelessWidget {
         ),
       );
     }
-    // The prediction chips. OWNER (readability): show at MOST 4 chips at once,
-    // each WIDE ENOUGH to read its full label — chip 5+ scroll horizontally,
-    // instead of squeezing every chip into an ever-narrower Expanded share (which
-    // truncated the labels to "…"). A fixed per-chip width sized so exactly
-    // min(count, 4) fill the strip pushes the overflow into a horizontal scroll.
+    // The prediction chips. OWNER (uniform font + "up to 4 per row, rest scroll"):
+    // every chip keeps the SAME key font. Each chip is at LEAST a quarter-strip
+    // wide (so ~4 sit in view) but GROWS to fit a longer label at full size rather
+    // than shrinking it — so the font stays uniform chip-to-chip. Chips past what
+    // fits overflow into the horizontal scroll.
     if (hasChips) {
       if (hasText) children.add(SizedBox(width: gap));
       children.add(
@@ -771,8 +771,9 @@ class _StripInput extends StatelessWidget {
               final visible = predictions.length < maxVisible
                   ? predictions.length
                   : maxVisible;
-              // Width of one chip so [visible] of them + the gaps between fill the
-              // strip exactly; any chip past the fourth then overflows into scroll.
+              // Baseline width so [visible] chips + their gaps fill the strip; a
+              // chip only ever GROWS past this (for a long label), never shrinks
+              // below it — keeping ~4 in view with the rest in horizontal scroll.
               final chipW =
                   (constraints.maxWidth - gap * (visible - 1)) / visible;
               return SingleChildScrollView(
@@ -782,8 +783,8 @@ class _StripInput extends StatelessWidget {
                   children: <Widget>[
                     for (var i = 0; i < predictions.length; i++) ...<Widget>[
                       if (i > 0) SizedBox(width: gap),
-                      SizedBox(
-                        width: chipW,
+                      ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: chipW),
                         child: _PredictionChip(
                           text: predictions[i],
                           isDestination:
@@ -882,23 +883,20 @@ class _PredictionChip extends StatelessWidget {
     final KbCellMetrics m = BsKbScale.of(context);
     // The shared text label — identical styling in both branches, so a
     // destination chip and a word chip read the same except for the affordance.
-    // OWNER (readability): scale an over-long label DOWN to fit its chip rather
-    // than truncating it to "…" — so even the longest suggestion (e.g. "חיפושים
-    // אחרונים") stays FULLY readable. FittedBox.scaleDown is a no-op for labels
-    // that already fit (they keep the normal key font); only over-long ones shrink.
-    final label = FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Text(
-        text,
-        maxLines: 1,
-        softWrap: false,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          // Uniform with the keys; responsive (desktop 20, mobile 19 — owner spec).
-          fontSize: m.fontSize,
-          color: BsTokens.inkLight,
-          fontWeight: FontWeight.w500,
-        ),
+    // OWNER (uniform font): the chip keeps the SAME key font as every other tile —
+    // NEVER shrink-to-fit (that made long suggestions render smaller than short
+    // ones). The strip lays chips at their natural width and scrolls horizontally,
+    // so a long label stays full-size and fully readable rather than squeezed.
+    final label = Text(
+      text,
+      maxLines: 1,
+      softWrap: false,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        // Uniform with the keys; responsive (desktop 20, mobile 19 — owner spec).
+        fontSize: m.fontSize,
+        color: BsTokens.inkLight,
+        fontWeight: FontWeight.w500,
       ),
     );
 
@@ -1019,23 +1017,19 @@ class _ToolTile extends StatelessWidget {
                 Icon(icon, size: m.iconSize, color: BsTokens.inkLight),
                 const SizedBox(width: BsTokens.space1),
                 Flexible(
-                  // OWNER (readability, ALL keyboard screens): scale an over-long
-                  // tool label DOWN to fit rather than truncating it to "…", so
-                  // every tile stays fully readable. FittedBox.scaleDown is a no-op
-                  // for labels that already fit (they keep the normal font).
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      softWrap: false,
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                        fontSize: m.fontSize,
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  // OWNER (uniform font, ALL keyboard screens): keep EVERY tile at
+                  // the same key font — never shrink a long label (that made the
+                  // font look non-uniform tile-to-tile). A label that does not fit
+                  // WRAPS to a second line instead; the Row sizes every tile in the
+                  // row to the same height, so the grid stays even.
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: m.fontSize,
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
