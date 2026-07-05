@@ -60,8 +60,6 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
-import 'package:buildsmart/state/keyboard_overlay.dart'
-    show keyboardOverlayOpenProvider, keyboardSearchModeProvider;
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -665,19 +663,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
     return Column(
       children: [
-        ClipRect(
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeInOut,
-            alignment: Alignment.topCenter,
-            child: showFull && !diveActive
-                ? const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [_SearchBar()],
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ),
+        // OWNER: the app's search BAR is deleted — the floating keyboard IS the
+        // search now (its 🔍 חיפוש tool starts a fresh typed search, and the live
+        // dive narrows the catalog underneath). No separate search field remains.
         if (searchOpen)
           const Expanded(child: _SearchPanel())
         else if (diveActive)
@@ -1586,203 +1574,6 @@ class _AddPill extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchBar extends ConsumerStatefulWidget {
-  const _SearchBar();
-
-  @override
-  ConsumerState<_SearchBar> createState() => _SearchBarState();
-}
-
-class _SearchBarState extends ConsumerState<_SearchBar> {
-  late final TextEditingController _controller;
-  late final FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: ref.read(searchQueryProvider));
-    _focusNode = FocusNode()..addListener(_onFocusChange);
-  }
-
-  @override
-  void dispose() {
-    _focusNode
-      ..removeListener(_onFocusChange)
-      ..dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onFocusChange() {
-    if (_focusNode.hasFocus) {
-      // OWNER (A / unify — "all keyboards the same size"): the search runs through
-      // the FLOATING keyboard now (its live dive narrows the catalog), not a
-      // separate panel + OS keyboard. Signal search mode (slice 2 → the keyboard
-      // leads with the LETTERS, ready to type), then open it. The field is readOnly
-      // so the OS keyboard never appears.
-      ref.read(keyboardSearchModeProvider.notifier).state = true;
-      ref.read(keyboardOverlayOpenProvider.notifier).state = true;
-    }
-  }
-
-  void _closePanel() {
-    _focusNode.unfocus();
-    ref.read(searchPanelOpenProvider.notifier).state = false;
-  }
-
-  void _submit(String value) {
-    final q = value.trim();
-    if (q.isEmpty) return;
-    // Honour the "שמור היסטוריית חיפוש" setting.
-    if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
-    ref.read(recentSearchesProvider.notifier).add(q);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Keep external query state in sync (e.g. when a recent-search is tapped).
-    ref.listen<String>(searchQueryProvider, (_, next) {
-      if (next != _controller.text) {
-        _controller.text = next;
-        _controller.selection =
-            TextSelection.collapsed(offset: next.length);
-      }
-    });
-
-    final open     = ref.watch(searchPanelOpenProvider);
-    final hasText  =
-        ref.watch(searchQueryProvider.select((q) => q.isNotEmpty));
-    final scope    = ref.watch(searchScopeProvider);
-    final hasScope = scope != 'הכל';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFE7E7EA),
-          borderRadius: BorderRadius.circular(24),
-          border: open
-              ? Border.all(color: BsTokens.brand, width: 1.5)
-              : null,
-        ),
-        child: Row(
-          children: [
-            // Leading: back arrow when panel open, search icon otherwise.
-            if (open)
-              IconButton(
-                tooltip: 'חזרה',
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Color(0xFF888888),
-                  size: 20,
-                ),
-                onPressed: _closePanel,
-              )
-            else
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Icon(Icons.search, color: Color(0xFF888888), size: 20),
-              ),
-
-            // Scope token chip — shown when a non-הכל scope is active.
-            if (hasScope) ...[
-              Semantics(
-                button: true,
-                label: 'נקה סינון',
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () =>
-                      ref.read(searchScopeProvider.notifier).state = 'הכל',
-                  // ≥48dp tap target: the whole chip clears the filter; the
-                  // visible pill stays small (a11y).
-                  child: ConstrainedBox(
-                    constraints:
-                        const BoxConstraints(minWidth: 48, minHeight: 48),
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: BsTokens.brand,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              scope,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 13,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-            ],
-
-            // Text input — expands to fill remaining width.
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                // OWNER (A / unify): readOnly → no OS keyboard; tapping the field
-                // opens the FLOATING keyboard (see [_onFocusChange]), so every
-                // keyboard in the app is the SAME one, at the SAME size.
-                readOnly: true,
-                textInputAction: TextInputAction.search,
-                onChanged: (v) =>
-                    ref.read(searchQueryProvider.notifier).state = v,
-                onSubmitted: _submit,
-                style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: hasScope
-                      ? 'חפש $scope...'
-                      : 'חיפוש מוצרים, קטגוריות, מסכים...',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-
-            // Clear button — shown when there is text.
-            if (hasText)
-              IconButton(
-                tooltip: 'נקה',
-                icon: const Icon(
-                  Icons.close,
-                  color: Color(0xFF888888),
-                  size: 18,
-                ),
-                onPressed: () {
-                  _controller.clear();
-                  ref.read(searchQueryProvider.notifier).state = '';
-                },
-              ),
-          ],
         ),
       ),
     );
