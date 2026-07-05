@@ -506,7 +506,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             child: _headerVisible
                 ? const Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [_Header(), _SectionChipsRow()],
+                    children: [_Header()],
                   )
                 : const SizedBox.shrink(),
           ),
@@ -601,102 +601,6 @@ class _Header extends ConsumerWidget {
               },
             ),
         ],
-      ),
-    );
-  }
-}
-
-
-// ─── section chips ───────────────────────────────────────────────────────────
-
-class _SectionChipsRow extends ConsumerWidget {
-  const _SectionChipsRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final section = ref.watch(notifSectionProvider);
-
-    void select(NotifSection s) =>
-        ref.read(notifSectionProvider.notifier).state = s;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _Pill(
-              label: 'הכל',
-              active: section == NotifSection.all,
-              onTap: () => select(NotifSection.all),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '📦 משלוחים',
-              active: section == NotifSection.shipments,
-              onTap: () => select(NotifSection.shipments),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🛒 הזמנות',
-              active: section == NotifSection.orders,
-              onTap: () => select(NotifSection.orders),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🦺 בטיחות',
-              active: section == NotifSection.safety,
-              onTap: () => select(NotifSection.safety),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '💰 תקציב',
-              active: section == NotifSection.budget,
-              onTap: () => select(NotifSection.budget),
-            ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🎁 מבצעים',
-              active: section == NotifSection.deals,
-              onTap: () => select(NotifSection.deals),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
-              fontSize: 13,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
       ),
     );
   }

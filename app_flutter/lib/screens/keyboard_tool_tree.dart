@@ -66,7 +66,7 @@ import 'package:buildsmart/screens/manager_screens_sheet.dart'
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/notifications_screen.dart'
-    show markAllNotifsRead;
+    show NotifSection, markAllNotifsRead, notifSectionProvider;
 import 'package:buildsmart/screens/order_notif_sheet.dart'
     show showOrderNotifSheet;
 import 'package:buildsmart/screens/rewards_hub_screen.dart'
@@ -615,11 +615,38 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
       final node = _destNode(label, icon);
       if (node != null) out.add(node);
     }
+    if (tab == 2) {
+      // OWNER (same treatment): the התראות type-filter chips — its deleted screen
+      // row. Each activates a NotifSection filter (notifSectionProvider) on tab 2.
+      for (final (label, section, icon) in _kNotifFilters) {
+        out.add(
+          KbToolNode.leaf(
+            icon: icon,
+            label: label,
+            action: (ref, context) {
+              ref.read(mainTabProvider.notifier).state = 2;
+              ref.read(notifSectionProvider.notifier).state = section;
+            },
+          ),
+        );
+      }
+    }
   }
   // Never leave ▦ empty: if nothing resolved (registry shape changed), fall back
   // to the legacy home tools.
   return out.isEmpty ? kbHomeNodes() : out;
 }
+
+/// OWNER: the התראות type-filter chips (its deleted screen row) as keyboard tools —
+/// label · the [NotifSection] it selects · its icon.
+const _kNotifFilters = <(String, NotifSection, IconData)>[
+  ('הכל', NotifSection.all, Icons.notifications_none),
+  ('משלוחים', NotifSection.shipments, Icons.local_shipping_outlined),
+  ('הזמנות', NotifSection.orders, Icons.shopping_cart_outlined),
+  ('בטיחות', NotifSection.safety, Icons.health_and_safety_outlined),
+  ('תקציב', NotifSection.budget, Icons.account_balance_wallet_outlined),
+  ('מבצעים', NotifSection.deals, Icons.card_giftcard_outlined),
+];
 
 IconData _kbListIcon(String label) => switch (label) {
       'מאתר'            => Icons.gps_fixed,
