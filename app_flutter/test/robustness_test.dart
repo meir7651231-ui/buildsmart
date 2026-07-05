@@ -183,15 +183,16 @@ void main() {
     }
   });
 
-  testWidgets('19 · catalog search panel renders live results', (t) async {
+  testWidgets('19 · catalog DIVE renders live results', (t) async {
     await t.pumpWidget(const ProviderScope(child: BuildSmartApp()));
     await t.pumpAndSettle();
     final c = shellContainer(t);
     c.read(homeDepartmentProvider.notifier).state = 'אינסטלציה';
     c.read(catalogTreePathProvider.notifier).state = const [];
     await t.pumpAndSettle();
-    c.read(searchPanelOpenProvider.notifier).state = true;
-    c.read(searchQueryProvider.notifier).state = 'מחסום';
+    // The app's search bar/panel were deleted (owner) — the floating keyboard's
+    // live DIVE is the search now. Drive its query directly; the catalog dives.
+    c.read(keyboardDiveQueryProvider.notifier).state = 'מחסום';
     await t.pumpAndSettle();
     expect(t.takeException(), isNull);
     expect(find.byType(ListView), findsWidgets);

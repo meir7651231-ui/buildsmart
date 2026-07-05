@@ -290,8 +290,8 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   void _recompute() {
     if (!mounted) return;
     // Live-mirror DIVE (owner): on the catalog tab the typed query filters the
-    // SCREEN underneath in real time — the screen dives WITH the keyboard,
-    // reusing the catalog's own [searchQueryProvider] → [searchResultsProvider].
+    // SCREEN underneath in real time — the screen dives WITH the keyboard, via
+    // the catalog's [keyboardDiveQueryProvider] → [diveResultsProvider].
     // Gated to tab 0 (only the catalog reads this provider); off-tab typing
     // leaves the screen untouched.
     if (ref.read(mainTabProvider) == 0) {
