@@ -882,16 +882,23 @@ class _PredictionChip extends StatelessWidget {
     final KbCellMetrics m = BsKbScale.of(context);
     // The shared text label — identical styling in both branches, so a
     // destination chip and a word chip read the same except for the affordance.
-    final label = Text(
-      text,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        // Uniform with the keys; responsive (desktop 20, mobile 19 — owner spec).
-        fontSize: m.fontSize,
-        color: BsTokens.inkLight,
-        fontWeight: FontWeight.w500,
+    // OWNER (readability): scale an over-long label DOWN to fit its chip rather
+    // than truncating it to "…" — so even the longest suggestion (e.g. "חיפושים
+    // אחרונים") stays FULLY readable. FittedBox.scaleDown is a no-op for labels
+    // that already fit (they keep the normal key font); only over-long ones shrink.
+    final label = FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          // Uniform with the keys; responsive (desktop 20, mobile 19 — owner spec).
+          fontSize: m.fontSize,
+          color: BsTokens.inkLight,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
 
