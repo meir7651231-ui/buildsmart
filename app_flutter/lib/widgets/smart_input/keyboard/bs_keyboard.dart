@@ -419,25 +419,34 @@ class BsKeyboard extends StatelessWidget {
   /// followed by a spacer to match the letter-row rhythm. Each tile DISPLAYS
   /// its [_ToolDef.label] but calls [onTool] with its typed [_ToolDef.id].
   List<Widget> _toolRows(List<_ToolDef> defs, {required double gap}) {
-    // OWNER: same single-row + horizontal-scroll model as [_tileRows] — uniform
-    // single-line content-width tiles that scroll, never crammed into equal
-    // Expanded shares that force a long label to shrink.
-    final children = <Widget>[];
-    for (var i = 0; i < defs.length; i++) {
-      if (i > 0) children.add(SizedBox(width: gap));
-      final def = defs[i];
-      children.add(
-        _ToolTile(
-          icon: def.icon,
-          label: def.label,
-          onTap: () => onTool?.call(def.id),
-        ),
-      );
-    }
+    // OWNER: same single-row + horizontal-scroll model as [_tileRows], with a
+    // per-tile MIN width (1/4) so a short-label tile stays a readable size, never
+    // a tiny content-width box, and a long label still grows + scrolls.
+    const int perRow = 4;
     return <Widget>[
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(children: children),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final double tileW =
+              (constraints.maxWidth - gap * (perRow - 1)) / perRow;
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                for (var i = 0; i < defs.length; i++) ...<Widget>[
+                  if (i > 0) SizedBox(width: gap),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: tileW),
+                    child: _ToolTile(
+                      icon: defs[i].icon,
+                      label: defs[i].label,
+                      onTap: () => onTool?.call(defs[i].id),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
       SizedBox(height: gap),
     ];
@@ -468,22 +477,31 @@ class BsKeyboard extends StatelessWidget {
       );
     }
 
-    // OWNER ("לכל המקלדת עד 4 בשורה נראית השאר נגלל"): ONE horizontal row at a
-    // UNIFORM single-line key font that SCROLLS for any tile that does not fit —
-    // never wrap the grid to more rows, never shrink or 2-line a label. Each tile
-    // is content-width (it grows with its label); ~[perRow]-worth sit in view and
-    // the rest scroll. [perRow] is retained for callers but no longer chunks.
+    // OWNER ("לכל המקלדת עד 4 בשורה נראית השאר נגלל" + "המשבצות קטנות מדי"): ONE
+    // horizontal row at a UNIFORM single-line key font that SCROLLS for overflow.
+    // Each tile is at LEAST 1/[perRow] of the width (responsive: 2 on mobile → wide
+    // readable tiles, 4 on desktop) so a SHORT label never becomes a tiny box, and
+    // GROWS for a longer label. ~[perRow] tiles sit in view; the rest scroll.
     return <Widget>[
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: <Widget>[
-            for (var i = 0; i < cells.length; i++) ...<Widget>[
-              if (i > 0) SizedBox(width: gap),
-              cells[i],
-            ],
-          ],
-        ),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final double tileW =
+              (constraints.maxWidth - gap * (perRow - 1)) / perRow;
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                for (var i = 0; i < cells.length; i++) ...<Widget>[
+                  if (i > 0) SizedBox(width: gap),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: tileW),
+                    child: cells[i],
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
       SizedBox(height: gap),
     ];
@@ -1000,6 +1018,11 @@ class _ToolTile extends StatelessWidget {
           label: label,
           child: Container(
             constraints: BoxConstraints(minHeight: m.cellHeight),
+            // Centre the icon+label inside the tile's MIN width (see the
+            // ConstrainedBox in [_tileRows]/[_toolRows]) so a short label sits in a
+            // comfortably-sized tile, not a tiny content-width box (owner: "the
+            // tiles are too small / not readable").
+            alignment: Alignment.center,
             padding: EdgeInsets.symmetric(
               vertical: vpad,
               horizontal: BsTokens.space1,
@@ -1065,6 +1088,11 @@ class _BackTile extends StatelessWidget {
           label: 'חזרה',
           child: Container(
             constraints: BoxConstraints(minHeight: m.cellHeight),
+            // Centre the icon+label inside the tile's MIN width (see the
+            // ConstrainedBox in [_tileRows]/[_toolRows]) so a short label sits in a
+            // comfortably-sized tile, not a tiny content-width box (owner: "the
+            // tiles are too small / not readable").
+            alignment: Alignment.center,
             padding: EdgeInsets.symmetric(
               vertical: vpad,
               horizontal: BsTokens.space1,

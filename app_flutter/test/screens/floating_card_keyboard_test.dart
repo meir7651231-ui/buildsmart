@@ -286,7 +286,11 @@ void main() {
           reason: 'the grid toggle opened the home tools (מהירים is a branch)');
 
       // Tapping the BRANCH morphs IN PLACE to the 3 _QuickTools children — with
-      // NO navigation and NO close (matching smart_home_screen _QuickTools).
+      // NO navigation and NO close (matching smart_home_screen _QuickTools). The
+      // tiles now live in a horizontal scroll (owner min-width sizing), so scroll
+      // the branch into view before the tap.
+      await tester.ensureVisible(find.text('מהירים'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('מהירים'));
       await tester.pumpAndSettle();
 
@@ -305,6 +309,8 @@ void main() {
           reason: 'morphing a branch keeps the overlay open');
 
       // BACK from the children returns to the home node-list (מהירים reappears).
+      await tester.ensureVisible(find.text('חזרה'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('חזרה'));
       await tester.pumpAndSettle();
       expect(find.text('מהירים'), findsOneWidget,
