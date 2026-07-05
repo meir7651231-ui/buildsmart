@@ -419,22 +419,26 @@ class BsKeyboard extends StatelessWidget {
   /// followed by a spacer to match the letter-row rhythm. Each tile DISPLAYS
   /// its [_ToolDef.label] but calls [onTool] with its typed [_ToolDef.id].
   List<Widget> _toolRows(List<_ToolDef> defs, {required double gap}) {
+    // OWNER: same single-row + horizontal-scroll model as [_tileRows] — uniform
+    // single-line content-width tiles that scroll, never crammed into equal
+    // Expanded shares that force a long label to shrink.
     final children = <Widget>[];
     for (var i = 0; i < defs.length; i++) {
       if (i > 0) children.add(SizedBox(width: gap));
       final def = defs[i];
       children.add(
-        Expanded(
-          child: _ToolTile(
-            icon: def.icon,
-            label: def.label,
-            onTap: () => onTool?.call(def.id),
-          ),
+        _ToolTile(
+          icon: def.icon,
+          label: def.label,
+          onTap: () => onTool?.call(def.id),
         ),
       );
     }
     return <Widget>[
-      Row(children: children),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: children),
+      ),
       SizedBox(height: gap),
     ];
   }
@@ -456,9 +460,7 @@ class BsKeyboard extends StatelessWidget {
     // Build the flat sequence of tile widgets (a leading back tile first).
     final cells = <Widget>[];
     if (showBack) {
-      cells.add(
-        _BackTile(onTap: onBack),
-      );
+      cells.add(_BackTile(onTap: onBack));
     }
     for (final t in tiles) {
       cells.add(
@@ -466,26 +468,25 @@ class BsKeyboard extends StatelessWidget {
       );
     }
 
-    // Chunk into rows of [perRow] (responsive: 2 on mobile, 4 on desktop),
-    // padding the last row with empty slots so widths stay uniform across rows.
-    final rowWidgets = <Widget>[];
-    for (var start = 0; start < cells.length; start += perRow) {
-      final end =
-          (start + perRow) < cells.length ? start + perRow : cells.length;
-      final rowCells = cells.sublist(start, end);
-      final children = <Widget>[];
-      for (var i = 0; i < perRow; i++) {
-        if (i > 0) children.add(SizedBox(width: gap));
-        children.add(
-          Expanded(
-            child: i < rowCells.length ? rowCells[i] : const SizedBox.shrink(),
-          ),
-        );
-      }
-      rowWidgets.add(Row(children: children));
-      rowWidgets.add(SizedBox(height: gap));
-    }
-    return rowWidgets;
+    // OWNER ("לכל המקלדת עד 4 בשורה נראית השאר נגלל"): ONE horizontal row at a
+    // UNIFORM single-line key font that SCROLLS for any tile that does not fit —
+    // never wrap the grid to more rows, never shrink or 2-line a label. Each tile
+    // is content-width (it grows with its label); ~[perRow]-worth sit in view and
+    // the rest scroll. [perRow] is retained for callers but no longer chunks.
+    return <Widget>[
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: <Widget>[
+            for (var i = 0; i < cells.length; i++) ...<Widget>[
+              if (i > 0) SizedBox(width: gap),
+              cells[i],
+            ],
+          ],
+        ),
+      ),
+      SizedBox(height: gap),
+    ];
   }
 
   @override
@@ -1008,29 +1009,27 @@ class _ToolTile extends StatelessWidget {
               border: Border.all(color: BsTokens.divider),
             ),
             child: Row(
-              // Owner: the symbol/emoji sits on the SIDE with the phrase beside
-              // it (RTL → icon on the right, label to its left), and the label is
-              // bigger — a horizontal tile, not the old stacked icon-over-label.
+              // Owner: the symbol/emoji sits on the SIDE with the phrase beside it
+              // (RTL → icon on the right, label to its left) — a horizontal tile.
+              // [MainAxisSize.min] sizes the tile to its content so it can live in a
+              // horizontal scroll (see [_tileRows]/[_toolRows]).
               textDirection: TextDirection.rtl,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Icon(icon, size: m.iconSize, color: BsTokens.inkLight),
                 const SizedBox(width: BsTokens.space1),
-                Flexible(
-                  // OWNER (uniform font, ALL keyboard screens): keep EVERY tile at
-                  // the same key font — never shrink a long label (that made the
-                  // font look non-uniform tile-to-tile). A label that does not fit
-                  // WRAPS to a second line instead; the Row sizes every tile in the
-                  // row to the same height, so the grid stays even.
-                  child: Text(
-                    label,
-                    maxLines: 2,
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: m.fontSize,
-                      color: BsTokens.inkLight,
-                      fontWeight: FontWeight.w500,
-                    ),
+                // OWNER ("עד 4 בשורה נראית השאר נגלל"): ONE key font, ONE line —
+                // never shrink, never wrap. A long label makes the tile WIDER (and
+                // the row scrolls); it never renders smaller or on a 2nd line.
+                Text(
+                  label,
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontSize: m.fontSize,
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -1076,7 +1075,7 @@ class _BackTile extends StatelessWidget {
             ),
             child: Row(
               textDirection: TextDirection.rtl,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Icon(
                   Icons.arrow_back,
@@ -1084,17 +1083,15 @@ class _BackTile extends StatelessWidget {
                   color: BsTokens.brand,
                 ),
                 const SizedBox(width: BsTokens.space1),
-                Flexible(
-                  child: Text(
-                    'חזרה',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: m.fontSize,
-                      color: BsTokens.brand,
-                      fontWeight: FontWeight.w500,
-                    ),
+                Text(
+                  'חזרה',
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontSize: m.fontSize,
+                    color: BsTokens.brand,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

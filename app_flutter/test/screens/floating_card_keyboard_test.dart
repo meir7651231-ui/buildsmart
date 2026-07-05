@@ -324,6 +324,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('הזמנות'), findsOneWidget);
 
+      // The tool tiles now live in a HORIZONTAL SCROLL (owner "עד 4 בשורה נראית
+      // השאר נגלל"), so a tile past the first few sits off-screen and must be
+      // scrolled into view before it is hittable.
+      await tester.ensureVisible(find.text('הזמנות'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('הזמנות'));
       await tester.pumpAndSettle();
 
