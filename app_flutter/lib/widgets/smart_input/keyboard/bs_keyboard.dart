@@ -1019,15 +1019,23 @@ class _ToolTile extends StatelessWidget {
                 Icon(icon, size: m.iconSize, color: BsTokens.inkLight),
                 const SizedBox(width: BsTokens.space1),
                 Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: m.fontSize,
-                      color: BsTokens.inkLight,
-                      fontWeight: FontWeight.w500,
+                  // OWNER (readability, ALL keyboard screens): scale an over-long
+                  // tool label DOWN to fit rather than truncating it to "…", so
+                  // every tile stays fully readable. FittedBox.scaleDown is a no-op
+                  // for labels that already fit (they keep the normal font).
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: m.fontSize,
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
