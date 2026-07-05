@@ -797,6 +797,13 @@ class _SectionChipsRow extends ConsumerWidget {
   }
 }
 
+/// OWNER: public entry so the KEYBOARD's 'רשימות' chip opens the full list manager
+/// (create / edit-contents / rename / hide / delete / reorder) — the same sheet the
+/// deleted section-pill row's ➕ opened. All list options now live behind a keyboard
+/// chip, not a persistent screen row.
+void openManageLists(BuildContext context, WidgetRef ref) =>
+    _openManageSheet(context, ref);
+
 void _openManageSheet(BuildContext context, WidgetRef ref) {
   final container = ProviderScope.containerOf(context);
   showModalBottomSheet<void>(
@@ -940,7 +947,21 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                         ),
                         onPressed: () => _toggleHidden(s),
                       ),
+                      // OWNER: rename now lives in the manager too (all options
+                      // reachable via the keyboard's 'רשימות' chip) — it was
+                      // previously ONLY on the deleted row's long-press menu.
                       IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'שנה שם',
+                        icon: const Icon(
+                          Icons.drive_file_rename_outline,
+                          color: Color(0xFF888888),
+                          size: 20,
+                        ),
+                        onPressed: () => _showRenameDialog(context, ref, i, s),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
                         tooltip: 'ערוך',
                         icon: const Icon(
                           Icons.edit_outlined,

@@ -26,7 +26,10 @@ import 'package:buildsmart/features/word_finder/word_finder_flag.dart'
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/budget_screen.dart' show BudgetScreen;
 import 'package:buildsmart/screens/catalog_screen.dart'
-    show catalogSectionProvider;
+    show
+        catalogSectionProvider,
+        catalogSectionsListProvider,
+        openManageLists;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
     show ChatsArchiveScreen, ChatsScreen;
@@ -102,6 +105,8 @@ import 'package:buildsmart/screens/worker_task_board_screen.dart'
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider;
+import 'package:buildsmart/state/hidden_catalog_sections.dart'
+    show hiddenCatalogSectionsProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
@@ -550,19 +555,6 @@ KbToolNode? _destNode(String label, IconData icon) {
 /// for parity with the other node-list factories (future per-tab live reads).
 List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
   const lists = <int, List<(String, IconData)>>{
-    0: <(String, IconData)>[
-      // OWNER: 'בית' leads the catalog tab-0 tiles so returning to the smart-home
-      // section is one tap in the keyboard (its section pill is being deleted from
-      // the screen). Wired via the SAME 'בית' destination the pill/bottom-nav use.
-      ('בית', Icons.home_outlined),
-      ('מאתר', Icons.gps_fixed),
-      ('עץ חכם', Icons.account_tree),
-      ('קטגוריות', Icons.grid_view),
-      ('וריאנטים', Icons.tune),
-      ('תכנון חיבור', Icons.cable),
-      ('חיפושים אחרונים', Icons.history),
-      ('מועדפים', Icons.star_border),
-    ],
     1: <(String, IconData)>[
       ('אינסטלציה', Icons.plumbing),
       ('ברזים וסניטריים', Icons.water_drop_outlined),
@@ -582,32 +574,74 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
       ('כספים', Icons.account_balance_wallet_outlined),
     ],
   };
-  final picks = lists[tab] ?? lists[0]!;
   final out = <KbToolNode>[];
-  for (final (label, icon) in picks) {
-    final node = _destNode(label, icon);
-    if (node != null) out.add(node);
-  }
-  // OWNER: the flag-gated 'מאתר חכם' word-finder as a CHIP (reachable via the
-  // keyboard's CHIPS, not search — its catalog section pill is being deleted from
-  // the screen). Shown only when kWordFinder is on, mirroring the pill; a manual
-  // leaf that activates the 'מאתר חכם' catalog section (tab 0 + section provider).
-  if (tab == 0 && ref.read(featureFlagsProvider).contains(kWordFinderFlag)) {
+  if (tab == 0) {
+    // OWNER: tab 0 (בית) LIVE-MIRRORS the catalog section list — 'בית' leads, then
+    // every VISIBLE list (incl. user-created, honouring hide + order) is a CHIP, the
+    // flag-gated 'מאתר חכם', and a 'רשימות' chip that opens the FULL list manager
+    // (create / edit-contents / rename / hide / delete / reorder). This replaces the
+    // deleted section-pill row: the lists AND all their options now live in the
+    // keyboard. Read (not watched): the grid rebuilds each time it re-opens.
+    final home = _destNode('בית', Icons.home_outlined);
+    if (home != null) out.add(home);
+    final hidden = ref.read(hiddenCatalogSectionsProvider);
+    for (final s in ref.read(catalogSectionsListProvider)) {
+      if (hidden.contains(s)) continue;
+      // A fixed section has a destination (the SAME opener its pill used); a
+      // user-created list has none → a manual leaf that activates its section.
+      out.add(_destNode(s, _kbListIcon(s)) ?? _listSectionChip(s));
+    }
+    if (ref.read(featureFlagsProvider).contains(kWordFinderFlag)) {
+      out.add(
+        KbToolNode.leaf(
+          icon: Icons.auto_awesome,
+          label: 'מאתר חכם',
+          action: (ref, context) {
+            ref.read(mainTabProvider.notifier).state = 0;
+            ref.read(catalogSectionProvider.notifier).state = 'מאתר חכם';
+          },
+        ),
+      );
+    }
     out.add(
       KbToolNode.leaf(
-        icon: Icons.auto_awesome,
-        label: 'מאתר חכם',
-        action: (ref, context) {
-          ref.read(mainTabProvider.notifier).state = 0;
-          ref.read(catalogSectionProvider.notifier).state = 'מאתר חכם';
-        },
+        icon: Icons.playlist_add_check,
+        label: 'רשימות',
+        action: (ref, context) => openManageLists(context, ref),
       ),
     );
+  } else {
+    for (final (label, icon) in lists[tab] ?? const <(String, IconData)>[]) {
+      final node = _destNode(label, icon);
+      if (node != null) out.add(node);
+    }
   }
   // Never leave ▦ empty: if nothing resolved (registry shape changed), fall back
   // to the legacy home tools.
   return out.isEmpty ? kbHomeNodes() : out;
 }
+
+IconData _kbListIcon(String label) => switch (label) {
+      'מאתר'            => Icons.gps_fixed,
+      'עץ חכם'          => Icons.account_tree,
+      'קטגוריות'        => Icons.grid_view,
+      'וריאנטים'        => Icons.tune,
+      'תכנון חיבור'     => Icons.cable,
+      'חיפושים אחרונים' => Icons.history,
+      'מועדפים'         => Icons.star_border,
+      _                 => Icons.list_alt_outlined,
+    };
+
+/// A user-created catalog list (which has no [kbDestination]) as a keyboard chip:
+/// activates its section (tab 0 + [catalogSectionProvider]), exactly like its pill.
+KbToolNode _listSectionChip(String label) => KbToolNode.leaf(
+      icon: Icons.list_alt_outlined,
+      label: label,
+      action: (ref, context) {
+        ref.read(mainTabProvider.notifier).state = 0;
+        ref.read(catalogSectionProvider.notifier).state = label;
+      },
+    );
 
 /// Owner button-spec v2 (#4): the CURRENT screen's ⋮ overflow menu as keyboard
 /// tools — what the floating ⚙ opens. Mirrors HomeShell's per-tab AppBar overflow
