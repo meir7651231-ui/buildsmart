@@ -21,8 +21,12 @@
 // imports NOTHING from here (it only knows pure [KbTile]s), so the keyboard
 // widget stays screen-agnostic.
 
+import 'package:buildsmart/features/word_finder/word_finder_flag.dart'
+    show kWordFinderFlag;
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/budget_screen.dart' show BudgetScreen;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show catalogSectionProvider;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
     show ChatsArchiveScreen, ChatsScreen;
@@ -96,6 +100,8 @@ import 'package:buildsmart/screens/worker_settings_screen.dart'
 import 'package:buildsmart/screens/worker_task_board_screen.dart'
     show WorkerTaskBoardScreen;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/feature_flags.dart'
+    show featureFlagsProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
@@ -581,6 +587,22 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
   for (final (label, icon) in picks) {
     final node = _destNode(label, icon);
     if (node != null) out.add(node);
+  }
+  // OWNER: the flag-gated 'מאתר חכם' word-finder as a CHIP (reachable via the
+  // keyboard's CHIPS, not search — its catalog section pill is being deleted from
+  // the screen). Shown only when kWordFinder is on, mirroring the pill; a manual
+  // leaf that activates the 'מאתר חכם' catalog section (tab 0 + section provider).
+  if (tab == 0 && ref.read(featureFlagsProvider).contains(kWordFinderFlag)) {
+    out.add(
+      KbToolNode.leaf(
+        icon: Icons.auto_awesome,
+        label: 'מאתר חכם',
+        action: (ref, context) {
+          ref.read(mainTabProvider.notifier).state = 0;
+          ref.read(catalogSectionProvider.notifier).state = 'מאתר חכם';
+        },
+      ),
+    );
   }
   // Never leave ▦ empty: if nothing resolved (registry shape changed), fall back
   // to the legacy home tools.

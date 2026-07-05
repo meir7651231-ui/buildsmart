@@ -342,23 +342,6 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
         run: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
       ),
       KbDestination(
-        label: 'מאתר חכם',
-        keywords: const [
-          'מאתר חכם',
-          'מאתר-חכם',
-          'חיפוש חכם',
-          'מוצא חכם',
-          'מקלדת מילים',
-          'smart finder',
-        ],
-        // → WordFinderHome, the flag-gated word-finder section. The catalog body
-        // branch is inert + WordFinderHome self-gates when kWordFinder is off (see
-        // _CatalogBody), so activating the section is safe UNCONDITIONALLY: flag ON
-        // (the live demo) opens the finder, OFF lands on the gated host — never a
-        // crash. Replaces the deleted 'מאתר חכם' section pill (keyboard-reachable).
-        run: (ref, context) => _openCatalogSection(ref, 'מאתר חכם'),
-      ),
-      KbDestination(
         label: 'עץ חכם',
         keywords: const ['עץ חכם', 'עץ', 'דפדוף חכם', 'smart tree'],
         // → _SmartTreeSection (catalog_screen.dart:2298). Reuse the tool seam.
