@@ -21,6 +21,16 @@ const bool kEnableWordFinderDemo =
 const bool kEnableCardKeyboardDemo =
     bool.fromEnvironment('ENABLE_CARD_KEYBOARD');
 
+/// True iff the build passed `--dart-define=ENABLE_RING_DIVE=true` — the demo
+/// build for the RingDive rotary product-finder (צלילת-טבעות, owner handoff).
+/// SAME idiom as [kEnableWordFinderDemo] / [kEnableCardKeyboardDemo]: default
+/// false → 'kRingDive' stays off → the dial never renders (a zero-height
+/// `SizedBox.shrink`) → byte-identical. The live deploy workflows do NOT pass it
+/// (the cut-over stays owner-gated); a demo build flips it on to A/B the dial
+/// beside the smart keyboard.
+const bool kEnableRingDiveDemo =
+    bool.fromEnvironment('ENABLE_RING_DIVE');
+
 /// Runtime tier name for the עדכונים LIVE-MIRROR keyboard (plan Q4). The floating
 /// keyboard's mirror branch is guarded by `kKbLiveMirror ||
 /// featureFlagsProvider.isOn(kKbLiveMirrorFlag)`, so the orchestrator can stage
@@ -83,6 +93,7 @@ class FeatureFlagsNotifier extends StateNotifier<Set<String>> {
   static const Set<String> _forcedOnFlags = <String>{
     if (kEnableWordFinderDemo) 'kWordFinder',
     if (kEnableCardKeyboardDemo) 'kCardKeyboard',
+    if (kEnableRingDiveDemo) 'kRingDive',
   };
 
   Future<void> _load() async {
