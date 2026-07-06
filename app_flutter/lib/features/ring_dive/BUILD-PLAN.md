@@ -98,4 +98,10 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
   current pool, tap → sheet) + product sheet (colour dot + brand + name + spec
   chips from colour/category/dims + "הוסף להזמנה" which dives to it). No price
   (the catalog has none). analyze 0, tests green.
-- P6b next — the cart/added state on resolve (add-to-cart button + confirmation).
+- P6b done (this commit) — the cart/added state: once a qty is chosen a "הוסף
+  לסל" button appears below the wheel; tapping it (strong haptic) shows the
+  "✓ נוסף לסל" confirmation + a "חיפוש חדש" reset. P6 complete — the FULL flow
+  (dive → product → qty → cart → added) works end-to-end. Real cart write = P7.
+  analyze 0, tests green.
+- P7 next — the swap seam: gate the smart-keyboard entry so flag ON opens
+  RingDive; wire the real app cart. Then P8 polish + tests.

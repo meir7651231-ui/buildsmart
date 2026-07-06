@@ -38,6 +38,7 @@ import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordEntry, WordLexicon, buildWordLexicon;
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The shared vocabulary — the SAME `buildWordLexicon(kDivePool)` the smart
@@ -82,6 +83,9 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   static const List<int> _qtyOpts = <int>[
     1, 2, 3, 4, 5, 6, 8, 10, 12, 20, 50, 100, //
   ];
+
+  /// True once the chosen product + qty has been added (the confirmation state).
+  bool _added = false;
 
   /// The catalog narrowed by every answered step (mirrors `_ensureMemo`).
   List<LipskeyCatalogProduct> get _pool {
@@ -150,6 +154,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     setState(() {
       _stack.removeRange(level, _stack.length);
       _qty = null;
+      _added = false;
     });
   }
 
@@ -157,13 +162,72 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     setState(() {
       _stack.clear();
       _qty = null;
+      _added = false;
     });
   }
 
   void _clearQty() {
     setState(() {
       _qty = null;
+      _added = false;
     });
+  }
+
+  void _addToCart() {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _added = true;
+    });
+  }
+
+  /// The add-to-cart action below the wheel once a product + qty is chosen —
+  /// the button, then the "נוסף לסל ✓" confirmation + a fresh-search reset.
+  /// (Phase 7 wires this to the app's real cart; here it is a local confirm.)
+  Widget _cartBar() {
+    if (_added) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              '✓ נוסף לסל',
+              style: TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF3E8E5A),
+              ),
+            ),
+            Text(
+              '$_qty יחידות',
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF8C8578),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: 200,
+              child: _pillButton('חיפוש חדש', const Color(0xFF1B1B1A), _reset),
+            ),
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: SizedBox(
+        width: 240,
+        child: _pillButton(
+          'הוסף לסל · × $_qty',
+          const Color(0xFFEE6907),
+          _addToCart,
+        ),
+      ),
+    );
   }
 
   @override
@@ -176,7 +240,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     final labels = <String>[];
     final sublabels = <String>[];
     var hubHint = 'סובב · הקש לבחור';
-    var resolved = false;
+    LipskeyCatalogProduct? resolvedProduct;
     void Function(int)? onSelect;
 
     switch (verdict) {
@@ -199,7 +263,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           if (i >= 0 && i < products.length) _diveProduct(products[i]);
         };
       case CardResolve(product: final product):
-        resolved = true;
+        resolvedProduct = product;
         if (_qty == null) {
           // Quantity phase — the rim becomes qty numbers, the hub the product.
           labels.addAll(_qtyOpts.map((q) => '$q'));
@@ -213,16 +277,17 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             }
           };
         } else {
-          // Chosen — a landed confirmation (Phase 6b = add-to-cart).
+          // Chosen — the hub shows the product; the cart bar below adds it.
           labels.add(product.nameHe);
-          sublabels.add('× $_qty נבחרו');
-          hubHint = 'נבחרה כמות';
+          sublabels.add('כמות $_qty');
+          hubHint = _added ? 'נוסף לסל ✓' : 'הוסף לסל למטה';
         }
     }
 
     // The results footer previews the current pool while still narrowing.
-    final footer =
-        resolved ? const <LipskeyCatalogProduct>[] : pool.take(10).toList();
+    final footer = resolvedProduct != null
+        ? const <LipskeyCatalogProduct>[]
+        : pool.take(10).toList();
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -238,6 +303,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               lockedCount: _stack.length,
               onSelect: onSelect,
             ),
+            if (resolvedProduct != null && _qty != null) _cartBar(),
             if (footer.isNotEmpty) _buildResultsFooter(footer),
           ],
         ),
