@@ -84,6 +84,20 @@ service cloud.firestore {
       return hasRole('manager') || isAdmin();
     }
 
+    /// The app OWNER, by verified email — the authority ROOT of the Studio
+    /// publish-to-all path. Mirrors, verbatim value, functions/src/common.ts
+    /// `isOwnerEmail` (OWNER_EMAIL) and the app's kOwnerEmails
+    /// (app_flutter/lib/data/board_accounts_local.dart:98). The Google ID-token
+    /// delivers this claim already normalized (lower-cased), so the compare is a
+    /// direct literal match. Defined here beside isManager() so the rules and the
+    /// callable share ONE owner identity; the §5 studioConfig blocks (Step 65)
+    /// consume it. Adding this helper does NOT change any existing rule — it is
+    /// referenced by no match block yet.
+    function isOwnerEmail() {
+      return isSignedIn()
+          && request.auth.token.get('email', '') == 'meir7651231@gmail.com';
+    }
+
     // ── users/{uid} — S5.1 · doc-id = auth uid · {phone, role, fcmToken,
     //    displayName} ───────────────────────────────────────────────────────────
     // read: self or admin. write: self may maintain the own mirror doc

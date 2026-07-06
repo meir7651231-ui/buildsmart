@@ -139,6 +139,10 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 //   #6    reviewRoleRequest            — gen2 callable; the matrix-authorized
 //                                        approver grants an operational role
 //                                        (writes the claim) or denies a request
+//   P5.56 publishConfig                — gen2 callable; THE sanctioned publish-
+//                                        to-all path (CAS on expectedBaseVersion,
+//                                        owner/dual-control + live allow-flag,
+//                                        per-uid rate-limit, audit on both paths)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export { deleteAccount } from "./deleteAccount";
@@ -148,3 +152,4 @@ export { askClaude } from "./claude";
 export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";
 export { reviewRoleRequest } from "./reviewRoleRequest";
+export { publishConfig } from "./studio";

@@ -45,3 +45,31 @@ export function callerRoles(token: Record<string, unknown>): string[] {
   }
   return out;
 }
+
+/**
+ * The BuildSmart OWNER account, by verified email. SSOT: the Flutter app's
+ * `kOwnerEmails` (app_flutter/lib/data/board_accounts_local.dart:98) — a single
+ * allow-listed Google account. Kept here (server) as the authority ROOT of the
+ * publish-to-all path (`publishConfig`, Pillar-5 Step 56): a caller whose ID-
+ * token email equals this may publish WITHOUT a second manager's dual-control
+ * approval. Mirrored — same verbatim value — by the `isOwnerEmail()` helper in
+ * firestore.rules (repo root) so the rules and the callable share ONE owner
+ * identity. Stored lower-cased; the compare trims + lower-cases the token email,
+ * exactly like the Dart `isOwnerEmail` (case/space-insensitive).
+ */
+export const OWNER_EMAIL = "meir7651231@gmail.com";
+
+/**
+ * True iff the authenticated caller's ID-token email is the app OWNER
+ * ([OWNER_EMAIL]). Tolerant like its Dart twin (board_accounts_local.dart:102):
+ * a null auth, an absent email, or a non-string yields false; a present email is
+ * trimmed + lower-cased before the compare. Takes the whole `request.auth`
+ * (structurally `{ token: { email } }`), so a handler passes `request.auth`
+ * straight through — `isOwnerEmail(request.auth)`.
+ */
+export function isOwnerEmail(
+  auth: { token?: { email?: unknown } } | null | undefined
+): boolean {
+  const email = auth?.token?.email;
+  return typeof email === "string" && email.trim().toLowerCase() === OWNER_EMAIL;
+}
