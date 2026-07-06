@@ -67,7 +67,8 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
   double _moved = 0;
   bool _dragging = false;
 
-  static const Offset _center = Offset(RingDiveGeo.center, RingDiveGeo.center);
+  /// The dial is a 340-box; its centre (the gesture origin) is (170, 170).
+  static const Offset _center = Offset(170, 170);
 
   int get _n => widget.labels.isEmpty ? 1 : widget.labels.length;
   double get _step => 360 / _n;
@@ -173,23 +174,20 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
     final bigSize = big.length > 5 ? 15.0 : (big.length > 3 ? 19.0 : 23.0);
     return IgnorePointer(
       child: Container(
-        width: 94,
-        height: 94,
-        padding: const EdgeInsets.symmetric(horizontal: 9),
+        width: 112,
+        height: 112,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: Alignment(0, -0.4),
-            colors: [Color(0xFFFFFFFF), Color(0xFFFBF9F5), Color(0xFFF2EDE5)],
-            stops: [0, 0.58, 1],
-          ),
-          boxShadow: [
+          color: const Color(0xD9FFFFFF),
+          border: Border.all(color: const Color(0x73FF7A18), width: 1.5),
+          boxShadow: const [
             BoxShadow(
-              color: Color(0x1F6E583A),
-              blurRadius: 30,
+              color: Color(0x40FF7A18),
+              blurRadius: 40,
               spreadRadius: -8,
-              offset: Offset(0, 16),
+              offset: Offset(0, 12),
             ),
           ],
         ),
