@@ -1,51 +1,31 @@
-/// RingDive (צלילת-טבעות) — the rotary product-finder surface (owner design
-/// handoff, 6/7). A NEW PRESENTATION of the SAME `card_engine` drill-down the
-/// smart keyboard renders: the axis options ride a spinning knurled dial; a tap
-/// on the focused option "dives" one axis deeper; after ≤6 dives the pool
-/// collapses to a single product. The engine is UNCHANGED — the dial renders
-/// `mergedKeys`'s verdict and feeds a chosen option back as a `NewbieStep`,
-/// EXACTLY as `card_keyboard_screen` does (same pool-narrowing, same
-/// `_predicateFor`, same `NewbieStep`).
+/// RingDive (צלילת-טבעות / Pro-X-Light) — the rotary product-finder surface
+/// (owner design handoff, 6/7). ONE wheel, phase-driven: `root` (the 9 search
+/// styles) → `find` (one clean axis per turn over the REAL catalog) → product
+/// leaves → quantity → cart. The wheel renders the CLEAN taxonomy/attribute
+/// axes derived by `ring_dive_catalog` (dept·cat·type·size·angle·color·material·
+/// brand) — NOT the old word-cloud. Zero engine change.
 ///
 /// GATED on `kRingDiveFlag` (runtime) — force-enabled for a demo build via
-/// `--dart-define=ENABLE_RING_DIVE=true` (`kEnableRingDiveDemo`). OFF by default
-/// → renders a zero-height `SizedBox.shrink()` → byte-identical to before.
+/// `--dart-define=ENABLE_RING_DIVE=true`. OFF by default → `SizedBox.shrink()` →
+/// byte-identical.
 ///
-/// PHASE 6a (this): the results footer (a live row of product cards from the
-/// current pool) + the product sheet (specs + "הוסף להזמנה" that dives to it).
-/// Phase 6b adds the cart/added state on resolve; Phase 7 the swap seam. See
-/// BUILD-PLAN.md.
+/// RD-B (this): the phase/state model wired to `ring_dive_catalog`
+/// (rdMatching/rdOptsFor/rdFindAxes). RD-C adds the axis-switcher chip strip,
+/// RD-D the qty dual-ring, RD-E compat+job, RD-F..H polish + tests. The
+/// hub/breadcrumb/results/sheet/cart scaffolding is reused. See BUILD-PLAN.md.
 library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
-import 'package:buildsmart/features/card_keyboard/card_engine.dart'
-    show
-        CardAskWords,
-        CardResolve,
-        CardShowProducts,
-        MergedKeys,
-        SignalChip,
-        mergedKeys;
-import 'package:buildsmart/features/card_keyboard/card_signals.dart'
-    show WordSignal, sourcesFor;
+import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart';
-import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
-import 'package:buildsmart/features/word_finder/word_finder_engine.dart'
-    show NewbieStep;
-import 'package:buildsmart/features/word_finder/word_lexicon.dart'
-    show WordEntry, WordLexicon, buildWordLexicon;
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The shared vocabulary — the SAME `buildWordLexicon(kDivePool)` the smart
-/// keyboard's `cardKeyboardLexicon` uses (built once, pure over const catalog).
-final WordLexicon _ringDiveLexicon = buildWordLexicon(kDivePool);
-
-/// Colour-name → swatch (the prototype's `dots` map), for the result cards.
+/// Colour-name → swatch (the design's `dots` map), for the result cards.
 const Map<String, Color> _dotColors = <String, Color>{
   'לבן': Color(0xFFF4F4F0),
   'שחור מט': Color(0xFF2A2A2A),
@@ -61,6 +41,22 @@ const Map<String, Color> _dotColors = <String, Color>{
   'קרמיקה': Color(0xFFF4F4F0),
 };
 
+/// The 9 root search styles (emoji + label + axis key). The first 8 enter `find`
+/// with that axis active; `job` is the kit flow (RD-E — a placeholder browse
+/// for now).
+const List<({String key, String emoji, String label})> _styles =
+    <({String key, String emoji, String label})>[
+  (key: 'dept', emoji: '🗂️', label: 'מחלקה'),
+  (key: 'cat', emoji: '📁', label: 'קטגוריה'),
+  (key: 'type', emoji: '🔧', label: 'סוג'),
+  (key: 'size', emoji: '📏', label: 'גודל'),
+  (key: 'angle', emoji: '📐', label: 'זווית'),
+  (key: 'color', emoji: '🎨', label: 'צבע'),
+  (key: 'material', emoji: '⚙️', label: 'חומר'),
+  (key: 'brand', emoji: '🏷️', label: 'מותג'),
+  (key: 'job', emoji: '🧩', label: 'לפי עבודה'),
+];
+
 /// The RingDive surface. Renders nothing until `kRingDiveFlag` is enabled.
 class RingDiveScreen extends ConsumerStatefulWidget {
   const RingDiveScreen({super.key});
@@ -70,97 +66,69 @@ class RingDiveScreen extends ConsumerStatefulWidget {
 }
 
 class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
-  /// The answered dive steps (the breadcrumb the engine reads via emptiness).
-  final List<NewbieStep> _stack = <NewbieStep>[];
+  /// 'root' — pick a search style · 'find' — drill the axes.
+  String _mode = 'root';
 
-  /// No curated sub-type — RingDive opens generic (the engine picks the axes).
-  static const String? _subtype = null;
+  /// The chosen constraints so far, in order (the breadcrumb).
+  final List<({String field, String value})> _path =
+      <({String field, String value})>[];
 
-  /// The chosen quantity — null until the qty phase completes.
+  /// The active axis in `find` mode (the wheel shows its options).
+  String? _axisField;
+
+  /// The landed product (→ the quantity phase) and its chosen quantity.
+  LipskeyCatalogProduct? _product;
   int? _qty;
+  bool _added = false;
 
-  /// Quantity options on the qty dial (the prototype's `qtyOpts`).
   static const List<int> _qtyOpts = <int>[
     1, 2, 3, 4, 5, 6, 8, 10, 12, 20, 50, 100, //
   ];
 
-  /// True once the chosen product + qty has been added (the confirmation state).
-  bool _added = false;
+  /// The path as a constraint map for the derivation layer.
+  RdCons get _cons =>
+      <String, String>{for (final s in _path) s.field: s.value};
 
-  /// The catalog narrowed by every answered step (mirrors `_ensureMemo`).
-  List<LipskeyCatalogProduct> get _pool {
-    var pool = kDivePool;
-    for (final step in _stack) {
-      pool = pool.where(step.predicate).toList();
-    }
-    return pool;
-  }
-
-  /// Rebuild a chip's narrowing predicate from its `(axisId, value)` DATA — the
-  /// SAME replay-stable idiom as `card_keyboard_screen._predicateFor`.
-  bool Function(LipskeyCatalogProduct) _predicateFor(
-    String axisId,
-    String value,
-  ) {
-    final src = sourcesFor(_subtype).firstWhere(
-      (s) => s.axisId == axisId,
-      orElse: () => const WordSignal(),
-    );
-    final chip = SignalChip(axisId: axisId, value: value, displayLabel: value);
-    return (p) => src.matches(p, chip);
-  }
-
-  void _diveWord(WordEntry word) {
+  void _enterStyle(String axis) {
     setState(() {
-      _stack.add(
-        NewbieStep(
-          axisLabel: 'התחלה',
-          chipLabel: word.word,
-          crumbWord: word.word,
-          predicate: _predicateFor('word', word.word),
-        ),
-      );
-    });
-  }
-
-  void _diveChip(SignalChip chip) {
-    setState(() {
-      _stack.add(
-        NewbieStep(
-          axisLabel: chip.axisName ?? '',
-          chipLabel: chip.displayLabel,
-          crumbWord: chip.displayLabel,
-          predicate: _predicateFor(chip.axisId, chip.value),
-        ),
-      );
-    });
-  }
-
-  void _diveProduct(LipskeyCatalogProduct product) {
-    setState(() {
-      _stack.add(
-        NewbieStep(
-          axisLabel: 'מוצר',
-          chipLabel: product.nameHe,
-          crumbWord: product.nameHe,
-          predicate: (p) => p.sku == product.sku,
-        ),
-      );
-    });
-  }
-
-  /// Go back to a dive level — drop the step at [level] and everything deeper.
-  void _backTo(int level) {
-    setState(() {
-      _stack.removeRange(level, _stack.length);
+      _mode = 'find';
+      _axisField = axis;
+      _path.clear();
+      _product = null;
       _qty = null;
       _added = false;
     });
   }
 
+  void _dive(String field, String value) {
+    setState(() {
+      _path.add((field: field, value: value));
+      final axes = rdFindAxes(_cons);
+      _axisField = axes.isNotEmpty ? axes.first : null;
+    });
+  }
+
+  void _pickProduct(LipskeyCatalogProduct p) {
+    setState(() => _product = p);
+  }
+
+  void _backTo(int level) {
+    setState(() {
+      _path.removeRange(level, _path.length);
+      _product = null;
+      _qty = null;
+      _added = false;
+      final axes = rdFindAxes(_cons);
+      _axisField = axes.isNotEmpty ? axes.first : null;
+    });
+  }
+
   void _reset() {
     setState(() {
-      _stack.clear();
+      _mode = 'root';
+      _path.clear();
+      _axisField = null;
+      _product = null;
       _qty = null;
       _added = false;
     });
@@ -175,14 +143,100 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _addToCart() {
     HapticFeedback.mediumImpact();
-    setState(() {
-      _added = true;
-    });
+    setState(() => _added = true);
   }
 
-  /// The add-to-cart action below the wheel once a product + qty is chosen —
-  /// the button, then the "נוסף לסל ✓" confirmation + a fresh-search reset.
-  /// (Phase 7 wires this to the app's real cart; here it is a local confirm.)
+  @override
+  Widget build(BuildContext context) {
+    final on = ref.watch(featureFlagsProvider).contains(kRingDiveFlag);
+    if (!on) return const SizedBox.shrink();
+
+    final labels = <String>[];
+    final sublabels = <String>[];
+    var hubHint = 'סובב · הקש לבחור';
+    void Function(int)? onSelect;
+    var footer = const <LipskeyCatalogProduct>[];
+
+    if (_product != null) {
+      // ── quantity / cart phase ──
+      final p = _product!;
+      if (_qty == null) {
+        labels.addAll(_qtyOpts.map((q) => '$q'));
+        sublabels.addAll(_qtyOpts.map((_) => p.nameHe));
+        hubHint = 'הקש לבחור כמות';
+        onSelect = (i) {
+          if (i >= 0 && i < _qtyOpts.length) {
+            setState(() => _qty = _qtyOpts[i]);
+          }
+        };
+      } else {
+        labels.add(p.nameHe);
+        sublabels.add('כמות $_qty');
+        hubHint = _added ? 'נוסף לסל ✓' : 'הוסף לסל למטה';
+      }
+    } else if (_mode == 'root') {
+      // ── root: the 9 search styles ──
+      for (final s in _styles) {
+        labels.add('${s.emoji} ${s.label}');
+        sublabels.add('התחל מ');
+      }
+      hubHint = 'בחר איך לחפש';
+      onSelect = (i) {
+        if (i >= 0 && i < _styles.length) _enterStyle(_styles[i].key);
+      };
+    } else {
+      // ── find: one clean axis at a time, then product leaves ──
+      final cons = _cons;
+      final axes = rdFindAxes(cons);
+      if (axes.isEmpty) {
+        final leaves = rdMatching(cons);
+        labels.addAll(leaves.map((rp) => rp.name));
+        sublabels.addAll(leaves.map((_) => 'בחר מוצר'));
+        hubHint = 'הקש לבחור מוצר';
+        onSelect = (i) {
+          if (i >= 0 && i < leaves.length) _pickProduct(leaves[i].product);
+        };
+      } else {
+        final field = (_axisField != null && axes.contains(_axisField))
+            ? _axisField!
+            : axes.first;
+        final opts = rdOptsFor(field, cons);
+        labels.addAll(opts);
+        sublabels.addAll(opts.map((_) => kRdAxisLabel[field] ?? ''));
+        onSelect = (i) {
+          if (i >= 0 && i < opts.length) _dive(field, opts[i]);
+        };
+        footer = rdMatching(cons)
+            .take(10)
+            .map((rp) => rp.product)
+            .toList(growable: false);
+      }
+    }
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_path.isNotEmpty || _mode != 'root') _buildBreadcrumb(),
+            RingDiveWheel(
+              labels: labels,
+              sublabels: sublabels,
+              hubHint: hubHint,
+              lockedCount: _path.length,
+              onSelect: onSelect,
+            ),
+            if (_product != null && _qty != null) _cartBar(),
+            if (footer.isNotEmpty) _buildResultsFooter(footer),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── cart bar ─────────────────────────────────────────────────────────────
+
   Widget _cartBar() {
     if (_added) {
       return Padding(
@@ -230,99 +284,18 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final on = ref.watch(featureFlagsProvider).contains(kRingDiveFlag);
-    if (!on) return const SizedBox.shrink();
-
-    final pool = _pool;
-    final verdict = mergedKeys(pool, _stack, _ringDiveLexicon, _subtype);
-    final labels = <String>[];
-    final sublabels = <String>[];
-    var hubHint = 'סובב · הקש לבחור';
-    LipskeyCatalogProduct? resolvedProduct;
-    void Function(int)? onSelect;
-
-    switch (verdict) {
-      case CardAskWords(words: final words):
-        labels.addAll(words.map((w) => w.word));
-        sublabels.addAll(words.map((_) => 'מה צריך?'));
-        onSelect = (i) {
-          if (i >= 0 && i < words.length) _diveWord(words[i]);
-        };
-      case MergedKeys(chips: final chips):
-        labels.addAll(chips.map((c) => c.displayLabel));
-        sublabels.addAll(chips.map((c) => c.axisName ?? ''));
-        onSelect = (i) {
-          if (i >= 0 && i < chips.length) _diveChip(chips[i]);
-        };
-      case CardShowProducts(products: final products):
-        labels.addAll(products.map((p) => p.nameHe));
-        sublabels.addAll(products.map((_) => 'בחר מוצר'));
-        onSelect = (i) {
-          if (i >= 0 && i < products.length) _diveProduct(products[i]);
-        };
-      case CardResolve(product: final product):
-        resolvedProduct = product;
-        if (_qty == null) {
-          // Quantity phase — the rim becomes qty numbers, the hub the product.
-          labels.addAll(_qtyOpts.map((q) => '$q'));
-          sublabels.addAll(_qtyOpts.map((_) => product.nameHe));
-          hubHint = 'הקש לבחור כמות';
-          onSelect = (i) {
-            if (i >= 0 && i < _qtyOpts.length) {
-              setState(() {
-                _qty = _qtyOpts[i];
-              });
-            }
-          };
-        } else {
-          // Chosen — the hub shows the product; the cart bar below adds it.
-          labels.add(product.nameHe);
-          sublabels.add('כמות $_qty');
-          hubHint = _added ? 'נוסף לסל ✓' : 'הוסף לסל למטה';
-        }
-    }
-
-    // The results footer previews the current pool while still narrowing.
-    final footer = resolvedProduct != null
-        ? const <LipskeyCatalogProduct>[]
-        : pool.take(10).toList();
-
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_stack.isNotEmpty || _qty != null) _buildBreadcrumb(),
-            RingDiveWheel(
-              labels: labels,
-              sublabels: sublabels,
-              hubHint: hubHint,
-              lockedCount: _stack.length,
-              onSelect: onSelect,
-            ),
-            if (resolvedProduct != null && _qty != null) _cartBar(),
-            if (footer.isNotEmpty) _buildResultsFooter(footer),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── breadcrumb ─────────────────────────────────────────────────────────────
+  // ── breadcrumb ───────────────────────────────────────────────────────────
 
   Widget _buildBreadcrumb() {
     return Container(
-      constraints: const BoxConstraints(maxWidth: 320),
+      constraints: const BoxConstraints(maxWidth: 340),
       padding: const EdgeInsets.only(bottom: 10),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            for (var i = 0; i < _stack.length; i++)
-              _crumb(_stack[i].crumbWord, () => _backTo(i)),
+            for (var i = 0; i < _path.length; i++)
+              _crumb(_path[i].value, () => _backTo(i)),
             if (_qty != null) _crumb('× $_qty', _clearQty),
             const SizedBox(width: 6),
             _resetCrumb(),
@@ -539,7 +512,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             const SizedBox(height: 20),
             _pillButton('הוסף להזמנה', const Color(0xFFFF7A18), () {
               Navigator.of(sheetCtx).pop();
-              _diveProduct(p);
+              _pickProduct(p);
             }),
           ],
         ),

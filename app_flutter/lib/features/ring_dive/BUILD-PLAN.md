@@ -55,4 +55,9 @@ in ring_dive_screen is REPLACED by ring_dive_catalog + the phase model (the old
 wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
 
 ## Status
-- RD-A done (this commit).
+- RD-A done (5c8f2086) — the derivation layer.
+- RD-B done (this commit) — ring_dive_screen rewired from card_engine to
+  ring_dive_catalog: root (9 styles) → find (one clean axis per turn) → product
+  leaves → qty → cart. Reuses the wheel/hub/breadcrumb/footer/sheet/cart. Test
+  verifies the clean root→dept→categories drill. analyze 0, tests green.
+- RD-C next — the axis-switcher chip strip (jump between the remaining axes).
