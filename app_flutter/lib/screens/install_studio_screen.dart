@@ -10,6 +10,15 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
+import 'package:buildsmart/domain/connection_resolver.dart'
+    show ConnectionResolver;
+import 'package:buildsmart/domain/connection_schema.dart'
+    show ProductConnectorSpec, SystemDef;
+import 'package:buildsmart/domain/trade_physics_config.dart'
+    show TradePhysicsConfig;
+import 'package:buildsmart/domain/trade_schema.dart' show AccessoryRule;
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
@@ -21,6 +30,8 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/saved_projects.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/trades_store.dart'
+    show TradesDoc, resolvedActiveTradeIdProvider, tradesStoreProvider;
 import 'package:buildsmart/widgets/chain_diagram.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -76,7 +87,138 @@ class _SheetClose extends StatelessWidget {
       );
 }
 
-Color _systemColor(LipskeyCatalogProduct p) {
+// ── s49b · the gated trade-config seams ───────────────────────────────────────
+// Every seam in this screen funnels through ONE guard: [_authoredConfigOf].
+// R1-2 KEYSTONE: when the plumbing-resolved active trade is in effect (today:
+// ALWAYS — a single published trade exists) the guard returns null BEFORE any
+// authored slice is touched, and every seam runs its legacy branch verbatim.
+// Only a published non-plumbing trade gets a config; plumbing's hand-written
+// physics/consts below are permanent and never read authored data.
+
+/// The resolved active trade's authored slices, bundled once per build:
+/// systems (+ colors), the per-sku [ProductConnectorSpec] map, the mustHave
+/// [AccessoryRule]s, the s41 [TradeResolution] (REUSED — no parallel seam) and
+/// the optional [TradePhysicsConfig] (v1: always null — no authoring UI yet,
+/// so the flow-physics panels hide for authored trades).
+class _ActiveTradeConfig {
+  _ActiveTradeConfig._({
+    required this.tradeId,
+    required this.systems,
+    required this.mustHaveAccessories,
+    required this.tradeResolution,
+    required Map<String, ProductConnectorSpec> specBySku,
+    required Map<String, String?> systemIdByTypeId,
+    required Map<String, SystemDef> systemById,
+    this.physics,
+  })  : _specBySku = specBySku,
+        _systemIdByTypeId = systemIdByTypeId,
+        _systemById = systemById;
+
+  factory _ActiveTradeConfig.fromDoc(String tradeId, TradesDoc doc) {
+    final systems = [
+      for (final s in doc.systems)
+        if (s.tradeId == tradeId) s,
+    ];
+    final connectorTypes = [
+      for (final t in doc.connectorTypes)
+        if (t.tradeId == tradeId) t,
+    ];
+    final specBySku = {
+      for (final s in doc.productSpecs)
+        if (s.tradeId == tradeId) s.productSku: s,
+    };
+    return _ActiveTradeConfig._(
+      tradeId: tradeId,
+      systems: systems,
+      mustHaveAccessories: [
+        for (final a in doc.accessories)
+          if (a.tradeId == tradeId && a.mustHave) a,
+      ],
+      tradeResolution: TradeResolution(
+        tradeId: tradeId,
+        resolver: ConnectionResolver(
+          rules: [
+            for (final r in doc.compatRules)
+              if (r.tradeId == tradeId) r,
+          ],
+          connectorTypes: connectorTypes,
+          systems: systems,
+          completionRules: [
+            for (final r in doc.completionRules)
+              if (r.tradeId == tradeId) r,
+          ],
+        ),
+        specOf: (sku) => specBySku[sku],
+      ),
+      specBySku: specBySku,
+      systemIdByTypeId: {
+        for (final t in connectorTypes) t.id: t.systemId,
+      },
+      systemById: {
+        for (final s in systems) s.id: s,
+      },
+      // physics stays null in v1 (no authoring UI for flow-physics yet) —
+      // the slope seam hides the ת"י-1205 panel for authored trades.
+    );
+  }
+
+  final String tradeId;
+  final List<SystemDef> systems;
+  final List<AccessoryRule> mustHaveAccessories;
+  final TradeResolution tradeResolution;
+  final TradePhysicsConfig? physics;
+  final Map<String, ProductConnectorSpec> _specBySku;
+  final Map<String, String?> _systemIdByTypeId;
+  final Map<String, SystemDef> _systemById;
+
+  /// The spec envelope's `maxTempC` for [sku], or null (no spec / no key —
+  /// the product is temp-suitable, matching the legacy null→suitable rule).
+  /// (Per-sku spec access goes through [tradeResolution]'s own `specOf`.)
+  num? maxTempCOf(String sku) => _specBySku[sku]?.envelope['maxTempC'];
+
+  /// [SystemDef.color] of the single authored system the sku's spec ends
+  /// belong to; the legacy multi-system convention ([_fixture], the bridge)
+  /// when they span more than one; null when the sku has no spec or no
+  /// system-carrying end — the caller falls through to the legacy consts.
+  Color? systemColorOf(String sku) {
+    final spec = _specBySku[sku];
+    if (spec == null) return null;
+    String? seen;
+    for (final end in spec.ends) {
+      final sysId = _systemIdByTypeId[end.connectorTypeId];
+      if (sysId == null) continue;
+      if (seen == null) {
+        seen = sysId;
+      } else if (seen != sysId) {
+        return _fixture;
+      }
+    }
+    if (seen == null) return null;
+    final def = _systemById[seen];
+    return def == null ? null : Color(def.color);
+  }
+}
+
+/// s49b — THE guard (R1-2): null whenever the RESOLVED active trade is
+/// 'plumbing' (today: always — count==1), returned BEFORE any authored slice
+/// is read, so every seam short-circuits to its legacy branch verbatim.
+/// `ref.read` (not watch) on purpose — this screen's existing in-build
+/// provider-read idiom; nothing live switches the active trade mid-frame yet
+/// (the s43 switcher renders only when >1 published trades exist).
+_ActiveTradeConfig? _authoredConfigOf(WidgetRef ref) {
+  final tradeId = ref.read(resolvedActiveTradeIdProvider);
+  if (tradeId == 'plumbing') return null;
+  return _ActiveTradeConfig.fromDoc(tradeId, ref.read(tradesStoreProvider));
+}
+
+Color _systemColor(LipskeyCatalogProduct p, [_ActiveTradeConfig? cfg]) {
+  // s49b seam: authored trade reads config (SystemDef.color via the product's
+  // spec ends); plumbing = legacy verbatim (R1-2 — cfg is null there, and
+  // every call-site that passes no cfg stays byte-identical).
+  if (cfg != null && cfg.systems.isNotEmpty) {
+    final authored = cfg.systemColorOf(p.sku);
+    if (authored != null) return authored;
+  }
   final s = productSystems(p);
   if (s.length > 1) return _fixture;
   return s.contains(WaterSystem.drainage) ? _drain : _supply;
@@ -634,20 +776,35 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   // ── the flow canvas — nodes wired by animated pipes ─────────────────────────
   Widget _canvas(List<LipskeyCatalogProduct> chain, int temp) {
     if (chain.isEmpty) return _emptyState(temp);
+    // s49b seam: authored trade reads config; plumbing = legacy verbatim (R1-2).
+    final s49bCfg = _authoredConfigOf(ref);
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       itemCount: chain.length,
       itemBuilder: (_, i) {
         final p = chain[i];
         final last = i == chain.length - 1;
-        final connectsToNext =
-            last ? true : canConnect(p, chain[i + 1]);
+        // s49b seam: authored trade resolves the joint via the s41
+        // connectionMethodLabel(trade:) delegation (non-empty label = mates);
+        // plumbing = legacy verbatim (R1-2) — its call stays positional-only.
+        final bool connectsToNext;
+        if (s49bCfg != null) {
+          connectsToNext = last ||
+              connectionMethodLabel(p, chain[i + 1],
+                      trade: s49bCfg.tradeResolution)
+                  .isNotEmpty;
+        } else {
+          connectsToNext =
+              last ? true : canConnect(p, chain[i + 1]);
+        }
         return _NodeRow(
           product: p,
           index: i,
           isLast: last,
           flow: _flow.value,
-          nextColor: last ? null : _systemColor(chain[i + 1]),
+          systemColorOverride:
+              s49bCfg == null ? null : _systemColor(p, s49bCfg),
+          nextColor: last ? null : _systemColor(chain[i + 1], s49bCfg),
           connectsToNext: connectsToNext,
           onRemove: () {
             final c = [...chain]..removeAt(i);
@@ -1506,6 +1663,7 @@ class _NodeRow extends StatelessWidget {
     required this.nextColor,
     required this.connectsToNext,
     required this.onRemove,
+    this.systemColorOverride,
   });
   final LipskeyCatalogProduct product;
   final int index;
@@ -1515,9 +1673,13 @@ class _NodeRow extends StatelessWidget {
   final bool connectsToNext; // false → broken joint (red)
   final VoidCallback onRemove;
 
+  /// s49b seam: the authored trade's SystemDef color for THIS node; null
+  /// (always, under plumbing — R1-2) keeps the legacy inference verbatim.
+  final Color? systemColorOverride;
+
   @override
   Widget build(BuildContext context) {
-    final c = _systemColor(product);
+    final c = systemColorOverride ?? _systemColor(product);
     return Column(children: [
       Container(
         padding: const EdgeInsets.all(14),
@@ -1923,10 +2085,21 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final isSupply = lineIsSupply(plan.items);
     final ok = plan.isComplete;
     final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
-    final checklist = lineComplianceChecklist(
-        plan.items,
-        ref.read(lineMaxTempProvider),
-        ref.read(lineAccessoriesProvider));
+    // s49b seam: authored trade reads config — its checklist IS its authored
+    // CompletionRule violations via the s41 trade: delegation; plumbing =
+    // legacy verbatim (R1-2) — the else call stays positional-only.
+    final s49bCfg = _authoredConfigOf(ref);
+    final checklist = s49bCfg != null
+        ? lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider),
+            trade: s49bCfg.tradeResolution,
+          )
+        : lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider));
     final checkPassed = checklist.where((c) => c.satisfied).length;
     final checkCritical = checklist.where((c) => !c.satisfied && c.severity == CheckSeverity.critical).length;
     return Directionality(
@@ -2279,6 +2452,18 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 // can still sit on a hot line. Flag it so they swap to a
                 // heat-resistant material instead of shipping a line that melts.
                 Builder(builder: (_) {
+                  // s49b seam: authored trade reads the spec envelope's
+                  // maxTempC; plumbing = legacy verbatim below (R1-2).
+                  final s49bTempCfg = s49bCfg;
+                  if (s49bTempCfg != null) {
+                    final temp = ref.read(lineMaxTempProvider);
+                    final unfit = plan.items.where((p) {
+                      final maxT = s49bTempCfg.maxTempCOf(p.sku);
+                      return maxT != null && temp > maxT;
+                    }).toList();
+                    if (unfit.isEmpty) return const SizedBox.shrink();
+                    return _authoredTempUnfitBanner(temp, unfit, s49bTempCfg);
+                  }
                   final temp = ref.read(lineMaxTempProvider);
                   final unfit = plan.items
                       .where((p) => !productSuitableForTemp(p, temp))
@@ -2407,6 +2592,14 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 //    pressure, they need a ≥2% fall so waste doesn't pool. ─────
                 if (!isSupply)
                   Builder(builder: (_) {
+                    // s49b seam: an authored trade with no flow-physics
+                    // (physics?.minSlopePercent == null — always in v1) hides
+                    // the ת"י-1205 panel; plumbing = legacy verbatim (R1-2 —
+                    // its hand-written 2% constants below are permanent).
+                    if (s49bCfg != null &&
+                        s49bCfg.physics?.minSlopePercent == null) {
+                      return const SizedBox.shrink();
+                    }
                     final res = checkDrainageSlope(
                       horizontalRunMeters: _drainRun,
                       verticalDropMeters: _drainDrop,
@@ -2523,6 +2716,12 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   }),
                 // ── Installation kit (tools & sealants for this chain) ──
                 Builder(builder: (_) {
+                  // s49b seam: authored trade derives its kit from its
+                  // mustHave AccessoryRules; plumbing = legacy verbatim (R1-2).
+                  final s49bKitCfg = s49bCfg;
+                  if (s49bKitCfg != null) {
+                    return _authoredKitSection(s49bKitCfg);
+                  }
                   final kit = recommendedKitFor(plan.items);
                   if (kit.isEmpty) return const SizedBox.shrink();
                   return Container(
@@ -2789,6 +2988,113 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     );
   }
 
+  // ── s49b authored-trade sections — NEW code, reached ONLY when the resolved
+  //    active trade is authored (never under plumbing — R1-2). No legacy line
+  //    above was moved into these; the legacy blocks stay verbatim in build. ──
+
+  /// s49b seam (d): the authored heat-rating guard — products whose
+  /// [ProductConnectorSpec] envelope carries a `maxTempC` below the line temp
+  /// (the plumbing-material advice line is deliberately absent — PEX/copper
+  /// guidance is plumbing-specific).
+  Widget _authoredTempUnfitBanner(
+      int temp, List<LipskeyCatalogProduct> unfit, _ActiveTradeConfig cfg) {
+    const warn = Color(0xFFEF4444);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDECEC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: warn.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.local_fire_department, color: warn, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'קו חם ($temp°C): ${unfit.length} מוצרים אינם עומדים בחום',
+                style: const TextStyle(
+                    color: warn, fontSize: 13, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          for (final p in unfit.take(6))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Text(
+                '• ${p.nameHe} — עד ${cfg.maxTempCOf(p.sku)?.toStringAsFixed(0) ?? "?"}°C',
+                style: const TextStyle(color: Color(0xFFC62828), fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// s49b seam (g): the authored kit — the trade's mustHave [AccessoryRule]s
+  /// (emoji · name · why). No rules → nothing renders (matches the legacy
+  /// empty-kit behavior).
+  Widget _authoredKitSection(_ActiveTradeConfig cfg) {
+    final rules = cfg.mustHaveAccessories;
+    if (rules.isEmpty) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _mute.withOpacity(0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            const Icon(Icons.build_circle_outlined, color: _supply, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'אביזרי חובה לקו: ${rules.length} פריטים',
+              style: const TextStyle(
+                  color: _supply, fontSize: 13, fontWeight: FontWeight.w800),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          for (final r in rules)
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(r.emoji, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(r.nameHe,
+                            style: const TextStyle(
+                                color: _ink,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600)),
+                        Text(r.whyHe,
+                            style: const TextStyle(
+                                color: _mute, fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   // Adds every BOM line to the cart with its quantity (pipes by ceil(metres)).
   void _addToCart(BuildContext context, WidgetRef ref) {
     final cart = ref.read(smartCartProvider.notifier);
@@ -2888,10 +3194,20 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     }
 
     // ── Compliance summary ────────────────────────────────────────────────
-    final checks = lineComplianceChecklist(
-        plan.items,
-        ref.read(lineMaxTempProvider),
-        ref.read(lineAccessoriesProvider));
+    // s49b seam: authored trade reads config (the s41 trade: delegation);
+    // plumbing = legacy verbatim (R1-2) — the else call stays positional-only.
+    final s49bCfg = _authoredConfigOf(ref);
+    final checks = s49bCfg != null
+        ? lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider),
+            trade: s49bCfg.tradeResolution,
+          )
+        : lineComplianceChecklist(
+            plan.items,
+            ref.read(lineMaxTempProvider),
+            ref.read(lineAccessoriesProvider));
     final missing = checks
         .where((c) => !c.satisfied && c.severity == CheckSeverity.critical)
         .toList();
@@ -3025,8 +3341,12 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           icon = Icons.info_outline;
       }
     }
-    final displayLabel = _simpleLabel(ch.label);
-    final displayWhy = _simpleWhy(ch.why);
+    // s49b seam: an authored check's text is its CompletionRule.whyHe VERBATIM
+    // — the plumbing jargon-mappers must not rewrite it; plumbing = legacy
+    // verbatim (R1-2).
+    final s49bAuthored = _authoredConfigOf(ref) != null;
+    final displayLabel = s49bAuthored ? ch.label : _simpleLabel(ch.label);
+    final displayWhy = s49bAuthored ? ch.why : _simpleWhy(ch.why);
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -3065,7 +3385,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   }
 
   Widget _bomRow(LipskeyCatalogProduct p, int n, bool anchor, int qty) {
-    final c = _systemColor(p);
+    // s49b seam: authored trade reads config; plumbing = legacy verbatim (R1-2).
+    final c = _systemColor(p, _authoredConfigOf(ref));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
       child: Row(children: [
@@ -3172,6 +3493,27 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
   late _PickerCategory? _cat = widget.initialCat;
 
   List<LipskeyCatalogProduct> _filtered() {
+    // s49b seam: an authored trade's picker serves ITS products — the same
+    // repo read + s35 adapter + sku-sort the s50 catalog path uses (single
+    // source, zero drift); temp-suitability comes from the spec envelope's
+    // maxTempC (null → suitable, the legacy rule); the plumbing category
+    // filter (_cat) is skipped — _kCats is plumbing-shaped and the grid is
+    // bypassed for authored trades. Plumbing = legacy verbatim (R1-2).
+    final s49bCfg = _authoredConfigOf(ref);
+    if (s49bCfg != null) {
+      final q = _q.trim();
+      return ref
+          .read(catalogRepositoryProvider)
+          .allProducts(tradeId: s49bCfg.tradeId)
+          .where((p) {
+        final maxT = s49bCfg.maxTempCOf(p.sku);
+        if (maxT != null && widget.lineTemp > maxT) return false;
+        if (q.isEmpty) return true;
+        return p.nameHe.contains(q) ||
+            p.categoryHe.contains(q) ||
+            p.sku.contains(q);
+      }).take(120).toList();
+    }
     final q = _q.trim();
     return kCompatCatalog.where((p) {
       if (!productSuitableForTemp(p, widget.lineTemp)) return false;
@@ -3185,7 +3527,11 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final showGrid = _q.trim().isEmpty && _cat == null;
+    // s49b seam: an authored trade skips the plumbing category grid (_kCats
+    // is plumbing-shaped) and goes straight to its product list; plumbing =
+    // legacy verbatim (R1-2 — the legacy expression is the && tail).
+    final s49bAuthored = _authoredConfigOf(ref) != null;
+    final showGrid = !s49bAuthored && _q.trim().isEmpty && _cat == null;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -3367,13 +3713,15 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
             style: TextStyle(color: _mute, fontSize: 14)),
       );
     }
+    // s49b seam: authored trade reads config; plumbing = legacy verbatim (R1-2).
+    final s49bCfg = _authoredConfigOf(ref);
     final chain = ref.watch(chainProvider);
     return ListView.builder(
       controller: ctrl,
       itemCount: items.length,
       itemBuilder: (_, i) {
         final p = items[i];
-        final c = _systemColor(p);
+        final c = _systemColor(p, s49bCfg);
         final inChain = chain.any((cp) => cp.sku == p.sku);
         return InkWell(
           onTap: () {

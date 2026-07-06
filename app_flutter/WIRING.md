@@ -3160,3 +3160,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **NEW `test/brand_profile_parity_test.dart`** — 6 בדיקות, **מוצמד מהקוד החי** (אפס-מעגליות): G1-G5 דרך פונקציות-חיות ציבוריות על מוצרים אמיתיים + literals-בייט; fall-through על AQUATEC (מותג-אמיתי בלי-arm). לא-ניתן-להרמה (מוצהר): גופי-פאנלים ווידג׳טיים; OR-חומר ב-install_kit:48 נשאר באתר.
 - **נמצאו 2 סולמות מחוץ-לתוכנית** (complianceTriggersFor :624-668 · products-screen chips :1322-1340) — לצעד-המחיקה העתידי.
 - **gate:** analyze 0 · parity 6/6 בריצה-ראשונה. הבא: **s49b** — 8 התפרים המגודרים במסך-ההתקנות.
+
+### #pillar2-s49b — 7 תפרים מגודרים במסך-ההתקנות + TradePhysicsConfig — **🏁 קשת 31-50 סגורה** — 2026-07-06
+**החצי הכבד של s49 (מסך 3,485 שורות): insert-only, 366+/18− (כל מחיקה=בליעה-משמרת-טוקנים):**
+- **guard יחיד** `_authoredConfigOf(ref)` — **null כש-resolved=='plumbing' (R1-2) לפני כל מגע ב-slices**; אחרת `_ActiveTradeConfig` (systems/specs/mustHave-rules + **TradeResolution של s41 — אפס תפר-מקביל**; physics=null v1).
+- **7 התפרים** (אתרים אמיתיים, נדדו מהתוכנית): (a) `_systemColor`+3 call-sites → SystemDef.color · (b) picker → `allProducts(tradeId:)` (נתיב-s50, מוצרים-לא-fixtures — סטייה-מנומקת) · (c) checklist ×2 + `_checkRow` verbatim-whyHe → התפר-s41 · (d) חום → envelope-banner · (e) canConnect → `connectionMethodLabel(trade:)` · (f) שיפוע → מוסתר כש-physics-null; **ת"י-1205 של אינסטלציה לא-נגוע** · (g) kit → mustHave-AccessoryRules. NEW `lib/domain/trade_physics_config.dart` (אינסטלציה לעולם לא קוראת — קבועיה קבועים).
+- **הושארו-legacy במוצהר:** kit/pressure-text ב-copyBom · free-text match · scenario-tiles · צנרת-assemble (פיזיקת-מנוע, צעדים עתידיים).
+- **NEW `test/install_studio_flag_off_test.dart` (G-flag-off) 5/5** — resolution-default · עוגני-shell · **פאנל-שיפוע נוכח לאינסטלציה** · תווית-חיבור positional-בלבד · צבעי-מערכת דרך ווידג׳טים מרונדרים. תיקוני-יישוב: משטח 440×950 + פילטר-onError ל-overflow-ישן בשורת-שרשרת :1139 (חוב-layout קיים-מראש בקוד לא-נגוע; ורק overflow — כל שגיאה אחרת מפילה).
+- **gate:** analyze 0 · flag-off 5/5 · parity 6/6 · delegation+safety ירוקים. **🏁 הקשת 31-50 הושלמה: schema→store→adapter→seed→keystone→resolver→parity→תפר-מנוע→תפר-repo→activeTrade→7 מסכי-authoring→import→acceptance→brand-parity→תפרי-studio.**

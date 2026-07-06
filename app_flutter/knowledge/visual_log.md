@@ -4,6 +4,12 @@
 
 ---
 
+## s49b — 🔌 7 תפרים מגודרים במסך-ההתקנות (בונה-הענפים) — 2026-07-06
+
+**שינוי-UI:** `install_studio_screen.dart` — 7 תפרי-config מגודרים ב-guard יחיד (`resolvedActiveTradeIdProvider=='plumbing'` → **null-config → כל נתיב-legacy בייט-זהה, R1-2**): צבעי-מערכת · picker · checklist · חום · canConnect · שיפוע · kit. insert-only 366+/18− (מחיקות=בליעות-משמרות-טוקנים). NEW `trade_physics_config.dart` (אינסטלציה לעולם לא קוראת).
+
+**אימות-ויזואלי:** `install_studio_flag_off_test` (G-flag-off) **5/5** — ברזולוציית-ברירת-המחדל (אינסטלציה): עוגני-shell ('תכנון חיבור' · 'מה אתה רוצה לחבר?' · CTA-ים) · **פאנל-השיפוע ת"י-1205 נוכח** ('מינ׳ 2% · ת"י 1205' + 'שיפוע ניקוז: 2.0%') · תוויות-חיבור positional-בלבד · צבעי-המערכת הקבועים (0xFF0284C7/0xFFD97706/0xFF7C3AED) דרך ווידג׳טים מרונדרים. הערה: פילטר-onError ל-RenderFlex-overflow קיים-מראש בשורת-השרשרת :1139 (חוב-layout ישן בקוד לא-נגוע; רק overflow מסונן).
+
 ## s50 — 🏆 G-newtrade + הרחבת-r3 בשער-הפרסום — 2026-07-06
 
 **שינוי-UI יחיד:** `trade_publish_sheet.dart` — r3 ('אין כלל-חיבור יתום') בודק עכשיו **גם** CompletionRules עם type-fields לא-ריקים (כלל-רפאים → ✗ → 'פרסם' חסום). אותה שורה, אותו label — רק היקף-הבדיקה גדל. שאר השינויים data-layer (repo read-path) — אפס-UI.
