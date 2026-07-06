@@ -24,6 +24,7 @@ import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_qty.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart';
+import 'package:buildsmart/logic/install_engine.dart' show compatibleWith;
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
@@ -102,6 +103,11 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   int? _qty;
   bool _added = false;
 
+  /// The anchor for `compat` mode (its real connectable partners fill the
+  /// wheel), and the live partner list indexed by the wheel's focus on tap.
+  LipskeyCatalogProduct? _origin;
+  List<LipskeyCatalogProduct> _compatLeaves = const <LipskeyCatalogProduct>[];
+
   /// The live 0–99 quantity from the dual-ring, shown on the confirm bar. Kept
   /// off `setState` so a qty drag rebuilds only the ring + the confirm label,
   /// not the whole card.
@@ -169,10 +175,36 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       _mode = 'root';
       _path.clear();
       _axisField = null;
+      _origin = null;
       _product = null;
       _qty = null;
       _added = false;
     });
+  }
+
+  /// Enter `compat` mode — the real "what connects to this product" list, from
+  /// the verified-connections engine, fills the wheel.
+  void _enterCompat(LipskeyCatalogProduct p) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _mode = 'compat';
+      _origin = p;
+      _path.clear();
+      _axisField = null;
+      _product = null;
+      _qty = null;
+      _added = false;
+    });
+  }
+
+  /// A short rim label for a product (type + size), falling back to its name.
+  String _short(LipskeyCatalogProduct p) {
+    final axes = RdProduct(p).axes;
+    final parts = <String>[
+      if (axes['type']?.isNotEmpty ?? false) axes['type']!.first,
+      if (axes['size']?.isNotEmpty ?? false) axes['size']!.first,
+    ];
+    return parts.isEmpty ? p.nameHe : parts.join(' ');
   }
 
   void _confirmQty(int v) {
@@ -231,10 +263,32 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         if (i >= 0 && i < _styles.length) _enterStyle(_styles[i].key);
       };
     } else if (_mode == 'job') {
-      // ── job (RD-E): honest placeholder — the kit flow is not wired yet ──
+      // ── job (RD-E2): honest placeholder — the kit flow is not wired yet ──
       hubHint = 'מצב "לפי עבודה" בקרוב';
       count = rdPool.length;
       statusLine = 'מצב "לפי עבודה" בקרוב — בחר סגנון אחר';
+    } else if (_mode == 'compat') {
+      // ── compat: the REAL "what connects" list (verified-connections) ──
+      final partners = _origin == null
+          ? const <LipskeyCatalogProduct>[]
+          : compatibleWith(_origin!);
+      _compatLeaves = partners;
+      count = partners.length;
+      readout = 'תואמים';
+      statusLine = partners.isEmpty
+          ? 'אין מוצרים תואמים'
+          : 'מה מתחבר ל${_origin!.nameHe}';
+      hubHint = 'הקש להוספה';
+      for (final p in partners.take(12)) {
+        labels.add(_short(p));
+        sublabels.add('תואם');
+      }
+      onSelect = (i) {
+        if (i >= 0 && i < _compatLeaves.length && i < 12) {
+          _pickProduct(_compatLeaves[i]);
+        }
+      };
+      footer = partners.take(10).toList(growable: false);
     } else {
       // ── find: one clean axis at a time, then product leaves ──
       final cons = _cons;
@@ -776,16 +830,18 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   Widget _cartBar() {
+    final p = _product;
+    final canCompat = p != null && compatibleWith(p).isNotEmpty;
     return Padding(
       padding: const EdgeInsets.only(top: 14, bottom: 18),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            '✓ נוסף לסל',
+            '✓ נוסף לסל · מה עכשיו?',
             style: TextStyle(
               fontFamily: 'Heebo',
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w900,
               color: Color(0xFF3E8E5A),
             ),
@@ -799,9 +855,20 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               color: _kMonoTag,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+          if (canCompat) ...[
+            SizedBox(
+              width: 240,
+              child: _pillButton(
+                '🔗 מה מתחבר לזה',
+                const Color(0xFFB54708),
+                () => _enterCompat(p),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           SizedBox(
-            width: 200,
+            width: 240,
             child: _pillButton('חיפוש חדש', _kInk, _reset),
           ),
         ],

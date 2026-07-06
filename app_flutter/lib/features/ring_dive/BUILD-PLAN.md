@@ -95,7 +95,19 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   test 2/2 · flag OFF byte-identical · a headless runAsync render (root → dive →
   product → qty) confirms the two concentric number rings + focus halos + the
   central "+" + the live-value hub + the confirm bar all match the prototype.
-- RD-E next — the real compat ("what connects", kVerifiedSpecs) + job (kit
-  recipes, kSmartProducts) modes; then RD-F (done follow-ups + cart sheet), RD-G
-  (motion polish + bundle JetBrains Mono + a browser-render fidelity pass). Show
-  the owner LIVE only once the FULL screen matches (not piecemeal).
+- RD-E1 done — compat ("what connects to this product") wired to the REAL
+  verified-connections engine: `compatibleWith(product)` from logic/install_
+  engine.dart (memoised, canConnect + temp-suitability over kVerifiedSpecs). The
+  done phase now offers "🔗 מה מתחבר לזה" when the added product has real
+  partners; it opens a `compat` mode whose wheel is the partner list (short
+  type+size labels), tap adds a partner. Verified: analyze 0 · test 3/3 (a new
+  test drives root→product→confirm→"what connects"→asserts compat) · flag OFF
+  byte-identical · a headless render confirms the compat count block + partner
+  wheel + rail. Known-deferred: the wheel caps at 12 partners (count block shows
+  the true total; pagination is RD-F) and the rail header still reads "מועמדים".
+- RD-E2 next — the job/kit mode via the REAL smart_tree recipes (kSmartProducts:
+  SmartProduct.acc slots, smartProductForSku); entered from the root "לפי עבודה"
+  style and the done "השלם ערכה" follow-up. Then RD-F (done follow-ups + cart
+  sheet + wheel pagination), RD-G (motion polish + bundle JetBrains Mono + a
+  browser-render fidelity pass). Show the owner LIVE only once the FULL screen
+  matches (not piecemeal).

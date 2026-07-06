@@ -2,6 +2,7 @@
 // shows the 9 search styles, entering a style shows real clean axis options, and
 // diving narrows to the next axis. No golden / no toImage (off the flaky path).
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_qty.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart';
 import 'package:flutter/material.dart';
@@ -54,5 +55,39 @@ void main() {
       isNot(equals(depts)),
       reason: 'a dive should advance to the next clean axis',
     );
+  });
+
+  testWidgets('compat: a product with real partners → what-connects mode',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // dive by the focused option until a product lands in the qty phase.
+    for (var i = 0; i < 14; i++) {
+      if (find.byType(RingDiveQty).evaluate().isNotEmpty) break;
+      wheel().onSelect!(0);
+      await tester.pumpAndSettle();
+    }
+    expect(find.byType(RingDiveQty), findsOneWidget);
+
+    // confirm the quantity → the done phase.
+    await tester.tap(find.textContaining('הוסף לסל'));
+    await tester.pumpAndSettle();
+
+    // the added product connects to real partners (verified-connections
+    // engine) → the "what connects" follow-up opens compat mode.
+    await tester.tap(find.textContaining('מה מתחבר'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('תואמים'), findsWidgets);
   });
 }
