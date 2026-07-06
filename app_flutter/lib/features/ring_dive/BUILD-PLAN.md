@@ -94,5 +94,8 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
   numbers (1..100) and the hub shows the product; picking a qty sets _qty + a
   "x N" crumb (tap to clear); reset/back clear _qty. analyze 0, tests green.
   P5 (hub + breadcrumb + qty) complete.
-- P6 next — results footer (product cards from the pool / hop_graph) + product
-  sheet (specs + add-to-order) + the cart/added state on the hub.
+- P6a done (this commit) — results footer (a live row of product cards from the
+  current pool, tap → sheet) + product sheet (colour dot + brand + name + spec
+  chips from colour/category/dims + "הוסף להזמנה" which dives to it). No price
+  (the catalog has none). analyze 0, tests green.
+- P6b next — the cart/added state on resolve (add-to-cart button + confirmation).
