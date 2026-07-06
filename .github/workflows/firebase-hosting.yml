@@ -45,7 +45,7 @@ jobs:
         # dive engine), swarm-audited (8 lens fixes) + full GATE-PASS + merged.
         # OWNER cut-over: deploy all fixes to buildsmart-il.com (1/7). Reversible:
         # remove the flag to fall back to byte-identical (the overlay tree-shakes).
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true
 
       - name: Deploy to Firebase Hosting (live channel)
         # Redundant with web-deploy.yml (firebase-tools CLI), which already deploys

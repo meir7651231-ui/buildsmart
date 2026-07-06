@@ -26,6 +26,8 @@ import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_home.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
@@ -1385,7 +1387,20 @@ class _CatalogBody extends ConsumerWidget {
     // the two-mode word-finder host. Unreachable when kWordFinderFlag is off
     // (the pill that sets this active section never renders), so this branch is
     // inert by default. WordFinderHome also self-gates on the same flag.
-    if (active == 'מאתר חכם') return const WordFinderHome();
+    // kRingDive demo: when the RingDive flag is on (the demo deploy adds
+    // --dart-define=ENABLE_RING_DIVE=true), the smart-finder pill opens the
+    // rotary RingDive surface instead; a normal build (flag off) is
+    // byte-identical (this section is only reachable via the kWordFinder pill
+    // and falls back to WordFinderHome). RingDiveScreen self-gates too.
+    if (active == 'מאתר חכם') {
+      if (ref.watch(featureFlagsProvider).contains(kRingDiveFlag)) {
+        return const Directionality(
+          textDirection: TextDirection.rtl,
+          child: SafeArea(child: RingDiveScreen()),
+        );
+      }
+      return const WordFinderHome();
+    }
     // OWNER-REVIEW · kCardKeyboard seam (#38 A/B) — routes the flag-gated
     // 'מקלדת חכמה' pill to the unified card-keyboard. Unreachable when the flag is
     // off (the pill that sets this active never renders); CardKeyboardScreen also
