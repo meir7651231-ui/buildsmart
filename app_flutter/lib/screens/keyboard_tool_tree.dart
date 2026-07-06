@@ -32,7 +32,7 @@ import 'package:buildsmart/screens/catalog_screen.dart'
         openManageLists;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
-    show ChatsArchiveScreen, ChatsScreen;
+    show ChatsArchiveScreen, ChatsScreen, allChatsMuted, toggleMuteAllChats;
 import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
     show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
@@ -51,6 +51,7 @@ import 'package:buildsmart/screens/courier_settings_screen.dart'
     show CourierSettingsScreen;
 import 'package:buildsmart/screens/defects_sheet.dart' show showDefectsSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
+import 'package:buildsmart/screens/home_shell.dart' show openNewChatSheet;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show kbDestinationByLabel;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
@@ -66,7 +67,7 @@ import 'package:buildsmart/screens/manager_screens_sheet.dart'
 import 'package:buildsmart/screens/notif_settings_screen.dart'
     show NotifSettingsScreen;
 import 'package:buildsmart/screens/notifications_screen.dart'
-    show NotifSection, markAllNotifsRead, notifSectionProvider;
+    show NotifSection, dismissAllNotifs, markAllNotifsRead, notifSectionProvider;
 import 'package:buildsmart/screens/order_notif_sheet.dart'
     show showOrderNotifSheet;
 import 'package:buildsmart/screens/rewards_hub_screen.dart'
@@ -108,8 +109,11 @@ import 'package:buildsmart/state/feature_flags.dart'
 import 'package:buildsmart/state/hidden_catalog_sections.dart'
     show hiddenCatalogSectionsProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
+import 'package:buildsmart/theme/tokens.dart' show BsTokens;
+import 'package:buildsmart/widgets/confirm_dialog.dart' show confirmDestructive;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTile, KbTool;
+import 'package:buildsmart/widgets/toast.dart' show showToast;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -670,6 +674,70 @@ KbToolNode _listSectionChip(String label) => KbToolNode.leaf(
       },
     );
 
+/// The 4 generic keyboard tools (קולי / חיפוש / מצלמה / היכרות) kept accessible
+/// from the ⚙ menu on EVERY screen — the owner's "they all stay" — each wired to
+/// its REAL opener: voice via the floating keyboard's `isVoiceInput` intercept
+/// (the real mic→field path), the rest via [runKeyboardTool] (search → the
+/// finder section, camera → the barcode scanner, intro → help mode). Appended
+/// after each screen's own overflow items in [kbScreenMenuNodes].
+List<KbToolNode> _kbGenericTools() => <KbToolNode>[
+      KbToolNode.leaf(
+        icon: Icons.mic,
+        label: 'קולי',
+        isVoiceInput: true,
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.voice),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.search,
+        label: 'חיפוש',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.search),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.camera_alt,
+        label: 'מצלמה',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.camera),
+      ),
+      KbToolNode.leaf(
+        icon: Icons.lightbulb_outline,
+        label: 'היכרות',
+        action: (ref, context) => runKeyboardTool(ref, context, KbTool.intro),
+      ),
+    ];
+
+/// The notifications ⋮ "נקה הכל" flow, wired to the SAME confirm-gated clear the
+/// mirror-target (`_NotificationsMenuButton`) runs: a destructive confirm, then
+/// [dismissAllNotifs] + a toast — never a confirmless wipe. Reached only from the
+/// KB_BUTTONS_V2 ⚙ menu ([kbScreenMenuNodes]), so it tree-shakes out off-flag.
+Future<void> _clearAllNotifsFlow(BuildContext context, WidgetRef ref) async {
+  final ok = await confirmDestructive(
+    context,
+    title: 'ניקוי כל ההתראות?',
+    message: 'כל ההתראות יימחקו לצמיתות.',
+    confirmLabel: 'נקה הכל',
+  );
+  if (!ok || !context.mounted) return;
+  dismissAllNotifs(ref);
+  showToast(context, 'כל ההתראות נמחקו');
+}
+
+/// The chats ⋮ "השתק הכל" flow, mirroring `_ChatsMenuButton`: confirm before
+/// muting (un-muting needs none), then [toggleMuteAllChats] + a toast.
+Future<void> _muteAllChatsFlow(BuildContext context, WidgetRef ref) async {
+  final wasAllMuted = allChatsMuted(ref);
+  if (!wasAllMuted) {
+    final ok = await confirmDestructive(
+      context,
+      title: 'השתקת כל השיחות?',
+      message: 'כל השיחות יושתקו עד לביטול ההשתקה.',
+      confirmLabel: 'השתק',
+      confirmColor: BsTokens.brand,
+    );
+    if (!ok || !context.mounted) return;
+  }
+  toggleMuteAllChats(ref);
+  showToast(context, wasAllMuted ? 'ההשתקה בוטלה' : 'כל השיחות הושתקו');
+}
+
 /// Owner button-spec v2 (#4): the CURRENT screen's ⋮ overflow menu as keyboard
 /// tools — what the floating ⚙ opens. Mirrors HomeShell's per-tab AppBar overflow
 /// popups (`_CatalogMenuButton` / `_NotificationsMenuButton` / `_ChatsMenuButton`
@@ -688,7 +756,7 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
           KbToolNode.leaf(
             icon: Icons.add_comment_outlined,
             label: 'שיחה חדשה',
-            action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+            action: (ref, context) => openNewChatSheet(context),
           ),
           KbToolNode.leaf(
             icon: Icons.archive_outlined,
@@ -699,8 +767,9 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
           KbToolNode.leaf(
             icon: Icons.notifications_off_outlined,
             label: 'השתק הכל',
-            action: (ref, context) => _toolSoon(context, 'השתק הכל'),
+            action: (ref, context) => _muteAllChatsFlow(context, ref),
           ),
+          ..._kbGenericTools(),
         ];
       }
       // התראות (notifications) overflow — mirrors _NotificationsMenuButton.
@@ -713,7 +782,7 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
         KbToolNode.leaf(
           icon: Icons.clear_all,
           label: 'נקה הכל',
-          action: (ref, context) => _toolSoon(context, 'נקה הכל'),
+          action: (ref, context) => _clearAllNotifsFlow(context, ref),
         ),
         KbToolNode.leaf(
           icon: Icons.settings,
@@ -721,6 +790,7 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
           action: (ref, context) =>
               Navigator.of(context).push(NotifSettingsScreen.route()),
         ),
+        ..._kbGenericTools(),
       ];
     case 3:
       // חנות (store) overflow — mirrors _StoreMenuButton (שירותים is gated by
@@ -745,6 +815,7 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
           action: (ref, context) =>
               Navigator.of(context).push(StoreSettingsScreen.route()),
         ),
+        ..._kbGenericTools(),
       ];
     default:
       // בית + מחלקות (catalog/departments) overflow — mirrors _CatalogMenuButton.
@@ -761,6 +832,7 @@ List<KbToolNode> kbScreenMenuNodes(int tab, WidgetRef ref) {
           action: (ref, context) =>
               Navigator.of(context).push(CatalogSettingsScreen.route()),
         ),
+        ..._kbGenericTools(),
       ];
   }
 }
