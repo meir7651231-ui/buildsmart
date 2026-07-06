@@ -90,4 +90,9 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
 - P5a done (this commit) — center hub (title + focused option + hint, tap-through
   IgnorePointer) + breadcrumb trail (tap a pill to go back to that level) + reset.
   analyze 0, tests green.
-- P5b next — quantity phase on CardResolve (qty numbers on the rim + a confirm).
+- P5b done (this commit) — quantity phase: on CardResolve the rim becomes qty
+  numbers (1..100) and the hub shows the product; picking a qty sets _qty + a
+  "x N" crumb (tap to clear); reset/back clear _qty. analyze 0, tests green.
+  P5 (hub + breadcrumb + qty) complete.
+- P6 next — results footer (product cards from the pool / hop_graph) + product
+  sheet (specs + add-to-order) + the cart/added state on the hub.

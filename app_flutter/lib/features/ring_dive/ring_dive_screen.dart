@@ -63,6 +63,15 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   /// No curated sub-type — RingDive opens generic (the engine picks the axes).
   static const String? _subtype = null;
 
+  /// The chosen quantity — null until the qty phase completes. Non-null → the
+  /// dive has landed and the wheel shows the qty confirmation (Phase 6 = cart).
+  int? _qty;
+
+  /// Quantity options on the qty dial (the prototype's `qtyOpts`).
+  static const List<int> _qtyOpts = <int>[
+    1, 2, 3, 4, 5, 6, 8, 10, 12, 20, 50, 100, //
+  ];
+
   /// The catalog narrowed by every answered step (mirrors `_ensureMemo`).
   List<LipskeyCatalogProduct> get _pool {
     var pool = kDivePool;
@@ -133,11 +142,21 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   void _backTo(int level) {
     setState(() {
       _stack.removeRange(level, _stack.length);
+      _qty = null;
     });
   }
 
   void _reset() {
-    setState(_stack.clear);
+    setState(() {
+      _stack.clear();
+      _qty = null;
+    });
+  }
+
+  void _clearQty() {
+    setState(() {
+      _qty = null;
+    });
   }
 
   @override
@@ -147,6 +166,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
     final labels = <String>[];
     final sublabels = <String>[];
+    var hubHint = 'סובב · הקש לבחור';
     void Function(int)? onSelect;
 
     switch (_verdict) {
@@ -169,9 +189,24 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           if (i >= 0 && i < products.length) _diveProduct(products[i]);
         };
       case CardResolve(product: final product):
-        // Landed on one product. Phase 5b turns this into the quantity phase.
-        labels.add(product.nameHe);
-        sublabels.add('המוצר');
+        if (_qty == null) {
+          // Quantity phase — the rim becomes qty numbers, the hub the product.
+          labels.addAll(_qtyOpts.map((q) => '$q'));
+          sublabels.addAll(_qtyOpts.map((_) => product.nameHe));
+          hubHint = 'הקש לבחור כמות';
+          onSelect = (i) {
+            if (i >= 0 && i < _qtyOpts.length) {
+              setState(() {
+                _qty = _qtyOpts[i];
+              });
+            }
+          };
+        } else {
+          // Chosen — a landed confirmation (Phase 6 = add-to-cart).
+          labels.add(product.nameHe);
+          sublabels.add('× $_qty נבחרו');
+          hubHint = 'נוסף';
+        }
     }
 
     return Directionality(
@@ -180,10 +215,11 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_stack.isNotEmpty) _buildBreadcrumb(),
+            if (_stack.isNotEmpty || _qty != null) _buildBreadcrumb(),
             RingDiveWheel(
               labels: labels,
               sublabels: sublabels,
+              hubHint: hubHint,
               lockedCount: _stack.length,
               onSelect: onSelect,
             ),
@@ -205,6 +241,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           children: [
             for (var i = 0; i < _stack.length; i++)
               _crumb(_stack[i].crumbWord, () => _backTo(i)),
+            if (_qty != null) _crumb('× $_qty', _clearQty),
             const SizedBox(width: 6),
             _resetCrumb(),
           ],
