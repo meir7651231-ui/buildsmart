@@ -76,10 +76,16 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
   axis values; per-glyph curving is a P8 option. If the owner finds the side
   (tangential) labels hard to read, an upright-in-ring variant is a one-liner.
   Screen shows 6 preview labels (replaced by engine chips in P4). analyze 0.
-- P3 done (this commit) — ring_dive_wheel.dart: drag-to-rotate (atan2), detent
-  snapping on release, focus tracking, haptics (selectionClick per detent,
-  mediumImpact on select), tap-vs-drag (8 deg threshold), reduce-motion gated.
-  Screen renders the interactive wheel. analyze 0.
-- P1-3 milestone — local render of the dial verified (see the loop report).
-- P4 next — wire to card_engine: options = MergedKeys chips, tap = dive
-  (NewbieStep -> narrow -> re-run); RingDive-scoped stack provider.
+- P3 done (10fa9a42) — ring_dive_wheel.dart: drag-to-rotate (atan2), detent
+  snapping, focus tracking, haptics, tap-vs-drag (8 deg). analyze 0.
+- P1-3 milestone — dial verified LIVE in the browser (spins + focus changes);
+  _app_ringdive_demo.dart serves it via flutter run + ENABLE_RING_DIVE.
+- P4 done (this commit) — ring_dive_screen.dart is a ConsumerStatefulWidget
+  driving the REAL card_engine: pool = kDivePool narrowed by the dive stack;
+  mergedKeys -> verdict -> wheel labels (opening words -> merged axis chips ->
+  scan list -> resolve); tapping the focused option dives (NewbieStep via the
+  same _predicateFor idiom as card_keyboard_screen, zero engine change). Opening
+  seed uses the word predicate (a later refinement may use the kOpeningSeedAxis
+  sentinel so it doesn't burn the word axis). analyze 0.
+- P5 next — breadcrumb/back (tap a locked ring / a back affordance) + the
+  quantity phase on CardResolve.
