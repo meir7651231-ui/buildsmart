@@ -20,6 +20,8 @@ library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
+import 'package:buildsmart/data/smart_tree.dart'
+    show SmartBrand, SmartProduct, kSmartProducts, smartProductForSku;
 import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_qty.dart';
@@ -108,6 +110,13 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   LipskeyCatalogProduct? _origin;
   List<LipskeyCatalogProduct> _compatLeaves = const <LipskeyCatalogProduct>[];
 
+  /// `job` mode: the chosen recipe key (null = the recipe list is on the wheel),
+  /// the chosen model within it (defaults to the recommended brand), and whether
+  /// its kit has been added.
+  String? _jobKey;
+  SmartBrand? _kitBrand;
+  bool _kitAdded = false;
+
   /// The live 0–99 quantity from the dual-ring, shown on the confirm bar. Kept
   /// off `setState` so a qty drag rebuilds only the ring + the confirm label,
   /// not the whole card.
@@ -126,17 +135,21 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   bool get _hasSelection => _mode != 'root';
 
   void _enterStyle(String axis) {
-    // 'job' (RD-E) has no real axis in `kRdAxes` yet; entering `find` with it
-    // would silently fall back to the first axis (dept) and mislead the user.
-    // Route it to an honest `job` placeholder mode instead of faking a drill.
+    // 'job' is not a real axis in `kRdAxes`; it enters the real recipe/kit mode
+    // (kSmartProducts) instead of drilling — routing it to `find` would silently
+    // fall back to the first axis (dept) and mislead the user.
     final validAxis = kRdAxes.contains(axis);
     setState(() {
       _mode = validAxis ? 'find' : 'job';
       _axisField = validAxis ? axis : null;
       _path.clear();
+      _origin = null;
       _product = null;
       _qty = null;
       _added = false;
+      _jobKey = null;
+      _kitBrand = null;
+      _kitAdded = false;
     });
   }
 
@@ -173,6 +186,60 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   void _reset() {
     setState(() {
       _mode = 'root';
+      _path.clear();
+      _axisField = null;
+      _origin = null;
+      _product = null;
+      _qty = null;
+      _added = false;
+      _jobKey = null;
+      _kitBrand = null;
+      _kitAdded = false;
+    });
+  }
+
+  // ── job / kit mode (the REAL smart_tree recipes) ───────────────────────────
+
+  SmartProduct _jobByKey(String key) =>
+      kSmartProducts.firstWhere((j) => j.key == key);
+
+  void _pickJob(String key) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _jobKey = key;
+      _kitBrand = _jobByKey(key).recBrand;
+      _kitAdded = false;
+    });
+  }
+
+  void _pickBrand(SmartBrand b) {
+    HapticFeedback.selectionClick();
+    setState(() => _kitBrand = b);
+  }
+
+  void _addKit() {
+    HapticFeedback.mediumImpact();
+    setState(() => _kitAdded = true);
+  }
+
+  void _backToJobList() {
+    setState(() {
+      _jobKey = null;
+      _kitBrand = null;
+      _kitAdded = false;
+    });
+  }
+
+  /// From the done phase — jump to the recipe that lists this product as a
+  /// model (the real reverse index); if none, land on the recipe list.
+  void _enterJobFrom(LipskeyCatalogProduct p) {
+    final job = smartProductForSku(p.sku);
+    HapticFeedback.selectionClick();
+    setState(() {
+      _mode = 'job';
+      _jobKey = job?.key;
+      _kitBrand = job?.recBrand;
+      _kitAdded = false;
       _path.clear();
       _axisField = null;
       _origin = null;
@@ -263,10 +330,44 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         if (i >= 0 && i < _styles.length) _enterStyle(_styles[i].key);
       };
     } else if (_mode == 'job') {
-      // ── job (RD-E2): honest placeholder — the kit flow is not wired yet ──
-      hubHint = 'מצב "לפי עבודה" בקרוב';
-      count = rdPool.length;
-      statusLine = 'מצב "לפי עבודה" בקרוב — בחר סגנון אחר';
+      // ── job (RD-E2): the REAL smart_tree recipes (kSmartProducts) ──
+      if (_jobKey == null) {
+        // the recipe list fills the wheel.
+        count = kSmartProducts.length;
+        readout = 'עבודות';
+        statusLine = 'בחר עבודה — נרכיב ערכה שלמה';
+        hubHint = 'בחר עבודה';
+        for (final j in kSmartProducts) {
+          labels.add('${j.emoji} ${j.name}');
+          sublabels.add('עבודה');
+        }
+        onSelect = (i) {
+          if (i >= 0 && i < kSmartProducts.length) {
+            _pickJob(kSmartProducts[i].key);
+          }
+        };
+      } else {
+        final job = _jobByKey(_jobKey!);
+        count = job.acc.length;
+        readout = 'רכיבים';
+        if (_kitAdded) {
+          labels.add(job.name);
+          sublabels.add('ערכה');
+          hubHint = 'הערכה נוספה ✓';
+          statusLine = 'הערכה נוספה — חיפוש חדש?';
+        } else {
+          // the models (brands) fill the wheel; the acc components sit below.
+          statusLine = 'ערכה ל${job.name} — בחר דגם והוסף';
+          hubHint = 'בחר דגם';
+          for (final b in job.brands) {
+            labels.add(b.name);
+            sublabels.add('דגם');
+          }
+          onSelect = (i) {
+            if (i >= 0 && i < job.brands.length) _pickBrand(job.brands[i]);
+          };
+        }
+      }
     } else if (_mode == 'compat') {
       // ── compat: the REAL "what connects" list (verified-connections) ──
       final partners = _origin == null
@@ -332,6 +433,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       }
     }
 
+    final kitPhase = _mode == 'job' && _jobKey != null && !_kitAdded;
+    final kitDone = _mode == 'job' && _jobKey != null && _kitAdded;
+    final kitJob = kitPhase ? _jobByKey(_jobKey!) : null;
+
     final inFind = _product == null;
     final Widget wheelChild = qtyChoosing
         ? RingDiveQty(
@@ -370,9 +475,13 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   if (inFind && axisFields.length > 1)
                     _axisStrip(axisFields, activeField),
                   if (inFind && _path.isNotEmpty) _breadcrumbStrip(),
+                  if (_mode == 'job' && _jobKey != null) _jobCrumb(),
                   _wheelArea(wheelChild),
                   if (qtyChoosing) _qtyConfirmBar(),
                   if (_product != null && _qty != null) _cartBar(),
+                  if (kitJob != null) _kitStrip(kitJob),
+                  if (kitJob != null) _kitAddBar(kitJob),
+                  if (kitDone) _kitDoneBar(),
                   if (inFind && footer.isNotEmpty)
                     _resultsRail(footer, count),
                 ],
@@ -832,6 +941,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   Widget _cartBar() {
     final p = _product;
     final canCompat = p != null && compatibleWith(p).isNotEmpty;
+    final canJob = p != null && smartProductForSku(p.sku) != null;
     return Padding(
       padding: const EdgeInsets.only(top: 14, bottom: 18),
       child: Column(
@@ -856,6 +966,17 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             ),
           ),
           const SizedBox(height: 12),
+          if (canJob) ...[
+            SizedBox(
+              width: 240,
+              child: _pillButton(
+                '🧩 השלם ערכה',
+                const Color(0xFF3A4D80),
+                () => _enterJobFrom(p),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           if (canCompat) ...[
             SizedBox(
               width: 240,
@@ -869,6 +990,182 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           ],
           SizedBox(
             width: 240,
+            child: _pillButton('חיפוש חדש', _kInk, _reset),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── job / kit widgets (breadcrumb · components strip · add · done) ──────────
+
+  Widget _jobCrumb() {
+    final job = _jobByKey(_jobKey!);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 12, 22, 4),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: _backToJobList,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0x1AFF7A18),
+              border: Border.all(color: const Color(0x52FF7A18)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'עבודה ✎',
+                  style: TextStyle(
+                    fontFamily: _kMono,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    color: _kMonoTag,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  '${job.emoji} ${job.name}',
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontFamily: 'Heebo',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: _kInk,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _kitStrip(SmartProduct job) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 12, bottom: 2),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0x0F000000))),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
+            child: Text(
+              'רכיבי הערכה · ${job.acc.length}',
+              style: const TextStyle(
+                fontFamily: _kMono,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2,
+                color: _kMonoTag,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Row(
+                children: [
+                  for (final a in job.acc) _accChip(a.emoji, a.name, must: a.must),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _accChip(String emoji, String name, {required bool must}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: BoxDecoration(
+          color: must ? const Color(0x14FF7A18) : const Color(0x08000000),
+          border: Border.all(
+            color: must ? const Color(0x40FF7A18) : const Color(0x14000000),
+          ),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 12)),
+            const SizedBox(width: 5),
+            Text(
+              name,
+              style: TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: must ? const Color(0xFFB54708) : _kSub,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _kitAddBar(SmartProduct job) {
+    final brand = _kitBrand ?? job.recBrand;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'דגם נבחר · ${brand.name}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: _kSub,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: _pillButton('🧩 הוסף ערכה לסל', _kOrange, _addKit),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _kitDoneBar() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14, bottom: 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '✓ הערכה נוספה לסל',
+            style: TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF3E8E5A),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 220,
             child: _pillButton('חיפוש חדש', _kInk, _reset),
           ),
         ],

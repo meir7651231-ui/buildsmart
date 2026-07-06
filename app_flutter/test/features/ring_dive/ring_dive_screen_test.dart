@@ -90,4 +90,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('תואמים'), findsWidgets);
   });
+
+  testWidgets('job: "by job" style → real recipe → kit with components',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // root: the 9th style is "לפי עבודה" (index 8) → the real recipe list.
+    wheel().onSelect!(8);
+    await tester.pumpAndSettle();
+    expect(wheel().labels, isNotEmpty, reason: 'recipes fill the wheel');
+
+    // pick the first recipe → the kit phase (real smart_tree components).
+    wheel().onSelect!(0);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('רכיבי הערכה'), findsOneWidget);
+    expect(find.textContaining('הוסף ערכה לסל'), findsOneWidget);
+  });
 }

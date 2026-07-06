@@ -105,9 +105,21 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   byte-identical · a headless render confirms the compat count block + partner
   wheel + rail. Known-deferred: the wheel caps at 12 partners (count block shows
   the true total; pagination is RD-F) and the rail header still reads "מועמדים".
-- RD-E2 next — the job/kit mode via the REAL smart_tree recipes (kSmartProducts:
-  SmartProduct.acc slots, smartProductForSku); entered from the root "לפי עבודה"
-  style and the done "השלם ערכה" follow-up. Then RD-F (done follow-ups + cart
-  sheet + wheel pagination), RD-G (motion polish + bundle JetBrains Mono + a
-  browser-render fidelity pass). Show the owner LIVE only once the FULL screen
+- RD-E2 done — the job/kit mode via the REAL smart_tree recipes (kSmartProducts).
+  root "לפי עבודה" → the recipe list on the wheel → pick a recipe → the kit
+  phase: the models (SmartProduct.brands) fill the wheel, the real components
+  (SmartProduct.acc) show as a strip (orange = must, grey = optional, NO price —
+  SmartAcc.price is deliberately never read), a "דגם נבחר" line + a "🧩 הוסף
+  ערכה לסל" button add it. The done phase also offers "🧩 השלם ערכה" when the
+  product is a recipe's model (smartProductForSku). Verified: analyze 0 · test
+  4/4 (a new test drives root→"by job"→recipe→asserts the kit components + add
+  button) · flag OFF byte-identical · a headless render confirms the recipe
+  breadcrumb, the model wheel, the must/optional components strip, and the add
+  button. Note: the real acc are specific named accessories (some sku-pinned),
+  not free-choice slots, so the honest realization is model-choice + a fixed
+  components view (not the prototype's per-slot pick).
+- RD-F next — a real cart (the sheet + running list) so qty-add and kit-add
+  accumulate; done follow-ups; wheel pagination for >12 options (compat/leaves).
+  Then RD-G (motion polish + bundle JetBrains Mono + a browser-render fidelity
+  pass) and RD-H (more tests). Show the owner LIVE only once the FULL screen
   matches (not piecemeal).
