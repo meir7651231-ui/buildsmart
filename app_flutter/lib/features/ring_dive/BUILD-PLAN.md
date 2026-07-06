@@ -1,107 +1,58 @@
-# RingDive (צלילת-טבעות) — build plan
+# RingDive (צלילת-טבעות / Pro-X-Light) — build plan
 
-A rotary product-finder that **replaces the smart keyboard's product-finding
-presentation** with a spinning knurled dial, while reusing the SAME drill-down
-engine (`card_engine.dart`). Owner design handoff, 2026-07-06.
+A rotary product-finder: ONE wheel, phase-driven (root → find → qty → done),
+9 search styles, clean one-axis-per-turn drill over the REAL catalog. Owner
+design handoff "RingDive-Pro-X-Light" (6/7). Replaces the smart keyboard's
+product-finding presentation; **zero engine change** (RingDive reads its own
+derivation layer + the existing finder helpers).
 
-## Non-negotiables (every phase)
-- **Flag-gated `kRingDiveFlag` ('kRingDive'), OFF = byte-identical.** Demo build
-  via `--dart-define=ENABLE_RING_DIVE=true` (`kEnableRingDiveDemo`). Live deploy
-  workflows do NOT pass it — cut-over stays owner-gated.
-- **Zero engine changes.** The dial is a new VIEW over `mergedKeys(...)`; the
-  brain (`card_engine` / `word_finder_engine`) is untouched (a byte-identity test
-  guards it, like #38 did).
-- `flutter analyze` = 0 new issues · golden/byte-identity green · **commit local
-  only — push ONLY on the literal owner word "תדחוף".**
-- Plain-word commit messages, **no backticks in `-m`**.
+## Non-negotiables
+- Flag-gated `kRingDiveFlag`, OFF = byte-identical. **Push ONLY on "תדחוף".**
+- analyze-0-new · tests green · local commits · plain-word messages (no backticks).
 
-## Shared-engine wiring (the whole point)
-`card_engine.mergedKeys(pool, stack, lexicon, subtype)` → sealed `CardVerdict`:
-- `CardAskWords(questionHe, words)` — opening turn (stack empty) → the dial's
-  first ring shows the opening plain-words.
-- `MergedKeys(chips)` — the merged axis options → the dial's rotating labels.
-  Each `SignalChip` (axisId · value · displayLabel · axisName) is one dial option.
-- `CardResolve(product, siblings)` — pool collapsed to one card → qty phase.
-- `CardShowProducts(products)` — scan-by-eye → the results footer.
+## Owner-locked (6/7)
+- **No price** (the catalog has none) — omit everywhere.
+- **Skip an axis with no data** — findAxes only offers axes with ≥2 options.
+- **compat "what connects"** = the REAL verified-connections engine (kVerifiedSpecs).
+- **jobs/kits** = the REAL smart_tree recipes (kSmartProducts).
 
-A **dive** = tap the hub/option → build a `NewbieStep` from the chosen chip →
-push to the stack (`cardKeyboardStackProvider`-style, but a RingDive-scoped
-provider) → recompute the pool → re-run `mergedKeys`. `≤6` is already enforced
-inside the engine (`kMaxDiveTurns` gate); `≤4`-between-products is `hop_graph`.
-Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
+## The design (RingDive-Pro-X-Light.dc.html) — ONE wheel, phase() drives the view
+- **root** — the 9 search styles (dept·cat·type·size·angle·color·material·brand + job).
+- **find** — the active axis's options; an axis-switcher chip strip jumps between
+  the remaining axes (findAxes ≥2); once ≤1 product remains → product leaves.
+- **qty** — two concentric number rings (tens 00–90 outer, units 0–9 inner) → 0–99.
+- **done** — scan spinner → success → complete-kit / what-connects / new-search.
+compat mode = "what connects to this product"; job mode = fill kit slots.
 
-## Owner decisions (defaults chosen; owner may override)
-1. **Scope** — RingDive replaces the smart product-finder only; the floating
-   keyboard (nav/text shell) is untouched. *(default)*
-2. **Axis order** — engine-driven (most-splitting axis per turn), NOT the
-   prototype's fixed dept→…→color order. *(default — keeps the smarts + ≤6)*
-3. **Typing** — pure-dial first; the floating keyboard's text field can SEED the
-   pool later (`pool_seed.dart`) as a compose option. *(default)*
-4. **Rollout** — web-demo define first → verify live → then mobile. *(default)*
+## The 8-axis derivation (ring_dive_catalog.dart) — RD-A DONE
+Each real product → {dept, cat, type, size, angle, color, material, brand}:
+- dept ← kDeptCatHeadings reverse (category→department)
+- cat  ← catalog-tree top-category title · type ← catalog-tree leaf (== categoryHe)
+- size ← productSizeTokens(p).label (multi-valued) · angle ← parseAngleTokens(name)
+- material ← materialOf(p) (partial) · color/brand ← direct
+Missing → omitted. `rdMatching` = predicate membership (product CARRIES the value),
+so multi-valued size works + reuses the engine's canonical tokens.
 
 ## Phase ladder
-- **P0 — flag + skeleton.** `ring_dive_flag.dart` · `feature_flags.dart` seed ·
-  `ring_dive_screen.dart` (SizedBox.shrink OFF, 320×320 box ON). ← this commit.
-- **P1 — dial geometry (CustomPainter).** Base disc (radial gradient + warm
-  shadow), 20 knurled grip pads @ r=108 (active pad @ 12:00), center groove,
-  locked depth rings, fixed 12:00 pointer. Static (no rotation yet).
-- **P2 — curved labels.** Text-on-arc per option at its LIVE screen angle
-  (`-90 + i*360/n + rot`); flip the baseline on the lower half so text stays
-  upright. Focus label bigger/orange. White halo stroke.
-- **P3 — rotation / drag / snap + haptics.** GestureDetector pan + `atan2`
-  angle; accumulate rot; snap to detent on release (`round(rot/step)*step`);
-  focusIndex; tap-vs-drag (>~8° = drag, suppress tap). `HapticFeedback`
-  selectionClick per detent, mediumImpact on select. reduce-motion gated.
-- **P4 — wire to `card_engine`.** Replace any demo data with the real pool;
-  options = `MergedKeys.chips`; dive = NewbieStep→narrow→re-run. RingDive-scoped
-  stack provider (identity-isolated). This is where it becomes REAL data.
-- **P5 — the 4 phases + breadcrumb.** dive → qty → cart → added. Center hub
-  morphs per phase (axis name+focus / product image+"בחר ×N" / "הוסף לסל"+total /
-  ✓). Breadcrumb pills = answered axes; tap a pill = back-to-level.
-- **P6 — results footer + product sheet.** Horizontal product cards from
-  `filtered()` / `hop_graph`; tap → bottom sheet (specs + הוסף להזמנה) → cart.
-- **P7 — swap seam.** At the smart-keyboard entry point, gate: flag ON →
-  RingDive, OFF → existing surface. One seam. Byte-identical OFF.
-- **P8 — polish + tests.** a11y/bidi (RTL semantics), reduce-motion, purity tests
-  for pure helpers, widget test for a dive→resolve→add path, byte-identity test.
+- **RD-A done (this commit)** — ring_dive_catalog.dart: the derivation layer +
+  rdMatching / rdOptsFor / rdFindAxes. VERIFIED over 1948 products: clean axes
+  (מחלקה=2 · קטגוריה=10 · סוג=98 · גודל=150 · זווית=8 · צבע=21 · חומר=6 · מותג=4;
+  sample trap → אינסטלציה / ניקוז וצנרת / מחסומים גלויים / 1¼" / לבן / ליפסקי).
+- **RD-B next** — phase/state model: rework ring_dive_screen to mode/path/
+  axisField + phase(); wheel shows root-styles / axis-options / product-leaves.
+- **RD-C** — the 9 root styles + the axis-switcher chip strip.
+- **RD-D** — qty dual number-ring (tens/units 0–99).
+- **RD-E** — compat (real kVerifiedSpecs) + job (real kSmartProducts) modes.
+- **RD-F** — done phase + follow-ups; results rail; product + cart sheets.
+- **RD-G** — visual polish to the design tokens (RINGDIVE·OS wordmark, corner
+  brackets, scan-line, JetBrains Mono numerals, glassmorphic hub, exact geometry).
+- **RD-H** — tests + memory update → report 'ready for cut-over'.
+
+## Reused from the earlier build (P0-P6, 94634644..a053ec81)
+The dial CustomPainter (ring_dive_dial), the wheel gesture (ring_dive_wheel), the
+hub/breadcrumb/results/sheet/qty scaffolding — KEPT. The card_engine data wiring
+in ring_dive_screen is REPLACED by ring_dive_catalog + the phase model (the old
+wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
 
 ## Status
-- P0 done (94634644) — flag + skeleton + feature_flags seed + BUILD-PLAN.
-- P1 done (7d9d2ecf) — ring_dive_dial.dart CustomPainter: warm-shadow base
-  disc, 20 knurled pads (active @ 12:00), top gloss, center groove, locked-ring
-  param, 12:00 pointer. Static; rotation + lockedCount params ready for P3/P4.
-- P2 done (this commit) — rim labels: one per option around radius 90,
-  tangent-rotated (upright-flip on the lower half), focus bigger+orange @ 12:00,
-  white halo. Whole-label tangent (not per-glyph arc) — faithful for the short
-  axis values; per-glyph curving is a P8 option. If the owner finds the side
-  (tangential) labels hard to read, an upright-in-ring variant is a one-liner.
-  Screen shows 6 preview labels (replaced by engine chips in P4). analyze 0.
-- P3 done (10fa9a42) — ring_dive_wheel.dart: drag-to-rotate (atan2), detent
-  snapping, focus tracking, haptics, tap-vs-drag (8 deg). analyze 0.
-- P1-3 milestone — dial verified LIVE in the browser (spins + focus changes);
-  _app_ringdive_demo.dart serves it via flutter run + ENABLE_RING_DIVE.
-- P4 done (this commit) — ring_dive_screen.dart is a ConsumerStatefulWidget
-  driving the REAL card_engine: pool = kDivePool narrowed by the dive stack;
-  mergedKeys -> verdict -> wheel labels (opening words -> merged axis chips ->
-  scan list -> resolve); tapping the focused option dives (NewbieStep via the
-  same _predicateFor idiom as card_keyboard_screen, zero engine change). Opening
-  seed uses the word predicate (a later refinement may use the kOpeningSeedAxis
-  sentinel so it doesn't burn the word axis). analyze 0.
-- P5a done (this commit) — center hub (title + focused option + hint, tap-through
-  IgnorePointer) + breadcrumb trail (tap a pill to go back to that level) + reset.
-  analyze 0, tests green.
-- P5b done (this commit) — quantity phase: on CardResolve the rim becomes qty
-  numbers (1..100) and the hub shows the product; picking a qty sets _qty + a
-  "x N" crumb (tap to clear); reset/back clear _qty. analyze 0, tests green.
-  P5 (hub + breadcrumb + qty) complete.
-- P6a done (this commit) — results footer (a live row of product cards from the
-  current pool, tap → sheet) + product sheet (colour dot + brand + name + spec
-  chips from colour/category/dims + "הוסף להזמנה" which dives to it). No price
-  (the catalog has none). analyze 0, tests green.
-- P6b done (this commit) — the cart/added state: once a qty is chosen a "הוסף
-  לסל" button appears below the wheel; tapping it (strong haptic) shows the
-  "✓ נוסף לסל" confirmation + a "חיפוש חדש" reset. P6 complete — the FULL flow
-  (dive → product → qty → cart → added) works end-to-end. Real cart write = P7.
-  analyze 0, tests green.
-- P7 next — the swap seam: gate the smart-keyboard entry so flag ON opens
-  RingDive; wire the real app cart. Then P8 polish + tests.
+- RD-A done (this commit).
