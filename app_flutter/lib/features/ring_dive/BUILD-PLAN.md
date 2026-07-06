@@ -130,6 +130,11 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
 - RD-F pagination done — every wheel set with >12 options now pages (11 + "עוד…"
   via _pageSlice + _page) so the rim never overflows (was: type 98 / size 150 /
   compat 234 crammed). Long rim labels capped (_cap). analyze 0 · test 6/6 · a
-  new test asserts 12 labels + "עוד…" + paging. STILL PENDING in RD-F: the real
-  accumulating cart + cart sheet. Then RD-G (motion + JetBrains Mono) + RD-H.
-  Next deploy of these polish fixes waits for the next "תדחוף".
+  new test asserts 12 labels + "עוד…" + paging.
+- RD-F cart done — a real accumulating _cart (products from the qty confirm +
+  kits from a recipe, persists across searches, NO price), a green cart crumb
+  showing the count, and a cart sheet (showModalBottomSheet + StatefulBuilder:
+  each line = dot · name · ×qty/ערכה · remove; "המשך בקנייה"). analyze 0 · test
+  7/7 (a new test confirms crumb → sheet → remove → empty). RD-F is DONE.
+  Then RD-G (motion + bundle JetBrains Mono) + RD-H. Next deploy of these polish
+  fixes waits for the next "תדחוף".

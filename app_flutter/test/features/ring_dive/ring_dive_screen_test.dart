@@ -181,4 +181,42 @@ void main() {
     expect(wheel().labels, isNot(equals(firstPage)));
     expect(wheel().labels.last, 'עוד…');
   });
+
+  testWidgets('cart: confirm a product → crumb + sheet + remove',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // dive to a product, then confirm a quantity → it lands in the cart.
+    for (var i = 0; i < 14; i++) {
+      if (find.byType(RingDiveQty).evaluate().isNotEmpty) break;
+      wheel().onSelect!(0);
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.textContaining('הוסף לסל'));
+    await tester.pumpAndSettle();
+
+    // the cart crumb now shows the running order.
+    expect(find.textContaining('ההזמנה שלי'), findsOneWidget);
+
+    // open the cart sheet → the line + the close button are there.
+    await tester.tap(find.textContaining('ההזמנה שלי'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('המשך בקנייה'), findsOneWidget);
+
+    // remove the only line → the sheet refreshes to empty.
+    await tester.tap(find.text('✕').first);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('הסל ריק'), findsOneWidget);
+  });
 }

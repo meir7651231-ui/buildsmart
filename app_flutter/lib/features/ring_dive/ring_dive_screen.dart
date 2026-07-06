@@ -74,6 +74,21 @@ const List<({String key, String emoji, String label})> _styles =
   (key: 'job', emoji: '🧩', label: 'לפי עבודה'),
 ];
 
+/// One line in the running order — a product (with a chosen quantity) or a whole
+/// kit (a recipe + its chosen model). NO price (the catalog has none).
+class _CartItem {
+  const _CartItem({this.product, this.kit, this.brand, this.qty = 1});
+
+  final LipskeyCatalogProduct? product;
+  final SmartProduct? kit;
+  final SmartBrand? brand;
+  final int qty;
+
+  bool get isKit => kit != null;
+  String get title => product?.nameHe ?? kit?.name ?? '';
+  String? get color => product?.color;
+}
+
 /// The RingDive surface. Renders nothing until `kRingDiveFlag` is enabled.
 class RingDiveScreen extends ConsumerStatefulWidget {
   const RingDiveScreen({super.key});
@@ -113,6 +128,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   /// The current wheel page. Any option set with >12 entries paginates (11 +
   /// "עוד…") so the rim never overflows; reset to 0 when the set changes.
   int _page = 0;
+
+  /// The accumulating order — products (from the qty confirm) and kits (from a
+  /// recipe). Persists across searches (NOT cleared on reset); NO price.
+  final List<_CartItem> _cart = <_CartItem>[];
 
   /// `job` mode: the chosen recipe key (null = the recipe list is on the wheel),
   /// the chosen model within it (defaults to the recommended brand), and whether
@@ -228,8 +247,186 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   void _addKit() {
+    if (_jobKey == null) return;
+    final job = _jobByKey(_jobKey!);
     HapticFeedback.mediumImpact();
-    setState(() => _kitAdded = true);
+    setState(() {
+      _cart.add(_CartItem(kit: job, brand: _kitBrand ?? job.recBrand));
+      _kitAdded = true;
+    });
+  }
+
+  void _removeCartItem(int i, StateSetter setSheet) {
+    setState(() => _cart.removeAt(i));
+    setSheet(() {});
+  }
+
+  void _openCartSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (ctx, setSheet) => _cartSheetContent(sheetCtx, setSheet),
+      ),
+    );
+  }
+
+  Widget _cartCrumb() {
+    final n = _cart.length;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 4, 22, 0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: _openCartSheet,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0x1A3E8E5A),
+              border: Border.all(color: const Color(0x593E8E5A)),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              '🛒 ההזמנה שלי · $n ${n == 1 ? 'פריט' : 'פריטים'}',
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF2F7A4E),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _cartSheetContent(BuildContext sheetCtx, StateSetter setSheet) {
+    final n = _cart.length;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 16, 22, 26),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE7E1D8),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'ההזמנה שלי',
+                  style: TextStyle(
+                    fontFamily: 'Heebo',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    color: _kInk,
+                  ),
+                ),
+                Text(
+                  '$n ${n == 1 ? 'פריט' : 'פריטים'}',
+                  style: const TextStyle(
+                    fontFamily: _kMono,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF2F7A4E),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_cart.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'הסל ריק',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontFamily: 'Heebo', color: _kSub),
+                ),
+              )
+            else
+              for (var i = 0; i < _cart.length; i++) _cartLine(i, setSheet),
+            const SizedBox(height: 16),
+            _pillButton(
+              'המשך בקנייה',
+              const Color(0xFF2E9E5B),
+              () => Navigator.of(sheetCtx).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cartLine(int i, StateSetter setSheet) {
+    final it = _cart[i];
+    final dot = it.isKit
+        ? const Color(0xFFFF7A18)
+        : (_dotColors[it.color] ?? const Color(0xFFB7B0A5));
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: dot,
+              border: Border.all(color: const Color(0x26000000)),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              it.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF2A303C),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            it.isKit ? 'ערכה' : '× ${it.qty}',
+            style: const TextStyle(
+              fontFamily: _kMono,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: _kMonoTag,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _removeCartItem(i, setSheet),
+            child: const Padding(
+              padding: EdgeInsets.only(right: 8, left: 2),
+              child: Text(
+                '✕',
+                style: TextStyle(fontSize: 14, color: Color(0xFFC0392B)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _backToJobList() {
@@ -286,9 +483,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   void _confirmQty(int v) {
-    if (v < 1) return;
+    if (v < 1 || _product == null) return;
     HapticFeedback.mediumImpact();
     setState(() {
+      _cart.add(_CartItem(product: _product, qty: v));
       _qty = v;
       _added = true;
     });
@@ -534,6 +732,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _statusBar(),
+                  if (_cart.isNotEmpty) _cartCrumb(),
                   if (inFind) _countBlock(count, readout, statusLine),
                   if (inFind && axisFields.length > 1)
                     _axisStrip(axisFields, activeField),
