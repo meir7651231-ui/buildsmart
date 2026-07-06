@@ -136,5 +136,14 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   showing the count, and a cart sheet (showModalBottomSheet + StatefulBuilder:
   each line = dot · name · ×qty/ערכה · remove; "המשך בקנייה"). analyze 0 · test
   7/7 (a new test confirms crumb → sheet → remove → empty). RD-F is DONE.
-  Then RD-G (motion + bundle JetBrains Mono) + RD-H. Next deploy of these polish
-  fixes waits for the next "תדחוף".
+  Then RD-G + RD-H.
+- RD-G font done — JetBrains Mono bundled (assets/fonts/JetBrainsMono-{Regular,
+  Bold,ExtraBold}.ttf + pubspec) for the RINGDIVE·OS wordmark + the count/qty
+  numerals, matching the design. It has no Hebrew glyphs, so every mono style
+  carries fontFamilyFallback:['Heebo'] — Latin/digits render JetBrains Mono,
+  Hebrew renders Heebo (caught a tofu regression in the render before shipping).
+  analyze 0 · test 7/7 · flag OFF byte-identical · a real-font render confirms
+  "1948"/"RINGDIVE·OS" in JetBrains Mono and "מוצרים" in Heebo. REMAINING RD-G:
+  the prototype motion (pulse dot · scan-line · knurl spin · phase ring-in)
+  behind a reduce-motion gate — optional ambiance. Then RD-H (more tests).
+  Undeployed polish (pagination + cart + font) waits for the next "תדחוף".

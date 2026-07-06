@@ -21,6 +21,9 @@ import 'package:buildsmart/features/ring_dive/ring_dive_dial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 
+/// JetBrains Mono has no Hebrew glyphs → 'כמות' etc. fall back to Heebo.
+const List<String> _kMonoFallback = <String>['Heebo'];
+
 class RingDiveQty extends StatefulWidget {
   const RingDiveQty({
     required this.onChanged,
@@ -114,9 +117,10 @@ class _RingDiveQtyState extends State<RingDiveQty> {
         _rot += delta;
       }
     });
-    final changed = _dragMode == 'tens'
-        ? _focusIndex(_rotT) != beforeT
-        : _focusIndex(_rot) != beforeU;
+    final changed =
+        _dragMode == 'tens'
+            ? _focusIndex(_rotT) != beforeT
+            : _focusIndex(_rot) != beforeU;
     if (changed && !_reduceMotion) HapticFeedback.selectionClick();
     widget.onChanged(_value);
   }
@@ -161,10 +165,7 @@ class _RingDiveQtyState extends State<RingDiveQty> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          RingDiveDial(
-            lockedCount: widget.lockedCount,
-            size: widget.size,
-          ),
+          RingDiveDial(lockedCount: widget.lockedCount, size: widget.size),
           CustomPaint(
             size: Size.square(widget.size),
             painter: _QtyPainter(rotT: _rotT, rot: _rot),
@@ -202,7 +203,8 @@ class _RingDiveQtyState extends State<RingDiveQty> {
             const Text(
               'כמות',
               style: TextStyle(
-                fontFamily: 'monospace',
+                fontFamily: 'JetBrains Mono',
+                fontFamilyFallback: _kMonoFallback,
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 2,
@@ -213,7 +215,8 @@ class _RingDiveQtyState extends State<RingDiveQty> {
             Text(
               '×$_value',
               style: const TextStyle(
-                fontFamily: 'monospace',
+                fontFamily: 'JetBrains Mono',
+                fontFamilyFallback: _kMonoFallback,
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
                 height: 1,
@@ -295,9 +298,7 @@ class _QtyPainter extends CustomPainter {
               ..color = const Color(0xE6FF7A18),
           );
       }
-      final label = tens
-          ? (vals[i] == 0 ? '00' : '${vals[i]}')
-          : '${vals[i]}';
+      final label = tens ? (vals[i] == 0 ? '00' : '${vals[i]}') : '${vals[i]}';
       _drawText(canvas, label, Offset(x, y), isF ? 21 : 17, focused: isF);
     }
   }
@@ -332,19 +333,20 @@ class _QtyPainter extends CustomPainter {
     required bool focused,
   }) {
     TextPainter build(Paint? fg, Color? color) => TextPainter(
-          text: TextSpan(
-            text: text,
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: fontSize,
-              fontWeight: focused ? FontWeight.w800 : FontWeight.w700,
-              color: color,
-              foreground: fg,
-            ),
-          ),
-          textDirection: TextDirection.ltr,
-          textAlign: TextAlign.center,
-        )..layout();
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontFamily: 'JetBrains Mono',
+          fontFamilyFallback: _kMonoFallback,
+          fontSize: fontSize,
+          fontWeight: focused ? FontWeight.w800 : FontWeight.w700,
+          color: color,
+          foreground: fg,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    )..layout();
 
     final halo = build(
       Paint()
