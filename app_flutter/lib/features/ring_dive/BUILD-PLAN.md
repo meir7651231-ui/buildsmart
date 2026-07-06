@@ -66,4 +66,10 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
   for pure helpers, widget test for a dive→resolve→add path, byte-identity test.
 
 ## Status
-- P0: in progress (this commit).
+- P0 done (94634644) — flag + skeleton + feature_flags seed + BUILD-PLAN.
+- P1 done (this commit) — ring_dive_dial.dart CustomPainter: warm-shadow base
+  disc, 20 knurled pads (active @ 12:00), top gloss, center groove, locked-ring
+  param, 12:00 pointer. Static; rotation + lockedCount params ready for P3/P4.
+  Wired into the screen. analyze 0. Visual browser check batched for the P1-3
+  milestone (one ENABLE_RING_DIVE web build once the dial spins).
+- P2 next — curved text labels (text-on-arc, upright-flip on the lower half).
