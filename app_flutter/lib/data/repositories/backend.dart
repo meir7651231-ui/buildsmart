@@ -187,3 +187,28 @@ const bool kFsDiag = bool.fromEnvironment('FS_DIAG');
 ///       --dart-define=APP_CHECK_RECAPTCHA_SITE_KEY=6Lc…
 const String kAppCheckRecaptchaSiteKey =
     String.fromEnvironment('APP_CHECK_RECAPTCHA_SITE_KEY');
+
+// ── Studio Pillar 5 · Phase 4 (steps 51+) — scale / backend / publish-to-all ──
+// Step 51: the DORMANT openers. All default OFF/empty with NO consumer yet
+// (consumers land steps 53+), so a normal build is byte-identical / compiler-
+// inert. Same idiom as [kUseFirebaseBackendFlag]; enable via --dart-define.
+
+/// STUDIO_LIVE — master switch for server-backed Studio config (draft→publish
+/// on Firestore). Default OFF → the Studio stays local-first exactly as today.
+const bool kStudioLive = bool.fromEnvironment('STUDIO_LIVE');
+
+/// CATALOG_SERVER_SEARCH — routes catalog search to the paged server index.
+/// Default OFF → search stays the in-memory fuzzy path (byte-identical).
+const bool kCatalogServerSearch =
+    bool.fromEnvironment('CATALOG_SERVER_SEARCH');
+
+/// CATALOG_BASE_URL — base URL for the server catalog/config API. Empty
+/// (default) → the app uses the BUNDLED const catalog, byte-identical; a
+/// non-empty value is REQUIRED before any server route activates. The empty
+/// default is load-bearing — a non-empty default would point the OFF build at a
+/// remote and break byte-identity.
+const String kCatalogBaseUrl = String.fromEnvironment('CATALOG_BASE_URL');
+
+/// True only when server-search is flagged ON *and* the backend is live —
+/// mirrors [useFirebaseBackend], so the flag can't activate offline / in tests.
+bool get useCatalogServerSearch => kCatalogServerSearch && useFirebaseBackend;
