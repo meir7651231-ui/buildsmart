@@ -22,6 +22,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
 import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_qty.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart';
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/material.dart';
@@ -101,9 +102,16 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   int? _qty;
   bool _added = false;
 
-  static const List<int> _qtyOpts = <int>[
-    1, 2, 3, 4, 5, 6, 8, 10, 12, 20, 50, 100, //
-  ];
+  /// The live 0–99 quantity from the dual-ring, shown on the confirm bar. Kept
+  /// off `setState` so a qty drag rebuilds only the ring + the confirm label,
+  /// not the whole card.
+  final ValueNotifier<int> _qtyLive = ValueNotifier<int>(1);
+
+  @override
+  void dispose() {
+    _qtyLive.dispose();
+    super.dispose();
+  }
 
   /// The path as a constraint map for the derivation layer.
   RdCons get _cons =>
@@ -141,6 +149,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   void _pickProduct(LipskeyCatalogProduct p) {
+    _qtyLive.value = 1;
     setState(() => _product = p);
   }
 
@@ -166,9 +175,17 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     });
   }
 
-  void _addToCart() {
+  void _confirmQty(int v) {
+    if (v < 1) return;
     HapticFeedback.mediumImpact();
-    setState(() => _added = true);
+    setState(() {
+      _qty = v;
+      _added = true;
+    });
+  }
+
+  void _cancelQty() {
+    setState(() => _product = null);
   }
 
   @override
@@ -182,6 +199,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     var hubHint = 'סובב · הקש לבחור';
     void Function(int)? onSelect;
     var footer = const <LipskeyCatalogProduct>[];
+    var qtyChoosing = false;
 
     var count = 0;
     var readout = 'מוצרים';
@@ -190,18 +208,12 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     String? activeField;
 
     if (_product != null) {
-      // ── quantity / cart phase (the dual-ring + done polish is RD-D/RD-F) ──
       final p = _product!;
       if (_qty == null) {
-        labels.addAll(_qtyOpts.map((q) => '$q'));
-        sublabels.addAll(_qtyOpts.map((_) => p.nameHe));
-        hubHint = 'הקש לבחור כמות';
-        onSelect = (i) {
-          if (i >= 0 && i < _qtyOpts.length) {
-            setState(() => _qty = _qtyOpts[i]);
-          }
-        };
+        // ── quantity: the dual number-ring (RingDiveQty) drives this phase ──
+        qtyChoosing = true;
       } else {
+        // ── done: the chosen product rests in the hub ──
         labels.add(p.nameHe);
         sublabels.add('כמות $_qty');
         hubHint = _added ? 'נוסף לסל ✓' : 'הוסף לסל למטה';
@@ -267,6 +279,19 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     }
 
     final inFind = _product == null;
+    final Widget wheelChild = qtyChoosing
+        ? RingDiveQty(
+            initial: _qtyLive.value,
+            lockedCount: _path.length,
+            onChanged: (v) => _qtyLive.value = v,
+          )
+        : RingDiveWheel(
+            labels: labels,
+            sublabels: sublabels,
+            hubHint: hubHint,
+            lockedCount: _path.length,
+            onSelect: onSelect,
+          );
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -291,7 +316,8 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   if (inFind && axisFields.length > 1)
                     _axisStrip(axisFields, activeField),
                   if (inFind && _path.isNotEmpty) _breadcrumbStrip(),
-                  _wheelArea(labels, sublabels, hubHint, onSelect),
+                  _wheelArea(wheelChild),
+                  if (qtyChoosing) _qtyConfirmBar(),
                   if (_product != null && _qty != null) _cartBar(),
                   if (inFind && footer.isNotEmpty)
                     _resultsRail(footer, count),
@@ -659,12 +685,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   // ── the wheel area (dial + commit marker) ──────────────────────────────────
 
-  Widget _wheelArea(
-    List<String> labels,
-    List<String> sublabels,
-    String hubHint,
-    void Function(int)? onSelect,
-  ) {
+  Widget _wheelArea(Widget child) {
     return SizedBox(
       height: 360,
       child: Center(
@@ -675,13 +696,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              RingDiveWheel(
-                labels: labels,
-                sublabels: sublabels,
-                hubHint: hubHint,
-                lockedCount: _path.length,
-                onSelect: onSelect,
-              ),
+              child,
               const Positioned(
                 top: 0,
                 child: IgnorePointer(
@@ -698,51 +713,98 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     );
   }
 
-  // ── cart bar ───────────────────────────────────────────────────────────────
+  // ── qty confirm bar (dual-ring live) + done cart bar ───────────────────────
+
+  Widget _qtyConfirmBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 14, 22, 18),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: _cancelQty,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0x0D000000),
+                border: Border.all(color: const Color(0x1F000000)),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Text(
+                'ביטול',
+                style: TextStyle(
+                  fontFamily: 'Heebo',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF5A6270),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: ValueListenableBuilder<int>(
+              valueListenable: _qtyLive,
+              builder: (context, v, _) => GestureDetector(
+                onTap: () => _confirmQty(v),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[Color(0xFFFF9A3F), Color(0xFFF0710C)],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Text(
+                    'הוסף לסל · × $v',
+                    style: const TextStyle(
+                      fontFamily: 'Heebo',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1A0D02),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _cartBar() {
-    if (_added) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 14, bottom: 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              '✓ נוסף לסל',
-              style: TextStyle(
-                fontFamily: 'Heebo',
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF3E8E5A),
-              ),
-            ),
-            Text(
-              '$_qty יחידות',
-              style: const TextStyle(
-                fontFamily: 'Heebo',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: _kMonoTag,
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: 200,
-              child: _pillButton('חיפוש חדש', _kInk, _reset),
-            ),
-          ],
-        ),
-      );
-    }
     return Padding(
       padding: const EdgeInsets.only(top: 14, bottom: 18),
-      child: SizedBox(
-        width: 240,
-        child: _pillButton(
-          'הוסף לסל · × $_qty',
-          const Color(0xFFEE6907),
-          _addToCart,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '✓ נוסף לסל',
+            style: TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF3E8E5A),
+            ),
+          ),
+          Text(
+            '$_qty יחידות',
+            style: const TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: _kMonoTag,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 200,
+            child: _pillButton('חיפוש חדש', _kInk, _reset),
+          ),
+        ],
       ),
     );
   }

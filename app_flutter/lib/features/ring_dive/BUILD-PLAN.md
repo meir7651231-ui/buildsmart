@@ -86,7 +86,16 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   in flutter_test (no fonts) — real-font fidelity is verified next in a browser
   render. LESSON: toImage in flutter_test MUST run inside tester.runAsync (a
   real-async future deadlocks under the fake clock — it timed out 2× before).
-- RD-V3 next — the qty dual number-ring (tens 00–90 + units 0–9 → 0–99) + the
-  product/qty sheets, then RD-E (compat via kVerifiedSpecs + job via
-  kSmartProducts), RD-G (motion polish + bundle JetBrains Mono). Show the owner
-  LIVE only once the FULL screen matches (not piecemeal).
+- RD-V3 done — the qty dual number-ring (ring_dive_qty.dart): tens 00–90 (outer
+  r124) + units 0–9 (inner r84) summed to 0–99. The first drag direction picks
+  the ring (CCW → tens), a tap on a number snaps its ring, release snaps both.
+  Wired into the screen's qty phase, replacing the discrete pick list; a live
+  ValueNotifier feeds the "הוסף לסל × N" confirm bar (ביטול + add), off setState
+  so a drag rebuilds only the ring + label, not the card. Verified: analyze 0 ·
+  test 2/2 · flag OFF byte-identical · a headless runAsync render (root → dive →
+  product → qty) confirms the two concentric number rings + focus halos + the
+  central "+" + the live-value hub + the confirm bar all match the prototype.
+- RD-E next — the real compat ("what connects", kVerifiedSpecs) + job (kit
+  recipes, kSmartProducts) modes; then RD-F (done follow-ups + cart sheet), RD-G
+  (motion polish + bundle JetBrains Mono + a browser-render fidelity pass). Show
+  the owner LIVE only once the FULL screen matches (not piecemeal).
