@@ -18,6 +18,23 @@
 > 🟦 **גל v6.88 (אומת בקוד+CI 23/6, ~50 קומיטים):** (1) **🤖 M2 Co‑Pilot למנהל נבנה** — `manager_copilot_screen.dart` "שאל את העסק שלך" + `logic/manager_copilot.dart` + 6 סבבי‑קשיחות (timeout/maxTokens/a11y/regression‑armor/injection/impersonation). **= חזון MANAGER‑MASTER‑PLAN M2, מומש.** (2) **⌨️ מקלדת‑חכמה נבנתה** — `features/card_keyboard/` (#38, phases 0‑5 + swarm R1‑R10) + A/B pill "מקלדת חכמה". (3) ה‑MANAGER‑MASTER‑PLAN שלי שולב ל"manager FINAL build‑plan" + ממשל‑בעלים #84. (4) 🆕 **Studio/No‑Code Platform** build‑plan (5 pillars + 100 steps + red‑team R1/R2). (5) קטלוג: 84 תמונות רשמיות lipski.co.il + spec‑copilot. CI @decc48b: **הכל ירוק כולל Play AAB (חתימה הוסדרה!)** — רק Protocol Enforcement ❌ (פנימי, לא‑חוסם).
 > 🎡 **Ring‑DIVE ✅ נבנה+חי (אומת בקוד+CI 6/7):** גל של ~19 קומיטים — P1‑P6 (גלגל→כמות→כרטיס‑מוצר→הוספה‑לסל) · RD‑A/B (שכבת‑8‑צירים + חיווט לטקסונומיה האמיתית) · RD‑V1‑V3 (מראה Pro‑X‑Light מהאב‑טיפוס של Claude‑Design + טבעת‑כמות 0‑99) · **RD‑E1 מצב‑תאימות ("מה מתחבר למוצר הזה") + RD‑E2 מצב‑עבודה/ערכה (smart_tree)** · הקשחת‑נחיל 10‑עדשות (flag‑OFF byte‑identical) · הורכב ב‑seam של המאתר‑החכם + **ENABLE_RING_DIVE=true בשני ה‑web‑deploys (כולל live)** — deploys ירוקים @e6c03b92. ⚠️ Play‑AAB עדיין אדום (מאז גל‑המקלדת, לא קשור לגלגל).
 > 🎡 **Ring‑DIVE המשך (אומת 6/7 ערב @f47e911a):** RD‑F **דפדוף** (הגלגל לא עולה על גדותיו) + **עגלה אמיתית מצטברת + גיליון‑עגלה** (הגלגל = זרימת‑קנייה שלמה) · RD‑G פונט JetBrains Mono לספרות · RD‑H טסטים למסלול ערכה→עגלה. CI: web+preview+TEST‑APKs ✅ · **Play‑AAB עדיין ❌ (החוסם היחיד לגרסת‑חנות, אין מטפל)** · Protocol/GH‑Pages ❌ כרוניים.
+> 🧨 **אבחון Play‑AAB (6.7 ערב) — הכשל פוענח. לא Gradle, לא flaky:** `android-package.yml`
+> נופל בשער `flutter test` — **13 טסטים אדומים** (3,969 ✅ · 5 ~ · 13 ❌) והבנייה של ה‑AAB לא
+> מתחילה בכלל. הפירוק: **10× `product_journey_test`** — כולם מתים ב‑`runJourney` (שורה ~55):
+> `find.byType(TextField)` → "Bad state: No element", כי גל‑המקלדת **מחק את שורת‑החיפוש**
+> (87b3df29 "delete the app's search BAR — the keyboard is the search") והטסט עדיין מקליד
+> לשדה שלא קיים; **2× `widget_test`** — 'חיפושים אחרונים' (שורה 114) וצ'יפ 'קטגוריות' (שורה 140)
+> שהוסרו/הועברו למקלדת באותו גל (86861c4f מחיקת שורת‑הפילים · d8ebc0fb רשימות‑קטלוג→מקלדת);
+> **1× `color_token_ratchet`** — `ring_dive_screen.dart:53`: swatch 'שחור' ב‑`_dotColors` =
+> `Color(0xFF1A1A1A)`, התנגשות מקרית בערך השמור של `BsTokens.inkLight` (רגרסיית גל RD).
+> **הרצף האדום התחיל ב‑32e3402e (5.7 07:07, "A slice 1 — route the search bar to the floating
+> keyboard"); ירוק אחרון f4e061b2 (5.7 06:51).** ה‑TEST‑APKs ירוקים כי הם מדלגים על שער הטסטים
+> בכוונה ("No flutter test gate here on purpose"). ⇒ התיקון = עדכון 3 קבצי‑טסט לממשק‑החיפוש
+> החדש (דרך `searchQueryProvider`, `catalog_screen.dart:95`) + הזזת ה‑swatch לערך לא‑שמור —
+> **בלי להחליש את השער**. ⚠️ נקודת‑בדיקה המשך: כשהשער יוריק — לוודא בראש הלוג
+> "✅ release signing configured"; בלי secret ה‑keystore ה‑AAB ייחתם debug ולא יתקבל ב‑Play.
+> הנחיה מדויקת להדבקה נמסרה לבעלים.
+
 > 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
 > | דגל | מפעיל | תנאי‑backend (מי) |
 > |---|---|---|
