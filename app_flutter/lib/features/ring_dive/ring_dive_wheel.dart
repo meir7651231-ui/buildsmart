@@ -133,6 +133,13 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
       _focus = focus;
     });
     widget.onFocusChanged?.call(focus);
+    // A "pan" that never crossed the tap threshold is really a click. On web and
+    // desktop a stationary click is frequently claimed by the pan recognizer, so
+    // `onTap` never fires — select here too so a click always dives.
+    if (_moved <= 8 && widget.labels.isNotEmpty) {
+      if (!_reduceMotion) HapticFeedback.mediumImpact();
+      widget.onSelect?.call(focus);
+    }
   }
 
   void _onTap() {
@@ -145,6 +152,9 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // Reset the drag distance on every pointer-down so a tap AFTER a drag is
+      // not swallowed by the previous drag's leftover `_moved` (> 8).
+      onTapDown: (_) => _moved = 0,
       onPanStart: _onPanStart,
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,

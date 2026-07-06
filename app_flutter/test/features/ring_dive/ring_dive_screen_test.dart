@@ -117,4 +117,36 @@ void main() {
     expect(find.textContaining('רכיבי הערכה'), findsOneWidget);
     expect(find.textContaining('הוסף ערכה לסל'), findsOneWidget);
   });
+
+  testWidgets('wheel: a real tap after a drag still selects (gesture path)',
+      (tester) async {
+    var selected = -1;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RingDiveWheel(
+              labels: const <String>['a', 'b', 'c', 'd'],
+              onSelect: (i) => selected = i,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final wheel = find.byType(RingDiveWheel);
+    // a drag leaves the internal moved-distance high (> the tap threshold)...
+    await tester.drag(wheel, const Offset(60, 30));
+    await tester.pumpAndSettle();
+    // ...and a genuine tap right after MUST still select. Before the fix the
+    // stale `_moved` swallowed it, so a click after any spin did nothing.
+    await tester.tap(wheel);
+    await tester.pumpAndSettle();
+    expect(
+      selected,
+      isNot(-1),
+      reason: 'a tap after a drag must dive, not be swallowed by stale _moved',
+    );
+  });
 }
