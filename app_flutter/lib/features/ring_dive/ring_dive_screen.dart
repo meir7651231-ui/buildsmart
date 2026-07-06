@@ -40,8 +40,11 @@ const Color _kMuted = Color(0xFF9AA0AC);
 const Color _kSub = Color(0xFF6B7280);
 const Color _kMonoTag = Color(0xFF9A8F82);
 
-/// The monospace face (JetBrains Mono is bundled in RD-V4; fall back for now).
-const String _kMono = 'monospace';
+/// The RINGDIVE·OS mono face (JetBrains Mono, bundled in RD-G). It has no Hebrew
+/// glyphs, so Hebrew in a mono style falls back to Heebo while Latin/digits stay
+/// JetBrains Mono.
+const String _kMono = 'JetBrains Mono';
+const List<String> _kMonoFallback = <String>['Heebo'];
 
 /// Colour-name → swatch (the design's `dots` map), for the result cards.
 const Map<String, Color> _dotColors = <String, Color>{
@@ -63,16 +66,31 @@ const Map<String, Color> _dotColors = <String, Color>{
 /// with that axis active; `job` is the kit flow (RD-E — a placeholder for now).
 const List<({String key, String emoji, String label})> _styles =
     <({String key, String emoji, String label})>[
-  (key: 'dept', emoji: '🗂️', label: 'מחלקה'),
-  (key: 'cat', emoji: '📁', label: 'קטגוריה'),
-  (key: 'type', emoji: '🔧', label: 'סוג'),
-  (key: 'size', emoji: '📏', label: 'גודל'),
-  (key: 'angle', emoji: '📐', label: 'זווית'),
-  (key: 'color', emoji: '🎨', label: 'צבע'),
-  (key: 'material', emoji: '⚙️', label: 'חומר'),
-  (key: 'brand', emoji: '🏷️', label: 'מותג'),
-  (key: 'job', emoji: '🧩', label: 'לפי עבודה'),
-];
+      (key: 'dept', emoji: '🗂️', label: 'מחלקה'),
+      (key: 'cat', emoji: '📁', label: 'קטגוריה'),
+      (key: 'type', emoji: '🔧', label: 'סוג'),
+      (key: 'size', emoji: '📏', label: 'גודל'),
+      (key: 'angle', emoji: '📐', label: 'זווית'),
+      (key: 'color', emoji: '🎨', label: 'צבע'),
+      (key: 'material', emoji: '⚙️', label: 'חומר'),
+      (key: 'brand', emoji: '🏷️', label: 'מותג'),
+      (key: 'job', emoji: '🧩', label: 'לפי עבודה'),
+    ];
+
+/// One line in the running order — a product (with a chosen quantity) or a whole
+/// kit (a recipe + its chosen model). NO price (the catalog has none).
+class _CartItem {
+  const _CartItem({this.product, this.kit, this.brand, this.qty = 1});
+
+  final LipskeyCatalogProduct? product;
+  final SmartProduct? kit;
+  final SmartBrand? brand;
+  final int qty;
+
+  bool get isKit => kit != null;
+  String get title => product?.nameHe ?? kit?.name ?? '';
+  String? get color => product?.color;
+}
 
 /// The RingDive surface. Renders nothing until `kRingDiveFlag` is enabled.
 class RingDiveScreen extends ConsumerStatefulWidget {
@@ -110,6 +128,14 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   LipskeyCatalogProduct? _origin;
   List<LipskeyCatalogProduct> _compatLeaves = const <LipskeyCatalogProduct>[];
 
+  /// The current wheel page. Any option set with >12 entries paginates (11 +
+  /// "עוד…") so the rim never overflows; reset to 0 when the set changes.
+  int _page = 0;
+
+  /// The accumulating order — products (from the qty confirm) and kits (from a
+  /// recipe). Persists across searches (NOT cleared on reset); NO price.
+  final List<_CartItem> _cart = <_CartItem>[];
+
   /// `job` mode: the chosen recipe key (null = the recipe list is on the wheel),
   /// the chosen model within it (defaults to the recommended brand), and whether
   /// its kit has been added.
@@ -129,8 +155,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   /// The path as a constraint map for the derivation layer.
-  RdCons get _cons =>
-      <String, String>{for (final s in _path) s.field: s.value};
+  RdCons get _cons => <String, String>{for (final s in _path) s.field: s.value};
 
   bool get _hasSelection => _mode != 'root';
 
@@ -140,6 +165,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     // fall back to the first axis (dept) and mislead the user.
     final validAxis = kRdAxes.contains(axis);
     setState(() {
+      _page = 0;
       _mode = validAxis ? 'find' : 'job';
       _axisField = validAxis ? axis : null;
       _path.clear();
@@ -155,6 +181,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _dive(String field, String value) {
     setState(() {
+      _page = 0;
       _path.add((field: field, value: value));
       final axes = rdFindAxes(_cons);
       _axisField = axes.isNotEmpty ? axes.first : null;
@@ -164,7 +191,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   /// Jump the active axis to [field] (the "סנן לפי" switcher) without diving.
   void _switchAxis(String field) {
     HapticFeedback.selectionClick();
-    setState(() => _axisField = field);
+    setState(() {
+      _axisField = field;
+      _page = 0;
+    });
   }
 
   void _pickProduct(LipskeyCatalogProduct p) {
@@ -174,6 +204,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _backTo(int level) {
     setState(() {
+      _page = 0;
       _path.removeRange(level, _path.length);
       _product = null;
       _qty = null;
@@ -218,8 +249,190 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   void _addKit() {
+    if (_jobKey == null) return;
+    final job = _jobByKey(_jobKey!);
     HapticFeedback.mediumImpact();
-    setState(() => _kitAdded = true);
+    setState(() {
+      _cart.add(_CartItem(kit: job, brand: _kitBrand ?? job.recBrand));
+      _kitAdded = true;
+    });
+  }
+
+  void _removeCartItem(int i, StateSetter setSheet) {
+    setState(() => _cart.removeAt(i));
+    setSheet(() {});
+  }
+
+  void _openCartSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder:
+          (sheetCtx) => StatefulBuilder(
+            builder: (ctx, setSheet) => _cartSheetContent(sheetCtx, setSheet),
+          ),
+    );
+  }
+
+  Widget _cartCrumb() {
+    final n = _cart.length;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 4, 22, 0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: _openCartSheet,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0x1A3E8E5A),
+              border: Border.all(color: const Color(0x593E8E5A)),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              '🛒 ההזמנה שלי · $n ${n == 1 ? 'פריט' : 'פריטים'}',
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF2F7A4E),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _cartSheetContent(BuildContext sheetCtx, StateSetter setSheet) {
+    final n = _cart.length;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 16, 22, 26),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE7E1D8),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'ההזמנה שלי',
+                  style: TextStyle(
+                    fontFamily: 'Heebo',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    color: _kInk,
+                  ),
+                ),
+                Text(
+                  '$n ${n == 1 ? 'פריט' : 'פריטים'}',
+                  style: const TextStyle(
+                    fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF2F7A4E),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_cart.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'הסל ריק',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontFamily: 'Heebo', color: _kSub),
+                ),
+              )
+            else
+              for (var i = 0; i < _cart.length; i++) _cartLine(i, setSheet),
+            const SizedBox(height: 16),
+            _pillButton(
+              'המשך בקנייה',
+              const Color(0xFF2E9E5B),
+              () => Navigator.of(sheetCtx).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cartLine(int i, StateSetter setSheet) {
+    final it = _cart[i];
+    final dot =
+        it.isKit
+            ? const Color(0xFFFF7A18)
+            : (_dotColors[it.color] ?? const Color(0xFFB7B0A5));
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: dot,
+              border: Border.all(color: const Color(0x26000000)),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              it.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF2A303C),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            it.isKit ? 'ערכה' : '× ${it.qty}',
+            style: const TextStyle(
+              fontFamily: _kMono,
+              fontFamilyFallback: _kMonoFallback,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: _kMonoTag,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _removeCartItem(i, setSheet),
+            child: const Padding(
+              padding: EdgeInsets.only(right: 8, left: 2),
+              child: Text(
+                '✕',
+                style: TextStyle(fontSize: 14, color: Color(0xFFC0392B)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _backToJobList() {
@@ -254,6 +467,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   void _enterCompat(LipskeyCatalogProduct p) {
     HapticFeedback.selectionClick();
     setState(() {
+      _page = 0;
       _mode = 'compat';
       _origin = p;
       _path.clear();
@@ -275,9 +489,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   }
 
   void _confirmQty(int v) {
-    if (v < 1) return;
+    if (v < 1 || _product == null) return;
     HapticFeedback.mediumImpact();
     setState(() {
+      _cart.add(_CartItem(product: _product, qty: v));
       _qty = v;
       _added = true;
     });
@@ -285,6 +500,29 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _cancelQty() {
     setState(() => _product = null);
+  }
+
+  /// Cap an over-long rim label so it fits the dial (real compat/leaf names can
+  /// run long, e.g. 'אביזרי נחושת — כל הסוגים 20 מ"מ').
+  String _cap(String s) => s.length > 20 ? '${s.substring(0, 19)}…' : s;
+
+  /// The current wheel page of [items]: up to 11 entries + an "עוד…" pager key
+  /// when there are >12, so the rim never overflows. `hasMore` says whether to
+  /// add the pager; `pageLabel` is its sublabel.
+  ({List<T> slice, bool hasMore, String pageLabel}) _pageSlice<T>(
+    List<T> items,
+  ) {
+    const per = 11;
+    if (items.length <= 12) {
+      return (slice: items, hasMore: false, pageLabel: '');
+    }
+    final pages = (items.length / per).ceil();
+    final pg = _page % pages;
+    return (
+      slice: items.skip(pg * per).take(per).toList(growable: false),
+      hasMore: true,
+      pageLabel: 'דף ${pg + 1}/$pages',
+    );
   }
 
   @override
@@ -370,22 +608,31 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       }
     } else if (_mode == 'compat') {
       // ── compat: the REAL "what connects" list (verified-connections) ──
-      final partners = _origin == null
-          ? const <LipskeyCatalogProduct>[]
-          : compatibleWith(_origin!);
-      _compatLeaves = partners;
+      final partners =
+          _origin == null
+              ? const <LipskeyCatalogProduct>[]
+              : compatibleWith(_origin!);
       count = partners.length;
       readout = 'תואמים';
-      statusLine = partners.isEmpty
-          ? 'אין מוצרים תואמים'
-          : 'מה מתחבר ל${_origin!.nameHe}';
+      statusLine =
+          partners.isEmpty
+              ? 'אין מוצרים תואמים'
+              : 'מה מתחבר ל${_origin!.nameHe}';
       hubHint = 'הקש להוספה';
-      for (final p in partners.take(12)) {
-        labels.add(_short(p));
+      final page = _pageSlice(partners);
+      _compatLeaves = page.slice;
+      for (final p in page.slice) {
+        labels.add(_cap(_short(p)));
         sublabels.add('תואם');
       }
+      if (page.hasMore) {
+        labels.add('עוד…');
+        sublabels.add(page.pageLabel);
+      }
       onSelect = (i) {
-        if (i >= 0 && i < _compatLeaves.length && i < 12) {
+        if (page.hasMore && i == _compatLeaves.length) {
+          setState(() => _page++);
+        } else if (i >= 0 && i < _compatLeaves.length) {
           _pickProduct(_compatLeaves[i]);
         }
       };
@@ -401,35 +648,61 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       count = matched.length;
       readout = 'מועמדים';
       if (axes.isEmpty) {
-        // Store the live leaves in a field; the tap handler indexes THIS field,
-        // so a select always resolves against the current constraint set.
-        _leaves = matched;
-        labels.addAll(matched.map((rp) => rp.name));
-        sublabels.addAll(matched.map((_) => 'בחר מוצר'));
+        // Store the current page's leaves in a field; the tap handler indexes
+        // THIS field, so a select always resolves against the shown set.
+        final page = _pageSlice(matched);
+        _leaves = page.slice;
+        for (final rp in page.slice) {
+          labels.add(_cap(rp.name));
+          sublabels.add('בחר מוצר');
+        }
+        if (page.hasMore) {
+          labels.add('עוד…');
+          sublabels.add(page.pageLabel);
+        }
         hubHint = 'הקש לבחור מוצר';
         statusLine = 'בחר מוצר · הקש על השם';
         onSelect = (i) {
-          if (i >= 0 && i < _leaves.length) _pickProduct(_leaves[i].product);
+          if (page.hasMore && i == _leaves.length) {
+            setState(() => _page++);
+          } else if (i >= 0 && i < _leaves.length) {
+            _pickProduct(_leaves[i].product);
+          }
         };
       } else {
         _leaves = const <RdProduct>[];
-        final field = (_axisField != null && axes.contains(_axisField))
-            ? _axisField!
-            : axes.first;
+        final field =
+            (_axisField != null && axes.contains(_axisField))
+                ? _axisField!
+                : axes.first;
         final opts = rdOptsFor(field, cons, matched);
         final label = kRdAxisLabel[field] ?? '';
-        labels.addAll(opts);
-        sublabels.addAll(opts.map((_) => label));
+        final page = _pageSlice(opts);
+        for (final o in page.slice) {
+          labels.add(_cap(o));
+          sublabels.add(label);
+        }
+        if (page.hasMore) {
+          labels.add('עוד…');
+          sublabels.add(page.pageLabel);
+        }
         axisFields = axes;
         activeField = field;
-        statusLine = axes.length > 1
-            ? 'בחר $label · או החלף סינון למעלה'
-            : 'בחר $label · סובב את הגלגל';
+        statusLine =
+            axes.length > 1
+                ? 'בחר $label · או החלף סינון למעלה'
+                : 'בחר $label · סובב את הגלגל';
         onSelect = (i) {
-          if (i >= 0 && i < opts.length) _dive(field, opts[i]);
+          if (page.hasMore && i == page.slice.length) {
+            setState(() => _page++);
+          } else if (i >= 0 && i < page.slice.length) {
+            _dive(field, page.slice[i]);
+          }
         };
-        footer =
-            matched.take(10).map((rp) => rp.product).toList(growable: false);
+        footer = matched
+            .take(10)
+            .map((rp) => rp.product)
+            .toList(growable: false);
       }
     }
 
@@ -438,19 +711,20 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     final kitJob = kitPhase ? _jobByKey(_jobKey!) : null;
 
     final inFind = _product == null;
-    final Widget wheelChild = qtyChoosing
-        ? RingDiveQty(
-            initial: _qtyLive.value,
-            lockedCount: _path.length,
-            onChanged: (v) => _qtyLive.value = v,
-          )
-        : RingDiveWheel(
-            labels: labels,
-            sublabels: sublabels,
-            hubHint: hubHint,
-            lockedCount: _path.length,
-            onSelect: onSelect,
-          );
+    final Widget wheelChild =
+        qtyChoosing
+            ? RingDiveQty(
+              initial: _qtyLive.value,
+              lockedCount: _path.length,
+              onChanged: (v) => _qtyLive.value = v,
+            )
+            : RingDiveWheel(
+              labels: labels,
+              sublabels: sublabels,
+              hubHint: hubHint,
+              lockedCount: _path.length,
+              onSelect: onSelect,
+            );
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -459,7 +733,11 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           gradient: RadialGradient(
             center: Alignment(0, -1.1),
             radius: 1.25,
-            colors: <Color>[Color(0xFFFFFFFF), Color(0xFFF8F2EA), Color(0xFFEFE6DB)],
+            colors: <Color>[
+              Color(0xFFFFFFFF),
+              Color(0xFFF8F2EA),
+              Color(0xFFEFE6DB),
+            ],
             stops: <double>[0, 0.45, 1],
           ),
         ),
@@ -471,6 +749,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _statusBar(),
+                  if (_cart.isNotEmpty) _cartCrumb(),
                   if (inFind) _countBlock(count, readout, statusLine),
                   if (inFind && axisFields.length > 1)
                     _axisStrip(axisFields, activeField),
@@ -482,8 +761,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   if (kitJob != null) _kitStrip(kitJob),
                   if (kitJob != null) _kitAddBar(kitJob),
                   if (kitDone) _kitDoneBar(),
-                  if (inFind && footer.isNotEmpty)
-                    _resultsRail(footer, count),
+                  if (inFind && footer.isNotEmpty) _resultsRail(footer, count),
                 ],
               ),
             ),
@@ -630,6 +908,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 'RINGDIVE·OS',
                 style: TextStyle(
                   fontFamily: _kMono,
+                  fontFamilyFallback: _kMonoFallback,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2,
@@ -643,7 +922,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             child: GestureDetector(
               onTap: _hasSelection ? _reset : null,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0x0A000000),
                   border: Border.all(color: const Color(0x17000000)),
@@ -653,6 +935,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   '↺ מחדש',
                   style: TextStyle(
                     fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1,
@@ -683,13 +966,18 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 '$count',
                 style: const TextStyle(
                   fontFamily: _kMono,
+                  fontFamilyFallback: _kMonoFallback,
                   fontSize: 56,
                   fontWeight: FontWeight.w800,
                   height: 0.9,
                   letterSpacing: -2,
                   color: _kInk,
                   shadows: <Shadow>[
-                    Shadow(color: Color(0x38FF7A18), blurRadius: 14, offset: Offset(0, 2)),
+                    Shadow(
+                      color: Color(0x38FF7A18),
+                      blurRadius: 14,
+                      offset: Offset(0, 2),
+                    ),
                   ],
                 ),
               ),
@@ -700,6 +988,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   readout,
                   style: const TextStyle(
                     fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
@@ -738,6 +1027,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               'סנן לפי',
               style: TextStyle(
                 fontFamily: _kMono,
+                fontFamilyFallback: _kMonoFallback,
                 fontSize: 9,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1,
@@ -760,13 +1050,14 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
           decoration: BoxDecoration(
-            gradient: active
-                ? const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[Color(0xFFFF9A3F), Color(0xFFF0710C)],
-                  )
-                : null,
+            gradient:
+                active
+                    ? const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[Color(0xFFFF9A3F), Color(0xFFF0710C)],
+                    )
+                    : null,
             color: active ? null : const Color(0x14FF7A18),
             border: Border.all(
               color: active ? _kOrangeDeep : const Color(0x4DFF7A18),
@@ -798,8 +1089,12 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         runSpacing: 7,
         children: [
           for (var i = 0; i < _path.length; i++)
-            _crumb(i + 1, kRdAxisLabel[_path[i].field] ?? '', _path[i].value,
-                () => _backTo(i)),
+            _crumb(
+              i + 1,
+              kRdAxisLabel[_path[i].field] ?? '',
+              _path[i].value,
+              () => _backTo(i),
+            ),
         ],
       ),
     );
@@ -823,6 +1118,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               '$n· $axis ✎',
               style: const TextStyle(
                 fontFamily: _kMono,
+                fontFamilyFallback: _kMonoFallback,
                 fontSize: 8.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,
@@ -907,30 +1203,31 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           Expanded(
             child: ValueListenableBuilder<int>(
               valueListenable: _qtyLive,
-              builder: (context, v, _) => GestureDetector(
-                onTap: () => _confirmQty(v),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[Color(0xFFFF9A3F), Color(0xFFF0710C)],
+              builder:
+                  (context, v, _) => GestureDetector(
+                    onTap: () => _confirmQty(v),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: <Color>[Color(0xFFFF9A3F), Color(0xFFF0710C)],
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        'הוסף לסל · × $v',
+                        style: const TextStyle(
+                          fontFamily: 'Heebo',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1A0D02),
+                        ),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Text(
-                    'הוסף לסל · × $v',
-                    style: const TextStyle(
-                      fontFamily: 'Heebo',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1A0D02),
-                    ),
-                  ),
-                ),
-              ),
             ),
           ),
         ],
@@ -988,10 +1285,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             ),
             const SizedBox(height: 8),
           ],
-          SizedBox(
-            width: 240,
-            child: _pillButton('חיפוש חדש', _kInk, _reset),
-          ),
+          SizedBox(width: 240, child: _pillButton('חיפוש חדש', _kInk, _reset)),
         ],
       ),
     );
@@ -1022,6 +1316,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   'עבודה ✎',
                   style: TextStyle(
                     fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
                     fontSize: 8.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1,
@@ -1063,6 +1358,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               'רכיבי הערכה · ${job.acc.length}',
               style: const TextStyle(
                 fontFamily: _kMono,
+                fontFamilyFallback: _kMonoFallback,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 2,
@@ -1078,7 +1374,8 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Row(
                 children: [
-                  for (final a in job.acc) _accChip(a.emoji, a.name, must: a.must),
+                  for (final a in job.acc)
+                    _accChip(a.emoji, a.name, must: a.must),
                 ],
               ),
             ),
@@ -1164,10 +1461,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: 220,
-            child: _pillButton('חיפוש חדש', _kInk, _reset),
-          ),
+          SizedBox(width: 220, child: _pillButton('חיפוש חדש', _kInk, _reset)),
         ],
       ),
     );
@@ -1199,6 +1493,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   'מועמדים',
                   style: TextStyle(
                     fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
@@ -1209,6 +1504,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   '$total ▸',
                   style: const TextStyle(
                     fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: _kOrangeDeep,
@@ -1290,6 +1586,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontFamily: _kMono,
+                            fontFamilyFallback: _kMonoFallback,
                             fontSize: 8.5,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1,
@@ -1376,6 +1673,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                   p.brand,
                   style: const TextStyle(
                     fontFamily: _kMono,
+                    fontFamilyFallback: _kMonoFallback,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     color: _kMonoTag,
@@ -1423,6 +1721,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         '$k · $v',
         style: const TextStyle(
           fontFamily: _kMono,
+          fontFamilyFallback: _kMonoFallback,
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: Color(0xFF4A505C),

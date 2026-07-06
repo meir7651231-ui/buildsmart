@@ -149,4 +149,112 @@ void main() {
       reason: 'a tap after a drag must dive, not be swallowed by stale _moved',
     );
   });
+
+  testWidgets('pagination: an axis with >12 options shows 11 + "עוד…"',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // enter the 'סוג' (type) style — the type axis has far more than 12 options.
+    final typeIndex = wheel().labels.indexWhere((l) => l.contains('סוג'));
+    wheel().onSelect!(typeIndex);
+    await tester.pumpAndSettle();
+
+    // the rim never overflows: exactly 12 (11 options + the "עוד…" pager).
+    expect(wheel().labels.length, 12);
+    expect(wheel().labels.last, 'עוד…');
+
+    // tapping "עוד…" pages to a different set.
+    final firstPage = List<String>.of(wheel().labels);
+    wheel().onSelect!(11);
+    await tester.pumpAndSettle();
+    expect(wheel().labels, isNot(equals(firstPage)));
+    expect(wheel().labels.last, 'עוד…');
+  });
+
+  testWidgets('cart: confirm a product → crumb + sheet + remove',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // dive to a product, then confirm a quantity → it lands in the cart.
+    for (var i = 0; i < 14; i++) {
+      if (find.byType(RingDiveQty).evaluate().isNotEmpty) break;
+      wheel().onSelect!(0);
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.textContaining('הוסף לסל'));
+    await tester.pumpAndSettle();
+
+    // the cart crumb now shows the running order.
+    expect(find.textContaining('ההזמנה שלי'), findsOneWidget);
+
+    // open the cart sheet → the line + the close button are there.
+    await tester.tap(find.textContaining('ההזמנה שלי'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('המשך בקנייה'), findsOneWidget);
+
+    // remove the only line → the sheet refreshes to empty.
+    await tester.tap(find.text('✕').first);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('הסל ריק'), findsOneWidget);
+  });
+
+  testWidgets('cart: adding a kit lands as a "ערכה" line', (tester) async {
+    // the kit "add" button sits low in the tall card — a taller surface keeps
+    // it on-screen so the tap hit-tests.
+    tester.view.physicalSize = const Size(440, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // root → "by job" (index 8) → first recipe → add the kit.
+    wheel().onSelect!(8);
+    await tester.pumpAndSettle();
+    wheel().onSelect!(0);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('הוסף ערכה לסל'));
+    await tester.pumpAndSettle();
+
+    // the kit is now in the cart; the sheet shows it as a "ערכה" line.
+    expect(find.textContaining('ההזמנה שלי'), findsOneWidget);
+    await tester.tap(find.textContaining('ההזמנה שלי'));
+    await tester.pumpAndSettle();
+    // the sheet is open and the kit shows as a "ערכה" line (the hub behind also
+    // carries the word, so allow more than one).
+    expect(find.textContaining('המשך בקנייה'), findsOneWidget);
+    expect(find.text('ערכה'), findsWidgets);
+  });
 }

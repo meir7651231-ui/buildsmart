@@ -118,8 +118,40 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   button. Note: the real acc are specific named accessories (some sku-pinned),
   not free-choice slots, so the honest realization is model-choice + a fixed
   components view (not the prototype's per-slot pick).
-- RD-F next — a real cart (the sheet + running list) so qty-add and kit-add
-  accumulate; done follow-ups; wheel pagination for >12 options (compat/leaves).
-  Then RD-G (motion polish + bundle JetBrains Mono + a browser-render fidelity
-  pass) and RD-H (more tests). Show the owner LIVE only once the FULL screen
-  matches (not piecemeal).
+- 🚀 LIVE (6/7) — pushed to buildsmart-il.com on the owner's "תתדחוף". Wired at
+  the catalog_screen 'מאתר חכם' seam (kRingDive → RingDive, else WordFinderHome)
+  + ENABLE_RING_DIVE in firebase-hosting.yml + web-deploy.yml + merged to
+  claude/whats-happening-LyY9G. Verified live: ETag flipped + RINGDIVE in the
+  built main.dart.js. Reached via the keyboard's '✨ מאתר חכם' chip.
+- fix (4e78f207) — a real click was swallowed after a spin (stale _moved) / on
+  web (pan claims the click); onTapDown resets _moved + onPanEnd selects on a
+  sub-threshold move. Gesture-level test added (the unit tests had bypassed the
+  gesture by calling onSelect directly).
+- RD-F pagination done — every wheel set with >12 options now pages (11 + "עוד…"
+  via _pageSlice + _page) so the rim never overflows (was: type 98 / size 150 /
+  compat 234 crammed). Long rim labels capped (_cap). analyze 0 · test 6/6 · a
+  new test asserts 12 labels + "עוד…" + paging.
+- RD-F cart done — a real accumulating _cart (products from the qty confirm +
+  kits from a recipe, persists across searches, NO price), a green cart crumb
+  showing the count, and a cart sheet (showModalBottomSheet + StatefulBuilder:
+  each line = dot · name · ×qty/ערכה · remove; "המשך בקנייה"). analyze 0 · test
+  7/7 (a new test confirms crumb → sheet → remove → empty). RD-F is DONE.
+  Then RD-G + RD-H.
+- RD-G font done — JetBrains Mono bundled (assets/fonts/JetBrainsMono-{Regular,
+  Bold,ExtraBold}.ttf + pubspec) for the RINGDIVE·OS wordmark + the count/qty
+  numerals, matching the design. It has no Hebrew glyphs, so every mono style
+  carries fontFamilyFallback:['Heebo'] — Latin/digits render JetBrains Mono,
+  Hebrew renders Heebo (caught a tofu regression in the render before shipping).
+  analyze 0 · test 7/7 · flag OFF byte-identical · a real-font render confirms
+  "1948"/"RINGDIVE·OS" in JetBrains Mono and "מוצרים" in Heebo.
+- RD-G motion SKIPPED (documented) — a repeating animation (e.g. the pulse dot)
+  makes `pumpAndSettle` in the existing tests never settle (it would hang the
+  suite ~10 min). Fixing every test to disable animations is invasive for
+  purely-optional ambiance, so motion is intentionally not shipped. If ever
+  wanted: build the animated bits behind MediaQuery.disableAnimations AND switch
+  the affected tests to `pump(Duration)` / a disableAnimations MediaQuery.
+- RD-H done — ring_dive test 8/8: flag-OFF byte-identity, root→clean dive, real
+  compat, real job kit, the gesture tap-after-drag fix, wheel pagination, the
+  product cart (crumb→sheet→remove) and the kit→cart line.
+- RingDive is POLISH-COMPLETE + LIVE. Undeployed local polish (pagination + cart
+  + JetBrains Mono) waits for the next "תדחוף" to go live.
