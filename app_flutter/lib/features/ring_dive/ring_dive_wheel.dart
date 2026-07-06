@@ -26,6 +26,8 @@ import 'package:flutter/services.dart' show HapticFeedback;
 class RingDiveWheel extends StatefulWidget {
   const RingDiveWheel({
     required this.labels,
+    this.sublabels = const <String>[],
+    this.hubHint = 'סובב · הקש לבחור',
     this.lockedCount = 0,
     this.onSelect,
     this.onFocusChanged,
@@ -34,6 +36,13 @@ class RingDiveWheel extends StatefulWidget {
 
   /// The axis options around the rim (P4 supplies the engine's chip labels).
   final List<String> labels;
+
+  /// Per-option context line, parallel to [labels] — shown small atop the center
+  /// hub (e.g. the axis name of each merged chip). Empty → no title line.
+  final List<String> sublabels;
+
+  /// The hint line at the bottom of the center hub.
+  final String hubHint;
 
   /// Dive depth → locked rings inside the dial.
   final int lockedCount;
@@ -138,11 +147,94 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,
       onTap: _onTap,
-      child: RingDiveDial(
-        labels: widget.labels,
-        focus: _focus,
-        rotation: _rot,
-        lockedCount: widget.lockedCount,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          RingDiveDial(
+            labels: widget.labels,
+            focus: _focus,
+            rotation: _rot,
+            lockedCount: widget.lockedCount,
+          ),
+          if (widget.labels.isNotEmpty) _buildHub(),
+        ],
+      ),
+    );
+  }
+
+  /// The center hub — a machined white disc showing the option context (title),
+  /// the focused option (big), and the hint. IgnorePointer so taps/drags fall
+  /// through to the wheel's own gestures (a tap anywhere selects the focus).
+  Widget _buildHub() {
+    final focus = _focus.clamp(0, widget.labels.length - 1);
+    final big = widget.labels[focus];
+    final title =
+        focus < widget.sublabels.length ? widget.sublabels[focus] : '';
+    final bigSize = big.length > 5 ? 15.0 : (big.length > 3 ? 19.0 : 23.0);
+    return IgnorePointer(
+      child: Container(
+        width: 94,
+        height: 94,
+        padding: const EdgeInsets.symmetric(horizontal: 9),
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            center: Alignment(0, -0.4),
+            colors: [Color(0xFFFFFFFF), Color(0xFFFBF9F5), Color(0xFFF2EDE5)],
+            stops: [0, 0.58, 1],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x1F6E583A),
+              blurRadius: 30,
+              spreadRadius: -8,
+              offset: Offset(0, 16),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (title.isNotEmpty)
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Heebo',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF8C8578),
+                ),
+              ),
+            Text(
+              big,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: bigSize,
+                fontWeight: FontWeight.w900,
+                height: 1.05,
+                color: const Color(0xFF1B1B1A),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              widget.hubHint,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC0B9AD),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -128,42 +128,133 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     });
   }
 
+  /// Go back to a dive level — drop the step at [level] and everything deeper
+  /// (mirrors the prototype's `backTo`). Tapping breadcrumb i lands here.
+  void _backTo(int level) {
+    setState(() {
+      _stack.removeRange(level, _stack.length);
+    });
+  }
+
+  void _reset() {
+    setState(_stack.clear);
+  }
+
   @override
   Widget build(BuildContext context) {
     final on = ref.watch(featureFlagsProvider).contains(kRingDiveFlag);
     if (!on) return const SizedBox.shrink();
 
     final labels = <String>[];
+    final sublabels = <String>[];
     void Function(int)? onSelect;
 
     switch (_verdict) {
       case CardAskWords(words: final words):
         labels.addAll(words.map((w) => w.word));
+        sublabels.addAll(words.map((_) => 'מה צריך?'));
         onSelect = (i) {
           if (i >= 0 && i < words.length) _diveWord(words[i]);
         };
       case MergedKeys(chips: final chips):
         labels.addAll(chips.map((c) => c.displayLabel));
+        sublabels.addAll(chips.map((c) => c.axisName ?? ''));
         onSelect = (i) {
           if (i >= 0 && i < chips.length) _diveChip(chips[i]);
         };
       case CardShowProducts(products: final products):
         labels.addAll(products.map((p) => p.nameHe));
+        sublabels.addAll(products.map((_) => 'בחר מוצר'));
         onSelect = (i) {
           if (i >= 0 && i < products.length) _diveProduct(products[i]);
         };
       case CardResolve(product: final product):
-        // Landed on one product. Phase 5 turns this into the quantity phase.
+        // Landed on one product. Phase 5b turns this into the quantity phase.
         labels.add(product.nameHe);
+        sublabels.add('המוצר');
     }
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Center(
-        child: RingDiveWheel(
-          labels: labels,
-          lockedCount: _stack.length,
-          onSelect: onSelect,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_stack.isNotEmpty) _buildBreadcrumb(),
+            RingDiveWheel(
+              labels: labels,
+              sublabels: sublabels,
+              lockedCount: _stack.length,
+              onSelect: onSelect,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The breadcrumb trail — one pill per answered step (tap to go back to that
+  /// level) + a "↺ מחדש" reset. Scrolls horizontally once the trail is long.
+  Widget _buildBreadcrumb() {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 320),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (var i = 0; i < _stack.length; i++)
+              _crumb(_stack[i].crumbWord, () => _backTo(i)),
+            const SizedBox(width: 6),
+            _resetCrumb(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _crumb(String text, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0x1FFF7A18),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          text,
+          maxLines: 1,
+          style: const TextStyle(
+            fontFamily: 'Heebo',
+            fontSize: 11.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFFC4590C),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _resetCrumb() {
+    return GestureDetector(
+      onTap: _reset,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFFE7E1D8)),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: const Text(
+          '↺ מחדש',
+          style: TextStyle(
+            fontFamily: 'Heebo',
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF8C8578),
+          ),
         ),
       ),
     );

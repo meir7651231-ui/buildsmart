@@ -87,5 +87,7 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
   same _predicateFor idiom as card_keyboard_screen, zero engine change). Opening
   seed uses the word predicate (a later refinement may use the kOpeningSeedAxis
   sentinel so it doesn't burn the word axis). analyze 0.
-- P5 next — breadcrumb/back (tap a locked ring / a back affordance) + the
-  quantity phase on CardResolve.
+- P5a done (this commit) — center hub (title + focused option + hint, tap-through
+  IgnorePointer) + breadcrumb trail (tap a pill to go back to that level) + reset.
+  analyze 0, tests green.
+- P5b next — quantity phase on CardResolve (qty numbers on the rim + a confirm).
