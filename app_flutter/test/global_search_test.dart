@@ -103,4 +103,67 @@ void main() {
       );
     });
   });
+
+  group('GlobalSearchIndex.searchBalanced', () {
+    // A prolific PRODUCT source (5 hits) beside a single screen + single chat.
+    // Every title starts with 'בר' → all score 3 (prefix), so the flat search
+    // ranks purely by kind and products win every tie.
+    GlobalSearchIndex flooded() => GlobalSearchIndex([
+          _sourceOf(
+            SearchResultKind.product,
+            ['בר1', 'בר2', 'בר3', 'בר4', 'בר5'],
+          ),
+          _sourceOf(SearchResultKind.screen, ['ברגים']),
+          _sourceOf(SearchResultKind.chat, ['ברוך']),
+        ]);
+
+    test('flat search FLOODS: the prolific domain fills every visible slot', () {
+      // Baseline that motivates searchBalanced — with a 3-slot row the products
+      // crowd the screen + chat out entirely.
+      final kinds = flooded().search('בר', total: 3).map((r) => r.kind);
+      expect(kinds.toSet(), {SearchResultKind.product},
+          reason: 'flat score sort → 3 products, no screen/chat');
+    });
+
+    test('searchBalanced REPRESENTS every domain before any repeats', () {
+      // Round 0 takes the #1 of each source, so all three domains appear in the
+      // first three slots even though products dominate the score board.
+      final kinds = flooded()
+          .searchBalanced('בר', total: 5)
+          .map((r) => r.kind)
+          .toList();
+      expect(
+        kinds.take(3).toSet(),
+        {
+          SearchResultKind.product,
+          SearchResultKind.screen,
+          SearchResultKind.chat,
+        },
+        reason: 'every domain with a hit is represented in the first round',
+      );
+      // Within round 0 the equal scores tie-break by kind order, so the very
+      // first is the product; the extra slots (4,5) go to the next products.
+      expect(kinds.first, SearchResultKind.product);
+      expect(kinds.length, 5, reason: 'honours the total cap');
+    });
+
+    test('searchBalanced: empty / whitespace query returns nothing', () {
+      expect(flooded().searchBalanced(''), isEmpty);
+      expect(flooded().searchBalanced('   '), isEmpty);
+    });
+
+    test('searchBalanced orders each round by score (not just kind)', () {
+      // A screen scoring higher (exact) than the product (prefix) leads its
+      // round despite products winning EQUAL-score ties.
+      final idx = GlobalSearchIndex([
+        _sourceOf(SearchResultKind.product, ['ברז']), // prefix vs 'בר' → 3
+        _sourceOf(SearchResultKind.screen, ['בר']), // exact 'בר' → 4
+      ]);
+      expect(
+        idx.searchBalanced('בר').map((r) => r.kind).toList(),
+        [SearchResultKind.screen, SearchResultKind.product],
+        reason: 'exact(4) screen outranks prefix(3) product within the round',
+      );
+    });
+  });
 }

@@ -4,6 +4,8 @@
 
 import 'package:buildsmart/features/global_search/global_search.dart';
 import 'package:buildsmart/features/global_search/global_search_sources.dart';
+import 'package:buildsmart/screens/chats_screen.dart'
+    show ThreadLite, visibleThreadsProvider;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,5 +61,42 @@ void main() {
     for (var i = 1; i < out.length; i++) {
       expect(out[i - 1].score, greaterThanOrEqualTo(out[i].score));
     }
+  });
+
+  testWidgets(
+      'the chats source contributes a live thread into the merged index '
+      '(chats join screens+products in the unified row)', (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    late GlobalSearchIndex idx;
+    late List<ThreadLite> threads;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: Consumer(
+          builder: (context, ref, _) {
+            idx = buildGlobalSearchIndex(ref);
+            threads = ref.read(visibleThreadsProvider);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    expect(threads, isNotEmpty,
+        reason: 'the contractor persona has seeded chat threads to search');
+    final target = threads.first;
+
+    // Search the thread's EXACT name → an exact (score-4) chat hit. An exact
+    // match leads its own source and is well within the per-source cap, so it
+    // MUST appear in the merged list — proving the chats source is wired into
+    // buildGlobalSearchIndex alongside screens + products.
+    final out = idx.search(target.name);
+    expect(
+      out.any(
+        (r) => r.kind == SearchResultKind.chat && r.title == target.name,
+      ),
+      isTrue,
+      reason: 'the chats source surfaced the visible thread "${target.name}" '
+          'into the unified results',
+    );
   });
 }

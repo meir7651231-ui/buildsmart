@@ -135,4 +135,54 @@ class GlobalSearchIndex {
 
     return merged.length <= total ? merged : merged.sublist(0, total);
   }
+
+  /// ROUND-ROBIN variant of [search] — the "everything is there" ordering the
+  /// keyboard row uses. Instead of a flat score sort (where one prolific domain,
+  /// e.g. products, can fill every visible slot and crowd screens/chats out), it
+  /// takes each source's #1 hit, then each source's #2, and so on: EVERY domain
+  /// with a match is represented before any domain gets a second slot. Within a
+  /// round the higher score still leads (then [SearchResultKind] order, then
+  /// title), so relevance orders the visible mix without any domain vanishing.
+  /// Same per-source + [total] caps and the same empty-query contract as [search].
+  List<SearchResult> searchBalanced(
+    String query, {
+    int perSource = 4,
+    int total = 24,
+  }) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return const <SearchResult>[];
+
+    // Per-source ranked buckets (each already scored + sorted + capped by the
+    // source; defensively re-capped here so an over-returning source can't skew
+    // the round-robin).
+    final buckets = <List<SearchResult>>[
+      for (final source in sources)
+        () {
+          final hits = source(q, perSource);
+          return hits.length <= perSource ? hits : hits.sublist(0, perSource);
+        }(),
+    ];
+
+    final out = <SearchResult>[];
+    for (var round = 0; out.length < total; round++) {
+      // This round's candidates: the round-th hit from every bucket that has one.
+      final roundHits = <SearchResult>[
+        for (final b in buckets)
+          if (round < b.length) b[round],
+      ];
+      if (roundHits.isEmpty) break; // every bucket exhausted.
+      roundHits.sort((a, b) {
+        final byScore = b.score.compareTo(a.score);
+        if (byScore != 0) return byScore;
+        final byKind = a.kind.index.compareTo(b.kind.index);
+        if (byKind != 0) return byKind;
+        return a.title.compareTo(b.title);
+      });
+      for (final h in roundHits) {
+        if (out.length >= total) break;
+        out.add(h);
+      }
+    }
+    return out;
+  }
 }

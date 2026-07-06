@@ -56,6 +56,10 @@ import 'package:buildsmart/data/lipskey_catalog.dart'
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
     show FindKeyboardPanel;
+import 'package:buildsmart/features/global_search/global_search.dart'
+    show kGlobalSearch;
+import 'package:buildsmart/features/global_search/global_search_sources.dart'
+    show buildGlobalSearchIndex;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
@@ -375,6 +379,42 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     return _PredRow(chips, destByChip);
   }
 
+  /// GLOBAL SEARCH typed row ([kGlobalSearch]) — the unified "search everything"
+  /// row (owner: "keep it in the same place [the prediction row] but let
+  /// EVERYTHING be there"). Fans [text] out to every wired domain source via
+  /// [buildGlobalSearchIndex] over THIS keyboard's own `ref`, takes the merged +
+  /// score-ranked hits, and renders the top [_kRowCap] as chips. Each chip
+  /// dispatches through the `runByChip` map — its `SearchResult.run` is the SAME
+  /// type as [KbRunByChip], so [_onPrediction]'s case (ii) runs it verbatim: open
+  /// the product sheet · navigate to the screen · open the chat — all keeping the
+  /// overlay floating (the closures flip a provider / show a sheet; none pops a
+  /// route from here). Every hit is a JUMP, so all chips are `destinationChips`
+  /// (nav-styled). ONLY reachable when the const flag is ON; when OFF the whole
+  /// method (and its two extra imports) tree-shakes away → the row is byte-
+  /// identical to the legacy [_buildRow] path.
+  _PredRow _globalRow(String text) {
+    // Balanced (round-robin) so no single domain floods the row — every domain
+    // with a hit is represented before any gets a second slot ("everything's
+    // there"); relevance still orders within each round.
+    final results = buildGlobalSearchIndex(ref).searchBalanced(text);
+    final chips = <String>[];
+    final runByChip = <String, KbRunByChip>{};
+    for (final r in results) {
+      if (chips.length >= _kRowCap) break;
+      // De-dupe by visible label (two domains could surface the same title —
+      // keep the first, i.e. the higher-ranked one after the index's own sort).
+      if (runByChip.containsKey(r.title) || chips.contains(r.title)) continue;
+      chips.add(r.title);
+      runByChip[r.title] = r.run;
+    }
+    return _PredRow(
+      chips,
+      const <String, KbDestination>{},
+      runByChip: runByChip,
+      destinationChips: chips.toSet(),
+    );
+  }
+
   /// THE ROW SELECTOR — the single decision for what the prediction row shows,
   /// called from [build] (the only place that can read [tab]). PURE (no side
   /// effects, no setState): it returns a [_PredRow] of chips + the two dispatch
@@ -407,10 +447,17 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     required int tab,
     KbUpdatesContext? ctx,
   }) {
-    // (1) TYPED row — unchanged path. Typed text never enters the mirror branch
-    // (the deriver mirrors the EMPTY-field surfaces), so it leads even under the
-    // flag — the universal typed path stays untouched.
-    if (text.isNotEmpty) return _buildRow(text);
+    // (1) TYPED row. Typed text never enters the LIVE-MIRROR branch (the deriver
+    // mirrors the EMPTY-field surfaces), so it leads. With [kGlobalSearch] ON
+    // (const ⇒ tree-shaken when off), the UNIFIED global search REPLACES the
+    // legacy destinations+words merge with ONE ranked row across every wired
+    // domain (screens · products · chats · …), each chip a JUMP dispatched via
+    // [runByChip] (case (ii)). Flag OFF → the legacy [_buildRow] path below is
+    // byte-identical (the whole [_globalRow] call + its imports fold out).
+    if (text.isNotEmpty) {
+      if (kGlobalSearch) return _globalRow(text);
+      return _buildRow(text);
+    }
 
     // (1.5) LIVE-MIRROR — folds out entirely when [kKbLiveMirror] is false (const
     // guard ⇒ tree-shaken) OR when [ctx] is null (every non-flag-ON-mirrored-tab
