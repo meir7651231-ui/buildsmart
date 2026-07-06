@@ -10,14 +10,14 @@
 /// → renders a zero-height `SizedBox.shrink()` → byte-identical to before, so
 /// this file is safe to land dark while the dial is built phase-by-phase.
 ///
-/// PHASE 1 (this): the flag gate + the static [RingDiveDial] (disc / knurled
-/// pads / center groove / 12:00 pointer). Phases 2-3 add curved labels +
-/// drag/snap; Phase 4 wires it to `mergedKeys`; Phases 5-6 the qty/cart flow +
-/// results footer; Phase 7 the swap seam. See BUILD-PLAN.md.
+/// PHASE 3 (this): the flag gate + the interactive `RingDiveWheel` (disc /
+/// knurled pads / curved labels / drag-to-rotate + snap + haptics). Phase 4
+/// wires it to `mergedKeys`; Phases 5-6 the qty/cart flow + results footer;
+/// Phase 7 the swap seam. See BUILD-PLAN.md.
 library;
 
-import 'package:buildsmart/features/ring_dive/ring_dive_dial.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
+import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart';
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,8 +34,8 @@ class RingDiveScreen extends ConsumerWidget {
     return const Directionality(
       textDirection: TextDirection.rtl,
       child: Center(
-        child: RingDiveDial(
-          // P2 preview options — replaced by the engine's live chips in P4.
+        child: RingDiveWheel(
+          // P3 preview options — replaced by the engine's live chips in P4.
           labels: <String>['ברז', 'מחסום', 'צינור', 'ברך', 'מסנן', 'שסתום'],
         ),
       ),

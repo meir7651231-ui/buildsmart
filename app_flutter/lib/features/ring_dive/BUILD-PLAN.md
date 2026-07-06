@@ -76,5 +76,10 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
   axis values; per-glyph curving is a P8 option. If the owner finds the side
   (tangential) labels hard to read, an upright-in-ring variant is a one-liner.
   Screen shows 6 preview labels (replaced by engine chips in P4). analyze 0.
-- P3 next — rotation / drag / snap + haptics; then the P1-3 browser check
-  (one ENABLE_RING_DIVE web build once the dial spins).
+- P3 done (this commit) — ring_dive_wheel.dart: drag-to-rotate (atan2), detent
+  snapping on release, focus tracking, haptics (selectionClick per detent,
+  mediumImpact on select), tap-vs-drag (8 deg threshold), reduce-motion gated.
+  Screen renders the interactive wheel. analyze 0.
+- P1-3 milestone — local render of the dial verified (see the loop report).
+- P4 next — wire to card_engine: options = MergedKeys chips, tap = dive
+  (NewbieStep -> narrow -> re-run); RingDive-scoped stack provider.
