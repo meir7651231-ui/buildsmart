@@ -67,9 +67,14 @@ Auto-skip single-option axes: the engine's own ladder + a thin dial-side skip.
 
 ## Status
 - P0 done (94634644) — flag + skeleton + feature_flags seed + BUILD-PLAN.
-- P1 done (this commit) — ring_dive_dial.dart CustomPainter: warm-shadow base
+- P1 done (7d9d2ecf) — ring_dive_dial.dart CustomPainter: warm-shadow base
   disc, 20 knurled pads (active @ 12:00), top gloss, center groove, locked-ring
   param, 12:00 pointer. Static; rotation + lockedCount params ready for P3/P4.
-  Wired into the screen. analyze 0. Visual browser check batched for the P1-3
-  milestone (one ENABLE_RING_DIVE web build once the dial spins).
-- P2 next — curved text labels (text-on-arc, upright-flip on the lower half).
+- P2 done (this commit) — rim labels: one per option around radius 90,
+  tangent-rotated (upright-flip on the lower half), focus bigger+orange @ 12:00,
+  white halo. Whole-label tangent (not per-glyph arc) — faithful for the short
+  axis values; per-glyph curving is a P8 option. If the owner finds the side
+  (tangential) labels hard to read, an upright-in-ring variant is a one-liner.
+  Screen shows 6 preview labels (replaced by engine chips in P4). analyze 0.
+- P3 next — rotation / drag / snap + haptics; then the P1-3 browser check
+  (one ENABLE_RING_DIVE web build once the dial spins).

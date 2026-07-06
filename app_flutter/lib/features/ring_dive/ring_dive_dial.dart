@@ -14,6 +14,7 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 /// Static geometry from the handoff (all in container-space, container = 320).
@@ -34,10 +35,20 @@ class RingDiveGeo {
 /// [_DialPainter]. [rotation] is in DEGREES (0 for the static P1 render).
 class RingDiveDial extends StatelessWidget {
   const RingDiveDial({
+    this.labels = const <String>[],
+    this.focus = 0,
     this.rotation = 0,
     this.lockedCount = 0,
     super.key,
   });
+
+  /// The axis options rendered around the rim (P4 supplies these from the
+  /// engine's MergedKeys chips). Empty → a bare dial.
+  final List<String> labels;
+
+  /// Index of the focused option (the one at the 12:00 marker). P3 derives it
+  /// from [rotation]; static callers pass it directly.
+  final int focus;
 
   /// Current wheel rotation in degrees (P3 supplies the live/dragged value).
   final double rotation;
@@ -52,7 +63,12 @@ class RingDiveDial extends StatelessWidget {
       width: RingDiveGeo.container,
       height: RingDiveGeo.container,
       child: CustomPaint(
-        painter: _DialPainter(rotation: rotation, lockedCount: lockedCount),
+        painter: _DialPainter(
+          labels: labels,
+          focus: focus,
+          rotation: rotation,
+          lockedCount: lockedCount,
+        ),
         size: const Size.square(RingDiveGeo.container),
       ),
     );
@@ -60,8 +76,15 @@ class RingDiveDial extends StatelessWidget {
 }
 
 class _DialPainter extends CustomPainter {
-  _DialPainter({required this.rotation, required this.lockedCount});
+  _DialPainter({
+    required this.labels,
+    required this.focus,
+    required this.rotation,
+    required this.lockedCount,
+  });
 
+  final List<String> labels;
+  final int focus;
   final double rotation;
   final int lockedCount;
 
@@ -76,6 +99,7 @@ class _DialPainter extends CustomPainter {
     _paintGripPads(canvas);
     _paintCenterGroove(canvas);
     _paintLockedRings(canvas);
+    _paintLabels(canvas);
     _paintPointer(canvas);
   }
 
@@ -277,6 +301,81 @@ class _DialPainter extends CustomPainter {
     }
   }
 
+  /// The axis-option labels — one per option, around an arc of radius 90. Each
+  /// label is rotated tangent to the rim (so it "follows the arc") and flipped
+  /// on the lower half to stay upright; the focused option (at 12:00) is larger
+  /// and orange. Redrawn every frame at its LIVE screen angle (P3), so the text
+  /// never rotates rigidly with the wheel. Port of the prototype's SVG
+  /// `textPath` labels (README "The Dial"). NOTE: whole-label tangent rotation
+  /// (not per-glyph arc layout) — faithful for the short axis values; per-glyph
+  /// curving is a possible P8 refinement.
+  void _paintLabels(Canvas canvas) {
+    final n = labels.length;
+    if (n == 0) return;
+    final step = 360 / n;
+    for (var i = 0; i < n; i++) {
+      final th = -90 + i * step + rotation; // live on-screen angle (deg)
+      final thRad = _deg2rad(th);
+      final at = Offset(
+        RingDiveGeo.center + 90 * math.cos(thRad),
+        RingDiveGeo.center + 90 * math.sin(thRad),
+      );
+      // Lower half: flip 180° so the text stays upright rather than inverted.
+      final lower = math.sin(thRad) > 0.15;
+      final labelRot = _deg2rad(th + 90 + (lower ? 180 : 0));
+      _drawLabel(canvas, labels[i], at, labelRot, focused: i == focus);
+    }
+  }
+
+  /// One label centred at [at], rotated by [rot] radians: a white halo pass
+  /// (stroke) under the coloured fill pass, both from ONE styled span.
+  void _drawLabel(
+    Canvas canvas,
+    String text,
+    Offset at,
+    double rot, {
+    required bool focused,
+  }) {
+    final fontSize = focused ? 16.0 : 12.5;
+    final weight = focused ? FontWeight.w800 : FontWeight.w700;
+    final fillColor =
+        focused ? const Color(0xFFF0710C) : const Color(0xFF3A342C);
+    final haloWidth = focused ? 3.0 : 2.5;
+
+    TextPainter build(Paint? foreground, Color? color) => TextPainter(
+          text: TextSpan(
+            text: text,
+            style: TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: fontSize,
+              fontWeight: weight,
+              color: color,
+              foreground: foreground,
+            ),
+          ),
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
+        )..layout();
+
+    final haloTp = build(
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = haloWidth
+        ..strokeJoin = StrokeJoin.round
+        ..color = const Color(0xE6FFFFFF),
+      null,
+    );
+    final fillTp = build(null, fillColor);
+
+    canvas
+      ..save()
+      ..translate(at.dx, at.dy)
+      ..rotate(rot);
+    haloTp.paint(canvas, Offset(-haloTp.width / 2, -haloTp.height / 2));
+    fillTp.paint(canvas, Offset(-fillTp.width / 2, -fillTp.height / 2));
+    canvas.restore();
+  }
+
   /// The fixed 12:00 marker: soft halo + downward triangle + dot. Does NOT
   /// rotate with the wheel — it marks where selection happens.
   void _paintPointer(Canvas canvas) {
@@ -315,5 +414,8 @@ class _DialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DialPainter old) =>
-      old.rotation != rotation || old.lockedCount != lockedCount;
+      old.rotation != rotation ||
+      old.lockedCount != lockedCount ||
+      old.focus != focus ||
+      !listEquals(old.labels, labels);
 }

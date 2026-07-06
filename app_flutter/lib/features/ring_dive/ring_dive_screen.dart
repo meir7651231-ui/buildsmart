@@ -33,7 +33,12 @@ class RingDiveScreen extends ConsumerWidget {
     if (!on) return const SizedBox.shrink();
     return const Directionality(
       textDirection: TextDirection.rtl,
-      child: Center(child: RingDiveDial()),
+      child: Center(
+        child: RingDiveDial(
+          // P2 preview options — replaced by the engine's live chips in P4.
+          labels: <String>['ברז', 'מחסום', 'צינור', 'ברך', 'מסנן', 'שסתום'],
+        ),
+      ),
     );
   }
 }
