@@ -83,6 +83,7 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
     if (!listEquals(old.labels, widget.labels)) {
       _rot = 0;
       _focus = 0;
+      _moved = 0;
     }
   }
 

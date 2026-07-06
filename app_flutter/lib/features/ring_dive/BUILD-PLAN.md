@@ -56,8 +56,28 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
 
 ## Status
 - RD-A done (5c8f2086) — the derivation layer.
-- RD-B done (this commit) — ring_dive_screen rewired from card_engine to
+- RD-B done (6385553d) — ring_dive_screen rewired from card_engine to
   ring_dive_catalog: root (9 styles) → find (one clean axis per turn) → product
-  leaves → qty → cart. Reuses the wheel/hub/breadcrumb/footer/sheet/cart. Test
-  verifies the clean root→dept→categories drill. analyze 0, tests green.
-- RD-C next — the axis-switcher chip strip (jump between the remaining axes).
+  leaves → qty → cart. Test verifies the clean root→dept→categories drill.
+- RD-V1 done (21ca0c0b) — **the dial visual is rebuilt to Pro-X-Light** (one
+  CustomPainter: warm plate, 72 ticks, wedge, r122 straight labels + focus halo,
+  dashed locked rings; glassmorphic hub). Verified by a render vs the prototype.
+  The OLD knurled-orange dial is gone. **The owner's "this is not the new design"
+  was the dial look — now fixed.**
+- RD-V1.5 done (swarm hardening) — the canonical 10-lens swarm (audit →
+  validate → fix, 31 agents) confirmed 14 findings; the file-disjoint fixers
+  applied the verified subset. Orchestrator byte-verify: analyze
+  lib/features/ring_dive = 0 · ring_dive test 2/2 green · flag OFF still
+  SizedBox.shrink. Fixes: honest job placeholder (no fake dept drill) · pool
+  filtered once per frame · live _leaves field (no stale closure) · RTL
+  breadcrumb + footer reverse and newest-first order · wheel _moved reset in
+  didUpdateWidget · catalog stores the trimmed value + reuses a match set ·
+  dial caches the unfocused label layouts + compares label content in
+  shouldRepaint. Still to visually confirm in RD-V2: the RTL breadcrumb/footer
+  order (a render check, not a logic one).
+- RD-V2 next — the SCREEN CHROME to Pro-X-Light: the 392px phone card (warm bg,
+  gradient border, corner brackets, scan-line) + RINGDIVE·OS status bar + the
+  56px count block + the "סנן לפי" axis-switcher chip strip + breadcrumbs +
+  results rail. Then RD-V3 (qty dual-ring + sheets), RD-V4 (compat/job/done +
+  JetBrains Mono font + polish). Show the owner LIVE only once the FULL screen
+  matches (not piecemeal).

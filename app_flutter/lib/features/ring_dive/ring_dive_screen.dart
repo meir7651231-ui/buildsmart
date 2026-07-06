@@ -76,6 +76,13 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   /// The active axis in `find` mode (the wheel shows its options).
   String? _axisField;
 
+  /// The product leaves under the current constraints — refreshed by [build]
+  /// each frame and indexed by the wheel's focus on tap. Selecting reads this
+  /// live field (not a closure-captured local), so a tap always resolves
+  /// against the current constraint set, never a stale snapshot from a prior
+  /// dive/back.
+  List<RdProduct> _leaves = const <RdProduct>[];
+
   /// The landed product (→ the quantity phase) and its chosen quantity.
   LipskeyCatalogProduct? _product;
   int? _qty;
@@ -90,9 +97,13 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       <String, String>{for (final s in _path) s.field: s.value};
 
   void _enterStyle(String axis) {
+    // 'job' (RD-E) has no real axis in `kRdAxes` yet; entering `find` with it
+    // would silently fall back to the first axis (dept) and mislead the user.
+    // Route it to an honest `job` placeholder mode instead of faking a drill.
+    final validAxis = kRdAxes.contains(axis);
     setState(() {
-      _mode = 'find';
-      _axisField = axis;
+      _mode = validAxis ? 'find' : 'job';
+      _axisField = validAxis ? axis : null;
       _path.clear();
       _product = null;
       _qty = null;
@@ -184,32 +195,41 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       onSelect = (i) {
         if (i >= 0 && i < _styles.length) _enterStyle(_styles[i].key);
       };
+    } else if (_mode == 'job') {
+      // ── job (RD-E): honest placeholder — the kit flow is not wired yet ──
+      hubHint = 'מצב "לפי עבודה" בקרוב';
     } else {
       // ── find: one clean axis at a time, then product leaves ──
       final cons = _cons;
-      final axes = rdFindAxes(cons);
+      // Filter the ~1948-product pool ONCE per frame and reuse the narrowed set
+      // as the pool for the axis + option queries (idempotent — every product
+      // in `matched` already satisfies `cons`) so we don't re-scan the full
+      // catalog three times per build.
+      final matched = rdMatching(cons);
+      final axes = rdFindAxes(cons, matched);
       if (axes.isEmpty) {
-        final leaves = rdMatching(cons);
-        labels.addAll(leaves.map((rp) => rp.name));
-        sublabels.addAll(leaves.map((_) => 'בחר מוצר'));
+        // Store the live leaves in a field; the tap handler indexes THIS field,
+        // so a select always resolves against the current constraint set.
+        _leaves = matched;
+        labels.addAll(matched.map((rp) => rp.name));
+        sublabels.addAll(matched.map((_) => 'בחר מוצר'));
         hubHint = 'הקש לבחור מוצר';
         onSelect = (i) {
-          if (i >= 0 && i < leaves.length) _pickProduct(leaves[i].product);
+          if (i >= 0 && i < _leaves.length) _pickProduct(_leaves[i].product);
         };
       } else {
+        _leaves = const <RdProduct>[];
         final field = (_axisField != null && axes.contains(_axisField))
             ? _axisField!
             : axes.first;
-        final opts = rdOptsFor(field, cons);
+        final opts = rdOptsFor(field, cons, matched);
         labels.addAll(opts);
         sublabels.addAll(opts.map((_) => kRdAxisLabel[field] ?? ''));
         onSelect = (i) {
           if (i >= 0 && i < opts.length) _dive(field, opts[i]);
         };
-        footer = rdMatching(cons)
-            .take(10)
-            .map((rp) => rp.product)
-            .toList(growable: false);
+        footer =
+            matched.take(10).map((rp) => rp.product).toList(growable: false);
       }
     }
 
@@ -292,13 +312,14 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        reverse: true,
         child: Row(
           children: [
-            for (var i = 0; i < _path.length; i++)
+            _resetCrumb(),
+            for (var i = _path.length - 1; i >= 0; i--)
               _crumb(_path[i].value, () => _backTo(i)),
             if (_qty != null) _crumb('× $_qty', _clearQty),
             const SizedBox(width: 6),
-            _resetCrumb(),
           ],
         ),
       ),
@@ -361,6 +382,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       padding: const EdgeInsets.only(top: 14),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        reverse: true,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [for (final p in products) _productCard(p)],
@@ -382,7 +404,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
           border: Border.all(color: const Color(0xFFECE6DC)),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Row(
               children: [

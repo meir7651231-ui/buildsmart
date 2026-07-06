@@ -151,7 +151,7 @@ Map<String, Set<String>> rdAxesOf(LipskeyCatalogProduct p) {
   void put(String field, Iterable<String> values) {
     final s = <String>{
       for (final v in values)
-        if (v.trim().isNotEmpty) v,
+        if (v.trim().isNotEmpty) v.trim(),
     };
     if (s.isNotEmpty) out[field] = s;
   }
@@ -216,9 +216,15 @@ int _rank(String field, String value) {
 }
 
 /// Distinct option values for [field] among products matching [cons], ordered by
-/// [kRdOrder] then alphabetically.
-List<String> rdOptsFor(String field, RdCons cons, [List<RdProduct>? pool]) {
-  final base = rdMatching(cons, pool);
+/// [kRdOrder] then alphabetically. Pass [matched] (an already-computed
+/// [rdMatching] result for the same [cons]/[pool]) to skip re-filtering.
+List<String> rdOptsFor(
+  String field,
+  RdCons cons, [
+  List<RdProduct>? pool,
+  List<RdProduct>? matched,
+]) {
+  final base = matched ?? rdMatching(cons, pool);
   final set = <String>{};
   for (final rp in base) {
     final v = rp.axes[field];
@@ -235,9 +241,11 @@ List<String> rdOptsFor(String field, RdCons cons, [List<RdProduct>? pool]) {
 /// The remaining discriminating axes (each still with >=2 options), in plan
 /// order — the axes worth asking about. Empty once <=1 product remains.
 List<String> rdFindAxes(RdCons cons, [List<RdProduct>? pool]) {
-  if (rdMatching(cons, pool).length <= 1) return const <String>[];
+  final matched = rdMatching(cons, pool);
+  if (matched.length <= 1) return const <String>[];
   return <String>[
     for (final f in kRdAxes)
-      if (!cons.containsKey(f) && rdOptsFor(f, cons, pool).length >= 2) f,
+      if (!cons.containsKey(f) && rdOptsFor(f, cons, pool, matched).length >= 2)
+        f,
   ];
 }

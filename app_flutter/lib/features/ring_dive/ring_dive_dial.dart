@@ -14,6 +14,7 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 /// Prototype SVG geometry (center 170,170; viewBox -52 -52 444 444).
@@ -85,6 +86,17 @@ class _DialPainter extends CustomPainter {
   final int lockedCount;
 
   static const Offset _c = Offset(RingDiveGeo.cx, RingDiveGeo.cy);
+
+  /// Per-label cache of the two [TextPainter]s (halo + fill) for the *unfocused*
+  /// style. Only rotation/focus change between most frames, so the label content
+  /// and its unfocused layout are stable — laying each out once and reusing it
+  /// avoids 2× layouts per option per frame (144 on a 72-option wheel). Keyed by
+  /// label text. Invalidation is by lifetime: a labels change makes
+  /// [shouldRepaint] adopt a fresh painter (empty cache), while an unchanged
+  /// wheel keeps this painter and reuses its entries. The one focused label
+  /// restyles as the wheel turns, so it is built fresh each paint.
+  final Map<String, (TextPainter, TextPainter)> _unfocusedCache =
+      <String, (TextPainter, TextPainter)>{};
 
   double _rad(double deg) => deg * math.pi / 180;
 
@@ -264,6 +276,20 @@ class _DialPainter extends CustomPainter {
   }
 
   void _drawLabel(Canvas canvas, String text, Offset at, {required bool focused}) {
+    // The focused label (exactly one) restyles as the wheel turns, so build it
+    // live; every unfocused label is stable, so reuse the cached pair.
+    final (halo, fill) =
+        focused ? _buildLabel(text, focused: true) : _unfocusedFor(text);
+    halo.paint(canvas, Offset(at.dx - halo.width / 2, at.dy - halo.height / 2));
+    fill.paint(canvas, Offset(at.dx - fill.width / 2, at.dy - fill.height / 2));
+  }
+
+  /// Cached halo+fill pair for [text] in the unfocused style.
+  (TextPainter, TextPainter) _unfocusedFor(String text) =>
+      _unfocusedCache[text] ??= _buildLabel(text, focused: false);
+
+  /// Lays out the halo (white stroke) and fill [TextPainter]s for [text].
+  (TextPainter, TextPainter) _buildLabel(String text, {required bool focused}) {
     final len = text.length;
     final fontSize = focused
         ? (len <= 3 ? 32.0 : (len <= 5 ? 28.0 : (len <= 8 ? 23.0 : 18.0)))
@@ -295,8 +321,7 @@ class _DialPainter extends CustomPainter {
       null,
     );
     final fill = build(null, fillColor);
-    halo.paint(canvas, Offset(at.dx - halo.width / 2, at.dy - halo.height / 2));
-    fill.paint(canvas, Offset(at.dx - fill.width / 2, at.dy - fill.height / 2));
+    return (halo, fill);
   }
 
   @override
@@ -304,6 +329,10 @@ class _DialPainter extends CustomPainter {
       old.rotation != rotation ||
       old.focus != focus ||
       old.lockedCount != lockedCount ||
-      old.labels.length != labels.length ||
-      !identical(old.labels, labels);
+      // The parent rebuilds a fresh labels list every frame, so identity always
+      // differs even when the content is unchanged; compare content instead so
+      // an unchanged wheel does not repaint (and the old painter's label cache
+      // is kept — a content change swaps in this new painter with a fresh cache).
+      !listEquals(old.labels, labels) ||
+      !listEquals(old.dots, dots);
 }
