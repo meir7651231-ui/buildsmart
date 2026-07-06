@@ -18,10 +18,22 @@
 //   • revoked allow-flag → permission-denied EVEN with a valid owner claim
 //   • rate-limit exceeded → the predicate that maps to resource-exhausted
 //   • every denial verdict carries ok:false → the flag written to auditLog
+//
+// PLUS the Step-57 `revertIllegalConfigWrite` PURE cores (spec detail/051-068.md
+// §57.5) — the trigger's transaction/audit sink are exercised via their cores:
+//   • forged direct write (stale / mismatched publishGuard) → decideRevert.revert
+//   • legit callable write (fresh publishGuard stamp)       → revert === false
+//   • the revert's own publishGuard change (loop-guard)     → revert === false
+//   • version-superseded (live ≠ toVersion)                 → revertStillApplies=false
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { decidePublish, rateLimitExceeded } from "../src/studio";
-import type { PublishVerdict } from "../src/studio";
+import {
+  decidePublish,
+  decideRevert,
+  rateLimitExceeded,
+  revertStillApplies,
+} from "../src/studio";
+import type { PublishVerdict, RevertVerdict } from "../src/studio";
 import { isOwnerEmail, OWNER_EMAIL } from "../src/common";
 
 let passed = 0;
@@ -60,6 +72,13 @@ function expectOk(v: PublishVerdict, toVersion: number, label: string): void {
   }
   check(v.toVersion === toVersion, `${label} — toVersion ${toVersion} (got ${v.toVersion})`);
   check(v.fromVersion === toVersion - 1, `${label} — fromVersion ${toVersion - 1}`);
+}
+
+/** Assert a Step-57 revert verdict — the `.revert` boolean the trigger acts on,
+ * plus a non-empty forensic reason (audited when revert === true). */
+function expectRevert(v: RevertVerdict, want: boolean, label: string): void {
+  check(v.revert === want, `${label} — revert === ${want} (got ${v.revert})`);
+  check(v.reason.length > 0, `${label} — carries a reason`);
 }
 
 // ── isOwnerEmail — the authority root (mirrors board_accounts_local.dart) ─────
@@ -188,6 +207,98 @@ check(
   !rateLimitExceeded({ windowStart: now - win - 1, count: 999 }, now, win, max),
   "expired window resets → allowed"
 );
+
+// ── decideRevert (Step 57) · FORGED direct write → revert ────────────────────
+// A forger moved the pointer 7→99 but LEFT publishGuard untouched (no fresh
+// callable stamp). Guard UNCHANGED + version moved ⇒ revert to the prior pointer.
+expectRevert(
+  decideRevert({
+    before: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 99, ref: "studioConfigSnapshots/v99", publishGuard: { publishedAt: "t7", version: 7 } },
+  }),
+  true,
+  "forged pointer move (stale guard) → revert"
+);
+// Stamp MISMATCH by ref only: same version, snapshot repointed to a malicious
+// ref, guard left stale ⇒ still forged ⇒ revert.
+expectRevert(
+  decideRevert({
+    before: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 7, ref: "studioConfigSnapshots/evil", publishGuard: { publishedAt: "t7", version: 7 } },
+  }),
+  true,
+  "forged ref repoint (same version, stale guard) → revert"
+);
+// Forger rewrites an IDENTICAL stale guard alongside the move ⇒ guard still
+// UNCHANGED ⇒ revert (re-stamping the same value buys no evasion).
+expectRevert(
+  decideRevert({
+    before: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 42, ref: "studioConfigSnapshots/v42", publishGuard: { publishedAt: "t7", version: 7 } },
+  }),
+  true,
+  "forged move + identical stale guard → revert"
+);
+
+// ── decideRevert · LEGIT callable write (fresh stamp) → NO revert ────────────
+// publishConfig stamped a FRESH publishGuard (new publishedAt+version) ⇒ guard
+// CHANGED ⇒ recognized as the sanctioned write ⇒ not reverted.
+expectRevert(
+  decideRevert({
+    before: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 8, ref: "studioConfigSnapshots/v8", publishGuard: { publishedAt: "t8", version: 8 } },
+  }),
+  false,
+  "legit callable publish (fresh guard) → no revert"
+);
+// Genesis publish 0→1 (no prior guard) also changes the guard ⇒ no revert.
+expectRevert(
+  decideRevert({
+    before: { version: 0, ref: null, publishGuard: null },
+    after: { version: 1, ref: "studioConfigSnapshots/v1", publishGuard: { publishedAt: "t1", version: 1 } },
+  }),
+  false,
+  "genesis publish 0→1 (guard appears) → no revert"
+);
+
+// ── decideRevert · the revert's OWN write (loop-guard) → NO revert ───────────
+// The revert restored 99→7 and stamped publishGuard.revertedAt. Guard CHANGED ⇒
+// skipped ⇒ the revert never re-triggers a revert (no infinite loop).
+expectRevert(
+  decideRevert({
+    before: { version: 99, ref: "studioConfigSnapshots/v99", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { revertedAt: "evt-123", from: 7, to: 99 } },
+  }),
+  false,
+  "revert's own revertedAt stamp → no revert (loop-guard)"
+);
+// The pure publishGuard-ONLY change (nothing else moved) is likewise skipped.
+expectRevert(
+  decideRevert({
+    before: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { revertedAt: "evt-9", from: 7, to: 7 } },
+  }),
+  false,
+  "publishGuard-only change → no revert (loop-guard)"
+);
+// A truly inert write (nothing changed at all) → no revert (no churn).
+expectRevert(
+  decideRevert({
+    before: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+    after: { version: 7, ref: "studioConfigSnapshots/v7", publishGuard: { publishedAt: "t7", version: 7 } },
+  }),
+  false,
+  "no-op write (nothing changed) → no revert"
+);
+
+// ── revertStillApplies (Step 57) · version-superseded → skip ─────────────────
+// Inside the transaction the LIVE version is re-read; the revert fires only if it
+// still equals the forged toVersion. A newer real publish (v8) that landed after
+// the forgery (v99) supersedes it — the revert is skipped, not a clobber (mirror
+// orders.ts:171).
+check(revertStillApplies(99, 99), "live still == toVersion → revert applies");
+check(!revertStillApplies(8, 99), "live superseded by real publish (8 ≠ 99) → skip");
+check(!revertStillApplies(100, 99), "live moved on (100 ≠ 99) → skip");
 
 // ── verdict ──────────────────────────────────────────────────────────────────
 console.log(`studio.test: ${passed}/${passed + failed} PASS`);

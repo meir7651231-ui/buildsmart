@@ -35,9 +35,12 @@
 //
 // STORAGE MODEL (assumptions — how the Firestore side is represented):
 //   studioConfig/published            — the ~200B pointer {version, schema, ref,
-//                                        checksum, publishedAt, publishedBy};
-//                                        callable-only-write (rules `if false`,
-//                                        step 65). version defaults 0 when absent.
+//                                        checksum, publishedAt, publishedBy,
+//                                        publishGuard}; callable-only-write (rules
+//                                        `if false`, step 65). publishGuard is the
+//                                        Step-57 audit-stamp (fresh each publish;
+//                                        the revert trigger's legit-write marker);
+//                                        version defaults 0 when absent.
 //   studioConfig/publishAllow         — the LIVE allow-flag {enabled:bool}. Read
 //                                        fresh in the tx. FAIL-CLOSED: an absent/
 //                                        false doc DENIES (an explicit enable is
@@ -55,6 +58,8 @@
 //                                        pointer flip back (always safe).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { FieldValue } from "firebase-admin/firestore";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
@@ -308,6 +313,13 @@ export const publishConfig = onCall(
               : {}),
             publishedAt: nowIso,
             publishedBy: uid,
+            // Step-57 audit-stamp: a FRESH publishGuard on EVERY publish is what
+            // marks this pointer write as the callable's own. `revertIllegal-
+            // ConfigWrite` skips any update that CHANGES publishGuard and reverts
+            // any pointer move that does NOT — so the callable stays the ONE
+            // sanctioned writer. `nowIso` guarantees the stamp differs each publish
+            // (so a legit publish is never mistaken for a forgery, and vice-versa).
+            publishGuard: { publishedAt: nowIso, version: toVersion },
           },
           { merge: true }
         );
@@ -346,5 +358,187 @@ export const publishConfig = onCall(
       }
       throw e;
     }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pillar 5 · Step 57 — `revertIllegalConfigWrite`, defense-in-depth around the
+// published pointer. Mirrors `revertIllegalOrderStageWrite` (orders.ts:145): an
+// onDocumentUpdated trigger that REVERTS any DIRECT write to `studioConfig/
+// published` that did NOT go through `publishConfig` above. The callable is the
+// ONE sanctioned writer — paired with the rules `allow write: if false` (step 65),
+// this trigger is the second layer for writes that slip past / precede the rules.
+//
+// AUTH NOTE (mirror orders.ts:16-17,193): Firestore triggers carry NO auth
+// context, so "sanctioned" cannot be decided by CALLER identity here — it is
+// decided by the callable's AUDIT-STAMP. `publishConfig` writes a FRESH
+// `publishGuard` ({publishedAt, version}) on every publish, so a legitimate
+// pointer move ALWAYS changes publishGuard; a pointer move whose publishGuard is
+// UNCHANGED did not pass through the callable → forged → reverted to the prior
+// pointer. Role enforcement for legal direct writes is not this trigger's job
+// (there is none — the pointer is callable-only); this trigger guards the STAMP.
+//
+// LOOP GUARD (mirror orders.ts:158-160 stageGuard): the revert re-stamps
+// `publishGuard.revertedAt = event.id`. Because ANY change to publishGuard (the
+// callable's publish stamp OR the revert's revertedAt stamp) is skipped, the
+// revert's own write never re-triggers a revert — no infinite loop.
+//
+// ACCEPTED HOLE (documented — step 57.6 addition-a): a forger who ALSO writes a
+// DIFFERENT publishGuard evades the stamp check (guard "changed" → skipped). The
+// stamp is defense-in-depth, not a cryptographic proof of origin; the stronger
+// check (a matching `config.publish` audit-entry for version N) is a future add.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The pointer fields the revert decision needs, coerced off the snapshot. */
+export interface ConfigPointerState {
+  /** `studioConfig/published.version` (0 when absent). */
+  version: number;
+  /** `studioConfig/published.ref` — the snapshot path (null when absent). */
+  ref: string | null;
+  /** The callable's audit-stamp — compared BY VALUE (stringify), not inspected. */
+  publishGuard: unknown;
+}
+
+export interface RevertDecisionInput {
+  /** Pointer state BEFORE the write (onDocumentUpdated `change.before`). */
+  before: ConfigPointerState;
+  /** Pointer state AFTER the write (onDocumentUpdated `change.after`). */
+  after: ConfigPointerState;
+}
+
+export type RevertVerdict = { revert: boolean; reason: string };
+
+/**
+ * PURE decision (no I/O — selftested like `decidePublish` / orderFlow): given the
+ * before/after pointer states of a `studioConfig/published` update, should this
+ * write be reverted as an illegal direct write? Order mirrors orders.ts:155-164:
+ *   1. LOOP-GUARD — publishGuard CHANGED ⇒ the write bears a fresh stamp (the
+ *      callable's publish OR the revert's own revertedAt) ⇒ NOT a forgery, skip.
+ *   2. FORGERY — publishGuard UNCHANGED yet the pointer (version|ref) MOVED ⇒ a
+ *      direct write that bypassed the callable (which always re-stamps) ⇒ revert.
+ *   3. otherwise nothing meaningful changed ⇒ nothing to revert.
+ */
+export function decideRevert(i: RevertDecisionInput): RevertVerdict {
+  const guardBefore = JSON.stringify(i.before.publishGuard ?? null);
+  const guardAfter = JSON.stringify(i.after.publishGuard ?? null);
+  // 1 · loop-guard (orders.ts:158-160): a changed guard is the callable's publish
+  //     stamp or the revert's own revertedAt stamp — never a forgery.
+  if (guardBefore !== guardAfter) {
+    return {
+      revert: false,
+      reason:
+        "publishGuard changed — sanctioned publish or revert write (loop-guard)",
+    };
+  }
+  // 2 · the pointer MOVED with a STALE (unchanged) guard ⇒ it never passed the
+  //     callable ⇒ forged direct write. Revert to the prior pointer.
+  if (i.before.version !== i.after.version || i.before.ref !== i.after.ref) {
+    return {
+      revert: true,
+      reason:
+        "illegal direct write to studioConfig/published " +
+        "(pointer moved without a fresh callable publishGuard stamp)",
+    };
+  }
+  // 3 · guard unchanged AND pointer unchanged ⇒ inert write, nothing to revert.
+  return { revert: false, reason: "no pointer change" };
+}
+
+/**
+ * PURE superseded-check (selftested; mirror orders.ts:171 `snap.stage !== toStage`):
+ * inside the revert transaction the LIVE `published.version` is re-read; the revert
+ * proceeds ONLY if it still equals the `toVersion` the forgery set. A newer version
+ * means a real publish already landed after the forgery — don't clobber it.
+ */
+export function revertStillApplies(
+  liveVersion: number,
+  toVersion: number
+): boolean {
+  return liveVersion === toVersion;
+}
+
+/** Coerce a Firestore field to a number, defaulting 0 (studio.ts:250 pattern). */
+function numOr0(v: unknown): number {
+  return typeof v === "number" ? v : 0;
+}
+
+/**
+ * Defense-in-depth: revert any DIRECT `studioConfig/published` write that did not
+ * pass through `publishConfig` (see the section header). The callable is the ONE
+ * sanctioned writer; this trigger + the rules `allow write: if false` (step 65)
+ * are the two layers that enforce it.
+ */
+export const revertIllegalConfigWrite = onDocumentUpdated(
+  { region: REGION, document: "studioConfig/{channel}" },
+  async (event) => {
+    const change = event.data;
+    if (!change) return;
+
+    // Only the published POINTER is callable-only. `publishAllow` (the live
+    // allow-flag) lives in the SAME `studioConfig` collection and is legitimately
+    // toggled by the owner — it must NOT be reverted.
+    const channel = event.params.channel;
+    if (channel !== "published") return;
+
+    const before = change.before;
+    const after = change.after;
+
+    const decision = decideRevert({
+      before: {
+        version: numOr0(before.get("version")),
+        ref: asString(before.get("ref")),
+        publishGuard: before.get("publishGuard") ?? null,
+      },
+      after: {
+        version: numOr0(after.get("version")),
+        ref: asString(after.get("ref")),
+        publishGuard: after.get("publishGuard") ?? null,
+      },
+    });
+    if (!decision.revert) return;
+
+    const toVersion = numOr0(after.get("version"));
+    await db().runTransaction(async (tx) => {
+      const snap = await tx.get(after.ref);
+      if (!snap.exists) return;
+      // Superseded by a newer (real) publish that landed after the forgery?
+      // Don't clobber it (mirror orders.ts:171).
+      if (!revertStillApplies(numOr0(snap.get("version")), toVersion)) return;
+      // Restore each pointer field to its pre-forgery value + stamp the loop-guard.
+      tx.update(after.ref, {
+        version: before.get("version") ?? FieldValue.delete(),
+        ref: before.get("ref") ?? FieldValue.delete(),
+        schema: before.get("schema") ?? FieldValue.delete(),
+        checksum: before.get("checksum") ?? FieldValue.delete(),
+        publishedAt: before.get("publishedAt") ?? FieldValue.delete(),
+        publishedBy: before.get("publishedBy") ?? FieldValue.delete(),
+        publishGuard: {
+          revertedAt: event.id,
+          from: numOr0(before.get("version")),
+          to: toVersion,
+        },
+      });
+    });
+
+    logger.warn("illegal direct config write reverted", {
+      channel,
+      from: numOr0(before.get("version")),
+      to: toVersion,
+      // Self-reported by the writer; may be absent or spoofed (no auth context).
+      reportedBy: asString(after.get("publishedBy")),
+    });
+    await writeAudit({
+      action: "config.revert",
+      source: "revertIllegalConfigWrite",
+      // Triggers carry no auth context; publishedBy is self-reported by the writer
+      // and may be absent or spoofed — recorded as-is for forensics.
+      actorUid: asString(after.get("publishedBy")),
+      actorRole: null,
+      target: `studioConfig/${channel}`,
+      before: { version: numOr0(before.get("version")) },
+      after: { version: toVersion },
+      ok: false,
+      reason: decision.reason,
+    });
   }
 );

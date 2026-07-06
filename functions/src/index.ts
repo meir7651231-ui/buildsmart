@@ -143,6 +143,10 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 //                                        to-all path (CAS on expectedBaseVersion,
 //                                        owner/dual-control + live allow-flag,
 //                                        per-uid rate-limit, audit on both paths)
+//   P5.57 revertIllegalConfigWrite     — trigger; reverts any DIRECT write to
+//                                        studioConfig/published lacking the
+//                                        callable's publishGuard stamp (defense-
+//                                        in-depth; loop-guarded like S8.1's revert)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export { deleteAccount } from "./deleteAccount";
@@ -152,4 +156,4 @@ export { askClaude } from "./claude";
 export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";
 export { reviewRoleRequest } from "./reviewRoleRequest";
-export { publishConfig } from "./studio";
+export { publishConfig, revertIllegalConfigWrite } from "./studio";
