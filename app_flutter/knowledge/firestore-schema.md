@@ -132,6 +132,14 @@ chatMessages/{id}  {threadId, fromUid, fromRole, text, ts}
 (`SPEC-server-connect-MICRO.md` §אזהרות). creds של R2/admin = בשרת/Functions
 בלבד, לעולם לא ב-client.
 
+> **עדכון Pillar 5 (Step 52) — התפתחות, לא סתירה.** ה-stance לעיל נשאר תקף
+> ל-**מסלול-ברירת-המחדל (flags OFF)** ול-**bundled starter subset** (Phase 4):
+> הקטלוג-המצומצם נשאר const/CDN, offline byte-identical, אפס עלות-DB. Pillar 5
+> **מוסיף** collection-מחובר `catalogProducts/{sku}` ל-**superset ה-authored ב-scale**
+> (10Ks) — **מאחורי דגלים** (`CATALOG_BASE_URL`/`CATALOG_SERVER_SEARCH`, default OFF),
+> נקרא ב-**paged query** (לא listen על כל-הקטלוג — בדיוק האזהרה לעיל נשמרת),
+> ומחיר ב-sub-doc role-scoped. פירוט: הסעיף "Pillar 5 — 4 משפחות-collections" למטה.
+
 ---
 
 ## מיפוי-שדות `orders` (Dart `Order` → Firestore doc)
@@ -178,3 +186,128 @@ chatMessages/{id}  {threadId, fromUid, fromRole, text, ts}
 ה-seam `RemoteCollectionSource` (abstract) מבודד את Firestore: המימוש-האמת
 `FirestoreCollectionSource` פותר `FirebaseFirestore.instance` **בעצלתיים**
 (lazily, לעולם לא ב-constructor) → הסוויטה (ללא Firebase) נשארת על המסלול-המקומי.
+
+---
+
+## Pillar 5 (Scale · Data · Backend) — 4 משפחות-collections חדשות + 8 composite indexes (Step 52)
+
+> **doc-only · dormant.** ארבע משפחות-הנתונים של Pillar 5 הן **greenfield** — אף
+> client לא כותב אליהן היום; הן חבויות מאחורי דגלי-ברירת-מחדל-OFF ב-`backend.dart`
+> (`USE_FIREBASE_BACKEND` · `STUDIO_LIVE` · `CATALOG_SERVER_SEARCH` · `CATALOG_BASE_URL`).
+> עם כל הדגלים כבויים ה-build **byte-identical** להיום; ה-indexes עולים אפס עד ה-seed
+> (Phase 1, Step 61). מקור-אמת: `knowledge/studio-plan/05-scale-data-backend.md`
+> §1 + §1.5, וה-**appendix R1 גובר** (price-sub-doc R1-6 · tombstone R1-9 ·
+> tokens-מ-`nameHe`-בלבד R1-7 · presenceSummary R1-3).
+>
+> **קונבנציות מורשות (ללא סטייה):** doc-id = natural key (לא משוכפל כשדה) · כל
+> timestamp = ISO-8601 string (מיון לקסיקוגרפי == כרונולוגי) · Local persist keys
+> מנוקדי-גרסה `bs.<feature>.v1` · לכל collection חדש **חייב** rule מפורש
+> (deny-by-default, §5/Step 65).
+
+### משפחה 1 · Pillar 1 — עץ-הקונפיג ה-no-code (draft + published)
+
+שני-ייצוגים, כי דפוסי-הגישה הפוכים: **מצביע** זעיר-חם שכולם קוראים, ו-**blobs
+immutable** מגובבים-לפי-גודל. פרסום = **flip של המצביע** מעל snapshot-immutable חדש (§3).
+
+#### `studioConfig/{channel}` — מצביע-הפרסום (זעיר · ~200B · doc-id = שם-ערוץ קבוע `published`/`draft`)
+| שדה | טיפוס | הערה |
+|---|---|---|
+| `version` | int | מונה-גרסה; client משווה נכנס↔cached כדי להחליט אם למשוך snapshot (אות ה-cache-bust, §3). |
+| `ref` | string | מצביע ל-snapshot immutable (`studioConfigSnapshots/v1287` / `draft-<uid>`). |
+| `checksum` | string | sha256 של ה-snapshot; אימות לפני swap אטומי (§3.1). |
+| `schema` | int | גרסת-סכמה; `> maxKnownSchema` → keep-last-good + "עדכן אפליקציה", **לא לנתח** (R2-7). |
+| `publishedAt` / `updatedAt` | string (ISO-8601) | זמן פרסום / עדכון-draft. |
+| `publishedBy` / `updatedBy` | string (uid) | מי פרסם / עדכן. |
+| `draftOwnerUid` / `lockedAt` | string / iso | advisory-lock רך על ה-draft ("מנהל אחר עורך כעת", TTL) — R1-4. |
+
+- **read:** `published` = world (כל signed-in) · `draft` = `isManager()` בלבד. **write:** `if false` — הכותב היחיד הוא ה-callable `publishConfig` (Admin-SDK, §3.2/Step 56), מגובה ב-trigger `revertIllegalConfigWrite`.
+
+#### `studioConfigSnapshots/{snapshotId}` — blobs immutable מגובבים (sharded)
+- כל publish כותב **`vN` חדש** (`v1`,`v2`,…; draft = `draft-<uid>`), לעולם לא מוטציה — rollback חינם + אין torn-read.
+- parent-doc: `{ version, nodeCount, shardCount, shards:["…/0","…/1"] }` + subcollection `studioConfigSnapshots/{id}/shards/{n}`, כל shard ≤~500KB serialized nodes (תקרת 1MiB עם headroom). ≤ אלפי-nodes = shard-אחד = read-אחד; 10Ks = כמה shards במקביל, cached-by-id, re-pull רק על version-bump.
+
+> **אין composite index** ל-`studioConfig*` — get/listen לפי doc-id קבוע בלבד (§1.5, Step-52 addition-b). העץ נקרא-לפי-version כ-blob, לעולם לא נשאל ב-query.
+
+### משפחה 2 · Pillar 2 — catalog מחובר ב-10Ks (בעיית-ה-scale היחידה)
+
+ה-domain היחיד שדורש query+pagination+search ב-scale → collection per-doc אמיתי
+(המימוש שהובטח ב-`catalog_repository.dart`). מודל ה-Dart `LipskeyCatalogProduct`
+**ללא שינוי**; ה-`_firebase` mapper מוסיף שדות רק כשלא-ריקים (round-trip תואם-לאחור,
+כמו `orders_firebase toDoc`).
+
+#### `catalogProducts/{sku}` — doc-id = SKU (natural key → upsert idempotent, `productForSku` = get-יחיד)
+| שדה | טיפוס | הערה |
+|---|---|---|
+| `sku, nameHe, nameEn, brand, color` | string | שדות-בסיס (זהים ל-`LipskeyCatalogProduct`). |
+| `categoryHe, categoryEn, categoryEmoji` | string | קטגוריה. |
+| `tradeId` | string | מקצוע Pillar-2 (חשמלאי/אינסטלטור…). ← index #8. |
+| `qtyPack, qtyPallet, page` | int | כמות-אריזה / משטח · עמוד-קטלוג. |
+| `dims` | map | מידות. |
+| `imageFile(s), specImageFile(s)` | string / array | תמונות (מסלול R2 הקיים, `product_images.dart`). |
+| `active` | bool | `true` = חי; **מחיקה = tombstone** `active:false` (paged-query מסנן `active==true`). ← index #10. |
+| `tombstone, tombstonedAt, replacedBy` | bool / iso / sku? | soft-delete + הפניה-לחלופה (R1-9); ה-fan-out `onCatalogProductWrite` מנקה `nameTokens`+`catalogTokenFreq` של ה-SKU-המת. |
+| `version` | int | per-product; delta-sync (§7). |
+| `updatedAt` | string (ISO-8601) | עדכון-אחרון (`updatedBy` uid). ← index #10. |
+| `nameTokens` | array&lt;string&gt; | tokens lowercased מ-**`nameHe` בלבד** (server indexer, parity עם ה-fuzzy החי — R1-7); token-search ב-scale (§2, index #11). |
+| `catalogShard` | int | bucket ל-shard-fanout listen (נדיר; ברירת-המחדל = paged-query, לא listen). |
+
+> **⚠️ `price` אינו כאן.** המחיר יושב ב-**sub-doc role-scoped** `catalogProducts/{sku}/pricing/{audience}` (R1-6) — read `isManager() || hasRole(audience)`, write `isManager()`. ה-doc-הציבורי world-readable ללא-מחיר, כך שחנות-מתחרה/לקוח-לא-מורשה **לא** קורא מחיר-קבלן. ה-mapper לא ממפה price ל-doc-הראשי; ה-token-index לא כולל price.
+
+#### `catalogTrades/{tradeId}` · `catalogCategories/{catId}` · `catalogTokenFreq/{token}` — metadata + search-support
+| collection | שדות | הערה |
+|---|---|---|
+| `catalogTrades/{tradeId}` | `nameHe, nameEn, emoji, order, active, productCount` | `productCount` aggregate incremental — מונה ללא `count()` יקר. |
+| `catalogCategories/{catId}` | `nameHe, emoji, tradeId, order` | metadata ל-browse-לפי-קטגוריה. |
+| `catalogTokenFreq/{token}` | `count:int` | token-frequency-map לבחירת "rarest token" ל-`arrayContains` (R1-7); מתוחזק ב-`onCatalogProductWrite` (increment/decrement פר-token). |
+
+### משפחה 3 · Pillar 3 — analytics event-stream + presence
+
+append-only · write-amplification-aware · **owner-read-only**.
+
+#### `analyticsEvents/{autoId}` — doc-id = auto (scatter · בלי hotspot)
+| שדה | טיפוס | הערה |
+|---|---|---|
+| `name` | string | שם-האירוע. ← index #12. |
+| `props` | map | payload (יתכן context רגיש — owner-read בלבד). |
+| `uid` | string | השחקן. **create חייב `uid == auth.uid`** (בלי spoofing). ← index #13. |
+| `role, sessionId` | string | תפקיד + סשן. |
+| `at` | string (ISO-8601) | חותם-שרת. ← index #13. |
+| `day` | string `"YYYY-MM-DD"` | מפתח-drill-down יומי. ← index #12. |
+| `clientTs` | string (ISO-8601) | חותם-client. |
+
+- **rule:** `create` = signed-in + `uid==auth.uid` · `read` = `isManager()` · `update/delete` = `if false` (append-only, כמו `auditLog`).
+
+#### `presence/{uid}` — doc-אחד/משתמש · self-write
+| שדה | טיפוס | הערה |
+|---|---|---|
+| `online` | bool | מחובר. ← index #14. |
+| `lastSeen` | string (ISO-8601) | heartbeat אחרון (debounced ≥30s); TTL-sweep מהפך stale `online→false`. ← index #14. |
+| `screen, role, sessionId` | string | מסך-נוכחי · תפקיד · סשן. |
+
+- **read:** `isManager()` (או self) — אבל ה-owner קורא **`presenceSummary/current`** (doc-מגולגל-שרת: `{count, byRole, sample:[≤50 uids], updatedAt}`, `read: if isManager(); write: if false`), **לא** listener על כל ה-`presence/*` (R1-3). index #14 משרת את ה-rollup-fn (server-side) ואת ה-drill-down ה-paged של ה-owner. **write:** self בלבד.
+
+#### `analyticsDaily/{day}` · `analyticsCounters/{metric}/shards/{n}` — rollups (Admin-SDK)
+| collection | שדות | הערה |
+|---|---|---|
+| `analyticsDaily/{day}` | `counts:{order_placed:N,…}, uniques:int` | scheduled-fn rollup; owner קורא **doc-אחד/יום** (לא 100K events). read `isManager()`, write `if false`. |
+| `analyticsCounters/{metric}/shards/{0..9}` | `count:int` | distributed-counter למטריקות-חמות (increment ל-shard אקראי, סכום ב-rollup). read `isManager()`, write `if false`. |
+
+### תוכנית ה-8 composite indexes (תוספת ל-`firestore.indexes.json`)
+
+נוספו ל-array `"indexes"` (entries 8–15); `"fieldOverrides": []` נשאר ריק (כל
+collection שומר את ה-single-field indexes האוטומטיים). שני ה-`ARRAY_CONTAINS`
+מעתיקים את הצורה המאומתת של `chatThreads participantUids` (`arrayConfig:"CONTAINS"`
++ שדה-order trailing) — אחרת deploy נכשל ב-`failed-precondition`.
+
+| # | collection | fields | משרת |
+|---|---|---|---|
+| 8 | `catalogProducts` | `tradeId` ASC, `nameHe` ASC | רשימת-catalog לפי-מקצוע, paginated |
+| 9 | `catalogProducts` | `categoryHe` ASC, `nameHe` ASC | browse לפי-קטגוריה, paginated |
+| 10 | `catalogProducts` | `active` ASC, `updatedAt` DESC | delta-sync (§7) + "נערך לאחרונה" של ה-owner (addition-a) |
+| 11 | `catalogProducts` | `nameTokens` ARRAY_CONTAINS, `nameHe` ASC | token-search ב-scale (§2) → fuzzy re-rank client-side |
+| 12 | `analyticsEvents` | `day` ASC, `name` ASC | drill-down יומי לבעלים |
+| 13 | `analyticsEvents` | `uid` ASC, `at` DESC | trail per-user (support) |
+| 14 | `presence` | `online` ASC, `lastSeen` DESC | "מי מחובר עכשיו" (rollup server-side + drill-down paged) |
+| 15 | `customers` | `searchTokens` ARRAY_CONTAINS, `used` DESC | חיפוש-לקוחות ב-scale (**optional**, forward-ready) |
+
+> **`studioConfig*` — אין composite index** (get/listen לפי doc-id קבוע בלבד; העץ blob-נקרא-לפי-version, לא נשאל ב-query). Step-52 addition-b. ולידציה: `firebase deploy --only firestore:indexes --project buildsmart-b0b78 --dry-run`.
