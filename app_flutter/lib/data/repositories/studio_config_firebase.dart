@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // FirebaseStudioConfigRepository — the Firestore-backed implementation of
 // [StudioConfigRepository], built on the offline-first cache base
-// ([FirestoreCachedRepo]). Pillar 5 · Step 54 — DORMANT until the flags flip.
+// ([FirestoreCachedRepo]). Pillar 5 · Steps 54-55 — DORMANT until the flags flip.
 // A DROP-IN for [LocalStudioConfigRepository]: the eventual consumers + the
 // provider are unchanged — only which class `studioConfigRepositoryProvider`
 // returns changes (see the switch in `studio_config_local.dart`).
@@ -31,6 +31,7 @@
 // `orders_firebase.dart` does; a fake source drives the whole bridge in tests.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/repositories/backend.dart' show kStudioLive;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/repositories/studio_config_repository.dart';
 import 'package:buildsmart/state/studio/config_doc.dart'
@@ -44,12 +45,37 @@ class FirebaseStudioConfigRepository
     extends FirestoreCachedRepo<StudioConfigPointer>
     implements StudioConfigRepository {
   /// Constructs the repo over the `studioConfig` collection (the single
-  /// `published` pointer doc). The real Firestore instance is resolved LAZILY by
+  /// `published` pointer doc, the read/listen surface) PLUS the owner-writable
+  /// `studioConfigSnapshots` collection ([_draftSource], the Step-55 draft-write
+  /// target). Both real Firestore instances are resolved LAZILY by
   /// [FirestoreCollectionSource] (never here), so construction does not require
-  /// Firebase to be initialised. Pass [source] in tests to drive the cache with
-  /// a fake.
-  FirebaseStudioConfigRepository({RemoteCollectionSource? source})
-      : super(source ?? FirestoreCollectionSource('studioConfig'));
+  /// Firebase to be initialised. Pass [source]/[draftSource] in tests to drive
+  /// the caches with fakes; [live] injects the Step-55 sink kill-switch (defaults
+  /// to [kStudioLive]) so the ON path is exercised in the define-less suite.
+  FirebaseStudioConfigRepository({
+    RemoteCollectionSource? source,
+    RemoteCollectionSource? draftSource,
+    bool? live,
+  })  : _draftSource =
+            draftSource ?? FirestoreCollectionSource('studioConfigSnapshots'),
+        _live = live ?? kStudioLive,
+        super(source ?? FirestoreCollectionSource('studioConfig'));
+
+  /// The owner-writable DRAFT collection — `studioConfigSnapshots`. The Step-55
+  /// sink ([saveDraft]) writes ONLY here (doc `draft-<uid>`, owner-write §5); the
+  /// published pointer (`studioConfig/published`) is callable-only-write (step 56)
+  /// and is NEVER touched by the client. Resolved LAZILY by
+  /// [FirestoreCollectionSource] (never at construction) and driven by a fake in
+  /// tests — exactly like the base `_source`. Its `snapshots()` is never listened
+  /// to (no `attach`); the sink uses only its guarded `set`.
+  final RemoteCollectionSource _draftSource;
+
+  /// Step-55 sink kill-switch — mirrors [kStudioLive] (the master flag the
+  /// provider already gates the whole repo on, `studio_config_local.dart`).
+  /// Default [kStudioLive]; a test injects `true` to exercise the ON path in the
+  /// define-less suite (the `kServerCallables` testability idiom). OFF ⇒ [saveDraft]
+  /// is a complete NO-OP (no write, no cache mutation) ⇒ byte-identical.
+  final bool _live;
 
   // ── base contract: seed · mapping · fresh-backend hook ──────────────────────
 
@@ -120,4 +146,42 @@ class FirebaseStudioConfigRepository
   /// changes through it. (Step 58 formalises the single-listener kill-switch.)
   @override
   Listenable? get changes => this;
+
+  // ── Step 55 — ConfigSink: optimistic owner DRAFT write (DORMANT) ─────────────
+
+  /// Save the owner's work-in-progress config [draft] as an OPTIMISTIC draft.
+  ///
+  /// Writes ONLY to `studioConfigSnapshots/draft-<ownerUid>` (owner-write §5) via
+  /// the base's guarded background write ([guardWrite], firestore_cached_repo.dart
+  /// :344) — NEVER to `studioConfig/published`, which is callable-only-write (step
+  /// 56) and would be blocked by rules / reverted by the step-57 trigger (a "looks
+  /// saved" lie). The optimistic cache update is the base's LOCAL-ONLY twin
+  /// ([upsertLocalOnly]): it replaces the single cached pointer + [notifyListeners]
+  /// WITHOUT a write to the published `_source`, so the UI sees the draft
+  /// synchronously. A later `studioConfig` snapshot then RECONCILES the cache (LWW)
+  /// through the base's existing `_onSnapshot` (firestore_cached_repo.dart :241) —
+  /// REUSED here, not reimplemented.
+  ///
+  /// A write failure (permission-denied / offline) is SWALLOWED by [guardWrite]
+  /// and reported via [onResult]`(false)` — it NEVER throws into the UI (base rule
+  /// #2). OFF ([_live] false — the master flag) or a missing [ownerUid] ⇒ a
+  /// complete NO-OP: no write, no cache mutation (byte-identical).
+  void saveDraft(
+    StudioConfigPointer draft, {
+    required String ownerUid,
+    void Function(bool ok)? onResult,
+  }) {
+    // OFF (flag) or no owner ⇒ no write, no cache mutation — byte-identical.
+    if (!_live || ownerUid.isEmpty) return;
+    // Optimistic: show the draft NOW (cache + notify), with NO write to the
+    // published `_source` (that path is callable-only). The persistent write is
+    // the owner draft doc below; a late snapshot reconciles this (base :241).
+    upsertLocalOnly(draft);
+    // The ONLY remote write — the owner's draft doc, guarded (a failure is
+    // swallowed → onResult(false), never thrown). Never `studioConfig/published`.
+    guardWrite(
+      () => _draftSource.set('draft-$ownerUid', toDoc(draft)),
+      onResult: onResult,
+    );
+  }
 }
