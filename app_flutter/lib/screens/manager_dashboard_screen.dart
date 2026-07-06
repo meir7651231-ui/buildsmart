@@ -29,7 +29,8 @@ import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
-import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
+import 'package:buildsmart/state/feature_flags.dart'
+    show featureFlagsProvider, kHrRelocationFlag;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -2370,6 +2371,12 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     final pendingVacations =
         vacations.where((v) => v.status == kVacationPending).length;
 
+    // PHASE 0 (HR relocation, governance #84): when kHrRelocationFlag is ON the
+    // manager goes OVERSIGHT-ONLY on worker HR (the contractor board owns the
+    // approvals). Default OFF → the live action section below is byte-identical.
+    final hrRelocated =
+        ref.watch(featureFlagsProvider).contains(kHrRelocationFlag);
+
     return ListView(
       // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
       // (gate 62 — no hard-coded left/right edge inset).
@@ -2384,39 +2391,61 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         const _ManageIntro(),
         const SizedBox(height: BsTokens.space4),
 
-        // 0. 👷 אישורי עובדים — the LIVE cross-persona link (W3): the worker's
-        // submitted tasks, approve/reject straight onto the shared engine. A
-        // count badge in the header surfaces how many are waiting.
-        _ManageSection(
-          sectionKey: 'approvals',
-          emoji: '👷',
-          title: 'אישורי עובדים',
-          sub: 'משימות שעובדים שלחו לאישור',
-          open: _open == 'approvals',
-          onTap: () => _toggle('approvals'),
-          badge: pending.length,
-          child: _ApprovalsBody(
-            pending: pending,
-            onApprove: (t) {
-              // 🪙 #22 — coins + the worker's ✅ bell fire AT DECISION TIME on
-              // the single unified engine (Wave T1): approve runs its
-              // review→done side-effects once, guarded by the `review` status
-              // (no double award).
-              ref.read(tasksProvider.notifier).approve(t.id);
-              showToast(context, '✅ אושר: ${t.name}');
-            },
-            onReject: (t) async {
-              // 📝 #12 — optional rejection reason (promptRejectReason):
-              // null = cancelled (no reject); the reason rides the unified
-              // engine's reject (side-map + the worker's 🔁 bell), Wave T1's
-              // single source of truth.
-              final why = await promptRejectReason(context);
-              if (why == null || !context.mounted) return;
-              ref.read(tasksProvider.notifier).reject(t.id, reason: why);
-              showToast(context, '↩️ נדחה: ${t.name}');
-            },
+        // 0. 👷 אישורי עובדים — PHASE 0 (HR relocation, governance #84): OFF
+        // (default) keeps the LIVE action section byte-identical; ON makes the
+        // manager OVERSIGHT-ONLY (the contractor board owns worker approvals) —
+        // a read-only count, no approve/reject.
+        if (!hrRelocated) ...[
+          _ManageSection(
+            sectionKey: 'approvals',
+            emoji: '👷',
+            title: 'אישורי עובדים',
+            sub: 'משימות שעובדים שלחו לאישור',
+            open: _open == 'approvals',
+            onTap: () => _toggle('approvals'),
+            badge: pending.length,
+            child: _ApprovalsBody(
+              pending: pending,
+              onApprove: (t) {
+                // 🪙 #22 — coins + the worker's ✅ bell fire AT DECISION TIME on
+                // the single unified engine (Wave T1): approve runs its
+                // review→done side-effects once, guarded by the `review` status
+                // (no double award).
+                ref.read(tasksProvider.notifier).approve(t.id);
+                showToast(context, '✅ אושר: ${t.name}');
+              },
+              onReject: (t) async {
+                // 📝 #12 — optional rejection reason (promptRejectReason):
+                // null = cancelled (no reject); the reason rides the unified
+                // engine's reject (side-map + the worker's 🔁 bell), Wave T1's
+                // single source of truth.
+                final why = await promptRejectReason(context);
+                if (why == null || !context.mounted) return;
+                ref.read(tasksProvider.notifier).reject(t.id, reason: why);
+                showToast(context, '↩️ נדחה: ${t.name}');
+              },
+            ),
           ),
-        ),
+        ] else ...[
+          // OVERSIGHT-ONLY: the contractor board owns worker approvals; the
+          // manager sees a live count, no approve/reject (governance #84).
+          _ManageSection(
+            sectionKey: 'approvals',
+            emoji: '👷',
+            title: 'אישורי עובדים',
+            sub: 'מנוהל בלוח-הקבלן',
+            open: _open == 'approvals',
+            onTap: () => _toggle('approvals'),
+            badge: pending.length,
+            child: Padding(
+              key: const Key('hr-oversight-approvals'),
+              padding: const EdgeInsets.all(BsTokens.space3),
+              child: Text(
+                '👷 ${pending.length} אישורי-עובדים ממתינים אצל הקבלנים · פיקוח בלבד',
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: BsTokens.space3),
 
         // 0.5 🏖️ בקשות חופשה (cluster #85ח) — vacation requests the worker
