@@ -75,9 +75,18 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   dial caches the unfocused label layouts + compares label content in
   shouldRepaint. Still to visually confirm in RD-V2: the RTL breadcrumb/footer
   order (a render check, not a logic one).
-- RD-V2 next — the SCREEN CHROME to Pro-X-Light: the 392px phone card (warm bg,
-  gradient border, corner brackets, scan-line) + RINGDIVE·OS status bar + the
-  56px count block + the "סנן לפי" axis-switcher chip strip + breadcrumbs +
-  results rail. Then RD-V3 (qty dual-ring + sheets), RD-V4 (compat/job/done +
-  JetBrains Mono font + polish). Show the owner LIVE only once the FULL screen
-  matches (not piecemeal).
+- RD-V2 done — the SCREEN CHROME is rebuilt to Pro-X-Light: the 392px phone card
+  (radial warm bg, gradient border, 4 corner brackets, static scan-line), the
+  RINGDIVE·OS status bar + reset, the 56px count block (count · readout · status
+  line), the "סנן לפי" axis-switcher chip strip, numbered breadcrumb chips, and
+  the results rail (NO price — the catalog has none). Verified: analyze 0 · test
+  2/2 · flag OFF byte-identical · a headless runAsync render (root + find PNGs)
+  confirms the STRUCTURE matches the prototype 1:1 (card, brackets, bar, count,
+  axis strip, breadcrumb, wheel, rail all present + placed). Text shows as tofu
+  in flutter_test (no fonts) — real-font fidelity is verified next in a browser
+  render. LESSON: toImage in flutter_test MUST run inside tester.runAsync (a
+  real-async future deadlocks under the fake clock — it timed out 2× before).
+- RD-V3 next — the qty dual number-ring (tens 00–90 + units 0–9 → 0–99) + the
+  product/qty sheets, then RD-E (compat via kVerifiedSpecs + job via
+  kSmartProducts), RD-G (motion polish + bundle JetBrains Mono). Show the owner
+  LIVE only once the FULL screen matches (not piecemeal).

@@ -9,10 +9,13 @@
 /// `--dart-define=ENABLE_RING_DIVE=true`. OFF by default → `SizedBox.shrink()` →
 /// byte-identical.
 ///
-/// RD-B (this): the phase/state model wired to `ring_dive_catalog`
-/// (rdMatching/rdOptsFor/rdFindAxes). RD-C adds the axis-switcher chip strip,
-/// RD-D the qty dual-ring, RD-E compat+job, RD-F..H polish + tests. The
-/// hub/breadcrumb/results/sheet/cart scaffolding is reused. See BUILD-PLAN.md.
+/// RD-V2 (this): the Pro-X-Light SCREEN CHROME — a 392px phone card (warm bg,
+/// gradient border, corner brackets, static scan-line), the RINGDIVE·OS status
+/// bar, the 56px count block (count · readout · status line), the "סנן לפי"
+/// axis-switcher chip strip, numbered breadcrumb chips, and the results rail
+/// (NO price — the catalog has none). The wheel + hub + sheets are reused. The
+/// qty dual-ring (RD-D), compat/job modes (RD-E) and motion polish + JetBrains
+/// Mono font (RD-G/V4) come later. See BUILD-PLAN.md.
 library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart'
@@ -24,6 +27,17 @@ import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// ── design tokens (Pro-X-Light) ──────────────────────────────────────────────
+const Color _kInk = Color(0xFF1C2230);
+const Color _kOrange = Color(0xFFFF7A18);
+const Color _kOrangeDeep = Color(0xFFE8690B);
+const Color _kMuted = Color(0xFF9AA0AC);
+const Color _kSub = Color(0xFF6B7280);
+const Color _kMonoTag = Color(0xFF9A8F82);
+
+/// The monospace face (JetBrains Mono is bundled in RD-V4; fall back for now).
+const String _kMono = 'monospace';
 
 /// Colour-name → swatch (the design's `dots` map), for the result cards.
 const Map<String, Color> _dotColors = <String, Color>{
@@ -42,8 +56,7 @@ const Map<String, Color> _dotColors = <String, Color>{
 };
 
 /// The 9 root search styles (emoji + label + axis key). The first 8 enter `find`
-/// with that axis active; `job` is the kit flow (RD-E — a placeholder browse
-/// for now).
+/// with that axis active; `job` is the kit flow (RD-E — a placeholder for now).
 const List<({String key, String emoji, String label})> _styles =
     <({String key, String emoji, String label})>[
   (key: 'dept', emoji: '🗂️', label: 'מחלקה'),
@@ -66,7 +79,7 @@ class RingDiveScreen extends ConsumerStatefulWidget {
 }
 
 class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
-  /// 'root' — pick a search style · 'find' — drill the axes.
+  /// 'root' — pick a search style · 'find' — drill the axes · 'job' — placeholder.
   String _mode = 'root';
 
   /// The chosen constraints so far, in order (the breadcrumb).
@@ -96,6 +109,8 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   RdCons get _cons =>
       <String, String>{for (final s in _path) s.field: s.value};
 
+  bool get _hasSelection => _mode != 'root';
+
   void _enterStyle(String axis) {
     // 'job' (RD-E) has no real axis in `kRdAxes` yet; entering `find` with it
     // would silently fall back to the first axis (dept) and mislead the user.
@@ -117,6 +132,12 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       final axes = rdFindAxes(_cons);
       _axisField = axes.isNotEmpty ? axes.first : null;
     });
+  }
+
+  /// Jump the active axis to [field] (the "סנן לפי" switcher) without diving.
+  void _switchAxis(String field) {
+    HapticFeedback.selectionClick();
+    setState(() => _axisField = field);
   }
 
   void _pickProduct(LipskeyCatalogProduct p) {
@@ -145,13 +166,6 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     });
   }
 
-  void _clearQty() {
-    setState(() {
-      _qty = null;
-      _added = false;
-    });
-  }
-
   void _addToCart() {
     HapticFeedback.mediumImpact();
     setState(() => _added = true);
@@ -162,14 +176,21 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     final on = ref.watch(featureFlagsProvider).contains(kRingDiveFlag);
     if (!on) return const SizedBox.shrink();
 
+    // ── the wheel content + the chrome read-outs for the current phase ──
     final labels = <String>[];
     final sublabels = <String>[];
     var hubHint = 'סובב · הקש לבחור';
     void Function(int)? onSelect;
     var footer = const <LipskeyCatalogProduct>[];
 
+    var count = 0;
+    var readout = 'מוצרים';
+    var statusLine = '';
+    var axisFields = const <String>[];
+    String? activeField;
+
     if (_product != null) {
-      // ── quantity / cart phase ──
+      // ── quantity / cart phase (the dual-ring + done polish is RD-D/RD-F) ──
       final p = _product!;
       if (_qty == null) {
         labels.addAll(_qtyOpts.map((q) => '$q'));
@@ -192,21 +213,26 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         sublabels.add('התחל מ');
       }
       hubHint = 'בחר איך לחפש';
+      count = rdPool.length;
+      statusLine = 'בחר איך למצוא את המוצר הראשון';
       onSelect = (i) {
         if (i >= 0 && i < _styles.length) _enterStyle(_styles[i].key);
       };
     } else if (_mode == 'job') {
       // ── job (RD-E): honest placeholder — the kit flow is not wired yet ──
       hubHint = 'מצב "לפי עבודה" בקרוב';
+      count = rdPool.length;
+      statusLine = 'מצב "לפי עבודה" בקרוב — בחר סגנון אחר';
     } else {
       // ── find: one clean axis at a time, then product leaves ──
       final cons = _cons;
       // Filter the ~1948-product pool ONCE per frame and reuse the narrowed set
       // as the pool for the axis + option queries (idempotent — every product
-      // in `matched` already satisfies `cons`) so we don't re-scan the full
-      // catalog three times per build.
+      // in `matched` already satisfies `cons`) so we don't re-scan three times.
       final matched = rdMatching(cons);
       final axes = rdFindAxes(cons, matched);
+      count = matched.length;
+      readout = 'מועמדים';
       if (axes.isEmpty) {
         // Store the live leaves in a field; the tap handler indexes THIS field,
         // so a select always resolves against the current constraint set.
@@ -214,6 +240,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
         labels.addAll(matched.map((rp) => rp.name));
         sublabels.addAll(matched.map((_) => 'בחר מוצר'));
         hubHint = 'הקש לבחור מוצר';
+        statusLine = 'בחר מוצר · הקש על השם';
         onSelect = (i) {
           if (i >= 0 && i < _leaves.length) _pickProduct(_leaves[i].product);
         };
@@ -223,8 +250,14 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             ? _axisField!
             : axes.first;
         final opts = rdOptsFor(field, cons, matched);
+        final label = kRdAxisLabel[field] ?? '';
         labels.addAll(opts);
-        sublabels.addAll(opts.map((_) => kRdAxisLabel[field] ?? ''));
+        sublabels.addAll(opts.map((_) => label));
+        axisFields = axes;
+        activeField = field;
+        statusLine = axes.length > 1
+            ? 'בחר $label · או החלף סינון למעלה'
+            : 'בחר $label · סובב את הגלגל';
         onSelect = (i) {
           if (i >= 0 && i < opts.length) _dive(field, opts[i]);
         };
@@ -233,34 +266,444 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       }
     }
 
+    final inFind = _product == null;
+
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_path.isNotEmpty || _mode != 'root') _buildBreadcrumb(),
-            RingDiveWheel(
-              labels: labels,
-              sublabels: sublabels,
-              hubHint: hubHint,
-              lockedCount: _path.length,
-              onSelect: onSelect,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -1.1),
+            radius: 1.25,
+            colors: <Color>[Color(0xFFFFFFFF), Color(0xFFF8F2EA), Color(0xFFEFE6DB)],
+            stops: <double>[0, 0.45, 1],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 14),
+            child: _phoneCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _statusBar(),
+                  if (inFind) _countBlock(count, readout, statusLine),
+                  if (inFind && axisFields.length > 1)
+                    _axisStrip(axisFields, activeField),
+                  if (inFind && _path.isNotEmpty) _breadcrumbStrip(),
+                  _wheelArea(labels, sublabels, hubHint, onSelect),
+                  if (_product != null && _qty != null) _cartBar(),
+                  if (inFind && footer.isNotEmpty)
+                    _resultsRail(footer, count),
+                ],
+              ),
             ),
-            if (_product != null && _qty != null) _cartBar(),
-            if (footer.isNotEmpty) _buildResultsFooter(footer),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── the phone card shell (gradient border · brackets · scan-line) ──────────
+
+  Widget _phoneCard({required Widget child}) {
+    return Container(
+      width: 392,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(34),
+        gradient: const LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: <Color>[
+            Color(0xB3FF7A18),
+            Color(0x80D2C8BC),
+            Color(0xB3FFFFFF),
+            Color(0x66FF7A18),
+          ],
+          stops: <double>[0, 0.32, 0.6, 1],
+        ),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x73785A2D),
+            blurRadius: 80,
+            spreadRadius: -30,
+            offset: Offset(0, 30),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Color(0xFFFFFFFF),
+                Color(0xFFFDFBF8),
+                Color(0xFFFAF5EF),
+              ],
+              stops: <double>[0, 0.6, 1],
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 744),
+            child: Stack(
+              children: [
+                // the scan-line accent (static for RD-V2; animated in RD-G)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 36,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[Color(0x1FFF7A18), Color(0x00FF7A18)],
+                      ),
+                    ),
+                  ),
+                ),
+                child,
+                ..._cornerBrackets(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _cornerBrackets() {
+    const orange = Color(0xB3FF7A18);
+    const grey = Color(0x59786E64);
+    Widget bracket({required bool top, required bool right, required Color c}) {
+      return Positioned(
+        top: top ? 14 : null,
+        bottom: top ? null : 14,
+        right: right ? 14 : null,
+        left: right ? null : 14,
+        child: IgnorePointer(
+          child: Container(
+            width: 22,
+            height: 22,
+            foregroundDecoration: BoxDecoration(
+              border: Border(
+                top: top ? BorderSide(color: c, width: 2) : BorderSide.none,
+                bottom: top ? BorderSide.none : BorderSide(color: c, width: 2),
+                right: right ? BorderSide(color: c, width: 2) : BorderSide.none,
+                left: right ? BorderSide.none : BorderSide(color: c, width: 2),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return <Widget>[
+      bracket(top: true, right: true, c: orange),
+      bracket(top: true, right: false, c: grey),
+      bracket(top: false, right: true, c: grey),
+      bracket(top: false, right: false, c: orange),
+    ];
+  }
+
+  // ── status bar (RINGDIVE·OS + reset) ───────────────────────────────────────
+
+  Widget _statusBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 9,
+                height: 9,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _kOrange,
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Color(0x99FF7A18),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 9),
+              const Text(
+                'RINGDIVE·OS',
+                style: TextStyle(
+                  fontFamily: _kMono,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
+                  color: Color(0xFF3A4150),
+                ),
+              ),
+            ],
+          ),
+          Opacity(
+            opacity: _hasSelection ? 1 : 0,
+            child: GestureDetector(
+              onTap: _hasSelection ? _reset : null,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0x0A000000),
+                  border: Border.all(color: const Color(0x17000000)),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  '↺ מחדש',
+                  style: TextStyle(
+                    fontFamily: _kMono,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    color: _kSub,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── the 56px count block ───────────────────────────────────────────────────
+
+  Widget _countBlock(int count, String readout, String statusLine) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 6, 22, 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$count',
+                style: const TextStyle(
+                  fontFamily: _kMono,
+                  fontSize: 56,
+                  fontWeight: FontWeight.w800,
+                  height: 0.9,
+                  letterSpacing: -2,
+                  color: _kInk,
+                  shadows: <Shadow>[
+                    Shadow(color: Color(0x38FF7A18), blurRadius: 14, offset: Offset(0, 2)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  readout,
+                  style: const TextStyle(
+                    fontFamily: _kMono,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    color: _kMuted,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            statusLine,
+            style: const TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: _kSub,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── "סנן לפי" axis switcher ─────────────────────────────────────────────────
+
+  Widget _axisStrip(List<String> fields, String? active) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        child: Row(
+          children: [
+            const Text(
+              'סנן לפי',
+              style: TextStyle(
+                fontFamily: _kMono,
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+                color: _kMonoTag,
+              ),
+            ),
+            const SizedBox(width: 7),
+            for (final f in fields) _axisChip(f, f == active),
           ],
         ),
       ),
     );
   }
 
-  // ── cart bar ─────────────────────────────────────────────────────────────
+  Widget _axisChip(String field, bool active) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 7),
+      child: GestureDetector(
+        onTap: active ? null : () => _switchAxis(field),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: active
+                ? const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[Color(0xFFFF9A3F), Color(0xFFF0710C)],
+                  )
+                : null,
+            color: active ? null : const Color(0x14FF7A18),
+            border: Border.all(
+              color: active ? _kOrangeDeep : const Color(0x4DFF7A18),
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            kRdAxisLabel[field] ?? field,
+            style: TextStyle(
+              fontFamily: 'Heebo',
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: active ? const Color(0xFF3A1600) : const Color(0xFFB54708),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── numbered breadcrumb chips ──────────────────────────────────────────────
+
+  Widget _breadcrumbStrip() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 12, 22, 4),
+      child: Wrap(
+        spacing: 7,
+        runSpacing: 7,
+        children: [
+          for (var i = 0; i < _path.length; i++)
+            _crumb(i + 1, kRdAxisLabel[_path[i].field] ?? '', _path[i].value,
+                () => _backTo(i)),
+        ],
+      ),
+    );
+  }
+
+  Widget _crumb(int n, String axis, String value, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: const Color(0x1AFF7A18),
+          border: Border.all(color: const Color(0x52FF7A18)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$n· $axis ✎',
+              style: const TextStyle(
+                fontFamily: _kMono,
+                fontSize: 8.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+                color: _kMonoTag,
+              ),
+            ),
+            const SizedBox(height: 1),
+            Text(
+              value,
+              maxLines: 1,
+              style: const TextStyle(
+                fontFamily: 'Heebo',
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: _kInk,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── the wheel area (dial + commit marker) ──────────────────────────────────
+
+  Widget _wheelArea(
+    List<String> labels,
+    List<String> sublabels,
+    String hubHint,
+    void Function(int)? onSelect,
+  ) {
+    return SizedBox(
+      height: 360,
+      child: Center(
+        child: SizedBox(
+          width: 340,
+          height: 340,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              RingDiveWheel(
+                labels: labels,
+                sublabels: sublabels,
+                hubHint: hubHint,
+                lockedCount: _path.length,
+                onSelect: onSelect,
+              ),
+              const Positioned(
+                top: 0,
+                child: IgnorePointer(
+                  child: Text(
+                    '▲',
+                    style: TextStyle(fontSize: 13, color: _kOrange),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── cart bar ───────────────────────────────────────────────────────────────
 
   Widget _cartBar() {
     if (_added) {
       return Padding(
-        padding: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.only(top: 14, bottom: 18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -279,20 +722,20 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 fontFamily: 'Heebo',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF8C8578),
+                color: _kMonoTag,
               ),
             ),
             const SizedBox(height: 10),
             SizedBox(
               width: 200,
-              child: _pillButton('חיפוש חדש', const Color(0xFF1B1B1A), _reset),
+              child: _pillButton('חיפוש חדש', _kInk, _reset),
             ),
           ],
         ),
       );
     }
     return Padding(
-      padding: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.only(top: 14, bottom: 18),
       child: SizedBox(
         width: 240,
         child: _pillButton(
@@ -304,151 +747,151 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     );
   }
 
-  // ── breadcrumb ───────────────────────────────────────────────────────────
+  // ── results rail + product sheet (NO price — owner-locked) ──────────────────
 
-  Widget _buildBreadcrumb() {
+  Widget _resultsRail(List<LipskeyCatalogProduct> products, int total) {
     return Container(
-      constraints: const BoxConstraints(maxWidth: 340),
-      padding: const EdgeInsets.only(bottom: 10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        reverse: true,
-        child: Row(
-          children: [
-            _resetCrumb(),
-            for (var i = _path.length - 1; i >= 0; i--)
-              _crumb(_path[i].value, () => _backTo(i)),
-            if (_qty != null) _crumb('× $_qty', _clearQty),
-            const SizedBox(width: 6),
-          ],
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 12, bottom: 20),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0x0F000000))),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[Color(0x08FF7A18), Color(0x00FF7A18)],
         ),
       ),
-    );
-  }
-
-  Widget _crumb(String text, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: const Color(0x1FFF7A18),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          text,
-          maxLines: 1,
-          style: const TextStyle(
-            fontFamily: 'Heebo',
-            fontSize: 11.5,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFFC4590C),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _resetCrumb() {
-    return GestureDetector(
-      onTap: _reset,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: const Color(0xFFE7E1D8)),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: const Text(
-          '↺ מחדש',
-          style: TextStyle(
-            fontFamily: 'Heebo',
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF8C8578),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── results footer + product sheet ───────────────────────────────────────
-
-  Widget _buildResultsFooter(List<LipskeyCatalogProduct> products) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 340),
-      height: 116,
-      padding: const EdgeInsets.only(top: 14),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        reverse: true,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [for (final p in products) _productCard(p)],
-        ),
-      ),
-    );
-  }
-
-  Widget _productCard(LipskeyCatalogProduct p) {
-    return GestureDetector(
-      onTap: () => _openSheet(p),
-      child: Container(
-        width: 132,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFECE6DC)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 0, 22, 9),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 11,
-                  height: 11,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _dotColors[p.color] ?? const Color(0xFFB7B0A5),
-                    border: Border.all(color: const Color(0x24000000)),
+                const Text(
+                  'מועמדים',
+                  style: TextStyle(
+                    fontFamily: _kMono,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    color: _kMonoTag,
                   ),
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    p.brand,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Heebo',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF8C8578),
-                    ),
+                Text(
+                  '$total ▸',
+                  style: const TextStyle(
+                    fontFamily: _kMono,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: _kOrangeDeep,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 7),
-            Expanded(
-              child: Text(
-                p.nameHe,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Heebo',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  height: 1.25,
-                  color: Color(0xFF2A2620),
-                ),
+          ),
+          SizedBox(
+            height: 96,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [for (final p in products) _railCard(p)],
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _railCard(LipskeyCatalogProduct p) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 11),
+      child: GestureDetector(
+        onTap: () => _openSheet(p),
+        child: Container(
+          width: 158,
+          padding: const EdgeInsets.all(13),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[Color(0xFFFFFFFF), Color(0xFFFBF8F4)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0x12000000)),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -13,
+                right: -13,
+                bottom: -13,
+                child: Container(
+                  width: 3,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[_kOrange, Color(0x00FF7A18)],
+                    ),
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: _dotColors[p.color] ?? const Color(0xFFB7B0A5),
+                          border: Border.all(color: const Color(0x26000000)),
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text(
+                          p.brand,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: _kMono,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                            color: _kMonoTag,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: Text(
+                      p.nameHe,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Heebo',
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                        color: Color(0xFF2A303C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -506,10 +949,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 Text(
                   p.brand,
                   style: const TextStyle(
-                    fontFamily: 'Heebo',
+                    fontFamily: _kMono,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF8C8578),
+                    color: _kMonoTag,
                   ),
                 ),
               ],
@@ -522,7 +965,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
                 height: 1.2,
-                color: Color(0xFF1B1B1A),
+                color: _kInk,
               ),
             ),
             const SizedBox(height: 14),
@@ -532,7 +975,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
               children: [for (final s in specs) _specChip(s.key, s.value)],
             ),
             const SizedBox(height: 20),
-            _pillButton('הוסף להזמנה', const Color(0xFFFF7A18), () {
+            _pillButton('הוסף להזמנה', _kOrange, () {
               Navigator.of(sheetCtx).pop();
               _pickProduct(p);
             }),
@@ -553,10 +996,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       child: Text(
         '$k · $v',
         style: const TextStyle(
-          fontFamily: 'Heebo',
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF5A544A),
+          fontFamily: _kMono,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF4A505C),
         ),
       ),
     );
