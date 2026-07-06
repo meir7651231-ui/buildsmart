@@ -366,10 +366,11 @@ List<KbToolNode> kbUpdatesNotifNodes() => <KbToolNode>[
     ];
 
 /// שיחות tools (owner steps 2 + 3): ➕ שיחה חדשה · 🔍 חיפוש שיחות · 📎 צרף ·
-/// 🎤 קולי. Per plan Q2 the first three ship as HONEST "בקרוב" deferred leaves
-/// now — the real openers (openNewChatWith / a search-focus seam / a compose
-/// attach) are exposed and wired in plan phase 6; the conversation PREDICTIONS
-/// (the headline real-data surface) are fully wired in the deriver meanwhile.
+/// 🎤 קולי. ➕ שיחה חדשה is WIRED to [openNewChatSheet] (the SAME _NewChatSheet
+/// contact-picker the chats ⋮ menu shows); 🔍 חיפוש שיחות + 📎 צרף still ship as
+/// HONEST "בקרוב" leaves (no search-focus seam / compose-attach opener exists
+/// yet). The conversation PREDICTIONS (the real-data surface) stay wired in the
+/// deriver meanwhile.
 /// 🎤 קולי REUSES the existing voice leaf verbatim ([KbToolNode.leaf] with
 /// `isVoiceInput: true`): the FLOATING keyboard already intercepts a voice-marked
 /// node in `_onTile` and runs mic→`insertAtCaret` itself, so the same leaf works
@@ -379,7 +380,7 @@ List<KbToolNode> kbUpdatesChatsNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.add_comment_outlined,
         label: 'שיחה חדשה',
-        action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+        action: (ref, context) => openNewChatSheet(context),
       ),
       KbToolNode.leaf(
         icon: Icons.search,
@@ -939,14 +940,14 @@ List<KbToolNode> kbStoreSettingsNodes() => <KbToolNode>[
       ),
     ];
 
-/// 🗄️ ארכיון שיחות ([ChatsArchiveScreen]) tools: ➕ שיחה חדשה (honest "בקרוב"
-/// until the real opener is exposed) + 🔍 חיפוש שיחות (likewise) — mirroring the
-/// chats overflow's deferred items.
+/// 🗄️ ארכיון שיחות ([ChatsArchiveScreen]) tools: ➕ שיחה חדשה (WIRED to
+/// [openNewChatSheet]) + 🔍 חיפוש שיחות (honest "בקרוב" — no opener yet) —
+/// mirroring the chats overflow's items.
 List<KbToolNode> kbChatsArchiveNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.add_comment_outlined,
         label: 'שיחה חדשה',
-        action: (ref, context) => _toolSoon(context, 'שיחה חדשה'),
+        action: (ref, context) => openNewChatSheet(context),
       ),
       KbToolNode.leaf(
         icon: Icons.search,
