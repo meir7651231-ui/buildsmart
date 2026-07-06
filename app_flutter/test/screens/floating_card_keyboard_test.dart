@@ -26,9 +26,13 @@ import 'package:buildsmart/features/word_finder/word_lexicon.dart';
 import 'package:buildsmart/screens/card_keyboard_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogSectionProvider, keyboardDiveQueryProvider;
+import 'package:buildsmart/screens/chats_screen.dart'
+    show updatesChatSearchProvider;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show matchDestinations;
+import 'package:buildsmart/screens/notifications_screen.dart'
+    show notifSearchQueryProvider;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSearchQueryProvider, storeSectionProvider;
 import 'package:buildsmart/screens/updates_screen.dart'
@@ -470,6 +474,50 @@ void main() {
           reason: 'store-tab typing drives the store filter query');
       expect(container.read(keyboardDiveQueryProvider), isEmpty,
           reason: 'the catalog dive stays untouched on the store tab');
+    });
+
+    testWidgets(
+        'on the UPDATES tab (2) שיחות sub-tab, typing drives the CHAT search',
+        (tester) async {
+      // OWNER (build search): on עדכונים the typed query must hit the ACTIVE
+      // sub-tab's own filter. On שיחות it drives updatesChatSearchProvider (→
+      // visibleThreadsProvider), NOT the notif filter — before this fix tab-2
+      // typing ALWAYS hit the notif filter, so the chats list never searched.
+      final container = await pumpPanel(tester);
+      container.read(mainTabProvider.notifier).state = 2; // 2 = עדכונים
+      container.read(updatesSubTabProvider.notifier).state = 1; // 1 = שיחות
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(updatesChatSearchProvider), 'בר',
+          reason: 'chats sub-tab typing drives the chat filter query');
+      expect(container.read(notifSearchQueryProvider), isEmpty,
+          reason: 'the notif filter stays untouched on the chats sub-tab');
+    });
+
+    testWidgets(
+        'on the UPDATES tab (2) התראות sub-tab, typing drives the NOTIF search',
+        (tester) async {
+      // The other half of the same routing: on התראות (sub-tab 0) the typed query
+      // drives the notifications filter, and the chat filter stays empty.
+      final container = await pumpPanel(tester);
+      container.read(mainTabProvider.notifier).state = 2; // 2 = עדכונים
+      container.read(updatesSubTabProvider.notifier).state = 0; // 0 = התראות
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(notifSearchQueryProvider), 'בר',
+          reason: 'notif sub-tab typing drives the notifications filter');
+      expect(container.read(updatesChatSearchProvider), isEmpty,
+          reason: 'the chat filter stays untouched on the notifications sub-tab');
     });
 
     testWidgets(

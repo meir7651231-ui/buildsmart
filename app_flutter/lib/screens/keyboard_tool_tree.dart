@@ -32,7 +32,12 @@ import 'package:buildsmart/screens/catalog_screen.dart'
         openManageLists;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
-    show ChatsArchiveScreen, ChatsScreen, allChatsMuted, toggleMuteAllChats;
+    show
+        ChatsArchiveScreen,
+        ChatsScreen,
+        allChatsMuted,
+        toggleMuteAllChats,
+        updatesChatSearchProvider;
 import 'package:buildsmart/screens/contractor_material_requests_sheet.dart'
     show showContractorMaterialRequestsSheet;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
@@ -367,9 +372,11 @@ List<KbToolNode> kbUpdatesNotifNodes() => <KbToolNode>[
 
 /// שיחות tools (owner steps 2 + 3): ➕ שיחה חדשה · 🔍 חיפוש שיחות · 📎 צרף ·
 /// 🎤 קולי. ➕ שיחה חדשה is WIRED to [openNewChatSheet] (the SAME _NewChatSheet
-/// contact-picker the chats ⋮ menu shows); 🔍 חיפוש שיחות + 📎 צרף still ship as
-/// HONEST "בקרוב" leaves (no search-focus seam / compose-attach opener exists
-/// yet). The conversation PREDICTIONS (the real-data surface) stay wired in the
+/// contact-picker the chats ⋮ menu shows); 🔍 חיפוש שיחות RESETS the chat filter
+/// ([updatesChatSearchProvider]) for a fresh search (the LIVE search is typing on
+/// the שיחות sub-tab — the floating keyboard routes it to that same provider);
+/// 📎 צרף stays HONEST "בקרוב" (attach means something only inside a chat's
+/// compose bar, where it already works — not the list). The conversation PREDICTIONS (the real-data surface) stay wired in the
 /// deriver meanwhile.
 /// 🎤 קולי REUSES the existing voice leaf verbatim ([KbToolNode.leaf] with
 /// `isVoiceInput: true`): the FLOATING keyboard already intercepts a voice-marked
@@ -385,7 +392,12 @@ List<KbToolNode> kbUpdatesChatsNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.search,
         label: 'חיפוש שיחות',
-        action: (ref, context) => _toolSoon(context, 'חיפוש שיחות'),
+        // Live search on the שיחות sub-tab is TYPING (the floating keyboard routes
+        // it to [updatesChatSearchProvider]); this chip RESETS that filter so a tap
+        // starts a fresh search (shows every thread again).
+        action: (ref, context) {
+          ref.read(updatesChatSearchProvider.notifier).state = '';
+        },
       ),
       KbToolNode.leaf(
         icon: Icons.attach_file,
@@ -941,8 +953,8 @@ List<KbToolNode> kbStoreSettingsNodes() => <KbToolNode>[
     ];
 
 /// 🗄️ ארכיון שיחות ([ChatsArchiveScreen]) tools: ➕ שיחה חדשה (WIRED to
-/// [openNewChatSheet]) + 🔍 חיפוש שיחות (honest "בקרוב" — no opener yet) —
-/// mirroring the chats overflow's items.
+/// [openNewChatSheet]) + 🔍 חיפוש שיחות (RESETS [updatesChatSearchProvider] for a
+/// fresh search) — mirroring the chats overflow's items.
 List<KbToolNode> kbChatsArchiveNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.add_comment_outlined,
@@ -952,7 +964,11 @@ List<KbToolNode> kbChatsArchiveNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.search,
         label: 'חיפוש שיחות',
-        action: (ref, context) => _toolSoon(context, 'חיפוש שיחות'),
+        // Resets the chat filter for a fresh search (live search = typing, routed
+        // to [updatesChatSearchProvider] by the floating keyboard).
+        action: (ref, context) {
+          ref.read(updatesChatSearchProvider.notifier).state = '';
+        },
       ),
     ];
 

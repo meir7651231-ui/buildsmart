@@ -64,7 +64,7 @@ import 'package:buildsmart/screens/card_keyboard_sheet.dart'
 import 'package:buildsmart/screens/catalog_screen.dart'
     show keyboardDiveQueryProvider;
 import 'package:buildsmart/screens/chats_screen.dart'
-    show ThreadLite, visibleThreadsProvider;
+    show ThreadLite, updatesChatSearchProvider, visibleThreadsProvider;
 import 'package:buildsmart/screens/keyboard_catalog_deriver.dart'
     show deriveCatalogContext;
 import 'package:buildsmart/screens/keyboard_dept_deriver.dart'
@@ -89,6 +89,8 @@ import 'package:buildsmart/screens/notifications_screen.dart'
     show notifSearchQueryProvider;
 import 'package:buildsmart/screens/store_screen.dart'
     show storeSearchQueryProvider;
+import 'package:buildsmart/screens/updates_screen.dart'
+    show updatesSubTabProvider;
 import 'package:buildsmart/services/voice.dart' show VoiceService;
 import 'package:buildsmart/state/catalog_location.dart'
     show CatalogLocation, catalogLocationProvider;
@@ -311,9 +313,16 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
       if (tab == 0) {
         ref.read(keyboardDiveQueryProvider.notifier).state = _controller.text;
       } else if (tab == 2) {
-        // UPDATES tab — the query drives the notifications' own filter (owner: same
-        // treatment — its search bar is deleted, the keyboard IS the notif search).
-        ref.read(notifSearchQueryProvider.notifier).state = _controller.text;
+        // UPDATES tab — route the typed query to the ACTIVE sub-tab's OWN filter:
+        // on שיחות ([updatesSubTabProvider] == 1) the keyboard IS the chat search
+        // ([updatesChatSearchProvider] → [visibleThreadsProvider]); on התראות it
+        // drives the notifications filter. Before this, tab-2 typing ALWAYS hit the
+        // notif filter, so typing on the chats sub-tab filtered the wrong list.
+        if (ref.read(updatesSubTabProvider) == 1) {
+          ref.read(updatesChatSearchProvider.notifier).state = _controller.text;
+        } else {
+          ref.read(notifSearchQueryProvider.notifier).state = _controller.text;
+        }
       } else if (tab == 3) {
         // STORE tab — the query drives the store's own filter (orders + products).
         ref.read(storeSearchQueryProvider.notifier).state = _controller.text;
