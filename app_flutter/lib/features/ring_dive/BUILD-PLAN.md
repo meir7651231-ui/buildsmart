@@ -118,8 +118,18 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   button. Note: the real acc are specific named accessories (some sku-pinned),
   not free-choice slots, so the honest realization is model-choice + a fixed
   components view (not the prototype's per-slot pick).
-- RD-F next — a real cart (the sheet + running list) so qty-add and kit-add
-  accumulate; done follow-ups; wheel pagination for >12 options (compat/leaves).
-  Then RD-G (motion polish + bundle JetBrains Mono + a browser-render fidelity
-  pass) and RD-H (more tests). Show the owner LIVE only once the FULL screen
-  matches (not piecemeal).
+- 🚀 LIVE (6/7) — pushed to buildsmart-il.com on the owner's "תתדחוף". Wired at
+  the catalog_screen 'מאתר חכם' seam (kRingDive → RingDive, else WordFinderHome)
+  + ENABLE_RING_DIVE in firebase-hosting.yml + web-deploy.yml + merged to
+  claude/whats-happening-LyY9G. Verified live: ETag flipped + RINGDIVE in the
+  built main.dart.js. Reached via the keyboard's '✨ מאתר חכם' chip.
+- fix (4e78f207) — a real click was swallowed after a spin (stale _moved) / on
+  web (pan claims the click); onTapDown resets _moved + onPanEnd selects on a
+  sub-threshold move. Gesture-level test added (the unit tests had bypassed the
+  gesture by calling onSelect directly).
+- RD-F pagination done — every wheel set with >12 options now pages (11 + "עוד…"
+  via _pageSlice + _page) so the rim never overflows (was: type 98 / size 150 /
+  compat 234 crammed). Long rim labels capped (_cap). analyze 0 · test 6/6 · a
+  new test asserts 12 labels + "עוד…" + paging. STILL PENDING in RD-F: the real
+  accumulating cart + cart sheet. Then RD-G (motion + JetBrains Mono) + RD-H.
+  Next deploy of these polish fixes waits for the next "תדחוף".

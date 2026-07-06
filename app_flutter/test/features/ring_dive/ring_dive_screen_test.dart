@@ -149,4 +149,36 @@ void main() {
       reason: 'a tap after a drag must dive, not be swallowed by stale _moved',
     );
   });
+
+  testWidgets('pagination: an axis with >12 options shows 11 + "עוד…"',
+      (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // enter the 'סוג' (type) style — the type axis has far more than 12 options.
+    final typeIndex = wheel().labels.indexWhere((l) => l.contains('סוג'));
+    wheel().onSelect!(typeIndex);
+    await tester.pumpAndSettle();
+
+    // the rim never overflows: exactly 12 (11 options + the "עוד…" pager).
+    expect(wheel().labels.length, 12);
+    expect(wheel().labels.last, 'עוד…');
+
+    // tapping "עוד…" pages to a different set.
+    final firstPage = List<String>.of(wheel().labels);
+    wheel().onSelect!(11);
+    await tester.pumpAndSettle();
+    expect(wheel().labels, isNot(equals(firstPage)));
+    expect(wheel().labels.last, 'עוד…');
+  });
 }

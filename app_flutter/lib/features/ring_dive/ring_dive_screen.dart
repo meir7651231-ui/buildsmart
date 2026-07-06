@@ -110,6 +110,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   LipskeyCatalogProduct? _origin;
   List<LipskeyCatalogProduct> _compatLeaves = const <LipskeyCatalogProduct>[];
 
+  /// The current wheel page. Any option set with >12 entries paginates (11 +
+  /// "עוד…") so the rim never overflows; reset to 0 when the set changes.
+  int _page = 0;
+
   /// `job` mode: the chosen recipe key (null = the recipe list is on the wheel),
   /// the chosen model within it (defaults to the recommended brand), and whether
   /// its kit has been added.
@@ -140,6 +144,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
     // fall back to the first axis (dept) and mislead the user.
     final validAxis = kRdAxes.contains(axis);
     setState(() {
+      _page = 0;
       _mode = validAxis ? 'find' : 'job';
       _axisField = validAxis ? axis : null;
       _path.clear();
@@ -155,6 +160,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _dive(String field, String value) {
     setState(() {
+      _page = 0;
       _path.add((field: field, value: value));
       final axes = rdFindAxes(_cons);
       _axisField = axes.isNotEmpty ? axes.first : null;
@@ -164,7 +170,10 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   /// Jump the active axis to [field] (the "סנן לפי" switcher) without diving.
   void _switchAxis(String field) {
     HapticFeedback.selectionClick();
-    setState(() => _axisField = field);
+    setState(() {
+      _axisField = field;
+      _page = 0;
+    });
   }
 
   void _pickProduct(LipskeyCatalogProduct p) {
@@ -174,6 +183,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _backTo(int level) {
     setState(() {
+      _page = 0;
       _path.removeRange(level, _path.length);
       _product = null;
       _qty = null;
@@ -254,6 +264,7 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
   void _enterCompat(LipskeyCatalogProduct p) {
     HapticFeedback.selectionClick();
     setState(() {
+      _page = 0;
       _mode = 'compat';
       _origin = p;
       _path.clear();
@@ -285,6 +296,29 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
 
   void _cancelQty() {
     setState(() => _product = null);
+  }
+
+  /// Cap an over-long rim label so it fits the dial (real compat/leaf names can
+  /// run long, e.g. 'אביזרי נחושת — כל הסוגים 20 מ"מ').
+  String _cap(String s) => s.length > 20 ? '${s.substring(0, 19)}…' : s;
+
+  /// The current wheel page of [items]: up to 11 entries + an "עוד…" pager key
+  /// when there are >12, so the rim never overflows. `hasMore` says whether to
+  /// add the pager; `pageLabel` is its sublabel.
+  ({List<T> slice, bool hasMore, String pageLabel}) _pageSlice<T>(
+    List<T> items,
+  ) {
+    const per = 11;
+    if (items.length <= 12) {
+      return (slice: items, hasMore: false, pageLabel: '');
+    }
+    final pages = (items.length / per).ceil();
+    final pg = _page % pages;
+    return (
+      slice: items.skip(pg * per).take(per).toList(growable: false),
+      hasMore: true,
+      pageLabel: 'דף ${pg + 1}/$pages',
+    );
   }
 
   @override
@@ -373,19 +407,26 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       final partners = _origin == null
           ? const <LipskeyCatalogProduct>[]
           : compatibleWith(_origin!);
-      _compatLeaves = partners;
       count = partners.length;
       readout = 'תואמים';
       statusLine = partners.isEmpty
           ? 'אין מוצרים תואמים'
           : 'מה מתחבר ל${_origin!.nameHe}';
       hubHint = 'הקש להוספה';
-      for (final p in partners.take(12)) {
-        labels.add(_short(p));
+      final page = _pageSlice(partners);
+      _compatLeaves = page.slice;
+      for (final p in page.slice) {
+        labels.add(_cap(_short(p)));
         sublabels.add('תואם');
       }
+      if (page.hasMore) {
+        labels.add('עוד…');
+        sublabels.add(page.pageLabel);
+      }
       onSelect = (i) {
-        if (i >= 0 && i < _compatLeaves.length && i < 12) {
+        if (page.hasMore && i == _compatLeaves.length) {
+          setState(() => _page++);
+        } else if (i >= 0 && i < _compatLeaves.length) {
           _pickProduct(_compatLeaves[i]);
         }
       };
@@ -401,15 +442,26 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
       count = matched.length;
       readout = 'מועמדים';
       if (axes.isEmpty) {
-        // Store the live leaves in a field; the tap handler indexes THIS field,
-        // so a select always resolves against the current constraint set.
-        _leaves = matched;
-        labels.addAll(matched.map((rp) => rp.name));
-        sublabels.addAll(matched.map((_) => 'בחר מוצר'));
+        // Store the current page's leaves in a field; the tap handler indexes
+        // THIS field, so a select always resolves against the shown set.
+        final page = _pageSlice(matched);
+        _leaves = page.slice;
+        for (final rp in page.slice) {
+          labels.add(_cap(rp.name));
+          sublabels.add('בחר מוצר');
+        }
+        if (page.hasMore) {
+          labels.add('עוד…');
+          sublabels.add(page.pageLabel);
+        }
         hubHint = 'הקש לבחור מוצר';
         statusLine = 'בחר מוצר · הקש על השם';
         onSelect = (i) {
-          if (i >= 0 && i < _leaves.length) _pickProduct(_leaves[i].product);
+          if (page.hasMore && i == _leaves.length) {
+            setState(() => _page++);
+          } else if (i >= 0 && i < _leaves.length) {
+            _pickProduct(_leaves[i].product);
+          }
         };
       } else {
         _leaves = const <RdProduct>[];
@@ -418,15 +470,26 @@ class _RingDiveScreenState extends ConsumerState<RingDiveScreen> {
             : axes.first;
         final opts = rdOptsFor(field, cons, matched);
         final label = kRdAxisLabel[field] ?? '';
-        labels.addAll(opts);
-        sublabels.addAll(opts.map((_) => label));
+        final page = _pageSlice(opts);
+        for (final o in page.slice) {
+          labels.add(_cap(o));
+          sublabels.add(label);
+        }
+        if (page.hasMore) {
+          labels.add('עוד…');
+          sublabels.add(page.pageLabel);
+        }
         axisFields = axes;
         activeField = field;
         statusLine = axes.length > 1
             ? 'בחר $label · או החלף סינון למעלה'
             : 'בחר $label · סובב את הגלגל';
         onSelect = (i) {
-          if (i >= 0 && i < opts.length) _dive(field, opts[i]);
+          if (page.hasMore && i == page.slice.length) {
+            setState(() => _page++);
+          } else if (i >= 0 && i < page.slice.length) {
+            _dive(field, page.slice[i]);
+          }
         };
         footer =
             matched.take(10).map((rp) => rp.product).toList(growable: false);
