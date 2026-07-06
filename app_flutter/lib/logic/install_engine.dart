@@ -6,6 +6,9 @@ import 'dart:collection';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/domain/connection_resolver.dart';
+import 'package:buildsmart/domain/connection_schema.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ── O(1) catalog lookup ──────────────────────────────────────────────────────
@@ -85,9 +88,43 @@ class LineCheck {
   final CheckSeverity severity;
 }
 
+/// s41: the delegation seam. Carried by the (future, s43) provider layer —
+/// nothing live passes it yet; the kTradeStudioFlag gate lives at that layer.
+/// R1-2 KEYSTONE CONTRACT: plumbing ('plumbing') NEVER delegates — its
+/// hand-written physics branch below is permanent and non-deletable.
+@immutable
+class TradeResolution {
+  const TradeResolution({required this.tradeId, required this.resolver, required this.specOf});
+  final String tradeId;
+  final ConnectionResolver resolver;
+  final ProductConnectorSpec? Function(String sku) specOf;
+}
+
 /// The physical join method between two mating products, derived from end types
 /// — so each transition states exactly how it's connected (Press / PTFE / …).
-String connectionMethodLabel(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+///
+/// [trade]: optional s41 authored-trade delegation seam — see [TradeResolution].
+String connectionMethodLabel(
+  LipskeyCatalogProduct a,
+  LipskeyCatalogProduct b, {
+  TradeResolution? trade,
+}) {
+  // s41 delegation seam. R1-2 KEYSTONE: plumbing NEVER enters the resolver —
+  // this runtime guard is unconditional and deliberately carries NO assert
+  // (a plumbing TradeResolution must be silently ignored in every build mode;
+  // the delegation tests enforce it by passing a throwing specOf).
+  if (trade != null && trade.tradeId != 'plumbing') {
+    try {
+      final sa = trade.specOf(a.sku);
+      final sb = trade.specOf(b.sku);
+      if (sa == null || sb == null) return '';
+      return trade.resolver.canConnect(sa, sb).methodLabelHe;
+    } on Object {
+      // Kill-switch (plan addition-B): any resolver failure falls through to
+      // the legacy hand-written physics branch below — silently, no print.
+    }
+  }
+
   final vA = kVerifiedSpecs[a.sku], vB = kVerifiedSpecs[b.sku];
   if (vA == null || vB == null) return '';
   for (final eA in vA.ends) {
@@ -148,8 +185,55 @@ String _directionalContext(List<LipskeyCatalogProduct> chain, int i) {
 
 /// Detects the safety/durability components a hot line requires and whether the
 /// current chain includes them — turning expert review into an automatic gate.
+///
+/// [trade]: optional s41 authored-trade delegation seam — see [TradeResolution].
 List<LineCheck> lineComplianceChecklist(
-    List<LipskeyCatalogProduct> chain, int tempC, Set<String> accessories) {
+  List<LipskeyCatalogProduct> chain,
+  int tempC,
+  Set<String> accessories, {
+  TradeResolution? trade,
+}) {
+  // s41 delegation seam — same R1-2 unconditional runtime guard as
+  // connectionMethodLabel: plumbing NEVER enters the resolver. v1 semantics
+  // for an AUTHORED trade: its checklist IS its rule violations — completion
+  // issues plus a system-coherence breach — returned as unsatisfied checks
+  // (no violations → empty checklist). Unknown skus (null spec) are skipped.
+  if (trade != null && trade.tradeId != 'plumbing') {
+    try {
+      final line = <ProductConnectorSpec>[
+        for (final p in chain)
+          if (trade.specOf(p.sku) case final s?) s,
+      ];
+      final coherence = trade.resolver.systemCoherence(line);
+      final mixedSku = coherence.offendingSku;
+      return <LineCheck>[
+        for (final issue in trade.resolver.completion(line))
+          LineCheck(
+            issue.whyHe,
+            false,
+            issue.whyHe,
+            severity: switch (issue.severity) {
+              RuleSeverity.critical => CheckSeverity.critical,
+              RuleSeverity.warning => CheckSeverity.warning,
+              RuleSeverity.info => CheckSeverity.info,
+            },
+          ),
+        if (!coherence.coherent)
+          LineCheck(
+            'ערבוב מערכות (אספקה/ניקוז)',
+            false,
+            mixedSku == null
+                ? 'הקו מערבב יותר ממערכת אחת'
+                : 'הקו מערבב יותר ממערכת אחת — רכיב חורג: $mixedSku',
+            severity: CheckSeverity.critical,
+          ),
+      ];
+    } on Object {
+      // Kill-switch (plan addition-B): any resolver failure falls through to
+      // the legacy plumbing checklist below — silently, by design (no print).
+    }
+  }
+
   final skus = chain.map((p) => p.sku).toSet();
   final mats = chain.map(productMaterial).whereType<String>().toSet();
   bool has(Set<String> ok) => skus.any(ok.contains);

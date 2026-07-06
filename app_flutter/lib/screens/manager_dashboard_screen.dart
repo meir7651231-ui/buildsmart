@@ -21,6 +21,7 @@ import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/studio/studio_entry.dart';
+import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 // #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
 // of the approval: the worker sheet and this dashboard).
@@ -28,12 +29,15 @@ import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
+import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/trade_builder_flags.dart'
+    show kTradeBuilderFlag;
 import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
@@ -2524,6 +2528,28 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
             onOpen: () => showManagerRoleAssignSheet(context),
           ),
         ),
+
+        // 7. 🏗️ בונה ענפים (Pillar-2 · step 44) — the OWNER-GATED authoring
+        // entry. A collection-`if` on [featureFlagsProvider] (kTradeBuilderFlag,
+        // default OFF — absent from prefs AND `_forcedOnFlags`), so with the
+        // flag off the entry is ABSENT from the widget tree and the ניהול tab
+        // is byte-identical to before; the ONLY path in is the owner-staged
+        // `enable('kTradeBuilder')`. Reuses the same [_ManageSection] card
+        // idiom as every entry above, but as a NAVIGATION tile (`open: false`,
+        // no accordion body): tapping the header pushes the trade-builder home.
+        if (ref.watch(featureFlagsProvider).contains(kTradeBuilderFlag)) ...[
+          const SizedBox(height: BsTokens.space3),
+          _ManageSection(
+            sectionKey: 'tradeBuilder',
+            emoji: '🏗️',
+            title: 'בונה ענפים',
+            sub: 'בניית ענף חדש — קטגוריות, מוצרים וחוקים',
+            open: false,
+            onTap: () =>
+                Navigator.of(context).push(TradeBuilderHomeScreen.route()),
+            child: const SizedBox.shrink(),
+          ),
+        ],
       ],
     );
   }

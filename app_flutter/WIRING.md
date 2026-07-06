@@ -3091,3 +3091,65 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **TEST 3 (גלווני):** copper+iron → issue critical עם whyHe (המתאם הדיאלקטרי) + offendingSkus; copper+benign / copper+copper → ריק (tripwire להוספות-seed עתידיות).
 - **TEST 4 (קוהרנטיות):** supply+drainage → לא-קוהרנטי, offendingSku=הניקוז, offendingSystem=`plumbing.sys.drainage`.
 - **ערוץ-סטייה שתועד ולא רוכך:** ה-resolver מנרמל sizes (`normalizeSize`) והמנוע משווה גולמי — הזוגיות מוכיחה שאין אי-עקביות-size בנתונים בפועל. **gate:** analyze 0 · 4/4 · הפינים הישנים (compat_50_samples · full_compliance_audit) לא-נגועים. **G-resolver ירוק = מותר לחווט (s41).**
+
+### #pillar2-s41 — תפר-ההאצלה במנוע החי: אינסטלציה קשיחה לנצח (R1-2) — **חלק ג׳ (39-41) נסגר** — 2026-07-06
+**לראשונה המנוע החי יודע להעריך תחומים-חדשים מחוקים-מחוברים — בלי לגעת באינסטלציה.** `install_engine.dart` (בנאי-נחיל; בודק-נחיל כתב חוזה במקביל — 6/6):
+- **`TradeResolution{tradeId, resolver, specOf}`** — תפר-ההאצלה. `connectionMethodLabel(a,b,{trade})` + `lineComplianceChecklist(chain,tempC,acc,{trade})` — פרמטר אופציונלי; **אף קורא חי לא מעביר אותו עדיין** (שער-הדגל `kTradeStudioFlag` יגיע בשכבת-ה-provider, s43) ⇒ אפס-רגרסיה, הגופים הישנים בייט-לא-נגועים (הוזרקו רק שורות מעל).
+- **R1-2 (חוזה-קיסטון):** guard רץ **ללא-תנאי** — `trade.tradeId!='plumbing'` — אינסטלציה **לעולם** לא נכנסת ל-resolver, גם אם הועבר לה tradeResolution (בכוונה אין assert — פלמבינג-מוזרם חייב להיבלע בשקט בכל build-mode; הבדיקה מוכיחה עם specOf-זורק + דגל-consulted שהוא **מעולם לא נקרא**).
+- **תחום-מחובר:** method דרך `resolver.canConnect(specOf(a),specOf(b)).methodLabelHe`; spec-חסר → `''` שקט. checklist v1: **"הצ׳קליסט של תחום-מחובר = הפרות-החוקים שלו"** — CompletionIssues כ-LineChecks לא-מסופקים (RuleSeverity→CheckSeverity שם-לשם, info קיים) + check-קריטי על ערבוב-מערכות ('ערבוב מערכות (אספקה/ניקוז)' + ה-sku החורג).
+- **Kill-switch (תוספת-ב):** האצלה שזורקת → fallback שקט ל-legacy (try/catch, בלי print).
+- **gate:** analyze 0 · `install_engine_delegation_test` 6/6 (כולל R1-2-מוכח + העדפת requiredInterposerWhyHe) · **כל בדיקות-המנוע הקיימות ירוקות ללא-שינוי** (safety/hardening/polyroll/b5-b13, 41 ירוקים בריצת-האימות). הבא: **s42** (tradeId ל-repo, default 'plumbing') → **s43** (activeTradeProvider + שער-הדגל).
+
+### #pillar2-s42 — תפר-tradeId ב-CatalogRepository (default 'plumbing' = בייט-זהה) — 2026-07-06
+**חלק ד׳ נפתח (42-43).** `catalog_repository.dart` + `catalog_local.dart` (בנאי-נחיל; בודק-נחיל במקביל — 6/6):
+- **`{String tradeId = 'plumbing'}`** על `allProducts`/`smartTreeCats`/`catalogCategories` — כל הקוראים הקיימים (אפס-ארגומנטים) בייט-זהים; ה-guard המוביל `if (tradeId != 'plumbing') return const [];` הוזרק **מעל** הגופים הקיימים (לא-נגועים). tradeId זר → קריאה ריקה (v1 מתועד — read-path של תחומים-מחוברים יגיע עם חיווט-ה-store, s43+).
+- **`categoryTree({tradeId})` חדש** — גוף-דיפולט על ה-abstract (מגן על מימושי-extends עתידיים) + **override מפורש ב-LocalCatalogRepository** (הבנאי תפס לבד ש-`implements` לא יורש גוף-דיפולט — אותה מלכודת שהבודק דיגל במקביל; שני הסוכנים התכנסו).
+- **gate:** analyze 0 · `catalog_repository_tradeid_test` 6/6 (כולל חוזה-תאימות-לאחור פורמלי לכל מתודה + non-electric-special-case) · `repositories_test` + `catalog_regression_test` ירוקים ללא-שינוי (48 ירוקים בריצת-האימות). הבא: **s43 — activeTradeProvider** (ברירת-מחדל 'plumbing'; switcher מוסתר כש-count==1).
+
+### #pillar2-s43 — activeTrade providers: הכרעת-התחום-הפעיל — **חלק ד׳ (42-43) נסגר** — 2026-07-06
+**append-only ל-`lib/state/trades_store.dart` (259→311; אפס נגיעה בקיים; אפס consumers חיים עדיין):**
+- **`publishedTradeIdsProvider`** — `{'plumbing'} ∪ published` — אינסטלציה **שמורה-לנצח** (guard תוספת-ב: אי-אפשר להישאר עם קטלוג ריק).
+- **`activeTradeProvider`** (raw, default 'plumbing') + **`resolvedActiveTradeIdProvider`** — הבחירה אם-פורסמה, אחרת fallback ל-'plumbing'; **read-paths צורכים רק את ה-resolved**.
+- **`activeTradeObjProvider`** (תוספת-א: ה-Trade המלא; null לאינסטלציה-השמורה) + **`tradeSwitcherVisibleProvider`** (מוצג רק כש->1 מפורסם ⇒ תחום-יחיד = UI בייט-זהה).
+- **gate:** analyze 0 · `active_trade_provider_test` 6/6 (default · reserved · hidden-at-1/visible-at-2 · set+resolve · unpublish-fallback · unknown-id) + `trades_store_test` 4/4 ללא-שינוי. **חלק ד׳ סגור — כל התשתית מוכנה; הבא: חלק ה׳ (44-47) — מסכי-הבנייה העבריים.**
+
+### #pillar2-s44 — ה-UI הראשון: כניסה מגודרת + בית-בונה-הענפים + define-step — 2026-07-06
+**חלק ה׳ נפתח (44-47).** בנאי+בודק-נחיל במקביל, הבנאי הצליב כל assertion מול הבדיקה לפני מסירה:
+- **NEW `lib/screens/trade_builder/trade_builder_home.dart`** — `TradeBuilderHomeScreen`: RTL פנימי, clamp-1.35 (min(ambient,1.35) — clamps לא resets), '🏗️ בונה ענפים', wizard 'שלב 1 מתוך 6' (6-segment), רשימת-ענפים מ-tradesStoreProvider (ריק → 'עדיין אין ענפים — הוסף את הראשון'; מלא → tile עם emoji/color-wash/צ׳יפ טיוטה/פורסם), 'הוסף ענף' (Semantics-button, brand-pill) → define-step.
+- **NEW `trade_define_step.dart`** — טופס: 'שם הענף' · 'אימוג׳י' (default 🛠️) · 'פרסונה' dropdown מ-kPersonas (Persona{id,emoji,title}) · 6-swatches · 'שמור טיוטה' → `upsertTrade(Trade(id:'trade.<slug-דטרמיניסטי>', published:false))` + pop. שם-ריק = no-op.
+- **`manager_dashboard_screen.dart`** — insert-only (26+/0-): כרטיס `_ManageSection` '🏗️ בונה ענפים' בסוף `_ManageTab`, **collection-if על `kTradeBuilderFlag`** → OFF = עץ בייט-זהה.
+- **gate:** analyze 0 · `trade_builder_home_test` 6/6 (flag-OFF-absent גם-offstage · RTL · semantics · clamp+anti-vacuity · ניווט · draft-write) · `manager_dashboard_screen_test` **36/36 ללא-שינוי** · visual_log מעודכן. הבא: **s45 — עורכי עץ-קטגוריות + סכמת-מאפיינים** (⚠️ תנאי-קדם: variant_families_snapshot לפני מחיקת-regex).
+
+### #pillar2-s45 — 🗂️ עורך עץ-קטגוריות + 🏷️ עורך מאפיינים — 2026-07-06
+**בנאי+בודק-נחיל במקביל; תיקון-יישוב יחיד (tooltip 'מחק'):**
+- **NEW `category_tree_editor.dart`** — `CategoryTreeEditorScreen{tradeId}`: קטגוריות-הענף לפי sortIndex ב-ReorderableListView (גרירה משכתבת 0..n-1 idempotent), הוסף ('שם קטגוריה'+'הוסף קטגוריה' → `upsertCategory` id `<tradeId>.cat.<slug>`, התנגשות → '-2'), שנה-שם (dialog, **id יציב**), מחק (Semantics+tooltip). AppBar-action '🏷️' → עורך-המאפיינים.
+- **NEW `attribute_schema_editor.dart`** — `AttributeSchemaEditorScreen{tradeId}`: רשימת AttributeDefs + טופס (שם/kind/ערכים-chips/'ציר וריאנט?') → `upsertAttribute`. **ולידציה edit-time:** 'ציר וריאנט ללא ערכים' (צהוב, חי על הטופס + על tile). **פירוק-שם חי:** 'בדיקת פירוק שם' — contains על labelHe/canonical → chips '<שם>: <ערך>'.
+- **`trades_store.dart`** — +4 mutators idempotent במראה-upsertTrade: `upsertCategory/removeCategory/upsertAttribute/removeAttribute` (+49 שורות).
+- **`trade_builder_home.dart`** — nav: tile-ענף tappable → עורך-הקטגוריות.
+- **gate:** analyze 0 · 10/10 (שני הקבצים) · const files (variant_families/catalog_tree) לא-נגועים (git diff ריק) · ⚠️ מחיקת-ה-regex נשארת חסומה עד ש-variant_families_snapshot עובר עם axes-מחוברים (s45-DoD, טרם). הבא: **s46 — עורך-מוצרים + עורך-אביזרים**.
+
+### #pillar2-s46 — 📦 עורך-מוצרים + 🧩 עורך-אביזרים — 2026-07-06
+**בנאי+בודק-נחיל; שרשרת-ה-authoring הושלמה (בית→הגדרה→קטגוריות→מאפיינים→מוצרים→אביזרים):**
+- **NEW `product_authoring_screen.dart`** — `ProductAuthoringScreen{tradeId}`: מוצרי-הענף + טופס: 'שם מוצר' · 'מק"ט' (=id verbatim; כפילות → no-op + 'מק"ט כבר קיים', הראשון שורד) · 'קטגוריה' (חובה; אין → 'צור קטגוריה קודם') · **קלטים דינמיים per-AttributeDef** (עם-values → dropdown labelHe = out-of-schema בלתי-אפשרי; number → digits) → `upsertProduct` (attributes: `Map<String,String>` defId→valueId/freeText; brandId/nameEn='' — לא בבעלות-הטופס).
+- **NEW `accessory_rule_editor.dart`** — `AccessoryRuleEditorScreen{tradeId}`: חוקי-האביזר + טופס: שם/למה-חשוב/'חובה?'/'מחיר' (non-digit → 'מחיר לא תקין' + no-op; ולידציה על הטקסט הגולמי, בכוונה בלי formatter) / 'קטגוריה' / **'מוצר מקושר' חסין-יתומים** (רק מוצרי-הענף; 'ללא'=null; נשמר id) → `upsertAccessory` (id `<tradeId>.acc.<slug>`, emoji default '🧩').
+- **`trades_store.dart`** — +4 mutators (upsertProduct/removeProduct/upsertAccessory/removeAccessory, מראה-s45). **`category_tree_editor.dart`** — פעולת '📦' (insert-only).
+- **gate:** analyze 0 · s46 9/9 + רגרסיית-s45 10/10 · const seeds לא-נגועים. הבא: **s47** (לפי התוכנית — קרא detail/031-050.md).
+
+### #pillar2-s47 — 🔌 סטודיו כללי-חיבור + 🚀 שער-פרסום FK — **חלק ה׳ (44-47) נסגר** — 2026-07-06
+**הוויזרד "תוסיף חשמלאי" קיים מקצה-לקצה: בית → הגדרה → קטגוריות → מאפיינים → מוצרים → אביזרים → כללי-חיבור → פרסום.**
+- **NEW `connection_rule_studio.dart`** — `ConnectionRuleStudioScreen{tradeId}`: 'מחברים' (upsert/removeConnectorType, id `<tradeId>.conn.<slug>`) · **מטריצת N×N** (זוג-לא-מסודר; dialog 'תווית שיטה' → upsertCompatRule `<tradeId>.rule.<a>__<b>` anyToAny/critical; 'מחק כלל') · **ספסל-בדיקה חי** — specs סינתטיים חד-קצה דרך **ה-ConnectionResolver האמיתי (s39)** → methodLabelHe/'לא מתחבר'. מקור-אמת יחיד = אפס-drift מול install-studio.
+- **NEW `trade_publish_sheet.dart`** — `TradePublishSheet{tradeId}`: r1 'לכל קטגוריה יש מוצר' · r2 'לכל ציר וריאנט יש ערכים' · r3 'אין כלל-חיבור יתום' · **r4 FK 'כל המוצרים משויכים לקטגוריה קיימת' (R2-7)** + dry-run counts + 'פרסם' (all-pass → published:true+pop; אחרת no-op). **ענף פגום לא יכול לעלות לאוויר.**
+- **`trades_store.dart`** — +4 mutators (connectorType/compatRule). חיווט: 🚀 בבית · 🔌 במוצרים (insert-only).
+- **gate:** analyze 0 · s47 10/10 · **רגרסיית-משפחה מלאה 35/35** · const seeds לא-נגועים. הבא: **חלק ו׳ — s48** (חוזה-ייבוא: template→map→dry-run→commit אטומי, מאחורי kTradeImportFlag).
+
+### #pillar2-s48 — 📥 חוזה-הייבוא (G-import): template→dry-run→commit אטומי — 2026-07-06
+- **NEW `lib/domain/trade_import.dart`** (Dart טהור): `kImportFixedColumns` [sku,name,category] · `generateCsvTemplate(defs)` (כותרת + שורת-דוגמה ריקה) · `parseAndValidateCsv(...)→ImportReport{valid, errors, canCommit}`. חוקים: כותרת-רעה → שגיאת-row-0 יחידה 'כותרות לא תקינות' · 'שדה חובה חסר' · 'מק"ט כפול' (בקובץ + מול ה-store) · **'קטגוריה לא קיימת' (R2-7, titleHe או id → נפתר ל-ID)** · **'ערך לא בסכמה'** (תא תחת def-עם-values חייב labelHe/id → נשמר value-ID) · freeText=raw · תא-ריק-תחת-def = תקין.
+- **`product_authoring_screen.dart`** — סקציית-ייבוא collection-if על `kTradeImportFlag` (OFF=בייט-זהה): הדבק→dry-run→'ייבא' רק על canCommit; **אטומי** (שגיאה אחת=אפס כתיבה; commit=לולאת upsertProduct על valid בלבד; עריכה מבטלת דוח).
+- **gate:** analyze 0 · `bulk_import_test` 8/8 (כולל אטומיות-store וקידוד value-id≠label) · רגרסיה 11/11. הבא: **s49-50** (סוגרים את קשת 31-50).
+
+### #pillar2-s50 — 🏆 G-newtrade: "תוסיף חשמלאי בעצמך" מוכח מקצה-לקצה — 2026-07-06
+**⚠️ סטיית-סדר מתועדת: s50 נבנה לפני s49** — מבחן-הקבלה משמש רשת-ביטחון לפני ה-refactor הכבד של s49 (מסך 3,485 שורות). בנאי+בודק-נחיל:
+- **(A) נתיב-הקריאה של ענפים-מחוברים:** `LocalCatalogRepository({TradesDoc Function()? authoredDoc})` — מוזרק מ-`catalogRepositoryProvider` (`ref.read(tradesStoreProvider)`; reactivity-חי יגיע עם ה-cutover). tradeId שאינו-plumbing: `allProducts` מגיש מוצרים-מחוברים דרך אדפטר-s35 `toLegacy()` (sorted-by-sku) · `categoryTree` מגיש קטגוריות-מחוברות כ-CatalogNodes (sorted-by-sortIndex). source-null → התנהגות-s42 (ריק). plumbing בייט-זהה.
+- **(B) הרחבת-r3 בשער-הפרסום:** גם CompletionRules עם type-fields לא-ריקים חייבים להיפתר ל-connectorTypes של הענף (חומר-בלבד = תקין) — כלל-רפאים חוסם פרסום.
+- **NEW `test/trade_newtrade_acceptance_test.dart` (G-newtrade, 6):** authoring מלא דרך ה-mutators → publish → **הקטלוג מגיש** (products+tree, adapter-converted, sorted) → ה-resolver עונה (connect 'חיבור בורג' + completion 'מאמ"ת דורש מפסק-פחת' יורה-רק-בהפרה) → **CompletionRule-יתום חוסם פרסום** → **default-OFF** (store-ריק = plumbing-בלבד, governance #84) → **הקיסטון לא-נגוע** (allProducts()==kCatalogProducts אחרי הכל).
+- **gate:** analyze 0 · **26/26** (acceptance 6 + publish-sheet 5 + repo-contracts 12 + keystone 3). **נשאר בקשת: s49 בלבד** (install-studio seams + BrandProfile parity — הכבד, במכוון אחרון).

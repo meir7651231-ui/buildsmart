@@ -17,6 +17,7 @@
 //   • the catalog↔smart bridge in `data/related_info.dart`
 //     (`catalogProductForSku` / `catalogProductForBrand` / `catalogProductForSmart`).
 //   • `kCatalogCats` (`data/catalog.dart`) — the 11 ▦ search top-categories.
+//   • `kCatalogTree` (`data/catalog_tree.dart`) — the ▦ drill-down taxonomy.
 // A future product API drops in behind this contract (swap-implementation-only).
 //
 // Method surface mirrors the catalog reads the card flow / catalog screen use
@@ -24,6 +25,8 @@
 // catalog↔smart bridge, and the category axes.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/catalog_tree.dart'
+    show CatalogNode, kCatalogTree;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/data/smart_tree.dart'
@@ -38,7 +41,8 @@ abstract class CatalogRepository {
 
   /// Every product in the unified catalog (Lipskey + Polyroll + Huliot).
   /// Mirrors `kCatalogProducts` (`data/polyroll_catalog.dart`).
-  List<LipskeyCatalogProduct> allProducts();
+  /// [tradeId] — per-trade seam; default `'plumbing'` keeps today byte-identical.
+  List<LipskeyCatalogProduct> allProducts({String tradeId = 'plumbing'});
 
   /// The unified catalog product with this [sku], or null when unknown / null.
   /// Mirrors `catalogProductForSku` (`data/related_info.dart`).
@@ -73,9 +77,19 @@ abstract class CatalogRepository {
 
   /// The distinct categories that have curated SmartProducts, in fixture order.
   /// Mirrors `kSmartTreeCats` (`data/smart_tree.dart`).
-  List<String> smartTreeCats();
+  /// [tradeId] — per-trade seam; default `'plumbing'` keeps today byte-identical.
+  List<String> smartTreeCats({String tradeId = 'plumbing'});
 
   /// The ▦ קטלוג top categories (11 leaves) shown under the Search FAB.
   /// Mirrors `kCatalogCats` (`data/catalog.dart`).
-  List<Section> catalogCategories();
+  /// [tradeId] — per-trade seam; default `'plumbing'` keeps today byte-identical.
+  List<Section> catalogCategories({String tradeId = 'plumbing'});
+
+  /// The catalog drill-down tree (the ▦ L1→L3 [CatalogNode] taxonomy).
+  /// Mirrors `kCatalogTree` (`data/catalog_tree.dart`).
+  /// [tradeId] — per-trade seam; default `'plumbing'` keeps today byte-identical;
+  /// other trades read `const []` until the trades-store wiring lands (s43+).
+  /// Default body (not abstract) so existing implementations compile unchanged.
+  List<CatalogNode> categoryTree({String tradeId = 'plumbing'}) =>
+      tradeId == 'plumbing' ? kCatalogTree : const <CatalogNode>[];
 }

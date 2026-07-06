@@ -1417,3 +1417,8 @@
 - **הלוגיקה (`lib/logic/money_format.dart` → גייט 42/44):** `groupThousands(int)` — פרימיטיב-יחיד שמקבץ את הערך-המוחלט (3150→"3,150"), והסימן/₪ באחריות-הקורא; + `formatNis(int, {prefix})` נוחות. ה-15 אתרי-הגולמי (`formatCatalogPrice` · 8 ב-catalog_screen · 2 ב-smart_home · 5 ב-contractor_tools) עברו דרכו → מקבצים עכשיו כמו העגלה.
 - **טסט-נעיצה:** `money_format_test` — `groupThousands` (0/900/4200/50000/1234567 + abs על שלילי) · `formatNis` (חיובי "₪4,200" · שלילי "-₪3,150" בלי "₪-" · prefix). 
 - **mutation-verify:** baseline 5 ירוק → שינוי תנאי-הפסיק ב-`groupThousands` (`% 3 == 0` → תמיד-false) → `groups every 3 digits` **אדום** ("4200"≠"4,200") → שחזור → 5 ירוק. analyze 0. catalog_price_units (18%) + product_journey (935 sheets) נשארו ירוקים (ערכי-המבחן <1000 → ללא-פסיק; 935 הכרטיסים מרונדרים בלי-overflow גם עם פסיק).
+
+## #pillar2-restore-s41-50 — שחזור-מאוחד + mutation על מנוע-הייבוא — 2026-07-06
+- **הרקע:** הקונטיינר גלגל-לאחור את היסטוריית-ה-git (commits s41-s50 נעלמו מקומית ומעולם לא נחתו ב-origin); התוכן שרד על הדיסק, גובה בייטים, ונחת-מחדש כ-commit-מאוחד על ה-tip החי. הקבצים הלוגיים בדיף: `lib/domain/trade_import.dart` (חדש — מנוע-הייבוא) · `install_engine` (תפר-s41, מכוסה ב-6 בדיקות-חוזה) · `trades_store` (mutators, מכוסים בבדיקות-המסכים).
+- **טסט-נעיצה:** `bulk_import_test` — 8 בדיקות (תבנית · תקין-מלא · כותרת-רעה · שדה-חסר · **מק"ט-כפול בקובץ+מול-store** · קטגוריה-לא-קיימת R2-7 · ערך-מחוץ-לסכמה · אטומיות-store).
+- **mutation-verify:** baseline 8 ירוק → נטרול תנאי-הכפילות (החלפת הבדיקה בתנאי-שקר קבוע) ב-`trade_import.dart` → הבדיקה `duplicate sku — in-file AND vs the store` **אדומה** → שחזור → 8 ירוק. analyze 0.

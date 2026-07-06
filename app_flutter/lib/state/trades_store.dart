@@ -238,6 +238,154 @@ class TradesStoreNotifier extends StateNotifier<TradesDoc> {
     _persist();
   }
 
+  /// s45: add or replace a category by id. Idempotent — an unchanged upsert
+  /// is a no-op (no persist / notify). Mirrors [upsertTrade].
+  void upsertCategory(TradeCategory c) {
+    final i = state.categories.indexWhere((x) => x.id == c.id);
+    if (i >= 0 && state.categories[i] == c) return;
+    final next = [...state.categories];
+    if (i >= 0) {
+      next[i] = c;
+    } else {
+      next.add(c);
+    }
+    state = state.copyWith(categories: next);
+    _persist();
+  }
+
+  /// s45: remove a category by id. Unknown id is a no-op (no persist / notify).
+  void removeCategory(String id) {
+    if (!state.categories.any((x) => x.id == id)) return; // no-op
+    state = state.copyWith(
+      categories: state.categories.where((x) => x.id != id).toList(),
+    );
+    _persist();
+  }
+
+  /// s45: add or replace an attribute definition by id. Idempotent — an
+  /// unchanged upsert is a no-op (no persist / notify). Mirrors [upsertTrade].
+  void upsertAttribute(AttributeDef a) {
+    final i = state.attributes.indexWhere((x) => x.id == a.id);
+    if (i >= 0 && state.attributes[i] == a) return;
+    final next = [...state.attributes];
+    if (i >= 0) {
+      next[i] = a;
+    } else {
+      next.add(a);
+    }
+    state = state.copyWith(attributes: next);
+    _persist();
+  }
+
+  /// s45: remove an attribute definition by id. Unknown id is a no-op (no
+  /// persist / notify).
+  void removeAttribute(String id) {
+    if (!state.attributes.any((x) => x.id == id)) return; // no-op
+    state = state.copyWith(
+      attributes: state.attributes.where((x) => x.id != id).toList(),
+    );
+    _persist();
+  }
+
+  /// s46: add or replace a product by id. Idempotent — an unchanged upsert
+  /// is a no-op (no persist / notify). Mirrors [upsertTrade].
+  void upsertProduct(TradeProduct p) {
+    final i = state.products.indexWhere((x) => x.id == p.id);
+    if (i >= 0 && state.products[i] == p) return;
+    final next = [...state.products];
+    if (i >= 0) {
+      next[i] = p;
+    } else {
+      next.add(p);
+    }
+    state = state.copyWith(products: next);
+    _persist();
+  }
+
+  /// s46: remove a product by id. Unknown id is a no-op (no persist / notify).
+  void removeProduct(String id) {
+    if (!state.products.any((x) => x.id == id)) return; // no-op
+    state = state.copyWith(
+      products: state.products.where((x) => x.id != id).toList(),
+    );
+    _persist();
+  }
+
+  /// s46: add or replace an accessory rule by id. Idempotent — an unchanged
+  /// upsert is a no-op (no persist / notify). Mirrors [upsertTrade].
+  void upsertAccessory(AccessoryRule a) {
+    final i = state.accessories.indexWhere((x) => x.id == a.id);
+    if (i >= 0 && state.accessories[i] == a) return;
+    final next = [...state.accessories];
+    if (i >= 0) {
+      next[i] = a;
+    } else {
+      next.add(a);
+    }
+    state = state.copyWith(accessories: next);
+    _persist();
+  }
+
+  /// s46: remove an accessory rule by id. Unknown id is a no-op (no persist /
+  /// notify).
+  void removeAccessory(String id) {
+    if (!state.accessories.any((x) => x.id == id)) return; // no-op
+    state = state.copyWith(
+      accessories: state.accessories.where((x) => x.id != id).toList(),
+    );
+    _persist();
+  }
+
+  /// s47: add or replace a connector type by id. Idempotent — an unchanged
+  /// upsert is a no-op (no persist / notify). Mirrors [upsertTrade].
+  void upsertConnectorType(ConnectorType t) {
+    final i = state.connectorTypes.indexWhere((x) => x.id == t.id);
+    if (i >= 0 && state.connectorTypes[i] == t) return;
+    final next = [...state.connectorTypes];
+    if (i >= 0) {
+      next[i] = t;
+    } else {
+      next.add(t);
+    }
+    state = state.copyWith(connectorTypes: next);
+    _persist();
+  }
+
+  /// s47: remove a connector type by id. Unknown id is a no-op (no persist /
+  /// notify).
+  void removeConnectorType(String id) {
+    if (!state.connectorTypes.any((x) => x.id == id)) return; // no-op
+    state = state.copyWith(
+      connectorTypes: state.connectorTypes.where((x) => x.id != id).toList(),
+    );
+    _persist();
+  }
+
+  /// s47: add or replace a compatibility rule by id. Idempotent — an
+  /// unchanged upsert is a no-op (no persist / notify). Mirrors [upsertTrade].
+  void upsertCompatRule(CompatibilityRule r) {
+    final i = state.compatRules.indexWhere((x) => x.id == r.id);
+    if (i >= 0 && state.compatRules[i] == r) return;
+    final next = [...state.compatRules];
+    if (i >= 0) {
+      next[i] = r;
+    } else {
+      next.add(r);
+    }
+    state = state.copyWith(compatRules: next);
+    _persist();
+  }
+
+  /// s47: remove a compatibility rule by id. Unknown id is a no-op (no
+  /// persist / notify).
+  void removeCompatRule(String id) {
+    if (!state.compatRules.any((x) => x.id == id)) return; // no-op
+    state = state.copyWith(
+      compatRules: state.compatRules.where((x) => x.id != id).toList(),
+    );
+    _persist();
+  }
+
   /// Replace the entire authored doc (used by import / restore). No-op if unchanged.
   void replaceAll(TradesDoc doc) {
     if (doc == state) return;
@@ -255,4 +403,57 @@ class TradesStoreNotifier extends StateNotifier<TradesDoc> {
 final tradesStoreProvider =
     StateNotifierProvider<TradesStoreNotifier, TradesDoc>(
   (ref) => TradesStoreNotifier(),
+);
+
+// ─── s43 · active trade ──────────────────────────────────────────────────────
+
+/// s43: the published-trades id set. Plumbing is a RESERVED trade — always
+/// present even though the authored store starts empty (plan addition-B
+/// guard: the owner can never unpublish their way into an empty catalog).
+final publishedTradeIdsProvider = Provider<Set<String>>((ref) {
+  final doc = ref.watch(tradesStoreProvider);
+  return {
+    'plumbing',
+    for (final t in doc.trades)
+      if (t.published) t.id,
+  };
+});
+
+/// s43: the RAW active-trade selection (what the owner last picked). The
+/// RESOLVED id (below) is what read-paths must use — it falls back to
+/// 'plumbing' whenever the selection is not published.
+class ActiveTradeNotifier extends StateNotifier<String> {
+  ActiveTradeNotifier() : super('plumbing');
+  void set(String id) => state = id;
+}
+
+final activeTradeProvider =
+    StateNotifierProvider<ActiveTradeNotifier, String>(
+  (ref) => ActiveTradeNotifier(),
+);
+
+/// s43: the RESOLVED active trade id — the raw selection when it is
+/// published, else 'plumbing' (also the constant answer while only one
+/// trade exists). Read-paths consume THIS, never the raw provider.
+final resolvedActiveTradeIdProvider = Provider<String>((ref) {
+  final raw = ref.watch(activeTradeProvider);
+  final published = ref.watch(publishedTradeIdsProvider);
+  return published.contains(raw) ? raw : 'plumbing';
+});
+
+/// s43 addition-A: the full [Trade] object for the resolved id, or null for
+/// the reserved 'plumbing' id (plumbing has no authored Trade in the store).
+final activeTradeObjProvider = Provider<Trade?>((ref) {
+  final id = ref.watch(resolvedActiveTradeIdProvider);
+  final doc = ref.watch(tradesStoreProvider);
+  for (final t in doc.trades) {
+    if (t.id == id) return t;
+  }
+  return null;
+});
+
+/// s43: the trade switcher renders only when MORE than one published trade
+/// exists — with a single trade the UI is byte-identical to today.
+final tradeSwitcherVisibleProvider = Provider<bool>(
+  (ref) => ref.watch(publishedTradeIdsProvider).length > 1,
 );

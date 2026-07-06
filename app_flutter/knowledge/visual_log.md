@@ -4,6 +4,42 @@
 
 ---
 
+## s50 — 🏆 G-newtrade + הרחבת-r3 בשער-הפרסום — 2026-07-06
+
+**שינוי-UI יחיד:** `trade_publish_sheet.dart` — r3 ('אין כלל-חיבור יתום') בודק עכשיו **גם** CompletionRules עם type-fields לא-ריקים (כלל-רפאים → ✗ → 'פרסם' חסום). אותה שורה, אותו label — רק היקף-הבדיקה גדל. שאר השינויים data-layer (repo read-path) — אפס-UI.
+
+**אימות-ויזואלי:** `trade_publish_sheet_test` 5/5 ללא-שינוי + acceptance test 4 (orphan-CompletionRule → r3 ✗ → no-op-בלי-pop; החלפה לכלל-חומר → ✓ → publish+pop). כל הדגלים OFF → אפס שינוי (acceptance test 5).
+
+## s48 — 📥 ייבוא-CSV מגודר (בונה-הענפים) — 2026-07-06
+
+**שינוי-UI:** `product_authoring_screen.dart` — סקציית 'ייבוא מ-CSV' **מאחורי `kTradeImportFlag` (collection-if → OFF = המסך בייט-זהה ל-s47)**: 'הורד תבנית' (ממלא תבנית מ-AttributeDefs) · 'הדבק CSV' (multiline) · 'בדוק (dry-run)' → 'תקינים: N · שגיאות: M' + עד 5 'שורה R: <שגיאה>' · 'ייבא' (רק כש-canCommit; עריכת-ההדבקה מבטלת דוח ישן) → 'יובאו N מוצרים'. המנוע: NEW `lib/domain/trade_import.dart` (Dart טהור).
+
+**אימות-ויזואלי:** `bulk_import_test` 8/8 (לוגיקה טהורה + אטומיות-דרך-store: קובץ-מעורב = אפס-כתיבה) + רגרסיית product_authoring/home 11/11 — המסך ב-flag-OFF לא-נגוע.
+
+## s47 — 🔌 סטודיו כללי-חיבור + 🚀 שער-פרסום FK (בונה-הענפים) — 2026-07-06
+
+**שינויי-UI:** (1) NEW `connection_rule_studio.dart` — '🔌 כללי חיבור': 'מחברים' (הוספה/מחיקה), **'מטריצת חיבורים' N×N** (Semantics לכל תא 'חיבור A אל B'; '·'→dialog 'תווית שיטה'→'✓'; תא-עם-כלל → 'מחק כלל'), **'ספסל בדיקה' חי** — dropdowns 'מחבר א/ב' + 'בדוק חיבור' מפעילים את **ה-ConnectionResolver האמיתי** (מקור-אמת יחיד) → תווית-שיטה או 'לא מתחבר'; (2) NEW `trade_publish_sheet.dart` — '🚀 פרסום ענף': 4 שערי-ולידציה ✓/✗ (קטגוריה-עם-מוצר · ציר-עם-ערכים · אין-כלל-יתום · **FK: כל מוצר→קטגוריה קיימת, R2-7**) + שורת-dry-run 'קטגוריות/מוצרים/כללים' + 'פרסם' שנחסם על ✗; (3) חיווט: 🚀 על tile-ענף בבית, 🔌 ב-AppBar של המוצרים.
+
+**אימות-ויזואלי:** widget-tests — `connection_rule_studio_test` 5/5 (כולל bench-behavioral: התווית מופיעה רק אחרי הלחיצה = ה-resolver ענה) + `trade_publish_sheet_test` 5/5 (עצמאות-שורות r1..r4; פרסום flip+pop; חסימה=no-op-בלי-pop). רגרסיית-המשפחה המלאה 35/35. גליפים ✓/✗/· אומתו בבייטים.
+
+## s46 — 📦 עורך-מוצרים + 🧩 עורך-אביזרים (בונה-הענפים) — 2026-07-06
+
+**שינויי-UI:** (1) NEW `product_authoring_screen.dart` — '📦 מוצרים': tiles (שם/מק"ט/קטגוריה), טופס עם **קלט-מונחה-סכמה** (AttributeDef עם ערכים → dropdown של labelHe — ערך-מחוץ-לסכמה בלתי-אפשרי; freeText/number → TextField), משמר-כפילויות ('מק"ט כבר קיים'), דרישת-קטגוריה ('צור קטגוריה קודם'), פעולת-AppBar '🧩'; (2) NEW `accessory_rule_editor.dart` — '🧩 אביזרים': טופס (שם/למה-חשוב/חובה?/מחיר-digits עם 'מחיר לא תקין'/קטגוריה/'מוצר מקושר' **חסין-יתומים** — רק מוצרי-הענף, 'ללא' ראשון), chips 'חובה'/'₪'; (3) `category_tree_editor.dart` — פעולת-AppBar '📦' (insert-only).
+
+**אימות-ויזואלי:** widget-tests — `product_authoring_screen_test` 5/5 + `accessory_rule_editor_test` 4/4 (כולל: מוצר-ענף-זר **נעדר** מהמקשר; ה-linkSku נשמר כ-id; המוצר הראשון שורד כפילות; non-digit-price חסום). רגרסיית-s45 10/10. const seed files — git diff ריק.
+
+## s45 — 🗂️ עורך עץ-קטגוריות + 🏷️ עורך מאפיינים (בונה-הענפים) — 2026-07-06
+
+**שינויי-UI:** (1) NEW `category_tree_editor.dart` — RTL+clamp-1.35, '🗂️ עץ קטגוריות', ReorderableListView לפי sortIndex, הוסף/שנה-שם (dialog)/מחק (Semantics+tooltip 'מחק'), פעולת-AppBar '🏷️'; (2) NEW `attribute_schema_editor.dart` — '🏷️ מאפיינים': טופס (שם/kind-dropdown/ערכים-chips/'ציר וריאנט?') + **אזהרה צהובה 'ציר וריאנט ללא ערכים'** (edit-time, גם על הטופס וגם על tile שמור) + **תצוגת-פירוק-שם חיה** ('בדיקת פירוק שם' → chips ירוקים 'קוטר: 16'); (3) `trade_builder_home.dart` — tile-ענף נהיה tappable → פותח את עורך-הקטגוריות.
+
+**אימות-ויזואלי:** widget-tests — `category_tree_editor_test` 5/5 (RTL · write-path scoped-tradeId · rename-stable-id · delete-והחזרת-empty-state · sortIndex 0,1 דטרמיניסטי) + `attribute_schema_editor_test` 5/5 (RTL · AttributeDef-write · אזהרת-axis חיה · פירוק-שם '16' · 2 chips). const files (variant_families/catalog_tree) — git diff ריק. תיקון-יישוב יחיד: tooltip 'מחק' על ה-IconButton (a11y אמיתי + עצמאי מ-timing של semantics-tree).
+
+## s44 — 🏗️ בונה-ענפים: כניסה מגודרת בלוח-המנהל + 2 מסכי-authoring — 2026-07-06
+
+**שינויי-UI:** (1) `manager_dashboard_screen.dart` — כרטיס `_ManageSection` "🏗️ בונה ענפים" בסוף טאב-הניהול, **מאחורי `kTradeBuilderFlag` (collection-if → flag-OFF = העץ בייט-זהה)**; (2) NEW `trade_builder_home.dart` — RTL, כותרת '🏗️ בונה ענפים', wizard 'שלב 1 מתוך 6', empty-state, כפתור 'הוסף ענף' (Semantics button), clamp טקסט 1.35; (3) NEW `trade_define_step.dart` — טופס RTL (שם/אימוג׳י/פרסונה-dropdown/6-swatches) → 'שמור טיוטה' כותב Trade-טיוטה ל-store.
+
+**אימות-ויזואלי:** widget-tests — `trade_builder_home_test` 6/6 (RTL directionality · semantics-button · clamp-1.35 עם anti-vacuity · wizard-literal · ניווט · write-path טיוטה + הרשימה מתעדכנת) + **flag-OFF absent נבדק גם offstage** (סריקת skipOffstage:false על ה-IndexedStack). `manager_dashboard_screen_test` — 36/36 ללא-שינוי (הלוח בייט-זהה ב-OFF). השפה הוויזואלית שוכפלה מהלוח (LIGHT · _ManageSection · brand-pill).
+
 ## merge — איחוד workstream המקלדת/חיפוש (origin) לקו Studio/עמוד-2 — 2026-06-30
 
 **שינויי-UI נכנסים (lib/screens, מ-merge):** 95 commits של ה-workstream האחר (card-keyboard/finder) כוללים שינויי-מסך כגון `lipskey_product_sheet.dart`. **אלו שינויים שכבר אומתו ע"י אותו workstream על origin** — לא שינויי-UI חדשים מהקו שלי. **קו עמוד-2/Studio שלי הוא state/domain בלבד — אפס שינוי-מסך.** אימות-ויזואלי של המסכים הנכנסים באחריות ה-workstream שיצר אותם; כאן רק מיזוג (אפס קונפליקטים, analyze 0).
