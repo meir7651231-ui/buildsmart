@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:buildsmart/data/repositories/backend.dart'
+    show useFirebaseBackend;
+import 'package:buildsmart/data/repositories/material_requests_firebase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -228,6 +231,21 @@ class MaterialRequestsNotifier extends StateNotifier<List<MaterialRequest>> {
     required List<String> items,
     String note = '',
   }) {
+    // SERVER-SWAP Z — bound to Firestore: delegate to the repo's verbatim port
+    // (same drop-empty + id-mint + append); its optimistic cache notifies back
+    // synchronously → [_refreshFromRemote] already mirrored it into state.
+    final remote = _remote;
+    if (remote != null) {
+      _userTouched = true;
+      return remote.submit(
+        employerId: employerId,
+        workerUid: workerUid,
+        username: username,
+        workerName: workerName,
+        items: items,
+        note: note,
+      );
+    }
     _userTouched = true;
     _seq++;
     final cleaned = [
@@ -259,6 +277,14 @@ class MaterialRequestsNotifier extends StateNotifier<List<MaterialRequest>> {
   /// untouched.
   void setStatus(String id, String status) {
     if (!kMatReqStatuses.contains(status)) return;
+    // SERVER-SWAP Z — bound: delegate to the repo's verbatim port (same guards);
+    // the optimistic cache mirrors back synchronously.
+    final remote = _remote;
+    if (remote != null) {
+      _userTouched = true;
+      remote.setStatus(id, status);
+      return;
+    }
     _userTouched = true;
     state = [
       for (final r in state)
@@ -273,12 +299,38 @@ class MaterialRequestsNotifier extends StateNotifier<List<MaterialRequest>> {
   static bool _isTerminal(String status) =>
       status == kMatReqSupplied || status == kMatReqDeclined;
 
-  /// SERVER-SWAP Z — bind a firebase repo so this queue mirrors a server-side
-  /// `material_requests` collection (the worker writes, the contractor advances,
-  /// both watch live). Empty seam today; the firebase repo lands here without
-  /// touching any consumer of [materialRequestsProvider].
-  void bindRemote(dynamic repo) {
-    /* SERVER-SWAP Z */
+  /// SERVER-SWAP Z — the bound Firestore-backed repo, or null on the local/demo
+  /// path (no Firebase → this engine itself stays the store, byte-identical).
+  FirebaseMaterialRequestsRepository? _remote;
+
+  /// SERVER-SWAP Z — bind the Firestore-backed repo so this queue mirrors a
+  /// server-side `material_requests` collection (worker writes ↔ contractor
+  /// advances, both watch live). Mirrors `orders_engine.dart:bindRemote`
+  /// (bind-once + `addListener(_refreshFromRemote)` + immediate refresh).
+  /// Nothing calls this on the local/demo path, so the engine stays the
+  /// byte-identical store.
+  void bindRemote(FirebaseMaterialRequestsRepository repo) {
+    if (identical(_remote, repo)) return; // same repo — no-op
+    _remote?.removeListener(_refreshFromRemote);
+    _remote = repo;
+    repo.addListener(_refreshFromRemote);
+    _refreshFromRemote();
+  }
+
+  /// SERVER-SWAP Z — rebuild engine state from the bound repo's SYNC snapshot
+  /// (mirrors `orders_engine.dart:_refreshFromRemote`). No-op while unbound;
+  /// flips [_userTouched] so a late `_load()` never clobbers server state.
+  void _refreshFromRemote() {
+    final r = _remote;
+    if (r == null) return;
+    _userTouched = true;
+    state = List<MaterialRequest>.of(r.all());
+  }
+
+  @override
+  void dispose() {
+    _remote?.removeListener(_refreshFromRemote);
+    super.dispose();
   }
 }
 
@@ -286,7 +338,20 @@ class MaterialRequestsNotifier extends StateNotifier<List<MaterialRequest>> {
 /// contractor board advances (setStatus), both watch the same list.
 final materialRequestsProvider =
     StateNotifierProvider<MaterialRequestsNotifier, List<MaterialRequest>>(
-  (ref) => MaterialRequestsNotifier(),
+  (ref) {
+    final n = MaterialRequestsNotifier();
+    // SERVER-SWAP Z — under the live Firebase backend bind the Firestore repo so
+    // the queue syncs both ways (worker submit ↔ contractor advance). On the
+    // Firebase-free path (demo + the whole test suite) nothing is bound and the
+    // engine behaves byte-identically. The repo's snapshot listener is cancelled
+    // on dispose.
+    if (useFirebaseBackend) {
+      final repo = FirebaseMaterialRequestsRepository()..attach();
+      n.bindRemote(repo);
+      ref.onDispose(repo.dispose);
+    }
+    return n;
+  },
 );
 
 /// CONTRACTOR inbox — every request addressed to [employerId], newest-first.
