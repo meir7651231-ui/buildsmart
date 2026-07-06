@@ -143,7 +143,15 @@ wiring produced a word-cloud; owner corrected it to the clean taxonomy drill).
   carries fontFamilyFallback:['Heebo'] — Latin/digits render JetBrains Mono,
   Hebrew renders Heebo (caught a tofu regression in the render before shipping).
   analyze 0 · test 7/7 · flag OFF byte-identical · a real-font render confirms
-  "1948"/"RINGDIVE·OS" in JetBrains Mono and "מוצרים" in Heebo. REMAINING RD-G:
-  the prototype motion (pulse dot · scan-line · knurl spin · phase ring-in)
-  behind a reduce-motion gate — optional ambiance. Then RD-H (more tests).
-  Undeployed polish (pagination + cart + font) waits for the next "תדחוף".
+  "1948"/"RINGDIVE·OS" in JetBrains Mono and "מוצרים" in Heebo.
+- RD-G motion SKIPPED (documented) — a repeating animation (e.g. the pulse dot)
+  makes `pumpAndSettle` in the existing tests never settle (it would hang the
+  suite ~10 min). Fixing every test to disable animations is invasive for
+  purely-optional ambiance, so motion is intentionally not shipped. If ever
+  wanted: build the animated bits behind MediaQuery.disableAnimations AND switch
+  the affected tests to `pump(Duration)` / a disableAnimations MediaQuery.
+- RD-H done — ring_dive test 8/8: flag-OFF byte-identity, root→clean dive, real
+  compat, real job kit, the gesture tap-after-drag fix, wheel pagination, the
+  product cart (crumb→sheet→remove) and the kit→cart line.
+- RingDive is POLISH-COMPLETE + LIVE. Undeployed local polish (pagination + cart
+  + JetBrains Mono) waits for the next "תדחוף" to go live.

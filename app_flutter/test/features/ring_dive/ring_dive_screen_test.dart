@@ -219,4 +219,42 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('הסל ריק'), findsOneWidget);
   });
+
+  testWidgets('cart: adding a kit lands as a "ערכה" line', (tester) async {
+    // the kit "add" button sits low in the tall card — a taller surface keeps
+    // it on-screen so the tap hit-tests.
+    tester.view.physicalSize = const Size(440, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'bs.feature-flags.v1': <String>[kRingDiveFlag],
+    });
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: RingDiveScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    RingDiveWheel wheel() =>
+        tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+
+    // root → "by job" (index 8) → first recipe → add the kit.
+    wheel().onSelect!(8);
+    await tester.pumpAndSettle();
+    wheel().onSelect!(0);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('הוסף ערכה לסל'));
+    await tester.pumpAndSettle();
+
+    // the kit is now in the cart; the sheet shows it as a "ערכה" line.
+    expect(find.textContaining('ההזמנה שלי'), findsOneWidget);
+    await tester.tap(find.textContaining('ההזמנה שלי'));
+    await tester.pumpAndSettle();
+    // the sheet is open and the kit shows as a "ערכה" line (the hub behind also
+    // carries the word, so allow more than one).
+    expect(find.textContaining('המשך בקנייה'), findsOneWidget);
+    expect(find.text('ערכה'), findsWidgets);
+  });
 }
