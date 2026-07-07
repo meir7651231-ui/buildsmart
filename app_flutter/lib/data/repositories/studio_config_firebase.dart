@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // FirebaseStudioConfigRepository — the Firestore-backed implementation of
 // [StudioConfigRepository], built on the offline-first cache base
-// ([FirestoreCachedRepo]). Pillar 5 · Steps 54-55 — DORMANT until the flags flip.
+// ([FirestoreCachedRepo]). Pillar 5 · Steps 54-59 — DORMANT until the flags flip.
 // A DROP-IN for [LocalStudioConfigRepository]: the eventual consumers + the
 // provider are unchanged — only which class `studioConfigRepositoryProvider`
 // returns changes (see the switch in `studio_config_local.dart`).
@@ -26,10 +26,22 @@
 // NO-OP — the client never writes the published pointer. A first EMPTY snapshot
 // just keeps the born bundled seed.
 //
+// STEP 59 — the shard→tree PULL: when step 58's `versionChanges` fires (a real
+// publish), the immutable snapshot named by the pointer's `ref` is pulled (its
+// `/shards` subcollection), its checksum VERIFIED over the raw bytes, the
+// `ConfigLayer` ASSEMBLED, and swapped in ATOMICALLY. R2-7 governs failure:
+// checksum-mismatch → retry-once then keep-last-good; a parse/`fromJson` throw →
+// fall back to the last-good/seed (NEVER a blank app); a schema-newer pointer was
+// already gated by step 58 (kept last-good + `needsAppUpdate`, no pull). The
+// last-good tree is held SEPARATELY (a new pointer arrives tree-less), so a failed
+// pull keeps rendering the previous good tree instead of blanking.
+//
 // No direct `cloud_firestore` import — the live handle is resolved lazily inside
 // [FirestoreCollectionSource] (from `firestore_cached_repo.dart`), exactly as
 // `orders_firebase.dart` does; a fake source drives the whole bridge in tests.
 // ─────────────────────────────────────────────────────────────────────────────
+
+import 'dart:convert' show jsonDecode, utf8;
 
 import 'package:buildsmart/data/repositories/backend.dart' show kStudioLive;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
@@ -37,7 +49,42 @@ import 'package:buildsmart/data/repositories/studio_config_repository.dart';
 import 'package:buildsmart/state/studio/config_doc.dart'
     show ConfigLayer, kSchemaVersion;
 import 'package:flutter/foundation.dart'
-    show Listenable, ValueListenable, ValueNotifier;
+    show Listenable, ValueListenable, ValueNotifier, debugPrint;
+
+/// The immutable-snapshot READ port (Step 59). Given a published pointer's
+/// [StudioConfigPointer.ref] (a snapshot id under `studioConfigSnapshots`), it
+/// returns that snapshot's ordered SHARD docs — the sharded blob the config tree
+/// is assembled from. Kept SEPARATE from the base [RemoteCollectionSource] (a
+/// whole-collection listen) because a snapshot pull is a one-shot BY-ID read of
+/// an IMMUTABLE doc's `/shards` subcollection — exactly the read Step 59 needs,
+/// and nothing the base offers. Firebase-free by the same trick as the base seam:
+/// a fake drives the tests; the real adapter resolves Firestore lazily.
+// A deliberate one-member seam port (the [RemoteCollectionSource] idiom) — kept
+// abstract so a fake drives the tests instead of a real Firestore subcollection.
+// ignore: one_member_abstracts
+abstract class ConfigSnapshotSource {
+  /// Fetch the shard docs of the immutable snapshot named [ref]. Each [RemoteDoc]
+  /// carries its shard index (`n`) + the serialized layer fragment (`data`, a JSON
+  /// string). Returns an EMPTY list when the snapshot is missing; a failure throws
+  /// (the caller catches it → keep last-good, never blank).
+  Future<List<RemoteDoc>> fetchShards(String ref);
+}
+
+/// The REAL snapshot adapter — a one-shot read of `studioConfigSnapshots/{ref}/
+/// shards`. Delegates to the base's lazy [FirestoreCollectionSource] so THIS file
+/// still imports NO `cloud_firestore` (the handle resolves lazily there, exactly
+/// as the header promises); `snapshots().first` takes a single settled read, and
+/// Firestore serves an immutable snapshot from its id-cache on any re-pull.
+class FirestoreConfigSnapshotSource implements ConfigSnapshotSource {
+  /// Const so the default is a `const` in the repo constructor (dormant path).
+  const FirestoreConfigSnapshotSource();
+
+  @override
+  Future<List<RemoteDoc>> fetchShards(String ref) async =>
+      FirestoreCollectionSource('studioConfigSnapshots/$ref/shards')
+          .snapshots()
+          .first;
+}
 
 /// The Firestore document-map mapper lives inline here (not in the model) so the
 /// pure [StudioConfigPointer] value-object stays Firebase-free — drop-in is
@@ -50,15 +97,19 @@ class FirebaseStudioConfigRepository
   /// `studioConfigSnapshots` collection ([_draftSource], the Step-55 draft-write
   /// target). Both real Firestore instances are resolved LAZILY by
   /// [FirestoreCollectionSource] (never here), so construction does not require
-  /// Firebase to be initialised. Pass [source]/[draftSource] in tests to drive
-  /// the caches with fakes; [live] injects the Step-55 sink kill-switch (defaults
-  /// to [kStudioLive]) so the ON path is exercised in the define-less suite.
+  /// Firebase to be initialised. Pass [source]/[draftSource]/[snapshotSource] in
+  /// tests to drive the caches + the Step-59 shard pull with fakes; [live] injects
+  /// the Step-55 sink kill-switch (defaults to [kStudioLive]) so the ON path is
+  /// exercised in the define-less suite.
   FirebaseStudioConfigRepository({
     RemoteCollectionSource? source,
     RemoteCollectionSource? draftSource,
+    ConfigSnapshotSource? snapshotSource,
     bool? live,
   })  : _draftSource =
             draftSource ?? FirestoreCollectionSource('studioConfigSnapshots'),
+        _snapshotSource =
+            snapshotSource ?? const FirestoreConfigSnapshotSource(),
         _live = live ?? kStudioLive,
         super(source ?? FirestoreCollectionSource('studioConfig'));
 
@@ -70,6 +121,12 @@ class FirebaseStudioConfigRepository
   /// tests — exactly like the base `_source`. Its `snapshots()` is never listened
   /// to (no `attach`); the sink uses only its guarded `set`.
   final RemoteCollectionSource _draftSource;
+
+  /// The Step-59 immutable-snapshot read port — pulls the `studioConfigSnapshots/
+  /// {ref}/shards` blob a published pointer names. Resolved LAZILY by the default
+  /// [FirestoreConfigSnapshotSource] (never at construction) and driven by a fake
+  /// in tests. Read ONLY on a version-bump (never listened to).
+  final ConfigSnapshotSource _snapshotSource;
 
   /// Step-55 sink kill-switch — mirrors [kStudioLive] (the master flag the
   /// provider already gates the whole repo on, `studio_config_local.dart`).
@@ -139,8 +196,14 @@ class FirebaseStudioConfigRepository
     return c.isEmpty ? StudioConfigPointer.bundled : c.first;
   }
 
+  /// The live published TREE — the last VERIFIED, atomically-swapped assembly
+  /// (Step 59), held in [_lastGoodTree]. Born [ConfigLayer.empty] (the bundled
+  /// seed ⇒ merge identity ⇒ byte-identical), and a failed pull never empties it
+  /// (R2-7 keep-last-good). NOTE: this is NOT `published().tree` — the pointer doc
+  /// is tree-less, so reading it would blank whenever a new pointer arrives before
+  /// its shard pull completes; the separate field is what keeps the last-good tree.
   @override
-  ConfigLayer publishedTree() => published().tree;
+  ConfigLayer publishedTree() => _lastGoodTree;
 
   /// LISTEN — the base is a [ChangeNotifier] (a [Listenable]); it notifies on
   /// every snapshot-driven cache replacement, so a consumer can watch pointer
@@ -255,6 +318,11 @@ class FirebaseStudioConfigRepository
     // The diff rides the SAME subscription's notify (self-listen on the base
     // ChangeNotifier) — it does NOT open a second `snapshots()` listener.
     addListener(_diffVersion);
+    // Step 59 — the immutable-shard re-pull hooks onto the version-change signal:
+    // a strictly-greater, known-schema publish fires `versionChanges`, and ONLY
+    // then do we pull + verify + swap. "Re-pull only on version-change" is free —
+    // an equal/smaller/schema-newer snapshot never fires it.
+    _versionChanges.addListener(_pullShards);
   }
 
   /// Version-diff — runs on each base cache-replacement (driven by the single
@@ -279,9 +347,176 @@ class FirebaseStudioConfigRepository
     // else: an equal/smaller version — NO-OP (no redundant rebuild).
   }
 
+  // ── Step 59 — immutable-shard PULL · checksum-verify · ATOMIC swap ────────────
+  //
+  // On a real version-bump (surfaced by step 58's `versionChanges`) pull the
+  // IMMUTABLE snapshot named by the pointer's `ref` (its `/shards` subcollection),
+  // VERIFY the checksum over the raw shard bytes, ASSEMBLE the `ConfigLayer`, and
+  // swap it in ATOMICALLY — one `notifyListeners`, the fully-built tree, so an
+  // in-flight reader is never torn and the old immutable snapshot is never mutated.
+  // R2-7 keep-last-good governs EVERY failure: a checksum mismatch retries ONCE
+  // then holds the last-good tree; a parse/`fromJson` throw falls back to the
+  // last-good/seed — NEVER a blank app; a schema-newer pointer never reaches here
+  // (step 58 gated it: kept last-good + raised `needsAppUpdate`, no advance).
+  //
+  // The last-good tree is held SEPARATELY from the pointer cache: a new pointer
+  // arrives tree-less (`fromDoc` maps only version/schema/ref/checksum), so a
+  // FAILED pull for `vN` keeps rendering the previously-good `v(N-1)` tree instead
+  // of blanking to the tree-less new pointer.
+
+  /// The last VERIFIED, fully-assembled published tree (R2-7 keep-last-good). Born
+  /// [ConfigLayer.empty] — the bundled seed, byte-identical cold-start — and only
+  /// ever replaced by a checksum-verified assembled tree, so a failed pull can
+  /// NEVER empty it. This is exactly what [publishedTree] serves.
+  ConfigLayer _lastGoodTree = ConfigLayer.empty;
+
+  /// The re-pull — triggered ONLY by a `versionChanges` advance (step 58), so it
+  /// runs once per real publish, never on an equal/smaller/schema-newer snapshot
+  /// ("re-pull only on version-change" falls out for free). Fully guarded (base
+  /// rule #2): any failure keeps the last-good tree and never throws.
+  Future<void> _pullShards() async {
+    try {
+      final target = published();
+      // No snapshot to pull (bundled/legacy pointer, empty ref) — keep last-good.
+      if (target.ref.isEmpty) return;
+      final assembled = await _fetchVerifyAssemble(target);
+      // Checksum/parse/missing failure → keep last-good, NEVER blank (R2-7).
+      if (assembled == null) return;
+      // A newer publish landed while we fetched → discard this stale tree; the
+      // newer pull owns the swap (monotonic — an in-flight reader is never torn).
+      final now = published();
+      if (now.version != target.version || now.ref != target.ref) return;
+      // ATOMIC swap — one assignment + one notify, the fully-built tree.
+      _lastGoodTree = assembled;
+      notifyListeners();
+    } on Object catch (e) {
+      // Defence in depth — a pull must never surface an error (base rule #2).
+      debugPrint(
+          'FirebaseStudioConfigRepository: shard pull failed (ignored): $e');
+    }
+  }
+
+  /// Fetch → checksum-verify → assemble. Returns the assembled tree on success or
+  /// `null` on any failure (caller keeps last-good). A checksum MISMATCH gets
+  /// exactly ONE retry (R2-7); a parse/`fromJson` throw falls back IMMEDIATELY
+  /// (re-fetching verified-but-unparseable bytes cannot help).
+  Future<ConfigLayer?> _fetchVerifyAssemble(StudioConfigPointer p) async {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final List<RemoteDoc> ordered;
+      try {
+        ordered = _ordered(await _snapshotSource.fetchShards(p.ref));
+      } on Object catch (e) {
+        debugPrint('FirebaseStudioConfigRepository: shard fetch failed '
+            '(attempt ${attempt + 1}) — keep last-good: $e');
+        continue; // transient fetch error → retry once
+      }
+      // A missing/empty snapshot is an incomplete pull — never swap to empty.
+      if (ordered.isEmpty) continue;
+      // Verify the checksum over the RAW bytes BEFORE parsing (cheap corruption
+      // guard). An empty pointer checksum (legacy) skips the check.
+      if (p.checksum.isNotEmpty && checksumOf(ordered) != p.checksum) {
+        debugPrint('FirebaseStudioConfigRepository: checksum mismatch '
+            '(attempt ${attempt + 1}) — keep last-good (R2-7)');
+        continue; // retry once, never swap to corrupt
+      }
+      // Parse/assemble GUARDED: a malformed shard (`jsonDecode` throw) or a
+      // hostile `fromJson` falls back to last-good/seed — never bricks the app.
+      try {
+        return _assemble(ordered);
+      } on Object catch (e) {
+        debugPrint('FirebaseStudioConfigRepository: assemble threw — keep '
+            'last-good/seed, never blank (R2-7): $e');
+        return null; // do NOT retry an unparseable-but-verified blob
+      }
+    }
+    return null; // both attempts failed the fetch/checksum — keep last-good
+  }
+
+  /// Assemble the ordered shards into a [ConfigLayer]. Each shard's `data` is a
+  /// JSON string of a layer FRAGMENT (a subset of the `global`/`persona`/
+  /// `structure` maps — the tree is split by size across shards, §1.1B); fragments
+  /// are merged in shard order, then decoded through the tolerant
+  /// [ConfigLayer.fromJson]. `jsonDecode` MAY throw on a malformed shard — that is
+  /// the R2-7 parse-throw the caller catches.
+  static ConfigLayer _assemble(List<RemoteDoc> ordered) {
+    final merged = <String, dynamic>{};
+    for (final shard in ordered) {
+      final Object? raw = shard.data['data'];
+      if (raw is! String) continue; // tolerate an absent/non-string payload
+      final Object? decoded = jsonDecode(raw); // MAY throw → caught by the caller
+      if (decoded is Map) _mergeLayerJson(merged, decoded);
+    }
+    return ConfigLayer.fromJson(merged);
+  }
+
+  /// Merge one shard's layer-fragment JSON into the accumulator. Top-level layer
+  /// keys (`global`/`persona`/`structure`) are shallow map-merged, so nodes split
+  /// across shards reunite (sharding partitions ids, so keys don't collide).
+  static void _mergeLayerJson(
+      Map<String, dynamic> into, Map<dynamic, dynamic> fragment) {
+    fragment.forEach((k, v) {
+      final key = k.toString();
+      final existing = into[key];
+      if (existing is Map && v is Map) {
+        final m = <String, dynamic>{};
+        existing.forEach((ek, ev) => m[ek.toString()] = ev);
+        v.forEach((vk, vv) => m[vk.toString()] = vv);
+        into[key] = m;
+      } else {
+        into[key] = v;
+      }
+    });
+  }
+
+  /// The canonical shard order — by the `n` index (the order the publish callable
+  /// wrote + checksummed), id-tiebroken — so the client's checksum + assembly read
+  /// the shards in the SAME order the server used.
+  static List<RemoteDoc> _ordered(List<RemoteDoc> shards) =>
+      List<RemoteDoc>.of(shards)
+        ..sort((a, b) {
+          final an = (a.data['n'] as num?)?.toInt();
+          final bn = (b.data['n'] as num?)?.toInt();
+          if (an != null && bn != null) return an.compareTo(bn);
+          return a.id.compareTo(b.id);
+        });
+
+  /// The content digest over the shard payloads — the value the publish callable
+  /// (step 56) stamps on the pointer as `checksum`, RE-DERIVED here to verify a
+  /// pull before the atomic swap (R2-7). Canonical = each shard's `data` string in
+  /// `n` order, space-joined, hashed with a dependency-free FNV-1a-64 (gate 60 —
+  /// no new pub dep; [BigInt] keeps it exact on web's 53-bit numbers). Exposed so
+  /// the define-less test derives the SAME digest it asserts, and step 56's server
+  /// contract is pinned to "produce `checksumOf`'s value" (swap this one body to
+  /// sha256 if/when that canonical hash is committed server-side).
+  static String checksumOf(List<RemoteDoc> shards) {
+    final buf = StringBuffer();
+    for (final s in _ordered(shards)) {
+      final Object? raw = s.data['data'];
+      buf
+        ..write(raw is String ? raw : '')
+        ..write(' '); // shard separator — guards concatenation ambiguity
+    }
+    return _fnv1a64Hex(buf.toString());
+  }
+
+  /// 64-bit FNV-1a over the UTF-8 bytes, hex. [BigInt] (not `int`) so it is exact
+  /// on web too (JS numbers are 53-bit) — a checksum, not a hot path.
+  static String _fnv1a64Hex(String s) {
+    final mask = (BigInt.one << 64) - BigInt.one;
+    final prime = BigInt.from(1099511628211);
+    var hash = BigInt.parse('14695981039346656037'); // FNV-1a 64-bit offset basis
+    for (final b in utf8.encode(s)) {
+      hash = ((hash ^ BigInt.from(b)) * prime) & mask;
+    }
+    return hash.toRadixString(16).padLeft(16, '0');
+  }
+
   @override
   void dispose() {
-    if (_diffWired) removeListener(_diffVersion);
+    if (_diffWired) {
+      removeListener(_diffVersion);
+      _versionChanges.removeListener(_pullShards);
+    }
     _versionChanges.dispose();
     _needsAppUpdate.dispose();
     super.dispose(); // base: cancels the single subscription + ChangeNotifier
