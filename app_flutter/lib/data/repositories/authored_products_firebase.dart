@@ -67,10 +67,12 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/paged_query.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show kSeedFreshBackend, useFirebaseBackend;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
     show RemoteDoc;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint, immutable;
 
 /// The NEUTRAL catalog remote seam. Extends the paged read-port [PagedSource]
 /// (step 53) with the two POINT operations `catalogProducts` also needs — a
@@ -104,6 +106,47 @@ abstract class AuthoredProductsSource implements PagedSource {
   );
 }
 
+/// Studio Pillar 5 · Step 61 (R2-9) — the STAGING seam for the OFF-by-default
+/// catalog seed importer.
+///
+/// Kept SEPARATE from [AuthoredProductsSource] (the browse/point seam) so the
+/// one-shot dev/emulator seed path does NOT widen the read seam every consumer
+/// implements — the real [FirestoreAuthoredProductsSource] implements BOTH, while a
+/// hand-rolled fake drives the seed test Firebase-free and the step-60 browse fake
+/// stays untouched. Speaks only neutral [RemoteDoc]s + plain field-maps.
+///
+/// The R2-9 invariant this seam exists to make possible: a bulk import NEVER writes
+/// straight to the live `catalogProducts` collection. It [stagePending]s every row
+/// into a `catalogPending/{batchId}` DRAFT, records progress via [setPendingMeta] (a
+/// resumable cursor), and only AFTER the whole batch is staged does the importer
+/// read it back ([pendingItems]) and [setLive] each row — so a mid-batch abort can
+/// never leave a half-public catalog.
+abstract class CatalogSeedSink {
+  /// Stage one product into the pending DRAFT
+  /// (`catalogPending/{batchId}/items/{sku}`) — never the live collection. Merge
+  /// semantics; doc-id = SKU ⇒ idempotent.
+  Future<void> stagePending(
+    String batchId,
+    String sku,
+    Map<String, dynamic> data,
+  );
+
+  /// The pending batch META doc (`catalogPending/{batchId}`) — carries the resume
+  /// `cursor`, the `complete` flag (written LAST), and the `aborted` flag. Null when
+  /// the batch has never been staged.
+  Future<RemoteDoc?> pendingMeta(String batchId);
+
+  /// Merge the pending batch META (progress cursor / complete / aborted).
+  Future<void> setPendingMeta(String batchId, Map<String, dynamic> data);
+
+  /// Every staged item of the batch — the source the flip publishes to live.
+  Future<List<RemoteDoc>> pendingItems(String batchId);
+
+  /// The FLIP write — publish one fully-staged product to the LIVE
+  /// `catalogProducts/{sku}`. Reached ONLY after the batch's `complete` flag is set.
+  Future<void> setLive(String sku, Map<String, dynamic> data);
+}
+
 /// The REAL Firestore adapter for the catalog seam. Resolves
 /// `FirebaseFirestore.instance` LAZILY (never in the constructor — a `const` ctor
 /// with a nullable injected instance), so constructing the repo does not require
@@ -116,7 +159,8 @@ abstract class AuthoredProductsSource implements PagedSource {
 /// `startAfterDocument` (the neutral [Cursor] carries no `DocumentSnapshot`, by
 /// design, to keep the seam Firebase-free). The trailing doc-id in the cursor
 /// tuple disambiguates ties on `nameHe`, so paging never skips or duplicates a row.
-class FirestoreAuthoredProductsSource implements AuthoredProductsSource {
+class FirestoreAuthoredProductsSource
+    implements AuthoredProductsSource, CatalogSeedSink {
   /// [firestore] is injectable (DI/tests); null ⇒ the singleton is resolved
   /// lazily on first use. [tradeId] optionally scopes browse to one Pillar-2
   /// trade (index #8 — `tradeId ASC, nameHe ASC`); empty (default) pages the whole
@@ -187,6 +231,48 @@ class FirestoreAuthoredProductsSource implements AuthoredProductsSource {
           .collection('pricing')
           .doc(audience)
           .set(data, SetOptions(merge: true));
+
+  // ── Step 61 (R2-9): the staging-batch writes ────────────────────────────────
+
+  /// The `catalogPending` staging collection (a SIBLING of `catalogProducts`, never
+  /// touched on a normal build — only the dev/emulator seed importer writes here).
+  CollectionReference<Map<String, dynamic>> get _pending =>
+      _db.collection(FirebaseAuthoredProductsRepository.kPendingCollection);
+
+  /// The staged-items sub-collection of one batch (`catalogPending/{batchId}/items`).
+  CollectionReference<Map<String, dynamic>> _pendingItemsCol(String batchId) =>
+      _pending.doc(batchId).collection('items');
+
+  @override
+  Future<void> stagePending(
+    String batchId,
+    String sku,
+    Map<String, dynamic> data,
+  ) =>
+      _pendingItemsCol(batchId).doc(sku).set(data, SetOptions(merge: true));
+
+  @override
+  Future<RemoteDoc?> pendingMeta(String batchId) async {
+    final snap = await _pending.doc(batchId).get();
+    final data = snap.data();
+    return data == null ? null : RemoteDoc(snap.id, data);
+  }
+
+  @override
+  Future<void> setPendingMeta(String batchId, Map<String, dynamic> data) =>
+      _pending.doc(batchId).set(data, SetOptions(merge: true));
+
+  @override
+  Future<List<RemoteDoc>> pendingItems(String batchId) async {
+    final snap = await _pendingItemsCol(batchId).get();
+    return snap.docs
+        .map((d) => RemoteDoc(d.id, d.data()))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<void> setLive(String sku, Map<String, dynamic> data) =>
+      _col.doc(sku).set(data, SetOptions(merge: true));
 }
 
 /// The Firestore-backed catalog access layer (Step 60). Holds a neutral
@@ -196,13 +282,33 @@ class FirestoreAuthoredProductsSource implements AuthoredProductsSource {
 class FirebaseAuthoredProductsRepository {
   /// Pass [source] in tests to drive every path with a fake; the default is the
   /// real lazy Firestore adapter (dormant until a provider wires this repo).
-  FirebaseAuthoredProductsRepository({AuthoredProductsSource? source})
-      : _source = source ?? const FirestoreAuthoredProductsSource();
+  /// [seedSink] (Step 61) is the staging sink for the OFF-by-default seed importer —
+  /// injected as a fake in the seed test; the default is the same lazy Firestore
+  /// adapter, never touched unless [seedCatalog] actually runs.
+  FirebaseAuthoredProductsRepository({
+    AuthoredProductsSource? source,
+    CatalogSeedSink? seedSink,
+  })  : _source = source ?? const FirestoreAuthoredProductsSource(),
+        _seedSink = seedSink ?? const FirestoreAuthoredProductsSource();
 
   final AuthoredProductsSource _source;
 
+  /// Step 61 — the OFF-by-default seed importer's staging sink (R2-9). The default
+  /// lazy Firestore adapter resolves Firebase only when [seedCatalog] runs, so
+  /// merely constructing the repo (a provider read) never requires Firebase and the
+  /// shipped build stays dormant.
+  final CatalogSeedSink _seedSink;
+
   /// The real collection name — SKU is the doc-id (natural key).
   static const String kCollection = 'catalogProducts';
+
+  /// Step 61 — the STAGING collection the seed importer drafts into before the flip
+  /// to [kCollection] (R2-9). A batch lives at `catalogPending/{batchId}`, its rows
+  /// at `catalogPending/{batchId}/items/{sku}`.
+  static const String kPendingCollection = 'catalogPending';
+
+  /// The default seed batch id — one canonical dev/emulator seed run.
+  static const String kDefaultSeedBatch = 'seed';
 
   /// Browse page size — the [PagedQuery] hard cap (40); no page ever asks the
   /// backend for more (§6 cost guardrail).
@@ -440,6 +546,108 @@ class FirebaseAuthoredProductsRepository {
     return current; // depth cap reached — return the deepest link reached
   }
 
+  // ── seed importer (Step 61 · R2-9 — stage-to-pending, flip-on-FULL-success) ──
+
+  /// OFF-by-default bulk seed of [products] into the catalog. Dev/emulator ONLY —
+  /// PROD NEVER auto-seeds: when the backend is live ([live]) and the deliberate
+  /// [seedFresh] opt-in is off, this SHORT-CIRCUITS to [SeedStatus.skipped] having
+  /// written NOTHING (honest-empty — real backend data is never shadowed by a demo
+  /// seed). This is the injectable twin of the `pushCacheToRemote` guard
+  /// (`firestore_cached_repo.dart:328`, `useFirebaseBackend && !kSeedFreshBackend`):
+  /// [live]/[seedFresh] default to the live globals, and a define-less test drives
+  /// the ON branch by passing them explicitly (the `serverCallables` testability
+  /// idiom). With [live] false (the shipped/test default) the seed runs against the
+  /// injected sink exactly as before — byte-identical to today.
+  ///
+  /// R2-9 safety (a mid-batch abort must never leave a HALF-PUBLIC catalog):
+  ///   • STAGE-TO-PENDING — every row is written to `catalogPending/{batchId}` (a
+  ///     DRAFT), never straight to the live collection.
+  ///   • FLIP-ON-FULL-SUCCESS — the `complete` flag is written LAST; only then are
+  ///     the staged rows published to live [kCollection]. An abort BEFORE complete
+  ///     leaves the live catalog exactly as it was.
+  ///   • RESUMABLE CURSOR — progress is saved after EVERY row, so a re-run resumes
+  ///     from the last staged SKU rather than restarting from zero.
+  ///   • TOMBSTONE PARTIALS — an aborted batch is marked `aborted:true` (not left
+  ///     half-live) and can be resumed or cleaned.
+  /// doc-id = SKU ⇒ the whole path is idempotent (a double run publishes ONE row
+  /// per SKU, never duplicates).
+  ///
+  /// [onStaged] is a TEST SEAM only: invoked after each row is staged (with the
+  /// running count); throwing from it simulates a mid-batch failure so the abort
+  /// path is covered without a real backend.
+  Future<SeedOutcome> seedCatalog(
+    List<LipskeyCatalogProduct> products, {
+    String batchId = kDefaultSeedBatch,
+    bool? live,
+    bool? seedFresh,
+    Future<void> Function(int stagedSoFar)? onStaged,
+  }) async {
+    final isLive = live ?? useFirebaseBackend;
+    final optedIn = seedFresh ?? kSeedFreshBackend;
+    // R2-9 / S1 gate: a live backend never auto-seeds — honest-empty, ZERO writes.
+    if (isLive && !optedIn) return const SeedOutcome.skipped();
+
+    // A batch already fully staged in a prior run just (re-)flips — idempotent.
+    final meta = await _seedSink.pendingMeta(batchId);
+    if (meta?.data['complete'] == true) return _flip(batchId);
+
+    // Resume: skip everything at or before the saved cursor (SKU order is total).
+    final resumeAfter = (meta?.data['cursor'] as String?) ?? '';
+    final ordered = [...products]..sort((a, b) => a.sku.compareTo(b.sku));
+
+    var staged = 0;
+    var lastSku = resumeAfter;
+    try {
+      for (final p in ordered) {
+        if (resumeAfter.isNotEmpty && p.sku.compareTo(resumeAfter) <= 0) {
+          continue; // already staged in a prior run — resume past it
+        }
+        await _seedSink.stagePending(batchId, p.sku, toDoc(p));
+        lastSku = p.sku;
+        staged++;
+        // Persist progress AFTER the row (a crash here ⇒ resume from lastSku).
+        await _seedSink.setPendingMeta(
+          batchId,
+          <String, dynamic>{'cursor': lastSku, 'aborted': false},
+        );
+        if (onStaged != null) await onStaged(staged);
+      }
+    } on Object catch (e) {
+      // R2-9: mark the batch aborted + keep the cursor, and DO NOT flip — the live
+      // catalog is untouched (staging never wrote to it), so no half-public catalog.
+      await _guard(
+        () => _seedSink.setPendingMeta(
+          batchId,
+          <String, dynamic>{'aborted': true, 'cursor': lastSku},
+        ),
+      );
+      debugPrint('seedCatalog: aborted mid-batch at "$lastSku" (ignored): $e');
+      return SeedOutcome.aborted(staged: staged, cursor: lastSku);
+    }
+
+    // Full success — the complete flag is written LAST, gating the flip.
+    await _seedSink.setPendingMeta(
+      batchId,
+      <String, dynamic>{'complete': true, 'aborted': false},
+    );
+    return _flip(batchId);
+  }
+
+  /// Publish a fully-staged batch to the live collection — ONLY when its `complete`
+  /// flag is set (defense-in-depth: an incomplete batch never flips). Each staged
+  /// row is [CatalogSeedSink.setLive]'d by its SKU doc-id, so the flip is idempotent.
+  Future<SeedOutcome> _flip(String batchId) async {
+    final meta = await _seedSink.pendingMeta(batchId);
+    if (meta?.data['complete'] != true) {
+      return const SeedOutcome.aborted(staged: 0, cursor: '');
+    }
+    final items = await _seedSink.pendingItems(batchId);
+    for (final it in items) {
+      await _seedSink.setLive(it.id, it.data);
+    }
+    return SeedOutcome.flipped(count: items.length);
+  }
+
   /// Run a background remote write, swallowing + logging any failure — a write
   /// (offline / rules rejection) must never throw into the UI. Returns the guarded
   /// future so a caller/test may await settling.
@@ -450,4 +658,53 @@ class FirebaseAuthoredProductsRepository {
       debugPrint('FirebaseAuthoredProductsRepository: write failed (ignored): $e');
     }
   }
+}
+
+/// The three terminal outcomes of [FirebaseAuthoredProductsRepository.seedCatalog]
+/// (Step 61).
+enum SeedStatus {
+  /// The honest-empty gate fired — a live backend without the `seedFresh` opt-in.
+  /// NOTHING was staged or flipped (real data is never shadowed by a demo seed).
+  skipped,
+
+  /// The batch staged fully, the `complete` flag was set, and every row was
+  /// published to the live catalog.
+  flipped,
+
+  /// The batch aborted mid-stage — the live catalog is UNCHANGED and the pending
+  /// batch is marked `aborted` with a resume [SeedOutcome.cursor].
+  aborted,
+}
+
+/// The immutable result of a seed run (Step 61).
+@immutable
+class SeedOutcome {
+  const SeedOutcome._(
+    this.status, {
+    this.count = 0,
+    this.staged = 0,
+    this.cursor = '',
+  });
+
+  /// The honest-empty gate fired — zero writes.
+  const SeedOutcome.skipped() : this._(SeedStatus.skipped);
+
+  /// [count] rows were published to the live catalog.
+  const SeedOutcome.flipped({required int count})
+      : this._(SeedStatus.flipped, count: count);
+
+  /// [staged] rows were staged before the abort; [cursor] is the resume point.
+  const SeedOutcome.aborted({required int staged, required String cursor})
+      : this._(SeedStatus.aborted, staged: staged, cursor: cursor);
+
+  final SeedStatus status;
+
+  /// Rows published to live (meaningful only for [SeedStatus.flipped]).
+  final int count;
+
+  /// Rows staged before an abort (meaningful only for [SeedStatus.aborted]).
+  final int staged;
+
+  /// The resume cursor after an abort — the last staged SKU.
+  final String cursor;
 }
