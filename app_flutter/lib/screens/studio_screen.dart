@@ -42,6 +42,8 @@ import 'package:buildsmart/logic/studio/registry_view.dart'
     show ElementRegistryView, RegistryView;
 import 'package:buildsmart/screens/studio_component_builder.dart'
     show StudioComponentBuilder;
+import 'package:buildsmart/screens/studio_rules_screen.dart'
+    show StudioRulesScreen;
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/board_auth.dart'
     show BoardRole, boardAuthProvider;
@@ -132,8 +134,8 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
                   _CoEditorPane(ai: gate.ai),
                   // 🛠️ manual builder (step 82) — no gateway, always usable (§8).
                   const StudioComponentBuilder(),
-                  // 🔒 rules — the safety floor (what the Studio may change).
-                  const _RulesPane(),
+                  // 🔒 rules — closed-set automation rules, read-only advisory (step 84).
+                  const StudioRulesScreen(),
                 ],
               ),
             ),
@@ -590,86 +592,7 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
   }
 }
 
-/// 🔒 The rules pane — what the Studio is allowed to change (the safety floor).
-/// Placeholder; the live rules view lands alongside the builder panes.
-class _RulesPane extends StatelessWidget {
-  const _RulesPane();
-
-  @override
-  Widget build(BuildContext context) {
-    return const _Placeholder(
-      emoji: '🔒',
-      title: 'כללי בטיחות',
-      body: 'מה מותר ומה חסום לעריכה — מחירים ופעולות-ליבה תמיד מוגנים. בקרוב.',
-    );
-  }
-}
-
-/// A centered "בקרוב" placeholder pane — an emoji, a title, a one-line purpose,
-/// and a small "בקרוב" pill. Shared by the three shell tabs until steps 82/83
-/// fill them. All colors from [BsTokens] (the color-ratchet — zero raw hex).
-class _Placeholder extends StatelessWidget {
-  const _Placeholder({
-    required this.emoji,
-    required this.title,
-    required this.body,
-  });
-
-  final String emoji;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(BsTokens.space5),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 44)),
-            const SizedBox(height: BsTokens.space3),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: BsTokens.inkLight,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: BsTokens.space2),
-            Text(
-              body,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: BsTokens.mutedLight,
-                fontSize: 13,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: BsTokens.space4),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: BsTokens.space3,
-                vertical: 5,
-              ),
-              decoration: BoxDecoration(
-                color: BsTokens.surfaceMid,
-                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              ),
-              child: const Text(
-                'בקרוב',
-                style: TextStyle(
-                  color: BsTokens.warnText,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// (step 84) The 🔒 rules tab now hosts `StudioRulesScreen` (closed-set automation
+// rules, read-only advisory). The step-81 `_RulesPane` / `_Placeholder` "safety
+// floor" placeholders were removed when the co-editor (83), manual builder (82),
+// and rules (84) panes all landed — no tab is a placeholder any longer.
