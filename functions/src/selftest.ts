@@ -8,6 +8,9 @@
 // This file is NOT exported by index.ts — it never deploys as a function.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import * as fs from "fs";
+import * as path from "path";
+
 import {
   contractorCredit,
   CREDIT_PROBE,
@@ -134,6 +137,64 @@ check(
   mayReviewRoleRequest(["contractor"], "manager") === false,
   "manager is not a requestable/reviewable role"
 );
+
+// ── P5.68 · deploy-ordering CI-assertion (R2-10) ─────────────────────────────
+// The Studio publish/catalog path ships server artifacts in a HARD order:
+//   bootstrap studioConfig/published → rules-lock → indexes (GATE) →
+//   wait-indexes-READY → functions (gated on index-deploy SUCCESS).
+// A functions deploy that races AHEAD of its composite index makes the
+// token-indexer / rollups throw FAILED_PRECONDITION; a rules-lock BEFORE the
+// pointer seed blocks the bootstrap. This OFFLINE check pins that ordering in
+// `.github/workflows/firebase-deploy.yml`, so any future edit that reorders the
+// steps or re-adds `continue-on-error` fails `npm run selftest` — no emulator,
+// no network, no Firebase (same contract as the pure S8 logic above).
+const wfPath = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  ".github",
+  "workflows",
+  "firebase-deploy.yml"
+);
+check(fs.existsSync(wfPath), `deploy workflow present (${wfPath})`);
+if (fs.existsSync(wfPath)) {
+  const wf = fs.readFileSync(wfPath, "utf8");
+  const iBootstrap = wf.indexOf("Bootstrap studioConfig/published pointer");
+  const iRules = wf.indexOf("name: Deploy Firestore rules");
+  const iIndexes = wf.indexOf("id: indexes");
+  const iReady = wf.indexOf("collectionGroups/-/indexes");
+  const iGate = wf.indexOf("steps.indexes.outcome == 'success'");
+
+  check(
+    wf.includes("bootstrap-studio-pointer.mjs"),
+    "R2-10(a): deploy runs the studioConfig/published bootstrap script"
+  );
+  check(iBootstrap >= 0, "R2-10(a): bootstrap-pointer step present");
+  check(iRules >= 0, "deploy has a Firestore-rules step");
+  check(
+    iBootstrap >= 0 && iRules >= 0 && iBootstrap < iRules,
+    "R2-10(a): bootstrap-pointer runs BEFORE the rules-lock"
+  );
+  check(iIndexes >= 0, "R2-10(b): indexes step is id-tagged (id: indexes) for gating");
+  check(
+    iRules >= 0 && iIndexes >= 0 && iRules < iIndexes,
+    "R2-10: indexes deploy after the rules step"
+  );
+  check(iReady >= 0, "R2-10(d): an index-READY poll is present");
+  check(
+    iIndexes >= 0 && iReady >= 0 && iIndexes < iReady,
+    "R2-10(d): READY-poll runs AFTER the indexes deploy"
+  );
+  check(iGate >= 0, "R2-10(c): functions deploy is gated on index-deploy success");
+  check(
+    iReady >= 0 && iGate >= 0 && iReady < iGate,
+    "R2-10(c/d): the gated functions deploy runs AFTER the READY-poll"
+  );
+  check(
+    !wf.includes("continue-on-error: true"),
+    "R2-10(b/e): no `continue-on-error: true` — an index failure gates functions; functions fail LOUD"
+  );
+}
 
 // ── verdict ──────────────────────────────────────────────────────────────────
 console.log(`selftest: ${passed}/${passed + failed} PASS`);

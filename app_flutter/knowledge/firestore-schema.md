@@ -221,6 +221,7 @@ immutable** מגובבים-לפי-גודל. פרסום = **flip של המצבי�
 | `draftOwnerUid` / `lockedAt` | string / iso | advisory-lock רך על ה-draft ("מנהל אחר עורך כעת", TTL) — R1-4. |
 
 - **read:** `published` = world (כל signed-in) · `draft` = `isManager()` בלבד. **write:** `if false` — הכותב היחיד הוא ה-callable `publishConfig` (Admin-SDK, §3.2/Step 56), מגובה ב-trigger `revertIllegalConfigWrite`.
+- **bootstrap-baseline (Step 68 / R2-10):** ה-`published` נזרע פעם-אחת ב-CI **לפני נעילת-ה-rules** ל-`{version:0, ref:null, …}` (`scripts/bootstrap-studio-pointer.mjs`, idempotent create-if-absent → לעולם לא דורס publish חי). כך cold-start-client קורא מצביע תקין-ריק (→ born-seed bundled, byte-identical) במקום doc-חסר; ה-Admin-SDK עוקף rules, אז זו הגנה-בעומק, וה-workflow ממקם אותה ראשונה בכל-מקרה (נתיב-seed לא-Admin היה נחסם ע"י ה-lock).
 
 #### `studioConfigSnapshots/{snapshotId}` — blobs immutable מגובבים (sharded)
 - כל publish כותב **`vN` חדש** (`v1`,`v2`,…; draft = `draft-<uid>`), לעולם לא מוטציה — rollback חינם + אין torn-read.
@@ -311,3 +312,15 @@ collection שומר את ה-single-field indexes האוטומטיים). שני �
 | 15 | `customers` | `searchTokens` ARRAY_CONTAINS, `used` DESC | חיפוש-לקוחות ב-scale (**optional**, forward-ready) |
 
 > **`studioConfig*` — אין composite index** (get/listen לפי doc-id קבוע בלבד; העץ blob-נקרא-לפי-version, לא נשאל ב-query). Step-52 addition-b. ולידציה: `firebase deploy --only firestore:indexes --project buildsmart-b0b78 --dry-run`.
+
+## סדר-הפריסה (Step 68 / R2-10 קנוני) — `.github/workflows/firebase-deploy.yml`
+
+ה-indexes האלה הם **תלות-קשיחה** של ה-functions: `onCatalogProductWrite` (token-indexer) ו-server-search שואלים את index #11 (`nameTokens` ARRAY_CONTAINS + `nameHe`), וה-rollups את #12–14. לכן הפריסה **מסודרת** ולא מקבילה:
+
+1. **bootstrap `studioConfig/published`** (`scripts/bootstrap-studio-pointer.mjs`) — **לפני** נעילת-rules.
+2. **`--only firestore:rules`**.
+3. **`--only firestore:indexes`** = **GATE** (`id: indexes`, ללא `continue-on-error` — ה-IAM "Cloud Datastore Index Admin" ניתן 2026-06-14). כשל כאן **עוצר** את ה-job → functions לא נפרסים.
+4. **READY-poll** (Firestore Admin REST `collectionGroups/-/indexes`, ≤10min, fail-loud) — ממתין שכל index יגיע ל-`READY` (לא `CREATING`).
+5. **`--only functions`** — מגודר `if: steps.indexes.outcome == 'success'`, ללא `continue-on-error` (fail-loud, Blaze חי).
+
+בלי הסדר הזה: functions חיים **לפני** ה-composite index → ה-query הראשון זורק `FAILED_PRECONDITION`; או rules-lock לפני ה-seed → ה-bootstrap נחסם. הסדר נאכף offline ב-`functions/src/selftest.ts` (`npm run selftest` — 11 checks על ה-YAML) שרץ כ-GATE בזרימת-הפריסה עצמה.
