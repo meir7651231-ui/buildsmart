@@ -45,6 +45,8 @@ class AppSettings {
     required this.privLocation,
     required this.privMarketing,
     required this.privCrashReports,
+    required this.privPresence,
+    required this.consentedPolicyVersion,
   });
 
   final BsTheme theme;
@@ -84,6 +86,18 @@ class AppSettings {
   final bool privMarketing;
   final bool privCrashReports;
 
+  /// §9 (R1-2) — DENY-default presence toggle (customer online-presence). A
+  /// SEPARATE consent axis from [privAnalytics] so all privacy defaults land
+  /// together in step 86; the presence forward ANDs it with the consent
+  /// version + backend (never staff — governance #84).
+  final bool privPresence;
+
+  /// The policy version the user has consented to (0 = never consented, the
+  /// default). The analytics/presence forward requires
+  /// `consentedPolicyVersion >= kCurrentPolicyVersion`, so a policy bump
+  /// de-facto resets consent to DENY until re-opt-in (Amendment-13 re-notice).
+  final int consentedPolicyVersion;
+
   static const AppSettings defaults = AppSettings(
     theme: BsTheme.light,
     textSize: BsTextSize.medium,
@@ -102,10 +116,12 @@ class AppSettings {
     notifDeals: true,
     notifBudget: true,
     notifOrders: true,
-    privAnalytics: true,
+    privAnalytics: false,
     privLocation: true,
     privMarketing: false,
     privCrashReports: true,
+    privPresence: false,
+    consentedPolicyVersion: 0,
   );
 
   AppSettings copyWith({
@@ -130,6 +146,8 @@ class AppSettings {
     bool? privLocation,
     bool? privMarketing,
     bool? privCrashReports,
+    bool? privPresence,
+    int? consentedPolicyVersion,
   }) {
     return AppSettings(
       theme: theme ?? this.theme,
@@ -153,6 +171,9 @@ class AppSettings {
       privLocation: privLocation ?? this.privLocation,
       privMarketing: privMarketing ?? this.privMarketing,
       privCrashReports: privCrashReports ?? this.privCrashReports,
+      privPresence: privPresence ?? this.privPresence,
+      consentedPolicyVersion:
+          consentedPolicyVersion ?? this.consentedPolicyVersion,
     );
   }
 
@@ -190,6 +211,8 @@ class AppSettings {
             'location': privLocation,
             'marketing': privMarketing,
             'crashReports': privCrashReports,
+            'presence': privPresence,
+            'consentedPolicyVersion': consentedPolicyVersion,
           },
         },
       };
@@ -233,10 +256,13 @@ class AppSettings {
       notifDeals:     notif['deals']     != false,
       notifBudget:    notif['budget']    != false,
       notifOrders:    notif['orders']    != false,
-      privAnalytics:    priv['analytics']    != false,
+      privAnalytics:    priv['analytics']    == true,
       privLocation:     priv['location']     != false,
       privMarketing:    priv['marketing']    == true,
       privCrashReports: priv['crashReports'] != false,
+      privPresence:     priv['presence']     == true,
+      consentedPolicyVersion:
+          (priv['consentedPolicyVersion'] as num?)?.toInt() ?? 0,
     );
   }
 }

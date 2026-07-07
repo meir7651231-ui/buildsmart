@@ -234,3 +234,20 @@ bool get useCatalogServerSearch => kCatalogServerSearch && useFirebaseBackend;
 /// gateway are live):
 ///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=CLAUDE_AI=true --dart-define=STUDIO_CO_EDITOR=true
 const bool kStudioCoEditor = bool.fromEnvironment('STUDIO_CO_EDITOR');
+
+// ── Studio Pillar 3 · עמוד-3 (Live Customer Intelligence · steps 86-100) ──
+// Step 86: the privacy-foundation master switch. DORMANT — born INERT off the
+// backend, the same zero-regression invariant as [kStudioLive] / [kStudioCoEditor].
+
+/// INTEL_LIVE — master switch for the LIVE customer-intelligence layer (the
+/// consent-gated analytics forward + presence). Default OFF: the consent modal
+/// is COMPILE-GATED behind this flag at its single call-site (`if (kIntelLive)`
+/// in `home_shell.dart`), so const-false in every normal build → the branch AND
+/// the whole `consent_modal.dart` surface tree-shake away and the shipped
+/// demo/test build is BYTE-IDENTICAL to today (mirrors the step-81 `_StudioHero`
+/// hero pattern). The analytics FORWARD gate ([analyticsForwardEnabled]) ANDs
+/// this with [useFirebaseBackend] AND the persisted consent version, so it never
+/// activates offline / in tests — the local ring buffer stays the only always-on
+/// piece. Step 100 flips this on (staged) after the backend + consent are live:
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=INTEL_LIVE=true
+const bool kIntelLive = bool.fromEnvironment('INTEL_LIVE');

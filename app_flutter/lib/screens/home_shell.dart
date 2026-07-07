@@ -1,7 +1,9 @@
+import 'package:buildsmart/data/repositories/backend.dart' show kIntelLive;
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/consent_modal.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
@@ -81,6 +83,16 @@ class HomeShell extends ConsumerWidget {
         });
       }
     });
+
+    // Step 86 — one-time, version-gated analytics-consent modal. COMPILE-GATED
+    // behind [kIntelLive] (const-false in every normal build) → this branch AND
+    // the whole consent_modal surface tree-shake away, so the shipped shell is
+    // BYTE-IDENTICAL to today (the step-81 `_StudioHero` hero pattern). When
+    // INTEL_LIVE is flipped on it prompts once until the user consents to the
+    // current policy version.
+    if (kIntelLive) {
+      maybeShowConsentModal(context, ref);
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
