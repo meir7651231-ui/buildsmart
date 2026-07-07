@@ -5,6 +5,8 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/intel/intel_bus.dart';
+import 'package:buildsmart/state/intel/intel_events.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/share_seam.dart';
@@ -1509,6 +1511,21 @@ class _CartViewState extends ConsumerState<_CartView> {
     _notesCtrl.addListener(
       () => ref.read(cartNotesProvider.notifier).state = _notesCtrl.text,
     );
+    // Step 94 — cart_view: fired ONCE per mount from a post-frame callback, never
+    // from build(). track() mutates intelLogProvider, so emitting it during a
+    // build trips Riverpod's "modify a provider while building" assertion (the
+    // step-93 lesson). initState runs exactly once per instance → no _emitted flag
+    // is needed and a rebuild cannot re-fire it. Scalar item_count only (§4).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(intelBusProvider).track(
+        IntelEvents.cartView,
+        props: {
+          'item_count':
+              '${cartItemCount(ref.read(cartQtysProvider), ref.read(smartCartProvider))}',
+        },
+      );
+    });
   }
 
   @override
@@ -1519,6 +1536,25 @@ class _CartViewState extends ConsumerState<_CartView> {
 
   @override
   Widget build(BuildContext context) {
+    // Step 94 — checkout_step: fired on a delivery/payment CHANGE via ref.listen.
+    // The callback runs OUTSIDE build, so — unlike the ref.watch below — it never
+    // trips the "modify a provider while building" assertion. `value` is the bare
+    // SCALAR enum name (delivery type / payment method) — NEVER a card number or
+    // any payment detail (§4 allow-set {step, value, dur_s}).
+    final bus = ref.read(intelBusProvider);
+    ref.listen<CartDelivery>(cartDeliveryProvider, (_, next) {
+      bus.track(
+        IntelEvents.checkoutStep,
+        props: {'step': 'delivery', 'value': next.name},
+      );
+    });
+    ref.listen<CartPaymentMethod>(cartPaymentProvider, (_, next) {
+      bus.track(
+        IntelEvents.checkoutStep,
+        props: {'step': 'payment', 'value': next.name},
+      );
+    });
+
     final qtys = ref.watch(cartQtysProvider);
     final delivery = ref.watch(cartDeliveryProvider);
     final project = ref.watch(cartProjectProvider);
@@ -2627,6 +2663,18 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
   }
 
   void _showCheckoutSheet(BuildContext context) {
+    // Step 94 — checkout_start: the funnel's "opened checkout" signal. Fired from
+    // this tap-driven handler (reached only after the min-order + large-order
+    // gates pass in _checkout), never from build(). Scalar props only
+    // (§4 allow-set {item_count, sum}); widget.total is the same total shown.
+    ref.read(intelBusProvider).track(
+      IntelEvents.checkoutStart,
+      props: {
+        'item_count':
+            '${cartItemCount(ref.read(cartQtysProvider), ref.read(smartCartProvider))}',
+        'sum': '${widget.total}',
+      },
+    );
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
