@@ -25,6 +25,17 @@
 //   • legit callable write (fresh publishGuard stamp)       → revert === false
 //   • the revert's own publishGuard change (loop-guard)     → revert === false
 //   • version-superseded (live ≠ toVersion)                 → revertStillApplies=false
+//
+// PLUS the Step-66 COST-GUARDRAIL cores (analytics.ts; spec detail/051-068.md
+// §66.5) — the scheduled rollups' transaction/Firestore sinks are exercised via
+// their PURE cores + the exported guardrail constants:
+//   • counter-increment hits a valid RANDOM shard           → pickShard
+//   • daily rollup sums a metric's shards → one total        → sumShards + dayKey
+//   • presence rollup → single summary, GHOSTS excluded      → summarizePresence
+//   • `maxInstances` is set on the rollups                   → kRollupMaxInstances
+//   • the owner reads ONE presence doc (`current`)           → kPresenceSummaryDocId
+//   (the `_publishRate/{uid}` publish-rate-limit — Step 66's other named ceiling —
+//    is asserted by the `rateLimitExceeded` block below; it ships on `publishConfig`.)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
@@ -35,6 +46,16 @@ import {
 } from "../src/studio";
 import type { PublishVerdict, RevertVerdict } from "../src/studio";
 import { isOwnerEmail, OWNER_EMAIL } from "../src/common";
+import {
+  dayKey,
+  kNumShards,
+  kPresenceStaleMs,
+  kPresenceSummaryDocId,
+  kRollupMaxInstances,
+  pickShard,
+  sumShards,
+  summarizePresence,
+} from "../src/analytics";
 
 let passed = 0;
 let failed = 0;
@@ -299,6 +320,88 @@ expectRevert(
 check(revertStillApplies(99, 99), "live still == toVersion → revert applies");
 check(!revertStillApplies(8, 99), "live superseded by real publish (8 ≠ 99) → skip");
 check(!revertStillApplies(100, 99), "live moved on (100 ≠ 99) → skip");
+
+// ══ STEP 66 — cost-guardrail cores (analytics.ts) ═════════════════════════════
+
+// ── guardrail constants — the ceilings the spec §66 DoD asserts exist ─────────
+check(kRollupMaxInstances === 10, "rollups carry maxInstances:10 (§66 R1-2)");
+check(kNumShards === 10, "distributed counter has 10 shards");
+check(kPresenceStaleMs === 120_000, "presence ghost threshold is 2 min (§66 add-a)");
+check(kPresenceSummaryDocId === "current", "owner reads the single presenceSummary/current doc (R1-3)");
+
+// ── pickShard — counter increment hits a valid RANDOM shard (§66.5) ───────────
+check(pickShard(0, 10) === 0, "r=0 → shard 0");
+check(pickShard(0.5, 10) === 5, "r=0.5 → shard 5");
+check(pickShard(0.99, 10) === 9, "r=0.99 → shard 9");
+check(pickShard(1, 10) === 9, "r=1 clamps → shard 9 (never out of range)");
+check(pickShard(1.5, 10) === 9, "r>1 clamps → last shard");
+check(pickShard(-0.3, 10) === 0, "r<0 clamps → shard 0");
+// Every random in [0,1) lands on an IN-RANGE shard (the increment never targets a
+// non-existent shard) — sampled across the unit interval.
+let allInRange = true;
+for (let k = 0; k < 1000; k++) {
+  const s = pickShard(k / 1000);
+  if (s < 0 || s >= kNumShards || !Number.isInteger(s)) allInRange = false;
+}
+check(allInRange, "pickShard(r) ∈ [0,kNumShards) integer for all r∈[0,1)");
+check(pickShard(0.5, 4) === 2, "shard count is parameterizable (0.5×4 → 2)");
+
+// ── sumShards — the daily rollup folds a metric's shards to one total (§66.5) ─
+check(sumShards([1, 2, 3, 4]) === 10, "sumShards sums shard counts");
+check(sumShards([]) === 0, "sumShards([]) === 0 (never-incremented metric)");
+check(sumShards([5]) === 5, "sumShards single shard");
+check(
+  sumShards([2, undefined, 3, null, "x", NaN, 4]) === 9,
+  "sumShards tolerates missing/garbage shards (2+3+4)"
+);
+
+// ── dayKey — the analyticsDaily/{day} partition id (UTC) ──────────────────────
+check(dayKey(new Date("2026-07-07T13:45:00Z")) === "2026-07-07", "dayKey → UTC YYYY-MM-DD");
+check(
+  dayKey(new Date("2026-07-07T23:59:59.999Z")) === "2026-07-07",
+  "dayKey is UTC-stable at the day edge"
+);
+check(
+  dayKey(new Date("2026-01-01T00:00:00Z")) === "2026-01-01",
+  "dayKey at the year boundary"
+);
+
+// ── summarizePresence — single-doc rollup, GHOSTS EXCLUDED (§66 add-a, R1-3) ──
+const t = 1_000_000_000_000; // a fixed "now"
+const fresh = t - 10_000; // 10s ago — online
+const ghost = t - 200_000; // >2min ago — crashed client, must NOT count
+const presence = summarizePresence(
+  [
+    { uid: "u1", role: "contractor", lastSeen: fresh },
+    { uid: "u2", role: "contractor", lastSeen: fresh },
+    { uid: "u3", role: "courier", lastSeen: fresh },
+    { uid: "g1", role: "store", lastSeen: ghost }, // ghost — excluded
+    { uid: "g2", role: "worker" }, // no heartbeat — excluded
+  ],
+  t
+);
+check(presence.count === 3, "presence count excludes ghosts (3 online, 2 stale)");
+check(presence.byRole.contractor === 2, "byRole: 2 contractors online");
+check(presence.byRole.courier === 1, "byRole: 1 courier online");
+check(!("store" in presence.byRole), "byRole: the ghost store is NOT counted");
+check(presence.sample.length === 3, "sample carries the online uids");
+check(
+  presence.sample.includes("u1") && !presence.sample.includes("g1"),
+  "sample includes online, excludes ghosts"
+);
+// Empty collection → an all-zero summary (not an error) — the owner sees 0 online.
+const empty = summarizePresence([], t);
+check(empty.count === 0 && empty.sample.length === 0, "empty presence → 0 online");
+// The `sample` is BOUNDED so `presenceSummary/current` stays a small doc even with
+// thousands online (R1-3: the owner reads ONE small doc, never the collection).
+const many: { uid: string; role: string; lastSeen: number }[] = [];
+for (let k = 0; k < 500; k++) many.push({ uid: `u${k}`, role: "worker", lastSeen: fresh });
+const big = summarizePresence(many, t);
+check(big.count === 500, "all 500 fresh clients counted");
+check(big.sample.length === 20, "sample is capped at 20 (bounded summary-doc size)");
+// A role-less online client is still counted, bucketed under "unknown".
+const roleless = summarizePresence([{ uid: "x", lastSeen: fresh }], t);
+check(roleless.count === 1 && roleless.byRole.unknown === 1, "role-less online → byRole.unknown");
 
 // ── verdict ──────────────────────────────────────────────────────────────────
 console.log(`studio.test: ${passed}/${passed + failed} PASS`);
