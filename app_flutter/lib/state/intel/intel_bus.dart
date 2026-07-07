@@ -26,9 +26,12 @@
 // bus is inert on the demo path — additive, zero new behavior today.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/intel/consent_gate.dart';
 import 'package:buildsmart/state/intel/intel_event.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
 import 'package:buildsmart/state/intel/intel_log.dart';
+import 'package:buildsmart/state/intel/intel_sink.dart';
 import 'package:buildsmart/state/telemetry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,11 +63,27 @@ class NoopIntelSink implements IntelSink {
   void enqueue(IntelEvent e) {}
 }
 
-/// The forward sink. INERT ([NoopIntelSink]) today; step 90 overrides this with
-/// the consent-gated batched sink that only forwards when
-/// `consentedPolicyVersion >= kCurrentPolicyVersion && useFirebaseBackend`. The
-/// bus READS this provider (never subscribes), so it is inert off-backend now.
-final intelSinkProvider = Provider<IntelSink>((ref) => const NoopIntelSink());
+/// The forward sink — the CONSENT + BACKEND DOUBLE-GATE (step 90, R1-1). It is
+/// the live [FirestoreIntelSink] ONLY when [analyticsForwardEnabled] holds — a
+/// PERSISTED consent VERSION (`consentedPolicyVersion >= kCurrentPolicyVersion`,
+/// not a floating bool) AND the live Firebase backend (`useFirebaseBackend`) AND
+/// the `kIntelLive` master switch. Off ANY axis (every demo / test / off-backend
+/// build) it is the inert [NoopIntelSink] — so NOTHING here touches a platform
+/// channel, opens a timer, or resolves `FirebaseFirestore.instance`; the forward
+/// path is byte-identical to no-forward-at-all (the connection_status.dart:82
+/// inert idiom, as non-construction).
+///
+/// `ref.read` (never `.watch`) — this gate has no reactive consumer (the bus
+/// READS it per-`track`), so a read keeps the whole `intel_bus.dart` file
+/// subscription-free (the §8 grep guard) while still evaluating the gate on first
+/// use. `ref.onDispose` cancels the live sink's flush timer.
+final intelSinkProvider = Provider<IntelSink>((ref) {
+  final settings = ref.read(appSettingsProvider);
+  if (!analyticsForwardEnabled(settings)) return const NoopIntelSink();
+  final sink = FirestoreIntelSink(writer: const FirestoreIntelBatchWriter());
+  ref.onDispose(sink.dispose);
+  return sink;
+});
 
 /// The ONE thing a screen touches. See the file header for the 3-way fan-out and
 /// the never-re-raise discipline.
