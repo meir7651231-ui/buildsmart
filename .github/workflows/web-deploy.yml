@@ -59,7 +59,9 @@ jobs:
         # --dart-define=KB_GLOBAL=true: the unified keyboard-on-every-screen (the
         # contractor-board monster) — MUST match firebase-hosting.yml (same race),
         # else whichever deploy wins could ship it OFF. OWNER cut-over (1/7).
-        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true
+        # --dart-define=GLOBAL_SEARCH=true: the unified global search (the keyboard
+        # row searches every domain) — MUST match firebase-hosting.yml (same race).
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true
 
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
