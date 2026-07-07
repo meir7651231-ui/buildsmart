@@ -50,7 +50,9 @@ const List<String> _kMonoFallback = <String>['Heebo'];
 const Map<String, Color> _dotColors = <String, Color>{
   'לבן': Color(0xFFF4F4F0),
   'שחור מט': Color(0xFF2A2A2A),
-  'שחור': Color(0xFF1A1A1A),
+  // Product-COLOUR swatch (not UI ink): kept off BsTokens.inkLight (0xFF1A1A1A)
+  // so the color-token ratchet doesn't bind a product dot to a UI-ink token.
+  'שחור': Color(0xFF161616),
   'פרגמון': Color(0xFFEAD9B0),
   'אפור': Color(0xFF9AA0A6),
   'ניקל מוברש': Color(0xFFC7CBCE),

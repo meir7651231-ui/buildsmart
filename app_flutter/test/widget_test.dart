@@ -110,19 +110,25 @@ void main() {
     await _openFinder(t);
     await t.tap(find.text('בית').first);
     await t.pumpAndSettle();
-    // Section labels are present (they also appear as chips → at least one).
-    expect(find.text('חיפושים אחרונים'), findsAtLeastNWidgets(1));
-    expect(find.text('תכנון חיבור'), findsAtLeastNWidgets(1));
-    expect(find.text('מועדפים'), findsAtLeastNWidgets(1));
-    expect(find.text('עץ חכם'), findsAtLeastNWidgets(1));
-    // The smart-home landing (#32) renders wired section blocks; scroll down
-    // until a body-only section title (not a chip) shows.
+    // The smart-home landing (#32) renders wired section BLOCKS. The section-chips
+    // row was removed (browse/search moved to the keyboard), so each label now
+    // lives ONLY as a body block — scroll the lazy list ('catalog-list') to each.
+    // Titles are verbatim from SmartHomeBody / kDefaultHomeOrder, in top→bottom
+    // order so each downward scroll reaches the next.
     final list = find.byKey(const Key('catalog-list'));
-    for (var i = 0; i < 20 && find.text('כלים מהירים').evaluate().isEmpty; i++) {
-      await t.drag(list, const Offset(0, -250));
-      await t.pump(const Duration(milliseconds: 50));
+    Future<void> scrollTo(Finder f, String label) async {
+      for (var i = 0; i < 30 && f.evaluate().isEmpty; i++) {
+        await t.drag(list, const Offset(0, -250));
+        await t.pump(const Duration(milliseconds: 50));
+      }
+      expect(f, findsAtLeastNWidgets(1),
+          reason: 'smart-home section block "$label" did not render');
     }
-    expect(find.text('כלים מהירים'), findsAtLeastNWidgets(1));
+
+    await scrollTo(find.textContaining('עץ חכם'), 'עץ חכם'); // 🌳 …אינסטלציה
+    await scrollTo(find.text('כלים מהירים'), 'כלים מהירים');
+    await scrollTo(find.text('תכנון חיבור'), 'תכנון חיבור');
+    await scrollTo(find.text('מועדפים'), 'מועדפים');
   });
 
   // B4 (owner policy): content-less catalog categories — those whose title has
@@ -136,10 +142,13 @@ void main() {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _openFinder(t);
-    final catChip = find.text('קטגוריות').first;
-    await t.ensureVisible(catChip);
-    await t.pumpAndSettle();
-    await t.tap(catChip);
+    // The 'קטגוריות' pills chip was removed (86861c4f) and its browse list moved
+    // to the keyboard lists (d8ebc0fb); open the categories browse by driving its
+    // section provider directly (active == 'קטגוריות' → _CatalogList) — the same
+    // seam the keyboard list writes, the way the other tests drive their providers.
+    ProviderScope.containerOf(t.element(find.byType(HomeShell)))
+        .read(catalogSectionProvider.notifier)
+        .state = 'קטגוריות';
     await t.pumpAndSettle();
 
     final listFinder = find.byKey(const Key('catalog-list'));
