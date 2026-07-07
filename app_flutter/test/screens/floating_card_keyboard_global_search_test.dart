@@ -21,6 +21,8 @@ import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show productSource;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show keyboardDiveQueryProvider;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart'
@@ -45,10 +47,14 @@ void main() {
     /// Pumps the REAL [FloatingCardKeyboard] in the same hermetic RTL shell the
     /// sibling test uses (the panel is mounted only while
     /// [keyboardOverlayOpenProvider] is true, seeded true). Returns the container.
-    Future<ProviderContainer> pumpPanel(WidgetTester tester) async {
+    Future<ProviderContainer> pumpPanel(WidgetTester tester,
+        {int tab = 0}) async {
       final container = ProviderContainer(
         overrides: [keyboardOverlayOpenProvider.overrideWith((_) => true)],
       );
+      // Seed the active tab BEFORE mount so the first build reads it (no tab
+      // CHANGE fires — the keyboard opens in typing mode on this tab).
+      if (tab != 0) container.read(mainTabProvider.notifier).state = tab;
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -154,17 +160,46 @@ void main() {
     });
 
     testWidgets(
-        'a broad query overflows the row with an "עוד…" chip that opens the '
-        'full-results sheet', (tester) async {
+        'on the catalog tab a broad query does NOT append "עוד…" — the unified '
+        'search window is already open below the keyboard', (tester) async {
       if (!kGlobalSearch) {
         markTestSkipped('kGlobalSearch OFF — run with '
             '--dart-define=GLOBAL_SEARCH=true to exercise the global row');
         return;
       }
-      await pumpPanel(tester);
+      final container = await pumpPanel(tester); // tab 0 = catalog
+      expect(container.read(mainTabProvider), 0, reason: 'starts on the catalog');
 
-      // "ברז" matches many products (+ a department screen), so the balanced row
-      // fills and an "עוד…" overflow chip is appended (results > row cap).
+      // "ברז" matches many products (the row would overflow), but on the catalog
+      // tab the dive window ([_DiveResultsView], extended to every domain) already
+      // shows the full unified results below — so an overflow "עוד…" chip (a dead
+      // jump to where you already are) is deliberately omitted.
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ז'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('עוד…'), findsNothing,
+          reason: 'no overflow chip on the catalog tab — that search window is '
+              'already open under the keyboard');
+    });
+
+    testWidgets(
+        'off the catalog tab "עוד…" opens the ONE existing search window: it '
+        'switches to the catalog tab and seeds the dive query (no bespoke sheet)',
+        (tester) async {
+      if (!kGlobalSearch) {
+        markTestSkipped('kGlobalSearch OFF — run with '
+            '--dart-define=GLOBAL_SEARCH=true to exercise the global row');
+        return;
+      }
+      final container = await pumpPanel(tester, tab: 3); // 3 = store
+      expect(container.read(mainTabProvider), 3, reason: 'starts on the store tab');
+
+      // Off the catalog tab that window is NOT open below, so the overflow chip is
+      // appended (results > row cap) as the one-tap way to reach the full results.
       await tester.tap(find.text('ב'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('ר'));
@@ -173,16 +208,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('עוד…'), findsOneWidget,
-          reason: 'a query with more than a row-full of hits shows the overflow '
-              'chip');
+          reason: 'off the catalog tab a broad query shows the overflow chip');
 
-      // Tapping it opens the full-results sheet (every ranked hit as a row).
+      // Tapping it opens the EXISTING search window (the catalog dive), NOT a
+      // sheet: switch to the catalog tab (0, where [_DiveResultsView] lives) and
+      // seed its [keyboardDiveQueryProvider] so it renders the full unified list.
       await tester.ensureVisible(find.text('עוד…'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('עוד…'));
       await tester.pumpAndSettle();
-      expect(find.byType(ListTile), findsWidgets,
-          reason: 'the "עוד…" sheet lists the full ranked results');
+
+      expect(container.read(mainTabProvider), 0,
+          reason: '"עוד…" navigates to the catalog tab where the search window is');
+      expect(container.read(keyboardDiveQueryProvider), 'ברז',
+          reason: '"עוד…" seeds the dive query so the window shows the results');
     });
   });
 }
