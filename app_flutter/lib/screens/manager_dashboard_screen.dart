@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/data/repositories/backend.dart' show kStudioCoEditor;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 // A13 — the server-canonical credit seam: the repository provider + the
@@ -10,6 +11,8 @@ import 'package:buildsmart/data/repositories/customers_local.dart'
 import 'package:buildsmart/data/repositories/order_functions.dart'
     show CreditResult;
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/logic/studio/co_editor_gate.dart'
+    show studioCoEditorProvider;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart'
@@ -21,6 +24,7 @@ import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/studio/studio_entry.dart';
+import 'package:buildsmart/screens/studio_screen.dart';
 import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 // #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
@@ -429,6 +433,13 @@ class _DashboardTab extends ConsumerWidget {
       ),
       children: [
         const _CopilotHero(),
+        // Studio Pillar-4 · step 81 — COMPILE-GATED cockpit hero. `kStudioCoEditor`
+        // is a const-false `bool.fromEnvironment`, so this is a const-false branch:
+        // Dart tree-shakes BOTH the branch AND `_StudioHero` (referenced only here)
+        // out of every normal build → the shipped cockpit is BYTE-IDENTICAL to
+        // today. Visible only under --dart-define=STUDIO_CO_EDITOR=true (and a
+        // manager session — the runtime `manager` axis is re-checked inside).
+        if (kStudioCoEditor) const _StudioHero(),
         const SizedBox(height: BsTokens.space4),
         // Owner-only Studio entry — SizedBox.shrink for everyone else, so the
         // cockpit is unchanged unless the signed-in owner-manager is looking.
@@ -499,6 +510,116 @@ class _CopilotHero extends ConsumerWidget {
               ),
               const Icon(Icons.chevron_left, color: Colors.white),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 🎬 Studio hero (Pillar-4 · step 81) — the manager-only cockpit gateway into
+/// the Studio CO-EDITOR. COMPILE-GATED behind [kStudioCoEditor] at its single
+/// call-site (`if (kStudioCoEditor) const _StudioHero()` in [_DashboardTab]):
+/// const-false in every normal build, so the branch AND this whole widget
+/// tree-shake away → the shipped cockpit is BYTE-IDENTICAL to today. The runtime
+/// `manager` axis (via [studioCoEditorProvider]) is a SECONDARY guard INSIDE
+/// build, never the outer gate. §9: an "ניסיוני" badge + a deep-link that opens
+/// [StudioScreen] on its default tab (the always-working manual builder).
+class _StudioHero extends ConsumerWidget {
+  const _StudioHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gate = ref.watch(studioCoEditorProvider);
+    // Secondary runtime guard: only a signed-in manager sees the hero. The
+    // compile-const `kStudioCoEditor` at the call-site is the OUTER byte-identical
+    // gate; this is the belt-and-braces role check (never the sole gate).
+    if (!gate.manager) return const SizedBox.shrink();
+    return Padding(
+      // The gap ABOVE the hero (below the co-pilot hero); the SizedBox in the
+      // ListView supplies the gap below it.
+      padding: const EdgeInsets.only(top: BsTokens.space4),
+      child: Semantics(
+        key: const Key('studio-hero'),
+        button: true,
+        label: 'סטודיו — ערוך את האפליקציה',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(cfgRadius(context)),
+          onTap: () => Navigator.of(context).push(StudioScreen.route()),
+          child: Container(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [BsTokens.brand, BsTokens.brandDark],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
+            ),
+            child: Row(
+              children: [
+                const Text('🎬', style: TextStyle(fontSize: 34)),
+                const SizedBox(width: BsTokens.space3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          const Flexible(
+                            child: Text(
+                              'סטודיו — ערוך את האפליקציה',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: BsTokens.space2),
+                          // §9 — the "ניסיוני" (experimental) badge: a white pill
+                          // with brand text flags the pillar as new/beta.
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: BsTokens.space2,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: BsTokens.cardLight,
+                              borderRadius: BorderRadius.circular(
+                                BsTokens.radiusPill,
+                              ),
+                            ),
+                            child: const Text(
+                              'ניסיוני',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        gate.ai
+                            ? 'תאר בעברית מה לשנות — או בנה ידנית · אני עורך את הנתונים'
+                            : 'בנייה ידנית עובדת תמיד · העורך החכם דורש חיבור לשרת',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_left, color: Colors.white),
+              ],
+            ),
           ),
         ),
       ),
