@@ -23,6 +23,8 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, matchDestinations;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/screens/manager_dashboard_screen.dart'
+    show showCustomerDetailSheet;
 import 'package:buildsmart/screens/notifications_screen.dart'
     show activeNotifViewsProvider, notifSectionProvider;
 import 'package:buildsmart/screens/store_screen.dart'
@@ -35,6 +37,8 @@ import 'package:buildsmart/screens/tasks_screen.dart' show showTaskDetailSheet;
 import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/orders_engine.dart'
+    show managerCustomersProvider;
 import 'package:buildsmart/state/tasks_engine.dart' show tasksProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -193,11 +197,34 @@ SearchSource taskSourceFor(WidgetRef ref) => (query, max) {
       return hits.length <= max ? hits : hits.sublist(0, max);
     };
 
+/// CUSTOMERS — reads the live [managerCustomersProvider] at query time and
+/// matches customer NAMES. Tapping opens that customer's detail sheet directly
+/// (the SAME manager sheet the dashboard's customers tab shows) via
+/// [showCustomerDetailSheet]. These live in the manager dashboard, so the result
+/// is only meaningful in a manager-context keyboard — dormant behind the flag.
+SearchSource customerSourceFor(WidgetRef ref) => (query, max) {
+      final hits = <SearchResult>[];
+      for (final c in ref.read(managerCustomersProvider)) {
+        final s = scoreMatch(query, c.name);
+        if (s <= 0) continue;
+        final name = c.name;
+        hits.add(
+          SearchResult(
+            kind: SearchResultKind.customer,
+            title: c.name,
+            score: s,
+            run: (r, context) => showCustomerDetailSheet(r, context, name),
+          ),
+        );
+      }
+      hits.sort((a, b) => b.score.compareTo(a.score));
+      return hits.length <= max ? hits : hits.sublist(0, max);
+    };
+
 /// Assemble the global search index with every wired source. Called by the
 /// keyboard with its live [ref]. Screens + products are pure (const data); the
-/// rest capture [ref] to read their live lists at query time. (Customers live in
-/// the manager dashboard — a cross-role route — so they stay out of this
-/// contractor-surface index for now.)
+/// rest capture [ref] to read their live lists at query time. All seven domains:
+/// screens · products · chats · orders · notifications · tasks · customers.
 GlobalSearchIndex buildGlobalSearchIndex(WidgetRef ref) => GlobalSearchIndex(
       <SearchSource>[
         screenSource,
@@ -206,5 +233,6 @@ GlobalSearchIndex buildGlobalSearchIndex(WidgetRef ref) => GlobalSearchIndex(
         orderSourceFor(ref),
         notifSourceFor(ref),
         taskSourceFor(ref),
+        customerSourceFor(ref),
       ],
     );

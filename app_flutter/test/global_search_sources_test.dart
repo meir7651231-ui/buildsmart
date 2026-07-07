@@ -9,6 +9,8 @@ import 'package:buildsmart/screens/chats_screen.dart'
 import 'package:buildsmart/screens/notifications_screen.dart'
     show activeNotifViewsProvider;
 import 'package:buildsmart/screens/store_screen.dart' show storeOrdersProvider;
+import 'package:buildsmart/state/orders_engine.dart'
+    show managerCustomersProvider;
 import 'package:buildsmart/state/tasks_engine.dart' show tasksProvider;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,6 +113,7 @@ void main() {
     String? orderId; // order number (o.id)
     String? notifTitle; // notification title
     String? taskName; // task name
+    String? custName; // customer name
     await tester.pumpWidget(
       ProviderScope(
         child: Consumer(
@@ -122,6 +125,8 @@ void main() {
             if (notifs.isNotEmpty) notifTitle = notifs.first.title;
             final tasks = ref.read(tasksProvider);
             if (tasks.isNotEmpty) taskName = tasks.first.name;
+            final customers = ref.read(managerCustomersProvider);
+            if (customers.isNotEmpty) custName = customers.first.name;
             return const SizedBox.shrink();
           },
         ),
@@ -158,6 +163,15 @@ void main() {
             (r) => r.kind == SearchResultKind.task && r.title == n),
         isTrue,
         reason: 'the tasks source surfaces task "$n"',
+      );
+    }
+    if (custName != null) {
+      final c = custName!;
+      expect(
+        idx.search(c).any(
+            (r) => r.kind == SearchResultKind.customer && r.title == c),
+        isTrue,
+        reason: 'the customers source surfaces customer "$c"',
       );
     }
   });
