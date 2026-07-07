@@ -23,6 +23,8 @@
 
 import 'package:buildsmart/logic/studio/co_editor_gate.dart'
     show studioCoEditorProvider;
+import 'package:buildsmart/screens/studio_component_builder.dart'
+    show StudioComponentBuilder;
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/board_auth.dart'
     show BoardRole, boardAuthProvider;
@@ -110,7 +112,7 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
                   // 🤖 co-editor (step 83) — honest off-state when gateway null.
                   _CoEditorPane(ai: gate.ai),
                   // 🛠️ manual builder (step 82) — no gateway, always usable (§8).
-                  const _ManualBuilderPane(),
+                  const StudioComponentBuilder(),
                   // 🔒 rules — the safety floor (what the Studio may change).
                   const _RulesPane(),
                 ],
@@ -227,23 +229,6 @@ class _CoEditorPane extends StatelessWidget {
       emoji: '🤖',
       title: 'עורך שפה-טבעית',
       body: 'תאר בעברית מה לשנות — ואכין תצוגה מקדימה לאישור לפני כל שינוי. בקרוב.',
-    );
-  }
-}
-
-/// 🛠️ The manual (no-model) builder pane. §8: needs NO gateway, so it is ALWAYS
-/// usable — the hero deep-link lands here by default. Placeholder for step 82
-/// (pick→prop/visibility/component/action→preview→confirm→undo).
-class _ManualBuilderPane extends StatelessWidget {
-  const _ManualBuilderPane();
-
-  @override
-  Widget build(BuildContext context) {
-    return const _Placeholder(
-      emoji: '🛠️',
-      title: 'בונה ידני',
-      body: 'בחר אלמנט → טקסט · נראות · רכיב · פעולה → תצוגה מקדימה → אישור. '
-          'עובד תמיד, גם בלי חיבור לשרת. בקרוב.',
     );
   }
 }
