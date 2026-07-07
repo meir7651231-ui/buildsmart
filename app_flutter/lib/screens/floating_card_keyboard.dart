@@ -399,19 +399,65 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     final results = buildGlobalSearchIndex(ref).searchBalanced(text);
     final chips = <String>[];
     final runByChip = <String, KbRunByChip>{};
+    // Reserve the LAST visible slot for an "עוד…" opener when more results exist
+    // than fit the row, so the full ranked list is always one tap away.
+    final overflow = results.length > _kRowCap;
+    final cap = overflow ? _kRowCap - 1 : _kRowCap;
     for (final r in results) {
-      if (chips.length >= _kRowCap) break;
+      if (chips.length >= cap) break;
       // De-dupe by visible label (two domains could surface the same title —
       // keep the first, i.e. the higher-ranked one after the index's own sort).
       if (runByChip.containsKey(r.title) || chips.contains(r.title)) continue;
       chips.add(r.title);
       runByChip[r.title] = r.run;
     }
+    if (overflow) {
+      const more = 'עוד…';
+      chips.add(more);
+      runByChip[more] = (r, context) => _showGlobalMore(r, context, text);
+    }
     return _PredRow(
       chips,
       const <String, KbDestination>{},
       runByChip: runByChip,
       destinationChips: chips.toSet(),
+    );
+  }
+
+  /// GLOBAL SEARCH ([kGlobalSearch]) — the "עוד…" overflow sheet: the FULL ranked
+  /// result list for [query] (re-derived fresh), each row running its own
+  /// `SearchResult.run` on tap (then closing the sheet). Only reachable from the
+  /// flag-gated "עוד…" chip, so it tree-shakes with the rest when the flag is off.
+  void _showGlobalMore(WidgetRef ref, BuildContext context, String query) {
+    final results = buildGlobalSearchIndex(ref).searchBalanced(query);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: <Widget>[
+              for (final r in results)
+                ListTile(
+                  dense: true,
+                  title: Text(r.title),
+                  subtitle: r.subtitle.isEmpty ? null : Text(r.subtitle),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    r.run(ref, context);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

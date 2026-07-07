@@ -152,5 +152,37 @@ void main() {
           reason: 'a global PRODUCT result renders in the typed row — proving '
               'the products source feeds _globalRow (not just screens)');
     });
+
+    testWidgets(
+        'a broad query overflows the row with an "עוד…" chip that opens the '
+        'full-results sheet', (tester) async {
+      if (!kGlobalSearch) {
+        markTestSkipped('kGlobalSearch OFF — run with '
+            '--dart-define=GLOBAL_SEARCH=true to exercise the global row');
+        return;
+      }
+      await pumpPanel(tester);
+
+      // "ברז" matches many products (+ a department screen), so the balanced row
+      // fills and an "עוד…" overflow chip is appended (results > row cap).
+      await tester.tap(find.text('ב'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ר'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ז'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('עוד…'), findsOneWidget,
+          reason: 'a query with more than a row-full of hits shows the overflow '
+              'chip');
+
+      // Tapping it opens the full-results sheet (every ranked hit as a row).
+      await tester.ensureVisible(find.text('עוד…'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('עוד…'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ListTile), findsWidgets,
+          reason: 'the "עוד…" sheet lists the full ranked results');
+    });
   });
 }
