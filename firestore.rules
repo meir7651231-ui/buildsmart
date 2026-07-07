@@ -523,11 +523,207 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // ═════════════════════════════════════════════════════════════════════════
+    // Pillar 5 · §5 STUDIO + AUTHORED-CATALOG blocks (Step 65) — R1-3/R1-6 canonical
+    // ─────────────────────────────────────────────────────────────────────────
+    // Server-side RBAC for the no-code Studio's four greenfield data families
+    // (knowledge/firestore-schema.md §"Pillar 5"): the publish POINTER + immutable
+    // SNAPSHOTS, the authored `catalogProducts` superset with its role-scoped PRICE
+    // sub-doc, and the append-only ANALYTICS / PRESENCE streams. Every collection
+    // gets an EXPLICIT rule (deny-by-default demands one per collection). The
+    // privileged paths run through the Admin SDK — the `publishConfig` callable +
+    // its revert/rollup/indexer triggers (functions/src/studio.ts) — which BYPASSES
+    // these rules, so the client-facing predicates below are deliberately tight:
+    // world-READ where the datum is public (the priceless catalog doc, the published
+    // pointer), owner/claim-GATED where it is not (drafts, the contractor price), and
+    // `if false` wherever ONLY the server may write (the published pointer/snapshots,
+    // the summary/rollup docs). ADDS ONLY — no existing rule above is touched; the
+    // catalog `if false` write pairs with the step-57 revert trigger, and these are
+    // the FIRST consumers of the isOwnerEmail() helper added in step 56. Flags OFF ⇒
+    // no client touches any of these ⇒ the blocks are inert/forward-ready, exactly
+    // like the customers/chat forward-ready gates above.
+    // ⚠️ App Check (S5.7) — enforce Firestore in the console for `studioConfig` /
+    //    `catalogProducts` too once the clients ship the provider; not a rules clause.
+
+    // ── studioConfig/{channel} — the publish POINTER collection (Step 56/58) ───
+    // Holds the `published` ~200B world-pointer (its `version` is the cache-bust
+    // signal EVERY client listens for, step 58) ALONGSIDE the operational
+    // `publishAllow` kill-switch flag {enabled} (studio.ts:240). READ = any signed-in
+    // client, DELIBERATELY uniform across channels: the step-58 client opens a
+    // WHOLE-collection `snapshots()` over `studioConfig` and does NOT scope the
+    // listen, and "RULES ARE NOT FILTERS" (see the file header) means a mixed
+    // per-doc gate would DENY the entire listen for a non-manager — starving the
+    // fan-out that must reach contractors/stores/couriers/workers. Neither datum is
+    // sensitive (a pointer + a boolean); the sensitive DRAFT TREES live in
+    // studioConfigSnapshots (owner/manager-gated below), NOT here. WRITE = `if false`
+    // for EVERY channel: the ONLY writer is the `publishConfig` callable (Admin SDK,
+    // step 56), backed by the `revertIllegalConfigWrite` trigger (step 57) — a forged
+    // direct client write is denied HERE and reverted THERE.
+    match /studioConfig/{channel} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ── studioConfigSnapshots/{snapshotId} (+ /shards) — immutable blobs + drafts
+    // Two shapes share this collection (studio_config_firebase.dart / studio.ts):
+    //   • a PUBLISHED snapshot `v<N>` — the IMMUTABLE frozen config tree a publish
+    //     creates. World-READ (signed-in) so any client can pull the `/shards` the
+    //     pointer names; NO client write (immutable — the callable/Admin SDK froze
+    //     it, step 57 protects it). Rollback is a pointer flip, never a mutate.
+    //   • a DRAFT `draft-<uid>` — the owner's working copy (the step-55 sink writes
+    //     ONLY here, owner-write §5). OWNER read+write (the doc-id ENCODES the owner
+    //     uid); a manager may READ any draft (draft config is manager-scoped) but
+    //     ONLY the owner writes it. Read/write is per-DOC (the sink uses a scoped
+    //     `set`; the shard pull is a scoped subcollection read) — no whole-collection
+    //     listen here, so a mixed gate is safe (unlike studioConfig above).
+    match /studioConfigSnapshots/{snapshotId} {
+      // A PUBLISHED immutable snapshot = any id NOT named `draft-…` (spec §65.6).
+      function isPublishedSnap(snap) {
+        return !snap.matches('draft-.*');
+      }
+      // The caller OWNS the draft `draft-<uid>` — its id encodes the owner's uid.
+      function ownsDraftSnap(snap) {
+        return isSignedIn() && snap == 'draft-' + request.auth.uid;
+      }
+      allow read: if isPublishedSnap(snapshotId)
+          ? isSignedIn()
+          : (isManager() || ownsDraftSnap(snapshotId));
+      // Published `v<N>` = immutable (no client write); a draft = owner-write only.
+      allow write: if !isPublishedSnap(snapshotId) && ownsDraftSnap(snapshotId);
+
+      // The sharded blob under a snapshot (studioConfigSnapshots/{id}/shards/{n}):
+      // SAME read gate as its parent; writes are Admin-SDK-only (the publish callable
+      // writes the shards it checksums), so `if false` for every client.
+      match /shards/{shardId} {
+        allow read: if isPublishedSnap(snapshotId)
+            ? isSignedIn()
+            : (isManager() || ownsDraftSnap(snapshotId));
+        allow write: if false;
+      }
+    }
+
+    // ── studioConfigApprovals/{approvalId} — DUAL-CONTROL approval (Step 56) ────
+    // A doc `draft-<publisherUid>` a SECOND manager writes {approved, approvedBy}
+    // to sign off another manager's publish; the callable counts it only when
+    // approvedBy DIFFERS from the publisher (the two-person rule, studio.ts:262).
+    // Manager/owner read+write — the approving authority, nobody else.
+    match /studioConfigApprovals/{approvalId} {
+      allow read, write: if isManager() || isOwnerEmail();
+    }
+
+    // ── _publishRate/{uid} — publish RATE-LIMIT ledger (Step 56/66) ────────────
+    // Server-internal fixed-window counter (studio.ts:175 enforceRateLimit),
+    // maintained by the Admin SDK ONLY. No client ever reads or writes it — an
+    // explicit `if false` so a client can never reset its OWN rate window.
+    match /_publishRate/{uid} {
+      allow read, write: if false;
+    }
+
+    // ── catalogProducts/{sku} (+ /pricing/{audience}) — authored superset (Step 60)
+    // The PUBLIC doc is PRICELESS (toDoc omits price, R1-6) and world-READ (signed-
+    // in — browse is a paged query, §1.6, so no mixed-gate listen issue); authoring
+    // is manager/owner. The PRICE lives ONLY in the role-scoped `pricing/{audience}`
+    // sub-doc: READ is claim-gated (`isManager() || hasRole(audience)`) so a
+    // competing store / an unauthorised customer can NEVER read the contractor price
+    // by scanning the collection (R1-6); WRITE is manager/owner (the Studio prices).
+    match /catalogProducts/{sku} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+
+      match /pricing/{audience} {
+        allow read: if isManager() || hasRole(audience);
+        allow write: if isManager() || isOwnerEmail();
+      }
+    }
+
+    // ── catalogPending/{batchId} (+ /items) — seed STAGING (Step 61, R2-9) ──────
+    // The OFF-by-default bulk-import DRAFT: rows stage here and flip to the live
+    // `catalogProducts` only on FULL success. Never a normal-client surface —
+    // manager/owner (or the emulator/admin seed session) only, reads and writes.
+    match /catalogPending/{batchId} {
+      allow read, write: if isManager() || isOwnerEmail();
+      match /items/{sku} {
+        allow read, write: if isManager() || isOwnerEmail();
+      }
+    }
+
+    // ── catalog metadata + search-support (Step 60/63) ─────────────────────────
+    // `catalogTrades`/`catalogCategories` — browse metadata: world-READ (signed-in),
+    //   manager/owner authoring. `catalogTokenFreq` — the token-frequency map the
+    //   client reads to pick the rarest `arrayContains` token (search_firebase.dart);
+    //   it is maintained by the `onCatalogProductWrite` indexer (Admin SDK), so a
+    //   client may READ but NEVER write it (governance #84 — the client never
+    //   fabricates search tokens/frequencies).
+    match /catalogTrades/{tradeId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /catalogCategories/{catId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /catalogTokenFreq/{token} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ── analyticsEvents/{eventId} — append-only event stream (Step 67) ─────────
+    // CREATE only as YOURSELF (`uid == auth.uid` — no actor spoofing); the payload
+    // may carry sensitive context, so READ is manager only. Events are IMMUTABLE —
+    // no update/delete from any client (append-only, like the audit log). The daily
+    // rollup runs Admin-SDK-side over these (bypassing rules).
+    match /analyticsEvents/{eventId} {
+      allow read: if isManager();
+      allow create: if isSignedIn()
+          && request.resource.data.get('uid', '') == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ── presence/{uid} — per-user heartbeat · self-write (Step 67, R1-3) ───────
+    // Each client writes ONLY its own `presence/<uid>` doc (heartbeat). READ is
+    // manager or self. The owner dashboard does NOT listen to this collection — it
+    // reads the server-rolled `presenceSummary/current` (below), so thousands of
+    // presence docs are never fanned out to a client (cost + "who's online" leak,
+    // R1-3).
+    match /presence/{uid} {
+      allow read: if isManager() || (isSignedIn() && request.auth.uid == uid);
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── presenceSummary/{summaryId} — server-rolled online summary (Step 66, R1-3)
+    // The single `current` doc {count, byRole, sample, updatedAt} a scheduled fn
+    // rolls up from `presence/*`. MANAGER-read (the owner dashboard reads ONE doc,
+    // not the collection); `if false` write — only the Admin-SDK rollup writes it.
+    match /presenceSummary/{summaryId} {
+      allow read: if isManager();
+      allow write: if false;
+    }
+
+    // ── analytics rollups — daily doc + distributed counters (Step 66) ─────────
+    // `analyticsDaily/{day}` — one owner-read doc/day the scheduled rollup writes.
+    // `analyticsCounters/{metric}/shards/{n}` — the distributed-counter shards the
+    // Admin SDK increments. Both are MANAGER-read, `if false` write (server-owned).
+    match /analyticsDaily/{day} {
+      allow read: if isManager();
+      allow write: if false;
+    }
+    match /analyticsCounters/{metric} {
+      allow read: if isManager();
+      allow write: if false;
+      match /shards/{shardId} {
+        allow read: if isManager();
+        allow write: if false;
+      }
+    }
+
     // ── default — S5 deny-by-default ─────────────────────────────────────────
     // Anything not explicitly matched above (including any future collection
-    // added without a rule) is denied for everyone. NOTE: the catalog (1,877
-    // products) is intentionally NOT a collection here — it is bundled/R2-CDN
-    // static JSON (SSOT §אזהרות), so no rule will ever exist for it.
+    // added without a rule) is denied for everyone. NOTE: the STATIC catalog
+    // (1,877 Lipskey products) is intentionally NOT a collection here — it is
+    // bundled/R2-CDN static JSON (SSOT §אזהרות), so no rule will ever exist for it.
+    // (This is DISTINCT from the AUTHORED `catalogProducts` superset gated above in
+    // the Step-65 block — the S3.K decision keeps them two separate data sets:
+    // see app_flutter/lib/data/repositories/authored_products_firebase.dart.)
     match /{document=**} {
       allow read, write: if false;
     }
