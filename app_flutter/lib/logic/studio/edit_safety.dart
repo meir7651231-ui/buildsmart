@@ -83,8 +83,9 @@ import 'dart:ui' show Color;
 import '../../state/studio/config_store.dart'
     show ConfigOp, SetAction, SetEmoji, SetHidden, SetOrder, SetStyle, SetText;
 import '../../state/studio/element_registry.dart'
-    show ElementDescriptor, findDescriptor, kElementRegistry;
+    show ElementDescriptor, ElementKind, findDescriptor, kElementRegistry;
 import '../../theme/tokens.dart' show BsTokens;
+import 'edit_intent.dart' show kStudioMaxBatch;
 import 'registry_view.dart' show ElementRegistryView, RegistryView;
 
 // ─── SafetyVerdict / BlockedEntry (§6) ───────────────────────────────────────
@@ -130,6 +131,53 @@ const double kStudioMinContrast = 4.5;
 /// from the SSOT token so this file never re-hard-codes a hex (the color-ratchet).
 const Color _kRefSurface = BsTokens.cardLight;
 
+// ─── Step 78 · role-visibility floor + batch/session/registry ceilings ───────
+// The step-77 backstop above answers "is this ONE op safe?"; step 78 adds the two
+// BREADTH questions the plan (§4) names: "safe for WHOM?" (the role-visibility
+// floor) and "safe at what SCALE?" (the batch / session / registry ceilings).
+//
+// ── ceiling reconciliation (§2/§10 prose is STALE — the committed value wins) ──
+// Step 76 (edit_intent.dart) COMMITTED `kStudioMaxBatch = 25` as the PER-UTTERANCE
+// broadcast ceiling, and its tests PIN the 25/26 boundary. The plan's prose still
+// says "~80 · soft-40 · hard-80" — that predates the committed 25 and is NOT
+// re-opened here. So this step:
+//   • REUSES the committed `kStudioMaxBatch` (imported, never redefined) as the
+//     hard per-utterance ceiling — the 25/26 boundary stays byte-identical;
+//   • ADDS `kStudioSessionBudget` — the CUMULATIVE op budget across successive
+//     utterances in ONE draft (per-utterance stays 25, but a long conversation
+//     that keeps issuing near-ceiling batches is still bounded);
+//   • ADDS `kStudioMaxRegistryFraction` — a breadth guard: a diff touching more
+//     than this FRACTION of the whole registry is a "rewrite half the app"
+//     broadcast (R1-8), refused regardless of the raw op count;
+//   • keeps the §10 "soft-warning" as a SEPARATE, purely-advisory const
+//     (`kStudioSoftBatchWarn`) that NEVER enters the block path — it cannot
+//     disturb the committed hard 25.
+// A ceiling breach fails CLOSED and WHOLE (mirrors step-76 `dryCountScope`): the
+// entire batch is refused — every op returned in `blocked` with a Hebrew reason,
+// none silently dropped — so the owner reduces the scope and retries. Advisory
+// only: the server re-runs the IDENTICAL ceilings in `publishConfig` (R1-1).
+
+/// CUMULATIVE op budget across utterances in ONE draft session — ADDITIVE to the
+/// per-utterance [kStudioMaxBatch] (=25, unchanged). A draft whose prior ops + this
+/// batch would exceed this is refused whole. Sane default; re-run server-side (R1-1).
+const int kStudioSessionBudget = 60;
+
+/// The breadth ceiling (R1-8): a diff touching MORE than this fraction of
+/// `registry.elementIds().length` DISTINCT targets is a "rewrite half the app"
+/// broadcast — refused whole. 0.25 = a quarter of the registry.
+const double kStudioMaxRegistryFraction = 0.25;
+
+/// §10 תוספת-א — a PURELY ADVISORY soft threshold (a UX "you're editing a lot"
+/// nudge) that sits BELOW the hard per-utterance [kStudioMaxBatch]. It is NOT a
+/// block and is NEVER read by [validateSafe]; [softBatchWarnHe] is its only reader,
+/// kept separate precisely so it can never disturb the committed hard 25.
+const int kStudioSoftBatchWarn = 15;
+
+/// The canonical `roleProvider` base key: `null`/'' (the main app / contractor) maps
+/// here. The `BsRole` enum OMITS contractor, so the role-visibility floor is computed
+/// over the `roleProvider` STRING space (R1-3) — never that enum; `null` = contractor.
+const String _kRoleContractor = 'contractor';
+
 // ─── criticalBusiness classification (R1-6 · derived, fail-closed) ───────────
 
 /// The two derived criticalBusiness kinds (beyond `kImmutable`) that carry a
@@ -150,6 +198,48 @@ _CriticalKind? _criticalBusinessKind(ElementDescriptor d) {
   // (b) price control.
   if (id.contains('price') || label.contains('מחיר')) {
     return _CriticalKind.price;
+  }
+  return null;
+}
+
+// ─── role-visibility floor (R1-6 · §4 · derived from the registry, §9 addition-a) ─
+// The floor is read from the FROZEN descriptor (`kRoleFloor` in the `roleProvider`
+// string space + the structural `area`/`kind` signal) — NOT a hard-coded persona
+// list, so it tracks the registry as the model grows (§9 addition-a).
+
+/// True when [d] is a NAVIGATION / structural surface (a nav bar / tab container)
+/// whose GLOBAL hide would orphan the app for EVERY persona. Derived from the
+/// registry (`area == 'nav'` or a container kind), never an id list.
+bool _isNavStructural(ElementDescriptor d) =>
+    d.area == 'nav' || d.kind == ElementKind.container;
+
+/// The role-visibility floor for a `SetHidden(hidden:true)` on [d] applied to the
+/// [persona] layer (`roleProvider` dialect — `null`/'' = the GLOBAL/contractor base
+/// that EVERY persona inherits; a non-empty string = ONE persona's layer). Returns a
+/// non-empty Hebrew reason to BLOCK, or `null` when the hide is legal. Two harms (§4):
+///   • a GLOBAL hide (null persona) strips the element from EVERYONE incl contractor
+///     — refused for a nav/tab surface, or for any element floored ABOVE contractor
+///     (a role that MUST keep it would lose it);
+///   • a SINGLE-persona hide is legal UNLESS it hides the element from the exact role
+///     it is FLOORED to (a manager-critical surface hidden from `manager`). Hiding
+///     from ONE persona while others keep it (§7.3) is the legal escape hatch.
+String? _roleFloorBlock(ElementDescriptor d, String? persona) {
+  final floor = d.kRoleFloor;
+  final isGlobal = persona == null || persona.isEmpty; // null = every persona
+  if (isGlobal) {
+    if (_isNavStructural(d)) {
+      return 'אי-אפשר להסתיר «${d.labelHe}» מכל הפרסונות (כולל קבלן) — '
+          'רכיב ניווט חייב להישאר גלוי';
+    }
+    if (floor != _kRoleContractor) {
+      return 'אי-אפשר להסתיר «${d.labelHe}» מכל הפרסונות — '
+          'הרכיב חייב להישאר גלוי לתפקיד «$floor»';
+    }
+    return null; // a mundane, non-structural element MAY be hidden app-wide.
+  }
+  // SINGLE persona: legal unless we hide it from the very role it is critical for.
+  if (persona == floor && floor != _kRoleContractor) {
+    return 'אי-אפשר להסתיר «${d.labelHe}» מהתפקיד «$floor» — קריטי לתפקיד זה';
   }
   return null;
 }
@@ -197,9 +287,17 @@ double _contrastRatio(Color a, Color b) {
 
 /// Partition [ops] into safe-to-stage vs blocked, checking EACH against the REAL
 /// frozen descriptor metadata (see the file header for the reconciliation). Reads
-/// `kImmutable` / `kind` / criticalBusiness from the concrete descriptor and grounds
-/// value/action legality through [view] (defaulting to the SAME source as
-/// [registry], so they never disagree). Pure, TOTAL, never throws.
+/// `kImmutable` / `kind` / criticalBusiness / `kRoleFloor` from the concrete
+/// descriptor and grounds value/action legality through [view] (defaulting to the
+/// SAME source as [registry], so they never disagree). Pure, TOTAL, never throws.
+///
+/// [persona] is the `roleProvider`-dialect layer a `SetHidden` would apply to
+/// (`null`/'' = the GLOBAL/contractor base every persona inherits; a non-empty
+/// string = ONE persona's layer) — it drives the step-78 role-visibility floor.
+/// [priorSessionOps] is the count of ops ALREADY staged in this draft session, so
+/// the cumulative [kStudioSessionBudget] can be enforced across utterances. The
+/// batch/session/registry ceilings are BATCH-LEVEL: a breach refuses the WHOLE
+/// batch (every op → blocked) BEFORE the per-op backstop — nothing partial (§4).
 ///
 /// ⚠️ ADVISORY (R1-1): a green verdict is NOT authorization — `publishConfig`
 /// re-runs this server-side before anything goes live (see the file header).
@@ -207,12 +305,24 @@ SafetyVerdict validateSafe(
   List<ConfigOp> ops, {
   List<ElementDescriptor> registry = kElementRegistry,
   RegistryView? view,
+  String? persona,
+  int priorSessionOps = 0,
 }) {
   final grounding = view ?? ElementRegistryView(registry);
+  // ── Step 78 · BATCH-LEVEL ceilings FIRST — a breach fails CLOSED and WHOLE: the
+  // entire batch is refused (every op → blocked with the Hebrew reason), so the
+  // owner reduces the scope. Runs before the per-op backstop (nothing partial).
+  final ceiling = _batchCeilingReason(ops, grounding, priorSessionOps);
+  if (ceiling != null) {
+    return SafetyVerdict(
+      applied: const [],
+      blocked: [for (final op in ops) BlockedEntry(op, ceiling)],
+    );
+  }
   final applied = <ConfigOp>[];
   final blocked = <BlockedEntry>[];
   for (final op in ops) {
-    final reason = _reasonToBlock(op, registry, grounding);
+    final reason = _reasonToBlock(op, registry, grounding, persona);
     if (reason == null) {
       applied.add(op);
     } else {
@@ -222,6 +332,49 @@ SafetyVerdict validateSafe(
   return SafetyVerdict(applied: applied, blocked: blocked);
 }
 
+/// The BATCH-LEVEL ceiling check (§4 · step 78) — a non-empty Hebrew reason when the
+/// whole [ops] batch must be refused, or `null` when it is within every ceiling.
+/// Order: per-utterance (the committed [kStudioMaxBatch]=25, REUSED not redefined) →
+/// cumulative session budget → registry-breadth fraction. Fail-closed and WHOLE
+/// (mirrors step-76 `dryCountScope`); an empty batch is vacuously fine.
+String? _batchCeilingReason(
+  List<ConfigOp> ops,
+  RegistryView grounding,
+  int priorSessionOps,
+) {
+  if (ops.isEmpty) return null;
+  // 1 — PER-UTTERANCE ceiling: REUSE the step-76 committed value (never redefined),
+  // so the 25/26 boundary its tests pin stays byte-identical.
+  if (ops.length > kStudioMaxBatch) {
+    return 'השינוי נרחב מדי — ${ops.length} פעולות (מעל התקרה '
+        '$kStudioMaxBatch). צמצם את הטווח.';
+  }
+  // 2 — CUMULATIVE session budget across utterances in one draft.
+  final cumulative = priorSessionOps + ops.length;
+  if (cumulative > kStudioSessionBudget) {
+    return 'השינוי נרחב מדי לסשן — $cumulative פעולות מצטברות '
+        '(מעל $kStudioSessionBudget). צמצם.';
+  }
+  // 3 — REGISTRY-breadth fraction (R1-8): distinct targets vs the whole registry.
+  final size = grounding.elementIds().length;
+  final distinct = <String>{for (final op in ops) op.id}.length;
+  if (size > 0 && distinct > size * kStudioMaxRegistryFraction) {
+    final pct = (kStudioMaxRegistryFraction * 100).round();
+    return 'השינוי נרחב מדי לסשן — נוגע ב-$distinct רכיבים '
+        '(מעל $pct% מהמרשם). צמצם.';
+  }
+  return null;
+}
+
+/// §10 תוספת-א — a pure, ADVISORY Hebrew soft-warning for a batch that is large but
+/// still UNDER the hard per-utterance ceiling ([kStudioSoftBatchWarn] ≤ n ≤
+/// [kStudioMaxBatch]); `null` otherwise. NOT a block — a UX nudge only; [validateSafe]
+/// never calls it, so it can never disturb the committed hard 25.
+String? softBatchWarnHe(int opCount) =>
+    (opCount >= kStudioSoftBatchWarn && opCount <= kStudioMaxBatch)
+        ? 'שים לב — $opCount פעולות בבת אחת. אפשר להמשיך, או לצמצם.'
+        : null;
+
 /// The single-op backstop — returns a non-empty Hebrew reason to BLOCK, or `null`
 /// when [op] is safe. FAIL-CLOSED: a missing descriptor / an unresolvable token /
 /// an empty legal-action set all BLOCK.
@@ -229,6 +382,7 @@ String? _reasonToBlock(
   ConfigOp op,
   List<ElementDescriptor> registry,
   RegistryView grounding,
+  String? persona,
 ) {
   // 0 — FAIL-CLOSED on a target the frozen registry doesn't know (R1-2).
   final d = findDescriptor(registry, op.id);
@@ -247,13 +401,19 @@ String? _reasonToBlock(
 
   switch (op) {
     // 2 — criticalBusiness VISIBILITY freeze (§4 · §9 prop-level: only the `hidden`
-    // axis is locked; the element stays otherwise editable).
+    // axis is locked; the element stays otherwise editable) + the step-78 role-
+    // visibility floor. The criticalBusiness reasons stay FIRST so their exact
+    // strings (pinned by step-77 tests) are unchanged; the role floor layers after.
     case SetHidden(:final hidden):
-      if ((hidden ?? false) && crit == _CriticalKind.price) {
-        return 'אי-אפשר להסתיר מחיר';
-      }
-      if ((hidden ?? false) && crit == _CriticalKind.confirmOrder) {
-        return 'אי-אפשר להסתיר את פקד «אשר הזמנה»';
+      if (hidden ?? false) {
+        if (crit == _CriticalKind.price) {
+          return 'אי-אפשר להסתיר מחיר';
+        }
+        if (crit == _CriticalKind.confirmOrder) {
+          return 'אי-אפשר להסתיר את פקד «אשר הזמנה»';
+        }
+        final floorReason = _roleFloorBlock(d, persona);
+        if (floorReason != null) return floorReason;
       }
       return null;
 
