@@ -203,3 +203,98 @@ class ElementRegistryView extends RegistryView {
   @override
   Set<String> componentTypes() => _empty; // palette lands in step 73 (fail-closed)
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Step 71 — the registry closed-set MATCHERS (exact → longest-contained, null-on-
+// miss). These are the ONE path from a model-emitted string to a REAL registry key
+// — the "code-currency" resolvers the whole co-editor grounds against (step 75
+// `parseConfigEdit` calls them field-by-field; step 76 uses `matchAllElementIds`).
+//
+// COPIED 1:1 from the proven, audited `matchRecipe` (describe_to_cart_screen.dart:
+// 50-67) + `matchAssistantRecipeKey` (assistant_intent.dart:80-95): `.trim()`, an
+// early `isEmpty → null` guard, exact-equality first, then the LONGEST CONTAINED
+// key (`k.length > best.length`) so a wrapped reply can't grab a short prefix.
+//
+// ADAPTATION (detail is PRE-S3.K): the source matchers close over a GLOBAL const set
+// (`kSmartProducts`). Here the closed set is pulled from the injected [RegistryView],
+// so the SAME resolver grounds against the in-memory `FakeRegistryView` (tests) AND
+// the real, frozen Pillar-1 `ElementRegistryView` (gate-119) — exactly the fake↔real
+// discipline `registryViewContract` pins (R2-#15). No global state, pure functions.
+//
+// FAIL-CLOSED / anti-hallucination: a blank reply, an empty closed set (unknown id /
+// absent prop / palette-not-landed), or no contained key all yield `null` (degrade —
+// the caller drops the op), NEVER a throw and NEVER an invented key. Per the gate-119
+// property invariant (step 85): for every reply, each matcher returns `null` OR a real
+// member of its closed set. DORMANT: pure top-level functions, imported by nothing in
+// `lib/` yet ⇒ tree-shaken out ⇒ byte-identical under every flag.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// The pure core (copy of `matchRecipe`): resolve [reply] to a key from [closed] —
+/// exact first, else the LONGEST key CONTAINED in the (trimmed) reply, else `null`.
+/// A blank reply or empty [closed] set is fail-closed (`null`). Empty keys are
+/// skipped so a stray `''` in a set can never spuriously "contain" — the return is
+/// always `null` or a REAL, non-empty member. NEVER throws.
+String? _matchClosed(Set<String> closed, String reply) {
+  final r = reply.trim();
+  if (r.isEmpty) return null; // early guard (assistant_intent.dart:60,82)
+  // Exact wins outright — short-circuits before the contained scan, so an exact
+  // short key isn't shadowed by a longer key that merely contains it.
+  for (final k in closed) {
+    if (r == k) return k;
+  }
+  // Longest-contained fallback (the model may wrap the key in quotes/prose). Many
+  // keys are prefixes of others (faucet⊂kitchenFaucet, card⊂card.order); first-match
+  // would grab the short prefix → the wrong key (the central collision defect).
+  String? best;
+  for (final k in closed) {
+    if (k.isNotEmpty &&
+        r.contains(k) &&
+        (best == null || k.length > best.length)) {
+      best = k;
+    }
+  }
+  return best;
+}
+
+/// The pure core for addition-a: EVERY key from [closed] contained in [reply] (not
+/// just the best). A blank reply → empty set; only real, non-empty keys. NEVER throws.
+Set<String> _matchAllClosed(Set<String> closed, String reply) {
+  final r = reply.trim();
+  if (r.isEmpty) return const <String>{};
+  return {
+    for (final k in closed)
+      if (k.isNotEmpty && r.contains(k)) k,
+  };
+}
+
+/// Resolve [reply] to a REAL element id from `reg.elementIds()`, or `null` (degrade).
+/// Exact then longest-contained; fail-closed on a blank reply / empty registry.
+String? matchElementId(RegistryView reg, String reply) =>
+    _matchClosed(reg.elementIds(), reply);
+
+/// Resolve [reply] to a REAL editable prop key on [id] (`reg.propKeysFor(id)`), or
+/// `null`. An unknown [id] has an empty prop set ⇒ any reply degrades (fail-closed).
+String? matchPropKey(RegistryView reg, String id, String reply) =>
+    _matchClosed(reg.propKeysFor(id), reply);
+
+/// Resolve [reply] to a REAL allowed value for [id].[propKey]
+/// (`reg.allowedValues(id, propKey)`), or `null`. An invented / out-of-set value
+/// (e.g. a raw hex the model made up) degrades — the closed color/enum subset wins.
+String? matchValue(RegistryView reg, String id, String propKey, String reply) =>
+    _matchClosed(reg.allowedValues(id, propKey), reply);
+
+/// Resolve [reply] to a REAL action id wireable onto [id] (`reg.actionIdsFor(id)`),
+/// or `null`. A read-only / unknown [id] has an empty action set ⇒ fail-closed.
+String? matchActionId(RegistryView reg, String id, String reply) =>
+    _matchClosed(reg.actionIdsFor(id), reply);
+
+/// Resolve [reply] to a REAL addable component type (`reg.componentTypes()`), or
+/// `null`. Empty until the step-73 palette lands ⇒ nothing addable (fail-closed).
+String? matchComponentType(RegistryView reg, String reply) =>
+    _matchClosed(reg.componentTypes(), reply);
+
+/// Addition-a (§9 · step 76 scope-expansion): EVERY real element id CONTAINED in
+/// [reply], not just the best — so an utterance naming several targets resolves to
+/// all of them, still only over REAL ids (never model-enumerated). Blank → empty.
+Set<String> matchAllElementIds(RegistryView reg, String reply) =>
+    _matchAllClosed(reg.elementIds(), reply);
