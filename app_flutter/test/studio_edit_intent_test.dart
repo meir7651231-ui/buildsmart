@@ -12,6 +12,8 @@ import 'dart:convert';
 import 'dart:math' show Random;
 
 import 'package:buildsmart/logic/studio/edit_intent.dart';
+import 'package:buildsmart/logic/studio/edit_prompt.dart'
+    show kScopeAll, kScopeScreenPrefix, kScopeSinglePrefix;
 import 'package:buildsmart/logic/studio/registry_view.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show
@@ -309,6 +311,199 @@ void main() {
     _invariantFuzz('fake', _reg());
     _invariantFuzz('real P1 (kElementRegistry)', ElementRegistryView.builtIn());
   });
+
+  // ── Step 76 — CLOSED scope-token EXPANSION to concrete registry ids. The model
+  // NAMES a token; Dart expands over REAL `elementIds()`; NO id comes from a model
+  // list. Broadcast = N ops, each independently validated through the step-75
+  // pipeline; a §10 dry-count refuses an over-ceiling scope BEFORE building. ──
+  group('expandScope — broadcast over REAL ids (§4 · no model enumeration)', () {
+    test('scope:actionable → N SetStyle ops over REAL grounded ids', () {
+      final reg = _fleet();
+      // The "all buttons" proxy = elements CARRYING actions (label.x is excluded — no
+      // ElementKind on the frozen seam, so an action-carrier is the button-like one).
+      expect(expandScope(kScopeActionable, reg), ['btn.a', 'btn.b', 'btn.c']);
+
+      final built = buildScopeEdit(
+        kScopeActionable,
+        {
+          'op': 'setStyle',
+          'style': {'colorToken': 'brand'},
+        },
+        reg,
+      );
+      expect(built.rejected, isFalse);
+      expect(built.requested, 3);
+      expect(built.result.dropped, 0);
+      expect(built.ops.length, 3, reason: 'one SetStyle per real target');
+      expect(built.ops.map((o) => o.id).toList(), ['btn.a', 'btn.b', 'btn.c']);
+      expect(built.ops.every((o) => o is SetStyle), isTrue);
+      for (final o in built.ops.whereType<SetStyle>()) {
+        expect(o.style?.colorToken, 'brand',
+            reason: 'grounded to the per-element closed color set');
+      }
+    });
+
+    test('per-op resilience — an element that rejects the field drops only its op',
+        () {
+      final reg = _fleet();
+      // scope:all includes label.x (text-only, NO style axis) → its setStyle drops;
+      // the 3 buttons survive independently (§9 — one bad op ≠ drop the others).
+      final built = buildScopeEdit(
+        kScopeAll,
+        {
+          'op': 'setStyle',
+          'style': {'colorToken': 'brand'},
+        },
+        reg,
+      );
+      expect(built.rejected, isFalse);
+      expect(built.requested, 4);
+      expect(built.ops.length, 3,
+          reason: 'label.x lacks a style axis → only its op drops');
+      expect(built.result.dropped, 1);
+      expect(built.ops.map((o) => o.id).toList(), ['btn.a', 'btn.b', 'btn.c']);
+    });
+
+    test('NO id comes from the model — a template `id` is overridden per target', () {
+      final reg = _fleet();
+      // Even if a caller leaves a stray/invented id in the template, expandScope's REAL
+      // ids WIN (id applied last) — every op targets a real element.
+      final built = buildScopeEdit(
+        kScopeActionable,
+        {'op': 'setText', 'id': 'ghost.invented', 'text': 'hi'},
+        reg,
+      );
+      expect(built.ops.map((o) => o.id).toList(), ['btn.a', 'btn.b', 'btn.c']);
+      expect(built.ops.every((o) => reg.elementIds().contains(o.id)), isTrue);
+    });
+  });
+
+  group('expandScope — every:<ns> / scope:single / unknown (fail-closed)', () {
+    test('every:<ns> expands the namespace subtree; non-existent ns → empty', () {
+      final reg = _fleet();
+      expect(expandScope('${kScopeEveryPrefix}btn', reg),
+          ['btn.a', 'btn.b', 'btn.c']);
+      expect(expandScope('${kScopeEveryPrefix}label', reg), ['label.x']);
+      expect(expandScope('${kScopeEveryPrefix}nope', reg), isEmpty,
+          reason: 'a non-existent namespace → empty');
+      expect(expandScope(kScopeEveryPrefix, reg), isEmpty,
+          reason: 'an empty namespace → empty');
+    });
+
+    test('scope:single grounds a real id; a missing single → empty/drop', () {
+      final reg = _fleet();
+      expect(expandScope('${kScopeSinglePrefix}btn.a', reg), ['btn.a']);
+      expect(expandScope('${kScopeSinglePrefix}ghost.missing', reg), isEmpty);
+    });
+
+    test('an unknown / blank scope token → empty (fail-closed)', () {
+      final reg = _fleet();
+      expect(expandScope('bogus:scope', reg), isEmpty);
+      expect(expandScope('', reg), isEmpty);
+    });
+  });
+
+  group('dryCountScope — §10 early batch ceiling (max=$kStudioMaxBatch)', () {
+    test('a scope past the ceiling is REJECTED early, before building any ops', () {
+      final big = FakeRegistryView.of(ids: {for (var i = 0; i < 30; i++) 'z.$i'});
+      expect(expandScope(kScopeAll, big).length, 30);
+
+      final counted = dryCountScope(kScopeAll, big);
+      expect(counted.rejected, isTrue);
+      expect(counted.requested, 30);
+      expect(counted.ids, isEmpty, reason: 'nothing built when over the ceiling');
+      expect(counted.rejectedReasonHe, isNotNull);
+      expect(counted.rejectedReasonHe, contains('30'));
+      expect(counted.rejectedReasonHe, contains('$kStudioMaxBatch'));
+
+      // The builder refuses too — empty ops, rejected flag set, count preserved.
+      final built =
+          buildScopeEdit(kScopeAll, {'op': 'setHidden', 'hidden': true}, big);
+      expect(built.rejected, isTrue);
+      expect(built.ops, isEmpty);
+      expect(built.requested, 30);
+    });
+
+    test('exactly kStudioMaxBatch passes; one over is rejected (boundary)', () {
+      final at = FakeRegistryView.of(
+          ids: {for (var i = 0; i < kStudioMaxBatch; i++) 'z.$i'});
+      final okCount = dryCountScope(kScopeAll, at);
+      expect(okCount.ok, isTrue);
+      expect(okCount.ids.length, kStudioMaxBatch);
+
+      final over = FakeRegistryView.of(
+          ids: {for (var i = 0; i <= kStudioMaxBatch; i++) 'z.$i'});
+      expect(dryCountScope(kScopeAll, over).rejected, isTrue);
+    });
+
+    test('real P1 scope:all (>25 ids) is over the ceiling', () {
+      expect(
+          dryCountScope(kScopeAll, ElementRegistryView.builtIn()).rejected, isTrue,
+          reason: 'the built-in registry has more than $kStudioMaxBatch ids');
+    });
+  });
+
+  group('scopeHe — Hebrew preview labels (§6)', () {
+    test('each token maps to its human phrase', () {
+      expect(scopeHe(kScopeAll), 'כל האלמנטים');
+      expect(scopeHe(kScopeActionable), 'כל הכפתורים');
+      expect(scopeHe('${kScopeScreenPrefix}cart'), 'מסך «cart»');
+      expect(scopeHe('${kScopeEveryPrefix}manager'), 'כל «manager»');
+      expect(scopeHe('${kScopeSinglePrefix}cart.cta'), 'האלמנט «cart.cta»');
+      expect(scopeHe('weird:token'), contains('לא מזוהה'));
+    });
+  });
+
+  group('real P1 — broadcast + expansion grounded in the FROZEN registry', () {
+    test('every:manager builds SetText ops over the real manager subtree', () {
+      final reg = ElementRegistryView.builtIn();
+      final built = buildScopeEdit(
+        '${kScopeEveryPrefix}manager',
+        {'op': 'setText', 'text': 'שלום'},
+        reg,
+      );
+      expect(built.rejected, isFalse);
+      expect(built.ops, isNotEmpty);
+      expect(built.ops.every((o) => o is SetText), isTrue);
+      expect(built.ops.every((o) => o.id.startsWith('manager')), isTrue);
+      expect(built.ops.every((o) => reg.elementIds().contains(o.id)), isTrue);
+    });
+
+    test('scope:single grounds a real id / drops a missing one', () {
+      final reg = ElementRegistryView.builtIn();
+      expect(expandScope('${kScopeSinglePrefix}cart.cta', reg), ['cart.cta']);
+      expect(expandScope('${kScopeSinglePrefix}ghost.nope', reg), isEmpty);
+    });
+  });
+
+  // ── DoD invariant (§8): EVERY id `expandScope` returns is in `elementIds()` — over
+  // BOTH the in-memory fake AND the real frozen P1 registry (R2-15); deduped + sorted.
+  group('expandScope — DoD invariant: every expanded id ∈ elementIds()', () {
+    _assertExpansionGrounded('fake', _fleet(), <String>[
+      kScopeAll,
+      kScopeActionable,
+      '${kScopeEveryPrefix}btn',
+      '${kScopeEveryPrefix}label',
+      '${kScopeEveryPrefix}nope',
+      '${kScopeSinglePrefix}btn.a',
+      '${kScopeSinglePrefix}ghost.x',
+      '${kScopeScreenPrefix}btn',
+      'unknown:token',
+      '',
+    ]);
+    _assertExpansionGrounded('real P1', ElementRegistryView.builtIn(), <String>[
+      kScopeAll,
+      kScopeActionable,
+      '${kScopeEveryPrefix}manager',
+      '${kScopeEveryPrefix}catalog',
+      '${kScopeEveryPrefix}auth',
+      '${kScopeEveryPrefix}nope',
+      '${kScopeSinglePrefix}cart.cta',
+      '${kScopeSinglePrefix}ghost.x',
+      '${kScopeScreenPrefix}catalog',
+      'unknown:token',
+    ]);
+  });
 }
 
 /// Run the MANDATORY property-invariant fuzz against [reg]: 3000 seeded random
@@ -436,6 +631,57 @@ void _invariantFuzz(String label, RegistryView reg) {
               reason: 'leaked ungrounded action <$k> on <${op.id}>');
         }
       }
+    }
+  });
+}
+
+// ─── Step 76 grounding fake ─────────────────────────────────────────────────────
+// A multi-element fake for the broadcast/scope tests: three "actionable" buttons
+// (each exposing style+color+action) under the `btn` namespace, plus one text-only
+// label under `label` (NO action → excluded from the actionable proxy).
+FakeRegistryView _fleet() => FakeRegistryView.of(
+      ids: {'btn.a', 'btn.b', 'btn.c', 'label.x'},
+      propKeys: {
+        'btn.a': {'text', 'style', 'action'},
+        'btn.b': {'text', 'style', 'action'},
+        'btn.c': {'text', 'style', 'action'},
+        'label.x': {'text'},
+      },
+      allowedValues: {
+        'btn.a': {
+          'color': {'brand', 'ink'},
+        },
+        'btn.b': {
+          'color': {'brand', 'ink'},
+        },
+        'btn.c': {
+          'color': {'brand', 'ink'},
+        },
+      },
+      actionIds: {
+        'btn.a': {'cart.open'},
+        'btn.b': {'cart.open'},
+        'btn.c': {'cart.open'},
+      },
+    );
+
+/// Assert the DoD §8 invariant over [reg] for every token in [tokens]: each id
+/// `expandScope` returns is a REAL `elementIds()` member, and the list is deduped +
+/// sorted. Run over BOTH the fake AND the real frozen registry (R2-15).
+void _assertExpansionGrounded(
+    String label, RegistryView reg, List<String> tokens) {
+  test('$label — every expanded id ∈ elementIds(), deduped + sorted', () {
+    final all = reg.elementIds();
+    for (final token in tokens) {
+      final out = expandScope(token, reg);
+      for (final id in out) {
+        expect(all.contains(id), isTrue,
+            reason: 'token <$token> leaked a non-registry id <$id>');
+      }
+      expect(out.toSet().length, out.length,
+          reason: 'token <$token> returned duplicate ids');
+      final sorted = [...out]..sort();
+      expect(out, sorted, reason: 'token <$token> is not sorted');
     }
   });
 }

@@ -63,6 +63,8 @@ import '../../state/studio/config_store.dart'
         SetText;
 import 'action_catalog.dart' show matchCatalogActionId;
 import 'config_op.dart' show configOpFromJson;
+import 'edit_prompt.dart'
+    show kScopeAll, kScopeScreenPrefix, kScopeSinglePrefix, scopeElementIds;
 import 'registry_view.dart'
     show RegistryView, matchActionId, matchElementId, matchPropKey, matchValue;
 
@@ -353,4 +355,224 @@ bool _looksTruncated(String candidate) {
     }
   }
   return inString || depth > 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BuildSmart Studio · Pillar 4 · Step 76 — CLOSED scope-token EXPANSION to concrete
+// registry ids (the broadcast path). A broadcast utterance ("כל הכפתורים" / "בכל מסך
+// העגלה") is NEVER trusted to the model as a LIST of ids — the model only NAMES a
+// closed SCOPE TOKEN, and THIS Dart code deterministically EXPANDS that token over the
+// REAL `registry.elementIds()`. Every id that leaves [expandScope] satisfies
+// `registry.elementIds().contains(id)` by construction (§4 · DoD §8): no id is ever
+// read from a model-emitted array. Builds directly on step 74's token shapes
+// (`scope:all` / `scope:screen:<ns>` / `scope:single:<id>` from `classifyScope`).
+//
+// RECONCILIATION — the plan (§2/§9) PREDATES the FROZEN [RegistryView] seam. It said
+// `elementIds().where(kind == button)` and `every:<kind>`, but the seam exposes NO
+// per-id `ElementKind` (step 70 froze exactly five query methods; there is deliberately
+// NO kind accessor and one may NOT be added). So, exactly as steps 72/74 reconciled the
+// same pre-seam text against the id-namespace stand-in:
+//   • `every:<ns>`  → `elementIds().where((id) => id == ns || id.startsWith('$ns.'))`.
+//                     The id-NAMESPACE subtree IS the screen/area grouping the frozen
+//                     seam affords (the same stand-in step 74 uses for "screen id").
+//   • "all buttons" → the seam has NO kind, so the seam-legal PROXY for "the
+//                     interactive/button-like elements" is "the elements that CARRY
+//                     actions": `elementIds().where((id) => actionIdsFor(id).isNotEmpty)`.
+//                     Named HONESTLY [kScopeActionable] (NOT "buttons") precisely because
+//                     it is an actionable-proxy, not a kind query — the honest name
+//                     documents the seam limit (WHY: no `ElementKind` on the frozen seam).
+//   • `scope:single:<id>` → the ONE id, RE-GROUNDED through the frozen `matchElementId`
+//                     (exact → longest-contained → null); a missing id drops to empty
+//                     (fail-closed). `scope:all` / `scope:screen:<ns>` delegate to step
+//                     74's proven `scopeElementIds` so the namespace semantics never
+//                     drift from Stage-B slicing.
+// INVARIANT: the model names a CLOSED token; Dart expands over REAL `elementIds()`; NO
+// id is read from a model list.
+//
+// DoS/FOOT-GUN GUARD (§3 · §10): a broadcast that would rewrite half the app is a real
+// hazard, so an early DRY-COUNT ([dryCountScope]) compares the expanded target COUNT to
+// [kStudioMaxBatch] BEFORE any op is built — an over-ceiling scope is refused with a
+// Hebrew reason, saving the wasted per-op construction. The broadcast builder
+// ([buildScopeEdit]) then stamps ONE desired edit onto every real target and runs the
+// WHOLE array through the step-75 [parseConfigEdit] pipeline — so each op is
+// independently registry-validated and an element that rejects a field drops ONLY its
+// own op (§4/§9), never bypassing the anti-hallucination pipeline.
+//
+// DORMANT: pure functions + consts — no view, no gateway, no provider, Firebase-free.
+// `parseConfigEdit` above stays byte-identical (this only APPENDS below it). Nothing in
+// `lib/` imports it yet ⇒ tree-shaken out ⇒ byte-identical under every flag.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// The "all buttons" broadcast token. NAMED HONESTLY: the frozen [RegistryView] has no
+/// per-id kind, so this expands to every element that CARRIES actions (the seam-legal
+/// proxy for "interactive/button-like"), NOT a real kind query (see the header).
+const String kScopeActionable = 'scope:actionable';
+
+/// The `every:<ns>` scope prefix (§9) — expands to every id in the namespace SUBTREE
+/// (`id == ns || id.startsWith('$ns.')`). The id-namespace is the seam's area grouping.
+const String kScopeEveryPrefix = 'every:';
+
+/// The per-utterance broadcast CEILING (§3/§7.6 · aligned with step 78). A scope that
+/// expands past this many REAL targets is rejected early ([dryCountScope]) as a
+/// DoS/foot-gun guard — a broadcast must not silently rewrite half the app.
+const int kStudioMaxBatch = 25;
+
+/// Deterministically EXPAND a closed [token] to the concrete, deduped, SORTED list of
+/// REAL registry ids it covers — the anti-hallucination core of the broadcast path
+/// (§4). Every returned id satisfies `registry.elementIds().contains(id)`; a
+/// non-existent namespace / missing single / unknown token yields an EMPTY list
+/// (fail-closed). NO id is ever taken from a model list — Dart enumerates the registry.
+List<String> expandScope(String token, RegistryView registry) {
+  final ids = registry.elementIds();
+  final Iterable<String> matched;
+  if (token == kScopeActionable) {
+    // "all buttons" proxy — an element CARRYING actions is the button-like one (there
+    // is no `ElementKind` on the frozen seam; see the header reconciliation).
+    matched = ids.where((id) => registry.actionIdsFor(id).isNotEmpty);
+  } else if (token.startsWith(kScopeEveryPrefix)) {
+    // §9 `every:<ns>` — the id-namespace subtree IS the area grouping.
+    final ns = token.substring(kScopeEveryPrefix.length).trim();
+    matched = ns.isEmpty
+        ? const <String>[]
+        : ids.where((id) => id == ns || id.startsWith('$ns.'));
+  } else if (token.startsWith(kScopeSinglePrefix)) {
+    // Re-ground the single id through the frozen matcher — drop to empty if missing.
+    final one =
+        matchElementId(registry, token.substring(kScopeSinglePrefix.length));
+    matched = one == null ? const <String>[] : <String>[one];
+  } else if (token == kScopeAll || token.startsWith(kScopeScreenPrefix)) {
+    // The model-emittable tokens (step 74 `classifyScope`) — reuse the proven
+    // `scopeElementIds` so the namespace semantics never drift from Stage-B slicing.
+    matched = scopeElementIds(token, registry);
+  } else {
+    return const <String>[]; // unknown token → fail-closed (empty).
+  }
+  // DoD §8: deduped, SORTED, and — via the `ids.contains` filter — every id is REAL.
+  final out = matched.where(ids.contains).toSet().toList()..sort();
+  return out;
+}
+
+/// The Hebrew reason for an over-ceiling broadcast (§3 · surfaced in the preview).
+String _batchRejectHe(int count) =>
+    'השינוי נרחב מדי — $count יעדים (מעל התקרה $kStudioMaxBatch). צמצם את הטווח.';
+
+/// The early DRY-COUNT verdict (§10): the real targets to build, the pre-ceiling
+/// [requested] count, and a Hebrew [rejectedReasonHe] that is non-null EXACTLY when the
+/// scope is over [kStudioMaxBatch] (then [ids] is empty — nothing is built).
+class ScopeCount {
+  const ScopeCount._(this.ids, this.requested, this.rejectedReasonHe);
+
+  /// The real targets to build (empty when [rejected]).
+  final List<String> ids;
+
+  /// How many ids the scope expanded to — the pre-ceiling count, shown even when
+  /// rejected so the preview can say "42 יעדים, מעל התקרה".
+  final int requested;
+
+  /// The Hebrew rejection reason, or null when under the ceiling.
+  final String? rejectedReasonHe;
+
+  bool get ok => rejectedReasonHe == null;
+  bool get rejected => rejectedReasonHe != null;
+  int get count => ids.length;
+}
+
+/// Run the §10 early DRY-COUNT for [token] over [registry]: [expandScope] once and
+/// compare the target COUNT to [kStudioMaxBatch] BEFORE building any ops. An
+/// over-ceiling scope is refused here (empty ids + a Hebrew reason), so the caller
+/// never wastes per-op construction on a "rewrite half the app" broadcast (§3).
+ScopeCount dryCountScope(String token, RegistryView registry) {
+  final expanded = expandScope(token, registry);
+  if (expanded.length > kStudioMaxBatch) {
+    return ScopeCount._(
+      const <String>[],
+      expanded.length,
+      _batchRejectHe(expanded.length),
+    );
+  }
+  return ScopeCount._(expanded, expanded.length, null);
+}
+
+/// The outcome of a BROADCAST build ([buildScopeEdit]). Carries the step-75 [result]
+/// (its `ops` survived per-field validation; `dropped` counts the ones an element
+/// rejected) plus the early-ceiling verdict: when [rejectedReasonHe] is non-null the
+/// broadcast was refused BEFORE building (over [kStudioMaxBatch]) and [result] is empty.
+class ScopeEditResult {
+  const ScopeEditResult({
+    required this.token,
+    required this.requested,
+    required this.result,
+    required this.rejectedReasonHe,
+  });
+
+  final String token;
+
+  /// How many real ids the scope expanded to (pre-ceiling / pre-validation).
+  final int requested;
+
+  /// The step-75 parse outcome (registry-validated ops + dropped count).
+  final ConfigEditResult result;
+
+  /// Non-null ⇒ refused early over the batch ceiling (then [result] is empty).
+  final String? rejectedReasonHe;
+
+  bool get rejected => rejectedReasonHe != null;
+
+  /// The surviving, registry-validated broadcast ops (empty when [rejected]).
+  List<ConfigOp> get ops => result.ops;
+}
+
+/// Build a BROADCAST edit: stamp ONE desired [editTemplate] (an op map WITHOUT an
+/// `id` — e.g. `{'op': 'setStyle', 'style': {'colorToken': 'brand'}}`) onto every REAL
+/// id the [token] expands to, then run the whole array through the step-75
+/// [parseConfigEdit] pipeline so EACH op is independently registry-validated and an
+/// element that rejects a field drops ONLY its own op (§4/§9 — the pipeline is never
+/// bypassed). The §10 dry-count guards FIRST: an over-[kStudioMaxBatch] scope is refused
+/// before any op is built. NO id comes from a model list — [expandScope] enumerates the
+/// registry.
+ScopeEditResult buildScopeEdit(
+  String token,
+  Map<String, Object?> editTemplate,
+  RegistryView registry,
+) {
+  final counted = dryCountScope(token, registry);
+  if (counted.rejected) {
+    return ScopeEditResult(
+      token: token,
+      requested: counted.requested,
+      result: const ConfigEditResult.empty(),
+      rejectedReasonHe: counted.rejectedReasonHe,
+    );
+  }
+  // Stamp the edit onto each REAL target (the per-target `id` is applied LAST so a stray
+  // `id` in the template can never override it), then VALIDATE through the existing
+  // pipeline — the SAME JSON path a model reply takes (never a bypass).
+  final opsJson = <Map<String, Object?>>[
+    for (final id in counted.ids) {...editTemplate, 'id': id},
+  ];
+  return ScopeEditResult(
+    token: token,
+    requested: counted.requested,
+    result: parseConfigEdit(jsonEncode(opsJson), registry),
+    rejectedReasonHe: null,
+  );
+}
+
+/// The Hebrew scope LABEL for a token (§6) — the human phrase step-79's preview shows
+/// beside the broadcast count ("כל הכפתורים: 12 שינויים" / "מסך «cart»"). Distinct from
+/// step 74's `scopeLabel` (which prefixes "מתוך: " for the Stage-B target line); this is
+/// the bare phrase for a count row.
+String scopeHe(String token) {
+  if (token == kScopeAll) return 'כל האלמנטים';
+  if (token == kScopeActionable) return 'כל הכפתורים';
+  if (token.startsWith(kScopeEveryPrefix)) {
+    return 'כל «${token.substring(kScopeEveryPrefix.length)}»';
+  }
+  if (token.startsWith(kScopeScreenPrefix)) {
+    return 'מסך «${token.substring(kScopeScreenPrefix.length)}»';
+  }
+  if (token.startsWith(kScopeSinglePrefix)) {
+    return 'האלמנט «${token.substring(kScopeSinglePrefix.length)}»';
+  }
+  return '(טווח לא מזוהה)';
 }
