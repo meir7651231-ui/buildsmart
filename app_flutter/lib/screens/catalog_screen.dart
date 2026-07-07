@@ -58,6 +58,8 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
+import 'package:buildsmart/state/intel/intel_bus.dart';
+import 'package:buildsmart/state/intel/intel_events.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -583,6 +585,29 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               curve: Curves.easeOut);
         }
       }
+    });
+
+    // Studio Pillar-3 · step 93 — catalog SEARCH intel (additive · read-only ·
+    // demo byte-identical). A single CHANGE-listener on the live-dive query is
+    // the faithful "search committed" seam — the app has NO discrete submit (the
+    // floating keyboard writes this provider per commit). `ref.listen` fires ONLY
+    // on a query change, never per rebuild, so each event lands once per query
+    // (§4). It NEVER carries the raw text — only q_len + a stable, non-reversible
+    // q_hash (§4/§7). search_no_result rides the SAME committed-query path (not a
+    // build(), which would re-fire): it emits when the query yields no products
+    // AND no index entries — the _DiveResultsView empty state.
+    ref.listen<String>(keyboardDiveQueryProvider, (_, next) {
+      final q = next.trim();
+      if (q.length < 2) return;
+      final bus = ref.read(intelBusProvider);
+      final props = <String, String>{
+        'q_len': '${q.length}',
+        'q_hash': '${q.hashCode}',
+      };
+      bus.track(IntelEvents.searchSubmit, props: props);
+      final noResults = ref.read(diveResultsProvider).isEmpty &&
+          kVisibleSearchIndex.where((e) => e.matches(q)).isEmpty;
+      if (noResults) bus.track(IntelEvents.searchNoResult, props: props);
     });
 
     // Live DIVE (owner): when the floating keyboard has a query, the catalog
@@ -3043,6 +3068,13 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
 /// accessories + cart sync) for [product]. Used by the catalog drill-down so
 /// reaching a leaf opens the same rich sheet as the smart-tree.
 void openSmartProductSheet(BuildContext context, SmartProduct product) {
+  // Studio Pillar-3 · step 93 — product_view intel (additive · one place catches
+  // every caller · fired from a tap handler, never build → demo byte-identical).
+  // Reads the bus via the container — the established idiom (catalog_screen:622).
+  ProviderScope.containerOf(context, listen: false)
+      .read(intelBusProvider)
+      .track(IntelEvents.productView,
+          props: <String, String>{'sku': product.key});
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -5419,6 +5451,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               accessories: selectedAcc,
                             ),
                           );
+                      // Studio Pillar-3 · step 93 — add_to_cart intel (additive ·
+                      // single statement · tap handler, not build → byte-identical).
+                      ref.read(intelBusProvider).track(IntelEvents.addToCart,
+                          props: <String, String>{'sku': p.key});
                       Navigator.pop(context);
                       showToast(context,
                           '${p.name} · ${brand.name} (+${selectedAcc.length} אביזרים) נוסף לסל 🛒');
