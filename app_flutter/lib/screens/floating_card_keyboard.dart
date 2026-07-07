@@ -424,11 +424,20 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     );
   }
 
+  /// True while the "עוד…" overflow sheet is open. The floating keyboard renders
+  /// ABOVE the modal, so the "עוד…" chip stays tappable while the sheet is up —
+  /// without this guard, repeated taps would STACK a new sheet (and a new dimming
+  /// scrim) each time. Reset when the sheet closes (whenComplete below).
+  bool _globalMoreOpen = false;
+
   /// GLOBAL SEARCH ([kGlobalSearch]) — the "עוד…" overflow sheet: the FULL ranked
   /// result list for [query] (re-derived fresh), each row running its own
   /// `SearchResult.run` on tap (then closing the sheet). Only reachable from the
   /// flag-gated "עוד…" chip, so it tree-shakes with the rest when the flag is off.
+  /// At most ONE sheet at a time — a repeat tap while it is open is ignored.
   void _showGlobalMore(WidgetRef ref, BuildContext context, String query) {
+    if (_globalMoreOpen) return; // guard against stacking (see [_globalMoreOpen])
+    _globalMoreOpen = true;
     final results = buildGlobalSearchIndex(ref).searchBalanced(query);
     showModalBottomSheet<void>(
       context: context,
@@ -458,7 +467,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
           ),
         ),
       ),
-    );
+    ).whenComplete(() => _globalMoreOpen = false);
   }
 
   /// THE ROW SELECTOR — the single decision for what the prediction row shows,
