@@ -34,6 +34,7 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/state/intel/actor_key.dart' show ActorStitchWriter;
 import 'package:buildsmart/state/intel/intel_bus.dart' show IntelSink;
 import 'package:buildsmart/state/intel/intel_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -94,6 +95,55 @@ class FirestoreIntelBatchWriter implements IntelBatchWriter {
       batch.set(col.doc(), doc);
     }
     await batch.commit();
+  }
+}
+
+/// The dedicated anon→uid STITCH collection (step 91 · §2) — keyed by uid, one doc
+/// per signed-in account, merge-accumulating the anon keys the journey passed
+/// through. ERASABLE like the events: the §7 erasure-sweep (step 99) + the
+/// `deleteAccount` callable purge it, and Pillar-5 enforces a TTL on it (§10).
+/// NEVER a `catalog_*` collection.
+const String kActorStitchCollection = 'actorStitch';
+
+/// The REAL Firestore stitch writer (step 91 · §2) — the anon→uid counterpart of
+/// [FirestoreIntelBatchWriter], kept HERE so cloud_firestore stays isolated to
+/// this ONE intel/ file (actor_key.dart routes through it, staying Firebase-free).
+/// Merge-writes `actorStitch/{uid}` = {anonKeys: arrayUnion(anonKey), at:
+/// serverTimestamp} — idempotent, so re-stitching the same pair is a no-op union.
+/// Resolves `FirebaseFirestore.instance` LAZILY (const ctor, nullable injected),
+/// so merely constructing it touches no platform channel; built ONLY behind the
+/// consent+backend gate (`actorStitchWriterProvider`), so it never exists
+/// off-backend. Throws on failure (the `ActorStitch` caller swallows it).
+class FirestoreActorStitchWriter implements ActorStitchWriter {
+  /// Const so the gate returns it without allocating; [firestore] is injectable
+  /// for tests (never resolved until [writeStitch]).
+  const FirestoreActorStitchWriter({
+    FirebaseFirestore? firestore,
+    this.collectionPath = kActorStitchCollection,
+  }) : _injected = firestore;
+
+  final FirebaseFirestore? _injected;
+
+  /// The stitch collection path (overridable in a test).
+  final String collectionPath;
+
+  FirebaseFirestore get _db => _injected ?? FirebaseFirestore.instance;
+
+  @override
+  Future<void> writeStitch({
+    required String uid,
+    required String anonKey,
+  }) async {
+    // ONE keyed merge doc per uid: arrayUnion dedupes the anon key, so a
+    // re-stitch (e.g. sign-out → sign-in again) never duplicates. `at` records
+    // the latest stitch time for the §10 TTL sweep.
+    await _db.collection(collectionPath).doc(uid).set(
+      <String, Object?>{
+        'anonKeys': FieldValue.arrayUnion(<String>[anonKey]),
+        'at': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
   }
 }
 

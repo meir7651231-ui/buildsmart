@@ -27,6 +27,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/intel/actor_key.dart' show actorKeyProvider;
 import 'package:buildsmart/state/intel/consent_gate.dart';
 import 'package:buildsmart/state/intel/intel_event.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
@@ -118,17 +119,7 @@ class IntelBus {
       // §9 — drop over-frequent screen_view / session_heartbeat entirely so the
       // buffer is not flooded; every other name is always let through.
       if (_isThrottled(name)) return;
-
-      final event = _context(name, props);
-
-      // (1) local ring buffer — ALWAYS (drives demo + live feed).
-      _ref.read(intelLogProvider.notifier).record(event);
-
-      // (2) external telemetry seam — no-op without Firebase (zero regression).
-      _ref.read(telemetryProvider).logEvent(name, params: props);
-
-      // (3) forward sink — inert (NoopIntelSink) today; step 90 makes it live.
-      _ref.read(intelSinkProvider).enqueue(event);
+      _fanOut(_context(name, props), props);
     } on Object catch (e) {
       // Screen-safety: analytics must never take down the UI. Any failure from
       // any destination is swallowed here (debugPrint at most); the caller
@@ -137,12 +128,52 @@ class IntelBus {
     }
   }
 
+  /// Step 91 — emit the sign-in stitch [IntelEvents.identify] bridge event. Unlike
+  /// [track] it stamps a SPECIFIC [anonKey] as the pseudonymous actorKey (the OLD
+  /// pre-login key, so the anon journey stays joinable) alongside the new [uid];
+  /// NEITHER is placed in a visible prop (props stays empty — R1-4). Same
+  /// never-re-raise fan-out as [track]. Called by `ActorStitch` (actor_key.dart).
+  void identify({required String anonKey, required String uid}) {
+    try {
+      _fanOut(
+        IntelEvent(
+          name: IntelEvents.identify,
+          at: DateTime.now(),
+          actorKey: anonKey,
+          uid: uid,
+        ),
+        const <String, String>{},
+      );
+    } on Object catch (e) {
+      debugPrint('IntelBus.identify ignored: $e');
+    }
+  }
+
+  /// The shared 3-way fan-out (local ring buffer · telemetry seam · forward sink),
+  /// each READ (never subscribed) and none allowed to re-raise past the [track] /
+  /// [identify] guards. [telemetryParams] is the scalar param map destination (2)
+  /// forwards (empty for [identify]).
+  void _fanOut(IntelEvent event, Map<String, String> telemetryParams) {
+    // (1) local ring buffer — ALWAYS (drives demo + live feed).
+    _ref.read(intelLogProvider.notifier).record(event);
+    // (2) external telemetry seam — no-op without Firebase (zero regression).
+    _ref.read(telemetryProvider).logEvent(event.name, params: telemetryParams);
+    // (3) forward sink — inert (NoopIntelSink) off-backend; step 90 makes it live.
+    _ref.read(intelSinkProvider).enqueue(event);
+  }
+
   /// Build the [IntelEvent] for [name] + [props], stamping `at` now and the
-  /// dimensions the bus can resolve today. actorKey / uid / sessionId / screen
-  /// are left null ON PURPOSE — step 91 fills actorKey, step 97 sessionId, step
-  /// 92 screen. The call-site never constructs an [IntelEvent] itself.
-  IntelEvent _context(String name, Map<String, String> props) =>
-      IntelEvent(name: name, at: DateTime.now(), props: props);
+  /// dimensions the bus can resolve. Step 91 fills [IntelEvent.actorKey] from
+  /// [actorKeyProvider] (the stable uid-or-anon key; null only in the cold-start
+  /// DEFER window). sessionId (step 97) + screen (step 92) stay null for now. The
+  /// call-site never constructs an [IntelEvent] itself. `read`, never subscribe —
+  /// the bus stays rebuild-free (§2).
+  IntelEvent _context(String name, Map<String, String> props) => IntelEvent(
+        name: name,
+        at: DateTime.now(),
+        actorKey: _ref.read(actorKeyProvider),
+        props: props,
+      );
 
   /// True when [name] is a throttled high-frequency signal that fired more
   /// recently than [_minInterval] ago (so [track] drops it). Records the
