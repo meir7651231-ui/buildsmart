@@ -212,3 +212,25 @@ const String kCatalogBaseUrl = String.fromEnvironment('CATALOG_BASE_URL');
 /// True only when server-search is flagged ON *and* the backend is live —
 /// mirrors [useFirebaseBackend], so the flag can't activate offline / in tests.
 bool get useCatalogServerSearch => kCatalogServerSearch && useFirebaseBackend;
+
+// ── Studio Pillar 4 · עמוד-4 (AI Co-Editor · steps 69-85) ──
+// Step 80: the manager-only Studio CO-EDITOR gate. DORMANT — no screen consumes
+// `studioCoEditorProvider` (lib/logic/studio/co_editor_gate.dart) yet (the
+// surface lands step 81+), so with the flag OFF the whole gate tree-shakes out.
+// Same idiom as [kClaudeAi] / [kStudioLive]; enable via --dart-define.
+
+/// STUDIO_CO_EDITOR — master switch for the manager-only Studio CO-EDITOR (the
+/// model-grounded Hebrew "tell the app what to change" config editor over the
+/// frozen Pillar-1 seams). Default OFF: the `studioCoEditorProvider` `enabled`
+/// axis reads false and — because NO screen watches the provider yet (step 81
+/// adds the cockpit surface) — the shipped build tree-shakes the gate away, so
+/// the demo/test build is BYTE-IDENTICAL to today (the same zero-regression
+/// invariant as [kClaudeAi] / [kStudioLive] / [kServerCallables]). Needs
+/// [useFirebaseBackend] too — the `enabled` axis ANDs with the live backend
+/// (mirrors [useCatalogServerSearch]), so it never activates offline / in tests.
+/// The Claude gateway (`ai`) and the manager role (`manager`) are SEPARATE,
+/// independent axes tracked by `studioCoEditorProvider` — pillar-on / gateway-off
+/// is a legal distinct state. Flip on at build time (AFTER the backend + Claude
+/// gateway are live):
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=CLAUDE_AI=true --dart-define=STUDIO_CO_EDITOR=true
+const bool kStudioCoEditor = bool.fromEnvironment('STUDIO_CO_EDITOR');
