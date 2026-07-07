@@ -23,9 +23,19 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, matchDestinations;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
+import 'package:buildsmart/screens/notifications_screen.dart'
+    show activeNotifViewsProvider, notifSectionProvider;
+import 'package:buildsmart/screens/store_screen.dart'
+    show
+        StoreSection,
+        storeOrderOpenProvider,
+        storeOrdersProvider,
+        storeSectionProvider;
+import 'package:buildsmart/screens/tasks_screen.dart' show showTaskDetailSheet;
 import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/tasks_engine.dart' show tasksProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Best relevance of [query] over any of a hit's [texts] (its label + synonyms).
@@ -104,14 +114,97 @@ SearchSource chatSourceFor(WidgetRef ref) => (query, max) {
       return hits.length <= max ? hits : hits.sublist(0, max);
     };
 
+/// ORDERS — reads the live [storeOrdersProvider] at query time and matches order
+/// NUMBERS (`o.id`, e.g. "BS-1042"). Tapping navigates to the store's orders
+/// section (main tab 3 + [storeSectionProvider] = orders) AND opens that order's
+/// detail sheet via [storeOrderOpenProvider] (the store screen listens) —
+/// navigate + open, no route push.
+SearchSource orderSourceFor(WidgetRef ref) => (query, max) {
+      final hits = <SearchResult>[];
+      for (final o in ref.read(storeOrdersProvider)) {
+        final s = scoreMatch(query, o.id);
+        if (s <= 0) continue;
+        final id = o.id;
+        hits.add(
+          SearchResult(
+            kind: SearchResultKind.order,
+            title: o.id,
+            subtitle: o.stageLabel,
+            score: s,
+            run: (r, context) {
+              r.read(mainTabProvider.notifier).state = 3; // חנות
+              r.read(storeSectionProvider.notifier).state = StoreSection.orders;
+              r.read(storeOrderOpenProvider.notifier).state = id;
+            },
+          ),
+        );
+      }
+      hits.sort((a, b) => b.score.compareTo(a.score));
+      return hits.length <= max ? hits : hits.sublist(0, max);
+    };
+
+/// NOTIFICATIONS — reads the live [activeNotifViewsProvider] at query time and
+/// matches notification titles. Notifications have no per-item detail view, so a
+/// tap navigates to the notification's SECTION (main tab 2 + [updatesSubTabProvider]
+/// = 0 התראות + [notifSectionProvider] = the hit's own type) — the natural "open"
+/// this domain supports, reusing the exact seam the keyboard's notif chips use.
+SearchSource notifSourceFor(WidgetRef ref) => (query, max) {
+      final hits = <SearchResult>[];
+      for (final n in ref.read(activeNotifViewsProvider)) {
+        final s = scoreMatch(query, n.title);
+        if (s <= 0) continue;
+        final section = n.type;
+        hits.add(
+          SearchResult(
+            kind: SearchResultKind.notification,
+            title: n.title,
+            score: s,
+            run: (r, context) {
+              r.read(mainTabProvider.notifier).state = 2; // עדכונים
+              r.read(updatesSubTabProvider.notifier).state = 0; // התראות
+              r.read(notifSectionProvider.notifier).state = section;
+            },
+          ),
+        );
+      }
+      hits.sort((a, b) => b.score.compareTo(a.score));
+      return hits.length <= max ? hits : hits.sublist(0, max);
+    };
+
+/// TASKS — reads the live [tasksProvider] at query time and matches task NAMES.
+/// Tapping opens that task's detail sheet directly over the keyboard's context
+/// (the SAME approver sheet the board rows show) via [showTaskDetailSheet] —
+/// tasks have no home tab, so opening the sheet IS the navigation.
+SearchSource taskSourceFor(WidgetRef ref) => (query, max) {
+      final hits = <SearchResult>[];
+      for (final t in ref.read(tasksProvider)) {
+        final s = scoreMatch(query, t.name);
+        if (s <= 0) continue;
+        hits.add(
+          SearchResult(
+            kind: SearchResultKind.task,
+            title: t.name,
+            score: s,
+            run: (r, context) => showTaskDetailSheet(context, t),
+          ),
+        );
+      }
+      hits.sort((a, b) => b.score.compareTo(a.score));
+      return hits.length <= max ? hits : hits.sublist(0, max);
+    };
+
 /// Assemble the global search index with every wired source. Called by the
-/// keyboard (phase 3) with its live [ref]. Screens + products are pure (const
-/// data); chats captures [ref] to read the live thread list at query time. More
-/// sources (tasks / orders / customers / notifications) join in phase 2.
+/// keyboard with its live [ref]. Screens + products are pure (const data); the
+/// rest capture [ref] to read their live lists at query time. (Customers live in
+/// the manager dashboard — a cross-role route — so they stay out of this
+/// contractor-surface index for now.)
 GlobalSearchIndex buildGlobalSearchIndex(WidgetRef ref) => GlobalSearchIndex(
       <SearchSource>[
         screenSource,
         productSource,
         chatSourceFor(ref),
+        orderSourceFor(ref),
+        notifSourceFor(ref),
+        taskSourceFor(ref),
       ],
     );

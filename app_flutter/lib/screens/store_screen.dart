@@ -1,3 +1,5 @@
+import 'package:buildsmart/features/global_search/global_search.dart'
+    show kGlobalSearch;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/screens/order_notif_sheet.dart';
@@ -42,6 +44,14 @@ final storeSectionProvider = StateProvider<StoreSection>(
   (_) => StoreSection.all,
 );
 final storeSearchQueryProvider = StateProvider<String>((_) => '');
+
+/// GLOBAL SEARCH seam ([kGlobalSearch]) — the order id a global-search hit asks
+/// the store to open. [_StoreScreenState] listens (flag-gated) and opens that
+/// order's detail sheet, then nulls this so a repeat hit re-fires. Mirrors the
+/// chats' updatesChatOpenProvider. Never set when the flag is OFF (the source is
+/// tree-shaken), so the listener + opener fold out and the screen stays
+/// byte-identical.
+final storeOrderOpenProvider = StateProvider<String?>((_) => null);
 
 /// Favorited store-hub rows (by title). Persisted to SharedPreferences so the
 /// ⭐ set survives restarts.
@@ -456,11 +466,38 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
     return false;
   }
 
+  /// GLOBAL SEARCH ([kGlobalSearch]) — open the order [id]'s detail sheet, the
+  /// SAME modal a store order row shows on tap. Nulls the trigger first (so a
+  /// repeat hit on the same order re-fires) and no-ops if the order vanished
+  /// after the hit rendered. Only reached from the flag-gated listener below.
+  void _openOrderById(String id) {
+    ref.read(storeOrderOpenProvider.notifier).state = null;
+    final match = ref.read(storeOrdersProvider).where((o) => o.id == id);
+    if (match.isEmpty) return;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _OrderSheet(order: match.first),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
       if (!hidden && !_headerVisible) _setHeaderVisible(true);
     });
+    // GLOBAL SEARCH ([kGlobalSearch], const ⇒ tree-shaken when OFF) — a hit sets
+    // storeOrderOpenProvider; open its detail sheet. Flag OFF ⇒ this folds out
+    // and the build stays byte-identical.
+    if (kGlobalSearch) {
+      ref.listen<String?>(storeOrderOpenProvider, (_, id) {
+        if (id != null) _openOrderById(id);
+      });
+    }
     return Column(
       children: [
         ClipRect(

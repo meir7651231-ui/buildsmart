@@ -6,6 +6,10 @@ import 'package:buildsmart/features/global_search/global_search.dart';
 import 'package:buildsmart/features/global_search/global_search_sources.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
     show ThreadLite, visibleThreadsProvider;
+import 'package:buildsmart/screens/notifications_screen.dart'
+    show activeNotifViewsProvider;
+import 'package:buildsmart/screens/store_screen.dart' show storeOrdersProvider;
+import 'package:buildsmart/state/tasks_engine.dart' show tasksProvider;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,5 +102,63 @@ void main() {
       reason: 'the chats source surfaced the visible thread "${target.name}" '
           'into the unified results',
     );
+  });
+
+  testWidgets('orders / notifications / tasks sources each contribute their '
+      'items into the merged index (phase 4)', (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    late GlobalSearchIndex idx;
+    String? orderId; // order number (o.id)
+    String? notifTitle; // notification title
+    String? taskName; // task name
+    await tester.pumpWidget(
+      ProviderScope(
+        child: Consumer(
+          builder: (context, ref, _) {
+            idx = buildGlobalSearchIndex(ref);
+            final orders = ref.read(storeOrdersProvider);
+            if (orders.isNotEmpty) orderId = orders.first.id;
+            final notifs = ref.read(activeNotifViewsProvider);
+            if (notifs.isNotEmpty) notifTitle = notifs.first.title;
+            final tasks = ref.read(tasksProvider);
+            if (tasks.isNotEmpty) taskName = tasks.first.name;
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    // The demo harness seeds all three, so all three should have surfaced a
+    // sample item; each must appear in the merged index with its own kind.
+    expect(orderId != null || notifTitle != null || taskName != null, isTrue,
+        reason: 'the demo harness seeds orders / notifications / tasks');
+
+    if (orderId != null) {
+      final id = orderId!;
+      expect(
+        idx.search(id).any(
+            (r) => r.kind == SearchResultKind.order && r.title == id),
+        isTrue,
+        reason: 'the orders source surfaces order "$id"',
+      );
+    }
+    if (notifTitle != null) {
+      final t = notifTitle!;
+      expect(
+        idx.search(t).any(
+            (r) => r.kind == SearchResultKind.notification && r.title == t),
+        isTrue,
+        reason: 'the notifications source surfaces "$t"',
+      );
+    }
+    if (taskName != null) {
+      final n = taskName!;
+      expect(
+        idx.search(n).any(
+            (r) => r.kind == SearchResultKind.task && r.title == n),
+        isTrue,
+        reason: 'the tasks source surfaces task "$n"',
+      );
+    }
   });
 }

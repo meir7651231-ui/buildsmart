@@ -46,6 +46,19 @@ String _wk(int i) => kWorkers[(i >= 0 && i < kWorkers.length) ? i : 0];
 void openTasks(BuildContext context) =>
     Navigator.of(context).push(TasksScreen.route());
 
+/// GLOBAL SEARCH (`kGlobalSearch`) — open a task's detail sheet directly over
+/// [context] (the SAME manager-approver sheet a board row shows on tap, via the
+/// private `_open`). Only called from the flag-gated task source, so it
+/// tree-shakes when the flag is off and this file stays byte-identical.
+void showTaskDetailSheet(BuildContext context, TaskItem task) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (_) => _TaskSheet(task: task, role: 'manager'),
+  );
+}
+
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
