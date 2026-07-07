@@ -19,6 +19,7 @@ import 'package:buildsmart/screens/updates_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/help_mode.dart';
+import 'package:buildsmart/state/intel/screen_view.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/under_construction.dart';
@@ -83,6 +84,13 @@ class HomeShell extends ConsumerWidget {
         });
       }
     });
+
+    // Step 92 — automatic `screen_view` on every tab switch. ONE read-only
+    // `ref.listen` on `mainTabProvider` (the RECONCILED real tab source, §3):
+    // `listen`, never a new `watch`, so this adds ZERO rebuild on top of the tab
+    // UI watch above (:69) and the 4 tabs stay byte-identical. The route half
+    // (pushed screens) is the app-global `intelRouteObserver` (main.dart).
+    listenTabScreenView(ref);
 
     // Step 86 — one-time, version-gated analytics-consent modal. COMPILE-GATED
     // behind [kIntelLive] (const-false in every normal build) → this branch AND
