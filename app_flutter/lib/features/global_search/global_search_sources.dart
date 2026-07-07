@@ -55,15 +55,30 @@ double _bestScore(String query, Iterable<String> texts) {
 /// SCREENS — reuses the existing 48-destination nav index. A hit scores on the
 /// BEST of its label + keywords (so a synonym match still ranks), and carries the
 /// destination's own verified [KbDestination.run] navigation closure verbatim.
-List<SearchResult> screenSource(String query, int max) => <SearchResult>[
-      for (final KbDestination d in matchDestinations(query, max: max))
-        SearchResult(
-          kind: SearchResultKind.screen,
-          title: d.label,
-          score: _bestScore(query, <String>[d.label, ...d.keywords]),
-          run: d.run,
-        ),
-    ];
+///
+/// Only STRONG matches (score >= 2 — exact / prefix / any-word-start) are kept.
+/// A mere substring match (score 1) is too weak for a NAVIGATION target: e.g. the
+/// one-letter query "ס" substring-hits the "מסך" keyword of the בית destination,
+/// so "בית" would surface for "ס" and then, on tap, navigate to a tab you are
+/// often already on — reading as a dead result. Products/chats/etc. keep score-1
+/// substring hits (you're narrowing a data set there); screens must be a real
+/// prefix/word match to be worth a jump.
+List<SearchResult> screenSource(String query, int max) {
+  final hits = <SearchResult>[];
+  for (final KbDestination d in matchDestinations(query, max: max)) {
+    final s = _bestScore(query, <String>[d.label, ...d.keywords]);
+    if (s < 2) continue; // exact/prefix/word-start only — no weak substring jumps
+    hits.add(
+      SearchResult(
+        kind: SearchResultKind.screen,
+        title: d.label,
+        score: s,
+        run: d.run,
+      ),
+    );
+  }
+  return hits;
+}
 
 /// PRODUCTS — scans the union catalog [kDivePool] by Hebrew name, top-[max] by
 /// relevance. Tapping opens the product sheet with its category siblings (so the

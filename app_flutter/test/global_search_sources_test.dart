@@ -27,6 +27,23 @@ void main() {
     }
   });
 
+  test('screenSource keeps only STRONG matches (score >= 2), no weak substring '
+      'jumps', () {
+    // Live regression: the one-letter query "ס" substring-hit the "מסך" keyword of
+    // the בית destination (score 1), so "בית" surfaced for "ס" and, on tap,
+    // navigated to a tab you're already on — a dead-feeling result. Screens now
+    // require exact/prefix/word-start (>= 2); a mere substring is too weak to jump.
+    for (final h in screenSource('ס', 20)) {
+      expect(h.score, greaterThanOrEqualTo(2),
+          reason: 'screen "${h.title}" is only a weak substring match for "ס"');
+    }
+    expect(
+      screenSource('ס', 20).any((h) => h.title == 'בית'),
+      isFalse,
+      reason: '"בית" (substring-only via a keyword) must not surface for "ס"',
+    );
+  });
+
   test('productSource scans the catalog by name; capped, all products', () {
     final hits = productSource('ברז', 5); // ברז = faucet/valve, very common
     expect(hits, isNotEmpty, reason: 'the catalog has ברז products');
