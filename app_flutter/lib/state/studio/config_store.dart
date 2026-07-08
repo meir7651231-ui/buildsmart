@@ -628,24 +628,6 @@ CfgNode _overlayNode(CfgNode? base, CfgNode over) {
   );
 }
 
-// ─── the live-app READ seam (the config CONSUMER entrypoint) ─────────────────
-
-/// Resolve the EFFECTIVE node the LIVE app renders for [id]: the `published`
-/// override with any `draft` edit overlaid on top (draft wins per-axis; nested
-/// style/action field-merged — the SAME fold as [_overlayNode]/`_promote`). Global
-/// layer only (persona-agnostic). Returns [CfgNode.identity] when NEITHER layer
-/// touches [id], so an un-edited element keeps its verbatim fallback byte-for-byte
-/// (the zero-regression contract). This is the read-back a wired widget consumes so
-/// a Studio edit finally becomes VISIBLE in the app.
-extension ConfigDocResolve on ConfigDoc {
-  CfgNode resolved(String id) {
-    final base = published.global[id];
-    final over = draft.global[id];
-    if (over == null || over.isEmpty) return base ?? CfgNode.identity;
-    return _overlayNode(base, over);
-  }
-}
-
 // ─── providers ───────────────────────────────────────────────────────────────
 
 /// The persistence/sync seam — Pillar-5 overrides this with a Firestore sink.
@@ -654,17 +636,6 @@ final configSinkProvider = Provider<ConfigSink>((ref) => LocalPrefsSink());
 final configStoreProvider =
     StateNotifierProvider<ConfigStore, ConfigDoc>((ref) {
   return ConfigStore(ref.watch(configSinkProvider));
-});
-
-/// The EFFECTIVE [CfgNode] for [id] that the LIVE app CONSUMES — `published` with
-/// any `draft` edit overlaid (draft wins) via [ConfigDocResolve.resolved]. Empty
-/// doc / untouched id ⇒ [CfgNode.identity] ⇒ the widget renders its verbatim
-/// fallback (byte-identical zero-regression). This is the read seam a wired element
-/// watches so a Studio edit becomes visible; it always overlays the draft (the owner
-/// sees the edit live) and is persona-agnostic (global layer).
-final resolvedCfgProvider = Provider.family<CfgNode, String>((ref, id) {
-  final doc = ref.watch(configStoreProvider);
-  return doc.resolved(id);
 });
 
 /// The effective [CfgNode] for [id] under the viewer's persona, including the
