@@ -10,7 +10,7 @@
 
 ## הבא הפנוי: **123**
 
-> **שמור-מראש ל-Studio (Red-Team R1):** 118=config ids⊆registry (ע1) **✅ מיושם (studio-s22, `test/studio/gate_118_test.dart`)** · 119=AI-grounded-config (ע4) **✅ מיושם (pillar4-s85, `test/studio/gate_119_test.dart`)** · 120=analytics-PII (ע3). מיושמים בזמן-הבנייה; שמורים כאן כדי שלא יתנגשו (ראה `studio-plan/RED-TEAM-R1.md`). **#119 שמור-מראש → אין bump ל"הבא הפנוי" (נשאר 123; 121/122 נלקחו ב-Pillar-5 s68).**
+> **שמור-מראש ל-Studio (Red-Team R1):** 118=config ids⊆registry (ע1) **✅ מיושם (studio-s22, `test/studio/gate_118_test.dart`)** · 119=AI-grounded-config (ע4) **✅ מיושם (pillar4-s85, `test/studio/gate_119_test.dart`)** · 120=analytics-PII (ע3) **✅ מיושם (pillar3-s99, `test/studio/gate_120_test.dart`)**. מיושמים בזמן-הבנייה; שמורים כאן כדי שלא יתנגשו (ראה `studio-plan/RED-TEAM-R1.md`). **#119/#120 שמורים-מראש → אין bump ל"הבא הפנוי" (נשאר 123; 121/122 נלקחו ב-Pillar-5 s68).**
 >
 > **Pillar-5 finale (Step 68, R2-10):** 121=deploy-ordering · 122=flags-OFF-parity. **✅ מיושמים** — ראה טבלת קבוצה ד׳.
 

@@ -100,6 +100,173 @@ async function purgeMultiPartyReferences(
   return counts;
 }
 
+/// GDPR erasure of the CUSTOMER-INTELLIGENCE layer for [uid] (Studio Pillar-3) —
+/// the server-side twin of the PURE Dart plan `eraseSubject`
+/// (app_flutter/lib/state/intel/erasure.dart). The Dart plan is the TESTABLE spec
+/// (erasure_completeness_test.dart proves ZERO residue); THIS runs the IDENTICAL
+/// key-set against live Firestore.
+///
+/// The MULTI-KEY set (R1-3): the deleted [uid] PLUS the pre-login ANON keys stitched
+/// to it (read from `actorStitch/{uid}`), so ORPHANED pre-stitch anon events (a
+/// DIFFERENT `actor_key`) are erased too. Over that key-set {uid, ...anonKeys}:
+///   • intelEvents  — where actor_key ∈ {uid, ...anonKeys}
+///   • presence     — presence/{uid} AND presence/{actorKey}   (doc-id per key)
+///   • sessions     — where actor_key ∈ {uid, ...anonKeys}     (forward-ready: no
+///                    server session collection is written today — no-op now)
+///   • displayName  — reset →'' on any RETAINED row (DEFENSIVE: IntelEvent.toWire
+///                    NEVER serializes a displayName, R1-4 — the events are deleted
+///                    above, so this matches zero docs today; the forward-ready hook
+///                    mirrors the `customers.ownerId` no-op precedent)
+///   • actorStitch/{uid} — the mapping doc itself, LAST (a mid-sweep failure leaves
+///                    the anon→uid join intact for a retry)
+/// Best-effort + paginated exactly like `purgeMultiPartyReferences`: one failure
+/// never aborts the rest. Returns a per-target count for the audit trail.
+async function purgeIntelForSubject(
+  uid: string
+): Promise<Record<string, number>> {
+  const fs = db();
+  const counts: Record<string, number> = {};
+  const batchSize = 400;
+  const maxRounds = 25;
+  const inChunk = 30; // Firestore `in` operator ceiling
+
+  // R1-3 — recover the anon keys stitched to this uid so PRE-login events (a
+  // DIFFERENT actor_key) are reachable. Best-effort: a read failure ⇒ uid-only.
+  let anonKeys: string[] = [];
+  try {
+    const stitchSnap = await fs.collection("actorStitch").doc(uid).get();
+    const raw = stitchSnap.exists ? stitchSnap.get("anonKeys") : undefined;
+    if (Array.isArray(raw)) {
+      anonKeys = raw.filter(
+        (k): k is string => typeof k === "string" && k.length > 0
+      );
+    }
+  } catch (e) {
+    logger.error("deleteAccount: actorStitch read failed", {
+      uid,
+      error: String(e),
+    });
+  }
+  // The pseudonymous key-set the WHOLE sweep operates over: {uid, ...anonKeys}.
+  const actorKeys = Array.from(new Set<string>([uid, ...anonKeys]));
+
+  /// Purge every doc a chunked `actor_key in [...]` query returns — paginated +
+  /// best-effort (mirrors `scrub`'s shape, deleting instead of updating). Firestore
+  /// caps `in` at [inChunk] terms, so the key-set is chunked.
+  async function purgeByActorKey(collection: string): Promise<void> {
+    for (let i = 0; i < actorKeys.length; i += inChunk) {
+      const chunk = actorKeys.slice(i, i + inChunk);
+      try {
+        for (let round = 0; round < maxRounds; round++) {
+          const snap = await fs
+            .collection(collection)
+            .where("actor_key", "in", chunk)
+            .limit(batchSize)
+            .get();
+          if (snap.empty) break;
+          const batch = fs.batch();
+          for (const doc of snap.docs) batch.delete(doc.ref);
+          await batch.commit();
+          counts[collection] = (counts[collection] ?? 0) + snap.size;
+          if (snap.size < batchSize) break; // last page
+        }
+      } catch (e) {
+        logger.error("deleteAccount: intel sweep failed", {
+          uid,
+          collection,
+          error: String(e),
+        });
+      }
+    }
+  }
+
+  // 1 · events — actor_key ∈ {uid, ...anonKeys} (INCLUDING the pre-stitch anon
+  //     events, the orphan-risk rows reachable only via actorStitch).
+  await purgeByActorKey("intelEvents");
+
+  // 2 · presence — presence/{uid} AND presence/{actorKey} for EVERY key (doc-id
+  //     keyed, so a plain get/delete per key — a signed-out actor's doc is anon-keyed,
+  //     a signed-in actor's is uid-keyed; both must go).
+  for (const key of actorKeys) {
+    try {
+      const ref = fs.collection("presence").doc(key);
+      const snap = await ref.get();
+      if (snap.exists) {
+        await ref.delete();
+        counts["presence"] = (counts["presence"] ?? 0) + 1;
+      }
+    } catch (e) {
+      logger.error("deleteAccount: presence sweep failed", {
+        uid,
+        key,
+        error: String(e),
+      });
+    }
+  }
+
+  // 3 · sessions (if present) — actor_key ∈ {uid, ...anonKeys}. Forward-ready: the
+  //     app mints session ids LOCALLY (no server `sessions` collection today), so
+  //     this is a no-op now, wired so a future server session doc is swept too.
+  await purgeByActorKey("sessions");
+
+  // 4 · displayName reset (R1-4, DEFENSIVE) — after the wholesale event delete above,
+  //     verify no RETAINED intel doc still carries a human displayName for this
+  //     subject and scrub it →''. IntelEvent.toWire NEVER serializes a displayName,
+  //     so this matches ZERO docs today (the events are already gone); it mirrors the
+  //     Dart plan's resetDisplayNames step + the forward-ready `customers.ownerId`
+  //     no-op precedent, catching any legacy / future retained-profile row.
+  for (let i = 0; i < actorKeys.length; i += inChunk) {
+    const chunk = actorKeys.slice(i, i + inChunk);
+    try {
+      for (let round = 0; round < maxRounds; round++) {
+        const snap = await fs
+          .collection("intelEvents")
+          .where("actor_key", "in", chunk)
+          .limit(batchSize)
+          .get();
+        if (snap.empty) break;
+        const batch = fs.batch();
+        let scrubbed = 0;
+        for (const doc of snap.docs) {
+          if (doc.get("displayName") !== undefined) {
+            batch.update(doc.ref, { displayName: "" });
+            scrubbed++;
+          }
+        }
+        if (scrubbed > 0) {
+          await batch.commit();
+          counts["displayName.reset"] =
+            (counts["displayName.reset"] ?? 0) + scrubbed;
+        }
+        if (snap.size < batchSize) break;
+      }
+    } catch (e) {
+      logger.error("deleteAccount: displayName reset failed", {
+        uid,
+        error: String(e),
+      });
+    }
+  }
+
+  // 5 · actorStitch/{uid} — the mapping doc itself, LAST (a mid-sweep failure leaves
+  //     the anon→uid join intact for a retry).
+  try {
+    const ref = fs.collection("actorStitch").doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) {
+      await ref.delete();
+      counts["actorStitch"] = (counts["actorStitch"] ?? 0) + 1;
+    }
+  } catch (e) {
+    logger.error("deleteAccount: actorStitch sweep failed", {
+      uid,
+      error: String(e),
+    });
+  }
+
+  return counts;
+}
+
 export const deleteAccount = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Sign-in required.");
@@ -134,9 +301,16 @@ export const deleteAccount = onCall({ region: REGION }, async (request) => {
   //      customers); the records stay for the other parties, only the link goes.
   const scrubbed = await purgeMultiPartyReferences(uid);
 
+  // 1c · GDPR erasure — sweep the CUSTOMER-INTELLIGENCE layer (Studio Pillar-3) for
+  //      this uid + its stitched anon keys: intelEvents / presence / sessions /
+  //      actorStitch + displayName reset. Multi-key + best-effort; the IDENTICAL
+  //      key-set the pure Dart plan `eraseSubject` proves complete
+  //      (app_flutter/.../erasure.dart · erasure_completeness_test.dart).
+  const intelPurged = await purgeIntelForSubject(uid);
+
   // 2 · delete the Auth record itself (Admin SDK — bypasses recent-login).
   await getAuth().deleteUser(uid);
-  logger.info("deleteAccount: erased", { uid, existed, scrubbed });
+  logger.info("deleteAccount: erased", { uid, existed, scrubbed, intelPurged });
 
   await writeAudit({
     action: "account.delete",
@@ -145,7 +319,7 @@ export const deleteAccount = onCall({ region: REGION }, async (request) => {
     actorRole: roles.join(",") || null,
     target: `users/${uid}`,
     before: existed,
-    after: { scrubbed },
+    after: { scrubbed, intelPurged },
     ok: true,
   });
 

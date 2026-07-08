@@ -2,6 +2,33 @@
 
 Short records of notable choices. Newest first.
 
+## D-016 · Customer-intelligence privacy model — consent-gated · uid-keyed · erasable · Gate #120
+**Trigger:** Studio Pillar-3 (steps 86–99) added a live analytics layer
+(`lib/state/intel/` + `lib/logic/intel/`). An analytics layer is the classic PII
+leak / GDPR-erasure trap, so the privacy properties are pinned as a decision, not
+left implicit.
+**Rules (all four enforced by tests):**
+1. **Consent-gated, default-DENY** — the forward sink / stitch / presence are the
+   inert `Noop*` impls unless `consentedPolicyVersion >= kCurrentPolicyVersion &&
+   privAnalytics && useFirebaseBackend && kIntelLive` (`consent_gate.dart`, D-scoped
+   per axis). The whole visible layer is compile-gated behind const `kIntelLive`
+   (default OFF) → the demo is byte-identical.
+2. **Pseudonymous / uid-keyed, never a name** — every event is stamped with a
+   pseudonymous `actor_key` (uid when signed-in, else a per-install uuid); joins
+   (journey, segments, presence) are BY uid/actorKey, never a display name
+   (R2-#12). `IntelEvent.toWire()` OMITS `displayName` by construction (R1-4) — names
+   are resolved OWNER-SIDE only.
+3. **Gate #120 (analytics-PII)** — `test/studio/gate_120_test.dart` scans the intel
+   layer and fails the suite if any wire/prop key looks like PII or if `displayName`
+   ever reaches a wire path; the serialization surface is a closed pseudonymous
+   allowlist. Registered ✅ in `GATE_REGISTRY.md`. Enforced via the TEST (not the
+   57 KB pre-commit hook — the same choice as Gate #119 in Pillar-4).
+4. **Erasable (right-to-erasure)** — `erasure.dart` is a pure, testable multi-key
+   sweep (`eraseSubject` over `{uid, ...anonKeys}` from `actorStitch/{uid}`, R1-3),
+   proven complete by `erasure_completeness_test.dart` (zero residue incl. pre-stitch
+   anon events); production runs the IDENTICAL key-set in the `deleteAccount` Cloud
+   Function (`functions/src/deleteAccount.ts`, `purgeIntelForSubject`).
+
 ## D-015 · Proposal lifecycle (draft→implemented→stub) — מונע יתום+כפילות
 **Trigger:** `PROPOSAL_version_friction.md` נוצר כיתום (לא ב-README, לקח #59), ואין
 ב-knowledge-base class למסמך-הצעה transient (ליטוש, לקח #72).
