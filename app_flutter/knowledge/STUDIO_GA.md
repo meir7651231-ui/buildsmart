@@ -104,3 +104,16 @@ web-deploy → הפריסה חוזרת byte-identical לשלב-הקודם. הפ�
   נפרד (`AddComponent` / role-grant) — מחוץ להיקף-הסטודיו.
 
 > **שורה-תחתונה:** הסטודיו **גמור, מלא, ומוכח-רדום.** מכאן זה החלטת-בעלים מתי לזרוע אותו לחיים.
+
+---
+
+## 6. Arming log (live)
+
+- **2026-07-08 — backend deployed.** `firebase-deploy` green (run 28917096081): all
+  request/trigger functions + the P5.66 rollup schedulers. Cloud Scheduler API enabled
+  + CI service account granted `roles/cloudscheduler.admin`.
+- **2026-07-08 — Studio stage-1 armed.** Repo variable `STUDIO_DART_DEFINES` set to
+  `--dart-define=STUDIO_CO_EDITOR=true` → the manager-only Studio cockpit + no-code
+  manual builder go live on buildsmart-il.com (draft-mode; the AI co-editor shows its
+  off-state until `CLAUDE_AI` + `USE_FIREBASE_BACKEND` are added). Regular users: no
+  change (manager-gated). Next stages 2–5 per §3, owner-paced.
