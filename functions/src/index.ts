@@ -162,4 +162,25 @@ export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";
 export { reviewRoleRequest } from "./reviewRoleRequest";
 export { publishConfig, revertIllegalConfigWrite } from "./studio";
-export { rollupAnalyticsDaily, rollupPresenceSummary } from "./analytics";
+// P5.66 rollup schedulers — DEPLOY-GATED (default OFF). Deploying an `onSchedule`
+// function needs BOTH the Cloud Scheduler API enabled AND the CI service account
+// granted `cloudscheduler.jobs.create/update` (roles/cloudscheduler.admin).
+// Until the owner arms intel and grants that role, DEPLOY_ROLLUP_SCHEDULERS is
+// unset → these exports are `undefined` → Firebase skips them → the functions
+// deploy is green WITHOUT the scheduler IAM (all the request/trigger functions
+// above still deploy). The rollups only summarise analytics/presence that exist
+// once intel is live, so deferring them changes nothing until arming. To arm:
+// enable the API, grant the SA roles/cloudscheduler.admin, then deploy with
+// `--dart-define`-free env `DEPLOY_ROLLUP_SCHEDULERS=true`. See STUDIO_GA.md.
+import {
+  rollupAnalyticsDaily as _rollupAnalyticsDaily,
+  rollupPresenceSummary as _rollupPresenceSummary,
+} from "./analytics";
+const kDeployRollupSchedulers =
+  process.env.DEPLOY_ROLLUP_SCHEDULERS === "true";
+export const rollupAnalyticsDaily = kDeployRollupSchedulers
+  ? _rollupAnalyticsDaily
+  : undefined;
+export const rollupPresenceSummary = kDeployRollupSchedulers
+  ? _rollupPresenceSummary
+  : undefined;
