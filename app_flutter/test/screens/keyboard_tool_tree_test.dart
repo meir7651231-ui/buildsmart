@@ -6,13 +6,59 @@
 // the AI-hub + settings children and marks קולי as [isVoiceInput]; leaf/branch
 // roles are well-formed (a leaf has an action and no children; a branch has
 // children and no action), and [kbTilesFor] projects a node-list to pure tiles
-// whose id == index. We do NOT invoke the leaf actions here (they touch real
-// screens/providers); the seam behaviour they delegate to is covered by
-// keyboard_tool_actions_test, and the morph wiring by floating_card_keyboard_test.
+// whose id == index. The pure groups do NOT invoke leaf actions (they touch real
+// screens/providers); that seam behaviour is covered by keyboard_tool_actions_test
+// and the morph wiring by floating_card_keyboard_test. The FINAL group is the one
+// exception — it pumps the KB_BUTTONS_V2 ⚙ menu (kbScreenMenuNodes) and taps
+// "נקה הכל" to prove the owner's wired confirm-clear fires (not a "בקרוב" leaf).
 
 import 'package:buildsmart/screens/keyboard_tool_tree.dart';
+import 'package:buildsmart/screens/updates_screen.dart'
+    show updatesSubTabProvider;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Pumps the KB_BUTTONS_V2 ⚙ menu ([kbScreenMenuNodes]) for the עדכונים tab (2)
+/// as tappable buttons and returns the built node list. [subTab] picks the
+/// התראות (0) vs שיחות (1) overflow via [updatesSubTabProvider].
+Future<List<KbToolNode>> _pumpScreenMenu(
+  WidgetTester tester, {
+  int subTab = 0,
+}) async {
+  late List<KbToolNode> nodes;
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: <Override>[
+        if (subTab != 0) updatesSubTabProvider.overrideWith((ref) => subTab),
+      ],
+      child: MaterialApp(
+        home: Consumer(
+          builder: (context, ref, _) {
+            nodes = kbScreenMenuNodes(2, ref);
+            return Scaffold(
+              body: ListView(
+                children: <Widget>[
+                  for (final n in nodes)
+                    TextButton(
+                      key: ValueKey<String>('kbmenu_${n.label}'),
+                      onPressed: n.action == null
+                          ? null
+                          : () => n.action!(ref, context),
+                      child: Text(n.label),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return nodes;
+}
 
 void main() {
   group('kbHomeNodes', () {
@@ -168,6 +214,53 @@ void main() {
       expect(plainLeaf.isVoiceInput, isFalse, reason: 'leaf defaults off');
       expect(voiceLeaf.isVoiceInput, isTrue, reason: 'leaf can opt in');
       expect(branch.isVoiceInput, isFalse, reason: 'a branch is never voice');
+    });
+  });
+
+  group('kbScreenMenuNodes — the ⚙ per-screen menu (KB_BUTTONS_V2)', () {
+    testWidgets('התראות subtab: the real clear + the 4 generic tools, all wired',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final nodes = await _pumpScreenMenu(tester);
+      final labels = nodes.map((n) => n.label).toList();
+      // the notifications overflow (mirror of _NotificationsMenuButton)…
+      expect(
+        labels,
+        containsAllInOrder(<String>['סמן הכל כנקרא', 'נקה הכל', 'הגדרות התראות']),
+      );
+      // …then the 4 generic tools kept on EVERY screen (owner: "they all stay").
+      expect(labels, containsAll(<String>['קולי', 'חיפוש', 'מצלמה', 'היכרות']));
+      for (final n in nodes) {
+        expect(n.action, isNotNull, reason: '"${n.label}" is a wired leaf');
+      }
+    });
+
+    testWidgets(
+        '"נקה הכל" runs the confirm-gated clear, not a "בקרוב" placeholder',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      await _pumpScreenMenu(tester);
+      await tester.tap(find.byKey(const ValueKey<String>('kbmenu_נקה הכל')));
+      await tester.pumpAndSettle();
+      // the REAL destructive confirm dialog — the wiring the owner asked for…
+      expect(find.text('ניקוי כל ההתראות?'), findsOneWidget);
+      // …and crucially NOT the old honest-deferral SnackBar.
+      expect(find.textContaining('בקרוב'), findsNothing);
+    });
+
+    testWidgets('שיחות subtab: new-chat + mute-all + generic tools, all wired',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final nodes = await _pumpScreenMenu(tester, subTab: 1);
+      final labels = nodes.map((n) => n.label).toList();
+      expect(
+        labels,
+        containsAllInOrder(<String>['שיחה חדשה', 'ארכיון שיחות', 'השתק הכל']),
+      );
+      expect(labels, containsAll(<String>['קולי', 'חיפוש', 'מצלמה', 'היכרות']));
+      for (final n in nodes) {
+        expect(n.action, isNotNull, reason: '"${n.label}" is a wired leaf');
+      }
     });
   });
 }

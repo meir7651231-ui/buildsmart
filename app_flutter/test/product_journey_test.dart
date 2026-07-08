@@ -50,18 +50,36 @@ void main() {
     // 1 · catalog boots
     expect(find.text('BuildSmart'), findsOneWidget);
 
-    // 2 · open the search panel and query the SKU
-    final field = find.byType(TextField).first;
-    await t.tap(field);
-    await t.pumpAndSettle();
-    await t.enterText(field, sku);
-    await t.pumpAndSettle();
-    expect(find.text(name), findsAtLeastNWidgets(1),
+    // 2 · query the SKU. The catalog search BAR was deleted (87b3df29 — search
+    // moved to the floating keyboard); the keyboard writes keyboardDiveQueryProvider
+    // and the catalog body dives to the matching products (diveResultsProvider →
+    // _DiveResultsView, active at ≥2 chars). A widget test can't type on the
+    // floating overlay, so drive that live seam directly — the same pattern step 0
+    // uses for homeDepartmentProvider. (searchQueryProvider is the removed bar's
+    // dead relic — nothing reads it anymore.)
+    // Locate the surfaced product by its always-present SKU badge ('#<sku>'),
+    // NOT its name: the dive tiles render a DISTINCT LABEL (shared attributes like
+    // the colour 'לבן' are split into their own chips), so the shown name can
+    // differ from the catalogue nameHe — the SKU badge is exact + unique.
+    containerOf(t).read(keyboardDiveQueryProvider.notifier).state = sku;
+    final skuTag = find.text('#$sku');
+    // The dive rebuilds and its tiles resolve network images asynchronously —
+    // those async attempts can outlast a single pumpAndSettle (the mis-timing the
+    // retry note below documents), so pump frames until the tile surfaces.
+    for (var i = 0; i < 40 && skuTag.evaluate().isEmpty; i++) {
+      await t.pump(const Duration(milliseconds: 50));
+    }
+    expect(skuTag, findsAtLeastNWidgets(1),
         reason: 'search did not surface $sku ($name)');
 
-    // 3 · open the product sheet
-    await t.ensureVisible(find.text(name).first);
-    await t.tap(find.text(name).first);
+    // 3 · open the product sheet. The row's NAME is a DISTINCT LABEL (attributes
+    // split into chips — it can even fall back to the category, e.g. 'אביזרי
+    // תבריג'), so it is not a reliable text anchor. Every row instead carries a
+    // 'פרטים' (details) button wired to the sheet (its own doc: "ⓘ → full sheet"),
+    // so tap that — stable, exact, independent of the label.
+    final details = find.text('פרטים');
+    await t.ensureVisible(details.first);
+    await t.tap(details.first);
     await t.pumpAndSettle();
     expect(find.byType(DraggableScrollableSheet), findsOneWidget);
 

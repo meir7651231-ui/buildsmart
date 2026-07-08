@@ -1005,6 +1005,21 @@ class _ChatsMenuButton extends ConsumerWidget {
   }
 }
 
+/// Public opener for the "שיחה חדשה" contact-picker sheet ([_NewChatSheet]) — the
+/// SAME sheet the chats ⋮ menu ('new_chat') shows. Exposed so the floating
+/// keyboard's ⚙ menu (`kbScreenMenuNodes`, behind KB_BUTTONS_V2) opens the real
+/// picker instead of a "בקרוב" placeholder. Referenced only from that flag-gated
+/// path (`kKbButtonsV2 ? … : kbKbdNodes()` const-folds away when off), so it
+/// tree-shakes out on a normal build — byte-identical.
+void openNewChatSheet(BuildContext context) => showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => const _NewChatSheet(),
+    );
+
 // ─── notifications 3-dot menu ──────────────────────────────────────────────────────
 
 class _NotificationsMenuButton extends ConsumerWidget {

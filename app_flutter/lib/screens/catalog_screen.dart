@@ -29,6 +29,14 @@ import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_home.dart';
+// GLOBAL SEARCH seam — the dive window ([_DiveResultsView]) becomes the ONE
+// unified search surface: with kGlobalSearch ON it also lists the live entity
+// domains (orders/tasks/customers/chats/notifications) via the global index.
+// Flag OFF (const) ⇒ the whole branch tree-shakes ⇒ the window is byte-identical.
+import 'package:buildsmart/features/global_search/global_search.dart'
+    show SearchResult, SearchResultKind, kGlobalSearch;
+import 'package:buildsmart/features/global_search/global_search_sources.dart'
+    show buildGlobalSearchIndex;
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
@@ -1291,6 +1299,12 @@ class _DiveResultsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // GLOBAL SEARCH ([kGlobalSearch], const ⇒ the `if (false)` folds out when the
+    // flag is off): the dive is the ONE unified search window — beyond products +
+    // the catalog index entries it also lists the live ENTITY domains. The early
+    // return tree-shakes when off, so the legacy body below is byte-identical.
+    if (kGlobalSearch) return _buildUnified(context, ref);
+
     final products = ref.watch(diveResultsProvider);
     // OWNER (A slice 3 — unify "so it searches those too"): the ONE keyboard search
     // finds CATEGORIES + SCREENS as well, not just products — exactly what the old
@@ -1331,6 +1345,137 @@ class _DiveResultsView extends ConsumerWidget {
               : LipskeyProductsList(products: products),
         ),
       ],
+    );
+  }
+
+  /// GLOBAL SEARCH ([kGlobalSearch]) — the dive window as the ONE unified search
+  /// surface (owner: "use the EXISTING search window, don't add another"). Beyond
+  /// the catalog index entries + the rich product list, it lists the live ENTITY
+  /// domains the window could never show — orders · tasks · customers · chats ·
+  /// notifications — via [buildGlobalSearchIndex], each tile running its OWN
+  /// open/navigate closure. Products stay [LipskeyProductsList] (not flattened to
+  /// tiles) and screens/categories/settings stay the [kVisibleSearchIndex] entries,
+  /// so this ONLY ADDS the five entity domains. The keyboard's "עוד…" opens THIS
+  /// window (switch to the catalog tab + seed the dive query) instead of a sheet.
+  Widget _buildUnified(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(diveResultsProvider);
+    final query = ref.watch(keyboardDiveQueryProvider).trim();
+    final entries = query.isEmpty
+        ? const <SearchEntry>[]
+        : kVisibleSearchIndex.where((e) => e.matches(query)).take(4).toList();
+    // The five ENTITY domains the catalog window can't already show (products →
+    // the rich list below; screens/categories/settings → the index entries above).
+    final extras = query.length >= 2
+        ? buildGlobalSearchIndex(ref)
+            .search(query)
+            .where((r) =>
+                r.kind != SearchResultKind.product &&
+                r.kind != SearchResultKind.screen &&
+                r.kind != SearchResultKind.setting)
+            .take(6)
+            .toList()
+        : const <SearchResult>[];
+
+    if (products.isEmpty && entries.isEmpty && extras.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(BsTokens.space4),
+          child: Text(
+            'אין תוצאות תואמות',
+            style: TextStyle(color: BsTokens.mutedLight),
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: <Widget>[
+        for (final e in entries) _DiveEntryTile(entry: e),
+        for (final r in extras) _GlobalDiveTile(result: r),
+        if (entries.isNotEmpty || extras.isNotEmpty)
+          const Divider(height: 1, color: Color(0xFFF5F5F5)),
+        Expanded(
+          child: products.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(BsTokens.space4),
+                    child: Text(
+                      'אין מוצרים תואמים',
+                      style: TextStyle(color: BsTokens.mutedLight),
+                    ),
+                  ),
+                )
+              : LipskeyProductsList(products: products),
+        ),
+      ],
+    );
+  }
+}
+
+/// A single ENTITY search hit (order / task / customer / chat / notification)
+/// inside the unified dive window ([kGlobalSearch]). Mirrors [_DiveEntryTile]'s
+/// look — emoji + title + optional subtitle + a Hebrew type badge — and on tap
+/// runs the result's OWN open/navigate closure (open the order/task/customer
+/// sheet · jump to the chat/notification section), keeping the overlay floating.
+class _GlobalDiveTile extends ConsumerWidget {
+  const _GlobalDiveTile({required this.result});
+
+  final SearchResult result;
+
+  static const Map<SearchResultKind, String> _emoji =
+      <SearchResultKind, String>{
+    SearchResultKind.order: '🧾',
+    SearchResultKind.task: '✅',
+    SearchResultKind.customer: '👤',
+    SearchResultKind.chat: '💬',
+    SearchResultKind.notification: '🔔',
+  };
+  static const Map<SearchResultKind, String> _label =
+      <SearchResultKind, String>{
+    SearchResultKind.order: 'הזמנה',
+    SearchResultKind.task: 'משימה',
+    SearchResultKind.customer: 'לקוח',
+    SearchResultKind.chat: 'שיחה',
+    SearchResultKind.notification: 'התראה',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      dense: true,
+      leading: Text(
+        _emoji[result.kind] ?? '🔎',
+        style: const TextStyle(fontSize: 20),
+      ),
+      title: Text(
+        result.title,
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: result.subtitle.isNotEmpty
+          ? Text(
+              result.subtitle,
+              style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          _label[result.kind] ?? '',
+          style: const TextStyle(
+            color: Color(0xFF888888),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      onTap: () => result.run(ref, context),
     );
   }
 }

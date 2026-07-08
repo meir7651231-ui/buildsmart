@@ -1665,6 +1665,31 @@ const Map<String, Color> _kCustomerStatusColor = {
   'off': Color(0xFF8B8D8F),
 };
 
+/// GLOBAL SEARCH (`kGlobalSearch`) — open a customer's detail sheet directly over
+/// [context], the SAME manager sheet the dashboard's customers tab shows on tap.
+/// Resolves the live view-model by name via the private [_customerViewsProvider]
+/// (so pct/sites derive exactly as the tab does). Only called from the flag-gated
+/// customer source, so it tree-shakes when the flag is off and this file stays
+/// byte-identical.
+void showCustomerDetailSheet(WidgetRef ref, BuildContext context, String name) {
+  final match =
+      ref.read(_customerViewsProvider).where((v) => v.customer.name == name);
+  if (match.isEmpty) return;
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: BsTokens.cardLight,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+    ),
+    builder: (_) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: _CustomerDetailSheet(view: match.first),
+    ),
+  );
+}
+
 /// One customer's full view-model — the [ManagerCustomer] aggregate (name /
 /// orderCount / totalSpend / creditLimit) PLUS the two derived fields the legacy
 /// `mc-card` renders that are NOT on the aggregate: `pct` (credit-utilisation %)
