@@ -674,8 +674,9 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ref.watch(catalogSectionProvider) == 'עץ חכם')
                   const _PulsingStatus(text: 'עץ חכם הופעל')
                 else
-                  // תווית-גרסה: kVersionLabel בלבד (secondary/אפור, לא ירוק — ליטוש).
-                  // ירוק שמור ל-_PulsingStatus החי. kBuild/kReleaseNote → "אודות" בלבד.
+                  // תווית-גרסה: kVersionLabel + kBuild (ה-sha) — secondary/אפור, לא
+                  // ירוק (ליטוש). ה-sha משתנה בכל פריסה, כך שאפשר לוודא "אני על החדש"
+                  // (לא cache ישן). ירוק שמור ל-_PulsingStatus החי.
                   // הגרסה נגזרת מ-version.g.dart (gitignored, אוטומטי — לקח #72).
                   const Row(
                     key: Key('version_chrome'),
@@ -683,7 +684,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          kVersionLabel,
+                          '$kVersionLabel · $kBuild',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
