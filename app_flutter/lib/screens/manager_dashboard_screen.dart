@@ -19,6 +19,7 @@ import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart'
     show CreditExplainScreen;
 import 'package:buildsmart/screens/intel/intel_tab.dart' show IntelTab;
+import 'package:buildsmart/screens/intel/journey_labels.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbManagerDashboardNodes;
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
@@ -37,6 +38,8 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kHrRelocationFlag;
+import 'package:buildsmart/state/intel/intel_event.dart' show IntelEvent;
+import 'package:buildsmart/state/intel/intel_log.dart' show intelLogProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -2378,11 +2381,246 @@ class _CustomerDetailSheet extends ConsumerWidget {
                   ),
                 ),
             ],
+            // ── Pillar-3 · step 99 (PART A) — the per-customer JOURNEY TIMELINE.
+            // ADDITIVE + COMPILE-GATED behind `kIntelLive` (const-false in every
+            // normal / test build ⇒ this whole block AND JourneyTimeline + its
+            // widget tree tree-shake out ⇒ the customer sheet is BYTE-IDENTICAL to
+            // today; the step-98 IntelTab gating pattern). JOINED BY the owner-side
+            // stable key (uid/actorKey), NEVER the display name (R2-#12); today the
+            // derived customer carries no key (`_resolveCustomerKey` → null) so the
+            // section shows its honest empty state instead of ever joining by name.
+            if (kIntelLive) ...[
+              const SizedBox(height: BsTokens.space4),
+              JourneyTimeline(
+                customerKey: _resolveCustomerKey(c),
+                events: ref.watch(intelLogProvider),
+                now: DateTime.now(),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
+}
+
+/// Owner-side resolver for a customer's STABLE intel key (uid/actorKey) — the
+/// journey timeline JOINS BY THIS, never the display name (R2-#12). The derived
+/// [ManagerCustomer] aggregate carries NO customer uid today: it is folded over
+/// `Order.who` display labels and its only identity-ish field, `ownerId`, is the
+/// OWNING MANAGER's uid (always '' on the derived path), NOT the customer's — so
+/// it is not a valid customer join key (identical reconciliation to intel_read.dart
+/// `_customerUid`, step 96). This therefore returns null and the live journey
+/// section shows its honest empty state rather than EVER joining by name.
+/// Forward-ready: when a customer-write path stamps a real customer uid, return it
+/// here and the timeline lights up owner-side — the event `displayName` stays
+/// unused.
+String? _resolveCustomerKey(ManagerCustomer c) => null;
+
+/// Pillar-3 STUDIO · step 99 (PART A) — the per-customer JOURNEY TIMELINE.
+///
+/// A vertical timeline of ONE customer's [IntelEvent]s, JOINED BY the customer's
+/// stable pseudonymous key ([customerKey] = uid/actorKey via `segmentKeyOf`) —
+/// NEVER the display name (R2-#12): two customers who share a NAME but resolve to
+/// different keys see disjoint journeys. The customer's human name is resolved
+/// OWNER-SIDE by the caller (R1-4); this widget NEVER reads
+/// [IntelEvent.displayName].
+///
+/// GATING (byte-identical): mounted ONLY inside `_CustomerDetailSheet`'s
+/// `if (kIntelLive)` branch, so with the compile-const flag OFF (every normal /
+/// test build) it tree-shakes away and the customer sheet is BYTE-IDENTICAL to
+/// today (the step-98 [IntelTab] pattern).
+///
+/// [customerKey] null/empty → the honest empty state (the derived ManagerCustomer
+/// carries no customer uid today — see [_resolveCustomerKey]); [events] is the full
+/// local ring buffer (this widget FOLDS it to the key via [journeyEventsFor]);
+/// [now] is INJECTED for the relative time (testable — never a hidden wall-clock
+/// read).
+///
+/// STYLE (Gate-46): a LIGHT surface, every colour from [BsTokens] (NO raw hex, NO
+/// dark token, NO chart library). Stuck rows are highlighted with the existing
+/// [_StagePill].
+class JourneyTimeline extends StatelessWidget {
+  const JourneyTimeline({
+    required this.customerKey,
+    required this.events,
+    required this.now,
+    super.key,
+  });
+
+  /// The owner-side-resolved stable join key (uid/actorKey). Null/empty → empty
+  /// state. NEVER a display label (R2-#12).
+  final String? customerKey;
+
+  /// The full local intel ring buffer — folded to [customerKey] here.
+  final List<IntelEvent> events;
+
+  /// Injected wall-clock for the relative-time labels (testable).
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final mine = journeyEventsFor(events, customerKey);
+    final converted = journeyConverted(mine);
+    final noKey = customerKey == null || customerKey!.isEmpty;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Semantics(
+              header: true,
+              child: const Text(
+                '🧭 מסע הלקוח',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space2),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsetsDirectional.all(BsTokens.space3),
+            decoration: BoxDecoration(
+              color: BsTokens.cardLight,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: BsTokens.divider),
+            ),
+            child: noKey
+                ? const _JourneyEmpty(
+                    text: 'אין מזהה לקוח לשיוך — המסע יופיע כשייווצר מזהה יציב.',
+                  )
+                : mine.isEmpty
+                    ? const _JourneyEmpty(text: 'אין פעילות מתועדת ללקוח זה עדיין.')
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < mine.length; i++)
+                            _JourneyRow(
+                              event: mine[i],
+                              now: now,
+                              stuck: journeyRowStuck(
+                                mine[i],
+                                converted: converted,
+                              ),
+                              isLast: i == mine.length - 1,
+                            ),
+                        ],
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One journey row — a timeline node (dot + connector), the event emoji + Hebrew
+/// label, a relative time, and — when [stuck] — the reused [_StagePill] highlight.
+/// NEVER renders the event's in-memory displayName (R1-4).
+class _JourneyRow extends StatelessWidget {
+  const _JourneyRow({
+    required this.event,
+    required this.now,
+    required this.stuck,
+    required this.isLast,
+  });
+
+  final IntelEvent event;
+  final DateTime now;
+  final bool stuck;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = stuck ? BsTokens.warnBright : BsTokens.brand;
+    return Semantics(
+      label: '${intelEventHe(event.name)}, ${journeyRelTime(event.at, now)}'
+          '${stuck ? ', תקוע' : ''}',
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Timeline gutter — the node dot + a connector line to the next node.
+            Column(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  margin: const EdgeInsetsDirectional.only(top: 2),
+                  decoration: BoxDecoration(color: node, shape: BoxShape.circle),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(width: 2, color: BsTokens.divider),
+                  ),
+              ],
+            ),
+            const SizedBox(width: BsTokens.space3),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  bottom: BsTokens.space3,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      intelEventEmoji(event.name),
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    const SizedBox(width: BsTokens.space2),
+                    Expanded(
+                      child: Text(
+                        intelEventHe(event.name),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (stuck) ...[
+                      const _StagePill(label: 'תקוע', color: BsTokens.warnBright),
+                      const SizedBox(width: BsTokens.space2),
+                    ],
+                    Text(
+                      journeyRelTime(event.at, now),
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The journey section's muted empty line — the honest "no key / no activity"
+/// state (never a fabricated row, never a name-join fallback).
+class _JourneyEmpty extends StatelessWidget {
+  const _JourneyEmpty({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+      );
 }
 
 // ───────────────────────────────────────────────────────────────────────────
