@@ -31,3 +31,22 @@ const int kRepeatNoResult = 3;
 /// counted per return) in one session that flags a dead-end navigation loop.
 /// Inclusive — the detector fires on `>=` this count.
 const int kBackLoop = 4;
+
+// ── Pillar-3 STUDIO · step 97 — presence heartbeat cadence + TTL ─────────────
+
+/// Presence heartbeat CADENCE: while a customer session is live AND the presence
+/// gate holds, the tracker re-writes `presence/{actorKey}` once per [kHeartbeat].
+/// A peer is judged LIVE only while `now - lastBeat < kHeartbeat * 2.5`
+/// (`presenceLive`, presence.dart) — a 2.5× freshness tolerance so a SINGLE
+/// dropped beat does not flip a live tab to "offline". 30 s balances promptness
+/// against write cost. INJECTED into the tracker/liveness, never read as a wall
+/// clock here (the deterministic-default discipline of this file).
+const Duration kHeartbeat = Duration(seconds: 30);
+
+/// Presence-doc SELF-EXPIRY horizon — deliberately in MINUTES, NOT the 30–90-DAY
+/// `events/` retention: presence is ephemeral "who is online NOW". Each heartbeat
+/// re-stamps `expireAt = serverTs + kPresenceTtl`; if the app dies WITHOUT a clean
+/// `session_end` delete, the Firestore-TTL sweep (Pillar 5) reaps the stale doc
+/// within a few minutes so a crashed tab never lingers as falsely "online".
+/// 3 min = 6× [kHeartbeat] (survives a handful of missed beats before TTL bites).
+const Duration kPresenceTtl = Duration(minutes: 3);

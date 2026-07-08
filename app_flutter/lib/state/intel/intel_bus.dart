@@ -33,6 +33,8 @@ import 'package:buildsmart/state/intel/intel_event.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
 import 'package:buildsmart/state/intel/intel_log.dart';
 import 'package:buildsmart/state/intel/intel_sink.dart';
+import 'package:buildsmart/state/intel/session_tracker.dart'
+    show sessionIdProvider;
 import 'package:buildsmart/state/telemetry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,13 +167,15 @@ class IntelBus {
   /// Build the [IntelEvent] for [name] + [props], stamping `at` now and the
   /// dimensions the bus can resolve. Step 91 fills [IntelEvent.actorKey] from
   /// [actorKeyProvider] (the stable uid-or-anon key; null only in the cold-start
-  /// DEFER window). sessionId (step 97) + screen (step 92) stay null for now. The
-  /// call-site never constructs an [IntelEvent] itself. `read`, never subscribe —
-  /// the bus stays rebuild-free (§2).
+  /// DEFER window); step 97 fills [IntelEvent.sessionId] from [sessionIdProvider]
+  /// (null before the first `session_start` / between sessions). `screen` (step 92)
+  /// rides in [props] via the route observer. The call-site never constructs an
+  /// [IntelEvent] itself. `read`, never subscribe — the bus stays rebuild-free (§2).
   IntelEvent _context(String name, Map<String, String> props) => IntelEvent(
         name: name,
         at: DateTime.now(),
         actorKey: _ref.read(actorKeyProvider),
+        sessionId: _ref.read(sessionIdProvider),
         props: props,
       );
 

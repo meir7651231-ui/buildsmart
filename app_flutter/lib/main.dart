@@ -11,6 +11,8 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/intel/intel_bus.dart' show intelBusProvider;
 import 'package:buildsmart/state/intel/screen_view.dart' show IntelRouteObserver;
+import 'package:buildsmart/state/intel/session_tracker.dart'
+    show sessionTrackerProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show keyboardScreenToolsProvider;
@@ -347,6 +349,12 @@ class BuildSmartApp extends ConsumerWidget {
     // `ref.read` (never watch): a stable-singleton hand-off, so this creates NO
     // rebuild dependency and the tracking stays byte-neutral for the 4 tabs.
     intelRouteObserver.bind(ref.read(intelBusProvider));
+    // Step 97 — construct the session tracker ONCE (read-only, like the bind
+    // above): its ctor registers the app's ONE app-lifecycle observer + runs the
+    // always-on LOCAL session (session_start/end → the bus). Off-backend /
+    // non-customer the presence heartbeat inside it is inert (the double-gate) —
+    // zero timer, zero Firestore on the demo/test path.
+    ref.read(sessionTrackerProvider);
     final settings = ref.watch(appSettingsProvider);
     final catalogSettings = ref.watch(catalogSettingsProvider);
     final textScale = switch (catalogSettings.textSize) {

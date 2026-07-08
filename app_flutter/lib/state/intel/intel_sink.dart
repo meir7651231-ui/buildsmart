@@ -37,6 +37,7 @@ import 'dart:async';
 import 'package:buildsmart/state/intel/actor_key.dart' show ActorStitchWriter;
 import 'package:buildsmart/state/intel/intel_bus.dart' show IntelSink;
 import 'package:buildsmart/state/intel/intel_event.dart';
+import 'package:buildsmart/state/intel/presence.dart' show PresenceWriter;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
@@ -144,6 +145,70 @@ class FirestoreActorStitchWriter implements ActorStitchWriter {
       },
       SetOptions(merge: true),
     );
+  }
+}
+
+/// The dedicated PRESENCE collection (step 97 · §2) — keyed by `actorKey`, ONE doc
+/// per live customer ("who is online NOW"). Minutes-scale `expireAt` (Firestore
+/// TTL, Pillar 5) reaps a crashed tab; the §7 erasure-sweep (step 99) purges BOTH
+/// `presence/{uid}` and `presence/{actorKey}`. NEVER a `catalog_*` collection.
+const String kPresenceCollection = 'presence';
+
+/// The REAL Firestore presence writer (step 97 · §2) — the heartbeat counterpart
+/// of [FirestoreIntelBatchWriter], kept HERE so `cloud_firestore` stays isolated to
+/// this ONE intel/ file (presence.dart defines only the neutral [PresenceWriter]
+/// port and stays Firebase-free). [upsert] merge-writes `presence/{actorKey}` with
+/// ONLY the pseudonymous `actor_key` / `uid` + the `screen` label + a server
+/// `last_beat` + a `expire_at` — NEVER a human name / PII (R1-4). Resolves
+/// `FirebaseFirestore.instance` LAZILY (const ctor, nullable injected), so merely
+/// constructing it touches no platform channel; built ONLY behind the presence
+/// double-gate (`presenceWriterProvider`), so it never exists off-backend. Throws
+/// on failure (the `Presence` caller swallows it).
+class FirestorePresenceWriter implements PresenceWriter {
+  /// Const so the gate returns it without allocating; [firestore] is injectable
+  /// for tests (never resolved until a write).
+  const FirestorePresenceWriter({
+    FirebaseFirestore? firestore,
+    this.collectionPath = kPresenceCollection,
+  }) : _injected = firestore;
+
+  final FirebaseFirestore? _injected;
+
+  /// The presence collection path (overridable in a test).
+  final String collectionPath;
+
+  FirebaseFirestore get _db => _injected ?? FirebaseFirestore.instance;
+
+  @override
+  Future<void> upsert({
+    required String actorKey,
+    required String screen,
+    required Duration ttl,
+    String? uid,
+  }) async {
+    // `last_beat` stays the AUTHORITATIVE serverTimestamp so a client cannot fake
+    // freshness (the injected-`now` discipline). `expire_at` is client-stamped
+    // `now + ttl` (MINUTES) because a serverTimestamp cannot be arithmetic'd
+    // server-side; it is re-stamped every beat and is only a TTL-reaper backstop.
+    // NO `displayName` — only the pseudonymous `actor_key` / `uid` + the `screen`
+    // label ever leave the device (R1-4).
+    final expireAt = Timestamp.fromDate(DateTime.now().toUtc().add(ttl));
+    await _db.collection(collectionPath).doc(actorKey).set(
+      <String, Object?>{
+        'actor_key': actorKey,
+        if (uid != null) 'uid': uid,
+        'screen': screen,
+        'last_beat': FieldValue.serverTimestamp(),
+        'expire_at': expireAt,
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  @override
+  Future<void> remove({required String actorKey}) async {
+    // session_end: delete the doc immediately (never rely on TTL alone, §4).
+    await _db.collection(collectionPath).doc(actorKey).delete();
   }
 }
 
