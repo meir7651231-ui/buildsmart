@@ -2,6 +2,30 @@
 
 Short records of notable choices. Newest first.
 
+## D-017 · Studio GA-lock — "built 100%, dormant, one owner-gated flip from live" · Gate #123
+**Trigger:** Step 100 closes the No-Code Studio at 100% (all five pillars end-to-end).
+"Done" for a feature this large needed a precise, machine-checkable definition —
+otherwise "complete" silently drifts into "accidentally armed in production".
+**Decision:** "Complete" = **built AND provably safe-by-default**, NOT "live". The
+distinction is pinned by a governance doc + a gate, not left to prose.
+1. **Dormancy is the shipped invariant** — every pillar sits behind a compile-const
+   flag (`STUDIO`/`STUDIO_LIVE`/`CATALOG_SERVER_SEARCH`/`CATALOG_BASE_URL`/
+   `STUDIO_CO_EDITOR`/`INTEL_LIVE`), all default OFF/empty, so a no-`--dart-define`
+   build tree-shakes the whole surface → `main.dart.js` byte-identical to today.
+2. **Gate #123 (`test/studio/gate_123_ga_safety_test.dart`)** proves it three ways:
+   (A) each flag const folds to its safe default; the composed `useCatalogServerSearch`
+   guard is false without a live backend (Firebase never inits in tests → nothing
+   activates); (B) a **self-maintaining** source scan fails the suite if any future
+   pillar flag is added without a default-OFF assertion — the safety net can't rot;
+   (C) anti-vacuous. Enforced via the TEST, not the 57 KB pre-commit hook (same
+   choice as #119/#120).
+3. **Go-live is owner-gated, never autonomous** — the arm sequence (merge→main →
+   Flutter cutover → backend deploy → staged flag-flip → per-step owner approval) is
+   documented in `knowledge/STUDIO_GA.md` and is a set of owner decisions. The agent
+   builds and proves-dormant; it does not flip production.
+**Consequence:** `STUDIO_GA.md` is the source of truth for "built vs live"; the next
+free gate advances to 124.
+
 ## D-016 · Customer-intelligence privacy model — consent-gated · uid-keyed · erasable · Gate #120
 **Trigger:** Studio Pillar-3 (steps 86–99) added a live analytics layer
 (`lib/state/intel/` + `lib/logic/intel/`). An analytics layer is the classic PII

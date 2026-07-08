@@ -90,6 +90,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | `CARRY_FORWARD.md` | numbered cross-session lessons, distilled from `stuck_log`; Top 10 section at top |
 | `stuck_log.md` | living problem→solution→ANTIPATTERN log (append-only; gates 101/102) |
 | `GATE_REGISTRY.md` | gate number map + "next available" counter — prevents collision (lesson #66, #67) |
+| `STUDIO_GA.md` | **Studio GA-lock (Step 100)** — pillar-completion matrix · the dormancy invariant (which flag arms what) · the owner-gated go-live runbook · Gate #123. Source of truth for "built vs live". |
 | `PROPOSAL_version_friction.md` | **proposal (draft)** — fix for version-label friction (lesson #72); reviewed by 6 agents. Status: awaiting GO. On implement → decisions move to DECISIONS/ADR, this → stub |
 
 ### הגדרות-תפקיד · session · build

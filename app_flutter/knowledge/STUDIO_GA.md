@@ -1,0 +1,84 @@
+# STUDIO_GA — מוכנוּת-שיגור ל-No-Code Studio (Step 100 · GA-lock)
+
+> **סטטוס: 🏁 Studio 100% בנוי · רדום · byte-identical · צעד-אישור-בעלים אחד מהחיים.**
+> נחתם ב-Step 100 (2026-07-08). זהו מסמך-המקור-האמת למצב-המוכנוּת של הסטודיו
+> ולרצף-ההדלקה שבשליטת-הבעלים. הוא **לא מדליק** דבר — הוא **נועל** את מצב-הכיבוי
+> ומוכיח אותו ע"י שער #123.
+
+---
+
+## 1. מטריצת-שלמות — 5 עמודים
+
+| עמוד | מה | שלבים | דגל-אב | שער | סטטוס |
+|------|-----|-------|--------|-----|-------|
+| ע1 | seams קפואים (`ElementDescriptor`/`ConfigOp`/`applyOps`) + config-store | 1–38 | `STUDIO` | #118 | ✅ |
+| ע2 | בונה-חיבורים (trade/connection studio) | 39–50 | `STUDIO` | — | ✅ |
+| ע5 | Scale/Data/Backend & Publish-to-All | 51–68 | `STUDIO_LIVE`·`CATALOG_*` | #121·#122 | ✅ |
+| ע4 | עורך-AI מעוגן ("תגיד לאפליקציה מה לשנות, בעברית") | 69–85 | `STUDIO_CO_EDITOR` | #119 | ✅ |
+| ע3 | מודיעין-לקוח חי (consent-gated · uid-keyed · erasable) | 86–99 | `INTEL_LIVE` | #120 | ✅ |
+| — | **GA-lock (safe-by-default capstone)** | **100** | *(כל הדגלים)* | **#123** | ✅ |
+
+**כל 5 העמודים בנויים end-to-end.** אין עמוד חלקי; אין TODO פתוח בקוד-הסטודיו.
+
+---
+
+## 2. אינווריאנט-הכיבוי (למה "בנוי" ≠ "חי")
+
+כל שטח-הסטודיו רדום מאחורי דגלי-קומפילציה `bool.fromEnvironment` / `String.fromEnvironment`.
+בבנייה **ללא** `--dart-define` כל דגל נטען לברירת-המחדל הבטוחה, התנאי `if (kXxx)` הופך
+`const false`, וה-tree-shaker מוחק את הענף **וגם** את השטח המופנה רק ממנו ⇒ ה-`main.dart.js`
+של ה-demo/פרודקשן **byte-identical** להיום. שער #123 מוכיח זאת מכנית.
+
+| דגל | סוג | ברירת-מחדל | מה נדלק כשמפעילים | קובץ |
+|-----|-----|------------|-------------------|------|
+| `STUDIO` (`kStudioFlag`) | bool | `false` | בסיס-הסטודיו | `state/studio/studio_flags.dart` |
+| `STUDIO_LIVE` (`kStudioLive`) | bool | `false` | config שרתי (draft→publish על Firestore) | `data/repositories/backend.dart:198` |
+| `CATALOG_SERVER_SEARCH` (`kCatalogServerSearch`) | bool | `false` | חיפוש-קטלוג ממודד-שרת | `backend.dart:202` |
+| `CATALOG_BASE_URL` (`kCatalogBaseUrl`) | String | `''` | ה-URL של ה-API (**ריק=נושא-משקל** — ברירת-מחדל לא-ריקה שוברת byte-identity) | `backend.dart:210` |
+| `STUDIO_CO_EDITOR` (`kStudioCoEditor`) | bool | `false` | עורך-ה-AI המנהלי (ע4) | `backend.dart:236` |
+| `INTEL_LIVE` (`kIntelLive`) | bool | `false` | מודיעין-לקוח חי (ע3) | `backend.dart:253` |
+
+**מגן-שכבה-שנייה:** ה-guards המורכבים (`useCatalogServerSearch`, `analyticsForwardEnabled`,
+ציר-ה-`enabled` של עורך-ה-AI) **מ-AND-ים** עם `useFirebaseBackend` (= `Firebase.apps.isNotEmpty`),
+כך שגם דגל שהודלק בטעות **אינו מפעיל** דבר ללא backend חי. בדיקות לעולם לא מאתחלות Firebase
+⇒ שום עמוד לא נדלק בטסטים. (נאכף ב-#123 part A.)
+
+---
+
+## 3. רצף-ההדלקה — **בשליטת-הבעלים בלבד** (לא אוטונומי)
+
+הסטודיו "חי על המסך הפעיל" דורש החלטות שהן של הבעלים. הסדר (fail-safe, הפיך):
+
+1. **merge → main** — מיזוג ענף `claude/kind-dijkstra-ptm4nn` ל-`main` (PR, אישור-בעלים).
+2. **Flutter cutover** — החלפת ה-Preact החי (`app/`, GitHub Pages) ב-build של `app_flutter/`.
+   עד לרגע זה `app/` הוא ה-live; שום דגל-Flutter לא משפיע על הפרודקשן.
+3. **backend deploy** — Firestore rules+indexes (סדר #121) → functions → seed. **לפני** כל דגל.
+4. **הדלקה מדורגת (staged)** — דגל-אחד-בכל-פעם, אימות בין לבין:
+   `USE_FIREBASE_BACKEND` → `STUDIO_LIVE` → `CATALOG_*` → `STUDIO_CO_EDITOR` (+`CLAUDE_AI`) → `INTEL_LIVE` (+consent).
+   כל דגל הפיך ע"י הסרת ה-`--dart-define` וre-build.
+5. **אישור-בעלים לכל שלב** — במיוחד ע3 (`INTEL_LIVE`): מפעיל את מודאל-ההסכמה; ברירת-מחדל DENY
+   נשמרת עד שהמשתמש מסכים פר-גרסת-מדיניות.
+
+**הערה:** אף אחד מ-1–5 לא בוצע ולא ייעשה אוטונומית — כולם ממתינים להוראת-בעלים מפורשת.
+
+---
+
+## 4. אימות (GA gate של Step 100)
+
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` → **0 errors**.
+- `flutter test test/studio/gate_123_ga_safety_test.dart` → **3/3** (part A const-fold ·
+  part A composed-guard · part B closed-set self-maintaining).
+- כל דגלי-ה-Pillar מכוסים; דגל-Pillar חדש שיתווסף ללא assertion בטוחה **יפיל** את #123
+  (part B) — רשת-הבטיחות לא מתיישנת.
+- אפס-רגרסיה: הבסיס ה-flaky (~13) נשמר; שום כשל דטרמיניסטי חדש.
+
+---
+
+## 5. מה **לא** נכלל ב-"100%" (בכוונה)
+
+- **הדלקה בפועל** — סעיף 3, החלטת-בעלים.
+- **פריסת-backend / cutover** — תשתית, לא קוד-סטודיו.
+- **מסכי typed-arg mutating** (ע4) — מוצגים GREYED/deferred במכוון (R1-5), יידרשו שער-P1
+  נפרד (`AddComponent` / role-grant) — מחוץ להיקף-הסטודיו.
+
+> **שורה-תחתונה:** הסטודיו **גמור, מלא, ומוכח-רדום.** מכאן זה החלטת-בעלים מתי לזרוע אותו לחיים.

@@ -3248,3 +3248,23 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **🔒 שער-פרטיות #120 (analytics-PII) — NEW `test/studio/gate_120_test.dart`** (מראה `gate_118`/`gate_119` — סריקת-מקור בזמן-טסט): (א) surface-הסריאליזציה (`toWire`+writers) = **closed-set פסאודונימי** (allowlist 10 מפתחות: `name`/`actor_key`/`uid`/`session_id`/`screen`/`props`/`at`/`anonKeys`/`last_beat`/`expire_at`) · (ב) `_looksLikePii` denylist על כל map-key ב-`lib/state/intel/`+`lib/logic/intel/` (email/phone/full_name/address/raw-query/credential) · (ג) `'displayName'` **נעדר** כ-wire-key מכל השכבה (R1-4) · (ד) anti-vacuous (`email`/`full_name`/`user_query`/`displayName` שתולים → יורים; `name`/`q_hash`/`actor_key` → לא). **`knowledge/GATE_REGISTRY.md:13` #120 ✅ מיושם** · **`.githooks/pre-commit` לא-נגוע במכוון** (57KB · no-op בענף) — **#120 נאכף דרך הטסט** (בדיוק כמו #119 ב-s85). **אין bump ל"הבא הפנוי" (נשאר 123 — #120 היה שמור-מראש).**
 - **🧹 erasure-sweep שלם (זכות-מחיקה תיקון-13 §14):** **NEW `lib/state/intel/erasure.dart`** — executor Dart **טהור** (`eraseSubject(uid, {reader, deleter})` + `ErasurePlan`/`ErasureReader`/`ErasureDeleter` ports, Firebase-free/testable) שמוחק על **key-set רב-מפתחי `{uid, ...anonKeys}`** (anonKeys מ-`actorStitch/{uid}`, R1-3): **events** `actor_key∈{uid,...}` · **presence/{uid} וגם presence/{actorKey}** · **sessions** (אם קיים) · **displayName→''** · **actorStitch/{uid}** עצמו. **`functions/src/deleteAccount.ts`** — הרחבת ה-GDPR callable ב-`purgeIntelForSubject(uid)` שמריץ את **אותו key-set בדיוק** מול Firestore חי (best-effort + paginated כמו `purgeMultiPartyReferences`; אודיט `intelPurged`). **NEW `test/intel/erasure_completeness_test.dart`** (חובה §5): seed anon-pre-stitch + uid events + presence×2 + displayName-row + `actorStitch/{uid}` → sweep → **אפס שאריות בכל קולקציה** (כולל ה-anon-pre-stitch, מגיע דרך actorStitch) + anti-vacuous (נושא-אחר שורד).
 - **gate:** `flutter analyze` **0** · `erasure_completeness_test`(3) + `gate_120_test`(6) + `journey_timeline_test` + `knowledge_protocol_test`(#94) ירוקים · `functions` **`tsc --noEmit` 0** + harness `studio.test.ts` 74/74 + `selftest.ts` 82/82. **🏁 עמוד-3 (86–99) חתום: הסכמה→taxonomy→bus→sink→actor-key/stitch→instrumentation→funnel/segments→session/presence→טאב-מנהל+journey→#120→erasure. הכל consent-gated · uid-keyed · erasable; ההדלקה ב-100 מאחורי אישור-בעלים.**
+
+### #studio-s100 — 🏁 GA-lock · safe-by-default capstone (Studio 100%) — 2026-07-08
+**הצעד האחרון של הסטודיו. אפס-`lib/` — capstone של test+docs בלבד (byte-identical by-construction).**
+**NEW `test/studio/gate_123_ga_safety_test.dart`** (שער #123): מוכיח מכנית שהסטודיו נשלח **רדום**.
+(A) כל 6 דגלי-ה-Pillar (`kStudioFlag`/`kStudioLive`/`kCatalogServerSearch`/`kCatalogBaseUrl`/
+`kStudioCoEditor`/`kIntelLive`) נטענים לברירת-מחדל בטוחה (false/'') בבנייה ללא `--dart-define` —
+כלומר האסרשן על ה-const **הוא** האסרשן על ערך-הבנייה-הנשלחת · ה-guard המורכב `useCatalogServerSearch`
+(=`kCatalogServerSearch && useFirebaseBackend`) = false ללא backend חי (טסטים לא מאתחלים Firebase ⇒
+`Firebase.apps` ריק ⇒ שום עמוד לא נדלק). (B) **closed-set self-maintaining** — סריקת-מקור של
+`backend.dart`+`studio_flags.dart` ל-`const … k(Studio|Intel|Catalog)… = …fromEnvironment(...)`;
+**כל** דגל-Pillar חייב להופיע בסט-המאושר, כך שדגל-Pillar חדש שיתווסף ללא assertion בטוחה **יפיל** את
+השער — רשת-הבטיחות לא מתיישנת. (C) anti-vacuous (הסריקה מוכחת לא-ריקה).
+**NEW `knowledge/STUDIO_GA.md`** — מקור-האמת ל"בנוי מול חי": מטריצת-שלמות 5-עמודים · אינווריאנט-הכיבוי
+(איזה דגל מדליק מה) · רצף-ההדלקה **בשליטת-בעלים** (merge→main → Flutter cutover → backend deploy →
+staged flag-flip → אישור-בעלים פר-שלב) · מה **לא** נכלל ב-100% במכוון. נרשם ב-`README.md` (אנטי-יתום D-015).
+**`knowledge/GATE_REGISTRY.md`:** #123 ✅ + **"הבא הפנוי" → 124** (הפעם bump אמיתי — #123 לא היה שמור-מראש).
+**`knowledge/DECISIONS.md` D-017:** "built 100%, dormant, one owner-gated flip from live". **`.githooks/pre-commit`
+לא-נגוע** (capstone של test+docs; #123 נאכף דרך חבילת-הטסטים כמו #119/#120). **gate:** `flutter analyze` **0** ·
+`gate_123`(3/3) + `knowledge_protocol_test`(#94) ירוקים · אפס raw Color · אפס שינוי `lib/` ⇒ אפס-רגרסיה by-construction.
+**🏁🏁 הסטודיו (No-Code) הושלם 100% end-to-end — 5 עמודים בנויים, מוכחים-רדומים, byte-identical, צעד-אישור-בעלים אחד מהחיים.**
