@@ -1,7 +1,8 @@
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
-import 'package:buildsmart/data/repositories/backend.dart' show kStudioCoEditor;
+import 'package:buildsmart/data/repositories/backend.dart'
+    show kIntelLive, kStudioCoEditor;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 // A13 — the server-canonical credit seam: the repository provider + the
@@ -17,6 +18,7 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart'
     show CreditExplainScreen;
+import 'package:buildsmart/screens/intel/intel_tab.dart' show IntelTab;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbManagerDashboardNodes;
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
@@ -78,9 +80,12 @@ class ManagerDashboardScreen extends ConsumerWidget {
 
   static final List<KbToolNode> _kbNodes = kbManagerDashboardNodes();
 
-  /// Number of top tabs (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול);
-  /// kept in lockstep with [_kManagerTabs] (asserted in the screen's test).
-  static const int tabCount = 4;
+  /// Number of top tabs (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול) —
+  /// DERIVED from [_kManagerTabs].length so the toggle, the help tuples and the
+  /// [IndexedStack] children can NEVER drift out of lockstep: all four carry the
+  /// SAME one `if (kIntelLive)`-gated 5th element (step 98). const-false
+  /// `kIntelLive` ⇒ 4 (byte-identical demo); INTEL_LIVE on ⇒ 5, all four together.
+  static int get tabCount => _kManagerTabs.length;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -238,6 +243,12 @@ class ManagerDashboardScreen extends ConsumerWidget {
                 _OrdersTab(),
                 _CustomersTab(),
                 _ManageTab(),
+                // Step 98 — the 5th tab (📡 מודיעין לקוחות) is COMPILE-GATED behind
+                // `kIntelLive` (const-false in every normal/test build ⇒ tree-shaken
+                // out, so the shipped dashboard is byte-identical with 4 tabs). In
+                // LOCKSTEP with `_kManagerTabs` / `_kManagerTabHelp` / `tabCount` —
+                // all four share this one `if (kIntelLive)`.
+                if (kIntelLive) IntelTab(),
               ],
             ),
           ),
@@ -3660,6 +3671,11 @@ const List<_ManagerTab> _kManagerTabs = [
   _ManagerTab(emoji: '🚚', label: 'הזמנות'),
   _ManagerTab(emoji: '👥', label: 'לקוחות'),
   _ManagerTab(emoji: '🛠️', label: 'ניהול'),
+  // Step 98 — the 5th tab, COMPILE-GATED behind `kIntelLive` (const-false in
+  // every normal/test build ⇒ this element collapses out and the list is the
+  // verbatim 4 tabs). LOCKSTEP with `_kManagerTabHelp` / the `IndexedStack`
+  // children / `tabCount` — all four carry this SAME `if (kIntelLive)`.
+  if (kIntelLive) _ManagerTab(emoji: '📡', label: 'מודיעין לקוחות'),
 ];
 
 /// #31 — the per-tab "מצב היכרות" (title, body) explanations, indexed in
@@ -3687,4 +3703,13 @@ const List<(String, String)> _kManagerTabHelp = [
     'פותח את מרכז הניהול (No-Code): אישורי משימות, בקשות חופשה, קטגוריות, '
         'הגדרות אפליקציה, עץ מוצרים, מותגים ושיוך תפקידים.',
   ),
+  // Step 98 — the 5th tab's help tuple, COMPILE-GATED behind `kIntelLive`
+  // (const-false ⇒ collapses out, 4 tuples byte-identical). LOCKSTEP with
+  // `_kManagerTabs` / the `IndexedStack` children / `tabCount`.
+  if (kIntelLive)
+    (
+      'מודיעין לקוחות',
+      'מציג מודיעין לקוחות חי: משפך המרה, פלחי לקוחות, שימור ומי מחובר כעת — '
+          'מקופל מהמכשיר, קריאה בלבד למנהל.',
+    ),
 ];
