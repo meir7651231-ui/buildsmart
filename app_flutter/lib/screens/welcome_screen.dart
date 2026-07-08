@@ -391,11 +391,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// via [BoardAuthNotifier.login]. The registration form is contractor-only
   /// and never built here; 'מצב דמו' enters an honest demo board session.
   List<Widget> _boardLoginChildren(BoardRole role) {
-    // Manager (OWNER) — Google-only secure login (no seed code, no demo entry).
-    if (role == BoardRole.manager) return _managerGoogleChildren();
     final codeFormatOk = _validBoardCode(_contact.text);
     final loginValid = _name.text.trim().isNotEmpty && codeFormatOk;
     return [
+      // Manager (OWNER): the secure path is "כניסה עם Google" (owner-email). On
+      // web — where Google sign-in isn't configured yet — a seeded code-login
+      // (admin/5555) is ALSO offered so the owner can reach the manager board.
+      // DEMO-GRADE (a compiled code); revert to Google-only before real production.
+      if (role == BoardRole.manager) ...[
+        ..._managerGoogleChildren(),
+        const SizedBox(height: BsTokens.space5),
+        const Divider(height: 1),
+        const SizedBox(height: BsTokens.space4),
+        const Text(
+          'או כניסה עם קוד (demo)',
+          style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        ),
+        const SizedBox(height: BsTokens.space3),
+      ],
       HelpTarget(
         title: 'כניסה ללקוח קיים',
         body: 'הדרך הראשית להיכנס ללוח — לחיצה פותחת את שדות שם המשתמש '
