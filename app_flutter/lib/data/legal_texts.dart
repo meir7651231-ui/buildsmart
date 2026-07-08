@@ -3,8 +3,12 @@
 // HONESTY RULES (חוקי-על):
 // • Everything stated here about what the app DOES is 100% true today:
 //   data lives on-device only (SharedPreferences), there is no BuildSmart
-//   server, no analytics SDK, no ads. Future Firebase sync is described as
-//   PLANNED and explicitly gated on a policy update + user notice.
+//   server, no ads, no third-party tracking. Usage analytics is GATED and
+//   default-OFF: today it is a local on-device event log that never transmits;
+//   a remote forward is consent-first (informed opt-in) and version-gated, and
+//   activates only WHEN explicitly enabled — never a live product by default.
+//   Future Firebase sync is described as PLANNED and explicitly gated on a
+//   policy update + user notice.
 // • Company-specific identity facts are unknown at this stage, so they appear
 //   as explicit bracketed placeholders ([שם החברה] etc.) — never invented.
 // • Legal references verified against Amendment 13 sources (Aug 2025):
@@ -16,7 +20,14 @@
 // Rendered by lib/screens/legal_screen.dart.
 
 /// Display date of the last revision of both documents.
-const String kLegalLastUpdated = '10 ביוני 2026';
+const String kLegalLastUpdated = '7 ביולי 2026';
+
+/// The CURRENT privacy-policy version the consent modal writes on "אני מסכים"
+/// (`AppSettings.consentedPolicyVersion`). The analytics-forward gate requires
+/// `consentedPolicyVersion >= kCurrentPolicyVersion`, so BUMPING this number
+/// de-facto resets every user's consent to DENY until they re-opt-in — the
+/// Amendment-13 re-notice requirement. Start at 1 (0 = never-consented default).
+const int kCurrentPolicyVersion = 1;
 
 /// תנאי שימוש — Terms of Use for BuildSmart.
 const String kTermsOfUse = '''
@@ -109,7 +120,7 @@ const String kPrivacyPolicy = '''
 
 תמונות מוצרים בקטלוג נטענות מרשת אחסון תוכן (CDN — שירות Cloudflare R2). כמו בכל בקשת רשת, ספק האחסון נחשף לנתוני התקשורת הטכניים (כגון כתובת IP). לבקשות אלה לא מצורף שום מידע מהפרופיל שלך. התמונות נשמרות במטמון מוגבל במכשיר לשיפור הביצועים.
 
-מעבר לכך: אין באפליקציה פרסומות, אין כלי אנליטיקה או מעקב של צד שלישי, אין מכירה או השכרה של מידע אישי, ואין דיוור ישיר. אם יופעל בעתיד דיוור ישיר — הוא יבוצע בכפוף להוראות סעיפים 17ג–17ו לחוק הגנת הפרטיות, לרבות זכותך לדרוש הסרה.
+מעבר לכך: אין באפליקציה פרסומות, אין מעקב של צד שלישי, אין מכירה או השכרה של מידע אישי, ואין דיוור ישיר. אנליטיקת השימוש מגודרת: ברירת-המחדל כבויה, והנתונים נאספים ונשמרים במכשירך בלבד (יומן אירועים מקומי) ואינם משודרים אלינו. העברת נתוני שימוש מצומצמים אלינו תופעל אך ורק לאחר קבלת הסכמתך המדעת, ובכפוף לגרסת המדיניות שאושרה; ניתן למשוך את ההסכמה ולחזור למצב הכבוי בכל עת. אם יופעל בעתיד דיוור ישיר — הוא יבוצע בכפוף להוראות סעיפים 17ג–17ו לחוק הגנת הפרטיות, לרבות זכותך לדרוש הסרה.
 
 ## 6. תוכניות עתידיות — סנכרון ענן
 

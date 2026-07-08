@@ -20,6 +20,7 @@ on:
       - 'firestore.rules'
       - 'firestore.indexes.json'
       - 'functions/**'
+      - 'scripts/bootstrap-studio-pointer.mjs'
       - '.github/workflows/firebase-deploy.yml'
   workflow_dispatch:
 
@@ -67,6 +68,15 @@ jobs:
         working-directory: functions
         run: npm run build
 
+      # Offline self-test (no Firebase/emulator/network): asserts the pure S8
+      # logic AND — Step 68 / R2-10 — the deploy-ordering of THIS workflow
+      # (bootstrap-before-rules, functions-gated-on-index-success, READY-poll,
+      # no continue-on-error). A reorder or a re-added continue-on-error fails
+      # here, before a single artifact ships.
+      - name: Functions self-test (GATE — logic + deploy-ordering, R2-10)
+        working-directory: functions
+        run: npm run selftest
+
       - name: Write service-account credentials
         run: |
           printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp-sa.json"
@@ -75,6 +85,17 @@ jobs:
       - name: Install firebase-tools
         run: npm i -g firebase-tools
 
+      # Step 68 / R2-10 (a): seed the studioConfig/published pointer BEFORE the
+      # rules-lock. Idempotent create-if-absent (never clobbers a live publish);
+      # firebase-admin resolves ADC from GOOGLE_APPLICATION_CREDENTIALS (set above).
+      - name: Install firebase-admin (bootstrap dep)
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install firebase-admin@13 >/dev/null 2>&1
+
+      - name: Bootstrap studioConfig/published pointer (R2-10 — before rules-lock)
+        run: node scripts/bootstrap-studio-pointer.mjs
+
       - name: Deploy Firestore rules
         run: |
           firebase deploy \
@@ -82,15 +103,45 @@ jobs:
             --project buildsmart-b0b78 \
             --non-interactive
 
-      # Indexes need the "Cloud Datastore Index Admin" role on FIREBASE_SERVICE_ACCOUNT.
-      # Best-effort (403 until the owner grants that IAM) so it never blocks rules/functions.
-      - name: Deploy Firestore indexes (best-effort — needs Datastore Index Admin IAM)
-        continue-on-error: true
+      # Step 68 / R2-10 (b): indexes are now a HARD GATE (the "Cloud Datastore
+      # Index Admin" role was granted 2026-06-14 — see the header note), so the
+      # old best-effort `continue-on-error` is removed. If the index deploy fails
+      # the job STOPS here and the functions deploy below never runs — the
+      # token-indexer / rollups must NEVER go live ahead of their composite index
+      # (that races into FAILED_PRECONDITION). The step id below lets the
+      # functions deploy gate on this step's outcome.
+      - name: Deploy Firestore indexes (GATE — R2-10 gates functions)
+        id: indexes
         run: |
           firebase deploy \
             --only firestore:indexes \
             --project buildsmart-b0b78 \
             --non-interactive
+
+      # Step 68 / R2-10 (d): a freshly-deployed composite index can be CREATING
+      # for minutes. Wait for every index to reach READY *before* the functions
+      # (token-indexer / server-search / rollups) that query it go live — else the
+      # first query throws FAILED_PRECONDITION. Bounded (≤10 min) and fails LOUD.
+      # No `if:` needed — the indexes step above is a hard gate (no
+      # continue-on-error), so on its failure the job aborts and this step is
+      # skipped automatically. Kept unconditional so the ONLY index-outcome gate
+      # in the file is the functions deploy below (single source of the gate).
+      - name: Wait for Firestore indexes READY (R2-10 — no FAILED_PRECONDITION)
+        run: |
+          gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+          for i in $(seq 1 40); do
+            STATES="$(curl -fsS -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+              'https://firestore.googleapis.com/v1/projects/buildsmart-b0b78/databases/(default)/collectionGroups/-/indexes' \
+              | jq -r '.indexes[]?.state' 2>/dev/null || true)"
+            if ! printf '%s\n' "$STATES" | grep -q 'CREATING'; then
+              echo "All Firestore indexes READY (attempt $i)."
+              exit 0
+            fi
+            echo "Indexes still CREATING (attempt $i/40) — waiting 15s…"
+            sleep 15
+          done
+          echo "::error::Timed out waiting for Firestore indexes to reach READY"
+          exit 1
 
       # Inject R2 config (secrets → Secret Manager; params → functions/.env.<project>).
       - name: Provision R2 config for functions
@@ -106,8 +157,15 @@ jobs:
 
       # --force: auto-set the Artifact Registry cleanup policy (otherwise the
       # deploy exits non-zero on the first 2nd-gen deploy even after success).
-      - name: Deploy Cloud Functions (Blaze-gated, non-blocking)
-        continue-on-error: true
+      #
+      # Step 68 / R2-10 (c/e): functions are GATED on the index deploy succeeding
+      # (the `if:` below reads the indexes step's outcome, and the READY-poll above
+      # has confirmed the indexes are live) and the old `continue-on-error` is REMOVED
+      # so a functions failure now fails the deploy LOUD (Blaze is live). This is
+      # what stops the token-indexer / rollups from going live ahead of their
+      # composite index.
+      - name: Deploy Cloud Functions (R2-10 — gated on index success)
+        if: steps.indexes.outcome == 'success'
         run: |
           echo "Deploying Cloud Functions to buildsmart-b0b78..."
           firebase deploy \

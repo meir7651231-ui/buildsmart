@@ -139,6 +139,19 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 //   #6    reviewRoleRequest            — gen2 callable; the matrix-authorized
 //                                        approver grants an operational role
 //                                        (writes the claim) or denies a request
+//   P5.56 publishConfig                — gen2 callable; THE sanctioned publish-
+//                                        to-all path (CAS on expectedBaseVersion,
+//                                        owner/dual-control + live allow-flag,
+//                                        per-uid rate-limit, audit on both paths)
+//   P5.57 revertIllegalConfigWrite     — trigger; reverts any DIRECT write to
+//                                        studioConfig/published lacking the
+//                                        callable's publishGuard stamp (defense-
+//                                        in-depth; loop-guarded like S8.1's revert)
+//   P5.66 rollupAnalyticsDaily         — scheduled; sums the distributed-counter
+//         rollupPresenceSummary          shards → one analyticsDaily/{day} doc, and
+//                                        rolls presence/* → one presenceSummary/
+//                                        current doc (cost-guardrails: owner reads
+//                                        ~1 doc, never the raw collections; R1-1/2/3)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export { deleteAccount } from "./deleteAccount";
@@ -148,3 +161,5 @@ export { askClaude } from "./claude";
 export { onChatMessageCreated, onOrderStageChanged } from "./push";
 export { getUploadUrl } from "./r2";
 export { reviewRoleRequest } from "./reviewRoleRequest";
+export { publishConfig, revertIllegalConfigWrite } from "./studio";
+export { rollupAnalyticsDaily, rollupPresenceSummary } from "./analytics";

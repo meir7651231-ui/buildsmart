@@ -9,6 +9,10 @@ import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/intel/intel_bus.dart' show intelBusProvider;
+import 'package:buildsmart/state/intel/screen_view.dart' show IntelRouteObserver;
+import 'package:buildsmart/state/intel/session_tracker.dart'
+    show sessionTrackerProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show keyboardScreenToolsProvider;
@@ -323,6 +327,15 @@ class _AutoLogoutState extends ConsumerState<_AutoLogout> {
   }
 }
 
+/// Step 92 — the ONE app-global navigator observer (the single addition to
+/// `MaterialApp.navigatorObservers`, empty until now). A stable top-level
+/// singleton so the Navigator's observer list never changes identity across
+/// [BuildSmartApp] rebuilds. It turns every *named* route push/pop into a
+/// `screen_view` centrally — no screen has to emit (~3 edits, not 270). Bound to
+/// the bus once, read-only, in [BuildSmartApp.build]; every current app route is
+/// unnamed so it is inert on the demo path (the tab listener carries the 4 tabs).
+final intelRouteObserver = IntelRouteObserver();
+
 class BuildSmartApp extends ConsumerWidget {
   const BuildSmartApp({super.key});
 
@@ -332,6 +345,16 @@ class BuildSmartApp extends ConsumerWidget {
     // follows auth (sign-in → users/{uid}.fcmToken · refresh → re-write ·
     // sign-out → clear) and foreground pushes toast. Inert without Firebase.
     ref.watch(pushControllerProvider);
+    // Step 92 — hand the app-global route observer its bus, ONCE (idempotent).
+    // `ref.read` (never watch): a stable-singleton hand-off, so this creates NO
+    // rebuild dependency and the tracking stays byte-neutral for the 4 tabs.
+    intelRouteObserver.bind(ref.read(intelBusProvider));
+    // Step 97 — construct the session tracker ONCE (read-only, like the bind
+    // above): its ctor registers the app's ONE app-lifecycle observer + runs the
+    // always-on LOCAL session (session_start/end → the bus). Off-backend /
+    // non-customer the presence heartbeat inside it is inert (the double-gate) —
+    // zero timer, zero Firestore on the demo/test path.
+    ref.read(sessionTrackerProvider);
     final settings = ref.watch(appSettingsProvider);
     final catalogSettings = ref.watch(catalogSettingsProvider);
     final textScale = switch (catalogSettings.textSize) {
@@ -361,6 +384,9 @@ class BuildSmartApp extends ConsumerWidget {
       // ASSIGNMENT is gated; `bsNavigatorKey`'s top-level declaration in toast.dart
       // stays unconditional (an inert `final` global until something reads it).
       navigatorKey: kKbGlobal ? bsNavigatorKey : null,
+      // Step 92 — the ONE navigator observer (empty list until now): emits
+      // `screen_view` automatically on every named route push/pop, read-only.
+      navigatorObservers: [intelRouteObserver],
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(highContrast: highContrast, cfg: cfgTheme),
       darkTheme: AppTheme.dark(highContrast: highContrast, cfg: cfgTheme),

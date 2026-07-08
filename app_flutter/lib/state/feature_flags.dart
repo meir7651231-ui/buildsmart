@@ -42,6 +42,16 @@ const bool kEnableRingDiveDemo =
 /// path. Naming it here keeps callers from stringly-typing the flag.
 const String kKbLiveMirrorFlag = 'kKbLiveMirror';
 
+/// PHASE 0 — HR relocation (owner governance ruling #84, 2026-06-14). When this
+/// runtime flag is enabled the manager board goes OVERSIGHT-ONLY on worker HR:
+/// the contractor/store boards own the actual approvals, the manager sees a
+/// read-only count. Default OFF — INTENTIONALLY absent from
+/// [FeatureFlagsNotifier._forcedOnFlags], so a normal build/test is
+/// byte-identical (the manager keeps its live action sections). Staged ON at
+/// runtime via `ref.read(featureFlagsProvider.notifier).enable(kHrRelocationFlag)`,
+/// exactly like [kKbLiveMirrorFlag].
+const String kHrRelocationFlag = 'kHrRelocation';
+
 // ── No-Code Studio master gate (studio plan, steps 4–5) ──────────────────────
 // The Studio's runtime flag-name is `kStudioFlagName` ('kStudio', in
 // `state/studio/studio_flags.dart`), with the compile-time twin `kStudioFlag`

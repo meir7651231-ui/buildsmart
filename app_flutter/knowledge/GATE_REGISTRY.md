@@ -8,9 +8,13 @@
 
 ---
 
-## הבא הפנוי: **121**
+## הבא הפנוי: **124**
 
-> **שמור-מראש ל-Studio (Red-Team R1):** 118=config ids⊆registry (ע1) **✅ מיושם (studio-s22, `test/studio/gate_118_test.dart`)** · 119=AI-grounded-config (ע4) · 120=analytics-PII (ע3). מיושמים בזמן-הבנייה; שמורים כאן כדי שלא יתנגשו (ראה `studio-plan/RED-TEAM-R1.md`).
+> **שמור-מראש ל-Studio (Red-Team R1):** 118=config ids⊆registry (ע1) **✅ מיושם (studio-s22, `test/studio/gate_118_test.dart`)** · 119=AI-grounded-config (ע4) **✅ מיושם (pillar4-s85, `test/studio/gate_119_test.dart`)** · 120=analytics-PII (ע3) **✅ מיושם (pillar3-s99, `test/studio/gate_120_test.dart`)**. מיושמים בזמן-הבנייה; שמורים כאן כדי שלא יתנגשו (ראה `studio-plan/RED-TEAM-R1.md`). **#119/#120 שמורים-מראש → לא bump בזמנו (121/122 נלקחו ב-Pillar-5 s68).**
+>
+> **Pillar-5 finale (Step 68, R2-10):** 121=deploy-ordering · 122=flags-OFF-parity. **✅ מיושמים** — ראה טבלת קבוצה ד׳.
+>
+> **Studio GA capstone (Step 100):** 123=GA-safe-by-default **✅ מיושם (`test/studio/gate_123_ga_safety_test.dart`)** — כל דגלי ה-Pillar (`STUDIO`/`STUDIO_LIVE`/`CATALOG_SERVER_SEARCH`/`CATALOG_BASE_URL`/`STUDIO_CO_EDITOR`/`INTEL_LIVE`) נטענים לברירת-המחדל הבטוחה בבנייה ללא `--dart-define`, + סריקת closed-set שמפילה כל דגל-Pillar חדש שאינו מכוסה. **הבא הפנוי → 124.**
 
 _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 
@@ -115,6 +119,9 @@ _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 | 115 | hot-file claims — advisory warn (P2 לקח #72) | פרוטוקוליסט 2026-06-03 |
 | 116 | שינוי UI דורש visual_log staged (enforce, P2 לקח #72) | פרוטוקוליסט 2026-06-03 |
 | 117 | lipskey_pdf_parity_test ירוק (kLipskeyCatalog מסונכרן ל-PDF המקור) | קטלגן 2026-06-03 |
+| 121 | deploy-ordering (R2-10): `firebase-deploy.yml` — bootstrap-pointer לפני rules-lock · indexes=GATE (`id: indexes`, ללא continue-on-error) · functions `if: steps.indexes.outcome=='success'` · READY-poll לפני functions. נאכף ב-`functions/src/selftest.ts` (`npm run selftest`, 11 checks offline) | Pillar-5 s68 2026-07-07 |
+| 122 | flags-OFF parity: כל דגל Pillar-5 (`STUDIO_LIVE`/`CATALOG_SERVER_SEARCH`/`CATALOG_BASE_URL`) default OFF/'' — נאכף ב-`test/backend_flag_test.dart` (shipped-default byte-identical) | Pillar-5 s68 2026-07-07 |
+| 123 | **Studio GA — safe-by-default** (capstone): כל דגלי ה-Pillar (STUDIO/STUDIO_LIVE/CATALOG_SERVER_SEARCH/CATALOG_BASE_URL/STUDIO_CO_EDITOR/INTEL_LIVE) נטענים לברירת-מחדל בטוחה ללא `--dart-define`, + `useCatalogServerSearch` guard=false ללא backend חי, + closed-set scan שמפיל דגל-Pillar לא-מכוסה. נאכף ב-`test/studio/gate_123_ga_safety_test.dart` | Studio s100 2026-07-08 |
 
 ---
 

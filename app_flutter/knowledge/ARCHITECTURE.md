@@ -34,6 +34,24 @@ dial overlays.
 `notif_settings`, `store_settings`, `smart_cart`, `cart_lists_state`,
 `product_favorites`. Settings notifiers persist via SharedPreferences.
 
+## Customer intelligence (`lib/state/intel/` + `lib/logic/intel/`)
+Studio Pillar-3 (steps 86–99): a **consent-gated, privacy-first** analytics layer,
+INERT off-backend / pre-consent (compile-gated behind const `kIntelLive`, default
+OFF → the demo is byte-identical). Flow: taxonomy (`intel_events.dart`) → local ring
+buffer (`intel_log.dart`) → `IntelBus.track` fan-out (`intel_bus.dart`) → the
+consent-gated batched Firestore sink (`intel_sink.dart`, the only file importing
+`cloud_firestore`). Every event carries a **pseudonymous `actor_key`** (uid or a
+per-install uuid; `actor_key.dart`), and `IntelEvent.toWire()` **omits `displayName`
+by construction** (R1-4 — names are resolved owner-side). Pure folds:
+`logic/intel/funnels.dart` (`analyzeIntel` + stuck detectors) and `segments.dart`
+(segments/cohorts, keyed by uid/actorKey, never a name). Session + presence:
+`session_tracker.dart` / `presence.dart`. Manager surfaces: `intel_read.dart` (4
+manager-gated providers) + the 5th dashboard tab + the per-customer `JourneyTimeline`.
+**Privacy invariants (D-016):** Gate #120 (`test/studio/gate_120_test.dart` — no PII
+on the wire) + right-to-erasure via `erasure.dart` (`eraseSubject`, a pure multi-key
+sweep proven complete by `erasure_completeness_test.dart`; production twin =
+`functions/src/deleteAccount.ts`).
+
 ## Data (`lib/data/`)
 `lipskey_catalog.dart` (935 products + lazy inverted word index
 `lipskeyWordIndex` / `indexableWord`), `lipskey_smart_data`, `lipskey_hotwater`,

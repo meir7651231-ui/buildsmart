@@ -20,6 +20,7 @@
 | BS dial | 5 personas × עצים · 4 עם תוכן-עלים |
 | בדיקות | 52 קבצי-בדיקה · 12 suites · flutter analyze clean |
 | CI Protocol Enforcement | ✅ Gate-5 false-positive נפתר (BsTokens.chatText v5.69); Gate 1+5 set-e fix; Flutter pin 3.29.3 |
+| Studio · עורך-AI (עמוד-4 · 69–85) | ✅ הושלם 2026-07-07 · שער #119 חי (anti-hallucination + governance #84 חתומים · `test/studio/gate_119_test.dart`) · דגל `kStudioCoEditor` default-OFF |
 
 ### מה בנוי אך מנותק 🔌
 | תחום | פירוט |

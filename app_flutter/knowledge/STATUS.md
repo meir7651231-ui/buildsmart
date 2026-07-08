@@ -5,6 +5,14 @@ Update **only here** on a deliberate release — build advances automatically (�
 
 _known-failing: 2 — שני כשלים **קיימים-מראש** שיורשו ב-merge מ-workstream המקלדת/חיפוש (`state_loadrace_guards` · `favorite_tile_opens_sheet`; פירוט מדויק ב-`known_failing.txt`). אומתו ככושלים **על origin לבדו** (ריצה נקייה) — **לא** מקו עמוד-2/Studio. לתיקון ע"י אותו workstream._
 
+## Studio · עמוד-4 (AI Co-Editor · 69–85) — ✅ הושלם · שער #119 חי — 2026-07-07
+
+**Pillar-4 complete · gate #119 live** — עורך-ה-config המעוגן-מודל חתום end-to-end (closed-sets → matchers → `parseConfigEdit` → `validateSafe` → preview → confirm). שער **#119** (anti-hallucination grounding + governance #84) רשום ב-`GATE_REGISTRY.md` ונאכף דרך `flutter test test/studio/` (`gate_119_test.dart` + ה-property-invariant fuzz ב-`studio_edit_intent_test.dart`, מול ה-registry האמיתי-הקפוא). דגל `kStudioCoEditor` default-OFF ⇒ demo byte-identical.
+
+**§10 governance snapshot (#84 — עקבות-ביקורת, נשמר בין sessions):**
+- **6 closed-sets** שהמודל/הבונה מוגבל לנקוב מתוכם: action-catalog ids (7) · nav.screen targets (38) · component palette types (6) · rule triggers (4) · rule actions (4) · rule condition fields (3).
+- **Capabilities נעדרות בכוונה (closed BY OMISSION):** auth / login / logout / signin/signout · role-grant / set / assign · HR · permission · claim · password / 2FA / OTP — **אף אחת אינה קיימת באף closed-set** (נאכף ב-`gate_119_test`). ה-registry של P1 נושא `auth.login.cta`/`auth.logout` **רק** כ-UI קפוא (`kImmutable`) שה-Studio לא יכול לערוך — הגנה, לא capability.
+
 ## v6.88 — 🐝 סיבוב-10 (הסיבוב העשירי · משלים ≥10): crash-paths CLEAN + date-fix
 
 4 עדשות-טריות. **crash-paths — LENS CLEAN** (סריקה ממצה: כל `.first`/`.firstWhere`/`.reduce`/`[i]`/`map[k]!`/parse גדור — אפס crash נגיש). תוקן:

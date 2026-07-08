@@ -49,7 +49,14 @@ jobs:
         # typing the keyboard row searches EVERY domain (products · screens · chats ·
         # orders · notifications · tasks · customers) — navigate + open, with an
         # "עוד…" overflow. Reversible: drop the flag → byte-identical (tree-shaken).
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true
+        # ── STUDIO GO-LIVE SEAM (dormant by default) ─────────────────────────
+        # ${{ vars.STUDIO_DART_DEFINES }} appends the Studio/Pillar flags for a
+        # STAGED, owner-controlled go-live. UNSET (default) → empty → BYTE-IDENTICAL
+        # to today's live (the Studio surface tree-shakes out). Arm by setting the
+        # repo variable STUDIO_DART_DEFINES to a stage's defines (knowledge/STUDIO_GA.md
+        # §3). Persists across re-deploys; reversible by clearing it. MUST match
+        # web-deploy.yml (same live race — else whichever deploy wins ships a mismatch).
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Deploy to Firebase Hosting (live channel)
         # Redundant with web-deploy.yml (firebase-tools CLI), which already deploys

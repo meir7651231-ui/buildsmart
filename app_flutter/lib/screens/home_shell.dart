@@ -1,7 +1,9 @@
+import 'package:buildsmart/data/repositories/backend.dart' show kIntelLive;
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/consent_modal.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
@@ -17,6 +19,7 @@ import 'package:buildsmart/screens/updates_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/help_mode.dart';
+import 'package:buildsmart/state/intel/screen_view.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/under_construction.dart';
@@ -81,6 +84,23 @@ class HomeShell extends ConsumerWidget {
         });
       }
     });
+
+    // Step 92 — automatic `screen_view` on every tab switch. ONE read-only
+    // `ref.listen` on `mainTabProvider` (the RECONCILED real tab source, §3):
+    // `listen`, never a new `watch`, so this adds ZERO rebuild on top of the tab
+    // UI watch above (:69) and the 4 tabs stay byte-identical. The route half
+    // (pushed screens) is the app-global `intelRouteObserver` (main.dart).
+    listenTabScreenView(ref);
+
+    // Step 86 — one-time, version-gated analytics-consent modal. COMPILE-GATED
+    // behind [kIntelLive] (const-false in every normal build) → this branch AND
+    // the whole consent_modal surface tree-shake away, so the shipped shell is
+    // BYTE-IDENTICAL to today (the step-81 `_StudioHero` hero pattern). When
+    // INTEL_LIVE is flipped on it prompts once until the user consents to the
+    // current policy version.
+    if (kIntelLive) {
+      maybeShowConsentModal(context, ref);
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

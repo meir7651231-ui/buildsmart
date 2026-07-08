@@ -22,4 +22,14 @@ void main() {
     // every repository provider resolves to its `_local` impl.
     expect(useFirebaseBackend, isFalse);
   });
+
+  // Studio Pillar 5 · step 51 — the dormant openers stay OFF/empty by default,
+  // so the whole Phase-4 server path is compiler-inert until explicitly enabled.
+  test('Studio server flags default OFF/empty (step 51 — byte-identical)', () {
+    expect(kStudioLive, isFalse);
+    expect(kCatalogServerSearch, isFalse);
+    expect(kCatalogBaseUrl, isEmpty);
+    // Compound getter ANDs with the backend switch (off in tests either way).
+    expect(useCatalogServerSearch, isFalse);
+  });
 }
