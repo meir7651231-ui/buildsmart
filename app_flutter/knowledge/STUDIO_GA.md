@@ -117,3 +117,8 @@ web-deploy → הפריסה חוזרת byte-identical לשלב-הקודם. הפ�
   manual builder go live on buildsmart-il.com (draft-mode; the AI co-editor shows its
   off-state until `CLAUDE_AI` + `USE_FIREBASE_BACKEND` are added). Regular users: no
   change (manager-gated). Next stages 2–5 per §3, owner-paced.
+- **2026-07-08 — full connect (stages 2a–2e).** `STUDIO_DART_DEFINES` extended to
+  `USE_FIREBASE_BACKEND` + `STUDIO_LIVE` + `STUDIO_CO_EDITOR` + `CLAUDE_AI` + `INTEL_LIVE`.
+  The live app now uses the Firestore backend; server-config publish, the AI co-editor,
+  and consent-gated customer intelligence are armed. Rollback: restore the variable to
+  the stage-1 value (`--dart-define=STUDIO_CO_EDITOR=true`) and re-deploy.
