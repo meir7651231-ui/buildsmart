@@ -122,3 +122,9 @@ web-deploy → הפריסה חוזרת byte-identical לשלב-הקודם. הפ�
   The live app now uses the Firestore backend; server-config publish, the AI co-editor,
   and consent-gated customer intelligence are armed. Rollback: restore the variable to
   the stage-1 value (`--dart-define=STUDIO_CO_EDITOR=true`) and re-deploy.
+- **2026-07-08 — rolled back to stage-1.** Full connect broke the app boot on
+  buildsmart-il.com (USE_FIREBASE_BACKEND on an unseeded/auth-unready backend →
+  stuck on the initial screen). Variable restored to `--dart-define=STUDIO_CO_EDITOR=true`.
+  Back to the working state: demo data, local board login (admin/5555), Studio visible.
+  The full backend cutover needs prep first: Firestore seed + web Google OAuth client
+  (web/index.html) + board-auth/UID_SCOPED_QUERIES coordination.
