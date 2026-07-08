@@ -231,6 +231,15 @@ export async function incrementMetric(
 }
 
 // ── scheduled rollups (deploy-gated; Admin-SDK; write server-owned docs) ──────
+//
+// OPS NOTE — these two `onSchedule` functions require the Cloud Scheduler API
+// (`cloudscheduler.googleapis.com`) to be ENABLED on the GCP project before the
+// functions deploy can register their schedules. The CI service account cannot
+// self-enable it (needs `serviceusage.services.enable`), so a project owner must
+// enable it once in the console (or grant the SA that permission). Symptom when
+// missing: `firebase deploy` fails with "Permissions denied enabling
+// cloudscheduler.googleapis.com". See `.github/workflows/firebase-deploy.yml`
+// "Required APIs" and `app_flutter/knowledge/STUDIO_GA.md`.
 
 /**
  * DAILY rollup: sum every metric's distributed-counter shards and write ONE
