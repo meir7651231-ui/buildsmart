@@ -45,21 +45,43 @@
 
 ---
 
-## 3. רצף-ההדלקה — **בשליטת-הבעלים בלבד** (לא אוטונומי)
+## 3. רצף-ההדלקה — **בשליטת-הבעלים בלבד** (runbook קונקרטי · fail-safe · הפיך)
 
-הסטודיו "חי על המסך הפעיל" דורש החלטות שהן של הבעלים. הסדר (fail-safe, הפיך):
+**טופולוגיית-פריסה (מאומת מהקוד):** אפליקציית-ה-Flutter כבר **חיה** ב-`buildsmart-il.com` /
+`buildsmart-b0b78.web.app` (ה-cutover מ-Preact בוצע 1/7). היא נפרסת מ-**`claude/whats-happening-LyY9G`**
+דרך `web-deploy.yml` + `firebase-hosting.yml` (מרוץ; חייבים דגלים תואמים). ה-backend נפרס
+בנפרד דרך `firebase-deploy.yml` (secrets: `FIREBASE_SERVICE_ACCOUNT`/`R2_*` — CI-בעלים בלבד).
 
-1. **merge → main** — מיזוג ענף `claude/kind-dijkstra-ptm4nn` ל-`main` (PR, אישור-בעלים).
-2. **Flutter cutover** — החלפת ה-Preact החי (`app/`, GitHub Pages) ב-build של `app_flutter/`.
-   עד לרגע זה `app/` הוא ה-live; שום דגל-Flutter לא משפיע על הפרודקשן.
-3. **backend deploy** — Firestore rules+indexes (סדר #121) → functions → seed. **לפני** כל דגל.
-4. **הדלקה מדורגת (staged)** — דגל-אחד-בכל-פעם, אימות בין לבין:
-   `USE_FIREBASE_BACKEND` → `STUDIO_LIVE` → `CATALOG_*` → `STUDIO_CO_EDITOR` (+`CLAUDE_AI`) → `INTEL_LIVE` (+consent).
-   כל דגל הפיך ע"י הסרת ה-`--dart-define` וre-build.
-5. **אישור-בעלים לכל שלב** — במיוחד ע3 (`INTEL_LIVE`): מפעיל את מודאל-ההסכמה; ברירת-מחדל DENY
-   נשמרת עד שהמשתמש מסכים פר-גרסת-מדיניות.
+**שלב 0 — המיזוג (בטוח, byte-identical):** מזג את ה-PR (`kind-dijkstra` → `whats-happening`).
+המיזוג מפעיל אוטומטית את web-deploy+firebase-hosting → רה-בילד של `buildsmart-il.com`. מאחר
+ש-`STUDIO_DART_DEFINES` **לא-מוגדר** (ברירת-מחדל), הבנייה **byte-identical** להיום — הסטודיו רדום
+(tree-shaken). כלומר המיזוג עצמו לא משנה כלום למשתמשים; הוא רק מציב את הקוד מוכן-לחימוש.
 
-**הערה:** אף אחד מ-1–5 לא בוצע ולא ייעשה אוטונומית — כולם ממתינים להוראת-בעלים מפורשת.
+**שלב 1 — פריסת-backend (לפני כל דגל):** הרץ `firebase-deploy.yml` (workflow_dispatch, הסודות
+שלך). פורס Firestore rules+indexes בסדר-החובה (שער #121) → functions. אמת ירוק. **אסור** להדליק
+דגל לפני שזה פרוס ומאומת — אחרת האפליקציה מצביעה על backend שאינו קיים.
+
+**שלב 2 — הדלקה מדורגת דרך משתנה-מאגר (Settings → Actions → Variables → `STUDIO_DART_DEFINES`):**
+קבע את המשתנה לערך-השלב, ואז הרץ מחדש את `web-deploy.yml` (dispatch). המשתנה **מתמיד** בין
+פריסות (לא input חד-פעמי שpush הבא מבטל). דורג — אמת על ה-live בין שלב לשלב:
+
+| שלב | ערך `STUDIO_DART_DEFINES` (מצטבר) | מדליק |
+|-----|-----------------------------------|-------|
+| 2a | `--dart-define=USE_FIREBASE_BACKEND=true` | האפליקציה מדברת ל-backend החי (הסטודיו עדיין כבוי) |
+| 2b | `… --dart-define=STUDIO_LIVE=true` | config שרתי (draft→publish) |
+| 2c | `… --dart-define=CATALOG_SERVER_SEARCH=true --dart-define=CATALOG_BASE_URL=<url>` | חיפוש-קטלוג שרתי (אם רוצים) |
+| 2d | `… --dart-define=STUDIO_CO_EDITOR=true --dart-define=CLAUDE_AI=true` | עורך-ה-AI (דורש gateway חי) |
+| 2e | `… --dart-define=INTEL_LIVE=true` | מודיעין-לקוח + מודאל-הסכמה (**go-live משפטי**) |
+
+**שלב 3 — rollback (בכל שלב):** נקה/החזר את `STUDIO_DART_DEFINES` לערך-השלב-הקודם → הרץ מחדש
+web-deploy → הפריסה חוזרת byte-identical לשלב-הקודם. הפיך לחלוטין, ללא שינוי-קוד.
+
+**מעטפות-בטיחות שממשיכות לעבוד גם עם דגלים דלוקים:** כל שטחי-הסטודיו **role-gated למנהל בלבד**
+(runtime) — משתמש רגיל לא רואה אותם גם כשהדגל דלוק. `INTEL_LIVE` **consent-gated default-DENY** —
+איסוף רק אחרי הסכמה מפורשת פר-גרסת-מדיניות.
+
+**הערה:** אף אחד משלבים 0–3 לא בוצע ולא ייעשה אוטונומית — כולם ממתינים להוראת-בעלים מפורשת,
+ורובם (backend deploy, dispatch, קביעת-המשתנה) רצים מהסודות/החשבון שלך ב-CI, לא מהסביבה של הסוכן.
 
 ---
 
