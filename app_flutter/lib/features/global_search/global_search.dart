@@ -79,6 +79,12 @@ class SearchResult {
 /// time; a test source is a trivial in-memory closure. No side effects.
 typedef SearchSource = List<SearchResult> Function(String query, int max);
 
+/// The whitespace splitter for [scoreMatch]'s word-start check — hoisted to a
+/// single top-level instance so a broad query does not reconstruct a RegExp for
+/// every one of the ~900 catalogue names it scans per keystroke (swarm perf
+/// finding). Same pattern the catalog uses for its hot `_kWhitespace`.
+final RegExp _wsSplit = RegExp(r'\s+');
+
 /// Relevance of [query] against [text]: exact 4 › prefix 3 › any-word-start 2 ›
 /// substring 1 › no-match 0. Case-insensitive — callers pass a lowered [query];
 /// [text] is lowered here. An empty query never matches (returns 0).
@@ -87,7 +93,7 @@ double scoreMatch(String query, String text) {
   final t = text.toLowerCase();
   if (t == query) return 4; // exact
   if (t.startsWith(query)) return 3; // prefix
-  for (final w in t.split(RegExp(r'\s+'))) {
+  for (final w in t.split(_wsSplit)) {
     if (w.isNotEmpty && w.startsWith(query)) return 2; // any word starts with it
   }
   if (t.contains(query)) return 1; // substring anywhere

@@ -59,7 +59,7 @@ import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
-    show buildGlobalSearchIndex;
+    show buildEntitySearchIndex;
 import 'package:buildsmart/features/global_search/narrowers.dart'
     show crossDomainNextTokens, mergeNarrowers;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
@@ -426,10 +426,12 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // Smart PRODUCT narrowers — the information-gain engine (most-decisive first).
     final product =
         cardKeyboardPredictions(text, kDivePool, _lexicon, max: _kRowCap);
-    // Cross-domain narrowers — next-tokens from every title the query matches,
-    // so every chip is result-guaranteed and non-product queries get help too.
+    // Cross-domain narrowers — the successor-words of the query in the titles of
+    // the ENTITY domains it matches (buildEntitySearchIndex drops the redundant
+    // product scan; products already lead above). Every successor is
+    // result-guaranteed, and non-product queries ("משה") still get help.
     final titles =
-        buildGlobalSearchIndex(ref).search(text).map((r) => r.title);
+        buildEntitySearchIndex(ref).search(text).map((r) => r.title);
     final cross = crossDomainNextTokens(text, titles, max: _kRowCap);
     // Product engine leads (richer), cross-domain fills; de-duped + capped.
     final chips = mergeNarrowers(product, cross, max: _kRowCap);

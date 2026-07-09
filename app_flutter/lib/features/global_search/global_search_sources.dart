@@ -251,3 +251,20 @@ GlobalSearchIndex buildGlobalSearchIndex(WidgetRef ref) => GlobalSearchIndex(
         customerSourceFor(ref),
       ],
     );
+
+/// Like [buildGlobalSearchIndex] but WITHOUT [productSource] — the ~900-SKU name
+/// scan. Used by the OPTION-B prediction row's cross-domain narrowers, which only
+/// need the ENTITY + screen titles (products there are already served by the
+/// finder engine via `cardKeyboardPredictions`); dropping productSource removes a
+/// full redundant per-keystroke pool scan + its throwaway allocations (adversarial
+/// swarm perf finding). Screens + the five entity domains only.
+GlobalSearchIndex buildEntitySearchIndex(WidgetRef ref) => GlobalSearchIndex(
+      <SearchSource>[
+        screenSource,
+        chatSourceFor(ref),
+        orderSourceFor(ref),
+        notifSourceFor(ref),
+        taskSourceFor(ref),
+        customerSourceFor(ref),
+      ],
+    );
