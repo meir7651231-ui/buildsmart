@@ -8,6 +8,13 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-07-09 — Studio coverage round 3 (v6.91): +28 owner-editable elements.** Wired `CfgText` into 4 more
+> screens — `worker_profile_screen` (9), `courier_forms_screen` (8), `courier_attendance_screen` (6),
+> `courier_certs_screen` (5). All BYTE-IDENTICAL (identity path). `kElementRegistry` 111 → **139** (`gate_118`
+> green). Note: `every:worker` (32) and `every:courier` (52) now exceed the `kStudioMaxBatch = 25` broadcast
+> ceiling — a per-utterance broadcast over those whole scopes is safely refused (no test asserts they build;
+> `every:manager` stays 17). analyze 0 · full suite green.
+
 > **2026-07-09 — Studio coverage round 2 (v6.90): +66 owner-editable elements.** Wired the canonical
 > `CfgText` consumer into 6 more screens — `worker_app_screen` (12), `worker_reports_tab` (11),
 > `courier_dashboard` (11), `courier_settings` (13), `courier_profile` (9), `manager_dashboard` (10 of 19).
