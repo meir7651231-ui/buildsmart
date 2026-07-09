@@ -61,6 +61,7 @@ const Set<String> _assertedPillarFlags = <String>{
   'kCatalogBaseUrl',
   'kStudioCoEditor',
   'kIntelLive',
+  'kStudioSharedSync',
 };
 
 void main() {
@@ -77,6 +78,9 @@ void main() {
           reason: 'STUDIO_CO_EDITOR (Pillar-4 AI co-editor) must default OFF');
       expect(kIntelLive, isFalse,
           reason: 'INTEL_LIVE (Pillar-3 customer intel) must default OFF');
+      expect(kStudioSharedSync, isFalse,
+          reason: 'STUDIO_SHARED_SYNC (Pillar-5 shared config sync) must '
+              'default OFF');
 
       // The empty CATALOG_BASE_URL default is load-bearing: a non-empty default
       // would point the OFF build at a remote and break byte-identity.
@@ -94,6 +98,8 @@ void main() {
           reason: 'no live backend in tests → every "…Live" guard is false');
       expect(useCatalogServerSearch, isFalse,
           reason: 'server-search guard must be false without a live backend');
+      expect(useStudioSharedSync, isFalse,
+          reason: 'shared-sync guard must be false without a live backend');
     });
 
     test('(B) closed-set — no Studio/Pillar flag exists that this gate does not cover',
