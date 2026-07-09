@@ -37,6 +37,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
@@ -270,7 +271,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               body: 'יציאה מהלוח חזרה למסך הקודם — אינה מנתקת אותך מהחשבון.',
               child: TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                child: const Text(
+                child: const CfgText(
+                  'store.action.exit',
                   '‹ יציאה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
                 ),
@@ -450,7 +452,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         BsTokens.space5,
       ),
       children: [
-        const Text(
+        const CfgText(
+          'store.home.greeting',
           'שלום 👋',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -610,7 +613,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         const SizedBox(height: BsTokens.space4),
 
         // ── #78 · the הזמנות pipeline IS the home (default) tab ──────────────
-        const Text(
+        const CfgText(
+          'store.section.orders',
           '📥 הזמנות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -809,7 +813,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             ),
           ),
-          child: const Text(
+          child: const CfgText(
+            'store.action.newProduct',
             '➕ הוסף מוצר חדש',
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
           ),
@@ -1095,7 +1100,8 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
             Row(
               children: [
                 const Expanded(
-                  child: Text(
+                  child: CfgText(
+                    'store.addProduct.title',
                     '➕ הוסף מוצר חדש',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -1161,7 +1167,8 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
               ),
             ),
             const SizedBox(height: BsTokens.space3),
-            const Text(
+            const CfgText(
+              'store.addProduct.category',
               'קטגוריה',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -1192,7 +1199,8 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: const Text(
+              child: const CfgText(
+                'store.action.addProduct',
                 '➕ הוסף מוצר',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               ),
@@ -1528,7 +1536,8 @@ class _SupplierSettingsScreenState
             icon: const Icon(Icons.arrow_back, color: Colors.black54),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text(
+          title: const CfgText(
+            'store.settings.title',
             '🏪 הגדרות ספק',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -1540,7 +1549,8 @@ class _SupplierSettingsScreenState
         body: ListView(
           padding: const EdgeInsets.all(BsTokens.space4),
           children: [
-            const Text(
+            const CfgText(
+              'store.settings.businessProfile',
               'פרופיל עסקי',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -1627,7 +1637,8 @@ class _SupplierSettingsScreenState
             const SizedBox(height: BsTokens.space3),
 
             // ── logo ──
-            const Text(
+            const CfgText(
+              'store.settings.logo',
               'לוגו העסק',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -1649,7 +1660,8 @@ class _SupplierSettingsScreenState
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: const Text(
+              child: const CfgText(
+                'store.action.captureLogo',
                 '📷 צלם / העלה לוגו',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               ),
