@@ -33,6 +33,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:buildsmart/widgets/voice_dictate_button.dart';
 import 'package:flutter/material.dart';
@@ -139,7 +140,8 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text(
+          title: const CfgText(
+            'worker.section.title',
             '🦺 עובד',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -217,7 +219,8 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
                   'ניתוק מלא נמצא בטאב אזור אישי.',
               child: TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                child: const Text(
+                child: const CfgText(
+                  'worker.action.exit',
                   '‹ יציאה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
                 ),
@@ -696,7 +699,8 @@ class _WeekStripCard extends ConsumerWidget {
           Row(
             children: [
               const Expanded(
-                child: Text(
+                child: CfgText(
+                  'worker.section.journal',
                   '📅 היומן שלי',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -721,7 +725,8 @@ class _WeekStripCard extends ConsumerWidget {
                         horizontal: BsTokens.space3,
                         vertical: 10,
                       ),
-                      child: Text(
+                      child: CfgText(
+                        'worker.action.fullMonth',
                         'חודש מלא ›',
                         style: TextStyle(
                           color: BsTokens.brandDark,
@@ -1594,7 +1599,8 @@ class _EquipmentButton extends StatelessWidget {
               ),
               onPressed: onPressed,
               icon: const Text('🧰', style: TextStyle(fontSize: 15)),
-              label: const Text(
+              label: const CfgText(
+                'worker.action.checkEquipment',
                 'בדוק ציוד נדרש',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
@@ -1646,7 +1652,8 @@ class _EmployerStockButton extends StatelessWidget {
               ),
               onPressed: onPressed,
               icon: const Text('📦', style: TextStyle(fontSize: 15)),
-              label: const Text(
+              label: const CfgText(
+                'worker.action.employerStock',
                 'מלאי הקבלן',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
@@ -1699,7 +1706,8 @@ class _ProposeTaskButton extends StatelessWidget {
               ),
               onPressed: onPressed,
               icon: const Text('➕', style: TextStyle(fontSize: 15)),
-              label: const Text(
+              label: const CfgText(
+                'worker.action.addTask',
                 'הוסף משימה',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
@@ -1752,7 +1760,8 @@ class _GanttButton extends StatelessWidget {
               ),
               onPressed: onPressed,
               icon: const Text('📊', style: TextStyle(fontSize: 15)),
-              label: const Text(
+              label: const CfgText(
+                'worker.action.gantt',
                 'גאנט משימות',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
@@ -1806,7 +1815,8 @@ class _DefectsButton extends StatelessWidget {
               ),
               onPressed: onPressed,
               icon: const Text('🔧', style: TextStyle(fontSize: 15)),
-              label: const Text(
+              label: const CfgText(
+                'worker.action.defects',
                 'ליקויים',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
@@ -1901,7 +1911,8 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
                       ),
                     ),
                   ),
-                  const Text(
+                  const CfgText(
+                    'worker.section.proposeTitle',
                     '➕ הצעת משימה לקבלן',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -1910,7 +1921,8 @@ class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
+                  const CfgText(
+                    'worker.propose.subtitle',
                     'המשימה תישלח לקבלן לאישור',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                   ),
@@ -2082,7 +2094,8 @@ class _SubmitButton extends StatelessWidget {
                 ),
                 child: Center(
                   widthFactor: 1,
-                  child: Text(
+                  child: CfgText(
+                    'worker.action.submit',
                     '📸 שלח לאישור',
                     style: TextStyle(
                       color: bsOnAccent(context),

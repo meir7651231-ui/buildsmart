@@ -46,6 +46,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -345,7 +346,8 @@ class WorkerReportsTab extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        const Text(
+        const CfgText(
+          'worker.reports.title',
           '📊 דוחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -410,6 +412,7 @@ class WorkerReportsTab extends ConsumerWidget {
 
         // ── ① weekly summary bar chart ──
         _Card(
+          titleId: 'worker.reports.weekly_title',
           title: '📅 סיכום שבועי — משימות שאושרו',
           children: [
             if (weekTotal == 0 && noDate == 0)
@@ -453,10 +456,12 @@ class WorkerReportsTab extends ConsumerWidget {
 
         // ── ③ time per task ──
         _Card(
+          titleId: 'worker.reports.time_title',
           title: '⏱️ זמן לכל משימה',
           children: [
             if (timed.isEmpty && running.isEmpty)
-              const Text(
+              const CfgText(
+                'worker.reports.time_empty',
                 'אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע תחילת משימה ועד אישורה.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
@@ -491,6 +496,7 @@ class WorkerReportsTab extends ConsumerWidget {
 
         // ── ⑤ per-work-area breakdown ──
         _Card(
+          titleId: 'worker.reports.area_title',
           title: '📍 פירוט לפי אזור עבודה',
           children: [
             // #109 — each area row dives to the tasks grouped under it.
@@ -513,7 +519,8 @@ class WorkerReportsTab extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: BsTokens.space1),
-            const Text(
+            const CfgText(
+              'worker.reports.area_note',
               // Honest: derived from the task name — the engine has no site
               // field; real project-site binding יחובר עם חיבור השרת.
               'האזור נגזר משם המשימה (אין שדה אתר במנוע המשימות). שיוך לאתרי פרויקט אמיתיים יחובר עם חיבור השרת.',
@@ -528,7 +535,8 @@ class WorkerReportsTab extends ConsumerWidget {
           title: '📋 היסטוריית הגשות (${submitted.length})',
           children: [
             if (submitted.isEmpty)
-              const Text(
+              const CfgText(
+                'worker.reports.history_empty',
                 'עוד לא הגשת משימות לאישור — ההגשות שלך יופיעו כאן.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
@@ -555,7 +563,8 @@ class WorkerReportsTab extends ConsumerWidget {
           title: '↩️ דחיות לתיקון (${rejectedTasks.length})',
           children: [
             if (rejectedTasks.isEmpty)
-              const Text(
+              const CfgText(
+                'worker.reports.rejections_empty',
                 'אין משימות שנדחו לתיקון.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
@@ -649,7 +658,8 @@ class WorkerReportsTab extends ConsumerWidget {
                 child: Container(
                   height: 48, // ≥48dp target
                   alignment: Alignment.center,
-                  child: Text(
+                  child: CfgText(
+                    'worker.reports.send_daily_button',
                     '💬 שלח דוח יומי לקבלן',
                     style: TextStyle(
                       color: bsOnAccent(context),
@@ -671,12 +681,13 @@ class WorkerReportsTab extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () => _openAiDailyReport(context, ref),
               icon: const Text('✨'),
-              label: const Text('נסח דוח עם AI'),
+              label: const CfgText('worker.reports.ai_button', 'נסח דוח עם AI'),
             ),
           ),
         ],
         const SizedBox(height: BsTokens.space2),
-        const Text(
+        const CfgText(
+          'worker.reports.send_note',
           'הדוח נשלח כהודעה אמיתית לשיחת הקבלן (טאב שיחות) — סיכום הסטטוסים הנוכחי, בלי המצאות.',
           textAlign: TextAlign.center,
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
@@ -818,9 +829,14 @@ class _KpiBox extends StatelessWidget {
 
 /// White card with a bold title — the worker board's card style.
 class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.children});
+  const _Card({required this.title, required this.children, this.titleId});
 
   final String title;
+
+  /// Studio content-id for the owner-editable card title. Null ⇒ plain [Text]
+  /// (byte-identical); set ⇒ the title renders through [CfgText].
+  final String? titleId;
+
   final List<Widget> children;
 
   @override
@@ -841,14 +857,25 @@ class _Card extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w800,
-              fontSize: 15,
+          if (titleId == null)
+            Text(
+              title,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
+            )
+          else
+            CfgText(
+              titleId!,
+              title,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
             ),
-          ),
           const SizedBox(height: BsTokens.space3),
           ...children,
         ],

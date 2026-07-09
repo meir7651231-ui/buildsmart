@@ -33,6 +33,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -375,7 +376,8 @@ class _CourierDashboardScreenState
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: BsTokens.space4,
-      title: const Text(
+      title: const CfgText(
+        'courier.dash.appbar_title',
         '🛵 שליח',
         style: TextStyle(
           color: BsTokens.inkLight,
@@ -425,7 +427,8 @@ class _CourierDashboardScreenState
               'התנתקות מלאה נמצאת באזור האישי.',
           child: TextButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: const Text(
+            child: const CfgText(
+              'courier.dash.exit',
               '‹ יציאה',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
             ),
@@ -456,7 +459,8 @@ class _CourierDashboardScreenState
                 style: TextStyle(fontSize: 44),
               ),
               const SizedBox(height: BsTokens.space3),
-              const Text(
+              const CfgText(
+                'courier.gate.vehicle_title',
                 'הרכב שלי היום',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -466,7 +470,8 @@ class _CourierDashboardScreenState
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
+              const CfgText(
+                'courier.gate.vehicle_sub',
                 'בחר רכב כדי להתחיל את המשמרת — רשימת המשלוחים תסונן לפי הקיבולת',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
@@ -579,14 +584,16 @@ class _CourierDashboardScreenState
           ),
         ),
         const SizedBox(height: 2),
-        const Text(
+        const CfgText(
+          'courier.dash.subtitle',
           'המשלוחים שלך להיום',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
         const SizedBox(height: BsTokens.space4),
 
         // Vehicle picker (החלפה באמצע משמרת — אותו סלקטור מהצעד הראשון).
-        const Text(
+        const CfgText(
+          'courier.dash.vehicle_title',
           'הרכב שלי היום',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -881,7 +888,8 @@ class _VehicleButton extends StatelessWidget {
               ),
               if (preferred) ...[
                 const SizedBox(height: 2),
-                Text(
+                CfgText(
+                  'courier.vehicle.preferred',
                   '★ מועדף',
                   style: TextStyle(
                     color: on ? bsOnAccent(context) : BsTokens.brandDark,
@@ -1386,7 +1394,8 @@ class _CourierNotifsSheet extends ConsumerWidget {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: CfgText(
+                          'courier.notifs.title',
                           '🔔 התראות',
                           style: TextStyle(
                             color: BsTokens.inkLight,
@@ -1412,7 +1421,8 @@ class _CourierNotifsSheet extends ConsumerWidget {
                     // events (משלוח שנמסר לידיך מהחנות · משלוח שמסרת ללקוח).
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                      child: Text(
+                      child: CfgText(
+                        'courier.notifs.empty',
                         'אין התראות עדיין.\nמשלוחים חדשים שנמסרים לידיך ומסירות שהשלמת יופיעו כאן.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -1436,7 +1446,8 @@ class _CourierNotifsSheet extends ConsumerWidget {
                                     : () => ref
                                         .read(workerNotifsProvider.notifier)
                                         .markAllRead(username),
-                            child: const Text(
+                            child: const CfgText(
+                              'courier.notifs.mark_all',
                               'סמן הכל כנקרא',
                               style: TextStyle(
                                 color: BsTokens.brandDark,
@@ -1466,7 +1477,8 @@ class _CourierNotifsSheet extends ConsumerWidget {
                                         .read(workerNotifsProvider.notifier)
                                         .clear(username);
                                   },
-                          child: const Text(
+                          child: const CfgText(
+                            'courier.notifs.clear_all',
                             'נקה הכל',
                             style: TextStyle(
                               color: BsTokens.danger,

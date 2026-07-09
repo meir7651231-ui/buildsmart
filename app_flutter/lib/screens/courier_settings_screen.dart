@@ -26,6 +26,7 @@ import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +59,8 @@ class CourierSettingsScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFFFFFFFF),
           elevation: 0,
-          title: const Text(
+          title: const CfgText(
+            'courier.settings.title',
             'הגדרות שליח',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -107,6 +109,7 @@ class _CourierNotifSection extends ConsumerWidget {
           title: 'התראות Push',
           body: notifBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.push',
             label: 'התראות Push',
             value: notif.pushEnabled,
             onChanged:
@@ -119,6 +122,7 @@ class _CourierNotifSection extends ConsumerWidget {
           title: 'עדכוני משלוחים',
           body: notifBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.shipment_updates',
             label: 'עדכוני משלוחים',
             value: notif.typeShipments,
             onChanged:
@@ -131,6 +135,7 @@ class _CourierNotifSection extends ConsumerWidget {
           title: 'הודעות צ׳אט חדשות',
           body: notifBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.new_chats',
             label: 'הודעות צ׳אט חדשות',
             value: notif.typeNewChats,
             onChanged:
@@ -143,6 +148,7 @@ class _CourierNotifSection extends ConsumerWidget {
           title: 'שקט בזמן נהיגה',
           body: notifBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.quiet_driving',
             label: 'שקט בזמן נהיגה',
             value: notif.quietWhileDriving,
             onChanged:
@@ -155,6 +161,7 @@ class _CourierNotifSection extends ConsumerWidget {
           title: 'צליל',
           body: notifBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.sound',
             label: 'צליל',
             value: notif.soundEnabled,
             onChanged:
@@ -167,6 +174,7 @@ class _CourierNotifSection extends ConsumerWidget {
           title: 'רטט',
           body: notifBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.vibration',
             label: 'רטט',
             value: notif.vibrationEnabled,
             onChanged:
@@ -198,6 +206,7 @@ class _CourierRegionSection extends ConsumerWidget {
               'בוחר את שפת האפליקציה. כרגע רק עברית פעילה; '
               'ערבית ואנגלית מסומנות "בקרוב".',
           child: _RadioGroupRow<BsLang>(
+            labelId: 'courier.settings.language',
             label: 'שפה',
             // רק עברית ממומשת (אין l10n אמיתי) — ערבית ואנגלית לא ניתנות
             // לבחירה ונושאות "בקרוב", כדי שהבורר לא יזייף החלפת שפה (כמו
@@ -239,6 +248,7 @@ class _CourierAccessibilitySection extends ConsumerWidget {
           title: 'ממשק ונגישות',
           body: accessBody,
           child: _RadioGroupRow<CatalogTextSize>(
+            labelId: 'courier.settings.text_size',
             label: 'גודל טקסט (כל האפליקציה)',
             value: settings.textSize,
             options: const [
@@ -256,6 +266,7 @@ class _CourierAccessibilitySection extends ConsumerWidget {
           title: 'ממשק ונגישות',
           body: accessBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.high_contrast',
             label: 'ניגודיות גבוהה (כל האפליקציה)',
             value: settings.highContrast,
             onChanged:
@@ -268,6 +279,7 @@ class _CourierAccessibilitySection extends ConsumerWidget {
           title: 'ממשק ונגישות',
           body: accessBody,
           child: _SwitchRow(
+            cfgId: 'courier.settings.reduced_motion',
             label: 'הנפשות מופחתות (כל האפליקציה)',
             value: settings.reducedMotion,
             onChanged:
@@ -297,7 +309,8 @@ class _CourierInfoSection extends StatelessWidget {
           body: 'פותח את מסמך תנאי-השימוש של האפליקציה.',
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: const Text(
+            title: const CfgText(
+              'courier.info.terms',
               'תנאי שימוש',
               style: TextStyle(color: BsTokens.inkLight),
             ),
@@ -316,7 +329,8 @@ class _CourierInfoSection extends StatelessWidget {
           body: 'פותח את מסמך מדיניות-הפרטיות של האפליקציה.',
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: const Text(
+            title: const CfgText(
+              'courier.info.privacy',
               'מדיניות פרטיות',
               style: TextStyle(color: BsTokens.inkLight),
             ),
@@ -405,11 +419,13 @@ class _SectionTile extends StatelessWidget {
 
 class _SwitchRow extends StatelessWidget {
   const _SwitchRow({
+    required this.cfgId,
     required this.label,
     required this.value,
     required this.onChanged,
   });
 
+  final String cfgId;
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -418,7 +434,11 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      title: CfgText(
+        cfgId,
+        label,
+        style: const TextStyle(color: BsTokens.inkLight),
+      ),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -441,12 +461,14 @@ class _RadioOption<T> {
 
 class _RadioGroupRow<T> extends StatelessWidget {
   const _RadioGroupRow({
+    required this.labelId,
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
   });
 
+  final String labelId;
   final String label;
   final T value;
   final List<_RadioOption<T>> options;
@@ -459,7 +481,8 @@ class _RadioGroupRow<T> extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
+          child: CfgText(
+            labelId,
             label,
             style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),

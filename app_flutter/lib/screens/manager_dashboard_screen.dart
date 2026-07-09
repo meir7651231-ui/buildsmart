@@ -115,7 +115,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  CfgText(
+                    'manager.dash.title',
                     'מרכז השליטה',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -126,7 +127,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                     ),
                   ),
                   SizedBox(height: 2),
-                  Text(
+                  CfgText(
+                    'manager.dash.subtitle',
                     'מנהל המערכת',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -222,7 +224,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
           // ניווט-בלבד (Navigator.maybePop) — חוזרת אחורה בלי לנקות את ה-session.
           TextButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: const Text(
+            child: const CfgText(
+              'manager.dash.exit',
               '‹ יציאה',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
             ),
@@ -817,7 +820,8 @@ class _OrderPipeline extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const CfgText(
+            'manager.dash.pipeline.title',
             'צינור ההזמנות',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -1009,7 +1013,8 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
           // The legacy empty line (@index.html:16983 `md-empty`).
           const Padding(
             padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-            child: Text(
+            child: CfgText(
+              'manager.orders.empty',
               'לא נמצאו הזמנות תואמות.',
               textAlign: TextAlign.center,
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
@@ -1402,7 +1407,8 @@ class _AdvanceButton extends StatelessWidget {
         onTap: onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
+          child: CfgText(
+            'manager.orders.advance',
             'קדם שלב ›',
             style: TextStyle(
               color: bsOnAccent(context),
@@ -1877,7 +1883,8 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
           // The legacy empty line (@index.html:16586 `md-empty`).
           const Padding(
             padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-            child: Text(
+            child: CfgText(
+              'manager.customers.empty',
               'לא נמצאו קבלנים תואמים.',
               textAlign: TextAlign.center,
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
@@ -2793,6 +2800,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         if (!hrRelocated) ...[
           _ManageSection(
             sectionKey: 'approvals',
+            titleCfgId: 'manager.manage.approvals.title',
             emoji: '👷',
             title: 'אישורי עובדים',
             sub: 'משימות שעובדים שלחו לאישור',
@@ -2826,6 +2834,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           // manager sees a live count, no approve/reject (governance #84).
           _ManageSection(
             sectionKey: 'approvals',
+            titleCfgId: 'manager.manage.approvals.title',
             emoji: '👷',
             title: 'אישורי עובדים',
             sub: 'מנוהל בלוח-הקבלן',
@@ -2849,6 +2858,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // through the same provider, and a chat line lands in his מנהל thread.
         _ManageSection(
           sectionKey: 'vacations',
+          titleCfgId: 'manager.manage.vacations.title',
           emoji: '🏖️',
           title: 'בקשות חופשה',
           sub: 'בקשות חופשה שעובדים ושליחים הגישו',
@@ -2866,6 +2876,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // 1. 🗂️ קטגוריות — the LIVE category list.
         _ManageSection(
           sectionKey: 'cats',
+          titleCfgId: 'manager.manage.cats.title',
           emoji: '🗂️',
           title: 'קטגוריות',
           sub: 'ניהול קטגוריות הקטלוג',
@@ -2878,6 +2889,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // 2. ⚙️ הגדרות אפליקציה — the verbatim config rows.
         _ManageSection(
           sectionKey: 'settings',
+          titleCfgId: 'manager.manage.settings.title',
           emoji: '⚙️',
           title: 'הגדרות אפליקציה',
           sub: 'פרמטרים שהקבלן רואה',
@@ -2890,6 +2902,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // 3. 🌳 עץ המוצרים — an inline summary of the catalog tree.
         _ManageSection(
           sectionKey: 'trees',
+          titleCfgId: 'manager.manage.trees.title',
           emoji: '🌳',
           title: 'עץ המוצרים',
           sub: 'עריכת האביזרים המשלימים של כל מוצר',
@@ -2905,6 +2918,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // 4. 🏷️ מותגים ומחירים — the brands list.
         _ManageSection(
           sectionKey: 'brands',
+          titleCfgId: 'manager.manage.brands.title',
           emoji: '🏷️',
           title: 'מותגים ומחירים',
           sub: 'עריכת המותגים והמחירים של כל מוצר',
@@ -2922,6 +2936,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         if (kDebugMode) ...[
           _ManageSection(
             sectionKey: 'regression',
+            titleCfgId: 'manager.manage.regression.title',
             emoji: '🔬',
             title: 'בדיקות רגרסיה',
             sub: 'הרצת חבילת הבדיקות המלאה של האפליקציה',
@@ -2943,6 +2958,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // live backend (the sheet gates on authGatewayProvider).
         _ManageSection(
           sectionKey: 'roles',
+          titleCfgId: 'manager.manage.roles.title',
           emoji: '🔑',
           title: 'שיוך תפקידים',
           sub: 'הקצאת תפקיד (חנות / שליח / עובד / מנהל) למשתמש',
@@ -2965,6 +2981,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           const SizedBox(height: BsTokens.space3),
           _ManageSection(
             sectionKey: 'tradeBuilder',
+            titleCfgId: 'manager.manage.tradeBuilder.title',
             emoji: '🏗️',
             title: 'בונה ענפים',
             sub: 'בניית ענף חדש — קטגוריות, מוצרים וחוקים',
@@ -2996,7 +3013,8 @@ class _ManageIntro extends StatelessWidget {
         color: BsTokens.brand.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(cfgRadius(context)),
       ),
-      child: const Text(
+      child: const CfgText(
+        'manager.manage.intro',
         '🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.',
         style: TextStyle(
           color: BsTokens.inkLight,
@@ -3016,6 +3034,7 @@ class _ManageIntro extends StatelessWidget {
 class _ManageSection extends StatelessWidget {
   const _ManageSection({
     required this.sectionKey,
+    required this.titleCfgId,
     required this.emoji,
     required this.title,
     required this.sub,
@@ -3026,6 +3045,10 @@ class _ManageSection extends StatelessWidget {
   });
 
   final String sectionKey;
+
+  /// Studio element id for the editable section title (mirrors [_MetricTile.cfgId]):
+  /// empty doc ⇒ the literal [title] verbatim with the same style ⇒ golden-identical.
+  final String titleCfgId;
   final String emoji;
   final String title;
   final String sub;
@@ -3080,7 +3103,8 @@ class _ManageSection extends StatelessWidget {
                               Row(
                                 children: [
                                   Flexible(
-                                    child: Text(
+                                    child: CfgText(
+                                      titleCfgId,
                                       title,
                                       style: const TextStyle(
                                         color: BsTokens.inkLight,
@@ -3841,7 +3865,8 @@ class _RegressionBody extends StatelessWidget {
               onTap: onOpen,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
+                child: CfgText(
+                  'manager.manage.regression.open',
                   '🔬 פתח מרכז בדיקות רגרסיה',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -3900,7 +3925,8 @@ class _RoleAssignBody extends StatelessWidget {
               onTap: onOpen,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
+                child: CfgText(
+                  'manager.manage.roles.open',
                   '🔑 פתח שיוך תפקידים',
                   textAlign: TextAlign.center,
                   style: TextStyle(

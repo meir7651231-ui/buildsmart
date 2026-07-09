@@ -42,6 +42,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -72,7 +73,8 @@ class CourierProfileScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text(
+          title: const CfgText(
+            'courier.profile.title',
             'פרופיל שליח',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -256,7 +258,8 @@ class CourierProfileBody extends ConsumerWidget {
                     'ונגישות ומידע משפטי.',
                 child: ListTile(
                   leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-                  title: const Text(
+                  title: const CfgText(
+                    'courier.profile.settings_title',
                     'הגדרות שליח',
                     style: TextStyle(color: BsTokens.inkLight),
                   ),
@@ -278,7 +281,8 @@ class CourierProfileBody extends ConsumerWidget {
                     'הנכון פותחת את בורר התפקידים.',
                 child: ListTile(
                   leading: const Text('🔁', style: TextStyle(fontSize: 20)),
-                  title: const Text(
+                  title: const CfgText(
+                    'courier.profile.role_switch_title',
                     'החלפת תפקיד',
                     style: TextStyle(color: BsTokens.inkLight),
                   ),
@@ -301,7 +305,8 @@ class CourierProfileBody extends ConsumerWidget {
                     'אישור. שונה מ-"יציאה" שב-AppBar של הלוח שרק חוזרת אחורה.',
                 child: ListTile(
                   leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-                  title: const Text(
+                  title: const CfgText(
+                    'courier.profile.logout_title',
                     'יציאה מהחשבון',
                     style: TextStyle(
                       // AA על כרטיס לבן (redAccent = 3.19:1 נכשל) — token חוזה 9.
@@ -560,7 +565,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'ושליחת דוח-נוכחות לחנות.',
             child: ListTile(
               leading: const Text('🕐', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'courier.personal.attendance_title',
                 'נוכחות',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
@@ -584,7 +590,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
             body: 'פותח את מרכז הטפסים — טופס 101, בקשת חופשה ואישור מחלה.',
             child: ListTile(
               leading: const Text('📄', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'courier.personal.forms_title',
                 'טפסים',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
@@ -608,7 +615,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'ורישיון רכב עם תאריכי תוקף.',
             child: ListTile(
               leading: const Text('🪪', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'courier.personal.certs_title',
                 'תעודות נהג',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
@@ -632,7 +640,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'עם חיבור השרת.',
             child: ListTile(
               leading: const Text('💰', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'courier.personal.payslips_title',
                 'תלושי שכר',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
@@ -944,7 +953,8 @@ class _EditCourierProfileSheetState
                         opacity: _saving ? 0.6 : 1,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 13),
-                          child: Text(
+                          child: CfgText(
+                            'courier.profile.save_action',
                             '✓ שמור פרופיל',
                             textAlign: TextAlign.center,
                             style: TextStyle(
