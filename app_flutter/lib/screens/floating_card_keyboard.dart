@@ -314,6 +314,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     final frontIsHomeShell =
         !kKbGlobal || bsNavigatorKey.currentState?.canPop() == false;
     if (frontIsHomeShell) {
+      // GLOBAL SEARCH (kGlobalSearch, const ⇒ folds out when off): drive the ONE
+      // unified results panel — which HomeShell overlays over EVERY tab (option A)
+      // — from the SAME query on every tab, not just the catalog. The per-tab
+      // writes below stay (harmless: the panel covers those screens while a query
+      // is present, and clears with it). Off ⇒ this line tree-shakes → byte-ident.
+      if (kGlobalSearch) {
+        ref.read(keyboardDiveQueryProvider.notifier).state = _controller.text;
+      }
       if (tab == 0) {
         ref.read(keyboardDiveQueryProvider.notifier).state = _controller.text;
       } else if (tab == 2) {
@@ -392,34 +400,33 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   /// (nav-styled). ONLY reachable when the const flag is ON; when OFF the whole
   /// method (and its two extra imports) tree-shakes away → the row is byte-
   /// identical to the legacy [_buildRow] path.
-  _PredRow _globalRow(String text, int tab) {
+  _PredRow _globalRow(String text) {
     // Balanced (round-robin) so no single domain floods the row — every domain
     // with a hit is represented before any gets a second slot ("everything's
-    // there"); relevance still orders within each round.
+    // there"); relevance still orders within each round. This row is just a QUICK
+    // preview — the FULL ranked list already shows in the in-place results panel
+    // ([GlobalSearchResultsView], which HomeShell overlays over EVERY tab while a
+    // query is present, option A), so there is NO "עוד…" overflow chip: the whole
+    // list is always on-screen. Each chip is still a one-tap jump via [runByChip].
     final results = buildGlobalSearchIndex(ref).searchBalanced(text);
     final chips = <String>[];
     final runByChip = <String, KbRunByChip>{};
-    // Reserve the LAST visible slot for an "עוד…" opener that opens the UNIFIED
-    // SEARCH WINDOW (the catalog dive [_DiveResultsView], extended to every
-    // domain) when more results exist than fit the row. It is useful ONLY off the
-    // catalog tab: on the catalog (tab 0) that window is ALREADY live below the
-    // keyboard, so an overflow chip would be a dead jump to where you already are
-    // (the owner's "clicking does nothing" bug) → omit it there and let the row
-    // show one more real result instead.
-    final overflow = results.length > _kRowCap && tab != 0;
-    final cap = overflow ? _kRowCap - 1 : _kRowCap;
     for (final r in results) {
-      if (chips.length >= cap) break;
+      if (chips.length >= _kRowCap) break;
       // De-dupe by visible label (two domains could surface the same title —
       // keep the first, i.e. the higher-ranked one after the index's own sort).
       if (runByChip.containsKey(r.title) || chips.contains(r.title)) continue;
       chips.add(r.title);
-      runByChip[r.title] = r.run;
-    }
-    if (overflow) {
-      const more = 'עוד…';
-      chips.add(more);
-      runByChip[more] = (r, context) => _openSearchWindow(r, text);
+      // END the in-place search before running: the result may navigate to a
+      // tab/section the results panel would otherwise keep COVERING. Clearing the
+      // field cascades through [_recompute] → drops [keyboardDiveQueryProvider] →
+      // the panel pulls down, revealing the destination. Sheet-openers then show
+      // over the destination, nav-results reveal it. The overlay stays floating.
+      final run = r.run;
+      runByChip[r.title] = (chipRef, chipCtx) {
+        _controller.clear();
+        run(chipRef, chipCtx);
+      };
     }
     return _PredRow(
       chips,
@@ -427,18 +434,6 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
       runByChip: runByChip,
       destinationChips: chips.toSet(),
     );
-  }
-
-  /// GLOBAL SEARCH ([kGlobalSearch]) — open the ONE unified search window: the
-  /// catalog's own dive results view (`_DiveResultsView`, extended to every
-  /// domain). Switch to the catalog tab (0, where that window lives) and seed its
-  /// [keyboardDiveQueryProvider] with [query] — the SAME window the catalog shows
-  /// while typing, now reachable from any tab. Replaces the old bespoke "עוד…"
-  /// sheet (owner: "use the existing search window, don't add another"). Only
-  /// reachable from the flag-gated "עוד…" chip, so it tree-shakes when off.
-  void _openSearchWindow(WidgetRef ref, String query) {
-    ref.read(mainTabProvider.notifier).state = 0; // catalog — the window's home
-    ref.read(keyboardDiveQueryProvider.notifier).state = query;
   }
 
   /// THE ROW SELECTOR — the single decision for what the prediction row shows,
@@ -481,7 +476,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // [runByChip] (case (ii)). Flag OFF → the legacy [_buildRow] path below is
     // byte-identical (the whole [_globalRow] call + its imports fold out).
     if (text.isNotEmpty) {
-      if (kGlobalSearch) return _globalRow(text, tab);
+      if (kGlobalSearch) return _globalRow(text);
       return _buildRow(text);
     }
 

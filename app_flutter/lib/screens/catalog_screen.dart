@@ -23,9 +23,7 @@ import 'package:buildsmart/data/variant_families.dart';
 // Additive only: when kWordFinderFlag is OFF the section pill never renders and
 // the _CatalogBody routing branch is unreachable, so catalog behaviour is
 // byte-identical for normal users.
-import 'package:buildsmart/features/card_keyboard/card_keyboard_flag.dart';
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
-import 'package:buildsmart/features/word_finder/word_finder_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_home.dart';
@@ -1299,11 +1297,12 @@ class _DiveResultsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // GLOBAL SEARCH ([kGlobalSearch], const ⇒ the `if (false)` folds out when the
-    // flag is off): the dive is the ONE unified search window — beyond products +
-    // the catalog index entries it also lists the live ENTITY domains. The early
-    // return tree-shakes when off, so the legacy body below is byte-identical.
-    if (kGlobalSearch) return _buildUnified(context, ref);
+    // GLOBAL SEARCH ([kGlobalSearch], const ⇒ folds out when off): the catalog's
+    // OWN inline dive stands down under the flag — [HomeShell] overlays the ONE
+    // unified panel ([GlobalSearchResultsView]) over EVERY tab instead (owner:
+    // option A — the list replaces the screen content in place, everywhere), so
+    // the results render exactly once. Off ⇒ the legacy body below is byte-identical.
+    if (kGlobalSearch) return const SizedBox.shrink();
 
     final products = ref.watch(diveResultsProvider);
     // OWNER (A slice 3 — unify "so it searches those too"): the ONE keyboard search
@@ -1348,23 +1347,31 @@ class _DiveResultsView extends ConsumerWidget {
     );
   }
 
-  /// GLOBAL SEARCH ([kGlobalSearch]) — the dive window as the ONE unified search
-  /// surface (owner: "use the EXISTING search window, don't add another"). Beyond
-  /// the catalog index entries + the rich product list, it lists the live ENTITY
-  /// domains the window could never show — orders · tasks · customers · chats ·
-  /// notifications — via [buildGlobalSearchIndex], each tile running its OWN
-  /// open/navigate closure. Products stay [LipskeyProductsList] (not flattened to
-  /// tiles) and screens/categories/settings stay the [kVisibleSearchIndex] entries,
-  /// so this ONLY ADDS the five entity domains. The keyboard's "עוד…" opens THIS
-  /// window (switch to the catalog tab + seed the dive query) instead of a sheet.
-  Widget _buildUnified(BuildContext context, WidgetRef ref) {
+}
+
+/// GLOBAL SEARCH ([kGlobalSearch]) — the ONE unified results panel. Owner: option
+/// A — when you type, this list REPLACES the screen content IN PLACE, on EVERY
+/// tab (not just the catalog). `HomeShell` overlays it over whatever tab is active
+/// whenever the keyboard has a query; the catalog's own inline dive stands down
+/// under the flag so the results render exactly once. Beyond the [kVisibleSearchIndex]
+/// entries (screens / categories / settings) + the rich [LipskeyProductsList], it
+/// lists the live ENTITY domains the search could never show before — orders ·
+/// tasks · customers · chats · notifications — via [buildGlobalSearchIndex], each
+/// tile running its OWN open/navigate closure. Products stay the rich list (not
+/// flattened to tiles), so this ONLY ADDS the five entity domains. Public because
+/// `HomeShell` mounts it.
+class GlobalSearchResultsView extends ConsumerWidget {
+  const GlobalSearchResultsView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(diveResultsProvider);
     final query = ref.watch(keyboardDiveQueryProvider).trim();
     final entries = query.isEmpty
         ? const <SearchEntry>[]
         : kVisibleSearchIndex.where((e) => e.matches(query)).take(4).toList();
-    // The five ENTITY domains the catalog window can't already show (products →
-    // the rich list below; screens/categories/settings → the index entries above).
+    // The five ENTITY domains the search can't already show (products → the rich
+    // list below; screens / categories / settings → the index entries above).
     final extras = query.length >= 2
         ? buildGlobalSearchIndex(ref)
             .search(query)
@@ -1475,7 +1482,14 @@ class _GlobalDiveTile extends ConsumerWidget {
           ),
         ),
       ),
-      onTap: () => result.run(ref, context),
+      onTap: () {
+        // END the in-place search before running: an entity result may navigate to
+        // a tab/section this panel would otherwise keep COVERING. Clearing the dive
+        // query drops the panel (see [GlobalSearchResultsView]); the result then
+        // opens its sheet over / navigates to the now-revealed destination.
+        ref.read(keyboardDiveQueryProvider.notifier).state = '';
+        result.run(ref, context);
+      },
     );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:buildsmart/data/repositories/backend.dart' show kIntelLive;
+import 'package:buildsmart/features/global_search/global_search.dart'
+    show kGlobalSearch;
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -117,6 +119,15 @@ class HomeShell extends ConsumerWidget {
               StoreScreen(), // 3 · חנות
             ],
           ),
+          // GLOBAL SEARCH (kGlobalSearch, const ⇒ this collection-if folds out when
+          // off ⇒ shell byte-identical): option A — typing shows the ONE unified
+          // results panel IN PLACE over WHATEVER tab is active (not just the
+          // catalog). A Positioned.fill above the IndexedStack but below the help
+          // layer + the global keyboard, so results replace the screen content while
+          // the floating keyboard keeps working. The child watches the live query
+          // and paints the opaque panel only once a query is present.
+          if (kGlobalSearch)
+            const Positioned.fill(child: _GlobalSearchOverlay()),
           // "מצב היכרות": freezes the content + a banner. Explainable elements
           // (📷 in the app-bar, the cart FAB) sit above this and stay tappable.
           if (helpMode) const Positioned.fill(child: _HelpModeOverlay()),
@@ -193,6 +204,28 @@ class HomeShell extends ConsumerWidget {
                   : const CartFab())
               : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+}
+
+/// GLOBAL SEARCH ([kGlobalSearch]) — the in-place results overlay (owner: option
+/// A). Mounted by [HomeShell] over the active tab; it watches the keyboard's live
+/// query and, once it reaches 2 chars, paints the opaque unified panel
+/// ([GlobalSearchResultsView]) over the whole body — so the results REPLACE the
+/// screen content wherever you are, no "עוד…" and no jump. Below the threshold it
+/// is an empty, non-absorbing box, leaving the tab fully interactive. The global
+/// floating keyboard (main.dart) sits ABOVE this, so typing keeps working. Only
+/// mounted on the flag-gated path, so it tree-shakes with the feature when off.
+class _GlobalSearchOverlay extends ConsumerWidget {
+  const _GlobalSearchOverlay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(keyboardDiveQueryProvider).trim().length >= 2;
+    if (!active) return const SizedBox.shrink();
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: const GlobalSearchResultsView(),
     );
   }
 }
