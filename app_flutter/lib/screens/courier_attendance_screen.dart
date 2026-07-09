@@ -11,6 +11,7 @@ import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,7 +93,8 @@ class _CourierAttendanceScreenState
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'courier.attend.title',
           '🕐 נוכחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -280,7 +282,8 @@ class _ClockCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          const CfgText(
+            'courier.attend.today',
             'היום',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -451,7 +454,11 @@ class _MonthCard extends StatelessWidget {
                     minimumSize: const Size(48, 48),
                     foregroundColor: BsTokens.mutedLight,
                   ),
-                  child: const Text('‹ הקודם', style: TextStyle(fontSize: 13)),
+                  child: const CfgText(
+                    'courier.attend.prev',
+                    '‹ הקודם',
+                    style: TextStyle(fontSize: 13),
+                  ),
                 ),
               ),
               Expanded(
@@ -476,7 +483,11 @@ class _MonthCard extends StatelessWidget {
                     minimumSize: const Size(48, 48),
                     foregroundColor: BsTokens.mutedLight,
                   ),
-                  child: const Text('הבא ›', style: TextStyle(fontSize: 13)),
+                  child: const CfgText(
+                    'courier.attend.next',
+                    'הבא ›',
+                    style: TextStyle(fontSize: 13),
+                  ),
                 ),
               ),
             ],
@@ -485,7 +496,8 @@ class _MonthCard extends StatelessWidget {
           if (days.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: BsTokens.space3),
-              child: Text(
+              child: CfgText(
+                'courier.attend.empty',
                 'אין רישומי נוכחות בחודש זה',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
@@ -511,7 +523,8 @@ class _MonthCard extends StatelessWidget {
             Row(
               children: [
                 const Expanded(
-                  child: Text(
+                  child: CfgText(
+                    'courier.attend.month_total',
                     'סה"כ חודשי',
                     style: TextStyle(
                       color: BsTokens.inkLight,

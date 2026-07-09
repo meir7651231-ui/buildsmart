@@ -12,6 +12,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +53,8 @@ class CourierCertsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'courier.certs.title',
           '🪪 תעודות נהג',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -208,7 +210,8 @@ class CourierCertsScreen extends ConsumerWidget {
                         Row(
                           children: [
                             const Expanded(
-                              child: Text(
+                              child: CfgText(
+                                'courier.certs.sheet_title',
                                 '🪪 הוספת תעודה',
                                 style: TextStyle(
                                   color: BsTokens.inkLight,
@@ -423,7 +426,8 @@ class CourierCertsScreen extends ConsumerWidget {
                             child: Container(
                               constraints: const BoxConstraints(minHeight: 48),
                               alignment: Alignment.center,
-                              child: Text(
+                              child: CfgText(
+                                'courier.certs.save_button',
                                 '💾 שמור תעודה',
                                 style: TextStyle(
                                   // bsOnAccent on the brand fill (F-28).
@@ -548,7 +552,8 @@ class _CertsCard extends StatelessWidget {
           if (certs.isEmpty)
             const Padding(
               padding: EdgeInsets.only(bottom: BsTokens.space3),
-              child: Text(
+              child: CfgText(
+                'courier.certs.empty',
                 'אין תעודות בארנק עדיין — הוסף את הראשונה.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -574,7 +579,8 @@ class _CertsCard extends StatelessWidget {
                   child: Container(
                     constraints: const BoxConstraints(minHeight: 48),
                     alignment: Alignment.center,
-                    child: Text(
+                    child: CfgText(
+                      'courier.certs.add_button',
                       '➕ הוסף תעודה',
                       style: TextStyle(
                         // bsOnAccent on the brand fill (F-28).

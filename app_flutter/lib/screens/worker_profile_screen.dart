@@ -25,6 +25,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -391,7 +392,8 @@ class _StatsCard extends StatelessWidget {
           Row(
             children: [
               const Expanded(
-                child: Text(
+                child: CfgText(
+                  'worker.profile.tasks_title',
                   'המשימות שלי',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -770,7 +772,8 @@ class _ActionsCard extends ConsumerWidget {
                 'ממשק ונגישות ומידע משפטי.',
             child: ListTile(
               leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'worker.profile.settings_title',
                 'הגדרות עובד',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
@@ -791,11 +794,13 @@ class _ActionsCard extends ConsumerWidget {
                 'ללא הקוד הנכון המעבר אינו מתאפשר.',
             child: ListTile(
               leading: const Text('🔄', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'worker.profile.role_switch_title',
                 'החלפת תפקיד',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
-              subtitle: const Text(
+              subtitle: const CfgText(
+                'worker.profile.role_switch_hint',
                 'מוגן בקוד',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -814,7 +819,8 @@ class _ActionsCard extends ConsumerWidget {
                 'תתבקש לאשר לפני הניתוק.',
             child: ListTile(
               leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-              title: const Text(
+              title: const CfgText(
+                'worker.profile.logout_title',
                 'יציאה',
                 // AA: redAccent על לבן נכשל — token חוזה 9.
                 style: TextStyle(color: BsTokens.dangerDark, fontSize: 15),
@@ -1181,7 +1187,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: CfgText(
+                          'worker.profile.edit_title',
                           'עריכת פרופיל',
                           style: TextStyle(
                             color: BsTokens.inkLight,
@@ -1282,7 +1289,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   // ── emergency contact (#104ג) ──
                   const Align(
                     alignment: AlignmentDirectional.centerStart,
-                    child: Text(
+                    child: CfgText(
+                      'worker.profile.emergency_title',
                       'איש קשר לחירום',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -1320,7 +1328,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                         opacity: _saving ? 0.6 : 1,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 13),
-                          child: Text(
+                          child: CfgText(
+                            'worker.profile.save_button',
                             '✓ שמור פרופיל',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -1369,7 +1378,8 @@ class _SpecialtyDerivedRow extends StatelessWidget {
             children: [
               const Text('🔧', style: TextStyle(fontSize: 16)),
               const SizedBox(width: BsTokens.space2),
-              const Text(
+              const CfgText(
+                'worker.profile.specialty_label',
                 'התמחות',
                 style: TextStyle(
                   color: BsTokens.inkLight,

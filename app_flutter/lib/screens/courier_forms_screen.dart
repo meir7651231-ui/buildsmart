@@ -14,6 +14,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,7 +124,8 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'courier.forms.title',
           '📄 טפסים',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -158,7 +160,8 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
       title: '📄 טופס 101 — שנת $_year',
       children: [
         // HONEST framing: a structured digital form, not the official PDF.
-        const Text(
+        const CfgText(
+          'courier.forms.form101_note',
           'טופס דיגיטלי מובנה — אינו הטופס הרשמי של רשות המסים. '
           'הגשה רשמית תחובר עם חיבור השרת.',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
@@ -228,6 +231,7 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
                     'שומר את טופס 101 במכשיר לשנת המס הנוכחית, בלי לשלוח. '
                     'ניתן להמשיך לערוך ולשלוח מאוחר יותר.',
                 child: _PillButton(
+                  id: 'courier.forms.save_101',
                   label: '💾 שמור טופס',
                   filled: false,
                   onPressed: () => _save101(session, send: false),
@@ -242,6 +246,7 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
                     'שומר ושולח הודעת-הגשה לחנות דרך הצ׳אט. '
                     'ההגשה הרשמית החתומה תחובר עם חיבור השרת.',
                 child: _PillButton(
+                  id: 'courier.forms.send_101',
                   label: '📨 שלח לחנות',
                   onPressed: () => _save101(session, send: true),
                 ),
@@ -385,13 +390,15 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
               'שולח את בקשת החופשה לאישור המנהל בתור המשותף. '
               'הסטטוס (ממתינה/אושרה/נדחתה) יתעדכן כאן.',
           child: _PillButton(
+            id: 'courier.forms.vacation_submit',
             label: '🏖️ שלח בקשה לאישור המנהל',
             onPressed: () => _submitVacation(session),
           ),
         ),
         if (mine.isNotEmpty) ...[
           const SizedBox(height: BsTokens.space4),
-          const Text(
+          const CfgText(
+            'courier.forms.my_requests',
             'הבקשות שלי',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -465,7 +472,8 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
     return _FormCard(
       title: '🤒 אישור מחלה',
       children: [
-        const Text(
+        const CfgText(
+          'courier.forms.sicknote_hint',
           'צלם את אישור המחלה — הצילום נשמר ברשימה כאן.',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
         ),
@@ -474,6 +482,7 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
           title: 'צירוף אישור מחלה',
           body: 'פותח את המצלמה לצילום אישור-מחלה; הצילום נשמר ברשימה למטה.',
           child: _PillButton(
+            id: 'courier.forms.sicknote_attach',
             label: '📷 צרף צילום אישור',
             onPressed: () => _addSickNote(username),
           ),
@@ -713,11 +722,13 @@ class _FormCard extends StatelessWidget {
 /// A ≥48dp pill action — brand fill, or a light outline when [filled]=false.
 class _PillButton extends StatelessWidget {
   const _PillButton({
+    required this.id,
     required this.label,
     required this.onPressed,
     this.filled = true,
   });
 
+  final String id;
   final String label;
   final VoidCallback onPressed;
   final bool filled;
@@ -743,7 +754,8 @@ class _PillButton extends StatelessWidget {
               border:
                   filled ? null : Border.all(color: const Color(0xFFE2E2E2)),
             ),
-            child: Text(
+            child: CfgText(
+              id,
               label,
               style: TextStyle(
                 // bsOnAccent on the brand fill (F-28) — high-contrast safe.
