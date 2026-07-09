@@ -1633,7 +1633,8 @@ class _CartViewState extends ConsumerState<_CartView> {
             children: const [
               Text('🛒', style: TextStyle(fontSize: 52)),
               SizedBox(height: 12),
-              Text(
+              CfgText(
+                'shop.emptycart.title',
                 'הסל ריק',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -1642,7 +1643,8 @@ class _CartViewState extends ConsumerState<_CartView> {
                 ),
               ),
               SizedBox(height: 4),
-              Text(
+              CfgText(
+                'shop.emptycart.hint',
                 'הוסיפו מוצרים מהקטלוג',
                 style: TextStyle(color: Color(0xFF888888), fontSize: 13),
               ),
@@ -2327,7 +2329,8 @@ class _DeliverySelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        const CfgText(
+          'shop.delivery.title',
           '🚚 אפשרויות משלוח',
           style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
@@ -2417,7 +2420,8 @@ class _NotesField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        const CfgText(
+          'shop.notes.title',
           '📝 הערות לשליח',
           style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
@@ -2552,7 +2556,8 @@ class _PaymentSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        const CfgText(
+          'shop.payment.title',
           '💳 אמצעי תשלום',
           style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
@@ -2778,7 +2783,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            const CfgText(
+              'shop.checkout.title',
               'סיכום הזמנה',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -2966,7 +2972,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 Navigator.pop(context);
                 showToast(context, 'הזמנה ${placed.id} אושרה! 🎉');
               },
-              child: const Text(
+              child: const CfgText(
+                'shop.checkout.confirm',
                 'אישור הזמנה',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
@@ -3718,7 +3725,8 @@ class _OrdersHidden extends ConsumerWidget {
                 children: [
                   const Text('🔒', style: TextStyle(fontSize: 48)),
                   const SizedBox(height: 12),
-                  const Text(
+                  const CfgText(
+                    'shop.orders.hidden',
                     'היסטוריית הרכישות מוסתרת',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -4084,7 +4092,8 @@ class _OrderSheet extends ConsumerWidget {
             const SizedBox(height: 20),
             const Align(
               alignment: Alignment.centerRight,
-              child: Text(
+              child: CfgText(
+                'shop.tracking.title',
                 '🚛 מעקב הזמנה',
                 style: TextStyle(
                   color: BsTokens.inkLight,
