@@ -8,6 +8,19 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-07-09 — Studio coverage round 2 (v6.90): +66 owner-editable elements.** Wired the canonical
+> `CfgText` consumer into 6 more screens — `worker_app_screen` (12), `worker_reports_tab` (11),
+> `courier_dashboard` (11), `courier_settings` (13), `courier_profile` (9), `manager_dashboard` (10 of 19).
+> All BYTE-IDENTICAL with an empty doc (identity path — `flag OFF ⇒ Text(fallback)` verbatim): three private
+> helpers gained an optional content-id (`_Card.titleId`, `_SwitchRow`/`_RadioGroupRow.cfgId`,
+> `_ManageSection.titleCfgId`) that renders through `CfgText(id, label)` when set and plain `Text` otherwise.
+> `kElementRegistry` 45 → **111** descriptors (`test/studio/gate_118` green — every referenced id registered).
+> **Deferred (9):** the manager `_ManageSection` section-title headers (`manager.manage.*.title`) are wired in
+> code but NOT yet registered — registering them would push the `every:manager` broadcast to 26 > the
+> `kStudioMaxBatch = 25` per-utterance safety ceiling (see `studio_edit_intent_test`). They render fallback
+> verbatim (fail-closed on the unregistered id) and light up once the manager-broadcast-ceiling call is made.
+> No behavior-row change → `wiring_test` untouched. analyze 0 · full suite green.
+
 > **2026-06-17 — owner-login dead-end fix (Google on the first screen):** on the LIVE backend the
 > `OnboardingGate` traps a signed-OUT user in `_OpeningFlow` until `auth.user != null`, but the owner's
 > manager Google login was only reachable from INSIDE `HomeShell` (unreachable while signed-out) — a
