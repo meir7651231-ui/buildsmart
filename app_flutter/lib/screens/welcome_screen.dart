@@ -13,6 +13,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -585,7 +586,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                     ),
                     const SizedBox(height: BsTokens.space4),
-                    const Text(
+                    const CfgText(
+                      'welcome.hero.title',
                       'BuildSmart',
                       style: TextStyle(
                         color: Colors.white,
@@ -595,7 +597,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                     ),
                     const SizedBox(height: BsTokens.space2),
-                    const Text(
+                    const CfgText(
+                      'welcome.hero.tagline',
                       'מהשרטוט עד האתר — בלי לשכוח כלום',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -715,7 +718,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             padding: EdgeInsets.symmetric(
                               horizontal: BsTokens.space3,
                             ),
-                            child: Text(
+                            child: CfgText(
+                              'welcome.signup.divider',
                               'או הירשם',
                               style: TextStyle(
                                 color: BsTokens.mutedLight,
@@ -732,7 +736,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         ],
                       ),
                       const SizedBox(height: BsTokens.space4),
-                      const Text(
+                      const CfgText(
+                        'welcome.signup.heading',
                         'רישום ראשוני',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
@@ -741,7 +746,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         ),
                       ),
                       const SizedBox(height: BsTokens.space1),
-                      const Text(
+                      const CfgText(
+                        'welcome.signup.subtitle',
                         'מלא את הפרטים — סימן ✓ יופיע כשהשדות תקינים',
                         style: TextStyle(
                           color: BsTokens.mutedLight,
