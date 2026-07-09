@@ -16,6 +16,27 @@ const bool kUseFirebaseBackendFlag =
 bool get useFirebaseBackend =>
     kUseFirebaseBackendFlag && Firebase.apps.isNotEmpty;
 
+/// Studio "live for everyone" — the SELF-CONTAINED shared-sync switch. When ON,
+/// the owner's PUBLISHED Studio config (config_store.dart) mirrors to a single
+/// owner-writable Firestore doc (`studioConfigLive/current`) that every client
+/// reads live, so a published edit reaches all users. It is INDEPENDENT of the
+/// heavier pointer/shard pipeline ([kStudioLive] + the `publishConfig` callable,
+/// studio_config_firebase.dart) — that stays the future hardened path; this flag
+/// needs only the `studioConfigLive` rules block (owner-only write) + the owner's
+/// Google sign-in, no Cloud Function.
+///
+/// Default OFF ⇒ the config store keeps its LOCAL [LocalPrefsSink] (per-device),
+/// BYTE-IDENTICAL to today (zero regression — the same invariant as
+/// [kUseFirebaseBackendFlag]). Tests never initialise Firebase, so the local path
+/// ignores this flag. Flip on at build time once the rules are deployed:
+///   flutter build web --dart-define=STUDIO_SHARED_SYNC=true
+const bool kStudioSharedSync = bool.fromEnvironment('STUDIO_SHARED_SYNC');
+
+/// True only when [kStudioSharedSync] is set AND Firebase actually initialised
+/// (so it can never activate offline / in the Firebase-free test suite).
+bool get useStudioSharedSync =>
+    kStudioSharedSync && Firebase.apps.isNotEmpty;
+
 /// A5 (launch uid-migration) — master switch for UID-SCOPED Firestore queries.
 /// Default OFF: the orders listen stays the WHOLE-collection listen every
 /// caller relies on today, so flipping this flag is the ONLY thing that changes

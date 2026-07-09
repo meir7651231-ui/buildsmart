@@ -716,6 +716,20 @@ service cloud.firestore {
       }
     }
 
+    // ── Studio "live for everyone" — the self-contained shared config doc ───────
+    // `studioConfigLive/current` mirrors the owner's PUBLISHED Studio config
+    // (app_flutter/lib/state/studio/config_sink_firebase.dart, gated by the
+    // STUDIO_SHARED_SYNC build flag). PUBLIC read — every client (incl. signed-out
+    // demo visitors) renders the published UI-text overrides, which are
+    // non-sensitive. WRITE is OWNER-ONLY via `isOwnerEmail()` (the un-spoofable
+    // Google email), so only the owner can publish an edit to all users. This is
+    // DISTINCT from the callable-only `studioConfig/published` pointer (Step 56):
+    // a simpler, self-contained path that needs no Cloud Function.
+    match /studioConfigLive/{docId} {
+      allow read: if true;
+      allow write: if isOwnerEmail();
+    }
+
     // ── default — S5 deny-by-default ─────────────────────────────────────────
     // Anything not explicitly matched above (including any future collection
     // added without a rule) is denied for everyone. NOTE: the STATIC catalog

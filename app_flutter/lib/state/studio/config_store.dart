@@ -24,18 +24,21 @@
 // studio-plan/01 §2.5 + the step-6 leaf (+ R1/R2).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/repositories/backend.dart' show useStudioSharedSync;
 import '../../theme/config_theme.dart' show CfgTheme;
 import '../auth_state.dart' show roleProvider;
 import 'config_doc.dart';
 import 'config_merge.dart'
     show mergeAction, mergeNodeSlices, mergeStyle, roleKeyOf;
 import 'config_node.dart';
+import 'config_sink_firebase.dart' show FirestoreConfigSink;
 import 'edit_mode.dart' show editModeProvider;
 import 'element_registry.dart' show criticalIdsProvider;
 
@@ -290,11 +293,13 @@ Map<String, dynamic> _decodeJsonMap(String raw) {
 class ConfigStore extends StateNotifier<ConfigDoc> {
   ConfigStore(this._sink) : super(ConfigDoc.empty) {
     _load();
+    _subscribeRemote();
   }
 
   final ConfigSink _sink;
   final List<ConfigLayer> _undo = [];
   final List<ConfigLayer> _redo = [];
+  StreamSubscription<ConfigDoc>? _remoteSub;
 
   bool get canUndo => _undo.isNotEmpty;
   bool get canRedo => _redo.isNotEmpty;
@@ -302,11 +307,34 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
   Future<void> _load() async {
     final loaded = await _sink.load();
     // Adopt the persisted doc ONLY if no edit raced ahead of the async load
-    // (pristine: still the empty seed, nothing on the undo stack) — else a draft
-    // made during the load window would be silently clobbered (lost update).
-    if (loaded != null && mounted && state == ConfigDoc.empty && _undo.isEmpty) {
-      state = loaded;
-    }
+    // (nothing on the undo stack) — else a draft made during the load window
+    // would be silently clobbered (lost update). A remote `published` snapshot
+    // may ALSO have already landed via [_subscribeRemote] before this local load
+    // resolved — keep that live layer and overlay the local draft/history on top;
+    // otherwise (the common local path) adopt the whole loaded doc verbatim.
+    if (loaded == null || !mounted || _undo.isNotEmpty) return;
+    state = state.published.isEmpty
+        ? loaded
+        : loaded.copyWith(published: state.published);
+  }
+
+  /// Subscribe to the sink's optional live stream — the shared-sync sink
+  /// ([FirestoreConfigSink]) pushes the PUBLISHED layer here on every remote
+  /// publish, so an edit the owner publishes reaches all users. A null stream
+  /// (the local [LocalPrefsSink]) ⇒ no subscription ⇒ byte-identical to today.
+  void _subscribeRemote() {
+    final stream = _sink.watch();
+    if (stream == null) return;
+    _remoteSub = stream.listen(_adoptRemote);
+  }
+
+  /// Adopt the shared `published` layer from a remote snapshot, PRESERVING the
+  /// owner's local draft + rollback history + undo/redo (a remote publish must
+  /// never clobber per-device WIP). Idempotent — our own publish echoing back is
+  /// a no-op.
+  void _adoptRemote(ConfigDoc remote) {
+    if (!mounted || state.published == remote.published) return;
+    state = state.copyWith(published: remote.published);
   }
 
   // ── PUBLIC op-based API (the seam Pillar-4 uses) ──
@@ -547,6 +575,12 @@ class ConfigStore extends StateNotifier<ConfigDoc> {
       : (d.persona[persona]?[id] ?? CfgNode.identity);
 
   void _save() => _sink.save(state);
+
+  @override
+  void dispose() {
+    _remoteSub?.cancel();
+    super.dispose();
+  }
 }
 
 // ─── pure layer helpers ──────────────────────────────────────────────────────
@@ -630,8 +664,15 @@ CfgNode _overlayNode(CfgNode? base, CfgNode over) {
 
 // ─── providers ───────────────────────────────────────────────────────────────
 
-/// The persistence/sync seam — Pillar-5 overrides this with a Firestore sink.
-final configSinkProvider = Provider<ConfigSink>((ref) => LocalPrefsSink());
+/// The persistence/sync seam. Default = the local [LocalPrefsSink] (per-device,
+/// byte-identical to today). When `useStudioSharedSync` is ON (the
+/// `STUDIO_SHARED_SYNC` build flag AND Firebase initialised) it swaps to the
+/// [FirestoreConfigSink] — the owner's published edits then mirror to
+/// `studioConfigLive/current` and every client reads them live. Tests never
+/// initialise Firebase, so this stays [LocalPrefsSink] there regardless.
+final configSinkProvider = Provider<ConfigSink>(
+  (ref) => useStudioSharedSync ? FirestoreConfigSink.live() : LocalPrefsSink(),
+);
 
 final configStoreProvider =
     StateNotifierProvider<ConfigStore, ConfigDoc>((ref) {
