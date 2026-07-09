@@ -35,6 +35,34 @@
 > "✅ release signing configured"; בלי secret ה‑keystore ה‑AAB ייחתם debug ולא יתקבל ב‑Play.
 > הנחיה מדויקת להדבקה נמסרה לבעלים.
 
+> ✅✅ **Play‑AAB: אדום→ירוק — מאומת (9.7):** הצי ביצע את הנחיית‑האבחון אחד‑לאחד בקומיט
+> `b8bc66b2` (7.7 03:39): journey ×10 → מונע דרך ה‑seam החי `keyboardDiveQueryProvider` + עוגן
+> SKU‑badge (השם הפך DISTINCT LABEL ולא אמין); widget_test ×2 → כותרות `SmartHomeBody`
+> האמיתיות + כניסת קטגוריות דרך `catalogSectionProvider`, אסרטי B4 'בקרוב' נשמרו; swatch
+> 'שחור' הוזז מ‑`0xFF1A1A1A` (עם הערה מפורשת "product dot, not UI ink"). **"No gate weakened
+> or skipped."** אימות CI: **10 ריצות `android-package` ירוקות ברצף** 8.7→9.7, כולל הראש
+> `2255c88d`. ⚠️ נשאר על Play: **ה‑keystore** — אפס אזכורים בקומיטים ⇒ כנראה עדיין
+> debug‑signed (לא קביל להעלאה); כרוך בפריט‑הבעלים "חשבון Google Play".
+>
+> 📦 **גל ענק מאז f47e911a — 95 קומיטים (7.7→9.7), הצי עבר לזרימת PRs (#6–#17):**
+> **(1) Studio No‑Code — 58 קומיטים, הגל הדומיננטי:** Pillar‑3 intel (steps 87–99A: IntelEvents
+> → IntelBus → actorKey יציב → screen_view אוטומטי → אירועי קטלוג+חנות funnel → segments+
+> retention cohorts → טאב 5 `_IntelTab` במנהל + ציר‑זמן לקוח; הכול `kIntelLive`‑gated רדום);
+> Pillar‑4 governance capstone (step 85: gate #119 + audit + injection‑sanitize); הכנת go‑live
+> (PR #6, רדום) → חימוש stage‑1 `STUDIO_CO_EDITOR` בדמו‑web → full‑connect 2a‑2e → **rollback
+> ל‑stage‑1** (`a6fdd235`); חיווט‑צרכן: האפליקציה החיה **מרנדרת מ‑config** (הוכחת cart.cta,
+> `CfgText` קנוני, coverage round 1: home_shell+store_dashboard = +16 editable). גרסה v6.89
+> + חותמת‑sha גלויה.
+> **(2) חיפוש‑על (global-search) — תוכנית חדשה, LIVE בדמו‑web:** phase 0 שכבת‑איחוד → 7
+> דומיינים (קטלוג/מסכים/הזמנות/התראות/משימות/לקוחות) → שורת‑הניבוי של המקלדת (`kGlobalSearch`)
+> → 'עוד…' אוחד לחלון‑החיפוש הקיים; הופעל בשני ה‑web‑workflows (`33d86d80`).
+> **(3) auth:** כניסת‑קוד מנהל **admin/5555** לצד Google — פתיחת חסימת web, demo‑grade
+> (`9596f7bc`). ⚠️ פריט‑השקה: להסיר/להחליף לפני חנויות — קוד קבוע בדמו חי.
+> **(4) backend:** material‑requests→Firestore (SERVER‑SWAP Z); rollup schedulers שוחררו —
+> **הבעלים העניק cloudscheduler.admin** (`c1f38b79`), backend‑deploy ירוק.
+> **(5) keyboard:** חיפוש‑צ'אטים בהקלדה, 'שיחה חדשה'+ארכיון, פריטי ⚙ אמיתיים. **(6) manager:**
+> `kHrRelocation` PHASE 0. CI ראש: android‑package ✅ · web‑deploy ✅.
+
 > 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
 > | דגל | מפעיל | תנאי‑backend (מי) |
 > |---|---|---|
