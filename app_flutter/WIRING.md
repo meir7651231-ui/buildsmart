@@ -8,6 +8,12 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-07-09 — Studio coverage round 4 (v6.92): +13 owner-editable elements.** Wired `welcome_screen`
+> (5 non-auth: hero title/tagline + first-run signup heading/subtitle/divider — ALL login/Google/code text
+> left as plain `Text`) and `home_shell` (8: the smart-tree status label + 7 top-bar menu items via the
+> `cfgId:` helper — catalog AI-hub, chats archive, notif read-all/clear-all/settings, store cart/orders).
+> `kElementRegistry` 139 → **152**. analyze 0 · `gate_118` green · full suite green.
+
 > **2026-07-09 — Studio coverage round 3 (v6.91): +28 owner-editable elements.** Wired `CfgText` into 4 more
 > screens — `worker_profile_screen` (9), `courier_forms_screen` (8), `courier_attendance_screen` (6),
 > `courier_certs_screen` (5). All BYTE-IDENTICAL (identity path). `kElementRegistry` 111 → **139** (`gate_118`

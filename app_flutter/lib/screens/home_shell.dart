@@ -912,7 +912,11 @@ class _CatalogMenuButton extends ConsumerWidget {
             // 🏠 home-tab tools, surfaced natively (mirror the menu-dial 🏠 branch).
             PopupMenuItem<String>(
               value: 'ai_hub',
-              child: _MenuRow(emoji: '🤖', label: 'בינה מלאכותית ואוטומציה'),
+              child: _MenuRow(
+                emoji: '🤖',
+                label: 'בינה מלאכותית ואוטומציה',
+                cfgId: 'home.catalogmenu.aihub',
+              ),
             ),
             PopupMenuDivider(),
             PopupMenuItem<String>(
@@ -956,7 +960,11 @@ class _ChatsMenuButton extends ConsumerWidget {
           ),
           const PopupMenuItem<String>(
             value: 'archive',
-            child: _MenuRow(emoji: '🗂️', label: 'ארכיון שיחות'),
+            child: _MenuRow(
+              emoji: '🗂️',
+              label: 'ארכיון שיחות',
+              cfgId: 'home.chatsmenu.archive',
+            ),
           ),
           PopupMenuItem<String>(
             value: 'mute_all',
@@ -1016,13 +1024,13 @@ class _ChatsMenuButton extends ConsumerWidget {
 /// path (`kKbButtonsV2 ? … : kbKbdNodes()` const-folds away when off), so it
 /// tree-shakes out on a normal build — byte-identical.
 void openNewChatSheet(BuildContext context) => showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _NewChatSheet(),
-    );
+  context: context,
+  backgroundColor: const Color(0xFFFFFFFF),
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  ),
+  builder: (_) => const _NewChatSheet(),
+);
 
 // ─── notifications 3-dot menu ──────────────────────────────────────────────────────
 
@@ -1042,15 +1050,27 @@ class _NotificationsMenuButton extends ConsumerWidget {
           (_) => const [
             PopupMenuItem<String>(
               value: 'mark_all_read',
-              child: _MenuRow(emoji: '✅', label: 'סמן הכל כנקרא'),
+              child: _MenuRow(
+                emoji: '✅',
+                label: 'סמן הכל כנקרא',
+                cfgId: 'home.notifmenu.readall',
+              ),
             ),
             PopupMenuItem<String>(
               value: 'clear_all',
-              child: _MenuRow(emoji: '🗑️', label: 'נקה הכל'),
+              child: _MenuRow(
+                emoji: '🗑️',
+                label: 'נקה הכל',
+                cfgId: 'home.notifmenu.clearall',
+              ),
             ),
             PopupMenuItem<String>(
               value: 'notif_settings',
-              child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות'),
+              child: _MenuRow(
+                emoji: '🔔',
+                label: 'הגדרות התראות',
+                cfgId: 'home.notifmenu.settings',
+              ),
             ),
           ],
     );
@@ -1099,11 +1119,19 @@ class _StoreMenuButton extends ConsumerWidget {
           (_) => [
             const PopupMenuItem<String>(
               value: 'cart',
-              child: _MenuRow(emoji: '🛒', label: 'הסל שלי'),
+              child: _MenuRow(
+                emoji: '🛒',
+                label: 'הסל שלי',
+                cfgId: 'home.storemenu.cart',
+              ),
             ),
             const PopupMenuItem<String>(
               value: 'orders',
-              child: _MenuRow(emoji: '📦', label: 'הזמנות'),
+              child: _MenuRow(
+                emoji: '📦',
+                label: 'הזמנות',
+                cfgId: 'home.storemenu.orders',
+              ),
             ),
             // 🔧 שירותים opens the all-"בבנייה" services section — hidden for Apple
             // review (kHideUnderConstruction); the route + section stay (reversible).
@@ -1138,22 +1166,42 @@ class _StoreMenuButton extends ConsumerWidget {
 // ─── shared menu row ──────────────────────────────────────────────────────────────────
 
 class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.emoji, required this.label});
+  const _MenuRow({required this.emoji, required this.label, this.cfgId});
   final String emoji;
   final String label;
 
+  /// Optional BuildSmart-Studio element id. When set, the label routes through
+  /// [CfgText] (owner-editable; identical style/params, byte-identical fallback);
+  /// null ⇒ a plain [Text], exactly as before.
+  final String? cfgId;
+
   @override
   Widget build(BuildContext context) {
+    final id = cfgId;
     return Row(
       children: [
         Text(emoji, style: const TextStyle(fontSize: 18)),
         const SizedBox(width: 12),
         Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
-          ),
+          child:
+              id == null
+                  ? Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 15,
+                    ),
+                  )
+                  : CfgText(
+                    id,
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 15,
+                    ),
+                  ),
         ),
       ],
     );
@@ -1450,7 +1498,8 @@ class _PulsingStatusState extends ConsumerState<_PulsingStatus>
         children: [
           Icon(Icons.circle, color: bsSuccess(context), size: 7),
           const SizedBox(width: 4),
-          Text(
+          CfgText(
+            'home.status.smarttree',
             widget.text,
             style: TextStyle(
               color: bsSuccess(context),
