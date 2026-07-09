@@ -31,6 +31,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show kKeyboardToolStrip;
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,7 +220,8 @@ class _HelpModeOverlay extends ConsumerWidget {
                 const Icon(Icons.lightbulb, color: Colors.white, size: 20),
                 const SizedBox(width: BsTokens.space2),
                 const Expanded(
-                  child: Text(
+                  child: CfgText(
+                    'home.helpmode.banner',
                     'מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה',
                     style: TextStyle(
                       color: Colors.white,
@@ -602,7 +604,8 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           'לחיצה על הלוגו פותחת את בורר התפקידים — מעבר בין '
                           'לוח קבלן · מנהל · חנות · שליח · עובד. כך עוברים בין '
                           'סוגי המשתמשים באפליקציה.',
-                      child: Text(
+                      child: CfgText(
+                        'home.topbar.brand',
                         'BuildSmart',
                         style: TextStyle(
                           color: BsTokens.brand,
@@ -1191,7 +1194,8 @@ class _NewChatSheet extends StatelessWidget {
           const SizedBox(height: 16),
           const Align(
             alignment: Alignment.centerRight,
-            child: Text(
+            child: CfgText(
+              'home.newchat.title',
               '✏️ שיחה חדשה',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -1203,7 +1207,8 @@ class _NewChatSheet extends StatelessWidget {
           const SizedBox(height: 4),
           const Align(
             alignment: Alignment.centerRight,
-            child: Text(
+            child: CfgText(
+              'home.newchat.subtitle',
               'בחר סוג איש קשר',
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
@@ -1382,7 +1387,8 @@ class _ProfileCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                   ),
                 ),
-                child: Text(
+                child: CfgText(
+                  'home.profilecard.editCta',
                   'ערוך פרופיל',
                   style: TextStyle(
                     color: bsOnAccent(context),
