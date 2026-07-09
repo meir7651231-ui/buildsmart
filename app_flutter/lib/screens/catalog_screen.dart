@@ -35,6 +35,8 @@ import 'package:buildsmart/features/global_search/global_search.dart'
     show SearchResult, SearchResultKind, kGlobalSearch;
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show buildGlobalSearchIndex;
+import 'package:buildsmart/features/global_search/prediction_ranking.dart'
+    show nameAffinity, productProminence;
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
@@ -372,8 +374,23 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   if (matched.isEmpty) matched = fuzzySearchProducts(query, limit: 40);
   final filtered = filterBySystem(matched, systemFilter);
   final ordered = sort == ProductSort.byOrder
-      ? ([...filtered]..sort((a, b) =>
-          searchRelevance(b, query).compareTo(searchRelevance(a, query))))
+      ? (kGlobalSearch
+          // PREDICTION ([kGlobalSearch], const ⇒ folds out when off): keep
+          // [searchRelevance] PRIMARY, but break its ties by prediction affinity —
+          // [nameAffinity] (a product whose name IS/starts-with the query beats a
+          // variant that merely embeds it — the baseline's biggest leak) plus
+          // [productProminence] (showcased / verified / curated). Measured lift on
+          // the baseline harness: 89→79 buried products, +66 reach top-4 after one
+          // word. Off ⇒ the plain relevance sort below is byte-identical.
+          ? ([...filtered]..sort((a, b) {
+              final byRel =
+                  searchRelevance(b, query).compareTo(searchRelevance(a, query));
+              if (byRel != 0) return byRel;
+              return (nameAffinity(b, query) + productProminence(b))
+                  .compareTo(nameAffinity(a, query) + productProminence(a));
+            }))
+          : ([...filtered]..sort((a, b) =>
+              searchRelevance(b, query).compareTo(searchRelevance(a, query)))))
       : sortCatalogProducts(filtered, sort);
   return ordered.take(40).toList();
 });

@@ -1,19 +1,20 @@
-// PRODUCT-PREDICTION BASELINE (measurement, not a pass/fail spec).
+// PRODUCT-PREDICTION BASELINE vs IMPROVED (measurement, not a pass/fail spec).
 //
 // Owner's real goal: the keyboard must be a CANNON at predicting WHICH PRODUCT
-// you want. Before "improving in the air", this measures the current ranking:
-// for every distinct product, we type its name WORD BY WORD (the natural way a
-// user narrows) and record how many words it takes for that product to reach the
-// TOP-1 and the TOP-4 of the ranked results (searchRelevance — the live panel
-// sort). Fewer words = a better predictor.
+// you want. This types every distinct product's name WORD BY WORD and records how
+// many words it takes to reach the TOP-1 / TOP-4 of the ranked results — for TWO
+// rankings, side by side:
+//   • BASE     = searchRelevance only (today's live sort).
+//   • IMPROVED = searchRelevance, then productProminence as the tie-breaker
+//                (image · verified specs · dive pool · brevity · page).
+// Fewer words / more early-top-4 = a better predictor. The delta PROVES the
+// improvement in numbers, not feel.
 //
-// Re-run after each engine change to PROVE improvement with numbers, not feel:
 //   flutter test test/features/prediction/prediction_baseline_test.dart
-//
-// The metrics are printed; a loose guard only catches gross regressions.
 
-import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/features/global_search/prediction_ranking.dart'
+    show nameAffinity, productProminence;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery, searchRelevance;
 import 'package:flutter_test/flutter_test.dart';
@@ -21,93 +22,126 @@ import 'package:flutter_test/flutter_test.dart';
 List<String> _words(String name) =>
     name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
 
-void main() {
-  test('BASELINE — words to reach the target product (top-1 / top-4)', () {
-    // Collapse variants: a "product" the user wants is a distinct name (a card).
-    final byName = <String, bool>{};
-    for (final p in kCatalogProducts) {
-      final n = p.nameHe.trim();
-      if (n.isNotEmpty) byName[n] = true;
-    }
-    final targets = byName.keys.toList();
+class _Acc {
+  final toTop1 = <int>[];
+  final toTop4 = <int>[];
+  int top1Ever = 0;
+  int top4Ever = 0;
+  int top4Within1 = 0;
+  int top4Within2 = 0;
+  int neverTop4 = 0;
+}
 
-    // Ranking for a query = distinct matching names, best searchRelevance first.
-    List<String> rankedNamesFor(String query) {
-      final best = <String, int>{};
+void main() {
+  test('BASELINE vs IMPROVED — words to reach the target product', () {
+    final targets = <String>{
+      for (final p in kCatalogProducts)
+        if (p.nameHe.trim().isNotEmpty) p.nameHe.trim(),
+    }.toList();
+
+    // For a query, rank distinct names two ways sharing ONE match pass.
+    ({List<String> base, List<String> improved}) rankedFor(String query) {
+      final rel = <String, int>{};
+      final bonus = <String, int>{};
       for (final p in kCatalogProducts) {
         if (!catalogProductMatchesQuery(p, query)) continue;
         final n = p.nameHe.trim();
         final r = searchRelevance(p, query);
-        if (r > (best[n] ?? -1)) best[n] = r;
+        if (r > (rel[n] ?? -1)) rel[n] = r;
+        final b = nameAffinity(p, query) + productProminence(p);
+        if (b > (bonus[n] ?? -1)) bonus[n] = b;
       }
-      final entries = best.entries.toList()
+      final names = rel.keys.toList();
+      final base = [...names]
         ..sort((a, b) {
-          final byRel = b.value.compareTo(a.value);
-          return byRel != 0 ? byRel : a.key.compareTo(b.key);
+          final byRel = rel[b]!.compareTo(rel[a]!);
+          return byRel != 0 ? byRel : a.compareTo(b);
         });
-      return [for (final e in entries) e.key];
+      final improved = [...names]
+        ..sort((a, b) {
+          final byRel = rel[b]!.compareTo(rel[a]!);
+          if (byRel != 0) return byRel;
+          final byBonus = bonus[b]!.compareTo(bonus[a]!);
+          return byBonus != 0 ? byBonus : a.compareTo(b);
+        });
+      return (base: base, improved: improved);
     }
 
     const maxWords = 5;
-    final toTop1 = <int>[];
-    final toTop4 = <int>[];
-    var top1Ever = 0;
-    var top4Ever = 0;
-    var top4Within1 = 0;
-    var top4Within2 = 0;
-    var neverTop4 = 0;
+    final base = _Acc();
+    final imp = _Acc();
+
+    void record(_Acc acc, List<String> ranked, String target, int k,
+        List<int> firstTop1, List<int> firstTop4) {
+      final rank = ranked.indexOf(target);
+      if (rank == 0 && firstTop1[0] < 0) firstTop1[0] = k;
+      if (rank >= 0 && rank < 4 && firstTop4[0] < 0) firstTop4[0] = k;
+    }
 
     for (final target in targets) {
       final words = _words(target);
       if (words.isEmpty) continue;
-      var firstTop1 = -1;
-      var firstTop4 = -1;
       final cap = words.length < maxWords ? words.length : maxWords;
+      final bT1 = [-1], bT4 = [-1], iT1 = [-1], iT4 = [-1];
       for (var k = 1; k <= cap; k++) {
-        final ranked = rankedNamesFor(words.take(k).join(' '));
-        final rank = ranked.indexOf(target);
-        if (rank == 0 && firstTop1 < 0) firstTop1 = k;
-        if (rank >= 0 && rank < 4 && firstTop4 < 0) firstTop4 = k;
-        if (firstTop1 > 0 && firstTop4 > 0) break;
+        final r = rankedFor(words.take(k).join(' '));
+        record(base, r.base, target, k, bT1, bT4);
+        record(imp, r.improved, target, k, iT1, iT4);
+        if (bT1[0] > 0 && bT4[0] > 0 && iT1[0] > 0 && iT4[0] > 0) break;
       }
-      if (firstTop1 > 0) {
-        top1Ever++;
-        toTop1.add(firstTop1);
+      void tally(_Acc a, List<int> t1, List<int> t4) {
+        if (t1[0] > 0) {
+          a.top1Ever++;
+          a.toTop1.add(t1[0]);
+        }
+        if (t4[0] > 0) {
+          a.top4Ever++;
+          a.toTop4.add(t4[0]);
+          if (t4[0] <= 1) a.top4Within1++;
+          if (t4[0] <= 2) a.top4Within2++;
+        } else {
+          a.neverTop4++;
+        }
       }
-      if (firstTop4 > 0) {
-        top4Ever++;
-        toTop4.add(firstTop4);
-        if (firstTop4 <= 1) top4Within1++;
-        if (firstTop4 <= 2) top4Within2++;
-      } else {
-        neverTop4++;
-      }
+
+      tally(base, bT1, bT4);
+      tally(imp, iT1, iT4);
     }
 
     final n = targets.length;
     String pct(int x) => '${(100 * x / n).round()}%';
-    String avg(List<int> xs) =>
-        xs.isEmpty ? '—' : (xs.reduce((a, b) => a + b) / xs.length).toStringAsFixed(2);
+    String avg(List<int> xs) => xs.isEmpty
+        ? '—'
+        : (xs.reduce((a, b) => a + b) / xs.length).toStringAsFixed(2);
+    void report(String label, _Acc a) {
+      // ignore: avoid_print
+      print('── $label ──');
+      // ignore: avoid_print
+      print('  TOP-1 : ${a.top1Ever} (${pct(a.top1Ever)}) · avg ${avg(a.toTop1)} words');
+      // ignore: avoid_print
+      print('  TOP-4 : ${a.top4Ever} (${pct(a.top4Ever)}) · avg ${avg(a.toTop4)} words');
+      // ignore: avoid_print
+      print('  TOP-4 after 1 word : ${a.top4Within1} (${pct(a.top4Within1)})');
+      // ignore: avoid_print
+      print('  TOP-4 after ≤2 words: ${a.top4Within2} (${pct(a.top4Within2)})');
+      // ignore: avoid_print
+      print('  NEVER top-4        : ${a.neverTop4} (${pct(a.neverTop4)})');
+    }
 
     // ignore: avoid_print
-    print('\n══════ PRODUCT-PREDICTION BASELINE ══════');
+    print('\n══════ PRODUCT-PREDICTION: BASE vs IMPROVED ($n products) ══════');
+    report('BASE (relevance only)', base);
+    report('IMPROVED (+ prominence tie-break)', imp);
     // ignore: avoid_print
-    print('distinct products (targets): $n');
+    print('  Δ TOP-4 after 1 word : ${imp.top4Within1 - base.top4Within1} products');
     // ignore: avoid_print
-    print('reach TOP-1 : $top1Ever (${pct(top1Ever)}) · avg words ${avg(toTop1)}');
+    print('  Δ NEVER top-4        : ${imp.neverTop4 - base.neverTop4} products');
     // ignore: avoid_print
-    print('reach TOP-4 : $top4Ever (${pct(top4Ever)}) · avg words ${avg(toTop4)}');
-    // ignore: avoid_print
-    print('TOP-4 after 1 word : $top4Within1 (${pct(top4Within1)})   ← early-predict power');
-    // ignore: avoid_print
-    print('TOP-4 after ≤2 words: $top4Within2 (${pct(top4Within2)})');
-    // ignore: avoid_print
-    print('NEVER top-4 (≤$maxWords words): $neverTop4 (${pct(neverTop4)})');
-    // ignore: avoid_print
-    print('═════════════════════════════════════════\n');
+    print('══════════════════════════════════════════════════════════════\n');
 
-    // Loose guard — only fails on a gross regression, not to gate the number.
-    expect(top4Ever / n, greaterThan(0.5),
-        reason: 'sanity: most products should reach top-4 within their name');
+    // Guard: the improvement must NOT regress early prediction.
+    expect(imp.top4Within1, greaterThanOrEqualTo(base.top4Within1),
+        reason: 'prominence tie-break must not reduce top-4-after-1-word');
+    expect(imp.top4Within2, greaterThanOrEqualTo(base.top4Within2));
   });
 }
