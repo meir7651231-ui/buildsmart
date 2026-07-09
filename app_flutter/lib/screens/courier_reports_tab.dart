@@ -56,6 +56,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -283,7 +284,8 @@ class CourierReportsTab extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        const Text(
+        const CfgText(
+          'courier.reports.title',
           '📊 דוחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -292,7 +294,8 @@ class CourierReportsTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 2),
-        const Text(
+        const CfgText(
+          'courier.reports.subtitle',
           'נתונים חיים ממנוע ההזמנות המשותף — ללא המצאות',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
@@ -423,7 +426,8 @@ class CourierReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
 
         // ── ⑥ delivered history with tappable POD thumbs ──
-        const Text(
+        const CfgText(
+          'courier.reports.history_title',
           'היסטוריית מסירות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -441,7 +445,8 @@ class CourierReportsTab extends ConsumerWidget {
                 children: [
                   Text('📭', style: TextStyle(fontSize: 40)),
                   SizedBox(height: 8),
-                  Text(
+                  CfgText(
+                    'courier.reports.empty_title',
                     'אין עדיין מסירות שהושלמו',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -492,7 +497,8 @@ class CourierReportsTab extends ConsumerWidget {
                 child: Container(
                   height: 48, // ≥48dp target
                   alignment: Alignment.center,
-                  child: Text(
+                  child: CfgText(
+                    'courier.reports.send_report',
                     '🏪 שלח דוח-יומי לחנות',
                     style: TextStyle(
                       color: bsOnAccent(context),

@@ -2,6 +2,7 @@ import 'package:buildsmart/screens/worker_task_detail_sheet.dart';
 import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,7 +55,8 @@ class WorkerTodayStrip extends ConsumerWidget {
           Row(
             children: [
               const Expanded(
-                child: Text(
+                child: CfgText(
+                  'worker.today.title',
                   '📅 היום שלי',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -87,13 +89,15 @@ class WorkerTodayStrip extends ConsumerWidget {
           const SizedBox(height: BsTokens.space2),
           if (mine.isEmpty)
             // Honest: the §7 plan has no day-stage assigned to this worker.
-            const Text(
+            const CfgText(
+              'worker.today.empty',
               'אין שלבי-יום מתוכננים עבורך בפרויקט',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             )
           else if (current == null)
             // Honest: every day-stage of this worker is marked done.
-            const Text(
+            const CfgText(
+              'worker.today.alldone',
               '✅ כל שלבי-היום שלך בפרויקט הושלמו',
               style: TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
             )
