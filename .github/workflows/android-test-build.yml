@@ -70,7 +70,13 @@ jobs:
             --dart-define=UID_SCOPED_QUERIES=true \
             --dart-define=SERVER_CALLABLES=true \
             --dart-define=CLAUDE_AI=true \
-            --dart-define=ENABLE_WORD_FINDER=true
+            --dart-define=ENABLE_WORD_FINDER=true \
+            --dart-define=KB_LIVE_MIRROR=true \
+            --dart-define=KB_GLOBAL=true \
+            --dart-define=ENABLE_RING_DIVE=true \
+            --dart-define=GLOBAL_SEARCH=true \
+            --dart-define=PLAIN_DIVE=true \
+            --dart-define=STUDIO_SHARED_SYNC=true
 
       - name: Upload backend-ON APK artifact
         uses: actions/upload-artifact@v4
@@ -103,5 +109,5 @@ jobs:
             app_flutter/build/app/outputs/flutter-apk/app-release.apk \
             --app "1:483064122180:android:e9d240f3251e7a33ca6511" \
             --testers "meir7651231@gmail.com" \
-            --release-notes "🟢 v6.88 — 🤖 קו-פיילוט במסך-הניהול: שאל את העסק שלך בעברית + תדריך-בוקר. + תיקון-מחיר: מע״מ 18% + ₪ מקובץ אחיד. + נגישות: WCAG + קורא-מסך + מנעול double-tap. + ביצועים: חיפוש-קטלוג מהיר יותר. מוקשח בעשרה סיבובי-אודיט-נחיל. v6.88 במסך הבית · build #${{ github.run_number }}" \
+            --release-notes "🟢 גרסה 1.4.7 (v6.99) — ✏️ עריכה חיה של כל טקסט באפליקציה: מנהל → 🎨 סטודיו → מצב עריכה → לוחצים על טקסט ומשנים ומפרסמים לכולם (863 טקסטים, כל 114 המסכים). + 🔎 מאתר-פשוט + חיפוש דו-לשוני. build #${{ github.run_number }}" \
             --project buildsmart-b0b78
