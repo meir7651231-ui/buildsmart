@@ -1713,7 +1713,8 @@ class _ProjectSelector extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        const CfgText(
+          'store_screen.proj_assign_title',
           '🏗️ שיוך לפרויקט',
           style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
@@ -1742,7 +1743,8 @@ class _ProjectSelector extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: const Color(0xFF444444)),
                   ),
-                  child: const Text(
+                  child: const CfgText(
+                    'store_screen.proj_add_chip',
                     '+ הוסף',
                     style: TextStyle(color: Color(0xFF888888), fontSize: 13),
                   ),
@@ -1762,7 +1764,8 @@ class _ProjectSelector extends ConsumerWidget {
       builder:
           (ctx) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: const CfgText(
+              'store_screen.proj_add_dialog_title',
               'הוספת פרויקט',
               style: TextStyle(color: BsTokens.inkLight),
             ),
@@ -1775,7 +1778,8 @@ class _ProjectSelector extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text(
+                child: const CfgText(
+                  'store_screen.proj_add_cancel',
                   'ביטול',
                   style: TextStyle(color: Colors.black38),
                 ),
@@ -1792,7 +1796,7 @@ class _ProjectSelector extends ConsumerWidget {
                   Navigator.pop(ctx);
                 },
                 style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-                child: const Text('הוסף'),
+                child: const CfgText('store_screen.proj_add_confirm', 'הוסף'),
               ),
             ],
           ),
@@ -2048,7 +2052,8 @@ class _SupplierHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Text(
+          const CfgText(
+            'store_screen.supplier_lead_time',
             'אספקה: יום-יומיים',
             style: TextStyle(color: Color(0xFF888888), fontSize: 11),
           ),
@@ -2258,7 +2263,8 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              const CfgText(
+                'store_screen.shipto_title',
                 'לאן לשלוח?',
                 style: TextStyle(
                   fontSize: 18,
@@ -2267,7 +2273,8 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              const CfgText(
+                'store_screen.shipto_hint',
                 'לא חובה — אפשר לאשר את ההזמנה גם בלי כתובת ולהשלים בהמשך.',
                 style: TextStyle(color: Colors.black54, fontSize: 13),
               ),
@@ -2292,7 +2299,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.pop(sheetCtx),
-                      child: const Text('דלג'),
+                      child: const CfgText('store_screen.shipto_skip', 'דלג'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -2306,7 +2313,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                             ctrl.text.trim();
                         Navigator.pop(sheetCtx);
                       },
-                      child: const Text('שמירה'),
+                      child: const CfgText('store_screen.shipto_save', 'שמירה'),
                     ),
                   ),
                 ],
@@ -2679,7 +2686,8 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
           builder:
               (ctx) => AlertDialog(
                 backgroundColor: const Color(0xFFFFFFFF),
-                title: const Text(
+                title: const CfgText(
+                  'store_screen.large_order_title',
                   'אישור הזמנה גדולה',
                   style: TextStyle(color: BsTokens.inkLight),
                 ),
@@ -2691,12 +2699,12 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('ביטול'),
+                    child: const CfgText('store_screen.large_order_cancel', 'ביטול'),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
                     style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-                    child: const Text('אשר והמשך'),
+                    child: const CfgText('store_screen.large_order_confirm', 'אשר והמשך'),
                   ),
                 ],
               ),
@@ -2802,7 +2810,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  const CfgText(
+                    'store_screen.checkout_project_label',
                     'פרויקט',
                     style: TextStyle(color: Colors.black54, fontSize: 12),
                   ),
@@ -2820,7 +2829,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      const CfgText(
+                        'store_screen.checkout_delivery_label',
                         '📦 משלוח',
                         style: TextStyle(color: Colors.black54, fontSize: 12),
                       ),
@@ -2837,7 +2847,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      const CfgText(
+                        'store_screen.checkout_payment_label',
                         '💳 תשלום',
                         style: TextStyle(color: Colors.black54, fontSize: 12),
                       ),
@@ -2856,7 +2867,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      const CfgText(
+                        'store_screen.checkout_total_label',
                         'סה"כ לתשלום',
                         style: TextStyle(
                           color: BsTokens.inkLight,
@@ -2998,7 +3010,8 @@ class _CartActionsRow extends ConsumerWidget {
       builder:
           (context) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: const CfgText(
+              'store_screen.save_list_title',
               'שמור סל כרשימה',
               style: TextStyle(color: BsTokens.inkLight),
             ),
@@ -3019,7 +3032,8 @@ class _CartActionsRow extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
+                child: const CfgText(
+                  'store_screen.save_list_cancel',
                   'ביטול',
                   style: TextStyle(color: Colors.black38),
                 ),
@@ -3052,7 +3066,8 @@ class _CartActionsRow extends ConsumerWidget {
                   Navigator.pop(context);
                   showToast(context, 'הרשימה נשמרה בהצלחה');
                 },
-                child: const Text(
+                child: const CfgText(
+                  'store_screen.save_list_confirm',
                   'שמור',
                   style: TextStyle(color: BsTokens.brand),
                 ),
@@ -3117,7 +3132,8 @@ class _CartActionsRow extends ConsumerWidget {
                     const SizedBox(height: 16),
                     const Align(
                       alignment: Alignment.centerRight,
-                      child: Text(
+                      child: CfgText(
+                        'store_screen.saved_lists_title',
                         '🔖 רשימות שמורות',
                         style: TextStyle(
                           color: BsTokens.inkLight,
@@ -3131,7 +3147,8 @@ class _CartActionsRow extends ConsumerWidget {
                     if (lists.isEmpty)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 28),
-                        child: Text(
+                        child: CfgText(
+                          'store_screen.saved_lists_empty',
                           'אין רשימות שמורות עדיין',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -3221,13 +3238,13 @@ class _CartActionsRow extends ConsumerWidget {
         TextButton.icon(
           onPressed: () => _showSavedListsSheet(context, ref),
           icon: const Icon(Icons.folder_open_outlined, size: 16),
-          label: const Text('רשימות'),
+          label: const CfgText('store_screen.actions_lists', 'רשימות'),
           style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
         TextButton.icon(
           onPressed: () => _showSaveDialog(context, ref),
           icon: const Icon(Icons.bookmark_border, size: 16),
-          label: const Text('שמור'),
+          label: const CfgText('store_screen.actions_save', 'שמור'),
           style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
         // 'שיתוף סל עם צוות' (storeSettings.shareCartWithTeam) gates the cart
@@ -3256,7 +3273,7 @@ class _CartActionsRow extends ConsumerWidget {
               await ref.read(shareTextProvider)(text);
             },
             icon: const Icon(Icons.share_outlined, size: 16),
-            label: const Text('שתף'),
+            label: const CfgText('store_screen.actions_share', 'שתף'),
             style: TextButton.styleFrom(foregroundColor: Colors.black38),
           ),
         TextButton.icon(
@@ -3287,7 +3304,7 @@ class _CartActionsRow extends ConsumerWidget {
             showToast(context, 'הסל נוקה');
           },
           icon: const Icon(Icons.delete_outline, size: 16),
-          label: const Text('נקה'),
+          label: const CfgText('store_screen.actions_clear', 'נקה'),
           style: TextButton.styleFrom(
             foregroundColor: Colors.redAccent.withValues(alpha: 0.8),
           ),
@@ -3491,7 +3508,8 @@ class _ServiceSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: const Color(0xFFFFD600)),
                 ),
-                child: const Text(
+                child: const CfgText(
+                  'store_screen.service_under_construction',
                   '🚧 בבנייה',
                   style: TextStyle(
                     color: Color(0xFF795548),
@@ -3736,7 +3754,8 @@ class _OrdersHidden extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  const CfgText(
+                    'store_screen.orders_hidden_hint',
                     'הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות.',
                     style: TextStyle(color: Color(0xFF888888), fontSize: 13),
                     textAlign: TextAlign.center,
@@ -3746,7 +3765,7 @@ class _OrdersHidden extends ConsumerWidget {
                     onPressed: () => ref
                         .read(storeSettingsProvider.notifier)
                         .update((s) => s.copyWith(purchaseHistory: true)),
-                    child: const Text('הצג היסטוריה'),
+                    child: const CfgText('store_screen.orders_hidden_show', 'הצג היסטוריה'),
                   ),
                 ],
               ),
@@ -3993,7 +4012,8 @@ class _OrderSheet extends ConsumerWidget {
             if (lines.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text(
+                child: CfgText(
+                  'store_screen.order_no_items',
                   'פרטי הפריטים אינם זמינים',
                   style: TextStyle(color: Color(0xFF888888), fontSize: 13),
                   textAlign: TextAlign.center,
@@ -4045,7 +4065,7 @@ class _OrderSheet extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('סכום ביניים',
+                  const CfgText('store_screen.order_subtotal', 'סכום ביניים',
                       style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
                   Text(_price(lineSubtotal),
                       style:
@@ -4057,7 +4077,7 @@ class _OrderSheet extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('מע"מ + משלוח',
+                    const CfgText('store_screen.order_vat_delivery', 'מע"מ + משלוח',
                         style:
                             TextStyle(color: Color(0xFF888888), fontSize: 13)),
                     Text(_price(extras),
@@ -4071,7 +4091,8 @@ class _OrderSheet extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                const CfgText(
+                  'store_screen.order_total',
                   'סה"כ',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -4112,7 +4133,7 @@ class _OrderSheet extends ConsumerWidget {
                 onPressed: () =>
                     showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
                 icon: const Text('📄', style: TextStyle(fontSize: 16)),
-                label: const Text('סרוק תעודת-משלוח'),
+                label: const CfgText('store_screen.order_scan_delivery', 'סרוק תעודת-משלוח'),
               ),
             ],
           ],

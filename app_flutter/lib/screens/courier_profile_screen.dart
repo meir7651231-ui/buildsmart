@@ -197,7 +197,8 @@ class CourierProfileBody extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
 
         // ── מסירות — סטטיסטיקה חיה (שלי בלבד, #86.6) ──────────────────────
-        const Text(
+        const CfgText(
+          'courier_profile_screen.stats_heading',
           'מסירות — סטטיסטיקה',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -286,7 +287,8 @@ class CourierProfileBody extends ConsumerWidget {
                     'החלפת תפקיד',
                     style: TextStyle(color: BsTokens.inkLight),
                   ),
-                  subtitle: const Text(
+                  subtitle: const CfgText(
+                    'courier_profile_screen.role_switch_subtitle',
                     'מוגן בקוד',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                   ),
@@ -433,7 +435,8 @@ class _CourierIdentityCard extends StatelessWidget {
                             BsTokens.radiusPill,
                           ),
                         ),
-                        child: const Text(
+                        child: const CfgText(
+                          'courier_profile_screen.demo_chip',
                           'דמו',
                           style: TextStyle(
                             color: BsTokens.mutedLight,
@@ -570,7 +573,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'נוכחות',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
-              subtitle: const Text(
+              subtitle: const CfgText(
+                'courier_profile_screen.attendance_subtitle',
                 'כניסה/יציאה ודוח חודשי',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -595,7 +599,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'טפסים',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
-              subtitle: const Text(
+              subtitle: const CfgText(
+                'courier_profile_screen.forms_subtitle',
                 'טופס 101 · בקשת חופשה · אישור מחלה',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -620,7 +625,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'תעודות נהג',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
-              subtitle: const Text(
+              subtitle: const CfgText(
+                'courier_profile_screen.certs_subtitle',
                 'רישיון נהיגה · ביטוח רכב · רישיון רכב',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -645,7 +651,8 @@ class _CourierPersonalAreaCard extends StatelessWidget {
                 'תלושי שכר',
                 style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
-              subtitle: const Text(
+              subtitle: const CfgText(
+                'courier_profile_screen.payslips_subtitle',
                 'יחובר עם חיבור השרת',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -840,7 +847,8 @@ class _EditCourierProfileSheetState
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: CfgText(
+                          'courier_profile_screen.edit_sheet_title',
                           'עריכת פרופיל',
                           style: TextStyle(
                             color: BsTokens.inkLight,
@@ -881,7 +889,8 @@ class _EditCourierProfileSheetState
                             if (_photo != null)
                               TextButton(
                                 onPressed: () => setState(() => _photo = null),
-                                child: const Text(
+                                child: const CfgText(
+                                  'courier_profile_screen.remove_photo',
                                   'הסר תמונה',
                                   // AA: redAccent על לבן נכשל — token חוזה 9.
                                   style: TextStyle(color: BsTokens.dangerDark),
@@ -926,7 +935,8 @@ class _EditCourierProfileSheetState
                   // ── סוג רכב מועדף (במקום "התמחות" של העובד) ──
                   const Align(
                     alignment: AlignmentDirectional.centerStart,
-                    child: Text(
+                    child: CfgText(
+                      'courier_profile_screen.preferred_vehicle_label',
                       'סוג רכב מועדף',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -1010,7 +1020,8 @@ class _RoleSwitchCodeDialogState extends State<_RoleSwitchCodeDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: const Color(0xFFFFFFFF),
-      title: const Text(
+      title: const CfgText(
+        'courier_profile_screen.role_switch_dialog_title',
         'החלפת תפקיד',
         style: TextStyle(color: BsTokens.inkLight),
       ),
@@ -1018,7 +1029,8 @@ class _RoleSwitchCodeDialogState extends State<_RoleSwitchCodeDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          const CfgText(
+            'courier_profile_screen.role_switch_dialog_body',
             'מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:',
             style: TextStyle(color: Colors.black54),
           ),
@@ -1048,12 +1060,12 @@ class _RoleSwitchCodeDialogState extends State<_RoleSwitchCodeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('ביטול'),
+          child: const CfgText('courier_profile_screen.dialog_cancel', 'ביטול'),
         ),
         TextButton(
           onPressed: _confirm,
           style: TextButton.styleFrom(foregroundColor: BsTokens.brandDark),
-          child: const Text('אישור'),
+          child: const CfgText('courier_profile_screen.dialog_confirm', 'אישור'),
         ),
       ],
     );

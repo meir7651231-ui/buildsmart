@@ -9,6 +9,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +59,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'worker_safety_screen.appbar_title',
           '🛡️ תיק בטיחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -232,7 +234,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     Row(
                       children: [
                         const Expanded(
-                          child: Text(
+                          child: CfgText(
+                            'worker_safety_screen.add_training_title',
                             '🎓 הוספת הדרכה',
                             style: TextStyle(
                               color: BsTokens.inkLight,
@@ -332,7 +335,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                                 Border.all(color: const Color(0xFFE2E2E2)),
                           ),
                           child: doc == null
-                              ? const Text(
+                              ? const CfgText(
+                                  'worker_safety_screen.attach_doc',
                                   '📄 צרף מסמך הדרכה (לא חובה)',
                                   style: TextStyle(
                                     color: BsTokens.inkLight,
@@ -343,7 +347,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                               : Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Text(
+                                    const CfgText(
+                                      'worker_safety_screen.doc_attached',
                                       '📄 מסמך צורף ✓',
                                       style: TextStyle(
                                         color: BsTokens.inkLight,
@@ -396,7 +401,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                         child: Container(
                           constraints: const BoxConstraints(minHeight: 48),
                           alignment: Alignment.center,
-                          child: Text(
+                          child: CfgText(
+                            'worker_safety_screen.save_training',
                             '💾 שמור הדרכה',
                             style: TextStyle(
                               // bsOnAccent on the brand fill (F-28).
@@ -529,7 +535,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     Row(
                       children: [
                         const Expanded(
-                          child: Text(
+                          child: CfgText(
+                            'worker_safety_screen.add_cert_title',
                             '🪪 הוספת תעודה',
                             style: TextStyle(
                               color: BsTokens.inkLight,
@@ -630,7 +637,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                                 Border.all(color: const Color(0xFFE2E2E2)),
                           ),
                           child: photo == null
-                              ? const Text(
+                              ? const CfgText(
+                                  'worker_safety_screen.attach_photo',
                                   '📷 צרף צילום תעודה (לא חובה)',
                                   style: TextStyle(
                                     color: BsTokens.inkLight,
@@ -641,7 +649,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                               : Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Text(
+                                    const CfgText(
+                                      'worker_safety_screen.photo_attached',
                                       '📷 צילום צורף ✓',
                                       style: TextStyle(
                                         color: BsTokens.inkLight,
@@ -695,7 +704,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                         child: Container(
                           constraints: const BoxConstraints(minHeight: 48),
                           alignment: Alignment.center,
-                          child: Text(
+                          child: CfgText(
+                            'worker_safety_screen.save_cert',
                             '💾 שמור תעודה',
                             style: TextStyle(
                               // bsOnAccent on the brand fill (F-28).
@@ -781,7 +791,8 @@ class _TrainingsCard extends StatelessWidget {
           if (trainings.isEmpty)
             const Padding(
               padding: EdgeInsets.only(bottom: BsTokens.space3),
-              child: Text(
+              child: CfgText(
+                'worker_safety_screen.no_trainings',
                 'אין הדרכות רשומות עדיין — הוסף את הראשונה.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -798,7 +809,8 @@ class _TrainingsCard extends StatelessWidget {
             const SizedBox(height: BsTokens.space1),
             // HONEST demo marker — the seeded rows are demo data, not a server
             // log; it stays until the worker removes them.
-            const Text(
+            const CfgText(
+              'worker_safety_screen.demo_hint',
               'נתוני דמו — רישום הדרכות אמיתי יחובר עם חיבור השרת.',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
             ),
@@ -817,7 +829,8 @@ class _TrainingsCard extends StatelessWidget {
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 48),
                   alignment: Alignment.center,
-                  child: Text(
+                  child: CfgText(
+                    'worker_safety_screen.add_training_btn',
                     '➕ הוסף הדרכה',
                     style: TextStyle(
                       // bsOnAccent on the brand fill (F-28).
@@ -1051,7 +1064,8 @@ class _CertsCard extends StatelessWidget {
           if (certs.isEmpty)
             const Padding(
               padding: EdgeInsets.only(bottom: BsTokens.space3),
-              child: Text(
+              child: CfgText(
+                'worker_safety_screen.no_certs',
                 'אין תעודות בארנק עדיין — הוסף את הראשונה.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -1072,7 +1086,8 @@ class _CertsCard extends StatelessWidget {
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 48),
                   alignment: Alignment.center,
-                  child: Text(
+                  child: CfgText(
+                    'worker_safety_screen.add_cert_btn',
                     '➕ הוסף תעודה',
                     style: TextStyle(
                       // bsOnAccent on the brand fill (F-28).

@@ -17,6 +17,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,13 +154,14 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
   @override
   Widget build(BuildContext context) {
     if (widget.products.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('📦', style: TextStyle(fontSize: 48)),
-            SizedBox(height: 12),
-            Text(
+            const Text('📦', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            CfgText(
+              'lipskey_products_screen.empty_title',
               'אין מוצרים להצגה',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -167,8 +169,9 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 6),
-            Text(
+            const SizedBox(height: 6),
+            CfgText(
+              'lipskey_products_screen.empty_hint',
               'נסו לבחור קטגוריה אחרת בקטלוג',
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
@@ -481,7 +484,8 @@ class LipskeyProductGridCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
+                  CfgText(
+                    'lipskey_products_screen.price_by_supplier_grid',
                     'מחיר לפי ספק',
                     style: TextStyle(
                       color: Color(0xFF45575E),
@@ -564,7 +568,8 @@ class LipskeyProductGridCard extends ConsumerWidget {
                           children: [
                             Icon(Icons.add, color: bsOnAccent(context), size: 16),
                             const SizedBox(width: 4),
-                            Text(
+                            CfgText(
+                              'lipskey_products_screen.to_cart',
                               'לסל',
                               style: TextStyle(
                                 color: bsOnAccent(context),
@@ -639,9 +644,9 @@ void showQtyWheel(BuildContext context, int current, void Function(int) onPick) 
         height: 280,
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.all(14),
-              child: Text('בחר כמות',
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: CfgText('lipskey_products_screen.choose_qty', 'בחר כמות',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
             ),
             Expanded(
@@ -1306,7 +1311,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                           height: 1.2)),
                 ),
                 const SizedBox(width: 8),
-                Text('מחיר לפי ספק',
+                CfgText('lipskey_products_screen.price_by_supplier_row',
+                    'מחיר לפי ספק',
                     style: TextStyle(
                         color: _muted,
                         fontSize: 11,
@@ -1350,9 +1356,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                     child: GestureDetector(
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: p.sku));
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('מק"ט הועתק'),
-                          duration: Duration(seconds: 1),
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: CfgText('lipskey_products_screen.sku_copied', 'מק"ט הועתק'),
+                          duration: const Duration(seconds: 1),
                           behavior: SnackBarBehavior.floating,
                         ));
                       },
@@ -2288,7 +2294,8 @@ class _HierarchyChips extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
+              CfgText(
+                'lipskey_products_screen.size_label',
                 'מידה',
                 style: TextStyle(
                   color: Color(0xFF8E8E93),

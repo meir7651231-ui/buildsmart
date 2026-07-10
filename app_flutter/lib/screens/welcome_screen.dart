@@ -289,7 +289,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   List<Widget> _managerGoogleChildren() {
     final canGoogle = ref.read(authGatewayProvider) != null;
     return [
-      const Text(
+      const CfgText(
+        'welcome_screen.mgr_login_title',
         'כניסת מנהל המערכת',
         style: TextStyle(
           fontWeight: FontWeight.w900,
@@ -298,7 +299,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         ),
       ),
       const SizedBox(height: BsTokens.space1),
-      const Text(
+      const CfgText(
+        'welcome_screen.mgr_login_subtitle',
         'חשבון הבעלים — כניסה מאובטחת עם חשבון Google.',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
       ),
@@ -320,7 +322,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ),
                   )
                 : const Icon(Icons.login_rounded),
-            label: const Text(
+            label: const CfgText(
+              'welcome_screen.mgr_continue_google',
               'המשך עם Google',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
@@ -341,7 +344,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             color: const Color(0xFFFFF4D6),
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           ),
-          child: const Text(
+          child: const CfgText(
+            'welcome_screen.mgr_needs_connection',
             'כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.',
             style: TextStyle(color: Color(0xFF8A6D00), fontSize: 13),
           ),
@@ -404,7 +408,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         const SizedBox(height: BsTokens.space5),
         const Divider(height: 1),
         const SizedBox(height: BsTokens.space4),
-        const Text(
+        const CfgText(
+          'welcome_screen.mgr_or_code_login',
           'או כניסה עם קוד (demo)',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
@@ -432,7 +437,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              const CfgText(
+                'welcome_screen.board_existing_login_btn',
                 'כניסה ללקוח קיים',
                 style: TextStyle(
                   fontSize: 16,
@@ -506,7 +512,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           body: 'כניסה ללוח בלי חשבון — לסיור מהיר עם נתוני דוגמה בלבד.',
           child: TextButton(
             onPressed: _demo,
-            child: const Text(
+            child: const CfgText(
+              'welcome_screen.board_demo_mode',
               'מצב דמו',
               style: TextStyle(
                 color: BsTokens.mutedLight,
@@ -661,7 +668,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               ),
                             ),
                             onPressed: _busy ? null : _managerGoogleLogin,
-                            child: const Text(
+                            child: const CfgText(
+                              'welcome_screen.owner_google_login',
                               'כניסה עם Google (בעלים)',
                               style: TextStyle(
                                 fontSize: 16,
@@ -696,7 +704,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             ),
                           ),
                           onPressed: _busy ? null : _existingLogin,
-                          child: const Text(
+                          child: const CfgText(
+                            'welcome_screen.existing_login_btn',
                             'כניסה ללקוח קיים',
                             style: TextStyle(
                               fontSize: 16,
@@ -852,7 +861,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         alignment: WrapAlignment.center,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          const Text(
+                          const CfgText(
+                            'welcome_screen.terms_prefix',
                             'בהרשמה אתה מאשר את ',
                             style: TextStyle(
                               color: BsTokens.mutedLight,
@@ -863,7 +873,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             onTap: () => Navigator.of(context).push(
                               LegalScreen.route(initialTab: LegalTab.terms),
                             ),
-                            child: const Text(
+                            child: const CfgText(
+                              'welcome_screen.terms_of_use',
                               'תנאי השימוש',
                               style: TextStyle(
                                 color: BsTokens.brandDark,
@@ -873,7 +884,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               ),
                             ),
                           ),
-                          const Text(
+                          const CfgText(
+                            'welcome_screen.terms_and',
                             ' ואת ',
                             style: TextStyle(
                               color: BsTokens.mutedLight,
@@ -884,7 +896,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             onTap: () => Navigator.of(context).push(
                               LegalScreen.route(initialTab: LegalTab.privacy),
                             ),
-                            child: const Text(
+                            child: const CfgText(
+                              'welcome_screen.privacy_policy',
                               'מדיניות הפרטיות',
                               style: TextStyle(
                                 color: BsTokens.brandDark,
@@ -894,7 +907,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               ),
                             ),
                           ),
-                          const Text(
+                          const CfgText(
+                            'welcome_screen.terms_suffix',
                             ' של BuildSmart',
                             style: TextStyle(
                               color: BsTokens.mutedLight,

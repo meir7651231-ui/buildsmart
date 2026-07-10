@@ -21,6 +21,7 @@ import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/kb_field_mode.dart';
 import 'package:buildsmart/widgets/smart_input/models.dart';
 import 'package:buildsmart/widgets/smart_input/smart_suggestion_strip.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -844,7 +845,8 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: const CfgText(
+          'chats_screen.appbar_title',
           'שיחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -1113,7 +1115,8 @@ class _ThreadList extends ConsumerWidget {
           children: [
             Text('💬', style: TextStyle(fontSize: 48)),
             SizedBox(height: 12),
-            Text(
+            CfgText(
+              'chats_screen.empty_title',
               'אין שיחות',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -1122,7 +1125,8 @@ class _ThreadList extends ConsumerWidget {
               ),
             ),
             SizedBox(height: 6),
-            Text(
+            CfgText(
+              'chats_screen.empty_hint',
               'כשיהיו שיחות — הן יופיעו כאן',
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
@@ -1174,7 +1178,7 @@ class _DismissibleThread extends ConsumerWidget {
         notifier.archive(id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('שיחה הועברה לארכיון'),
+            content: const CfgText('chats_screen.archived_snack', 'שיחה הועברה לארכיון'),
             backgroundColor: const Color(0xFFF5F5F5),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
@@ -1686,19 +1690,19 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                       Icons.archive_outlined,
                       color: Colors.black54,
                     ),
-                    title: const Text('העבר לארכיון'),
+                    title: const CfgText('chats_screen.menu_archive', 'העבר לארכיון'),
                     onTap: () => Navigator.pop(sheetCtx, 'archive'),
                   ),
                   ListTile(
                     leading: const Icon(Icons.search, color: Colors.black54),
-                    title: const Text('חיפוש בשיחה'),
+                    title: const CfgText('chats_screen.menu_search', 'חיפוש בשיחה'),
                     // Honest: in-thread search has no backing index in the demo.
                     enabled: false,
                     onTap: null,
                   ),
                   ListTile(
                     leading: const Icon(Icons.block, color: Colors.black54),
-                    title: const Text('חסום איש קשר'),
+                    title: const CfgText('chats_screen.menu_block', 'חסום איש קשר'),
                     // Honest: blocking requires a server contact list (not in demo).
                     enabled: false,
                     onTap: null,
@@ -1806,7 +1810,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                     ),
                   ),
                   if (showOnline)
-                    const Text(
+                    const CfgText(
+                      'chats_screen.online_now',
                       'פעיל כעת',
                       style: TextStyle(color: Color(0xFF4CAF50), fontSize: 11),
                     ),
@@ -2037,7 +2042,8 @@ class _DeliveryStatus extends StatelessWidget {
             const SizedBox(width: 3),
             GestureDetector(
               onTap: onRetry,
-              child: const Text(
+              child: const CfgText(
+                'chats_screen.retry',
                 'נסה שוב',
                 style: TextStyle(
                   color: Colors.red,
@@ -2080,7 +2086,8 @@ class _TypingBubble extends StatelessWidget {
             ),
           ],
         ),
-        child: const Text(
+        child: const CfgText(
+          'chats_screen.typing',
           'מקליד...',
           style: TextStyle(
             color: Color(0xFF888888),
@@ -2154,7 +2161,8 @@ class _PrivacyNotice extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Expanded(
-            child: Text(
+            child: CfgText(
+              'chats_screen.privacy_notice',
               '🔒 ההודעות בשיחה זו מוצפנות מקצה לקצה. רק המשתתפים יכולים לקרוא אותן.',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -2179,15 +2187,16 @@ void _showVoiceUnavailable(BuildContext context) {
     context: context,
     builder:
         (dialogCtx) => AlertDialog(
-          title: const Text('הקלטת קול'),
-          content: const Text(
+          title: const CfgText('chats_screen.voice_title', 'הקלטת קול'),
+          content: const CfgText(
+            'chats_screen.voice_body',
             'הקלטת הודעות קוליות אינה זמינה בגרסת הדמו.',
             textAlign: TextAlign.right,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: const Text('הבנתי'),
+              child: const CfgText('chats_screen.voice_ok', 'הבנתי'),
             ),
           ],
         ),
@@ -2228,7 +2237,7 @@ void _showAttachSheet(BuildContext context) {
                     Icons.photo_camera_outlined,
                     color: BsTokens.brand,
                   ),
-                  title: const Text('מצלמה'),
+                  title: const CfgText('chats_screen.attach_camera', 'מצלמה'),
                   onTap: () {
                     Navigator.pop(sheetCtx);
                     openCameraSheet(context);
@@ -2243,8 +2252,8 @@ void _showAttachSheet(BuildContext context) {
                       Icons.insert_drive_file_outlined,
                       color: Colors.black38,
                     ),
-                    title: Text('מסמך'),
-                    subtitle: Text('לא זמין בדמו'),
+                    title: CfgText('chats_screen.attach_doc', 'מסמך'),
+                    subtitle: CfgText('chats_screen.attach_doc_unavail', 'לא זמין בדמו'),
                     enabled: false,
                   ),
                   const ListTile(
@@ -2252,8 +2261,8 @@ void _showAttachSheet(BuildContext context) {
                       Icons.location_on_outlined,
                       color: Colors.black38,
                     ),
-                    title: Text('מיקום'),
-                    subtitle: Text('לא זמין בדמו'),
+                    title: CfgText('chats_screen.attach_location', 'מיקום'),
+                    subtitle: CfgText('chats_screen.attach_location_unavail', 'לא זמין בדמו'),
                     enabled: false,
                   ),
                 ],
@@ -2577,7 +2586,8 @@ class ChatsArchiveScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: const CfgText(
+          'chats_screen.archive_title',
           'ארכיון שיחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -2598,7 +2608,8 @@ class ChatsArchiveScreen extends ConsumerWidget {
                       color: Color(0xFFBBBBBB),
                     ),
                     SizedBox(height: 12),
-                    Text(
+                    CfgText(
+                      'chats_screen.archive_empty_title',
                       'אין שיחות בארכיון',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -2607,7 +2618,8 @@ class ChatsArchiveScreen extends ConsumerWidget {
                       ),
                     ),
                     SizedBox(height: 6),
-                    Text(
+                    CfgText(
+                      'chats_screen.archive_empty_hint',
                       'החלק שיחה שמאלה כדי לארכב אותה',
                       style: TextStyle(color: Color(0xFF888888), fontSize: 13),
                     ),

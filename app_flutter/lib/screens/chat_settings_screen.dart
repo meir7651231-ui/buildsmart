@@ -2,6 +2,7 @@ import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +24,8 @@ class ChatSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
-        title: const Text(
+        title: CfgText(
+          'chat_settings_screen.t01',
           'הגדרות שיחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -64,23 +66,25 @@ class ChatSettingsScreen extends ConsumerWidget {
       builder:
           (ctx) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: CfgText(
+              'chat_settings_screen.t02',
               'איפוס הגדרות?',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: CfgText(
+              'chat_settings_screen.t03',
               'כל הגדרות השיחות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+                child: CfgText('chat_settings_screen.t04', 'ביטול'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+                child: CfgText('chat_settings_screen.t05', 'אפס'),
               ),
             ],
           ),
@@ -110,7 +114,7 @@ class _QuickReplyBanner extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('תשובות מהירות'),
+        title: CfgText('chat_settings_screen.t06', 'תשובות מהירות'),
         content: const Text(
           'התבניות קבועות בגרסה זו. הקש על תבנית כדי להעתיק אותה — '
           'עריכת תבניות מותאמות אישית תתווסף בהמשך.',
@@ -119,7 +123,7 @@ class _QuickReplyBanner extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('הבנתי'),
+            child: CfgText('chat_settings_screen.t07', 'הבנתי'),
           ),
         ],
       ),
@@ -142,8 +146,9 @@ class _QuickReplyBanner extends StatelessWidget {
             children: [
               const Text('⚡', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              const Flexible(
-                child: Text(
+              Flexible(
+                child: CfgText(
+                  'chat_settings_screen.t08',
                   'תשובות מהירות',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -160,11 +165,12 @@ class _QuickReplyBanner extends StatelessWidget {
                 onTap: () => _showEditInfo(context),
                 // ≥48dp tap target around the small link (a11y), without
                 // enlarging the visible text.
-                child: const SizedBox(
+                child: SizedBox(
                   width: 48,
                   height: 48,
                   child: Center(
-                    child: Text(
+                    child: CfgText(
+                      'chat_settings_screen.t09',
                       'ערוך',
                       style: TextStyle(color: BsTokens.brand, fontSize: 13),
                     ),
@@ -421,23 +427,25 @@ class _ChatPrivacySection extends ConsumerWidget {
       builder:
           (ctx) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: CfgText(
+              'chat_settings_screen.t10',
               'מחיקת היסטוריית שיחות',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: CfgText(
+              'chat_settings_screen.t11',
               'היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+                child: CfgText('chat_settings_screen.t12', 'ביטול'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('מחק'),
+                child: CfgText('chat_settings_screen.t13', 'מחק'),
               ),
             ],
           ),
@@ -801,9 +809,10 @@ class _SectionTile extends StatelessWidget {
             ),
           ),
           subtitle: underConstruction
-              ? const Padding(
+              ? Padding(
                   padding: EdgeInsets.only(top: 2),
-                  child: Text(
+                  child: CfgText(
+                    'chat_settings_screen.t14',
                     'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                   ),
@@ -842,7 +851,8 @@ class _SwitchRow extends StatelessWidget implements _Inert {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       subtitle: underConstruction
-          ? const Text(
+          ? CfgText(
+              'chat_settings_screen.t15',
               'בבנייה — עדיין לא משפיע',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             )
@@ -885,9 +895,10 @@ class _RadioGroupRow<T> extends StatelessWidget implements _Inert {
                 style: const TextStyle(color: Colors.black54, fontSize: 13),
               ),
               if (underConstruction)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 2),
-                  child: Text(
+                  child: CfgText(
+                    'chat_settings_screen.t16',
                     'בבנייה — עדיין לא משפיע',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                   ),
@@ -1076,7 +1087,8 @@ class _PlaceholderRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
-      trailing: const Text(
+      trailing: CfgText(
+        'chat_settings_screen.t17',
         'בבנייה',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),

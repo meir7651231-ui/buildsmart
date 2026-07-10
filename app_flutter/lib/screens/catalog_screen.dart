@@ -715,7 +715,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                   icon: const Icon(Icons.check, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
-                const Text(
+                const CfgText('catalog_screen.t01', 
                   'ניהול רשימות',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -866,7 +866,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                 children: [
                   Icon(Icons.add, color: BsTokens.brand, size: 22),
                   SizedBox(width: 10),
-                  Text(
+                  CfgText('catalog_screen.t02', 
                     'יצירת רשימה מותאמת אישית',
                     style: TextStyle(
                       color: BsTokens.brand,
@@ -890,7 +890,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
       context: ctx,
       builder: (dCtx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text(
+        title: const CfgText('catalog_screen.t03', 
           'רשימה חדשה',
           style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
@@ -912,7 +912,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dCtx),
-            child: const Text(
+            child: const CfgText('catalog_screen.t04', 
               'ביטול',
               style: TextStyle(color: Color(0xFF888888)),
             ),
@@ -928,7 +928,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               }
               Navigator.pop(dCtx);
             },
-            child: const Text(
+            child: const CfgText('catalog_screen.t05', 
               'הוספה',
               style: TextStyle(color: BsTokens.brand),
             ),
@@ -951,7 +951,7 @@ void _showRenameDialog(
     context: ctx,
     builder: (dCtx) => AlertDialog(
       backgroundColor: Colors.white,
-      title: const Text(
+      title: const CfgText('catalog_screen.t06', 
         'שינוי שם הרשימה',
         style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
       ),
@@ -973,7 +973,7 @@ void _showRenameDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dCtx),
-          child: const Text(
+          child: const CfgText('catalog_screen.t07', 
             'ביטול',
             style: TextStyle(color: Color(0xFF888888)),
           ),
@@ -1002,7 +1002,7 @@ void _showRenameDialog(
             }
             Navigator.pop(dCtx);
           },
-          child: const Text(
+          child: const CfgText('catalog_screen.t08', 
             'שמירה',
             style: TextStyle(color: BsTokens.brand),
           ),
@@ -1069,7 +1069,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
       context: context,
       builder: (dCtx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text(
+        title: const CfgText('catalog_screen.t09', 
           'שינוי שם הרשימה',
           style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
@@ -1091,14 +1091,14 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dCtx),
-            child: const Text(
+            child: const CfgText('catalog_screen.t10', 
               'ביטול',
               style: TextStyle(color: Color(0xFF888888)),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dCtx, controller.text.trim()),
-            child: const Text(
+            child: const CfgText('catalog_screen.t11', 
               'שמירה',
               style: TextStyle(color: BsTokens.brand),
             ),
@@ -1153,7 +1153,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
               children: [
                 TextButton(
                   onPressed: _save,
-                  child: const Text(
+                  child: const CfgText('catalog_screen.t12', 
                     'שמירה',
                     style: TextStyle(
                       color: BsTokens.brand,
@@ -1209,7 +1209,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
+              child: CfgText('catalog_screen.t13', 
                 'בחר אילו פריטים יופיעו ברשימה',
                 style: TextStyle(color: Color(0xFF888888), fontSize: 13),
               ),
@@ -1318,7 +1318,7 @@ class _DiveResultsView extends ConsumerWidget {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(BsTokens.space4),
-          child: Text(
+          child: CfgText('catalog_screen.t14', 
             'אין תוצאות תואמות',
             style: TextStyle(color: BsTokens.mutedLight),
           ),
@@ -1335,7 +1335,7 @@ class _DiveResultsView extends ConsumerWidget {
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(BsTokens.space4),
-                    child: Text(
+                    child: CfgText('catalog_screen.t15', 
                       'אין מוצרים תואמים',
                       style: TextStyle(color: BsTokens.mutedLight),
                     ),
@@ -1387,7 +1387,7 @@ class GlobalSearchResultsView extends ConsumerWidget {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(BsTokens.space4),
-          child: Text(
+          child: CfgText('catalog_screen.t16', 
             'אין תוצאות תואמות',
             style: TextStyle(color: BsTokens.mutedLight),
           ),
@@ -1405,7 +1405,7 @@ class GlobalSearchResultsView extends ConsumerWidget {
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(BsTokens.space4),
-                    child: Text(
+                    child: CfgText('catalog_screen.t17', 
                       'אין מוצרים תואמים',
                       style: TextStyle(color: BsTokens.mutedLight),
                     ),
@@ -1720,7 +1720,7 @@ class _EmptySection extends StatelessWidget {
           const SizedBox(height: 8),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
+            child: CfgText('catalog_screen.t18', 
               'אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
@@ -2374,7 +2374,7 @@ class _ProductsHeader extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          Text(
+          CfgText('catalog_screen.t19', 
             'מוצרים',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
@@ -2448,7 +2448,7 @@ class _ProductsHeader extends ConsumerWidget {
                 children: [
                   const Icon(Icons.swap_vert, size: 16, color: BsTokens.brand),
                   const SizedBox(width: 4),
-                  Text(
+                  CfgText('catalog_screen.t20', 
                     'מיון לפי',
                     style: const TextStyle(
                       color: BsTokens.brand,
@@ -2508,7 +2508,7 @@ class _TreeComingSoon extends StatelessWidget {
                 color: BsTokens.brand,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(
+              child: CfgText('catalog_screen.t21', 
                 'בקרוב',
                 style: TextStyle(
                   color: bsOnAccent(context),
@@ -2518,7 +2518,7 @@ class _TreeComingSoon extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            const CfgText('catalog_screen.t22', 
               'הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF888888), fontSize: 13),
@@ -3569,7 +3569,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             color: BsTokens.brand,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
+                          child: const CfgText('catalog_screen.t23', 
                             'מומלץ',
                             style: TextStyle(
                               color: Colors.white,
@@ -3728,7 +3728,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('סגור')),
+                child: const CfgText('catalog_screen.t24', 'סגור')),
           ],
         ),
       ),
@@ -3772,7 +3772,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('סגור')),
+                child: const CfgText('catalog_screen.t25', 'סגור')),
           ],
         ),
       ),
@@ -4099,7 +4099,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 14),
                           child: Center(
-                            child: Text(
+                            child: CfgText('catalog_screen.t26', 
                               'אין מותג תואם לסינון שנבחר',
                               style: TextStyle(
                                   color: Color(0xFF64748B), fontSize: 13),
@@ -4303,7 +4303,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content:
-                                            Text('הצעת המחיר הועתקה'),
+                                            CfgText('catalog_screen.t27', 'הצעת המחיר הועתקה'),
                                         duration: Duration(seconds: 2)),
                                   );
                                 },
@@ -4876,7 +4876,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                 color:
                                                     const Color(0xFFFCD34D)),
                                           ),
-                                          child: const Text(
+                                          child: const CfgText('catalog_screen.t28', 
                                               '🛒 + בטיחות לסל',
                                               style: TextStyle(
                                                   color: Color(0xFFB45309),
@@ -4956,7 +4956,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(const SnackBar(
                                               content:
-                                                  Text('נוסף ל-3 חדרים'),
+                                                  CfgText('catalog_screen.t29', 'נוסף ל-3 חדרים'),
                                               duration: Duration(seconds: 2)));
                                     },
                                     child: Container(
@@ -4968,7 +4968,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFE2E8F0)),
                                       ),
-                                      child: const Text('×3 חדרים',
+                                      child: const CfgText('catalog_screen.t30', '×3 חדרים',
                                           style: TextStyle(
                                               color: Color(0xFF475569),
                                               fontSize: 12,
@@ -5053,7 +5053,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFA5B4FC)),
                                       ),
-                                      child: const Text(
+                                      child: const CfgText('catalog_screen.t31', 
                                           '📋 BOM פרויקט מלא',
                                           style: TextStyle(
                                               color: Color(0xFF3730A3),
@@ -5073,7 +5073,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                               proj, inProj)));
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(const SnackBar(
-                                              content: Text(
+                                              content: CfgText('catalog_screen.t32', 
                                                   'הצעת מחיר לפרויקט הועתקה'),
                                               duration: Duration(seconds: 2)));
                                     },
@@ -5087,7 +5087,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFA7F3D0)),
                                       ),
-                                      child: const Text(
+                                      child: const CfgText('catalog_screen.t33', 
                                           '📋 הצעת מחיר לפרויקט',
                                           style: TextStyle(
                                               color: Color(0xFF047857),
@@ -5499,7 +5499,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 if (mustItems.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.only(top: 16, bottom: 8),
-                    child: Text(
+                    child: CfgText('catalog_screen.t34', 
                       '⚡ פריטי חובה',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -5540,7 +5540,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 if (optItems.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.only(top: 16, bottom: 8),
-                    child: Text(
+                    child: CfgText('catalog_screen.t35', 
                       '💡 פריטים אופציונליים',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -5858,7 +5858,7 @@ class _DiagramFlowState extends ConsumerState<_DiagramFlow>
               textAlign: TextAlign.center,
             )
           else
-            const Text(
+            const CfgText('catalog_screen.t36', 
               '💡 הקש על שלב כדי להדגיש את האביזרים שלו',
               style: TextStyle(
                 color: Color(0xFF888888),
@@ -6266,7 +6266,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
+              const CfgText('catalog_screen.t37', 
                 'למה צריך:',
                 style: TextStyle(
                   color: Color(0xFF888888),
@@ -6293,7 +6293,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 ),
                 child: Row(
                   children: [
-                    const Text(
+                    const CfgText('catalog_screen.t38', 
                       'מחיר ליחידה:',
                       style: TextStyle(
                         color: Color(0xFF666666),
@@ -6319,7 +6319,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text(
+                  child: const CfgText('catalog_screen.t39', 
                     'סגור',
                     style: TextStyle(color: BsTokens.brand, fontSize: 14),
                   ),
@@ -6659,7 +6659,7 @@ class _VariantsSection extends ConsumerWidget {
         ),
         Expanded(
           child: families.isEmpty
-              ? const Center(child: Text('אין משפחות וריאנטים'))
+              ? const Center(child: CfgText('catalog_screen.t40', 'אין משפחות וריאנטים'))
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   itemCount: families.length,
@@ -6730,7 +6730,7 @@ class _SizeSortAxisRow extends ConsumerWidget {
     return Wrap(
       spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Padding(padding: const EdgeInsets.only(left: 2, right: 2), child: Text('מיון לפי:', style: TextStyle(color: cs.onSurface.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: 12))),
+        Padding(padding: const EdgeInsets.only(left: 2, right: 2), child: CfgText('catalog_screen.t41', 'מיון לפי:', style: TextStyle(color: cs.onSurface.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: 12))),
         for (final axis in SizeSortAxis.values)
           _AxisChip(
             label: kSizeSortLabel[axis]!,

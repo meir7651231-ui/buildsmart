@@ -32,6 +32,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +107,8 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
           bottom: 36,
           left: 0,
           right: 0,
-          child: Text('צבוט להגדלה · הקש לסגירה',
+          child: CfgText('lipskey_product_sheet.zoom_hint_fullscreen',
+              'צבוט להגדלה · הקש לסגירה',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.black38, fontSize: 12)),
         ),
@@ -352,7 +354,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
           accessories: accs,
         ));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('נוסף לסל ✓'),
+      content: CfgText('lipskey_product_sheet.added_to_cart', 'נוסף לסל ✓'),
       duration: Duration(seconds: 1),
       behavior: SnackBarBehavior.floating,
     ));
@@ -407,7 +409,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('🔗 קשור',
+          const CfgText('lipskey_product_sheet.related_rail_title', '🔗 קשור',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
           Wrap(
@@ -456,7 +458,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('🔌 מה מתחבר לזה',
+          const CfgText('lipskey_product_sheet.connects_rail_title',
+              '🔌 מה מתחבר לזה',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
           Wrap(
@@ -497,7 +500,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
           ActionChip(
             key: const Key('addToLineChip'),
             avatar: const Icon(Icons.add, size: 16),
-            label: const Text('הוסף לקו'),
+            label: const CfgText('lipskey_product_sheet.add_to_line', 'הוסף לקו'),
             onPressed: () => _addCurrentToLine(p),
           ),
           if (picks.length >= 2)
@@ -517,7 +520,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
           CardPick(sku: p.sku, label: p.nameHe),
         );
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('נוסף לקו ✓'),
+      content: CfgText('lipskey_product_sheet.added_to_line', 'נוסף לקו ✓'),
       duration: Duration(seconds: 1),
       behavior: SnackBarBehavior.floating,
     ));
@@ -538,7 +541,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('📋 רשימת חומרים — קו',
+                const CfgText('lipskey_product_sheet.line_bom_title',
+                    '📋 רשימת חומרים — קו',
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
@@ -550,7 +554,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         if (plan.items.isEmpty)
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
+                            child: CfgText(
+                                'lipskey_product_sheet.line_bom_empty',
                                 'לא נמצאו פריטים לפתרון — בחר מוצרים אחרים לקו',
                                 style: TextStyle(
                                     fontSize: 13, color: Color(0xFF888888))),
@@ -791,7 +796,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                       ClipboardData(text: p.sku));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('מק"ט הועתק'),
+                                      content: CfgText(
+                                          'lipskey_product_sheet.sku_copied',
+                                          'מק"ט הועתק'),
                                       duration: Duration(seconds: 1),
                                       behavior: SnackBarBehavior.floating,
                                     ),
@@ -866,7 +873,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                 child: ActionChip(
                                   key: const Key('hopBackChip'),
                                   avatar: const Icon(Icons.undo, size: 16),
-                                  label: const Text('חזרה למוצר הקודם'),
+                                  label: const CfgText(
+                                      'lipskey_product_sheet.hop_back',
+                                      'חזרה למוצר הקודם'),
                                   onPressed: _hopBack,
                                 ),
                               ),
@@ -886,7 +895,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           if (widget.categoryProducts.length > 1)
                             const Padding(
                               padding: EdgeInsets.only(top: 6),
-                              child: Text(
+                              child: CfgText(
+                                  'lipskey_product_sheet.chip_hint',
                                   '💡 צ׳יפ כתום ▾ — הקש להחלפת גודל/צבע/דגם',
                                   style: TextStyle(
                                       color: Color(0xFF888888), fontSize: 11)),
@@ -1019,7 +1029,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text('ערכת התקנה מומלצת',
+                                      const CfgText(
+                                          'lipskey_product_sheet.recommended_kit',
+                                          'ערכת התקנה מומלצת',
                                           style: TextStyle(
                                               color: BsTokens.inkLight,
                                               fontSize: 13,
@@ -1040,7 +1052,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                         horizontal: 14, vertical: 8),
                                   ),
                                   onPressed: () => _addKitToCart(kit),
-                                  child: const Text('+ ערכה',
+                                  child: const CfgText(
+                                      'lipskey_product_sheet.add_kit',
+                                      '+ ערכה',
                                       style: TextStyle(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 13)),
@@ -1167,7 +1181,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('אביזרים נבחרים:',
+                            const CfgText(
+                                'lipskey_product_sheet.selected_accessories',
+                                'אביזרים נבחרים:',
                                 style: TextStyle(
                                     color: Colors.black38, fontSize: 13)),
                             Text('+ ₪$_accTotal',
@@ -1191,7 +1207,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         ),
                         onPressed: _addToCart,
                         icon: const Icon(Icons.shopping_cart, size: 19),
-                        label: const Text('הוסף לסל',
+                        label: const CfgText(
+                            'lipskey_product_sheet.add_to_cart_btn',
+                            'הוסף לסל',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                       ),
@@ -1207,7 +1225,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           onPressed: () => Navigator.of(context)
                               .push(SpecCopilotScreen.route(p)),
                           icon: const Text('🌡️', style: TextStyle(fontSize: 15)),
-                          label: const Text('מתאים לתנאים שלי?',
+                          label: const CfgText(
+                              'lipskey_product_sheet.spec_copilot_cta',
+                              'מתאים לתנאים שלי?',
                               style: TextStyle(fontWeight: FontWeight.w700)),
                         ),
                       ),
@@ -1232,7 +1252,9 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                       product: p.nameHe, types: pairedTypes)),
                               icon: const Text('🧩',
                                   style: TextStyle(fontSize: 15)),
-                              label: const Text('מה עוד צריך להתקנה?',
+                              label: const CfgText(
+                                  'lipskey_product_sheet.paired_explain_cta',
+                                  'מה עוד צריך להתקנה?',
                                   style: TextStyle(fontWeight: FontWeight.w700)),
                             ),
                           ),
@@ -1612,7 +1634,8 @@ class _ProductSideState extends State<_ProductSide> {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.white, width: 1.5),
                   ),
-                  child: const Text('PPR-CT',
+                  child: const CfgText('lipskey_product_sheet.ppr_ct_badge',
+                      'PPR-CT',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -1647,7 +1670,8 @@ class _ProductSideState extends State<_ProductSide> {
                           Icon(Icons.description_outlined,
                               color: Color(0xFF1A1200), size: 14),
                           SizedBox(width: 5),
-                          Text('פרטים / מפרט',
+                          CfgText('lipskey_product_sheet.details_spec',
+                              'פרטים / מפרט',
                               style: TextStyle(
                                   color: Color(0xFF1A1200),
                                   fontSize: 11,
@@ -1681,7 +1705,8 @@ class _ZoomHint extends StatelessWidget {
           children: [
             Icon(Icons.zoom_in, color: Colors.black54, size: 14),
             SizedBox(width: 4),
-            Text('הגדלה',
+            CfgText('lipskey_product_sheet.zoom',
+                'הגדלה',
                 style: TextStyle(
                     color: Colors.black54,
                     fontSize: 10,
@@ -1804,7 +1829,8 @@ class _SpecSideState extends State<_SpecSide> {
                           Icon(Icons.image_outlined,
                               color: Color(0xFF1A1200), size: 14),
                           SizedBox(width: 5),
-                          Text('חזרה למוצר',
+                          CfgText('lipskey_product_sheet.back_to_product',
+                              'חזרה למוצר',
                               style: TextStyle(
                                   color: Color(0xFF1A1200),
                                   fontSize: 11,
@@ -2459,7 +2485,8 @@ class _StripPanel extends StatelessWidget {
         if (must.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
-            child: Text('חובה (עץ חכם)',
+            child: CfgText('lipskey_product_sheet.must_smart_tree',
+                'חובה (עץ חכם)',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                     color: Color(0xFFCC6614),
@@ -2471,7 +2498,8 @@ class _StripPanel extends StatelessWidget {
         if (opt.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 8, 4, 4),
-            child: Text('אופציונלי (עץ חכם)',
+            child: CfgText('lipskey_product_sheet.optional_smart_tree',
+                'אופציונלי (עץ חכם)',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                     color: Color(0xFF888888),
@@ -2483,7 +2511,8 @@ class _StripPanel extends StatelessWidget {
         if (tools.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 8, 4, 4),
-            child: Text('כלים ואיטומים (אוטומטי)',
+            child: CfgText('lipskey_product_sheet.tools_auto',
+                'כלים ואיטומים (אוטומטי)',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                     color: Color(0xFF7FD0FF),
@@ -2579,7 +2608,7 @@ class _StripPanel extends StatelessWidget {
                 color: const Color(0xFFFF6B35).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text('חובה',
+              child: const CfgText('lipskey_product_sheet.must_badge', 'חובה',
                   style: TextStyle(
                       color: Color(0xFFCC4A14),
                       fontSize: 9,
@@ -2620,7 +2649,8 @@ class _StripPanel extends StatelessWidget {
                     color: const Color(0xFFEF4444).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text('חובה',
+                  child: const CfgText(
+                      'lipskey_product_sheet.must_badge_compliance', 'חובה',
                       style: TextStyle(
                           color: Color(0xFFEF4444),
                           fontSize: 9,
@@ -2724,7 +2754,8 @@ class _StripPanel extends StatelessWidget {
               errorBuilder: (_, __, ___) => const SizedBox.shrink()),
         ),
         const SizedBox(height: 2),
-        const Text('צנרת PPR לאספקת מים חמים וקרים',
+        const CfgText('lipskey_product_sheet.ppr_caption',
+            'צנרת PPR לאספקת מים חמים וקרים',
             textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xFF888888), fontSize: 10.5)),
         _infoHead('חומר גלם'),
@@ -2748,7 +2779,8 @@ class _StripPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        const CfgText(
+            'lipskey_product_sheet.smartlock_caption',
             'SMART LOCK — מערכת דלוחין, צנרת ואביזרים מפוליפרופילן בקטרים 32-63 מ"מ בצבע שחור',
             textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xFF888888), fontSize: 10.5)),
@@ -2867,7 +2899,8 @@ class _StripPanel extends StatelessWidget {
                         fontWeight: FontWeight.w900)),
                 if (s.showUnitPrice) ...[
                   const SizedBox(width: 6),
-                  Text('ליחידה',
+                  CfgText('lipskey_product_sheet.per_unit',
+                      'ליחידה',
                       style: TextStyle(
                           color: bsSuccess(context).withValues(alpha: 0.7),
                           fontSize: 12,
@@ -2881,7 +2914,8 @@ class _StripPanel extends StatelessWidget {
                   color: const Color(0xFFFBBF24).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Text('הערכה',
+                child: const CfgText('lipskey_product_sheet.estimate_badge',
+                    'הערכה',
                     style: TextStyle(
                         color: Color(0xFFCC9114),
                         fontSize: 9,
@@ -2892,7 +2926,8 @@ class _StripPanel extends StatelessWidget {
         ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
+            child: CfgText(
+                'lipskey_product_sheet.price_note',
                 'הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.',
                 style: TextStyle(
                     color: Color(0xFF888888), fontSize: 10, height: 1.4)),

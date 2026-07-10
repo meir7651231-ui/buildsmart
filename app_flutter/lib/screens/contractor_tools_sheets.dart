@@ -17,6 +17,7 @@ import 'package:buildsmart/screens/alt_explain_screen.dart'
     show AltExplainScreen;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -196,7 +197,8 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
         children: [
           const _SheetHandle(),
           const SizedBox(height: 14),
-          const Text(
+          CfgText(
+            'contractor_tools_sheets.cheaper_title',
             '💡 חלופות זולות',
             style: TextStyle(
               fontSize: 18,
@@ -205,7 +207,8 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          CfgText(
+            'contractor_tools_sheets.cheaper_subtitle',
             'מותג חלופי זול יותר לאותו מוצר — אותה התקנה, פחות עלות.',
             style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
           ),
@@ -344,7 +347,10 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                                 ),
                               ),
                               icon: const Text('🤔'),
-                              label: const Text('למה כדאי?'),
+                              label: CfgText(
+                                'contractor_tools_sheets.why_worth',
+                                'למה כדאי?',
+                              ),
                               // a11y (swarm): ≥48dp tap target (was 32dp+shrinkWrap).
                               style: TextButton.styleFrom(
                                 padding:
@@ -361,7 +367,8 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
               ),
             ),
           const SizedBox(height: 14),
-          const Text(
+          CfgText(
+            'contractor_tools_sheets.cheaper_prod_note',
             '⚙️ בפרודקשן: השוואת-מחירים חיה מול מחירוני הספקים.',
             style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
           ),
@@ -426,7 +433,8 @@ class _StorePriceComparisonSheet extends StatelessWidget {
         children: [
           const _SheetHandle(),
           const SizedBox(height: 14),
-          const Text(
+          CfgText(
+            'contractor_tools_sheets.compare_title',
             '📊 השוואת מחירים',
             style: TextStyle(
               fontSize: 18,
@@ -435,15 +443,17 @@ class _StorePriceComparisonSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          CfgText(
+            'contractor_tools_sheets.compare_subtitle',
             'מחירים מ-3 חנויות שותפות — הזול ביותר מסומן.',
             style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
           ),
           const SizedBox(height: 14),
           if (rows.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Text(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: CfgText(
+                'contractor_tools_sheets.compare_empty',
                 'אין מחירים להשוואה כרגע.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Color(0xFF888888)),
@@ -488,7 +498,8 @@ class _StorePriceComparisonSheet extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 14),
-          const Text(
+          CfgText(
+            'contractor_tools_sheets.compare_prices_note',
             '💰 המחירים נמשכים מ-3 חנויות שותפות. BuildSmart בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
             style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
           ),
@@ -659,7 +670,8 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
   }
 
   List<Widget> _picker() => [
-    const Text(
+    CfgText(
+      'contractor_tools_sheets.scan_title',
       '📐 סרוק תוכנית עבודה',
       style: TextStyle(
         fontSize: 18,
@@ -668,7 +680,8 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       ),
     ),
     const SizedBox(height: 4),
-    const Text(
+    CfgText(
+      'contractor_tools_sheets.scan_pick',
       'בחר סוג תוכנית לסריקה',
       style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
     ),
@@ -704,7 +717,8 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       ),
     ),
     const SizedBox(height: 16),
-    const Text(
+    CfgText(
+      'contractor_tools_sheets.scan_analyzing',
       'מנתח את תצורת הבנייה ומחלץ כמויות חומרים…',
       textAlign: TextAlign.center,
       style: TextStyle(
@@ -745,7 +759,8 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
         style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
       ),
       const SizedBox(height: 6),
-      const Text(
+      CfgText(
+        'contractor_tools_sheets.scan_prices_note',
         '💰 המחירים נמשכים מ-3 חנויות שותפות. BuildSmart בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
         style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
       ),
@@ -777,7 +792,10 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
                 _plan = null;
                 _scanning = false;
               }),
-          child: const Text('סרוק תוכנית אחרת'),
+          child: CfgText(
+            'contractor_tools_sheets.scan_another',
+            'סרוק תוכנית אחרת',
+          ),
         ),
       ),
     ];

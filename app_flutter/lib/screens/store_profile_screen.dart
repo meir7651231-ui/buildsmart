@@ -42,6 +42,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,7 +74,8 @@ class StoreProfileScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text(
+          title: CfgText(
+            'store_profile_screen.appbar_title',
             'אזור אישי — ספק',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -145,7 +147,8 @@ class StoreProfileBody extends ConsumerWidget {
             children: [
               ListTile(
                 leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-                title: const Text(
+                title: CfgText(
+                  'store_profile_screen.settings_row',
                   'הגדרות ספק',
                   style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                 ),
@@ -159,7 +162,8 @@ class StoreProfileBody extends ConsumerWidget {
               const Divider(height: 1, color: Color(0xFFF0F0F0)),
               ListTile(
                 leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-                title: const Text(
+                title: CfgText(
+                  'store_profile_screen.logout_row',
                   'יציאה מהחשבון',
                   style: TextStyle(
                     // AA על כרטיס לבן (redAccent = 3.19:1 נכשל) — token חוזה 9.
@@ -265,7 +269,8 @@ class _StoreIdentityCard extends StatelessWidget {
                           borderRadius:
                               BorderRadius.circular(BsTokens.radiusPill),
                         ),
-                        child: const Text(
+                        child: CfgText(
+                          'store_profile_screen.demo_chip',
                           'דמו',
                           style: TextStyle(
                             color: BsTokens.mutedLight,
@@ -406,7 +411,8 @@ class _StoreStatsCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          CfgText(
+            'store_profile_screen.stats_title',
             '📊 סטטיסטיקת חנות',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -479,7 +485,8 @@ class _StoreStatsCard extends ConsumerWidget {
           ),
           const SizedBox(height: BsTokens.space2),
           // ביאור כן: כלל-חנותי, נגזר חי — אין כאן מספר 'אישי'.
-          const Text(
+          CfgText(
+            'store_profile_screen.stats_note',
             'נתונים חיים ממנוע ההזמנות — כלל ההזמנות של החנות.',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
           ),
@@ -563,11 +570,13 @@ class _StorePersonalAreaCard extends StatelessWidget {
         children: [
           ListTile(
             leading: const Text('🏪', style: TextStyle(fontSize: 20)),
-            title: const Text(
+            title: CfgText(
+              'store_profile_screen.profile_row',
               'פרופיל עסק',
               style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
             ),
-            subtitle: const Text(
+            subtitle: CfgText(
+              'store_profile_screen.profile_row_sub',
               'שם, טלפון, כתובת, ח.פ. ולוגו',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
@@ -579,11 +588,13 @@ class _StorePersonalAreaCard extends StatelessWidget {
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
           ListTile(
             leading: const Text('🪪', style: TextStyle(fontSize: 20)),
-            title: const Text(
+            title: CfgText(
+              'store_profile_screen.certs_row',
               'תעודות עסק',
               style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
             ),
-            subtitle: const Text(
+            subtitle: CfgText(
+              'store_profile_screen.certs_row_sub',
               'רישיון עסק · ביטוח עסק',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
@@ -594,11 +605,13 @@ class _StorePersonalAreaCard extends StatelessWidget {
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
           ListTile(
             leading: const Text('🧾', style: TextStyle(fontSize: 20)),
-            title: const Text(
+            title: CfgText(
+              'store_profile_screen.docs_row',
               'מסמכים',
               style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
             ),
-            subtitle: const Text(
+            subtitle: CfgText(
+              'store_profile_screen.docs_row_sub',
               'יחובר עם חיבור השרת',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
@@ -755,8 +768,9 @@ class _EditStoreProfileSheetState
                 children: [
                   Row(
                     children: [
-                      const Expanded(
-                        child: Text(
+                      Expanded(
+                        child: CfgText(
+                          'store_profile_screen.edit_sheet_title',
                           'עריכת פרופיל עסק',
                           style: TextStyle(
                             color: BsTokens.inkLight,
@@ -798,7 +812,8 @@ class _EditStoreProfileSheetState
                               TextButton(
                                 onPressed: () =>
                                     setState(() => _logo = null),
-                                child: const Text(
+                                child: CfgText(
+                                  'store_profile_screen.remove_logo',
                                   'הסר לוגו',
                                   // AA: redAccent על לבן נכשל — token חוזה 9.
                                   style:
@@ -888,7 +903,8 @@ class _EditStoreProfileSheetState
                         opacity: _saving ? 0.6 : 1,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 13),
-                          child: Text(
+                          child: CfgText(
+                            'store_profile_screen.save_profile_btn',
                             '✓ שמור פרופיל',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -949,7 +965,8 @@ class StoreCertsScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text(
+          title: CfgText(
+            'store_profile_screen.certs_screen_title',
             '🪪 תעודות עסק',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -1091,8 +1108,9 @@ class StoreCertsScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Expanded(
-                            child: Text(
+                          Expanded(
+                            child: CfgText(
+                              'store_profile_screen.add_cert_title',
                               '🪪 הוספת תעודה',
                               style: TextStyle(
                                 color: BsTokens.inkLight,
@@ -1244,7 +1262,8 @@ class StoreCertsScreen extends ConsumerWidget {
                                   Border.all(color: const Color(0xFFE2E2E2)),
                             ),
                             child: photo == null
-                                ? const Text(
+                                ? CfgText(
+                                    'store_profile_screen.attach_photo_btn',
                                     '📷 צרף צילום תעודה (לא חובה)',
                                     style: TextStyle(
                                       color: BsTokens.inkLight,
@@ -1255,7 +1274,8 @@ class StoreCertsScreen extends ConsumerWidget {
                                 : Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Text(
+                                      CfgText(
+                                        'store_profile_screen.photo_attached',
                                         '📷 צילום צורף ✓',
                                         style: TextStyle(
                                           color: BsTokens.inkLight,
@@ -1305,7 +1325,8 @@ class StoreCertsScreen extends ConsumerWidget {
                           child: Container(
                             constraints: const BoxConstraints(minHeight: 48),
                             alignment: Alignment.center,
-                            child: Text(
+                            child: CfgText(
+                              'store_profile_screen.save_cert_btn',
                               '💾 שמור תעודה',
                               style: TextStyle(
                                 // ניגודיות-גבוהה: לא Colors.white קשיח (F-28).
@@ -1376,11 +1397,12 @@ class _StoreCertsCard extends StatelessWidget {
           ),
           const SizedBox(height: BsTokens.space3),
           if (certs.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(bottom: BsTokens.space3),
-              child: Text(
+            Padding(
+              padding: const EdgeInsets.only(bottom: BsTokens.space3),
+              child: CfgText(
+                'store_profile_screen.certs_empty',
                 'אין תעודות בארנק עדיין — הוסף את הראשונה.',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
             )
           else
@@ -1400,7 +1422,8 @@ class _StoreCertsCard extends StatelessWidget {
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 48),
                   alignment: Alignment.center,
-                  child: Text(
+                  child: CfgText(
+                    'store_profile_screen.add_cert_btn',
                     '➕ הוסף תעודה',
                     style: TextStyle(
                       // ניגודיות-גבוהה: לא Colors.white קשיח (F-28).

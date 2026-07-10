@@ -289,7 +289,8 @@ class _LivePill extends StatelessWidget {
         children: [
           _Dot(),
           SizedBox(width: 6),
-          Text(
+          CfgText(
+            'manager_dashboard_screen.hi_pill',
             'חי',
             style: TextStyle(
               color: Color(0xFF1B7A3D),
@@ -585,7 +586,8 @@ class _StudioHero extends ConsumerWidget {
                       Row(
                         children: [
                           const Flexible(
-                            child: Text(
+                            child: CfgText(
+                              'manager_dashboard_screen.studio_hero_title',
                               'סטודיו — ערוך את האפליקציה',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -610,7 +612,8 @@ class _StudioHero extends ConsumerWidget {
                                 BsTokens.radiusPill,
                               ),
                             ),
-                            child: const Text(
+                            child: const CfgText(
+                              'manager_dashboard_screen.studio_experimental_badge',
                               'ניסיוני',
                               style: TextStyle(
                                 color: BsTokens.brandDark,
@@ -1312,7 +1315,8 @@ class _OrderRow extends StatelessWidget {
                           child: _AdvanceButton(onPressed: onAdvance),
                         )
                       else
-                        const Text(
+                        const CfgText(
+                          'manager_dashboard_screen.order_completed_badge',
                           '✓ הושלם',
                           style: TextStyle(
                             color: Color(0xFF1B7A3D),
@@ -1579,7 +1583,8 @@ class _OrderDetailSheet extends ConsumerWidget {
                   color: const Color(0xFFE7F6EC),
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
-                child: const Text(
+                child: const CfgText(
+                  'manager_dashboard_screen.order_completed_delivered',
                   '✓ ההזמנה הושלמה ונמסרה',
                   style: TextStyle(
                     color: Color(0xFF1B7A3D),
@@ -2363,7 +2368,10 @@ class _CustomerDetailSheet extends ConsumerWidget {
                         ),
                       ),
                   icon: const Text('💳'),
-                  label: const Text('הסבר אשראי'),
+                  label: const CfgText(
+                    'manager_dashboard_screen.credit_explain_btn',
+                    'הסבר אשראי',
+                  ),
                 ),
               ),
             ],
@@ -2505,7 +2513,8 @@ class JourneyTimeline extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: Semantics(
               header: true,
-              child: const Text(
+              child: const CfgText(
+                'manager_dashboard_screen.journey_title',
                 '🧭 מסע הלקוח',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -3218,7 +3227,8 @@ class _ApprovalsBody extends StatelessWidget {
     if (pending.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
-        child: Text(
+        child: CfgText(
+          'manager_dashboard_screen.approvals_empty',
           '🎉 אין משימות הממתינות לאישור.',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
@@ -3425,7 +3435,8 @@ class _VacationsBody extends StatelessWidget {
     if (requests.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
-        child: Text(
+        child: CfgText(
+          'manager_dashboard_screen.vacations_empty',
           'אין בקשות חופשה.',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
@@ -3736,7 +3747,8 @@ class _ProductTreeBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        const CfgText(
+          'manager_dashboard_screen.producttree_intro',
           'עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -3841,7 +3853,8 @@ class _RegressionBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        const CfgText(
+          'manager_dashboard_screen.regression_intro',
           'הרצת חבילת בדיקות הרגרסיה המלאה (קטלוג · מאתר · מנוע תאימות · state · '
           'ניווט) על המכשיר.',
           style: TextStyle(
@@ -3899,7 +3912,8 @@ class _RoleAssignBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        const CfgText(
+          'manager_dashboard_screen.roleassign_intro',
           'הקצאת תפקיד למשתמש לפי טלפון או מזהה (uid). השיוך מופעל ע״י השרת '
           'של בעל המערכת ומשפיע על המשתמש בהתחברות הבאה.',
           style: TextStyle(

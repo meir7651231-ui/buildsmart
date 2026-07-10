@@ -99,7 +99,13 @@ TextStyle? applyCfgTextStyle(
 
 /// A studio-editable text. Drop-in for `Text(fallback, …)`: empty doc ⇒ the literal
 /// verbatim; published override ⇒ text/emoji/style applied; edit-mode ⇒ EditHandle.
-class CfgText extends ConsumerWidget {
+///
+/// TRUE drop-in: with NO [ProviderScope] in the tree (isolated widget tests, or any
+/// scope-less host) it renders the fallback as a plain [Text] instead of throwing
+/// "No ProviderScope found" — so wrapping a label can never break a widget tested
+/// in isolation. The real app always has a scope (main.dart), so the editable path
+/// always runs there.
+class CfgText extends StatelessWidget {
   const CfgText(
     this.id,
     this.fallback, {
@@ -119,23 +125,43 @@ class CfgText extends ConsumerWidget {
   final TextOverflow? overflow;
   final bool? softWrap;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final n = ref.watch(resolvedNodeProvider(id));
-    final txt = n.text ?? fallback;
-    final display = n.emoji == null ? txt : '${n.emoji} $txt';
-    return EditHandle.maybe(
-      ref,
-      id,
-      editText: txt,
-      child: Text(
-        display,
-        style: applyCfgTextStyle(context, style, n.style),
+  Widget _rawFallback() => Text(
+        fallback,
+        style: style,
         textAlign: textAlign,
         maxLines: maxLines,
         overflow: overflow,
         softWrap: softWrap,
-      ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    // Degrade to the verbatim fallback when there is no Riverpod scope (a
+    // scope-less test host) — never throw. `containerOf` throws when absent.
+    try {
+      ProviderScope.containerOf(context, listen: false);
+    } on Object {
+      return _rawFallback();
+    }
+    return Consumer(
+      builder: (context, ref, _) {
+        final n = ref.watch(resolvedNodeProvider(id));
+        final txt = n.text ?? fallback;
+        final display = n.emoji == null ? txt : '${n.emoji} $txt';
+        return EditHandle.maybe(
+          ref,
+          id,
+          editText: txt,
+          child: Text(
+            display,
+            style: applyCfgTextStyle(context, style, n.style),
+            textAlign: textAlign,
+            maxLines: maxLines,
+            overflow: overflow,
+            softWrap: softWrap,
+          ),
+        );
+      },
     );
   }
 }
