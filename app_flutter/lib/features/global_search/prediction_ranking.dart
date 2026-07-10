@@ -19,10 +19,30 @@ library;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show kVerifiedSpecs;
+import 'package:buildsmart/data/related_info.dart' show compatibleProductsFor;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 
 /// SKUs of the curated dive pool — a Set for O(1) membership (built once).
 final Set<String> _diveSkus = {for (final p in kDivePool) p.sku};
+
+/// The SKUs that PHYSICALLY MATE with anything in [context] — the union of each
+/// context product's verified compatible set ([compatibleProductsFor], memoised).
+/// Compute ONCE per query from the cart / line the user is building, then feed
+/// [matesBoost] per candidate (O(1) lookup). Empty context ⇒ empty ⇒ no effect.
+Set<String> contextCompatibleSkus(Iterable<LipskeyCatalogProduct> context) => {
+      for (final p in context)
+        for (final q in compatibleProductsFor(p)) q.sku,
+    };
+
+/// PURE. The prediction boost for a candidate that physically CONNECTS to what
+/// the user is ALREADY building — the signal ORTHOGONAL to the typed letters that
+/// breaks the "re-ranking is zero-sum" wall (swarm finding #1). Once a ½" nipple
+/// is in the cart, typing "ברז" should surface the faucets that actually FIT, not
+/// a random 4 of ~100. [compatibleSkus] is [contextCompatibleSkus] of the
+/// cart/line; membership is the strongest tie-break there is (verified geometry,
+/// not a guess). Zero when the context is empty ⇒ byte-safe.
+int matesBoost(LipskeyCatalogProduct candidate, Set<String> compatibleSkus) =>
+    compatibleSkus.contains(candidate.sku) ? 400 : 0;
 
 final RegExp _wsSplit = RegExp(r'\s+');
 

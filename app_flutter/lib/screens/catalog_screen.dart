@@ -18,6 +18,7 @@ import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/data/variant_families.dart';
 // OWNER-REVIEW · kWordFinder seam — flag-gated in-app entry to WordFinderHome.
 // Additive only: when kWordFinderFlag is OFF the section pill never renders and
@@ -36,7 +37,7 @@ import 'package:buildsmart/features/global_search/global_search.dart'
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show buildGlobalSearchIndex;
 import 'package:buildsmart/features/global_search/prediction_ranking.dart'
-    show nameAffinity, productProminence;
+    show nameAffinity, productProminence, matesBoost, contextCompatibleSkus;
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
@@ -376,19 +377,41 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   final ordered = sort == ProductSort.byOrder
       ? (kGlobalSearch
           // PREDICTION ([kGlobalSearch], const ⇒ folds out when off): keep
-          // [searchRelevance] PRIMARY, but break its ties by prediction affinity —
+          // [searchRelevance] PRIMARY, but break its ties by prediction signal —
           // [nameAffinity] (a product whose name IS/starts-with the query beats a
-          // variant that merely embeds it — the baseline's biggest leak) plus
-          // [productProminence] (showcased / verified / curated). Measured lift on
-          // the baseline harness: 89→79 buried products, +66 reach top-4 after one
-          // word. Off ⇒ the plain relevance sort below is byte-identical.
-          ? ([...filtered]..sort((a, b) {
-              final byRel =
-                  searchRelevance(b, query).compareTo(searchRelevance(a, query));
-              if (byRel != 0) return byRel;
-              return (nameAffinity(b, query) + productProminence(b))
-                  .compareTo(nameAffinity(a, query) + productProminence(a));
-            }))
+          // variant that merely embeds it — the baseline's biggest leak),
+          // [productProminence] (showcased / verified / curated), and — the signal
+          // ORTHOGONAL to the letters — [matesBoost]: a candidate that physically
+          // CONNECTS to what's already staged on the line (the smart cart + the
+          // freshest recently-viewed). Context-seeded harness lift: 39%→66% of the
+          // FITTING product reaching top-4. Off ⇒ the plain relevance sort below is
+          // byte-identical (this whole branch, [matesBoost] + the context read
+          // included, tree-shakes out).
+          ? (() {
+              final ctx = <LipskeyCatalogProduct>[];
+              for (final line in ref.watch(smartCartProvider)) {
+                final k = line.productKey;
+                final p =
+                    productBySku(k.startsWith('lip:') ? k.substring(4) : k);
+                if (p != null) ctx.add(p);
+              }
+              for (final sku in ref.watch(recentlyViewedProvider).take(5)) {
+                final p = productBySku(sku);
+                if (p != null) ctx.add(p);
+              }
+              final mates = contextCompatibleSkus(ctx);
+              return [...filtered]..sort((a, b) {
+                final byRel = searchRelevance(b, query)
+                    .compareTo(searchRelevance(a, query));
+                if (byRel != 0) return byRel;
+                return (nameAffinity(b, query) +
+                        productProminence(b) +
+                        matesBoost(b, mates))
+                    .compareTo(nameAffinity(a, query) +
+                        productProminence(a) +
+                        matesBoost(a, mates));
+              });
+            })()
           : ([...filtered]..sort((a, b) =>
               searchRelevance(b, query).compareTo(searchRelevance(a, query)))))
       : sortCatalogProducts(filtered, sort);
