@@ -18,12 +18,14 @@ import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/data/variant_families.dart';
 // OWNER-REVIEW · kWordFinder seam — flag-gated in-app entry to WordFinderHome.
 // Additive only: when kWordFinderFlag is OFF the section pill never renders and
 // the _CatalogBody routing branch is unreachable, so catalog behaviour is
 // byte-identical for normal users.
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
+import 'package:buildsmart/features/ring_dive/plain_dive_screen.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_home.dart';
@@ -35,6 +37,17 @@ import 'package:buildsmart/features/global_search/global_search.dart'
     show SearchResult, SearchResultKind, kGlobalSearch;
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show buildGlobalSearchIndex;
+import 'package:buildsmart/features/global_search/hebrew_morph.dart'
+    show hebrewSearchVariants;
+import 'package:buildsmart/features/global_search/plumber_slang.dart'
+    show slangVariants;
+import 'package:buildsmart/features/global_search/prediction_ranking.dart'
+    show
+        nameAffinity,
+        productProminence,
+        matesBoost,
+        contextCompatibleSkus,
+        jobBoost;
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
@@ -66,6 +79,7 @@ import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/intel/intel_bus.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
+import 'package:buildsmart/state/keyboard_job_context.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -171,7 +185,13 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
   // unrelated SKU (e.g. "200" inside SKU 120011) — that buried real size hits
   // under SKU-coincidence noise. Word queries don't touch the SKU at all.
   if (q.length >= 5 && _normForSearch(p.sku).contains(q)) return true;
-  final hay = _normForSearch('${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
+  // BILINGUAL ([kGlobalSearch] const-false ⇒ the English tail folds out ⇒ the
+  // haystack string is byte-identical). Every product carries nameEn/categoryEn
+  // but the search ignored them; folding them in lets an English query ("elbow",
+  // "ball valve", "tee") find the Hebrew product it names.
+  final hay = _normForSearch(kGlobalSearch
+      ? '${p.nameHe} ${p.categoryHe} ${p.color ?? ''} ${p.nameEn} ${p.categoryEn}'
+      : '${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
   final tokens = q.split(_wsSplit).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
   bool hit(String t) {
@@ -194,8 +214,17 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   final name = _normForSearch(p.nameHe);
   final cat = _normForSearch(p.categoryHe);
   final color = _normForSearch(p.color ?? '');
+  // BILINGUAL scoring ([kGlobalSearch] const-false ⇒ '' ⇒ every English arm below
+  // folds out, byte-identical). An English hit scores just under its Hebrew twin,
+  // so a real Hebrew match still leads.
+  final nameEn = kGlobalSearch ? _normForSearch(p.nameEn) : '';
+  final catEn = kGlobalSearch ? _normForSearch(p.categoryEn) : '';
   var score = 0;
-  if (name.contains(q)) score += 100; // whole query in the name
+  if (name.contains(q)) {
+    score += 100; // whole query in the name
+  } else if (kGlobalSearch && nameEn.contains(q)) {
+    score += 90; // whole query in the English name
+  }
   for (final t in q.split(_wsSplit).where((t) => t.isNotEmpty)) {
     if (name.contains(t)) {
       score += 20;
@@ -203,6 +232,10 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
       score += 8;
     } else if (color.contains(t)) {
       score += 6;
+    } else if (kGlobalSearch && nameEn.contains(t)) {
+      score += 18;
+    } else if (kGlobalSearch && catEn.contains(t)) {
+      score += 7;
     } else {
       final alts = kSearchSynonyms[t];
       if (alts != null) {
@@ -364,6 +397,32 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   var matched = kCatalogProducts
       .where((p) => catalogProductMatchesQuery(p, query))
       .toList();
+  // Query RESCUE ([kGlobalSearch] const-false-FIRST ⇒ the whole block folds out
+  // when off, byte-identical). Fires ONLY when the literal query found nothing, so
+  // it can never bury or reorder a working search. Two rescues, UNIONED so every
+  // real synonym surfaces together:
+  //   • Hebrew morphology — a plural query ("ברזים") → its singular ("ברז").
+  //   • Plumber slang — a trade / loan word ("אלבו", "valve") → the catalog's real
+  //     word(s) ("ברך"/"זווית", "ברז"). Verified against the catalog (אין המצאות).
+  if (kGlobalSearch && matched.isEmpty) {
+    final variants = <String>[
+      ...hebrewSearchVariants(query),
+      ...slangVariants(query),
+    ];
+    if (variants.isNotEmpty) {
+      final seen = <String>{};
+      final union = <LipskeyCatalogProduct>[];
+      for (final p in kCatalogProducts) {
+        for (final v in variants) {
+          if (catalogProductMatchesQuery(p, v)) {
+            if (seen.add(p.sku)) union.add(p);
+            break;
+          }
+        }
+      }
+      matched = union;
+    }
+  }
   if (matched.isEmpty) {
     matched = kCatalogProducts
         .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
@@ -372,8 +431,58 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   if (matched.isEmpty) matched = fuzzySearchProducts(query, limit: 40);
   final filtered = filterBySystem(matched, systemFilter);
   final ordered = sort == ProductSort.byOrder
-      ? ([...filtered]..sort((a, b) =>
-          searchRelevance(b, query).compareTo(searchRelevance(a, query))))
+      ? (kGlobalSearch
+          // PREDICTION ([kGlobalSearch], const ⇒ folds out when off): keep
+          // [searchRelevance] PRIMARY, but break its ties by prediction signal —
+          // [nameAffinity] (a product whose name IS/starts-with the query beats a
+          // variant that merely embeds it — the baseline's biggest leak),
+          // [productProminence] (showcased / verified / curated), and — the signal
+          // ORTHOGONAL to the letters — [matesBoost]: a candidate that physically
+          // CONNECTS to what's already staged on the line (the smart cart + the
+          // freshest recently-viewed). Context-seeded harness lift: 39%→66% of the
+          // FITTING product reaching top-4. Off ⇒ the plain relevance sort below is
+          // byte-identical (this whole branch, [matesBoost] + the context read
+          // included, tree-shakes out).
+          ? (() {
+              final ctx = <LipskeyCatalogProduct>[];
+              for (final line in ref.watch(smartCartProvider)) {
+                final k = line.productKey;
+                final p =
+                    productBySku(k.startsWith('lip:') ? k.substring(4) : k);
+                if (p != null) ctx.add(p);
+              }
+              for (final sku in ref.watch(recentlyViewedProvider).take(5)) {
+                final p = productBySku(sku);
+                if (p != null) ctx.add(p);
+              }
+              // JOB (keystroke-zero): the OPEN job's own kit steers even the first
+              // pick on an empty cart — its SKUs win a [jobBoost], and they also
+              // enter the mate-context so what CONNECTS to them is boosted too.
+              final jobSkus = <String>{};
+              for (final sku in ref.watch(keyboardJobSkusProvider)) {
+                final p = productBySku(sku);
+                if (p != null) {
+                  ctx.add(p);
+                  jobSkus.add(p.sku);
+                }
+              }
+              final mates = contextCompatibleSkus(ctx);
+              return [...filtered]..sort((a, b) {
+                final byRel = searchRelevance(b, query)
+                    .compareTo(searchRelevance(a, query));
+                if (byRel != 0) return byRel;
+                return (nameAffinity(b, query) +
+                        productProminence(b) +
+                        matesBoost(b, mates) +
+                        jobBoost(b, jobSkus))
+                    .compareTo(nameAffinity(a, query) +
+                        productProminence(a) +
+                        matesBoost(a, mates) +
+                        jobBoost(a, jobSkus));
+              });
+            })()
+          : ([...filtered]..sort((a, b) =>
+              searchRelevance(b, query).compareTo(searchRelevance(a, query)))))
       : sortCatalogProducts(filtered, sort);
   return ordered.take(40).toList();
 });
@@ -1576,7 +1685,19 @@ class _CatalogBody extends ConsumerWidget {
     // rotary RingDive surface instead; a normal build (flag off) is
     // byte-identical (this section is only reachable via the kWordFinder pill
     // and falls back to WordFinderHome). RingDiveScreen self-gates too.
+    // OWNER · PlainDive ([kPlainDive], const-false ⇒ this branch folds out ⇒
+    // byte-identical). A SEPARATE layman finder that runs ALONGSIDE 'מאתר חכם' —
+    // reached by its OWN 'מאתר פשוט' chip, never replacing the pro dial. The 4-ring
+    // dictionary drill narrows in everyday words down to the exact product.
+    if (kPlainDive && active == 'מאתר פשוט') {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(child: PlainDiveScreen()),
+      );
+    }
     if (active == 'מאתר חכם') {
+      // kRingDive demo → the rotary RingDive dial; otherwise the two-mode
+      // word-finder host. Flag off (default) → WordFinderHome (byte-identical).
       if (ref.watch(featureFlagsProvider).contains(kRingDiveFlag)) {
         return const Directionality(
           textDirection: TextDirection.rtl,

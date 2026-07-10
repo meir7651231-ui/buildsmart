@@ -54,12 +54,15 @@
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
     show FindKeyboardPanel;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
-    show buildGlobalSearchIndex;
+    show buildEntitySearchIndex;
+import 'package:buildsmart/features/global_search/narrowers.dart'
+    show crossDomainNextTokens, mergeNarrowers;
 import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
 import 'package:buildsmart/features/word_finder/word_lexicon.dart'
     show WordLexicon, buildWordLexicon;
@@ -105,6 +108,8 @@ import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kKbLiveMirrorFlag;
 import 'package:buildsmart/state/finder_front.dart'
     show catalogLeadsWithFinder, kFinderFront;
+import 'package:buildsmart/state/keyboard_job_context.dart'
+    show keyboardJobSkusProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show kKbGlobal, keyboardOverlayOpenProvider, keyboardSearchModeProvider;
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
@@ -401,40 +406,40 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   /// (nav-styled). ONLY reachable when the const flag is ON; when OFF the whole
   /// method (and its two extra imports) tree-shakes away → the row is byte-
   /// identical to the legacy [_buildRow] path.
-  _PredRow _globalRow(String text) {
-    // Balanced (round-robin) so no single domain floods the row — every domain
-    // with a hit is represented before any gets a second slot ("everything's
-    // there"); relevance still orders within each round. This row is just a QUICK
-    // preview — the FULL ranked list already shows in the in-place results panel
-    // ([GlobalSearchResultsView], which HomeShell overlays over EVERY tab while a
-    // query is present, option A), so there is NO "עוד…" overflow chip: the whole
-    // list is always on-screen. Each chip is still a one-tap jump via [runByChip].
-    final results = buildGlobalSearchIndex(ref).searchBalanced(text);
-    final chips = <String>[];
-    final runByChip = <String, KbRunByChip>{};
-    for (final r in results) {
-      if (chips.length >= _kRowCap) break;
-      // De-dupe by visible label (two domains could surface the same title —
-      // keep the first, i.e. the higher-ranked one after the index's own sort).
-      if (runByChip.containsKey(r.title) || chips.contains(r.title)) continue;
-      chips.add(r.title);
-      // END the in-place search before running: the result may navigate to a
-      // tab/section the results panel would otherwise keep COVERING. Clearing the
-      // field cascades through [_recompute] → drops [keyboardDiveQueryProvider] →
-      // the panel pulls down, revealing the destination. Sheet-openers then show
-      // over the destination, nav-results reveal it. The overlay stays floating.
-      final run = r.run;
-      runByChip[r.title] = (chipRef, chipCtx) {
-        _controller.clear();
-        run(chipRef, chipCtx);
-      };
-    }
-    return _PredRow(
-      chips,
-      const <String, KbDestination>{},
-      runByChip: runByChip,
-      destinationChips: chips.toSet(),
-    );
+  /// OPTION B ([kGlobalSearch]) — the typed row is TYPING HELP, not results. The
+  /// full ranked results already show IN PLACE in the panel
+  /// ([GlobalSearchResultsView]); duplicating them here was redundant, so the row
+  /// goes back to what a keyboard's suggestion strip is FOR — the smartest NEXT
+  /// WORDS to narrow the search:
+  ///
+  ///   • PRODUCTS lead via [cardKeyboardPredictions] → the finder's own
+  ///     [offerQuestion], which scores the MOST-DECISIVE next words by information
+  ///     gain (not a dumb substring match) — so each chip is a real step toward a
+  ///     product in the fewest taps.
+  ///   • CROSS-DOMAIN fills via [crossDomainNextTokens] over the titles of the
+  ///     OTHER domains the query currently matches (tasks · customers · chats ·
+  ///     screens · …), so a non-product query ("משה") still gets smart narrowers.
+  ///
+  /// Every chip appears in ≥1 currently-matching item, so appending it can never
+  /// dead-end the search. All chips are plain WORDS (no destByChip / runByChip) →
+  /// [_onPrediction] case (iii) APPENDS the word, narrowing the query one token at
+  /// a time; the panel re-narrows live. ONLY reachable when the flag is ON; OFF ⇒
+  /// the whole method + its imports tree-shake and the legacy [_buildRow] path is
+  /// byte-identical.
+  _PredRow _wordsRow(String text) {
+    // Smart PRODUCT narrowers — the information-gain engine (most-decisive first).
+    final product =
+        cardKeyboardPredictions(text, kDivePool, _lexicon, max: _kRowCap);
+    // Cross-domain narrowers — the successor-words of the query in the titles of
+    // the ENTITY domains it matches (buildEntitySearchIndex drops the redundant
+    // product scan; products already lead above). Every successor is
+    // result-guaranteed, and non-product queries ("משה") still get help.
+    final titles =
+        buildEntitySearchIndex(ref).search(text).map((r) => r.title);
+    final cross = crossDomainNextTokens(text, titles, max: _kRowCap);
+    // Product engine leads (richer), cross-domain fills; de-duped + capped.
+    final chips = mergeNarrowers(product, cross, max: _kRowCap);
+    return _PredRow(chips, const <String, KbDestination>{});
   }
 
   /// THE ROW SELECTOR — the single decision for what the prediction row shows,
@@ -471,13 +476,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   }) {
     // (1) TYPED row. Typed text never enters the LIVE-MIRROR branch (the deriver
     // mirrors the EMPTY-field surfaces), so it leads. With [kGlobalSearch] ON
-    // (const ⇒ tree-shaken when off), the UNIFIED global search REPLACES the
-    // legacy destinations+words merge with ONE ranked row across every wired
-    // domain (screens · products · chats · …), each chip a JUMP dispatched via
-    // [runByChip] (case (ii)). Flag OFF → the legacy [_buildRow] path below is
-    // byte-identical (the whole [_globalRow] call + its imports fold out).
+    // (const ⇒ tree-shaken when off), option B: the row is TYPING HELP — the
+    // smartest NEXT WORDS to narrow the search ([_wordsRow]) — because the FULL
+    // results already show in the in-place panel ([GlobalSearchResultsView]), so
+    // repeating them here would be redundant. Flag OFF → the legacy [_buildRow]
+    // path below is byte-identical (the whole [_wordsRow] call + its imports fold).
     if (text.isNotEmpty) {
-      if (kGlobalSearch) return _globalRow(text);
+      if (kGlobalSearch) return _wordsRow(text);
       return _buildRow(text);
     }
 
@@ -1052,6 +1057,55 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   ) =>
       showLipskeyProductSheet(_navContext, product, siblings);
 
+  /// The distinct label of the JOB-KIT option chip ([kGlobalSearch]). Prepended to
+  /// the search row when a job is open; its run-callback reveals the job's parts.
+  static const String _kJobKitChip = '🧰 החלקים לעבודה';
+
+  /// Reveal the OPEN job's parts as a bottom sheet — an OPTION offered in the
+  /// search row, never a replacement for the catalog. Each row opens its product
+  /// via the SAME root-navigator path as a finder tap ([_openFinderProduct]), so
+  /// it works under KB_GLOBAL where the keyboard sits above the app Navigator.
+  void _showJobKit(BuildContext ctx, List<String> skus) {
+    final products = <LipskeyCatalogProduct>[];
+    for (final s in skus) {
+      final p = productBySku(s);
+      if (p != null) products.add(p);
+    }
+    if (products.isEmpty) return;
+    showModalBottomSheet<void>(
+      context: ctx,
+      showDragHandle: true,
+      builder: (sheetCtx) => SafeArea(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 6),
+                child: Text('החלקים לעבודה',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              ),
+              for (final p in products)
+                ListTile(
+                  leading: Text(p.typeEmoji,
+                      style: const TextStyle(fontSize: 22)),
+                  title: Text(p.nameHe, textDirection: TextDirection.rtl),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    _openFinderProduct(p, products);
+                  },
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// ANDROID hardware / gesture BACK while the keyboard is open (audit fix): step
   /// OUT of the current face instead of backgrounding / exiting the app — pop a
   /// tool drill, then the finder → letters, then close the keyboard. Returns true
@@ -1272,7 +1326,27 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
       }
     }
 
-    final row = _rowFor(text: _controller.text, tab: tab, ctx: ctx);
+    var row = _rowFor(text: _controller.text, tab: tab, ctx: ctx);
+    // JOB-KIT option ([kGlobalSearch], const-false ⇒ the block + the provider
+    // watch fold out, byte-identical). When a job is open (a task screen seeded
+    // [keyboardJobSkusProvider]), prepend a DISTINCT run-chip to the search row
+    // that reveals the job's parts on tap ([_showJobKit]) — an OPTION offered
+    // alongside the normal chips, never a replacement for the catalog. Empty job ⇒
+    // the row is untouched, so the surface only changes when there IS a job.
+    if (kGlobalSearch) {
+      final jobSkus = ref.watch(keyboardJobSkusProvider);
+      if (jobSkus.isNotEmpty) {
+        row = _PredRow(
+          <String>[_kJobKitChip, ...row.chips],
+          row.destByChip,
+          runByChip: <String, KbRunByChip>{
+            ...row.runByChip,
+            _kJobKitChip: (r, c) => _showJobKit(c, jobSkus),
+          },
+          destinationChips: row.destinationChips,
+        );
+      }
+    }
     // Persist the dispatch maps to fields EVERY build (even to empty) so the
     // out-of-build [_onPrediction] callback reads the CURRENT row's mapping and a
     // stale tab/drill's mapping is never carried into the next tap. This is a

@@ -61,6 +61,9 @@ jobs:
         # else whichever deploy wins could ship it OFF. OWNER cut-over (1/7).
         # --dart-define=GLOBAL_SEARCH=true: the unified global search (the keyboard
         # row searches every domain) — MUST match firebase-hosting.yml (same race).
+        # --dart-define=PLAIN_DIVE=true: the layman 'מאתר פשוט' finder (the plain
+        # 4-ring dictionary drill) running ALONGSIDE 'מאתר חכם'. OWNER-REQUESTED live
+        # (10/7). MUST match firebase-hosting.yml (same race).
         # ── STUDIO GO-LIVE SEAM (dormant by default) ─────────────────────────
         # ${{ vars.STUDIO_DART_DEFINES }} appends the Studio/Pillar flags for a
         # STAGED, owner-controlled go-live. UNSET (default) → empty → this build is
@@ -71,7 +74,7 @@ jobs:
         # It persists across re-deploys (unlike an ephemeral dispatch input a later
         # push would revert). Reversible: clear the variable → next deploy is
         # byte-identical again. MUST match firebase-hosting.yml (same live race).
-        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"

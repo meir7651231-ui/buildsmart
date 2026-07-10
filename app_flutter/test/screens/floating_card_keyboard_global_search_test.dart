@@ -19,10 +19,17 @@
 
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
-import 'package:buildsmart/features/global_search/global_search_sources.dart'
-    show productSource;
+import 'package:buildsmart/features/word_finder/dive_pool.dart' show kDivePool;
+import 'package:buildsmart/features/word_finder/word_lexicon.dart'
+    show buildWordLexicon;
+import 'package:buildsmart/screens/card_keyboard_sheet.dart'
+    show cardKeyboardPredictions;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show keyboardDiveQueryProvider;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/keyboard_job_context.dart'
+    show keyboardJobSkusProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
@@ -83,8 +90,9 @@ void main() {
     }
 
     testWidgets(
-        'typing routes through _globalRow: a SCREEN result surfaces and, on tap, '
-        'navigates while the overlay keeps floating', (tester) async {
+        'OPTION B — the typed row shows the finder engine\'s NARROWER WORDS '
+        '(typing help), and tapping one APPENDS it to narrow the query; it does '
+        'NOT navigate (results live in the panel, not the row)', (tester) async {
       if (!kGlobalSearch) {
         markTestSkipped('kGlobalSearch OFF — run with '
             '--dart-define=GLOBAL_SEARCH=true to exercise the global row');
@@ -93,64 +101,44 @@ void main() {
       final container = await pumpPanel(tester);
       expect(container.read(mainTabProvider), 0, reason: 'starts on tab 0');
 
-      // Type "מח" (two letter keys). The global index's screen source
-      // (matchDestinations) surfaces the מחלקות screen. Under the flag the legacy
-      // _buildRow is compiled out of the typed branch, so this chip can ONLY have
-      // come from _globalRow.
-      await tester.tap(find.text('מ'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('ח'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('מחלקות'), findsWidgets,
-          reason: 'the unified global row surfaced the מחלקות screen result');
-
-      // Tapping it dispatches via runByChip (the result carries the destination's
-      // own nav closure), routing to the departments tab (1) and KEEPING the
-      // overlay floating — the same keep-floating contract every chip honours.
-      await tester.ensureVisible(find.text('מחלקות').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('מחלקות').first);
-      await tester.pumpAndSettle();
-
-      expect(container.read(mainTabProvider), 1,
-          reason: 'the global screen result ran its nav (→ departments tab 1)');
-      expect(container.read(keyboardOverlayOpenProvider), isTrue,
-          reason: 'a global-result tap must NOT close the floating overlay');
-      expect(find.byType(BsKeyboard), findsOneWidget,
-          reason: 'the keyboard keeps floating after the global-result nav');
-      expect(find.text('screen-underneath'), findsOneWidget,
-          reason: 'the full screen underneath stays');
-    });
-
-    testWidgets(
-        'typing a catalog term surfaces a real PRODUCT result in the row '
-        '(the products source is wired into _globalRow)', (tester) async {
-      if (!kGlobalSearch) {
-        markTestSkipped('kGlobalSearch OFF — run with '
-            '--dart-define=GLOBAL_SEARCH=true to exercise the global row');
-        return;
-      }
-      await pumpPanel(tester);
-
-      // Type "ברז" (three letter keys) — a common catalogue term. The products
-      // source scans kDivePool by name; its top hits are what productSource
-      // returns here, so at least one of them must be rendered as a row chip.
+      // Type "ברז". The row is now TYPING HELP: the finder engine's most-decisive
+      // next WORDS (via cardKeyboardPredictions), not the result titles. Compute
+      // those words to know what the row renders.
       await tester.tap(find.text('ב'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('ר'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('ז'));
       await tester.pumpAndSettle();
+      expect(container.read(keyboardDiveQueryProvider), 'ברז');
 
-      final productHits = productSource('ברז', 5).map((r) => r.title).toList();
-      expect(productHits, isNotEmpty,
-          reason: 'sanity: the catalogue has ברז products');
+      final words = cardKeyboardPredictions(
+          'ברז', kDivePool, buildWordLexicon(kDivePool), max: 5);
+      expect(words, isNotEmpty,
+          reason: 'sanity: the finder engine offers narrower words for ברז');
       final shown =
-          productHits.where((t) => find.text(t).evaluate().isNotEmpty).toList();
+          words.where((w) => find.text(w).evaluate().isNotEmpty).toList();
       expect(shown, isNotEmpty,
-          reason: 'a global PRODUCT result renders in the typed row — proving '
-              'the products source feeds _globalRow (not just screens)');
+          reason: 'the row renders the engine\'s narrower WORDS (typing help), '
+              'not result titles');
+
+      // Tapping a word APPENDS it (dispatch case iii) → the query GROWS and
+      // narrows; it must NOT navigate — the row no longer carries result jumps.
+      // (The row scrolls horizontally, so bring the chip on-screen before tapping.)
+      final word = shown.first;
+      await tester.ensureVisible(find.text(word).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(word).first);
+      await tester.pumpAndSettle();
+      expect(container.read(keyboardDiveQueryProvider), contains(word),
+          reason: 'tapping a word appended it → the query narrowed step-by-step');
+      expect(container.read(keyboardDiveQueryProvider), startsWith('ברז'),
+          reason: 'the original query is kept; the word is added after it');
+      expect(container.read(mainTabProvider), 0,
+          reason: 'a word tap is typing help — it does NOT navigate anywhere');
+      expect(container.read(keyboardOverlayOpenProvider), isTrue,
+          reason: 'the keyboard keeps floating');
+      expect(find.byType(BsKeyboard), findsOneWidget);
     });
 
     testWidgets(
@@ -178,6 +166,38 @@ void main() {
       expect(find.text('עוד…'), findsNothing,
           reason: 'no "עוד…" chip anymore — the results panel shows the full list '
               'in place, so there is nothing to overflow into');
+    });
+
+    testWidgets(
+        'a JOB in focus adds the "החלקים לעבודה" OPTION chip; tapping it opens a '
+        'sheet of the job parts — an option, NOT a catalog replacement',
+        (tester) async {
+      if (!kGlobalSearch) {
+        markTestSkipped('kGlobalSearch OFF — run with '
+            '--dart-define=GLOBAL_SEARCH=true');
+        return;
+      }
+      final container = await pumpPanel(tester);
+      // No job in focus → no option chip (the catalog surface is untouched).
+      expect(find.textContaining('החלקים לעבודה'), findsNothing);
+
+      // Open a job: seed its parts (task 1 = the hot-water PEX couplers).
+      container.read(keyboardJobSkusProvider.notifier).state =
+          const <String>['77401622', '77402222'];
+      await tester.pumpAndSettle();
+
+      final chip = find.textContaining('החלקים לעבודה');
+      expect(chip, findsOneWidget,
+          reason: 'an open job adds the option chip to the search row');
+
+      await tester.ensureVisible(chip.first);
+      await tester.pumpAndSettle();
+      await tester.tap(chip.first);
+      await tester.pumpAndSettle();
+
+      // The kit sheet lists the job's OWN parts (both couplers are "מקשר …").
+      expect(find.textContaining('מקשר'), findsWidgets,
+          reason: 'tapping the option reveals the job parts');
     });
   });
 }
