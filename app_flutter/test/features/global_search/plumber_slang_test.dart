@@ -21,6 +21,15 @@ void main() {
       expect(slangVariants('פטמה'), ['ניפל']);
     });
 
+    test('owner field-slang folds to the real catalog word', () {
+      expect(slangVariants('תוכי'), ['חותך']); // parrot = pipe cutter
+      expect(slangVariants('חנוכייה'), ['מחלק', 'מסעף']); // menorah = manifold
+      expect(slangVariants('פרלטור'), ['פיה', 'מעדן']); // aerator
+      expect(slangVariants('אוכף'), ['רוכב']); // saddle
+      expect(slangVariants('מנומטר'), ['שעון']); // manometer
+      expect(slangVariants('דריין'), ['ניקוז']); // drain
+    });
+
     test('Latin loan-words match case-insensitively, size preserved', () {
       expect(slangVariants('valve'), ['ברז', 'שסתום']);
       expect(slangVariants('VALVE'), ['ברז', 'שסתום']);
