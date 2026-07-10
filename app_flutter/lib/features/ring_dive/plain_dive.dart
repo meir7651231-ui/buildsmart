@@ -12,10 +12,11 @@
 //
 // Pure + deterministic. Behind [kPlainDive] at the wiring layer; this data module
 // is inert until a screen reads it.
-library;
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart'
+    show kRdOrder, rdAxesOf;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery;
 
@@ -122,4 +123,80 @@ List<PlainNode> plainNodes(String superCat, String classification) => [
             n.classification == classification &&
             _reaches(n))
           n,
+    ];
+
+// ── rings 4+ : keep drilling PAST the type — narrow the variants (size-first,
+//    then material/angle/colour) ring-by-ring, in plain words, until ONE product
+//    instead of dumping a list of 22. Reuses RingDive's [rdAxesOf] projection. ────
+
+/// Axes we narrow the variants by, size-first (the plumber's first question).
+const List<String> _narrowAxes = <String>['size', 'material', 'angle', 'color'];
+
+/// Inch sizes → the spoken word, so rings 4+ stay in plain language ("חצי צול"
+/// not '½"'). Non-inch sizes (mm / DN) already read plainly enough.
+const Map<String, String> _sizePlain = <String, String>{
+  '½"': 'חצי צול',
+  '1/2"': 'חצי צול',
+  '¾"': '3/4 צול',
+  '3/4"': '3/4 צול',
+  '1"': 'צול',
+  '1¼"': 'צול ורבע',
+  '1½"': 'צול וחצי',
+  '2"': '2 צול',
+};
+
+/// Plain label for a variant value — inch sizes become the spoken "צול" word;
+/// every other axis value already reads plainly (נחושת, לבן, 45°).
+String plainAxisLabel(String axis, String value) =>
+    axis == 'size' ? (_sizePlain[value] ?? value) : value;
+
+/// The ring's question for a narrowing axis.
+String plainAxisTitle(String axis) => switch (axis) {
+      'size' => 'איזה גודל?',
+      'material' => 'איזה חומר?',
+      'angle' => 'איזו זווית?',
+      'color' => 'איזה צבע?',
+      _ => 'בחר',
+    };
+
+/// The NEXT narrowing ring for [products]: the first axis (size-first) on which
+/// they actually SPLIT into ≥2 groups, its values ordered by [kRdOrder] then
+/// alphabetically. Returns null when the drill is DONE — ≤1 product left, or the
+/// products share every axis (indistinguishable) — so the caller shows the
+/// remaining product(s).
+({String axis, List<String> values})? plainNextAxis(
+    List<LipskeyCatalogProduct> products,
+    {Set<String> usedAxes = const <String>{}}) {
+  if (products.length <= 1) return null;
+  for (final axis in _narrowAxes) {
+    // Each axis narrows ONCE — a product may carry two sizes (½×⅜), so re-offering
+    // the same axis would loop on it forever without shrinking the set.
+    if (usedAxes.contains(axis)) continue;
+    final vals = <String>{};
+    for (final p in products) {
+      final a = rdAxesOf(p)[axis];
+      if (a != null) vals.addAll(a);
+    }
+    if (vals.length >= 2) {
+      final ord = kRdOrder[axis] ?? const <String>[];
+      final sorted = vals.toList()
+        ..sort((a, b) {
+          final ia = ord.indexOf(a);
+          final ib = ord.indexOf(b);
+          final ra = ia < 0 ? 999 : ia;
+          final rb = ib < 0 ? 999 : ib;
+          return ra != rb ? ra - rb : a.compareTo(b);
+        });
+      return (axis: axis, values: sorted);
+    }
+  }
+  return null;
+}
+
+/// Keep only the products carrying [value] on [axis] — one drill-narrow step.
+List<LipskeyCatalogProduct> plainFilterBy(
+        List<LipskeyCatalogProduct> products, String axis, String value) =>
+    [
+      for (final p in products)
+        if (rdAxesOf(p)[axis]?.contains(value) ?? false) p,
     ];

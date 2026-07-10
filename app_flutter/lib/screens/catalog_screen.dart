@@ -1685,17 +1685,19 @@ class _CatalogBody extends ConsumerWidget {
     // rotary RingDive surface instead; a normal build (flag off) is
     // byte-identical (this section is only reachable via the kWordFinder pill
     // and falls back to WordFinderHome). RingDiveScreen self-gates too.
+    // OWNER · PlainDive ([kPlainDive], const-false ⇒ this branch folds out ⇒
+    // byte-identical). A SEPARATE layman finder that runs ALONGSIDE 'מאתר חכם' —
+    // reached by its OWN 'מאתר פשוט' chip, never replacing the pro dial. The 4-ring
+    // dictionary drill narrows in everyday words down to the exact product.
+    if (kPlainDive && active == 'מאתר פשוט') {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(child: PlainDiveScreen()),
+      );
+    }
     if (active == 'מאתר חכם') {
-      // PlainDive ([kPlainDive], const-false ⇒ folds out ⇒ byte-identical, and the
-      // pro RingDive below is untouched). When on, the smart-finder pill opens the
-      // LAYMAN 4-ring dictionary drill instead — running ALONGSIDE the pro dial in
-      // the codebase, never replacing it.
-      if (kPlainDive) {
-        return const Directionality(
-          textDirection: TextDirection.rtl,
-          child: SafeArea(child: PlainDiveScreen()),
-        );
-      }
+      // kRingDive demo → the rotary RingDive dial; otherwise the two-mode
+      // word-finder host. Flag off (default) → WordFinderHome (byte-identical).
       if (ref.watch(featureFlagsProvider).contains(kRingDiveFlag)) {
         return const Directionality(
           textDirection: TextDirection.rtl,

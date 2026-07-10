@@ -21,6 +21,8 @@
 // imports NOTHING from here (it only knows pure [KbTile]s), so the keyboard
 // widget stays screen-agnostic.
 
+import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
+    show kPlainDive;
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart'
     show kWordFinderFlag;
 import 'package:buildsmart/screens/ai_hub_screen.dart';
@@ -616,6 +618,21 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
           action: (ref, context) {
             ref.read(mainTabProvider.notifier).state = 0;
             ref.read(catalogSectionProvider.notifier).state = 'מאתר חכם';
+          },
+        ),
+      );
+    }
+    // OWNER · a SEPARATE 'מאתר פשוט' chip next to 'מאתר חכם' — the layman 4-ring
+    // dictionary drill (PlainDive). Behind [kPlainDive] (const-false ⇒ this block
+    // tree-shakes out ⇒ the keyboard grid is byte-identical by default).
+    if (kPlainDive) {
+      out.add(
+        KbToolNode.leaf(
+          icon: Icons.spoke_outlined,
+          label: 'מאתר פשוט',
+          action: (ref, context) {
+            ref.read(mainTabProvider.notifier).state = 0;
+            ref.read(catalogSectionProvider.notifier).state = 'מאתר פשוט';
           },
         ),
       );

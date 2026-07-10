@@ -1,13 +1,12 @@
-// PLAIN DIVE screen — the layman 4-ring drill, riding the SAME rotary wheel the
-// pro RingDive uses (RingDiveWheel), fed by the dictionary tree ([plain_dive.dart]).
+// PLAIN DIVE screen — the layman drill, riding the SAME rotary wheel the pro
+// RingDive uses (RingDiveWheel), fed by the dictionary tree ([plain_dive.dart]).
 // Runs ALONGSIDE the pro RingDive; reached only behind [kPlainDive], so with the
 // flag off this screen + its entry tree-shake and the app is byte-identical.
 //
-//   ring 1 קטגוריית-על → ring 2 סיווג → ring 3 שם-טכני\סלנג → ring 4 המוצרים
+//   ring 1 קטגוריית-על → ring 2 סיווג → ring 3 סלנג → rings 4+ narrow the variants
+//   by size/material/… (in plain words) → the final short list → open the product.
 //
-// The leaf reaches REAL products (plainProductsFor) and a tap opens the product
-// sheet — the same path the finder uses — so the drill genuinely lands on a part.
-library;
+// Every ring keeps SPINNING toward one product instead of dumping a long list.
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/ring_dive/plain_dive.dart';
@@ -25,14 +24,39 @@ class PlainDiveScreen extends StatefulWidget {
 }
 
 class _PlainDiveScreenState extends State<PlainDiveScreen> {
-  String? _superCat; // ring 1 choice
-  String? _classification; // ring 2 choice
-  PlainNode? _type; // ring 3 choice → ring 4 shows its products
+  String? _superCat; // ring 1
+  String? _classification; // ring 2
+  PlainNode? _type; // ring 3 → then the narrow phase begins
 
-  /// Step UP one ring; false when already at the root (the caller pops the route).
+  // Narrow phase (rings 4+): the current product set + the plain choices made.
+  List<LipskeyCatalogProduct> _products = const <LipskeyCatalogProduct>[];
+  final List<({String axis, String value})> _picks =
+      <({String axis, String value})>[];
+
+  Set<String> get _usedAxes => {for (final p in _picks) p.axis};
+
+  void _rebuildProducts() {
+    var ps = plainProductsFor(_type!);
+    for (final p in _picks) {
+      ps = plainFilterBy(ps, p.axis, p.value);
+    }
+    _products = ps;
+  }
+
+  /// Step UP one ring; false when at the root (the route pops).
   bool _up() {
+    if (_picks.isNotEmpty) {
+      setState(() {
+        _picks.removeLast();
+        _rebuildProducts();
+      });
+      return true;
+    }
     if (_type != null) {
-      setState(() => _type = null);
+      setState(() {
+        _type = null;
+        _products = const <LipskeyCatalogProduct>[];
+      });
       return true;
     }
     if (_classification != null) {
@@ -53,6 +77,7 @@ class _PlainDiveScreenState extends State<PlainDiveScreen> {
       if (_superCat != null) _superCat!,
       if (_classification != null) _classification!,
       if (_type != null) _type!.slang,
+      for (final p in _picks) plainAxisLabel(p.axis, p.value),
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -101,19 +126,44 @@ class _PlainDiveScreenState extends State<PlainDiveScreen> {
       return _wheel(cls, const <String>[], _superCat!,
           (i) => setState(() => _classification = cls[i]));
     }
-    // Ring 3 — type nodes, labelled in the layman's word (slang), the usage note
-    // as the sub-line.
+    // Ring 3 — the type, in the layman's word.
     if (_type == null) {
       final nodes = plainNodes(_superCat!, _classification!);
       return _wheel(
         [for (final n in nodes) n.slang],
         [for (final n in nodes) n.usage],
         _classification!,
-        (i) => setState(() => _type = nodes[i]),
+        (i) => setState(() {
+          _type = nodes[i];
+          _picks.clear();
+          _rebuildProducts();
+        }),
       );
     }
-    // Ring 4 — the real products the leaf reaches; a tap opens the product sheet.
-    final products = plainProductsFor(_type!);
+
+    // Rings 4+ — keep narrowing the variants by size/material/… in plain words,
+    // until no axis splits them; then show the short final list.
+    if (_products.length > 1) {
+      final next = plainNextAxis(_products, usedAxes: _usedAxes);
+      if (next != null) {
+        return _wheel(
+          [for (final v in next.values) plainAxisLabel(next.axis, v)],
+          const <String>[],
+          plainAxisTitle(next.axis),
+          (i) => setState(() {
+            _picks.add((axis: next.axis, value: next.values[i]));
+            _rebuildProducts();
+          }),
+        );
+      }
+    }
+
+    // Final ring — the remaining product(s); a tap opens the product sheet.
+    return _finalList();
+  }
+
+  Widget _finalList() {
+    final products = _products;
     return Column(
       children: <Widget>[
         Container(
@@ -124,36 +174,38 @@ class _PlainDiveScreenState extends State<PlainDiveScreen> {
             children: <Widget>[
               Text('${_type!.slang}  ·  ${_type!.english}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  style:
+                      const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
-              Text(_type!.usage,
+              Text(
+                  products.length == 1
+                      ? 'המוצר שמצאנו:'
+                      : 'בחר את המדויק · ${products.length} אפשרויות',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 12.5)),
-              const SizedBox(height: 2),
-              Text('${products.length} מוצרים',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 11.5)),
             ],
           ),
         ),
         const Divider(height: 1),
         Expanded(
-          child: ListView.separated(
-            itemCount: products.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (_, i) {
-              final LipskeyCatalogProduct p = products[i];
-              return ListTile(
-                leading:
-                    Text(p.typeEmoji, style: const TextStyle(fontSize: 22)),
-                title: Text(p.nameHe, textDirection: TextDirection.rtl),
-                subtitle: p.nameEn.isEmpty
-                    ? null
-                    : Text(p.nameEn, style: const TextStyle(fontSize: 11)),
-                onTap: () => showLipskeyProductSheet(context, p, products),
-              );
-            },
-          ),
+          child: products.isEmpty
+              ? const Center(child: Text('לא נמצאו מוצרים'))
+              : ListView.separated(
+                  itemCount: products.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, i) {
+                    final p = products[i];
+                    return ListTile(
+                      leading: Text(p.typeEmoji,
+                          style: const TextStyle(fontSize: 22)),
+                      title: Text(p.nameHe, textDirection: TextDirection.rtl),
+                      subtitle: p.nameEn.isEmpty
+                          ? null
+                          : Text(p.nameEn, style: const TextStyle(fontSize: 11)),
+                      onTap: () => showLipskeyProductSheet(context, p, products),
+                    );
+                  },
+                ),
         ),
       ],
     );
