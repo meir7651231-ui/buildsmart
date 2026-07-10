@@ -28,6 +28,8 @@ import 'package:buildsmart/screens/catalog_screen.dart'
     show keyboardDiveQueryProvider;
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/keyboard_job_context.dart'
+    show keyboardJobSkusProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show keyboardOverlayOpenProvider;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
@@ -164,6 +166,38 @@ void main() {
       expect(find.text('עוד…'), findsNothing,
           reason: 'no "עוד…" chip anymore — the results panel shows the full list '
               'in place, so there is nothing to overflow into');
+    });
+
+    testWidgets(
+        'a JOB in focus adds the "החלקים לעבודה" OPTION chip; tapping it opens a '
+        'sheet of the job parts — an option, NOT a catalog replacement',
+        (tester) async {
+      if (!kGlobalSearch) {
+        markTestSkipped('kGlobalSearch OFF — run with '
+            '--dart-define=GLOBAL_SEARCH=true');
+        return;
+      }
+      final container = await pumpPanel(tester);
+      // No job in focus → no option chip (the catalog surface is untouched).
+      expect(find.textContaining('החלקים לעבודה'), findsNothing);
+
+      // Open a job: seed its parts (task 1 = the hot-water PEX couplers).
+      container.read(keyboardJobSkusProvider.notifier).state =
+          const <String>['77401622', '77402222'];
+      await tester.pumpAndSettle();
+
+      final chip = find.textContaining('החלקים לעבודה');
+      expect(chip, findsOneWidget,
+          reason: 'an open job adds the option chip to the search row');
+
+      await tester.ensureVisible(chip.first);
+      await tester.pumpAndSettle();
+      await tester.tap(chip.first);
+      await tester.pumpAndSettle();
+
+      // The kit sheet lists the job's OWN parts (both couplers are "מקשר …").
+      expect(find.textContaining('מקשר'), findsWidgets,
+          reason: 'tapping the option reveals the job parts');
     });
   });
 }

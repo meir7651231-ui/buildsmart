@@ -54,6 +54,7 @@
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
     show FindKeyboardPanel;
 import 'package:buildsmart/features/global_search/global_search.dart'
@@ -107,6 +108,8 @@ import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kKbLiveMirrorFlag;
 import 'package:buildsmart/state/finder_front.dart'
     show catalogLeadsWithFinder, kFinderFront;
+import 'package:buildsmart/state/keyboard_job_context.dart'
+    show keyboardJobSkusProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart'
     show kKbGlobal, keyboardOverlayOpenProvider, keyboardSearchModeProvider;
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
@@ -1051,6 +1054,55 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   ) =>
       showLipskeyProductSheet(_navContext, product, siblings);
 
+  /// The distinct label of the JOB-KIT option chip ([kGlobalSearch]). Prepended to
+  /// the search row when a job is open; its run-callback reveals the job's parts.
+  static const String _kJobKitChip = '🧰 החלקים לעבודה';
+
+  /// Reveal the OPEN job's parts as a bottom sheet — an OPTION offered in the
+  /// search row, never a replacement for the catalog. Each row opens its product
+  /// via the SAME root-navigator path as a finder tap ([_openFinderProduct]), so
+  /// it works under KB_GLOBAL where the keyboard sits above the app Navigator.
+  void _showJobKit(BuildContext ctx, List<String> skus) {
+    final products = <LipskeyCatalogProduct>[];
+    for (final s in skus) {
+      final p = productBySku(s);
+      if (p != null) products.add(p);
+    }
+    if (products.isEmpty) return;
+    showModalBottomSheet<void>(
+      context: ctx,
+      showDragHandle: true,
+      builder: (sheetCtx) => SafeArea(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 6),
+                child: Text('החלקים לעבודה',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              ),
+              for (final p in products)
+                ListTile(
+                  leading: Text(p.typeEmoji,
+                      style: const TextStyle(fontSize: 22)),
+                  title: Text(p.nameHe, textDirection: TextDirection.rtl),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    _openFinderProduct(p, products);
+                  },
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// ANDROID hardware / gesture BACK while the keyboard is open (audit fix): step
   /// OUT of the current face instead of backgrounding / exiting the app — pop a
   /// tool drill, then the finder → letters, then close the keyboard. Returns true
@@ -1271,7 +1323,27 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
       }
     }
 
-    final row = _rowFor(text: _controller.text, tab: tab, ctx: ctx);
+    var row = _rowFor(text: _controller.text, tab: tab, ctx: ctx);
+    // JOB-KIT option ([kGlobalSearch], const-false ⇒ the block + the provider
+    // watch fold out, byte-identical). When a job is open (a task screen seeded
+    // [keyboardJobSkusProvider]), prepend a DISTINCT run-chip to the search row
+    // that reveals the job's parts on tap ([_showJobKit]) — an OPTION offered
+    // alongside the normal chips, never a replacement for the catalog. Empty job ⇒
+    // the row is untouched, so the surface only changes when there IS a job.
+    if (kGlobalSearch) {
+      final jobSkus = ref.watch(keyboardJobSkusProvider);
+      if (jobSkus.isNotEmpty) {
+        row = _PredRow(
+          <String>[_kJobKitChip, ...row.chips],
+          row.destByChip,
+          runByChip: <String, KbRunByChip>{
+            ...row.runByChip,
+            _kJobKitChip: (r, c) => _showJobKit(c, jobSkus),
+          },
+          destinationChips: row.destinationChips,
+        );
+      }
+    }
     // Persist the dispatch maps to fields EVERY build (even to empty) so the
     // out-of-build [_onPrediction] callback reads the CURRENT row's mapping and a
     // stale tab/drill's mapping is never carried into the next tap. This is a
