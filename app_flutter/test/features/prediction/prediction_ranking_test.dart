@@ -55,4 +55,19 @@ void main() {
       expect(productProminence(_p('ברז')), productProminence(_p('ברז')));
     });
   });
+
+  group('matesBoost + jobBoost (orthogonal context signals — empty ⇒ zero)', () {
+    final p = _p('x', sku: 'S1');
+    test('membership boosts; miss + empty set ⇒ 0 (byte-safe when unused)', () {
+      expect(matesBoost(p, {'S1'}), greaterThan(0));
+      expect(matesBoost(p, {'other'}), 0);
+      expect(matesBoost(p, const <String>{}), 0);
+      expect(jobBoost(p, {'S1'}), greaterThan(0));
+      expect(jobBoost(p, {'other'}), 0);
+      expect(jobBoost(p, const <String>{}), 0);
+    });
+    test('a verified in-hand mate outweighs a mere job-kit membership', () {
+      expect(matesBoost(p, {'S1'}), greaterThan(jobBoost(p, {'S1'})));
+    });
+  });
 }

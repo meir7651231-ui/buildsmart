@@ -1,10 +1,13 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/task_skus_local.dart';
+import 'package:buildsmart/features/global_search/global_search.dart'
+    show kGlobalSearch;
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/keyboard_job_context.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
@@ -217,6 +220,20 @@ class _WorkerTaskDetailSheetState
     final match =
         ref.read(tasksProvider).where((x) => x.id == widget.taskId).toList();
     _note = TextEditingController(text: match.isEmpty ? '' : match.first.note);
+    // KEYSTROKE-ZERO job seed ([kGlobalSearch], swarm #2): opening a task tells
+    // the floating keyboard which JOB it is helping with, so its FIRST product
+    // pick is steered by the job's own kit — even before a keystroke, on an empty
+    // cart. Deferred off the init frame: setting a provider synchronously during
+    // initState throws in a release build (the didUpdateWidget-during-build class
+    // of bug). Flag-off ⇒ this whole block compiles out (byte-identical).
+    if (kGlobalSearch) {
+      final jobSkus = kTaskSkus[widget.taskId] ?? const <String>[];
+      Future.microtask(() {
+        if (mounted) {
+          ref.read(keyboardJobSkusProvider.notifier).state = jobSkus;
+        }
+      });
+    }
   }
 
   /// Whether a [VoiceService] session is live right now (#6 voice honesty) —

@@ -44,6 +44,17 @@ Set<String> contextCompatibleSkus(Iterable<LipskeyCatalogProduct> context) => {
 int matesBoost(LipskeyCatalogProduct candidate, Set<String> compatibleSkus) =>
     compatibleSkus.contains(candidate.sku) ? 400 : 0;
 
+/// PURE. The keystroke-ZERO boost for a candidate that IS a product the OPEN JOB
+/// needs (its own kit) — the signal that steers even the FIRST pick, on an empty
+/// cart, before [matesBoost] has anything to mate against (swarm finding #2). From
+/// the letters alone the keyboard can't tell which of ~100 "couplers" you mean; the
+/// job you're on can ("hot-water line" ⇒ its PEX couplers lead the moment you type
+/// "מקשר"). [jobSkus] is [keyboardJobSkusProvider]'s set; empty ⇒ no effect
+/// (byte-safe). A notch below [matesBoost]: a verified physical mate to what's
+/// in-hand is a stronger intent than mere job-kit membership.
+int jobBoost(LipskeyCatalogProduct candidate, Set<String> jobSkus) =>
+    jobSkus.contains(candidate.sku) ? 300 : 0;
+
 final RegExp _wsSplit = RegExp(r'\s+');
 
 /// PURE. How CENTRAL [query] is to [p]'s name — the non-zero-sum half of the

@@ -37,7 +37,12 @@ import 'package:buildsmart/features/global_search/global_search.dart'
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show buildGlobalSearchIndex;
 import 'package:buildsmart/features/global_search/prediction_ranking.dart'
-    show nameAffinity, productProminence, matesBoost, contextCompatibleSkus;
+    show
+        nameAffinity,
+        productProminence,
+        matesBoost,
+        contextCompatibleSkus,
+        jobBoost;
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
@@ -69,6 +74,7 @@ import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/intel/intel_bus.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
+import 'package:buildsmart/state/keyboard_job_context.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -399,6 +405,17 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
                 final p = productBySku(sku);
                 if (p != null) ctx.add(p);
               }
+              // JOB (keystroke-zero): the OPEN job's own kit steers even the first
+              // pick on an empty cart — its SKUs win a [jobBoost], and they also
+              // enter the mate-context so what CONNECTS to them is boosted too.
+              final jobSkus = <String>{};
+              for (final sku in ref.watch(keyboardJobSkusProvider)) {
+                final p = productBySku(sku);
+                if (p != null) {
+                  ctx.add(p);
+                  jobSkus.add(p.sku);
+                }
+              }
               final mates = contextCompatibleSkus(ctx);
               return [...filtered]..sort((a, b) {
                 final byRel = searchRelevance(b, query)
@@ -406,10 +423,12 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
                 if (byRel != 0) return byRel;
                 return (nameAffinity(b, query) +
                         productProminence(b) +
-                        matesBoost(b, mates))
+                        matesBoost(b, mates) +
+                        jobBoost(b, jobSkus))
                     .compareTo(nameAffinity(a, query) +
                         productProminence(a) +
-                        matesBoost(a, mates));
+                        matesBoost(a, mates) +
+                        jobBoost(a, jobSkus));
               });
             })()
           : ([...filtered]..sort((a, b) =>
