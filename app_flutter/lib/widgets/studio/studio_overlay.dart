@@ -17,6 +17,7 @@ import 'package:buildsmart/state/studio/edit_mode.dart'
 import 'package:buildsmart/state/studio/element_registry.dart'
     show criticalIdsProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
+import 'package:buildsmart/widgets/toast.dart' show showGlobalToast;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,7 +57,7 @@ class StudioOverlay extends ConsumerWidget {
                 ),
                 if (draftCount > 0)
                   TextButton(
-                    onPressed: () => _publish(context, ref),
+                    onPressed: () => _publish(ref),
                     child: const Text(
                       'פרסם',
                       style: TextStyle(
@@ -84,44 +85,23 @@ class StudioOverlay extends ConsumerWidget {
     );
   }
 
-  /// Publish the in-place draft to ALL users — behind a confirm so an accidental
-  /// tap can't broadcast. Mirrors the studio top-bar's publish (owner email +
-  /// critical-id publish-validator).
-  Future<void> _publish(BuildContext context, WidgetRef ref) async {
-    final count = ref.read(configStoreProvider).draftNodeCount;
-    if (count == 0) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('פרסום לכל המשתמשים'),
-        content: Text('לפרסם $count שינויים? כל המשתמשים יראו אותם מיד.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ביטול'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('פרסם'),
-          ),
-        ],
-      ),
-    );
-    if (ok != true) return;
+  /// Publish the in-place draft to ALL users. The overlay lives in
+  /// `MaterialApp.builder` (ABOVE the Navigator), so it must NOT use
+  /// `showDialog` / `ScaffoldMessenger.of(context)` — there is no Navigator in
+  /// this context and the call fails silently ("פרסם does nothing"). We publish
+  /// directly (the button is deliberate + a publish is reversible via history)
+  /// and confirm with the CONTEXT-FREE [showGlobalToast] (served through the root
+  /// `bsMessengerKey`, which is always mounted).
+  void _publish(WidgetRef ref) {
+    if (ref.read(configStoreProvider).draftNodeCount == 0) return;
     final published = ref.read(configStoreProvider.notifier).publish(
           note: 'עריכה בחי',
           byEmail: ref.read(studioOwnerEmailProvider) ?? '',
           nowMs: DateTime.now().millisecondsSinceEpoch,
           criticalIds: ref.read(criticalIdsProvider),
         );
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            published ? 'פורסם לכל המשתמשים ✓' : 'אין שינויים לפרסום',
-          ),
-        ),
-      );
-    }
+    showGlobalToast(
+      published ? 'פורסם לכל המשתמשים ✓' : 'אין שינויים לפרסום',
+    );
   }
 }
