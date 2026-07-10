@@ -87,20 +87,33 @@ void main() {
         reason: 'a bare "16" must not startsWith-match "160" 6-inch parts');
   });
 
-  test('FIX-C size ring ascends by DN and drops cm/meter twins', () {
-    final ball = kPlainDict.firstWhere((n) => n.technical == 'ברז כדורי');
-    final ring = plainNextAxis(plainProductsFor(ball));
-    expect(ring?.axis, 'size');
-    final dns = <int>[
-      for (final v in ring!.values)
-        if (RegExp(r'^DN\d+$').hasMatch(v)) int.parse(v.substring(2)),
-    ];
-    expect(dns, [...dns]..sort(), reason: 'DN sizes read small→large, not lexical');
-
-    final nil = kPlainDict.firstWhere((n) => n.technical == 'ברז ניל');
-    final nilVals = plainNextAxis(plainProductsFor(nil))!.values;
-    expect(nilVals.where((v) => v.contains('מ׳')), isEmpty,
-        reason: 'the 0.15 מ׳ twin collapses into 15 ס"מ');
+  test('FIX-C every size ring ascends by DN and drops cm/meter twins', () {
+    // Size is no longer guaranteed FIRST (it is skipped when some products lack a
+    // size, so none is stranded) — so verify the property on EVERY size ring the
+    // greedy drill actually surfaces.
+    var sawSize = false;
+    for (final n in kPlainDict) {
+      var products = plainProductsFor(n);
+      final used = <String>{};
+      var g = 0;
+      while (g++ < 12) {
+        final next = plainNextAxis(products, usedAxes: used);
+        if (next == null) break;
+        if (next.axis == 'size') {
+          sawSize = true;
+          final dns = <int>[
+            for (final v in next.values)
+              if (RegExp(r'^DN\d+$').hasMatch(v)) int.parse(v.substring(2)),
+          ];
+          expect(dns, [...dns]..sort(), reason: 'DN sizes ascend, not lexical');
+          expect(next.values.where((v) => v.contains('מ׳')), isEmpty,
+              reason: 'cm/meter twins collapse into one chip');
+        }
+        products = plainFilterBy(products, next.axis, next.values.first);
+        used.add(next.axis);
+      }
+    }
+    expect(sawSize, isTrue, reason: 'the drill does surface size rings');
   });
 
   test('FIX-F elbow collapses to one generic ברך leaf', () {
@@ -110,21 +123,53 @@ void main() {
     expect(plainProductsFor(elbows.single).length, greaterThan(50));
   });
 
-  test('FIX-B type axis is reachable — a PPR size bucket splits by "איזה סוג?"',
-      () {
-    final ppr = kPlainDict.firstWhere((n) => n.technical == 'PPR');
-    final all = plainProductsFor(ppr);
-    final sizeRing = plainNextAxis(all)!;
-    expect(sizeRing.axis, 'size');
+  test('FIX-B the "איזה סוג?" type axis fires somewhere in the drill', () {
     var sawType = false;
-    for (final v in sizeRing.values) {
-      final bucket = plainFilterBy(all, 'size', v);
-      if (plainNextAxis(bucket, usedAxes: {'size'})?.axis == 'type') {
-        sawType = true;
-        break;
+    for (final n in kPlainDict) {
+      var products = plainProductsFor(n);
+      final used = <String>{};
+      var g = 0;
+      while (g++ < 12) {
+        final next = plainNextAxis(products, usedAxes: used);
+        if (next == null) break;
+        if (next.axis == 'type') sawType = true;
+        products = plainFilterBy(products, next.axis, next.values.first);
+        used.add(next.axis);
       }
     }
     expect(sawType, isTrue,
-        reason: 'a big single-caliber family narrows by kind, not a long dump');
+        reason: 'big families split by kind instead of dumping a long list');
+  });
+
+  test('REACH: no ring ever strands a product (narrowing is loss-free)', () {
+    // The real coverage guarantee, stated as the INVARIANT that gives it: at every
+    // ring, the union of filtering by ALL offered values must equal the current set
+    // (no product lacks a value on an offered axis). If that holds at every state,
+    // every product reaches a final list — verified here on each node's greedy path.
+    for (final sc in plainSuperCats()) {
+      for (final cls in plainClassifications(sc)) {
+        for (final n in plainNodes(sc, cls)) {
+          var products = plainProductsFor(n);
+          final used = <String>{};
+          var g = 0;
+          while (g++ < 12) {
+            final next = plainNextAxis(products, usedAxes: used);
+            if (next == null) break;
+            final union = <String>{};
+            for (final v in next.values) {
+              for (final p in plainFilterBy(products, next.axis, v)) {
+                union.add(p.sku);
+              }
+            }
+            for (final p in products) {
+              expect(union.contains(p.sku), isTrue,
+                  reason: '${n.slang}: "${p.nameHe}" stranded by ${next.axis}');
+            }
+            products = plainFilterBy(products, next.axis, next.values.first);
+            used.add(next.axis);
+          }
+        }
+      }
+    }
   });
 }

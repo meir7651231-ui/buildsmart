@@ -259,17 +259,29 @@ String plainAxisTitle(String axis) => switch (axis) {
       // mixed with DN), and orders each family small→large — none of which the raw
       // rdAxesOf set does. plainFilterBy mirrors it via productHasChip.
       final toks = sizeTokensIn(products);
-      if (toks.length >= 2) {
+      // Offer size ONLY when every product carries a size chip — otherwise a
+      // size-less product would be dropped by the pick and never reach a final
+      // list. When some lack a size we skip to the next axis ('type' always covers
+      // everyone), so no product is lost on the way down.
+      if (toks.length >= 2 &&
+          products.every((p) => toks.any((t) => productHasChip(p, t.label)))) {
         return (axis: 'size', values: [for (final t in toks) t.label]);
       }
       continue;
     }
     final vals = <String>{};
+    var everyoneHasIt = true;
     for (final p in products) {
       final a = rdAxesOf(p)[axis];
-      if (a != null) vals.addAll(a);
+      if (a == null || a.isEmpty) {
+        everyoneHasIt = false;
+      } else {
+        vals.addAll(a);
+      }
     }
-    if (vals.length >= 2) {
+    // Same rule for the other axes: only narrow when NO product lacks a value on
+    // it, so the pick can't strand a value-less product.
+    if (vals.length >= 2 && everyoneHasIt) {
       final ord = kRdOrder[axis] ?? const <String>[];
       final sorted = vals.toList()
         ..sort((a, b) {
