@@ -32,8 +32,8 @@ void main() {
       final r = _drill(n);
       expect(r.rings, lessThan(20),
           reason: '${n.slang} never terminated — an axis was re-offered');
-      // At most one ring per narrow axis (size/material/angle/color) = ≤4.
-      expect(r.rings, lessThanOrEqualTo(4),
+      // At most one ring per narrow axis (size/material/angle/color/type) = ≤5.
+      expect(r.rings, lessThanOrEqualTo(5),
           reason: '${n.slang} ran more rings than there are axes');
     }
   });
@@ -75,5 +75,56 @@ void main() {
 
   test('plainNextAxis returns null at zero/one product', () {
     expect(plainNextAxis(const <LipskeyCatalogProduct>[]), isNull);
+  });
+
+  // ── adversarial-swarm fix regressions ───────────────────────────────────────
+
+  test('FIX-A caliber isolation: 16mm node does not reach DN160 fittings', () {
+    final n16 = kPlainDict.firstWhere((n) => n.technical == '16');
+    final p16 = plainProductsFor(n16);
+    expect(p16, isNotEmpty, reason: '16mm still reaches its own products');
+    expect(p16.where((p) => p.nameHe.contains('160')), isEmpty,
+        reason: 'a bare "16" must not startsWith-match "160" 6-inch parts');
+  });
+
+  test('FIX-C size ring ascends by DN and drops cm/meter twins', () {
+    final ball = kPlainDict.firstWhere((n) => n.technical == 'ברז כדורי');
+    final ring = plainNextAxis(plainProductsFor(ball));
+    expect(ring?.axis, 'size');
+    final dns = <int>[
+      for (final v in ring!.values)
+        if (RegExp(r'^DN\d+$').hasMatch(v)) int.parse(v.substring(2)),
+    ];
+    expect(dns, [...dns]..sort(), reason: 'DN sizes read small→large, not lexical');
+
+    final nil = kPlainDict.firstWhere((n) => n.technical == 'ברז ניל');
+    final nilVals = plainNextAxis(plainProductsFor(nil))!.values;
+    expect(nilVals.where((v) => v.contains('מ׳')), isEmpty,
+        reason: 'the 0.15 מ׳ twin collapses into 15 ס"מ');
+  });
+
+  test('FIX-F elbow collapses to one generic ברך leaf', () {
+    final elbows = kPlainDict.where((n) => n.slang.startsWith('ברך')).toList();
+    expect(elbows.length, 1, reason: 'the 45°/90° leaves merged into one');
+    expect(elbows.single.english, 'Elbow', reason: 'generic, not "Elbow 90"');
+    expect(plainProductsFor(elbows.single).length, greaterThan(50));
+  });
+
+  test('FIX-B type axis is reachable — a PPR size bucket splits by "איזה סוג?"',
+      () {
+    final ppr = kPlainDict.firstWhere((n) => n.technical == 'PPR');
+    final all = plainProductsFor(ppr);
+    final sizeRing = plainNextAxis(all)!;
+    expect(sizeRing.axis, 'size');
+    var sawType = false;
+    for (final v in sizeRing.values) {
+      final bucket = plainFilterBy(all, 'size', v);
+      if (plainNextAxis(bucket, usedAxes: {'size'})?.axis == 'type') {
+        sawType = true;
+        break;
+      }
+    }
+    expect(sawType, isTrue,
+        reason: 'a big single-caliber family narrows by kind, not a long dump');
   });
 }

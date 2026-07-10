@@ -17,6 +17,8 @@ import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart'
     show kRdOrder, rdAxesOf;
+import 'package:buildsmart/features/word_finder/narrow_axis.dart'
+    show productHasChip, sizeTokensIn;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery;
 
@@ -52,8 +54,10 @@ const List<PlainNode> kPlainDict = <PlainNode>[
   PlainNode(superCat: 'צנרת וחומרים', classification: 'צנרת ניקוז', technical: '160', slang: '6 צול · 160מ"מ', english: 'DN160 Pipe', usage: 'קו ביוב ראשי בחצר'),
   PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'מופה', slang: 'מחבר ישר', english: 'Coupling', usage: 'חיבור בין שני צינורות'),
   PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'ניפל', slang: 'צינור קצר', english: 'Nipple', usage: 'זכר-זכר לחיבור אביזרים'),
-  PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'זווית 90', slang: 'ברך', english: 'Elbow 90', usage: 'שינוי כיוון 90 מעלות'),
-  PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'זווית 45', slang: 'ברך 45', english: 'Elbow 45', usage: 'שינוי כיוון עדין'),
+  // ONE generic elbow leaf — the drill's angle ring ("איזו זווית?") splits 45°/90°
+  // natively, so a separate "ברך 45" leaf would just duplicate a subset and the
+  // "ברך 90" header would sit over 45° products.
+  PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'ברך', slang: 'ברך', english: 'Elbow', usage: 'שינוי כיוון בצנרת'),
   PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'טי', slang: 'T', english: 'Tee Fitting', usage: 'פיצול קו ל-3 כיוונים'),
   PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'בוקסה', slang: 'מתאם הברגה', english: 'Bushing', usage: 'מעבר מהברגה גדולה לקטנה'),
   PlainNode(superCat: 'אביזרי חיבור', classification: 'הברגות', technical: 'מעבר', slang: 'רדוקציה / מקטין', english: 'Reducer', usage: 'מעבר קוטר בצינור'),
@@ -84,6 +88,16 @@ List<LipskeyCatalogProduct> plainProductsFor(PlainNode n) {
   var ps = kCatalogProducts
       .where((p) => catalogProductMatchesQuery(p, n.technical))
       .toList();
+  // A bare-number technical ('16','40','110') is a CALIBER, but the catalog search
+  // matches by startsWith — so '16' also grabs DN160 6-inch fittings and '20' grabs
+  // '200 מ"מ'. Require the number as a WHOLE digit-run so a size node keeps to its
+  // own caliber (digits are invariant under search-normalisation, so match raw).
+  if (RegExp(r'^\d+$').hasMatch(n.technical)) {
+    final whole = RegExp('(?<![0-9])${n.technical}(?![0-9])');
+    ps = ps
+        .where((p) => whole.hasMatch('${p.nameHe} ${p.categoryHe}'))
+        .toList();
+  }
   if (ps.isEmpty) {
     ps = kCatalogProducts
         .where((p) => catalogProductMatchesQuery(p, n.slang))
@@ -129,12 +143,22 @@ List<PlainNode> plainNodes(String superCat, String classification) => [
 //    then material/angle/colour) ring-by-ring, in plain words, until ONE product
 //    instead of dumping a list of 22. Reuses RingDive's [rdAxesOf] projection. ────
 
-/// Axes we narrow the variants by, size-first (the plumber's first question).
-const List<String> _narrowAxes = <String>['size', 'material', 'angle', 'color'];
+/// Axes we narrow the variants by, size-first (the plumber's first question);
+/// 'type' LAST so a big single-caliber family (46 PPR ½" fittings) still splits by
+/// kind (ברכיים / מסעפים / מתאמים) instead of dumping one long list.
+const List<String> _narrowAxes = <String>[
+  'size',
+  'material',
+  'angle',
+  'color',
+  'type',
+];
 
 /// Inch sizes → the spoken word, so rings 4+ stay in plain language ("חצי צול"
 /// not '½"'). Non-inch sizes (mm / DN) already read plainly enough.
 const Map<String, String> _sizePlain = <String, String>{
+  '¼"': 'רבע צול',
+  '3/8"': '3/8 צול',
   '½"': 'חצי צול',
   '1/2"': 'חצי צול',
   '¾"': '3/4 צול',
@@ -143,6 +167,10 @@ const Map<String, String> _sizePlain = <String, String>{
   '1¼"': 'צול ורבע',
   '1½"': 'צול וחצי',
   '2"': '2 צול',
+  '2½"': '2 וחצי צול',
+  '2⅜"': '2 ו-3/8 צול',
+  '3"': '3 צול',
+  '4"': '4 צול',
 };
 
 /// Plain label for a variant value — inch sizes become the spoken "צול" word;
@@ -156,6 +184,7 @@ String plainAxisTitle(String axis) => switch (axis) {
       'material' => 'איזה חומר?',
       'angle' => 'איזו זווית?',
       'color' => 'איזה צבע?',
+      'type' => 'איזה סוג?',
       _ => 'בחר',
     };
 
@@ -172,6 +201,17 @@ String plainAxisTitle(String axis) => switch (axis) {
     // Each axis narrows ONCE — a product may carry two sizes (½×⅜), so re-offering
     // the same axis would loop on it forever without shrinking the set.
     if (usedAxes.contains(axis)) continue;
+    if (axis == 'size') {
+      // Route the size ring through the finder's OWN size vocabulary: it dedups
+      // cm/meter twins (15 ס"מ ≡ 0.15 מ׳ → one chip), groups families (no inch
+      // mixed with DN), and orders each family small→large — none of which the raw
+      // rdAxesOf set does. plainFilterBy mirrors it via productHasChip.
+      final toks = sizeTokensIn(products);
+      if (toks.length >= 2) {
+        return (axis: 'size', values: [for (final t in toks) t.label]);
+      }
+      continue;
+    }
     final vals = <String>{};
     for (final p in products) {
       final a = rdAxesOf(p)[axis];
@@ -198,5 +238,8 @@ List<LipskeyCatalogProduct> plainFilterBy(
         List<LipskeyCatalogProduct> products, String axis, String value) =>
     [
       for (final p in products)
-        if (rdAxesOf(p)[axis]?.contains(value) ?? false) p,
+        if (axis == 'size'
+            ? productHasChip(p, value)
+            : (rdAxesOf(p)[axis]?.contains(value) ?? false))
+          p,
     ];

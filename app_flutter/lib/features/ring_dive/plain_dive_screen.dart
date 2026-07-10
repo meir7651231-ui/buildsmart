@@ -43,7 +43,8 @@ class _PlainDiveScreenState extends State<PlainDiveScreen> {
     _products = ps;
   }
 
-  /// Step UP one ring; false when at the root (the route pops).
+  /// Step UP one ring. Returns false only at the drill root — where the back arrow
+  /// is hidden (the user leaves via the tabs), so that case isn't reached in the UI.
   bool _up() {
     if (_picks.isNotEmpty) {
       setState(() {
@@ -83,13 +84,18 @@ class _PlainDiveScreenState extends State<PlainDiveScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            tooltip: 'חזרה',
-            onPressed: () {
-              if (!_up()) Navigator.of(context).maybePop();
-            },
-          ),
+          // At the drill ROOT there is nowhere up — this screen is embedded in the
+          // tab body (not a pushed route), so a back arrow there is dead (or, under
+          // the pushed manager frame, ejects the whole shell). Show it only once the
+          // user has drilled at least one ring; at the root they leave via the tabs.
+          automaticallyImplyLeading: false,
+          leading: _superCat == null
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  tooltip: 'חזרה',
+                  onPressed: () => _up(),
+                ),
           title: Text(crumbs.join(' › '),
               style: const TextStyle(fontSize: 15), overflow: TextOverflow.fade),
         ),

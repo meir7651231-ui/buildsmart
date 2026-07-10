@@ -31,6 +31,7 @@ import 'package:buildsmart/screens/catalog_screen.dart'
     show
         catalogSectionProvider,
         catalogSectionsListProvider,
+        keyboardDiveQueryProvider,
         openManageLists;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart'
@@ -633,6 +634,9 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
           action: (ref, context) {
             ref.read(mainTabProvider.notifier).state = 0;
             ref.read(catalogSectionProvider.notifier).state = 'מאתר פשוט';
+            // Clear any live dive query, else the catalog stays on the text-results
+            // list (diveActive) and the PlainDive wheel never renders.
+            ref.read(keyboardDiveQueryProvider.notifier).state = '';
           },
         ),
       );
