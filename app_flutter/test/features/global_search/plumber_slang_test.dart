@@ -28,6 +28,10 @@ void main() {
       expect(slangVariants('אוכף'), ['רוכב']); // saddle
       expect(slangVariants('מנומטר'), ['שעון']); // manometer
       expect(slangVariants('דריין'), ['ניקוז']); // drain
+      expect(slangVariants('שיבר'), ['ברז']); // Schieber
+      expect(slangVariants('קלנבו'), ['זווית', 'ברך']); // old elbow distortion
+      expect(slangVariants('אורינג'), ['אטם', 'טבעת']); // O-ring
+      expect(slangVariants('מנהול'), ['תא']); // manhole
     });
 
     test('Latin loan-words match case-insensitively, size preserved', () {

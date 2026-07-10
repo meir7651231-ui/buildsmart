@@ -101,6 +101,30 @@ const Map<String, List<String>> kPlumberSlang = {
   'מנומטר': ['שעון'],
   'ספרטור': ['משחרר'],
   'קיט': ['ערכה'],
+  // ── owner field-slang, batch 2 (verified). Tool/consumable terms this catalog
+  //    doesn't stock (טפלון, סיליקון, סיקא, פומפה, ונטוזה, שיער) were DROPPED — no
+  //    product to point at, אין המצאות. Terms that already hit (מפצל, בנד, סוללה,
+  //    ספירלה, קונוס) or are too generic (מוליך=conductor, כרטיס=card) were skipped.
+  'קלנבו': ['זווית', 'ברך'], // old distortion of Elbow
+  'קנט': ['זווית', 'ברך'],
+  'תה': ['הסתעפות'], // "tee"
+  'טיפי': ['הסתעפות'], // T-piece
+  'שיבר': ['ברז'], // Schieber — gate/main valve
+  'מיקסר': ['ברז', 'סוללה'],
+  'סייפטי': ['משחרר', 'שסתום'], // safety / pressure-relief
+  'קלינגרית': ['אטם'],
+  'אורינג': ['אטם', 'טבעת'], // O-ring
+  'פשתן': ['אטם'], // sealing flax
+  'מרזב': ['קולט'],
+  'שפופרת': ['מזלף'], // shower handset
+  'מקלחון': ['מזלף'],
+  'גיברית': ['צינור'], // Geberit → black drainage pipe
+  'גיבריט': ['צינור'],
+  'חסכם': ['פיה'], // water-saver aerator
+  'כוסית': ['רוזטה'],
+  'מנהול': ['תא'], // manhole → chamber
+  'קופסת': ['מחסום'], // inspection box → floor trap
+  'סטאב': ['צווארון'], // stub end
   // Latin loan-words
   'coupling': ['מצמד', 'מחבר'],
   'elbow': ['ברך', 'זווית'],
