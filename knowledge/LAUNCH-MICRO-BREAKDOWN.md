@@ -63,6 +63,26 @@
 > **(5) keyboard:** חיפוש‑צ'אטים בהקלדה, 'שיחה חדשה'+ארכיון, פריטי ⚙ אמיתיים. **(6) manager:**
 > `kHrRelocation` PHASE 0. CI ראש: android‑package ✅ · web‑deploy ✅.
 
+> 📲 **עדכון 10.7 (15:53Z) — +45 קומיטים מאז 2255c88d, ראש `2417b2d1`:**
+> **(1) APK 1.4.7 לטסטר‑הבעלים — נשלח עכשיו:** תוקן "התקוע על 1.4.6 (v6.88)" — versionName
+> הוקפץ ל‑1.4.7, release‑notes אמיתיים, וה‑TEST‑APK קיבל את **כל** דגלי‑הפיצ'רים של ה‑web החי
+> (STUDIO_SHARED_SYNC · KB_LIVE_MIRROR/KB_GLOBAL · ENABLE_RING_DIVE · GLOBAL_SEARCH ·
+> PLAIN_DIVE); מופץ ב‑Firebase App Distribution ל‑meir7651231@gmail.com (ריצה in_progress
+> בזמן העדכון). **(2) Studio — כיסוי טקסט מלא:** batch‑1 242 + batch‑2 478 → כל הטקסטים
+> הסטטיים editable (~863 טקסטים, v6.98); **WYSIWYG עריכה‑בחי + publish על‑המסך** (v6.96,
+> תיקון publish v6.97); **shared‑sync go‑live שלב‑2** — `STUDIO_SHARED_SYNC=true` בשני
+> בילדי‑ה‑web החיים ⇒ עריכות‑בעלים חיות‑לכולם (gate‑123 נרשם). **(3) PlainDive 'מאתר‑פשוט'
+> — חדש ו‑LIVE:** עץ‑מילון 4 טבעות למתחיל על גלגל‑RingDive (מגודר `kPlainDive`), פיל נפרד
+> ליד 'מאתר חכם', צלילה‑עד‑מוצר + טסט טבעת‑לטבעת + 7 תיקוני‑נחיל; `PLAIN_DIVE=true` בשתי
+> הפריסות (`84100c33`). **(4) ניבוי‑מוצר גל‑1:** מדידת‑בסיס → דירוג nameAffinity+prominence
+> (קבורים 89→79) → matesBoost (גרף‑חיבורים כאות) → jobBoost (זריעת‑הקשה‑אפס) → מורפולוגיה
+> רבים→יחיד → **מילון‑סלנג אינסטלטורים ~114 מונחים מהבעלים (מאומתים)** +13 כינויים +10
+> סלנג‑מידות → דו‑לשוני nameEn/categoryEn (דגל). **(5) חיפוש‑על:** אפשרות א' (רשימה מאוחדת
+> במקום, ירד 'עוד…') → **Option B: שורת‑הניבוי = מוח‑מילים** מוקשח ע"פ ביקורת "הנחיל‑היריב".
+> **CI:** בוקר אדום ב‑android-package (04:05→15:11 — שגיאת bool‑operand ב‑plumber_slang_test)
+> → תוקן `f32a54ed` 15:13 ✅; web‑deploy ✅ על הראש (v6.99 חי); android-package על v6.99+1.4.7
+> רץ בזמן העדכון. ⚠️ עומדים: keystore (אפס אזכורים — עדיין debug‑signed), admin/5555 עדיין בפנים.
+
 > 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
 > | דגל | מפעיל | תנאי‑backend (מי) |
 > |---|---|---|
