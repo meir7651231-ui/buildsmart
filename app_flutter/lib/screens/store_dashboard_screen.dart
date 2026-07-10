@@ -483,7 +483,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           )
         else
           _FlatCard(
-            child: Text(
+            child: CfgText(
+              'store_dashboard_screen.t01',
               '✓ אין הזמנות שממתינות לאישור',
               style: TextStyle(
                 color: BsTokens.inkLight.withValues(alpha: 0.8),
@@ -600,7 +601,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
                 borderRadius: BorderRadius.circular(cfgRadius(context)),
               ),
             ),
-            child: const Text(
+            child: const CfgText(
+              'store_dashboard_screen.t02',
               '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
               style: TextStyle(
                 color: BsTokens.mutedLight,
@@ -683,7 +685,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         const Padding(
           padding: EdgeInsets.only(top: BsTokens.space4),
           child: Center(
-            child: Text(
+            child: CfgText(
+              'store_dashboard_screen.t03',
               'אין הזמנות בקטגוריה זו ✓',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
             ),
@@ -861,7 +864,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           const Padding(
             padding: EdgeInsets.only(top: BsTokens.space5),
             child: Center(
-              child: Text(
+              child: CfgText(
+                'store_dashboard_screen.t04',
                 'לא נמצאו מוצרים תואמים.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
@@ -1677,7 +1681,8 @@ class _SupplierSettingsScreenState
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   ),
                 ),
-                child: const Text(
+                child: const CfgText(
+                  'store_dashboard_screen.t05',
                   '🗑️ הסר לוגו',
                   style: TextStyle(
                     color: BsTokens.danger,
@@ -1828,7 +1833,8 @@ class _LogoPreview extends ConsumerWidget {
                   gaplessPlayback: true,
                 ),
               )
-              : const Text(
+              : const CfgText(
+                'store_dashboard_screen.t06',
                 'אין לוגו עדיין — צלמו או העלו אחד',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -1944,7 +1950,8 @@ class _StoreNotifsSheet extends ConsumerWidget {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: CfgText(
+                          'store_dashboard_screen.t07',
                           '🔔 התראות',
                           style: TextStyle(
                             color: BsTokens.inkLight,
@@ -1969,7 +1976,8 @@ class _StoreNotifsSheet extends ConsumerWidget {
                     // (דוח יומי מהשליח, עדכוני משלוחים).
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                      child: Text(
+                      child: CfgText(
+                        'store_dashboard_screen.t08',
                         'אין התראות עדיין.\nדוחות מהשליח ועדכוני משלוחים יופיעו כאן.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -1987,7 +1995,8 @@ class _StoreNotifsSheet extends ConsumerWidget {
                                 () => ref
                                     .read(workerNotifsProvider.notifier)
                                     .markAllRead(username),
-                            child: const Text(
+                            child: const CfgText(
+                              'store_dashboard_screen.t09',
                               'סמן הכל כנקרא',
                               style: TextStyle(
                                 color: BsTokens.brandDark,
@@ -2010,7 +2019,8 @@ class _StoreNotifsSheet extends ConsumerWidget {
                                 .read(workerNotifsProvider.notifier)
                                 .clear(username);
                           },
-                          child: const Text(
+                          child: const CfgText(
+                            'store_dashboard_screen.t10',
                             'נקה הכל',
                             style: TextStyle(
                               color: BsTokens.danger,
@@ -2488,7 +2498,8 @@ class _StoreOrderCard extends StatelessWidget {
                 // (hidden when the order carries no phone — seed/legacy).
                 ContactActions(phone: order.customerPhone, compact: true),
                 const SizedBox(height: 2),
-                const Text(
+                const CfgText(
+                  'store_dashboard_screen.t11',
                   '🕒 נדרש: בתיאום',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
                 ),
@@ -2502,7 +2513,8 @@ class _StoreOrderCard extends StatelessWidget {
                 ),
                 if (!held && fulfillment.missingResolved) ...[
                   const SizedBox(height: 2),
-                  const Text(
+                  const CfgText(
+                    'store_dashboard_screen.t12',
                     '✓ תיקון בוצע — בדוק שינויים',
                     style: TextStyle(
                       color: Color(0xFF1F8A4C),
@@ -2643,7 +2655,8 @@ class _DeliveredCard extends StatelessWidget {
                           BsTokens.radiusPill,
                         ),
                       ),
-                      child: const Text(
+                      child: const CfgText(
+                        'store_dashboard_screen.t13',
                         'נמסר ✓',
                         style: TextStyle(
                           color: Color(0xFF1F8A4C),

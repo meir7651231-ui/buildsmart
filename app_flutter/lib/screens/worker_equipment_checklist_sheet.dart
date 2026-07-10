@@ -39,6 +39,7 @@ import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -211,9 +212,10 @@ class _EquipmentChecklistSheetState
     final stock = ref.watch(employerStockProvider(employerId));
     return _sheetShell(
       children: [
-        const Text(
+        CfgText(
+          'worker_equipment_checklist_sheet.t01',
           '🧰 ציוד נדרש להיום',
-          style: TextStyle(
+          style: const TextStyle(
             color: BsTokens.inkLight,
             fontWeight: FontWeight.w800,
             fontSize: 18,
@@ -235,9 +237,10 @@ class _EquipmentChecklistSheetState
             color: const Color(0xFFFFF0E3),
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
           ),
-          child: const Text(
+          child: CfgText(
+            'worker_equipment_checklist_sheet.t02',
             'רשימת הציוד נגזרת ממיפוי דמו של מוצרים למשימה — תחובר עם השרת',
-            style: TextStyle(
+            style: const TextStyle(
               color: BsTokens.brandDark,
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
@@ -249,9 +252,10 @@ class _EquipmentChecklistSheetState
         const SizedBox(height: BsTokens.space3),
         const _SecH('צ׳קליסט ציוד'),
         if (_items.isEmpty)
-          const Text(
+          CfgText(
+            'worker_equipment_checklist_sheet.t03',
             'אין רשימת ציוד למשימות הנוכחיות',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           )
         else
           for (final it in _items)
@@ -292,7 +296,7 @@ class _EquipmentChecklistSheetState
         const SizedBox(height: BsTokens.space2),
         OutlinedButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('סגור'),
+          child: CfgText('worker_equipment_checklist_sheet.t04', 'סגור'),
         ),
       ],
     );

@@ -38,6 +38,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -139,7 +140,8 @@ class TradePublishSheet extends ConsumerWidget {
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'trade_publish_sheet.t01',
               '🚀 פרסום ענף',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

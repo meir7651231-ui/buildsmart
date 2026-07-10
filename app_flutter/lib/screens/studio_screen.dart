@@ -52,6 +52,7 @@ import 'package:buildsmart/state/studio/config_store.dart'
 import 'package:buildsmart/theme/app_theme.dart' show bsOnAccent;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart' show AiOffState;
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -101,7 +102,8 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              CfgText(
+                'studio_screen_old.t01',
                 '🎬 סטודיו',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -111,7 +113,8 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
                   fontSize: 18,
                 ),
               ),
-              Text(
+              CfgText(
+                'studio_screen_old.t02',
                 'ערוך את האפליקציה — עורך ניסיוני',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -432,7 +435,8 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
     return ListView(
       padding: const EdgeInsets.all(BsTokens.space4),
       children: [
-        const Text(
+        const CfgText(
+          'studio_screen_old.t03',
           '🤖 תאר בעברית מה לשנות. אכין תצוגה מקדימה — שום דבר לא ישתנה עד שתאשר.',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13, height: 1.5),
         ),
@@ -466,7 +470,8 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
               foregroundColor: bsOnAccent(context),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text(
+            child: const CfgText(
+              'studio_screen_old.t04',
               'נסח שינוי לתצוגה מקדימה',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
@@ -496,7 +501,8 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
                 foregroundColor: bsOnAccent(context),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              child: const Text(
+              child: const CfgText(
+                'studio_screen_old.t05',
                 'אשר והחל בטיוטה ✓',
                 style: TextStyle(fontWeight: FontWeight.w800),
               ),
@@ -540,7 +546,8 @@ class _CoEditorPaneState extends ConsumerState<_CoEditorPane> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          const CfgText(
+            'studio_screen_old.t06',
             '👁️ תצוגה מקדימה (לפני החלה)',
             style: TextStyle(
               color: BsTokens.inkLight,

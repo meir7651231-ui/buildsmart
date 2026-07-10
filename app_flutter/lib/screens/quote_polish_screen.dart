@@ -18,6 +18,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -112,7 +113,8 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('ההצעה המנוסחת הועתקה'),
+          content:
+              CfgText('quote_polish_screen.copied_toast', 'ההצעה המנוסחת הועתקה'),
           duration: Duration(seconds: 2)),
     );
   }
@@ -128,7 +130,7 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('✨ הצעה מקצועית',
+          title: const CfgText('quote_polish_screen.title', '✨ הצעה מקצועית',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -172,12 +174,14 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
                 child: FilledButton.icon(
                   onPressed: _copy,
                   icon: const Text('📋'),
-                  label: const Text('העתק לשליחה'),
+                  label: const CfgText('quote_polish_screen.copy_btn', 'העתק לשליחה'),
                 ),
               ),
             ],
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח — לא משנה מחירים.',
+            const CfgText(
+                'quote_polish_screen.footer_note',
+                '⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח — לא משנה מחירים.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

@@ -25,6 +25,7 @@ import 'package:buildsmart/logic/prompt_sanitize.dart';
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -162,7 +163,7 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('🗣️ תאר עבודה → סל',
+          title: CfgText('describe_to_cart_screen.t01', '🗣️ תאר עבודה → סל',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -172,10 +173,10 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
           padding: const EdgeInsets.all(BsTokens.space4),
           children: [
             if (!aiAvailable)
-              const Text('💡 הפיצ\'ר דורש חיבור לשרת.',
+              CfgText('describe_to_cart_screen.t02', '💡 הפיצ\'ר דורש חיבור לשרת.',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13))
             else ...[
-              const Text('ספר במילים שלך מה אתה צריך:',
+              CfgText('describe_to_cart_screen.t03', 'ספר במילים שלך מה אתה צריך:',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
               const SizedBox(height: 8),
               TextField(
@@ -197,14 +198,14 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
                 child: FilledButton.icon(
                   onPressed: _loading ? null : _find,
                   icon: const Text('🔎'),
-                  label: const Text('מצא לי את הסל'),
+                  label: CfgText('describe_to_cart_screen.t04', 'מצא לי את הסל'),
                 ),
               ),
               const SizedBox(height: BsTokens.space4),
               if (_loading)
                 const Center(child: CircularProgressIndicator())
               else if (_failed)
-                const Text('משהו השתבש — נסה שוב.',
+                CfgText('describe_to_cart_screen.t05', 'משהו השתבש — נסה שוב.',
                     // dangerDark for WCAG AA (parity with shared AiFailedState)
                     style: TextStyle(color: BsTokens.dangerDark, fontSize: 14))
               else if (_recipe != null) ...[
@@ -215,7 +216,8 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: BsTokens.space2),
                 if (_products.isEmpty)
-                  const Text('זוהתה העבודה, אך לחלקיה עדיין אין מק"ט מקושר.',
+                  CfgText('describe_to_cart_screen.t06',
+                      'זוהתה העבודה, אך לחלקיה עדיין אין מק"ט מקושר.',
                       style:
                           TextStyle(color: BsTokens.mutedLight, fontSize: 13))
                 else ...[
@@ -239,7 +241,7 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
                   ),
                 ],
               ] else if (_controller.text.trim().isNotEmpty)
-                const Text('לא זוהתה עבודה מתאימה — נסה לתאר אחרת.',
+                CfgText('describe_to_cart_screen.t07', 'לא זוהתה עבודה מתאימה — נסה לתאר אחרת.',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
             ],
           ],

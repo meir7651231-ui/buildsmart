@@ -5,6 +5,7 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,7 +33,8 @@ class NotifSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'notif_settings_screen.t01',
           'הגדרות התראות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -74,23 +76,25 @@ class NotifSettingsScreen extends ConsumerWidget {
       builder:
           (ctx) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: const CfgText(
+              'notif_settings_screen.t02',
               'איפוס הגדרות?',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: const CfgText(
+              'notif_settings_screen.t03',
               'כל הגדרות ההתראות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+                child: const CfgText('notif_settings_screen.t04', 'ביטול'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+                child: const CfgText('notif_settings_screen.t05', 'אפס'),
               ),
             ],
           ),
@@ -222,7 +226,8 @@ class _SnoozeSheet extends StatelessWidget {
           const SizedBox(height: 16),
           const Align(
             alignment: Alignment.centerRight,
-            child: Text(
+            child: CfgText(
+              'notif_settings_screen.t06',
               '🔇 השתק התראות',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -881,7 +886,8 @@ class _SectionTile extends StatelessWidget {
               underConstruction
                   ? const Padding(
                     padding: EdgeInsets.only(top: 2),
-                    child: Text(
+                    child: CfgText(
+                      'notif_settings_screen.t07',
                       'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
                       style: TextStyle(
                         color: BsTokens.mutedLight,
@@ -929,12 +935,14 @@ class _SwitchRow extends StatelessWidget implements _Inert {
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       subtitle:
           requiresServer
-              ? const Text(
+              ? const CfgText(
+                'notif_settings_screen.t08',
                 'דורש חיבור שרת — לא זמין בגרסה זו',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               )
               : underConstruction
-              ? const Text(
+              ? const CfgText(
+                'notif_settings_screen.t09',
                 'בבנייה — עדיין לא משפיע',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               )
@@ -1048,7 +1056,8 @@ class _PlaceholderRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
-      trailing: const Text(
+      trailing: const CfgText(
+        'notif_settings_screen.t10',
         'בבנייה',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),

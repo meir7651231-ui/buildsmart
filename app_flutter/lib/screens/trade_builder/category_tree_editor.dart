@@ -26,6 +26,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -200,7 +201,8 @@ class _CategoryTreeEditorState extends ConsumerState<CategoryTreeEditorScreen> {
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'category_tree_editor.t01',
               '🗂️ עץ קטגוריות',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -340,7 +342,8 @@ class _EmptyCategories extends StatelessWidget {
         children: [
           Text('🗂️', style: TextStyle(fontSize: 34)),
           SizedBox(height: BsTokens.space2),
-          Text(
+          CfgText(
+            'category_tree_editor.t02',
             'אין עדיין קטגוריות',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -467,7 +470,8 @@ class _RenameCategoryDialogState extends State<_RenameCategoryDialog> {
       textDirection: TextDirection.rtl,
       child: AlertDialog(
         backgroundColor: BsTokens.cardLight,
-        title: const Text(
+        title: const CfgText(
+          'category_tree_editor.t03',
           'שינוי שם',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -496,7 +500,8 @@ class _RenameCategoryDialogState extends State<_RenameCategoryDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: const CfgText(
+              'category_tree_editor.t04',
               'ביטול',
               style: TextStyle(color: BsTokens.mutedLight),
             ),
@@ -504,7 +509,8 @@ class _RenameCategoryDialogState extends State<_RenameCategoryDialog> {
           TextButton(
             onPressed: () => Navigator.pop(context, _ctl.text),
             style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const Text(
+            child: const CfgText(
+              'category_tree_editor.t05',
               'שמור',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),

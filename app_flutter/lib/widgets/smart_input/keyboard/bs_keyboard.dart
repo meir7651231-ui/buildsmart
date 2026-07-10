@@ -18,6 +18,7 @@ import 'package:buildsmart/widgets/smart_input/keyboard/bs_key.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/english_layout.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/hebrew_layout.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/key_models.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// Which tool LAYER (if any) replaces the letter/symbol area of [BsKeyboard].
@@ -1128,7 +1129,8 @@ class _BackTile extends StatelessWidget {
                   color: BsTokens.brand,
                 ),
                 const SizedBox(width: BsTokens.space1),
-                Text(
+                CfgText(
+                  'bs_keyboard.back',
                   'חזרה',
                   maxLines: 1,
                   softWrap: false,

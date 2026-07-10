@@ -13,6 +13,7 @@ import 'package:buildsmart/screens/reject_reason_screen.dart'
     show RejectReasonScreen;
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,7 +57,7 @@ class _RoleRequestsInboxScreenState
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
         appBar: AppBar(
-          title: const Text('בקשות תפקיד'),
+          title: CfgText('role_requests_inbox_screen.t01', 'בקשות תפקיד'),
           backgroundColor: BsTokens.cardLight,
           foregroundColor: BsTokens.inkLight,
         ),
@@ -185,7 +186,7 @@ class _RequestCard extends StatelessWidget {
                       foregroundColor: Colors.white,
                     ),
                     icon: const Icon(Icons.check, size: 18),
-                    label: const Text('אישור'),
+                    label: CfgText('role_requests_inbox_screen.t02', 'אישור'),
                   ),
                 ),
                 const SizedBox(width: BsTokens.space3),
@@ -196,7 +197,7 @@ class _RequestCard extends StatelessWidget {
                       foregroundColor: BsTokens.mutedLight,
                     ),
                     icon: const Icon(Icons.close, size: 18),
-                    label: const Text('דחייה'),
+                    label: CfgText('role_requests_inbox_screen.t03', 'דחייה'),
                   ),
                 ),
               ],
@@ -216,7 +217,7 @@ class _RequestCard extends StatelessWidget {
                   onPressed: () => Navigator.of(context).push(
                       RejectReasonScreen.route(role: role, name: name ?? '')),
                   icon: const Text('✨'),
-                  label: const Text('נסח סיבת-דחייה'),
+                  label: CfgText('role_requests_inbox_screen.t04', 'נסח סיבת-דחייה'),
                 ),
               ),
             );

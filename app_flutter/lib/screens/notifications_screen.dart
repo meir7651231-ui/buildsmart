@@ -7,6 +7,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -434,12 +435,16 @@ void showNotifActionSheet(
                     Navigator.of(sheetCtx).pop();
                     showToast(context, 'התדריך אושר');
                   },
-                  child: const Text('אשר תדריך'),
+                  child: const CfgText(
+                    'notifications_screen.approve_brief',
+                    'אשר תדריך',
+                  ),
                 ),
               ] else ...[
                 Text(preview, style: const TextStyle(fontSize: 14)),
                 const SizedBox(height: 12),
-                const Text(
+                const CfgText(
+                  'notifications_screen.budget_note',
                   'התראות תקציב מופעלות אוטומטית בעת חציית הספים:',
                   style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
                 ),
@@ -541,7 +546,8 @@ class _Header extends ConsumerWidget {
       child: Row(
         children: [
           const Expanded(
-            child: Text(
+            child: CfgText(
+              'notifications_screen.screen_title',
               'התראות',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -662,7 +668,8 @@ class _NotifList extends ConsumerWidget {
                   children: [
                     const Text('🔕', style: TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
-                    const Text(
+                    const CfgText(
+                      'notifications_screen.snooze_title',
                       'התראות מושתקות',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -705,7 +712,8 @@ class _NotifList extends ConsumerWidget {
                   children: [
                     const Text('🌙', style: TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
-                    const Text(
+                    const CfgText(
+                      'notifications_screen.quiet_title',
                       'שעות שקט פעילות',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -714,7 +722,8 @@ class _NotifList extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    const CfgText(
+                      'notifications_screen.quiet_sub',
                       'מושתק בשעות השקט',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -746,7 +755,8 @@ class _NotifList extends ConsumerWidget {
                   children: [
                     Text('🔔', style: TextStyle(fontSize: 48)),
                     SizedBox(height: 12),
-                    Text(
+                    CfgText(
+                      'notifications_screen.empty_title',
                       'אין התראות',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -755,7 +765,8 @@ class _NotifList extends ConsumerWidget {
                       ),
                     ),
                     SizedBox(height: 6),
-                    Text(
+                    CfgText(
+                      'notifications_screen.empty_sub',
                       'כשיהיו עדכונים — הם יופיעו כאן',
                       style: TextStyle(
                         color: Color(0xFF888888),
@@ -881,7 +892,10 @@ class _DismissibleRow extends ConsumerWidget {
         notifier.add(id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('התראה נמחקה'),
+            content: const CfgText(
+              'notifications_screen.deleted_toast',
+              'התראה נמחקה',
+            ),
             backgroundColor: const Color(0xFFF5F5F5),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
@@ -934,7 +948,8 @@ class _NotifRow extends ConsumerWidget {
                 children: [
                   Icon(Icons.done, color: Colors.black54, size: 20),
                   SizedBox(width: 12),
-                  Text(
+                  CfgText(
+                    'notifications_screen.mark_read',
                     'סמן כנקרא',
                     style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                   ),
@@ -947,7 +962,8 @@ class _NotifRow extends ConsumerWidget {
               children: [
                 Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
                 SizedBox(width: 12),
-                Text(
+                CfgText(
+                  'notifications_screen.menu_delete',
                   'מחק',
                   style: TextStyle(color: Colors.redAccent, fontSize: 15),
                 ),

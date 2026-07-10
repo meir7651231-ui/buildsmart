@@ -19,6 +19,7 @@
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/material_requests_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -102,7 +103,8 @@ class _ContractorMaterialRequestsSheet extends ConsumerWidget {
               Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'contractor_material_requests_sheet.t01',
                       '📥 בקשות חומר',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -125,7 +127,8 @@ class _ContractorMaterialRequestsSheet extends ConsumerWidget {
                 // submissions (worker_employer_stock_sheet → submit), never seeded.
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'contractor_material_requests_sheet.t02',
                     'אין בקשות חומר עדיין.\n'
                     'כשעובד ישלח בקשת חומרים — היא תופיע כאן ותוכל לעדכן את הסטטוס.',
                     textAlign: TextAlign.center,
@@ -213,7 +216,8 @@ class _RequestCard extends StatelessWidget {
           const SizedBox(height: BsTokens.space2),
           // ── requested items (one per line) ──
           if (request.items.isEmpty)
-            const Text(
+            const CfgText(
+              'contractor_material_requests_sheet.t03',
               'ללא פריטים',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             )

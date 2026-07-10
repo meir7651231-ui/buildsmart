@@ -42,6 +42,7 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/site_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -152,7 +153,8 @@ class _SiteScaffold extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(
+              child: CfgText(
+                'site_hub_screen.back',
                 '‹ חזרה',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
@@ -445,7 +447,7 @@ Future<String?> _promptInput(
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(null),
-            child: const Text('ביטול',
+            child: CfgText('site_hub_screen.cancel', 'ביטול',
                 style: TextStyle(color: BsTokens.mutedLight)),
           ),
           FilledButton(
@@ -834,7 +836,8 @@ class _SiteSafetyState extends State<_SiteSafety> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              CfgText(
+                'site_hub_screen.brief_today',
                 'תדריך היום',
                 style: TextStyle(
                   color: Color(0xFFFFE7C2),
@@ -872,7 +875,8 @@ class _SiteSafetyState extends State<_SiteSafety> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                CfgText(
+                  'site_hub_screen.brief_acked',
                   '🦺 תדריך הבטיחות אושר',
                   style: TextStyle(
                     color: _kOk,

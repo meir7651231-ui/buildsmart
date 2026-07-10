@@ -1,5 +1,6 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/camera_error_view.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -51,7 +52,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('סריקת ברקוד'),
+        title: CfgText('barcode_scanner.scan_title', 'סריקת ברקוד'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

@@ -25,6 +25,7 @@ import 'package:buildsmart/services/nav_launch.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/worker_attendance.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -87,7 +88,8 @@ class _ContractorAttendanceSheet extends ConsumerWidget {
               Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'contractor_attendance_sheet.header',
                       '🕒 נוכחות עובדים',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -110,7 +112,8 @@ class _ContractorAttendanceSheet extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 2),
-              const Text(
+              const CfgText(
+                'contractor_attendance_sheet.subtitle',
                 'מי מהעובדים שלך מחותם כרגע ומי נכח היום (לצפייה בלבד)',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -129,7 +132,8 @@ class _ContractorAttendanceSheet extends ConsumerWidget {
               if (present.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'contractor_attendance_sheet.empty_present',
                     'אין עובדים מחותמים כרגע',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -147,7 +151,8 @@ class _ContractorAttendanceSheet extends ConsumerWidget {
 
               // ══ SECTION — היום ══
               const Divider(height: 32),
-              const Text(
+              const CfgText(
+                'contractor_attendance_sheet.today',
                 'היום',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -159,7 +164,8 @@ class _ContractorAttendanceSheet extends ConsumerWidget {
               if (todayAll.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'contractor_attendance_sheet.empty_today',
                     'אין נוכחות רשומה היום',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -329,7 +335,8 @@ class _LocationPill extends StatelessWidget {
               Icon(Icons.place, color: Color(0xFF1D6FE0), size: 20),
               SizedBox(width: BsTokens.space2),
               Expanded(
-                child: Text(
+                child: CfgText(
+                  'contractor_attendance_sheet.location',
                   'מיקום הכניסה — פתח ניווט',
                   style: TextStyle(
                     color: Color(0xFF1D4ED8),

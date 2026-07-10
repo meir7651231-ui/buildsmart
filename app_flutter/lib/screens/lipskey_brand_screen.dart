@@ -4,6 +4,7 @@ import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/state/under_construction.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// The catalog entries of [section] that have at least one product. Under
@@ -50,12 +51,13 @@ class LipskeyBrandScreen extends StatelessWidget {
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Text('ליפסקי ברקן',
+                  CfgText('lipskey_brand_screen.appbar_title', 'ליפסקי ברקן',
                       style: TextStyle(
                           color: BsTokens.inkLight,
                           fontWeight: FontWeight.bold,
                           fontSize: 17)),
-                  Text('אינסטלציה · סניטציה',
+                  CfgText(
+                      'lipskey_brand_screen.appbar_sub', 'אינסטלציה · סניטציה',
                       style:
                           TextStyle(color: Colors.black38, fontSize: 12)),
                 ],
@@ -136,7 +138,8 @@ class _BrandHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ליפסקי ברקן',
+                const CfgText(
+                    'lipskey_brand_screen.header_title', 'ליפסקי ברקן',
                     style: TextStyle(
                         color: Color(0xFF64FFDA),
                         fontSize: 14,
@@ -368,7 +371,8 @@ class _CategoryCard extends StatelessWidget {
                             color: const Color(0xFFF5F5F5),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text('בקרוב',
+                          child: const CfgText(
+                              'lipskey_brand_screen.badge_soon', 'בקרוב',
                               style: TextStyle(
                                   color: Color(0xFF888888),
                                   fontSize: 11)),

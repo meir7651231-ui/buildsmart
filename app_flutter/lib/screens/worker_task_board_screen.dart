@@ -6,6 +6,7 @@ import 'package:buildsmart/screens/worker_task_detail_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -90,7 +91,8 @@ class WorkerTaskBoardScreen extends ConsumerWidget {
           elevation: 0,
           titleSpacing: BsTokens.space4,
           iconTheme: const IconThemeData(color: BsTokens.mutedLight),
-          title: const Text(
+          title: const CfgText(
+            'worker_task_board_screen.board_title',
             '🗂️ לוח משימות מלא',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -234,7 +236,8 @@ class _StatusGroupState extends State<_StatusGroup> {
                   BsTokens.space4,
                   BsTokens.space4,
                 ),
-                child: Text(
+                child: CfgText(
+                  'worker_task_board_screen.empty_group',
                   'אין משימות במצב זה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
                 ),

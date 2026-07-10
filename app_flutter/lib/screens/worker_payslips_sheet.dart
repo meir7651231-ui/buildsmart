@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// 💰 תלושי שכר (cluster #85ח) — SERVER-READY sheet: the complete months UI
@@ -58,7 +59,8 @@ class _PayslipsSheetBody extends StatelessWidget {
               child: Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'worker_payslips_sheet.t01',
                       '💰 תלושי שכר',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -172,7 +174,8 @@ class _MonthRow extends StatelessWidget {
                 color: const Color(0xFFF2F3F5),
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               ),
-              child: const Text(
+              child: const CfgText(
+                'worker_payslips_sheet.t02',
                 'יחובר עם חיבור השרת',
                 style: TextStyle(
                   color: BsTokens.mutedLight,

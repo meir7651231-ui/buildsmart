@@ -3,6 +3,7 @@ import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,7 +68,7 @@ class ProfessionScreen extends ConsumerWidget {
                           ref.read(startupStepProvider.notifier).state = 0,
                       icon: const Icon(Icons.chevron_right,
                           color: BsTokens.mutedLight),
-                      label: const Text('חזור',
+                      label: CfgText('profession_screen.t01', 'חזור',
                           style: TextStyle(color: BsTokens.mutedLight)),
                     ),
                   ),
@@ -76,7 +77,8 @@ class ProfessionScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: BsTokens.space2),
-              const Text(
+              CfgText(
+                'profession_screen.t02',
                 'מה התחום שלך?',
                 style: TextStyle(
                   fontSize: 24,
@@ -85,7 +87,8 @@ class ProfessionScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
-              const Text(
+              CfgText(
+                'profession_screen.t03',
                 'נתאים לך את האפליקציה — קטלוג, כלים והמלצות לפי המקצוע',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
@@ -104,7 +107,8 @@ class ProfessionScreen extends ConsumerWidget {
                 const SizedBox(height: BsTokens.space3),
               ],
               const Spacer(),
-              const Text(
+              CfgText(
+                'profession_screen.t04',
                 'תוכל לשנות את הבחירה בכל עת מההגדרות',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),

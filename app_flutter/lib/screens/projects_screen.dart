@@ -25,6 +25,7 @@ import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +54,7 @@ class ProjectsScreen extends ConsumerWidget {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text('🏗️ הפרויקטים שלי',
+          title: const CfgText('projects_screen.title', '🏗️ הפרויקטים שלי',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -61,7 +62,7 @@ class ProjectsScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('‹ יציאה',
+              child: const CfgText('projects_screen.exit', '‹ יציאה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
             ),
           ],
@@ -70,7 +71,7 @@ class ProjectsScreen extends ConsumerWidget {
           backgroundColor: BsTokens.brand,
           onPressed: () => _addSheet(context, ref),
           icon: Icon(Icons.add, color: bsOnAccent(context)),
-          label: Text('פרויקט חדש',
+          label: CfgText('projects_screen.new_project', 'פרויקט חדש',
               style: TextStyle(
                   color: bsOnAccent(context), fontWeight: FontWeight.w800)),
         ),
@@ -105,7 +106,8 @@ class ProjectsScreen extends ConsumerWidget {
                   children: [
                     const Text('🏗️', style: TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
-                    const Text(
+                    const CfgText(
+                      'projects_screen.empty_title',
                       'אין פרויקטים עדיין',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -114,7 +116,8 @@ class ProjectsScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    const CfgText(
+                      'projects_screen.empty_sub',
                       'צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Color(0xFF888888), fontSize: 13),
@@ -124,7 +127,8 @@ class ProjectsScreen extends ConsumerWidget {
                       onPressed: () => _addSheet(context, ref),
                       icon: const Icon(Icons.add,
                           size: 18, color: BsTokens.brand),
-                      label: const Text(
+                      label: const CfgText(
+                        'projects_screen.empty_cta',
                         'פרויקט חדש',
                         style: TextStyle(
                             color: BsTokens.brand,
@@ -304,7 +308,7 @@ class _SiteCard extends StatelessWidget {
                 const SizedBox(height: BsTokens.space2),
                 GestureDetector(
                   onTap: onStatus,
-                  child: const Text('📊 הקש לסטטוס האתר המלא',
+                  child: const CfgText('projects_screen.status_hint', '📊 הקש לסטטוס האתר המלא',
                       style: TextStyle(
                           color: BsTokens.brandDark,
                           fontWeight: FontWeight.w600,
@@ -444,7 +448,7 @@ class _StatusSheet extends ConsumerWidget {
                         _kv('👷 מנהל עבודה',
                             p.manager.isEmpty ? '—' : p.manager),
                         const SizedBox(height: 6),
-                        const Text('✏️ הקש לעריכת הפרטים',
+                        const CfgText('projects_screen.edit_hint', '✏️ הקש לעריכת הפרטים',
                             style: TextStyle(
                                 color: BsTokens.brandDark,
                                 fontWeight: FontWeight.w600,
@@ -474,7 +478,7 @@ class _StatusSheet extends ConsumerWidget {
                   },
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('✏️ עריכת פרטי האתר',
+                    child: CfgText('projects_screen.edit_site', '✏️ עריכת פרטי האתר',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white,

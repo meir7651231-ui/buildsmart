@@ -32,6 +32,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -68,7 +69,8 @@ class TradeBuilderHomeScreen extends ConsumerWidget {
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'trade_builder_home.title',
               '🏗️ בונה ענפים',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -145,7 +147,8 @@ class _WizardHeader extends StatelessWidget {
             const Row(
               children: [
                 Expanded(
-                  child: Text(
+                  child: CfgText(
+                    'trade_builder_home.t01',
                     'שלב 1 מתוך 6',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -154,7 +157,8 @@ class _WizardHeader extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
+                CfgText(
+                  'trade_builder_home.t02',
                   'הגדרת הענף',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
                 ),
@@ -208,7 +212,8 @@ class _EmptyTrades extends StatelessWidget {
         children: [
           Text('🧱', style: TextStyle(fontSize: 34)),
           SizedBox(height: BsTokens.space2),
-          Text(
+          CfgText(
+            'trade_builder_home.empty',
             'עדיין אין ענפים — הוסף את הראשון',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -377,7 +382,8 @@ class _AddTradeButton extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(
+            child: CfgText(
+              'trade_builder_home.add',
               'הוסף ענף',
               textAlign: TextAlign.center,
               style: TextStyle(

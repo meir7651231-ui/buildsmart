@@ -1,5 +1,6 @@
 import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -152,7 +153,7 @@ Future<void> showHelpInfo(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
                           onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('הבנתי'),
+                          child: const CfgText('help_target.got_it', 'הבנתי'),
                         ),
                       ),
                     ],
@@ -391,7 +392,8 @@ class HelpModeBanner extends ConsumerWidget {
             const Icon(Icons.lightbulb, color: Colors.white, size: 20),
             const SizedBox(width: BsTokens.space2),
             const Expanded(
-              child: Text(
+              child: CfgText(
+                'help_target.banner',
                 'מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה',
                 style: TextStyle(
                   color: Colors.white,

@@ -3,6 +3,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/state/catalog_lens_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,7 +37,8 @@ class LensSelectorRow extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: Row(
         children: [
-          const Text(
+          CfgText(
+            'lens_selector_row.sort_by',
             'סדר לפי:',
             style: TextStyle(
               color: Color(0xFF888888),

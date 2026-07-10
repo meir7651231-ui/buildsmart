@@ -8,6 +8,7 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +59,8 @@ class DocsReadinessGate extends ConsumerWidget {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text(
+          title: const CfgText(
+            'docs_readiness_gate.t01',
             '🔒 מסמכים חסרים',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -69,7 +71,8 @@ class DocsReadinessGate extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(
+              child: const CfgText(
+                'docs_readiness_gate.t02',
                 '‹ יציאה',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
@@ -84,7 +87,8 @@ class DocsReadinessGate extends ConsumerWidget {
               const Text('🔒', textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 48)),
               const SizedBox(height: BsTokens.space3),
-              const Text(
+              const CfgText(
+                'docs_readiness_gate.t03',
                 '🔒 מסמכים חסרים — לא ניתן להתחיל עבודה',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -411,7 +415,8 @@ class _RecheckButton extends ConsumerWidget {
               }
             }
           },
-          child: const Text(
+          child: const CfgText(
+            'docs_readiness_gate.t04',
             '🔄 בדוק שוב',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
           ),

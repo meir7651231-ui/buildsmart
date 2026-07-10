@@ -509,7 +509,8 @@ class _RadioGroupRow<T> extends StatelessWidget {
                       color: const Color(0xFFF2F3F5),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: const CfgText(
+                      'courier_settings_screen.soon',
                       'בקרוב',
                       style: TextStyle(
                         color: BsTokens.mutedLight,

@@ -490,7 +490,8 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
         if (notes.isEmpty)
           const Padding(
             padding: EdgeInsets.only(top: BsTokens.space3),
-            child: Text(
+            child: CfgText(
+              'courier_forms_screen.t01',
               'אין אישורים שהועלו עדיין',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
             ),

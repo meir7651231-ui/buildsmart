@@ -24,6 +24,7 @@ import 'package:buildsmart/state/orders_engine.dart'
     show ordersEngineProvider, Order;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -249,7 +250,7 @@ class BudgetScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black54),
-        title: const Text('תקציב הפרויקט',
+        title: const CfgText('budget_screen.title', 'תקציב הפרויקט',
             style: TextStyle(color: _ink, fontWeight: FontWeight.w700)),
       ),
       body: ListView(
@@ -331,7 +332,7 @@ class BudgetScreen extends ConsumerWidget {
           Row(
             children: [
               const Expanded(
-                child: Text('פירוט הוצאות לפי קטגוריה',
+                child: CfgText('budget_screen.cat_header', 'פירוט הוצאות לפי קטגוריה',
                     style: TextStyle(
                         fontSize: 14, fontWeight: FontWeight.w700, color: _ink)),
               ),
@@ -340,7 +341,7 @@ class BudgetScreen extends ConsumerWidget {
                   final i = ref.read(budgetProvider.notifier).addCategory();
                   _openCategoryEditor(context, ref, i);
                 },
-                child: const Text('＋ הוסף',
+                child: const CfgText('budget_screen.add', '＋ הוסף',
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -352,7 +353,8 @@ class BudgetScreen extends ConsumerWidget {
           if (b.categories.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
+              child: CfgText(
+                'budget_screen.no_cats',
                 'אין קטגוריות עדיין — הקש "＋ הוסף" כדי להוסיף קטגוריה',
                 style: TextStyle(fontSize: 13, color: _muted),
               ),
@@ -366,14 +368,15 @@ class BudgetScreen extends ConsumerWidget {
               ),
           const SizedBox(height: 20),
           // spend by site — tap a site (bd-site). weight = (n-i)/(n*(n+1)/2)
-          const Text('הוצאות לפי אתר',
+          const CfgText('budget_screen.site_header', 'הוצאות לפי אתר',
               style: TextStyle(
                   fontSize: 14, fontWeight: FontWeight.w700, color: _ink)),
           const SizedBox(height: 8),
           if (projects.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
+              child: CfgText(
+                'budget_screen.no_sites',
                 'אין אתרים פעילים — הוסיפו פרויקט במסך הפרויקטים',
                 style: TextStyle(fontSize: 13, color: _muted),
               ),
@@ -401,7 +404,7 @@ class BudgetScreen extends ConsumerWidget {
             child: FilledButton(
               style: FilledButton.styleFrom(backgroundColor: _ok),
               onPressed: () => _openEditor(context, ref),
-              child: const Text('✏️ עריכת התקציב'),
+              child: const CfgText('budget_screen.edit_budget_btn', '✏️ עריכת התקציב'),
             ),
           ),
         ],
@@ -431,7 +434,7 @@ class BudgetScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('עריכת תקציב',
+            const CfgText('budget_screen.editor_title', 'עריכת תקציב',
                 style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w700, color: _ink)),
             const SizedBox(height: 14),
@@ -462,7 +465,7 @@ class BudgetScreen extends ConsumerWidget {
                   Navigator.pop(ctx);
                   showToast(context, 'התקציב עודכן');
                 },
-                child: const Text('שמירה'),
+                child: const CfgText('budget_screen.save', 'שמירה'),
               ),
             ),
             const Divider(height: 28),
@@ -478,7 +481,7 @@ class BudgetScreen extends ConsumerWidget {
                   child: OutlinedButton(
                     onPressed: () =>
                         _adjust(context, ctx, ref, costCtl.text, -1),
-                    child: const Text('− הסר הוצאה'),
+                    child: const CfgText('budget_screen.remove_expense', '− הסר הוצאה'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -487,7 +490,7 @@ class BudgetScreen extends ConsumerWidget {
                     style: FilledButton.styleFrom(backgroundColor: _ok),
                     onPressed: () =>
                         _adjust(context, ctx, ref, costCtl.text, 1),
-                    child: const Text('＋ הוסף הוצאה'),
+                    child: const CfgText('budget_screen.add_expense', '＋ הוסף הוצאה'),
                   ),
                 ),
               ],
@@ -566,7 +569,7 @@ class BudgetScreen extends ConsumerWidget {
                   Navigator.pop(ctx);
                   showToast(context, 'הקטגוריה נשמרה');
                 },
-                child: const Text('שמירה'),
+                child: const CfgText('budget_screen.save_cat', 'שמירה'),
               ),
             ),
             if (canDelete) ...[
@@ -586,7 +589,7 @@ class BudgetScreen extends ConsumerWidget {
                     Navigator.pop(ctx);
                     showToast(context, 'הקטגוריה נמחקה');
                   },
-                  child: const Text('🗑️ מחיקת קטגוריה',
+                  child: const CfgText('budget_screen.delete_cat', '🗑️ מחיקת קטגוריה',
                       style: TextStyle(color: _danger)),
                 ),
               ),

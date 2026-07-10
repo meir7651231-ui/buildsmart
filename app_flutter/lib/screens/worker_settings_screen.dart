@@ -9,6 +9,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +45,8 @@ class WorkerSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'worker_settings_screen.settings_title',
           'הגדרות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -91,7 +93,8 @@ class _NotifRow extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: const Text('🔔', style: TextStyle(fontSize: 22)),
-        title: const Text(
+        title: const CfgText(
+          'worker_settings_screen.notifications',
           'התראות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -178,7 +181,8 @@ class _LangOption extends StatelessWidget {
           ),
           if (!enabled) ...[
             const SizedBox(width: 8),
-            const Text(
+            const CfgText(
+              'worker_settings_screen.coming_soon',
               'בקרוב',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
@@ -211,7 +215,8 @@ class _AccessibilitySection extends ConsumerWidget {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
+          child: CfgText(
+            'worker_settings_screen.text_size',
             'גודל טקסט (כל האפליקציה)',
             style: TextStyle(color: Colors.black54, fontSize: 13),
           ),
@@ -242,7 +247,8 @@ class _AccessibilitySection extends ConsumerWidget {
           ),
         SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
+          title: const CfgText(
+            'worker_settings_screen.high_contrast',
             'ניגודיות גבוהה (כל האפליקציה)',
             style: TextStyle(color: BsTokens.inkLight),
           ),
@@ -254,7 +260,8 @@ class _AccessibilitySection extends ConsumerWidget {
         ),
         SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
+          title: const CfgText(
+            'worker_settings_screen.reduced_motion',
             'הנפשות מופחתות (כל האפליקציה)',
             style: TextStyle(color: BsTokens.inkLight),
           ),
@@ -282,7 +289,8 @@ class _InfoSection extends StatelessWidget {
       children: [
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
+          title: const CfgText(
+            'worker_settings_screen.terms',
             'תנאי שימוש',
             style: TextStyle(color: BsTokens.inkLight),
           ),
@@ -292,7 +300,8 @@ class _InfoSection extends StatelessWidget {
         ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
+          title: const CfgText(
+            'worker_settings_screen.privacy',
             'מדיניות פרטיות',
             style: TextStyle(color: BsTokens.inkLight),
           ),

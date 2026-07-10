@@ -12,6 +12,7 @@ import 'package:buildsmart/screens/store_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -87,7 +88,8 @@ class _ManagerScreensSheet extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            CfgText(
+              'manager_screens_sheet.t01',
               'מעבר בין מסכים',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -96,7 +98,8 @@ class _ManagerScreensSheet extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            CfgText(
+              'manager_screens_sheet.t02',
               'צפייה בכל לוח של המערכת — חזרה לניהול בכל רגע.',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
@@ -177,7 +180,7 @@ class _ImpersonationFrame extends ConsumerWidget {
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                           ),
-                          child: const Text('חזרה לניהול'),
+                          child: CfgText('manager_screens_sheet.t03', 'חזרה לניהול'),
                         ),
                       ],
                     ),

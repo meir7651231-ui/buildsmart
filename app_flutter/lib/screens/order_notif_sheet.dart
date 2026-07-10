@@ -1,4 +1,5 @@
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,29 +22,37 @@ class OrderNotifSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 18, 20, 2),
-              child: Text(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 2),
+              child: CfgText(
+                'order_notif_sheet.t01',
                 '🔔 התראות הזמנות ומשלוחים',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 6),
-              child: Text(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
+              child: CfgText(
+                'order_notif_sheet.t02',
                 'שאר ההתראות נשארו בהגדרות › התראות',
-                style: TextStyle(fontSize: 12.5, color: Color(0xFF888888)),
+                style: const TextStyle(fontSize: 12.5, color: Color(0xFF888888)),
               ),
             ),
             SwitchListTile(
-              title: const Text('עדכוני הזמנות'),
-              subtitle: const Text('אישור · בהכנה · מוכן · שינוי סטטוס'),
+              title: CfgText('order_notif_sheet.t03', 'עדכוני הזמנות'),
+              subtitle: CfgText(
+                'order_notif_sheet.t04',
+                'אישור · בהכנה · מוכן · שינוי סטטוס',
+              ),
               value: s.typeOrders,
               onChanged: (v) => n.update((x) => x.copyWith(typeOrders: v)),
             ),
             SwitchListTile(
-              title: const Text('עדכוני משלוחים'),
-              subtitle: const Text('יצא לדרך · בדרך אליך · נמסר'),
+              title: CfgText('order_notif_sheet.t05', 'עדכוני משלוחים'),
+              subtitle: CfgText(
+                'order_notif_sheet.t06',
+                'יצא לדרך · בדרך אליך · נמסר',
+              ),
               value: s.typeShipments,
               onChanged: (v) => n.update((x) => x.copyWith(typeShipments: v)),
             ),

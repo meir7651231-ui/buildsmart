@@ -20,6 +20,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -122,7 +123,7 @@ class _PairedExplainState extends ConsumerState<PairedExplainScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('🧩 מה עוד צריך?',
+          title: const CfgText('paired_explain_screen.title', '🧩 מה עוד צריך?',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -138,7 +139,8 @@ class _PairedExplainState extends ConsumerState<PairedExplainScreen> {
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
-            const Text('מותקן לרוב יחד עם:',
+            const CfgText(
+                'paired_explain_screen.paired_with', 'מותקן לרוב יחד עם:',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
             const SizedBox(height: 6),
             Wrap(
@@ -175,7 +177,9 @@ class _PairedExplainState extends ConsumerState<PairedExplainScreen> {
                   style: const TextStyle(
                       color: BsTokens.inkLight, fontSize: 15, height: 1.5)),
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ הרשימה מנתוני-הקטלוג; ה-AI רק מסביר למה כל אביזר נחוץ.',
+            const CfgText(
+                'paired_explain_screen.footer',
+                '⚙️ הרשימה מנתוני-הקטלוג; ה-AI רק מסביר למה כל אביזר נחוץ.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

@@ -9,6 +9,7 @@ import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -162,7 +163,8 @@ class DepartmentsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
                   BsTokens.space4, BsTokens.space2),
-              child: Text(
+              child: CfgText(
+                'departments_screen.t01',
                 'מחלקות',
                 style: theme.textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
@@ -257,7 +259,7 @@ class _DeptTile extends ConsumerWidget {
                 ),
                 if (!dept.live) ...[
                   const SizedBox(height: BsTokens.space1),
-                  Text('בקרוב',
+                  CfgText('departments_screen.t02', 'בקרוב',
                       style: theme.textTheme.labelSmall?.copyWith(color: fg)),
                 ],
               ],
@@ -357,7 +359,7 @@ class _DeptScopeBar extends ConsumerWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('כל המחלקות',
+                        CfgText('departments_screen.t03', 'כל המחלקות',
                             style: TextStyle(
                                 color: BsTokens.brand,
                                 fontSize: 13,
@@ -396,13 +398,15 @@ class _DeptCatGroups extends ConsumerWidget {
           children: [
             const Text('🗂️', style: TextStyle(fontSize: 48)),
             const SizedBox(height: 12),
-            Text(
+            CfgText(
+              'departments_screen.t04',
               'אין קטגוריות במחלקה זו',
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
-            Text(
+            CfgText(
+              'departments_screen.t05',
               'הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה',
               style: theme.textTheme.bodySmall,
             ),

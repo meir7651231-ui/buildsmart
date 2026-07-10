@@ -20,6 +20,7 @@ import 'package:buildsmart/state/orders_engine.dart'
     show managerAnalyticsProvider, managerCustomersProvider, ordersEngineProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart' show AiOffState;
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -134,14 +135,14 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
             children: [
               // maxLines+ellipsis: at large text-scale a 2-line title can exceed
               // the toolbar height → clip/overflow; cap each line to one row.
-              Text('🤖 קו-פיילוט',
+              CfgText('manager_copilot_screen.title', '🤖 קו-פיילוט',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       color: BsTokens.inkLight,
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
-              Text('שאל את העסק שלך',
+              CfgText('manager_copilot_screen.subtitle', 'שאל את העסק שלך',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
@@ -196,14 +197,14 @@ class _Welcome extends StatelessWidget {
         const SizedBox(height: BsTokens.space4),
         const Text('🤖', style: TextStyle(fontSize: 44), textAlign: TextAlign.center),
         const SizedBox(height: BsTokens.space3),
-        const Text('שאל אותי כל דבר על העסק שלך.',
+        const CfgText('manager_copilot_screen.welcome_headline', 'שאל אותי כל דבר על העסק שלך.',
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: BsTokens.inkLight,
                 fontSize: 17,
                 fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
-        const Text('אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.',
+        const CfgText('manager_copilot_screen.welcome_sub', 'אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.',
             textAlign: TextAlign.center,
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
         const SizedBox(height: BsTokens.space4),
@@ -212,11 +213,11 @@ class _Welcome extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: onBrief,
             icon: const Text('☀️'),
-            label: const Text('תדריך-בוקר'),
+            label: const CfgText('manager_copilot_screen.morning_brief', 'תדריך-בוקר'),
           ),
         ),
         const SizedBox(height: BsTokens.space4),
-        const Text('או שאל:',
+        const CfgText('manager_copilot_screen.or_ask', 'או שאל:',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
         const SizedBox(height: BsTokens.space2),
         Wrap(

@@ -22,6 +22,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -158,7 +159,7 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('🔌 איך לגשר?',
+          title: const CfgText('adapter_explain_screen.t01', '🔌 איך לגשר?',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -174,7 +175,7 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
-            const Text('הקצוות שלו:',
+            const CfgText('adapter_explain_screen.t02', 'הקצוות שלו:',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
             const SizedBox(height: 6),
             Wrap(
@@ -211,7 +212,7 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
                   style: const TextStyle(
                       color: BsTokens.inkLight, fontSize: 15, height: 1.5)),
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ הקצוות מנתוני-המפרט; ה-AI רק מסביר איזה סוג-מתאם מגשר.',
+            const CfgText('adapter_explain_screen.t03', '⚙️ הקצוות מנתוני-המפרט; ה-AI רק מסביר איזה סוג-מתאם מגשר.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

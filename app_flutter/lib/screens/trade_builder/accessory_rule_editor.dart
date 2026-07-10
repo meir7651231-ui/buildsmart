@@ -31,6 +31,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -234,7 +235,8 @@ class _AccessoryRuleEditorState
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'accessory_rule_editor.t01',
               '🧩 אביזרים',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -292,7 +294,8 @@ class _AccessoryRuleEditorState
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 activeColor: BsTokens.brand,
-                title: const Text(
+                title: const CfgText(
+                  'accessory_rule_editor.t02',
                   'חובה?',
                   style: TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 ),
@@ -315,7 +318,8 @@ class _AccessoryRuleEditorState
                 const SizedBox(height: BsTokens.space2),
                 const Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: Text(
+                  child: CfgText(
+                    'accessory_rule_editor.t03',
                     'מחיר לא תקין',
                     style: TextStyle(
                       color: BsTokens.dangerDark,
@@ -350,7 +354,9 @@ class _AccessoryRuleEditorState
                   // 'ללא' first (the null pick), then ONLY the trade's own
                   // products — an out-of-trade / non-existent SKU is
                   // impossible to author (orphan-proof).
-                  const DropdownMenuItem<String?>(child: Text('ללא')),
+                  const DropdownMenuItem<String?>(
+                    child: CfgText('accessory_rule_editor.t04', 'ללא'),
+                  ),
                   for (final p in products)
                     DropdownMenuItem<String?>(
                       value: p.id,
@@ -396,7 +402,8 @@ class _EmptyAccessories extends StatelessWidget {
         children: [
           Text('🧩', style: TextStyle(fontSize: 34)),
           SizedBox(height: BsTokens.space2),
-          Text(
+          CfgText(
+            'accessory_rule_editor.t05',
             'אין עדיין אביזרים',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -530,7 +537,8 @@ class _MustChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      label: const Text(
+      label: const CfgText(
+        'accessory_rule_editor.t06',
         'חובה',
         style: TextStyle(
           color: _kMustColor,

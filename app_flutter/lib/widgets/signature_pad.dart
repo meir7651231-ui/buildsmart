@@ -21,6 +21,7 @@ import 'dart:ui' as ui;
 
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// One continuous pen stroke — the ordered points from pen-down to pen-up.
@@ -179,7 +180,8 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
             ),
           ),
           const SizedBox(height: BsTokens.space3),
-          const Text(
+          const CfgText(
+            'signature_pad.pod_title',
             '✍️ חתימת הלקוח',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -188,7 +190,8 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
             ),
           ),
           const SizedBox(height: 2),
-          const Text(
+          const CfgText(
+            'signature_pad.pod_hint',
             'חתמו באצבע או בעכבר במסגרת',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           ),
@@ -222,7 +225,8 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     ),
                   ),
-                  child: const Text(
+                  child: const CfgText(
+                    'signature_pad.clear_btn',
                     'נקה',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -251,7 +255,8 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
                               BorderRadius.circular(BsTokens.radiusPill),
                         ),
                       ),
-                      child: const Text(
+                      child: const CfgText(
+                        'signature_pad.save_btn',
                         'שמור חתימה ✍️',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
@@ -435,7 +440,8 @@ Future<String?> showSignatureSheet(
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
-              const Text(
+              const CfgText(
+                'signature_pad.form_hint',
                 'חתום/חתמי באצבע בתוך המסגרת.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -459,7 +465,8 @@ Future<String?> showSignatureSheet(
                           child: Container(
                             constraints: const BoxConstraints(minHeight: 48),
                             alignment: Alignment.center,
-                            child: const Text(
+                            child: const CfgText(
+                              'signature_pad.clear2',
                               '🧽 נקה',
                               style: TextStyle(
                                 color: BsTokens.inkLight,
@@ -490,7 +497,8 @@ Future<String?> showSignatureSheet(
                           child: Container(
                             constraints: const BoxConstraints(minHeight: 48),
                             alignment: Alignment.center,
-                            child: const Text(
+                            child: const CfgText(
+                              'signature_pad.cancel_btn',
                               'ביטול',
                               style: TextStyle(
                                 color: BsTokens.inkLight,
@@ -538,7 +546,8 @@ Future<String?> showSignatureSheet(
                     child: Container(
                       constraints: const BoxConstraints(minHeight: 48),
                       alignment: Alignment.center,
-                      child: Text(
+                      child: CfgText(
+                        'signature_pad.confirm_btn',
                         '✓ אישור',
                         style: TextStyle(
                           color: bsOnAccent(sheetCtx),

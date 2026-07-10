@@ -28,6 +28,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart'
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -204,7 +205,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text(
+          title: CfgText(
+            'ai_finder_screen.t01',
             '🗣️ חיפוש חכם',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -230,7 +232,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   if (!aiAvailable)
-                    const Text(
+                    CfgText(
+                      'ai_finder_screen.t02',
                       '💡 החיפוש החכם דורש חיבור לשרת.',
                       style: TextStyle(
                         color: BsTokens.mutedLight,
@@ -238,7 +241,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       ),
                     )
                   else ...[
-                    const Text(
+                    CfgText(
+                      'ai_finder_screen.t03',
                       'תאר במילים שלך מה אתה מחפש:',
                       style: TextStyle(
                         color: BsTokens.mutedLight,
@@ -267,14 +271,15 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       child: FilledButton.icon(
                         onPressed: _loading ? null : _search,
                         icon: const Text('🔎'),
-                        label: const Text('מצא לי'),
+                        label: CfgText('ai_finder_screen.t04', 'מצא לי'),
                       ),
                     ),
                     const SizedBox(height: BsTokens.space4),
                     if (_loading)
                       const Center(child: CircularProgressIndicator())
                     else if (_failed)
-                      const Text(
+                      CfgText(
+                        'ai_finder_screen.t05',
                         'משהו השתבש — נסה שוב.',
                         // dangerDark for WCAG AA (parity with shared AiFailedState)
                         style: TextStyle(
@@ -293,7 +298,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       ),
                       const SizedBox(height: BsTokens.space2),
                     ] else if (_searched)
-                      const Text(
+                      CfgText(
+                        'ai_finder_screen.t06',
                         'לא נמצאו תוצאות — נסה מילים אחרות.',
                         style: TextStyle(
                           color: BsTokens.mutedLight,

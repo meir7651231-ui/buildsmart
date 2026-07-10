@@ -1,5 +1,6 @@
 import 'package:buildsmart/data/legal_texts.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// Which legal document the screen opens on.
@@ -44,7 +45,8 @@ class _LegalScreenState extends State<LegalScreen> {
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'legal_screen.t01',
           'תנאי שימוש ופרטיות',
           style: TextStyle(
             color: BsTokens.inkLight,

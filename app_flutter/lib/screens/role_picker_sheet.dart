@@ -8,6 +8,7 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -95,18 +96,20 @@ class _RolePickerCard extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          CfgText(
+            'role_picker_sheet.t01',
             'מי אתה?',
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 20,
               color: BsTokens.inkLight,
             ),
           ),
           const SizedBox(height: 2),
-          const Text(
+          CfgText(
+            'role_picker_sheet.t02',
             'בחר תפקיד כדי להיכנס',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           ),
           const SizedBox(height: BsTokens.space3),
           for (final p in kPersonas)

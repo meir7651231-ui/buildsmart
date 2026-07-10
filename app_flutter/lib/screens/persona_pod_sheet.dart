@@ -41,6 +41,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/signature_pad.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,29 +72,31 @@ class PersonaPodSheet extends ConsumerWidget {
     final idx = orders.indexWhere((o) => o.id == orderId);
     final order = idx >= 0 ? orders[idx] : null;
     if (order == null) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(
+      return Padding(
+        padding: const EdgeInsets.symmetric(
           horizontal: BsTokens.space4,
           vertical: BsTokens.space5,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('📦', style: TextStyle(fontSize: 48)),
-            SizedBox(height: 12),
-            Text(
+            const Text('📦', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            CfgText(
+              'persona_pod_sheet.t01',
               'ההזמנה לא נמצאה',
-              style: TextStyle(
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 6),
-            Text(
+            const SizedBox(height: 6),
+            CfgText(
+              'persona_pod_sheet.t02',
               'ייתכן שההזמנה הוסרה או שהמשלוח כבר נסגר — חזרו לרשימת המשלוחים',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
           ],
         ),
@@ -125,18 +128,20 @@ class PersonaPodSheet extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: BsTokens.space3),
-            const Text(
+            CfgText(
+              'persona_pod_sheet.t03',
               '📸 אישור מסירה',
-              style: TextStyle(
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontWeight: FontWeight.w800,
                 fontSize: 19,
               ),
             ),
             const SizedBox(height: 2),
-            const Text(
+            CfgText(
+              'persona_pod_sheet.t04',
               'POD + צילום',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
             const SizedBox(height: BsTokens.space3),
             Text(
@@ -196,14 +201,15 @@ class PersonaPodSheet extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                   border: Border.all(color: const Color(0xFFE0E0E0)),
                 ),
-                child: const Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('📷', style: TextStyle(fontSize: 40)),
-                    SizedBox(height: 6),
-                    Text(
+                    const Text('📷', style: TextStyle(fontSize: 40)),
+                    const SizedBox(height: 6),
+                    CfgText(
+                      'persona_pod_sheet.t05',
                       'אין צילום עדיין',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: BsTokens.mutedLight,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
@@ -353,9 +359,13 @@ class PersonaPodSheet extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   ),
                 ),
-                child: const Text(
+                child: CfgText(
+                  'persona_pod_sheet.t06',
                   '✅ נמסר ללקוח',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],

@@ -151,7 +151,8 @@ class WorkerProfileScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'worker_profile_screen.appbar_title',
           'פרופיל עובד',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -259,7 +260,8 @@ class _IdentityCard extends StatelessWidget {
                                 BsTokens.radiusPill,
                               ),
                             ),
-                            child: const Text(
+                            child: const CfgText(
+                              'worker_profile_screen.demo',
                               'דמו',
                               style: TextStyle(
                                 color: BsTokens.mutedLight,
@@ -858,7 +860,8 @@ class _ActionsCard extends ConsumerWidget {
 
               return AlertDialog(
                 backgroundColor: const Color(0xFFFFFFFF),
-                title: const Text(
+                title: const CfgText(
+                  'worker_profile_screen.role_switch_dialog_title',
                   'החלפת תפקיד',
                   style: TextStyle(color: BsTokens.inkLight),
                 ),
@@ -866,7 +869,8 @@ class _ActionsCard extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
+                    const CfgText(
+                      'worker_profile_screen.role_switch_dialog_body',
                       'מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:',
                       style: TextStyle(color: Colors.black54, fontSize: 13.5),
                     ),
@@ -891,9 +895,12 @@ class _ActionsCard extends ConsumerWidget {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(dialogCtx, false),
-                    child: const Text('ביטול'),
+                    child: const CfgText('worker_profile_screen.cancel', 'ביטול'),
                   ),
-                  TextButton(onPressed: submit, child: const Text('אישור')),
+                  TextButton(
+                    onPressed: submit,
+                    child: const CfgText('worker_profile_screen.confirm', 'אישור'),
+                  ),
                 ],
               );
             },
@@ -1229,7 +1236,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                             if (_photo != null)
                               TextButton(
                                 onPressed: () => setState(() => _photo = null),
-                                child: const Text(
+                                child: const CfgText(
+                                  'worker_profile_screen.remove_photo',
                                   'הסר תמונה',
                                   // AA: redAccent על לבן נכשל — token חוזה 9.
                                   style: TextStyle(color: BsTokens.dangerDark),
@@ -1403,7 +1411,8 @@ class _SpecialtyDerivedRow extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           // Honest pointer to the single source of truth (no second editor).
-          const Text(
+          const CfgText(
+            'worker_profile_screen.specialty_hint',
             'נערך בטופס 101 (מקצוע / התמחות)',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
           ),

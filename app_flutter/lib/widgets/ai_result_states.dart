@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// Shared render-states for the AI "narrate" screens (alt/paired/adapter/credit
@@ -47,7 +48,8 @@ class AiFailedState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // dangerDark (not the lighter `danger`) — clears WCAG AA on light card.
-          const Text(
+          const CfgText(
+            'ai_result_states.t01',
             'משהו השתבש — נסה שוב.',
             style: TextStyle(color: BsTokens.dangerDark, fontSize: 14),
           ),
@@ -55,7 +57,7 @@ class AiFailedState extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Text('🔄'),
-            label: const Text('נסה שוב'),
+            label: const CfgText('ai_result_states.t02', 'נסה שוב'),
           ),
         ],
       );

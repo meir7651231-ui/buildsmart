@@ -40,6 +40,7 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/telemetry.dart';
 import 'package:buildsmart/theme/app_theme.dart' show bsOnAccent;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -231,7 +232,8 @@ class _ManagerRoleAssignSheetState
           children: [
             const Text('🔑', style: TextStyle(fontSize: 34), textAlign: TextAlign.center),
             const SizedBox(height: BsTokens.space2),
-            const Text(
+            CfgText(
+              'manager_role_assign_sheet.t01',
               'שיוך תפקיד למשתמש',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -241,7 +243,8 @@ class _ManagerRoleAssignSheetState
               ),
             ),
             const SizedBox(height: 2),
-            const Text(
+            CfgText(
+              'manager_role_assign_sheet.t02',
               'אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.',
               textAlign: TextAlign.center,
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
@@ -272,9 +275,10 @@ class _ManagerRoleAssignSheetState
             ),
             const SizedBox(height: BsTokens.space4),
 
-            const Align(
+            Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
+              child: CfgText(
+                'manager_role_assign_sheet.t03',
                 'תפקיד',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -449,7 +453,8 @@ class _AssignButton extends StatelessWidget {
                     ),
                   ),
                 )
-              : Text(
+              : CfgText(
+                  'manager_role_assign_sheet.t04',
                   'שייך תפקיד',
                   textAlign: TextAlign.center,
                   style: TextStyle(

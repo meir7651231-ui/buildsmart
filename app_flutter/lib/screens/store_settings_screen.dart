@@ -8,6 +8,7 @@ import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +36,8 @@ class StoreSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'store_settings_screen.screen_title',
           'הגדרות חנות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -76,18 +78,20 @@ class StoreSettingsScreen extends ConsumerWidget {
       builder:
           (ctx) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: const CfgText(
+              'store_settings_screen.reset_title',
               'איפוס הגדרות?',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: const CfgText(
+              'store_settings_screen.reset_body',
               'כל הגדרות החנות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+                child: const CfgText('store_settings_screen.cancel', 'ביטול'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
@@ -95,7 +99,7 @@ class StoreSettingsScreen extends ConsumerWidget {
                   // AA על רקע-דיאלוג לבן (redAccent=3.19:1 נכשל) — token חוזה 9.
                   foregroundColor: BsTokens.dangerDark,
                 ),
-                child: const Text('אפס'),
+                child: const CfgText('store_settings_screen.reset_ok', 'אפס'),
               ),
             ],
           ),
@@ -756,7 +760,8 @@ class _SectionTile extends StatelessWidget {
               underConstruction
                   ? const Padding(
                     padding: EdgeInsets.only(top: 2),
-                    child: Text(
+                    child: CfgText(
+                      'store_settings_screen.section_wip',
                       'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
                       style: TextStyle(
                         color: BsTokens.mutedLight,
@@ -799,7 +804,8 @@ class _SwitchRow extends StatelessWidget implements _Inert {
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       subtitle:
           underConstruction
-              ? const Text(
+              ? const CfgText(
+                'store_settings_screen.switch_wip',
                 'בבנייה — עדיין לא משפיע',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               )
@@ -844,7 +850,8 @@ class _RadioGroupRow<T> extends StatelessWidget implements _Inert {
               if (underConstruction)
                 const Padding(
                   padding: EdgeInsets.only(top: 2),
-                  child: Text(
+                  child: CfgText(
+                    'store_settings_screen.radio_wip',
                     'בבנייה — עדיין לא משפיע',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                   ),
@@ -931,7 +938,8 @@ class _InlineTextRowState extends State<_InlineTextRow> {
           if (widget.underConstruction)
             const Padding(
               padding: EdgeInsets.only(top: 2),
-              child: Text(
+              child: CfgText(
+                'store_settings_screen.inline_wip',
                 'בבנייה — עדיין לא משפיע',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
               ),
@@ -1022,7 +1030,8 @@ class _NumberRowState extends State<_NumberRow> {
                 if (widget.underConstruction)
                   const Padding(
                     padding: EdgeInsets.only(top: 2),
-                    child: Text(
+                    child: CfgText(
+                      'store_settings_screen.number_wip',
                       'בבנייה — עדיין לא משפיע',
                       style: TextStyle(
                         color: BsTokens.mutedLight,
@@ -1072,7 +1081,8 @@ class _PlaceholderRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
-      trailing: const Text(
+      trailing: const CfgText(
+        'store_settings_screen.placeholder_wip',
         'בבנייה',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -66,7 +67,8 @@ void showFullPhotoDialog(
       fit: BoxFit.contain,
       gaplessPlayback: true,
       // A corrupt payload renders an honest message, never a crash.
-      errorBuilder: (_, __, ___) => const Text(
+      errorBuilder: (_, __, ___) => CfgText(
+        'photo_viewer.t01',
         'לא ניתן להציג את התמונה',
         style: TextStyle(color: Colors.white70, fontSize: 14),
       ),
@@ -93,7 +95,8 @@ void showFullPhotoRefDialog(
       image: provider,
       fit: BoxFit.contain,
       gaplessPlayback: true,
-      errorBuilder: (_, __, ___) => const Text(
+      errorBuilder: (_, __, ___) => CfgText(
+        'photo_viewer.t02',
         'לא ניתן להציג את התמונה',
         style: TextStyle(color: Colors.white70, fontSize: 14),
       ),
@@ -160,7 +163,8 @@ void _showFullPhoto(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              const Text(
+              CfgText(
+                'photo_viewer.t03',
                 'צבוט להגדלה · הקש לסגירה',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white38, fontSize: 12),

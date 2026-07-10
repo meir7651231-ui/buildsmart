@@ -15,6 +15,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/services/photo_downscale.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -254,7 +255,8 @@ class _WebcamCaptureScreenState extends State<WebcamCaptureScreen> {
                               horizontal: 36,
                               vertical: 16,
                             ),
-                            child: Text(
+                            child: CfgText(
+                              'webcam_capture_sheet.shoot',
                               '📸 צלם',
                               style: TextStyle(
                                 color: Colors.white,

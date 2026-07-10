@@ -32,6 +32,7 @@ import 'package:buildsmart/state/smart_cart.dart'
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -144,7 +145,12 @@ class AIHubScreen extends ConsumerWidget {
     );
     if (!ok) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('הדפדפן לא תומך בחיפוש קולי')),
+        const SnackBar(
+          content: CfgText(
+            'ai_hub_screen.t01',
+            'הדפדפן לא תומך בחיפוש קולי',
+          ),
+        ),
       );
     }
   }
@@ -473,7 +479,8 @@ class _ThreeWay extends StatelessWidget {
                 ),
                 if (!d.match) ...[
                   const SizedBox(height: 8),
-                  const Text(
+                  const CfgText(
+                    'ai_hub_screen.t02',
                     'נדרשת בדיקה — הסכומים אינם זהים',
                     style: TextStyle(
                       color: Color(0xFFC62828),
@@ -600,7 +607,8 @@ class _Wear extends StatelessWidget {
                 AiBar(pct: g.pct.clamp(0, 100), danger: g.worn),
                 if (g.worn) ...[
                   const SizedBox(height: 8),
-                  const Text(
+                  const CfgText(
+                    'ai_hub_screen.t03',
                     'מומלץ לתזמן תחזוקה',
                     style: TextStyle(
                       color: Color(0xFFC62828),
@@ -659,7 +667,7 @@ class _Analytics extends ConsumerWidget {
                     ),
                   ),
               icon: const Text('✨'),
-              label: const Text('סיכום בעברית'),
+              label: const CfgText('ai_hub_screen.t04', 'סיכום בעברית'),
             ),
           ),
           const SizedBox(height: BsTokens.space2),
@@ -708,7 +716,8 @@ PreferredSizeWidget aiAppBar(BuildContext context, String title) => AppBar(
   actions: [
     TextButton(
       onPressed: () => Navigator.of(context).maybePop(),
-      child: const Text(
+      child: const CfgText(
+        'ai_hub_screen.t05',
         '‹ חזרה',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
       ),

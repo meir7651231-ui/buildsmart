@@ -28,6 +28,7 @@ import 'package:buildsmart/screens/worker_profile_screen.dart'
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -117,7 +118,8 @@ class _TasksGanttSheet extends ConsumerWidget {
               Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'tasks_gantt_sheet.header',
                       '📊 גאנט משימות',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -140,7 +142,8 @@ class _TasksGanttSheet extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 2),
-              const Text(
+              const CfgText(
+                'tasks_gantt_sheet.subtitle',
                 'לוח-הזמנים של המשימות לפי תאריך-התחלה מתוזמן (לצפייה בלבד)',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -150,7 +153,8 @@ class _TasksGanttSheet extends ConsumerWidget {
               if (empty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'tasks_gantt_sheet.empty',
                     'אין משימות',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -163,7 +167,8 @@ class _TasksGanttSheet extends ConsumerWidget {
 
               // ══ TIMELINE — one proportional bar per scheduled task ══
               if (layout.bars.isNotEmpty) ...[
-                const Text(
+                const CfgText(
+                  'tasks_gantt_sheet.timeline',
                   '📊 לוח-זמנים (גאנט)',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -195,7 +200,8 @@ class _TasksGanttSheet extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                const CfgText(
+                  'tasks_gantt_sheet.unscheduled_note',
                   'משימות אלו לא ממוקמות על הציר — הקבלן יכול לשבץ להן תאריך התחלה.',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                 ),

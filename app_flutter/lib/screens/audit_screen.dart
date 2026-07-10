@@ -11,6 +11,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 class AuditScreen extends StatefulWidget {
@@ -176,7 +177,7 @@ class _AuditScreenState extends State<AuditScreen> {
                       ),
                     ),
                   ),
-                  const Text('אודיט תרחישים',
+                  const CfgText('audit_screen.t01', 'אודיט תרחישים',
                       style: TextStyle(
                           color: BsTokens.inkLight,
                           fontSize: 16,
@@ -237,7 +238,8 @@ class _AuditScreenState extends State<AuditScreen> {
                         children: [
                           Text('🧪', style: TextStyle(fontSize: 48)),
                           SizedBox(height: 12),
-                          Text(
+                          CfgText(
+                            'audit_screen.t02',
                             'עדיין לא הורצו בדיקות',
                             style: TextStyle(
                               color: Color(0xFF334155),
@@ -246,7 +248,8 @@ class _AuditScreenState extends State<AuditScreen> {
                             ),
                           ),
                           SizedBox(height: 6),
-                          Text(
+                          CfgText(
+                            'audit_screen.t03',
                             'הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל',
                             style: TextStyle(
                                 color: Color(0xFF64748B), fontSize: 13),

@@ -29,6 +29,7 @@ import 'package:buildsmart/logic/intel/segments.dart'
 import 'package:buildsmart/state/intel/intel_events.dart' show IntelEvents;
 import 'package:buildsmart/state/intel/intel_read.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -106,7 +107,8 @@ class _IntelIntro extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            CfgText(
+              'intel_tab.t01',
               '📡 מודיעין לקוחות',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -115,7 +117,8 @@ class _IntelIntro extends StatelessWidget {
               ),
             ),
             SizedBox(height: BsTokens.spaceHair),
-            Text(
+            CfgText(
+              'intel_tab.t02',
               'משפך ההמרה, פלחי הלקוחות, שימור ומי מחובר כעת — חי מהמכשיר.',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),

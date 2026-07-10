@@ -3,6 +3,7 @@ import 'package:buildsmart/test_harness/runner.dart';
 import 'package:buildsmart/test_harness/types.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,7 +27,8 @@ class RegressionPanelScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         foregroundColor: BsTokens.inkLight,
-        title: const Text(
+        title: CfgText(
+          'regression_panel_screen.t01',
           '🔬 מרכז בדיקות רגרסיה',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
@@ -35,7 +37,8 @@ class RegressionPanelScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
+          CfgText(
+            'regression_panel_screen.t02',
             'בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring',
             style: TextStyle(color: Color(0xFF888888), fontSize: 13),
           ),

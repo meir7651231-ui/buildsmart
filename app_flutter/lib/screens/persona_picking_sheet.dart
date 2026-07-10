@@ -29,6 +29,7 @@ import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,8 @@ class PersonaPickingSheet extends ConsumerWidget {
       // Order vanished (e.g. delivered/removed) — nothing to pick.
       return const Padding(
         padding: EdgeInsets.all(BsTokens.space5),
-        child: Text(
+        child: CfgText(
+          'persona_picking_sheet.t01',
           'אין הזמנות בקטגוריה זו ✓',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
         ),
@@ -223,7 +225,8 @@ class PersonaPickingSheet extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   ),
                 ),
-                child: const Text(
+                child: const CfgText(
+                  'persona_picking_sheet.t02',
                   '📄 הצג תעודת משלוח',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -343,7 +346,8 @@ class PersonaPickingSheet extends ConsumerWidget {
             color: const Color(0xFFF2F3F5),
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           ),
-          child: const Text(
+          child: const CfgText(
+            'persona_picking_sheet.t03',
             '🛵 ההזמנה מוכנה — ממתינה לאיסוף השליח',
             style: TextStyle(
               color: BsTokens.mutedLight,
@@ -366,7 +370,8 @@ class PersonaPickingSheet extends ConsumerWidget {
       out.add(
         const Padding(
           padding: EdgeInsets.only(bottom: BsTokens.space2),
-          child: Text(
+          child: CfgText(
+            'persona_picking_sheet.t04',
             'סמן כל פריט כ"לוקט" או "חסר" כדי לסיים את ההכנה',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
           ),
@@ -443,7 +448,8 @@ class PersonaPickingSheet extends ConsumerWidget {
               children: [
                 const _Grip(),
                 const SizedBox(height: BsTokens.space3),
-                const Text(
+                const CfgText(
+                  'persona_picking_sheet.t05',
                   'תעודת משלוח',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -623,7 +629,8 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
             Row(
               children: [
                 const Expanded(
-                  child: Text(
+                  child: CfgText(
+                    'persona_picking_sheet.t06',
                     'פריט חסר — נדרשת החלטה',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -649,7 +656,8 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
             ),
             const SizedBox(height: BsTokens.space2),
             if (order == null)
-              const Text(
+              const CfgText(
+                'persona_picking_sheet.t07',
                 'ההזמנה אינה זמינה עוד',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               )
@@ -824,7 +832,8 @@ class _DecisionLine extends StatelessWidget {
                             BorderRadius.circular(BsTokens.radiusPill),
                       ),
                     ),
-                    child: const Text(
+                    child: const CfgText(
+                      'persona_picking_sheet.t08',
                       '🔁 החלף מוצר',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
@@ -845,7 +854,8 @@ class _DecisionLine extends StatelessWidget {
                             BorderRadius.circular(BsTokens.radiusPill),
                       ),
                     ),
-                    child: const Text(
+                    child: const CfgText(
+                      'persona_picking_sheet.t09',
                       'הסר מההזמנה',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -942,7 +952,8 @@ class _PickLine extends StatelessWidget {
                                   BsTokens.radiusPill,
                                 ),
                               ),
-                              child: const Text(
+                              child: const CfgText(
+                                'persona_picking_sheet.t10',
                                 'מוצר חלופי',
                                 style: TextStyle(
                                   color: Color(0xFF2B6CB0),
@@ -1028,7 +1039,8 @@ class _PickLine extends StatelessWidget {
                         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                       ),
                     ),
-                    child: Text(
+                    child: CfgText(
+                      'persona_picking_sheet.t11',
                       'חסר',
                       style: TextStyle(
                         color: missing ? BsTokens.brandDark : BsTokens.inkLight,
@@ -1063,7 +1075,8 @@ class _SplitControl extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const CfgText(
+            'persona_picking_sheet.t12',
             '🚚 פיצול משלוחים',
             style: TextStyle(
               color: BsTokens.inkLight,

@@ -9,6 +9,7 @@ import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/camera_error_view.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -359,7 +360,8 @@ void _showGalleryPreview(
                           color: Colors.white54, fontSize: 18),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    const CfgText(
+                      'camera_sheet.t01',
                       'תצוגה מדומה — תמונת דמו',
                       style: TextStyle(color: Colors.white30, fontSize: 12),
                     ),
@@ -400,7 +402,7 @@ Future<bool> _confirmCapture(BuildContext context, String dataUrl) async {
       textDirection: TextDirection.rtl,
       child: AlertDialog(
         backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text('📸 תצוגה מקדימה'),
+        title: const CfgText('camera_sheet.t02', '📸 תצוגה מקדימה'),
         content: SizedBox(
           width: 320,
           child: Column(
@@ -422,7 +424,8 @@ Future<bool> _confirmCapture(BuildContext context, String dataUrl) async {
                   ),
                 ),
               const SizedBox(height: BsTokens.space3),
-              const Text(
+              const CfgText(
+                'camera_sheet.t03',
                 'להשתמש בתמונה הזו?',
                 style: TextStyle(color: Colors.black54, fontSize: 13.5),
               ),
@@ -433,12 +436,12 @@ Future<bool> _confirmCapture(BuildContext context, String dataUrl) async {
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('ביטול'),
+            child: const CfgText('camera_sheet.t04', 'ביטול'),
           ),
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(dialogCtx, true),
-            child: const Text('אישור'),
+            child: const CfgText('camera_sheet.t05', 'אישור'),
           ),
         ],
       ),
@@ -591,7 +594,7 @@ class _GalleryAllBtn extends StatelessWidget {
                   Icon(Icons.photo_library_outlined,
                       color: BsTokens.brand, size: 26),
                   SizedBox(height: 4),
-                  Text('כל\nהגלריה',
+                  CfgText('camera_sheet.t06', 'כל\nהגלריה',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: BsTokens.brand, fontSize: 9, height: 1.3)),

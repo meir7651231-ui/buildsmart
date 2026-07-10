@@ -19,6 +19,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -108,7 +109,7 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('✨ סיכום עסקי',
+          title: const CfgText('business_summary_screen.t01', '✨ סיכום עסקי',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -118,7 +119,7 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
           padding: const EdgeInsets.all(BsTokens.space4),
           children: [
             // ── The REAL computed insights (data, never the model). ──
-            const Text('התובנות שחושבו:',
+            const CfgText('business_summary_screen.t02', 'התובנות שחושבו:',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
             const SizedBox(height: 6),
             for (final line in widget.insightLines)
@@ -142,7 +143,7 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
                   style: const TextStyle(
                       color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח אותם לסיכום.',
+            const CfgText('business_summary_screen.t03', '⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח אותם לסיכום.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

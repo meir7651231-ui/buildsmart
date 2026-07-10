@@ -10,6 +10,7 @@ import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -145,7 +146,8 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: CfgText(
+                          'worker_notifs_sheet.t01',
                           '🔔 התראות',
                           style: TextStyle(
                             color: BsTokens.inkLight,
@@ -171,7 +173,8 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                     // (אישור/דחייה של המנהל, משימה חדשה שנכנסה לביצוע).
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                      child: Text(
+                      child: CfgText(
+                        'worker_notifs_sheet.t02',
                         'אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -192,7 +195,8 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                                     : () => ref
                                         .read(workerNotifsProvider.notifier)
                                         .markAllRead(username),
-                            child: const Text(
+                            child: const CfgText(
+                              'worker_notifs_sheet.t03',
                               'סמן הכל כנקרא',
                               style: TextStyle(
                                 color: BsTokens.brandDark,
@@ -219,7 +223,8 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                                         .read(workerNotifsProvider.notifier)
                                         .clear(username);
                                   },
-                          child: const Text(
+                          child: const CfgText(
+                            'worker_notifs_sheet.t04',
                             'נקה הכל',
                             style: TextStyle(
                               color: BsTokens.danger,

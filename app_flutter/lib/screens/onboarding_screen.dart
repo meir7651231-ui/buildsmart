@@ -10,6 +10,7 @@ import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -192,7 +193,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     body: 'מדלג על שקופיות ההיכרות ועובר ישר לאפליקציה.',
                     child: TextButton(
                       onPressed: _finish,
-                      child: const Text(
+                      child: CfgText(
+                        'onboarding_screen.skip',
                         'דלג',
                         style: TextStyle(color: BsTokens.mutedLight),
                       ),

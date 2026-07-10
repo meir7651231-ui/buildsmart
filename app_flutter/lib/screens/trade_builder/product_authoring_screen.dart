@@ -55,6 +55,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -305,7 +306,8 @@ class _ProductAuthoringState extends ConsumerState<ProductAuthoringScreen> {
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'product_authoring_screen.t01',
               '📦 מוצרים',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -395,7 +397,8 @@ class _ProductAuthoringState extends ConsumerState<ProductAuthoringScreen> {
                 // stays a no-op.
                 const Padding(
                   padding: EdgeInsets.only(bottom: BsTokens.space2),
-                  child: Text(
+                  child: CfgText(
+                    'product_authoring_screen.t02',
                     'צור קטגוריה קודם',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -472,7 +475,8 @@ class _ProductAuthoringState extends ConsumerState<ProductAuthoringScreen> {
                 const SizedBox(height: BsTokens.space2),
                 const Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: Text(
+                  child: CfgText(
+                    'product_authoring_screen.t03',
                     'מק"ט כבר קיים',
                     style: TextStyle(
                       color: BsTokens.dangerDark,
@@ -628,7 +632,8 @@ class _EmptyProducts extends StatelessWidget {
         children: [
           Text(_kProductEmoji, style: TextStyle(fontSize: 34)),
           SizedBox(height: BsTokens.space2),
-          Text(
+          CfgText(
+            'product_authoring_screen.t04',
             'אין עדיין מוצרים',
             textAlign: TextAlign.center,
             style: TextStyle(

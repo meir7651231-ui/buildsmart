@@ -12,6 +12,7 @@ import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,7 +48,8 @@ class CatalogSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
-        title: const Text(
+        title: const CfgText(
+          'catalog_settings_screen.t01',
           'הגדרות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -93,23 +95,25 @@ class CatalogSettingsScreen extends ConsumerWidget {
       builder:
           (ctx) => AlertDialog(
             backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text(
+            title: const CfgText(
+              'catalog_settings_screen.t02',
               'איפוס הגדרות?',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: const Text(
+            content: const CfgText(
+              'catalog_settings_screen.t03',
               'כל ההגדרות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ביטול'),
+                child: const CfgText('catalog_settings_screen.t04', 'ביטול'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text('אפס'),
+                child: const CfgText('catalog_settings_screen.t05', 'אפס'),
               ),
             ],
           ),
@@ -141,7 +145,8 @@ class _ProfileRow extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: const Text('👤', style: TextStyle(fontSize: 22)),
-        title: const Text(
+        title: const CfgText(
+          'catalog_settings_screen.t06',
           'הפרופיל שלי',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -253,8 +258,11 @@ class _ThemeSection extends ConsumerWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.swap_vert, color: BsTokens.brandDark),
-          title: const Text('סידור מסך הבית'),
-          subtitle: const Text('גרור לשנות את סדר המקטעים בבית'),
+          title: const CfgText('catalog_settings_screen.t07', 'סידור מסך הבית'),
+          subtitle: const CfgText(
+            'catalog_settings_screen.t08',
+            'גרור לשנות את סדר המקטעים בבית',
+          ),
           trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
           onTap: () => Navigator.of(context).push(HomeContentReorder.route()),
         ),
@@ -676,7 +684,8 @@ class _InfoSection extends StatelessWidget {
       children: [
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
+          title: const CfgText(
+            'catalog_settings_screen.t09',
             'תנאי שימוש',
             style: TextStyle(color: BsTokens.inkLight),
           ),
@@ -688,7 +697,8 @@ class _InfoSection extends StatelessWidget {
         ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          title: const Text(
+          title: const CfgText(
+            'catalog_settings_screen.t10',
             'מדיניות פרטיות',
             style: TextStyle(color: BsTokens.inkLight),
           ),
@@ -860,7 +870,8 @@ class _RadioGroupRow<T> extends StatelessWidget {
                 ),
                 if (!enabled) ...[
                   const SizedBox(width: 8),
-                  const Text(
+                  const CfgText(
+                    'catalog_settings_screen.t11',
                     'בקרוב',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                   ),
@@ -911,7 +922,8 @@ class _PlaceholderRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
-      trailing: const Text(
+      trailing: const CfgText(
+        'catalog_settings_screen.t12',
         'בבנייה',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),

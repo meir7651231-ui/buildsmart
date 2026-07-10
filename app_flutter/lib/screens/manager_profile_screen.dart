@@ -19,6 +19,7 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,7 +41,8 @@ class ManagerProfileScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text(
+          title: CfgText(
+            'manager_profile_screen.t01',
             'אזור אישי — מנהל המערכת',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -147,7 +149,8 @@ class _ManagerProfileBody extends ConsumerWidget {
                     color: const Color(0xFFFFF4D6),
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   ),
-                  child: const Text(
+                  child: CfgText(
+                    'manager_profile_screen.t02',
                     'מצב הדגמה',
                     style: TextStyle(
                       color: Color(0xFF8A6D00),
@@ -162,7 +165,8 @@ class _ManagerProfileBody extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
 
         // ── הזמנות — סטטיסטיקה חיה (אותו מנוע משותף של הלוח) ───────────────
-        const Text(
+        CfgText(
+          'manager_profile_screen.t03',
           'הזמנות — סטטיסטיקה',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -205,7 +209,8 @@ class _ManagerProfileBody extends ConsumerWidget {
             children: [
               ListTile(
                 leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-                title: const Text(
+                title: CfgText(
+                  'manager_profile_screen.t04',
                   'הגדרות',
                   style: TextStyle(color: BsTokens.inkLight),
                 ),
@@ -220,11 +225,13 @@ class _ManagerProfileBody extends ConsumerWidget {
               const Divider(height: 1, color: Color(0xFFF0F0F0)),
               ListTile(
                 leading: const Text('🖥️', style: TextStyle(fontSize: 20)),
-                title: const Text(
+                title: CfgText(
+                  'manager_profile_screen.t05',
                   'מעבר בין מסכים',
                   style: TextStyle(color: BsTokens.inkLight),
                 ),
-                subtitle: const Text(
+                subtitle: CfgText(
+                  'manager_profile_screen.t06',
                   'צפייה בכל לוח — מצב מנהל',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
                 ),

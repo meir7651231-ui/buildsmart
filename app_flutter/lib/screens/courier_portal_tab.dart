@@ -23,6 +23,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -49,7 +50,8 @@ class CourierPortalTab extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        const Text(
+        CfgText(
+          'courier_portal_tab.t01',
           '🧰 פורטל השליח',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -58,7 +60,8 @@ class CourierPortalTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 2),
-        const Text(
+        CfgText(
+          'courier_portal_tab.t02',
           'ניווט, צי רכב, צ׳אט ומעקב SLA',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
@@ -488,7 +491,8 @@ class _DestinationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: const Text(
+              child: CfgText(
+                'courier_portal_tab.t03',
                 '🧭 פתח ניווט — יחובר עם חיבור השרת',
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),

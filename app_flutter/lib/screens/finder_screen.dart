@@ -13,6 +13,7 @@ import 'package:buildsmart/screens/_size_norm.dart';
 import '../features/word_finder/narrow_axis.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -406,7 +407,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         Expanded(
           child: results.isEmpty
               ? const Center(
-                  child: Text('לא נמצאו מוצרים',
+                  child: CfgText('finder_screen.no_results', 'לא נמצאו מוצרים',
                       style: TextStyle(color: _mute),),)
               : LipskeyProductsList(products: results),
         ),
@@ -481,7 +482,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         const Text('💡', style: TextStyle(fontSize: 13)),
         const SizedBox(width: 6),
         const Expanded(
-          child: Text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
+          child: CfgText('finder_screen.chip_tip', 'צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
               style: TextStyle(color: _ink, fontSize: 12),),
         ),
         Semantics(

@@ -20,6 +20,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,29 +70,31 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
     final order = idx >= 0 ? orders[idx] : null;
     if (order == null) {
       // אותו מצב-ריק כן כמו ב-PersonaPodSheet — ההזמנה כבר לא קיימת.
-      return const Padding(
-        padding: EdgeInsets.symmetric(
+      return Padding(
+        padding: const EdgeInsets.symmetric(
           horizontal: BsTokens.space4,
           vertical: BsTokens.space5,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('📦', style: TextStyle(fontSize: 48)),
-            SizedBox(height: 12),
-            Text(
+            const Text('📦', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            CfgText(
+              'courier_delivery_detail_sheet.t01',
               'ההזמנה לא נמצאה',
-              style: TextStyle(
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 6),
-            Text(
+            const SizedBox(height: 6),
+            CfgText(
+              'courier_delivery_detail_sheet.t02',
               'ייתכן שההזמנה הוסרה או שהמשלוח כבר נסגר — חזרו לרשימת המשלוחים',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
           ],
         ),
@@ -186,9 +189,10 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             const SizedBox(height: BsTokens.space3),
 
             // Items — the order's real lines.
-            const Text(
+            CfgText(
+              'courier_delivery_detail_sheet.t03',
               'פריטי המשלוח',
-              style: TextStyle(
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -238,9 +242,10 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
 
             // Stage flow — the order's position in kOrderFlow. No timestamps in
             // the demo engine, so none are shown (honest).
-            const Text(
+            CfgText(
+              'courier_delivery_detail_sheet.t04',
               'מסלול ההזמנה',
-              style: TextStyle(
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -286,9 +291,10 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: 2),
-            const Text(
+            CfgText(
+              'courier_delivery_detail_sheet.t05',
               'חותמות זמן לשלבים יחוברו עם חיבור השרת',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
             ),
             const SizedBox(height: BsTokens.space4),
 
@@ -332,7 +338,8 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: Text(
+              child: CfgText(
+                'courier_delivery_detail_sheet.t06',
                 '📸 אישור מסירה (POD)',
                 style: TextStyle(
                   color: canPod ? BsTokens.inkLight : BsTokens.mutedLight,
@@ -343,10 +350,11 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             ),
             if (!canPod) ...[
               const SizedBox(height: 2),
-              const Text(
+              CfgText(
+                'courier_delivery_detail_sheet.t07',
                 'POD זמין משלב האיסוף (כשההזמנה בידי השליח)',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
+                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
               ),
             ],
           ],

@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// Shared confirmation dialog for irreversible actions.
@@ -32,7 +33,7 @@ Future<bool> confirmDestructive(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ביטול'),
+              child: const CfgText('confirm_dialog.cancel', 'ביטול'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),

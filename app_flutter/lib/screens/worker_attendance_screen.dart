@@ -10,6 +10,7 @@ import 'package:buildsmart/state/worker_attendance.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,7 +101,8 @@ class _WorkerAttendanceScreenState
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: CfgText(
+          'worker_attendance_screen.title',
           '🕐 נוכחות',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -363,8 +365,9 @@ class _ClockCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
-                child: Text(
+              Expanded(
+                child: CfgText(
+                  'worker_attendance_screen.today',
                   'היום',
                   style: TextStyle(
                     color: BsTokens.inkLight,
@@ -376,7 +379,8 @@ class _ClockCard extends StatelessWidget {
               // 📍 honest GPS chip — shows only once a location was actually
               // captured (no invented "location on" badge).
               if (hasLoc)
-                const Text(
+                CfgText(
+                  'worker_attendance_screen.loc_recorded',
                   '📍 מיקום נרשם',
                   style: TextStyle(
                     color: BsTokens.successDark,
@@ -566,7 +570,8 @@ class _CalendarCard extends StatelessWidget {
                   minimumSize: const Size(48, 48),
                   foregroundColor: BsTokens.mutedLight,
                 ),
-                child: const Text('‹ הקודם', style: TextStyle(fontSize: 13)),
+                child: CfgText('worker_attendance_screen.prev', '‹ הקודם',
+                    style: TextStyle(fontSize: 13)),
               ),
               Expanded(
                 child: Text(
@@ -585,7 +590,8 @@ class _CalendarCard extends StatelessWidget {
                   minimumSize: const Size(48, 48),
                   foregroundColor: BsTokens.mutedLight,
                 ),
-                child: const Text('הבא ›', style: TextStyle(fontSize: 13)),
+                child: CfgText('worker_attendance_screen.next', 'הבא ›',
+                    style: TextStyle(fontSize: 13)),
               ),
             ],
           ),
@@ -620,7 +626,8 @@ class _CalendarCard extends StatelessWidget {
           ),
           if (dayCount == 0) ...[
             const SizedBox(height: BsTokens.space2),
-            const Text(
+            CfgText(
+              'worker_attendance_screen.no_records',
               'אין רישומי נוכחות בחודש זה',
               textAlign: TextAlign.center,
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
@@ -629,8 +636,9 @@ class _CalendarCard extends StatelessWidget {
             const Divider(height: 20, color: Color(0xFFF2F3F5)),
             Row(
               children: [
-                const Expanded(
-                  child: Text(
+                Expanded(
+                  child: CfgText(
+                    'worker_attendance_screen.month_total',
                     'סה"כ חודשי',
                     style: TextStyle(
                       color: BsTokens.inkLight,
@@ -828,15 +836,17 @@ class _DayDetailSheet extends StatelessWidget {
                   query: loc,
                 )
               else
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
-                  child: Text(
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
+                  child: CfgText(
+                    'worker_attendance_screen.no_loc_day',
                     '📍 לא נרשם מיקום ביום זה',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                   ),
                 ),
               const Divider(height: 24, color: Color(0xFFF2F3F5)),
-              const Text(
+              CfgText(
+                'worker_attendance_screen.work_summary',
                 'סיכום עבודה יומי',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -847,7 +857,8 @@ class _DayDetailSheet extends StatelessWidget {
               const SizedBox(height: BsTokens.space2),
               if (work.isEmpty)
                 // Honest empty state — the engine has no task dated to this day.
-                const Text(
+                CfgText(
+                  'worker_attendance_screen.no_work_day',
                   'אין פירוט-עבודה משויך ליום זה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                 )
@@ -893,7 +904,8 @@ class _LocationButton extends StatelessWidget {
                 const Icon(Icons.place, color: Color(0xFF1D6FE0), size: 20),
                 const SizedBox(width: BsTokens.space2),
                 Expanded(
-                  child: Text(
+                  child: CfgText(
+                    'worker_attendance_screen.open_nav',
                     'מיקום הכניסה — פתח ניווט',
                     style: const TextStyle(
                       color: Color(0xFF1D4ED8),

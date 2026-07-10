@@ -2,6 +2,7 @@ import 'package:buildsmart/screens/smart_home_screen.dart'
     show smartHomeSectionFor;
 import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +36,8 @@ class HomeContentReorder extends ConsumerWidget {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text(
+          title: CfgText(
+            'home_content_reorder.t01',
             '🏠 תוכן הבית',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -46,7 +48,7 @@ class HomeContentReorder extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('‹ חזרה',
+              child: CfgText('home_content_reorder.t02', '‹ חזרה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
             ),
           ],
@@ -77,8 +79,9 @@ class _BodyState extends ConsumerState<_Body> {
           BsTokens.space4, BsTokens.space4, BsTokens.space4, BsTokens.space2),
       child: Row(
         children: [
-          const Expanded(
-            child: Text(
+          Expanded(
+            child: CfgText(
+              'home_content_reorder.t03',
               'מסך הבית שלי',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -93,7 +96,7 @@ class _BodyState extends ConsumerState<_Body> {
                 notifier.reset();
                 showToast(context, 'הסדר אופס לברירת מחדל');
               },
-              child: const Text('איפוס',
+              child: CfgText('home_content_reorder.t04', 'איפוס',
                   style: TextStyle(color: BsTokens.mutedLight)),
             ),
           TextButton.icon(

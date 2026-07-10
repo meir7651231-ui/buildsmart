@@ -235,7 +235,8 @@ class CourierCertsScreen extends ConsumerWidget {
                         // Quick-add presets (#86.4) — pre-fill the NAME field
                         // ONLY; issuer and expiry stay user input (אין המצאות:
                         // no invented issuer, no invented dates).
-                        const Text(
+                        const CfgText(
+                          'courier_certs_screen.quick_fill_hint',
                           'מילוי מהיר — ממלא את שם התעודה בלבד:',
                           style: TextStyle(
                             color: BsTokens.mutedLight,
@@ -353,7 +354,8 @@ class CourierCertsScreen extends ConsumerWidget {
                               ),
                               child:
                                   photo == null
-                                      ? const Text(
+                                      ? const CfgText(
+                                        'courier_certs_screen.attach_photo',
                                         '📷 צרף צילום תעודה (לא חובה)',
                                         style: TextStyle(
                                           color: BsTokens.inkLight,
@@ -364,7 +366,8 @@ class CourierCertsScreen extends ConsumerWidget {
                                       : Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Text(
+                                          const CfgText(
+                                            'courier_certs_screen.photo_attached',
                                             '📷 צילום צורף ✓',
                                             style: TextStyle(
                                               color: BsTokens.inkLight,

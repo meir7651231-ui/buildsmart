@@ -33,6 +33,7 @@ import 'package:buildsmart/state/orders_engine.dart'
     show Order, managerAnalyticsProvider, ordersEngineProvider;
 import 'package:buildsmart/theme/app_theme.dart' show bsOnAccent;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -195,7 +196,8 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
           ],
         ),
         const SizedBox(height: BsTokens.space2),
-        const Text(
+        const CfgText(
+          'studio_rules_screen.t01',
           'פעולות משנות (סמן הזמנה · הצע הזמנה חוזרת) מוקפאות — ידרשו אישור מפורש. '
           'הכללים כאן קוראים בלבד ומתריעים; אינם משנים הזמנות.',
           style: TextStyle(
@@ -221,7 +223,8 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
               foregroundColor: bsOnAccent(context),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text(
+            child: const CfgText(
+              'studio_rules_screen.t02',
               'הוסף כלל',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
@@ -249,7 +252,8 @@ class _StudioRulesScreenState extends ConsumerState<StudioRulesScreen> {
         color: BsTokens.surfaceMid,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
-      child: const Text(
+      child: const CfgText(
+        'studio_rules_screen.t03',
         '🔒 כללי אוטומציה — מתי → תנאי → פעולה. בשלב זה הכללים קוראים בלבד: הם '
         'סופרים כמה פריטים תואמים כרגע ומתריעים. מחירים ופעולות-ליבה תמיד מוגנים; '
         'פעולות שמשנות הזמנות מוקפאות עד אישור מפורש.',

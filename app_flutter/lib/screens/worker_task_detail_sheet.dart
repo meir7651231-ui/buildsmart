@@ -11,6 +11,7 @@ import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,7 +94,8 @@ Widget _photoPlaceholder() => Container(
         color: const Color(0xFFF2F3F5),
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       ),
-      child: const Text(
+      child: CfgText(
+        'worker_task_detail_sheet.t01',
         '📷 תמונה מהשטח (הדגמה)',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
       ),
@@ -141,7 +143,8 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
       textDirection: TextDirection.rtl,
       child: AlertDialog(
         backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text(
+        title: CfgText(
+          'worker_task_detail_sheet.t02',
           '📸 הוכחת ביצוע',
           style: TextStyle(color: BsTokens.inkLight),
         ),
@@ -157,7 +160,8 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
             children: [
               taskPhotoWidget(dataUrl, height: 180, context: dialogCtx),
               const SizedBox(height: BsTokens.space3),
-              const Text(
+              CfgText(
+                'worker_task_detail_sheet.t03',
                 'לשלוח את המשימה לאישור המנהל עם התמונה הזו?',
                 style: TextStyle(color: Colors.black54, fontSize: 13.5),
               ),
@@ -168,12 +172,12 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('ביטול'),
+            child: CfgText('worker_task_detail_sheet.t04', 'ביטול'),
           ),
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(dialogCtx, true),
-            child: const Text('שלח לאישור'),
+            child: CfgText('worker_task_detail_sheet.t05', 'שלח לאישור'),
           ),
         ],
       ),
@@ -321,9 +325,10 @@ class _WorkerTaskDetailSheetState
       ),
       if (kit.isEmpty)
         // Honest: the mapped products carry no kit recommendation.
-        const Padding(
-          padding: EdgeInsets.only(top: BsTokens.space2),
-          child: Text(
+        Padding(
+          padding: const EdgeInsets.only(top: BsTokens.space2),
+          child: CfgText(
+            'worker_task_detail_sheet.t09',
             'אין המלצת ערכת התקנה למוצרי המשימה',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           ),
@@ -341,8 +346,9 @@ class _WorkerTaskDetailSheetState
     if (match.isEmpty) {
       // Honest empty state — the id no longer exists on the engine.
       return _sheetShell(
-        children: const [
-          Text(
+        children: [
+          CfgText(
+            'worker_task_detail_sheet.t06',
             'המשימה לא נמצאה',
             textAlign: TextAlign.center,
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
@@ -409,7 +415,8 @@ class _WorkerTaskDetailSheetState
         if (t.status == 'pending') ...[
           const SizedBox(height: BsTokens.space2),
           // Honest: this is exactly the engine's auto-advance behavior.
-          const Text(
+          CfgText(
+            'worker_task_detail_sheet.t07',
             'משימה בתור — תעבור לביצוע אוטומטית כשתוגש המשימה הנוכחית.',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
           ),
@@ -431,7 +438,8 @@ class _WorkerTaskDetailSheetState
         const _SecH('שלבי ביצוע'),
         if (t.steps.isEmpty)
           // Honest: this task has no step list on the seed.
-          const Text(
+          CfgText(
+            'worker_task_detail_sheet.t08',
             'לא הוגדרו שלבים למשימה זו',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           )

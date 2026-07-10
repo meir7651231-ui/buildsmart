@@ -19,6 +19,7 @@ import 'package:buildsmart/data/lipskey_verified_connections.dart'
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -126,7 +127,8 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('🌡️ מתאים לתנאים שלי?',
+          title: const CfgText(
+              'spec_copilot_screen.t01', '🌡️ מתאים לתנאים שלי?',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -141,7 +143,7 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space3),
-            const Text('טמפרטורת הקו:',
+            const CfgText('spec_copilot_screen.t02', 'טמפרטורת הקו:',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
             const SizedBox(height: 6),
             Wrap(
@@ -163,7 +165,8 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
             const SizedBox(height: BsTokens.space4),
             // ── the deterministic verdict (always shown, offline-safe) ──
             if (v.ok == null)
-              const Text('אין מפרט מאומת למוצר זה — לא ניתן לקבוע.',
+              const CfgText(
+                  'spec_copilot_screen.t03', 'אין מפרט מאומת למוצר זה — לא ניתן לקבוע.',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14))
             else
               Container(
@@ -189,7 +192,8 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
             // ── the AI explanation (only when the gateway is live) ──
             if (v.ok != null) ...[
               if (!aiAvailable)
-                const Text('💡 הסבר-AI דורש חיבור לשרת.',
+                const CfgText(
+                    'spec_copilot_screen.t04', '💡 הסבר-AI דורש חיבור לשרת.',
                     style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5))
               else if (_loading)
                 const Row(children: [
@@ -198,7 +202,7 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2)),
                   SizedBox(width: 8),
-                  Text('מנסח הסבר…',
+                  CfgText('spec_copilot_screen.t05', 'מנסח הסבר…',
                       style:
                           TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
                 ])

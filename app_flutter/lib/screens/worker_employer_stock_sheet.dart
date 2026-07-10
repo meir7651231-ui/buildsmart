@@ -22,6 +22,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/employer_stock.dart';
 import 'package:buildsmart/state/material_requests_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -80,9 +81,10 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
     return _sheetShell(
       context: context,
       children: [
-        const Text(
+        CfgText(
+          'worker_employer_stock_sheet.t01',
           '📦 מלאי הקבלן',
-          style: TextStyle(
+          style: const TextStyle(
             color: BsTokens.inkLight,
             fontWeight: FontWeight.w800,
             fontSize: 18,
@@ -105,21 +107,23 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
               color: const Color(0xFFF5F6FA),
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                CfgText(
+                  'worker_employer_stock_sheet.t02',
                   'הקבלן טרם שיתף מלאי',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: BsTokens.inkLight,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
                 ),
-                SizedBox(height: BsTokens.space1),
-                Text(
+                const SizedBox(height: BsTokens.space1),
+                CfgText(
+                  'worker_employer_stock_sheet.t03',
                   'רשימת המלאי תוצג כאן כשתחובר עם השרת.',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                  style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                 ),
               ],
             ),
@@ -142,9 +146,10 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
         // ── The worker's OWN recent requests + live status ────────────────
         if (myRequests.isNotEmpty) ...[
           const SizedBox(height: BsTokens.space4),
-          const Text(
+          CfgText(
+            'worker_employer_stock_sheet.t04',
             'הבקשות שלי',
-            style: TextStyle(
+            style: const TextStyle(
               color: BsTokens.inkLight,
               fontWeight: FontWeight.w800,
               fontSize: 15,
@@ -157,7 +162,7 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
         const SizedBox(height: BsTokens.space4),
         OutlinedButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('סגור'),
+          child: const CfgText('worker_employer_stock_sheet.t05', 'סגור'),
         ),
       ],
     );
@@ -349,7 +354,8 @@ class _RequestComposer extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
           ),
           icon: const Text('🧱', style: TextStyle(fontSize: 16)),
-          label: const Text(
+          label: const CfgText(
+            'worker_employer_stock_sheet.t06',
             'בקש חומרים',
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
@@ -365,7 +371,8 @@ class _RequestComposer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          const CfgText(
+            'worker_employer_stock_sheet.t07',
             '🧱 בקשת חומרים מהקבלן',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -374,7 +381,8 @@ class _RequestComposer extends StatelessWidget {
             ),
           ),
           const SizedBox(height: BsTokens.space1),
-          const Text(
+          const CfgText(
+            'worker_employer_stock_sheet.t08',
             'כתוב פריט אחד בכל שורה. הבקשה נשלחת לקבלן המעסיק — לא משנה את המלאי.',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
           ),
@@ -415,7 +423,8 @@ class _RequestComposer extends StatelessWidget {
                     backgroundColor: BsTokens.brand,
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  child: const Text(
+                  child: const CfgText(
+                    'worker_employer_stock_sheet.t09',
                     'שלח בקשה',
                     style: TextStyle(fontWeight: FontWeight.w800),
                   ),
@@ -427,7 +436,7 @@ class _RequestComposer extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(48, 48),
                 ),
-                child: const Text('בטל'),
+                child: const CfgText('worker_employer_stock_sheet.t10', 'בטל'),
               ),
             ],
           ),

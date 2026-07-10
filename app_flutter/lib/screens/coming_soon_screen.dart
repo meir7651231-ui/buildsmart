@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// "בקרוב" — an honest placeholder screen for a profession whose content
@@ -27,7 +28,8 @@ class ComingSoonScreen extends StatelessWidget {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text(
+          title: const CfgText(
+            'coming_soon_screen.title',
             'בקרוב',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -38,7 +40,8 @@ class ComingSoonScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(
+              child: const CfgText(
+                'coming_soon_screen.back',
                 '‹ חזרה',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
@@ -58,7 +61,8 @@ class ComingSoonScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 64),
                 ),
                 const SizedBox(height: BsTokens.space4),
-                const Text(
+                const CfgText(
+                  'coming_soon_screen.heading',
                   'בקרוב',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -92,7 +96,8 @@ class ComingSoonScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () => Navigator.of(context).maybePop(),
-                  child: const Text(
+                  child: const CfgText(
+                    'coming_soon_screen.back_to_picker',
                     '‹ חזור לבחירת מקצוע',
                     style: TextStyle(
                       fontSize: 16,

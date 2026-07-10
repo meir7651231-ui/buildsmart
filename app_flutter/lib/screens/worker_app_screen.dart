@@ -1043,7 +1043,8 @@ class _DayAttendanceCard extends StatelessWidget {
                 color: const Color(0xFFE9EAEC),
                 borderRadius: BorderRadius.circular(cfgRadius(context)),
               ),
-              child: const Text(
+              child: const CfgText(
+                'worker_app_screen.t01',
                 '✓ נרשמה נוכחות להיום',
                 style: TextStyle(
                   color: BsTokens.mutedLight,
@@ -1055,7 +1056,8 @@ class _DayAttendanceCard extends StatelessWidget {
           ] else if (inTs == null) ...[
             const SizedBox(height: BsTokens.space2),
             // Honest empty state for a past day with no attendance record.
-            const Text(
+            const CfgText(
+              'worker_app_screen.t02',
               'לא נרשמה נוכחות ביום זה',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
@@ -1239,7 +1241,8 @@ class _SummaryCard extends StatelessWidget {
                                 BsTokens.radiusPill,
                               ),
                             ),
-                            child: const Text(
+                            child: const CfgText(
+                              'worker_app_screen.t03',
                               'דמו',
                               style: TextStyle(
                                 color: BsTokens.mutedLight,

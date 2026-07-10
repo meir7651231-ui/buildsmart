@@ -24,6 +24,7 @@ import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -134,7 +135,8 @@ class _TradeDefineStepState extends ConsumerState<TradeDefineStepScreen> {
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'trade_define_step.title',
               '🏗️ הגדרת ענף',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -186,7 +188,8 @@ class _TradeDefineStepState extends ConsumerState<TradeDefineStepScreen> {
                     setState(() => _personaId = v ?? _personaId),
               ),
               const SizedBox(height: BsTokens.space4),
-              const Text(
+              const CfgText(
+                'trade_define_step.color',
                 'צבע',
                 style: TextStyle(
                   color: BsTokens.mutedLight,
@@ -287,7 +290,8 @@ class _SaveDraftButton extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(
+            child: CfgText(
+              'trade_define_step.save_draft',
               'שמור טיוטה',
               textAlign: TextAlign.center,
               style: TextStyle(

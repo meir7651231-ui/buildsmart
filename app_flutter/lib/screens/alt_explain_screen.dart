@@ -20,6 +20,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -150,7 +151,7 @@ class _AltExplainState extends ConsumerState<AltExplainScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('💡 למה החלופה שווה?',
+          title: const CfgText('alt_explain_screen.t01', '💡 למה החלופה שווה?',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -205,7 +206,8 @@ class _AltExplainState extends ConsumerState<AltExplainScreen> {
                   style: const TextStyle(
                       color: BsTokens.inkLight, fontSize: 15, height: 1.5)),
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ המחירים מתוך נתוני-הקטלוג; ה-AI רק מנסח את ההשוואה.',
+            const CfgText('alt_explain_screen.t02',
+                '⚙️ המחירים מתוך נתוני-הקטלוג; ה-AI רק מנסח את ההשוואה.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

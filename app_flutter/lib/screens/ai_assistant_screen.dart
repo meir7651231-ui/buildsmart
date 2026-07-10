@@ -34,6 +34,7 @@ import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -239,7 +240,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('🤖 העוזר החכם',
+          title: const CfgText('ai_assistant_screen.title', '🤖 העוזר החכם',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -249,7 +250,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(BsTokens.space5),
-                  child: Text('💡 העוזר החכם דורש חיבור לשרת.',
+                  child: CfgText('ai_assistant_screen.offline', '💡 העוזר החכם דורש חיבור לשרת.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: BsTokens.mutedLight, fontSize: 14)),
@@ -285,12 +286,12 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
             children: const [
               Text('🤖', style: TextStyle(fontSize: 40)),
               SizedBox(height: BsTokens.space3),
-              Text('שאל אותי כל דבר על אינסטלציה, רכש או עבודה.',
+              CfgText('ai_assistant_screen.empty_prompt', 'שאל אותי כל דבר על אינסטלציה, רכש או עבודה.',
                   textAlign: TextAlign.center,
                   style:
                       TextStyle(color: BsTokens.inkLight, fontSize: 15)),
               SizedBox(height: 6),
-              Text('אפשר גם לבקש: "תמצא לי ברז" · "מה מצב ההזמנות" · '
+              CfgText('ai_assistant_screen.empty_examples', 'אפשר גם לבקש: "תמצא לי ברז" · "מה מצב ההזמנות" · '
                   '"כמה נשאר בתקציב" · "תוסיף ערכה לסל".',
                   textAlign: TextAlign.center,
                   style:
@@ -330,7 +331,7 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
             if (hasKit) ...[
               const SizedBox(height: 8),
               if (confirmed)
-                const Text('✓ נוסף לסל',
+                const CfgText('ai_assistant_screen.added', '✓ נוסף לסל',
                     style: TextStyle(
                         color: Color(0xFF0F766E),
                         fontSize: 13,

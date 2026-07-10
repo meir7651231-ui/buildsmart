@@ -21,6 +21,7 @@ import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,9 +165,10 @@ class StockScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black54),
-        title: const Text(
+        title: CfgText(
+          'stock_screen.t01',
           'המלאי שלי',
-          style: TextStyle(color: _ink, fontWeight: FontWeight.w700),
+          style: const TextStyle(color: _ink, fontWeight: FontWeight.w700),
         ),
         actions: [
           // 📥 בקשות חומר — the contractor's inbox of worker material requests
@@ -181,13 +183,14 @@ class StockScreen extends ConsumerWidget {
       body: Column(
         children: [
           // section title (📦 המלאי שלי)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
+              child: CfgText(
+                'stock_screen.t02',
                 '📦 המלאי שלי',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: _ink,
@@ -241,11 +244,12 @@ class StockScreen extends ConsumerWidget {
                     ),
           ),
           // hint (stock-hint)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 20),
-            child: Text(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+            child: CfgText(
+              'stock_screen.t03',
               '💡 כשתסמן פריט כ"במחסן" או "באתר" בעץ המוצרים — הוא יופיע כאן.',
-              style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
+              style: const TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
             ),
           ),
         ],

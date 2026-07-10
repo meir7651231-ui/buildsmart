@@ -15,6 +15,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,18 +111,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           backgroundColor: BsTokens.cardLight,
-          title: const Text(
+          title: CfgText(
+            'profile_screen.t01',
             'מחיקת חשבון',
             style: TextStyle(color: _ink, fontWeight: FontWeight.w800),
           ),
-          content: const Text(
+          content: CfgText(
+            'profile_screen.t02',
             'החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל.',
             style: TextStyle(color: _ink),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text(
+              child: CfgText(
+                'profile_screen.t03',
                 'ביטול',
                 style: TextStyle(color: BsTokens.mutedLight),
               ),
@@ -131,7 +135,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 backgroundColor: const Color(0xFFD32F2F),
               ),
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text(
+              child: CfgText(
+                'profile_screen.t04',
                 'מחק לצמיתות',
                 style: TextStyle(fontWeight: FontWeight.w800),
               ),
@@ -188,7 +193,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           backgroundColor: BsTokens.cardLight,
           foregroundColor: _ink,
           elevation: 0,
-          title: const Text(
+          title: CfgText(
+            'profile_screen.t05',
             'הפרופיל שלי',
             style: TextStyle(
               color: _ink,
@@ -269,7 +275,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     borderRadius: BorderRadius.circular(cfgRadius(context)),
                   ),
                 ),
-                child: Text(
+                child: CfgText(
+                  'profile_screen.t06',
                   'שמור',
                   style: TextStyle(
                     color: bsOnAccent(context),

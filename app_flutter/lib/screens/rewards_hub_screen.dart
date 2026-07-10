@@ -3,6 +3,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -314,7 +315,7 @@ class _Referral extends StatelessWidget {
           ),
           child: Column(
             children: const [
-              Text('קוד ההזמנה שלך',
+              CfgText('rewards_hub_screen.t01', 'קוד ההזמנה שלך',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
               SizedBox(height: 6),
               Text(
@@ -452,7 +453,8 @@ PreferredSizeWidget _hubAppBar(BuildContext context, String title) => AppBar(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).maybePop(),
-          child: const Text(
+          child: const CfgText(
+            'rewards_hub_screen.t02',
             '‹ חזרה',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
           ),

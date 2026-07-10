@@ -24,6 +24,7 @@ import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -390,7 +391,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
               ),
             ),
             const SizedBox(height: BsTokens.space3),
-            const Text(
+            CfgText(
+              'login_sheet.t01',
               '🔐 התחברות לחשבון',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -438,7 +440,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           onPressed: _busy
               ? null
               : () => setState(() => _step = _LoginStep.email),
-          child: const Text(
+          child: CfgText(
+            'login_sheet.t02',
             'כניסה עם אימייל וסיסמה',
             style: TextStyle(
               color: BsTokens.mutedLight,
@@ -467,7 +470,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           children: [
             TextButton(
               onPressed: _busy ? null : _onResendTapped,
-              child: const Text(
+              child: CfgText(
+                'login_sheet.t03',
                 'שליחת קוד חדש',
                 style: TextStyle(
                   color: BsTokens.mutedLight,
@@ -482,7 +486,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
                         _code.clear();
                         _step = _LoginStep.phone;
                       }),
-              child: const Text(
+              child: CfgText(
+                'login_sheet.t04',
                 'החלפת מספר',
                 style: TextStyle(
                   color: BsTokens.mutedLight,
@@ -566,7 +571,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         if (!_emailCreateMode)
           TextButton(
             onPressed: _busy ? null : _resetPassword,
-            child: const Text(
+            child: CfgText(
+              'login_sheet.t05',
               'שכחתי סיסמה',
               style: TextStyle(
                 color: BsTokens.mutedLight,
@@ -579,7 +585,8 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
           onPressed: _busy
               ? null
               : () => setState(() => _step = _LoginStep.phone),
-          child: const Text(
+          child: CfgText(
+            'login_sheet.t06',
             'חזרה לכניסה עם טלפון',
             style: TextStyle(
               color: BsTokens.mutedLight,

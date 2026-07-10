@@ -19,6 +19,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,7 +149,7 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('💳 הסבר אשראי',
+          title: const CfgText('credit_explain_screen.title', '💳 הסבר אשראי',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -181,7 +182,8 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
                   style: const TextStyle(
                       color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ המספרים מנתוני-המערכת; ה-AI רק מסביר אותם.',
+            const CfgText('credit_explain_screen.note',
+                '⚙️ המספרים מנתוני-המערכת; ה-AI רק מסביר אותם.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

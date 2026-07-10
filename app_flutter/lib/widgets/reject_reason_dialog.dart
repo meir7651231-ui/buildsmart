@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// #12 — the manager's reject-with-optional-reason dialog, shared by BOTH
@@ -23,7 +24,8 @@ Future<String?> promptRejectReason(BuildContext context) async {
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           backgroundColor: const Color(0xFFFFFFFF),
-          title: const Text(
+          title: CfgText(
+            'reject_reason_dialog.title',
             '↩️ החזרה לתיקון',
             style: TextStyle(color: BsTokens.inkLight),
           ),
@@ -31,7 +33,8 @@ Future<String?> promptRejectReason(BuildContext context) async {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              CfgText(
+                'reject_reason_dialog.body',
                 'המשימה תוחזר לעובד לתיקון. אפשר לצרף סיבה — היא תוצג לעובד.',
                 style: TextStyle(color: Colors.black54, fontSize: 13),
               ),
@@ -51,7 +54,7 @@ Future<String?> promptRejectReason(BuildContext context) async {
             TextButton(
               style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
               onPressed: () => Navigator.pop(dialogCtx),
-              child: const Text('ביטול'),
+              child: CfgText('reject_reason_dialog.cancel', 'ביטול'),
             ),
             TextButton(
               style: TextButton.styleFrom(
@@ -59,7 +62,7 @@ Future<String?> promptRejectReason(BuildContext context) async {
                 foregroundColor: Colors.redAccent,
               ),
               onPressed: () => Navigator.pop(dialogCtx, ctrl.text.trim()),
-              child: const Text('דחה'),
+              child: CfgText('reject_reason_dialog.reject', 'דחה'),
             ),
           ],
         ),

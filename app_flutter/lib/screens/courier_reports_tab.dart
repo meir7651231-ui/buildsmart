@@ -359,7 +359,8 @@ class CourierReportsTab extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
+              const CfgText(
+                'courier_reports_tab.t01',
                 // ביאור כן (כמו F-3): רשומות legacy בלי ייחוס לא נספרות.
                 'מסירות ישנות ללא ייחוס אינן נספרות',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
@@ -406,7 +407,8 @@ class CourierReportsTab extends ConsumerWidget {
           title: '⏱️ זמן איסוף→מסירה',
           children: [
             if (timed.isEmpty)
-              const Text(
+              const CfgText(
+                'courier_reports_tab.t02',
                 'אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע אישור האיסוף ועד המסירה ללקוח.',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
@@ -455,7 +457,8 @@ class CourierReportsTab extends ConsumerWidget {
                     ),
                   ),
                   SizedBox(height: 4),
-                  Text(
+                  CfgText(
+                    'courier_reports_tab.t03',
                     'משלוח שיסומן "נמסר ללקוח" יופיע כאן',
                     style: TextStyle(
                       color: BsTokens.mutedLight,
@@ -521,12 +524,13 @@ class CourierReportsTab extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () => _openAiCourierReport(context, ref),
               icon: const Text('✨'),
-              label: const Text('נסח דוח עם AI'),
+              label: const CfgText('courier_reports_tab.t04', 'נסח דוח עם AI'),
             ),
           ),
         ],
         const SizedBox(height: BsTokens.space2),
-        const Text(
+        const CfgText(
+          'courier_reports_tab.t05',
           'הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.',
           textAlign: TextAlign.center,
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
@@ -819,7 +823,8 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                           BsTokens.radiusPill,
                         ),
                       ),
-                      child: const Text(
+                      child: const CfgText(
+                        'courier_reports_tab.t06',
                         'נמסר ✓',
                         style: TextStyle(
                           // F-34: AA on the light-green pill.

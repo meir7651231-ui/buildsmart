@@ -33,6 +33,7 @@ import 'package:buildsmart/screens/worker_profile_screen.dart'
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -131,7 +132,8 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'defects_sheet.header',
                       '🔧 ליקויים',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -163,7 +165,8 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               const SizedBox(height: BsTokens.space3),
 
               // ══ LIST — רשימת ליקויים ══
-              const Text(
+              const CfgText(
+                'defects_sheet.list_title',
                 'רשימת ליקויים',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -175,7 +178,8 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               if (scoped.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space4),
-                  child: Text(
+                  child: CfgText(
+                    'defects_sheet.empty',
                     'אין ליקויים',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -432,7 +436,8 @@ class _AddDefectForm extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        const Text(
+        const CfgText(
+          'defects_sheet.severity',
           'חומרה',
           style: TextStyle(
             color: BsTokens.inkLight,

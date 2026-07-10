@@ -39,6 +39,7 @@ import 'package:buildsmart/state/pdf_print_seam.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -850,7 +851,8 @@ class _ApprovalCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
+                    child: const CfgText(
+                      'finance_hub_sheets.approve',
                       'אשר',
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
@@ -868,7 +870,8 @@ class _ApprovalCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
+                    child: const CfgText(
+                      'finance_hub_sheets.reject',
                       'דחה',
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
@@ -1180,7 +1183,8 @@ class _PenaltyInputState extends State<_PenaltyInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        const CfgText(
+          'finance_hub_sheets.late_days_q',
           'כמה ימי איחור?',
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
         ),
@@ -1335,7 +1339,8 @@ class _FinReportView extends ConsumerWidget {
           backgroundColor: BsTokens.cardLight,
           foregroundColor: BsTokens.inkLight,
           elevation: 0.5,
-          title: const Text(
+          title: const CfgText(
+            'finance_hub_sheets.report_appbar',
             'דוח פיננסי — BuildSmart',
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
           ),
@@ -1361,7 +1366,7 @@ class _FinReportView extends ConsumerWidget {
                 );
               },
               icon: const Icon(Icons.print, size: 18),
-              label: const Text('הדפסה'),
+              label: const CfgText('finance_hub_sheets.print', 'הדפסה'),
               style: TextButton.styleFrom(foregroundColor: _kBrandTeal),
             ),
           ],
@@ -1389,7 +1394,8 @@ class _FinReportView extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const CfgText(
+                      'finance_hub_sheets.report_title',
                       'BuildSmart — דוח פיננסי לפרויקט',
                       style: TextStyle(
                         color: Color(0xFF16191D),
@@ -1548,7 +1554,8 @@ void _openFx(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFFFE0A3)),
             ),
-            child: const Text(
+            child: const CfgText(
+              'finance_hub_sheets.fx_server_note',
               '⚙️ שערי המט״ח מתעדכנים מהשרת — כאן מוצגים שערי דמו',
               style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
@@ -1620,7 +1627,8 @@ class _FxCalcState extends State<_FxCalc> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          const CfgText(
+            'finance_hub_sheets.convert_amount',
             'המרת סכום',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
           ),
@@ -1674,9 +1682,18 @@ class _FxCalcState extends State<_FxCalc> {
             ),
             items: const [
               // proto <option> labels verbatim.
-              DropdownMenuItem(value: 'USD', child: Text('דולר אמריקאי (USD)')),
-              DropdownMenuItem(value: 'EUR', child: Text('אירו (EUR)')),
-              DropdownMenuItem(value: 'GBP', child: Text('לירה שטרלינג (GBP)')),
+              DropdownMenuItem(
+                value: 'USD',
+                child: CfgText('finance_hub_sheets.cur_usd', 'דולר אמריקאי (USD)'),
+              ),
+              DropdownMenuItem(
+                value: 'EUR',
+                child: CfgText('finance_hub_sheets.cur_eur', 'אירו (EUR)'),
+              ),
+              DropdownMenuItem(
+                value: 'GBP',
+                child: CfgText('finance_hub_sheets.cur_gbp', 'לירה שטרלינג (GBP)'),
+              ),
             ],
             onChanged: (v) => setState(() => _cur = v ?? 'USD'),
           ),

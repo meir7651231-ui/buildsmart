@@ -31,6 +31,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -222,11 +223,12 @@ class _AttributeSchemaEditorState
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: CfgText(
+              'attribute_schema_editor.title',
               '🏷️ מאפיינים',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
@@ -243,12 +245,13 @@ class _AttributeSchemaEditorState
             children: [
               // ── the authored defs ──────────────────────────────────────
               if (defs.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: BsTokens.space4),
-                  child: Text(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: BsTokens.space4),
+                  child: CfgText(
+                    'attribute_schema_editor.empty',
                     'אין עדיין מאפיינים',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: BsTokens.mutedLight,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -340,9 +343,10 @@ class _AttributeSchemaEditorState
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 activeColor: BsTokens.brand,
-                title: const Text(
+                title: CfgText(
+                  'attribute_schema_editor.axis_q',
                   'ציר וריאנט?',
-                  style: TextStyle(color: BsTokens.inkLight, fontSize: 14),
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 ),
                 value: _isAxis,
                 onChanged: (v) => setState(() => _isAxis = v),

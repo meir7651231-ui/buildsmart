@@ -13,6 +13,7 @@ import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,7 +69,7 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text('🏗️ פרויקט חכם',
+          title: const CfgText('smart_project_screen.t01', '🏗️ פרויקט חכם',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -76,12 +77,12 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
           actions: [
             TextButton(
               onPressed: () => _openDayPicker(stages, done),
-              child: const Text('📅 בחר יום',
+              child: const CfgText('smart_project_screen.t02', '📅 בחר יום',
                   style: TextStyle(color: BsTokens.brandDark, fontSize: 13.5)),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('‹ יציאה',
+              child: const CfgText('smart_project_screen.t03', '‹ יציאה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
             ),
           ],
@@ -105,7 +106,8 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
                   children: [
                     Text('🗓️', style: TextStyle(fontSize: 40)),
                     SizedBox(height: 8),
-                    Text(
+                    CfgText(
+                      'smart_project_screen.t04',
                       'אין ימי עבודה בתוכנית',
                       style: TextStyle(
                           color: BsTokens.inkLight,
@@ -113,7 +115,8 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
                           fontSize: 15),
                     ),
                     SizedBox(height: 4),
-                    Text(
+                    CfgText(
+                      'smart_project_screen.t05',
                       'כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן',
                       style: TextStyle(
                           color: BsTokens.mutedLight, fontSize: 13),
@@ -176,7 +179,7 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
               controller: scroll,
               padding: const EdgeInsets.all(BsTokens.space4),
               children: [
-                const Text('בחר יום',
+                const CfgText('smart_project_screen.t06', 'בחר יום',
                     style: TextStyle(
                         color: BsTokens.inkLight,
                         fontWeight: FontWeight.w800,
@@ -203,7 +206,7 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
                                     color: BsTokens.inkLight, fontSize: 13.5)),
                           ),
                           if (done.contains(stages[i].key))
-                            const Text('✓ הושלם',
+                            const CfgText('smart_project_screen.t07', '✓ הושלם',
                                 style: TextStyle(
                                     color: Color(0xFF1f8a4c),
                                     fontWeight: FontWeight.w700,
@@ -292,7 +295,7 @@ class _ProjectDone extends StatelessWidget {
           color: const Color(0xFFE9F7EE),
           borderRadius: BorderRadius.circular(cfgRadius(context)),
         ),
-        child: const Text('🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!',
+        child: const CfgText('smart_project_screen.t08', '🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!',
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: Color(0xFF1f6f3f),
@@ -401,7 +404,7 @@ class _StageCard extends StatelessWidget {
                     _row('היקף', '${stage.totalDays} ימי עבודה'),
                     if (stage.steps.isNotEmpty) ...[
                       const SizedBox(height: BsTokens.space2),
-                      const Text('שלבי ביצוע',
+                      const CfgText('smart_project_screen.t09', 'שלבי ביצוע',
                           style: TextStyle(
                               color: BsTokens.inkLight,
                               fontWeight: FontWeight.w800,

@@ -21,6 +21,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,7 +116,8 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('הדוח הועתק'), duration: Duration(seconds: 2)),
+          content: CfgText('daily_report_screen.copied', 'הדוח הועתק'),
+          duration: Duration(seconds: 2)),
     );
   }
 
@@ -130,7 +132,7 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('✨ ניסוח חכם',
+          title: const CfgText('daily_report_screen.title', '✨ ניסוח חכם',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -171,12 +173,13 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
                 child: FilledButton.icon(
                   onPressed: _copy,
                   icon: const Text('📋'),
-                  label: const Text('העתק לשליחה'),
+                  label: const CfgText('daily_report_screen.copy_send', 'העתק לשליחה'),
                 ),
               ),
             ],
             const SizedBox(height: BsTokens.space4),
-            const Text('⚙️ המספרים נרשמו במערכת; ה-AI רק מנסח אותם לדוח.',
+            const CfgText('daily_report_screen.footer_note',
+                '⚙️ המספרים נרשמו במערכת; ה-AI רק מנסח אותם לדוח.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
           ],
         ),

@@ -41,6 +41,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -265,7 +266,8 @@ class _ConnectionRuleStudioState
             backgroundColor: BsTokens.cardLight,
             elevation: 0,
             iconTheme: const IconThemeData(color: BsTokens.inkLight),
-            title: const Text(
+            title: const CfgText(
+              'connection_rule_studio.screen_title',
               '🔌 כללי חיבור',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -436,7 +438,8 @@ class _EmptyConnectors extends StatelessWidget {
         children: [
           Text(_kConnectorEmoji, style: TextStyle(fontSize: 34)),
           SizedBox(height: BsTokens.space2),
-          Text(
+          CfgText(
+            'connection_rule_studio.empty_connectors',
             'אין עדיין מחברים',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -655,7 +658,8 @@ class _MethodLabelDialogState extends State<_MethodLabelDialog> {
       textDirection: TextDirection.rtl,
       child: AlertDialog(
         backgroundColor: BsTokens.cardLight,
-        title: const Text(
+        title: const CfgText(
+          'connection_rule_studio.new_rule',
           'כלל חדש',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -689,7 +693,8 @@ class _MethodLabelDialogState extends State<_MethodLabelDialog> {
           TextButton(
             onPressed: () => Navigator.pop(context, _ctl.text),
             style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const Text(
+            child: const CfgText(
+              'connection_rule_studio.save',
               'שמור',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
@@ -714,7 +719,8 @@ class _RuleInspectDialog extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: AlertDialog(
         backgroundColor: BsTokens.cardLight,
-        title: const Text(
+        title: const CfgText(
+          'connection_rule_studio.rule_title',
           'כלל חיבור',
           style: TextStyle(
             color: BsTokens.inkLight,
@@ -729,7 +735,8 @@ class _RuleInspectDialog extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
+            child: const CfgText(
+              'connection_rule_studio.delete_rule',
               'מחק כלל',
               style: TextStyle(
                 color: BsTokens.dangerDark,
@@ -740,7 +747,8 @@ class _RuleInspectDialog extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const Text(
+            child: const CfgText(
+              'connection_rule_studio.close',
               'סגור',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),

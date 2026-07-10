@@ -24,6 +24,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 // #106/#107 — the reusable handwritten-signature capture sheet (pure dart:ui).
 import 'package:buildsmart/widgets/signature_pad.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -182,9 +183,10 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       appBar: AppBar(
         backgroundColor: BsTokens.cardLight,
         elevation: 0,
-        title: const Text(
+        title: CfgText(
+          'worker_forms_screen.forms_title',
           '📄 טפסים',
-          style: TextStyle(
+          style: const TextStyle(
             color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
@@ -217,10 +219,11 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       title: '📄 טופס 101 — שנת $_year',
       children: [
         // HONEST framing: a structured digital form, not the official PDF.
-        const Text(
+        CfgText(
+          'worker_forms_screen.form101_note',
           'טופס דיגיטלי מובנה — אינו הטופס הרשמי של רשות המסים. '
           'הגשה רשמית תחובר עם חיבור השרת.',
-          style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
         ),
         const SizedBox(height: BsTokens.space3),
         _field(_nameCtl, 'שם מלא', errorText: _errName),
@@ -352,9 +355,10 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          CfgText(
+            'worker_forms_screen.employer_details',
             'פרטי המעסיק',
-            style: TextStyle(
+            style: const TextStyle(
               color: BsTokens.inkLight,
               fontWeight: FontWeight.w800,
               fontSize: 13.5,
@@ -581,9 +585,10 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
         ),
         if (mine.isNotEmpty) ...[
           const SizedBox(height: BsTokens.space4),
-          const Text(
+          CfgText(
+            'worker_forms_screen.my_requests',
             'הבקשות שלי',
-            style: TextStyle(
+            style: const TextStyle(
               color: BsTokens.inkLight,
               fontWeight: FontWeight.w800,
               fontSize: 14,
@@ -693,9 +698,10 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     return _FormCard(
       title: '🤒 אישור מחלה',
       children: [
-        const Text(
+        CfgText(
+          'worker_forms_screen.sick_hint',
           'צלם את אישור המחלה — הצילום נשמר ברשימה כאן.',
-          style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
         ),
         const SizedBox(height: BsTokens.space3),
         // #107 — the declaration must be ticked before attaching a photo
@@ -710,11 +716,12 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
           onPressed: () => _addSickNote(username),
         ),
         if (notes.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: BsTokens.space3),
-            child: Text(
+          Padding(
+            padding: const EdgeInsets.only(top: BsTokens.space3),
+            child: CfgText(
+              'worker_forms_screen.no_uploads',
               'אין אישורים שהועלו עדיין',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
             ),
           )
         else ...[
@@ -946,9 +953,10 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
         // Image.memory gets a Uint8List (not nullable).
         if (bytes != null) ...[
           const SizedBox(width: BsTokens.space2),
-          const Text(
+          CfgText(
+            'worker_forms_screen.signed',
             'חתום ✓',
-            style: TextStyle(
+            style: const TextStyle(
               color: BsTokens.successDark,
               fontSize: 13,
               fontWeight: FontWeight.w800,

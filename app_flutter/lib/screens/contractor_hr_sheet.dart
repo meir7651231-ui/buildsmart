@@ -26,6 +26,7 @@ import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/state/worker_trainings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,7 +211,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
               Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'contractor_hr_sheet.t01',
                       '👷 חופשות עובדים',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -244,7 +246,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
                 // Honest empty state — no fake rows.
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'contractor_hr_sheet.t02',
                     '🌴 אין בקשות חופשה מהעובדים שלך כרגע',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -275,7 +278,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
 
               // ══ SECTION A — הדרכות עובדים (approve-back) ══
               const Divider(height: 32),
-              const Text(
+              const CfgText(
+                'contractor_hr_sheet.t03',
                 '🎓 הדרכות עובדים',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -294,7 +298,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
               if (trainings.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'contractor_hr_sheet.t04',
                     '🎓 אין הדרכות מהעובדים שלך כרגע',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -342,7 +347,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
                 ),
                 const SizedBox(height: BsTokens.space3),
               ],
-              const Text(
+              const CfgText(
+                'contractor_hr_sheet.t05',
                 '📜 תעודות עובדים',
                 style: TextStyle(
                   color: BsTokens.inkLight,
@@ -351,7 +357,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
+              const CfgText(
+                'contractor_hr_sheet.t06',
                 'התעודות המקצועיות של העובדים שלך (לצפייה בלבד)',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
@@ -359,7 +366,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
               if (certs.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-                  child: Text(
+                  child: CfgText(
+                    'contractor_hr_sheet.t07',
                     '📜 אין תעודות מהעובדים שלך כרגע',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -383,7 +391,8 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
               // normalizes to this name). Same cert vocabulary, so it sits right
               // after the certs section.
               const Divider(height: 32),
-              const Text(
+              const CfgText(
+                'contractor_hr_sheet.t08',
                 '📋 מסמכים נדרשים מהעובדים',
                 style: TextStyle(
                   color: BsTokens.inkLight,

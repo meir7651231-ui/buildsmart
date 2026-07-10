@@ -1101,11 +1101,12 @@ class _HistoryRow extends StatelessWidget {
                                   child: Image(
                                     image: imageProviderForRef(task.photo)!,
                                     errorBuilder:
-                                        (_, __, ___) => const Padding(
-                                          padding: EdgeInsets.all(24),
-                                          child: Text(
+                                        (_, __, ___) => Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: CfgText(
+                                            'worker_reports_tab.photo_error',
                                             '📷 לא ניתן להציג את התמונה',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.white70,
                                             ),
                                           ),

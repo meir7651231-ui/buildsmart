@@ -123,6 +123,7 @@ import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbToolLayer;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show BsKeyboardHost, kKbButtonsV2, kKbLiveMirror;
+import 'package:buildsmart/widgets/studio/cfg_text.dart' show CfgText;
 import 'package:buildsmart/widgets/toast.dart' show bsNavigatorKey;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
@@ -978,7 +979,9 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   void _voiceUnavailable() {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('קולי — בקרוב')));
+      ..showSnackBar(const SnackBar(
+        content: CfgText('floating_card_keyboard.voice_soon', 'קולי — בקרוב'),
+      ));
   }
 
   /// BACK tile: pop one drill level. From a deeper view this returns to the

@@ -32,6 +32,7 @@ import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -135,7 +136,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text(
+          title: const CfgText(
+            'tasks_screen.title',
             '📋 משימות',
             style: TextStyle(
               color: BsTokens.inkLight,
@@ -146,7 +148,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('‹ יציאה',
+              child: const CfgText('tasks_screen.exit', '‹ יציאה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
             ),
           ],
@@ -300,7 +302,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       const Padding(
         padding: EdgeInsets.fromLTRB(
             BsTokens.space1, 0, BsTokens.space1, BsTokens.space2),
-        child: Text('עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.',
+        child: CfgText('tasks_screen.proposal_intro',
+            'עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.',
             style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
       ),
       for (final t in proposals)
@@ -465,7 +468,8 @@ class _LogButton extends StatelessWidget {
           onTap: onTap,
           child: const Padding(
             padding: EdgeInsets.all(BsTokens.space4),
-            child: Text(
+            child: CfgText(
+              'tasks_screen.log_btn',
               '📅 יומן עבודה — מה בוצע בכל יום',
               style: TextStyle(
                 color: BsTokens.inkLight,
@@ -495,7 +499,8 @@ class _NewTaskButton extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(BsTokens.space4),
-            child: Text(
+            child: CfgText(
+              'tasks_screen.new_task',
               '＋ משימה חדשה',
               style: TextStyle(
                 color: bsOnAccent(context),
@@ -552,7 +557,8 @@ class _ApprovalCard extends StatelessWidget {
                     child: OutlinedButton(
                       key: ValueKey('approval-reject-$name'),
                       onPressed: onReject,
-                      child: const Text('↩️ החזר לתיקון'),
+                      child: const CfgText(
+                          'tasks_screen.approval_reject', '↩️ החזר לתיקון'),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -631,7 +637,7 @@ class _ProposalCard extends StatelessWidget {
                     child: OutlinedButton(
                       key: ValueKey('proposal-reject-$id'),
                       onPressed: onReject,
-                      child: const Text('❌ דחה'),
+                      child: const CfgText('tasks_screen.proposal_reject', '❌ דחה'),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -759,7 +765,7 @@ class _Card extends StatelessWidget {
                         child: const Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
-                          child: Text('✏️ ערוך',
+                          child: CfgText('tasks_screen.edit', '✏️ ערוך',
                               style: TextStyle(
                                   color: BsTokens.brandDark,
                                   fontWeight: FontWeight.w700,
@@ -945,7 +951,8 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
               // MANAGER decide block
               if (canDecide) ...[
                 const SizedBox(height: BsTokens.space3),
-                const Text(
+                const CfgText(
+                  'tasks_screen.decide_intro',
                   'העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                 ),
@@ -967,7 +974,8 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                         Navigator.of(context).pop();
                         showToast(context, 'המשימה הוחזרה לעובד לתיקון');
                       },
-                      child: const Text('↩️ החזר לתיקון'),
+                      child: const CfgText(
+                          'tasks_screen.sheet_reject', '↩️ החזר לתיקון'),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -1102,13 +1110,13 @@ class _WorkLogSheet extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Text('יומן עבודה',
+              const CfgText('tasks_screen.worklog_title', 'יומן עבודה',
                   style: TextStyle(
                       color: BsTokens.inkLight,
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
               const SizedBox(height: 2),
-              const Text('סיכום יומי — מה בוצע בפרויקט',
+              const CfgText('tasks_screen.worklog_sub', 'סיכום יומי — מה בוצע בפרויקט',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
               const SizedBox(height: BsTokens.space3),
               for (final day in log) _logDay(day),

@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 /// 🧾 מסמכים — חשבוניות ודוח חודשי (#87.4, F-24) — SERVER-READY sheet for the
@@ -66,7 +67,8 @@ class _DocumentsSheetBody extends StatelessWidget {
               child: Row(
                 children: [
                   const Expanded(
-                    child: Text(
+                    child: CfgText(
+                      'store_documents_sheet.t01',
                       '🧾 חשבוניות ודוח חודשי',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -103,7 +105,8 @@ class _DocumentsSheetBody extends StatelessWidget {
                   color: BsTokens.brand.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                 ),
-                child: const Text(
+                child: const CfgText(
+                  'store_documents_sheet.t02',
                   '🔌 החשבוניות והדוחות האמיתיים יחוברו עם חיבור השרת — '
                   'המסך מוכן ויתמלא אוטומטית.',
                   style: TextStyle(
@@ -182,7 +185,8 @@ class _MonthRow extends StatelessWidget {
                 color: const Color(0xFFF2F3F5),
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               ),
-              child: const Text(
+              child: const CfgText(
+                'store_documents_sheet.t03',
                 'יחובר עם חיבור השרת',
                 style: TextStyle(
                   color: BsTokens.mutedLight,

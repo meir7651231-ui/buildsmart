@@ -21,6 +21,7 @@ import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -398,7 +399,7 @@ class _SmartTreeCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: const Text('הוסף לסל',
+              child: CfgText('smart_home_screen.add_to_cart', 'הוסף לסל',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -442,20 +443,21 @@ class _WorkPath extends ConsumerWidget {
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   ),
-                  child: const Text('🛁 חדש — מאפס עד גמר',
+                  child: CfgText('smart_home_screen.workpath_badge', '🛁 חדש — מאפס עד גמר',
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 12)),
                 ),
                 const SizedBox(height: 6),
-                const Text('גמר אמבטיה — מלווה אותך שלב-שלב',
+                CfgText('smart_home_screen.workpath_title', 'גמר אמבטיה — מלווה אותך שלב-שלב',
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
                         fontSize: 17)),
                 const SizedBox(height: 4),
-                const Text(
+                CfgText(
+                  'smart_home_screen.workpath_sub',
                   '4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון "סדר הרכבה".',
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
@@ -581,14 +583,14 @@ class _InstallStudioHero extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('תכנון חיבור',
+                    CfgText('smart_home_screen.install_title', 'תכנון חיבור',
                         style: TextStyle(
                           color: pal.ink,
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
                         )),
                     const SizedBox(height: 2),
-                    Text('בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור',
+                    CfgText('smart_home_screen.install_sub', 'בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור',
                         style: TextStyle(color: pal.muted, fontSize: 12)),
                   ],
                 ),

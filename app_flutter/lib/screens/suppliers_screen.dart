@@ -4,6 +4,7 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart'
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 
 class SuppliersScreen extends StatelessWidget {
@@ -24,7 +25,8 @@ class SuppliersScreen extends StatelessWidget {
           backgroundColor: const Color(0xFFFFFFFF),
           foregroundColor: BsTokens.inkLight,
           elevation: 0,
-          title: const Text(
+          title: const CfgText(
+            'suppliers_screen.title',
             'ספקים ומותגים',
             style: TextStyle(
               color: BsTokens.inkLight,

@@ -17,6 +17,7 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/logic/prompt_sanitize.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,7 +114,8 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('הנוסח הועתק'), duration: Duration(seconds: 2)),
+          content: CfgText('reject_reason_screen.copied', 'הנוסח הועתק'),
+          duration: Duration(seconds: 2)),
     );
   }
 
@@ -128,7 +130,7 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
         appBar: AppBar(
           backgroundColor: BsTokens.cardLight,
           elevation: 0,
-          title: const Text('✨ סיבת-דחייה',
+          title: const CfgText('reject_reason_screen.title', '✨ סיבת-דחייה',
               style: TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w800,
@@ -162,12 +164,12 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
                 child: FilledButton.icon(
                   onPressed: _copy,
                   icon: const Text('📋'),
-                  label: const Text('העתק'),
+                  label: const CfgText('reject_reason_screen.copy', 'העתק'),
                 ),
               ),
             ],
             const SizedBox(height: BsTokens.space4),
-            const Text(
+            const CfgText('reject_reason_screen.note',
                 '⚙️ נוסח כללי ומכובד; ערוך לפי הצורך לפני שליחה. ה-AI לא ממציא '
                 'פרטים על המבקש.',
                 style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),

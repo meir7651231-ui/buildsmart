@@ -6,6 +6,7 @@
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,7 +96,8 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
                   ),
                 ),
               ),
-              const Text(
+              CfgText(
+                'role_request_sheet.title',
                 '🪪 בקשת תפקיד',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
@@ -104,7 +106,8 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
+              CfgText(
+                'role_request_sheet.subtitle',
                 'בחר תפקיד — הבקשה תישלח לאישור הגורם המתאים',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
