@@ -44,20 +44,40 @@ void main() {
       expect(slangVariants('אלבו 1/2'), ['ברך 1/2', 'זווית 1/2']);
     });
 
+    test('owner glossary aliases (slang + English) fold to the catalog word', () {
+      expect(slangVariants('toilet'), ['אסלה']);
+      expect(slangVariants('trap'), ['סיפון', 'מחסום']);
+      expect(slangVariants('pipe'), ['צינור']);
+      expect(slangVariants('טאפה'), ['פקק']);
+      expect(slangVariants('פולירול'), ['PPR']);
+    });
+
+    test('inch-size phrases swap to the catalog notation', () {
+      expect(slangVariants('חצי צול'), contains('1/2'));
+      expect(slangVariants('ברז חצי צול'), contains('ברז 1/2'));
+      expect(slangVariants('צול וחצי'), containsAll(['1 1/2', 'DN40']));
+      expect(slangVariants('4 צול'), contains('DN110'));
+    });
+
     test('a real catalog word is not slang ⇒ empty', () {
       expect(slangVariants('ברז'), isEmpty);
       expect(slangVariants(''), isEmpty);
     });
 
     test('every canonical target really exists in the catalog (אין המצאות)', () {
-      kPlumberSlang.forEach((slang, canons) {
-        for (final c in canons) {
-          final hits =
-              kCatalogProducts.where((p) => catalogProductMatchesQuery(p, c));
-          expect(hits, isNotEmpty,
-              reason: 'slang "$slang" → "$c" must match real products');
-        }
-      });
+      void checkTargets(Map<String, List<String>> m) {
+        m.forEach((slang, canons) {
+          for (final c in canons) {
+            final hits =
+                kCatalogProducts.where((p) => catalogProductMatchesQuery(p, c));
+            expect(hits, isNotEmpty,
+                reason: 'slang "$slang" → "$c" must match real products');
+          }
+        });
+      }
+
+      checkTargets(kPlumberSlang);
+      checkTargets(kPlumberSlangPhrases);
     });
   });
 

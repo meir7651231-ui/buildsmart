@@ -162,6 +162,41 @@ const Map<String, List<String>> kPlumberSlang = {
   'cartridge': ['מנגנון'],
   'aerator': ['פיה'],
   'floater': ['מצוף'],
+  // ── owner glossary batch (מעודכן.xlsx): the slang + English aliases from the
+  //    owner's technical|slang|English dictionary whose target has REAL products.
+  //    Tool/sealant/adhesive rows (מפתח שוודי, טפלון, סיליקון, דבק) were dropped —
+  //    no catalog product to point at (owner: "מה שאין מוצר לא צריך").
+  'פולירול': ['PPR'],
+  'טאפה': ['פקק'],
+  'פעמון': ['מנגנון'], // niagara flush mechanism
+  'float': ['מצוף'],
+  'check': ['אל חוזר'],
+  'flush': ['מנגנון'],
+  'monobloc': ['אסלה'],
+  'toilet': ['אסלה'],
+  'trap': ['סיפון', 'מחסום'],
+  'pipe': ['צינור'],
+  'saddle': ['רוכב'],
+  'plug': ['פקק'],
+  'bushing': ['תותב', 'בושינג'],
+};
+
+/// Multi-word slang PHRASES — mostly the inch-size colloquialisms a plumber
+/// speaks ("חצי צול", "צול וחצי", "4 צול") → the token the catalog actually uses
+/// (½" is written "1/2", 1½" is "1 1/2", 4" is "DN110"). [slangVariants] swaps the
+/// phrase as a substring, so "ברז חצי צול" → "ברז 1/2". Every target below was
+/// verified to match real products.
+const Map<String, List<String>> kPlumberSlangPhrases = <String, List<String>>{
+  'חצי צול': ['1/2'],
+  'שלושת רבעי צול': ['3/4'],
+  '3/4 צול': ['3/4'],
+  'צול ורבע': ['1 1/4', '32'],
+  'צול וחצי': ['1 1/2', 'DN40'],
+  '2 צול': ['2"', 'DN50'],
+  'שני צול': ['2"', 'DN50'],
+  '4 צול': ['DN110', '110'],
+  'ארבעה צול': ['DN110', '110'],
+  '6 צול': ['DN160', '160'],
 };
 
 final RegExp _ws = RegExp(r'\s+');
@@ -174,8 +209,20 @@ final RegExp _ws = RegExp(r'\s+');
 List<String> slangVariants(String query) {
   final q = query.trim();
   if (q.isEmpty) return const [];
-  final words = q.split(_ws);
   final out = <String>[];
+  // (1) Multi-word inch-size phrases: swap the whole colloquialism as a substring
+  // ("ברז חצי צול" → "ברז 1/2"), so the size finds the catalog's real notation.
+  // Keys are Hebrew (case-free), so a plain contains/replace preserves the rest of
+  // the query and the target's own casing (DN40).
+  kPlumberSlangPhrases.forEach((phrase, targets) {
+    if (q.contains(phrase)) {
+      for (final t in targets) {
+        out.add(q.replaceAll(phrase, t));
+      }
+    }
+  });
+  // (2) Per-token single-word slang: swap one slang token for its canonical.
+  final words = q.split(_ws);
   for (var i = 0; i < words.length; i++) {
     final canons = kPlumberSlang[words[i].toLowerCase()];
     if (canons == null) continue;
