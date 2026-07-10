@@ -184,7 +184,13 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
   // unrelated SKU (e.g. "200" inside SKU 120011) — that buried real size hits
   // under SKU-coincidence noise. Word queries don't touch the SKU at all.
   if (q.length >= 5 && _normForSearch(p.sku).contains(q)) return true;
-  final hay = _normForSearch('${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
+  // BILINGUAL ([kGlobalSearch] const-false ⇒ the English tail folds out ⇒ the
+  // haystack string is byte-identical). Every product carries nameEn/categoryEn
+  // but the search ignored them; folding them in lets an English query ("elbow",
+  // "ball valve", "tee") find the Hebrew product it names.
+  final hay = _normForSearch(kGlobalSearch
+      ? '${p.nameHe} ${p.categoryHe} ${p.color ?? ''} ${p.nameEn} ${p.categoryEn}'
+      : '${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
   final tokens = q.split(_wsSplit).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
   bool hit(String t) {
@@ -207,8 +213,17 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   final name = _normForSearch(p.nameHe);
   final cat = _normForSearch(p.categoryHe);
   final color = _normForSearch(p.color ?? '');
+  // BILINGUAL scoring ([kGlobalSearch] const-false ⇒ '' ⇒ every English arm below
+  // folds out, byte-identical). An English hit scores just under its Hebrew twin,
+  // so a real Hebrew match still leads.
+  final nameEn = kGlobalSearch ? _normForSearch(p.nameEn) : '';
+  final catEn = kGlobalSearch ? _normForSearch(p.categoryEn) : '';
   var score = 0;
-  if (name.contains(q)) score += 100; // whole query in the name
+  if (name.contains(q)) {
+    score += 100; // whole query in the name
+  } else if (kGlobalSearch && nameEn.contains(q)) {
+    score += 90; // whole query in the English name
+  }
   for (final t in q.split(_wsSplit).where((t) => t.isNotEmpty)) {
     if (name.contains(t)) {
       score += 20;
@@ -216,6 +231,10 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
       score += 8;
     } else if (color.contains(t)) {
       score += 6;
+    } else if (kGlobalSearch && nameEn.contains(t)) {
+      score += 18;
+    } else if (kGlobalSearch && catEn.contains(t)) {
+      score += 7;
     } else {
       final alts = kSearchSynonyms[t];
       if (alts != null) {
