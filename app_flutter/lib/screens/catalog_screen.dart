@@ -25,6 +25,7 @@ import 'package:buildsmart/data/variant_families.dart';
 // the _CatalogBody routing branch is unreachable, so catalog behaviour is
 // byte-identical for normal users.
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
+import 'package:buildsmart/features/ring_dive/plain_dive_screen.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
 import 'package:buildsmart/features/word_finder/word_finder_home.dart';
@@ -1685,6 +1686,16 @@ class _CatalogBody extends ConsumerWidget {
     // byte-identical (this section is only reachable via the kWordFinder pill
     // and falls back to WordFinderHome). RingDiveScreen self-gates too.
     if (active == 'מאתר חכם') {
+      // PlainDive ([kPlainDive], const-false ⇒ folds out ⇒ byte-identical, and the
+      // pro RingDive below is untouched). When on, the smart-finder pill opens the
+      // LAYMAN 4-ring dictionary drill instead — running ALONGSIDE the pro dial in
+      // the codebase, never replacing it.
+      if (kPlainDive) {
+        return const Directionality(
+          textDirection: TextDirection.rtl,
+          child: SafeArea(child: PlainDiveScreen()),
+        );
+      }
       if (ref.watch(featureFlagsProvider).contains(kRingDiveFlag)) {
         return const Directionality(
           textDirection: TextDirection.rtl,
