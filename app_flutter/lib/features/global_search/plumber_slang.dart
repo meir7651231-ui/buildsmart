@@ -26,7 +26,7 @@ const Map<String, List<String>> kPlumberSlang = {
   'מרפק': ['ברך', 'זווית'],
   // reducers / adapters
   'רדוקציה': ['מעבר', 'מצמצם'],
-  'רדוקטור': ['מעבר', 'מצמצם'],
+  'רדוקטור': ['מעבר', 'מצמצם', 'מקטין'],
   'אדפטר': ['מתאם', 'מעבר'],
   // couplers / connectors
   'קפלר': ['מצמד', 'מחבר'],
@@ -60,7 +60,7 @@ const Map<String, List<String>> kPlumberSlang = {
   'אוכף': ['רוכב'],
   'טאפ': ['פקק'],
   'טאפא': ['פקק'],
-  'קאפ': ['מכסה', 'פקק'],
+  'קאפ': ['מכסה', 'פקק', 'כפה'],
   'קולר': ['צווארון', 'מתלה'],
   'פלאנג': ['אוגן'],
   'פילטר': ['רשת', 'מסנן'],
@@ -125,6 +125,15 @@ const Map<String, List<String>> kPlumberSlang = {
   'מנהול': ['תא'], // manhole → chamber
   'קופסת': ['מחסום'], // inspection box → floor trap
   'סטאב': ['צווארון'], // stub end
+  // ── owner field-slang, batch 3 (the last uncovered types). שרשורי dropped — it
+  //    already finds סיפון on its own; זרוע/אקדח keep their own name (their field
+  //    terms were all multi-word). ──
+  'פנל': ['משפך'], // funnel
+  'לוחץ': ['ונטיל'], // sink drain outlet
+  'קולקטור': ['מסעף', 'מחלק', 'סעפת'], // collector / manifold
+  'חנוכיית': ['מחלק', 'מסעף'], // water-meter manifold
+  'פטרייה': ['כובע'], // roof vent cap
+  'ווסת': ['מקטין'], // pressure regulator
   // Latin loan-words
   'coupling': ['מצמד', 'מחבר'],
   'elbow': ['ברך', 'זווית'],

@@ -32,6 +32,10 @@ void main() {
       expect(slangVariants('קלנבו'), ['זווית', 'ברך']); // old elbow distortion
       expect(slangVariants('אורינג'), ['אטם', 'טבעת']); // O-ring
       expect(slangVariants('מנהול'), ['תא']); // manhole
+      expect(slangVariants('לוחץ'), ['ונטיל']); // sink drain outlet
+      expect(slangVariants('ווסת'), ['מקטין']); // pressure regulator
+      expect(slangVariants('פטרייה'), ['כובע']); // roof vent cap
+      expect(slangVariants('קולקטור'), ['מסעף', 'מחלק', 'סעפת']); // manifold
     });
 
     test('Latin loan-words match case-insensitively, size preserved', () {
