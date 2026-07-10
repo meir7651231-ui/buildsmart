@@ -127,6 +127,7 @@ class CfgText extends ConsumerWidget {
     return EditHandle.maybe(
       ref,
       id,
+      editText: txt,
       child: Text(
         display,
         style: applyCfgTextStyle(context, style, n.style),

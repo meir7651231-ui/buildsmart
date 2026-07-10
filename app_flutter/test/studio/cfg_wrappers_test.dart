@@ -99,6 +99,59 @@ void main() {
     });
   });
 
+  group('EditHandle — WYSIWYG in-place edit (עריכה בחי)', () {
+    testWidgets('tap a live text → editor → applies SetText to the draft',
+        (tester) async {
+      final c = _store(editing: true);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(body: Center(child: CfgText('cart.cta', 'הזמן'))),
+            ),
+          ),
+        ),
+      );
+
+      // A tap on the live text opens the inline editor (NOT any app action).
+      await tester.tap(find.text('הזמן'));
+      await tester.pumpAndSettle();
+      expect(find.text('עריכת טקסט'), findsOneWidget);
+
+      // Edit + save ⇒ the draft carries the new text (live preview).
+      await tester.enterText(find.byType(TextField), 'שלם עכשיו');
+      await tester.tap(find.text('שמור'));
+      await tester.pumpAndSettle();
+      expect(
+        c.read(configStoreProvider).draft.global['cart.cta']?.text,
+        'שלם עכשיו',
+      );
+    });
+
+    testWidgets('cancel leaves the draft untouched', (tester) async {
+      final c = _store(editing: true);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(body: Center(child: CfgText('cart.cta', 'הזמן'))),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('הזמן'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'לא נשמר');
+      await tester.tap(find.text('ביטול'));
+      await tester.pumpAndSettle();
+      expect(c.read(configStoreProvider).draft.isEmpty, isTrue);
+    });
+  });
+
   group('CfgText — content wrapper', () {
     testWidgets('empty doc ⇒ the fallback verbatim (identity style + RTL)', (
       tester,
