@@ -71,7 +71,7 @@ jobs:
         # It persists across re-deploys (unlike an ephemeral dispatch input a later
         # push would revert). Reversible: clear the variable → next deploy is
         # byte-identical again. MUST match firebase-hosting.yml (same live race).
-        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true ${{ vars.STUDIO_DART_DEFINES }}
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"

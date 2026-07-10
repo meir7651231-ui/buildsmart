@@ -56,7 +56,7 @@ jobs:
         # repo variable STUDIO_DART_DEFINES to a stage's defines (knowledge/STUDIO_GA.md
         # §3). Persists across re-deploys; reversible by clearing it. MUST match
         # web-deploy.yml (same live race — else whichever deploy wins ships a mismatch).
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true ${{ vars.STUDIO_DART_DEFINES }}
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Deploy to Firebase Hosting (live channel)
         # Redundant with web-deploy.yml (firebase-tools CLI), which already deploys
