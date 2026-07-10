@@ -38,6 +38,8 @@ import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show buildGlobalSearchIndex;
 import 'package:buildsmart/features/global_search/hebrew_morph.dart'
     show hebrewSearchVariants;
+import 'package:buildsmart/features/global_search/plumber_slang.dart'
+    show slangVariants;
 import 'package:buildsmart/features/global_search/prediction_ranking.dart'
     show
         nameAffinity,
@@ -375,20 +377,30 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   var matched = kCatalogProducts
       .where((p) => catalogProductMatchesQuery(p, query))
       .toList();
-  // Hebrew morphology rescue ([kGlobalSearch] const-false-FIRST ⇒ the block folds
-  // out when off, byte-identical). A plural query ("ברזים") matches nothing
-  // literally, so retry with the singular head word ("ברז") BEFORE loosening to an
-  // OR/fuzzy match. Rescue-only (guarded on the literal match being empty), so it
-  // can never bury or reorder a working query's results.
+  // Query RESCUE ([kGlobalSearch] const-false-FIRST ⇒ the whole block folds out
+  // when off, byte-identical). Fires ONLY when the literal query found nothing, so
+  // it can never bury or reorder a working search. Two rescues, UNIONED so every
+  // real synonym surfaces together:
+  //   • Hebrew morphology — a plural query ("ברזים") → its singular ("ברז").
+  //   • Plumber slang — a trade / loan word ("אלבו", "valve") → the catalog's real
+  //     word(s) ("ברך"/"זווית", "ברז"). Verified against the catalog (אין המצאות).
   if (kGlobalSearch && matched.isEmpty) {
-    for (final v in hebrewSearchVariants(query)) {
-      final m = kCatalogProducts
-          .where((p) => catalogProductMatchesQuery(p, v))
-          .toList();
-      if (m.isNotEmpty) {
-        matched = m;
-        break;
+    final variants = <String>[
+      ...hebrewSearchVariants(query),
+      ...slangVariants(query),
+    ];
+    if (variants.isNotEmpty) {
+      final seen = <String>{};
+      final union = <LipskeyCatalogProduct>[];
+      for (final p in kCatalogProducts) {
+        for (final v in variants) {
+          if (catalogProductMatchesQuery(p, v)) {
+            if (seen.add(p.sku)) union.add(p);
+            break;
+          }
+        }
       }
+      matched = union;
     }
   }
   if (matched.isEmpty) {
