@@ -36,6 +36,8 @@ import 'package:buildsmart/features/global_search/global_search.dart'
     show SearchResult, SearchResultKind, kGlobalSearch;
 import 'package:buildsmart/features/global_search/global_search_sources.dart'
     show buildGlobalSearchIndex;
+import 'package:buildsmart/features/global_search/hebrew_morph.dart'
+    show hebrewSearchVariants;
 import 'package:buildsmart/features/global_search/prediction_ranking.dart'
     show
         nameAffinity,
@@ -373,6 +375,22 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   var matched = kCatalogProducts
       .where((p) => catalogProductMatchesQuery(p, query))
       .toList();
+  // Hebrew morphology rescue ([kGlobalSearch] const-false-FIRST ⇒ the block folds
+  // out when off, byte-identical). A plural query ("ברזים") matches nothing
+  // literally, so retry with the singular head word ("ברז") BEFORE loosening to an
+  // OR/fuzzy match. Rescue-only (guarded on the literal match being empty), so it
+  // can never bury or reorder a working query's results.
+  if (kGlobalSearch && matched.isEmpty) {
+    for (final v in hebrewSearchVariants(query)) {
+      final m = kCatalogProducts
+          .where((p) => catalogProductMatchesQuery(p, v))
+          .toList();
+      if (m.isNotEmpty) {
+        matched = m;
+        break;
+      }
+    }
+  }
   if (matched.isEmpty) {
     matched = kCatalogProducts
         .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
