@@ -2,10 +2,30 @@
 // catalog products, the drill navigates end-to-end, and a concrete plain-language
 // path lands on the right product. This is the owner's "verify it reaches products".
 
+import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/features/ring_dive/plain_dive.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('the full tree reaches ~every catalog product (coverage)', () {
+    final covered = <String>{};
+    for (final sc in plainSuperCats()) {
+      for (final cls in plainClassifications(sc)) {
+        for (final n in plainNodes(sc, cls)) {
+          for (final p in plainProductsFor(n)) {
+            covered.add(p.sku);
+          }
+        }
+      }
+    }
+    // Curated core + swarm coverage nodes + auto-fallback ⇒ ~100%. Guard ≥99% so a
+    // future catalog category can't silently fall out of מאתר-פשוט.
+    expect(covered.length,
+        greaterThanOrEqualTo((kCatalogProducts.length * 0.99).floor()),
+        reason:
+            'PlainDive reaches ${covered.length}/${kCatalogProducts.length} — a category lost its node');
+  });
+
   test('every node in the tree reaches real products (מגיע למוצרים)', () {
     for (final n in kPlainDict) {
       expect(plainProductsFor(n), isNotEmpty,

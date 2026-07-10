@@ -15,6 +15,8 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/features/ring_dive/plain_dive_coverage.dart'
+    show kPlainCoverage;
 import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart'
     show kRdOrder, rdAxesOf;
 import 'package:buildsmart/features/word_finder/narrow_axis.dart'
@@ -32,6 +34,7 @@ class PlainNode {
     required this.slang,
     required this.english,
     required this.usage,
+    this.categoriesExact,
   });
 
   final String superCat; // ring 1
@@ -40,6 +43,13 @@ class PlainNode {
   final String slang; // ring 3 label — the everyday word
   final String english;
   final String usage; // "what it does / where it goes"
+
+  /// When set, this leaf reaches products by EXACT catalog category membership
+  /// (p.categoryHe ∈ categoriesExact) instead of the [technical] search — used by
+  /// the coverage nodes (curated + auto-fallback) so every category is reachable.
+  /// A list because several catalog categories can share one plain word (all the
+  /// drain-pipe categories → "צינור ניקוז").
+  final List<String>? categoriesExact;
 }
 
 /// The owner's dictionary (מעודכן.xlsx) verbatim — the 4-ring tree source.
@@ -82,9 +92,17 @@ final Map<String, List<LipskeyCatalogProduct>> _cache =
 /// catalog uses. Falls back from the technical term to the slang if the technical
 /// term finds nothing. Memoised (the catalog is const).
 List<LipskeyCatalogProduct> plainProductsFor(PlainNode n) {
-  final key = '${n.superCat}|${n.classification}|${n.technical}';
+  final key =
+      '${n.superCat}|${n.classification}|${n.technical}|${n.categoriesExact?.join(',') ?? ''}';
   final cached = _cache[key];
   if (cached != null) return cached;
+  // Coverage node: reach the whole catalog category/categories exactly (no fuzz).
+  if (n.categoriesExact != null) {
+    final cats = n.categoriesExact!.toSet();
+    return _cache[key] = kCatalogProducts
+        .where((p) => cats.contains(p.categoryHe))
+        .toList();
+  }
   var ps = kCatalogProducts
       .where((p) => catalogProductMatchesQuery(p, n.technical))
       .toList();
@@ -108,10 +126,44 @@ List<LipskeyCatalogProduct> plainProductsFor(PlainNode n) {
 
 bool _reaches(PlainNode n) => plainProductsFor(n).isNotEmpty;
 
-/// Ring 1 — the super-categories that actually reach products, in dictionary order.
+/// The FULL tree: the owner's core dictionary + the swarm-curated coverage nodes +
+/// an AUTO-FALLBACK so every catalog category is reachable (no product invisible).
+/// Memoised (the catalog is const). The auto nodes sit under a catch-all 'עוד'
+/// super-category, each reaching one leftover category by exact match.
+List<PlainNode>? _treeCache;
+List<PlainNode> _allNodes() {
+  final cached = _treeCache;
+  if (cached != null) return cached;
+  final curated = <PlainNode>[...kPlainDict, ...kPlainCoverage];
+  final reached = <String>{};
+  for (final n in curated) {
+    for (final p in plainProductsFor(n)) {
+      reached.add(p.sku);
+    }
+  }
+  final leftover = <String>{};
+  for (final p in kCatalogProducts) {
+    if (!reached.contains(p.sku)) leftover.add(p.categoryHe);
+  }
+  final auto = <PlainNode>[
+    for (final cat in leftover.toList()..sort())
+      PlainNode(
+        superCat: 'עוד',
+        classification: 'קטגוריות נוספות',
+        technical: cat,
+        slang: cat,
+        english: '',
+        usage: '',
+        categoriesExact: <String>[cat],
+      ),
+  ];
+  return _treeCache = <PlainNode>[...curated, ...auto];
+}
+
+/// Ring 1 — the super-categories that actually reach products, in tree order.
 List<String> plainSuperCats() {
   final out = <String>[];
-  for (final n in kPlainDict) {
+  for (final n in _allNodes()) {
     if (!out.contains(n.superCat) && _reaches(n)) out.add(n.superCat);
   }
   return out;
@@ -120,7 +172,7 @@ List<String> plainSuperCats() {
 /// Ring 2 — the classifications under [superCat] that reach products.
 List<String> plainClassifications(String superCat) {
   final out = <String>[];
-  for (final n in kPlainDict) {
+  for (final n in _allNodes()) {
     if (n.superCat == superCat &&
         !out.contains(n.classification) &&
         _reaches(n)) {
@@ -132,7 +184,7 @@ List<String> plainClassifications(String superCat) {
 
 /// Ring 3 — the type nodes under [superCat] / [classification] that reach products.
 List<PlainNode> plainNodes(String superCat, String classification) => [
-      for (final n in kPlainDict)
+      for (final n in _allNodes())
         if (n.superCat == superCat &&
             n.classification == classification &&
             _reaches(n))
