@@ -1,3 +1,4 @@
+// ~120 verified field-slang entries (owner-contributed, 10/7).
 // The plumber's own words. A tradesman asks for an "אלבו", a "רקורד", a "בול" —
 // slang and foreign loan-words the catalog never uses (it says ברך, מחבר, ברז
 // כדורי). Without help those queries find NOTHING. This maps each such term to the
