@@ -98,12 +98,14 @@ void main() {
 
       final elbow = res('אלבו');
       expect(elbow, isNotEmpty, reason: '"אלבו" must be rescued to elbows');
-      expect(elbow.any((p) => p.nameHe.contains('ברך') || p.nameHe.contains('זווית')),
+      expect(
+          elbow.any((p) =>
+              '${p.nameHe}'.contains('ברך') || '${p.nameHe}'.contains('זווית')),
           isTrue);
 
       final valve = res('valve');
       expect(valve, isNotEmpty, reason: 'the loan-word "valve" must find taps');
-      expect(valve.any((p) => p.nameHe.contains('ברז')), isTrue);
+      expect(valve.any((p) => '${p.nameHe}'.contains('ברז')), isTrue);
     });
   });
 }
