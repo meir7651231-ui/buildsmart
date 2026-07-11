@@ -16,3 +16,9 @@ const String kRingDiveFlag = 'kRingDive';
 /// PlainDive screen + its entry point tree-shake out ⇒ the live app is
 /// byte-identical. Turned on with `--dart-define=PLAIN_DIVE=true`.
 const bool kPlainDive = bool.fromEnvironment('PLAIN_DIVE');
+
+/// Compile-time flag for the AXIS-DIVE catalog wheel — the owner's "pick which of
+/// the ~15 wheels to start from" finder (a constraint engine over [catAxesOf], any
+/// axis in any order). Const-false ⇒ the screen + its entry tree-shake out ⇒
+/// byte-identical. Turned on with `--dart-define=AXIS_DIVE=true`.
+const bool kAxisDive = bool.fromEnvironment('AXIS_DIVE');
