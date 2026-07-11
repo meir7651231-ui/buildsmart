@@ -38,10 +38,21 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   /// The user asked to see the remaining products (the "📋 הצג" option).
   bool _showList = false;
 
+  /// The current wheel shows ALL options (the user tapped "עוד"); else it caps at
+  /// [_cap] with a trailing "עוד…" that expands.
+  bool _expanded = false;
+
+  /// Max options on a ring before the rest fold behind "עוד…".
+  static const int _cap = 12;
+
   CatAxis _ax(String id) => kCatAxes.firstWhere((a) => a.id == id);
 
   /// Step up one ring; false at the root (nothing to undo).
   bool _up() {
+    if (_expanded) {
+      setState(() => _expanded = false);
+      return true;
+    }
     if (_showList) {
       setState(() => _showList = false);
       return true;
@@ -98,20 +109,31 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   Widget _body() {
     final matched = catMatching(_cons);
 
-    // ── VALUE wheel — the options of the axis being chosen ─────────────────────
+    // ── VALUE wheel — the options of the axis being chosen (capped at _cap) ────
     if (_axis != null) {
       final vals = catOptsFor(_axis!, _cons, matched, matched);
+      final more = !_expanded && vals.length > _cap;
+      final shown = more ? vals.take(_cap - 1).toList() : vals;
+      final labels = <String>[
+        for (final v in shown) catValueLabel(_axis!, v),
+        if (more) 'עוד ${vals.length - shown.length}…',
+      ];
       return _wheel(
-        // Display the layman slang (מסעפים → מפצלים) but KEEP the raw value as the
-        // constraint, so matching stays exact.
-        [for (final v in vals) catValueLabel(_axis!, v)],
+        labels,
         const <String>[],
         'איזה ${_ax(_axis!).label}?',
-        (i) => setState(() {
-          _cons[_axis!] = vals[i];
-          _order.add(_axis!);
-          _axis = null;
-        }),
+        (i) {
+          if (more && i == shown.length) {
+            setState(() => _expanded = true);
+            return;
+          }
+          setState(() {
+            _cons[_axis!] = shown[i]; // raw value; label was the slang
+            _order.add(_axis!);
+            _axis = null;
+            _expanded = false;
+          });
+        },
       );
     }
 
@@ -122,26 +144,40 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       return _finalList(matched);
     }
 
-    // ── AXIS wheel — "which wheel do we start / continue from?" ────────────────
+    // ── AXIS wheel — "which wheel do we start / continue from?" (capped) ────────
+    // Slot 0 is always "הצג"; the remaining _cap-1 slots hold the top axes (easy-
+    // path order), the rest fold behind a trailing "עוד…".
+    final moreA = !_expanded && axes.length > _cap - 1;
+    final shownAxes = moreA ? axes.take(_cap - 2).toList() : axes;
     final labels = <String>[
       '📋 הצג ${matched.length}',
-      for (final id in axes) '${_ax(id).emoji} ${_ax(id).label}',
+      for (final id in shownAxes) '${_ax(id).emoji} ${_ax(id).label}',
+      if (moreA) 'עוד ${axes.length - shownAxes.length} צירים…',
     ];
     final subs = <String>[
       'כל המוצרים',
-      for (final id in axes) '${catOptsFor(id, _cons, matched, matched).length} אפשרויות',
+      for (final id in shownAxes)
+        '${catOptsFor(id, _cons, matched, matched).length} אפשרויות',
+      if (moreA) 'צירים נוספים',
     ];
     return _wheel(
       labels,
       subs,
       _order.isEmpty ? 'ממה נתחיל?' : 'לפי מה עוד?',
-      (i) => setState(() {
+      (i) {
         if (i == 0) {
-          _showList = true;
-        } else {
-          _axis = axes[i - 1];
+          setState(() => _showList = true);
+          return;
         }
-      }),
+        if (moreA && i == shownAxes.length + 1) {
+          setState(() => _expanded = true);
+          return;
+        }
+        setState(() {
+          _axis = shownAxes[i - 1];
+          _expanded = false;
+        });
+      },
     );
   }
 

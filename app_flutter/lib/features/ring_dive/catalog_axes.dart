@@ -186,17 +186,25 @@ int _sizeRank(String axis, String value) {
 List<String> catOptsFor(String axis, Map<String, String> cons,
     [List<CatProduct>? pool, List<CatProduct>? matched]) {
   final base = matched ?? catMatching(cons, pool);
-  final set = <String>{};
+  final counts = <String, int>{};
   for (final rp in base) {
     final v = rp.axes[axis];
-    if (v != null) set.addAll(v);
+    if (v != null) {
+      for (final x in v) {
+        counts[x] = (counts[x] ?? 0) + 1;
+      }
+    }
   }
   final ord = kRdOrder[axis] ?? const <String>[];
-  return set.toList()
+  return counts.keys.toList()
     ..sort((a, b) {
       final sa = _sizeRank(axis, a);
       final sb = _sizeRank(axis, b);
-      if (sa >= 0 && sb >= 0) return sa.compareTo(sb);
+      if (sa >= 0 && sb >= 0) return sa.compareTo(sb); // size: small → large
+      // ENGINE 2 (ranking): the most COMMON values lead, so the wheel's first
+      // (and its top-12 before "עוד") are the ones people actually reach for.
+      final c = counts[b]!.compareTo(counts[a]!);
+      if (c != 0) return c;
       final ra = ord.indexOf(a);
       final rb = ord.indexOf(b);
       final x = (ra < 0 ? 999 : ra) - (rb < 0 ? 999 : rb);
