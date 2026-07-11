@@ -13,6 +13,8 @@
 // PURE + deterministic. Imported by nothing yet ⇒ inert (byte-identical) until a
 // screen reads it.
 
+import 'dart:math' show log;
+
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/ring_dive/ring_dive_catalog.dart'
     show kRdOrder, rdAxesOf;
@@ -202,9 +204,34 @@ List<String> catOptsFor(String axis, Map<String, String> cons,
     });
 }
 
+/// ENGINE 1 — the "easy path" (info-gain). How much a single ring narrows the
+/// pool: the Shannon entropy of [axis]'s value distribution over [base]. A high
+/// score means the axis splits the pool into many, evenly-sized groups — the most
+/// decisive question to ask. Zero when the axis is absent or single-valued.
+double catAxisGain(String axis, List<CatProduct> base) {
+  final counts = <String, int>{};
+  var total = 0;
+  for (final p in base) {
+    final vals = p.axes[axis];
+    if (vals == null) continue;
+    for (final v in vals) {
+      counts[v] = (counts[v] ?? 0) + 1;
+      total++;
+    }
+  }
+  if (total == 0 || counts.length < 2) return 0;
+  var h = 0.0;
+  for (final c in counts.values) {
+    final pr = c / total;
+    h -= pr * (log(pr) / log(2));
+  }
+  return h;
+}
+
 /// The axes still worth asking about for [cons] — each with ≥2 distinct options —
-/// in registry order. THIS is the wheel-selector: with an empty [cons] it is the
-/// FIRST wheel (every startable axis); deeper it is "which axis next".
+/// ORDERED BY the easy-path engine (most-decisive first). THIS is the wheel-
+/// selector: with an empty [cons] it is the FIRST wheel (every startable axis, the
+/// smartest question on top); deeper it is "which axis next".
 List<String> catFindAxes(Map<String, String> cons, [List<CatProduct>? pool]) {
   final base = catMatching(cons, pool);
   if (base.length <= 1) return const <String>[];
@@ -213,5 +240,8 @@ List<String> catFindAxes(Map<String, String> cons, [List<CatProduct>? pool]) {
     if (cons.containsKey(ax.id)) continue;
     if (catOptsFor(ax.id, cons, base, base).length >= 2) out.add(ax.id);
   }
+  // Easy-path: the most-decisive axis leads. Ties keep registry order (stable).
+  final gain = <String, double>{for (final ax in out) ax: catAxisGain(ax, base)};
+  out.sort((a, b) => gain[b]!.compareTo(gain[a]!));
   return out;
 }
