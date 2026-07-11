@@ -9,11 +9,15 @@
 //   products. Behind [kAxisDive] ⇒ tree-shaken (byte-identical) when off.
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
+import 'package:buildsmart/data/smart_tree.dart'
+    show SmartProduct, kSmartProducts;
 import 'package:buildsmart/features/ring_dive/catalog_axes.dart';
 import 'package:buildsmart/features/ring_dive/catalog_slang.dart'
     show catValueLabel;
 import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart'
     show RingDiveWheel;
+import 'package:buildsmart/features/word_finder/recipe_kit.dart'
+    show assembleKit;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:flutter/material.dart';
@@ -45,10 +49,28 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   /// Max options on a ring before the rest fold behind "עוד…".
   static const int _cap = 12;
 
+  /// ENGINE 3 — jobs. When [_jobMode], the wheel walks the work-recipes instead of
+  /// the axes: job-category → job → its assembled kit. A whole job in a few taps.
+  bool _jobMode = false;
+  String? _jobCat;
+  SmartProduct? _job;
+
   CatAxis _ax(String id) => kCatAxes.firstWhere((a) => a.id == id);
 
   /// Step up one ring; false at the root (nothing to undo).
   bool _up() {
+    if (_job != null) {
+      setState(() => _job = null);
+      return true;
+    }
+    if (_jobCat != null) {
+      setState(() => _jobCat = null);
+      return true;
+    }
+    if (_jobMode) {
+      setState(() => _jobMode = false);
+      return true;
+    }
     if (_expanded) {
       setState(() => _expanded = false);
       return true;
@@ -106,78 +128,149 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         ),
       );
 
+  /// A wheel over [items], capped at [_cap] with a trailing "עוד…" that expands.
+  Widget _capped<T>(List<T> items, String Function(T) label, String hint,
+      void Function(T) pick) {
+    final more = !_expanded && items.length > _cap;
+    final shown = more ? items.take(_cap - 1).toList() : items;
+    final labels = <String>[
+      for (final it in shown) label(it),
+      if (more) 'עוד ${items.length - shown.length}…',
+    ];
+    return _wheel(labels, const <String>[], hint, (i) {
+      if (more && i == shown.length) {
+        setState(() => _expanded = true);
+        return;
+      }
+      pick(shown[i]);
+    });
+  }
+
   Widget _body() {
+    // ── ENGINE 3 — the JOB path (recipe kits) ──────────────────────────────────
+    if (_jobMode) return _jobBody();
+
     final matched = catMatching(_cons);
 
-    // ── VALUE wheel — the options of the axis being chosen (capped at _cap) ────
+    // ── VALUE wheel — the options of the axis being chosen (capped) ─────────────
     if (_axis != null) {
       final vals = catOptsFor(_axis!, _cons, matched, matched);
-      final more = !_expanded && vals.length > _cap;
-      final shown = more ? vals.take(_cap - 1).toList() : vals;
-      final labels = <String>[
-        for (final v in shown) catValueLabel(_axis!, v),
-        if (more) 'עוד ${vals.length - shown.length}…',
-      ];
-      return _wheel(
-        labels,
-        const <String>[],
+      return _capped(
+        vals,
+        (v) => catValueLabel(_axis!, v),
         'איזה ${_ax(_axis!).label}?',
-        (i) {
-          if (more && i == shown.length) {
-            setState(() => _expanded = true);
-            return;
-          }
-          setState(() {
-            _cons[_axis!] = shown[i]; // raw value; label was the slang
-            _order.add(_axis!);
-            _axis = null;
-            _expanded = false;
-          });
-        },
+        (v) => setState(() {
+          _cons[_axis!] = v; // raw value; the label shown was the slang
+          _order.add(_axis!);
+          _axis = null;
+          _expanded = false;
+        }),
       );
     }
 
     final axes = catFindAxes(_cons);
-
-    // Nothing left to split (or the user asked) → the final products.
     if (_showList || axes.isEmpty || matched.length <= 1) {
       return _finalList(matched);
     }
 
-    // ── AXIS wheel — "which wheel do we start / continue from?" (capped) ────────
-    // Slot 0 is always "הצג"; the remaining _cap-1 slots hold the top axes (easy-
-    // path order), the rest fold behind a trailing "עוד…".
-    final moreA = !_expanded && axes.length > _cap - 1;
-    final shownAxes = moreA ? axes.take(_cap - 2).toList() : axes;
-    final labels = <String>[
-      '📋 הצג ${matched.length}',
-      for (final id in shownAxes) '${_ax(id).emoji} ${_ax(id).label}',
-      if (moreA) 'עוד ${axes.length - shownAxes.length} צירים…',
-    ];
-    final subs = <String>[
-      'כל המוצרים',
-      for (final id in shownAxes)
+    // ── AXIS wheel — "הצג" + a "לפי עבודה" entry (opening only) + the top axes
+    //    (easy-path order), the rest behind "עוד…", all within [_cap] slots. ─────
+    final labels = <String>[];
+    final subs = <String>[];
+    final actions = <VoidCallback>[];
+    void add(String label, String sub, VoidCallback act) {
+      labels.add(label);
+      subs.add(sub);
+      actions.add(act);
+    }
+
+    add('📋 הצג ${matched.length}', 'כל המוצרים',
+        () => setState(() => _showList = true));
+    if (_cons.isEmpty) {
+      add('🔧 לפי עבודה', '${kSmartProducts.length} מתכונים',
+          () => setState(() => _jobMode = true));
+    }
+    final reserved = labels.length;
+    final moreA = !_expanded && axes.length > _cap - reserved;
+    final shownAxes = moreA ? axes.take(_cap - reserved - 1).toList() : axes;
+    for (final id in shownAxes) {
+      add(
+        '${_ax(id).emoji} ${_ax(id).label}',
         '${catOptsFor(id, _cons, matched, matched).length} אפשרויות',
-      if (moreA) 'צירים נוספים',
-    ];
-    return _wheel(
-      labels,
-      subs,
-      _order.isEmpty ? 'ממה נתחיל?' : 'לפי מה עוד?',
-      (i) {
-        if (i == 0) {
-          setState(() => _showList = true);
-          return;
-        }
-        if (moreA && i == shownAxes.length + 1) {
-          setState(() => _expanded = true);
-          return;
-        }
-        setState(() {
-          _axis = shownAxes[i - 1];
+        () => setState(() {
+          _axis = id;
           _expanded = false;
-        });
-      },
+        }),
+      );
+    }
+    if (moreA) {
+      add('עוד ${axes.length - shownAxes.length} צירים…', 'צירים נוספים',
+          () => setState(() => _expanded = true));
+    }
+    return _wheel(labels, subs,
+        _order.isEmpty ? 'ממה נתחיל?' : 'לפי מה עוד?', (i) => actions[i]());
+  }
+
+  /// ENGINE 3 — the job flow: category → job → its assembled kit.
+  Widget _jobBody() {
+    if (_job != null) return _kitList(_job!);
+    if (_jobCat != null) {
+      final jobs = <SmartProduct>[
+        for (final s in kSmartProducts)
+          if (s.cat == _jobCat) s,
+      ];
+      return _capped(jobs, (j) => '${j.emoji} ${j.name}', 'איזו עבודה?',
+          (j) => setState(() => _job = j));
+    }
+    final cats = <String>[];
+    for (final s in kSmartProducts) {
+      if (!cats.contains(s.cat)) cats.add(s.cat);
+    }
+    return _capped(cats, (c) => c, 'איזו עבודה תעשה?',
+        (c) => setState(() => _jobCat = c));
+  }
+
+  /// The chosen job's kit — one line per accessory, resolved to a catalog product.
+  Widget _kitList(SmartProduct job) {
+    final lines = assembleKit(job);
+    return Column(
+      children: <Widget>[
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+          child: Column(
+            children: <Widget>[
+              Text('${job.emoji} ${job.name}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600)),
+              Text('הערכה המלאה · ${lines.length} חלקים',
+                  style: const TextStyle(fontSize: 12.5)),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: ListView.separated(
+            itemCount: lines.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (_, i) {
+              final l = lines[i];
+              final p = l.product;
+              return ListTile(
+                leading: Text(p?.typeEmoji ?? '•',
+                    style: const TextStyle(fontSize: 20)),
+                title: Text(l.acc.name, textDirection: TextDirection.rtl),
+                subtitle: Text(p?.nameHe ?? 'לבחירה ידנית',
+                    style: const TextStyle(fontSize: 11)),
+                trailing: p == null ? null : const Icon(Icons.chevron_left),
+                onTap:
+                    p == null ? null : () => showLipskeyProductSheet(context, p, <LipskeyCatalogProduct>[p]),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

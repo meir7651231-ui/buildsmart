@@ -36,13 +36,15 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: CatalogWheelScreen()));
     await tester.pumpAndSettle();
 
-    // Ring 1 = the axis selector. Option 0 is "📋 הצג", the rest are axes.
+    // Ring 1 = the axis selector. Slot 0 is "📋 הצג", slot 1 is "🔧 לפי עבודה",
+    // the rest are axes (easy-path order).
     var wheel = tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
     expect(wheel.labels.first, contains('הצג'));
-    expect(wheel.labels.length, greaterThan(3), reason: 'many axes to start from');
+    expect(wheel.labels[1], contains('עבודה'), reason: 'the job engine entry');
+    expect(wheel.labels.length, greaterThan(4), reason: 'many axes to start from');
 
-    // Pick the first real axis (index 1) → its VALUE wheel appears.
-    wheel.onSelect!(1);
+    // Pick the first real axis (slot 2, after הצג + לפי-עבודה) → its VALUE wheel.
+    wheel.onSelect!(2);
     await tester.pumpAndSettle();
     wheel = tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
     expect(wheel.labels, isNotEmpty, reason: 'the axis has values to pick');
@@ -60,5 +62,30 @@ void main() {
     expect(find.byType(RingDiveWheel), findsNothing);
     expect(find.byType(ListView), findsOneWidget);
     expect(find.byType(ListTile), findsWidgets);
+  });
+
+  testWidgets('engine 3 — לפי עבודה → category → job → kit', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: CatalogWheelScreen()));
+    await tester.pumpAndSettle();
+
+    // Slot 1 = "🔧 לפי עבודה" → the job categories.
+    var wheel = tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+    wheel.onSelect!(1);
+    await tester.pumpAndSettle();
+    wheel = tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+    expect(wheel.labels, isNotEmpty, reason: 'the job categories');
+
+    // Category → its jobs.
+    wheel.onSelect!(0);
+    await tester.pumpAndSettle();
+    wheel = tester.widget<RingDiveWheel>(find.byType(RingDiveWheel));
+    expect(wheel.labels, isNotEmpty, reason: 'jobs in the category');
+
+    // Job → its assembled kit (a list of parts).
+    wheel.onSelect!(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(RingDiveWheel), findsNothing);
+    expect(find.byType(ListView), findsOneWidget, reason: 'the kit list');
+    expect(find.byType(ListTile), findsWidgets, reason: 'the kit parts');
   });
 }

@@ -101,6 +101,12 @@ const Map<String, Map<String, String>> kAxisValueSlang = <String, Map<String, St
     'ריתוך חשמלי': 'אביזרי אלקטרופיוז\'ן',
     'תעלות מקלחת': 'תעלות ניקוז למקלחון',
   },
+  // ENGINE 5 — full slang: the two plastic families a layman won't name by acronym.
+  'material': <String, String>{
+    'PPR': 'פלסטיק ירוק (PPR)',
+    'HDPE': 'פלסטיק שחור (HDPE)',
+    'רב-שכבתי': 'רב-שכבתי (מולטיגול)',
+  },
 };
 
 /// The layman label for [value] on [axis] — its slang if the owner mapped one,
