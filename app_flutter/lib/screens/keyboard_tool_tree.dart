@@ -22,7 +22,7 @@
 // widget stays screen-agnostic.
 
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
-    show kPlainDive;
+    show kAxisDive, kPlainDive;
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart'
     show kWordFinderFlag;
 import 'package:buildsmart/screens/ai_hub_screen.dart';
@@ -636,6 +636,21 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
             ref.read(catalogSectionProvider.notifier).state = 'מאתר פשוט';
             // Clear any live dive query, else the catalog stays on the text-results
             // list (diveActive) and the PlainDive wheel never renders.
+            ref.read(keyboardDiveQueryProvider.notifier).state = '';
+          },
+        ),
+      );
+    }
+    // OWNER · the AXIS-DIVE super-wheel chip (kAxisDive; const-false ⇒ this block
+    // tree-shakes ⇒ byte-identical). Pick which of the ~15 wheels to start from.
+    if (kAxisDive) {
+      out.add(
+        KbToolNode.leaf(
+          icon: Icons.hub_outlined,
+          label: 'מאתר-על',
+          action: (ref, context) {
+            ref.read(mainTabProvider.notifier).state = 0;
+            ref.read(catalogSectionProvider.notifier).state = 'מאתר-על';
             ref.read(keyboardDiveQueryProvider.notifier).state = '';
           },
         ),

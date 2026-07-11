@@ -25,6 +25,7 @@ import 'package:buildsmart/data/variant_families.dart';
 // the _CatalogBody routing branch is unreachable, so catalog behaviour is
 // byte-identical for normal users.
 import 'package:buildsmart/features/card_keyboard/card_keyboard_screen.dart';
+import 'package:buildsmart/features/ring_dive/catalog_wheel_screen.dart';
 import 'package:buildsmart/features/ring_dive/plain_dive_screen.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart';
 import 'package:buildsmart/features/ring_dive/ring_dive_screen.dart';
@@ -1689,6 +1690,15 @@ class _CatalogBody extends ConsumerWidget {
     // byte-identical). A SEPARATE layman finder that runs ALONGSIDE 'מאתר חכם' —
     // reached by its OWN 'מאתר פשוט' chip, never replacing the pro dial. The 4-ring
     // dictionary drill narrows in everyday words down to the exact product.
+    // OWNER · the AXIS-DIVE super-wheel ([kAxisDive], const-false ⇒ folds out ⇒
+    // byte-identical). Its OWN 'מאתר-על' chip: the first wheel picks WHICH of the
+    // ~15 axes to start from, then any axis in any order down to the product.
+    if (kAxisDive && active == 'מאתר-על') {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(child: CatalogWheelScreen()),
+      );
+    }
     if (kPlainDive && active == 'מאתר פשוט') {
       return const Directionality(
         textDirection: TextDirection.rtl,
