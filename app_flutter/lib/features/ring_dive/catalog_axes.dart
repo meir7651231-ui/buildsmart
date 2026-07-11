@@ -41,7 +41,9 @@ const List<CatAxis> kCatAxes = <CatAxis>[
   CatAxis('group', 'קבוצה', '🗂️'),
   CatAxis('world', 'עולם', '🏢'),
   CatAxis('cat', 'קטגוריה', '📁'),
-  CatAxis('diameter', 'קוטר', '⭕'),
+  CatAxis('diamInch', 'קוטר אינץ׳', '⭕'),
+  CatAxis('diamDn', 'קוטר DN', '⭕'),
+  CatAxis('diamMm', 'קוטר מ"מ', '⭕'),
   CatAxis('length', 'אורך', '📏'),
   CatAxis('transition', 'מעבר', '↔️'),
   CatAxis('material', 'חומר', '🧱'),
@@ -94,20 +96,29 @@ Map<String, Set<String>> catAxesOf(LipskeyCatalogProduct p) {
   // Category group — the 12 human-curated buckets (100% coverage).
   put('group', <String>[groupOf(p)]);
 
-  // ── SIZE, split into the physical axes a plumber distinguishes ─────────────
-  final diameter = <String>{};
-  final length = <String>{};
-  final transition = <String>{};
+  // ── SIZE, split into the physical axes a plumber distinguishes — and the bore
+  //    itself split by MEASURING SYSTEM (owner: inch / DN / mm never share a wheel).
+  final diamInch = <String>{}; // ½" / ¾" / 2"
+  final diamDn = <String>{}; //   DN40 / DN110
+  final diamMm = <String>{}; //   250 מ"מ (shower heads etc.)
+  final length = <String>{}; //   50 ס"מ / 3 מ׳ — how long
+  final transition = <String>{}; // 16×½ / 20×¾ — a reducer's two bores
   for (final t in productSizeTokens(p)) {
     if (t.label.contains('×')) {
-      transition.add(t.label); // 16×½ / 20×¾ — a reducer's two bores
+      transition.add(t.label);
     } else if (t.family == SizeFamily.cm || t.family == SizeFamily.meters) {
-      length.add(t.label); // 50 ס"מ / 3 מ׳ — how long
+      length.add(t.label);
+    } else if (t.family == SizeFamily.inchDiameter) {
+      diamInch.add(t.label);
+    } else if (t.family == SizeFamily.dnDiameter) {
+      diamDn.add(t.label);
     } else {
-      diameter.add(t.label); // ½" / DN40 / 250 מ"מ — the bore
+      diamMm.add(t.label);
     }
   }
-  if (diameter.isNotEmpty) out['diameter'] = diameter;
+  if (diamInch.isNotEmpty) out['diamInch'] = diamInch;
+  if (diamDn.isNotEmpty) out['diamDn'] = diamDn;
+  if (diamMm.isNotEmpty) out['diamMm'] = diamMm;
   if (length.isNotEmpty) out['length'] = length;
   if (transition.isNotEmpty) out['transition'] = transition;
 
@@ -153,8 +164,16 @@ List<CatProduct> catMatching(Map<String, String> cons,
   ];
 }
 
+const Set<String> _sizeAxes = <String>{
+  'diamInch',
+  'diamDn',
+  'diamMm',
+  'length',
+  'transition',
+};
+
 int _sizeRank(String axis, String value) {
-  if (axis != 'diameter' && axis != 'length' && axis != 'transition') return -1;
+  if (!_sizeAxes.contains(axis)) return -1;
   final t = parseSizeTokens(value);
   if (t.isEmpty) return -1;
   return (t.first.family.index * 100000) + t.first.mm.round();

@@ -14,11 +14,22 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('the FIRST wheel offers many startable axes', () {
     final first = catFindAxes(const <String, String>{});
-    expect(first.length, greaterThanOrEqualTo(8),
-        reason: 'you can start from most of the ~15 axes');
-    // The size super-axis is really split into distinct axes.
-    expect(first, containsAll(<String>['diameter', 'length', 'transition']));
+    expect(first.length, greaterThanOrEqualTo(10),
+        reason: 'you can start from most of the ~17 axes');
+    // The size super-axis is really split into distinct axes — diameter itself
+    // split by measuring system (inch / DN / mm), plus length + transition.
+    expect(
+        first,
+        containsAll(<String>[
+          'diamInch',
+          'diamDn',
+          'diamMm',
+          'length',
+          'transition',
+        ]));
     expect(first.contains('size'), isFalse, reason: 'no lumped "size" axis');
+    expect(first.contains('diameter'), isFalse,
+        reason: 'no lumped "diameter" axis — split by system');
   });
 
   testWidgets('axis wheel → value wheel → constraint → products', (tester) async {
