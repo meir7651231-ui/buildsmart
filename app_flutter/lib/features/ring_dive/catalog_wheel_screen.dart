@@ -10,6 +10,8 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/features/ring_dive/catalog_axes.dart';
+import 'package:buildsmart/features/ring_dive/catalog_slang.dart'
+    show catValueLabel;
 import 'package:buildsmart/features/ring_dive/ring_dive_wheel.dart'
     show RingDiveWheel;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
@@ -59,7 +61,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   Widget build(BuildContext context) {
     final crumbs = <String>[
       'הכול',
-      for (final id in _order) '${_ax(id).label}: ${_cons[id]}',
+      for (final id in _order) '${_ax(id).label}: ${catValueLabel(id, _cons[id]!)}',
       if (_axis != null) _ax(_axis!).label,
     ];
     return Directionality(
@@ -100,7 +102,9 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
     if (_axis != null) {
       final vals = catOptsFor(_axis!, _cons, matched, matched);
       return _wheel(
-        vals,
+        // Display the layman slang (מסעפים → מפצלים) but KEEP the raw value as the
+        // constraint, so matching stays exact.
+        [for (final v in vals) catValueLabel(_axis!, v)],
         const <String>[],
         'איזה ${_ax(_axis!).label}?',
         (i) => setState(() {
