@@ -42,9 +42,11 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   /// The user asked to see the remaining products (the "📋 הצג" option).
   bool _showList = false;
 
-  /// The current wheel shows ALL options (the user tapped "עוד"); else it caps at
-  /// [_cap] with a trailing "עוד…" that expands.
-  bool _expanded = false;
+  /// Which page of a long wheel is showing. Every wheel caps at [_cap] slots; when
+  /// there are more options, the last slot is "עוד…" and tapping it advances one
+  /// page (cycling back to the start), so a wheel is NEVER more than [_cap] items —
+  /// the owner's hard rule. "עוד" pages, it does NOT dump the whole list at once.
+  int _page = 0;
 
   /// Max options on a ring before the rest fold behind "עוד…".
   static const int _cap = 12;
@@ -71,8 +73,8 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       setState(() => _jobMode = false);
       return true;
     }
-    if (_expanded) {
-      setState(() => _expanded = false);
+    if (_page > 0) {
+      setState(() => _page = 0);
       return true;
     }
     if (_showList) {
@@ -128,21 +130,27 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         ),
       );
 
-  /// A wheel over [items], capped at [_cap] with a trailing "עוד…" that expands.
+  /// A wheel over [items], NEVER more than [_cap] slots. When there are more, the
+  /// last slot is "עוד…" and tapping it pages forward (cycling back to the start),
+  /// so the wheel stays ≤ [_cap] — instead of dumping the whole list onto one wheel.
   Widget _capped<T>(List<T> items, String Function(T) label, String hint,
       void Function(T) pick) {
-    final more = !_expanded && items.length > _cap;
-    final shown = more ? items.take(_cap - 1).toList() : items;
-    final labels = <String>[
-      for (final it in shown) label(it),
-      if (more) 'עוד ${items.length - shown.length}…',
-    ];
+    if (items.length <= _cap) {
+      return _wheel(<String>[for (final it in items) label(it)],
+          const <String>[], hint, (i) => pick(items[i]));
+    }
+    const per = _cap - 1; // 11 real options + 1 reserved "עוד…" slot
+    final pages = (items.length + per - 1) ~/ per;
+    final start = (_page % pages) * per;
+    final end = start + per < items.length ? start + per : items.length;
+    final slice = items.sublist(start, end);
+    final labels = <String>[for (final it in slice) label(it), 'עוד…'];
     return _wheel(labels, const <String>[], hint, (i) {
-      if (more && i == shown.length) {
-        setState(() => _expanded = true);
+      if (i == slice.length) {
+        setState(() => _page++);
         return;
       }
-      pick(shown[i]);
+      pick(slice[i]);
     });
   }
 
@@ -163,7 +171,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
           _cons[_axis!] = v; // raw value; the label shown was the slang
           _order.add(_axis!);
           _axis = null;
-          _expanded = false;
+          _page = 0;
         }),
       );
     }
@@ -188,24 +196,38 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         () => setState(() => _showList = true));
     if (_cons.isEmpty) {
       add('🔧 לפי עבודה', '${kSmartProducts.length} מתכונים',
-          () => setState(() => _jobMode = true));
+          () => setState(() {
+                _jobMode = true;
+                _page = 0;
+              }));
     }
-    final reserved = labels.length;
-    final moreA = !_expanded && axes.length > _cap - reserved;
-    final shownAxes = moreA ? axes.take(_cap - reserved - 1).toList() : axes;
+    // Page the axes so the wheel — הצג/לפי-עבודה + the axes + a "עוד…" slot —
+    // never tops [_cap]. "עוד…" advances one page and cycles; no dump-all wheel.
+    final reserved = labels.length; // הצג [+ לפי עבודה] are on EVERY page
+    final slots = _cap - reserved;
+    final moreA = axes.length > slots;
+    List<String> shownAxes;
+    if (moreA) {
+      final per = slots - 1; // reserve one slot for "עוד…"
+      final pages = (axes.length + per - 1) ~/ per;
+      final start = (_page % pages) * per;
+      final end = start + per < axes.length ? start + per : axes.length;
+      shownAxes = axes.sublist(start, end);
+    } else {
+      shownAxes = axes;
+    }
     for (final id in shownAxes) {
       add(
         '${_ax(id).emoji} ${_ax(id).label}',
         '${catOptsFor(id, _cons, matched, matched).length} אפשרויות',
         () => setState(() {
           _axis = id;
-          _expanded = false;
+          _page = 0;
         }),
       );
     }
     if (moreA) {
-      add('עוד ${axes.length - shownAxes.length} צירים…', 'צירים נוספים',
-          () => setState(() => _expanded = true));
+      add('עוד…', 'צירים נוספים', () => setState(() => _page++));
     }
     return _wheel(labels, subs,
         _order.isEmpty ? 'ממה נתחיל?' : 'לפי מה עוד?', (i) => actions[i]());
@@ -220,14 +242,20 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
           if (s.cat == _jobCat) s,
       ];
       return _capped(jobs, (j) => '${j.emoji} ${j.name}', 'איזו עבודה?',
-          (j) => setState(() => _job = j));
+          (j) => setState(() {
+                _job = j;
+                _page = 0;
+              }));
     }
     final cats = <String>[];
     for (final s in kSmartProducts) {
       if (!cats.contains(s.cat)) cats.add(s.cat);
     }
     return _capped(cats, (c) => c, 'איזו עבודה תעשה?',
-        (c) => setState(() => _jobCat = c));
+        (c) => setState(() {
+              _jobCat = c;
+              _page = 0;
+            }));
   }
 
   /// The chosen job's kit — one line per accessory, resolved to a catalog product.
