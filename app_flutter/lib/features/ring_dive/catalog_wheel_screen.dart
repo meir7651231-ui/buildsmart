@@ -9,6 +9,7 @@
 //   products. Behind [kAxisDive] ⇒ tree-shaken (byte-identical) when off.
 
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
+import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/smart_tree.dart'
     show SmartProduct, kSmartProducts;
 import 'package:buildsmart/features/ring_dive/catalog_axes.dart';
@@ -57,6 +58,22 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   String? _jobCat;
   SmartProduct? _job;
 
+  /// The wheel's currently-focused index, fired by [RingDiveWheel.onFocusChanged]
+  /// as you SPIN (not only on tap). The live gallery under the wheel rebuilds off
+  /// this to preview the focused value's products in real time — and ONLY the
+  /// gallery rebuilds on a spin, never the wheel itself.
+  final ValueNotifier<int> _focus = ValueNotifier<int>(0);
+
+  /// Max thumbnails in the live gallery before a trailing "+N" tile (which opens
+  /// the full list) — so the grid never tries to lay out thousands of images.
+  static const int _galCap = 24;
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
   CatAxis _ax(String id) => kCatAxes.firstWhere((a) => a.id == id);
 
   /// Step up one ring; false at the root (nothing to undo).
@@ -82,11 +99,17 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       return true;
     }
     if (_axis != null) {
-      setState(() => _axis = null);
+      setState(() {
+        _axis = null;
+        _focus.value = 0;
+      });
       return true;
     }
     if (_order.isNotEmpty) {
-      setState(() => _cons.remove(_order.removeLast()));
+      setState(() {
+        _cons.remove(_order.removeLast());
+        _focus.value = 0;
+      });
       return true;
     }
     return false;
@@ -154,25 +177,226 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
     });
   }
 
+  /// The visible slice of [items] for the current [_page] (cycling) when the list
+  /// tops [_cap]; the whole list otherwise. Mirrors [_capped]'s paging so the
+  /// value wheel + its trailing "עוד…" stay within [_cap] slots.
+  List<T> _pageOf<T>(List<T> items) {
+    if (items.length <= _cap) return items;
+    const per = _cap - 1;
+    final pages = (items.length + per - 1) ~/ per;
+    final start = (_page % pages) * per;
+    final end = start + per < items.length ? start + per : items.length;
+    return items.sublist(start, end);
+  }
+
+  /// A wheel with a LIVE product gallery beneath it. Spinning fires
+  /// [RingDiveWheel.onFocusChanged] → [_focus]; only the gallery (a
+  /// [ValueListenableBuilder]) rebuilds, showing [previewFor] of the focused
+  /// index — the wheel keeps its own rotation untouched.
+  Widget _wheelWithGallery({
+    required List<String> labels,
+    required List<String> subs,
+    required String hint,
+    required ValueChanged<int> onSelect,
+    required List<CatProduct> Function(int) previewFor,
+    required String Function(int) headline,
+  }) {
+    return Column(
+      children: <Widget>[
+        RingDiveWheel(
+          labels: labels,
+          sublabels: subs,
+          hubHint: hint,
+          onSelect: onSelect,
+          onFocusChanged: (i) => _focus.value = i,
+        ),
+        const SizedBox(height: 4),
+        Expanded(
+          child: ValueListenableBuilder<int>(
+            valueListenable: _focus,
+            builder: (_, f, __) => _gallery(previewFor(f), headline(f)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The live thumbnail grid under the wheel (3-wide). Capped at [_galCap]; a
+  /// trailing "+N" tile opens the full list instead of silently dropping the rest.
+  Widget _gallery(List<CatProduct> set, String headline) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
+          child: Text(
+            '🖼️ $headline · ${set.length}',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+          ),
+        ),
+        Expanded(
+          child: set.isEmpty
+              ? const Center(
+                  child: Text('אין מוצרים תואמים',
+                      style: TextStyle(fontSize: 12)))
+              : GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 0.80,
+                  ),
+                  itemCount: set.length > _galCap ? _galCap : set.length,
+                  itemBuilder: (_, i) {
+                    if (set.length > _galCap && i == _galCap - 1) {
+                      return _moreTile(set.length - (_galCap - 1));
+                    }
+                    return _galTile(set[i].product);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  /// The "+N עוד" tile — opens the full products list (never a silent cap).
+  Widget _moreTile(int n) => InkWell(
+        onTap: () => setState(() {
+          _showList = true;
+          _focus.value = 0;
+        }),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFFEEF2F5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text('+$n\nעוד',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF556070))),
+          ),
+        ),
+      );
+
+  /// One product thumbnail — the real CDN photo via the app's single resolver
+  /// ([resolveProductImage]; NEVER a raw asset, which would vanish in a release
+  /// build), sized down for the grid, with the type-emoji as the fallback for the
+  /// ~4% of products that have no photo. Tapping opens the full product sheet.
+  Widget _galTile(LipskeyCatalogProduct p) {
+    final asset = p.imageAsset;
+    return InkWell(
+      onTap: () =>
+          showLipskeyProductSheet(context, p, <LipskeyCatalogProduct>[p]),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0x17000000)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: SizedBox.expand(
+                child: ColoredBox(
+                  color: const Color(0xFFF6F9FB),
+                  child: asset == null
+                      ? Center(
+                          child: Text(p.typeEmoji,
+                              style: const TextStyle(fontSize: 30)))
+                      : Image(
+                          image: ResizeImage(resolveProductImage(asset),
+                              width: 220),
+                          fit: BoxFit.contain,
+                          excludeFromSemantics: true,
+                          gaplessPlayback: true,
+                          errorBuilder: (_, __, ___) => Center(
+                              child: Text(p.typeEmoji,
+                                  style: const TextStyle(fontSize: 30))),
+                          frameBuilder: (_, child, frame, sync) =>
+                              (sync || frame != null)
+                                  ? child
+                                  : const ColoredBox(color: Color(0x08000000)),
+                        ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+              child: Text(
+                p.nameHe,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                    fontSize: 10.5, height: 1.15, color: Color(0xFF2A2A2A)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _body() {
     // ── ENGINE 3 — the JOB path (recipe kits) ──────────────────────────────────
     if (_jobMode) return _jobBody();
 
     final matched = catMatching(_cons);
 
-    // ── VALUE wheel — the options of the axis being chosen (capped) ─────────────
+    // ── VALUE wheel — the axis's options, with a LIVE product gallery under it
+    //    that previews the FOCUSED value's products as you SPIN (before you tap).
     if (_axis != null) {
-      final vals = catOptsFor(_axis!, _cons, matched, matched);
-      return _capped(
-        vals,
-        (v) => catValueLabel(_axis!, v),
-        'איזה ${_ax(_axis!).label}?',
-        (v) => setState(() {
-          _cons[_axis!] = v; // raw value; the label shown was the slang
-          _order.add(_axis!);
-          _axis = null;
-          _page = 0;
-        }),
+      final axisId = _axis!;
+      final vals = catOptsFor(axisId, _cons, matched, matched);
+      final more = vals.length > _cap;
+      final shown = _pageOf(vals);
+      final labels = <String>[
+        for (final v in shown) catValueLabel(axisId, v),
+        if (more) 'עוד…',
+      ];
+      return _wheelWithGallery(
+        labels: labels,
+        subs: const <String>[],
+        hint: 'איזה ${_ax(axisId).label}?',
+        onSelect: (i) {
+          if (more && i == shown.length) {
+            setState(() {
+              _page++;
+              _focus.value = 0;
+            });
+            return;
+          }
+          setState(() {
+            _cons[axisId] = shown[i]; // raw value; the label shown was the slang
+            _order.add(axisId);
+            _axis = null;
+            _page = 0;
+            _focus.value = 0;
+          });
+        },
+        previewFor: (f) {
+          if (f >= 0 && f < shown.length) {
+            final v = shown[f];
+            return <CatProduct>[
+              for (final cp in matched)
+                if (cp.has(axisId, v)) cp,
+            ];
+          }
+          return matched;
+        },
+        headline: (f) => (f >= 0 && f < shown.length)
+            ? 'תצוגה מקדימה · ${_ax(axisId).label}: ${catValueLabel(axisId, shown[f])}'
+            : 'מוצרים תואמים',
       );
     }
 
@@ -199,6 +423,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
           () => setState(() {
                 _jobMode = true;
                 _page = 0;
+                _focus.value = 0;
               }));
     }
     // Page the axes so the wheel — הצג/לפי-עבודה + the axes + a "עוד…" slot —
@@ -223,14 +448,27 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         () => setState(() {
           _axis = id;
           _page = 0;
+          _focus.value = 0;
         }),
       );
     }
     if (moreA) {
-      add('עוד…', 'צירים נוספים', () => setState(() => _page++));
+      add('עוד…', 'צירים נוספים', () => setState(() {
+            _page++;
+            _focus.value = 0;
+          }));
     }
-    return _wheel(labels, subs,
-        _order.isEmpty ? 'ממה נתחיל?' : 'לפי מה עוד?', (i) => actions[i]());
+    // The axis wheel too carries the live gallery — spinning across axes keeps the
+    // current matched set below (an axis is not itself a filter, so it previews
+    // everything that still matches).
+    return _wheelWithGallery(
+      labels: labels,
+      subs: subs,
+      hint: _order.isEmpty ? 'ממה נתחיל?' : 'לפי מה עוד?',
+      onSelect: (i) => actions[i](),
+      previewFor: (_) => matched,
+      headline: (_) => 'מוצרים תואמים',
+    );
   }
 
   /// ENGINE 3 — the job flow: category → job → its assembled kit.
@@ -321,21 +559,17 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         Expanded(
           child: products.isEmpty
               ? const Center(child: Text('לא נמצאו מוצרים'))
-              : ListView.separated(
+              : GridView.builder(
+                  padding: const EdgeInsets.all(10),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 0.80,
+                  ),
                   itemCount: products.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (_, i) {
-                    final p = products[i];
-                    return ListTile(
-                      leading: Text(p.typeEmoji,
-                          style: const TextStyle(fontSize: 22)),
-                      title: Text(p.nameHe, textDirection: TextDirection.rtl),
-                      subtitle: p.nameEn.isEmpty
-                          ? null
-                          : Text(p.nameEn, style: const TextStyle(fontSize: 11)),
-                      onTap: () => showLipskeyProductSheet(context, p, products),
-                    );
-                  },
+                  itemBuilder: (_, i) => _galTile(products[i]),
                 ),
         ),
       ],
