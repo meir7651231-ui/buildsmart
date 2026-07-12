@@ -478,34 +478,32 @@ class BsKeyboard extends StatelessWidget {
       );
     }
 
-    // OWNER ("לכל המקלדת עד 4 בשורה נראית השאר נגלל" + "המשבצות קטנות מדי"): ONE
-    // horizontal row at a UNIFORM single-line key font that SCROLLS for overflow.
-    // Each tile is at LEAST 1/[perRow] of the width (responsive: 2 on mobile → wide
-    // readable tiles, 4 on desktop) so a SHORT label never becomes a tiny box, and
-    // GROWS for a longer label. ~[perRow] tiles sit in view; the rest scroll.
-    return <Widget>[
-      LayoutBuilder(
-        builder: (context, constraints) {
-          final double tileW =
-              (constraints.maxWidth - gap * (perRow - 1)) / perRow;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: <Widget>[
-                for (var i = 0; i < cells.length; i++) ...<Widget>[
-                  if (i > 0) SizedBox(width: gap),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: tileW),
-                    child: cells[i],
-                  ),
-                ],
-              ],
-            ),
-          );
-        },
-      ),
-      SizedBox(height: gap),
-    ];
+    // OWNER (12/7 "תעשה אותו רשת ארבע בשורה"): a real GRID — [perRow] tiles per row
+    // (4 on desktop, 2 on mobile), WRAPPING to as many rows as needed, instead of
+    // the old single horizontal-scroll row that hid every tile past the 4th
+    // (מאתר-על among them). The tool area is height-capped + VERTICALLY scrollable
+    // ([_cappedToolArea]), so extra rows scroll rather than clip. Each tile is
+    // [Expanded] so a full row splits the width evenly; the last row is padded with
+    // empty cells so its tiles keep a full row's width.
+    final rows = <Widget>[];
+    for (var start = 0; start < cells.length; start += perRow) {
+      if (start > 0) rows.add(SizedBox(height: gap));
+      rows.add(
+        Row(
+          children: <Widget>[
+            for (var i = 0; i < perRow; i++) ...<Widget>[
+              if (i > 0) SizedBox(width: gap),
+              Expanded(
+                child: start + i < cells.length
+                    ? cells[start + i]
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+    return rows;
   }
 
   @override
