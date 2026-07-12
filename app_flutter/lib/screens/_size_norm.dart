@@ -110,6 +110,10 @@ final RegExp _kSizeRe = RegExp(
   r'DN ?\d+'
   // 25 ס"מ / 200 מ"מ  (Hebrew unit suffixes)
   r'|\d+(?:\.\d+)? ?[מס]["״]מ'
+  // 3 מ׳ — metres (the L(cm)/100 form tokensFromDims emits). Must round-trip so
+  // the 'length' axis orders metres by MAGNITUDE, not by popularity (which made
+  // the comparator non-transitive when cm + metres mixed on one wheel).
+  r'|\d+(?:\.\d+)? ?מ׳'
   // 1.25" / 1.5"
   r'|\d+\.\d+["׳]'
   // 11/4" / 21/2" (legacy two-int form before pretty-fold)
@@ -189,6 +193,14 @@ SizeToken? _tokenize(String label) {
   if (cm != null) {
     final v = double.parse(cm.group(1)!);
     return SizeToken(label: '${_fmt(v)} ס"מ', family: SizeFamily.cm, mm: v * 10);
+  }
+  // metres — the `L (cm)/100` form tokensFromDims emits (e.g. '3 מ׳'). Round-trips
+  // so _sizeRank orders metre lengths by magnitude (family index 4, after cm).
+  final meters = RegExp(r'^(\d+(?:\.\d+)?) ?מ׳$').firstMatch(label);
+  if (meters != null) {
+    final v = double.parse(meters.group(1)!);
+    return SizeToken(
+        label: '${_fmt(v)} מ׳', family: SizeFamily.meters, mm: v * 1000);
   }
   // Cross-dim (16×20 / 20×2.8): first dim is the sort key, decimals accepted
   // on both sides for multilayer pipes (OD × wall thickness).

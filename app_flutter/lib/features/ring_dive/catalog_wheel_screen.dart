@@ -178,8 +178,34 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
                   tooltip: 'חזרה',
                   onPressed: () => _up(),
                 ),
-          title: Text(crumbs.join(' › '),
-              style: const TextStyle(fontSize: 14), overflow: TextOverflow.fade),
+          title: Builder(
+            builder: (context) {
+              // In RTL a faded single Text clips the LEFT edge = the NEWEST crumb
+              // (the current location). Pin the leaf so it always shows; only the
+              // parent trail fades when the title overflows.
+              final leaf = crumbs.last;
+              final trail = crumbs.length > 1
+                  ? '${crumbs.sublist(0, crumbs.length - 1).join(' › ')} › '
+                  : '';
+              return Row(
+                children: <Widget>[
+                  if (trail.isNotEmpty)
+                    Flexible(
+                      child: Text(
+                        trail,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.fade,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  Text(leaf,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w600)),
+                ],
+              );
+            },
+          ),
         ),
         body: SafeArea(child: _body()),
       ),
@@ -246,40 +272,60 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
     required String Function(int) headline,
     bool livePreview = true,
   }) {
-    return Column(
-      children: <Widget>[
-        RingDiveWheel(
-          labels: labels,
-          sublabels: subs,
-          hubHint: hint,
-          onSelect: onSelect,
-          // VALUE wheel: DEBOUNCE the preview so a fast spin only previews the value
-          // it SETTLES on (not every crossed detent → CDN fetch churn + spin jank);
-          // the wheel's own dial highlight stays instant (its internal focus).
-          // AXIS wheel (livePreview:false): the gallery ignores focus, so don't tick
-          // _focus at all — no wasted per-detent gallery rebuild.
-          onFocusChanged: livePreview
-              ? (i) {
-                  _previewDebounce?.cancel();
-                  _previewDebounce = Timer(
-                    const Duration(milliseconds: 140),
-                    () {
-                      if (mounted) _focus.value = i;
-                    },
-                  );
-                }
-              : null,
-        ),
-        const SizedBox(height: 4),
-        Expanded(
-          child: livePreview
-              ? ValueListenableBuilder<int>(
-                  valueListenable: _focus,
-                  builder: (_, f, __) => _gallery(previewFor(f), headline(f)),
-                )
-              : _gallery(previewFor(0), headline(0)),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Keep the dial at its natural 340px when the viewport has room; on a short
+        // / landscape / split viewport shrink it (reserving room for the gallery) so
+        // the Column never overflows + zeroes the gallery below it. FittedBox routes
+        // hit-testing through its transform, so the wheel's (170,170) centre holds.
+        final double dial = constraints.maxHeight.isFinite
+            ? (constraints.maxHeight - 124).clamp(140.0, 340.0)
+            : 340.0;
+        return Column(
+          children: <Widget>[
+            SizedBox(
+              width: dial,
+              height: dial,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: 340,
+                  height: 340,
+                  child: RingDiveWheel(
+                    labels: labels,
+                    sublabels: subs,
+                    hubHint: hint,
+                    onSelect: onSelect,
+                    // VALUE wheel: DEBOUNCE the preview so a fast spin only previews
+                    // the value it SETTLES on (not every detent → CDN churn + jank).
+                    // AXIS wheel (livePreview:false): gallery ignores focus → no tick.
+                    onFocusChanged: livePreview
+                        ? (i) {
+                            _previewDebounce?.cancel();
+                            _previewDebounce = Timer(
+                              const Duration(milliseconds: 140),
+                              () {
+                                if (mounted) _focus.value = i;
+                              },
+                            );
+                          }
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Expanded(
+              child: livePreview
+                  ? ValueListenableBuilder<int>(
+                      valueListenable: _focus,
+                      builder: (_, f, __) => _gallery(previewFor(f), headline(f)),
+                    )
+                  : _gallery(previewFor(0), headline(0)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -363,8 +409,17 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   Widget _galTile(LipskeyCatalogProduct p) {
     final asset = p.imageAsset;
     return InkWell(
-      onTap: () =>
-          showLipskeyProductSheet(context, p, <LipskeyCatalogProduct>[p]),
+      // Pass the SAME-CATEGORY products (not just [p]) so the sheet's "💡 tap to
+      // switch size/color" variant hint appears when the product actually has
+      // switchable variants (it gates on categoryProducts.length > 1).
+      onTap: () => showLipskeyProductSheet(
+        context,
+        p,
+        <LipskeyCatalogProduct>[
+          for (final cp in catPool)
+            if (cp.product.categoryHe == p.categoryHe) cp.product,
+        ],
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -440,6 +495,15 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         for (final v in shown) catValueLabel(axisId, v),
         if (more) 'עוד…',
       ];
+      // Partition the matched set by the SHOWN values ONCE, so the live preview
+      // is an O(1) map lookup per spin instead of an O(matched) rescan every time
+      // the focus changes (or the gallery rebuilds).
+      final byValue = <String, List<CatProduct>>{};
+      for (final cp in matched) {
+        for (final v in shown) {
+          if (cp.has(axisId, v)) (byValue[v] ??= <CatProduct>[]).add(cp);
+        }
+      }
       return _wheelWithGallery(
         labels: labels,
         subs: const <String>[],

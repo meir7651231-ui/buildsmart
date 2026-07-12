@@ -149,27 +149,65 @@ class _RingDiveWheelState extends State<RingDiveWheel> {
     widget.onSelect?.call(_focus);
   }
 
+  /// Advance the focused option by [dir] (+1 / -1), wrapping — the a11y increment/
+  /// decrement path so a screen-reader / switch user can change focus WITHOUT the
+  /// drag-to-rotate gesture they cannot perform (see the Semantics slider in build).
+  void _stepFocus(int dir) {
+    if (widget.labels.isEmpty) return;
+    final n = _n;
+    final next = (((_focus + dir) % n) + n) % n;
+    if (next == _focus) return;
+    if (!_reduceMotion) HapticFeedback.selectionClick();
+    setState(() {
+      _focus = next;
+      _rot = -next * _step;
+    });
+    widget.onFocusChanged?.call(next);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      // Reset the drag distance on every pointer-down so a tap AFTER a drag is
-      // not swallowed by the previous drag's leftover `_moved` (> 8).
-      onTapDown: (_) => _moved = 0,
-      onPanStart: _onPanStart,
-      onPanUpdate: _onPanUpdate,
-      onPanEnd: _onPanEnd,
-      onTap: _onTap,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          RingDiveDial(
-            labels: widget.labels,
-            focus: _focus,
-            rotation: _rot,
-            lockedCount: widget.lockedCount,
-          ),
-          if (widget.labels.isNotEmpty) _buildHub(),
-        ],
+    final hasLabels = widget.labels.isNotEmpty;
+    final n = widget.labels.length;
+    // A slider only offers increment/decrement when there is more than one option
+    // to move between. The framework couples the two: whenever an increase/decrease
+    // action is present, `value` and `increased/decreasedValue` must be all-set or
+    // all-empty — so we supply the next/previous labels alongside the actions.
+    final hasMulti = n > 1;
+    final f = hasLabels ? _focus.clamp(0, n - 1) : 0;
+    // A11y: expose the painted canvas dial as an adjustable SLIDER so a screen-
+    // reader / switch user can increment/decrement the focused option + activate
+    // it, without the drag-to-rotate gesture they cannot perform.
+    return Semantics(
+      container: true,
+      slider: true,
+      label: widget.hubHint,
+      value: hasLabels ? widget.labels[f] : null,
+      increasedValue: hasMulti ? widget.labels[(f + 1) % n] : null,
+      decreasedValue: hasMulti ? widget.labels[(f - 1 + n) % n] : null,
+      onIncrease: hasMulti ? () => _stepFocus(1) : null,
+      onDecrease: hasMulti ? () => _stepFocus(-1) : null,
+      onTap: hasLabels ? () => widget.onSelect?.call(_focus) : null,
+      child: GestureDetector(
+        // Reset the drag distance on every pointer-down so a tap AFTER a drag is
+        // not swallowed by the previous drag's leftover `_moved` (> 8).
+        onTapDown: (_) => _moved = 0,
+        onPanStart: _onPanStart,
+        onPanUpdate: _onPanUpdate,
+        onPanEnd: _onPanEnd,
+        onTap: _onTap,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            RingDiveDial(
+              labels: widget.labels,
+              focus: _focus,
+              rotation: _rot,
+              lockedCount: widget.lockedCount,
+            ),
+            if (widget.labels.isNotEmpty) _buildHub(),
+          ],
+        ),
       ),
     );
   }

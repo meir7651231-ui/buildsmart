@@ -823,6 +823,11 @@ class _StripInput extends StatelessWidget {
                   (constraints.maxWidth - gap * (visible - 1)) / visible;
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                // reverse so the resting scroll offset is the RIGHT edge (the RTL
+                // start) = chip[0], the TOP prediction — instead of the LTR default
+                // that parked the best suggestion off-screen right until a reverse
+                // scroll. With ≤[visible] chips there is no scroll, so it's a no-op.
+                reverse: true,
                 child: Row(
                   textDirection: TextDirection.rtl,
                   children: <Widget>[
