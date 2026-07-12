@@ -52,6 +52,9 @@ jobs:
         # --dart-define=PLAIN_DIVE=true turns ON the layman 'מאתר פשוט' finder (the
         # plain 4-ring dictionary drill) running ALONGSIDE 'מאתר חכם'. OWNER-REQUESTED
         # live (10/7). Reversible: drop the flag → byte-identical. MUST match web-deploy.yml.
+        # --dart-define=AXIS_DIVE=true turns ON the owner's 'מאתר-על' axis-dive wheel
+        # (pick any of the 17 catalog axes in any order + a LIVE product-photo gallery
+        # under the wheel). OWNER-REQUESTED live (12/7). MUST match web-deploy.yml.
         # ── STUDIO GO-LIVE SEAM (dormant by default) ─────────────────────────
         # ${{ vars.STUDIO_DART_DEFINES }} appends the Studio/Pillar flags for a
         # STAGED, owner-controlled go-live. UNSET (default) → empty → BYTE-IDENTICAL
@@ -59,7 +62,7 @@ jobs:
         # repo variable STUDIO_DART_DEFINES to a stage's defines (knowledge/STUDIO_GA.md
         # §3). Persists across re-deploys; reversible by clearing it. MUST match
         # web-deploy.yml (same live race — else whichever deploy wins ships a mismatch).
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Deploy to Firebase Hosting (live channel)
         # Redundant with web-deploy.yml (firebase-tools CLI), which already deploys
