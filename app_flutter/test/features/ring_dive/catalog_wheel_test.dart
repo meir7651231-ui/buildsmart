@@ -118,4 +118,30 @@ void main() {
     expect(find.byType(ListView), findsOneWidget, reason: 'the kit list');
     expect(find.byType(ListTile), findsWidgets, reason: 'the kit parts');
   });
+
+  testWidgets('scrolling the gallery collapses the wheel into a 🎡 pill',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: CatalogWheelScreen()));
+    await tester.pump();
+
+    // Ring 1 already carries a full-height wheel + a live gallery (1948 products
+    // → a scrollable grid). At rest there is no collapsed pill.
+    expect(find.byType(RingDiveWheel), findsOneWidget);
+    expect(find.byType(GridView), findsOneWidget);
+    expect(find.text('🎡'), findsNothing,
+        reason: 'wheel is full-size — no collapsed pill yet');
+
+    // Scroll the product photos UP → the header collapses to its 🎡 pill.
+    await tester.drag(find.byType(GridView), const Offset(0, -260));
+    await tester.pump();
+    expect(find.text('🎡'), findsOneWidget,
+        reason: 'scrolling the images collapsed the wheel into its pill');
+
+    // Tapping the pill scrolls the gallery back to the top → the wheel re-opens.
+    await tester.tap(find.text('🎡'));
+    await tester.pump(); // fire onTap → the 260ms animateTo(0) starts
+    await tester.pump(const Duration(milliseconds: 400)); // it flushes to the top
+    expect(find.text('🎡'), findsNothing,
+        reason: 'back at the top → the wheel re-expanded');
+  });
 }

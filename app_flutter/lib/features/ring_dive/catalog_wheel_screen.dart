@@ -80,9 +80,49 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   /// the spin). The wheel's own dial highlight stays instant regardless.
   Timer? _previewDebounce;
 
+  /// Drives the COLLAPSING HEADER: the live gallery's scroll controller feeds a
+  /// 0→1 "collapse" amount — 0 = wheel at full size, 1 = wheel shrunk away and a
+  /// small 🎡 emoji pill pinned at the top. So scrolling INTO the product photos
+  /// hands the screen over to the images; scrolling back up brings the wheel back.
+  final ScrollController _galScroll = ScrollController();
+  final ValueNotifier<double> _collapse = ValueNotifier<double>(0);
+
+  /// Gallery scroll distance (px) that fully collapses the wheel.
+  static const double _collapseSpan = 120;
+
+  /// Level signature — when the wheel moves to a new ring (dive / back / page) we
+  /// reset scroll + collapse so every new level opens with the wheel back up.
+  String _lastSig = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _galScroll.addListener(_onGalScroll);
+  }
+
+  void _onGalScroll() {
+    if (!_galScroll.hasClients) return;
+    final t = (_galScroll.offset / _collapseSpan).clamp(0.0, 1.0);
+    if ((t - _collapse.value).abs() > 0.001) _collapse.value = t;
+  }
+
+  /// Re-expand the wheel + jump the gallery to the top. Called from [_body] DURING
+  /// build when the ring level changes, so the whole reset is deferred to a post-
+  /// frame callback — mutating [_collapse] mid-build would fire its
+  /// ValueListenableBuilder's setState during build (a framework error).
+  void _resetCollapse() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_galScroll.hasClients) _galScroll.jumpTo(0);
+      _collapse.value = 0;
+    });
+  }
+
   @override
   void dispose() {
     _previewDebounce?.cancel();
+    _galScroll.dispose();
+    _collapse.dispose();
     _focus.dispose();
     super.dispose();
   }
@@ -281,38 +321,68 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         final double dial = constraints.maxHeight.isFinite
             ? (constraints.maxHeight - 124).clamp(140.0, 340.0)
             : 340.0;
+        // Built ONCE (not inside the collapse builder) so its State — and thus the
+        // wheel's live rotation — survives every collapse tick.
+        final wheel = RingDiveWheel(
+          labels: labels,
+          sublabels: subs,
+          hubHint: hint,
+          onSelect: onSelect,
+          // VALUE wheel: DEBOUNCE the preview so a fast spin only previews the
+          // value it SETTLES on (not every detent → CDN churn + jank). AXIS wheel
+          // (livePreview:false): the gallery ignores focus → no tick.
+          onFocusChanged: livePreview
+              ? (i) {
+                  _previewDebounce?.cancel();
+                  _previewDebounce = Timer(
+                    const Duration(milliseconds: 140),
+                    () {
+                      if (mounted) _focus.value = i;
+                    },
+                  );
+                }
+              : null,
+        );
         return Column(
           children: <Widget>[
-            SizedBox(
-              width: dial,
-              height: dial,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: SizedBox(
-                  width: 340,
-                  height: 340,
-                  child: RingDiveWheel(
-                    labels: labels,
-                    sublabels: subs,
-                    hubHint: hint,
-                    onSelect: onSelect,
-                    // VALUE wheel: DEBOUNCE the preview so a fast spin only previews
-                    // the value it SETTLES on (not every detent → CDN churn + jank).
-                    // AXIS wheel (livePreview:false): gallery ignores focus → no tick.
-                    onFocusChanged: livePreview
-                        ? (i) {
-                            _previewDebounce?.cancel();
-                            _previewDebounce = Timer(
-                              const Duration(milliseconds: 140),
-                              () {
-                                if (mounted) _focus.value = i;
-                              },
-                            );
-                          }
-                        : null,
+            // COLLAPSING HEADER — as the gallery scrolls (_collapse 0→1) the wheel
+            // shrinks (its FittedBox) and fades out while a small 🎡 pill fades in,
+            // pinned to the top. Tapping the pill scrolls back up → the wheel re-opens.
+            ValueListenableBuilder<double>(
+              valueListenable: _collapse,
+              builder: (context, t, _) {
+                final e = Curves.easeOut.transform(t);
+                final h = dial - (dial - 46.0) * e;
+                return SizedBox(
+                  width: dial,
+                  height: h,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      IgnorePointer(
+                        // Once mostly collapsed the tiny wheel must not steal the
+                        // pill's tap.
+                        ignoring: t > 0.6,
+                        child: Opacity(
+                          opacity: (1 - e * 1.3).clamp(0.0, 1.0),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: SizedBox(width: 340, height: 340, child: wheel),
+                          ),
+                        ),
+                      ),
+                      if (t > 0.45)
+                        Opacity(
+                          opacity: ((t - 0.45) / 0.55).clamp(0.0, 1.0),
+                          child: IgnorePointer(
+                            ignoring: t < 0.6,
+                            child: _collapsedPill(hint),
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-              ),
+                );
+              },
             ),
             const SizedBox(height: 4),
             Expanded(
@@ -328,6 +398,57 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       },
     );
   }
+
+  /// The wheel's COLLAPSED form: a compact 🎡 pill pinned at the top that names
+  /// what the wheel is choosing ([hint], e.g. "איזה קוטר?"). Tapping it scrolls the
+  /// gallery back to the top, which re-opens the full wheel.
+  Widget _collapsedPill(String hint) => Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => _galScroll.animateTo(
+                0,
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOut,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3E8),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0x33FF7A18)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text('🎡', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 7),
+                    Flexible(
+                      child: Text(
+                        hint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF7A3B00),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.keyboard_arrow_up,
+                        size: 16, color: Color(0xFFB06A2E)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 
   /// The live thumbnail grid under the wheel (3-wide). Capped at [_galCap]; a
   /// trailing "+N" tile opens the full list instead of silently dropping the rest.
@@ -352,6 +473,9 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
                   child: Text('אין מוצרים תואמים',
                       style: TextStyle(fontSize: 12)))
               : GridView.builder(
+                  // Feeds the collapsing header — scrolling the photos shrinks the
+                  // wheel into its 🎡 pill (see _collapse / _onGalScroll).
+                  controller: _galScroll,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   gridDelegate:
                       // Responsive: ~132px-wide cells (≈3 columns on a phone, more
@@ -473,6 +597,16 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   }
 
   Widget _body() {
+    // Reset the collapsing header whenever the ring LEVEL changes (dive / back /
+    // page / job step) so a fresh level never inherits the prior level's scroll
+    // offset and opens already-collapsed.
+    final sig =
+        '$_jobMode|$_jobCat|${_job != null}|$_axis|${_order.length}|$_showList|$_page';
+    if (sig != _lastSig) {
+      _lastSig = sig;
+      _resetCollapse();
+    }
+
     // ── ENGINE 3 — the JOB path (recipe kits) ──────────────────────────────────
     if (_jobMode) return _jobBody();
 
