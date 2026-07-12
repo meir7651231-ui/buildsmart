@@ -604,13 +604,9 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
     // keyboard. Read (not watched): the grid rebuilds each time it re-opens.
     final home = _destNode('בית', Icons.home_outlined);
     if (home != null) out.add(home);
-    final hidden = ref.read(hiddenCatalogSectionsProvider);
-    for (final s in ref.read(catalogSectionsListProvider)) {
-      if (hidden.contains(s)) continue;
-      // A fixed section has a destination (the SAME opener its pill used); a
-      // user-created list has none → a manual leaf that activates its section.
-      out.add(_destNode(s, _kbListIcon(s)) ?? _listSectionChip(s));
-    }
+    // OWNER (12/7): the flag-gated FINDERS lead — right after 'בית', BEFORE the
+    // section chips — so 'מאתר חכם / מאתר פשוט / מאתר-על' are the FIRST tiles the
+    // compact ▦ grid shows, not buried past ~8 sections where it clips them.
     if (ref.read(featureFlagsProvider).contains(kWordFinderFlag)) {
       out.add(
         KbToolNode.leaf(
@@ -655,6 +651,14 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
           },
         ),
       );
+    }
+    // The catalog sections follow the finders — fixed sections + user lists,
+    // honouring hide + order; each uses the SAME opener its pill used (a user list
+    // is a manual leaf that activates its section).
+    final hidden = ref.read(hiddenCatalogSectionsProvider);
+    for (final s in ref.read(catalogSectionsListProvider)) {
+      if (hidden.contains(s)) continue;
+      out.add(_destNode(s, _kbListIcon(s)) ?? _listSectionChip(s));
     }
     out.add(
       KbToolNode.leaf(
