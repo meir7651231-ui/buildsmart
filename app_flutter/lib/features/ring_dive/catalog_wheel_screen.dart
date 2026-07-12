@@ -308,8 +308,11 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
               : GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                      // Responsive: ~132px-wide cells (≈3 columns on a phone, more
+                      // on a wide desktop browser) instead of a hardcoded 3 that
+                      // balloon to ~400px each on buildsmart-il.com.
+                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 132,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                     childAspectRatio: 0.80,
@@ -639,8 +642,11 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
               : GridView.builder(
                   padding: const EdgeInsets.all(10),
                   gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                      // Responsive: ~132px-wide cells (≈3 columns on a phone, more
+                      // on a wide desktop browser) instead of a hardcoded 3 that
+                      // balloon to ~400px each on buildsmart-il.com.
+                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 132,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                     childAspectRatio: 0.80,
