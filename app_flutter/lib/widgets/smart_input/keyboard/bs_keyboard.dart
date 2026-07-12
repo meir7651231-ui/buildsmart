@@ -474,7 +474,12 @@ class BsKeyboard extends StatelessWidget {
     }
     for (final t in tiles) {
       cells.add(
-        _ToolTile(icon: t.icon, label: t.label, onTap: () => onTile?.call(t.id)),
+        _ToolTile(
+          icon: t.icon,
+          label: t.label,
+          onTap: () => onTile?.call(t.id),
+          bounded: true, // fixed-width grid cell → ellipsize, never overflow
+        ),
       );
     }
 
@@ -490,6 +495,11 @@ class BsKeyboard extends StatelessWidget {
       if (start > 0) rows.add(SizedBox(height: gap));
       rows.add(
         Row(
+          // RTL so Hebrew tiles fill right→left: tile[0] / the BACK tile sit top-
+          // RIGHT (the front-loaded finders read first for a Hebrew user) and the
+          // trailing empty padding cells go left. The keyboard is pinned LTR for the
+          // letter rows, so this per-row override is what keeps the grid Hebrew-correct.
+          textDirection: TextDirection.rtl,
           children: <Widget>[
             for (var i = 0; i < perRow; i++) ...<Widget>[
               if (i > 0) SizedBox(width: gap),
@@ -1010,10 +1020,16 @@ class _ToolTile extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
 
+  /// True in the fixed-width GRID ([_tileRows] Expanded cells): the label then
+  /// ellipsizes within its slot instead of overflowing. False in the horizontal-
+  /// scroll layers ([_toolRows], unbounded width) where a [Flexible] would assert.
+  final bool bounded;
+
   const _ToolTile({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.bounded = false,
   });
 
   @override
@@ -1057,20 +1073,37 @@ class _ToolTile extends StatelessWidget {
               children: <Widget>[
                 Icon(icon, size: m.iconSize, color: BsTokens.inkLight),
                 const SizedBox(width: BsTokens.space1),
-                // OWNER ("עד 4 בשורה נראית השאר נגלל"): ONE key font, ONE line —
-                // never shrink, never wrap. A long label makes the tile WIDER (and
-                // the row scrolls); it never renders smaller or on a 2nd line.
-                Text(
-                  label,
-                  maxLines: 1,
-                  softWrap: false,
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: m.fontSize,
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w500,
+                // ONE key font, ONE line, never shrink. In the horizontal-scroll
+                // layers a long label makes the tile WIDER (the row scrolls); in the
+                // fixed-width GRID ([bounded]) it ellipsizes within its Expanded slot
+                // instead of overflowing (RenderFlex overflow / clipped text).
+                if (bounded)
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: m.fontSize,
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: m.fontSize,
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

@@ -217,11 +217,14 @@ List<String> catOptsFor(String axis, Map<String, String> cons,
 /// score means the axis splits the pool into many, evenly-sized groups — the most
 /// decisive question to ask. Zero when the axis is absent or single-valued.
 double catAxisGain(String axis, List<CatProduct> base) {
+  if (base.isEmpty) return 0;
   final counts = <String, int>{};
   var total = 0;
+  var present = 0; // products that HAVE this axis (for coverage weighting)
   for (final p in base) {
     final vals = p.axes[axis];
     if (vals == null) continue;
+    present++;
     for (final v in vals) {
       counts[v] = (counts[v] ?? 0) + 1;
       total++;
@@ -233,7 +236,13 @@ double catAxisGain(String axis, List<CatProduct> base) {
     final pr = c / total;
     h -= pr * (log(pr) / log(2));
   }
-  return h;
+  // Weight by COVERAGE. Raw entropy is computed over ONLY the products that have
+  // the axis, so a 1-23%-coverage axis (קוטר-מ"מ, אורך, חדר) whose few present
+  // products spread over many values scores as "most decisive" — but picking such
+  // a value drops the 77-99% that simply LACK the axis. Scaling by present/base
+  // demotes sparse axes below full-coverage ones (סוג/קבוצה/מותג), so the first
+  // wheel leads with genuinely pool-splitting questions.
+  return h * (present / base.length);
 }
 
 /// The axes still worth asking about for [cons] — each with ≥2 distinct options —

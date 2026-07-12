@@ -8,6 +8,8 @@
 //   Repeat in ANY order; a "📋 הצג" option and the auto-collapse show the final
 //   products. Behind [kAxisDive] ⇒ tree-shaken (byte-identical) when off.
 
+import 'dart:async' show Timer;
+
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/smart_tree.dart'
@@ -68,34 +70,76 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
   /// the full list) — so the grid never tries to lay out thousands of images.
   static const int _galCap = 24;
 
+  /// The exact product set the "+N עוד" tile counted, so tapping it opens THAT set
+  /// even on the value wheel (where a bare _showList was swallowed by the _axis
+  /// early-return). Null → the current [_cons] match.
+  List<CatProduct>? _listSet;
+
+  /// Debounces the live gallery preview so a fast spin only previews the value the
+  /// wheel SETTLES on, not every crossed detent (which churned CDN fetches + janked
+  /// the spin). The wheel's own dial highlight stays instant regardless.
+  Timer? _previewDebounce;
+
   @override
   void dispose() {
+    _previewDebounce?.cancel();
     _focus.dispose();
     super.dispose();
   }
 
   CatAxis _ax(String id) => kCatAxes.firstWhere((a) => a.id == id);
 
+  /// True when [_up] has something to undo — the AppBar back button reads this so
+  /// it renders EXACTLY when _up() can act (job mode, paging, list, value wheel,
+  /// constraints). Was gated on only _order/_axis/_showList, which hid the arrow
+  /// through the whole 'לפי עבודה' flow + a paged wheel → a navigation dead-end.
+  bool get _canBack =>
+      _job != null ||
+      _jobCat != null ||
+      _jobMode ||
+      _page > 0 ||
+      _showList ||
+      _axis != null ||
+      _order.isNotEmpty;
+
   /// Step up one ring; false at the root (nothing to undo).
   bool _up() {
     if (_job != null) {
-      setState(() => _job = null);
+      setState(() {
+        _job = null;
+        _page = 0;
+        _focus.value = 0;
+      });
       return true;
     }
     if (_jobCat != null) {
-      setState(() => _jobCat = null);
+      setState(() {
+        _jobCat = null;
+        _page = 0;
+        _focus.value = 0;
+      });
       return true;
     }
     if (_jobMode) {
-      setState(() => _jobMode = false);
+      setState(() {
+        _jobMode = false;
+        _page = 0;
+        _focus.value = 0;
+      });
       return true;
     }
     if (_page > 0) {
-      setState(() => _page = 0);
+      setState(() {
+        _page = 0;
+        _focus.value = 0;
+      });
       return true;
     }
     if (_showList) {
-      setState(() => _showList = false);
+      setState(() {
+        _showList = false;
+        _listSet = null;
+      });
       return true;
     }
     if (_axis != null) {
@@ -127,7 +171,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          leading: (_order.isEmpty && _axis == null && !_showList)
+          leading: !_canBack
               ? null
               : IconButton(
                   icon: const Icon(Icons.arrow_forward),
@@ -200,6 +244,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
     required ValueChanged<int> onSelect,
     required List<CatProduct> Function(int) previewFor,
     required String Function(int) headline,
+    bool livePreview = true,
   }) {
     return Column(
       children: <Widget>[
@@ -208,14 +253,31 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
           sublabels: subs,
           hubHint: hint,
           onSelect: onSelect,
-          onFocusChanged: (i) => _focus.value = i,
+          // VALUE wheel: DEBOUNCE the preview so a fast spin only previews the value
+          // it SETTLES on (not every crossed detent → CDN fetch churn + spin jank);
+          // the wheel's own dial highlight stays instant (its internal focus).
+          // AXIS wheel (livePreview:false): the gallery ignores focus, so don't tick
+          // _focus at all — no wasted per-detent gallery rebuild.
+          onFocusChanged: livePreview
+              ? (i) {
+                  _previewDebounce?.cancel();
+                  _previewDebounce = Timer(
+                    const Duration(milliseconds: 140),
+                    () {
+                      if (mounted) _focus.value = i;
+                    },
+                  );
+                }
+              : null,
         ),
         const SizedBox(height: 4),
         Expanded(
-          child: ValueListenableBuilder<int>(
-            valueListenable: _focus,
-            builder: (_, f, __) => _gallery(previewFor(f), headline(f)),
-          ),
+          child: livePreview
+              ? ValueListenableBuilder<int>(
+                  valueListenable: _focus,
+                  builder: (_, f, __) => _gallery(previewFor(f), headline(f)),
+                )
+              : _gallery(previewFor(0), headline(0)),
         ),
       ],
     );
@@ -230,7 +292,8 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
           child: Text(
-            '🖼️ $headline · ${set.length}',
+            // Count FIRST so it never ellipsizes away behind a long slang label.
+            '🖼️ ${set.length} · $headline',
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -254,7 +317,7 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
                   itemCount: set.length > _galCap ? _galCap : set.length,
                   itemBuilder: (_, i) {
                     if (set.length > _galCap && i == _galCap - 1) {
-                      return _moreTile(set.length - (_galCap - 1));
+                      return _moreTile(set.length - (_galCap - 1), set);
                     }
                     return _galTile(set[i].product);
                   },
@@ -264,9 +327,13 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
     );
   }
 
-  /// The "+N עוד" tile — opens the full products list (never a silent cap).
-  Widget _moreTile(int n) => InkWell(
+  /// The "+N עוד" tile — opens the full list of EXACTLY [set] (the products it
+  /// counted). Carrying [set] via [_listSet] is what makes it work on the VALUE
+  /// wheel too: a bare _showList there was swallowed by _body's `_axis != null`
+  /// early-return, so the tile was a dead tap.
+  Widget _moreTile(int n, List<CatProduct> set) => InkWell(
         onTap: () => setState(() {
+          _listSet = List<CatProduct>.of(set);
           _showList = true;
           _focus.value = 0;
         }),
@@ -353,6 +420,12 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
 
     final matched = catMatching(_cons);
 
+    // "+N עוד" / "📋 הצג" → the full list. Checked BEFORE the value-wheel branch so
+    // the gallery's overflow tile opens the EXACT set it counted, on BOTH wheels
+    // (previously the `_axis != null` early-return below swallowed it on the value
+    // wheel, making "+N" a dead tap that also leaked _showList into the next pick).
+    if (_showList) return _finalList(_listSet ?? matched);
+
     // ── VALUE wheel — the axis's options, with a LIVE product gallery under it
     //    that previews the FOCUSED value's products as you SPIN (before you tap).
     if (_axis != null) {
@@ -401,8 +474,8 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
     }
 
     final axes = catFindAxes(_cons);
-    if (_showList || axes.isEmpty || matched.length <= 1) {
-      return _finalList(matched);
+    if (axes.isEmpty || matched.length <= 1) {
+      return _finalList(matched); // _showList handled at the top of _body
     }
 
     // ── AXIS wheel — "הצג" + a "לפי עבודה" entry (opening only) + the top axes
@@ -468,6 +541,10 @@ class _CatalogWheelScreenState extends State<CatalogWheelScreen> {
       onSelect: (i) => actions[i](),
       previewFor: (_) => matched,
       headline: (_) => 'מוצרים תואמים',
+      // The axis-wheel gallery is focus-INDEPENDENT (always the current matched
+      // set), so don't drive it off _focus — avoids a wasted 24-tile rebuild on
+      // every spin detent that produces identical output.
+      livePreview: false,
     );
   }
 

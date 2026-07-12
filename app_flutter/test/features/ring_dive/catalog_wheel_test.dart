@@ -86,9 +86,10 @@ void main() {
     expect(wheel.onFocusChanged, isNotNull,
         reason: 'the wheel reports the focused index as it spins');
 
-    // Spin lands on the first value → the gallery header previews it.
+    // Spin lands on the first value → the gallery header previews it, after the
+    // ~140ms preview debounce (which suppresses per-detent churn) flushes.
     wheel.onFocusChanged!(0);
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
     expect(find.textContaining('תצוגה מקדימה'), findsOneWidget,
         reason: 'spinning previews the focused value under the wheel');
   });

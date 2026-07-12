@@ -728,7 +728,14 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
     // Live DIVE (owner): when the floating keyboard has a query, the catalog
     // body shows the NATIVE narrowed product list — the app dives in place.
-    final diveActive = ref.watch(keyboardDiveQueryProvider).trim().length >= 2;
+    // BUT a wheel-finder section (מאתר-על / מאתר פשוט) is its OWN finder and holds
+    // ephemeral in-progress dive state, so a stray 2-char keystroke must NOT swap it
+    // out for the text-dive (which would unmount the wheel and discard the dive).
+    final diveSection = ref.watch(catalogSectionProvider);
+    final wheelFinder = (kAxisDive && diveSection == 'מאתר-על') ||
+        (kPlainDive && diveSection == 'מאתר פשוט');
+    final diveActive = !wheelFinder &&
+        ref.watch(keyboardDiveQueryProvider).trim().length >= 2;
 
     return Column(
       children: [
