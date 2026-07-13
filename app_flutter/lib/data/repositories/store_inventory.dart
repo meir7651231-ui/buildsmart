@@ -27,9 +27,16 @@ const String kC1SeedTimestamp = '2026-07-12T00:00:00Z';
 /// The product whose two offers carry the owner's demo numbers (the C1.8 headline).
 const String kC1HeadlineSku = '118220';
 
-/// A store front — minimal for C1 (C3.1 adds logo/contact).
+/// A store front. `logo`/`contact` (C3.1) are optional — a C1 store without them
+/// round-trips unchanged (the guarded-field idiom).
 class Store {
-  const Store({required this.id, required this.name, required this.area});
+  const Store({
+    required this.id,
+    required this.name,
+    required this.area,
+    this.logo,
+    this.contact,
+  });
 
   factory Store.fromDoc(RemoteDoc doc) {
     final j = doc.data;
@@ -37,15 +44,24 @@ class Store {
       id: (j['id'] as String?) ?? doc.id,
       name: (j['name'] as String?) ?? '',
       area: (j['area'] as String?) ?? '',
+      logo: j['logo'] as String?,
+      contact: j['contact'] as String?,
     );
   }
 
   final String id;
   final String name;
   final String area;
+  final String? logo;
+  final String? contact;
 
-  Map<String, dynamic> toDoc() =>
-      <String, dynamic>{'id': id, 'name': name, 'area': area};
+  Map<String, dynamic> toDoc() => <String, dynamic>{
+        'id': id,
+        'name': name,
+        'area': area,
+        if (logo != null) 'logo': logo,
+        if (contact != null) 'contact': contact,
+      };
 }
 
 /// One store's price + stock for one SKU — the heart of multi-store comparison. Its
