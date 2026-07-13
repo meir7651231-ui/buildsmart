@@ -44,6 +44,20 @@ class StoreInventoryRepository {
   Future<StoreComparison> comparison(String sku) async =>
       storeComparison(sku, await inventoryForSku(sku));
 
+  /// C3.5 — the REAL price: the cheapest IN-STOCK offer for [sku] (null when nothing
+  /// is in stock). This is the ready drop-in for the category-GUESS `priceFor` — a
+  /// real number from a real store, never an estimate. The live swap happens at the
+  /// cutover (when real inventory exists); until then `priceFor` stays.
+  Future<num?> cheapestPrice(String sku) async =>
+      (await comparison(sku)).cheapest?.price;
+
+  /// C3.3 — the across-catalog comparison: one [StoreComparison] per requested sku.
+  /// The ready drop-in for the demo `storePriceComparisonAcrossCatalog`
+  /// (`contractor_seeds` ScanItem/StoreOffer) — sourced from real `inventory`, not
+  /// hardcoded offers. Swapped in at the cutover.
+  Future<List<StoreComparison>> compareMany(Iterable<String> skus) async =>
+      <StoreComparison>[for (final sku in skus) await comparison(sku)];
+
   /// Drop the caches (a store/price/stock change → the next read re-syncs). Pass a
   /// [sku] to invalidate just that product's offers; null clears everything.
   void invalidate([String? sku]) {
