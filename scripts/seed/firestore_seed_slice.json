@@ -1,0 +1,872 @@
+{
+  "catalogProducts": {
+    "118220": {
+      "sku": "118220",
+      "nameHe": "מסעף 45° DN110 עם תבריג · כולל 3 אומים ו-3 אטמים",
+      "nameEn": "Branch 45° DN110 screw-on Includes 3 nuts and 3 seals",
+      "brand": "ליפסקי",
+      "categoryHe": "מסעפים וחיבורי אסלה",
+      "categoryEn": "Branches & WC Conn.",
+      "categoryEmoji": "⑂",
+      "page": 12,
+      "active": true,
+      "qtyPack": 18,
+      "qtyPallet": 1950,
+      "dims": {
+        "זווית": "45°",
+        "מידה": "DN110",
+        "תיאור": "מסעף 45° DN110 עם תבריג · כולל 3 אומים ו-3 אטמים"
+      },
+      "imageFile": "118220.jpeg"
+    },
+    "9101601610": {
+      "sku": "9101601610",
+      "nameHe": "מצמד HDPE 16×16",
+      "nameEn": "HDPE Coupler 16×16",
+      "brand": "AQUATEC",
+      "categoryHe": "מחברי HDPE",
+      "categoryEn": "HDPE Fittings",
+      "categoryEmoji": "🔧",
+      "page": 75,
+      "active": true,
+      "dims": {
+        "מידה": "16*16",
+        "תיאור": "מצמד"
+      },
+      "imageFile": "9101601610.jpg"
+    },
+    "9102002004": {
+      "sku": "9102002004",
+      "nameHe": "מצמד HDPE 16×20",
+      "nameEn": "HDPE Coupler 16×20",
+      "brand": "AQUATEC",
+      "categoryHe": "מחברי HDPE",
+      "categoryEn": "HDPE Fittings",
+      "categoryEmoji": "🔧",
+      "page": 75,
+      "active": true,
+      "dims": {
+        "מידה": "16*20",
+        "תיאור": "מצמד"
+      },
+      "imageFile": "9101601610.jpg"
+    },
+    "9102002010": {
+      "sku": "9102002010",
+      "nameHe": "מצמד HDPE 20×20",
+      "nameEn": "HDPE Coupler 20×20",
+      "brand": "AQUATEC",
+      "categoryHe": "מחברי HDPE",
+      "categoryEn": "HDPE Fittings",
+      "categoryEmoji": "🔧",
+      "page": 75,
+      "active": true,
+      "dims": {
+        "מידה": "20*20",
+        "תיאור": "מצמד"
+      },
+      "imageFile": "9101601610.jpg"
+    },
+    "77777641": {
+      "sku": "77777641",
+      "nameHe": "ניפל כפול נחושת ארוך 1/2\"",
+      "nameEn": "Long Double Nipple Brass 1/2\"",
+      "brand": "AQUATEC",
+      "categoryHe": "אביזרי נחושת",
+      "categoryEn": "Brass Fittings",
+      "categoryEmoji": "🔧",
+      "page": 66,
+      "active": true,
+      "dims": {
+        "תצורה": "כפול",
+        "חומר": "נחושת",
+        "מידה": "1/2\"",
+        "תיאור": "ניפל כפול נחושת ארוך"
+      },
+      "imageFile": "77777641.jpg"
+    },
+    "77777642": {
+      "sku": "77777642",
+      "nameHe": "ניפל כפול נחושת ארוך 3/4\"",
+      "nameEn": "Long Double Nipple Brass 3/4\"",
+      "brand": "AQUATEC",
+      "categoryHe": "אביזרי נחושת",
+      "categoryEn": "Brass Fittings",
+      "categoryEmoji": "🔧",
+      "page": 66,
+      "active": true,
+      "dims": {
+        "תצורה": "כפול",
+        "חומר": "נחושת",
+        "מידה": "3/4\"",
+        "תיאור": "ניפל כפול נחושת ארוך"
+      },
+      "imageFile": "77777641.jpg"
+    },
+    "77777643": {
+      "sku": "77777643",
+      "nameHe": "ניפל כפול נחושת ארוך 1\"",
+      "nameEn": "Long Double Nipple Brass 1\"",
+      "brand": "AQUATEC",
+      "categoryHe": "אביזרי נחושת",
+      "categoryEn": "Brass Fittings",
+      "categoryEmoji": "🔧",
+      "page": 66,
+      "active": true,
+      "dims": {
+        "תצורה": "כפול",
+        "חומר": "נחושת",
+        "מידה": "1\"",
+        "תיאור": "ניפל כפול נחושת ארוך"
+      },
+      "imageFile": "77777641.jpg"
+    },
+    "77401622": {
+      "sku": "77401622",
+      "nameHe": "מקשר כפול NTM 16×16",
+      "nameEn": "NTM Double Coupler 16×16",
+      "brand": "AQUATEC",
+      "categoryHe": "מחברי NTM",
+      "categoryEn": "NTM Fittings",
+      "categoryEmoji": "🔧",
+      "page": 82,
+      "active": true,
+      "dims": {
+        "תצורה": "כפול",
+        "מידה": "16*16",
+        "תיאור": "מקשר כפול"
+      },
+      "imageFile": "77401622.jpg"
+    },
+    "77401028": {
+      "sku": "77401028",
+      "nameHe": "מקשר כפול NTM 20×20",
+      "nameEn": "NTM Double Coupler 20×20",
+      "brand": "AQUATEC",
+      "categoryHe": "מחברי NTM",
+      "categoryEn": "NTM Fittings",
+      "categoryEmoji": "🔧",
+      "page": 82,
+      "active": true,
+      "dims": {
+        "תצורה": "כפול",
+        "מידה": "20*20",
+        "תיאור": "מקשר כפול"
+      },
+      "imageFile": "77401622.jpg"
+    },
+    "98415838": {
+      "sku": "98415838",
+      "nameHe": "מחבר מתוברג מפלסטיק פוליפרופילן מפורק 20",
+      "nameEn": "PPR Adapter 20",
+      "brand": "פולירול",
+      "categoryHe": "מתאמים PPR",
+      "categoryEn": "PPR Adapters",
+      "categoryEmoji": "🔩",
+      "page": 29,
+      "active": true,
+      "dims": {
+        "D": "46",
+        "z1": "5.5",
+        "L1": "20.0",
+        "z": "12",
+        "L": "26",
+        "d": "20",
+        "מק\"ט חוליות": "98415838",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p29_b.jpg",
+      "imageFiles": [
+        "ppr_p29_a.jpg"
+      ],
+      "specImageFiles": [
+        "spec_adapter_round_p29.jpg"
+      ]
+    },
+    "98415840": {
+      "sku": "98415840",
+      "nameHe": "מחבר מתוברג מפלסטיק פוליפרופילן מפורק 25",
+      "nameEn": "PPR Adapter 25",
+      "brand": "פולירול",
+      "categoryHe": "מתאמים PPR",
+      "categoryEn": "PPR Adapters",
+      "categoryEmoji": "🔩",
+      "page": 29,
+      "active": true,
+      "dims": {
+        "D": "56",
+        "z1": "5.0",
+        "L1": "21.0",
+        "z": "12",
+        "L": "28",
+        "d": "25",
+        "מק\"ט חוליות": "98415840",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p29_b.jpg",
+      "imageFiles": [
+        "ppr_p29_a.jpg"
+      ],
+      "specImageFiles": [
+        "spec_adapter_round_p29.jpg"
+      ]
+    },
+    "98415842": {
+      "sku": "98415842",
+      "nameHe": "מחבר מתוברג מפלסטיק פוליפרופילן מפורק 32",
+      "nameEn": "PPR Adapter 32",
+      "brand": "פולירול",
+      "categoryHe": "מתאמים PPR",
+      "categoryEn": "PPR Adapters",
+      "categoryEmoji": "🔩",
+      "page": 29,
+      "active": true,
+      "dims": {
+        "D": "66",
+        "z1": "5.0",
+        "L1": "23.0",
+        "z": "12",
+        "L": "32",
+        "d": "32",
+        "מק\"ט חוליות": "98415842",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p29_b.jpg",
+      "imageFiles": [
+        "ppr_p29_a.jpg"
+      ],
+      "specImageFiles": [
+        "spec_adapter_round_p29.jpg"
+      ]
+    },
+    "94117202": {
+      "sku": "94117202",
+      "nameHe": "מסעף PPR 20",
+      "nameEn": "PPR Tee 20",
+      "brand": "פולירול",
+      "categoryHe": "מסעפים PPR",
+      "categoryEn": "PPR Tees",
+      "categoryEmoji": "🔱",
+      "page": 20,
+      "active": true,
+      "dims": {
+        "D": "29.5",
+        "I": "25.5",
+        "z": "11.0",
+        "d": "20",
+        "מק\"ט חוליות": "94117202",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p20_c.jpg",
+      "specImageFiles": [
+        "spec_tee_p20.jpg"
+      ]
+    },
+    "92117102": {
+      "sku": "92117102",
+      "nameHe": "ברך PPR 45° פ.פ 20",
+      "nameEn": "PPR Elbow 20",
+      "brand": "פולירול",
+      "categoryHe": "ברכיים PPR",
+      "categoryEn": "PPR Elbows",
+      "categoryEmoji": "↪️",
+      "page": 19,
+      "active": true,
+      "dims": {
+        "D": "29.5",
+        "I": "19.5",
+        "z": "5.0",
+        "d": "20",
+        "מק\"ט חוליות": "92117102",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p19_a.jpg",
+      "specImageFiles": [
+        "spec_elbow_45_p19.jpg"
+      ]
+    },
+    "91117002": {
+      "sku": "91117002",
+      "nameHe": "מצמד PPR 20",
+      "nameEn": "PPR Coupler 20",
+      "brand": "פולירול",
+      "categoryHe": "מצמדים PPR",
+      "categoryEn": "PPR Couplers",
+      "categoryEmoji": "🔗",
+      "page": 22,
+      "active": true,
+      "dims": {
+        "D": "29.5",
+        "z": "1.5",
+        "l": "16.0",
+        "d": "20",
+        "מק\"ט חוליות": "91117002",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p22_c.jpg",
+      "specImageFiles": [
+        "spec_coupler_p22.jpg"
+      ]
+    },
+    "98217741": {
+      "sku": "98217741",
+      "nameHe": "רוכב PPR 40/20",
+      "nameEn": "PPR Saddle 40/20",
+      "brand": "פולירול",
+      "categoryHe": "רוכבים PPR",
+      "categoryEn": "PPR Saddles",
+      "categoryEmoji": "🪢",
+      "page": 24,
+      "active": true,
+      "dims": {
+        "D": "29.50",
+        "z": "14.50",
+        "l": "27.00",
+        "d2": "25",
+        "d1": "40",
+        "d": "20",
+        "מק\"ט חוליות": "98217741",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p24_a.jpg",
+      "specImageFiles": [
+        "spec_saddle_p24.jpg"
+      ]
+    },
+    "99040858": {
+      "sku": "99040858",
+      "nameHe": "ברז PPR סמוי (ציפוי כרום) 20",
+      "nameEn": "PPR Valve 20",
+      "brand": "פולירול",
+      "categoryHe": "ברזים PPR",
+      "categoryEn": "PPR Valves",
+      "categoryEmoji": "🚰",
+      "page": 30,
+      "active": true,
+      "dims": {
+        "h2": "59",
+        "h1": "28",
+        "h": "116",
+        "D": "29.5",
+        "z": "20.5",
+        "l": "35",
+        "d": "20",
+        "מק\"ט חוליות": "99040858",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p30_a.jpg",
+      "specImageFiles": [
+        "spec_valve_concealed_p30_a.jpg"
+      ]
+    },
+    "91814802": {
+      "sku": "91814802",
+      "nameHe": "שרוול PPR חשמלי 20",
+      "nameEn": "PPR EF Sleeve 20",
+      "brand": "פולירול",
+      "categoryHe": "אביזרי ריתוך חשמלי PPR",
+      "categoryEn": "PPR Electrofusion",
+      "categoryEmoji": "⚡",
+      "page": 33,
+      "active": true,
+      "dims": {
+        "D": "31.5",
+        "h": "36.0",
+        "l": "35.0",
+        "d": "20",
+        "מק\"ט חוליות": "91814802",
+        "יצרן": "Polyroll",
+        "תיאור": "שרוול ריתוך חשמלי"
+      },
+      "imageFile": "ppr_p33_a.jpg",
+      "specImageFiles": [
+        "spec_shroud_p33.jpg"
+      ]
+    },
+    "98417805": {
+      "sku": "98417805",
+      "nameHe": "צווארון PPR 40",
+      "nameEn": "PPR Collar 40",
+      "brand": "פולירול",
+      "categoryHe": "צווארונים ואוגנים PPR",
+      "categoryEn": "PPR Collars",
+      "categoryEmoji": "⭕",
+      "page": 33,
+      "active": true,
+      "dims": {
+        "l": "11.0",
+        "D1": "78",
+        "D": "50",
+        "z1": "15.0",
+        "z": "35.5",
+        "d": "40",
+        "מק\"ט חוליות": "98417805",
+        "יצרן": "Polyroll"
+      },
+      "imageFile": "ppr_p33_b.jpg",
+      "specImageFiles": [
+        "spec_collar_p33.jpg",
+        "ppr_p33_c.jpg"
+      ]
+    },
+    "67750440": {
+      "sku": "67750440",
+      "nameHe": "אטם לג'וקר 40",
+      "nameEn": "אטם לג'וקר 40",
+      "brand": "חוליות",
+      "categoryHe": "אביזרים משלימים",
+      "categoryEn": "אביזרים משלימים",
+      "categoryEmoji": "🚰",
+      "page": 24,
+      "active": true,
+      "dims": {
+        "יצרן": "חוליות",
+        "מק\"ט חוליות": "67750440",
+        "סימון": "אטם לג'וקר 40",
+        "חומר": "SBR",
+        "DN": "40",
+        "L": "30",
+        "W": "50"
+      },
+      "imageFile": "page_24.jpg"
+    }
+  },
+  "verified_specs": {
+    "118220": {
+      "sku": "118220",
+      "material": "PVC",
+      "maxTempC": 50.0,
+      "ends": [
+        {
+          "type": "hdpeCompression",
+          "size": "110"
+        },
+        {
+          "type": "hdpeCompression",
+          "size": "110"
+        },
+        {
+          "type": "hdpeCompression",
+          "size": "110"
+        }
+      ]
+    },
+    "9101601610": {
+      "sku": "9101601610",
+      "material": "HDPE",
+      "maxTempC": 40.0,
+      "ends": [
+        {
+          "type": "hdpeCompression",
+          "size": "16"
+        },
+        {
+          "type": "hdpeCompression",
+          "size": "16"
+        }
+      ],
+      "pressureRating": "PN16"
+    },
+    "9102002004": {
+      "sku": "9102002004",
+      "material": "HDPE",
+      "maxTempC": 40.0,
+      "ends": [
+        {
+          "type": "hdpeCompression",
+          "size": "16"
+        },
+        {
+          "type": "hdpeCompression",
+          "size": "20"
+        }
+      ],
+      "pressureRating": "PN16"
+    },
+    "9102002010": {
+      "sku": "9102002010",
+      "material": "HDPE",
+      "maxTempC": 40.0,
+      "ends": [
+        {
+          "type": "hdpeCompression",
+          "size": "20"
+        },
+        {
+          "type": "hdpeCompression",
+          "size": "20"
+        }
+      ],
+      "pressureRating": "PN16"
+    },
+    "77777641": {
+      "sku": "77777641",
+      "material": "פליז",
+      "maxTempC": 90.0,
+      "ends": [
+        {
+          "type": "bspMale",
+          "size": "1/2\""
+        },
+        {
+          "type": "bspMale",
+          "size": "1/2\""
+        }
+      ]
+    },
+    "77777642": {
+      "sku": "77777642",
+      "material": "פליז",
+      "maxTempC": 90.0,
+      "ends": [
+        {
+          "type": "bspMale",
+          "size": "3/4\""
+        },
+        {
+          "type": "bspMale",
+          "size": "3/4\""
+        }
+      ]
+    },
+    "77777643": {
+      "sku": "77777643",
+      "material": "פליז",
+      "maxTempC": 90.0,
+      "ends": [
+        {
+          "type": "bspMale",
+          "size": "1\""
+        },
+        {
+          "type": "bspMale",
+          "size": "1\""
+        }
+      ]
+    },
+    "77401622": {
+      "sku": "77401622",
+      "material": "PP",
+      "maxTempC": 90.0,
+      "ends": [
+        {
+          "type": "pexPress",
+          "size": "16"
+        },
+        {
+          "type": "pexPress",
+          "size": "16"
+        }
+      ]
+    },
+    "77401028": {
+      "sku": "77401028",
+      "material": "PP",
+      "maxTempC": 90.0,
+      "ends": [
+        {
+          "type": "pexPress",
+          "size": "20"
+        },
+        {
+          "type": "pexPress",
+          "size": "20"
+        }
+      ]
+    }
+  },
+  "stores": {
+    "ahim_cohen": {
+      "id": "ahim_cohen",
+      "name": "אחים כהן",
+      "area": "תל אביב"
+    },
+    "merkaz": {
+      "id": "merkaz",
+      "name": "מרכז האינסטלציה",
+      "area": "ראשון לציון"
+    }
+  },
+  "inventory": {
+    "ahim_cohen_118220": {
+      "storeId": "ahim_cohen",
+      "sku": "118220",
+      "price": 38,
+      "stock": 12,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_118220": {
+      "storeId": "merkaz",
+      "sku": "118220",
+      "price": 42,
+      "stock": 3,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_9101601610": {
+      "storeId": "ahim_cohen",
+      "sku": "9101601610",
+      "price": 14,
+      "stock": 12,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_9101601610": {
+      "storeId": "merkaz",
+      "sku": "9101601610",
+      "price": 18,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_9102002004": {
+      "storeId": "ahim_cohen",
+      "sku": "9102002004",
+      "price": 8,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_9102002004": {
+      "storeId": "merkaz",
+      "sku": "9102002004",
+      "price": 12,
+      "stock": 5,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_9102002010": {
+      "storeId": "ahim_cohen",
+      "sku": "9102002010",
+      "price": 14,
+      "stock": 12,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_9102002010": {
+      "storeId": "merkaz",
+      "sku": "9102002010",
+      "price": 18,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_77777641": {
+      "storeId": "ahim_cohen",
+      "sku": "77777641",
+      "price": 45,
+      "stock": 7,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_77777641": {
+      "storeId": "merkaz",
+      "sku": "77777641",
+      "price": 49,
+      "stock": 7,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_77777642": {
+      "storeId": "ahim_cohen",
+      "sku": "77777642",
+      "price": 46,
+      "stock": 8,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_77777642": {
+      "storeId": "merkaz",
+      "sku": "77777642",
+      "price": 50,
+      "stock": 1,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_77777643": {
+      "storeId": "ahim_cohen",
+      "sku": "77777643",
+      "price": 47,
+      "stock": 9,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_77777643": {
+      "storeId": "merkaz",
+      "sku": "77777643",
+      "price": 51,
+      "stock": 2,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_77401622": {
+      "storeId": "ahim_cohen",
+      "sku": "77401622",
+      "price": 26,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_77401622": {
+      "storeId": "merkaz",
+      "sku": "77401622",
+      "price": 30,
+      "stock": 2,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_77401028": {
+      "storeId": "ahim_cohen",
+      "sku": "77401028",
+      "price": 32,
+      "stock": 12,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_77401028": {
+      "storeId": "merkaz",
+      "sku": "77401028",
+      "price": 36,
+      "stock": 1,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_98415838": {
+      "storeId": "ahim_cohen",
+      "sku": "98415838",
+      "price": 62,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_98415838": {
+      "storeId": "merkaz",
+      "sku": "98415838",
+      "price": 66,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_98415840": {
+      "storeId": "ahim_cohen",
+      "sku": "98415840",
+      "price": 4,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_98415840": {
+      "storeId": "merkaz",
+      "sku": "98415840",
+      "price": 8,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_98415842": {
+      "storeId": "ahim_cohen",
+      "sku": "98415842",
+      "price": 6,
+      "stock": 8,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_98415842": {
+      "storeId": "merkaz",
+      "sku": "98415842",
+      "price": 10,
+      "stock": 1,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_94117202": {
+      "storeId": "ahim_cohen",
+      "sku": "94117202",
+      "price": 26,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_94117202": {
+      "storeId": "merkaz",
+      "sku": "94117202",
+      "price": 30,
+      "stock": 3,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_92117102": {
+      "storeId": "ahim_cohen",
+      "sku": "92117102",
+      "price": 46,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_92117102": {
+      "storeId": "merkaz",
+      "sku": "92117102",
+      "price": 50,
+      "stock": 3,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_91117002": {
+      "storeId": "ahim_cohen",
+      "sku": "91117002",
+      "price": 6,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_91117002": {
+      "storeId": "merkaz",
+      "sku": "91117002",
+      "price": 10,
+      "stock": 3,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_98217741": {
+      "storeId": "ahim_cohen",
+      "sku": "98217741",
+      "price": 25,
+      "stock": 7,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_98217741": {
+      "storeId": "merkaz",
+      "sku": "98217741",
+      "price": 29,
+      "stock": 7,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_99040858": {
+      "storeId": "ahim_cohen",
+      "sku": "99040858",
+      "price": 22,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_99040858": {
+      "storeId": "merkaz",
+      "sku": "99040858",
+      "price": 26,
+      "stock": 3,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_91814802": {
+      "storeId": "ahim_cohen",
+      "sku": "91814802",
+      "price": 26,
+      "stock": 4,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_91814802": {
+      "storeId": "merkaz",
+      "sku": "91814802",
+      "price": 30,
+      "stock": 3,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_98417805": {
+      "storeId": "ahim_cohen",
+      "sku": "98417805",
+      "price": 29,
+      "stock": 7,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_98417805": {
+      "storeId": "merkaz",
+      "sku": "98417805",
+      "price": 33,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "ahim_cohen_67750440": {
+      "storeId": "ahim_cohen",
+      "sku": "67750440",
+      "price": 24,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    },
+    "merkaz_67750440": {
+      "storeId": "merkaz",
+      "sku": "67750440",
+      "price": 28,
+      "stock": 6,
+      "updatedAt": "2026-07-12T00:00:00Z"
+    }
+  }
+}
