@@ -150,3 +150,49 @@ Future<int> seedC1Inventory(FirestoreDocSink sink) async {
   }
   return inv.length;
 }
+
+/// The multi-store comparison for one SKU (C1.8) — the minimal read the product sheet
+/// shows. C3.3 grows this into the full comparison engine (replacing the
+/// `contractor_seeds` demo); here it is a pure function over the inventory rows.
+class StoreComparison {
+  const StoreComparison({required this.sku, required this.offers});
+
+  final String sku;
+
+  /// This SKU's offers across stores (any stock level).
+  final List<InventoryItem> offers;
+
+  /// Offers actually in stock, cheapest first.
+  List<InventoryItem> get inStock {
+    final live = offers.where((o) => o.stock > 0).toList()
+      ..sort((a, b) => a.price.compareTo(b.price));
+    return live;
+  }
+
+  /// How many stores have it in stock.
+  int get availableCount => inStock.length;
+
+  /// The cheapest in-stock offer (null when nothing is in stock).
+  InventoryItem? get cheapest => inStock.isEmpty ? null : inStock.first;
+
+  /// The product-sheet headline — e.g. "זמין ב-2 · הזול 38₪".
+  String get headline {
+    final c = cheapest;
+    if (c == null) return 'אזל מהמלאי';
+    final price = c.price == c.price.roundToDouble()
+        ? c.price.toStringAsFixed(0)
+        : c.price.toString();
+    return 'זמין ב-$availableCount · הזול $price₪';
+  }
+}
+
+/// Build the [StoreComparison] for [sku] from a flat list of inventory rows (the query
+/// `inventory where sku == sku`, evaluated in-memory here).
+StoreComparison storeComparison(String sku, List<InventoryItem> inventory) =>
+    StoreComparison(
+      sku: sku,
+      offers: <InventoryItem>[
+        for (final it in inventory)
+          if (it.sku == sku) it,
+      ],
+    );
