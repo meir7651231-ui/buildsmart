@@ -29,6 +29,7 @@ class SupplierDraft {
     this.color,
     this.dims,
     this.imageFile,
+    this.barcode,
     this.price,
     this.stock,
     this.updatedAt = '',
@@ -45,6 +46,10 @@ class SupplierDraft {
   final String? color;
   final Map<String, dynamic>? dims;
   final String? imageFile;
+
+  /// C3.6 — the scannable barcode (EAN/UPC). Optional; the scanner resolves it to a
+  /// [sku] via [resolveBarcodeToSku]. Written into the product doc (not the model).
+  final String? barcode;
   final num? price;
   final int? stock;
   final String updatedAt;
@@ -126,8 +131,29 @@ DraftValidation validateDraft(SupplierDraft d, Set<String> existingSkus) {
 Map<String, dynamic> draftToProductDoc(
   SupplierDraft d,
   FirebaseAuthoredProductsRepository repo,
-) =>
-    repo.toDoc(d.toProduct());
+) {
+  final doc = repo.toDoc(d.toProduct());
+  // C3.6 — the barcode rides on the doc (the bundled model has no such field);
+  // guarded, so a product without one round-trips unchanged.
+  if (d.barcode != null && d.barcode!.isNotEmpty) doc['barcode'] = d.barcode;
+  return doc;
+}
+
+/// C3.6 — resolve a scanned BARCODE to its sku, by looking through catalog product
+/// docs (which carry the optional `barcode` field). Null when no product matches —
+/// the scanner then falls back to treating the scan as a raw sku. This replaces the
+/// scan→sku-direct path with scan→barcode→sku.
+String? resolveBarcodeToSku(
+  String barcode,
+  Iterable<Map<String, dynamic>> productDocs,
+) {
+  final b = barcode.trim();
+  if (b.isEmpty) return null;
+  for (final doc in productDocs) {
+    if (doc['barcode'] == b) return doc['sku'] as String?;
+  }
+  return null;
+}
 
 /// C4.4 — the inventory row a submit writes to `inventory` (null when no price given).
 /// This is the store-layer half the product-only authoring never had.
