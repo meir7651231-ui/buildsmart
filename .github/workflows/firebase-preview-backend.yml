@@ -43,11 +43,20 @@ jobs:
       # FS_DIAG=true mounts the on-screen backend badge (🟢 server/🔴 demo + uid +
       # a 4-step Firestore self-test) so a tester can SEE both devices are on the
       # same server + same uid — the thing that must match for cross-device sync.
-      - name: Build Flutter web (REAL backend + uid-scoped queries + callables + diag)
+      # GO-LIVE step 2 — also flip the SERVER CATALOG on this preview:
+      # CATALOG_BASE_URL (any non-empty value → `useServerCatalog` true; the real
+      # read is Firestore via FirebaseAuthoredProductsRepository, NOT this URL) +
+      # STORE_COMPARISON_UI (the C3.4 product-sheet comparison line). Guests are
+      # signed in anonymously by main.dart's gated bootstrap so the seeded catalog
+      # (3,614 docs) is readable. The LIVE site is untouched — this is the isolated
+      # preview channel only.
+      - name: Build Flutter web (REAL backend + SERVER CATALOG + comparison + diag)
         working-directory: app_flutter
         run: >-
           flutter build web --release
           --dart-define=USE_FIREBASE_BACKEND=true
+          --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com
+          --dart-define=STORE_COMPARISON_UI=true
           --dart-define=UID_SCOPED_QUERIES=true
           --dart-define=SERVER_CALLABLES=true
           --dart-define=FS_DIAG=true
