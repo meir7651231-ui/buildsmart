@@ -12,8 +12,12 @@
 // go-live (1-B) — until then [storeInventoryRepositoryProvider] throws, which is never
 // reached live (the gate is off) and is overridden by a fake in tests.
 
+import 'package:buildsmart/data/repositories/catalog_paged.dart'
+    show useServerCatalog;
 import 'package:buildsmart/data/repositories/store_inventory.dart'
     show StoreComparison;
+import 'package:buildsmart/data/repositories/store_inventory_firestore.dart'
+    show StoreInventoryFirestoreSource;
 import 'package:buildsmart/data/repositories/store_repo.dart'
     show StoreInventoryRepository;
 import 'package:buildsmart/theme/tokens.dart';
@@ -25,15 +29,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// `useServerCatalog` (the data master) — the UI never shows a price with no data.
 const bool kStoreComparisonUi = bool.fromEnvironment('STORE_COMPARISON_UI');
 
-/// The store/inventory repository. Wired to the real lazy-Firestore
-/// `StoreInventorySource` at go-live (1-B); until then it is only reached behind
-/// [kStoreComparisonUi] (folds false → tree-shaken) and tests override it with a fake,
-/// so this throw is never hit in a live build.
+/// The store/inventory repository. With the server catalog live it reads the seeded
+/// `stores` + `inventory` from Firestore ([StoreInventoryFirestoreSource]); gated on
+/// [useServerCatalog] (folds false in the demo build ⇒ the Firestore branch tree-shakes,
+/// byte-identical). Tests override this with a fake, so neither branch runs in tests.
 final storeInventoryRepositoryProvider = Provider<StoreInventoryRepository>(
-  (ref) => throw UnimplementedError(
-    'storeInventoryRepositoryProvider: wire the Firestore StoreInventorySource '
-    'at go-live (C5.1 / 1-B)',
-  ),
+  (ref) {
+    if (useServerCatalog) {
+      return StoreInventoryRepository(StoreInventoryFirestoreSource());
+    }
+    // Unreachable in a live build (the widget is behind [kStoreComparisonUi]); tests
+    // override the provider, so this throw guards only a misconfiguration.
+    throw UnimplementedError(
+      'storeInventoryRepositoryProvider needs useServerCatalog (or a test override)',
+    );
+  },
 );
 
 /// The multi-store comparison for one `sku`, from the cached repository.
