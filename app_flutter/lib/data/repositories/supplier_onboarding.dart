@@ -166,3 +166,66 @@ InventoryItem? draftToInventory(SupplierDraft d) => d.price == null
         stock: d.stock ?? 0,
         updatedAt: d.updatedAt,
       );
+
+/// C4.5 — parse a supplier CSV/Excel export (a header row + data rows) into
+/// [SupplierDraft]s for the bulk importer (the dormant Trade Builder, kTradeImport).
+/// Minimal RFC-ish CSV: comma-separated, optional `"quoted, fields"`. The header maps
+/// column → field (English or Hebrew names accepted); unknown columns are ignored;
+/// a row with no sku is skipped. Every row is stamped with [storeId].
+List<SupplierDraft> parseCsvToDrafts(String csv, {required String storeId}) {
+  final lines = csv
+      .split(RegExp(r'\r?\n'))
+      .where((l) => l.trim().isNotEmpty)
+      .toList();
+  if (lines.length < 2) return const <SupplierDraft>[];
+  final header = [for (final h in _splitCsvLine(lines.first)) h.trim()];
+  final out = <SupplierDraft>[];
+  for (final line in lines.skip(1)) {
+    final cells = _splitCsvLine(line);
+    final row = <String, String>{};
+    for (var i = 0; i < header.length && i < cells.length; i++) {
+      row[header[i]] = cells[i].trim();
+    }
+    String pick(List<String> names) {
+      for (final n in names) {
+        final v = row[n];
+        if (v != null && v.isNotEmpty) return v;
+      }
+      return '';
+    }
+
+    final sku = pick(['sku', 'מק"ט', 'מקט', 'barcode-sku']);
+    if (sku.isEmpty) continue;
+    final barcode = pick(['barcode', 'ברקוד']);
+    out.add(SupplierDraft(
+      storeId: storeId,
+      sku: sku,
+      nameHe: pick(['nameHe', 'שם', 'name']),
+      categoryHe: pick(['categoryHe', 'קטגוריה', 'category']),
+      barcode: barcode.isEmpty ? null : barcode,
+      price: num.tryParse(pick(['price', 'מחיר'])),
+      stock: int.tryParse(pick(['stock', 'מלאי'])),
+    ));
+  }
+  return out;
+}
+
+/// Split ONE CSV line, honouring `"quoted, fields"` (a comma inside quotes is data).
+List<String> _splitCsvLine(String line) {
+  final out = <String>[];
+  final sb = StringBuffer();
+  var inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    final c = line[i];
+    if (c == '"') {
+      inQuotes = !inQuotes;
+    } else if (c == ',' && !inQuotes) {
+      out.add(sb.toString());
+      sb.clear();
+    } else {
+      sb.write(c);
+    }
+  }
+  out.add(sb.toString());
+  return out;
+}
