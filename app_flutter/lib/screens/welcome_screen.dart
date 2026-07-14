@@ -10,6 +10,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
+import 'package:buildsmart/state/user_system_sync.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
@@ -275,6 +276,26 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           if (p.address.isNotEmpty) 'address': p.address,
           if (p.businessId.isNotEmpty) 'businessId': p.businessId,
         }).catchError((Object _) {}),
+      );
+    }
+    // U0.3 (user-system) — DORMANT behind [kUserSystem]: on a REGISTERED login,
+    // ensure the unified users/{uid} record exists (born status=pending,
+    // all-by-approval) and refresh lastSeen. This registered-entry path is never
+    // reached by an anonymous catalog guest, so the sync is non-anonymous here.
+    // Const-false in every normal build → this whole block tree-shakes → the
+    // shipped welcome flow is BYTE-IDENTICAL to today (the `if (kIntelLive)`
+    // consent-modal call-site pattern).
+    if (kUserSystem && uid != null) {
+      unawaited(
+        ref
+            .read(userSystemSyncProvider)
+            .onRegisteredLogin(
+              uid: uid,
+              profile: ref.read(userProfileProvider),
+              isAnonymous: false,
+              now: DateTime.now(),
+            )
+            .catchError((Object _) {}),
       );
     }
     ref.read(welcomeSeenProvider.notifier).state = true;

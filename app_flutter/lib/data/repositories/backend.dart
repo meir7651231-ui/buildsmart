@@ -272,3 +272,23 @@ const bool kStudioCoEditor = bool.fromEnvironment('STUDIO_CO_EDITOR');
 /// piece. Step 100 flips this on (staged) after the backend + consent are live:
 ///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=INTEL_LIVE=true
 const bool kIntelLive = bool.fromEnvironment('INTEL_LIVE');
+
+// ── User-system foundation (SPEC-user-system · step U0) ──────────────────────
+// Step U0: the unified user model + `users/{uid}` server repo. DORMANT — born
+// INERT with NO live consumer, the same zero-regression invariant as
+// [kIntelLive] / [kStudioLive].
+
+/// USER_SYSTEM — master switch for the unified user layer (the typed `BsUser`
+/// model + the `users/{uid}` repository + the login→`users` doc sync). Default
+/// OFF: every new call-site is COMPILE-GATED behind `if (kUserSystem)` (mirroring
+/// the `if (kIntelLive)` consent-modal call-site in `home_shell.dart`), so
+/// const-false in every normal build → the sync provider, the users repository
+/// and the whole `bs_user`/`users_repository`/`user_system_sync` surface
+/// tree-shake away and the shipped demo/test build is BYTE-IDENTICAL to today.
+/// The existing login / guest / profile-mirror flow is UNTOUCHED — U0 is purely
+/// additive. `usersRepositoryProvider` also ANDs this with [useFirebaseBackend],
+/// so it can never touch Firestore offline / in the Firebase-free test suite
+/// (the local in-memory repo is the OFF path). Flip on at build time once the
+/// server + rules are live (a later staged step):
+///   flutter build web --dart-define=USE_FIREBASE_BACKEND=true --dart-define=USER_SYSTEM=true
+const bool kUserSystem = bool.fromEnvironment('USER_SYSTEM');
