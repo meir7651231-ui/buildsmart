@@ -32,6 +32,8 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/store_comparison_line.dart'
+    show StoreComparisonLine, kStoreComparisonUi;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -827,6 +829,13 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
+                          // ── C3.4 · multi-store comparison ──────────────────
+                          // OWNER-LOCKED: the ONLY sheet surface that shows a
+                          // price. Gated on a const (default false) ⇒ dead code,
+                          // tree-shaken ⇒ the sheet is byte-identical with the
+                          // flag OFF. Turned on at go-live with useServerCatalog.
+                          if (kStoreComparisonUi)
+                            StoreComparisonLine(sku: p.sku),
                           // Two HONEST chips instead of one conflated "ציון
                           // נתונים": cardReadinessScore is gated on the verified
                           // CONNECTION spec, so it really measures install/
