@@ -730,6 +730,48 @@ service cloud.firestore {
       allow write: if isOwnerEmail();
     }
 
+    // ═════════════════════════════════════════════════════════════════════════
+    // catalog-to-server (SPEC-catalog-to-server · C0.4 / C5.3) — the migrated data
+    // families + the multi-store INVENTORY. Every collection gets an explicit rule
+    // (deny-by-default). products/specs/recipes/stores/meta are WORLD-READ (signed-in
+    // — the catalog + the "available in N · cheapest X" comparison render for any
+    // client; browse is a paged query, no mixed-gate listen) and manager/owner-
+    // AUTHORED. `inventory` is the C5.3 core: a STORE writes ONLY its own rows. The
+    // Admin-SDK seed (scripts/seed) BYPASSES these; the flags are OFF so no client
+    // touches them yet ⇒ inert/forward-ready, like the studio blocks above.
+    // ─────────────────────────────────────────────────────────────────────────
+    match /verified_specs/{sku} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /recipes/{key} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    match /stores/{storeId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    // The catalog VERSION doc the sync gate polls (C1.6) — public-read, server-write.
+    match /catalogMeta/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail();
+    }
+    // ── inventory/{storeId}_{sku} — S/price/stock · C5.3 per-store write ────────
+    // read: signed-in (the product-sheet comparison). write: manager/owner (the seed
+    // + Studio) OR the OWNING store ONLY — the row's `storeId` must equal the caller's
+    // `storeId` custom claim (minted when a store onboards), so a store can NEVER
+    // write a competitor's price/stock. FORWARD-READY: until the store `storeId` claim
+    // lands, only manager/owner writes (backward-tolerant, never hard-breaks a seed).
+    match /inventory/{invId} {
+      allow read: if isSignedIn();
+      allow write: if isManager() || isOwnerEmail()
+          || (hasRole('store')
+              && request.auth.token.get('storeId', '') != ''
+              && request.resource.data.get('storeId', '')
+                  == request.auth.token.get('storeId', ''));
+    }
+
     // ── default — S5 deny-by-default ─────────────────────────────────────────
     // Anything not explicitly matched above (including any future collection
     // added without a rule) is denied for everyone. NOTE: the STATIC catalog
