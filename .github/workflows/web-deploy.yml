@@ -77,7 +77,12 @@ jobs:
         # It persists across re-deploys (unlike an ephemeral dispatch input a later
         # push would revert). Reversible: clear the variable → next deploy is
         # byte-identical again. MUST match firebase-hosting.yml (same live race).
-        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true ${{ vars.STUDIO_DART_DEFINES }}
+        # CATALOG_BASE_URL + STORE_COMPARISON_UI = the catalog-to-server GO-LIVE (MUST
+        # match firebase-hosting.yml — same live site). useFirebaseBackend is already ON
+        # (STUDIO_DART_DEFINES), so a non-empty CATALOG_BASE_URL flips useServerCatalog
+        # TRUE → the catalog reads Firestore (guests anon-sign-in; a server blip falls
+        # back to the bundled catalog — C5.5). Reversible: drop these two flags.
+        run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com --dart-define=STORE_COMPARISON_UI=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
