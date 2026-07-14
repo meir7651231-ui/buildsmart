@@ -34,7 +34,14 @@ class CatalogSyncGate {
     required this.fetchAll,
     required this.toDoc,
     required this.fromDoc,
+    this.bundledFallback,
   });
+
+  /// C5.5 — the LAST resort: the bundled const catalog. When the server is down AND
+  /// there is no cache (a cold offline start), the app serves this instead of
+  /// bricking — server → cache → bundled, never a blank screen. Null ⇒ the old
+  /// behaviour (surface the error). In prod this is `() => kCatalogProducts`.
+  final List<LipskeyCatalogProduct> Function()? bundledFallback;
 
   /// The persistence seam.
   final CatalogKvStore kv;
@@ -89,9 +96,12 @@ class CatalogSyncGate {
       if (serverVersion != null) await kv.write(kVersionKey, serverVersion);
       return items;
     } on Object {
-      // The fetch failed (dropped mid-open). A stale cache still beats a blank screen.
+      // The fetch failed (dropped mid-open). Fallback chain (C5.5): a stale cache
+      // beats a blank screen; failing that, the bundled catalog beats bricking.
       if (cached != null) return _decode(cached);
-      rethrow; // cold start + offline + no cache — nothing to serve, surface it.
+      final bundled = bundledFallback;
+      if (bundled != null) return bundled(); // server↓ + no cache → bundled
+      rethrow; // no cache + no bundled fallback — nothing to serve, surface it.
     }
   }
 

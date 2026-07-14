@@ -52,12 +52,14 @@ class _Backend {
     return c1SliceProducts();
   }
 
-  CatalogSyncGate openGate() => CatalogSyncGate(
+  CatalogSyncGate openGate({List<LipskeyCatalogProduct> Function()? bundled}) =>
+      CatalogSyncGate(
         kv: kv,
         readServerVersion: _readVersion,
         fetchAll: _fetchAll,
         toDoc: repo.toDoc,
         fromDoc: repo.fromDoc,
+        bundledFallback: bundled,
       );
 }
 
@@ -116,5 +118,36 @@ void main() {
       () async {
     final b = _Backend(_FakeKv())..online = false;
     expect(b.openGate().open(), throwsA(isA<StateError>()));
+  });
+
+  test('C5.5 — cold OFFLINE + no cache BUT a bundled fallback → serves bundled '
+      '(never bricks)', () async {
+    final b = _Backend(_FakeKv())..online = false; // kill-server
+    final bundled = c1SliceProducts();
+    final items = await b.openGate(bundled: () => bundled).open();
+    expect(items, hasLength(20), reason: 'server↓ + no cache → the bundled catalog');
+    expect(b.catalogFetches, 0);
+  });
+
+  test('C5.5 — the fallback chain: server → cache → bundled (each level covers)',
+      () async {
+    final b = _Backend(_FakeKv());
+    final bundled = c1SliceProducts();
+
+    // 1) server up → server (and caches).
+    await b.openGate(bundled: () => bundled).open();
+    expect(b.catalogFetches, 1);
+
+    // 2) server down, cache warm → cache (0 fetch), bundled untouched.
+    b.online = false;
+    final cached = await b.openGate(bundled: () => bundled).open();
+    expect(cached, hasLength(20));
+    expect(b.catalogFetches, 1);
+
+    // 3) server down, cache wiped → bundled.
+    b.kv.m.clear();
+    final fell = await b.openGate(bundled: () => bundled).open();
+    expect(fell, hasLength(20));
+    expect(b.catalogFetches, 1, reason: 'never hit the dead server');
   });
 }
