@@ -35,7 +35,9 @@ if (!bundlePath || bundlePath.startsWith('--')) {
 
 const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
 
+let admin;
 if (!dryRun) {
+  admin = require('firebase-admin'); // lazy — dry-run needs no install/creds
   admin.initializeApp({
     credential: admin.credential.applicationDefault(),
     projectId: projectId,
