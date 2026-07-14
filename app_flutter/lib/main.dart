@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/catalog_paged.dart'
+    show useServerCatalog;
 import 'package:buildsmart/firebase_options.dart';
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
@@ -18,6 +20,7 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show keyboardScreenToolsProvider;
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
+import 'package:buildsmart/state/server_catalog_auth.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
 import 'package:buildsmart/theme/app_theme.dart';
@@ -30,6 +33,7 @@ import 'package:buildsmart/widgets/toast.dart'
     show bsMessengerKey, bsNavigatorKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'
@@ -189,6 +193,23 @@ Future<void> main() async {
       }
     } catch (_) {
       // non-fatal: App Check enforcement is a Firebase console toggle (owner's)
+    }
+  }
+  // GO-LIVE (server catalog) — guest anonymous auth. The seeded catalog/inventory
+  // reads need a signed-in user (firestore.rules); the app browses as a GUEST, so
+  // when useServerCatalog is on, sign a guest in anonymously. Gated on
+  // useServerCatalog (a const-folding getter, false in the demo build) ⇒ dead code /
+  // dormant today; only activates once USE_FIREBASE_BACKEND + CATALOG_BASE_URL ship.
+  // A failure is non-fatal (browsing continues on the bundled catalog).
+  if (useServerCatalog && Firebase.apps.isNotEmpty) {
+    try {
+      final auth = fb.FirebaseAuth.instance;
+      await ensureAnonAuthForServerCatalog(
+        hasUser: auth.currentUser != null,
+        signInAnon: auth.signInAnonymously,
+      );
+    } on Object catch (_) {
+      // non-fatal: browsing continues on the bundled catalog / local path
     }
   }
   // G4 — Crashlytics global error capture, ACTIVE ONLY when Firebase actually
