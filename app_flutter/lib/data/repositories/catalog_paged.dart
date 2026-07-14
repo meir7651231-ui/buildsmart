@@ -46,7 +46,7 @@ import 'package:buildsmart/data/repositories/authored_products_firebase.dart'
     show FirebaseAuthoredProductsRepository;
 import 'package:buildsmart/data/repositories/backend.dart'
     show kCatalogBaseUrl, useFirebaseBackend;
-import 'package:flutter/foundation.dart' show SynchronousFuture;
+import 'package:flutter/foundation.dart' show SynchronousFuture, debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// True only when a server catalog base URL is configured AND the backend is live
@@ -196,6 +196,24 @@ class CatalogPagedBrowse {
     return authored.browse(after: after).then((result) {
       cache.put(key, result);
       return result;
+    }).catchError((Object e, StackTrace st) {
+      // GO-LIVE SAFETY (C5.5) — a server read must NEVER show a broken/empty catalog.
+      // On failure, fall back to the bundled const catalog: the FIRST page serves the
+      // whole bundled catalog (browsing always works); a LATER page just stops paging
+      // (empty terminal — no duplicates). The rollout can be turned off, but even ON a
+      // transient Firestore blip degrades gracefully instead of blanking the catalog.
+      debugPrint('CatalogPagedBrowse: server browse failed → bundled fallback: $e');
+      return after == null
+          ? PagedResult<LipskeyCatalogProduct>(
+              items: List<LipskeyCatalogProduct>.unmodifiable(kCatalogProducts),
+              cursor: null,
+              hasMore: false,
+            )
+          : const PagedResult<LipskeyCatalogProduct>(
+              items: <LipskeyCatalogProduct>[],
+              cursor: null,
+              hasMore: false,
+            );
     });
   }
 }
