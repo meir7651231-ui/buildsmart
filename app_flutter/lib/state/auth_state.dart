@@ -587,6 +587,29 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   Future<void> assignRole({required String uid, required String role}) async =>
       _required().setRole(uid: uid, role: role);
 
+  /// U1.4.3 (user-system) — force a FRESH claims read (`forceRefresh`) and
+  /// re-apply the role, so a user whose role was just (re)assigned server-side
+  /// sees it WITHOUT a re-login. A no-op when signed-out / gateway-less. Same
+  /// generation guard as [_onAuthEvent]: a slow refresh can never clobber a
+  /// newer auth event or resurrect a signed-out user. Additive — no live
+  /// surface calls it yet (a gated "refresh my role" action wires it under
+  /// kUserSystem), so with the flag OFF it is uncalled and tree-shakes out.
+  Future<void> reloadRole() async {
+    final g = _gateway;
+    final user = state.user;
+    if (g == null || user == null) return;
+    final gen = ++_gen;
+    List<String> roles;
+    try {
+      roles = rolesFromClaims(await g.idTokenClaims(forceRefresh: true));
+    } on Object catch (e) {
+      debugPrint('AuthStateNotifier: reloadRole claims failed (kept): $e');
+      return;
+    }
+    if (!mounted || gen != _gen) return;
+    state = AuthSnapshot(user: user, roles: roles, loaded: true);
+  }
+
   /// The S1.7/S1.8 local wipe: identity-coupled state only (user profile +
   /// active persona, via the injected hook). Device preferences (theme,
   /// catalog settings, welcome-seen) are NOT account data and survive.
