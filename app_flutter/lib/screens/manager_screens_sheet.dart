@@ -9,8 +9,13 @@
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
+import 'package:buildsmart/screens/supplier_onboarding_screen.dart'
+    show SupplierOnboardingScreen;
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
+import 'package:buildsmart/state/trade_builder_flags.dart'
+    show kTradeImportFlag;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -115,6 +120,25 @@ class _ManagerScreensSheet extends ConsumerWidget {
                 trailing:
                     const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
                 onTap: () => _open(context, ref, d),
+              ),
+            // C4.1 · supplier self-onboarding — gated (kTradeImportFlag, default
+            // OFF ⇒ this tile is ABSENT and the screen is unreachable). At go-live
+            // the owner enables the flag AND wires supplierSubmitProvider; the
+            // storeId is a demo store here (a real store session supplies it live).
+            if (ref.watch(featureFlagsProvider).contains(kTradeImportFlag))
+              ListTile(
+                leading: const Text('🏪', style: TextStyle(fontSize: 24)),
+                title: const Text(
+                  'העלאת מוצר (ספק)',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                trailing:
+                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                onTap: () {
+                  Navigator.pop(context); // close the sheet first
+                  Navigator.of(context)
+                      .push(SupplierOnboardingScreen.route('ahim_cohen'));
+                },
               ),
           ],
         ),
