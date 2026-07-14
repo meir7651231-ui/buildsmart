@@ -114,6 +114,11 @@
 >
 > 📐 **חדש (14.7) — SPEC-architecture-SDD.md:** מסמך‑ארכיטקטורה הנדסי מקיף (14 חלקים) למתכנת‑בכיר, מאומת‑קוד. סטאק · עקרונות (Repository/flag‑gating/strangler/cache) · client‑server split · מודל‑נתונים · מפת‑מודולים · **המנועים** · 269 providers · 10 functions · 30+ collections · 13 workflows · אבטחה · **הערכה‑הנדסית חזק/דק**. היקף: 506 קבצי‑Dart · ~4,700 טסטים. תיקון‑דיוק: deleteAccount+reviewRoleRequest קיימים כ‑functions. נמסר כ‑Word.
 >
+> 🎉🚀 **14.7 — GO‑LIVE הושלם: קטלוג→שרת חי בפרודקשן! (ראש `15cd0dda`, web‑deploy = ✅ GREEN · נפרס).**
+> הצי הדליק על החי: `CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com` + `STORE_COMPARISON_UI=true` → useServerCatalog=TRUE → הקטלוג קורא 3,614 מסמכים מ‑Firestore. **מנעולי‑בטיחות מאומתים בקוד:** התחברות‑אנונימית‑לאורח (stage‑2, 63efc1d2) · fallback שרת→cache→bundled (C5.5, c91571e9) · הפיך (הסרת 2 דגלים→מובנה) · לא נגע ב‑USE_FIREBASE_BACKEND (שכבר דלוק — הצי מדווח 131 קריאות‑Firestore חיות). כל שלבי‑go‑live ירוקים (stage1 זריעה · stage2 preview+anon · stage3 arm).
+> **אימות עצמי:** קוד(דגלים‑חמושים) + CI(web‑deploy green) + מנגנוני‑בטיחות. ⚠️ **לא ניתן‑לאימות‑עצמאי מכאן:** תקינות/שלמות 3,614 המסמכים ב‑Firestore (אין גישת‑DB לסשן) — זו טענת‑הצי + ריצת‑seed; **ההוכחה האמיתית = הבעלים פותח את האתר החי.**
+> **⇒ ביקורת המתכן ('המאחורה לא בנוי') נענתה IN PRODUCTION.** נשאר: keystore · admin/5555 · Google‑OAuth‑web · מערך‑משתמשים (U0‑U5) · באג מאתר‑על ב‑APK (AXIS_DIVE חסר).
+>
 > 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
 > | דגל | מפעיל | תנאי‑backend (מי) |
 > |---|---|---|
