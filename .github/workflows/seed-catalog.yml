@@ -1,0 +1,81 @@
+# GO-LIVE · Seed the catalog→server data into PRODUCTION Firestore (buildsmart-b0b78).
+#
+# Manual only (workflow_dispatch) — the OWNER pulls the trigger. Two safety locks:
+#   1. mode defaults to 'dry-run' (counts only, NO write, NO credentials touched).
+#   2. a REAL write needs mode=real AND confirm=SEED (double confirmation).
+# A dry-run always runs first and prints the counts; the real write only follows when
+# both locks are satisfied. The uploader is idempotent (merge:true) so a re-run is safe.
+#
+# The seed writes to NEW collections (catalogProducts/verified_specs/recipes/stores/
+# inventory) that the live app does NOT read until `useServerCatalog` is turned on — so
+# even the real write cannot affect any user. Reuses the existing FIREBASE_SERVICE_ACCOUNT
+# secret (same as firebase-deploy.yml / bootstrap-admin.yml).
+name: Seed Catalog → Firestore (GO-LIVE)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run = counts only (safe) · real = WRITE to production Firestore"
+        type: choice
+        options: [dry-run, real]
+        default: dry-run
+      confirm:
+        description: "Type SEED to confirm a REAL write (ignored for dry-run)"
+        type: string
+        default: ""
+
+concurrency:
+  group: seed-catalog
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install firebase-admin
+        working-directory: scripts/seed
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install firebase-admin@12 >/dev/null 2>&1
+
+      # ALWAYS run a dry-run first — reports the exact per-collection counts, writes
+      # nothing, needs no credentials. This is the whole job when mode=dry-run.
+      - name: Dry-run (report the bundle — no write)
+        working-directory: scripts/seed
+        run: node upload_seed.js firestore_seed_full.json --project buildsmart-b0b78 --dry-run
+
+      # Safety lock #2 — a real write needs the exact confirmation word. If missing,
+      # the job FAILS here, before any credential is written or any doc is touched.
+      - name: Guard the real write
+        if: ${{ inputs.mode == 'real' }}
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "SEED" ]; then
+            echo "::error::mode=real requires confirm=SEED — you did not type it. Aborting (nothing was written)."
+            exit 1
+          fi
+          echo "Real write confirmed."
+
+      - name: Write service-account credentials (real only)
+        if: ${{ inputs.mode == 'real' && inputs.confirm == 'SEED' }}
+        run: |
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp-sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${RUNNER_TEMP}/gcp-sa.json" >> "$GITHUB_ENV"
+
+      - name: REAL seed → production Firestore
+        if: ${{ inputs.mode == 'real' && inputs.confirm == 'SEED' }}
+        working-directory: scripts/seed
+        run: |
+          echo "Seeding buildsmart-b0b78 (real write)…"
+          node upload_seed.js firestore_seed_full.json --project buildsmart-b0b78
+          echo "Seed complete — verify the counts above match the dry-run (3614 docs)."
