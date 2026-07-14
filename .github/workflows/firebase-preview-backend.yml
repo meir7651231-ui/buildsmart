@@ -50,10 +50,29 @@ jobs:
       # signed in anonymously by main.dart's gated bootstrap so the seeded catalog
       # (3,614 docs) is readable. The LIVE site is untouched — this is the isolated
       # preview channel only.
-      - name: Build Flutter web (REAL backend + SERVER CATALOG + comparison + diag)
+      # Mirror the LIVE build (firebase-hosting.yml) EXACTLY — all the finder flags
+      # (מאתר-על AXIS_DIVE, RingDive, PlainDive, word-finder, global search, live-mirror
+      # keyboard) — so the preview is the SAME app the owner knows, PLUS the server
+      # catalog (USE_FIREBASE_BACKEND + CATALOG_BASE_URL → useServerCatalog) +
+      # STORE_COMPARISON_UI + the backend parity flags (uid-scoped/callables/diag).
+      # EXACTLY the live build (firebase-hosting.yml:65) — base-href, all finder flags,
+      # AND ${{ vars.STUDIO_DART_DEFINES }} — so the preview is the SAME app the owner
+      # knows. THEN append the server-catalog flags (last ⇒ they win over any conflict
+      # in STUDIO_DART_DEFINES): USE_FIREBASE_BACKEND + CATALOG_BASE_URL (→ useServerCatalog)
+      # + STORE_COMPARISON_UI + the backend parity flags (uid-scoped/callables/diag).
+      - name: Build Flutter web (LIVE build + SERVER CATALOG + comparison + diag)
         working-directory: app_flutter
         run: >-
-          flutter build web --release
+          flutter build web --release --base-href "/"
+          --dart-define=ENABLE_WORD_FINDER=true
+          --dart-define=KB_LIVE_MIRROR=true
+          --dart-define=KB_GLOBAL=true
+          --dart-define=ENABLE_RING_DIVE=true
+          --dart-define=PLAIN_DIVE=true
+          --dart-define=AXIS_DIVE=true
+          --dart-define=GLOBAL_SEARCH=true
+          --dart-define=STUDIO_SHARED_SYNC=true
+          ${{ vars.STUDIO_DART_DEFINES }}
           --dart-define=USE_FIREBASE_BACKEND=true
           --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com
           --dart-define=STORE_COMPARISON_UI=true
