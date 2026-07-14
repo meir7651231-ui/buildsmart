@@ -33,8 +33,14 @@ jobs:
   seed:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # Always seed from the live branch's assets (the bundle + uploader live there),
+      # regardless of which ref this dispatch was launched from (this file is also on
+      # `main` so the manual "Run workflow" button appears — GitHub reads dispatchable
+      # workflows from the default branch).
+      - name: Checkout (live branch — has scripts/seed + the bundle)
         uses: actions/checkout@v4
+        with:
+          ref: claude/whats-happening-LyY9G
 
       - name: Setup Node
         uses: actions/setup-node@v4
