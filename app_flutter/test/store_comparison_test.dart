@@ -66,4 +66,25 @@ void main() {
     expect(cmp.cheapest!.storeId, 'ahim_cohen');
     expect(cmp.headline, 'זמין ב-1 · הזול 38₪');
   });
+
+  test('C3.4 — the product-sheet line: stores · cheapest · in-stock', () {
+    final cmp = storeComparison('118220', c1Inventory());
+    expect(cmp.sheetLine, 'זמין ב-2 חנויות · הזול ב-38₪ · במלאי');
+
+    // Nothing in stock → an explicit "sold out" line (no fake price).
+    final out = <InventoryItem>[
+      for (final it in c1Inventory())
+        if (it.sku == '118220')
+          InventoryItem(
+            storeId: it.storeId,
+            sku: it.sku,
+            price: it.price,
+            stock: 0,
+            updatedAt: it.updatedAt,
+          )
+        else
+          it,
+    ];
+    expect(storeComparison('118220', out).sheetLine, 'אזל מהמלאי בכל החנויות');
+  });
 }

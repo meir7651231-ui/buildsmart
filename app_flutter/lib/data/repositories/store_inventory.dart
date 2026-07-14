@@ -195,11 +195,20 @@ class StoreComparison {
   String get headline {
     final c = cheapest;
     if (c == null) return 'אזל מהמלאי';
-    final price = c.price == c.price.roundToDouble()
-        ? c.price.toStringAsFixed(0)
-        : c.price.toString();
-    return 'זמין ב-$availableCount · הזול $price₪';
+    return 'זמין ב-$availableCount · הזול ${_fmtPrice(c.price)}₪';
   }
+
+  /// C3.4 — the fuller line the product sheet shows: stores · cheapest · in-stock.
+  /// e.g. "זמין ב-3 חנויות · הזול ב-38₪ · במלאי". OWNER-LOCKED: price appears ONLY in
+  /// this store-comparison line — never in the finder/catalog surfaces.
+  String get sheetLine {
+    final c = cheapest;
+    if (c == null) return 'אזל מהמלאי בכל החנויות';
+    return 'זמין ב-$availableCount חנויות · הזול ב-${_fmtPrice(c.price)}₪ · במלאי';
+  }
+
+  static String _fmtPrice(num p) =>
+      p == p.roundToDouble() ? p.toStringAsFixed(0) : p.toString();
 }
 
 /// Build the [StoreComparison] for [sku] from a flat list of inventory rows (the query
