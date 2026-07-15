@@ -137,6 +137,18 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
     delete claims.roles;
     claims.role = requestedRole;
     await getAuth().setCustomUserClaims(uid, claims);
+    // U4.4 — approval ACTIVATES the account: flip users/{uid}.status
+    // pending→active. The Admin SDK bypasses the self-write freeze the S5 rules
+    // put on `status`, so this is the ONLY sanctioned path to activation. Merge,
+    // so displayName/phone/role-mirror/etc. are untouched; a users doc that does
+    // not exist yet (edge) is created with just the status. This CLOSES the
+    // all-by-approval loop (decision #1): until now approve granted the role
+    // claim but left the account `pending`, so the client pending-gate kept
+    // blocking the (now-approved) user.
+    await db()
+      .collection("users")
+      .doc(uid)
+      .set({ status: "active" }, { merge: true });
   }
   logger.info("reviewRoleRequest", { uid, requestedRole, decision, reviewerUid });
 
@@ -147,7 +159,10 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
     actorRole: reviewerRoles.join(",") || null,
     target: `roleRequests/${uid}`,
     before: { requestedRole, status: "pending" },
-    after: { status: approved ? "approved" : "denied" },
+    after: {
+      status: approved ? "approved" : "denied",
+      ...(approved ? { accountStatus: "active" } : {}),
+    },
     ok: true,
   });
 
