@@ -23,7 +23,7 @@ import { getAuth } from "firebase-admin/auth";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
-import { callerRoles } from "./common";
+import { callerRoles, db } from "./common";
 
 initializeApp();
 
@@ -36,6 +36,10 @@ interface SetRoleData {
   uid?: unknown;
   role?: unknown;
   roles?: unknown;
+  /** U3.1.1 — OPTIONAL store-ownership claim (single-owner, decision #3). When
+   * present it names the store this user OWNS; stamped as the `storeId` claim the
+   * live inventory rule checks. */
+  storeId?: unknown;
 }
 
 export const setRole = onCall({ region: "me-west1" }, async (request) => {
@@ -45,7 +49,7 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
   }
   const callerUid = request.auth.uid;
   const callerRolesList = callerRoles(request.auth.token);
-  const { uid, role, roles } = (request.data ?? {}) as SetRoleData;
+  const { uid, role, roles, storeId } = (request.data ?? {}) as SetRoleData;
   const targetLabel =
     typeof uid === "string" && uid.length > 0 ? `users/${uid}` : "users/?";
 
@@ -89,6 +93,27 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
     );
   }
 
+  // 3b · U3.1.1 — validate the OPTIONAL storeId claim (store-ownership). When
+  //     supplied it must be a non-empty string naming an EXISTING store, so the
+  //     claim can never point at a store that does not exist. Same admin-only gate
+  //     as the whole callable (checked above). The live inventory rule
+  //     (firestore.rules) already lets a `store` write ONLY rows whose `storeId`
+  //     equals this claim — stamping it here is what WAKES that dormant branch.
+  let storeIdValue: string | null = null;
+  if (storeId !== undefined && storeId !== null) {
+    if (typeof storeId !== "string" || storeId.length === 0) {
+      throw new HttpsError(
+        "invalid-argument",
+        "storeId, when provided, must be a non-empty string."
+      );
+    }
+    const storeSnap = await db().collection("stores").doc(storeId).get();
+    if (!storeSnap.exists) {
+      throw new HttpsError("not-found", `store '${storeId}' does not exist.`);
+    }
+    storeIdValue = storeId;
+  }
+
   // 4 · merge over the target's EXISTING claims (e.g. an admin keeps `admin`),
   //     replacing only the role surface — single `role` and multi `roles` are
   //     mutually exclusive by construction.
@@ -97,10 +122,17 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
   const claims: Record<string, unknown> = { ...(target.customClaims ?? {}) };
   delete claims.role;
   delete claims.roles;
+  delete claims.storeId;
   if (roleList) {
     claims.roles = roleList;
   } else {
     claims.role = role;
+  }
+  // U3.1.1 — stamp the (validated) store-ownership claim. It is cleared above,
+  // so a re-role that omits storeId REVOKES ownership (a user demoted from store
+  // loses inventory-write) — ownership is always explicit, never sticky.
+  if (storeIdValue) {
+    claims.storeId = storeIdValue;
   }
   await auth.setCustomUserClaims(uid, claims);
 
@@ -111,11 +143,19 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
     actorRole: callerRolesList.join(",") || null,
     target: `users/${uid}`,
     before: null,
-    after: roleList ? { roles: roleList } : { role },
+    after: {
+      ...(roleList ? { roles: roleList } : { role }),
+      ...(storeIdValue ? { storeId: storeIdValue } : {}),
+    },
     ok: true,
   });
 
-  return roleList ? { ok: true, uid, roles: roleList } : { ok: true, uid, role };
+  return {
+    ok: true,
+    uid,
+    ...(roleList ? { roles: roleList } : { role }),
+    ...(storeIdValue ? { storeId: storeIdValue } : {}),
+  };
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

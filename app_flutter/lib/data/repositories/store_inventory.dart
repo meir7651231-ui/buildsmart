@@ -36,6 +36,7 @@ class Store {
     required this.area,
     this.logo,
     this.contact,
+    this.ownerUid,
   });
 
   factory Store.fromDoc(RemoteDoc doc) {
@@ -46,6 +47,7 @@ class Store {
       area: (j['area'] as String?) ?? '',
       logo: j['logo'] as String?,
       contact: j['contact'] as String?,
+      ownerUid: j['ownerUid'] as String?,
     );
   }
 
@@ -55,12 +57,19 @@ class Store {
   final String? logo;
   final String? contact;
 
+  /// U3.1.2 — the single OWNER of this store (decision #3: one owner per store).
+  /// The reverse link (store→owner) of the `storeId` auth claim; server/admin-set
+  /// only. Null on every store today (dormant — the C1 seed carries none), so a
+  /// store round-trips unchanged (the guarded-field idiom).
+  final String? ownerUid;
+
   Map<String, dynamic> toDoc() => <String, dynamic>{
         'id': id,
         'name': name,
         'area': area,
         if (logo != null) 'logo': logo,
         if (contact != null) 'contact': contact,
+        if (ownerUid != null) 'ownerUid': ownerUid,
       };
 }
 
