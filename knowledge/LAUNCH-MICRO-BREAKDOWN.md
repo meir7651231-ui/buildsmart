@@ -119,6 +119,12 @@
 > **אימות עצמי:** קוד(דגלים‑חמושים) + CI(web‑deploy green) + מנגנוני‑בטיחות. ⚠️ **לא ניתן‑לאימות‑עצמאי מכאן:** תקינות/שלמות 3,614 המסמכים ב‑Firestore (אין גישת‑DB לסשן) — זו טענת‑הצי + ריצת‑seed; **ההוכחה האמיתית = הבעלים פותח את האתר החי.**
 > **⇒ ביקורת המתכן ('המאחורה לא בנוי') נענתה IN PRODUCTION.** נשאר: keystore · admin/5555 · Google‑OAuth‑web · מערך‑משתמשים (U0‑U5) · באג מאתר‑על ב‑APK (AXIS_DIVE חסר).
 >
+> 🔐 **15.7 — מערך-המשתמשים טס: U0 + U1 חיים-רדומים בפרודקשן · U3 הנחיה מוכנה.**
+> **U0 (יסודות)** נדחף חי (`079c5cbf`, FF נקי): מודל `BsUser`+`UserStatus` · repo `users/{uid}` (local↔firebase scoped-לעצמי) · חיווט-לוגין (ensure pending + lastSeen, אורח מדולג) · rules `users/{uid}` מהודקים (role/storeUid/orgId/status חסומים-מלקוח) · דגל `kUserSystem` (OFF default). **אומת בקוד+CI:** נקודת-החיבור `if (kUserSystem && uid)` → זהה-בייטים · **10/10 CI ירוק** · ה-rules חיים-ומהודקים-בלבד (בטוח).
+> **U1 (RBAC)** נדחף חי (`b8fecd93`, FF נקי, **8/8 CI כולל protocol-enforce**): שכבה טיפוסית `rbac.dart` (BsRole/Permission/מפה · pending-gate · hasPermission) + `auth_state.reloadRole()` (רענון-claims מיידי, U1.4.3). **אומת בקוד (לא מהדיווח):** `rbac.dart` לא-מיובא בקוד-חי (טסטים בלבד) + `reloadRole` חסר-קורא-חי → **נמחקים בקומפילציה, זהה-בייטים** · `finance_hub_state`/kRbacMatrix **לא נגעו** (הכרעה #2 = דו-קיום-שכבות, לא מיזוג — ה-diff מוכיח) · rules/functions לא נגעו (Dart-בלבד → firebase-deploy דילג נכון). **דחוי מכוון:** באנר "ממתין-לאישור"→U2 · role-switch-רב-תפקיד→עתידי.
+> **U3 (בעלות-חנות ⭐ חוסם-השקה)** — הנחיה מוכנה (`DIRECTIVE-U3-store-ownership.md`), מקורקעת ל-`b8fecd93`. **הגילוי:** C5.3 כבר פרס את חוק-המלאי owner-gated (`firestore.rules:783`, forward-ready) — חנות כותבת רק את המלאי-שלה, הכלל חי-וממתין. **האבן-ראשה היחידה = טביעת claim `storeId` ב-setRole** (לא storeUid! חייב `== store.id`). `Store` חסר `ownerUid` → להוסיף. שינוי אדיטיבי-בטוח: אף claim `storeId` לא קיים היום → אפס-שינוי-למשתמש-קיים; פעיל רק כשאדמין ממנה בעל-חנות.
+> **תשתית:** נפתרה חסימת-הטראקר — commits-ידע נכתבים כעת מ-worktree נקי של ענף-הידע (nice-volta לא נושא פרוטוקול, אז אין hook). U1-directive `47878609` · U0/U1 אומתו ישירות מ-GitHub API.
+>
 > 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
 > | דגל | מפעיל | תנאי‑backend (מי) |
 > |---|---|---|
