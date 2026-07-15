@@ -1,0 +1,87 @@
+# USER-SYSTEM ACTIVATION · Backfill status:'active' onto EXISTING users (buildsmart-b0b78).
+#
+# The ONE-TIME migration that must run BEFORE flipping USER_SYSTEM on: existing
+# users/{uid} docs (written before the user-system) carry NO status field, which the
+# app decodes as 'pending' — so without this they would ALL be flagged "waiting for
+# approval" once the flag is on. This stamps status:'active' on every doc MISSING a
+# status, grandfathering existing accounts in; only genuinely-new registrations
+# (which write status:'pending' explicitly) stay pending.
+#
+# Manual only (workflow_dispatch) — the OWNER pulls the trigger. Two safety locks:
+#   1. mode defaults to 'dry-run' (explains only, NO write, NO credentials touched).
+#   2. a REAL write needs mode=real AND confirm=ACTIVATE (double confirmation).
+# SAFE + IDEMPOTENT: the script only touches docs MISSING a status (never overwrites
+# an explicit pending/active/suspended). Reuses the existing FIREBASE_SERVICE_ACCOUNT
+# secret (same as seed-catalog.yml / firebase-deploy.yml).
+name: Backfill user.status → active (USER-SYSTEM ACTIVATION)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run = explain only (safe) · real = WRITE status:active to existing users"
+        type: choice
+        options: [dry-run, real]
+        default: dry-run
+      confirm:
+        description: "Type ACTIVATE to confirm a REAL write (ignored for dry-run)"
+        type: string
+        default: ""
+
+concurrency:
+  group: backfill-user-status
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      # The dispatchable workflow is read from the DEFAULT branch (main), but the
+      # script lives on the live branch — check that out so scripts/seed is present.
+      - name: Checkout (live branch — has scripts/seed)
+        uses: actions/checkout@v4
+        with:
+          ref: claude/whats-happening-LyY9G
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install firebase-admin
+        working-directory: scripts/seed
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install firebase-admin@12 >/dev/null 2>&1
+
+      # ALWAYS run a dry-run first — explains the migration, writes nothing, needs no
+      # credentials. This is the whole job when mode=dry-run.
+      - name: Dry-run (explain — no write)
+        working-directory: scripts/seed
+        run: node backfill_user_status.js --project buildsmart-b0b78 --dry-run
+
+      # Safety lock #2 — a real write needs the exact confirmation word.
+      - name: Guard the real write
+        if: ${{ inputs.mode == 'real' }}
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "ACTIVATE" ]; then
+            echo "::error::mode=real requires confirm=ACTIVATE — you did not type it. Aborting (nothing was written)."
+            exit 1
+          fi
+          echo "Real write confirmed."
+
+      - name: Write service-account credentials (real only)
+        if: ${{ inputs.mode == 'real' && inputs.confirm == 'ACTIVATE' }}
+        run: |
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp-sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${RUNNER_TEMP}/gcp-sa.json" >> "$GITHUB_ENV"
+
+      - name: REAL backfill → production Firestore
+        if: ${{ inputs.mode == 'real' && inputs.confirm == 'ACTIVATE' }}
+        working-directory: scripts/seed
+        run: |
+          echo "Backfilling users.status=active on buildsmart-b0b78 (real write)…"
+          node backfill_user_status.js --project buildsmart-b0b78
+          echo "Backfill complete — verify the 'backfilled to active' count above."
