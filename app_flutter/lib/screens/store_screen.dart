@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/repositories/backend.dart' show kUserSystem;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
@@ -2902,6 +2903,14 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               onPressed: _confirmed ? null : () {
                 // One-shot guard: ignore any tap after the first.
                 if (_confirmed) return;
+                // U2.5 — order requires registration (decision #2): a guest (not
+                // yet registered) is blocked from checkout; catalog browsing stays
+                // open. COMPILE-GATED behind [kUserSystem] (const-false in every
+                // normal build) → this tree-shakes → byte-identical to today.
+                if (kUserSystem && !ref.read(userProfileProvider).registered) {
+                  showToast(context, 'יש להירשם כדי לבצע הזמנה');
+                  return;
+                }
                 setState(() => _confirmed = true);
                 final itemCount = cartItemCount(
                   ref.read(cartQtysProvider),

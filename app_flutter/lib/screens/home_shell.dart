@@ -1,4 +1,5 @@
-import 'package:buildsmart/data/repositories/backend.dart' show kIntelLive;
+import 'package:buildsmart/data/repositories/backend.dart'
+    show kIntelLive, kUserSystem;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/logic/system_division.dart';
@@ -31,6 +32,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/version.g.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/pending_approval_banner.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show kKeyboardToolStrip;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -119,6 +121,18 @@ class HomeShell extends ConsumerWidget {
               StoreScreen(), // 3 · חנות
             ],
           ),
+          // U1.5.2 — "ממתין לאישור" strip. COMPILE-GATED behind [kUserSystem]
+          // (const-false in every normal build) → this branch AND the banner
+          // tree-shake away, so the shell is BYTE-IDENTICAL to today (the
+          // `if (kIntelLive)` consent pattern). When USER_SYSTEM is on it shows
+          // ONLY for a signed-in pending user (else SizedBox.shrink).
+          if (kUserSystem)
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: PendingApprovalBanner(),
+            ),
           // GLOBAL SEARCH (kGlobalSearch, const ⇒ this collection-if folds out when
           // off ⇒ shell byte-identical): option A — typing shows the ONE unified
           // results panel IN PLACE over WHATEVER tab is active (not just the

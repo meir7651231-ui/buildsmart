@@ -8,6 +8,7 @@ import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
+import 'package:buildsmart/state/role_requests.dart' show submitRoleRequest;
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/state/user_system_sync.dart';
@@ -297,6 +298,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             )
             .catchError((Object _) {}),
       );
+      // U2.4 — file the roleRequest that seeds the U4 admin-approval queue: every
+      // registration stays pending until an admin approves it (all-by-approval,
+      // decision #1). The welcome flow is the contractor registration; store/
+      // courier requests arrive via their own onboarding. submitRoleRequest
+      // self-handles a signed-out / write failure (returns false, never throws).
+      unawaited(submitRoleRequest(ref, 'contractor').then<void>((_) {}));
     }
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());
