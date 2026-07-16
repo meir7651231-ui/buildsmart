@@ -37,6 +37,7 @@ jobs:
         run: |
           if [ ! -f app/src/main/res/raw/video.mp4 ]; then
             echo "No video.mp4 in repo — generating test-pattern placeholder"
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
             ffmpeg -y -f lavfi -i testsrc2=size=1280x720:rate=24:duration=5 \
               -c:v libx264 -pix_fmt yuv420p -preset fast -crf 28 \
               -movflags +faststart -an app/src/main/res/raw/video.mp4
