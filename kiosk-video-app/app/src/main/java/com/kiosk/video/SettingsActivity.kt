@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Process
+import android.os.UserManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +72,14 @@ class SettingsActivity : ComponentActivity() {
         val admin = ComponentName(this, KioskDeviceAdminReceiver::class.java)
         try {
             if (dpm.isDeviceOwnerApp(packageName)) {
+                for (r in arrayOf(
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    UserManager.DISALLOW_USB_FILE_TRANSFER,
+                    UserManager.DISALLOW_SAFE_BOOT,
+                    UserManager.DISALLOW_ADD_USER
+                )) {
+                    try { dpm.clearUserRestriction(admin, r) } catch (_: Throwable) {}
+                }
                 dpm.clearDeviceOwnerApp(packageName)
             }
         } catch (_: Throwable) { /* nothing we can do */ }
@@ -126,8 +135,8 @@ private fun SettingsScreen(
             Text("קוד PIN לגישה למסך זה")
             OutlinedTextField(
                 value = pinField,
-                onValueChange = { pinField = it.filter { c -> c.isDigit() }.take(8) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                onValueChange = { pinField = it.take(32) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )

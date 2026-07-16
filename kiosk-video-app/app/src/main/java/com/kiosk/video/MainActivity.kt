@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.UserManager
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -134,6 +135,12 @@ class MainActivity : ComponentActivity() {
         // Whitelist ourselves when we are the Device Owner
         if (dpm.isDeviceOwnerApp(packageName)) {
             dpm.setLockTaskPackages(admin, arrayOf(packageName))
+            try {
+                dpm.addUserRestriction(admin, UserManager.DISALLOW_DEBUGGING_FEATURES)
+                dpm.addUserRestriction(admin, UserManager.DISALLOW_USB_FILE_TRANSFER)
+                dpm.addUserRestriction(admin, UserManager.DISALLOW_SAFE_BOOT)
+                dpm.addUserRestriction(admin, UserManager.DISALLOW_ADD_USER)
+            } catch (_: Throwable) { }
         }
 
         // Start lock task if allowed (Device Owner OR user-whitelisted).

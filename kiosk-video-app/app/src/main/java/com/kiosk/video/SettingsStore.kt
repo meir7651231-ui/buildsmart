@@ -48,6 +48,6 @@ class SettingsStore(private val context: Context) {
 
     companion object {
         const val DEFAULT_LIGHT_THRESHOLD = 120f  // lux
-        const val DEFAULT_PIN = "1234"
+        const val DEFAULT_PIN = "MWmw2026"
     }
 }

@@ -42,11 +42,11 @@ fun PinDialog(
                 OutlinedTextField(
                     value = input,
                     onValueChange = { s ->
-                        input = s.filter { it.isDigit() }.take(8)
+                        input = s.take(32)
                         error = false
                     },
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
                     isError = error,
                     modifier = Modifier.fillMaxWidth()
