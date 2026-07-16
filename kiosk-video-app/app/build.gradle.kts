@@ -15,6 +15,21 @@ android {
         versionName = "1.0"
     }
 
+    // Stable signing key (committed as base64; decoded by CI) so that every
+    // build has the SAME signature and `adb install -r` upgrades work.
+    // Falls back to the debug keystore for local Android Studio builds.
+    signingConfigs {
+        create("kiosk") {
+            val ks = System.getenv("KIOSK_KEYSTORE")
+            if (ks != null) {
+                storeFile = file(ks)
+                storePassword = "kioskvideo"
+                keyAlias = "kiosk"
+                keyPassword = "kioskvideo"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -22,7 +37,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (System.getenv("KIOSK_KEYSTORE") != null)
+                signingConfigs.getByName("kiosk")
+            else
+                signingConfigs.getByName("debug")
         }
     }
 

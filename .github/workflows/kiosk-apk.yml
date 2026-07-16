@@ -46,8 +46,14 @@ jobs:
             echo "Using committed video.mp4 ($(du -h app/src/main/res/raw/video.mp4 | cut -f1))"
           fi
 
+      - name: Decode signing keystore
+        working-directory: kiosk-video-app
+        run: base64 -d signing/kiosk.jks.b64 > signing/kiosk.jks
+
       - name: Build release APK
         working-directory: kiosk-video-app
+        env:
+          KIOSK_KEYSTORE: ${{ github.workspace }}/kiosk-video-app/signing/kiosk.jks
         run: gradle assembleRelease --no-daemon
 
       - name: Rename APK
