@@ -65,9 +65,6 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
 
-        // Hide status bar + nav bar (immersive)
-        goFullscreen()
-
         settings = SettingsStore(applicationContext)
 
         // Prepare ExoPlayer with the bundled raw video, looping forever
@@ -89,6 +86,11 @@ class MainActivity : ComponentActivity() {
                 onAdminExitRequested = { exitKiosk() }
             )
         }
+
+        // Hide status bar + nav bar (immersive). MUST run after setContent:
+        // before the decor view exists, window.insetsController throws an
+        // NPE on some OEM builds (Samsung/MediaTek Android 13 — SM-X133).
+        goFullscreen()
     }
 
     override fun onStart() {
@@ -156,24 +158,29 @@ class MainActivity : ComponentActivity() {
     // ---------- Immersive fullscreen ----------
 
     private fun goFullscreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(false)
-            window.insetsController?.let {
-                it.hide(WindowInsets.Type.systemBars())
-                it.systemBarsBehavior =
-                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // Defensive try/catch: on some OEM builds the insets controller is
+        // unavailable until the decor view exists. onResume and
+        // onWindowFocusChanged re-run this, so skipping once is harmless.
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false)
+                window.insetsController?.let {
+                    it.hide(WindowInsets.Type.systemBars())
+                    it.systemBarsBehavior =
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                )
             }
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            )
-        }
+        } catch (_: Throwable) { /* decor not ready yet — retried later */ }
     }
 }
 
