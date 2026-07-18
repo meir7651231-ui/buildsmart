@@ -22,6 +22,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/smart_input/nav/category_suggestion_strip.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -1770,7 +1771,8 @@ class _ProjectSelector extends ConsumerWidget {
               'הוספת פרויקט',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: TextField(
+            // APP-KEYBOARD-ONLY — add-project dialog (root-overlay keyboard).
+            content: BsKeyboardField(
               controller: controller,
               autofocus: true,
               style: const TextStyle(color: BsTokens.inkLight),
@@ -2280,10 +2282,12 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                 style: TextStyle(color: Colors.black54, fontSize: 13),
               ),
               const SizedBox(height: 16),
-              TextField(
+              // APP-KEYBOARD-ONLY — ship-to address sheet. `textInputAction`
+              // dropped for the same reason as the catalog searches: it only
+              // styles the OS keyboard's enter key, which we replace.
+              BsKeyboardField(
                 controller: ctrl,
                 autofocus: true,
-                textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   hintText: 'כתובת / אתר העבודה',
                   filled: true,
@@ -2434,7 +2438,8 @@ class _NotesField extends StatelessWidget {
           style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
         const SizedBox(height: 6),
-        TextField(
+        // APP-KEYBOARD-ONLY — delivery-notes field (multi-line, brand caret).
+        BsKeyboardField(
           controller: controller,
           style: const TextStyle(color: BsTokens.inkLight, fontSize: 13),
           cursorColor: BsTokens.brand,
@@ -3024,7 +3029,9 @@ class _CartActionsRow extends ConsumerWidget {
               'שמור סל כרשימה',
               style: TextStyle(color: BsTokens.inkLight),
             ),
-            content: TextField(
+            // APP-KEYBOARD-ONLY — save-cart-as-list dialog; the keyboard docks
+            // in the root overlay (a dialog has no bottom bar of its own).
+            content: BsKeyboardField(
               controller: controller,
               style: const TextStyle(color: BsTokens.inkLight),
               decoration: InputDecoration(

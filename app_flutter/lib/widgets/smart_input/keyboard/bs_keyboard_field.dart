@@ -40,6 +40,7 @@ class BsKeyboardField extends ConsumerStatefulWidget {
     this.focusNode,
     this.decoration,
     this.style,
+    this.cursorColor,
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.maxLines = 1,
@@ -59,6 +60,12 @@ class BsKeyboardField extends ConsumerStatefulWidget {
 
   final InputDecoration? decoration;
   final TextStyle? style;
+
+  /// Caret colour. Load-bearing under this widget: with the feature ON the caret
+  /// is the ONLY thing marking the edit position (the device keyboard is gone),
+  /// so a call site that themed it must keep that theming.
+  final Color? cursorColor;
+
   final TextAlign textAlign;
   final TextDirection? textDirection;
   final int? maxLines;
@@ -165,6 +172,7 @@ class _BsKeyboardFieldState extends ConsumerState<BsKeyboardField> {
       showCursor: custom ? true : null,
       decoration: widget.decoration,
       style: widget.style,
+      cursorColor: widget.cursorColor,
       textAlign: widget.textAlign,
       textDirection: widget.textDirection,
       maxLines: widget.maxLines,

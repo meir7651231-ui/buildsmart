@@ -1008,11 +1008,14 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
       context: ctx,
       builder: (dCtx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const CfgText('catalog_screen.t03', 
+        title: const CfgText('catalog_screen.t03',
           'רשימה חדשה',
           style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
-        content: TextField(
+        // APP-KEYBOARD-ONLY — inside a DIALOG, which is precisely why the field
+        // docks its keyboard in the ROOT overlay: a dialog has no bottom bar to
+        // host one. Flag OFF ⇒ the same plain autofocused TextField as before.
+        content: BsKeyboardField(
           controller: controller,
           autofocus: true,
           style: const TextStyle(color: BsTokens.inkLight),
@@ -1069,11 +1072,12 @@ void _showRenameDialog(
     context: ctx,
     builder: (dCtx) => AlertDialog(
       backgroundColor: Colors.white,
-      title: const CfgText('catalog_screen.t06', 
+      title: const CfgText('catalog_screen.t06',
         'שינוי שם הרשימה',
         style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
       ),
-      content: TextField(
+      // APP-KEYBOARD-ONLY — rename dialog (root-overlay keyboard, as above).
+      content: BsKeyboardField(
         controller: controller,
         autofocus: true,
         style: const TextStyle(color: BsTokens.inkLight),
@@ -1187,11 +1191,12 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
       context: context,
       builder: (dCtx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const CfgText('catalog_screen.t09', 
+        title: const CfgText('catalog_screen.t09',
           'שינוי שם הרשימה',
           style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
-        content: TextField(
+        // APP-KEYBOARD-ONLY — second rename dialog (root-overlay keyboard).
+        content: BsKeyboardField(
           controller: controller,
           autofocus: true,
           style: const TextStyle(color: BsTokens.inkLight),
