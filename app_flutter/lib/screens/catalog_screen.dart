@@ -90,6 +90,7 @@ import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart' show CfgText;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -2852,10 +2853,19 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
           // Scoped search field (compact).
           SizedBox(
             width: 92,
-            child: TextField(
+            // APP-KEYBOARD-ONLY: a drop-in for the TextField that was here —
+            // with SMART_INPUT off it renders that same plain field (device
+            // keyboard unchanged); with it on the field goes readOnly and our
+            // keyboard docks itself, so the platform keyboard never covers the
+            // catalog. `textInputAction` is dropped on purpose: it only styles
+            // the OS keyboard's enter key, which is exactly what we replace —
+            // its search behaviour is `onSubmitted` below, which our keyboard's
+            // send key fires too.
+            child: BsKeyboardField(
               controller: _controller,
-              textInputAction: TextInputAction.search,
               onChanged: (v) =>
+                  ref.read(catalogTreeQueryProvider.notifier).state = v,
+              onSubmitted: (v) =>
                   ref.read(catalogTreeQueryProvider.notifier).state = v,
               style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
               decoration: const InputDecoration(
@@ -3240,10 +3250,12 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: TextField(
+                // APP-KEYBOARD-ONLY — same drop-in as the tree search above.
+                child: BsKeyboardField(
                   controller: _searchCtrl,
-                  textInputAction: TextInputAction.search,
                   onChanged: (v) =>
+                      ref.read(smartTreeQueryProvider.notifier).state = v,
+                  onSubmitted: (v) =>
                       ref.read(smartTreeQueryProvider.notifier).state = v,
                   style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                   decoration: const InputDecoration(
