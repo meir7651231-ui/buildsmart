@@ -31,6 +31,30 @@ const bool kEnableCardKeyboardDemo =
 const bool kEnableRingDiveDemo =
     bool.fromEnvironment('ENABLE_RING_DIVE');
 
+/// True iff the build passed `--dart-define=SMART_INPUT=true` — the owner's
+/// "APP KEYBOARD ONLY" switch: our in-app `BsKeyboard` REPLACES the device's
+/// native keyboard on every wired field.
+///
+/// SAME idiom as [kEnableWordFinderDemo] / [kEnableCardKeyboardDemo] /
+/// [kEnableRingDiveDemo]: default false → 'kSmartInput' stays absent from
+/// [FeatureFlagsNotifier._forcedOnFlags] → every consumer keeps today's
+/// behaviour → BYTE-IDENTICAL. The live deploy workflows do NOT pass it (the
+/// cut-over stays owner-gated, flipped via the STUDIO_DART_DEFINES repo
+/// variable like USER_SYSTEM).
+///
+/// ⚠️ WHAT IT TURNS ON (one flag, four consumers — all already built + wired):
+///   • `useCustomKeyboard` (keyboard/kb_field_mode.dart) — the SHARED gate that
+///     BOTH sets a wired field's `readOnly:true` (so the OS keyboard never
+///     appears) AND shows `BsKeyboardHost`. The two must flip together or the
+///     field becomes untypable — that split-brain is exactly why the predicate
+///     is one shared function, and why this flag must never be read directly.
+///   • the suggestion strips (smart_suggestion_strip / category_suggestion_strip
+///     / smart_input_scaffold) — they self-gate on the same flag.
+///
+/// A11Y: `useCustomKeyboard` ALSO requires `!accessibleNavigation`, so a screen
+/// reader keeps the OS keyboard even with this ON — the fallback is preserved.
+const bool kSmartInputDemo = bool.fromEnvironment('SMART_INPUT');
+
 /// Runtime tier name for the עדכונים LIVE-MIRROR keyboard (plan Q4). The floating
 /// keyboard's mirror branch is guarded by `kKbLiveMirror ||
 /// featureFlagsProvider.isOn(kKbLiveMirrorFlag)`, so the orchestrator can stage
@@ -104,6 +128,11 @@ class FeatureFlagsNotifier extends StateNotifier<Set<String>> {
     if (kEnableWordFinderDemo) 'kWordFinder',
     if (kEnableCardKeyboardDemo) 'kCardKeyboard',
     if (kEnableRingDiveDemo) 'kRingDive',
+    // APP-KEYBOARD-ONLY (owner): our keyboard replaces the device keyboard on
+    // every wired field. Literal 'kSmartInput' == `kSmartInputFlag`
+    // (widgets/smart_input/models.dart) — kept literal like its three siblings
+    // so this const set stays import-free. Default OFF ⇒ byte-identical.
+    if (kSmartInputDemo) 'kSmartInput',
   };
 
   Future<void> _load() async {
