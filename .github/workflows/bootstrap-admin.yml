@@ -6,6 +6,14 @@
 #
 # ⚠️ DELETE this workflow after the test account is confirmed working — it must
 #    not linger as a way to mint admins.
+#
+# RUN LOG — 2026-07-18: fired for the OWNER's admin bootstrap (meir7651231@gmail.com,
+# the script default) now that USE_FIREBASE_BACKEND + USER_SYSTEM are live. Without
+# the claim the owner cannot see the role-approval inbox (profile_screen gates it on
+# approvableRolesForClaims) and cannot call setRole — the documented chicken-and-egg.
+# The dispatch button is unavailable (this file is not on the default branch), so the
+# push trigger above is the entry point. DELETE both this workflow and
+# scripts/bootstrap-admin.mjs once the owner's claim is confirmed.
 name: One-time - bootstrap test admin (DELETE AFTER USE)
 
 on:
