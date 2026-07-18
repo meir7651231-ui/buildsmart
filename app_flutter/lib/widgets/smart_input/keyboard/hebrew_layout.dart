@@ -67,6 +67,14 @@ const List<KbKey> kBottomRow = <KbKey>[
 /// punctuation; row 3 is currency and symbols. There is NO separate
 /// back-to-letters key here — the single bottom-row layer-switch key relabels
 /// (`?123` on letters -> `אבג` on symbols). Backspace is appended by the grid.
+///
+/// This layer is INDEPENDENT of the letter layers (Hebrew XOR English XOR these),
+/// so every character here is reachable while typing English — which is what
+/// makes an email address typable at all. `keyboard_can_type_email_test.dart`
+/// pins that: with the app keyboard replacing the device one, a character that
+/// is missing here is a character the user simply CANNOT enter, and in a
+/// registration form that means they cannot sign up. Row 3 keeps 2 free slots
+/// (rows 1-2 hold 10) — the budget for future additions.
 const List<List<KbKey>> kSymbolsRows = <List<KbKey>>[
   <KbKey>[
     KbKey('1', kind: KeyKind.punct, output: '1'),
@@ -101,5 +109,10 @@ const List<List<KbKey>> kSymbolsRows = <List<KbKey>>[
     KbKey(')', kind: KeyKind.punct),
     KbKey('&', kind: KeyKind.punct),
     KbKey('+', kind: KeyKind.punct),
+    // Underscore — added for wave 2 (forms): it is legal in an email local-part
+    // (first_last@…) and common in passwords, and was the ONE character the
+    // typability gate found missing. Row 3 goes 8 -> 9 keys, still under the
+    // 10 that rows 1-2 already render, so the grid is unchanged in width.
+    KbKey('_', kind: KeyKind.punct),
   ],
 ];
