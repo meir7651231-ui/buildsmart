@@ -357,12 +357,30 @@ class FirebaseAuthGateway implements AuthGateway {
         if (kIsWeb) {
           // Web: FirebaseAuth opens the Google popup directly (the google_sign_in
           // chooser is mobile-only) and returns the credential in one step.
-          final cred = await _auth.signInWithPopup(fb.GoogleAuthProvider());
+          //
+          // `prompt: select_account` is what makes it ASK. Without it Google
+          // sees a browser already signed in, silently picks that account and
+          // completes — no chooser, no confirmation, nothing. That is not just
+          // abrupt: it makes a second account unreachable. Someone with a
+          // personal and a work Google is pinned to whichever one the browser
+          // happens to hold, and the owner cannot sign in as an ordinary user
+          // to check anything, because they are always let straight back in as
+          // themselves.
+          final provider = fb.GoogleAuthProvider()
+            ..setCustomParameters(<String, String>{'prompt': 'select_account'});
+          final cred = await _auth.signInWithPopup(provider);
           return _toAuthUser(cred.user);
         }
         // Mobile: the google_sign_in chooser yields OAuth tokens, exchanged for
         // a Firebase credential. A null account = the user cancelled the chooser.
-        final account = await gsi.GoogleSignIn().signIn();
+        //
+        // Same problem, different cause: the plugin caches the last account and
+        // `signIn()` returns it silently. Clearing the cached session first is
+        // what brings the chooser back. It only forgets the app's own reference
+        // to the account — the Google account on the device is untouched.
+        final google = gsi.GoogleSignIn();
+        await google.signOut();
+        final account = await google.signIn();
         if (account == null) return null;
         final googleAuth = await account.authentication;
         final cred = await _auth.signInWithCredential(
