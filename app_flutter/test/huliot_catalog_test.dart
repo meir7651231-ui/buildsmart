@@ -9,6 +9,7 @@
 // compat/variant engines do not crash on Huliot products.
 
 import 'package:buildsmart/data/catalog_source.dart';
+import 'package:buildsmart/data/fitting_image_overrides.dart';
 import 'package:buildsmart/data/huliot_catalog.dart';
 import 'package:buildsmart/data/huliot_image_overrides.dart';
 import 'package:buildsmart/data/lipski_image_overrides.dart';
@@ -70,18 +71,22 @@ void main() {
   });
 
   group('owner image overrides (existing products) — LIVE in v1', () {
-    test('760 overrides (512 huliot + 248 lipski) applied LIVE in v1', () {
+    test('784 overrides (512 huliot + 248 lipski + 24 fitting) LIVE in v1', () {
       expect(kHuliotImageOverrides.length, 512);
       expect(kLipskiImageOverrides.length, 248);
-      // the two maps are disjoint (different brands, different SKUs).
+      // the maps are pairwise disjoint. Fitting only fills SKUs with NO earlier
+      // owner pick (net-new), so it never overlaps huliot/lipski.
       expect(
         kHuliotImageOverrides.keys.toSet().intersection(
           kLipskiImageOverrides.keys.toSet(),
         ),
         isEmpty,
       );
-      // v1 (the live catalog every consumer reads) now carries ALL 760 overrides
-      // — applied at the source (polyroll_catalog.dart), so the good photos show
+      final fittingKeys = kFittingImageOverrides.keys.toSet();
+      expect(fittingKeys.intersection(kHuliotImageOverrides.keys.toSet()), isEmpty);
+      expect(fittingKeys.intersection(kLipskiImageOverrides.keys.toSet()), isEmpty);
+      // v1 (the live catalog every consumer reads) carries ALL overrides —
+      // applied at the source (polyroll_catalog.dart), so the good photos show
       // everywhere, not only behind CATALOG_SOURCE=v2.
       final v1Overridden = {
         for (final p in kCatalogProducts)
@@ -89,10 +94,13 @@ void main() {
       };
       expect(
         v1Overridden.length,
-        kHuliotImageOverrides.length + kLipskiImageOverrides.length,
+        kHuliotImageOverrides.length +
+            kLipskiImageOverrides.length +
+            kFittingImageOverrides.length,
       );
       expect(v1Overridden, containsAll(kHuliotImageOverrides.keys));
       expect(v1Overridden, containsAll(kLipskiImageOverrides.keys));
+      expect(v1Overridden, containsAll(kFittingImageOverrides.keys));
       // v2 inherits them (v2 = v1 + the 789 new products) — no extra overrides.
       final v2Overridden = {
         for (final p in kCatalogProductsV2)
@@ -116,6 +124,21 @@ void main() {
       expect(lp.imageAsset, kLipskiImageOverrides[lSku]);
       expect(lp.imageAsset, startsWith('assets/lipski_site/'));
       expect(lp.brand, isNotEmpty);
+    });
+
+    test('24 fitting overrides fill net-new SKUs (owner picks still win)', () {
+      expect(kFittingImageOverrides.length, 24);
+      final fSku = kFittingImageOverrides.keys.first;
+      final fp = kCatalogProducts.firstWhere((e) => e.sku == fSku);
+      // the fitting image is live on the product...
+      expect(fp.imageAsset, kFittingImageOverrides[fSku]);
+      expect(fp.imageAsset, startsWith('assets/huliot/products/'));
+      // ...and brand identity is untouched (these are Polyroll fittings).
+      expect(fp.brand, isNotEmpty);
+      // precedence: any SKU that ALSO had a huliot pick keeps the huliot one.
+      for (final s in kFittingImageOverrides.keys) {
+        expect(kHuliotImageOverrides.containsKey(s), isFalse);
+      }
     });
   });
 }

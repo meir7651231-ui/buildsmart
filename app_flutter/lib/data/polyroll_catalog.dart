@@ -9,6 +9,7 @@
 // 35–92) is pending — append below under the matching kPpr* constant.
 // ─────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/fitting_image_overrides.dart';
 import 'package:buildsmart/data/huliot_image_overrides.dart';
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -1535,9 +1536,12 @@ final List<LipskeyCatalogProduct> kCatalogProducts = [
 
 /// Applies the owner's picked image (if any) to [p] as an `imageAssetOverride`,
 /// keeping brand and every other field; returns [p] unchanged when the SKU
-/// wasn't upgraded. The two override maps are disjoint (different brands/SKUs).
+/// wasn't upgraded. Owner picks (huliot/lipski) win; [kFittingImageOverrides]
+/// only fills SKUs that had NO earlier pick (net-new, disjoint by construction).
 LipskeyCatalogProduct _withOwnerImage(LipskeyCatalogProduct p) {
-  final override = kHuliotImageOverrides[p.sku] ?? kLipskiImageOverrides[p.sku];
+  final override = kHuliotImageOverrides[p.sku] ??
+      kLipskiImageOverrides[p.sku] ??
+      kFittingImageOverrides[p.sku];
   if (override == null) return p;
   return LipskeyCatalogProduct(
     sku: p.sku,
