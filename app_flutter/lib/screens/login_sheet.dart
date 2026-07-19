@@ -22,6 +22,7 @@ import 'dart:async';
 
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/feature_flags.dart' show kEmailPasswordAuth;
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -234,6 +235,11 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   }
 
   Future<void> _emailLogin() async {
+    // LOCK 2 of 2 — the two calls that actually hand a password to Firebase are
+    // guarded here, not only where the button is drawn. A UI-only gate is
+    // undone by anyone who later adds another entry point; these two lines are
+    // the ones that matter.
+    if (!kEmailPasswordAuth) return;
     final email = _email.text.trim();
     final password = _password.text;
     if (email.isEmpty || password.isEmpty) {
@@ -262,6 +268,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   /// like sign-in; the honest errors (`email-already-in-use` / `weak-password`)
   /// are Hebrew-toasted.
   Future<void> _emailCreate() async {
+    if (!kEmailPasswordAuth) return; // LOCK 2 of 2 — see [_emailLogin]
     final email = _email.text.trim();
     final password = _password.text;
     if (email.isEmpty || password.isEmpty) {
@@ -312,6 +319,7 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
   /// `user-not-found` is folded into success); only real failures
   /// (invalid-email / network / too-many) surface in Hebrew. Needs an email.
   Future<void> _resetPassword() async {
+    if (!kEmailPasswordAuth) return; // no passwords ⇒ nothing to reset
     final email = _email.text.trim();
     if (email.isEmpty) {
       showToast(context, 'הזן אימייל לאיפוס הסיסמה');
@@ -448,19 +456,23 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         const SizedBox(height: BsTokens.space3),
         _primaryButton(label: 'שלח קוד אימות', onPressed: _sendOtp),
         const SizedBox(height: BsTokens.space2),
-        TextButton(
-          onPressed: _busy
-              ? null
-              : () => setState(() => _step = _LoginStep.email),
-          child: CfgText(
-            'login_sheet.t02',
-            'כניסה עם אימייל וסיסמה',
-            style: TextStyle(
-              color: BsTokens.mutedLight,
-              fontWeight: FontWeight.w600,
+        // LOCK 1 of 2 — the only way into the email pane from this sheet. With
+        // [kEmailPasswordAuth] off the button is not built at all, so [_step]
+        // can never become [_LoginStep.email].
+        if (kEmailPasswordAuth)
+          TextButton(
+            onPressed: _busy
+                ? null
+                : () => setState(() => _step = _LoginStep.email),
+            child: CfgText(
+              'login_sheet.t02',
+              'כניסה עם אימייל וסיסמה',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-        ),
       ];
 
   List<Widget> _codePane() => [

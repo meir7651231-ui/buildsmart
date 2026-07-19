@@ -324,143 +324,25 @@ void main() {
     });
   });
 
-  group('login sheet — S1.3 email fallback', () {
-    testWidgets('email + password signs in and closes the sheet', (t) async {
+  // ── S1.3 email fallback — RETIRED ─────────────────────────────────────────
+  // The owner chose Google + phone-OTP only: a password is a secret this
+  // project would otherwise have to hold (resets, weak choices, breach
+  // exposure), and Google and the carrier already do that work. The email pane
+  // and its four flows — sign-in, wrong password, create-account, weak password
+  // — went with that decision; see [kEmailPasswordAuth].
+  //
+  // Their assertions are not simply deleted. What replaces them is a STRONGER
+  // claim — that those flows are now unreachable — pinned in
+  // test/auth/email_password_door_test.dart along with the registration form,
+  // and with the honest caveat that the client is not the actual lock: Firebase
+  // Auth is a public API whose key ships in the bundle, so the lock is the
+  // Email/Password provider being disabled in the console.
+  group('login sheet — S1.3 email fallback is closed', () {
+    testWidgets('the sheet offers the phone door and no other', (t) async {
       final gw = _FakeAuthGateway();
       await pumpLoginHost(t, gw);
-
-      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
-      await t.pumpAndSettle();
-      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'a@b.co');
-      await t.enterText(find.widgetWithText(TextField, 'סיסמה'), 'secret');
-      await t.tap(find.text('כניסה עם אימייל'));
-      await t.pumpAndSettle();
-      expect(find.text('🔐 התחברות לחשבון'), findsNothing);
-      await drainToast(t);
-    });
-
-    testWidgets('a wrong password toasts Hebrew and stays open', (t) async {
-      final gw = _FakeAuthGateway();
-      await pumpLoginHost(t, gw);
-
-      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
-      await t.pumpAndSettle();
-      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'a@b.co');
-      await t.enterText(find.widgetWithText(TextField, 'סיסמה'), 'nope');
-      await t.tap(find.text('כניסה עם אימייל'));
-      await t.pumpAndSettle();
-      expect(find.text('אימייל או סיסמה שגויים'), findsOneWidget);
-      expect(find.text('🔐 התחברות לחשבון'), findsOneWidget);
-      await drainToast(t);
-    });
-
-    // server-gate-auth — "צור חשבון" mints a REAL account from the email pane.
-    testWidgets('create-account toggle → צור חשבון signs in the new account',
-        (t) async {
-      final gw = _FakeAuthGateway();
-      await pumpLoginHost(t, gw);
-
-      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
-      await t.pumpAndSettle();
-      // The sign-in CTA is showing; flip to create-account mode.
-      expect(find.text('כניסה עם אימייל'), findsOneWidget);
-      await t.tap(find.text('אין לי חשבון — צור חשבון'));
-      await t.pumpAndSettle();
-      expect(find.text('צור חשבון'), findsOneWidget);
-      expect(find.text('כניסה עם אימייל'), findsNothing);
-
-      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'new@b.co');
-      await t.enterText(
-        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
-        'create123',
-      );
-      await t.tap(find.text('צור חשבון'));
-      await t.pumpAndSettle();
-      expect(gw.emailCreations, ['new@b.co']);
-      // #3 — the create path now shows the email-verification notice (not the
-      // generic sign-in toast); a verification mail was sent best-effort.
-      expect(
-        find.text('✓ החשבון נוצר — שלחנו מייל אימות לכתובת, אַשרו אותו'),
-        findsOneWidget,
-      );
-      expect(find.text('🔐 התחברות לחשבון'), findsNothing); // sheet closed
-      await drainToast(t);
-    });
-
-    // P2 — an optional full name on the create path is captured into the local
-    // profile (the welcome flow's post-auth step mirrors it to users/{uid}).
-    testWidgets('צור חשבון with a name registers it to the local profile',
-        (t) async {
-      final gw = _FakeAuthGateway();
-      await pumpLoginHost(t, gw);
-
-      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
-      await t.pumpAndSettle();
-      await t.tap(find.text('אין לי חשבון — צור חשבון'));
-      await t.pumpAndSettle();
-      await t.enterText(
-        find.widgetWithText(TextField, 'שם מלא (לא חובה)'),
-        'רותי בונה',
-      );
-      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'ruti@b.co');
-      await t.enterText(
-        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
-        'create123',
-      );
-      await t.tap(find.text('צור חשבון'));
-      await t.pumpAndSettle();
-      expect(gw.emailCreations, ['ruti@b.co']);
-      // The name landed in the local profile (server mirror rides on _finishAfterAuth).
-      final container =
-          ProviderScope.containerOf(t.element(find.text('open')));
-      expect(container.read(userProfileProvider).name, 'רותי בונה');
-      await drainToast(t);
-    });
-
-    testWidgets('צור חשבון — an already-registered email toasts honest Hebrew',
-        (t) async {
-      final gw = _FakeAuthGateway();
-      await pumpLoginHost(t, gw);
-
-      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
-      await t.pumpAndSettle();
-      await t.tap(find.text('אין לי חשבון — צור חשבון'));
-      await t.pumpAndSettle();
-      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'dup@b.co');
-      await t.enterText(
-        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
-        'create123',
-      );
-      await t.tap(find.text('צור חשבון'));
-      await t.pumpAndSettle();
-      expect(find.text('האימייל כבר רשום — התחברו במקום'), findsOneWidget);
-      expect(find.text('🔐 התחברות לחשבון'), findsOneWidget); // stays open
-      expect(gw.emailCreations, isEmpty);
-      await drainToast(t);
-    });
-
-    // P2 — the client-side length pre-check short-circuits BEFORE the round-trip
-    // (the gateway is never reached; the server weak-password error is a backstop).
-    testWidgets('צור חשבון — a password under 6 chars is rejected client-side',
-        (t) async {
-      final gw = _FakeAuthGateway();
-      await pumpLoginHost(t, gw);
-
-      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
-      await t.pumpAndSettle();
-      await t.tap(find.text('אין לי חשבון — צור חשבון'));
-      await t.pumpAndSettle();
-      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'short@b.co');
-      await t.enterText(
-        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
-        '123',
-      );
-      await t.tap(find.text('צור חשבון'));
-      await t.pumpAndSettle();
-      expect(find.text('הסיסמה חייבת לפחות 6 תווים'), findsOneWidget);
-      expect(gw.emailCreations, isEmpty); // never reached the gateway
-      expect(find.text('🔐 התחברות לחשבון'), findsOneWidget); // stays open
-      await drainToast(t);
+      expect(find.text('כניסה עם אימייל וסיסמה'), findsNothing);
+      expect(find.text('שלח קוד אימות'), findsOneWidget);
     });
   });
 

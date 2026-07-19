@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/feature_flags.dart' show kEmailPasswordAuth;
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/role_requests.dart' show submitRoleRequest;
 import 'package:buildsmart/state/under_construction.dart';
@@ -147,7 +148,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Future<void> _registerViaAuth() async {
     final contact = _contact.text.trim();
     final password = _password.text;
-    if (validEmail(contact)) {
+    // LOCK 2 of 2 — the one that actually mints the account. Deliberately
+    // redundant with the `contactOk` gate in build(): this is the only line that
+    // calls createUserWithEmailPassword, so it is the line that must be right
+    // even if a future edit loosens the form validation above.
+    if (kEmailPasswordAuth && validEmail(contact)) {
       // Mirror the typed name locally so the post-auth users/{uid} write and
       // the profile chip carry it (the account itself is the real Firebase
       // identity — this is the on-device display copy, like the login flow).
@@ -588,14 +593,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // uniqueness checks are deferred to the Firebase backend. Contractor
     // flow only — role mode (cluster #85א) builds its own login sheet via
     // [_boardLoginChildren] and never reads these.
-    final contactOk =
-        validIsraeliMobile(_contact.text) || validEmail(_contact.text);
+    // LOCK 1 of 2 on the email door: with [kEmailPasswordAuth] off, an email is
+    // not a valid contact at all, so the form never validates and the
+    // account-minting branch below is never reached. (Lock 2 is inside
+    // [_registerViaAuth] itself — one gate can be edited away by mistake; two
+    // independent ones in different methods cannot be, silently.)
+    final contactOk = kEmailPasswordAuth
+        ? validIsraeliMobile(_contact.text) || validEmail(_contact.text)
+        : validIsraeliMobile(_contact.text);
     // server-gate-auth — flag ON + an EMAIL contact mints a real account from
     // the welcome CTA, so a 6+ char password is required before it unlocks. A
     // PHONE contact routes to OTP (no password), and flag OFF never reads it —
     // so the demo CTA gate is byte-identical.
     final needsPassword =
-        useFirebaseBackend && validEmail(_contact.text);
+        kEmailPasswordAuth && useFirebaseBackend && validEmail(_contact.text);
     final passwordOk = !needsPassword || _password.text.length >= 6;
     final valid =
         registrationValid(_name.text, _contact.text) && contactOk && passwordOk;
@@ -833,17 +844,31 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             ),
                       ),
                       const SizedBox(height: BsTokens.space3),
+                      // The wording follows the doors that are actually open, so
+                      // nobody is invited to type something that will be
+                      // rejected. With email+password closed this is a phone
+                      // field in every respect — label, keyboard, autofill and
+                      // error message.
                       HelpTarget(
-                        title: 'טלפון או אימייל',
-                        body: 'פרטי הקשר שמזהים אותך כלקוח — לפיהם תזוהה '
-                            'בכניסה הבאה. כאן מקלידים מספר טלפון או כתובת מייל.',
+                        title: kEmailPasswordAuth ? 'טלפון או אימייל' : 'מספר טלפון',
+                        body: kEmailPasswordAuth
+                            ? 'פרטי הקשר שמזהים אותך כלקוח — לפיהם תזוהה '
+                                'בכניסה הבאה. כאן מקלידים מספר טלפון או כתובת מייל.'
+                            : 'המספר שמזהה אותך. נשלח אליו קוד חד-פעמי ב-SMS, '
+                                'ואיתו נכנסים גם בפעם הבאה — בלי סיסמה לזכור.',
                         child: _field(
                           _contact,
-                          'טלפון או אימייל',
-                          Icons.alternate_email,
+                          kEmailPasswordAuth ? 'טלפון או אימייל' : 'מספר טלפון נייד',
+                          kEmailPasswordAuth
+                              ? Icons.alternate_email
+                              : Icons.phone_iphone,
                           ltr: true,
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
+                          keyboardType: kEmailPasswordAuth
+                              ? TextInputType.emailAddress
+                              : TextInputType.phone,
+                          autofillHints: kEmailPasswordAuth
+                              ? const [AutofillHints.email]
+                              : const [AutofillHints.telephoneNumber],
                           textInputAction: needsPassword
                               ? TextInputAction.next
                               : TextInputAction.done,
@@ -851,7 +876,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               needsPassword ? null : (valid ? _register : null),
                           errorText: _contact.text.trim().isEmpty || contactOk
                               ? null
-                              : 'מספר נייד או אימייל לא תקינים',
+                              : kEmailPasswordAuth
+                                  ? 'מספר נייד או אימייל לא תקינים'
+                                  : 'מספר נייד לא תקין',
                         ),
                       ),
                       // server-gate-auth — flag ON + an email contact: a real

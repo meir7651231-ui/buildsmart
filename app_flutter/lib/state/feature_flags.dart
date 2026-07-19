@@ -76,6 +76,29 @@ const bool kSmartInputDemo = bool.fromEnvironment('SMART_INPUT');
 /// the platform keyboard even with this on — the control is never installed.
 const bool kAppKbOnly = bool.fromEnvironment('APP_KB_ONLY');
 
+/// Whether the app offers EMAIL + PASSWORD sign-in at all.
+///
+/// ⚠️ THIS FLAG IS INVERTED relative to every other flag in this file. The
+/// others default false = "nothing changes"; this one defaults false =
+/// "the email+password door is CLOSED", which is a deliberate behaviour change.
+/// The owner chose Google + SMS only, and a flag that defaulted to the old
+/// behaviour would leave the decision unimplemented on every build that forgot
+/// to pass it. Restoring the door is `--dart-define=EMAIL_PASSWORD_AUTH=true`.
+///
+/// WHY NO PASSWORDS: a password is a secret this project would then have to
+/// hold — resets, weak choices, breach exposure. Google and phone-OTP push that
+/// onto Google and the carrier, which is the whole reason they were chosen.
+///
+/// 🛑 THE CLIENT IS NOT THE LOCK. Firebase Auth is a public HTTPS API and the
+/// web API key ships inside main.dart.js, so `accounts:signUp` accepts
+/// email+password from anyone who reads it — verified against the live project,
+/// which answered WEAK_PASSWORD (i.e. it processed the request and only
+/// objected to the value). Hiding the UI removes the door people can SEE.
+/// The actual lock is the Email/Password provider being DISABLED in the
+/// Firebase console; this flag exists so the app stops offering a door the
+/// server is about to refuse.
+const bool kEmailPasswordAuth = bool.fromEnvironment('EMAIL_PASSWORD_AUTH');
+
 /// Runtime tier name for the עדכונים LIVE-MIRROR keyboard (plan Q4). The floating
 /// keyboard's mirror branch is guarded by `kKbLiveMirror ||
 /// featureFlagsProvider.isOn(kKbLiveMirrorFlag)`, so the orchestrator can stage

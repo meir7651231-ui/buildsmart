@@ -173,7 +173,7 @@ void main() {
       'מאיר ישראלי',
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'טלפון או אימייל'),
+      find.widgetWithText(TextField, 'מספר טלפון נייד'),
       '0501234567',
     );
     await tester.pump();
@@ -216,7 +216,7 @@ void main() {
     expect(find.text('מצב דמו — נתונים מקומיים'), findsNothing);
     // Even with an email typed, no password field appears with the flag OFF.
     await tester.enterText(
-      find.widgetWithText(TextField, 'טלפון או אימייל'),
+      find.widgetWithText(TextField, 'מספר טלפון נייד'),
       'a@b.co',
     );
     await tester.pump();
