@@ -55,6 +55,27 @@ const bool kEnableRingDiveDemo =
 /// reader keeps the OS keyboard even with this ON — the fallback is preserved.
 const bool kSmartInputDemo = bool.fromEnvironment('SMART_INPUT');
 
+/// True iff the build passed `--dart-define=APP_KB_ONLY=true` — the SECOND half
+/// of the owner's "app keyboard only" demand, and the one that actually makes it
+/// true everywhere.
+///
+/// [kSmartInputDemo] converts fields ONE BY ONE (`readOnly:true` + a docked host
+/// per field); 10 of ~109 are done, so on the other 99 the device keyboard still
+/// appears. THIS flag mounts `AppKeyboardOnlyLayer` instead — a
+/// `TextInputControl` the framework routes EVERY field through — so coverage is
+/// complete by construction and cannot drift as screens are added.
+///
+/// Kept SEPARATE from [kSmartInputDemo] on purpose. That one is already ON in the
+/// live build, and a global input-control swap is not something to turn on by
+/// side effect: it changes how text input works on every screen at once. Default
+/// false ⇒ the layer is never added to the tree ⇒ BYTE-IDENTICAL. Flipping it on
+/// is the same one-line edit to the STUDIO_DART_DEFINES repo variable as
+/// SMART_INPUT and USER_SYSTEM were, and removing it is the whole rollback.
+///
+/// A11Y: the layer ALSO gates on `useCustomKeyboard`, so a screen reader keeps
+/// the platform keyboard even with this on — the control is never installed.
+const bool kAppKbOnly = bool.fromEnvironment('APP_KB_ONLY');
+
 /// Runtime tier name for the עדכונים LIVE-MIRROR keyboard (plan Q4). The floating
 /// keyboard's mirror branch is guarded by `kKbLiveMirror ||
 /// featureFlagsProvider.isOn(kKbLiveMirrorFlag)`, so the orchestrator can stage

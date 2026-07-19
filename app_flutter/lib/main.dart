@@ -11,6 +11,7 @@ import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/feature_flags.dart' show kAppKbOnly;
 import 'package:buildsmart/state/intel/intel_bus.dart' show intelBusProvider;
 import 'package:buildsmart/state/intel/screen_view.dart' show IntelRouteObserver;
 import 'package:buildsmart/state/intel/session_tracker.dart'
@@ -28,6 +29,8 @@ import 'package:buildsmart/theme/config_theme.dart' show combinedTextScale;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
+import 'package:buildsmart/widgets/smart_input/keyboard/app_keyboard_only.dart'
+    show AppKeyboardInsets, AppKeyboardOnlyLayer;
 import 'package:buildsmart/widgets/studio/studio_overlay.dart';
 import 'package:buildsmart/widgets/toast.dart'
     show bsMessengerKey, bsNavigatorKey, showToast;
@@ -483,7 +486,15 @@ class BuildSmartApp extends ConsumerWidget {
         // and the global keyboard overlay (kKbGlobal).
         Widget appContent = Stack(
           children: [
-            child ?? const SizedBox(),
+            // ⌨️ APP-KEYBOARD-ONLY: the app's screens inset for OUR keyboard the
+            // same way they already inset for the device one, so a docked
+            // keyboard never covers the field being typed into. Wraps the
+            // Navigator ONLY — the keyboard layer below stays pinned to the real
+            // bottom, so it can never inset itself. Flag-gated → OFF identical.
+            if (kAppKbOnly)
+              AppKeyboardInsets(child: child ?? const SizedBox())
+            else
+              child ?? const SizedBox(),
             // OWNER POLICY: the launch-diagnostic badge is dev-only — gated by
             // kDebugMode so a release/web build shows NOTHING (see
             // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
@@ -517,6 +528,26 @@ class BuildSmartApp extends ConsumerWidget {
                   initialEntries: [
                     OverlayEntry(
                       builder: (_) => const _GlobalKeyboardOverlay(),
+                    ),
+                  ],
+                ),
+              ),
+            // ⌨️ APP-KEYBOARD-ONLY (kAppKbOnly): the keyboard that answers for
+            // EVERY field, mounted here — above the Navigator — so it also
+            // covers fields inside pushed routes, dialogs and bottom sheets,
+            // which is where most of the app's forms actually live.
+            //
+            // Hosted in its OWN Overlay for the same reason the floating
+            // keyboard above is: this subtree is a Stack SIBLING of the app's
+            // Navigator and so has no Overlay ancestor of its own, and anything
+            // inside that calls Overlay.of() would throw and freeze the screen.
+            // Omitted entirely when the flag is off → byte-identical.
+            if (kAppKbOnly)
+              Positioned.fill(
+                child: Overlay(
+                  initialEntries: [
+                    OverlayEntry(
+                      builder: (_) => const AppKeyboardOnlyLayer(),
                     ),
                   ],
                 ),
