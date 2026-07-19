@@ -2995,13 +2995,18 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // their own people's approvals away from them.
         const SizedBox(height: BsTokens.space3),
         _ManageSection(
-          sectionKey: 'approvals',
-          titleCfgId: 'manager.manage.approvals.title',
+          // A DISTINCT key. The first version of this card reused 'approvals',
+          // which is the worker-approvals section's key — and since the accordion
+          // holds ONE open key, both cards expanded together and both chevrons
+          // flipped. They also shared a titleCfgId, so a Studio text edit renamed
+          // both. Two different approvals, two different keys.
+          sectionKey: 'accountApprovals',
+          titleCfgId: 'manager.manage.accountApprovals.title',
           emoji: '📋',
           title: 'אישור חשבונות חדשים',
           sub: 'מי נרשם וממתין — אישור נותן תפקיד ומפעיל את החשבון',
-          open: _open == 'approvals',
-          onTap: () => _toggle('approvals'),
+          open: _open == 'accountApprovals',
+          onTap: () => _toggle('accountApprovals'),
           child: _NewAccountApprovalsBody(
             onOpen: () => Navigator.of(context)
                 .push(RoleRequestsInboxScreen.route()),

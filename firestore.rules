@@ -119,6 +119,33 @@ service cloud.firestore {
     // businessId), so the added blocks never break an existing write.
     // delete: self (S1.8 in-app account deletion — Apple requirement:
     // user.delete() + data deletion) or admin.
+    // ── directory/{uid} — the readable "who exists here" list ────────────────
+    // { role, displayName, status, updatedAt } and nothing more. It exists
+    // because chat threads isolate on `participantUids`, and filling that list
+    // means resolving the OTHER side's uids by role — a read the `users` rule
+    // below correctly denies, since `users` holds phones, e-mails and approval
+    // status. The client swallowed that denial and stamped only itself, so every
+    // thread silently became private to whoever wrote first: two contractors in
+    // one conversation, neither able to see the other.
+    //
+    // READ: any signed-in, non-anonymous account. An anonymous catalog browser
+    // is not a person anyone can message, so it has no business enumerating who
+    // is here.
+    //
+    // WRITE: server only (the Admin SDK bypasses rules). `role` is what every
+    // permission decision keys on; a client-writable directory would be a way to
+    // claim a role by declaring one. The ONE exception is a person stamping
+    // their OWN `lastSeenAt` — the presence heartbeat — which can touch nothing
+    // else, so "who is online" can never become "who says they are an admin".
+    match /directory/{uid} {
+      allow read: if isSignedIn()
+          && request.auth.token.firebase.sign_in_provider != 'anonymous';
+      allow update: if isSignedIn() && request.auth.uid == uid
+          && request.resource.data.diff(resource.data)
+              .affectedKeys().hasOnly(['lastSeenAt']);
+      allow create, delete: if false; // server-written only
+    }
+
     match /users/{uid} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
       allow create: if isAdmin()

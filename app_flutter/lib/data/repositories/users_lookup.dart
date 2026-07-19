@@ -62,7 +62,21 @@ const String kUsersRoleField = 'role';
 /// never a throw (HARD RULE #3).
 @immutable
 class UsersLookup {
-  const UsersLookup(this._source);
+  const UsersLookup(this._source, {RemoteCollectionSource? directorySource})
+      : _directory = directorySource;
+
+  /// The `directory` seam — the small, readable {role, displayName, status}
+  /// list. Optional: null keeps every lookup on `_source`, which is what the
+  /// existing tests (and any Firebase-free path) expect.
+  ///
+  /// It exists because role resolution is done by EVERY signed-in person, and
+  /// the `users` rule only lets someone read their OWN document. That read was
+  /// therefore denied for everyone but an admin, and the denial was swallowed —
+  /// so a chat thread got stamped with only its sender and became invisible to
+  /// the person it was addressed to. Phone lookup deliberately stays on `users`:
+  /// it is an admin-only surface (the manager assigning a role), and a phone
+  /// number is exactly the kind of field the directory must not carry.
+  final RemoteCollectionSource? _directory;
 
   /// The injectable Firestore seam pointed at `users`. The real provider passes
   /// `FirestoreCollectionSource('users')` (resolves the instance lazily); tests
@@ -73,9 +87,12 @@ class UsersLookup {
   /// is a live stream; a directory lookup only needs the current state, so we
   /// take the first event. ANY error (stream error, no backend reachable) is
   /// swallowed to an empty list — the caller then gets the "not found" answer.
-  Future<List<RemoteDoc>> _readAll() async {
+  Future<List<RemoteDoc>> _readAll() => _readAllFrom(_source);
+
+  /// One snapshot of [source]. Same swallow-to-empty contract as [_readAll].
+  Future<List<RemoteDoc>> _readAllFrom(RemoteCollectionSource source) async {
     try {
-      return await _source.snapshots().first;
+      return await source.snapshots().first;
     } on Object catch (e) {
       // A backend hiccup is a "directory unavailable" → empty, never a throw.
       debugPrint('UsersLookup: users read failed (treated as empty): $e');
@@ -117,7 +134,7 @@ class UsersLookup {
   /// impossible (doc-ids are unique).
   Future<List<String>> uidsByRole(String role) async {
     final out = <String>[];
-    for (final doc in await _readAll()) {
+    for (final doc in await _readAllFrom(_directory ?? _source)) {
       if (doc.data[kUsersRoleField] == role) out.add(doc.id);
     }
     return List.unmodifiable(out);
@@ -131,6 +148,11 @@ class UsersLookup {
 /// same `users` collection. A7 only EXPOSES this — A4/A8 wire it in next.
 /// Tests override this (or construct [UsersLookup] directly) with a fake source.
 final usersLookupProvider = Provider<UsersLookup?>((ref) {
-  if (useFirebaseBackend) return UsersLookup(FirestoreCollectionSource('users'));
+  if (useFirebaseBackend) {
+    return UsersLookup(
+      FirestoreCollectionSource('users'),
+      directorySource: FirestoreCollectionSource('directory'),
+    );
+  }
   return null;
 });

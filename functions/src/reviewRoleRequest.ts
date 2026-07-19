@@ -26,6 +26,7 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
+import { syncDirectoryEntry } from "./directory";
 import { asString, callerRoles, db, REGION } from "./common";
 
 /// The role a CALLER must hold to approve a request for the keyed role. Only
@@ -150,6 +151,10 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
       .collection("users")
       .doc(uid)
       .set({ status: "active" }, { merge: true });
+    // The directory keys addressability on the role, and the role just changed.
+    // Waiting for the users-write trigger would work, but this is the moment the
+    // person becomes reachable — so refresh it here rather than a beat later.
+    await syncDirectoryEntry(uid);
   }
   logger.info("reviewRoleRequest", { uid, requestedRole, decision, reviewerUid });
 

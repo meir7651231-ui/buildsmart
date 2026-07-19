@@ -204,6 +204,7 @@ export {
   onUserActivated,
 } from "./push";
 export { getUploadUrl } from "./r2";
+export { onUserDocWritten } from "./directory";
 export {
   onUserCreatedQueueApproval,
   reviewRoleRequest,
