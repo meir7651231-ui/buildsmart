@@ -24,6 +24,9 @@ import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/server_catalog_auth.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
+import 'package:buildsmart/state/user_profile.dart' show userProfileProvider;
+import 'package:buildsmart/state/user_system_sync.dart'
+    show userSystemSyncProvider;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show combinedTextScale;
 import 'package:buildsmart/theme/tokens.dart';
@@ -291,6 +294,56 @@ List<Widget> debugOverlayChildren({
 /// On the backend it signs the user out after [timeout] of inactivity so an
 /// unattended session on a shared device falls back to the login gate. The timer
 /// is cancelled on dispose and re-armed on every interaction.
+/// Makes `users/{uid}` exist for EVERY real sign-in — the door the approval gate
+/// was leaking through.
+///
+/// Registration is all-by-approval, and that is enforced by
+/// `permitAction`, which blocks a user whose status is `pending`. But it blocks
+/// on the STATUS, and a user with no `users/{uid}` document at all has no
+/// status: the check falls straight through to the role's permissions, and
+/// `bsRoleFrom` hands a signed-in user with no server role the default
+/// contractor role. So "no document" did not mean "not approved yet" — it meant
+/// APPROVED.
+///
+/// And the document was only ever created in one place: the welcome screen's
+/// registration button (`_finishAfterAuth`). Anyone who signed in through the
+/// login sheet instead — the "🔐 התחברות לחשבון" row in the profile — got a real
+/// Firebase identity, no document, and therefore walked past the gate.
+///
+/// Listening here closes that by construction: every path that produces a real
+/// user ends up in `authStateChanges`, so there is no door left to forget.
+/// `ensureUser` is create-if-absent, so a returning user's server-assigned
+/// status/role/store is never touched and calling this on every sign-in — next
+/// to the registration call that already does it — is harmless.
+///
+/// Guests are skipped inside `onRegisteredLogin`: an anonymous catalog browser
+/// is not a user record.
+class _UserDocSync extends ConsumerWidget {
+  const _UserDocSync({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AuthSnapshot>(authStateProvider, (prev, next) {
+      final user = next.user;
+      if (user == null || !user.isRealUser) return;
+      if (prev?.user?.uid == user.uid && (prev?.user?.isRealUser ?? false)) {
+        return; // same person as a moment ago — nothing new to ensure
+      }
+      unawaited(
+        ref.read(userSystemSyncProvider).onRegisteredLogin(
+              uid: user.uid,
+              profile: ref.read(userProfileProvider),
+              isAnonymous: user.isAnonymous,
+              now: DateTime.now(),
+            ),
+      );
+    });
+    return child;
+  }
+}
+
 class _AutoLogout extends ConsumerStatefulWidget {
   const _AutoLogout({required this.timeout, required this.child});
 
@@ -582,7 +635,12 @@ class BuildSmartApp extends ConsumerWidget {
             // gate.
             child: _AutoLogout(
               timeout: settings.sessionTimeout,
-              child: appContent,
+              // Compile-gated like every other user-system touchpoint: with
+              // kUserSystem const-false the wrapper and its provider tree-shake
+              // away and the tree is byte-identical.
+              child: kUserSystem
+                  ? _UserDocSync(child: appContent)
+                  : appContent,
             ),
           ),
         );

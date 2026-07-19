@@ -453,7 +453,72 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     );
   }
 
+  /// Sign in with Google — for ANY user, not only the owner.
+  ///
+  /// The mechanism existed already, but every entry point to it was the
+  /// owner/manager one (`_managerGoogleLogin`, gated on an email allowlist), so
+  /// a normal person had no Google door at all. With email+password closed that
+  /// left exactly one way in — an SMS message, which costs money per send and
+  /// depends on a carrier region policy that has already blocked this project
+  /// once. This restores the second door the decision assumed was there.
+  ///
+  /// No allowlist and no role granted: this only proves identity. The account
+  /// still lands `pending` like every other registration, because `_UserDocSync`
+  /// (main.dart) ensures the record on any real sign-in.
+  Future<void> _googleLogin() async {
+    setState(() => _busy = true);
+    try {
+      final user =
+          await ref.read(authStateProvider.notifier).signInWithGoogle();
+      if (!mounted) return;
+      setState(() => _busy = false);
+      // A null user is the person closing the Google chooser — not a failure,
+      // so it must not toast an error at them.
+      if (user == null) return;
+      // Success lands on authStateChanges → the ref.listen below pops the sheet.
+    } on AuthGatewayException catch (e) {
+      _fail(hebrewAuthError(e.code));
+    } on Object catch (_) {
+      _fail('כניסת Google נכשלה — נסה שוב');
+    }
+  }
+
   List<Widget> _phonePane() => [
+        // Google first: it is one tap, costs nothing to send, and works where
+        // SMS delivery does not.
+        if (ref.read(authGatewayProvider) != null) ...[
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _googleLogin,
+            icon: const Icon(Icons.g_mobiledata, size: 28),
+            label: const Text('המשך עם Google'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              foregroundColor: BsTokens.inkLight,
+              side: const BorderSide(color: Color(0xFFDDDDDD)),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space3),
+          Row(
+            children: [
+              const Expanded(child: Divider(color: Color(0xFFEEEEEE))),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space2,
+                ),
+                child: CfgText(
+                  'login_sheet.t06',
+                  'או בקוד ל-SMS',
+                  style: const TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const Expanded(child: Divider(color: Color(0xFFEEEEEE))),
+            ],
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
         _field(
           controller: _phone,
           hint: 'מספר טלפון נייד',
