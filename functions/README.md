@@ -159,18 +159,24 @@ firebase deploy --only functions    # פרויקט: buildsmart-b0b78 · region m
 > `functions/.gitignore` מחזיר אותם (`!package.json`/`!package-lock.json`) כדי
 > ש-CI/deploy יראו את המניפסט.
 
-## bootstrap האדמין הראשון (ביצה-ותרנגולת)
+## bootstrap האדמין הראשון (ביצה-ותרנגולת) — ✅ **בוצע, והכלי נמחק**
 
-`setRole` דורש שלקורא יש claim `admin: true` — שמוקצה פעם אחת מחוץ ל-callable,
-בסקריפט Admin-SDK חד-פעמי (Cloud Shell / מכונה עם service-account):
-```js
-// node bootstrap-admin.js <uid>
-const { initializeApp } = require("firebase-admin/app");
-const { getAuth } = require("firebase-admin/auth");
-initializeApp();
-getAuth().setCustomUserClaims(process.argv[2], { admin: true })
-  .then(() => console.log("admin claim set"));
-```
+`setRole` דורש שלקורא יש claim `admin: true`. ל-Firebase אין UI בקונסולה
+ל-custom-claims, ולכן האדמין הראשון חייב להיות מוקצה פעם אחת מחוץ ל-callable,
+בסקריפט Admin-SDK.
+
+**זה כבר קרה (2026-07-19):** הבעלים (`meir7651231@gmail.com`) קיבל
+`admin: true` + `role: 'manager'`, ומכאן כל תפקיד אחר מוקצה **מתוך האפליקציה**
+דרך `setRole` — אין יותר צורך בכלי חיצוני.
+
+⚠️ **הסקריפט וה-workflow שביצעו זאת נמחקו במכוון** (`scripts/bootstrap-admin.mjs`
++ `.github/workflows/bootstrap-admin.yml`). הם היו דלת שמייצרת אדמינים, וכל עוד
+היו קיימים כל מי שיכול לדחוף לענף-החי יכול היה להעניק לעצמו שליטה מלאה. הכלי
+עצמו תיעד את הדרישה הזו: *"it must not linger as a way to mint admins"*.
+
+**אם אי-פעם יידרש אדמין נוסף** — עדיף להשתמש ב-`setRole` מתוך האפליקציה
+(חשבון-אדמין קיים מעניק). רק אם **כל** חשבונות-האדמין אבדו, יש לשחזר את הסקריפט
+מהיסטוריית-git לריצה חד-פעמית, **ולמחוק אותו שוב מיד אחרי**.
 
 ## קריאה מהאפליקציה
 
