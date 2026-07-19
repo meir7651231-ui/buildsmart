@@ -10,6 +10,7 @@
 import 'package:buildsmart/data/catalog_source.dart';
 import 'package:buildsmart/data/huliot_catalog.dart';
 import 'package:buildsmart/data/huliot_image_overrides.dart';
+import 'package:buildsmart/data/lipski_image_overrides.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/related_info.dart'
     show compatibleProductsFor, variantSiblingsOf;
@@ -68,8 +69,16 @@ void main() {
   });
 
   group('owner image overrides (existing products, v2 only)', () {
-    test('512 overrides applied in v2; v1 untouched', () {
+    test('512 huliot + 248 lipski overrides applied in v2; v1 untouched', () {
       expect(kHuliotImageOverrides.length, 512);
+      expect(kLipskiImageOverrides.length, 248);
+      // the two maps are disjoint (different brands, different SKUs).
+      expect(
+        kHuliotImageOverrides.keys.toSet().intersection(
+          kLipskiImageOverrides.keys.toSet(),
+        ),
+        isEmpty,
+      );
       // v1 carries NO override — the existing catalog stays byte-identical.
       expect(
         kCatalogProducts.where((p) => p.imageAssetOverride != null),
@@ -79,17 +88,26 @@ void main() {
         for (final p in kCatalogProductsV2)
           if (p.imageAssetOverride != null) p.sku,
       };
-      expect(v2Overridden.length, kHuliotImageOverrides.length);
+      expect(
+        v2Overridden.length,
+        kHuliotImageOverrides.length + kLipskiImageOverrides.length,
+      );
       expect(v2Overridden, containsAll(kHuliotImageOverrides.keys));
+      expect(v2Overridden, containsAll(kLipskiImageOverrides.keys));
     });
 
-    test('overridden product resolves to the huliot image, brand unchanged', () {
-      final sku = kHuliotImageOverrides.keys.first;
-      final p = kCatalogProductsV2.firstWhere((e) => e.sku == sku);
-      expect(p.imageAsset, kHuliotImageOverrides[sku]);
-      expect(p.imageAsset, startsWith('assets/huliot/products/'));
-      final v1 = kCatalogProducts.firstWhere((e) => e.sku == sku);
-      expect(p.brand, v1.brand); // identity preserved
+    test('overridden products resolve to the chosen image, brand unchanged', () {
+      final hSku = kHuliotImageOverrides.keys.first;
+      final hp = kCatalogProductsV2.firstWhere((e) => e.sku == hSku);
+      expect(hp.imageAsset, kHuliotImageOverrides[hSku]);
+      expect(hp.imageAsset, startsWith('assets/huliot/products/'));
+      expect(hp.brand, kCatalogProducts.firstWhere((e) => e.sku == hSku).brand);
+
+      final lSku = kLipskiImageOverrides.keys.first;
+      final lp = kCatalogProductsV2.firstWhere((e) => e.sku == lSku);
+      expect(lp.imageAsset, kLipskiImageOverrides[lSku]);
+      expect(lp.imageAsset, startsWith('assets/lipski_site/'));
+      expect(lp.brand, kCatalogProducts.firstWhere((e) => e.sku == lSku).brand);
     });
   });
 }

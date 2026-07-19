@@ -17,6 +17,8 @@ import 'package:buildsmart/data/huliot_catalog.dart' show kHuliotProducts;
 import 'package:buildsmart/data/huliot_image_overrides.dart'
     show kHuliotImageOverrides;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
+import 'package:buildsmart/data/lipski_image_overrides.dart'
+    show kLipskiImageOverrides;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 
 /// The two catalog sources. [v1] is the live/rollback baseline; [v2] is the
@@ -37,7 +39,7 @@ final List<LipskeyCatalogProduct> kCatalogProductsV2 = <LipskeyCatalogProduct>[
 /// Huliot image through [LipskeyCatalogProduct.imageAssetOverride]; brand, dims
 /// and every other field stay identical. Untouched products pass through as-is.
 LipskeyCatalogProduct _withOwnerImage(LipskeyCatalogProduct p) {
-  final override = kHuliotImageOverrides[p.sku];
+  final override = kHuliotImageOverrides[p.sku] ?? kLipskiImageOverrides[p.sku];
   if (override == null) return p;
   return LipskeyCatalogProduct(
     sku: p.sku,
