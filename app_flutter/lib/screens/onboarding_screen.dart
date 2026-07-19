@@ -79,11 +79,30 @@ class OnboardingGate extends ConsumerWidget {
       // successfully and still land back on "רישום ראשוני". Anyone already
       // authenticated has, by definition, finished the opening flow.
       if (auth.user?.isRealUser ?? false) return const HomeShell();
-      // Signed-out (not even the anonymous guest) → the welcome/login flow.
-      if (auth.loaded && auth.user == null) return const _OpeningFlow();
+      // NOT a real person — an anonymous catalog guest, or nobody at all.
+      //
+      // The owner's rule: the front door asks who you are. A guest may browse
+      // the catalog, but that has to be a CHOICE made on the welcome screen,
+      // not something that happens silently. Before this, the anonymous
+      // bootstrap + a persisted `welcomeSeen` dropped every returning visitor
+      // straight into the app with no sign-in and no way to reach one — and
+      // anything they created was bound to a throwaway anonymous uid that
+      // vanishes when browser storage is cleared, so their orders would quietly
+      // disappear.
+      //
+      // `seen` still decides what the opening flow SHOWS (a returning guest is
+      // not walked through onboarding again), but it can no longer stand in for
+      // being signed in.
+      //
+      // The one way in without an account is the EXPLICIT choice made on the
+      // welcome screen. Without honouring it here the guest button would loop
+      // straight back to this screen — the same lock-everyone-out failure the
+      // anonymous bootstrap was added to fix, so it is load-bearing, not a
+      // convenience.
+      if (ref.watch(guestBrowsingProvider)) return const HomeShell();
+      return const _OpeningFlow();
     }
-    // Anonymous catalog guest (or the demo build): today's behaviour, unchanged
-    // — browsing stays open, the welcome shows once.
+    // Demo build (no backend): guest/local access IS the product — unchanged.
     return seen ? const HomeShell() : const _OpeningFlow();
   }
 }

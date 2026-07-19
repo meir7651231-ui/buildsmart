@@ -194,6 +194,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       return;
     }
     ref.read(userProfileProvider.notifier).continueAsDemo();
+    // Record the CHOICE to browse without an account. On the live backend this
+    // is the only thing that opens the gate for a visitor who is not signed in
+    // (OnboardingGate) — `welcomeSeen` alone no longer counts as entry, because
+    // the anonymous catalog bootstrap makes everyone look "signed in" and a
+    // returning visitor would otherwise slip into the app never having been
+    // asked who they are.
+    ref.read(guestBrowsingProvider.notifier).state = true;
+    unawaited(persistGuestBrowsing());
     _advance();
   }
 

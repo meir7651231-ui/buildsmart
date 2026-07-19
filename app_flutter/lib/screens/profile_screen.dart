@@ -301,15 +301,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               onTap: () =>
                   Navigator.of(context).push(RewardsHubScreen.route()),
             ),
-            // ── S1 חשבון — login (signed out) / logout + deletion (signed in).
-            if (hasAuthGateway && auth.user == null) ...[
+            // ── S1 חשבון — login (guest / signed out) vs. account actions.
+            //
+            // The test is "is there a REAL person here", not "is there a user".
+            // The server-catalog bootstrap signs every visitor in anonymously, so
+            // `auth.user == null` stopped being reachable the day the live build
+            // turned the backend on — which silently deleted the ONLY in-app way
+            // to log in, while showing a browsing GUEST the logout and
+            // delete-account rows for an account they do not have.
+            if (hasAuthGateway && !(auth.user?.isRealUser ?? false)) ...[
               const SizedBox(height: BsTokens.space2),
               _LinkRow(
                 label: '🔐 התחברות לחשבון',
                 onTap: () => showLoginSheet(context),
               ),
             ],
-            if (auth.user != null) ...[
+            if (auth.user?.isRealUser ?? false) ...[
               const SizedBox(height: BsTokens.space5),
               const _SectionLabel('חשבון'),
               const SizedBox(height: BsTokens.space3),

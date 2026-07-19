@@ -51,3 +51,42 @@ Future<void> clearWelcomeSeen() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(kWelcomeSeenKey, false);
 }
+
+/// The visitor EXPLICITLY chose "browse the catalog without an account".
+const String kGuestBrowsingKey = 'bs.guest-browsing.v1';
+
+/// Whether this visitor opted into guest browsing.
+///
+/// Deliberately SEPARATE from [welcomeSeenProvider], which only records that
+/// the onboarding was shown. Conflating the two is what let a returning visitor
+/// into the app with no sign-in at all: the anonymous catalog bootstrap makes
+/// `auth.user` non-null for everyone, so `welcomeSeen` was the only thing left
+/// gating entry — and it says nothing about identity. Anything such a visitor
+/// created was bound to a throwaway anonymous uid that disappears when browser
+/// storage is cleared.
+///
+/// So entry now needs one of two POSITIVE answers: a real signed-in person, or
+/// this explicit choice. Defaults to `false` — a visitor is asked, never assumed.
+final guestBrowsingProvider = StateProvider<bool>((ref) => false);
+
+/// Read the persisted guest choice (absent → `false`, i.e. ask).
+Future<bool> loadGuestBrowsing() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(kGuestBrowsingKey) ?? false;
+}
+
+/// Remember that the visitor chose to browse as a guest.
+Future<void> persistGuestBrowsing() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(kGuestBrowsingKey, true);
+}
+
+/// Forget the guest choice — the next launch asks again.
+///
+/// Called on the inactivity auto-logout together with [clearWelcomeSeen]: an
+/// expired session must not silently degrade into an anonymous guest session
+/// that still browses the app.
+Future<void> clearGuestBrowsing() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(kGuestBrowsingKey, false);
+}

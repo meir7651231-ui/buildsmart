@@ -89,14 +89,19 @@ void main() {
   group('OnboardingGate routing — the welcome-screen dead end', () {
     /// Mirrors OnboardingGate.build under `useFirebaseBackend == true`.
     /// Returns 'home' or 'opening'.
+    ///
+    /// Entry needs one of two POSITIVE answers: a real signed-in person, or an
+    /// explicit "browse as guest" choice. `welcomeSeen` is no longer entry — it
+    /// only records that onboarding was shown.
     String route({
       required AuthUser? user,
       required bool loaded,
       required bool welcomeSeen,
+      bool guestBrowsing = false,
     }) {
       if (user?.isRealUser ?? false) return 'home';
-      if (loaded && user == null) return 'opening';
-      return welcomeSeen ? 'home' : 'opening';
+      if (guestBrowsing) return 'home';
+      return 'opening';
     }
 
     test('THE BUG: signed-in person + welcome NEVER seen ⇒ home, not welcome',
@@ -114,11 +119,40 @@ void main() {
       expect(route(user: _person, loaded: true, welcomeSeen: true), 'home');
     });
 
-    test('guest + welcome seen ⇒ home (browsing stays open — no regression)',
-        () {
-      // Guarding the fix: the anonymous guest MUST keep getting in, or we are
-      // back to the lock-everyone-out failure the bootstrap was added to solve.
-      expect(route(user: _guest, loaded: true, welcomeSeen: true), 'home');
+    test('guest who has NOT chosen ⇒ asked, even on a return visit', () {
+      // The owner's report: "it lets me in without authenticating". A persisted
+      // welcomeSeen used to be the whole gate, and since the anonymous
+      // bootstrap makes auth.user non-null for everyone, a returning visitor
+      // slipped into the app never having been asked who they are — with their
+      // data bound to a throwaway anon uid.
+      expect(route(user: _guest, loaded: true, welcomeSeen: true), 'opening');
+    });
+
+    test('⚠️ LOCKOUT GUARD: an explicit guest choice MUST open the app', () {
+      // Without honouring the choice, the welcome screen's guest button loops
+      // back to itself and NOBODY without an account can browse — the exact
+      // lock-everyone-out failure the anonymous bootstrap was added to fix.
+      expect(
+        route(
+          user: _guest,
+          loaded: true,
+          welcomeSeen: true,
+          guestBrowsing: true,
+        ),
+        'home',
+      );
+    });
+
+    test('the guest choice survives with onboarding not yet seen', () {
+      expect(
+        route(
+          user: _guest,
+          loaded: true,
+          welcomeSeen: false,
+          guestBrowsing: true,
+        ),
+        'home',
+      );
     });
 
     test('guest + first visit ⇒ opening flow (the welcome shows once)', () {
@@ -127,6 +161,13 @@ void main() {
 
     test('truly signed out (anon bootstrap failed) ⇒ opening flow', () {
       expect(route(user: null, loaded: true, welcomeSeen: true), 'opening');
+    });
+
+    test('a real user outranks everything — never asked again', () {
+      expect(
+        route(user: _person, loaded: true, welcomeSeen: false),
+        'home',
+      );
     });
 
     test('a real user routes home even before auth finishes loading', () {

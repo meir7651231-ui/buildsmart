@@ -242,12 +242,16 @@ Future<void> main() async {
   registerPolyrollSpecs();
   // First-run gate: seed the welcome flag from prefs before the first frame.
   final welcomeSeen = await loadWelcomeSeen();
+  // …and the guest-browsing CHOICE, or a visitor who already picked "browse
+  // without an account" would be asked again on every reload.
+  final guestBrowsing = await loadGuestBrowsing();
   // Benzi #4: seed the one-time ship-to-prompt flag (absent → false → prompt).
   final shipToPrompted = await loadShipToPrompted();
   runApp(
     ProviderScope(
       overrides: [
         welcomeSeenProvider.overrideWith((ref) => welcomeSeen),
+        guestBrowsingProvider.overrideWith((ref) => guestBrowsing),
         shipToPromptedProvider.overrideWith((ref) => shipToPrompted),
       ],
       child: const BuildSmartApp(),
@@ -357,6 +361,10 @@ class _AutoLogoutState extends ConsumerState<_AutoLogout> {
     if (!mounted) return;
     ref.read(welcomeSeenProvider.notifier).state = false;
     unawaited(clearWelcomeSeen());
+    // Also drop any guest choice — an expired session must land on the login
+    // screen, not quietly continue as an anonymous browser.
+    ref.read(guestBrowsingProvider.notifier).state = false;
+    unawaited(clearGuestBrowsing());
     if (!mounted) return;
     // Say WHY the screen changed — otherwise the app silently teleports to the
     // welcome screen and reads as a crash.
