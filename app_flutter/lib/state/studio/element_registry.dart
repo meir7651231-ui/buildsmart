@@ -1075,6 +1075,15 @@ const List<ElementDescriptor> kElementRegistry = [
     wired: true,
   ),
   ElementDescriptor(
+    id: 'manager.manage.approvals.open',
+    screen: 'manager',
+    area: 'manage',
+    labelHe: 'כפתור פתיחת בקשות אישור',
+    kind: ElementKind.action,
+    editableProps: {EditAxis.text, EditAxis.style},
+    wired: true,
+  ),
+  ElementDescriptor(
     id: 'manager.manage.regression.open',
     screen: 'manager',
     area: 'manage',
@@ -1766,6 +1775,7 @@ const List<ElementDescriptor> kElementRegistry = [
   ElementDescriptor(id: 'manager_dashboard_screen.producttree_intro', screen: 'manager_dashboard_screen', area: 'Manage — product tree', labelHe: 'עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'manager_dashboard_screen.regression_intro', screen: 'manager_dashboard_screen', area: 'Manage — regression', labelHe: 'הרצת חבילת בדיקות הרגרסיה המלאה (קטלוג · מאתר · מנוע תאימות · state · ניווט) על המכשיר.', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'manager_dashboard_screen.roleassign_intro', screen: 'manager_dashboard_screen', area: 'Manage — role assign', labelHe: 'הקצאת תפקיד למשתמש לפי טלפון או מזהה (uid). השיוך מופעל ע״י השרת של בעל המערכת ומשפיע על המשתמש בהתחברות הבאה.', kind: ElementKind.text, wired: true),
+  ElementDescriptor(id: 'manager_dashboard_screen.approvals_intro', screen: 'manager_dashboard_screen', area: 'Manage — new-account approvals', labelHe: 'כל מי שנרשם ממתין לאישור וחסום עד שיאושר. אישור נותן תפקיד ומפעיל את החשבון בו-זמנית — ומופיע אצלו על המסך מיד.', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'store_profile_screen.appbar_title', screen: 'store_profile_screen', area: 'כותרת מסך', labelHe: 'אזור אישי — ספק', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'store_profile_screen.settings_row', screen: 'store_profile_screen', area: 'פעולות', labelHe: 'הגדרות ספק', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'store_profile_screen.logout_row', screen: 'store_profile_screen', area: 'פעולות', labelHe: 'יציאה מהחשבון', kind: ElementKind.text, wired: true),

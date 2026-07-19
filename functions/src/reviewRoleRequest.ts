@@ -22,6 +22,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
@@ -168,3 +169,52 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
 
   return { ok: true, uid, requestedRole, decision };
 });
+
+/** Put EVERY new account into the approval queue — the trigger that makes the
+ * inbox tell the truth.
+ *
+ * Registration is all-by-approval, and the reviewer works from `roleRequests`.
+ * But that document was written by exactly one screen: the welcome-screen
+ * registration button. Anyone who arrived through the login sheet — phone code,
+ * or the Google button — got a `users/{uid}` record held at `pending` and NO
+ * request, so they were blocked and simultaneously invisible: waiting forever in
+ * a queue nobody could see them in.
+ *
+ * Doing it here, rather than in the app, is deliberate on three counts:
+ *   • `users/{uid}` is created exactly once (`ensureUser` is create-if-absent),
+ *     so this fires once per person — no "is this their first time?" guessing
+ *     against a cache that may not have loaded yet;
+ *   • the client helper `submitRoleRequest` DELETES and recreates, which on a
+ *     returning user would wipe a decision that was already made;
+ *   • it covers doors that do not exist yet. A future sign-in method is enrolled
+ *     the moment it writes a user record.
+ *
+ * Never overwrites: an existing request (pending, approved or denied) is left
+ * exactly as it is.
+ */
+export const onUserCreatedQueueApproval = onDocumentCreated(
+  { region: REGION, document: "users/{uid}" },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    const uid = event.params.uid;
+
+    // Already active (an admin-seeded or migrated record) — nothing to approve.
+    if (asString(snap.get("status")) !== "pending") return;
+
+    const ref = db().collection("roleRequests").doc(uid);
+    if ((await ref.get()).exists) return; // a decision already exists — leave it
+
+    await ref.set({
+      requestedRole: "contractor",
+      status: "pending",
+      displayName: asString(snap.get("displayName")) ?? "",
+      phone: asString(snap.get("phone")) ?? "",
+      requestedAt: FieldValue.serverTimestamp(),
+      // Marks the ones that arrived by signing in rather than by filling the
+      // registration form, so the queue can be read honestly.
+      source: "signIn",
+    });
+    logger.info("queued for approval", { uid });
+  }
+);

@@ -204,7 +204,10 @@ export {
   onUserActivated,
 } from "./push";
 export { getUploadUrl } from "./r2";
-export { reviewRoleRequest } from "./reviewRoleRequest";
+export {
+  onUserCreatedQueueApproval,
+  reviewRoleRequest,
+} from "./reviewRoleRequest";
 export { publishConfig, revertIllegalConfigWrite } from "./studio";
 // P5.66 rollup schedulers. Deploying these `onSchedule` functions requires the
 // Cloud Scheduler API enabled AND the CI service account granted

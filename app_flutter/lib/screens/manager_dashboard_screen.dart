@@ -26,6 +26,8 @@ import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
+import 'package:buildsmart/screens/role_requests_inbox_screen.dart'
+    show RoleRequestsInboxScreen;
 import 'package:buildsmart/screens/studio/studio_entry.dart';
 import 'package:buildsmart/screens/studio_screen.dart';
 import 'package:buildsmart/screens/trade_builder/trade_builder_home.dart';
@@ -42,6 +44,8 @@ import 'package:buildsmart/state/intel/intel_event.dart' show IntelEvent;
 import 'package:buildsmart/state/intel/intel_log.dart' show intelLogProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/role_requests.dart'
+    show pendingRoleRequestsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -2978,6 +2982,32 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           ),
         ),
 
+        // 6b. 📋 בקשות אישור — the approval QUEUE, sitting next to the role
+        // assignment it feeds. The inbox itself already existed, but it was
+        // reachable only from the profile screen — an odd place to run the
+        // platform's admin work from, and easy to never find. Approving here
+        // does both halves at once: it grants the role AND flips the account
+        // from `pending` to `active`.
+        //
+        // The profile link is kept for the OTHER approver tiers — a store owner
+        // signs off couriers and a contractor signs off workers, and neither of
+        // them has this dashboard at all. Moving it outright would have taken
+        // their own people's approvals away from them.
+        const SizedBox(height: BsTokens.space3),
+        _ManageSection(
+          sectionKey: 'approvals',
+          titleCfgId: 'manager.manage.approvals.title',
+          emoji: '📋',
+          title: 'אישור חשבונות חדשים',
+          sub: 'מי נרשם וממתין — אישור נותן תפקיד ומפעיל את החשבון',
+          open: _open == 'approvals',
+          onTap: () => _toggle('approvals'),
+          child: _NewAccountApprovalsBody(
+            onOpen: () => Navigator.of(context)
+                .push(RoleRequestsInboxScreen.route()),
+          ),
+        ),
+
         // 7. 🏗️ בונה ענפים (Pillar-2 · step 44) — the OWNER-GATED authoring
         // entry. A collection-`if` on [featureFlagsProvider] (kTradeBuilderFlag,
         // default OFF — absent from prefs AND `_forcedOnFlags`), so with the
@@ -3902,6 +3932,77 @@ class _RegressionBody extends StatelessWidget {
 /// .dart). The sheet owns ALL the logic (phone→uid lookup, the assignRole call,
 /// the no-backend gating); this is purely the mount hook. [onOpen] performs the
 /// `showModalBottomSheet`. Keyed `open-role-assign` so a test can tap it.
+/// The approvals card body: a LIVE count of who is waiting, and the way in.
+///
+/// The count is the point. Approval is invisible work — nobody opens a queue to
+/// check whether it is empty — so the number has to come to the manager rather
+/// than the other way round. It reads the same stream the inbox does, scoped
+/// server-side to the tier this caller may actually review.
+class _NewAccountApprovalsBody extends ConsumerWidget {
+  const _NewAccountApprovalsBody({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pending = ref.watch(pendingRoleRequestsProvider);
+    final count = pending.asData?.value.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CfgText(
+          'manager_dashboard_screen.approvals_intro',
+          'כל מי שנרשם ממתין לאישור וחסום עד שיאושר. אישור נותן תפקיד ומפעיל '
+          'את החשבון בו-זמנית — ומופיע אצלו על המסך מיד.',
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+        if (count != null)
+          Text(
+            count == 0 ? 'אין ממתינים כרגע' : 'ממתינים לאישור: $count',
+            style: TextStyle(
+              color: count == 0 ? BsTokens.mutedLight : BsTokens.warnText,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        const SizedBox(height: BsTokens.space3),
+        HelpTarget(
+          title: 'בקשות אישור',
+          body: 'פותח את תיבת הבקשות: מי ממתין, ואישור או דחייה לכל אחד. '
+              'אישור נותן את התפקיד ומשחרר את החשבון מהמתנה.',
+          child: Material(
+            color: BsTokens.brand,
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            child: InkWell(
+              key: const ValueKey('open-approvals'),
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              onTap: onOpen,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: CfgText(
+                  'manager.manage.approvals.open',
+                  '📋 פתח בקשות אישור',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: bsOnAccent(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _RoleAssignBody extends StatelessWidget {
   const _RoleAssignBody({required this.onOpen});
 
