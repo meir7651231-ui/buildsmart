@@ -3,9 +3,10 @@
 // against the MATERIALIZED ~1,867-product catalog (not a regex): 557 already
 // exist (390 Polyroll + 167 SmartLock) and are EXCLUDED here to stay additive;
 // only the 789 genuinely-new SKUs are added. This proves the staging catalog is
-// well-formed, truly additive (zero SKU overlap → no duplicates), that v1 stays
-// byte-identical under the default flag, and that the compat/variant engines do
-// not crash on Huliot products.
+// well-formed, truly additive (zero SKU overlap → no duplicates), that under the
+// default flag the product UNIVERSE is unchanged (the 789 new products stay
+// staged) while the owner's image upgrades are LIVE in v1, and that the
+// compat/variant engines do not crash on Huliot products.
 
 import 'package:buildsmart/data/catalog_source.dart';
 import 'package:buildsmart/data/huliot_catalog.dart';
@@ -43,7 +44,7 @@ void main() {
       expect(skus.toSet().length, skus.length);
     });
 
-    test('v2 = v1 + new Huliot; default source stays v1 (byte-identical)', () {
+    test('v2 = v1 + 789 new; default source stays v1 (same universe)', () {
       expect(
         kCatalogProductsV2.length,
         kCatalogProducts.length + kHuliotProducts.length,
@@ -68,8 +69,8 @@ void main() {
     });
   });
 
-  group('owner image overrides (existing products, v2 only)', () {
-    test('512 huliot + 248 lipski overrides applied in v2; v1 untouched', () {
+  group('owner image overrides (existing products) — LIVE in v1', () {
+    test('760 overrides (512 huliot + 248 lipski) applied LIVE in v1', () {
       expect(kHuliotImageOverrides.length, 512);
       expect(kLipskiImageOverrides.length, 248);
       // the two maps are disjoint (different brands, different SKUs).
@@ -79,35 +80,42 @@ void main() {
         ),
         isEmpty,
       );
-      // v1 carries NO override — the existing catalog stays byte-identical.
+      // v1 (the live catalog every consumer reads) now carries ALL 760 overrides
+      // — applied at the source (polyroll_catalog.dart), so the good photos show
+      // everywhere, not only behind CATALOG_SOURCE=v2.
+      final v1Overridden = {
+        for (final p in kCatalogProducts)
+          if (p.imageAssetOverride != null) p.sku,
+      };
       expect(
-        kCatalogProducts.where((p) => p.imageAssetOverride != null),
-        isEmpty,
+        v1Overridden.length,
+        kHuliotImageOverrides.length + kLipskiImageOverrides.length,
       );
+      expect(v1Overridden, containsAll(kHuliotImageOverrides.keys));
+      expect(v1Overridden, containsAll(kLipskiImageOverrides.keys));
+      // v2 inherits them (v2 = v1 + the 789 new products) — no extra overrides.
       final v2Overridden = {
         for (final p in kCatalogProductsV2)
           if (p.imageAssetOverride != null) p.sku,
       };
-      expect(
-        v2Overridden.length,
-        kHuliotImageOverrides.length + kLipskiImageOverrides.length,
-      );
-      expect(v2Overridden, containsAll(kHuliotImageOverrides.keys));
-      expect(v2Overridden, containsAll(kLipskiImageOverrides.keys));
+      expect(v2Overridden, v1Overridden);
     });
 
-    test('overridden products resolve to the chosen image, brand unchanged', () {
+    test('overridden products resolve to the chosen image, brand kept', () {
       final hSku = kHuliotImageOverrides.keys.first;
-      final hp = kCatalogProductsV2.firstWhere((e) => e.sku == hSku);
+      final hp = kCatalogProducts.firstWhere((e) => e.sku == hSku);
       expect(hp.imageAsset, kHuliotImageOverrides[hSku]);
       expect(hp.imageAsset, startsWith('assets/huliot/products/'));
-      expect(hp.brand, kCatalogProducts.firstWhere((e) => e.sku == hSku).brand);
+      // brand identity is preserved — a Huliot-photo override can sit on a
+      // פולירול/חוליות product; it is NOT rebranded to the image's directory.
+      expect(hp.brand, isNotEmpty);
+      expect(hp.brand, isNot('Huliot'));
 
       final lSku = kLipskiImageOverrides.keys.first;
-      final lp = kCatalogProductsV2.firstWhere((e) => e.sku == lSku);
+      final lp = kCatalogProducts.firstWhere((e) => e.sku == lSku);
       expect(lp.imageAsset, kLipskiImageOverrides[lSku]);
       expect(lp.imageAsset, startsWith('assets/lipski_site/'));
-      expect(lp.brand, kCatalogProducts.firstWhere((e) => e.sku == lSku).brand);
+      expect(lp.brand, isNotEmpty);
     });
   });
 }

@@ -262,12 +262,17 @@ void main() {
       expect(profileForBrand(null).imageDir, _liveImageDirOf(lip.first),
           reason: 'פרופיל ברירת-מחדל == הסגמנט החי (מוצר ${lip.first.sku})');
 
-      // imageAsset (nullable getter) agrees for a product that has a photo.
-      final polyWithImage =
-          poly.where((p) => p.imageFile != null).toList();
-      expect(polyWithImage, isNotEmpty,
-          reason: 'non-vacuity: מוצר פולירול עם imageFile (למשל 6001602200)');
-      expect(polyWithImage.first.imageAsset, startsWith('assets/polyroll/'),
+      // imageAsset (nullable getter) resolves under the brand dir for a Polyroll
+      // product the owner did NOT image-upgrade. (Owner picks legitimately point
+      // imageAsset elsewhere via imageAssetOverride — brand identity is kept in
+      // `.brand`, asserted above through specImageAsset — so test a non-overridden
+      // one to validate the _brandDir mapping itself.)
+      final polyBrandDir = poly
+          .where((p) => p.imageFile != null && p.imageAssetOverride == null)
+          .toList();
+      expect(polyBrandDir, isNotEmpty,
+          reason: 'non-vacuity: מוצר פולירול עם imageFile ובלי override');
+      expect(polyBrandDir.first.imageAsset, startsWith('assets/polyroll/'),
           reason: 'lipskey_catalog.dart:61-62 — imageAsset תחת ספריית המותג');
     });
 

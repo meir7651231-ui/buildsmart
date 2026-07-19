@@ -9,8 +9,10 @@
 // 35–92) is pending — append below under the matching kPpr* constant.
 // ─────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/huliot_image_overrides.dart';
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipski_image_overrides.dart';
 
 const String kPolyrollBrand = 'פולירול';
 
@@ -1509,12 +1511,54 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('99550311', 'תותב ריתוך לתיקון חורים 11', 'PPR Hole-Repair Welding Die 11', kPprTools, 'PPR Welding Tools', '🔩', 92, dims: {'קוטר': '11', 'מק"ט יצרן': 'P-HLCT0011-H', 'מק"ט חוליות': '99550311', 'יישום': 'תותב לסגירת תיקון חור בריתוך', 'יצרן': 'Polyroll'}),
 ];
 
-/// Unified catalog = Lipskey (auto-generated) + Polyroll (PPR).
-final List<LipskeyCatalogProduct> kCatalogProducts = [
+/// The raw unified catalog = Lipskey (auto-generated) + Polyroll (PPR) + Huliot
+/// (SmartLock), assembly order preserved. [kCatalogProducts] wraps this to apply
+/// the owner's live image upgrades.
+final List<LipskeyCatalogProduct> _kCatalogRaw = [
   ...kLipskeyCatalog,
   ...kPolyrollCatalog,
   ...kHuliotCatalog,
 ];
+
+/// Unified catalog with the owner's curated image upgrades applied LIVE (512
+/// Huliot + 248 Lipski photos). Each product is mapped through [_withOwnerImage]:
+/// for a SKU the owner picked (image game / picker) `imageAsset` points at the
+/// chosen higher-res photo via [LipskeyCatalogProduct.imageAssetOverride] — brand
+/// and every other field stay identical; untouched products pass through as-is.
+/// THIS is the single list every consumer reads, so the good photos show
+/// everywhere at once. (The 789 genuinely-NEW Huliot products stay behind
+/// `CATALOG_SOURCE=v2` — see catalog_source.dart; image upgrades on EXISTING
+/// products are live here.)
+final List<LipskeyCatalogProduct> kCatalogProducts = [
+  for (final p in _kCatalogRaw) _withOwnerImage(p),
+];
+
+/// Applies the owner's picked image (if any) to [p] as an `imageAssetOverride`,
+/// keeping brand and every other field; returns [p] unchanged when the SKU
+/// wasn't upgraded. The two override maps are disjoint (different brands/SKUs).
+LipskeyCatalogProduct _withOwnerImage(LipskeyCatalogProduct p) {
+  final override = kHuliotImageOverrides[p.sku] ?? kLipskiImageOverrides[p.sku];
+  if (override == null) return p;
+  return LipskeyCatalogProduct(
+    sku: p.sku,
+    nameHe: p.nameHe,
+    nameEn: p.nameEn,
+    color: p.color,
+    qtyPack: p.qtyPack,
+    qtyPallet: p.qtyPallet,
+    categoryHe: p.categoryHe,
+    categoryEn: p.categoryEn,
+    categoryEmoji: p.categoryEmoji,
+    page: p.page,
+    dims: p.dims,
+    imageFile: p.imageFile,
+    imageFiles: p.imageFiles,
+    specImageFile: p.specImageFile,
+    specImageFiles: p.specImageFiles,
+    brand: p.brand,
+    imageAssetOverride: override,
+  );
+}
 
 const List<String> kPprCategories = [
   kPprPipesSupply, kPprPipesFiber, kPprPipesAC, kPprElbows, kPprTees,

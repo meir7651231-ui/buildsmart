@@ -1,66 +1,35 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Catalog source flag — additive staging for the Huliot catalog (directive:
+// Catalog source flag — additive staging for the NEW Huliot catalog (directive:
 // knowledge/DIRECTIVE-huliot-images.md).
 //
-//   • v1 = `kCatalogProducts` (the existing unified catalog) — UNCHANGED, live,
-//          kept intact for instant rollback.
-//   • v2 = v1 + `kHuliotProducts` (adds the 1,346 additive Huliot products).
+//   • v1 = `kCatalogProducts` (the existing unified catalog) — live. It already
+//          carries the owner's curated image upgrades on EXISTING products (512
+//          Huliot + 248 Lipski), applied at the source in polyroll_catalog.dart.
+//   • v2 = v1 + `kHuliotProducts` (adds the 789 genuinely-NEW Huliot products).
 //
-// The DEFAULT is v1: nothing changes live until the flag flips. The flip is
-// owner-gated (gradual 5%→100%) and set at launch via
-// `--dart-define=CATALOG_SOURCE=v2`. Because the default resolves to the SAME
-// const list the app reads today, wiring a consumer to [resolvedCatalogProducts]
-// is byte-identical until CATALOG_SOURCE=v2.
+// The image upgrades are LIVE (part of v1). This flag stages ONLY the catalog
+// EXPANSION (the 789 new products): the product universe is unchanged until the
+// flag flips. The flip is owner-gated (gradual 5%→100%) and set at launch via
+// `--dart-define=CATALOG_SOURCE=v2`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/huliot_catalog.dart' show kHuliotProducts;
-import 'package:buildsmart/data/huliot_image_overrides.dart'
-    show kHuliotImageOverrides;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
-import 'package:buildsmart/data/lipski_image_overrides.dart'
-    show kLipskiImageOverrides;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 
-/// The two catalog sources. [v1] is the live/rollback baseline; [v2] is the
-/// staging catalog that includes the additive Huliot products.
+/// The two catalog sources. [v1] is the live baseline (already image-upgraded);
+/// [v2] is the staging catalog that ALSO includes the 789 new Huliot products.
 enum CatalogSource { v1, v2 }
 
-/// The staging catalog (v2): the live unified catalog PLUS the additive Huliot
-/// products. A SEPARATE list — v1 (`kCatalogProducts`) is never mutated, so a
-/// rollback is simply "read v1". (`final`, not `const`: `kCatalogProducts` is
-/// itself assembled at load time, so the union can't be a compile-time const.)
+/// The staging catalog (v2): the live unified catalog PLUS the additive NEW
+/// Huliot products. A SEPARATE list — v1 (`kCatalogProducts`) is never mutated,
+/// so a rollback of the EXPANSION is simply "read v1". (`final`, not `const`:
+/// `kCatalogProducts` is itself assembled at load time, so the union can't be a
+/// compile-time const.)
 final List<LipskeyCatalogProduct> kCatalogProductsV2 = <LipskeyCatalogProduct>[
-  for (final p in kCatalogProducts) _withOwnerImage(p),
+  ...kCatalogProducts,
   ...kHuliotProducts,
 ];
-
-/// s-huliot: for a product the owner upgraded (via the image picker →
-/// [kHuliotImageOverrides]), return a copy that points at the chosen higher-res
-/// Huliot image through [LipskeyCatalogProduct.imageAssetOverride]; brand, dims
-/// and every other field stay identical. Untouched products pass through as-is.
-LipskeyCatalogProduct _withOwnerImage(LipskeyCatalogProduct p) {
-  final override = kHuliotImageOverrides[p.sku] ?? kLipskiImageOverrides[p.sku];
-  if (override == null) return p;
-  return LipskeyCatalogProduct(
-    sku: p.sku,
-    nameHe: p.nameHe,
-    nameEn: p.nameEn,
-    color: p.color,
-    qtyPack: p.qtyPack,
-    qtyPallet: p.qtyPallet,
-    categoryHe: p.categoryHe,
-    categoryEn: p.categoryEn,
-    categoryEmoji: p.categoryEmoji,
-    page: p.page,
-    dims: p.dims,
-    imageFile: p.imageFile,
-    imageFiles: p.imageFiles,
-    specImageFile: p.specImageFile,
-    specImageFiles: p.specImageFiles,
-    brand: p.brand,
-    imageAssetOverride: override,
-  );
-}
 
 const String _kCatalogSourceDefine =
     String.fromEnvironment('CATALOG_SOURCE', defaultValue: 'v1');
@@ -72,6 +41,6 @@ CatalogSource get catalogSource =>
 
 /// The resolved product universe for the active source. Opt-in consumers read
 /// THIS instead of `kCatalogProducts` directly. Under the default (v1) this
-/// returns the byte-identical existing const list — zero live change.
+/// returns the existing image-upgraded list; v2 appends the 789 new products.
 List<LipskeyCatalogProduct> get resolvedCatalogProducts =>
     catalogSource == CatalogSource.v2 ? kCatalogProductsV2 : kCatalogProducts;

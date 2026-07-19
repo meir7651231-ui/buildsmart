@@ -1,5 +1,10 @@
 # WIRING CONTRACT — app_flutter
 
+## #activate-images — 760 שדרוגי-תמונה שבחר-הבעלים עלו לחי (v1) — 2026-07-19
+שיבוץ-התמונות עבר מ-v2-בלבד ל-**מקור-הקטלוג** (`data/polyroll_catalog.dart`): `kCatalogProducts` ממופה דרך `_withOwnerImage` (מחיל `kHuliotImageOverrides` 512 + `kLipskiImageOverrides` 248 כ-`imageAssetOverride`, brand + כל שדה נשמרים). כל צרכן שקורא `kCatalogProducts` **ישירות** (כרטיסים · חיפוש · dashboards · dive) רואה עכשיו את התמונות הטובות — לא רק מאחורי `CATALOG_SOURCE=v2`. `catalog_source.dart` פושט: `kCatalogProductsV2 = [...kCatalogProducts, ...kHuliotProducts]` (יורש את השדרוגים) — הדגל מדרג עכשיו רק את **789 המוצרים החדשים**. ספירה 1,867 ללא-שינוי; `huliot_catalog_test`/`brand_profile_parity_test` עודכנו (v1 נושא את ה-760).
+
+---
+
 ## #lipski-images — 248 מוצרי ליפסקי/AQUATEC → תמונת-אתר אמיתית (v2) — 2026-07-19
 `data/lipski_image_overrides.dart` (`kLipskiImageOverrides`, מוזג ב-`catalog_source._withOwnerImage`, v2 בלבד, כל תמונה מאומתת-R2; fallback ל-extra כש-att-404). 20 fuzzy + 6 ללא-תמונה דחויים.
 
