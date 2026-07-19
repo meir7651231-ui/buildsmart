@@ -262,23 +262,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final uid = ref.read(authStateProvider).user?.uid ??
         ref.read(authGatewayProvider)?.currentUser?.uid;
     final writer = ref.read(usersProfileWriterProvider);
-    if (uid != null && writer != null) {
-      final p = ref.read(userProfileProvider);
-      // Best-effort identity mirror (merge); never blocks entry. The contact is
-      // EITHER a phone OR an email (the email-create flow stores the email in
-      // `contact`), so route it to the matching field — never write an email
-      // into `phone` (the field users_lookup.uidByPhone queries).
-      unawaited(
-        writer.set(uid, {
-          if (p.name.isNotEmpty) 'displayName': p.name,
-          if (validIsraeliMobile(p.contact)) 'phone': p.contact,
-          if (validEmail(p.contact)) 'email': p.contact,
-          if (p.profession.isNotEmpty) 'profession': p.profession,
-          if (p.address.isNotEmpty) 'address': p.address,
-          if (p.businessId.isNotEmpty) 'businessId': p.businessId,
-        }).catchError((Object _) {}),
-      );
-    }
     // U0.3 (user-system) — DORMANT behind [kUserSystem]: on a REGISTERED login,
     // ensure the unified users/{uid} record exists (born status=pending,
     // all-by-approval) and refresh lastSeen. This registered-entry path is never
@@ -286,6 +269,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Const-false in every normal build → this whole block tree-shakes → the
     // shipped welcome flow is BYTE-IDENTICAL to today (the `if (kIntelLive)`
     // consent-modal call-site pattern).
+    //
+    // ⚠️ ORDER IS LOAD-BEARING — this MUST be enqueued BEFORE the legacy mirror
+    // below, and it is the whole reason the two blocks are in this order.
+    // Both write the SAME users/{uid} doc through `set(merge:true)`, and the SDK
+    // preserves enqueue order, so whichever fires first CREATES the document:
+    //   • mirror first (the old order) → the doc is created with NO `status`
+    //     key, which firestore.rules ALLOWS on create
+    //     (`request.resource.data.get('status','pending') == 'pending'` defaults
+    //     when the key is absent). `ensureUser` then becomes an UPDATE that ADDS
+    //     `status`, and the users update rule FREEZES `status` → permission-
+    //     denied, swallowed by guardWrite. The doc is left status-less forever,
+    //     `BsUser.fromWire(null)` decodes it as `pending`, and EVERY registered
+    //     user is shown "ממתין לאישור מנהל" with all permissions denied.
+    //   • ensureUser first (this order) → the doc is CREATED carrying
+    //     `status: 'pending'` (legal on create), and the mirror's later merge
+    //     touches only display fields, so the update rule passes.
+    // This was deterministic, not a race: the mirror used to be ~10 statements
+    // earlier in the same synchronous block.
     if (kUserSystem && uid != null) {
       unawaited(
         ref
@@ -304,6 +305,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       // courier requests arrive via their own onboarding. submitRoleRequest
       // self-handles a signed-out / write failure (returns false, never throws).
       unawaited(submitRoleRequest(ref, 'contractor').then<void>((_) {}));
+    }
+    if (uid != null && writer != null) {
+      final p = ref.read(userProfileProvider);
+      // Best-effort identity mirror (merge); never blocks entry. The contact is
+      // EITHER a phone OR an email (the email-create flow stores the email in
+      // `contact`), so route it to the matching field — never write an email
+      // into `phone` (the field users_lookup.uidByPhone queries).
+      // Runs AFTER the user-system create above — see the ordering note there.
+      unawaited(
+        writer.set(uid, {
+          if (p.name.isNotEmpty) 'displayName': p.name,
+          if (validIsraeliMobile(p.contact)) 'phone': p.contact,
+          if (validEmail(p.contact)) 'email': p.contact,
+          if (p.profession.isNotEmpty) 'profession': p.profession,
+          if (p.address.isNotEmpty) 'address': p.address,
+          if (p.businessId.isNotEmpty) 'businessId': p.businessId,
+        }).catchError((Object _) {}),
+      );
     }
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());

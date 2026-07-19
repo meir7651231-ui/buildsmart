@@ -69,8 +69,21 @@ class OnboardingGate extends ConsumerWidget {
     // Firebase-free test suite (the flag is a compile-time const, false in tests).
     if (useFirebaseBackend) {
       final auth = ref.watch(authStateProvider);
+      // A REAL (non-anonymous) sign-in IS a completed entry — open the app.
+      //
+      // Without this, someone who signed in through the LOGIN sheet was bounced
+      // straight back to the welcome screen: the gate's last line opens only on
+      // `welcomeSeen`, and that flag is hand-flipped on the REGISTRATION path
+      // (`welcome_screen._finishAfterAuth`) — the login path never set it. So a
+      // fresh visitor (welcomeSeen absent ⇒ false) could verify an SMS code
+      // successfully and still land back on "רישום ראשוני". Anyone already
+      // authenticated has, by definition, finished the opening flow.
+      if (auth.user?.isRealUser ?? false) return const HomeShell();
+      // Signed-out (not even the anonymous guest) → the welcome/login flow.
       if (auth.loaded && auth.user == null) return const _OpeningFlow();
     }
+    // Anonymous catalog guest (or the demo build): today's behaviour, unchanged
+    // — browsing stays open, the welcome shows once.
     return seen ? const HomeShell() : const _OpeningFlow();
   }
 }

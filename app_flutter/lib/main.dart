@@ -30,7 +30,7 @@ import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/connection_indicator.dart';
 import 'package:buildsmart/widgets/studio/studio_overlay.dart';
 import 'package:buildsmart/widgets/toast.dart'
-    show bsMessengerKey, bsNavigatorKey;
+    show bsMessengerKey, bsNavigatorKey, showToast;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -48,6 +48,8 @@ import 'package:flutter/foundation.dart'
         kIsWeb,
         visibleForTesting;
 import 'package:flutter/material.dart';
+// HardwareKeyboard — so typing counts as activity for the idle auto-logout.
+import 'package:flutter/services.dart' show HardwareKeyboard, KeyEvent;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -306,6 +308,18 @@ class _AutoLogoutState extends ConsumerState<_AutoLogout> {
   void initState() {
     super.initState();
     _arm();
+    // Typing is activity. Without this a user writing a long note or chat
+    // message for the whole idle window was signed out MID-SENTENCE and lost
+    // everything still held in the TextEditingControllers — the pointer
+    // listener below never sees a keystroke. Global (not a Focus subtree) so it
+    // counts wherever the caret is; returns false so the event still reaches
+    // whatever was going to handle it.
+    HardwareKeyboard.instance.addHandler(_onKey);
+  }
+
+  bool _onKey(KeyEvent _) {
+    _arm();
+    return false; // never consume — this only observes
   }
 
   @override
@@ -323,14 +337,35 @@ class _AutoLogoutState extends ConsumerState<_AutoLogout> {
 
   void _bump(PointerEvent _) => _arm();
 
+  /// Idle limit reached — end the session and make it STICK.
+  ///
+  /// `signOut()` alone was not enough: the server-catalog bootstrap signs every
+  /// visitor back in anonymously before the first frame, and with `welcomeSeen`
+  /// still persisted the gate routed that guest straight back to the home shell.
+  /// The sign-out was therefore invisible the moment the page reloaded. Clearing
+  /// the welcome flag re-arms [OnboardingGate], so the idle user lands on the
+  /// welcome/login screen and has to sign in again — the owner's choice.
+  ///
+  /// GUESTS ARE NEVER EXPIRED: an anonymous visitor has no session to end, and
+  /// expiring them would eject a harmless browser to a login screen for doing
+  /// nothing wrong. `_expire` therefore no-ops unless a REAL user is signed in.
   Future<void> _expire() async {
     if (!mounted) return;
-    // signOut is optimistic and a harmless no-op when already signed out.
+    final user = ref.read(authStateProvider).user;
+    if (!(user?.isRealUser ?? false)) return; // guest / signed out — nothing to do
     await ref.read(authStateProvider.notifier).signOut();
+    if (!mounted) return;
+    ref.read(welcomeSeenProvider.notifier).state = false;
+    unawaited(clearWelcomeSeen());
+    if (!mounted) return;
+    // Say WHY the screen changed — otherwise the app silently teleports to the
+    // welcome screen and reads as a crash.
+    showToast(context, 'נותקת עקב חוסר פעילות — יש להתחבר מחדש');
   }
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_onKey);
     _timer?.cancel();
     super.dispose();
   }
@@ -343,6 +378,9 @@ class _AutoLogoutState extends ConsumerState<_AutoLogout> {
       onPointerDown: _bump,
       onPointerMove: _bump,
       onPointerSignal: _bump,
+      // On web a moving mouse emits HOVER, not move — without this, a user
+      // actively reading and moving the cursor counted as idle.
+      onPointerHover: _bump,
       child: widget.child,
     );
   }

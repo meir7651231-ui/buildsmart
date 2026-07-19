@@ -36,3 +36,18 @@ Future<void> persistWelcomeSeen() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(kWelcomeSeenKey, true);
 }
+
+/// Re-arm the welcome gate, so the NEXT launch lands on the welcome/login
+/// screen instead of the home shell.
+///
+/// The one caller is the inactivity auto-logout (`main.dart` `_AutoLogout`).
+/// Signing out alone is not enough to keep an idle user out: the server-catalog
+/// bootstrap signs every visitor back in ANONYMOUSLY before the first frame, so
+/// with `welcomeSeen` still persisted `true` the `OnboardingGate` would route a
+/// returning guest straight back to the home shell — the sign-out would be
+/// invisible across a reload. Clearing the flag is what makes "log the idle user
+/// out" survive a refresh.
+Future<void> clearWelcomeSeen() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(kWelcomeSeenKey, false);
+}

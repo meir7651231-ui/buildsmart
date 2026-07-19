@@ -352,7 +352,19 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     // auto-verification) → toast + pop. Toast BEFORE pop so the root
     // ScaffoldMessenger is resolved from a still-mounted context.
     ref.listen<AuthSnapshot>(authStateProvider, (prev, next) {
-      if (next.user != null && prev?.user == null && !_popped) {
+      // The transition we close on is GUEST-OR-NOBODY → A REAL PERSON.
+      //
+      // This used to read `next.user != null && prev?.user == null`, which was
+      // correct only while a signed-out visitor really had no Firebase user.
+      // Since the server-catalog bootstrap signs every visitor in ANONYMOUSLY
+      // before the first frame (main.dart → ensureAnonAuthForServerCatalog),
+      // `prev.user` is never null, so a successful OTP moved anonUser → phoneUser
+      // and this predicate NEVER fired: no toast, no pop, and the awaiting
+      // `_enterViaAuth` never ran `_finishAfterAuth()`. The user typed a valid
+      // code, the spinner stopped, and the sheet just sat there.
+      final becameReal = next.user?.isRealUser ?? false;
+      final wasReal = prev?.user?.isRealUser ?? false;
+      if (becameReal && !wasReal && !_popped) {
         _popped = true; // one-shot — never re-toast / double-pop this sheet
         // #3 — a fresh account was just sent a verification email (best-effort,
         // by createUserWithEmailPassword); prompt the user to confirm it rather

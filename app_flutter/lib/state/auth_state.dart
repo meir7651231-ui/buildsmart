@@ -65,6 +65,7 @@ class AuthUser {
     this.phone,
     this.email,
     this.displayName,
+    this.isAnonymous = false,
   });
 
   /// The Firebase uid — the identity every Security Rule (S5) keys on.
@@ -79,16 +80,32 @@ class AuthUser {
   /// Display name, when the account carries one.
   final String? displayName;
 
+  /// True for the GUEST session (`signInAnonymously`) the bootstrap creates so
+  /// the server catalog is readable (`main.dart` → `ensureAnonAuthForServerCatalog`).
+  ///
+  /// ⚠️ LOAD-BEARING: since that bootstrap runs before the first frame, `user`
+  /// is NEVER null on the live build — so "signed in" can no longer be tested as
+  /// `user != null`. Anything that means "a REAL person is signed in" must ask
+  /// [isRealUser]; treating a guest as authenticated is what stranded a
+  /// freshly-verified user on the welcome screen (the login sheet's pop
+  /// predicate and the OnboardingGate both assumed a null user meant guest).
+  final bool isAnonymous;
+
+  /// A genuinely signed-in person, as opposed to the anonymous catalog guest.
+  bool get isRealUser => !isAnonymous;
+
   @override
   bool operator ==(Object other) =>
       other is AuthUser &&
       other.uid == uid &&
       other.phone == phone &&
       other.email == email &&
-      other.displayName == displayName;
+      other.displayName == displayName &&
+      other.isAnonymous == isAnonymous;
 
   @override
-  int get hashCode => Object.hash(uid, phone, email, displayName);
+  int get hashCode =>
+      Object.hash(uid, phone, email, displayName, isAnonymous);
 }
 
 /// The neutral auth failure: a stable [code] (mirrors FirebaseAuthException
@@ -215,6 +232,10 @@ class FirebaseAuthGateway implements AuthGateway {
           phone: u.phoneNumber,
           email: u.email,
           displayName: u.displayName,
+          // Carry the guest marker through — dropping it here is what made an
+          // anonymous catalog guest indistinguishable from a signed-in person
+          // everywhere downstream (see [AuthUser.isAnonymous]).
+          isAnonymous: u.isAnonymous,
         );
 
   /// Run one auth/functions call, translating provider exceptions into the
