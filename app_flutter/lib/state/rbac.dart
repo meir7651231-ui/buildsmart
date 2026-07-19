@@ -227,3 +227,47 @@ bool requirePermission(WidgetRef ref, Permission perm, String label) {
       );
   return false;
 }
+
+/// Why checkout is refused — or [none] when it is not.
+///
+/// Split out as a PURE function because the widget path cannot be tested: the
+/// gate lives behind `kUserSystem`, a compile-time const that folds false in
+/// every test build, so a widget test walks straight through it and proves
+/// nothing about the ON path. That is exactly how the previous gate stayed
+/// broken while its tests stayed green — `contractor_checkout_engine_test`
+/// asserts, correctly and uselessly, that "an UNREGISTERED contractor still
+/// places a live order".
+enum CheckoutBlock {
+  /// Allowed through.
+  none,
+
+  /// No account at all — signed out, or the anonymous catalog guest.
+  notRegistered,
+
+  /// A real account that an admin has not approved yet.
+  pendingApproval,
+}
+
+/// The checkout decision, asking the SAME two questions `firestore.rules` asks
+/// on an orders create, in the same order:
+///
+///   `isRealUser()`  → is there a person here, not just a session
+///   `isActive()`    → has an admin approved them
+///
+/// Kept deliberately in step with those rules. The server is what enforces this
+/// — a client predicate is a courtesy that turns a silent permission-denied
+/// (after the cart has already been cleared) into a Hebrew sentence in front of
+/// the person, with the action that resolves it.
+///
+/// The flag is a PARAMETER rather than a read of `kUserSystem`, so a test can
+/// exercise the ON path that ships without needing the build to be ON.
+CheckoutBlock checkoutBlock({
+  required bool userSystemOn,
+  required bool isRealUser,
+  required bool isPending,
+}) {
+  if (!userSystemOn) return CheckoutBlock.none;
+  if (!isRealUser) return CheckoutBlock.notRegistered;
+  if (isPending) return CheckoutBlock.pendingApproval;
+  return CheckoutBlock.none;
+}

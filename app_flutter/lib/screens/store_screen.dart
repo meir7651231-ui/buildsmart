@@ -1,10 +1,17 @@
+import 'dart:async' show unawaited;
+
 import 'package:buildsmart/data/repositories/backend.dart' show kUserSystem;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
+import 'package:buildsmart/screens/login_sheet.dart' show showLoginSheet;
 import 'package:buildsmart/screens/order_notif_sheet.dart';
+import 'package:buildsmart/screens/role_request_sheet.dart'
+    show showRoleRequestSheet;
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/rbac.dart'
+    show CheckoutBlock, checkoutBlock, pendingApprovalProvider;
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/dial_state.dart';
@@ -2908,13 +2915,49 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               onPressed: _confirmed ? null : () {
                 // One-shot guard: ignore any tap after the first.
                 if (_confirmed) return;
-                // U2.5 — order requires registration (decision #2): a guest (not
-                // yet registered) is blocked from checkout; catalog browsing stays
-                // open. COMPILE-GATED behind [kUserSystem] (const-false in every
-                // normal build) → this tree-shakes → byte-identical to today.
-                if (kUserSystem && !ref.read(userProfileProvider).registered) {
-                  showToast(context, 'יש להירשם כדי לבצע הזמנה');
-                  return;
+                // U2.5 — ordering requires a REGISTERED, APPROVED person.
+                //
+                // This gate used to read `userProfileProvider.registered`, and
+                // that flag decides nothing: it is a device-local
+                // SharedPreferences bool that `user_profile.dart` flips true the
+                // moment a name and a contact validate. Anyone — including the
+                // anonymous catalog guest, who has no account at all — could
+                // type two fields into the profile screen and walk through. The
+                // order then landed on the store and courier boards
+                // indistinguishable from an approved contractor's.
+                //
+                // It now asks the same two questions the security rules ask, in
+                // the same order, so the client's answer and the server's cannot
+                // disagree: is this a real person, and have they been approved.
+                // The rules are what actually enforce it (`isActive()` on the
+                // orders create); this exists so the refusal arrives as Hebrew
+                // in front of the person instead of a silent permission-denied
+                // after the cart has already been cleared.
+                //
+                // Each refusal now carries the action that resolves it. The old
+                // one said "register" and stopped there, pointing at a screen an
+                // already-signed-in person cannot reach — a dead end that left
+                // closing the app as the only move.
+                final block = checkoutBlock(
+                  userSystemOn: kUserSystem,
+                  isRealUser:
+                      ref.read(authStateProvider).user?.isRealUser ?? false,
+                  isPending: ref.read(pendingApprovalProvider),
+                );
+                switch (block) {
+                  case CheckoutBlock.notRegistered:
+                    showToast(context, 'יש להירשם כדי לבצע הזמנה');
+                    unawaited(showLoginSheet(context));
+                    return;
+                  case CheckoutBlock.pendingApproval:
+                    showToast(
+                      context,
+                      'החשבון ממתין לאישור — אפשר לשלוח בקשת תפקיד',
+                    );
+                    showRoleRequestSheet(context);
+                    return;
+                  case CheckoutBlock.none:
+                    break;
                 }
                 setState(() => _confirmed = true);
                 final itemCount = cartItemCount(

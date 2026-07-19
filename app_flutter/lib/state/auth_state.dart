@@ -727,6 +727,25 @@ final roleProvider = Provider<String?>((ref) {
 /// work; signed-out states are always decided, so today's behavior is intact.
 final roleSwitchLockedProvider = Provider<bool>((ref) {
   final auth = ref.watch(authStateProvider);
+  // THE ANONYMOUS VISITOR IS NOT A PERSONA CHOOSER. Nobody unlocked the picker
+  // for strangers; the condition below simply predates the anonymous guest.
+  // It was written when `user == null` meant "not signed in", and a signed-out
+  // visitor was a demo user who SHOULD get the picker to walk the personas.
+  //
+  // Since the catalog cutover, `main()` signs every visitor in anonymously
+  // before the first frame, so `signedIn` is true for a total stranger — and a
+  // stranger carries no role claims, so `roles.length == 1` is false. Not
+  // single-role, therefore "multi-role", therefore hand them the picker: the
+  // browser tab of a person who has never registered offers to switch into
+  // מנהל המערכת. The boards behind it hold their own gates, so this was not an
+  // open door — but it is a door that should not be visible, and the owner
+  // asked for it locked.
+  //
+  // This is the FIFTH place the same assumption broke (see the pending-status
+  // write order, `AuthUser.isAnonymous`, the window-close predicate and the
+  // welcome cancel-guard). The rule is one line long: on this build,
+  // `signedIn` answers "is there a session", never "is there a person".
+  if (auth.user?.isAnonymous ?? false) return true;
   return auth.singleRole || (auth.signedIn && !auth.loaded);
 });
 

@@ -78,6 +78,43 @@ service cloud.firestore {
               || (r in request.auth.token.get('roles', [])));
     }
 
+    /// A PERSON, not merely a session.
+    ///
+    /// `isSignedIn()` is `request.auth != null`, and since the catalog cutover
+    /// every visitor is signed in anonymously before the first frame so the
+    /// catalog can be read. That makes `isSignedIn()` true for a total stranger,
+    /// which is correct for reading a catalog and wrong for everything else.
+    /// The `directory` rule already uses this predicate; commercial writes need
+    /// it just as much.
+    function isRealUser() {
+      return isSignedIn()
+          && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    /// An APPROVED person — the server-side half of "all-by-approval".
+    ///
+    /// The approval lifecycle existed only on the client until now: the amber
+    /// banner calls itself "a non-blocking notice", the typed `requirePermission`
+    /// gate has no call sites, and the checkout fence tests a device-local
+    /// SharedPreferences bool the user sets by typing their own name. No rule
+    /// read `users/{uid}.status` anywhere, so an unapproved account's order
+    /// landed on the store and courier boards exactly like an approved one.
+    ///
+    /// Costs one document read per evaluated write. That is the price of the
+    /// claim being authoritative; a claims-based mirror would be cheaper but
+    /// would go stale for exactly as long as a token lives, which is the window
+    /// an approval revocation most needs to close.
+    ///
+    /// Defaults to `pending` on a MISSING field but requires the DOC to exist —
+    /// `fromWire(null) -> active` was an early trap here, and a document that
+    /// was never created must never read as approved.
+    function isActive() {
+      return isRealUser()
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', 'pending') == 'active';
+    }
+
     /// Manager is the app's god-role (dashboard / setStage / finance); admin
     /// (claims bootstrap) is a superset everywhere a manager is allowed.
     function isManager() {
@@ -177,7 +214,14 @@ service cloud.firestore {
     match /chatThreads/{threadId} {
       allow read: if isSignedIn()
           && request.auth.uid in resource.data.get('participantUids', []);
-      allow create: if isSignedIn()
+      // DELIBERATELY `isRealUser()` AND NOT `isActive()`. Ordering requires
+      // approval; talking must not. A person whose account is still pending is
+      // precisely the person who needs to ask an admin "when?", and a rule that
+      // answered that question with permission-denied would close the only
+      // channel they have left — the app would be silent in both directions.
+      // The anonymous catalog guest is a different case: it is a browser
+      // session, not somebody anyone can hold a conversation with.
+      allow create: if isRealUser()
           && request.auth.uid in request.resource.data.get('participantUids', []);
       // Two shapes are allowed:
       //  (a) an EXISTING participant refreshing the denorm (lastMsg/ts) — the
@@ -229,7 +273,9 @@ service cloud.firestore {
     match /chatMessages/{messageId} {
       allow read: if isSignedIn()
           && request.auth.uid in threadParticipants(resource.data.threadId);
-      allow create: if isSignedIn()
+      // Same split as the thread above: a pending person may still speak, an
+      // anonymous session may not. Thread membership remains the real fence.
+      allow create: if isRealUser()
           && request.resource.data.fromUid == request.auth.uid
           && request.auth.uid in
               threadParticipants(request.resource.data.threadId);
@@ -419,7 +465,13 @@ service cloud.firestore {
                   || (hasRole('store') && inStorePool())
                   || (hasRole('courier') && inCourierPool())))
           ;
-      allow create: if (isSignedIn()
+      // An order is a commercial act, so the caller must be an APPROVED PERSON —
+      // not merely a session. `isSignedIn()` alone admitted both the anonymous
+      // catalog guest and a registered-but-unapproved account, and their orders
+      // reached the store and courier boards indistinguishable from real ones.
+      // This is the server half of "all-by-approval"; the client half is the
+      // checkout gate in store_screen.dart, which now asks the same question.
+      allow create: if (isActive()
               && request.resource.data.stage == 'new'
               && request.resource.data.get('contractorUid', '')
                   == request.auth.uid)

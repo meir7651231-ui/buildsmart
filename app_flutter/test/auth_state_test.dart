@@ -509,6 +509,69 @@ void main() {
       expect(c.read(roleSwitchLockedProvider), isFalse);
       expect(c.read(roleProvider), isNull);
     });
+
+    // THE ANONYMOUS VISITOR. The test directly above is the one this pair had
+    // to be told apart from: a REAL signed-in account with no role claims is a
+    // person mid-onboarding and still gets the picker. A stranger who has never
+    // registered is not.
+    //
+    // The two were indistinguishable until now, and that is the whole bug. The
+    // lock read `singleRole || (signedIn && !loaded)`, written when `signedIn`
+    // meant "a person logged in". Since the catalog cutover `main()` signs every
+    // visitor in anonymously before the first frame, so an anonymous stranger is
+    // `signedIn` with `roles == []` — not single-role, therefore treated as
+    // multi-role, therefore handed the persona picker including מנהל המערכת.
+    test('an ANONYMOUS visitor is locked out of the picker', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(const AuthUser(uid: 'anon-1', isAnonymous: true));
+      await pumpEventQueue();
+
+      expect(c.read(authStateProvider).signedIn, isTrue,
+          reason: 'the bug lives here: an anonymous guest IS signedIn');
+      expect(c.read(authStateProvider).roles, isEmpty);
+      expect(c.read(authStateProvider).singleRole, isFalse,
+          reason: 'zero roles is not one role — the old branch fell through');
+      expect(c.read(roleSwitchLockedProvider), isTrue,
+          reason: 'and yet the picker must not open for a stranger');
+    });
+
+    test('anonymous stays locked across the whole claims round-trip', () async {
+      // Two different reasons must both hold, or the picker flickers open for a
+      // frame: mid-flight the existing `signedIn && !loaded` clause locks it,
+      // and once the claims land EMPTY only the anonymity check still does.
+      final gw = _FakeAuthGateway()..claimsHold = Completer<void>();
+      final c = makeContainer(gw);
+
+      gw.emit(const AuthUser(uid: 'anon-2', isAnonymous: true));
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).loaded, isFalse);
+      expect(c.read(roleSwitchLockedProvider), isTrue, reason: 'in flight');
+
+      gw.claimsHold!.complete();
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).loaded, isTrue);
+      expect(c.read(authStateProvider).roles, isEmpty);
+      expect(c.read(roleSwitchLockedProvider), isTrue,
+          reason: 'settled with no roles — the frame the old lock let through');
+    });
+
+    test('signing OUT of an anonymous session restores the demo picker',
+        () async {
+      // Off-backend there is no anonymous user at all, so the demo/test build
+      // must behave exactly as before — the picker is how a demo walks personas.
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(const AuthUser(uid: 'anon-3', isAnonymous: true));
+      await pumpEventQueue();
+      expect(c.read(roleSwitchLockedProvider), isTrue);
+
+      gw.emit(null);
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).signedIn, isFalse);
+      expect(c.read(roleSwitchLockedProvider), isFalse,
+          reason: 'a genuinely signed-out build keeps the picker');
+    });
   });
 
   group('currentUidProvider — A2 (launch uid seam)', () {

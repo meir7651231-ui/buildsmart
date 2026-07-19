@@ -142,9 +142,38 @@ describe('orders · ownership keys on contractorUid (not the display-name contra
 });
 
 describe('orders · create is bound to contractorUid == uid', () => {
+  // APPROVAL IS NOW A PRECONDITION OF ORDERING, so this suite's contractor needs
+  // an approved users doc before the ownership assertions below mean anything.
+  //
+  // This seed is the visible half of a deliberate contract change. The test
+  // immediately below used to pass with no users doc at all, because the rule
+  // asked only `isSignedIn()` — and that permissiveness WAS the bug: an
+  // unapproved account's order reached the store and courier boards looking
+  // exactly like an approved one. The old assertion is not being silenced; it
+  // is being corrected, and its former behaviour is now pinned as a DENIAL in
+  // approval.test.js ("a PENDING account may NOT place an order").
+  beforeEach(async () => {
+    await seed('users/uid-alice', { displayName: 'יוסי קבלן', status: 'active' });
+  });
+
   it('contractor CREATES their own new order (contractorUid == uid, stage new)', async () => {
     await assertSucceeds(
       setDoc(doc(db('uid-alice', asContractor()), 'orders/BS-new-1'), {
+        contractorId: 'יוסי קבלן',
+        contractorUid: 'uid-alice',
+        stage: 'new',
+        sum: 250,
+      }),
+    );
+  });
+
+  it('and the SAME contractor is denied the moment approval is withdrawn', async () => {
+    // Suspension has to bite immediately: the ceiling on a rules `get()` is the
+    // write itself, not a token lifetime, which is the whole reason the status
+    // is read from the document rather than mirrored into a claim.
+    await seed('users/uid-alice', { displayName: 'יוסי קבלן', status: 'suspended' });
+    await assertFails(
+      setDoc(doc(db('uid-alice', asContractor()), 'orders/BS-new-1b'), {
         contractorId: 'יוסי קבלן',
         contractorUid: 'uid-alice',
         stage: 'new',
