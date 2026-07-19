@@ -25,6 +25,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The grounded prompt — hands the model the REAL credit figures and asks ONLY
 /// for a short read on the utilisation; every number must be used as-is.
+///
+/// A ZERO LIMIT MEANS "NOT ON RECORD", AND THE PROMPT MUST SAY SO. The instruction
+/// below is "use only the numbers you were given — invent nothing", and it works:
+/// the model faithfully explains whatever ceiling it is handed. That is precisely
+/// why handing it a placeholder was dangerous — the ceiling used to fall back to a
+/// hash of the customer's name, and the model would then reason confidently about
+/// whether that contractor was "close to the ceiling" and advise on approving the
+/// next order. An honest model grounded on a fabricated number produces a
+/// fabricated recommendation, stated with all the authority of a real one. So when
+/// there is no ceiling, the utilisation question is not asked at all.
 String creditExplainPrompt({
   required String name,
   required int creditLimit,
@@ -37,6 +47,13 @@ String creditExplainPrompt({
   // + cap to defang an "ignore the above / new system:" injection. Same lever
   // already guarded for the SAME field in manager_copilot.dart (was raw here).
   final who = promptSafeText(name, maxLen: 40, collapseWhitespace: true);
+  if (creditLimit <= 0) {
+    return 'לקוח: "$who".\n'
+        'לא רשומה עבורו מסגרת-אשראי במערכת. הסכום שנוצל בפועל: ₪$used.\n\n'
+        'כתוב למנהל 2–3 משפטים בעברית. פתח בכך שאין מסגרת-אשראי רשומה ולכן '
+        'אי-אפשר לומר כמה מהמסגרת נוצל. אל תעריך, אל תשער ואל תרמוז מהי המסגרת, '
+        'ואל תמליץ אם לאשר הזמנה. השתמש אך ורק במספר שניתן לך.';
+  }
   return 'לקוח: "$who".\n'
       'מסגרת-אשראי: ₪$creditLimit · נוצל: ₪$used · יתרה: ₪$balance · '
       'ניצול: $pct%.\n\n'
@@ -165,10 +182,22 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
-            _row('מסגרת', '₪${widget.creditLimit}'),
-            _row('נוצל', '₪${widget.used}'),
-            _row('יתרה', '₪${widget.balance}'),
-            _row('ניצול', '${widget.pct}%'),
+            // No ceiling on record → say that, rather than print "₪0". A zero
+            // shekel figure reads as an approved limit of nothing, which is a
+            // different (and equally wrong) claim from "we do not know it". The
+            // spend stays: it is folded from this contractor's own orders and is
+            // the one figure here that was never in doubt.
+            if (widget.creditLimit <= 0) ...[
+              _row('מסגרת', 'לא רשומה'),
+              _row('נוצל', '₪${widget.used}'),
+              _row('יתרה', '—'),
+              _row('ניצול', '—'),
+            ] else ...[
+              _row('מסגרת', '₪${widget.creditLimit}'),
+              _row('נוצל', '₪${widget.used}'),
+              _row('יתרה', '₪${widget.balance}'),
+              _row('ניצול', '${widget.pct}%'),
+            ],
             const Divider(height: BsTokens.space5, color: BsTokens.divider),
 
             if (!aiAvailable)

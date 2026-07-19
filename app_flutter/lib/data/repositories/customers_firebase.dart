@@ -188,11 +188,26 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   @override
   int creditLimit(String name) => 0;
 
-  /// A13 — the server-canonical credit aggregate. Same gate + graceful fallback
-  /// as `LocalCustomersRepository.computeCredit`: OFF / no gateway → the local
-  /// derivation over THIS repo's cached aggregate (byte-identical to the sync
-  /// path); ON + a bound gateway → the `computeCredit` callable, falling back to
-  /// the local derivation on a [OrderFunctionsException] (never a faked success).
+  /// A13 — the server-canonical credit aggregate.
+  ///
+  /// The server callable is the ONLY real source of a credit ceiling here. When
+  /// it is unavailable — callable unbound, flag off, or the call threw — this
+  /// falls back to a limit of ZERO, matching the deliberate choice already made
+  /// by the synchronous [creditLimit] above, and for the same reason.
+  ///
+  /// IT USED TO FALL BACK TO `contractorCredit(name)`, and that was the bug. That
+  /// helper is a hash of the person's NAME bucketed into the 30,000–120,000 ₪
+  /// band; it is a demo prop, not a credit decision. Its doc comment called this
+  /// path "never a faked success" while the code underneath it fabricated exactly
+  /// that — a per-name number, stable across reloads, rendered by
+  /// `credit_explain_screen` under the heading "the REAL credit figures". A
+  /// manager reading ₪85,000 next to a contractor's name has no way to tell it
+  /// from an approved limit, and approving an order against it is the whole
+  /// damage. A degraded read must look degraded: showing nothing is recoverable,
+  /// showing a confident wrong number is not.
+  ///
+  /// Local/demo builds are untouched — `LocalCustomersRepository` keeps the
+  /// derivation, and this repo is constructed only when the backend is live.
   @override
   Future<CreditResult> computeCredit(String name) async {
     final fns = _functions;
@@ -200,24 +215,21 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
       try {
         return await fns.computeCredit(name);
       } on OrderFunctionsException catch (e) {
-        debugPrint('Customers(fb): computeCredit failed (local fallback): $e');
+        debugPrint('Customers(fb): computeCredit failed (no local invention): $e');
       }
     }
-    final creditLimit = contractorCredit(name);
     final c = byName(name);
-    final used = c?.totalSpend ?? 0;
-    final orderCount = c?.orderCount ?? 0;
-    final balance = (creditLimit - used).clamp(0, creditLimit);
-    final pct = creditLimit == 0
-        ? 0
-        : ((used / creditLimit) * 100).round().clamp(0, 100);
+    // `used` and `orderCount` are real — they are folded from this contractor's
+    // own orders — so they stay. Only the ceiling was ever invented, and with no
+    // ceiling there is no balance and no percentage to report: a "0% used" next
+    // to a real spend would be a second invented claim.
     return CreditResult(
       name: name,
-      creditLimit: creditLimit,
-      used: used,
-      balance: balance,
-      pct: pct,
-      orderCount: orderCount,
+      creditLimit: 0,
+      used: c?.totalSpend ?? 0,
+      balance: 0,
+      pct: 0,
+      orderCount: c?.orderCount ?? 0,
     );
   }
 }

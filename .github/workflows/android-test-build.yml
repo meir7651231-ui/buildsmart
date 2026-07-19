@@ -64,6 +64,21 @@ jobs:
           # versionCode on every build. Without it the versionCode stays pinned at
           # pubspec's +N, so App Distribution / Android saw every build as the SAME
           # version "1.4.x (8)" and never offered the update (the v6.20 delivery bug).
+          #
+          # CATALOG_BASE_URL + STORE_COMPARISON_UI ARE A PAIR — never ship one alone.
+          # STORE_COMPARISON_UI puts the comparison line in the product sheet; the
+          # repository behind it is built only `if (useServerCatalog)`, and a non-empty
+          # CATALOG_BASE_URL is what turns that on. The UI flag without the URL put the
+          # app in the exact state store_comparison_line.dart calls unreachable: the
+          # widget renders, its provider throws UnimplementedError, and maybeWhen's
+          # orElse swallows it — the feature reads as ON while being silently dead, and
+          # every product-sheet open raises an exception nobody ever sees.
+          # It also left the app on the BUNDLED catalog while the site reads the server
+          # one — the same product answering differently depending on where you opened
+          # it. Keep in step with web-deploy.yml + firebase-hosting.yml (one dataset).
+          #
+          # (Comments belong HERE, above the command — a `#` inside the backslash
+          # continuation below would comment out every flag after it.)
           flutter build apk --release \
             --build-number=${{ github.run_number }} \
             --dart-define=USE_FIREBASE_BACKEND=true \
@@ -78,6 +93,7 @@ jobs:
             --dart-define=PLAIN_DIVE=true \
             --dart-define=STUDIO_SHARED_SYNC=true \
             --dart-define=AXIS_DIVE=true \
+            --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com \
             --dart-define=STORE_COMPARISON_UI=true \
             ${{ vars.STUDIO_DART_DEFINES }}
 
