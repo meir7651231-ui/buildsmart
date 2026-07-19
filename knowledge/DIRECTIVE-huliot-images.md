@@ -30,7 +30,10 @@
 - **דו"ח-תקינות:** שדות-סותרים · הפניות-שבורות · חוסרים.
 
 ## שלב 3 · הטמעה (אדיטיבי · staging · אפס-קריסה)
-- **תמונות** (כבר ב-R2 `huliot/products/{sku}.jpeg`) → חבר ל-imageFile של התואמים+החדשים (סיומת `.jpeg`).
+- **⭐ חיווט-תמונות — המפתח = `sku` (עובד על כל 3 המבנים):** ב-`app_flutter/lib/data/product_images.dart` (ב-whats-happening!), הוסף מפת-override לפי-sku ש-`resolveProductImage` בודק **קודם**:
+  `kHuliotImages = { '{sku}': 'huliot/products/{sku}.jpeg', ... }` (הרשימה = **6,158 הקבצים ב-R2**, או עמודת-ה-sku ב-CSV).
+  - מוצר ש-sku שלו במפה → מציג צילום-R2, **בלי קשר למבנה** (lipskey/polyroll-`ppr()`/smartlock-`_sl()`/חדש).
+  - מוצר בלי → נשאר עם התמונה הקיימת. גלריה: `{sku}_1.jpeg`... אופציונלי. ⚠️ סיומת **`.jpeg`**.
 - **חדשים** → רשומות `catalogProducts` (sku · nameHe · imageFile · brand='Huliot' · dims מהפרסור).
 - **תואמים** → עדכן `imageFile` (+ שדות שאושרו בשלב 2 בלבד).
 - זריעה ל-**staging** (`catalogProducts_v2`) → **שער-אימות:** `fromDoc` 0-כשלים + dive/compat/search + smart_tree עובדים + rules-test → **דגל** `CATALOG_SOURCE=v2` → **מדורג 5%→100%**. הישן שלם ל-rollback.
