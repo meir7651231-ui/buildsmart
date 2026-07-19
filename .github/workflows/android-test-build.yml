@@ -76,7 +76,10 @@ jobs:
             --dart-define=ENABLE_RING_DIVE=true \
             --dart-define=GLOBAL_SEARCH=true \
             --dart-define=PLAIN_DIVE=true \
-            --dart-define=STUDIO_SHARED_SYNC=true
+            --dart-define=STUDIO_SHARED_SYNC=true \
+            --dart-define=AXIS_DIVE=true \
+            --dart-define=STORE_COMPARISON_UI=true \
+            ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: Upload backend-ON APK artifact
         uses: actions/upload-artifact@v4

@@ -4,6 +4,7 @@
 // sheet states WHO approves each tier so the user knows what to expect.
 
 import 'package:buildsmart/data/personas.dart';
+import 'package:buildsmart/state/auth_state.dart' show authStateProvider;
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -112,6 +113,15 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               ),
               const SizedBox(height: BsTokens.space3),
+              // WHO is asking, and on whose behalf. Signing in with Google hands
+              // the app a name and an address the person never typed, and until
+              // now none of it was shown back to them: they were asked to pick a
+              // role with no indication of which account the request would be
+              // filed under. With two Google accounts — and the chooser now
+              // offering both — that is a real chance of requesting a role for
+              // the wrong identity and not finding out until it is approved.
+              const _RequestingAs(),
+              const SizedBox(height: BsTokens.space3),
               for (final role in kRequestableRoles)
                 _RoleRequestRow(
                   role: role,
@@ -121,6 +131,69 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Requesting as …" — the signed-in identity, shown before the role choice.
+///
+/// Reads the account the request will actually be filed under, so the person can
+/// see it is the one they meant. Falls back through name → email → phone,
+/// because a Google sign-in carries a name while a phone sign-in carries only a
+/// number, and either one has to be nameable.
+class _RequestingAs extends ConsumerWidget {
+  const _RequestingAs();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authStateProvider).user;
+    if (user == null) return const SizedBox.shrink();
+    final name = (user.displayName ?? '').trim();
+    final contact = (user.email ?? user.phone ?? '').trim();
+    if (name.isEmpty && contact.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F7F9),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.person_outline, size: 20, color: BsTokens.mutedLight),
+          const SizedBox(width: BsTokens.space2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'מבקש/ת בשם',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 11),
+                ),
+                Text(
+                  name.isNotEmpty ? name : contact,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (name.isNotEmpty && contact.isNotEmpty)
+                  Text(
+                    contact,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

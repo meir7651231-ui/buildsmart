@@ -13,6 +13,8 @@
 // normal build → the widget + this file tree-shake away → byte-identical.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/screens/role_request_sheet.dart'
+    show showRoleRequestSheet;
 import 'package:buildsmart/state/rbac.dart' show pendingApprovalProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart' show showToast;
@@ -49,30 +51,47 @@ class _PendingApprovalBannerState extends ConsumerState<PendingApprovalBanner> {
       }
     });
     if (!ref.watch(pendingApprovalProvider)) return const SizedBox.shrink();
-    return const Material(
-      color: Color(0xFFFFF3CD), // soft amber — a non-blocking notice
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: BsTokens.space3,
-            vertical: BsTokens.space2,
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.hourglass_top, size: 18, color: Color(0xFF8A6D00)),
-              SizedBox(width: BsTokens.space2),
-              Expanded(
-                child: Text(
-                  'החשבון שלך ממתין לאישור מנהל — חלק מהפעולות חסומות עד ההפעלה.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF8A6D00),
+    return Material(
+      color: const Color(0xFFFFF3CD), // soft amber — a non-blocking notice
+      // TAPPABLE. As a notice alone the strip was a dead end: it said the
+      // account is waiting and gave the person nothing to do about it, so the
+      // only move left was to close the app. Tapping now opens the role request
+      // — which is the thing that actually gets them approved, and the sheet
+      // names the account it will be filed under.
+      child: InkWell(
+        onTap: () => showRoleRequestSheet(context),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: BsTokens.space3,
+              vertical: BsTokens.space2,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.hourglass_top,
+                  size: 18,
+                  color: Color(0xFF8A6D00),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                const Expanded(
+                  child: Text(
+                    'החשבון שלך ממתין לאישור — הקש כאן לבחירת תפקיד ושליחת בקשה.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF8A6D00),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const Icon(
+                  Icons.chevron_left, // RTL: points the way forward
+                  size: 20,
+                  color: Color(0xFF8A6D00),
+                ),
+              ],
+            ),
           ),
         ),
       ),
