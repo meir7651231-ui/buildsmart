@@ -32,6 +32,7 @@ import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' show FieldPath;
+import 'package:flutter/foundation.dart' show ChangeNotifier;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The sync repository contract for `users/{uid}`. Every method is synchronous
@@ -192,9 +193,33 @@ final usersRepositoryProvider = Provider<UsersRepository>((ref) {
   return LocalUsersRepository(currentUid: uid);
 });
 
-/// The signed-in [BsUser], or null. Reads through [usersRepositoryProvider], so
-/// it tracks login/logout (the uid seam) live. Dormant with [kUserSystem] OFF
-/// (the local repo is empty → always null → zero regression).
+/// The signed-in [BsUser], or null. Dormant with [kUserSystem] OFF (the local
+/// repo is empty → always null → zero regression).
+///
+/// LISTENS to the repository, not just to which repository is in use. Watching
+/// [usersRepositoryProvider] alone only re-runs when the repo INSTANCE changes —
+/// i.e. on login/logout — so a change to the user's own document was never seen:
+/// the value was computed once at sign-in and cached from then on.
+///
+/// What that cost in practice: an admin activates a waiting account, the server
+/// document flips to `active`, and the person keeps looking at "ממתין לאישור"
+/// with the app still locked down — believing it, and with no reason to try
+/// again. The status only caught up on a full app restart.
+///
+/// [FirestoreCachedRepo] is a [ChangeNotifier] that fires on every snapshot
+/// (that is what its class doc means by "a thin Riverpod provider can listen"),
+/// so subscribing is all that was missing. `invalidateSelf` re-reads the cache
+/// and pushes the new value to every watcher — the banner disappears and the
+/// app unlocks the moment approval lands, with nothing for the user to do.
+///
+/// The local (Firebase-free) repo is not a notifier; the type check keeps that
+/// path exactly as it was.
 final currentUserProvider = Provider<BsUser?>((ref) {
-  return ref.watch(usersRepositoryProvider).currentUser();
+  final repo = ref.watch(usersRepositoryProvider);
+  if (repo case final ChangeNotifier notifier) {
+    void onRemoteChange() => ref.invalidateSelf();
+    notifier.addListener(onRemoteChange);
+    ref.onDispose(() => notifier.removeListener(onRemoteChange));
+  }
+  return repo.currentUser();
 });

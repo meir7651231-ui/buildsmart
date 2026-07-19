@@ -198,7 +198,11 @@ export { deleteAccount } from "./deleteAccount";
 export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";
 export { computeCredit } from "./credit";
 export { askClaude } from "./claude";
-export { onChatMessageCreated, onOrderStageChanged } from "./push";
+export {
+  onChatMessageCreated,
+  onOrderStageChanged,
+  onUserActivated,
+} from "./push";
 export { getUploadUrl } from "./r2";
 export { reviewRoleRequest } from "./reviewRoleRequest";
 export { publishConfig, revertIllegalConfigWrite } from "./studio";

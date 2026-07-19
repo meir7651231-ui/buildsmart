@@ -15,17 +15,39 @@
 
 import 'package:buildsmart/state/rbac.dart' show pendingApprovalProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/toast.dart' show showToast;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The standing "waiting for admin approval" strip. Renders nothing unless the
 /// signed-in user is pending. Placed at the top of the shell body (a `Positioned`
 /// top strip) so it overlays the content without restructuring the layout.
-class PendingApprovalBanner extends ConsumerWidget {
+///
+/// It also announces the moment the wait ENDS. Approval used to be silent from
+/// the user's side: the push (`onUserActivated`) only lands if notifications
+/// were permitted, and the live site is regularly opened in a browser that
+/// denied them — so the notification alone would leave exactly the people who
+/// waited longest still staring at "ממתין לאישור". Watching the flip in-app
+/// needs no permission and cannot be declined.
+class PendingApprovalBanner extends ConsumerStatefulWidget {
   const PendingApprovalBanner({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PendingApprovalBanner> createState() =>
+      _PendingApprovalBannerState();
+}
+
+class _PendingApprovalBannerState extends ConsumerState<PendingApprovalBanner> {
+  @override
+  Widget build(BuildContext context) {
+    // The pending → approved EDGE, not the state: `previous` is null on the
+    // first build, so someone who was already active when the app opened is not
+    // congratulated for nothing.
+    ref.listen<bool>(pendingApprovalProvider, (wasPending, isPending) {
+      if ((wasPending ?? false) && !isPending) {
+        showToast(context, 'החשבון שלך אושר ✓ — אפשר להתחיל');
+      }
+    });
     if (!ref.watch(pendingApprovalProvider)) return const SizedBox.shrink();
     return const Material(
       color: Color(0xFFFFF3CD), // soft amber — a non-blocking notice

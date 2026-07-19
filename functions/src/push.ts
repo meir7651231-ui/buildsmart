@@ -183,3 +183,35 @@ export const onChatMessageCreated = onDocumentCreated(
     });
   }
 );
+
+/** Account-approval push (Hebrew).
+ *
+ * Registration is all-by-approval: a new account is born `pending` and most of
+ * the app is locked until an admin activates it. Until now that activation was
+ * SILENT — the person was told to wait and then never told anything again, so
+ * the only way to discover the account had opened was to keep reopening the app
+ * and guessing. Most people would simply stop.
+ *
+ * Fires only on the pending → active edge, so re-saving an already-active user,
+ * a suspension, or any other field change never notifies. */
+export const onUserActivated = onDocumentUpdated(
+  { region: REGION, document: "users/{uid}" },
+  async (event) => {
+    const change = event.data;
+    if (!change) return;
+
+    const from = asString(change.before.get("status"));
+    const to = asString(change.after.get("status"));
+    // The single edge worth announcing. Anything → active where it was already
+    // active is a no-op; suspended → active is a genuine re-activation and does
+    // count.
+    if (to !== "active" || from === "active") return;
+
+    await sendToUsers(
+      [event.params.uid],
+      "החשבון שלך אושר ✓",
+      "אפשר להתחיל — כל הפעולות פתוחות עכשיו.",
+      { type: "userActivated" }
+    );
+  }
+);
