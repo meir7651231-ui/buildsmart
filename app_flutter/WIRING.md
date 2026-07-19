@@ -1,5 +1,11 @@
 # WIRING CONTRACT — app_flutter
 
+## #huliot — קטלוג-חוליות אדיטיבי + שדרוג-תמונות-בעלים (מאחורי CATALOG_SOURCE, default v1) — 2026-07-19
+789 מוצרי-חוליות חדשים (`data/huliot_catalog.dart`, deduped מול 1,867 הקיימים; אפס-כפילות) · staging `kCatalogProductsV2` + דגל `CATALOG_SOURCE` (default v1 ⇒ live byte-identical, v1 ל-rollback) · שדרוג-תמונות שבחר הבעלים: **512 קיימים** (Polyroll/SmartLock) דרך `imageAssetOverride` (`data/huliot_image_overrides.dart`, brand-נשמר) + **714 חדשים** לתמונת-מוצר אמיתית (במקום ה-#0 שלרוב באנר/לוגו) · smart_tree 474/474 מגובות (0 שבורות; ה"167" היה ארטיפקט-grep) · `test/huliot_catalog_test.dart` 8 ירוקות. seam: `catalog_local.dart` קורא `resolvedCatalogProducts`.
+
+---
+
+
 What every interactive button / setting is expected to do, and its status.
 **This contract is enforced by `test/wiring_test.dart`** (the wired-behavior rows
 marked ✅ have an executable regression check). Keep this file and that test in

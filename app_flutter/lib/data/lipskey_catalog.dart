@@ -27,6 +27,12 @@ class LipskeyCatalogProduct {
   final List<String>? specImageFiles;
   final String brand;
 
+  /// s-huliot: when set, this exact asset path wins over the brand-dir-computed
+  /// image path — lets the v2 catalog point a product at a chosen Huliot image
+  /// (`assets/huliot/products/{sku}_N.jpeg`) WITHOUT changing its brand. Null on
+  /// every v1 product, so the computed path (and v1 behavior) stays identical.
+  final String? imageAssetOverride;
+
   const LipskeyCatalogProduct({
     required this.sku,
     required this.nameHe,
@@ -44,6 +50,7 @@ class LipskeyCatalogProduct {
     this.specImageFile,
     this.specImageFiles,
     this.brand = 'ליפסקי',
+    this.imageAssetOverride,
   });
 
   static String _brandDir(String brand) {
@@ -60,7 +67,8 @@ class LipskeyCatalogProduct {
       'assets/$dir/${file.startsWith('page_') ? 'pages' : 'products'}/$file';
 
   String? get imageAsset =>
-      imageFile == null ? null : _imgPath(_brandDir(brand), imageFile!);
+      imageAssetOverride ??
+      (imageFile == null ? null : _imgPath(_brandDir(brand), imageFile!));
 
   /// All FRONT-side images for the 1/N pager: `imageFile` first, then any
   /// extras from `imageFiles` (de-duplicated). Empty list when no image at all
@@ -68,6 +76,7 @@ class LipskeyCatalogProduct {
   List<String> get imageAssets {
     final dir = _brandDir(brand);
     final out = <String>[];
+    if (imageAssetOverride != null) out.add(imageAssetOverride!);
     if (imageFile != null) out.add(_imgPath(dir, imageFile!));
     for (final f in imageFiles ?? const <String>[]) {
       final a = _imgPath(dir, f);

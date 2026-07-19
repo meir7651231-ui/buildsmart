@@ -14,6 +14,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/huliot_catalog.dart' show kHuliotProducts;
+import 'package:buildsmart/data/huliot_image_overrides.dart'
+    show kHuliotImageOverrides;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 
@@ -26,9 +28,37 @@ enum CatalogSource { v1, v2 }
 /// rollback is simply "read v1". (`final`, not `const`: `kCatalogProducts` is
 /// itself assembled at load time, so the union can't be a compile-time const.)
 final List<LipskeyCatalogProduct> kCatalogProductsV2 = <LipskeyCatalogProduct>[
-  ...kCatalogProducts,
+  for (final p in kCatalogProducts) _withOwnerImage(p),
   ...kHuliotProducts,
 ];
+
+/// s-huliot: for a product the owner upgraded (via the image picker →
+/// [kHuliotImageOverrides]), return a copy that points at the chosen higher-res
+/// Huliot image through [LipskeyCatalogProduct.imageAssetOverride]; brand, dims
+/// and every other field stay identical. Untouched products pass through as-is.
+LipskeyCatalogProduct _withOwnerImage(LipskeyCatalogProduct p) {
+  final override = kHuliotImageOverrides[p.sku];
+  if (override == null) return p;
+  return LipskeyCatalogProduct(
+    sku: p.sku,
+    nameHe: p.nameHe,
+    nameEn: p.nameEn,
+    color: p.color,
+    qtyPack: p.qtyPack,
+    qtyPallet: p.qtyPallet,
+    categoryHe: p.categoryHe,
+    categoryEn: p.categoryEn,
+    categoryEmoji: p.categoryEmoji,
+    page: p.page,
+    dims: p.dims,
+    imageFile: p.imageFile,
+    imageFiles: p.imageFiles,
+    specImageFile: p.specImageFile,
+    specImageFiles: p.specImageFiles,
+    brand: p.brand,
+    imageAssetOverride: override,
+  );
+}
 
 const String _kCatalogSourceDefine =
     String.fromEnvironment('CATALOG_SOURCE', defaultValue: 'v1');

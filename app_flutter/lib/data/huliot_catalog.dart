@@ -18,7 +18,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Flange',
     categoryEmoji: '⭕',
     page: 0,
-    imageFile: '8160002100.jpeg',
+    imageFile: '8160002100_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -114,7 +114,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 100},
-    imageFile: '47640050.jpeg',
+    imageFile: '47640050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -126,7 +126,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'inch': '2"'},
-    imageFile: '61239160.jpeg',
+    imageFile: '61239160_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -246,7 +246,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '47640041.jpeg',
+    imageFile: '47640041_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -258,7 +258,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 125},
-    imageFile: '47650041.jpeg',
+    imageFile: '47650041_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -270,7 +270,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '47660041.jpeg',
+    imageFile: '47660041_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -282,7 +282,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 40},
-    imageFile: '47610041.jpeg',
+    imageFile: '47610041_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -294,7 +294,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 50},
-    imageFile: '47620041.jpeg',
+    imageFile: '47620041_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -306,7 +306,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '47630041.jpeg',
+    imageFile: '47630041_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -318,7 +318,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '47680041.jpeg',
+    imageFile: '47680041_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -330,7 +330,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '47690041.jpeg',
+    imageFile: '47690041_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -342,7 +342,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 315},
-    imageFile: '47631541.jpeg',
+    imageFile: '47631541_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -354,7 +354,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 355},
-    imageFile: '47635541.jpeg',
+    imageFile: '47635541_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -366,7 +366,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚫',
     page: 0,
     dims: {'diameter_mm': 400},
-    imageFile: '47649941.jpeg',
+    imageFile: '47649941_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -378,7 +378,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '44040000.jpeg',
+    imageFile: '44040000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -390,7 +390,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '44060000.jpeg',
+    imageFile: '44060000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -402,7 +402,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '44080000.jpeg',
+    imageFile: '44080000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -414,7 +414,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '44090000.jpeg',
+    imageFile: '44090000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -426,7 +426,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 315},
-    imageFile: '44031000.jpeg',
+    imageFile: '44031000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -438,7 +438,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 87},
-    imageFile: '43040859.jpeg',
+    imageFile: '43040859_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -462,7 +462,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 30, 'series': 'Ultra White'},
-    imageFile: '7370040370.jpeg',
+    imageFile: '7370040370_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -474,7 +474,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 30, 'series': 'Ultra White'},
-    imageFile: '7370060370.jpeg',
+    imageFile: '7370060370_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -498,7 +498,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 45, 'series': 'Ultra White'},
-    imageFile: '7370060470.jpeg',
+    imageFile: '7370060470_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -522,7 +522,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 87.5, 'series': 'Ultra White'},
-    imageFile: '7370040870.jpeg',
+    imageFile: '7370040870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -534,7 +534,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 15, 'series': 'Ultra Silent Plus'},
-    imageFile: '7870040170.jpeg',
+    imageFile: '7870040170_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -546,7 +546,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 30, 'series': 'Ultra Silent Plus'},
-    imageFile: '7870040370.jpeg',
+    imageFile: '7870040370_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -558,7 +558,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 45, 'series': 'Ultra Silent Plus'},
-    imageFile: '7870040470.jpeg',
+    imageFile: '7870040470_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -570,7 +570,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 125, 'angle_deg': 45, 'series': 'Ultra Silent Plus'},
-    imageFile: '7870050470.jpeg',
+    imageFile: '7870050470_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -582,7 +582,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 45, 'series': 'Ultra Silent Plus'},
-    imageFile: '7870060470.jpeg',
+    imageFile: '7870060470_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -598,7 +598,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870040870.jpeg',
+    imageFile: '7870040870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -862,7 +862,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'angle_deg': 45, 'series': 'Ultra Silent'},
-    imageFile: '7070010470.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -874,7 +873,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'angle_deg': 45, 'series': 'Ultra Silent'},
-    imageFile: '7070020470.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -886,7 +884,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 75, 'angle_deg': 45, 'series': 'Ultra Silent'},
-    imageFile: '7070030470.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1078,7 +1075,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 40, 'angle_deg': 90},
-    imageFile: '61410960.jpeg',
+    imageFile: '61410960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1090,7 +1087,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 50, 'angle_deg': 90},
-    imageFile: '61450960.jpeg',
+    imageFile: '61450960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1101,7 +1098,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Elbow',
     categoryEmoji: '📐',
     page: 0,
-    imageFile: '41542866.jpeg',
+    imageFile: '41542866_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1113,7 +1110,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 45},
-    imageFile: '43040457.jpeg',
+    imageFile: '43040457_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1125,7 +1122,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 45},
-    imageFile: '43040458.jpeg',
+    imageFile: '43040458_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1137,7 +1134,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 45},
-    imageFile: '43040459.jpeg',
+    imageFile: '43040459_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1149,7 +1146,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 45},
-    imageFile: '83040450.jpeg',
+    imageFile: '83040450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1161,7 +1158,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 87},
-    imageFile: '43040857.jpeg',
+    imageFile: '43040857_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1173,7 +1170,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 87},
-    imageFile: '43040858.jpeg',
+    imageFile: '43040858_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1185,7 +1182,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 87},
-    imageFile: '83040850.jpeg',
+    imageFile: '83040850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1197,7 +1194,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 15},
-    imageFile: '83060150.jpeg',
+    imageFile: '83060150_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1209,7 +1206,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 30},
-    imageFile: '83060350.jpeg',
+    imageFile: '83060350_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1221,7 +1218,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 45},
-    imageFile: '43060457.jpeg',
+    imageFile: '43060457_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1233,7 +1230,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 45},
-    imageFile: '43060458.jpeg',
+    imageFile: '43060458_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1245,7 +1242,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 45},
-    imageFile: '83060450.jpeg',
+    imageFile: '83060450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1257,7 +1254,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 87},
-    imageFile: '43060857.jpeg',
+    imageFile: '43060857_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1269,7 +1266,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 87},
-    imageFile: '43060858.jpeg',
+    imageFile: '43060858_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1281,7 +1278,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 87},
-    imageFile: '43060859.jpeg',
+    imageFile: '43060859_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1293,7 +1290,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 87},
-    imageFile: '83060850.jpeg',
+    imageFile: '83060850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1305,7 +1302,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 200, 'angle_deg': 45},
-    imageFile: '83080440.jpeg',
+    imageFile: '83080440_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1317,7 +1314,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 200, 'angle_deg': 87},
-    imageFile: '43080857.jpeg',
+    imageFile: '43080857_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1329,7 +1326,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 200, 'angle_deg': 87},
-    imageFile: '43080840.jpeg',
+    imageFile: '43080840_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1341,7 +1338,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 250, 'angle_deg': 45},
-    imageFile: '43090440.jpeg',
+    imageFile: '43090440_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1353,7 +1350,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 250, 'angle_deg': 87},
-    imageFile: '43090840.jpeg',
+    imageFile: '43090840_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1365,7 +1362,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 315, 'angle_deg': 45},
-    imageFile: '43031430.jpeg',
+    imageFile: '43031430_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1377,7 +1374,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 315, 'angle_deg': 87},
-    imageFile: '43031830.jpeg',
+    imageFile: '43031830_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1389,7 +1386,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 400, 'angle_deg': 45},
-    imageFile: '43045430.jpeg',
+    imageFile: '43045430_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1401,7 +1398,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 400, 'angle_deg': 87},
-    imageFile: '43049840.jpeg',
+    imageFile: '43049840_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1413,7 +1410,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 45, 'angle_deg': 45},
-    imageFile: '43060459.jpeg',
+    imageFile: '43060459_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1425,7 +1422,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 67},
-    imageFile: '45040050.jpeg',
+    imageFile: '45040050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1437,7 +1434,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 32, 'angle_deg': 90},
-    imageFile: '60053930.jpeg',
+    imageFile: '60053930_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1449,7 +1446,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '92518005.jpeg',
+    imageFile: '92518005_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1461,7 +1458,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '92518007.jpeg',
+    imageFile: '92518007_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1473,7 +1470,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'חיצוני'},
-    imageFile: '92518255.jpeg',
+    imageFile: '92518255_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1485,7 +1482,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'חיצוני'},
-    imageFile: '92518257.jpeg',
+    imageFile: '92518257_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1497,7 +1494,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '3"', 'connection': 'ריתוך', 'thread': 'חיצוני'},
-    imageFile: '92518259.jpeg',
+    imageFile: '92518259_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1509,7 +1506,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '½"', 'connection': 'ריתוך', 'thread': 'חיצוני'},
-    imageFile: '92518254.jpeg',
+    imageFile: '92518254_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1521,7 +1518,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '92518207.jpeg',
+    imageFile: '92518207_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1533,7 +1530,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '½2"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '92518206.jpeg',
+    imageFile: '92518206_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1545,7 +1542,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '92518205.jpeg',
+    imageFile: '92518205_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1562,7 +1559,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'sdr': 17.6,
       'connection': 'ריתוך פנים',
     },
-    imageFile: '922012538.jpeg',
+    imageFile: '922012538_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1574,7 +1571,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 15},
-    imageFile: '40040150.jpeg',
+    imageFile: '40040150_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1586,7 +1583,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 15},
-    imageFile: '40060100.jpeg',
+    imageFile: '40060100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1634,7 +1631,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 160, 'angle_deg': 45},
-    imageFile: '40060457.jpeg',
+    imageFile: '40060457_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1706,7 +1703,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 45},
-    imageFile: '40040460.jpeg',
+    imageFile: '40040460_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1742,7 +1739,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'angle_deg': 45},
-    imageFile: '40010460.jpeg',
+    imageFile: '40010460_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1778,7 +1775,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 87},
-    imageFile: '40040867.jpeg',
+    imageFile: '40040867_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1802,7 +1799,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'angle_deg': 87},
-    imageFile: '40020867.jpeg',
+    imageFile: '40020867_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1814,7 +1811,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 75, 'angle_deg': 87},
-    imageFile: '40030867.jpeg',
+    imageFile: '40030867_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1886,7 +1883,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 125, 'angle_deg': 87},
-    imageFile: '40050860.jpeg',
+    imageFile: '40050860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1910,7 +1907,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'angle_deg': 87},
-    imageFile: '40010860.jpeg',
+    imageFile: '40010860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1934,7 +1931,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 75, 'angle_deg': 87},
-    imageFile: '40030860.jpeg',
+    imageFile: '40030860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1946,7 +1943,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'inch': '¼1"'},
-    imageFile: '60043930.jpeg',
+    imageFile: '60043930_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1958,7 +1955,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'angle_deg': 45},
-    imageFile: '60041460.jpeg',
+    imageFile: '60041460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1982,7 +1979,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 32, 'diameter2_mm': 32, 'angle_deg': 45},
-    imageFile: '60033460.jpeg',
+    imageFile: '60033460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -1994,7 +1991,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 40, 'angle_deg': 45},
-    imageFile: '60044460.jpeg',
+    imageFile: '60044460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2018,7 +2015,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 63, 'diameter2_mm': 63, 'angle_deg': 45},
-    imageFile: '60066463.jpeg',
+    imageFile: '60066463_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2030,7 +2027,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 100, 'angle_deg': 45},
-    imageFile: '42144445.jpeg',
+    imageFile: '42144445_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2042,7 +2039,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'angle_deg': 45},
-    imageFile: '87090470.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2054,7 +2050,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'angle_deg': 15},
-    imageFile: '60051150.jpeg',
+    imageFile: '60051150_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2066,7 +2062,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'angle_deg': 30},
-    imageFile: '60051300.jpeg',
+    imageFile: '60051300_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2078,7 +2074,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'angle_deg': 45},
-    imageFile: '60051460.jpeg',
+    imageFile: '60051460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2090,7 +2086,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'angle_deg': 90},
-    imageFile: '60051960.jpeg',
+    imageFile: '60051960_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2102,7 +2098,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 100, 'angle_deg': 87},
-    imageFile: '42144845.jpeg',
+    imageFile: '42144845_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2114,7 +2110,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 32, 'diameter2_mm': 32, 'angle_deg': 90},
-    imageFile: '60033960.jpeg',
+    imageFile: '60033960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2126,7 +2122,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 32, 'angle_deg': 90},
-    imageFile: '60043960.jpeg',
+    imageFile: '60043960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2138,7 +2134,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 40, 'angle_deg': 90},
-    imageFile: '60044960.jpeg',
+    imageFile: '60044960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2150,7 +2146,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 32, 'angle_deg': 90},
-    imageFile: '60053960.jpeg',
+    imageFile: '60053960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2162,7 +2158,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 40, 'angle_deg': 90},
-    imageFile: '60054960.jpeg',
+    imageFile: '60054960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2174,7 +2170,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📐',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 50, 'angle_deg': 90},
-    imageFile: '60055960.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2187,7 +2182,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 16, 'length_mm': 100000, 'series': 'HiPE-X'},
-    imageFile: '8861601100.jpeg',
+    imageFile: '8861601100_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2200,7 +2195,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 16, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8861601050.jpeg',
+    imageFile: '8861601050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2213,7 +2208,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 16, 'length_mm': 100000, 'series': 'HiPE-X'},
-    imageFile: '8861602100.jpeg',
+    imageFile: '8861602100_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2226,7 +2221,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 16, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8861602050.jpeg',
+    imageFile: '8861602050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2239,7 +2234,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 20, 'length_mm': 100000, 'series': 'HiPE-X'},
-    imageFile: '8862004100.jpeg',
+    imageFile: '8862004100_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2252,7 +2247,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 20, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8862004050.jpeg',
+    imageFile: '8862004050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2265,7 +2260,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 25, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8862504050.jpeg',
+    imageFile: '8862504050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2278,7 +2273,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 32, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8863204050.jpeg',
+    imageFile: '8863204050_5.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2290,7 +2285,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 16, 'length_mm': 100000, 'series': 'HiPE-X'},
-    imageFile: '8861603100.jpeg',
+    imageFile: '8861603100_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2302,7 +2297,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 16, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8861603050.jpeg',
+    imageFile: '8861603050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2314,7 +2309,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 20, 'length_mm': 100000, 'series': 'HiPE-X'},
-    imageFile: '8862003100.jpeg',
+    imageFile: '8862003100_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2326,7 +2321,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 20, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8862003050.jpeg',
+    imageFile: '8862003050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2338,7 +2333,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 25, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8862503050.jpeg',
+    imageFile: '8862503050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2350,7 +2345,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '📏',
     page: 0,
     dims: {'diameter_mm': 32, 'length_mm': 50000, 'series': 'HiPE-X'},
-    imageFile: '8863203050.jpeg',
+    imageFile: '8863203050_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2361,7 +2356,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '60200263.jpeg',
+    imageFile: '60200263_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2373,7 +2368,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '7073540070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2384,7 +2378,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'ToiletConnector',
     categoryEmoji: '🚽',
     page: 0,
-    imageFile: '41540027.jpeg',
+    imageFile: '41540027_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2395,7 +2389,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'ToiletConnector',
     categoryEmoji: '🚽',
     page: 0,
-    imageFile: '41540020.jpeg',
+    imageFile: '41540020_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2407,7 +2401,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '42340060.jpeg',
+    imageFile: '42340060_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2419,7 +2413,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '42360040.jpeg',
+    imageFile: '42360040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2431,7 +2425,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50},
-    imageFile: '42320040.jpeg',
+    imageFile: '42320040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2443,7 +2437,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '42330040.jpeg',
+    imageFile: '42330040_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2455,7 +2449,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 70, 'diameter2_mm': 40},
-    imageFile: '60140760.jpeg',
+    imageFile: '60140760_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2467,7 +2461,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 100},
-    imageFile: '60113566.jpeg',
+    imageFile: '60113566_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2479,7 +2473,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '60113565.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2491,7 +2484,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 50},
-    imageFile: '60113562.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2503,7 +2495,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 130, 'diameter2_mm': 50},
-    imageFile: '60113560.jpeg',
+    imageFile: '60113560_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2515,7 +2507,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 130, 'diameter2_mm': 63},
-    imageFile: '60113663.jpeg',
+    imageFile: '60113663_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2527,7 +2519,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔀',
     page: 0,
     dims: {'diameter_mm': 230, 'diameter2_mm': 50},
-    imageFile: '60123663.jpeg',
+    imageFile: '60123663_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2538,7 +2530,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Connector',
     categoryEmoji: '🔗',
     page: 0,
-    imageFile: '41540110.jpeg',
+    imageFile: '41540110_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2550,7 +2542,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'connection': 'הברגה', 'material': 'פלדה'},
-    imageFile: '42120050.jpeg',
+    imageFile: '42120050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2562,7 +2554,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'connection': 'הברגה', 'material': 'פלדה'},
-    imageFile: '42120060.jpeg',
+    imageFile: '42120060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2574,7 +2566,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '44140040.jpeg',
+    imageFile: '44140040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2586,7 +2578,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '44160040.jpeg',
+    imageFile: '44160040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2598,7 +2590,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '44180040.jpeg',
+    imageFile: '44180040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2610,7 +2602,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110},
-    imageFile: '44164050.jpeg',
+    imageFile: '44164050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2622,7 +2614,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 110},
-    imageFile: '44184050.jpeg',
+    imageFile: '44184050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2634,7 +2626,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 160},
-    imageFile: '44186050.jpeg',
+    imageFile: '44186050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2646,7 +2638,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 175, 'diameter2_mm': 50},
-    imageFile: '60117500.jpeg',
+    imageFile: '60117500_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2658,7 +2650,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 175, 'diameter2_mm': 50},
-    imageFile: '60117560.jpeg',
+    imageFile: '60117560_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2694,7 +2686,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 245, 'diameter2_mm': 50},
-    imageFile: '60124599.jpeg',
+    imageFile: '60124599_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2718,7 +2710,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 80, 'diameter2_mm': 50},
-    imageFile: '60145960.jpeg',
+    imageFile: '60145960_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2767,7 +2759,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '41430060.jpeg',
+    imageFile: '41430060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2900,7 +2892,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 45,
       'series': 'Ultra White',
     },
-    imageFile: '7370688470.jpeg',
+    imageFile: '7370688470_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2917,7 +2909,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 45,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870644470.jpeg',
+    imageFile: '7870644470_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2934,7 +2926,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 45,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870642470.jpeg',
+    imageFile: '7870642470_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2951,7 +2943,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 45,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870654470.jpeg',
+    imageFile: '7870654470_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2968,7 +2960,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870642870.jpeg',
+    imageFile: '7870642870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -2985,7 +2977,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870652870.jpeg',
+    imageFile: '7870652870_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3002,7 +2994,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870662870.jpeg',
+    imageFile: '7870662870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3665,7 +3657,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 45,
     },
-    imageFile: '41044457.jpeg',
+    imageFile: '41044457_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3682,7 +3674,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '41044857.jpeg',
+    imageFile: '41044857_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3699,7 +3691,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '41064857.jpeg',
+    imageFile: '41064857_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3716,7 +3708,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 45,
     },
-    imageFile: '41044450.jpeg',
+    imageFile: '41044450_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3750,7 +3742,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 45,
     },
-    imageFile: '41042450.jpeg',
+    imageFile: '41042450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3767,7 +3759,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '41042860.jpeg',
+    imageFile: '41042860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3784,7 +3776,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '41054850.jpeg',
+    imageFile: '41054850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3818,7 +3810,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 45,
     },
-    imageFile: '41064450.jpeg',
+    imageFile: '41064450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3852,7 +3844,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 45,
     },
-    imageFile: '41062450.jpeg',
+    imageFile: '41062450_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3887,7 +3879,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871044870.jpeg',
+    imageFile: '7871044870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3905,7 +3897,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871042870.jpeg',
+    imageFile: '7871042870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3923,7 +3915,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871054870.jpeg',
+    imageFile: '7871054870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3941,7 +3933,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871052870.jpeg',
+    imageFile: '7871052870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3959,7 +3951,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871064870.jpeg',
+    imageFile: '7871064870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -3977,7 +3969,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871062870.jpeg',
+    imageFile: '7871062870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4223,7 +4215,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 45},
-    imageFile: '43344457.jpeg',
+    imageFile: '43344457_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4235,7 +4227,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 45},
-    imageFile: '83344450.jpeg',
+    imageFile: '83344450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4247,7 +4239,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '83344850.jpeg',
+    imageFile: '83344850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4259,7 +4251,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110, 'angle_deg': 45},
-    imageFile: '83364450.jpeg',
+    imageFile: '83364450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4271,7 +4263,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '83364850.jpeg',
+    imageFile: '83364850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4283,7 +4275,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 160, 'angle_deg': 45},
-    imageFile: '83366450.jpeg',
+    imageFile: '83366450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4295,7 +4287,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 160, 'angle_deg': 87},
-    imageFile: '83366850.jpeg',
+    imageFile: '83366850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4307,7 +4299,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 200, 'angle_deg': 45},
-    imageFile: '83388450.jpeg',
+    imageFile: '83388450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4319,7 +4311,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 110, 'angle_deg': 45},
-    imageFile: '43384450.jpeg',
+    imageFile: '43384450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4331,7 +4323,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '43384850.jpeg',
+    imageFile: '43384850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4343,7 +4335,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 160, 'angle_deg': 45},
-    imageFile: '83386450.jpeg',
+    imageFile: '83386450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4355,7 +4347,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 160, 'angle_deg': 87},
-    imageFile: '43386850.jpeg',
+    imageFile: '43386850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4367,7 +4359,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 200, 'angle_deg': 45},
-    imageFile: '43388450.jpeg',
+    imageFile: '43388450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4379,7 +4371,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 200, 'angle_deg': 87},
-    imageFile: '43388850.jpeg',
+    imageFile: '43388850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4391,7 +4383,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 160, 'angle_deg': 87},
-    imageFile: '43396850.jpeg',
+    imageFile: '43396850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4403,7 +4395,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 200, 'angle_deg': 45},
-    imageFile: '43398450.jpeg',
+    imageFile: '43398450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4415,7 +4407,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 200, 'angle_deg': 87},
-    imageFile: '43398850.jpeg',
+    imageFile: '43398850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4427,7 +4419,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 250, 'angle_deg': 45},
-    imageFile: '43399450.jpeg',
+    imageFile: '43399450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4439,7 +4431,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 250, 'angle_deg': 87},
-    imageFile: '43399850.jpeg',
+    imageFile: '43399850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4451,7 +4443,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 315, 'diameter2_mm': 315, 'angle_deg': 87},
-    imageFile: '43333830.jpeg',
+    imageFile: '43333830_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4463,7 +4455,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '94618305.jpeg',
+    imageFile: '94618305_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4475,7 +4467,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '94618307.jpeg',
+    imageFile: '94618307_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4487,7 +4479,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'inch': '½"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '94618313.jpeg',
+    imageFile: '94618313_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4499,7 +4491,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '94618308.jpeg',
+    imageFile: '94618308_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4518,7 +4510,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'פנימי',
     },
-    imageFile: '94618309.jpeg',
+    imageFile: '94618309_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4530,7 +4522,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '94618315.jpeg',
+    imageFile: '94618315_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4549,7 +4541,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'פנימי',
     },
-    imageFile: '94618312.jpeg',
+    imageFile: '94618312_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4561,7 +4553,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40644868.jpeg',
+    imageFile: '40644868_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4573,7 +4565,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40644869.jpeg',
+    imageFile: '40644869_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4585,7 +4577,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40644867.jpeg',
+    imageFile: '40644867_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4597,7 +4589,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 50, 'angle_deg': 87},
-    imageFile: '40642867.jpeg',
+    imageFile: '40642867_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4609,7 +4601,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40664857.jpeg',
+    imageFile: '40664857_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4621,7 +4613,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 160, 'angle_deg': 87},
-    imageFile: '40666857.jpeg',
+    imageFile: '40666857_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4633,7 +4625,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 45},
-    imageFile: '40644460.jpeg',
+    imageFile: '40644460_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4645,7 +4637,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40644860.jpeg',
+    imageFile: '40644860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4657,7 +4649,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 50, 'angle_deg': 45},
-    imageFile: '40642460.jpeg',
+    imageFile: '40642460_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4669,7 +4661,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 50, 'angle_deg': 87},
-    imageFile: '40642860.jpeg',
+    imageFile: '40642860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4681,7 +4673,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 75, 'angle_deg': 45},
-    imageFile: '40643460.jpeg',
+    imageFile: '40643460_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4693,7 +4685,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 75, 'angle_deg': 87},
-    imageFile: '40643860.jpeg',
+    imageFile: '40643860_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4705,7 +4697,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 125, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40654860.jpeg',
+    imageFile: '40654860_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4717,7 +4709,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 125, 'diameter2_mm': 50, 'angle_deg': 87},
-    imageFile: '40652860.jpeg',
+    imageFile: '40652860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4729,7 +4721,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110, 'angle_deg': 45},
-    imageFile: '40664450.jpeg',
+    imageFile: '40664450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4741,7 +4733,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110, 'angle_deg': 87},
-    imageFile: '40664860.jpeg',
+    imageFile: '40664860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4753,7 +4745,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 160, 'angle_deg': 45},
-    imageFile: '40666450.jpeg',
+    imageFile: '40666450_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4765,7 +4757,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 160, 'angle_deg': 87},
-    imageFile: '40666860.jpeg',
+    imageFile: '40666860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4777,7 +4769,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 50, 'angle_deg': 87},
-    imageFile: '40662860.jpeg',
+    imageFile: '40662860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4789,7 +4781,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 40, 'angle_deg': 45},
-    imageFile: '40611440.jpeg',
+    imageFile: '40611440_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4801,7 +4793,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 40, 'angle_deg': 87},
-    imageFile: '40611860.jpeg',
+    imageFile: '40611860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4813,7 +4805,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 40, 'angle_deg': 45},
-    imageFile: '40621440.jpeg',
+    imageFile: '40621440_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4825,7 +4817,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 40, 'angle_deg': 87},
-    imageFile: '40621860.jpeg',
+    imageFile: '40621860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4837,7 +4829,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 50, 'angle_deg': 45},
-    imageFile: '40622460.jpeg',
+    imageFile: '40622460_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4849,7 +4841,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 50, 'angle_deg': 87},
-    imageFile: '40622860.jpeg',
+    imageFile: '40622860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4861,7 +4853,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 50, 'angle_deg': 45},
-    imageFile: '40632460.jpeg',
+    imageFile: '40632460_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4873,7 +4865,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 50, 'angle_deg': 87},
-    imageFile: '40632860.jpeg',
+    imageFile: '40632860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4885,7 +4877,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 75, 'angle_deg': 45},
-    imageFile: '40633460.jpeg',
+    imageFile: '40633460_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4897,7 +4889,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 75, 'angle_deg': 87},
-    imageFile: '40633860.jpeg',
+    imageFile: '40633860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4914,7 +4906,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644803.jpeg',
+    imageFile: '40644803_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4931,7 +4923,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '40644806.jpeg',
+    imageFile: '40644806_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4948,7 +4940,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644807.jpeg',
+    imageFile: '40644807_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4965,7 +4957,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644805.jpeg',
+    imageFile: '40644805_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4977,7 +4969,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 110, 'diameter3_mm': 100},
-    imageFile: '40644845.jpeg',
+    imageFile: '40644845_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -4989,7 +4981,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 50, 'diameter3_mm': 100},
-    imageFile: '40642845.jpeg',
+    imageFile: '40642845_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5006,7 +4998,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644810.jpeg',
+    imageFile: '40644810_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5023,7 +5015,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644813.jpeg',
+    imageFile: '40644813_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5040,7 +5032,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644811.jpeg',
+    imageFile: '40644811_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5057,7 +5049,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '40644804.jpeg',
+    imageFile: '40644804_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5074,7 +5066,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644801.jpeg',
+    imageFile: '40644801_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5091,7 +5083,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644812.jpeg',
+    imageFile: '40644812_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5108,7 +5100,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '40644802.jpeg',
+    imageFile: '40644802_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5120,7 +5112,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔱',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 3},
-    imageFile: '40644814.jpeg',
+    imageFile: '40644814_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5136,7 +5128,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter2_mm': 110,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870744870.jpeg',
+    imageFile: '7870744870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5152,7 +5144,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter2_mm': 110,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870754870.jpeg',
+    imageFile: '7870754870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5168,7 +5160,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter2_mm': 110,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7870764870.jpeg',
+    imageFile: '7870764870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5185,7 +5177,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent',
     },
-    imageFile: '7070744877.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5305,7 +5296,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871244870.jpeg',
+    imageFile: '7871244870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5323,7 +5314,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871242870.jpeg',
+    imageFile: '7871242870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5341,7 +5332,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871254870.jpeg',
+    imageFile: '7871254870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5359,7 +5350,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871252870.jpeg',
+    imageFile: '7871252870_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5377,7 +5368,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871264870.jpeg',
+    imageFile: '7871264870_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5395,7 +5386,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'angle_deg': 87.5,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7871262870.jpeg',
+    imageFile: '7871262870_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5610,7 +5601,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '41244850.jpeg',
+    imageFile: '41244850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5627,7 +5618,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 45,
     },
-    imageFile: '41242450.jpeg',
+    imageFile: '41242450_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5644,7 +5635,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '41242850.jpeg',
+    imageFile: '41242850_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5661,7 +5652,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '41252860.jpeg',
+    imageFile: '41252860_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5678,7 +5669,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '41264850.jpeg',
+    imageFile: '41264850_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5695,7 +5686,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 87,
     },
-    imageFile: '41262850.jpeg',
+    imageFile: '41262850_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5712,7 +5703,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 32,
       'angle_deg': 45,
     },
-    imageFile: '60633460.jpeg',
+    imageFile: '60633460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5746,7 +5737,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 40,
       'angle_deg': 45,
     },
-    imageFile: '60644460.jpeg',
+    imageFile: '60644460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5780,7 +5771,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 45,
       'angle_deg': 45,
     },
-    imageFile: '87398470.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5797,7 +5787,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 45,
       'angle_deg': 45,
     },
-    imageFile: '87399470.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5814,7 +5803,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 40,
       'angle_deg': 45,
     },
-    imageFile: '60654460.jpeg',
+    imageFile: '60654460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5831,7 +5820,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 40,
       'angle_deg': 90,
     },
-    imageFile: '60654860.jpeg',
+    imageFile: '60654860_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5848,7 +5837,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 45,
     },
-    imageFile: '60655460.jpeg',
+    imageFile: '60655460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5865,7 +5854,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 90,
     },
-    imageFile: '60655860.jpeg',
+    imageFile: '60655860_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5882,7 +5871,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 45,
     },
-    imageFile: '62065450.jpeg',
+    imageFile: '62065450_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5899,7 +5888,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 50,
       'angle_deg': 45,
     },
-    imageFile: '60665463.jpeg',
+    imageFile: '60665463_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5911,7 +5900,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'material': 'פלסטיק', 'gender': 'זכר'},
-    imageFile: '42160050.jpeg',
+    imageFile: '42160050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5923,7 +5912,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'material': 'פלסטיק', 'gender': 'נקבה'},
-    imageFile: '42160052.jpeg',
+    imageFile: '42160052_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5935,7 +5924,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'material': 'פלסטיק'},
-    imageFile: '42140052.jpeg',
+    imageFile: '42140052_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -5958,7 +5947,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'Ultra Silent Plus'},
-    imageFile: '7872240070.jpeg',
+    imageFile: '7872240070_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6054,7 +6043,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '42240050.jpeg',
+    imageFile: '42240050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6066,7 +6055,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '42260050.jpeg',
+    imageFile: '42260050_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6078,7 +6067,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 50},
-    imageFile: '42220050.jpeg',
+    imageFile: '42220050_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6090,7 +6079,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '42230050.jpeg',
+    imageFile: '42230050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6102,7 +6091,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'Ultra Silent'},
-    imageFile: '7071740275.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6114,7 +6102,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 125, 'series': 'Ultra Silent'},
-    imageFile: '7071750275.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6126,7 +6113,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160, 'series': 'Ultra Silent'},
-    imageFile: '7071760275.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6138,7 +6124,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 50, 'series': 'Ultra Silent'},
-    imageFile: '7071720275.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6150,7 +6135,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 75, 'series': 'Ultra Silent'},
-    imageFile: '7071730275.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6161,7 +6145,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Coupling',
     categoryEmoji: '🔗',
     page: 0,
-    imageFile: '41760055.jpeg',
+    imageFile: '41760055_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6209,7 +6193,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '83940055.jpeg',
+    imageFile: '83940055_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6221,7 +6205,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '83960055.jpeg',
+    imageFile: '83960055_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6233,7 +6217,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '83980055.jpeg',
+    imageFile: '83980055_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6245,7 +6229,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '43990050.jpeg',
+    imageFile: '43990050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6257,7 +6241,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 315},
-    imageFile: '43931550.jpeg',
+    imageFile: '43931550_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6269,7 +6253,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 400},
-    imageFile: '43940550.jpeg',
+    imageFile: '43940550_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6281,7 +6265,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '41740060.jpeg',
+    imageFile: '41740060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6293,7 +6277,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '41740250.jpeg',
+    imageFile: '41740250_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6317,7 +6301,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 40},
-    imageFile: '41710050.jpeg',
+    imageFile: '41710050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6329,7 +6313,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '41730050.jpeg',
+    imageFile: '41730050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6341,7 +6325,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 40},
-    imageFile: '60540460.jpeg',
+    imageFile: '60540460_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6353,7 +6337,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 50},
-    imageFile: '60550560.jpeg',
+    imageFile: '60550560_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6377,7 +6361,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '83940053.jpeg',
+    imageFile: '83940053_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6389,7 +6373,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '83960053.jpeg',
+    imageFile: '83960053_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6401,7 +6385,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '83980053.jpeg',
+    imageFile: '83980053_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6413,7 +6397,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 315},
-    imageFile: '43931553.jpeg',
+    imageFile: '43931553_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6425,7 +6409,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 400},
-    imageFile: '43940553.jpeg',
+    imageFile: '43940553_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6437,7 +6421,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '41740053.jpeg',
+    imageFile: '41740053_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6449,7 +6433,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 125},
-    imageFile: '41750053.jpeg',
+    imageFile: '41750053_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6461,7 +6445,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '41760053.jpeg',
+    imageFile: '41760053_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6473,7 +6457,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '41730053.jpeg',
+    imageFile: '41730053_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6497,7 +6481,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 160, 'series': 'Ultra White'},
-    imageFile: '7372186070.jpeg',
+    imageFile: '7372186070_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6705,7 +6689,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter2_mm': 110,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7872154070.jpeg',
+    imageFile: '7872154070_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6721,7 +6705,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter2_mm': 125,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '7872164070.jpeg',
+    imageFile: '7872164070_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6733,7 +6717,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110},
-    imageFile: '83464040.jpeg',
+    imageFile: '83464040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6745,7 +6729,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 200, 'diameter2_mm': 160},
-    imageFile: '83486040.jpeg',
+    imageFile: '83486040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6757,7 +6741,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 200},
-    imageFile: '43498040.jpeg',
+    imageFile: '43498040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6769,7 +6753,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 400, 'diameter2_mm': 200},
-    imageFile: '43440200.jpeg',
+    imageFile: '43440200_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6781,7 +6765,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 100},
-    imageFile: '42144040.jpeg',
+    imageFile: '42144040_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6793,7 +6777,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 94},
-    imageFile: '42144145.jpeg',
+    imageFile: '42144145_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6805,7 +6789,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 50, 'connection': 'שקע-תקע'},
-    imageFile: '42142050.jpeg',
+    imageFile: '42142050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6817,7 +6801,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 75, 'connection': 'שקע-תקע'},
-    imageFile: '42143050.jpeg',
+    imageFile: '42143050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6829,7 +6813,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 125, 'diameter2_mm': 110, 'connection': 'שקע-תקע'},
-    imageFile: '42154060.jpeg',
+    imageFile: '42154060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6841,7 +6825,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 160, 'diameter2_mm': 110, 'connection': 'שקע-תקע'},
-    imageFile: '42164050.jpeg',
+    imageFile: '42164050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6853,7 +6837,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 40, 'connection': 'שקע-תקע'},
-    imageFile: '42121060.jpeg',
+    imageFile: '42121060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6865,7 +6849,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 50, 'connection': 'שקע-תקע'},
-    imageFile: '42132050.jpeg',
+    imageFile: '42132050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6877,7 +6861,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 250, 'diameter2_mm': 200},
-    imageFile: '87498070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6889,7 +6872,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 32},
-    imageFile: '62153260.jpeg',
+    imageFile: '62153260_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6901,7 +6884,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 60, 'diameter2_mm': 50},
-    imageFile: '62160560.jpeg',
+    imageFile: '62160560_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6913,7 +6896,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '⚙',
     page: 0,
     dims: {'diameter_mm': 63, 'diameter2_mm': 50},
-    imageFile: '62163563.jpeg',
+    imageFile: '62163563_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6949,7 +6932,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '45000001.jpeg',
+    imageFile: '45000001_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6961,7 +6944,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '45000003.jpeg',
+    imageFile: '45000003_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6979,7 +6962,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'חיצוני',
     },
-    imageFile: '91618162.jpeg',
+    imageFile: '91618162_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -6997,7 +6980,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'חיצוני',
     },
-    imageFile: '91618167.jpeg',
+    imageFile: '91618167_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7015,7 +6998,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'פנימי',
     },
-    imageFile: '91618112.jpeg',
+    imageFile: '91618112_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7033,7 +7016,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'פנימי',
     },
-    imageFile: '91618114.jpeg',
+    imageFile: '91618114_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7045,7 +7028,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '7"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '91618116.jpeg',
+    imageFile: '91618116_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7063,7 +7046,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'חיצוני',
     },
-    imageFile: '91618170.jpeg',
+    imageFile: '91618170_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7075,7 +7058,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '¾"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '91621012.jpeg',
+    imageFile: '91621012_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7087,7 +7070,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '2"', 'connection': 'ריתוך', 'thread': 'חיצוני'},
-    imageFile: '98427310.jpeg',
+    imageFile: '98427310_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7105,7 +7088,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'חיצוני',
     },
-    imageFile: '98427315.jpeg',
+    imageFile: '98427315_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7117,7 +7100,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '5"', 'connection': 'ריתוך', 'thread': 'חיצוני'},
-    imageFile: '98427317.jpeg',
+    imageFile: '98427317_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7129,7 +7112,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '2"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '98420044.jpeg',
+    imageFile: '98420044_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7141,7 +7124,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '2"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '98420048.jpeg',
+    imageFile: '98420048_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7159,7 +7142,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'פנימי',
     },
-    imageFile: '98420051.jpeg',
+    imageFile: '98420051_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7177,7 +7160,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'connection': 'ריתוך',
       'thread': 'פנימי',
     },
-    imageFile: '98420054.jpeg',
+    imageFile: '98420054_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7189,7 +7172,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔌',
     page: 0,
     dims: {'inch': '5"', 'connection': 'ריתוך', 'thread': 'פנימי'},
-    imageFile: '98420057.jpeg',
+    imageFile: '98420057_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7201,7 +7184,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '41840050.jpeg',
+    imageFile: '41840050_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7213,7 +7196,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '41840051.jpeg',
+    imageFile: '41840051_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7225,7 +7208,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '43640051.jpeg',
+    imageFile: '43640051_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7237,7 +7220,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🌀',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '43640050.jpeg',
+    imageFile: '43640050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7249,7 +7232,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '41661052.jpeg',
+    imageFile: '41661052_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7261,7 +7244,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 50, 'connection': 'הברגה'},
-    imageFile: '60950060.jpeg',
+    imageFile: '60950060_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7273,7 +7256,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 69, 'connection': 'הברגה'},
-    imageFile: '60969060.jpeg',
+    imageFile: '60969060_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7285,7 +7268,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'Ultra White'},
-    imageFile: '7371640070.jpeg',
+    imageFile: '7371640070_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7321,7 +7304,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '7371660070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7345,7 +7327,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '7371680070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7417,7 +7398,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '83860050.jpeg',
+    imageFile: '83860050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7429,7 +7410,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '43880050.jpeg',
+    imageFile: '43880050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7441,7 +7422,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '43890050.jpeg',
+    imageFile: '43890050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7453,7 +7434,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 315},
-    imageFile: '43831550.jpeg',
+    imageFile: '43831550_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7465,7 +7446,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 400},
-    imageFile: '43840050.jpeg',
+    imageFile: '43840050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7501,7 +7482,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '87390070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7513,7 +7493,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 75},
-    imageFile: '41630052.jpeg',
+    imageFile: '41630052_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7525,7 +7505,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 160},
-    imageFile: '83860052.jpeg',
+    imageFile: '83860052_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7537,7 +7517,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 200},
-    imageFile: '43880052.jpeg',
+    imageFile: '43880052_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7561,7 +7541,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔘',
     page: 0,
     dims: {'diameter_mm': 125},
-    imageFile: '41650060.jpeg',
+    imageFile: '41650060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7621,7 +7601,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 6000},
-    imageFile: '57110610.jpeg',
+    imageFile: '57110610_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7633,7 +7613,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 6000},
-    imageFile: '57160610.jpeg',
+    imageFile: '57160610_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7645,7 +7625,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 225, 'length_mm': 6000},
-    imageFile: '57225610.jpeg',
+    imageFile: '57225610_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7657,7 +7637,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 6000},
-    imageFile: '57110600.jpeg',
+    imageFile: '57110600_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7669,7 +7649,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1000, 'series': 'Ultra Beton'},
-    imageFile: '5901100100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7681,7 +7660,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 250, 'series': 'Ultra Beton'},
-    imageFile: '5901100025.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7693,7 +7671,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000, 'series': 'Ultra Beton'},
-    imageFile: '5901100300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7705,7 +7682,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 500, 'series': 'Ultra Beton'},
-    imageFile: '5901100050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7717,7 +7693,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 1000, 'series': 'Ultra Beton'},
-    imageFile: '5901200100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7729,7 +7704,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 3000, 'series': 'Ultra Beton'},
-    imageFile: '5901200300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7741,7 +7715,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 1000, 'series': 'Ultra Beton'},
-    imageFile: '5901600100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7753,7 +7726,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 250, 'series': 'Ultra Beton'},
-    imageFile: '5901600025.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7765,7 +7737,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000, 'series': 'Ultra Beton'},
-    imageFile: '5901600300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7777,7 +7748,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 500, 'series': 'Ultra Beton'},
-    imageFile: '5901600050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7789,7 +7759,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 1000, 'series': 'Ultra Beton'},
-    imageFile: '5902000100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7801,7 +7770,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 3000, 'series': 'Ultra Beton'},
-    imageFile: '5902000300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7813,7 +7781,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 3000, 'series': 'Ultra Beton'},
-    imageFile: '5907500300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7825,7 +7792,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 4000, 'series': 'Ultra Beton'},
-    imageFile: '5901111400.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7837,7 +7803,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 4000, 'series': 'Ultra Beton'},
-    imageFile: '5901616400.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7849,7 +7814,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 3000, 'series': 'Ultra Beton'},
-    imageFile: '5907575300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7861,7 +7825,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 1000, 'series': 'Ultra White'},
-    imageFile: '5302000100.jpeg',
+    imageFile: '5302000100_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7885,7 +7849,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1000, 'series': 'Ultra White'},
-    imageFile: '5301100100.jpeg',
+    imageFile: '5301100100_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7909,7 +7873,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000, 'series': 'Ultra White'},
-    imageFile: '5301100300.jpeg',
+    imageFile: '5301100300_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7933,7 +7897,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 1000, 'series': 'Ultra White'},
-    imageFile: '5301600100.jpeg',
+    imageFile: '5301600100_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7969,7 +7933,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1000},
-    imageFile: '514110100.jpeg',
+    imageFile: '514110100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7981,7 +7945,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000},
-    imageFile: '514110300.jpeg',
+    imageFile: '514110300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -7993,7 +7957,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 4000},
-    imageFile: '514110400.jpeg',
+    imageFile: '514110400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8005,7 +7969,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 1000},
-    imageFile: '514160100.jpeg',
+    imageFile: '514160100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8017,7 +7981,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000},
-    imageFile: '514160300.jpeg',
+    imageFile: '514160300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8029,7 +7993,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 4000},
-    imageFile: '514160400.jpeg',
+    imageFile: '514160400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8041,7 +8005,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000},
-    imageFile: '568110300.jpeg',
+    imageFile: '568110300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8053,7 +8017,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000},
-    imageFile: '568160300.jpeg',
+    imageFile: '568160300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8065,7 +8029,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5741111300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8077,7 +8040,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 4000, 'series': 'Ultra Silent'},
-    imageFile: '5741111400.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8089,7 +8051,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5741212300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8101,7 +8062,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5741616300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8113,7 +8073,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 4000, 'series': 'Ultra Silent'},
-    imageFile: '5741616400.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8129,7 +8088,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'length_mm': 1000,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '5841100100.jpeg',
+    imageFile: '5841100100_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8145,7 +8104,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'length_mm': 3000,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '5841100300.jpeg',
+    imageFile: '5841100300_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8157,7 +8116,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 500, 'series': 'Ultra Silent Plus'},
-    imageFile: '5841100050.jpeg',
+    imageFile: '5841100050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8173,7 +8132,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'length_mm': 1000,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '5841200100.jpeg',
+    imageFile: '5841200100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8189,7 +8148,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'length_mm': 3000,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '5841200300.jpeg',
+    imageFile: '5841200300_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8201,7 +8160,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 500, 'series': 'Ultra Silent Plus'},
-    imageFile: '5841200050.jpeg',
+    imageFile: '5841200050_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8217,7 +8176,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'length_mm': 1000,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '5841600100.jpeg',
+    imageFile: '5841600100_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8233,7 +8192,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'length_mm': 3000,
       'series': 'Ultra Silent Plus',
     },
-    imageFile: '5841600300.jpeg',
+    imageFile: '5841600300_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8245,7 +8204,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 500, 'series': 'Ultra Silent Plus'},
-    imageFile: '5841600050.jpeg',
+    imageFile: '5841600050_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8257,7 +8216,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1000, 'series': 'Ultra Silent'},
-    imageFile: '5741100100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8269,7 +8227,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 250, 'series': 'Ultra Silent'},
-    imageFile: '5741100025.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8281,7 +8238,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5741100300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8293,7 +8249,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 500, 'series': 'Ultra Silent'},
-    imageFile: '5741100050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8305,7 +8260,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 1000, 'series': 'Ultra Silent'},
-    imageFile: '5741200100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8317,7 +8271,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5741200300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8329,7 +8282,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'length_mm': 500, 'series': 'Ultra Silent'},
-    imageFile: '5741200050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8341,7 +8293,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 1000, 'series': 'Ultra Silent'},
-    imageFile: '5741600100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8353,7 +8304,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5741600300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8365,7 +8315,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 500, 'series': 'Ultra Silent'},
-    imageFile: '5741600050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8377,7 +8326,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 1000, 'series': 'Ultra Silent'},
-    imageFile: '5745000100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8389,7 +8337,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5745000300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8401,7 +8348,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 500, 'series': 'Ultra Silent'},
-    imageFile: '5745000050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8413,7 +8359,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 1000, 'series': 'Ultra Silent'},
-    imageFile: '5747500100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8425,7 +8370,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5747500300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8437,7 +8381,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 500, 'series': 'Ultra Silent'},
-    imageFile: '5747500050.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8449,7 +8392,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 90, 'length_mm': 1000, 'series': 'Ultra Silent'},
-    imageFile: '5749000100.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8461,7 +8403,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 90, 'length_mm': 3000, 'series': 'Ultra Silent'},
-    imageFile: '5749000300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8473,7 +8414,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'Ultra White'},
-    imageFile: '7379140070.jpeg',
+    imageFile: '7379140070_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8497,7 +8438,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'series': 'Ultra White'},
-    imageFile: '7379180070.jpeg',
+    imageFile: '7379180070_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8581,7 +8522,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'Ultra Silent Plus'},
-    imageFile: '7879140070.jpeg',
+    imageFile: '7879140070_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8593,7 +8534,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'series': 'Ultra Silent Plus'},
-    imageFile: '7879150070.jpeg',
+    imageFile: '7879150070_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8605,7 +8546,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'series': 'Ultra Silent Plus'},
-    imageFile: '7879160070.jpeg',
+    imageFile: '7879160070_3.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8617,7 +8558,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '49140060.jpeg',
+    imageFile: '49140060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8629,7 +8570,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125},
-    imageFile: '49150060.jpeg',
+    imageFile: '49150060_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8641,7 +8582,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '87900070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8653,7 +8593,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000},
-    imageFile: '500110300.jpeg',
+    imageFile: '500110300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8665,7 +8605,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 4000},
-    imageFile: '500110400.jpeg',
+    imageFile: '500110400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8677,7 +8617,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000},
-    imageFile: '500160300.jpeg',
+    imageFile: '500160300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8689,7 +8629,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 4000},
-    imageFile: '500160400.jpeg',
+    imageFile: '500160400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8701,7 +8641,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000},
-    imageFile: '501110300.jpeg',
+    imageFile: '501110300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8713,7 +8653,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000},
-    imageFile: '501160300.jpeg',
+    imageFile: '501160300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8725,7 +8665,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 3000},
-    imageFile: '501200300.jpeg',
+    imageFile: '501200300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8737,7 +8677,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 250, 'length_mm': 3000},
-    imageFile: '501250300.jpeg',
+    imageFile: '501250300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8749,7 +8689,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 315, 'length_mm': 3000},
-    imageFile: '501315300.jpeg',
+    imageFile: '501315300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8761,7 +8701,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 400, 'length_mm': 3000},
-    imageFile: '501400300.jpeg',
+    imageFile: '501400300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8773,7 +8713,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1000},
-    imageFile: '51110100.jpeg',
+    imageFile: '51110100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8785,7 +8725,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 2000},
-    imageFile: '51110200.jpeg',
+    imageFile: '51110200_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8797,7 +8737,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000},
-    imageFile: '51110300.jpeg',
+    imageFile: '51110300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8809,7 +8749,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 4000},
-    imageFile: '51110400.jpeg',
+    imageFile: '51110400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8821,7 +8761,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 500},
-    imageFile: '51110050.jpeg',
+    imageFile: '51110050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8833,7 +8773,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 1000},
-    imageFile: '51160100.jpeg',
+    imageFile: '51160100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8845,7 +8785,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 2000},
-    imageFile: '51160200.jpeg',
+    imageFile: '51160200_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8857,7 +8797,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 250},
-    imageFile: '51160025.jpeg',
+    imageFile: '51160025_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8869,7 +8809,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000},
-    imageFile: '51160300.jpeg',
+    imageFile: '51160300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8881,7 +8821,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 4000},
-    imageFile: '51160400.jpeg',
+    imageFile: '51160400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8893,7 +8833,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 500},
-    imageFile: '51160050.jpeg',
+    imageFile: '51160050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8905,7 +8845,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 1000},
-    imageFile: '51200100.jpeg',
+    imageFile: '51200100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8917,7 +8857,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 3000},
-    imageFile: '51200300.jpeg',
+    imageFile: '51200300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8929,7 +8869,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 500},
-    imageFile: '51200050.jpeg',
+    imageFile: '51200050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8941,7 +8881,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000},
-    imageFile: '56110300.jpeg',
+    imageFile: '56110300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8953,7 +8893,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 3000},
-    imageFile: '56160300.jpeg',
+    imageFile: '56160300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8965,7 +8905,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'length_mm': 3000},
-    imageFile: '56200300.jpeg',
+    imageFile: '56200300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8977,7 +8917,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 250, 'length_mm': 3000},
-    imageFile: '56250300.jpeg',
+    imageFile: '56250300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -8989,7 +8929,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1000, 'material': 'PP'},
-    imageFile: '54110100.jpeg',
+    imageFile: '54110100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9001,7 +8941,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 150, 'material': 'PP'},
-    imageFile: '54110015.jpeg',
+    imageFile: '54110015_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9013,7 +8953,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 1500, 'material': 'PP'},
-    imageFile: '54110150.jpeg',
+    imageFile: '54110150_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9025,7 +8965,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 2000, 'material': 'PP'},
-    imageFile: '54110200.jpeg',
+    imageFile: '54110200_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9037,7 +8977,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 250, 'material': 'PP'},
-    imageFile: '54110025.jpeg',
+    imageFile: '54110025_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9049,7 +8989,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 3000, 'material': 'PP'},
-    imageFile: '54110300.jpeg',
+    imageFile: '54110300_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9061,7 +9001,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 500, 'material': 'PP'},
-    imageFile: '54110050.jpeg',
+    imageFile: '54110050_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9073,7 +9013,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'length_mm': 750, 'material': 'PP'},
-    imageFile: '54110075.jpeg',
+    imageFile: '54110075_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9085,7 +9025,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'length_mm': 4000, 'material': 'PP'},
-    imageFile: '54160400.jpeg',
+    imageFile: '54160400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9097,7 +9037,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 40, 'length_mm': 1000, 'material': 'PP'},
-    imageFile: '54040100.jpeg',
+    imageFile: '54040100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9109,7 +9049,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 40, 'length_mm': 3000, 'material': 'PP'},
-    imageFile: '54040300.jpeg',
+    imageFile: '54040300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9121,7 +9061,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 40, 'length_mm': 500, 'material': 'PP'},
-    imageFile: '54040050.jpeg',
+    imageFile: '54040050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9133,7 +9073,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 1000, 'material': 'PP'},
-    imageFile: '54050100.jpeg',
+    imageFile: '54050100_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9145,7 +9085,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 250, 'material': 'PP'},
-    imageFile: '54050025.jpeg',
+    imageFile: '54050025_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9157,7 +9097,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 3000, 'material': 'PP'},
-    imageFile: '54050300.jpeg',
+    imageFile: '54050300_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9169,7 +9109,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 4000, 'material': 'PP'},
-    imageFile: '54050400.jpeg',
+    imageFile: '54050400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9181,7 +9121,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'length_mm': 500, 'material': 'PP'},
-    imageFile: '54050050.jpeg',
+    imageFile: '54050050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9193,7 +9133,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 1000, 'material': 'PP'},
-    imageFile: '54075100.jpeg',
+    imageFile: '54075100_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9205,7 +9145,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 250, 'material': 'PP'},
-    imageFile: '54075025.jpeg',
+    imageFile: '54075025_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9217,7 +9157,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 3000, 'material': 'PP'},
-    imageFile: '54075300.jpeg',
+    imageFile: '54075300_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9229,7 +9169,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 4000, 'material': 'PP'},
-    imageFile: '54075400.jpeg',
+    imageFile: '54075400_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9241,7 +9181,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'length_mm': 500, 'material': 'PP'},
-    imageFile: '54075050.jpeg',
+    imageFile: '54075050_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9253,7 +9193,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 250},
-    imageFile: '502250300.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9264,7 +9203,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '8160000101.jpeg',
+    imageFile: '8160000101_5.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9275,7 +9214,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '8160000201.jpeg',
+    imageFile: '8160000201_5.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9287,7 +9226,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 110, 'material': 'נירוסטה'},
-    imageFile: '44041002.jpeg',
+    imageFile: '44041002_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9299,7 +9238,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 110, 'material': 'פלסטיק'},
-    imageFile: '44041000.jpeg',
+    imageFile: '44041000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9311,7 +9250,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 160, 'material': 'נירוסטה'},
-    imageFile: '44061002.jpeg',
+    imageFile: '44061002_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9323,7 +9262,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔄',
     page: 0,
     dims: {'diameter_mm': 160, 'material': 'פלסטיק'},
-    imageFile: '44061000.jpeg',
+    imageFile: '44061000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9335,7 +9274,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'inch': '¼1"'},
-    imageFile: '61235060.jpeg',
+    imageFile: '61235060_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9346,7 +9285,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '41540615.jpeg',
+    imageFile: '41540615_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9365,7 +9304,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318360.jpeg',
+    imageFile: '98318360_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9384,7 +9323,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318365.jpeg',
+    imageFile: '98318365_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9403,7 +9342,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318366.jpeg',
+    imageFile: '98318366_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9422,7 +9361,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318356.jpeg',
+    imageFile: '98318356_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9441,7 +9380,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318357.jpeg',
+    imageFile: '98318357_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9460,7 +9399,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318358.jpeg',
+    imageFile: '98318358_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9479,7 +9418,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318359.jpeg',
+    imageFile: '98318359_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9498,7 +9437,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318363.jpeg',
+    imageFile: '98318363_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9517,7 +9456,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318364.jpeg',
+    imageFile: '98318364_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9536,7 +9475,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'thread': 'פנימי',
       'series': 'Polirol PP-R',
     },
-    imageFile: '98318352.jpeg',
+    imageFile: '98318352_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9560,7 +9499,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '60400160.jpeg',
+    imageFile: '60400160_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9572,7 +9511,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '60400363.jpeg',
+    imageFile: '60400363_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9680,7 +9619,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110},
-    imageFile: '49040043.jpeg',
+    imageFile: '49040043_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9692,7 +9631,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 20, 'connection': 'ריתוך'},
-    imageFile: '99515086.jpeg',
+    imageFile: '99515086_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9704,7 +9643,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 32, 'connection': 'ריתוך'},
-    imageFile: '99515087.jpeg',
+    imageFile: '99515087_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9716,7 +9655,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'diameter2_mm': 40, 'connection': 'ריתוך'},
-    imageFile: '99515088.jpeg',
+    imageFile: '99515088_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9728,7 +9667,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'diameter2_mm': 63, 'connection': 'ריתוך'},
-    imageFile: '99515644.jpeg',
+    imageFile: '99515644_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9740,7 +9679,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 40, 'diameter2_mm': 20, 'connection': 'ריתוך'},
-    imageFile: '99515065.jpeg',
+    imageFile: '99515065_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9752,7 +9691,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 50, 'diameter2_mm': 20, 'connection': 'ריתוך'},
-    imageFile: '99515066.jpeg',
+    imageFile: '99515066_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9764,7 +9703,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 63, 'diameter2_mm': 20, 'connection': 'ריתוך'},
-    imageFile: '99515067.jpeg',
+    imageFile: '99515067_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9776,7 +9715,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 63, 'diameter2_mm': 32, 'connection': 'ריתוך'},
-    imageFile: '99515081.jpeg',
+    imageFile: '99515081_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9788,7 +9727,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 20, 'connection': 'ריתוך'},
-    imageFile: '99515068.jpeg',
+    imageFile: '99515068_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9800,7 +9739,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'diameter2_mm': 32, 'connection': 'ריתוך'},
-    imageFile: '99515082.jpeg',
+    imageFile: '99515082_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9812,7 +9751,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 90, 'diameter2_mm': 20, 'connection': 'ריתוך'},
-    imageFile: '99515083.jpeg',
+    imageFile: '99515083_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9824,7 +9763,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 90, 'diameter2_mm': 32, 'connection': 'ריתוך'},
-    imageFile: '99515084.jpeg',
+    imageFile: '99515084_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -9836,7 +9775,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 90, 'diameter2_mm': 40, 'connection': 'ריתוך'},
-    imageFile: '99515085.jpeg',
+    imageFile: '99515085_4.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10002,7 +9941,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Fitting',
     categoryEmoji: '🔧',
     page: 0,
-    imageFile: '41540120.jpeg',
+    imageFile: '41540120_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10013,7 +9952,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEn: 'Connector',
     categoryEmoji: '🔗',
     page: 0,
-    imageFile: '41540105.jpeg',
+    imageFile: '41540105_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10054,7 +9993,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '7070944871.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10071,7 +10009,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 110,
       'angle_deg': 87,
     },
-    imageFile: '7070943871.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10083,7 +10020,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'angle_deg': 90},
-    imageFile: '7075400070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10100,7 +10036,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 125,
       'angle_deg': 87,
     },
-    imageFile: '7070954871.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10117,7 +10052,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 125,
       'angle_deg': 87,
     },
-    imageFile: '7070953871.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10134,7 +10068,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 160,
       'angle_deg': 87,
     },
-    imageFile: '7070964871.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10151,7 +10084,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
       'diameter3_mm': 160,
       'angle_deg': 87,
     },
-    imageFile: '7070963871.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10175,7 +10107,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 75, 'angle_deg': 90},
-    imageFile: '7075300070.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10199,7 +10130,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'series': 'Ultra White'},
-    imageFile: '7378006000.jpeg',
+    imageFile: '7378006000_2.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10211,7 +10142,7 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 200, 'series': 'Ultra White'},
-    imageFile: '7378008000.jpeg',
+    imageFile: '7378008000_1.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10331,7 +10262,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'Ultra Silent'},
-    imageFile: '7890011071.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10343,7 +10273,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 125, 'series': 'Ultra Silent'},
-    imageFile: '7890012571.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10355,7 +10284,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔗',
     page: 0,
     dims: {'diameter_mm': 160, 'series': 'Ultra Silent'},
-    imageFile: '7890016071.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10367,7 +10295,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 110, 'series': 'UltraSeal'},
-    imageFile: '7981100000.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10379,7 +10306,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 125, 'series': 'UltraSeal'},
-    imageFile: '7981250000.jpeg',
     brand: 'Huliot',
   ),
   LipskeyCatalogProduct(
@@ -10391,7 +10317,6 @@ const List<LipskeyCatalogProduct> kHuliotProducts = <LipskeyCatalogProduct>[
     categoryEmoji: '🔧',
     page: 0,
     dims: {'diameter_mm': 160, 'series': 'UltraSeal'},
-    imageFile: '7981600000.jpeg',
     brand: 'Huliot',
   ),
 ];
