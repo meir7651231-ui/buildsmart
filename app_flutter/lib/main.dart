@@ -20,6 +20,8 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show keyboardScreenToolsProvider;
 import 'package:buildsmart/state/onboarding_gate.dart';
+import 'package:buildsmart/state/push_routing.dart'
+    show afterThisFrame, pendingPushThreadProvider, threadIdFromLaunchUrl;
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/server_catalog_auth.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
@@ -468,6 +470,22 @@ class BuildSmartApp extends ConsumerWidget {
     // follows auth (sign-in → users/{uid}.fcmToken · refresh → re-write ·
     // sign-out → clear) and foreground pushes toast. Inert without Firebase.
     ref.watch(pushControllerProvider);
+    // The web arm of the same tap. When no tab is open the service worker
+    // cannot postMessage into a page that does not exist, so it launches one
+    // with `?thread=` in the url; this is where that is picked up. Read ONCE
+    // from `Uri.base` — it is the launch url, not a stream — and parked in the
+    // same place the mobile tap parks it, so `ChatsScreen` has a single thing to
+    // consume regardless of which platform the notification came from.
+    // Off web, `Uri.base` is a file uri with no query, so this is a no-op.
+    final launchThread = threadIdFromLaunchUrl(Uri.base.toString());
+    if (launchThread != null &&
+        ref.read(pendingPushThreadProvider) != launchThread) {
+      // Assign outside the build phase: writing to a provider during build is
+      // the release-only crash pattern already fixed once in this codebase.
+      afterThisFrame(
+        () => ref.read(pendingPushThreadProvider.notifier).state = launchThread,
+      );
+    }
     // Step 92 — hand the app-global route observer its bus, ONCE (idempotent).
     // `ref.read` (never watch): a stable-singleton hand-off, so this creates NO
     // rebuild dependency and the tracking stays byte-neutral for the 4 tabs.

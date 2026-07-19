@@ -58,6 +58,8 @@ import 'dart:async';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/push_routing.dart'
+    show pendingPushThreadProvider, threadIdFrom;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' as fm;
 import 'package:flutter/foundation.dart';
@@ -235,12 +237,31 @@ class FirebaseMessagingGateway implements PushGateway {
         settings.authorizationStatus == fm.AuthorizationStatus.provisional;
   }
 
-  /// NOTE (web): web push needs a VAPID key (console → Cloud Messaging → Web
-  /// Push certificates) passed as `getToken(vapidKey: …)`. Until that key is
-  /// provisioned this throws on web — which the controller's guard logs and
-  /// swallows (mobile is unaffected). Follow-up: console task + const here.
+  /// The browser's half of the push handshake, now provisioned.
+  ///
+  /// Web push is the only platform that needs an application key here: the
+  /// browser's own push service (FCM's endpoint for Chrome, Mozilla's for
+  /// Firefox) will not mint a subscription without one. Without it `getToken()`
+  /// THREW on web, the controller's guard logged and swallowed it, and the
+  /// result was the quietest possible failure — the site never registered a
+  /// token, `users/{uid}.fcmToken` stayed empty, `sendToUsers` skipped the
+  /// recipient as "no token", and nobody on the website ever received a
+  /// notification. Mobile was unaffected the whole time, which is exactly why
+  /// this could sit unnoticed.
+  ///
+  /// PUBLIC BY DESIGN — this is the public half of the VAPID key pair and is
+  /// handed to every browser that subscribes, so it belongs in the bundle
+  /// alongside `firebase_options.dart`'s apiKey and projectId. The PRIVATE half
+  /// never leaves the Firebase console. Rotating the pair there invalidates
+  /// existing subscriptions, so this constant is replaced, not edited.
+  ///
+  /// Ignored on Android/iOS, where the platform SDK owns the handshake — hence
+  /// one unconditional call rather than a platform branch.
+  static const String _vapidPublicKey =
+      'BN1BNeE3qvsGIocClUkDinZGOpeylpsjVJZ-Kt8a6HeRXfjW73rT340wPlTycLJXz0oqyrexTVPSB_lN9n2OSCA';
+
   @override
-  Future<String?> getToken() => _messaging.getToken();
+  Future<String?> getToken() => _messaging.getToken(vapidKey: _vapidPublicKey);
 
   @override
   Future<void> deleteToken() => _messaging.deleteToken();
@@ -707,6 +728,22 @@ final pushControllerProvider = Provider<PushController>((ref) {
     gateway: ref.watch(pushGatewayProvider),
     users: ref.watch(pushTokenWriterProvider),
     localNotifications: ref.watch(localNotificationsGatewayProvider),
+    // THE TAP FINALLY GOES SOMEWHERE. `_onOpened` was built as a seam and left
+    // unwired — its own doc calls deep-navigation "a documented FOLLOW-UP" — so
+    // the payload arrived carrying its threadId and the app opened wherever it
+    // had been. A notification that names a person and quotes their message and
+    // then drops you on the catalog is a broken promise, not a feature.
+    //
+    // The id is PARKED rather than acted on: `ChatsScreen` may not exist yet
+    // (cold launch), and it opens conversations off a `ref.listen` that does not
+    // fire for a value set before it started listening. Parking, plus the
+    // read-on-arrival in that screen, is what covers both orders. See
+    // push_routing.dart.
+    onOpened: (message) {
+      final threadId = threadIdFrom(message.data);
+      if (threadId == null) return; // an order push is not a conversation
+      ref.read(pendingPushThreadProvider.notifier).state = threadId;
+    },
   );
   // fireImmediately: a RESTORED session (AuthStateNotifier is born seeded from
   // gateway.currentUser) must register without waiting for the next auth event.

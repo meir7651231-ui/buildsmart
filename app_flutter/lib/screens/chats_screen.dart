@@ -8,6 +8,8 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/push_routing.dart'
+    show afterThisFrame, consumePendingThread;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/sys_chat.dart';
@@ -795,6 +797,17 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     ref.listen<String?>(updatesChatOpenProvider, (_, id) {
       if (id != null) _openChatById(id);
     });
+    // A TAPPED NOTIFICATION, which is the case the listener above cannot serve.
+    // `ref.listen` fires on a CHANGE, and every push route sets the thread id
+    // BEFORE this screen exists — a cold launch, a browser page opened fresh
+    // with `?thread=`, or a warm resume that sets the id and then navigates
+    // here. The listener would find the value already in place and never fire,
+    // so the notification would open the app and then sit on the wrong screen.
+    // Reading it on arrival is what closes that gap; `consumePendingThread`
+    // clears as it reads, so a later notification for the same conversation
+    // still re-opens it.
+    final fromPush = consumePendingThread(ref);
+    if (fromPush != null) afterThisFrame(() => _openChatById(fromPush));
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
