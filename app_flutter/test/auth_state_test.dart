@@ -595,6 +595,92 @@ void main() {
     });
   });
 
+  group('account switch — the cache belongs to a uid, not to a device', () {
+    // `_clearIdentityCache` was only reached from signOut() and deleteAccount()
+    // — the two paths a person takes DELIBERATELY. The auth stream can change
+    // identity without either: a different Google account, a revoked token
+    // resolving elsewhere, a session restored as another uid. In all of those
+    // the on-device profile and the picked persona still belonged to whoever
+    // was here before, and the next person inherited them as their own — and
+    // mirrored them back to `users/{uid}` on the next write.
+    Future<void> signedInWithProfile(
+      ProviderContainer c,
+      _FakeAuthGateway gw,
+      String uid,
+    ) async {
+      c
+          .read(userProfileProvider.notifier)
+          .register(name: 'מאיר', contact: '050-1234567');
+      c.read(activePersonaProvider.notifier).state = 'store';
+      gw.signInAs(AuthUser(uid: uid));
+      await pumpEventQueue();
+    }
+
+    test('THE BUG: a DIFFERENT uid on the stream wipes the previous profile',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      await signedInWithProfile(c, gw, 'uid-alice');
+      expect(c.read(userProfileProvider).name, 'מאיר');
+
+      gw.signInAs(const AuthUser(uid: 'uid-bob'));
+      await pumpEventQueue();
+
+      expect(c.read(userProfileProvider).name, isEmpty,
+          reason: "bob must not inherit alice's name");
+      expect(c.read(activePersonaProvider), isNull,
+          reason: "nor her persona");
+      expect(c.read(authStateProvider).user?.uid, 'uid-bob');
+    });
+
+    test('the TWO-STEP version is covered too: A ends, then B signs in',
+        () async {
+      // Without clearing on the change to null, B would arrive to a "first
+      // event" — previous uid null — and inherit A's cache anyway.
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      await signedInWithProfile(c, gw, 'uid-alice');
+
+      gw.emit(null);
+      await pumpEventQueue();
+      expect(c.read(userProfileProvider).name, isEmpty);
+
+      gw.signInAs(const AuthUser(uid: 'uid-bob'));
+      await pumpEventQueue();
+      expect(c.read(userProfileProvider).name, isEmpty);
+    });
+
+    test('the SAME uid signing in again keeps the profile', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      await signedInWithProfile(c, gw, 'uid-alice');
+
+      gw.signInAs(const AuthUser(uid: 'uid-alice'), withClaims: const {
+        'role': 'store',
+      });
+      await pumpEventQueue();
+
+      expect(c.read(userProfileProvider).name, 'מאיר',
+          reason: 'a claims refresh is not an account switch');
+    });
+
+    test('a RESTORED session on launch is not a switch — nothing is wiped',
+        () async {
+      // Previous uid is null on the first event, so a relaunch keeps what the
+      // person typed. Clearing here would wipe the profile on every cold start.
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      c
+          .read(userProfileProvider.notifier)
+          .register(name: 'מאיר', contact: '050-1234567');
+
+      gw.signInAs(const AuthUser(uid: 'uid-alice'));
+      await pumpEventQueue();
+
+      expect(c.read(userProfileProvider).name, 'מאיר');
+    });
+  });
+
   group('logout — S1.7 (sign-out + cache clear)', () {
     test('signs out remotely AND wipes the local identity', () async {
       final gw = _FakeAuthGateway();

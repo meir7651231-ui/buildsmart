@@ -259,7 +259,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Future<void> _enterViaAuth() async {
     await showLoginSheet(context);
     if (!mounted) return;
-    if (!ref.read(authStateProvider).signedIn) return; // cancelled — stay
+    // "CANCELLED" HAS TO MEAN "STILL NOT A REAL ACCOUNT", not "no session".
+    //
+    // This guard read `signedIn`, which is `user != null` — and since the
+    // catalog cutover `main()` signs every visitor in anonymously before the
+    // first frame, so it is true for someone who has just dismissed the sheet
+    // without logging in. The guard therefore never returned, and a visitor who
+    // backed out ran the whole registered-entry path against a throwaway
+    // anonymous uid: the welcome gate flipped, and `_finishAfterAuth` mirrored
+    // their half-typed identity to `users/{that anonymous uid}` — a document
+    // nobody will ever sign in as again. Its own comment claims that path "is
+    // never reached by an anonymous catalog guest".
+    //
+    // Sixth appearance of one assumption: on this build `signedIn` answers
+    // whether a SESSION exists, never whether a PERSON does. `isRealUser` is
+    // the question that was always meant here.
+    if (!(ref.read(authStateProvider).user?.isRealUser ?? false)) {
+      return; // cancelled — stay
+    }
     _finishAfterAuth();
   }
 

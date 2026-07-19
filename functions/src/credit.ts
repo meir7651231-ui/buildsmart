@@ -1,27 +1,39 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // S8.2 — `computeCredit` callable: contractor credit computed SERVER-side.
 //
-// The deterministic ceiling is the EXACT port in creditCore.ts (see its header
-// for source + bit-for-bit verification). On top of it this callable derives
-// the same numbers the manager dashboard derives client-side
-// (manager_dashboard_screen.dart, @legacy index.html:16559-16562):
-//   used    = Σ `sum` of the contractor's orders (mgrCustomerList totalSpend
-//             group-by-buyer fold) — read live from the `orders` collection,
-//             where `contractorId` carries the buyer (`who` → contractorId per
-//             knowledge/firestore-schema.md field mapping);
-//   balance = (creditLimit - used).clamp(0, creditLimit)   — יתרה ≥ 0;
-//   pct     = creditLimit == 0 ? 0 : round(used/creditLimit*100).clamp(0,100).
+//   creditLimit = READ from `customers/{name}.creditLimit`, or 0 when a manager
+//                 has not set one. It is NOT derived. It used to be
+//                 `contractorCredit(name)` — a hash of the person's name in the
+//                 30,000–120,000 ₪ band — and returning that from here was worse
+//                 than returning it from the client, because the client treats
+//                 this callable as the one authority on credit: an invented
+//                 figure arrived wearing the server's authority, was rendered
+//                 under "the REAL credit figures", and was handed to an advisor
+//                 that reasons about approving the next order.
+//   used        = Σ `sum` of the caller's orders, folded live from `orders`.
+//   balance     = (creditLimit - used).clamp(0, creditLimit)   — יתרה ≥ 0;
+//   pct         = creditLimit == 0 ? 0 : round(used/creditLimit*100).clamp(0,100).
 //
-// Authorization mirrors S5.4 ("read credit: role==manager || ownerId==uid"):
-// manager/admin may compute for ANY contractor name; any other caller only for
-// THEIR OWN name (users/{uid}.displayName). Every computation is audit-logged.
+// AUTHORIZATION mirrors S5.4 ("read credit: role==manager || ownerId==uid"), but
+// ownership now keys on the UID. It used to compare the requested name against
+// `users/{uid}.displayName` — a field the caller can write, since the users
+// update rule freezes only role/roles/storeUid/orgId/status. A contractor wrote
+// a colleague's name into their own document and the comparison passed, handing
+// them that colleague's spend and standing. A non-manager is therefore scoped by
+// uid and the name they send is discarded rather than validated; the decision
+// contains nothing the caller controls. Every computation is audit-logged.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
 import { asString, callerRoles, db, REGION } from "./common";
-import { contractorCredit, orderSum } from "./creditCore";
+// `contractorCredit` is deliberately NOT imported here any more. It is the
+// name-hash ceiling, and this callable is the one place the client is told to
+// treat as authoritative — so a fabricated number returned from here arrived
+// wearing the server's authority. It remains in creditCore for the local/demo
+// derivation, which is what it was always for.
+import { creditScopeFor, orderSum, readCreditLimit } from "./creditCore";
 
 interface ComputeCreditData {
   name?: unknown;
@@ -40,37 +52,59 @@ export const computeCredit = onCall({ region: REGION }, async (request) => {
     ? data.name
     : null;
 
-  if (!isManager) {
-    // S5.4 ownership: a non-manager may only compute their OWN credit.
+  // S5.4 ownership. A non-manager may only compute their OWN credit — and
+  // "own" has to mean their uid, never a field they control.
+  //
+  // THE HOLE THIS CLOSES. The check used to resolve the caller's identity from
+  // `users/{uid}.displayName` and compare it to the requested name. But the users
+  // update rule freezes only role/roles/storeUid/orgId/status, so displayName is
+  // self-writable by design — the welcome flow mirrors it there on every login.
+  // So contractor B wrote contractor A's exact name into their own document, and
+  // from that moment `own` WAS A's name: the comparison passed, and B read A's
+  // spend, order count and standing. The gate was asking a question the attacker
+  // got to answer.
+  //
+  // Two identifiers were being conflated: a display name, which is typed, shared
+  // between namesakes and editable, and a uid, which is none of those. Ownership
+  // now keys on the uid alone, so nothing the caller can write takes part in the
+  // decision. The name is still resolved, but only to label the result.
+  const scope = creditScopeFor({ callerUid: uid, isManager });
+  const scopeUid = scope.byUid;
+  if (scopeUid !== null) {
     const me = await db().collection("users").doc(uid).get();
-    const own = asString(me.get("displayName"));
-    if (own === null) {
-      throw new HttpsError(
-        "failed-precondition",
-        "users/{uid}.displayName is missing — cannot resolve the caller's " +
-          "contractor name."
-      );
-    }
-    if (name !== null && name !== own) {
-      throw new HttpsError(
-        "permission-denied",
-        "Only a manager may compute another contractor's credit (S5.4)."
-      );
-    }
-    name = own;
+    // Display only — if it is missing the figures are still correct.
+    name = asString(me.get("displayName")) ?? uid;
   }
   if (name === null) {
     throw new HttpsError("invalid-argument", "name (string) is required.");
   }
 
-  // Deterministic ceiling — the exact client formula, now server-canonical.
-  const creditLimit = contractorCredit(name);
+  // THE CEILING IS READ, NOT INVENTED.
+  //
+  // This used to return `contractorCredit(name)` — a hash of the person's name
+  // bucketed into the 30,000–120,000 ₪ band. Being computed on the server made it
+  // worse, not better: the client was told the server is the one authority on
+  // credit, so a figure with no basis arrived carrying the server's authority,
+  // and `credit_explain_screen` presented it as "the REAL credit figures" and fed
+  // it to an advisor that reasons about whether to approve the next order.
+  //
+  // A real ceiling lives in `customers/{name}.creditLimit`, set by a manager.
+  // When there is none the honest answer is zero — "not on record" — which the
+  // client already renders as "לא רשומה" rather than "₪0". A degraded read must
+  // look degraded.
+  const customer = await db().collection("customers").doc(name).get();
+  const creditLimit = readCreditLimit(customer.get("creditLimit"));
 
-  // Live spend — the mgrCustomerList fold over this buyer's orders.
-  const q = await db()
-    .collection("orders")
-    .where("contractorId", "==", name)
-    .get();
+  // Live spend. KEYED ON THE UID for a non-manager, because `contractorId` is
+  // the display NAME: self-written, and shared by any two namesakes. Querying it
+  // for the caller's own credit would fold a stranger's orders into their total
+  // the moment two people registered under the same name — the same
+  // name-versus-uid confusion the orders rules were already hardened against.
+  // A manager asking about a name keeps the name query: they are permitted to
+  // read, and the legacy documents they browse are keyed that way.
+  const q = await (scopeUid !== null
+    ? db().collection("orders").where("contractorUid", "==", scopeUid).get()
+    : db().collection("orders").where("contractorId", "==", name).get());
   let used = 0;
   for (const doc of q.docs) {
     // `used` = Σ the contractor's COMMITTED order total — the stored `sum` (grand

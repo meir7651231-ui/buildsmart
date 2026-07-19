@@ -97,3 +97,52 @@ export const CREDIT_PROBE: ReadonlyArray<readonly [string, number, number]> = [
   ["בניין הרצליה 12", 426786400, 31600],
   ["🦺 עובד", 8297365, 47200],
 ];
+
+/** Whose orders a credit query is allowed to fold, and under which key.
+ *
+ * SPLIT OUT AS A PURE CORE because it is the security decision, and the only
+ * part of `computeCredit` that can be tested without Firebase — the same shape
+ * as `mayReviewRoleRequest` beside its transaction.
+ *
+ * THE HOLE IT CLOSES. Ownership used to be decided by reading
+ * `users/{uid}.displayName` and comparing it to the requested name. The users
+ * update rule freezes role/roles/storeUid/orgId/status and nothing else, so
+ * displayName is self-writable by design — the login flow mirrors it there. A
+ * contractor wrote a colleague's exact name into their own document and the
+ * comparison then passed, handing them that colleague's spend and standing. The
+ * gate was asking a question the caller got to answer.
+ *
+ * So a non-manager is scoped BY UID and the name they sent is discarded, not
+ * validated: there is no value they control anywhere in the decision. Keying on
+ * the uid also fixes a quieter bug — `contractorId` is a display name, and two
+ * contractors registering under the same one would have folded each other's
+ * orders into a single total.
+ *
+ * A manager keeps the name query. They are permitted to read anyone, and the
+ * historical documents they browse are keyed that way. */
+export function creditScopeFor(opts: {
+  callerUid: string;
+  isManager: boolean;
+}): { byUid: string | null; byName: boolean } {
+  return opts.isManager
+    ? { byUid: null, byName: true }
+    : { byUid: opts.callerUid, byName: false };
+}
+
+/** A credit ceiling is READ, never derived.
+ *
+ * `contractorCredit` above is a hash of a person's name in the 30,000–120,000 ₪
+ * band — a demo prop. Returning it from the server was worse than returning it
+ * on the client, because the client is told the server is the one authority on
+ * credit: a number with no basis arrived carrying that authority, was rendered
+ * under the heading "the REAL credit figures", and was fed to an advisor that
+ * reasons about approving the next order.
+ *
+ * Zero means "not on record", which the app renders as "לא רשומה" rather than
+ * "₪0" — a different and equally false claim. A degraded read must look
+ * degraded. */
+export function readCreditLimit(stored: unknown): number {
+  return typeof stored === "number" && Number.isFinite(stored) && stored > 0
+    ? Math.round(stored)
+    : 0;
+}

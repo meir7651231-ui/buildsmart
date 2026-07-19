@@ -530,6 +530,31 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
 
   Future<void> _onAuthEvent(AuthUser? user) async {
     final gen = ++_gen;
+    // AN ACCOUNT SWITCH LEAVES THE PREVIOUS PERSON'S DATA ON THE DEVICE unless
+    // it is wiped here.
+    //
+    // `_clearIdentityCache` was only ever reached from `signOut()` and
+    // `deleteAccount()` — the two paths a person takes DELIBERATELY. The auth
+    // STREAM can change identity without either: signing in with a different
+    // Google account, a revoked token resolving to somebody else, a session
+    // restored as a different uid. In all of those the on-device profile
+    // (name/contact under bs.profile.v1) and the picked persona still belonged
+    // to whoever was here before, and the next person inherited them — reading
+    // as their own, and mirrored back to `users/{uid}` on the next write.
+    //
+    // Clearing on ANY uid change, including a change to null, closes the
+    // two-step version as well: A's session ends, B signs in, and without the
+    // null case B would arrive to a "first event" and inherit A's cache anyway.
+    //
+    // A restored session on launch is NOT a switch — the previous uid is null
+    // there, so a relaunch keeps the profile, as it should. Re-signing in as the
+    // same uid is not a switch either. The callback is idempotent (a profile
+    // reset and a persona null), so overlapping with an explicit sign-out costs
+    // nothing.
+    final previousUid = state.user?.uid;
+    if (previousUid != null && previousUid != user?.uid) {
+      _clearIdentityCache();
+    }
     if (user == null) {
       state = const AuthSnapshot(loaded: true);
       return;
