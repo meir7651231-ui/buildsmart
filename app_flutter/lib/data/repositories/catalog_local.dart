@@ -21,13 +21,12 @@
 //   • `kCatalogTree`                (data/catalog_tree.dart)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:buildsmart/data/catalog.dart' show kCatalogCats;
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/catalog_tree.dart'
     show CatalogNode, kCatalogTree;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/related_info.dart'
     show catalogProductForBrand, catalogProductForSku, catalogProductForSmart;
 import 'package:buildsmart/data/repositories/catalog_repository.dart';
@@ -45,6 +44,7 @@ import 'package:buildsmart/domain/trade_product_adapter.dart'
     show TradeProductLegacy;
 import 'package:buildsmart/state/trades_store.dart'
     show TradesDoc, tradesStoreProvider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local (const-backed) implementation of [CatalogRepository]. The plumbing
 /// reads are pure: every method forwards to a top-level const / const-derived
@@ -80,7 +80,10 @@ class LocalCatalogRepository implements CatalogRepository {
           if (p.tradeId == tradeId) p.toLegacy(),
       ]..sort((a, b) => a.sku.compareTo(b.sku));
     }
-    return kCatalogProducts;
+    // s-huliot: the catalog-source seam. Default (CATALOG_SOURCE unset / 'v1')
+    // returns `kCatalogProducts` byte-identically; `--dart-define=CATALOG_SOURCE=v2`
+    // serves the additive Huliot catalog. v1 stays intact for rollback.
+    return resolvedCatalogProducts;
   }
 
   @override

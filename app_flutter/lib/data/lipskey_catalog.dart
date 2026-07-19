@@ -49,6 +49,7 @@ class LipskeyCatalogProduct {
   static String _brandDir(String brand) {
     if (brand == 'פולירול') return 'polyroll';
     if (brand == 'חוליות') return 'huliot_smartlock';
+    if (brand == 'Huliot') return 'huliot';
     return 'lipskey';
   }
 
