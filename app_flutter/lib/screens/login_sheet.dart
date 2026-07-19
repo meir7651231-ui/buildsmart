@@ -435,7 +435,17 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
             ...switch (_step) {
               _LoginStep.phone => _phonePane(),
               _LoginStep.code => _codePane(),
-              _LoginStep.email => _emailPane(),
+              // LOCK 3 of 3 — the one that makes the pane ABSENT rather than
+              // merely unreachable. Locks 1 and 2 mean no code path can set
+              // [_step] to `email`, but dart2js cannot prove that (it is runtime
+              // state), so `_emailPane` and every string in it still shipped in
+              // the bundle. With this const branch the compiler folds the arm
+              // away, the method becomes unreferenced, and it is tree-shaken out
+              // — verified by searching the deployed main.dart.js. It also means
+              // a future edit that somehow reaches this state renders the phone
+              // pane instead of a working password form.
+              _LoginStep.email =>
+                kEmailPasswordAuth ? _emailPane() : _phonePane(),
             },
           ],
         ),
