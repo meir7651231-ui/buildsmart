@@ -149,6 +149,23 @@ class _AppKeyboardOnlyLayerState extends ConsumerState<AppKeyboardOnlyLayer>
   /// types one or performs the field's action (what a device keyboard does).
   bool get _multiline => _config?.inputType == TextInputType.multiline;
 
+  /// True for a field that only takes digits — phone, SMS code, quantity, date.
+  ///
+  /// Read off the field's own `keyboardType`, the same declaration the device
+  /// keyboard uses to decide it should open on its number pad. Compared by name
+  /// so the `numberWithOptions(decimal:)/(signed:)` variants all count, which a
+  /// direct `==` against [TextInputType.number] would miss.
+  bool get _numeric {
+    final type = _config?.inputType;
+    if (type == null) return false;
+    const numeric = <String>{
+      'TextInputType.number',
+      'TextInputType.phone',
+      'TextInputType.datetime',
+    };
+    return numeric.contains(type.toJson()['name']);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -345,6 +362,9 @@ class _AppKeyboardOnlyLayerState extends ConsumerState<AppKeyboardOnlyLayer>
                 focusNode: _sink,
                 onSend: _performAction,
                 onClose: _dismiss,
+                // A phone or SMS-code field opens straight on the digits, the
+                // way the device keyboard used to.
+                startOnSymbols: _numeric,
               ),
             ),
           ),

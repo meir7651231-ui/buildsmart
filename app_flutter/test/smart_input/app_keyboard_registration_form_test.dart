@@ -123,6 +123,102 @@ void main() {
     }
   });
 
+  group('a number field opens on the digits', () {
+    // The owner chose manual typing over the OS one-time-code suggestion, so the
+    // six-digit login code is typed by hand every time. Landing on Hebrew
+    // letters would mean hunting for ?123 before the first digit — the device
+    // keyboard opened its number pad straight away, and so must ours.
+    testWidgets('the SMS-code field shows digits, not Hebrew letters',
+        (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await _pump(
+        tester,
+        Center(
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            autofillHints: const [AutofillHints.oneTimeCode],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ש'), findsNothing, reason: 'no letters on a code field');
+      expect(find.text('@'), findsOneWidget,
+          reason: 'the digits/symbols layer is up');
+
+      _type(tester, '482915');
+      await tester.pump();
+      expect(controller.text, '482915');
+    });
+
+    testWidgets('a phone field does the same', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await _pump(
+        tester,
+        Center(
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.phone,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      expect(find.text('ש'), findsNothing);
+    });
+
+    testWidgets('a normal text field still opens on the letters',
+        (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await _pump(tester, Center(child: TextField(controller: controller)));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      expect(find.text('ש'), findsOneWidget);
+    });
+
+    testWidgets('moving from a name field to the code field switches layer',
+        (tester) async {
+      final name = TextEditingController();
+      final code = TextEditingController();
+      addTearDown(name.dispose);
+      addTearDown(code.dispose);
+
+      await _pump(
+        tester,
+        Column(
+          children: [
+            TextField(
+              controller: name,
+              decoration: const InputDecoration(labelText: 'שם'),
+            ),
+            TextField(
+              controller: code,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'קוד'),
+            ),
+          ],
+        ),
+      );
+
+      await tester.tap(find.widgetWithText(TextField, 'שם'));
+      await tester.pumpAndSettle();
+      expect(find.text('ש'), findsOneWidget, reason: 'letters for a name');
+
+      await tester.tap(find.widgetWithText(TextField, 'קוד'));
+      await tester.pumpAndSettle();
+      expect(find.text('ש'), findsNothing,
+          reason: 'the one live keyboard must follow the field KIND too');
+    });
+  });
+
   group('where the real form actually lives', () {
     testWidgets('a field inside a MODAL BOTTOM SHEET gets the keyboard on top',
         (tester) async {

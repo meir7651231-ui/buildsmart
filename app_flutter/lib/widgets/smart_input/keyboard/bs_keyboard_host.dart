@@ -100,6 +100,18 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
   /// floating mount passes [kKbButtonsV2]. Default false → byte-identical.
   final bool symbolsAlwaysToggles;
 
+  /// Open on the digits/symbols layer instead of the letters.
+  ///
+  /// For a field that only ever takes numbers — a phone, an SMS code, a
+  /// quantity. The device keyboard does this on its own from `keyboardType`;
+  /// once ours replaces it, landing on Hebrew letters means hunting for `?123`
+  /// before a single digit can be typed. On the six-digit login code that is the
+  /// difference between a smooth sign-in and a fumble, which is exactly where
+  /// the owner chose manual typing over the OS autofill suggestion.
+  ///
+  /// Default false → every existing mount opens on letters as before.
+  final bool startOnSymbols;
+
   /// Override for the He/En letter layer (owner button-spec v2, #6). When
   /// non-null it REPLACES the host's internal `_english` so the floating mount
   /// can drive the language as part of its 3-way globe cycle. Null (every other
@@ -197,6 +209,7 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
     this.typedText = '',
     this.onExitTools,
     this.symbolsAlwaysToggles = false,
+    this.startOnSymbols = false,
     this.englishOverride,
     this.onLanguageOverride,
     this.showToolStrip = false,
@@ -220,7 +233,21 @@ class BsKeyboardHost extends ConsumerStatefulWidget {
 
 class _BsKeyboardHostState extends ConsumerState<BsKeyboardHost> {
   /// Whether the `?123` symbols layer is showing (vs. the letters).
-  bool _showSymbols = false;
+  late bool _showSymbols = widget.startOnSymbols;
+
+  @override
+  void didUpdateWidget(BsKeyboardHost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The app-wide keyboard keeps ONE host alive and re-points it as the focus
+    // moves, so "what kind of field is this" changes under a mounted host. Only
+    // react to a real change, so a user who chose a layer by hand keeps it while
+    // moving between fields of the same kind. (Plain assignment, not setState: a
+    // build already follows didUpdateWidget, and pushing state mid-build is the
+    // release-only crash this project has hit before.)
+    if (widget.startOnSymbols != oldWidget.startOnSymbols) {
+      _showSymbols = widget.startOnSymbols;
+    }
+  }
 
   /// Whether the English QWERTY letter layer is showing (vs. Hebrew). Toggled
   /// by the globe key.
