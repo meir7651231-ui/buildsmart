@@ -1,6 +1,6 @@
 /**
  * מסך ההגדרות — מרכז ניהול המערכת:
- * ארגון · מורים · חדרים · התראות · גיבוי ושחזור · ייבוא נתונים · נגישות · איפוס.
+ * ארגון · מורים · חדרים · התראות · גיבוי ושחזור · ייצוא נתונים · ייבוא נתונים · נגישות · איפוס.
  */
 import { useEffect, useState } from 'react';
 import type { NotifPrefs } from '../../types/domain';
@@ -10,6 +10,7 @@ import { Section, SectionNote, Toggle } from './lib';
 import { TeachersSection } from './TeachersSection';
 import { RoomsSection } from './RoomsSection';
 import { BackupSection } from './BackupSection';
+import { ExportSection } from './ExportSection';
 import { ImportSection } from './ImportSection';
 import { AccessSection } from './AccessSection';
 import { ThemeSection } from './ThemeSection';
@@ -21,6 +22,7 @@ const SECTIONS: { id: string; label: string }[] = [
   { id: 'sec-rooms', label: 'חדרים' },
   { id: 'sec-notif', label: 'התראות' },
   { id: 'sec-backup', label: 'גיבוי ושחזור' },
+  { id: 'sec-export', label: 'ייצוא נתונים' },
   { id: 'sec-import', label: 'ייבוא נתונים' },
   { id: 'sec-access', label: 'נגישות' },
   { id: 'sec-reset', label: 'איפוס' },
@@ -44,6 +46,7 @@ export function SettingsView() {
       <RoomsSection />
       <NotifSection />
       <BackupSection />
+      <ExportSection />
       <ImportSection />
       <AccessSection />
       <ResetSection />

@@ -5,7 +5,9 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../../store/useApp';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
+import { HebDateInput } from '../HebDateInput';
 import { hebDateFull } from '../../lib/hebrew';
+import { orgBlockError, roomClashError } from './calLib';
 import {
   HEBREW_RECURRING,
   type EventPriority,
@@ -50,9 +52,14 @@ export function EventModal(props: {
   ev: OrgEvent | null;
   /** תאריך התחלתי לאירוע חדש (ISO). */
   date: string;
+  /** ערכים התחלתיים לאירוע חדש — למשל הזמנת משבצת חדר מהיומן. */
+  prefill?: { time?: string; roomId?: string; type?: EventType; notes?: string };
+  /** טקסט toast מותאם לשמירת אירוע חדש (ברירת מחדל: 'האירוע נוסף ללוח'). */
+  saveToast?: string;
   onClose: () => void;
 }) {
-  const { ev, date, onClose } = props;
+  const { ev, date, prefill, saveToast, onClose } = props;
+  const db = useApp((s) => s.db);
   const rooms = useApp((s) => s.db.rooms);
   const families = useApp((s) => s.db.families);
   const upsertEvent = useApp((s) => s.upsertEvent);
@@ -63,12 +70,12 @@ export function EventModal(props: {
   const [f, setF] = useState<FormState>(() => ({
     title: ev?.title ?? '',
     date: ev?.date ?? date,
-    time: ev?.time ?? '',
-    type: ev?.type ?? 'org',
+    time: ev?.time ?? prefill?.time ?? '',
+    type: ev?.type ?? prefill?.type ?? 'org',
     customType: ev?.customType ?? '',
-    notes: ev?.notes ?? '',
+    notes: ev?.notes ?? prefill?.notes ?? '',
     price: ev && ev.price ? String(ev.price) : '',
-    roomId: ev?.roomId ?? '',
+    roomId: ev?.roomId ?? prefill?.roomId ?? '',
     famId: ev?.famId ?? '',
     priority: ev?.priority ?? 'green',
     done: ev?.done ?? false,
@@ -112,6 +119,20 @@ export function EventModal(props: {
       setError('מחיר האירוע חייב להיות מספר');
       return;
     }
+    // התנגשות חדר — אירוע אחר או מפגש חוג באותה שעה (כמו במקור)
+    const clash = roomClashError(db, f, ev?.id);
+    if (clash) {
+      setError(clash);
+      return;
+    }
+    // אירוע ארגוני אסור בשבת ובחג מלא
+    if (f.type === 'org') {
+      const blocked = orgBlockError(f.date);
+      if (blocked) {
+        setError(blocked);
+        return;
+      }
+    }
     const next: OrgEvent = {
       id: ev?.id ?? nextId('ev'),
       title: f.title.trim(),
@@ -127,7 +148,7 @@ export function EventModal(props: {
       done: f.done,
     };
     upsertEvent(next);
-    toast(ev ? 'האירוע עודכן' : 'האירוע נוסף ללוח');
+    toast(ev ? 'האירוע עודכן' : (saveToast ?? 'האירוע נוסף ללוח'));
     onClose();
   }
 
@@ -152,7 +173,7 @@ export function EventModal(props: {
           </Field>
         </div>
         <Field label="תאריך *">
-          <TextInput type="date" value={f.date} onChange={(v) => set('date', v)} dir="ltr" />
+          <HebDateInput value={f.date} onChange={(iso) => set('date', iso)} />
         </Field>
         <Field label="שעה">
           <TextInput type="time" value={f.time} onChange={(v) => set('time', v)} dir="ltr" />

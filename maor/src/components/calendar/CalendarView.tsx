@@ -5,21 +5,25 @@
  */
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useApp } from '../../store/useApp';
-import { Btn, Empty, PageHead } from '../ui';
+import { Btn, Chip, Empty, PageHead } from '../ui';
 import type { OrgEvent } from '../../types/domain';
 import {
+  allowItem,
   buildGregorianGrid,
   buildHebrewGrid,
   DAY_NAMES,
+  DEFAULT_FILTERS,
   EV_META,
   HOLIDAY_META,
   isoOf,
   SESSION_META,
   upcomingRows,
   type CalCell,
+  type CalFilters,
   type DayItem,
 } from './calLib';
 import { EventModal } from './EventModal';
+import { DayModal } from './DayModal';
 
 const MAX_PILLS = 3;
 
@@ -45,17 +49,17 @@ interface ModalState {
   date: string;
 }
 
-function DayCell(props: { cell: CalCell; onAdd: () => void; onItem: (it: DayItem) => void }) {
-  const { cell, onAdd, onItem } = props;
+function DayCell(props: { cell: CalCell; onOpen: () => void; onItem: (it: DayItem) => void }) {
+  const { cell, onOpen, onItem } = props;
   const pills = cell.items.slice(0, MAX_PILLS);
   const more = cell.items.length - MAX_PILLS;
   return (
     <div
       role="button"
       tabIndex={0}
-      title={'הוספת אירוע — ' + cell.iso.split('-').reverse().join('/')}
-      onClick={onAdd}
-      onKeyDown={(e) => e.key === 'Enter' && e.target === e.currentTarget && onAdd()}
+      title={'תצוגת יום — ' + cell.iso.split('-').reverse().join('/')}
+      onClick={onOpen}
+      onKeyDown={(e) => e.key === 'Enter' && e.target === e.currentTarget && onOpen()}
       style={{
         minHeight: 96,
         padding: '6px 7px',
@@ -120,9 +124,19 @@ function DayCell(props: { cell: CalCell; onAdd: () => void; onItem: (it: DayItem
   );
 }
 
+/** צ'יפי הפילטרים — תווית לכל שכבה. */
+const FILTER_CHIPS: { key: keyof Omit<CalFilters, 'urgentOnly'>; label: string }[] = [
+  { key: 'events', label: 'אירועים' },
+  { key: 'courses', label: 'חוגים' },
+  { key: 'bdays', label: 'ימי הולדת' },
+  { key: 'joins', label: 'הצטרפות' },
+  { key: 'enrolls', label: 'הרשמות' },
+];
+
 export function CalendarView() {
   const db = useApp((s) => s.db);
   const selectCourse = useApp((s) => s.selectCourse);
+  const selectFamily = useApp((s) => s.selectFamily);
   const upsertEvent = useApp((s) => s.upsertEvent);
   const toast = useApp((s) => s.toast);
 
@@ -131,10 +145,16 @@ export function CalendarView() {
   const [hebMode, setHebMode] = useState(false);
   const [hebAnchor, setHebAnchor] = useState(isoOf(now));
   const [modal, setModal] = useState<ModalState | null>(null);
+  const [dayIso, setDayIso] = useState<string | null>(null);
+  const [filters, setFilters] = useState<CalFilters>(DEFAULT_FILTERS);
 
   const grid = useMemo(
     () => (hebMode ? buildHebrewGrid(db, hebAnchor) : buildGregorianGrid(db, ym.y, ym.m)),
     [db, hebMode, hebAnchor, ym],
+  );
+  const cells = useMemo(
+    () => grid.cells.map((c) => ({ ...c, items: c.items.filter((it) => allowItem(it, filters)) })),
+    [grid, filters],
   );
   const upcoming = useMemo(() => upcomingRows(db, 14), [db]);
 
@@ -172,6 +192,7 @@ export function CalendarView() {
   function onItem(it: DayItem) {
     if (it.ev) setModal({ ev: it.ev, date: it.ev.date });
     else if (it.courseId) selectCourse(it.courseId);
+    else if (it.famId) selectFamily(it.famId);
   }
 
   function markCallDone(ev: OrgEvent) {
@@ -203,7 +224,23 @@ export function CalendarView() {
         }
       />
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 16 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 14 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-faint)' }}>שכבות:</span>
+        {FILTER_CHIPS.map((fc) => (
+          <Chip
+            key={fc.key}
+            on={filters[fc.key]}
+            onClick={() => setFilters((p) => ({ ...p, [fc.key]: !p[fc.key] }))}
+          >
+            {fc.label}
+          </Chip>
+        ))}
+        <Chip on={filters.urgentOnly} onClick={() => setFilters((p) => ({ ...p, urgentOnly: !p.urgentOnly }))}>
+          דחוף בלבד
+        </Chip>
+      </div>
+
+      <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 12 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
           {DAY_NAMES.map((n) => (
             <div
@@ -220,11 +257,11 @@ export function CalendarView() {
               {n}
             </div>
           ))}
-          {grid.cells.map((cell) => (
+          {cells.map((cell) => (
             <DayCell
               key={cell.iso}
               cell={cell}
-              onAdd={() => setModal({ ev: null, date: cell.iso })}
+              onOpen={() => setDayIso(cell.iso)}
               onItem={onItem}
             />
           ))}
@@ -325,6 +362,16 @@ export function CalendarView() {
         ))}
       </section>
 
+      {dayIso && (
+        <DayModal
+          iso={dayIso}
+          filters={filters}
+          onClose={() => setDayIso(null)}
+          onShift={(iso) => setDayIso(iso)}
+          onAdd={(iso) => setModal({ ev: null, date: iso })}
+          onEdit={(ev) => setModal({ ev, date: ev.date })}
+        />
+      )}
       {modal && <EventModal ev={modal.ev} date={modal.date} onClose={() => setModal(null)} />}
     </div>
   );

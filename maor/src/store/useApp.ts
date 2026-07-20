@@ -11,6 +11,7 @@ import {
   emptyDb,
   type Absence,
   type Course,
+  type CredLogEntry,
   type Db,
   type Donation,
   type Enrollment,
@@ -84,6 +85,12 @@ interface AppState {
   upsertMember: (famId: string, member: Member) => void;
   deleteMember: (famId: string, memberId: string) => void;
   addCred: (famId: string, delta: number, reason: string) => void;
+  /** Batch יומי: ‎-2 נק׳ לכל משפחה ללא פעילות ניקוד ב-14 הימים האחרונים. */
+  runDecay: () => void;
+
+  // מרכז טיפול — סימון פריטי "דורש טיפול" כטופלו
+  markAttnDone: (key: string) => void;
+  unmarkAttnDone: (key: string) => void;
 
   // חוגים ושיבוצים
   upsertCourse: (course: Course) => void;
@@ -117,6 +124,24 @@ let toastSeq = 1;
 
 function isoToday(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** תאריך ISO במרחק ימים מהיום (שלילי = אחורה). */
+function isoDaysAgo(days: number): string {
+  return new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** מפתח localStorage המבטיח ריצת דעיכה אחת ביום. */
+const DECAY_LS_KEY = 'maor_decay';
+
+/**
+ * מקדם מגמה (TrendFactor) — לפי 3 רשומות הלוג האחרונות:
+ * כולן חיוביות → 1.2, כולן שליליות → 0.8, ביניים לפי היחס. לוג ריק → 1.
+ */
+function trendFactor(log: CredLogEntry[]): number {
+  const last3 = log.slice(0, 3);
+  if (!last3.length) return 1;
+  return 0.8 + 0.4 * (last3.filter((e) => e.delta > 0).length / last3.length);
 }
 
 export const useApp = create<AppState>()((set, get) => {
@@ -167,6 +192,32 @@ export const useApp = create<AppState>()((set, get) => {
       void dailySnapshot(db);
       if (corrupt) {
         get().toast('⚠ הנתונים השמורים נמצאו פגומים — נשמר עותק בצד. שחזרו מגיבוי דרך הגדרות ← ייבוא');
+      }
+      // ניקוי סימוני "טופל" ישנים (30+ ימים) — שומר על המפה קטנה
+      const pruneCutoff = isoDaysAgo(30);
+      const stale = Object.entries(db.attnDone ?? {}).filter(([, d]) => d < pruneCutoff);
+      if (stale.length) {
+        setDb((cur) => {
+          const attnDone = { ...cur.attnDone };
+          for (const [k] of stale) delete attnDone[k];
+          return { attnDone };
+        });
+      }
+      // דעיכת אי-פעילות — ריצה אחת ביום (guard ב-localStorage)
+      const today = isoToday();
+      let ranToday = false;
+      try {
+        ranToday = localStorage.getItem(DECAY_LS_KEY) === today;
+      } catch {
+        /* localStorage חסום — נריץ בכל טעינה, לא קריטי */
+      }
+      if (!ranToday) {
+        try {
+          localStorage.setItem(DECAY_LS_KEY, today);
+        } catch {
+          /* אין מקום / מצב פרטי */
+        }
+        get().runDecay();
       }
     },
 
@@ -241,19 +292,71 @@ export const useApp = create<AppState>()((set, get) => {
       }));
     },
     addCred(famId, delta, reason) {
+      const fam = get().db.families.find((f) => f.id === famId);
+      if (!fam) return;
+      const prevScore = fam.cred?.score ?? 700;
+      const log = fam.cred?.log ?? [];
+      // מקדם מגמה — מוחל על זיכויים בלבד (כמו באב-טיפוס); חיובים עוברים כמות שהם
+      const tf = trendFactor(log);
+      const applied = delta > 0 ? Math.round(delta * tf) : delta;
+      const newScore = Math.max(0, Math.min(1000, prevScore + applied));
+      const entryReason =
+        reason + (delta > 0 && tf !== 1 ? ` (מקדם מגמה ${tf.toFixed(1)})` : '');
       setDb((db) => ({
         families: db.families.map((f) =>
           f.id === famId
             ? {
                 ...f,
                 cred: {
-                  score: Math.max(0, Math.min(1000, (f.cred?.score ?? 500) + delta)),
-                  log: [{ date: isoToday(), delta, reason }, ...(f.cred?.log ?? [])].slice(0, 200),
+                  score: newScore,
+                  log: [{ date: isoToday(), delta: applied, reason: entryReason }, ...log].slice(0, 200),
                 },
               }
             : f,
         ),
       }));
+      // חציית סף למדד אדום — התראה למנהל
+      if (prevScore >= 300 && newScore < 300) {
+        get().toast(`⚠ משפחת ${fam.name} ירדה למדד אדום — מומלץ ליצור קשר`);
+      }
+    },
+    runDecay() {
+      const cutoff = isoDaysAgo(14);
+      const today = isoToday();
+      let n = 0;
+      setDb((db) => ({
+        families: db.families.map((f) => {
+          const score = f.cred?.score ?? 700;
+          if (score <= 0) return f; // אין לאן לרדת
+          const last = f.cred?.log?.[0];
+          if (last && last.date >= cutoff) return f; // הייתה פעילות לאחרונה
+          n++;
+          return {
+            ...f,
+            cred: {
+              score: Math.max(0, score - 2),
+              log: [
+                { date: today, delta: -2, reason: 'דעיכה — חוסר פעילות' },
+                ...(f.cred?.log ?? []),
+              ].slice(0, 200),
+            },
+          };
+        }),
+      }));
+      if (n > 0) {
+        get().toast(`Batch יומי: הפחתת אי-פעילות (‎-2) ל-${n} משפחות`);
+      }
+    },
+
+    markAttnDone(key) {
+      setDb((db) => ({ attnDone: { ...db.attnDone, [key]: isoToday() } }));
+    },
+    unmarkAttnDone(key) {
+      setDb((db) => {
+        const attnDone = { ...db.attnDone };
+        delete attnDone[key];
+        return { attnDone };
+      });
     },
 
     upsertCourse(course) {

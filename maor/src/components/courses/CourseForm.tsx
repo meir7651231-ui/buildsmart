@@ -7,6 +7,7 @@ import type { Course, Gender, Teacher, Weekday } from '../../types/domain';
 import { useApp } from '../../store/useApp';
 import { normalizePhone } from '../../lib/validate';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
+import { HebDateInput } from '../HebDateInput';
 import { ADD_TEACHER, CAT_OPTIONS, DAY_NAMES, OTHER, OTHER_LABEL, SEMESTER_OPTIONS } from './lib';
 
 interface CourseFormState {
@@ -334,11 +335,11 @@ export function CourseForm(props: { course: Course | null; onClose: () => void }
         <Field label="עד גיל">
           <TextInput value={f.ageMax} onChange={(v) => set({ ageMax: v })} placeholder="99" dir="ltr" />
         </Field>
-        <Field label="התחלה (לועזי)">
-          <TextInput value={f.start} onChange={(v) => set({ start: v })} type="date" />
+        <Field label="תאריך התחלה">
+          <HebDateInput value={f.start} onChange={(iso) => set({ start: iso })} />
         </Field>
-        <Field label="סיום (לועזי)">
-          <TextInput value={f.end} onChange={(v) => set({ end: v })} type="date" />
+        <Field label="תאריך סיום">
+          <HebDateInput value={f.end} onChange={(iso) => set({ end: iso })} />
         </Field>
       </div>
       <div

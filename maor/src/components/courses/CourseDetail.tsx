@@ -6,6 +6,7 @@ import { useState } from 'react';
 import type { Course, Enrollment, Weekday } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
 import { hebDateFull } from '../../lib/hebrew';
+import { downloadCsv, type Cell } from '../../lib/csvx';
 import { Btn, Empty } from '../ui';
 import { CourseForm } from './CourseForm';
 import { EnrollModal } from './EnrollModal';
@@ -78,6 +79,30 @@ export function CourseDetail(props: { course: Course }) {
     const fam = db.families.find((f) => f.members.some((m) => m.id === e.memberId));
     if (fam) addCred(fam.id, 5, 'נוכחות (Check-in)');
     toast('הניקוב נרשם בהצלחה');
+  }
+
+  /** תדפיס למורה — CSV של התלמידים הרשומים, כולל רגישויות (port של exportCourseStudents). */
+  function exportStudents() {
+    const rows: Cell[][] = [
+      ['תלמיד/ה', 'גיל', 'משפחה', 'טלפון', 'קבוצה', 'מסלול', 'יתרה', 'רגישויות/רפואי', 'הערה'],
+    ];
+    for (const e of enrolled) {
+      const m = members.find((x) => x.id === e.memberId);
+      const fam = db.families.find((f) => f.id === m?.famId);
+      rows.push([
+        m?.first ?? '',
+        (m ? ageOf(m.birth) : null) ?? '',
+        fam?.name ?? '',
+        m?.phone || fam?.phone || '',
+        e.group,
+        e.plan === 'punch' ? 'כרטיסייה ' + (e.purchased - e.used) + '/' + e.purchased : 'מנוי',
+        e.plan === 'punch' ? e.purchased - e.used : '',
+        m?.health ?? '',
+        e.note,
+      ]);
+    }
+    downloadCsv('course-' + c.name + '.csv', rows);
+    toast('רשימת התלמידים של "' + c.name + '" ירדה — כולל רגישויות למורה');
   }
 
   function setGroup(e: Enrollment, v: string, first: string) {
@@ -184,6 +209,9 @@ export function CourseDetail(props: { course: Course }) {
                 <span style={{ fontSize: 12, color: 'var(--ink-faint)', fontWeight: 600 }}>
                   {enrolled.length + '/' + (c.maxStudents || '∞') + ' רשומים'}
                 </span>
+                <Btn sm disabled={!enrolled.length} onClick={exportStudents} title="הורדת רשימת התלמידים כ-CSV למורה — כולל רגישויות">
+                  ⬇ תדפיס למורה
+                </Btn>
                 <Btn sm disabled={full} onClick={() => setModal({ kind: 'enroll' })}>
                   {full ? 'הקורס מלא' : '+ שיבוץ תלמיד'}
                 </Btn>

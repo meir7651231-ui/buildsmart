@@ -57,6 +57,58 @@ export function famEnrollments(db: Db, fam: Family): Enrollment[] {
   return db.enrollments.filter((e) => ids.has(e.memberId));
 }
 
+/** רשומת היסטוריה משפחתית — נגזרת מהנתונים הקיימים, לא נשמרת בנפרד. */
+export interface FamHistoryEntry {
+  date: string;
+  tag: string;
+  bg: string;
+  c: string;
+  text: string;
+}
+
+/**
+ * היסטוריית הפעולות של המשפחה (כמו famHistoryOf במקור) — נגזרת מהנתונים:
+ * הצטרפות · לוג מדד האמינות · מסמכים · שיבוצים · תשלומים · היעדרויות.
+ * ממוינת מהחדש לישן, עד 40 הפעולות האחרונות.
+ */
+export function famHistoryOf(db: Db, fam: Family): FamHistoryEntry[] {
+  const out: FamHistoryEntry[] = [];
+  const push = (date: string, tag: string, bg: string, c: string, text: string) => {
+    if (date) out.push({ date, tag, bg, c, text });
+  };
+  if (fam.createdAt) push(fam.createdAt, 'הצטרפות', '#e7edf5', '#3a5a86', 'המשפחה הצטרפה');
+  for (const l of fam.cred?.log ?? []) {
+    push(l.date, 'אמינות', '#f6ead1', '#9a6414', l.reason + ' (' + (l.delta > 0 ? '+' : '') + l.delta + ' נק׳)');
+  }
+  for (const d of fam.docs) push(d.addedAt, 'מסמך', '#eceae2', '#4d463c', 'מסמך נוסף: ' + d.name);
+  const ids = new Set(fam.members.map((m) => m.id));
+  for (const e of db.enrollments) {
+    if (!ids.has(e.memberId)) continue;
+    const first = fam.members.find((x) => x.id === e.memberId)?.first ?? '';
+    const cname = db.courses.find((x) => x.id === e.courseId)?.name ?? '';
+    push(
+      e.enrolledAt,
+      'שיבוץ',
+      '#eef7e6',
+      '#3f6212',
+      'נרשמ/ה ' + first + ' ל' + cname + (e.group ? ' · ' + e.group : ''),
+    );
+    for (const p of e.payments) {
+      push(p.date, 'תשלום', '#e4f5ea', '#12803c', 'תשלום ₪' + p.amount + ' (' + p.method + ') — ' + cname + ' · ' + p.rid);
+    }
+    for (const a of e.absences) {
+      push(
+        a.date,
+        a.noshow ? 'No-Show' : 'היעדרות',
+        '#fdeaea',
+        '#b91c1c',
+        'היעדרות — ' + cname + (a.reason ? ' · ' + a.reason : '') + (a.makeup ? ' · זכאי/ת השלמה' : ''),
+      );
+    }
+  }
+  return out.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 40);
+}
+
 /** ערכי הבחירה בטופס — verbatim מהמקור; '__other' פותח הקלדה חופשית. */
 export const MARITAL_OPTIONS = ['נשואים', 'גרושים', 'אלמן/ה', 'פרודים'];
 export const LANGUAGE_OPTIONS = ['עברית', 'יידיש', 'רוסית', 'צרפתית', 'אנגלית'];

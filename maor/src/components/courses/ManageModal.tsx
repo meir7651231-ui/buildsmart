@@ -7,6 +7,7 @@ import type { Course, Enrollment, OrgEvent } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
 import { downloadReceipt } from '../../lib/receipt';
 import { Btn, Field, Modal, Select, TextInput } from '../ui';
+import { HebDateInput } from '../HebDateInput';
 import {
   PAY_METHODS,
   chipStyle,
@@ -232,7 +233,7 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
             <TextInput value={totalDue} onChange={saveTotalDue} placeholder={String(c.price || 0)} dir="ltr" />
           </Field>
           <Field label="מתי ישלם את השאר">
-            <TextInput value={en.dueDate} onChange={saveDueDate} type="date" />
+            <HebDateInput value={en.dueDate} onChange={saveDueDate} />
           </Field>
         </div>
         {en.payments.length > 0 && (
@@ -261,8 +262,8 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
           <div style={{ flex: 1, minWidth: 110 }}>
             <Select value={payMethod} onChange={setPayMethod} options={PAY_METHODS.map((v) => ({ value: v, label: v }))} />
           </div>
-          <div style={{ width: 150 }}>
-            <TextInput value={payDate} onChange={setPayDate} type="date" />
+          <div style={{ flex: '1 1 220px', minWidth: 220 }}>
+            <HebDateInput value={payDate} onChange={setPayDate} />
           </div>
           <Btn sm kind="primary" onClick={addPay}>
             ＋ קבלת תשלום

@@ -21,6 +21,15 @@ import {
   weeklyRoomSessions,
 } from './lib';
 import { AttendancePanel } from './AttendancePanel';
+import { EventModal } from '../calendar/EventModal';
+
+/** הזמנת משבצת פנויה — הנתונים המוזרקים למודאל האירוע. */
+interface Booking {
+  date: string;
+  time: string;
+  roomId: string;
+  roomName: string;
+}
 
 export function DiaryView() {
   const db = useApp((s) => s.db);
@@ -29,6 +38,7 @@ export function DiaryView() {
   const [roomSel, setRoomSel] = useState('');
   const [date, setDate] = useState(isoToday());
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
 
   const activeRooms = db.rooms.filter((r) => r.active);
   const room = activeRooms.find((r) => r.id === roomSel) ?? activeRooms[0];
@@ -171,18 +181,39 @@ export function DiaryView() {
                 <div key={sl.key} style={{ borderBottom: '1px solid #ece7db' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px' }}>
                     <span style={{ width: 46, flex: 'none', fontWeight: 800, fontSize: 13 }}>{sl.time}</span>
-                    <span
-                      style={{
-                        ...chipStyle(sl.bg, sl.c),
-                        flex: 1,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                      title={sl.label}
-                    >
-                      {sl.label}
-                      {sl.course && sl.session?.label ? ' · ' + sl.session.label : ''}
-                    </span>
+                    {sl.kind === 'free' ? (
+                      <button
+                        type="button"
+                        style={{
+                          ...chipStyle(sl.bg, sl.c),
+                          flex: 1,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          textAlign: 'right',
+                          cursor: 'pointer',
+                          border: '1px dashed #9cc9ab',
+                        }}
+                        title="הזמנת המשבצת — פתיחת אירוע חדש בחדר ובשעה האלה"
+                        onClick={() =>
+                          setBooking({ date, time: sl.time, roomId: room.id, roomName: room.name })
+                        }
+                      >
+                        {sl.label} · + הזמנה
+                      </button>
+                    ) : (
+                      <span
+                        style={{
+                          ...chipStyle(sl.bg, sl.c),
+                          flex: 1,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                        title={sl.label}
+                      >
+                        {sl.label}
+                        {sl.course && sl.session?.label ? ' · ' + sl.session.label : ''}
+                      </span>
+                    )}
                     {sl.course && (
                       <Btn sm onClick={() => setOpenKey(open ? null : sl.key)} title="פתיחת פאנל נוכחות למפגש">
                         👥 נוכחות ({enrolledCount}) {open ? '▴' : '▾'}
@@ -232,6 +263,21 @@ export function DiaryView() {
           })
         )}
       </div>
+
+      {booking && (
+        <EventModal
+          ev={null}
+          date={booking.date}
+          prefill={{
+            time: booking.time,
+            roomId: booking.roomId,
+            type: 'org',
+            notes: 'חדר: ' + booking.roomName,
+          }}
+          saveToast="ההזמנה נכנסה — המשבצת מסומנת תפוסה ביומן"
+          onClose={() => setBooking(null)}
+        />
+      )}
     </div>
   );
 }

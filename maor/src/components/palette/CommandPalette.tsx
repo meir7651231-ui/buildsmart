@@ -1,12 +1,14 @@
 /**
  * פלטת פקודות (Ctrl+K) — חיפוש מהיר בכל המערכת:
  * מסכים, משפחות, בני משפחה, חוגים, מורים, תורמים, אירועים, מסמכים ופעולות.
+ * בנוסף: חיפוש שיבוץ לפי מזהה (e123), רשימת "כרטיסיות מסתיימות" עם ניקוב
+ * ישיר כשאין שאילתה, והצעות "אולי התכוונת" כשאין תוצאות.
  *
  * App מרנדר את הרכיב רק כאשר paletteOpen=true; סגירה דרך setPalette(false).
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { allMembers, useApp, type View } from '../../store/useApp';
-import { smartFilter } from '../../lib/search';
+import { levenshtein, smartFilter } from '../../lib/search';
 import { normSearch } from '../../lib/validate';
 
 /** פריט בר-הפעלה בפלטה: אייקון + כותרת + שורת משנה + פעולה. */
@@ -18,6 +20,10 @@ interface Cmd {
   /** מונחי חיפוש מנורמלים (normSearch) — מחרוזות שלמות + מילים בודדות. */
   terms: string[];
   run: () => void;
+  /** כותרת קבוצה — מוצגת מעל הפריט הזה (הראשון בקבוצה). */
+  section?: string;
+  /** כפתור פעולה משני בתוך השורה (עכבר בלבד; Enter מפעיל את run). */
+  inline?: { label: string; run: () => void };
 }
 
 /** פקודות ניווט — זהות לתפריט הראשי ב-App (משוכפל כאן כי NAV אינו מיוצא). */
@@ -69,6 +75,8 @@ export function CommandPalette() {
   const selectCourse = useApp((s) => s.selectCourse);
   const setPalette = useApp((s) => s.setPalette);
   const exportBackup = useApp((s) => s.exportBackup);
+  const punch = useApp((s) => s.punch);
+  const toast = useApp((s) => s.toast);
 
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
@@ -110,9 +118,64 @@ export function CommandPalette() {
           setPalette(false);
         },
       },
+      {
+        key: 'act-wheel',
+        icon: '🎡',
+        title: 'גלגל החוגים',
+        sub: 'סיבוב מזל שבוחר חוג',
+        terms: toTerms(['גלגל החוגים', 'גלגל', 'מזל', 'הגרלה', 'מצא חוג', 'wheel']),
+        run: () => {
+          try {
+            sessionStorage.setItem('maor_open_wheel', '1');
+          } catch {
+            /* sessionStorage חסום */
+          }
+          go('courses');
+          // אם מסך החוגים כבר פתוח — הדגל לא ייקרא ב-mount; האירוע משלים
+          window.dispatchEvent(new Event('maor:open-wheel'));
+          setPalette(false);
+        },
+      },
     ];
     return [...nav, ...actions];
   }, [go, selectFamily, exportBackup, setPalette]);
+
+  /** כרטיסיות מסתיימות — שיבוצי כרטיסייה פעילים עם ≤2 ניקובים שנותרו. */
+  const expiringCmds = useMemo<Cmd[]>(() => {
+    const members = allMembers(db);
+    const out: Cmd[] = [];
+    for (const e of db.enrollments) {
+      if (e.plan !== 'punch' || e.status !== 'active') continue;
+      const left = e.purchased - e.used;
+      if (left > 2 || left < 0) continue;
+      const m = members.find((x) => x.id === e.memberId);
+      const c = db.courses.find((x) => x.id === e.courseId);
+      if (!m || !c) continue;
+      out.push({
+        key: 'punch-' + e.id,
+        icon: '🎟️',
+        title: `${m.first} · ${c.name} · נותרו ${left}`,
+        sub: left === 0 ? 'הכרטיסייה נגמרה' : 'Enter — מעבר לחוג',
+        terms: [],
+        run: () => {
+          selectCourse(c.id);
+          setPalette(false);
+        },
+        inline:
+          left > 0
+            ? {
+                label: 'נקב ✓',
+                run: () => {
+                  punch(e.id);
+                  toast(`ניקוב נרשם ל${m.first} ✓ — נותרו ${left - 1}`);
+                },
+              }
+            : undefined,
+      });
+      if (out.length >= 5) break;
+    }
+    return out;
+  }, [db, punch, toast, selectCourse, setPalette]);
 
   /** ישויות מהנתונים — משפחות, בני משפחה, חוגים, מורים, תורמים, מסמכים ואירועים פתוחים. */
   const entityCmds = useMemo<Cmd[]>(() => {
@@ -234,12 +297,63 @@ export function CommandPalette() {
     return out;
   }, [db, go, selectFamily, selectCourse, setPalette]);
 
-  /** דירוג חכם (smartFilter) על מונחי החיפוש המנורמלים. עד 12 תוצאות. */
+  /** דירוג חכם (smartFilter) על מונחי החיפוש המנורמלים. עד 12 תוצאות.
+   * שאילתה ריקה: ניווט + פעולות ואחריהם "כרטיסיות מסתיימות".
+   * מזהה שיבוץ (e123): קפיצה ישירה לחוג של השיבוץ, לפני שאר התוצאות. */
   const results = useMemo<Cmd[]>(() => {
     const nq = normSearch(q);
-    if (!nq) return baseCmds.slice(0, MAX_RESULTS);
-    return smartFilter(nq, [...baseCmds, ...entityCmds], (c) => c.terms, MAX_RESULTS);
-  }, [q, baseCmds, entityCmds]);
+    if (!nq) {
+      const exp = expiringCmds.map((c, i) => (i === 0 ? { ...c, section: 'כרטיסיות מסתיימות' } : c));
+      return [...baseCmds, ...exp];
+    }
+    const pre: Cmd[] = [];
+    const t = q.trim().toLowerCase();
+    if (/^e\d+$/.test(t)) {
+      const e = db.enrollments.find((x) => x.id.toLowerCase() === t);
+      const c = e && db.courses.find((x) => x.id === e.courseId);
+      if (e && c) {
+        const m = allMembers(db).find((x) => x.id === e.memberId);
+        pre.push({
+          key: 'enr-' + e.id,
+          icon: '🎫',
+          title: 'שיבוץ ' + e.id + (m ? ' — ' + m.first : ''),
+          sub: c.name + ' · מעבר לכרטיס החוג',
+          terms: [],
+          run: () => {
+            selectCourse(c.id);
+            setPalette(false);
+          },
+        });
+      }
+    }
+    return [...pre, ...smartFilter(nq, [...baseCmds, ...entityCmds], (c) => c.terms, MAX_RESULTS)].slice(
+      0,
+      MAX_RESULTS,
+    );
+  }, [q, baseCmds, entityCmds, expiringCmds, db, selectCourse, setPalette]);
+
+  /** "אולי התכוונת" — שאילתה ≥3 תווים בלי תוצאות: עד 3 מילים קרובות
+   * (levenshtein ≤ 2) מתוך כותרות כל הפריטים המאונדקסים. */
+  const suggestions = useMemo<string[]>(() => {
+    const nq = normSearch(q);
+    if (nq.length < 3 || results.length > 0) return [];
+    const scored: { w: string; d: number }[] = [];
+    const seen = new Set<string>();
+    for (const c of [...baseCmds, ...entityCmds]) {
+      for (const w of c.title.split(/\s+/)) {
+        if (w.length < 2) continue;
+        const nw = normSearch(w);
+        if (!nw || nw === nq || seen.has(nw)) continue;
+        const d = levenshtein(nq, nw);
+        if (d <= 2) {
+          seen.add(nw);
+          scored.push({ w, d });
+        }
+      }
+    }
+    scored.sort((a, b) => a.d - b.d);
+    return scored.slice(0, 3).map((x) => x.w);
+  }, [q, results, baseCmds, entityCmds]);
 
   // איפוס הבחירה כשהשאילתה משתנה, והצמדה לטווח כשהתוצאות מתקצרות.
   useEffect(() => {
@@ -293,26 +407,76 @@ export function CommandPalette() {
           aria-label="חיפוש מהיר בכל המערכת"
         />
         <div className="results" ref={listRef} role="listbox" aria-label="תוצאות חיפוש">
-          {results.map((c, i) => (
-            <button
-              key={c.key}
-              type="button"
-              className={i === sel ? 'sel' : ''}
-              role="option"
-              aria-selected={i === sel}
-              onMouseEnter={() => setSel(i)}
-              onClick={c.run}
-            >
-              <span aria-hidden>{c.icon}</span>
-              <span style={{ fontWeight: 600 }}>{c.title}</span>
-              {c.sub && (
-                <span style={{ color: 'var(--ink-faint)', fontSize: 12.5, marginInlineStart: 'auto' }}>{c.sub}</span>
-              )}
-            </button>
-          ))}
+          {results.map((c, i) => {
+            const inline = c.inline;
+            return (
+              <Fragment key={c.key}>
+                {c.section && (
+                  <div
+                    style={{
+                      padding: '10px 16px 4px',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: 'var(--ink-faint)',
+                      borderTop: '1px solid var(--line-soft)',
+                    }}
+                  >
+                    {c.section}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className={i === sel ? 'sel' : ''}
+                  role="option"
+                  aria-selected={i === sel}
+                  onMouseEnter={() => setSel(i)}
+                  onClick={c.run}
+                >
+                  <span aria-hidden>{c.icon}</span>
+                  <span style={{ fontWeight: 600 }}>{c.title}</span>
+                  <span style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {c.sub && <span style={{ color: 'var(--ink-faint)', fontSize: 12.5 }}>{c.sub}</span>}
+                    {inline && (
+                      <span
+                        role="button"
+                        tabIndex={-1}
+                        className="chip"
+                        title={inline.label}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          inline.run();
+                        }}
+                      >
+                        {inline.label}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              </Fragment>
+            );
+          })}
           {results.length === 0 && (
             <div className="empty" style={{ padding: '24px 16px' }}>
-              לא נמצאו תוצאות עבור "{q}"
+              <div>לא נמצאו תוצאות עבור "{q}"</div>
+              {suggestions.length > 0 && (
+                <div
+                  style={{
+                    marginTop: 14,
+                    display: 'flex',
+                    gap: 8,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span style={{ fontSize: 13 }}>אולי התכוונת:</span>
+                  {suggestions.map((w) => (
+                    <button key={w} type="button" className="chip" onClick={() => setQ(w)}>
+                      {w}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

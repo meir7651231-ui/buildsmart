@@ -321,6 +321,8 @@ export interface Db {
   notif: NotifPrefs;
   reports: ReportPrefs;
   ui: UiPrefs;
+  /** פריטי "דורש טיפול" שסומנו כטופלו — מפתח פריט → תאריך הסימון (ISO). */
+  attnDone: Record<string, string>;
 }
 
 export const DB_VERSION = 2;
@@ -343,6 +345,7 @@ export function emptyDb(): Db {
     notif: { email: true, push: false, sms: true, strong: false },
     reports: { daily: true, weekly: true, monthly: false, quarterly: false },
     ui: { famView: 'list', crsView: 'grid' },
+    attnDone: {},
   };
 }
 
@@ -390,6 +393,6 @@ export function emptyFamily(): Omit<Family, 'id' | 'createdAt'> {
     notes: '',
     members: [],
     docs: [],
-    cred: { score: 500, log: [] },
+    cred: { score: 700, log: [] },
   };
 }

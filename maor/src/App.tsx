@@ -14,6 +14,7 @@ import { ReportsView } from './components/reports/ReportsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { CommandPalette } from './components/palette/CommandPalette';
 import { DemoDrop } from './components/DemoDrop';
+import { DayGate } from './components/wheel/DayGate';
 
 const NAV: { view: View; icon: string; label: string }[] = [
   { view: 'home', icon: '🏠', label: 'בית' },
@@ -66,13 +67,17 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [setPalette]);
 
-  // גיבוי סוף-יום: פעם ביום, אחרי 17:00, יורד קובץ גיבוי אוטומטית
+  // גיבוי סוף-יום: פעם ביום, אחרי שעת הסיום שנקבעה בפתיחת היום
+  // (localStorage 'maor_dayend', ברירת מחדל 17:00), יורד קובץ גיבוי אוטומטית
   useEffect(() => {
     const tick = setInterval(() => {
       try {
         const today = new Date().toISOString().slice(0, 10);
         if (localStorage.getItem('maor_autoexp') === today) return;
-        if (new Date().getHours() < 17) return;
+        const [eh, em] = (localStorage.getItem('maor_dayend') || '17:00').split(':').map(Number);
+        const endMin = (Number.isFinite(eh) ? eh : 17) * 60 + (Number.isFinite(em) ? em : 0);
+        const now = new Date();
+        if (now.getHours() * 60 + now.getMinutes() < endMin) return;
         if (!useApp.getState().db.families.length) return;
         localStorage.setItem('maor_autoexp', today);
         exportBackup();
@@ -112,6 +117,7 @@ export default function App() {
 
       <main className="app-main">
         {famCount === 0 && <DemoDrop />}
+        <DayGate />
         <Current />
       </main>
 

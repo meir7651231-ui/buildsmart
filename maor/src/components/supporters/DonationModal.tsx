@@ -7,8 +7,8 @@ import { useState } from 'react';
 import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
 import { downloadReceipt } from '../../lib/receipt';
-import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
+import { HebDateInput } from '../HebDateInput';
 import { isoToday } from './lib';
 
 export function DonationModal(props: { supporter: Supporter; onClose: () => void }) {
@@ -60,7 +60,7 @@ export function DonationModal(props: { supporter: Supporter; onClose: () => void
       <FormError error={error} />
       <div className="form-grid">
         <Field label="תאריך">
-          <TextInput value={date} onChange={setDate} type="date" dir="ltr" />
+          <HebDateInput value={date} onChange={setDate} />
         </Field>
         <Field label="סכום">
           <TextInput value={amount} onChange={setAmount} type="number" dir="ltr" placeholder="0" />
@@ -79,11 +79,6 @@ export function DonationModal(props: { supporter: Supporter; onClose: () => void
           <TextInput value={cat} onChange={setCat} placeholder="מלגות, פעילות, כללי…" />
         </Field>
       </div>
-      {date && (
-        <div style={{ fontSize: 12.5, color: 'var(--ink-faint)', marginBottom: 4 }}>
-          {hebDateFull(date)}
-        </div>
-      )}
       <div className="modal-actions">
         <Btn kind="primary" onClick={save}>
           רישום התרומה

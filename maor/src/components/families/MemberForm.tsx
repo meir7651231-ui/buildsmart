@@ -8,6 +8,7 @@ import { useApp } from '../../store/useApp';
 import { validIsraeliId } from '../../lib/validate';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Chip, Field, FormError, Modal, Select, TextInput } from '../ui';
+import { HebDateInput } from '../HebDateInput';
 import { ageOf } from './lib';
 
 const MEDIA: { key: keyof MemberMedia; label: string }[] = [
@@ -124,7 +125,7 @@ export function MemberForm(props: { famId: string; member: Member | null; onClos
           />
         </Field>
         <Field label="תאריך לידה">
-          <TextInput type="date" value={f.birth} onChange={(v) => set({ birth: v })} />
+          <HebDateInput value={f.birth} onChange={(iso) => set({ birth: iso })} />
         </Field>
         <Field label={'ת"ז (רשות)'}>
           <TextInput value={f.idNum} onChange={(v) => set({ idNum: v })} placeholder="9 ספרות" dir="ltr" />

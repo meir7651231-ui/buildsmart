@@ -6,7 +6,8 @@ import { useState } from 'react';
 import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
 import { hebDateFull } from '../../lib/hebrew';
-import { Btn, Empty, Field, TextInput } from '../ui';
+import { Btn, Empty, Field } from '../ui';
+import { HebDateInput } from '../HebDateInput';
 import { chipStyle, fmtDate, isoToday, supScore, supTier, totalLabel } from './lib';
 import { SupporterForm } from './SupporterForm';
 import { DonationModal } from './DonationModal';
@@ -197,7 +198,7 @@ export function SupporterDetail(props: { supporter: Supporter; onBack: () => voi
         <div className="card">
           <h3 style={{ fontSize: 15, marginBottom: 8 }}>קשר הבא 🎯</h3>
           <Field label="תאריך יעד ליצירת קשר">
-            <TextInput value={sp.nextDate || ''} onChange={setNextDate} type="date" dir="ltr" />
+            <HebDateInput value={sp.nextDate || ''} onChange={setNextDate} />
           </Field>
           {sp.nextDate ? (
             <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>

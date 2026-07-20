@@ -82,6 +82,78 @@ export function sessionsOf(c: Course): CourseSession[] {
   return c.sessions && c.sessions.length ? c.sessions : [{ day: c.weekday, time: c.time, label: '' }];
 }
 
+/* ---------- חסימות לוח ---------- */
+
+/** חגים שבהם אין פעילות כלל (הרשימה המלאה מהמקור, בלי המועדים הקלים). */
+export const FULL_HOLIDAYS: readonly string[] = [
+  'ראש השנה',
+  'ראש השנה ב׳',
+  'יום כיפור',
+  'סוכות',
+  'שמחת תורה',
+  'פסח',
+  'שביעי של פסח',
+  'שבועות',
+  'תשעה באב',
+];
+
+/**
+ * סיבת חסימת היום — שבת וחג מלא לכל אירוע; ב-kind 'course' נוספים גם
+ * יום שישי וחול המועד (port של blockReason מהמקור).
+ */
+export function blockReason(d: Date, kind: 'org' | 'course' = 'org'): string | null {
+  const dow = d.getDay();
+  if (dow === 6) return 'שבת';
+  if (kind === 'course' && dow === 5) return 'יום שישי (שעתיים לפני שבת)';
+  const hol = holidayOf(d);
+  if (hol && FULL_HOLIDAYS.includes(hol)) return hol;
+  if (kind === 'course') {
+    const hp = hpOf(isoOf(d), d);
+    if ((hp.month === 'Tishri' && hp.day >= 16 && hp.day <= 21) || (hp.month === 'Nisan' && hp.day >= 16 && hp.day <= 20))
+      return 'חול המועד';
+  }
+  return null;
+}
+
+/** שגיאת חסימה לאירוע ארגוני — שבת או חג מלא (ולידציית saveEvent מהמקור). */
+export function orgBlockError(dateIso: string): string | null {
+  const br = blockReason(dateOf(dateIso), 'org');
+  if (!br) return null;
+  return br === 'שבת' ? 'לא ניתן לקבוע אירוע ארגוני בשבת' : 'לא ניתן לקבוע אירוע ארגוני ב' + br;
+}
+
+/**
+ * התנגשות חדר: אירוע אחר (אותו תאריך, חדר ושעה, לא בוצע) או מפגש חוג
+ * (אותו יום בשבוע בטווח החוג, אותה שעה) — כמו ולידציית saveEvent במקור.
+ */
+export function roomClashError(
+  db: Db,
+  form: { date: string; time: string; roomId: string },
+  excludeEventId?: string,
+): string | null {
+  if (!form.roomId || !form.time || !form.date) return null;
+  const hr = parseInt(form.time, 10);
+  const clashEv = db.events.find(
+    (x) =>
+      !x.done &&
+      x.id !== excludeEventId &&
+      x.roomId === form.roomId &&
+      x.date === form.date &&
+      parseInt(x.time || '-1', 10) === hr,
+  );
+  if (clashEv) return 'החדר תפוס בשעה זו: "' + clashEv.title + '" — בחרו שעה או חדר אחרים';
+  const dow = dateOf(form.date).getDay();
+  const clashC = db.courses.find(
+    (c) =>
+      c.roomId === form.roomId &&
+      (!c.start || form.date >= c.start) &&
+      (!c.end || form.date <= c.end) &&
+      sessionsOf(c).some((ss) => ss.day === dow && parseInt(ss.time, 10) === hr),
+  );
+  if (clashC) return 'בשעה זו מתקיים החוג "' + clashC.name + '" בחדר הזה — בחרו שעה או חדר אחרים';
+  return null;
+}
+
 /* ---------- שכבות יום ---------- */
 
 /**
@@ -110,8 +182,43 @@ export interface DayItem {
   prC: string;
   ev?: OrgEvent;
   courseId?: string;
+  /** ניווט לכרטיס משפחה (יום הולדת / הצטרפות). */
+  famId?: string;
+  /** שכבה נגזרת — יום הולדת של בן/בת משפחה, יום הצטרפות משפחה, הרשמה לחוג. */
+  layer?: 'bday' | 'join' | 'enroll';
   /** מפגש חוג שנופל על חג — מוצג מסומן כלא מתקיים. */
   skipped?: boolean;
+}
+
+/* ---------- פילטרים לשכבות ---------- */
+
+export interface CalFilters {
+  events: boolean;
+  courses: boolean;
+  bdays: boolean;
+  joins: boolean;
+  enrolls: boolean;
+  urgentOnly: boolean;
+}
+
+export const DEFAULT_FILTERS: CalFilters = {
+  events: true,
+  courses: true,
+  bdays: true,
+  joins: true,
+  enrolls: true,
+  urgentOnly: false,
+};
+
+/** האם פריט יום עובר את הפילטרים (כמו allowE במקור). */
+export function allowItem(it: DayItem, f: CalFilters): boolean {
+  if (f.urgentOnly && !(it.ev && it.ev.priority === 'red')) return false;
+  if (it.layer === 'bday') return f.bdays;
+  if (it.layer === 'join') return f.joins;
+  if (it.layer === 'enroll') return f.enrolls;
+  if (it.courseId) return f.courses;
+  if (it.ev) return f.events;
+  return true;
 }
 
 /** כל מה שקורה ביום: אירועים (כולל חוזרים) + מפגשי חוגים. חג מוחזר בנפרד בתא. */
@@ -135,6 +242,76 @@ export function dayItems(db: Db, d: Date): DayItem[] {
       sort: ev.priority === 'red' ? 0.5 : 1,
       prC: PRIORITY_COLOR[ev.priority] ?? 'transparent',
       ev,
+    });
+  }
+
+  // ימי הולדת של בני משפחה — חזרה שנתית לפי היום והחודש העבריים של תאריך הלידה
+  // (אותה לוגיקת hebParts כמו אזכרות), עם הגיל בשנים עבריות.
+  for (const f of db.families) {
+    for (const m of f.members) {
+      if (!m.birth || iso <= m.birth) continue;
+      const bh = hpOf(m.birth);
+      if (bh.day !== hp.day || bh.month !== hp.month) continue;
+      const age = hp.year - bh.year;
+      out.push({
+        key: 'bd-' + m.id,
+        label: `🎂 יום הולדת — ${m.first} (${age})`,
+        title: `🎂 יום הולדת — ${m.first} (${age}) · משפחת ${f.name}`,
+        bg: EV_META.bday.bg,
+        c: EV_META.bday.c,
+        typeLabel: 'יום הולדת',
+        sort: 2,
+        prC: 'transparent',
+        famId: f.id,
+        layer: 'bday',
+      });
+    }
+  }
+
+  // ימי שנה להצטרפות משפחה — לפי createdAt (חודש-יום לועזי, מהשנה שאחרי ההצטרפות).
+  for (const f of db.families) {
+    if (!f.createdAt || iso <= f.createdAt || iso.slice(5) !== f.createdAt.slice(5)) continue;
+    const n = +iso.slice(0, 4) - +f.createdAt.slice(0, 4);
+    out.push({
+      key: 'join-' + f.id,
+      label: `🏠 ${n} שנים למשפחת ${f.name}`,
+      title: `🏠 ${n} שנים למשפחת ${f.name} במערכת`,
+      bg: '#e7edf5',
+      c: '#3a5a86',
+      typeLabel: 'הצטרפות',
+      sort: 2.4,
+      prC: 'transparent',
+      famId: f.id,
+      layer: 'join',
+    });
+  }
+
+  // הרשמות לחוגים — ביום הרישום (enrolledAt).
+  for (const e of db.enrollments) {
+    if (e.enrolledAt !== iso) continue;
+    let em = null as { first: string } | null;
+    let ef = null as { id: string; name: string } | null;
+    for (const f of db.families) {
+      const x = f.members.find((mm) => mm.id === e.memberId);
+      if (x) {
+        em = x;
+        ef = f;
+        break;
+      }
+    }
+    const ec = db.courses.find((x) => x.id === e.courseId);
+    if (!em || !ec) continue;
+    out.push({
+      key: 'enr-' + e.id,
+      label: `📝 נרשמ/ה ${em.first} — ${ec.name}`,
+      title: `📝 הרשמה לחוג: ${em.first}` + (ef ? ` (משפחת ${ef.name})` : '') + ` ← ${ec.name}`,
+      bg: '#eef7e6',
+      c: '#3f6212',
+      typeLabel: 'הרשמה לחוג',
+      sort: 2.6,
+      prC: 'transparent',
+      courseId: ec.id,
+      layer: 'enroll',
     });
   }
 

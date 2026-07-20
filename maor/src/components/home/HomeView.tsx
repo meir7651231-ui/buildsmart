@@ -2,14 +2,16 @@
  * מסך הבית — לוח מחוונים: ברכה עם תאריך עברי ולועזי, כרטיסי נתונים,
  * פאנל "היום", פעולות מהירות, "דורש טיפול" ומשפחות אחרונות.
  */
-import { useMemo, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { useApp } from '../../store/useApp';
 import { Btn, PageHead } from '../ui';
 import { hebDateFull, holidayOf } from '../../lib/hebrew';
 import {
   attentionItems,
   birthdaysOn,
+  carouselItems,
   DAY_NAMES,
+  digestLines,
   EV_META,
   evLabel,
   eventsOnDate,
@@ -20,6 +22,7 @@ import {
   ST_META,
   todaySessions,
   type AttentionNav,
+  type CarouselItem,
 } from './homeData';
 
 const rowBtn: CSSProperties = {
@@ -80,11 +83,111 @@ function Panel(props: { title: string; badge?: string; action?: ReactNode; child
   );
 }
 
+/**
+ * קרוסלת אירועים קרובים — מתחלפת כל 5 שניות, נעצרת בריחוף/פוקוס,
+ * ומכבדת prefers-reduced-motion (ללא רוטציה אוטומטית). נקודות + חצים לניווט ידני.
+ */
+function Carousel(props: { items: CarouselItem[]; navTo: (nav: AttentionNav) => void }) {
+  const { items } = props;
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reduced = useMemo(
+    () =>
+      typeof window !== 'undefined' &&
+      !!window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  );
+
+  useEffect(() => {
+    if (reduced || paused || items.length < 2) return;
+    const t = setInterval(() => setIdx((i) => i + 1), 5000);
+    return () => clearInterval(t);
+  }, [reduced, paused, items.length]);
+
+  const cur = items.length ? items[idx % items.length] : null;
+  const step = (dir: 1 | -1) =>
+    setIdx((i) => ((i % items.length) + items.length + dir) % items.length);
+
+  return (
+    <section
+      className="card"
+      aria-label="אירועים קרובים"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 14 }}
+    >
+      {cur ? (
+        <button
+          type="button"
+          key={cur.key}
+          onClick={() => props.navTo(cur.nav)}
+          title={cur.cta}
+          style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'right', cursor: 'pointer' }}
+        >
+          <span aria-hidden style={{ fontSize: 30, flexShrink: 0 }}>{cur.icon}</span>
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+            <span style={{ fontWeight: 700, fontSize: 15.5 }}>{cur.title}</span>
+            <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{cur.sub}</span>
+          </span>
+          <span style={{ marginInlineStart: 'auto', fontSize: 13, color: 'var(--ink-faint)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {cur.cta}
+          </span>
+        </button>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span aria-hidden style={{ fontSize: 30 }}>🎂</span>
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontWeight: 700, fontSize: 15.5 }}>אין אירועים קרובים</span>
+            <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>14 הימים הקרובים שקטים</span>
+          </span>
+        </div>
+      )}
+      {items.length > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button type="button" aria-label="הפריט הקודם" onClick={() => step(-1)} style={{ padding: '0 6px', color: 'var(--ink-faint)' }}>
+            ‹
+          </button>
+          <div style={{ display: 'flex', gap: 6 }} role="tablist" aria-label="פריטי הקרוסלה">
+            {items.slice(0, 8).map((it, i2) => {
+              const active = i2 === (idx % items.length) % 8;
+              return (
+                <button
+                  key={it.key}
+                  type="button"
+                  aria-label={`פריט ${i2 + 1}`}
+                  aria-current={active}
+                  onClick={() => setIdx(i2)}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 99,
+                    padding: 0,
+                    background: active ? 'var(--accent-deep)' : 'rgba(127, 119, 103, .3)',
+                  }}
+                />
+              );
+            })}
+          </div>
+          <button type="button" aria-label="הפריט הבא" onClick={() => step(1)} style={{ padding: '0 6px', color: 'var(--ink-faint)' }}>
+            ›
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function HomeView() {
   const db = useApp((s) => s.db);
   const go = useApp((s) => s.go);
   const selectFamily = useApp((s) => s.selectFamily);
   const selectCourse = useApp((s) => s.selectCourse);
+  const markAttnDone = useApp((s) => s.markAttnDone);
+  const unmarkAttnDone = useApp((s) => s.unmarkAttnDone);
+  const [showDone, setShowDone] = useState(false);
 
   const now = new Date();
   const todayIso = isoOf(now);
@@ -96,12 +199,19 @@ export function HomeView() {
       events: eventsOnDate(db, now),
       bdays: birthdaysOn(db, now),
       attention: attentionItems(db, now),
+      digest: digestLines(db, now),
+      carousel: carouselItems(db, now),
       recent: recentFamilies(db, 5),
       holiday: holidayOf(now),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [db, todayIso],
   );
+
+  // מרכז טיפול: הפרדת פריטים פתוחים מפריטים שסומנו "טופל"
+  const attnDone = db.attnDone ?? {};
+  const openAttn = c.attention.filter((a) => !attnDone[a.key]);
+  const doneAttn = c.attention.filter((a) => attnDone[a.key]);
 
   const navTo = (nav: AttentionNav) => {
     if (nav.kind === 'course') selectCourse(nav.id);
@@ -124,6 +234,29 @@ export function HomeView() {
           (c.holiday ? ` · ${c.holiday}` : '')
         }
       />
+
+      {/* תקציר הבוקר */}
+      <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 14 }}>
+        <h2 style={{ fontSize: 16.5, marginBottom: 4 }}>☀️ תקציר הבוקר</h2>
+        {c.digest.map((l) => (
+          <button
+            key={l.key}
+            type="button"
+            style={{
+              ...rowBtn,
+              padding: '4px 6px',
+              ...(l.urgent ? { color: '#b91c1c', fontWeight: 600 } : null),
+            }}
+            onClick={() => navTo(l.nav)}
+          >
+            {!l.urgent && <span aria-hidden style={{ color: 'var(--ink-faint)' }}>•</span>}
+            <span>{l.text}</span>
+          </button>
+        ))}
+      </section>
+
+      {/* קרוסלת אירועים קרובים */}
+      <Carousel items={c.carousel} navTo={navTo} />
 
       {/* כרטיסי נתונים */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 12 }}>
@@ -250,19 +383,51 @@ export function HomeView() {
         </Panel>
 
         {/* דורש טיפול */}
-        <Panel title="דורש טיפול" badge={c.attention.length ? String(c.attention.length) : undefined}>
-          {c.attention.length === 0 && (
+        <Panel title="דורש טיפול" badge={openAttn.length ? String(openAttn.length) : undefined}>
+          {openAttn.length === 0 && (
             <div style={{ ...softEmpty, color: 'var(--green)', fontWeight: 600 }}>הכל מטופל ✓</div>
           )}
-          {c.attention.slice(0, 8).map((a) => (
-            <button key={a.key} type="button" style={rowBtn} onClick={() => navTo(a.nav)}>
-              <span style={tagStyle(a.tagBg, a.tagC)}>{a.tag}</span>
-              <span>{a.title}</span>
-            </button>
+          {openAttn.slice(0, 8).map((a) => (
+            <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <button type="button" style={{ ...rowBtn, flex: 1, minWidth: 0 }} onClick={() => navTo(a.nav)}>
+                <span style={tagStyle(a.tagBg, a.tagC)}>{a.tag}</span>
+                <span>{a.title}</span>
+              </button>
+              <Btn sm onClick={() => markAttnDone(a.key)} title="סימון הפריט כטופל">
+                ✓ טופל
+              </Btn>
+            </div>
           ))}
-          {c.attention.length > 8 && (
-            <div style={softEmpty}>+{c.attention.length - 8} פריטים נוספים</div>
+          {openAttn.length > 8 && (
+            <div style={softEmpty}>+{openAttn.length - 8} פריטים נוספים</div>
           )}
+          {doneAttn.length > 0 && (
+            <button
+              type="button"
+              style={{ ...softEmpty, textAlign: 'right', cursor: 'pointer', textDecoration: 'underline' }}
+              onClick={() => setShowDone((v) => !v)}
+            >
+              {showDone ? 'הסתרת שטופלו' : `הצג שטופלו (${doneAttn.length})`}
+            </button>
+          )}
+          {showDone &&
+            doneAttn.map((a) => (
+              <div
+                key={a.key}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.55, fontSize: 13.5, padding: '4px 6px' }}
+              >
+                <span style={tagStyle(a.tagBg, a.tagC)}>{a.tag}</span>
+                <span style={{ textDecoration: 'line-through', minWidth: 0 }}>{a.title}</span>
+                <span
+                  style={{ marginInlineStart: 'auto', fontSize: 12, color: 'var(--ink-faint)', whiteSpace: 'nowrap', flexShrink: 0 }}
+                >
+                  טופל {fmtD(attnDone[a.key])}
+                </span>
+                <Btn sm onClick={() => unmarkAttnDone(a.key)} title="החזרת הפריט לרשימה הפתוחה">
+                  ביטול
+                </Btn>
+              </div>
+            ))}
         </Panel>
       </div>
 

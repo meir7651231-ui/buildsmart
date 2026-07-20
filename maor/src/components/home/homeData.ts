@@ -249,7 +249,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
           ? 'יום ' + DAY_NAMES[new Date(y, m - 1, d).getDay()]
           : fmtD(ev.date);
     out.push({
-      key: 'red-' + ev.id,
+      key: 'urgent:' + ev.id,
       tag: 'דחוף',
       tagBg: '#fdeaea',
       tagC: '#b91c1c',
@@ -264,7 +264,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     const room = db.rooms.find((r) => r.id === c.roomId);
     if (room && !room.active) {
       out.push({
-        key: 'room-' + c.id,
+        key: 'room:' + c.id,
         tag: 'חדר',
         tagBg: '#fdeaea',
         tagC: '#b91c1c',
@@ -282,7 +282,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
       const m = members.find((x) => x.id === e.memberId);
       const c = db.courses.find((x) => x.id === e.courseId);
       out.push({
-        key: 'due-' + e.id,
+        key: 'debt:' + e.id,
         tag: 'תשלום',
         tagBg: '#fdeee0',
         tagC: '#b45309',
@@ -306,7 +306,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     const m = members.find((x) => x.id === e.memberId);
     const c = db.courses.find((x) => x.id === e.courseId);
     out.push({
-      key: 'low-' + e.id,
+      key: 'punch:' + e.id,
       tag: 'יתרה',
       tagBg: '#efe7f3',
       tagC: '#7c3aed',
@@ -325,7 +325,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     const oldest = pending.reduce((a, b) => (a.createdAt <= b.createdAt ? a : b));
     const wait = Math.max(0, daysBetween(oldest.createdAt, todayIso));
     out.push({
-      key: 'pending-families',
+      key: 'pending:families',
       tag: 'אישור',
       tagBg: '#fdf1d4',
       tagC: '#9a6414',
@@ -346,7 +346,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
   for (const { sp, late } of lateSup.slice(0, 3)) {
     const crit = late > 7;
     out.push({
-      key: 'sup-' + sp.id,
+      key: 'supnext:' + sp.id,
       tag: 'תורם',
       tagBg: crit ? '#fdeaea' : '#fdf1d4',
       tagC: crit ? '#b91c1c' : '#9a6414',
@@ -357,7 +357,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
   }
   if (lateSup.length > 3) {
     out.push({
-      key: 'sup-more',
+      key: 'supnext:more',
       tag: 'תורם',
       tagBg: '#fdf1d4',
       tagC: '#9a6414',
@@ -371,7 +371,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
   const noSefach = db.families.filter((f) => f.status === 'active' && f.fullSefach === false);
   if (noSefach.length) {
     out.push({
-      key: 'no-sefach',
+      key: 'sefach:families',
       tag: 'מסמך',
       tagBg: '#e7edf5',
       tagC: '#3a5a86',
@@ -385,10 +385,10 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
   }
 
   // מדד אמינות אדום — ניקוד מתחת ל-300, פריט מצטבר
-  const redCred = db.families.filter((f) => (f.cred?.score ?? 500) < 300);
+  const redCred = db.families.filter((f) => (f.cred?.score ?? 700) < 300);
   if (redCred.length) {
     out.push({
-      key: 'red-cred',
+      key: 'redcred:families',
       tag: 'סיכון',
       tagBg: '#fdeaea',
       tagC: '#b91c1c',
@@ -413,7 +413,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
   for (const { c, n } of filling.slice(0, 3)) {
     const full = n >= c.maxStudents;
     out.push({
-      key: 'fill-' + c.id,
+      key: 'fill:' + c.id,
       tag: full ? 'מלא' : 'מתמלא',
       tagBg: '#fdf1d4',
       tagC: '#9a6414',
@@ -424,7 +424,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
   }
   if (filling.length > 3) {
     out.push({
-      key: 'fill-more',
+      key: 'fill:more',
       tag: 'מתמלא',
       tagBg: '#fdf1d4',
       tagC: '#9a6414',
@@ -436,4 +436,202 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
 
   // קריטי קודם — מיון יציב שומר על הסדר הפנימי בכל קבוצה
   return out.sort((a, b) => (a.sev === b.sev ? 0 : a.sev === 'crit' ? -1 : 1));
+}
+
+/** תאריך ISO מקומי במרחק ימים נתון מ-now. */
+function isoAddDays(now: Date, days: number): string {
+  return isoOf(new Date(now.getFullYear(), now.getMonth(), now.getDate() + days));
+}
+
+/** שורה בתקציר הבוקר — טקסט + יעד ניווט. */
+export interface DigestLine {
+  key: string;
+  text: string;
+  /** שורת "שבוע דחוף" — מודגשת באדום בראש התקציר. */
+  urgent?: boolean;
+  nav: AttentionNav;
+}
+
+/**
+ * "תקציר הבוקר" — עד 6 שורות קומפקטיות (פורט מהאב-טיפוס):
+ * כרטיסיות שכמעט נגמרו · משפחות ממתינות · מפגשי היום ·
+ * תזכורות טלפון פתוחות · אירועים מיוחדים השבוע · ימי הולדת היום.
+ * כשיש פריטים קריטיים ב"דורש טיפול" — שורת "שבוע דחוף" נוספת בראש.
+ * סימוני "טופל" (attnDone) מוחרגים מספירת הקריטיים.
+ */
+export function digestLines(db: Db, now: Date): DigestLine[] {
+  const members = allMembers(db);
+  const out: DigestLine[] = [];
+
+  // שבוע דחוף — פריטים קריטיים שטרם סומנו כטופלו
+  const done = db.attnDone ?? {};
+  const crit = attentionItems(db, now).filter((a) => a.sev === 'crit' && !done[a.key]);
+  if (crit.length) {
+    out.push({
+      key: 'urgent',
+      urgent: true,
+      text:
+        crit.length === 1
+          ? '⚠ שבוע דחוף — פריט קריטי אחד דורש טיפול'
+          : `⚠ שבוע דחוף — ${crit.length} פריטים קריטיים דורשים טיפול`,
+      nav: crit[0].nav,
+    });
+  }
+
+  // כרטיסייה שכמעט נגמרה — כדאי להציע חידוש
+  const low = db.enrollments
+    .filter(
+      (e) => e.plan === 'punch' && e.status === 'active' && e.purchased > 0 && e.used >= e.purchased - 1,
+    )
+    .map((e) => ({ e, rem: e.purchased - e.used }))
+    .sort((a, b) => a.rem - b.rem);
+  if (low.length) {
+    const { e, rem } = low[0];
+    const m = members.find((x) => x.id === e.memberId);
+    const c = db.courses.find((x) => x.id === e.courseId);
+    const what =
+      rem <= 0 ? 'נגמרה הכרטיסייה' : rem === 1 ? 'נשאר ניקוב אחד' : `נשארו ${rem} ניקובים`;
+    out.push({
+      key: 'punch',
+      text:
+        `ל${m?.first ?? ''} ${m?.famName ?? ''} ${what} ב${c?.name ?? ''} — כדאי להציע חידוש` +
+        (low.length > 1 ? ` (+${low.length - 1} נוספים)` : ''),
+      nav: m ? { kind: 'family', id: m.famId } : { kind: 'calendar' },
+    });
+  }
+
+  // משפחות ממתינות לאישור
+  const pend = db.families.filter((f) => f.status === 'pending');
+  if (pend.length) {
+    out.push({
+      key: 'pending',
+      text:
+        pend.length === 1
+          ? `משפחה אחת ממתינה לאישור: ${pend[0].name}`
+          : `${pend.length} משפחות ממתינות לאישור: ${pend.map((f) => f.name).slice(0, 3).join(', ')}`,
+      nav: { kind: 'family', id: pend[0].id },
+    });
+  }
+
+  // מפגשי החוגים של היום
+  const sessions = todaySessions(db, now);
+  if (sessions.length) {
+    out.push({
+      key: 'today',
+      text:
+        'היום: ' +
+        sessions
+          .map((ts) => ts.course.name + (ts.session.time ? ' ב-' + ts.session.time : ''))
+          .join(' · '),
+      nav: { kind: 'course', id: sessions[0].course.id },
+    });
+  }
+
+  // תזכורות טלפון פתוחות (עד מחר)
+  const calls = db.events.filter(
+    (e) => e.type === 'call' && !e.done && !!e.date && e.date <= isoAddDays(now, 1),
+  );
+  if (calls.length) {
+    out.push({
+      key: 'calls',
+      text:
+        'תזכורות טלפון פתוחות: ' +
+        calls[0].title +
+        (calls.length > 1 ? ` (+${calls.length - 1} נוספות)` : ''),
+      nav: { kind: 'calendar' },
+    });
+  }
+
+  // אירועים מיוחדים השבוע (עד 2)
+  const SPECIAL: ReadonlySet<EventType> = new Set([
+    'wedding',
+    'memorial',
+    'anniversary',
+    'bday',
+  ] as EventType[]);
+  const specials: string[] = [];
+  for (let i = 0; i < 7 && specials.length < 2; i++) {
+    const dd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    for (const ev of eventsOnDate(db, dd)) {
+      if (SPECIAL.has(ev.type) && specials.length < 2) {
+        specials.push(`${evLabel(ev)} ביום ${DAY_NAMES[dd.getDay()]}: ${ev.title}`);
+      }
+    }
+  }
+  if (specials.length) {
+    out.push({ key: 'specials', text: 'מיוחדים השבוע — ' + specials.join(' · '), nav: { kind: 'calendar' } });
+  }
+
+  // ימי הולדת היום
+  const bd = birthdaysOn(db, now);
+  if (bd.length) {
+    out.push({
+      key: 'bday',
+      text:
+        `יום הולדת היום ל${bd[0].member.first} (משפחת ${bd[0].member.famName})` +
+        (bd.length > 1 ? ` +${bd.length - 1} נוספים` : ''),
+      nav: { kind: 'family', id: bd[0].member.famId },
+    });
+  }
+
+  if (!out.length) {
+    out.push({ key: 'quiet', text: 'הכל מעודכן — אין משימות דחופות הבוקר', nav: { kind: 'calendar' } });
+  }
+  return out;
+}
+
+/** פריט בקרוסלת האירועים הקרובים. */
+export interface CarouselItem {
+  key: string;
+  icon: string;
+  title: string;
+  sub: string;
+  cta: string;
+  nav: AttentionNav;
+}
+
+/** אייקונים לקרוסלה — אזכרה 🕯️, יום הולדת 🎂, שאר השמחות 🎉. */
+const CAR_ICONS: Partial<Record<EventType, string>> = { memorial: '🕯️', bday: '🎂' };
+
+/**
+ * קרוסלת 14 הימים הקרובים — ימי הולדת של בני משפחה (חזרה שנתית כמו
+ * birthdaysOn) ואירועים מיוחדים (כולל חזרה עברית דרך eventsOnDate).
+ * עד 10 פריטים, בסדר כרונולוגי.
+ */
+export function carouselItems(db: Db, now: Date): CarouselItem[] {
+  const SPECIAL: ReadonlySet<EventType> = new Set([
+    'wedding',
+    'memorial',
+    'anniversary',
+    'bday',
+    'org',
+    'custom',
+  ] as EventType[]);
+  const out: CarouselItem[] = [];
+  for (let i = 0; i < 14 && out.length < 10; i++) {
+    const dd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const when = i === 0 ? 'היום!' : i === 1 ? 'מחר' : `בעוד ${i} ימים`;
+    for (const b of birthdaysOn(db, dd)) {
+      out.push({
+        key: `bd:${b.member.id}:${i}`,
+        icon: '🎂',
+        title: `יום הולדת — ${b.member.first} (${b.age})`,
+        sub: `משפחת ${b.member.famName} · ${when}`,
+        cta: 'לכרטיס המשפחה ←',
+        nav: { kind: 'family', id: b.member.famId },
+      });
+    }
+    for (const ev of eventsOnDate(db, dd)) {
+      if (!SPECIAL.has(ev.type)) continue;
+      out.push({
+        key: `ev:${ev.id}:${i}`,
+        icon: CAR_ICONS[ev.type] ?? '🎉',
+        title: ev.title,
+        sub: `${evLabel(ev)} · ${when}` + (ev.time ? ' · ' + ev.time : ''),
+        cta: 'ללוח השנה ←',
+        nav: { kind: 'calendar' },
+      });
+    }
+  }
+  return out.slice(0, 10);
 }

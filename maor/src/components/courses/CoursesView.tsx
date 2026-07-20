@@ -2,23 +2,48 @@
  * מסך ניהול הקורסים — גריד/רשימה (db.ui.crsView), חיפוש וסינון לפי קטגוריה
  * וסמסטר, קורס חדש, וכרטיס קורס מלא בבחירה.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Course } from '../../types/domain';
 import { useApp, useCourse } from '../../store/useApp';
 import { normSearch } from '../../lib/validate';
 import { Btn, Empty, PageHead, Select, TextInput } from '../ui';
 import { CourseForm } from './CourseForm';
 import { CourseDetail } from './CourseDetail';
+import { CourseWheel } from '../wheel/CourseWheel';
 import { DAY_LETTERS, TINTS, chipStyle, enrollCount, modelMeta } from './lib';
 
 export function CoursesView() {
   const selCourseId = useApp((s) => s.selCourseId);
   const selected = useCourse(selCourseId);
-  if (selected) return <CourseDetail course={selected} />;
-  return <CoursesList />;
+  const [wheelOpen, setWheelOpen] = useState(false);
+
+  // פלטת הפקודות מסמנת דגל ב-sessionStorage (וגם משדרת אירוע, למקרה
+  // שהמסך כבר פתוח) — הגלגל נפתח מיד עם הכניסה לחוגים.
+  useEffect(() => {
+    const check = () => {
+      try {
+        if (sessionStorage.getItem('maor_open_wheel') === '1') {
+          sessionStorage.removeItem('maor_open_wheel');
+          setWheelOpen(true);
+        }
+      } catch {
+        /* sessionStorage חסום */
+      }
+    };
+    check();
+    window.addEventListener('maor:open-wheel', check);
+    return () => window.removeEventListener('maor:open-wheel', check);
+  }, []);
+
+  return (
+    <>
+      {selected ? <CourseDetail course={selected} /> : <CoursesList onOpenWheel={() => setWheelOpen(true)} />}
+      {wheelOpen && <CourseWheel onClose={() => setWheelOpen(false)} />}
+    </>
+  );
 }
 
-function CoursesList() {
+function CoursesList(props: { onOpenWheel: () => void }) {
   const db = useApp((s) => s.db);
   const setDb = useApp((s) => s.setDb);
   const selectCourse = useApp((s) => s.selectCourse);
@@ -65,6 +90,9 @@ function CoursesList() {
         }
         actions={
           <>
+            <Btn onClick={props.onOpenWheel} title="גלגל מזל שבוחר חוג לפי הסינון שלכם">
+              🎡 מצא חוג
+            </Btn>
             <Btn onClick={toggleView} title="החלפת תצוגה: גריד / רשימה">
               {view === 'list' ? '▦ גריד' : '☰ רשימה'}
             </Btn>

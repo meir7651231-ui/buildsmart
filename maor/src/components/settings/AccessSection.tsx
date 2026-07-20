@@ -17,6 +17,10 @@ const SCALE_MAX = 1.5;
 interface AccPrefs {
   contrast: boolean;
   noanim: boolean;
+  /** הדגשת כפתורים וקישורים — קו תחתון לקישורים, מסגרת עדינה לכפתורים. */
+  links: boolean;
+  /** ריווח טקסט מוגדל — אותיות, מילים ושורות. */
+  spacing: boolean;
 }
 
 function readScale(): number {
@@ -31,9 +35,9 @@ function readScale(): number {
 function readAcc(): AccPrefs {
   try {
     const a = JSON.parse(localStorage.getItem(ACC_KEY) ?? '{}') as Partial<AccPrefs> | null;
-    return { contrast: !!a?.contrast, noanim: !!a?.noanim };
+    return { contrast: !!a?.contrast, noanim: !!a?.noanim, links: !!a?.links, spacing: !!a?.spacing };
   } catch {
-    return { contrast: false, noanim: false };
+    return { contrast: false, noanim: false, links: false, spacing: false };
   }
 }
 
@@ -52,6 +56,10 @@ function applyAcc(a: AccPrefs): void {
   else el.removeAttribute('data-contrast');
   if (a.noanim) el.setAttribute('data-noanim', '1');
   else el.removeAttribute('data-noanim');
+  if (a.links) el.setAttribute('data-links', '1');
+  else el.removeAttribute('data-links');
+  if (a.spacing) el.setAttribute('data-spacing', '1');
+  else el.removeAttribute('data-spacing');
 }
 
 function persistScale(scale: number): void {
@@ -101,7 +109,7 @@ export function AccessSection() {
     setScale(1);
     applyScale(1);
     persistScale(1);
-    const next: AccPrefs = { contrast: false, noanim: false };
+    const next: AccPrefs = { contrast: false, noanim: false, links: false, spacing: false };
     setAcc(next);
     applyAcc(next);
     persistAcc(next);
@@ -152,6 +160,18 @@ export function AccessSection() {
         onToggle={() => toggle('noanim')}
         label="ביטול אנימציות"
         desc="ללא מעברים ותנועה בממשק"
+      />
+      <Toggle
+        on={acc.links}
+        onToggle={() => toggle('links')}
+        label="הדגשת כפתורים וקישורים"
+        desc="קו תחתון לקישורים ומסגרת עדינה סביב כפתורים"
+      />
+      <Toggle
+        on={acc.spacing}
+        onToggle={() => toggle('spacing')}
+        label="ריווח טקסט מוגדל"
+        desc="מרווח גדול יותר בין אותיות, מילים ושורות — לקריאה נוחה"
       />
 
       <div style={{ marginTop: 14 }}>

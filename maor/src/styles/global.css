@@ -466,3 +466,401 @@ button:focus-visible {
     padding: 0;
   }
 }
+
+/* ═══════════ 🎡 גלגל החוגים (components/wheel/CourseWheel) ═══════════
+   אוברליי כהה theme-aware (--toast-bg כהה בכל הערכות, --toast-ink בהיר בכולן),
+   גלגל SVG עם 4 גווני accent, פס זהב, נורות, קונפטי וכרטיס תוצאה. */
+
+.wheel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background:
+    radial-gradient(120% 90% at 50% 30%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.4) 100%),
+    color-mix(in srgb, var(--toast-bg) 88%, transparent);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 22px 14px;
+}
+
+.wheel-shell {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  height: fit-content;
+  padding-bottom: 30px;
+  color: var(--toast-ink);
+  animation: wheel-fade-in 0.25s ease-out;
+}
+
+@keyframes wheel-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.wheel-head {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  padding: 0 40px;
+}
+
+.wheel-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.wheel-sub {
+  font-size: 13.5px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.wheel-close {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--toast-ink) 35%, transparent);
+  color: var(--toast-ink);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.wheel-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ── נעילות (chips) ── */
+
+.wheel-locks {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.wheel-lock-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.wheel-lock-label {
+  min-width: 58px;
+  font-size: 12.5px;
+  font-weight: 700;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.wheel-lock-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wheel-chip {
+  border: 1px solid color-mix(in srgb, var(--toast-ink) 35%, transparent);
+  color: var(--toast-ink);
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.wheel-chip:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.wheel-chip.on {
+  background: var(--primary-bg);
+  border-color: var(--accent);
+  color: var(--primary-ink);
+  font-weight: 700;
+}
+
+.wheel-chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ── הגלגל עצמו ── */
+
+.wheel-stage {
+  position: relative;
+  width: min(78vw, 560px);
+}
+
+.wheel-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 14px 44px rgba(0, 0, 0, 0.45));
+}
+
+.wheel-base {
+  fill: var(--toast-bg);
+}
+
+.wheel-seg {
+  stroke: color-mix(in srgb, var(--accent) 40%, transparent);
+  stroke-width: 1;
+}
+
+.wheel-seg.shade-0 {
+  fill: color-mix(in srgb, var(--accent) 58%, var(--toast-bg));
+}
+
+.wheel-seg.shade-1 {
+  fill: color-mix(in srgb, var(--accent) 40%, var(--toast-bg));
+}
+
+.wheel-seg.shade-2 {
+  fill: color-mix(in srgb, var(--accent) 24%, var(--toast-bg));
+}
+
+.wheel-seg.shade-3 {
+  fill: color-mix(in srgb, var(--accent) 11%, var(--toast-bg));
+}
+
+.wheel-seg.win {
+  stroke: var(--accent);
+  stroke-width: 3;
+  animation: wheel-win 0.8s ease-in-out 4;
+}
+
+@keyframes wheel-win {
+  50% {
+    filter: brightness(1.6);
+  }
+}
+
+.wheel-seg-text {
+  fill: color-mix(in srgb, var(--toast-ink) 94%, transparent);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--toast-bg) 60%, transparent);
+  stroke-width: 2.5px;
+  pointer-events: none;
+}
+
+.wheel-rim {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 9;
+}
+
+.wheel-rim-inner {
+  fill: none;
+  stroke: var(--accent-deep);
+  stroke-width: 1.5;
+  opacity: 0.85;
+}
+
+.wheel-bulb {
+  fill: var(--toast-ink);
+  stroke: var(--accent-deep);
+  stroke-width: 1;
+  animation: wheel-bulb 1.2s ease-in-out infinite;
+}
+
+.wheel-bulb.alt {
+  animation-delay: 0.6s;
+}
+
+@keyframes wheel-bulb {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.wheel-pointer {
+  fill: var(--accent);
+  stroke: var(--toast-bg);
+  stroke-width: 2;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.4));
+}
+
+.wheel-hub {
+  fill: var(--toast-bg);
+  stroke: var(--accent);
+  stroke-width: 5;
+}
+
+.wheel-count {
+  font-size: 12.5px;
+  opacity: 0.7;
+}
+
+/* ── כפתור הסיבוב, ריק ותוצאה ── */
+
+.wheel-spin-btn {
+  background: var(--primary-bg);
+  color: var(--primary-ink);
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  padding: 12px 46px;
+  font-size: 19px;
+  font-weight: 800;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.wheel-spin-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.wheel-spin-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.wheel-empty {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px dashed color-mix(in srgb, var(--toast-ink) 45%, transparent);
+  color: var(--toast-ink);
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.wheel-result {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lift);
+  padding: 18px 22px;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  animation: wheel-slide-up 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.12);
+}
+
+@keyframes wheel-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
+
+.wheel-result-tag {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+
+.wheel-result-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 4px 0 2px;
+}
+
+.wheel-result-meta {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.wheel-result-spots {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-deep);
+  margin-top: 6px;
+}
+
+.wheel-result-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── קונפטי זהב ── */
+
+.wheel-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.wheel-confetti span {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  border-radius: 2px;
+  opacity: 0;
+  animation: wheel-confetti-pop 1.4s ease-out forwards;
+}
+
+.wheel-confetti .shade-0 {
+  background: var(--accent);
+}
+
+.wheel-confetti .shade-1 {
+  background: color-mix(in srgb, var(--accent) 55%, var(--toast-ink));
+}
+
+.wheel-confetti .shade-2 {
+  background: var(--accent-deep);
+}
+
+.wheel-confetti .shade-3 {
+  background: color-mix(in srgb, var(--accent) 70%, var(--toast-bg));
+}
+
+@keyframes wheel-confetti-pop {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  55% {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rz));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(var(--dx) * 1.1), calc(var(--dy) * 0.35)) rotate(calc(var(--rz) * 1.4)) scale(0.7);
+    opacity: 0;
+  }
+}
+
+/* נגישות: הדגשת כפתורים וקישורים (הגדרות ← נגישות) */
+:root[data-links='1'] a {
+  text-decoration: underline;
+}
+
+:root[data-links='1'] .btn:not(:focus-visible),
+:root[data-links='1'] button:not(:focus-visible) {
+  outline: 1px solid var(--accent-deep);
+  outline-offset: 1px;
+}
+
+/* נגישות: ריווח טקסט מוגדל */
+:root[data-spacing='1'] body {
+  letter-spacing: 0.03em;
+  word-spacing: 0.08em;
+  line-height: 1.75;
+}
