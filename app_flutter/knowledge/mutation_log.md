@@ -1448,3 +1448,9 @@
 - **הלוגיקה (`data/fitting_image_overrides.dart` + `polyroll_catalog.dart` → גייט 42/44):** מפת `kFittingImageOverrides` (24 sku→`assets/huliot/products/{img}.jpeg`, כל נתיב מאומת R2=200); מוזגה ב-`_withOwnerImage` בעדיפות-אחרונה (`huliot ?? lipski ?? fitting`) → פיקים קיימים גוברים. brand + כל שדה נשמרים; ספירה 1,867.
 - **טסט-נעיצה:** `huliot_catalog_test` — `784 overrides ... LIVE` (512+248+24 · fitting∩huliot=∅ · fitting∩lipski=∅) + `24 fitting overrides fill net-new SKUs` (imageAsset==הבחירה · כל מפתח-fitting לא-ב-huliot).
 - **mutation-verify:** baseline ירוק → הסרת `?? kFittingImageOverrides[p.sku]` מ-`_withOwnerImage` → הבדיקה `24 fitting overrides` **אדומה** (imageAsset חוזר לנתיב brand-dir) + ספירת-784 **אדומה** (760) → שחזור → ירוק. analyze 0.
+
+## #ultra-silent-images — 70 מוצרי Ultra Silent חדשים קיבלו תמונה (משחק-שיבוץ שני) — 2026-07-19
+- **הרקע:** 75 מוצרי הקו האקוסטי Ultra Silent (brand='Huliot', בלי fallback → אמוג׳י) לא היו במשחק הראשון. התמונות שלהם היו על R2 כל הזמן (`huliot/products/{sku}_N.jpeg`) — פשוט לא הורדו מקומית לסט-המשחק. משחק-שיבוץ שני (`ultra-silent-game.html`, 48 משפחות) → הבעלים בחר 46, 2 ענה "אין".
+- **הלוגיקה (`data/huliot_catalog.dart` → גייט 42/44):** הזרקה כירורגית של `imageFile` ל-70 הרשומות שהבעלים בחר (SKU→קובץ מ-`us_sku2file`, כל 46 הקבצים הייחודיים מאומתים R2=200; אין regen → אפס-drift, diff=70 שורות בלבד). brand='Huliot' ⇒ imageAsset=`assets/huliot/products/{file}`. 789 מוצרים ללא-שינוי; 714→**784** עם תמונה; 5 (2 משפחות "אין") נשארו אמוג׳י.
+- **טסט-נעיצה:** `huliot_catalog_test` — `789 new products; 784 with an owner-picked image` (הספירה 784).
+- **mutation-verify:** baseline ירוק → הסרת שורת `imageFile` מרשומה אחת (5901100100) → הבדיקה **אדומה** (Expected 784, Actual 783) → שחזור (re-insert 70) → 9/9 ירוק. analyze 0.

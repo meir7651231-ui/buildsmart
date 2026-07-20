@@ -1,5 +1,10 @@
 # WIRING CONTRACT — app_flutter
 
+## #ultra-silent-images — 70 תמונות למוצרי Ultra Silent החדשים — 2026-07-19
+`data/huliot_catalog.dart`: 70 מרשומות ה-Huliot החדשות שהיו אמוג׳י קיבלו `imageFile` (משחק-שיבוץ שני `ultra-silent-game.html`: 46 בחירות → 70 מק"טים; כל קובץ מאומת R2=200). 714→784 עם תמונה; 5 נשארו אמוג׳י (2 משפחות "אין"). brand='Huliot' ⇒ `assets/huliot/products/{file}`. מאחורי `CATALOG_SOURCE=v2` כמו שאר ה-789 החדשים.
+
+---
+
 ## #fitting-images — 24 שיבוצי-תמונה למוצרי-פיטינג שהיו ללא-תמונה — 2026-07-19
 `data/fitting_image_overrides.dart` (`kFittingImageOverrides`, 24 sku→`huliot/products/{img}.jpeg`) מוזג ב-`polyroll_catalog._withOwnerImage` בעדיפות-אחרונה (`huliot ?? lipski ?? fitting` — פיקים קיימים גוברים). מתוך 14 תמונות-פיטינג שהבעלים שייך ל-61 SKU: **24 net-new חוברו** (ברך 90° · צינור שחור · מסעף-מצרה · ברך 45°), **37 שכבר-נשאו-תמונה נשמרו** (לא-נדרסו). brand נשמר, ספירה 1,867.
 

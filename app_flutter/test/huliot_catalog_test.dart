@@ -20,7 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Huliot catalog — additive staging (new-only)', () {
-    test('789 new products; 714 with an owner-picked image, rest → emoji', () {
+    test('789 new products; 784 with an owner-picked image, rest → emoji', () {
       expect(kHuliotProducts.length, 789);
       for (final p in kHuliotProducts) {
         expect(p.brand, 'Huliot');
@@ -30,8 +30,9 @@ void main() {
           expect(p.imageFile!.endsWith('.jpeg'), isTrue);
         }
       }
-      // owner's image-game: 714 got a real photo, 75 answered "none" → emoji.
-      expect(kHuliotProducts.where((p) => p.imageFile != null).length, 714);
+      // owner's image-games: 784 got a real photo (714 first pass + 70 Ultra
+      // Silent), 5 answered "none" → emoji.
+      expect(kHuliotProducts.where((p) => p.imageFile != null).length, 784);
     });
 
     test('truly additive — zero SKU overlap with the existing catalog', () {
