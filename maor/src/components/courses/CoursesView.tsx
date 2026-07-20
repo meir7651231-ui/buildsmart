@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Course } from '../../types/domain';
 import { useApp, useCourse } from '../../store/useApp';
-import { featureOn } from '../../lib/config';
+import { featureOn, termOf } from '../../lib/config';
 import { normSearch } from '../../lib/validate';
 import { Btn, Empty, PageHead, Select, TextInput } from '../ui';
 import { CourseForm } from './CourseForm';
@@ -104,7 +104,7 @@ function CoursesList(props: { onOpenWheel: () => void }) {
               {view === 'list' ? '▦ גריד' : '☰ רשימה'}
             </Btn>
             <Btn kind="primary" onClick={() => setFormOpen(true)}>
-              + קורס חדש
+              + {termOf(cfg, 'entity.course', 'חוג')} חדש
             </Btn>
           </>
         }
