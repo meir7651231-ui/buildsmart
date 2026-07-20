@@ -46,8 +46,40 @@ export function saveConfigOverride(cfg: OrgConfig): void {
   }
 }
 
+/** מחיקת דריסת הריצה — חזרה לקונפיגורציית הקובץ/ברירת המחדל. */
+export function clearConfigOverride(): void {
+  try {
+    localStorage.removeItem(LS_CONFIG_KEY);
+  } catch {
+    /* localStorage חסום */
+  }
+}
+
+/** slug מה-URL: ?org=<slug> — פריסה אחת משרתת אינסוף לקוחות (public/c/<slug>/config.json). */
+export function orgSlugFromUrl(): string | null {
+  try {
+    const slug = new URLSearchParams(window.location.search).get('org');
+    return slug && /^[a-z0-9-]{2,40}$/.test(slug) ? slug : null;
+  } catch {
+    return null;
+  }
+}
+
 /** טעינת קונפיגורציית הארגון לפי סדר הרזולוציה המתועד למעלה. */
 export async function loadOrgConfig(): Promise<OrgConfig> {
+  // ?org=<slug> גובר על הכול — כתובת של לקוח ספציפי
+  const slug = orgSlugFromUrl();
+  if (slug) {
+    try {
+      const res = await fetch(`./c/${slug}/config.json`, { cache: 'no-cache' });
+      if (res.ok) {
+        const cfg = normalize(await res.json());
+        if (cfg) return { ...cfg, slug };
+      }
+    } catch {
+      /* קובץ הלקוח חסר — ניפול להמשך השרשרת */
+    }
+  }
   const override = readConfigOverride();
   if (override) return override;
   try {

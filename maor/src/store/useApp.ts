@@ -25,7 +25,7 @@ import {
 } from '../types/domain';
 import { DEFAULT_CONFIG, type OrgConfig } from '../types/config';
 import { applyTheme, loadOrgConfig, saveConfigOverride } from '../lib/config';
-import { dailySnapshot, exportBackupFile, loadDb, saveDb } from './persist';
+import { dailySnapshot, exportBackupFile, loadDb, saveDb, setPersistNamespace } from './persist';
 
 export type View =
   | 'home'
@@ -185,6 +185,8 @@ export const useApp = create<AppState>()((set, get) => {
 
     async init() {
       const config = await loadOrgConfig();
+      // בידוד נתונים בין לקוחות על אותו host — חייב לקרות לפני loadDb
+      setPersistNamespace(config.slug);
       const { db, corrupt } = await loadDb();
       set({ db, corrupt, config, ready: true });
       // ערכת הנושא: העדפת משתמש (db.ui) גוברת על ברירת המחדל של הארגון

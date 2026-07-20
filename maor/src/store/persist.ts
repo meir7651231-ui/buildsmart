@@ -16,12 +16,24 @@ import {
   type FamilyDoc,
 } from '../types/domain';
 
-const LS_KEY = 'maor_db';
-const LS_CORRUPT_KEY = 'maor_db_corrupt';
-const IDB_NAME = 'maor';
+let LS_KEY = 'maor_db';
+let LS_CORRUPT_KEY = 'maor_db_corrupt';
+let IDB_NAME = 'maor';
 const IDB_STORE = 'db';
 const IDB_SNAPSHOTS = 'snapshots';
 const SNAPSHOT_KEEP = 30;
+
+/**
+ * מרחב-שמות לפי ארגון: כמה לקוחות על אותו host (?org=<slug>) לא חולקים נתונים.
+ * חובה לקרוא לפני loadDb (init עושה זאת). slug 'default' שומר על המפתחות הישנים.
+ */
+export function setPersistNamespace(slug: string): void {
+  if (!slug || slug === 'default') return;
+  LS_KEY = `maor_db:${slug}`;
+  LS_CORRUPT_KEY = `maor_db_corrupt:${slug}`;
+  IDB_NAME = `maor:${slug}`;
+  idb = null; // חיבור קודם (אם נפתח) מצביע ל-DB הלא נכון
+}
 
 let idb: Promise<IDBPDatabase> | null = null;
 

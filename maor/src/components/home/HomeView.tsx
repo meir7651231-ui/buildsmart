@@ -182,6 +182,7 @@ function Carousel(props: { items: CarouselItem[]; navTo: (nav: AttentionNav) => 
 
 export function HomeView() {
   const db = useApp((s) => s.db);
+  const cfgName = useApp((s) => s.config.orgName);
   const go = useApp((s) => s.go);
   const selectFamily = useApp((s) => s.selectFamily);
   const selectCourse = useApp((s) => s.selectCourse);
@@ -228,7 +229,7 @@ export function HomeView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <PageHead
-        title={`${greet}, ${db.orgName}`}
+        title={`${greet}, ${cfgName || db.orgName}`}
         sub={
           `יום ${DAY_NAMES[now.getDay()]}, ${hebDateFull(todayIso)} · ${fmtD(todayIso)}` +
           (c.holiday ? ` · ${c.holiday}` : '')

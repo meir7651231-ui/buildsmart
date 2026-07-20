@@ -2,8 +2,9 @@
  * שלד האפליקציה: ניווט, החלפת מסכים, טוסטים, פלטת פקודות (Ctrl+K)
  * וגיבוי סוף-יום אוטומטי.
  */
-import { useEffect, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { useApp, type View } from './store/useApp';
+import { BuilderWizard } from './components/builder/BuilderWizard';
 import { HomeView } from './components/home/HomeView';
 import { FamiliesView } from './components/families/FamiliesView';
 import { CoursesView } from './components/courses/CoursesView';
@@ -55,6 +56,14 @@ export default function App() {
     void init();
   }, [init]);
 
+  // אשף ההרכבה — למטמיע בלבד, נפתח עם #builder בכתובת
+  const [builderOpen, setBuilderOpen] = useState(() => window.location.hash === '#builder');
+  useEffect(() => {
+    const onHash = () => setBuilderOpen(window.location.hash === '#builder');
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
   // קיצורי מקלדת גלובליים
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -102,7 +111,12 @@ export default function App() {
   return (
     <div className="app-shell">
       <nav className="app-nav" aria-label="ניווט ראשי">
-        <div className="brand">{orgName}</div>
+        <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {config.logoDataUri && (
+            <img src={config.logoDataUri} alt="" style={{ height: 26, borderRadius: 6 }} />
+          )}
+          {orgName}
+        </div>
         {nav.map((n) => (
           <button key={n.view} className={view === n.view ? 'active' : ''} onClick={() => go(n.view)}>
             <span aria-hidden>{n.icon}</span>
@@ -122,6 +136,15 @@ export default function App() {
       </main>
 
       {paletteOpen && <CommandPalette />}
+
+      {builderOpen && (
+        <BuilderWizard
+          onClose={() => {
+            window.location.hash = '';
+            setBuilderOpen(false);
+          }}
+        />
+      )}
 
       <div className="toasts" role="status" aria-live="polite">
         {toasts.map((t) => (
