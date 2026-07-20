@@ -295,6 +295,8 @@ export interface ReportPrefs {
 export interface UiPrefs {
   famView: 'list' | 'grid';
   crsView: 'list' | 'grid';
+  /** פריסת לוח הבית: מזהי ווידג'טים בסדר תצוגה (ריק = ברירת המחדל). */
+  homeLayout?: string[];
   /** ערכת נושא נבחרת (or-rishon/heichal/tsohar/kehila) — ריק = לפי קונפיגורציית הארגון. */
   theme?: string;
   /** דריסת צבע הדגשה (hex) — ריק = צבע הערכה. */
@@ -318,6 +320,8 @@ export interface Db {
   orgName: string;
   orgSite: string;
   orgDonate: string;
+  /** יעד גיוס שנתי בש"ח — 0 = לא הוגדר (קיר ההשפעה מציג סכום בלבד). */
+  orgGoal: number;
   notif: NotifPrefs;
   reports: ReportPrefs;
   ui: UiPrefs;
@@ -342,6 +346,7 @@ export function emptyDb(): Db {
     orgName: 'מאור החסד',
     orgSite: '',
     orgDonate: '',
+    orgGoal: 0,
     notif: { email: true, push: false, sms: true, strong: false },
     reports: { daily: true, weekly: true, monthly: false, quarterly: false },
     ui: { famView: 'list', crsView: 'grid' },

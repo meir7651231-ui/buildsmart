@@ -61,6 +61,8 @@ export const FEATURES: FeatureDef[] = [
   { key: 'home.digest', label: 'תקציר הבוקר', desc: 'תקציר יומי בראש מסך הבית', module: 'home' },
   { key: 'home.carousel', label: 'קרוסלה', desc: 'קרוסלת כרטיסים מתחלפת במסך הבית', module: 'home' },
   { key: 'home.care', label: 'דורש טיפול', desc: 'רשימת פריטים הדורשים טיפול במסך הבית', module: 'home' },
+  { key: 'home.board', label: 'לוח נבנה אישית', desc: 'עריכת מסך הבית: הוספה, הסרה וסידור ווידג\'טים', module: 'home' },
+  { key: 'home.impactwall', label: 'קיר ההשפעה ✨', desc: 'מסך ראווה לטלוויזיה ולערבי גיוס — מונים חיים וזוהרים', module: 'home' },
 
   // ——— הגדרות ———
   { key: 'settings.rooms', label: 'ניהול חדרים', desc: 'הוספה ועריכה של חדרים בהגדרות', module: 'settings' },
