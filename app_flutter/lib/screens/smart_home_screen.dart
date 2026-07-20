@@ -461,16 +461,10 @@ class _WorkPath extends ConsumerWidget {
                   '4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון "סדר הרכבה".',
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  child: const LinearProgressIndicator(
-                    value: 0.38,
-                    minHeight: 8,
-                    backgroundColor: Colors.white24,
-                    valueColor: AlwaysStoppedAnimation<Color>(BsTokens.brand),
-                  ),
-                ),
+                // fake-data-sweep H1: removed the hardcoded 38% progress bar — there
+                // is no real progress source and no 4-stage sub-tree to wire it to,
+                // so a fabricated percentage is dishonest. The card stays as an
+                // honest "coming soon" teaser (badge + title + sub-text).
               ],
             ),
           ),

@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fake-sweep-H1 — הסרת פס-התקדמות מזויף 38% (גמר אמבטיה) — 2026-07-20
+`screens/smart_home_screen.dart`: הוסר `const LinearProgressIndicator(value: 0.38)` + ה-`ClipRRect`/`SizedBox(height:10)` העוטפים, מכרטיס "מסלול עבודה חכם / גמר אמבטיה" — פס קבוע-מזויף (38% לכל משתמש) בלי provider-התקדמות ובלי עץ-4-שלבים לחבר אליו (מאמת-D: היעד לא-נבנה). החלטת-בעלים "2א"=להסיר; הכרטיס נשאר טיזר-כן (badge+כותרת+תת-כותרת). הנחיה `DIRECTIVE-fake-data-sweep.md` (H1). גארד: `smart_home_screen.dart:::!value: 0.38`.
+
 ## #fake-sweep-store — חנות: הסרת 5 הזמנות-דמו · הסתרת צ'יפ-הצעות · אריח-הזמנות חי (S1·S2·S3) — 2026-07-20
 `screens/store_screen.dart`: (S1) `storeOrdersProvider` — נמחק const `_kContractorDemoOrders` (5 שורות BS-1234…); הפרוביידר מחזיר `engineOrders.where(createdAt!=null)` בלבד → קבלן-חדש רואה רשימה-ריקה כנה, מונה "ההזמנות הפתוחות" (`_SummaryRow`) = 0 אמיתי במקום ~3 מזויף. (S2) צ'יפ `📨 הצעות ספקים` (const `_kSupplierOffersCount`) מגודר `if(!kHideUnderConstruction)` — מוסתר בבניה-החיה. (S3) אריח `📦 ההזמנות שלי` (`_AllList` `.map`) נגזר חי: `badge`=מספר-פתוחות (`openOrdersCount`), `preview`=הזמנה-אחרונה/"אין הזמנות פעילות" (`ordersPreview`), במקום const `#1234`/badge-1. הנחיה `DIRECTIVE-fake-data-sweep.md` (S1·S2·S3). **טסטים שוכתבו להתנהגות-אמת:** `state_deep_test` (fresh⇒empty⇒0 open) · `store_notif_widget_test` (מציב הזמנה-אמיתית BS-1234) · `global_search_sources_test` (מציב הזמנה-אמיתית BS-7777, `UncontrolledProviderScope`, שימור-כיסוי מקור-חיפוש). **נותר בשלב-1:** M2 credit (החלטת-בעלים) · H1 progress (החלטת-בעלים) · F5 approval-rewire (defer-large).
 

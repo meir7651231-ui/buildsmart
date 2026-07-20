@@ -37,3 +37,6 @@ lib/screens/finance_hub_sheets.dart:::index_server_note
 lib/screens/store_screen.dart:::!_kContractorDemoOrders
 #  S3 — the "ההזמנות שלי" tile derives from real orders (not the old const '#1234' / badge 1):
 lib/screens/store_screen.dart:::ordersPreview
+#
+# Regression — fake-data-sweep H1 (2026-07-20 · owner "2א"=remove): the fake 38% progress bar must never return:
+lib/screens/smart_home_screen.dart:::!value: 0.38
