@@ -1,0 +1,130 @@
+/* ערכות נושא — דריסת משתני העיצוב לפי :root[data-theme="..."].
+ * ברירת המחדל (אור ראשון) מוגדרת ב-global.css; קובץ זה נטען לפניו
+ * כדי שמצב ניגודיות גבוהה (data-contrast) ינצח כל ערכה.
+ * דריסת צבע ארגונית: --accent נקבע inline על documentElement (lib/config.ts)
+ * ולכן גובר על כל ערכה — --nav-active-bg ו---primary-* נגזרים ממנו.
+ */
+
+/* ── אור ראשון — שמנת, ענבר וזהב (המראה הקלאסי; זהה לברירת המחדל) ── */
+:root[data-theme='or-rishon'] {
+  --bg: #f6f3ec;
+  --panel: #fffdf8;
+  --ink: #2e2c26;
+  --ink-soft: #4d463c;
+  --ink-faint: #8a8172;
+  --line: #ded7c8;
+  --line-soft: #ece7db;
+  --hover-bg: #faf8f2;
+  --accent: #f3c76b;
+  --accent-deep: #a05008;
+  --dark: #211d17;
+  --nav-bg: #211d17;
+  --nav-ink: #f7f3ea;
+  --nav-ink-soft: #d9d2c4;
+  --nav-hover-bg: rgba(243, 199, 107, 0.12);
+  --nav-active-bg: var(--accent);
+  --nav-active-ink: #211d17;
+  --primary-bg: #211d17;
+  --primary-ink: var(--accent);
+  --primary-hover-bg: #35302a;
+  --toast-bg: #211d17;
+  --toast-ink: #f7f3ea;
+  --error-bg: #fdecea;
+  --overlay: rgba(33, 29, 23, 0.45);
+  --overlay-soft: rgba(33, 29, 23, 0.35);
+}
+
+/* ── היכל — כהה ויוקרתי: זהב על שחור-חום, קווי שיער מוזהבים ── */
+:root[data-theme='heichal'] {
+  --bg: #12100c;
+  --panel: #1b1812;
+  --ink: #f2ead8;
+  --ink-soft: #d8cdb4;
+  --ink-faint: #9c9078;
+  --line: #332d21;
+  --line-soft: #2a2519;
+  --hover-bg: #221e16;
+  --accent: #e9bd63;
+  --accent-deep: #d9a84e;
+  --dark: #453a24;
+  --green: #86c98f;
+  --red: #ef7b72;
+  --orange: #e2a85c;
+  --nav-bg: #0b0906;
+  --nav-ink: #f2ead8;
+  --nav-ink-soft: #a89b7f;
+  --nav-hover-bg: rgba(233, 189, 99, 0.12);
+  --nav-active-bg: var(--accent);
+  --nav-active-ink: #12100c;
+  --primary-bg: var(--accent);
+  --primary-ink: #1b1509;
+  --primary-hover-bg: #f0cc7f;
+  --toast-bg: #2c2618;
+  --toast-ink: #f2ead8;
+  --error-bg: #3c211d;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --overlay-soft: rgba(0, 0, 0, 0.5);
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* ── צֹהַר — SaaS בהיר ונקי: לבן, אפור חם וטורקיז ── */
+:root[data-theme='tsohar'] {
+  --bg: #faf9f7;
+  --panel: #ffffff;
+  --ink: #1c1a17;
+  --ink-soft: #45413a;
+  --ink-faint: #8b857b;
+  --line: #e6e3dd;
+  --line-soft: #efede8;
+  --hover-bg: #f6f5f2;
+  --accent: #0e7a6c;
+  --accent-deep: #0a5d53;
+  --dark: #1c1a17;
+  --nav-bg: #ffffff;
+  --nav-ink: #1c1a17;
+  --nav-ink-soft: #5f594f;
+  --nav-hover-bg: rgba(14, 122, 108, 0.08);
+  --nav-active-bg: var(--accent);
+  --nav-active-ink: #ffffff;
+  --primary-bg: var(--accent);
+  --primary-ink: #ffffff;
+  --primary-hover-bg: var(--accent-deep);
+  --toast-bg: #1c1a17;
+  --toast-ink: #faf9f7;
+  --error-bg: #fdecea;
+  --overlay: rgba(28, 26, 23, 0.4);
+  --overlay-soft: rgba(28, 26, 23, 0.3);
+  --shadow: 0 1px 3px rgba(28, 26, 23, 0.07);
+  --shadow-lift: 0 6px 24px rgba(28, 26, 23, 0.12);
+}
+
+/* ── קהילה — חם ומשחקי: שמנת חמה, טורקיז ופינות מעוגלות ── */
+:root[data-theme='kehila'] {
+  --bg: #fdf8ef;
+  --panel: #ffffff;
+  --ink: #26221c;
+  --ink-soft: #4d463c;
+  --ink-faint: #92887a;
+  --line: #eadfc9;
+  --line-soft: #f1e9d8;
+  --hover-bg: #faf4e6;
+  --accent: #178f80;
+  --accent-deep: #0e6f63;
+  --dark: #14554d;
+  --nav-bg: linear-gradient(180deg, #1a9c8b 0%, #0e6f63 100%);
+  --nav-ink: #ffffff;
+  --nav-ink-soft: #cdeae6;
+  --nav-hover-bg: rgba(255, 255, 255, 0.14);
+  --nav-active-bg: #ffffff;
+  --nav-active-ink: #0e6f63;
+  --primary-bg: var(--accent);
+  --primary-ink: #ffffff;
+  --primary-hover-bg: var(--accent-deep);
+  --toast-bg: #14554d;
+  --toast-ink: #ffffff;
+  --error-bg: #fdecea;
+  --overlay: rgba(20, 85, 77, 0.4);
+  --overlay-soft: rgba(20, 85, 77, 0.3);
+  --radius: 18px;
+}

@@ -12,9 +12,11 @@ import { RoomsSection } from './RoomsSection';
 import { BackupSection } from './BackupSection';
 import { ImportSection } from './ImportSection';
 import { AccessSection } from './AccessSection';
+import { ThemeSection } from './ThemeSection';
 
 const SECTIONS: { id: string; label: string }[] = [
   { id: 'sec-org', label: 'ארגון' },
+  { id: 'sec-theme', label: 'ערכת נושא' },
   { id: 'sec-teachers', label: 'מורים' },
   { id: 'sec-rooms', label: 'חדרים' },
   { id: 'sec-notif', label: 'התראות' },
@@ -37,6 +39,7 @@ export function SettingsView() {
       </div>
 
       <OrgSection />
+      <ThemeSection />
       <TeachersSection />
       <RoomsSection />
       <NotifSection />

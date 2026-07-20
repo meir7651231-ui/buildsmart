@@ -295,6 +295,10 @@ export interface ReportPrefs {
 export interface UiPrefs {
   famView: 'list' | 'grid';
   crsView: 'list' | 'grid';
+  /** ערכת נושא נבחרת (or-rishon/heichal/tsohar/kehila) — ריק = לפי קונפיגורציית הארגון. */
+  theme?: string;
+  /** דריסת צבע הדגשה (hex) — ריק = צבע הערכה. */
+  accent?: string;
 }
 
 /** מסמך ה-DB המלא — יחידת השמירה, הייצוא והגיבוי. */

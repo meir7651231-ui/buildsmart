@@ -1,18 +1,38 @@
-/* עיצוב גלובלי — ערכת שמנת/ענבר של מאור החסד, RTL תחילה. */
+/* עיצוב גלובלי — RTL תחילה. כל הצבעים דרך משתני :root;
+   ברירת המחדל כאן היא ערכת "אור ראשון", וערכות נוספות דורסות ב-themes.css. */
 
 :root {
-  --bg: #f4f2ec;
-  --panel: #ffffff;
+  --bg: #f6f3ec;
+  --panel: #fffdf8;
   --ink: #2e2c26;
   --ink-soft: #4d463c;
   --ink-faint: #8a8172;
   --line: #ded7c8;
-  --amber: #f3c76b;
-  --amber-deep: #b45309;
+  --line-soft: #ece7db;
+  --hover-bg: #faf8f2;
+  --accent: #f3c76b;
+  --accent-deep: #a05008;
+  /* כינויים היסטוריים — רכיבים קיימים עדיין מפנים אליהם */
+  --amber: var(--accent);
+  --amber-deep: var(--accent-deep);
   --dark: #211d17;
   --green: #2e7d32;
   --red: #b3261e;
   --orange: #b45309;
+  --nav-bg: #211d17;
+  --nav-ink: #f7f3ea;
+  --nav-ink-soft: #d9d2c4;
+  --nav-hover-bg: rgba(243, 199, 107, 0.12);
+  --nav-active-bg: var(--accent);
+  --nav-active-ink: #211d17;
+  --primary-bg: #211d17;
+  --primary-ink: var(--accent);
+  --primary-hover-bg: #35302a;
+  --toast-bg: #211d17;
+  --toast-ink: #f7f3ea;
+  --error-bg: #fdecea;
+  --overlay: rgba(33, 29, 23, 0.45);
+  --overlay-soft: rgba(33, 29, 23, 0.35);
   --radius: 12px;
   --shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   --shadow-lift: 0 6px 24px rgba(33, 29, 23, 0.14);
@@ -66,11 +86,11 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 button:focus-visible {
-  outline: 2px solid var(--amber-deep);
+  outline: 2px solid var(--accent-deep);
   outline-offset: 1px;
 }
 
-/* נגישות: מצב ניגודיות גבוהה */
+/* נגישות: מצב ניגודיות גבוהה (מנצח ערכת נושא — themes.css נטען לפני הקובץ הזה) */
 :root[data-contrast='high'] {
   --bg: #ffffff;
   --panel: #ffffff;
@@ -78,6 +98,8 @@ button:focus-visible {
   --ink-soft: #1a1a1a;
   --ink-faint: #333333;
   --line: #666666;
+  --line-soft: #666666;
+  --hover-bg: #f2f2f2;
 }
 
 /* נגישות: ביטול אנימציות */
@@ -107,8 +129,8 @@ button:focus-visible {
 
 .app-nav {
   width: 216px;
-  background: var(--dark);
-  color: #f7f3ea;
+  background: var(--nav-bg);
+  color: var(--nav-ink);
   display: flex;
   flex-direction: column;
   padding: 16px 10px;
@@ -121,7 +143,7 @@ button:focus-visible {
 .app-nav .brand {
   font-size: 19px;
   font-weight: 700;
-  color: var(--amber);
+  color: var(--accent);
   padding: 6px 12px 18px;
 }
 
@@ -131,19 +153,19 @@ button:focus-visible {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  color: #d9d2c4;
+  color: var(--nav-ink-soft);
   font-size: 15px;
   text-align: right;
 }
 
 .app-nav button:hover {
-  background: rgba(243, 199, 107, 0.12);
-  color: #fff;
+  background: var(--nav-hover-bg);
+  color: var(--nav-ink);
 }
 
 .app-nav button.active {
-  background: var(--amber);
-  color: var(--dark);
+  background: var(--nav-active-bg);
+  color: var(--nav-active-ink);
   font-weight: 600;
 }
 
@@ -230,13 +252,13 @@ button:focus-visible {
 }
 
 .btn.primary {
-  background: var(--dark);
-  border-color: var(--dark);
-  color: var(--amber);
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--primary-ink);
 }
 
 .btn.primary:hover {
-  background: #35302a;
+  background: var(--primary-hover-bg);
 }
 
 .btn.danger {
@@ -262,9 +284,9 @@ button:focus-visible {
 }
 
 .chip.on {
-  background: var(--dark);
-  border-color: var(--dark);
-  color: var(--amber);
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--primary-ink);
 }
 
 .field {
@@ -287,7 +309,7 @@ button:focus-visible {
 }
 
 .form-error {
-  background: #fdecea;
+  background: var(--error-bg);
   color: var(--red);
   border-radius: 8px;
   padding: 8px 12px;
@@ -300,7 +322,7 @@ button:focus-visible {
 .modal-back {
   position: fixed;
   inset: 0;
-  background: rgba(33, 29, 23, 0.45);
+  background: var(--overlay);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -343,8 +365,8 @@ button:focus-visible {
 }
 
 .toast {
-  background: var(--dark);
-  color: #f7f3ea;
+  background: var(--toast-bg);
+  color: var(--toast-ink);
   padding: 10px 16px;
   border-radius: 10px;
   box-shadow: var(--shadow-lift);
@@ -371,11 +393,11 @@ button:focus-visible {
 
 .table td {
   padding: 9px 10px;
-  border-bottom: 1px solid #ece7db;
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .table tr:hover td {
-  background: #faf8f2;
+  background: var(--hover-bg);
 }
 
 .empty {
@@ -390,7 +412,7 @@ button:focus-visible {
 .palette-back {
   position: fixed;
   inset: 0;
-  background: rgba(33, 29, 23, 0.35);
+  background: var(--overlay-soft);
   display: flex;
   justify-content: center;
   padding-top: 12vh;

@@ -189,7 +189,11 @@ export function recentFamilies(db: Db, n = 5): Family[] {
 export type AttentionNav =
   | { kind: 'course'; id: string }
   | { kind: 'family'; id: string }
+  | { kind: 'supporters' }
   | { kind: 'calendar' };
+
+/** חומרת פריט טיפול — קריטי מוצג לפני אזהרה. */
+export type AttentionSev = 'crit' | 'warn';
 
 export interface AttentionItem {
   key: string;
@@ -197,7 +201,17 @@ export interface AttentionItem {
   tagBg: string;
   tagC: string;
   title: string;
+  sev: AttentionSev;
   nav: AttentionNav;
+}
+
+/** הפרש ימים בין שני תאריכי ISO (חיובי כאשר toIso מאוחר יותר). */
+function daysBetween(fromIso: string, toIso: string): number {
+  const [y1, m1, d1] = fromIso.split('-').map(Number);
+  const [y2, m2, d2] = toIso.split('-').map(Number);
+  return Math.round(
+    (new Date(y2, m2 - 1, d2).getTime() - new Date(y1, m1 - 1, d1).getTime()) / 86_400_000,
+  );
 }
 
 /** יתרת תשלום פתוחה בשיבוץ (סה"כ עסקה פחות תקבולים). */
@@ -208,7 +222,10 @@ function payBal(totalDue: number, payments: { amount: number }[]): number {
 /**
  * פאנל "דורש טיפול":
  * אירועים בעדיפות אדומה שלא טופלו · חוגים בחדר כבוי ·
- * שיבוצים שעבר מועד התשלום שלהם · כרטיסיות שכמעט נגמרו.
+ * שיבוצים שעבר מועד התשלום שלהם · כרטיסיות שכמעט נגמרו ·
+ * משפחות הממתינות לאישור · תורמים שעבר יעד הקשר שלהם ·
+ * ספח ת"ז חסר · מדד אמינות אדום · חוגים שכמעט מלאים.
+ * הפריטים ממוינים כך שהקריטיים מוצגים ראשונים.
  */
 export function attentionItems(db: Db, now: Date): AttentionItem[] {
   const todayIso = isoOf(now);
@@ -237,6 +254,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
       tagBg: '#fdeaea',
       tagC: '#b91c1c',
       title: ev.title + ' — ' + when + (ev.time ? ' ' + ev.time : ''),
+      sev: 'crit',
       nav: { kind: 'calendar' },
     });
   }
@@ -251,6 +269,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
         tagBg: '#fdeaea',
         tagC: '#b91c1c',
         title: `"${c.name}" משויך לחדר כבוי (${room.name}) — הפעילו את החדר או העבירו את החוג`,
+        sev: 'crit',
         nav: { kind: 'course', id: c.id },
       });
     }
@@ -270,6 +289,7 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
         title:
           `יתרת ₪${bal} — ${m?.first ?? ''} (${m?.famName ?? ''}) · ${c?.name ?? ''}` +
           ` · עבר המועד ${fmtD(e.dueDate)}`,
+        sev: 'warn',
         nav: m ? { kind: 'family', id: m.famId } : { kind: 'calendar' },
       });
     }
@@ -294,9 +314,126 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
         `${m?.first ?? ''} (${m?.famName ?? ''}) — ` +
         (rem <= 0 ? 'הכרטיסייה נגמרה' : 'נשאר ניקוב אחד') +
         ` ב${c?.name ?? ''}`,
+      sev: 'warn',
       nav: m ? { kind: 'family', id: m.famId } : { kind: 'calendar' },
     });
   }
 
-  return out;
+  // משפחות הממתינות לאישור — פריט מצטבר אחד עם ותק ההמתנה הארוך ביותר
+  const pending = db.families.filter((f) => f.status === 'pending' && f.createdAt);
+  if (pending.length) {
+    const oldest = pending.reduce((a, b) => (a.createdAt <= b.createdAt ? a : b));
+    const wait = Math.max(0, daysBetween(oldest.createdAt, todayIso));
+    out.push({
+      key: 'pending-families',
+      tag: 'אישור',
+      tagBg: '#fdf1d4',
+      tagC: '#9a6414',
+      title:
+        pending.length === 1
+          ? `משפחה אחת ממתינה לאישור · ${wait} ימים`
+          : `${pending.length} משפחות ממתינות לאישור · הוותיקה ממתינה ${wait} ימים`,
+      sev: 'warn',
+      nav: { kind: 'family', id: oldest.id },
+    });
+  }
+
+  // תורמים שעבר יעד הקשר שלהם — פריט לכל תורם (עד 3), אחר כך צבירה
+  const lateSup = db.supporters
+    .filter((sp) => sp.nextDate && sp.nextDate < todayIso)
+    .map((sp) => ({ sp, late: daysBetween(sp.nextDate, todayIso) }))
+    .sort((a, b) => b.late - a.late);
+  for (const { sp, late } of lateSup.slice(0, 3)) {
+    const crit = late > 7;
+    out.push({
+      key: 'sup-' + sp.id,
+      tag: 'תורם',
+      tagBg: crit ? '#fdeaea' : '#fdf1d4',
+      tagC: crit ? '#b91c1c' : '#9a6414',
+      title: `יעד קשר — ${sp.name} · באיחור ${late} ימים`,
+      sev: crit ? 'crit' : 'warn',
+      nav: { kind: 'supporters' },
+    });
+  }
+  if (lateSup.length > 3) {
+    out.push({
+      key: 'sup-more',
+      tag: 'תורם',
+      tagBg: '#fdf1d4',
+      tagC: '#9a6414',
+      title: `+${lateSup.length - 3} תורמים נוספים עברו יעד קשר`,
+      sev: 'warn',
+      nav: { kind: 'supporters' },
+    });
+  }
+
+  // ספח ת"ז חסר — משפחות פעילות ללא ספח מלא, פריט מצטבר
+  const noSefach = db.families.filter((f) => f.status === 'active' && f.fullSefach === false);
+  if (noSefach.length) {
+    out.push({
+      key: 'no-sefach',
+      tag: 'מסמך',
+      tagBg: '#e7edf5',
+      tagC: '#3a5a86',
+      title:
+        noSefach.length === 1
+          ? 'משפחה אחת ללא ספח ת"ז מלא'
+          : `${noSefach.length} משפחות ללא ספח ת"ז מלא`,
+      sev: 'warn',
+      nav: { kind: 'family', id: noSefach[0].id },
+    });
+  }
+
+  // מדד אמינות אדום — ניקוד מתחת ל-300, פריט מצטבר
+  const redCred = db.families.filter((f) => (f.cred?.score ?? 500) < 300);
+  if (redCred.length) {
+    out.push({
+      key: 'red-cred',
+      tag: 'סיכון',
+      tagBg: '#fdeaea',
+      tagC: '#b91c1c',
+      title:
+        redCred.length === 1
+          ? 'משפחה אחת במדד אמינות אדום'
+          : `${redCred.length} משפחות במדד אמינות אדום`,
+      sev: 'crit',
+      nav: { kind: 'family', id: redCred[0].id },
+    });
+  }
+
+  // חוגים שכמעט מלאים (80% ומעלה מהמקומות) — פריט לכל חוג (עד 3), אחר כך צבירה
+  const filling = db.courses
+    .filter((c) => c.maxStudents > 0)
+    .map((c) => ({
+      c,
+      n: db.enrollments.filter((e) => e.courseId === c.id && e.status === 'active').length,
+    }))
+    .filter(({ c, n }) => n >= c.maxStudents * 0.8)
+    .sort((a, b) => b.n / b.c.maxStudents - a.n / a.c.maxStudents);
+  for (const { c, n } of filling.slice(0, 3)) {
+    const full = n >= c.maxStudents;
+    out.push({
+      key: 'fill-' + c.id,
+      tag: full ? 'מלא' : 'מתמלא',
+      tagBg: '#fdf1d4',
+      tagC: '#9a6414',
+      title: `חוג ${c.name} — ${n}/${c.maxStudents}` + (full ? ' · מלא!' : ''),
+      sev: 'warn',
+      nav: { kind: 'course', id: c.id },
+    });
+  }
+  if (filling.length > 3) {
+    out.push({
+      key: 'fill-more',
+      tag: 'מתמלא',
+      tagBg: '#fdf1d4',
+      tagC: '#9a6414',
+      title: `+${filling.length - 3} חוגים נוספים כמעט מלאים`,
+      sev: 'warn',
+      nav: { kind: 'course', id: filling[3].c.id },
+    });
+  }
+
+  // קריטי קודם — מיון יציב שומר על הסדר הפנימי בכל קבוצה
+  return out.sort((a, b) => (a.sev === b.sev ? 0 : a.sev === 'crit' ? -1 : 1));
 }

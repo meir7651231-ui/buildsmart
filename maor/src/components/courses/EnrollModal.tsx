@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import type { Course, Enrollment } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
-import { normSearch } from '../../lib/validate';
+import { smartFilter } from '../../lib/search';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
 import { enrollCount, groupOptionsOf, isoToday } from './lib';
 
@@ -33,13 +33,14 @@ export function EnrollModal(props: { course: Course; onClose: () => void }) {
       .map((m) => ({
         id: m.id,
         label: (m.isParent ? (m.gender === 'f' ? 'אמא — ' : 'אבא — ') : '') + m.first + ' · משפחת ' + m.famName,
+        terms: [m.first, m.famName, (m.phone || '').replace(/\D/g, ''), m.idNum].filter(Boolean),
       }));
   }, [db, c.id]);
 
+  // חיפוש חכם — סבלני לשגיאות הקלדה ולתעתיק, לפי שם/משפחה/טלפון/ת"ז
   const matches = useMemo(() => {
-    const nq = normSearch(q);
-    if (!nq) return options.slice(0, 7);
-    return options.filter((o) => normSearch(o.label).includes(nq)).slice(0, 7);
+    if (!q.trim()) return options.slice(0, 7);
+    return smartFilter(q, options, (o) => o.terms, 7);
   }, [q, options]);
 
   function pick(id: string, label: string) {

@@ -106,6 +106,7 @@ export function HomeView() {
   const navTo = (nav: AttentionNav) => {
     if (nav.kind === 'course') selectCourse(nav.id);
     else if (nav.kind === 'family') selectFamily(nav.id);
+    else if (nav.kind === 'supporters') go('supporters');
     else go('calendar');
   };
 

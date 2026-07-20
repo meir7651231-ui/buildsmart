@@ -13,6 +13,7 @@ import { SupportersView } from './components/supporters/SupportersView';
 import { ReportsView } from './components/reports/ReportsView';
 import { SettingsView } from './components/settings/SettingsView';
 import { CommandPalette } from './components/palette/CommandPalette';
+import { DemoDrop } from './components/DemoDrop';
 
 const NAV: { view: View; icon: string; label: string }[] = [
   { view: 'home', icon: '🏠', label: 'בית' },
@@ -40,7 +41,9 @@ export default function App() {
   const ready = useApp((s) => s.ready);
   const view = useApp((s) => s.view);
   const go = useApp((s) => s.go);
-  const orgName = useApp((s) => s.db.orgName);
+  const dbOrgName = useApp((s) => s.db.orgName);
+  const famCount = useApp((s) => s.db.families.length);
+  const config = useApp((s) => s.config);
   const toasts = useApp((s) => s.toasts);
   const paletteOpen = useApp((s) => s.paletteOpen);
   const setPalette = useApp((s) => s.setPalette);
@@ -84,11 +87,18 @@ export default function App() {
 
   const Current = VIEWS[view];
 
+  // מיתוג: שם מהקונפיגורציה גובר על השם השמור בנתונים
+  const orgName = config.orgName || dbOrgName;
+  // מודולים: בית והגדרות תמיד; השאר לפי config.modules (חסר = פעיל)
+  const nav = NAV.filter(
+    (n) => n.view === 'home' || n.view === 'settings' || config.modules[n.view] !== false,
+  );
+
   return (
     <div className="app-shell">
       <nav className="app-nav" aria-label="ניווט ראשי">
         <div className="brand">{orgName}</div>
-        {NAV.map((n) => (
+        {nav.map((n) => (
           <button key={n.view} className={view === n.view ? 'active' : ''} onClick={() => go(n.view)}>
             <span aria-hidden>{n.icon}</span>
             {n.label}
@@ -101,6 +111,7 @@ export default function App() {
       </nav>
 
       <main className="app-main">
+        {famCount === 0 && <DemoDrop />}
         <Current />
       </main>
 

@@ -1,6 +1,6 @@
 /**
  * פאנלים של כרטיס המשפחה: מסמכים (רשומות שם בלבד), מדד אמינות (+/- ולוג),
- * שיבוצים לחוגים ואירועים מקושרים.
+ * שיבוצים לחוגים (כולל ＋ שיבוץ לחוג) ואירועים מקושרים.
  */
 import { useState, type ReactNode } from 'react';
 import type { Family, FamilyDoc } from '../../types/domain';
@@ -8,6 +8,7 @@ import { useApp } from '../../store/useApp';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty, TextInput } from '../ui';
 import { chipStyle, EVENT_META, fmtDate, isoToday, tierOf } from './lib';
+import { JoinModal } from './JoinModal';
 
 function SectionCard(props: { title: string; actions?: ReactNode; children: ReactNode }) {
   return (
@@ -178,19 +179,23 @@ export function CredPanel(props: { fam: Family }) {
   );
 }
 
-/** שיבוצים לחוגים של בני המשפחה — תצוגה בלבד (ניהול מלא במודול החוגים). */
+/** שיבוצים לחוגים של בני המשפחה — כולל ＋ שיבוץ לחוג ישירות מהכרטיס. */
 export function EnrollPanel(props: { fam: Family }) {
   const courses = useApp((s) => s.db.courses);
   const enrollments = useApp((s) => s.db.enrollments);
+  const [joinOpen, setJoinOpen] = useState(false);
   const memberIds = new Set(props.fam.members.map((m) => m.id));
   const list = enrollments.filter((e) => memberIds.has(e.memberId));
 
   const STATUS: Record<string, string> = { active: 'פעיל', paused: 'מוקפא ⏸', ended: 'הסתיים' };
 
   return (
-    <SectionCard title="קורסים פעילים וניקובים">
+    <SectionCard
+      title="קורסים פעילים וניקובים"
+      actions={<Btn onClick={() => setJoinOpen(true)}>+ שיבוץ לחוג</Btn>}
+    >
       {list.length === 0 ? (
-        <Empty>אין שיבוצים פעילים — ניתן לשבץ מתוך כרטיס קורס</Empty>
+        <Empty>אין שיבוצים פעילים — לחצו על "+ שיבוץ לחוג"</Empty>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="table">
@@ -234,6 +239,7 @@ export function EnrollPanel(props: { fam: Family }) {
           </table>
         </div>
       )}
+      {joinOpen && <JoinModal family={props.fam} onClose={() => setJoinOpen(false)} />}
     </SectionCard>
   );
 }

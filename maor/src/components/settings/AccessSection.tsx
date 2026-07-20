@@ -38,7 +38,12 @@ function readAcc(): AccPrefs {
 }
 
 function applyScale(scale: number): void {
-  document.documentElement.style.fontSize = 16 * scale + 'px';
+  // zoom מגדיל את כל הממשק — כולל רכיבים עם מידות px קבועות, ש-root font-size
+  // לא השפיע עליהם (נתמך בכל הדפדפנים המודרניים, כולל Firefox 126+).
+  // ההצהרה עדיין לא בכל גרסאות lib.dom — לכן ההרחבה הטיפוסית המקומית.
+  (document.body.style as CSSStyleDeclaration & { zoom: string }).zoom = String(scale);
+  // ניקוי המנגנון הישן (root font-size) — שלא יוכפל עם ה-zoom
+  document.documentElement.style.fontSize = '';
 }
 
 function applyAcc(a: AccPrefs): void {
@@ -152,7 +157,7 @@ export function AccessSection() {
       <div style={{ marginTop: 14 }}>
         <Btn onClick={resetAllAcc}>איפוס כל הגדרות הנגישות</Btn>
       </div>
-      <SectionNote>גודל הטקסט משנה את בסיס הגופן — חלק מהרכיבים בגודל קבוע ולא יושפעו.</SectionNote>
+      <SectionNote>גודל התצוגה מוחל על כל הממשק — טקסט, כפתורים ורכיבים בגודל קבוע.</SectionNote>
     </Section>
   );
 }

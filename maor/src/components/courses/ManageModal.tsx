@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Course, Enrollment, OrgEvent } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
+import { downloadReceipt } from '../../lib/receipt';
 import { Btn, Field, Modal, Select, TextInput } from '../ui';
 import {
   PAY_METHODS,
@@ -90,10 +91,24 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
       toast('הקלידו סכום תשלום תקין');
       return;
     }
-    addPayment(en.id, { date: payDate || isoToday(), amount: amt, method: payMethod || 'מזומן' });
+    // מספר הקבלה נגזר מה-seq הנוכחי — בדיוק כפי ש-addPayment שב-store מחשב אותו
+    const rid = 'R-' + useApp.getState().db.seq;
+    const date = payDate || isoToday();
+    const method = payMethod || 'מזומן';
+    addPayment(en.id, { date, amount: amt, method });
+    downloadReceipt({
+      rid,
+      orgName: db.orgName,
+      payer: ((m?.first ?? '') + ' ' + (m?.famName ?? '')).trim() || '—',
+      amount: amt,
+      method,
+      date,
+      forWhat: c.name,
+    });
     setPayAmt('');
     const newBal = Math.max(0, (en.totalDue || 0) - (paid + amt));
-    toast('התקבל ₪' + amt + (en.totalDue ? ' · יתרה: ₪' + newBal : '') + ' — קבלה נוצרה');
+    toast('התקבל ₪' + amt + (en.totalDue ? ' · יתרה: ₪' + newBal : '') + ' — קבלה ' + rid);
+    toast('הקבלה ירדה למחשב ✓');
     const fam = famOf();
     if (fam) addCred(fam.id, 5, 'תשלום התקבל (₪' + amt + ')');
   }

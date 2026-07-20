@@ -1,11 +1,11 @@
 /**
- * CRM המשפחות — רשימה/גריד (נשמר ב-db.ui.famView), חיפוש מנורמל,
- * סינון סטטוס/עיר/קהילה, טופס משפחה וכרטיס משפחה מפורט.
+ * CRM המשפחות — רשימה/גריד (נשמר ב-db.ui.famView), חיפוש חכם (סבלני לשגיאות
+ * הקלדה ולתעתיק), סינון סטטוס/עיר/קהילה, טופס משפחה וכרטיס משפחה מפורט.
  */
 import { useState, type KeyboardEvent } from 'react';
 import type { Family } from '../../types/domain';
 import { useApp } from '../../store/useApp';
-import { normSearch } from '../../lib/validate';
+import { smartFilter } from '../../lib/search';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty, PageHead, Select, TextInput } from '../ui';
 import { chipStyle, famEnrollments, STATUS_META, tierOf } from './lib';
@@ -52,17 +52,27 @@ export function FamiliesView() {
   const toggleView = () =>
     setDb((d) => ({ ui: { ...d.ui, famView: d.ui.famView === 'grid' ? 'list' : 'grid' } }));
 
-  const nq = normSearch(q);
-  const qd = q.replace(/\D/g, '');
-  const filtered = db.families.filter((f) => {
+  const prefiltered = db.families.filter((f) => {
     if (status !== 'all' && f.status !== status) return false;
     if (city !== 'all' && f.city !== city) return false;
     if (comm !== 'all' && f.community !== comm) return false;
-    if (!q.trim()) return true;
-    const hay = normSearch([f.name, f.father, f.mother, f.city, ...f.members.map((m) => m.first)].join(' '));
-    if (nq && hay.includes(nq)) return true;
-    return qd.length >= 2 && ((f.phone || '') + (f.phone2 || '')).replace(/\D/g, '').includes(qd);
+    return true;
   });
+  // חיפוש חכם — סבלני לשגיאות הקלדה ולתעתיק עברית/לועזית
+  const filtered = q.trim()
+    ? smartFilter(q, prefiltered, (f) =>
+        [
+          f.name,
+          f.father,
+          f.mother,
+          f.city,
+          f.community,
+          (f.phone || '').replace(/\D/g, ''),
+          (f.phone2 || '').replace(/\D/g, ''),
+          ...f.members.map((m) => m.first),
+        ].filter(Boolean),
+      )
+    : prefiltered;
 
   const cityOptions = [...new Set(db.families.map((f) => f.city).filter(Boolean))];
   const commOptions = [...new Set(db.families.map((f) => f.community).filter(Boolean))];

@@ -1,11 +1,12 @@
 /**
  * פלטת פקודות (Ctrl+K) — חיפוש מהיר בכל המערכת:
- * מסכים, משפחות, בני משפחה, חוגים, תורמים, אירועים ופעולות.
+ * מסכים, משפחות, בני משפחה, חוגים, מורים, תורמים, אירועים, מסמכים ופעולות.
  *
  * App מרנדר את הרכיב רק כאשר paletteOpen=true; סגירה דרך setPalette(false).
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { allMembers, useApp, type View } from '../../store/useApp';
+import { smartFilter } from '../../lib/search';
 import { normSearch } from '../../lib/validate';
 
 /** פריט בר-הפעלה בפלטה: אייקון + כותרת + שורת משנה + פעולה. */
@@ -113,7 +114,7 @@ export function CommandPalette() {
     return [...nav, ...actions];
   }, [go, selectFamily, exportBackup, setPalette]);
 
-  /** ישויות מהנתונים — משפחות, בני משפחה, חוגים, תורמים ואירועים פתוחים. */
+  /** ישויות מהנתונים — משפחות, בני משפחה, חוגים, מורים, תורמים, מסמכים ואירועים פתוחים. */
   const entityCmds = useMemo<Cmd[]>(() => {
     const out: Cmd[] = [];
     for (const f of db.families) {
@@ -165,6 +166,29 @@ export function CommandPalette() {
         },
       });
     }
+    for (const t of db.teachers) {
+      out.push({
+        key: 'tch-' + t.id,
+        icon: '🧑‍🏫',
+        title: t.name,
+        sub: [t.specialty, t.phone].filter(Boolean).join(' · '),
+        terms: toTerms([
+          t.name,
+          t.specialty,
+          t.email,
+          digits(t.phone),
+          digits(t.phone2),
+          t.idNum,
+          'מורה',
+          'מדריך',
+          'צוות',
+        ]),
+        run: () => {
+          go('settings');
+          setPalette(false);
+        },
+      });
+    }
     for (const sp of db.supporters) {
       out.push({
         key: 'sup-' + sp.id,
@@ -177,6 +201,21 @@ export function CommandPalette() {
           setPalette(false);
         },
       });
+    }
+    for (const f of db.families) {
+      for (const doc of f.docs) {
+        out.push({
+          key: 'doc-' + f.id + '-' + doc.id,
+          icon: '📄',
+          title: doc.name,
+          sub: ['משפחת ' + f.name, fmtDate(doc.addedAt)].filter(Boolean).join(' · '),
+          terms: toTerms([doc.name, f.name, 'משפחת ' + f.name, 'מסמך', 'קובץ']),
+          run: () => {
+            selectFamily(f.id);
+            setPalette(false);
+          },
+        });
+      }
     }
     for (const ev of db.events) {
       if (ev.done) continue;
@@ -195,18 +234,11 @@ export function CommandPalette() {
     return out;
   }, [db, go, selectFamily, selectCourse, setPalette]);
 
-  /** דירוג: התאמת תחילית מדויקת קודם, אחריה הכלה. עד 12 תוצאות. */
+  /** דירוג חכם (smartFilter) על מונחי החיפוש המנורמלים. עד 12 תוצאות. */
   const results = useMemo<Cmd[]>(() => {
     const nq = normSearch(q);
     if (!nq) return baseCmds.slice(0, MAX_RESULTS);
-    const prefix: Cmd[] = [];
-    const contains: Cmd[] = [];
-    for (const c of [...baseCmds, ...entityCmds]) {
-      if (prefix.length >= MAX_RESULTS) break;
-      if (c.terms.some((t) => t.startsWith(nq))) prefix.push(c);
-      else if (c.terms.some((t) => t.includes(nq))) contains.push(c);
-    }
-    return [...prefix, ...contains].slice(0, MAX_RESULTS);
+    return smartFilter(nq, [...baseCmds, ...entityCmds], (c) => c.terms, MAX_RESULTS);
   }, [q, baseCmds, entityCmds]);
 
   // איפוס הבחירה כשהשאילתה משתנה, והצמדה לטווח כשהתוצאות מתקצרות.
@@ -257,7 +289,7 @@ export function CommandPalette() {
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="חיפוש: מסך, משפחה, שם, חוג, תורם או פעולה…"
+          placeholder="חיפוש: מסך, משפחה, שם, חוג, מורה, תורם, מסמך או פעולה…"
           aria-label="חיפוש מהיר בכל המערכת"
         />
         <div className="results" ref={listRef} role="listbox" aria-label="תוצאות חיפוש">

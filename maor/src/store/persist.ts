@@ -7,7 +7,14 @@
  * אין שרת. הנתונים חיים אצל הלקוח — ולכן כל שכבה כאן קריטית.
  */
 import { openDB, type IDBPDatabase } from 'idb';
-import { DB_VERSION, emptyDb, type Db } from '../types/domain';
+import {
+  DB_VERSION,
+  emptyDb,
+  type CredLogEntry,
+  type Db,
+  type FamilyCred,
+  type FamilyDoc,
+} from '../types/domain';
 
 const LS_KEY = 'maor_db';
 const LS_CORRUPT_KEY = 'maor_db_corrupt';
@@ -28,6 +35,41 @@ function getIdb(): Promise<IDBPDatabase> {
     });
   }
   return idb;
+}
+
+/** v1 שמר מסמכים כמערך שמות קבצים — ממירים לאובייקטי FamilyDoc. */
+function migrateDocs(raw: unknown): FamilyDoc[] {
+  if (!Array.isArray(raw)) return [];
+  const out: FamilyDoc[] = [];
+  raw.forEach((d, i) => {
+    if (typeof d === 'string') {
+      out.push({ id: 'dx' + i, name: d, addedAt: '' });
+    } else if (d && typeof d === 'object') {
+      const o = d as Partial<FamilyDoc>;
+      out.push({ id: o.id || 'dx' + i, name: o.name ?? '', addedAt: o.addedAt ?? '' });
+    }
+    // ערכים אחרים (null / מספרים) — נזרקים
+  });
+  return out;
+}
+
+/**
+ * ניקוד משפחתי: ב-v1 רשומות הלוג היו {d|date, delta, desc} — ממופות
+ * ל-{date, delta, reason}. cred חסר מקבל את ברירת המחדל המקורית (700).
+ */
+function migrateCred(raw: unknown): FamilyCred {
+  const o = (raw && typeof raw === 'object' ? raw : {}) as { score?: unknown; log?: unknown };
+  const score = typeof o.score === 'number' && Number.isFinite(o.score) ? o.score : 700;
+  const log: CredLogEntry[] = Array.isArray(o.log)
+    ? o.log
+        .filter((e): e is Record<string, unknown> => !!e && typeof e === 'object')
+        .map((e) => ({
+          date: String(e.date ?? e.d ?? ''),
+          delta: typeof e.delta === 'number' && Number.isFinite(e.delta) ? e.delta : Number(e.delta) || 0,
+          reason: String(e.reason ?? e.desc ?? ''),
+        }))
+    : [];
+  return { score, log };
 }
 
 /** מיגרציה מגרסאות קודמות של הסכמה (כולל v1 של האב-טיפוס). */
@@ -60,7 +102,8 @@ export function migrate(raw: unknown): Db | null {
       ...f,
       id: f.id || 'fx' + i,
       members: Array.isArray(f.members) ? f.members : [],
-      docs: Array.isArray(f.docs) ? f.docs : [],
+      docs: migrateDocs(f.docs),
+      cred: migrateCred(f.cred),
     }))
     .filter((f) => !seen.has(f.id) && !!seen.add(f.id));
   return merged;

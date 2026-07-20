@@ -61,6 +61,47 @@ describe('migrate', () => {
     expect(migrate({ families: [] })).toBeNull();
   });
 
+  it('converts legacy v1 string docs to FamilyDoc objects', () => {
+    const db = migrate({
+      v: 1,
+      families: [{ id: 'f1', name: 'כהן', docs: ['tofes.pdf', 'sefach.jpg'] }],
+    })!;
+    expect(db.families[0].docs).toEqual([
+      { id: 'dx0', name: 'tofes.pdf', addedAt: '' },
+      { id: 'dx1', name: 'sefach.jpg', addedAt: '' },
+    ]);
+  });
+
+  it('maps legacy cred log fields (desc→reason, d→date)', () => {
+    const db = migrate({
+      v: 1,
+      families: [
+        {
+          id: 'f1',
+          name: 'כהן',
+          cred: {
+            score: 320,
+            log: [
+              { d: '2024-01-01', delta: 5, desc: 'תשלום' },
+              { date: '2024-02-01', delta: -2, desc: 'ביטול' },
+            ],
+          },
+        },
+      ],
+    })!;
+    const cred = db.families[0].cred;
+    expect(cred.score).toBe(320);
+    expect(cred.log).toEqual([
+      { date: '2024-01-01', delta: 5, reason: 'תשלום' },
+      { date: '2024-02-01', delta: -2, reason: 'ביטול' },
+    ]);
+  });
+
+  it('defaults missing cred to the original prototype score (700)', () => {
+    const db = migrate({ v: 1, families: [{ id: 'f1', name: 'לוי' }] })!;
+    expect(db.families[0].cred).toEqual({ score: 700, log: [] });
+  });
+
   it('accepts a current-version blob and normalizes bad arrays', () => {
     const db = migrate({ v: DB_VERSION, families: 'garbage', events: null });
     expect(db).not.toBeNull();

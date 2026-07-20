@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { downloadReceipt } from '../../lib/receipt';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
 import { isoToday } from './lib';
@@ -33,6 +34,15 @@ export function DonationModal(props: { supporter: Supporter; onClose: () => void
     // מספר האסמכתה נגזר מה-seq הנוכחי — בדיוק כפי ש-addDonation שב-store מחשב אותו
     const rid = 'D-' + useApp.getState().db.seq;
     addDonation(props.supporter.id, { date, amount: amt, cur, cat: cat.trim() });
+    downloadReceipt({
+      rid,
+      orgName: useApp.getState().db.orgName,
+      payer: props.supporter.name,
+      amount: amt,
+      currency: cur,
+      date,
+      forWhat: 'תרומה — ' + (cat.trim() || 'כללי'),
+    });
     toast(
       'נרשמה תרומה ' +
         (cur === '$' ? '$' : '₪') +
@@ -41,6 +51,7 @@ export function DonationModal(props: { supporter: Supporter; onClose: () => void
         rid +
         ' · הציון עודכן',
     );
+    toast('הקבלה ירדה למחשב ✓');
     props.onClose();
   }
 

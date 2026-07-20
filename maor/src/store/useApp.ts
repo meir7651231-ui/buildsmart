@@ -22,6 +22,8 @@ import {
   type Supporter,
   type Teacher,
 } from '../types/domain';
+import { DEFAULT_CONFIG, type OrgConfig } from '../types/config';
+import { applyTheme, loadOrgConfig, saveConfigOverride } from '../lib/config';
 import { dailySnapshot, exportBackupFile, loadDb, saveDb } from './persist';
 
 export type View =
@@ -50,6 +52,8 @@ interface AppState {
   selCourseId: string | null;
   toasts: Toast[];
   paletteOpen: boolean;
+  /** קונפיגורציית הארגון — localStorage ← config.json ← ברירת מחדל. */
+  config: OrgConfig;
 
   // מחזור חיים
   init: () => Promise<void>;
@@ -61,6 +65,14 @@ interface AppState {
   selectFamily: (id: string | null) => void;
   selectCourse: (id: string | null) => void;
   setPalette: (open: boolean) => void;
+
+  // ערכת נושא וקונפיגורציה
+  /** קביעת קונפיגורציה חדשה + שמירתה כדריסת ריצה ב-localStorage. */
+  setConfig: (cfg: OrgConfig) => void;
+  /** בחירת ערכת נושא — נשמרת ב-db.ui ומוחלת על ה-DOM. */
+  setTheme: (theme: string) => void;
+  /** דריסת צבע הדגשה (hex) — undefined מחזיר לצבע הערכה. */
+  setAccent: (accent: string | undefined) => void;
 
   // הודעות
   toast: (text: string) => void;
@@ -144,10 +156,14 @@ export const useApp = create<AppState>()((set, get) => {
     selCourseId: null,
     toasts: [],
     paletteOpen: false,
+    config: DEFAULT_CONFIG,
 
     async init() {
+      const config = await loadOrgConfig();
       const { db, corrupt } = await loadDb();
-      set({ db, corrupt, ready: true });
+      set({ db, corrupt, config, ready: true });
+      // ערכת הנושא: העדפת משתמש (db.ui) גוברת על ברירת המחדל של הארגון
+      applyTheme(db.ui.theme ?? config.theme, db.ui.accent ?? config.accent);
       void dailySnapshot(db);
       if (corrupt) {
         get().toast('⚠ הנתונים השמורים נמצאו פגומים — נשמר עותק בצד. שחזרו מגיבוי דרך הגדרות ← ייבוא');
@@ -166,6 +182,19 @@ export const useApp = create<AppState>()((set, get) => {
     selectFamily: (id) => set({ selFamilyId: id, view: 'families' }),
     selectCourse: (id) => set({ selCourseId: id, view: 'courses' }),
     setPalette: (open) => set({ paletteOpen: open }),
+
+    setConfig(cfg) {
+      set({ config: cfg });
+      saveConfigOverride(cfg);
+      const { db } = get();
+      applyTheme(db.ui.theme ?? cfg.theme, db.ui.accent ?? cfg.accent);
+    },
+    setTheme(theme) {
+      setDb((db) => ({ ui: { ...db.ui, theme } }));
+    },
+    setAccent(accent) {
+      setDb((db) => ({ ui: { ...db.ui, accent } }));
+    },
 
     toast(text) {
       const id = toastSeq++;
@@ -329,6 +358,14 @@ export const useApp = create<AppState>()((set, get) => {
       get().toast('המערכת אופסה — כל הנתונים נמחקו');
     },
   };
+});
+
+// החלת ערכת הנושא על ה-DOM בכל שינוי העדפה ב-db.ui —
+// מכסה גם setTheme/setAccent וגם שחזור מגיבוי (restoreDb) ואיפוס (resetAll).
+useApp.subscribe((s, prev) => {
+  if (s.db.ui.theme !== prev.db.ui.theme || s.db.ui.accent !== prev.db.ui.accent) {
+    applyTheme(s.db.ui.theme ?? s.config.theme, s.db.ui.accent ?? s.config.accent);
+  }
 });
 
 /** בוחרי עזר נפוצים. */
