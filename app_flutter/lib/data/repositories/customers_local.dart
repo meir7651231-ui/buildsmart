@@ -68,8 +68,9 @@ class LocalCustomersRepository implements CustomersRepository {
     return null;
   }
 
+  // fake-data-sweep 1א: no local ceiling — "לא רשומה" unless the server (computeCredit) provides a real one. Mirrors FirebaseCustomersRepository.creditLimit()==0.
   @override
-  int creditLimit(String name) => contractorCredit(name);
+  int creditLimit(String name) => 0;
 
   /// A13 — whether the server-canonical credit path is active: the flag (the
   /// injected bool, else the compile-time [kServerCallables]) AND a bound
@@ -79,18 +80,19 @@ class LocalCustomersRepository implements CustomersRepository {
 
   /// A13 — the server-canonical contractor credit aggregate for [name].
   ///
-  /// • OFF (default) / no gateway → returns the SYNC client derivation,
-  ///   byte-identical to today: `creditLimit = contractorCredit(name)`, `used`
-  ///   = the live `mgrCustomerList` spend fold, `balance`/`pct` derived exactly
-  ///   as the manager dashboard does (`_customerViewsProvider`). No network.
+  /// • OFF (default) / no gateway → returns the local aggregate ([_localCredit]):
+  ///   the REAL `used` + `orderCount` folded from this contractor's own orders,
+  ///   and a ZERO ceiling ("לא רשומה") — so `creditLimit`/`balance`/`pct` are 0.
+  ///   No network. (fake-data-sweep 1א — the demo name-hash ceiling is never
+  ///   surfaced.)
   /// • ON + a bound gateway → calls the `computeCredit` callable for the
   ///   server-canonical numbers. A [OrderFunctionsException] (not deployed /
   ///   permission) is caught and FALLS BACK to the same local derivation —
   ///   honest (the manager still sees a number), never a faked server success.
   ///
-  /// Additive: the existing sync [creditLimit] + the dashboard's sync `pct`
-  /// derivation are untouched (the OFF behaviour). This is the forward-ready
-  /// hook a future async credit surface reads once the flag is flipped.
+  /// This is the forward-ready hook a future async credit surface reads once the
+  /// flag is flipped; mirrors FirebaseCustomersRepository.computeCredit's honest
+  /// no-ceiling fallback.
   @override
   Future<CreditResult> computeCredit(String name) async {
     final fns = _functions;
@@ -105,27 +107,26 @@ class LocalCustomersRepository implements CustomersRepository {
     return _localCredit(name);
   }
 
-  /// The client-side credit aggregate — the EXACT numbers the manager dashboard
-  /// derives today (`contractorCredit` ceiling + the live spend fold + the
-  /// `balance`/`pct` formulas), packaged as a [CreditResult]. This is the
-  /// byte-identical OFF result and the graceful fallback when the callable fails.
+  /// The client-side credit aggregate — the REAL numbers the manager can trust:
+  /// `used` + `orderCount` folded from this contractor's own orders. There is NO
+  /// local credit source, so the ceiling is 0 ("לא רשומה") and `balance`/`pct`
+  /// are 0 too — a real credit figure arrives only from the server
+  /// (`computeCredit` callable). This is the OFF result and the graceful fallback
+  /// when the callable fails. Mirrors FirebaseCustomersRepository's no-record
+  /// result (customers_firebase.dart).
   CreditResult _localCredit(String name) {
-    final creditLimit = contractorCredit(name);
     final c = byName(name);
-    final used = c?.totalSpend ?? 0;
-    final orderCount = c?.orderCount ?? 0;
-    // @legacy index.html:16559-16562 (manager_dashboard_screen.dart pct/balance).
-    final balance = (creditLimit - used).clamp(0, creditLimit);
-    final pct = creditLimit == 0
-        ? 0
-        : ((used / creditLimit) * 100).round().clamp(0, 100);
+    // fake-data-sweep 1א: `used` and `orderCount` stay REAL (folded from this
+    // contractor's own orders). With no local ceiling there is no balance and no
+    // percentage to report (a "0% used" next to a real spend would be a second
+    // invented claim); the demo name-hash ceiling is never surfaced.
     return CreditResult(
       name: name,
-      creditLimit: creditLimit,
-      used: used,
-      balance: balance,
-      pct: pct,
-      orderCount: orderCount,
+      creditLimit: 0,
+      used: c?.totalSpend ?? 0,
+      balance: 0,
+      pct: 0,
+      orderCount: c?.orderCount ?? 0,
     );
   }
 }

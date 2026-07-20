@@ -9,6 +9,8 @@
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart'
     show catalogRepositoryProvider;
+import 'package:buildsmart/data/repositories/order_functions.dart'
+    show CreditResult;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
@@ -31,7 +33,8 @@ void main() {
     }
   }
 
-  Future<ProviderContainer> pumpScreen(WidgetTester t) async {
+  Future<ProviderContainer> pumpScreen(WidgetTester t,
+      {List<Override> overrides = const []}) async {
     SharedPreferences.setMockInitialValues({
       // #65 gate: seed a board session so the board (not the gate) renders.
       'bs.board-auth.v1':
@@ -40,8 +43,9 @@ void main() {
     await t.binding.setSurfaceSize(const Size(440, 950));
     addTearDown(() => t.binding.setSurfaceSize(null));
     await t.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
+      ProviderScope(
+        overrides: overrides,
+        child: const MaterialApp(
           locale: Locale('he'),
           home: ManagerDashboardScreen(),
         ),
@@ -542,18 +546,9 @@ void main() {
           reason: '${cust.name} meta line',
         );
 
-        // The verbatim credit line `ניצול אשראי: ₪used / ₪limit (pct%)` is
-        // UNIQUE per customer (distinct spend/limit), so exactly one.
-        final pct = cust.creditLimit == 0
-            ? 0
-            : ((cust.totalSpend / cust.creditLimit) * 100).round().clamp(0, 100);
-        expect(
-          find.text(
-            'ניצול אשראי: ₪${_grp(cust.totalSpend)} / ₪${_grp(cust.creditLimit)} ($pct%)',
-          ),
-          findsOneWidget,
-          reason: '${cust.name} credit line',
-        );
+        // fake-data-sweep 1א: no real server record → creditLimit 0 ("לא רשומה"),
+        // so the card shows 'אשראי: לא רשומה', never a fabricated name-hash ceiling.
+        expect(cust.creditLimit, 0, reason: '${cust.name}: no fabricated ceiling');
       }
 
       // The 👷 avatar appears once per customer; the summary labels are present.
@@ -561,8 +556,10 @@ void main() {
       expect(find.text('קבלנים'), findsOneWidget);
       expect(find.text('סך רכש'), findsOneWidget);
 
-      // Every seed buyer is under the credit ceiling → all "פעיל"; none high.
-      expect(find.text('פעיל'), findsWidgets);
+      // fake-data-sweep 1א: every card renders the honest 'אשראי: לא רשומה' line
+      // (no server ceiling), and status 'off' → 'לא פעיל' (none 'פעיל', none high).
+      expect(find.text('אשראי: לא רשומה'), findsNWidgets(customers.length));
+      expect(find.text('לא פעיל'), findsWidgets);
     });
 
     testWidgets('each card carries a credit-utilisation bar '
@@ -611,44 +608,67 @@ void main() {
       expect(find.text('בנאי חדש'), findsOneWidget);
       final fresh =
           c.read(managerCustomersProvider).firstWhere((x) => x.name == 'בנאי חדש');
-      final freshPct = ((fresh.totalSpend / fresh.creditLimit) * 100)
-          .round()
-          .clamp(0, 100);
-      expect(
-        find.text(
-          'ניצול אשראי: ₪${_grp(fresh.totalSpend)} / ₪${_grp(fresh.creditLimit)} ($freshPct%)',
-        ),
-        findsOneWidget,
-      );
+      // fake-data-sweep 1א: the new card mounted live; with no server ceiling its
+      // creditLimit is 0 → it shows the honest 'אשראי: לא רשומה' (never a fabricated
+      // 'ניצול אשראי' line, and no divide-by-zero on a 0 ceiling).
+      expect(fresh.creditLimit, 0);
+      expect(find.text('אשראי: לא רשומה'), findsWidgets);
     });
 
     testWidgets('a contractor over 90% of their ceiling shows "⚠️ אשראי גבוה" '
         'and the אשראי גבוה filter narrows to them', (t) async {
-      final c = await pumpScreen(t);
+      // fake-data-sweep 1א: the local path no longer fabricates a ceiling
+      // (creditLimit 0 = "לא רשומה"), so the high-credit path is only exercisable
+      // with a REAL server ceiling. Inject one for יוסי כהן (simulating the server
+      // figure) via BOTH the customer list (drives status/pct/filter) AND
+      // customerCreditProvider (drives the card display), so pill + filter run on
+      // consistent honest data; משה אברהם stays unregistered (creditLimit 0 → off).
+      const target = 'יוסי כהן';
+      const other = 'משה אברהם';
+      final injected = <ManagerCustomer>[
+        ManagerCustomer(
+            name: target, orderCount: 2, totalSpend: 5000, creditLimit: 5000),
+        ManagerCustomer(
+            name: other, orderCount: 1, totalSpend: 1000, creditLimit: 0),
+      ];
+      CreditResult resultFor(String name) {
+        final cust = injected.firstWhere(
+          (x) => x.name == name,
+          orElse: () => ManagerCustomer(
+              name: name, orderCount: 0, totalSpend: 0, creditLimit: 0),
+        );
+        final pct = cust.creditLimit == 0
+            ? 0
+            : ((cust.totalSpend / cust.creditLimit) * 100).round().clamp(0, 100);
+        return CreditResult(
+          name: name,
+          creditLimit: cust.creditLimit,
+          used: cust.totalSpend,
+          balance:
+              (cust.creditLimit - cust.totalSpend).clamp(0, cust.creditLimit),
+          pct: pct,
+          orderCount: cust.orderCount,
+        );
+      }
 
-      // Push an EXISTING seed buyer (יוסי כהן) past 90% by placing an order
-      // whose sum exceeds their whole credit ceiling → pct clamps to 100 → low.
-      final ceiling = contractorCredit('יוסי כהן');
-      c.read(ordersEngineProvider.notifier).placeOrder(
-            who: 'יוסי כהן',
-            site: 'מגדל הרצליה',
-            items: 1,
-            sum: ceiling, // total now > ceiling → pct = 100 ≥ 90 → status 'low'
-          );
+      await pumpScreen(t, overrides: [
+        managerCustomersProvider.overrideWithValue(injected),
+        customerCreditProvider
+            .overrideWith((ref, name) async => resultFor(name)),
+      ]);
       await openCustomersTab(t);
       await settle(t);
 
-      // The high-credit pill (with the ⚠️ glyph) is now on the יוסי כהן card.
+      // The high-credit pill (⚠️) is on the יוסי כהן card (100% of its ceiling).
       expect(find.text('⚠️ אשראי גבוה'), findsWidgets);
 
-      // The status-filter chip row now offers an "אשראי גבוה (N)" chip; tapping
-      // it narrows the list to the high-credit contractor(s) only.
+      // The status-filter chip row offers "אשראי גבוה (N)"; tapping it narrows the
+      // list to the high-credit contractor only.
       expect(find.textContaining('אשראי גבוה ('), findsOneWidget);
       await t.tap(find.textContaining('אשראי גבוה ('));
       await settle(t);
-      expect(find.text('יוסי כהן'), findsOneWidget);
-      // A still-active seed buyer (משה אברהם, low utilisation) is filtered out.
-      expect(find.text('משה אברהם'), findsNothing);
+      expect(find.text(target), findsOneWidget);
+      expect(find.text(other), findsNothing);
     });
 
     testWidgets('tapping a customer card opens the detail sheet '

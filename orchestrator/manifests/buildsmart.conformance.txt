@@ -40,3 +40,9 @@ lib/screens/store_screen.dart:::ordersPreview
 #
 # Regression — fake-data-sweep H1 (2026-07-20 · owner "2א"=remove): the fake 38% progress bar must never return:
 lib/screens/smart_home_screen.dart:::!value: 0.38
+#
+# Regression — fake-data-sweep M2 (2026-07-20 · owner "1א"): customer credit is real-or-"לא רשומה", never the name-hash:
+#  the fabrication call-site (mgrCustomerList stamping contractorCredit onto every customer) must never return:
+lib/logic/manager_dashboard.dart:::!creditLimit: contractorCredit
+#  the honest "not registered" render must stay on the customer card:
+lib/screens/manager_dashboard_screen.dart:::אשראי: לא רשומה

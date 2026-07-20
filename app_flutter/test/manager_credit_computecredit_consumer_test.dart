@@ -214,15 +214,18 @@ void main() {
               '(the seam is reachable — no longer dead)',
         );
 
-        // PROOF 2 — OFF = zero-regression: the rendered ceiling equals the LOCAL
-        // derivation, which is byte-identical to the sync path the dashboard
-        // shows today (`creditLimit == contractorCredit(name)`). The OFF path
-        // returns this WITHOUT any network call.
-        final localCeiling = contractorCredit(buyer);
+        // PROOF 2 — fake-data-sweep 1א: OFF has no real server record, so the
+        // sheet shows "לא רשומה", NEVER the fabricated name-hash ceiling (which
+        // OFF used to render). The seam is still reached WITHOUT a network call.
         expect(
-          find.text('₪${_grp(localCeiling)}'),
+          find.text('₪${_grp(contractorCredit(buyer))}'),
+          findsNothing,
+          reason: 'OFF no longer renders the name-hash ceiling',
+        );
+        expect(
+          find.text('לא רשומה'),
           findsWidgets,
-          reason: 'OFF: the ceiling is the local figure == today',
+          reason: 'OFF with no real record → "לא רשומה"',
         );
       },
     );
@@ -270,12 +273,18 @@ void main() {
         await t.tap(find.text(buyer));
         await settle(t);
 
-        // OFF must show the LOCAL ceiling, never the fake server figure.
-        expect(find.text('₪${_grp(contractorCredit(buyer))}'), findsWidgets);
+        // fake-data-sweep 1א: OFF has no real record → "לא רשומה"; it must show
+        // NEITHER the fabricated name-hash NOR the injected server figure.
+        expect(find.text('לא רשומה'), findsWidgets);
+        expect(
+          find.text('₪${_grp(contractorCredit(buyer))}'),
+          findsNothing,
+          reason: 'OFF no longer renders the name-hash ceiling',
+        );
         expect(
           find.text('₪${_grp(999999)}'),
           findsNothing,
-          reason: 'OFF must ignore any server figure — local derivation only',
+          reason: 'OFF must ignore any injected server figure',
         );
       },
     );

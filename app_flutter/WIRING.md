@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fake-sweep-M2 — אשראי-לקוח: hash-מהשם → אמת-מהשרת / "לא רשומה" (1א) — 2026-07-20
+`logic/manager_dashboard.dart:282`: `creditLimit: contractorCredit(o.who)` → `0` (הפונקציה contractorCredit :256-264 **נשמרה** — נעולה כ"ערך-אסור" ע"י credit_never_invented_test; רק הקריאה הוסרה). `data/repositories/customers_local.dart`: `creditLimit()`→`0`, `_localCredit` מחזיר ceiling 0/balance 0/pct 0 עם `used`/`orderCount` אמיתיים (מראָה FirebaseCustomersRepository, שכבר-כן). `screens/manager_dashboard_screen.dart` (B4-B7): כרטיס `liveLimit<=0?'אשראי: לא רשומה'`, גיליון tile `'—'`, שורת מסגרת `'לא רשומה'`, שורת יתרה `'—'`. המקור-החי = `customerCreditProvider`→`computeCredit` (server-canonical). דליפת-קו-פיילוט נסגרה ע"י A1 (מקור=managerCustomersProvider). הנחיה `DIRECTIVE-fake-data-sweep.md` (M2·M3·1א). **תוצאה:** תג/פילטר "⚠️ אשראי גבוה" רדומים בדמו (fired רק על תקרת-שרת אמיתית). **טסטים שוכתבו:** orders_credit_a13 (expect 0) · manager_credit_computecredit_consumer (לא רשומה) · manager_dashboard_screen (לא רשומה + פילטר עם override-מוזרק + הסרת ÷0). גארד: `manager_dashboard.dart:::!contractorCredit(o.who)`.
+
 ## #fake-sweep-H1 — הסרת פס-התקדמות מזויף 38% (גמר אמבטיה) — 2026-07-20
 `screens/smart_home_screen.dart`: הוסר `const LinearProgressIndicator(value: 0.38)` + ה-`ClipRRect`/`SizedBox(height:10)` העוטפים, מכרטיס "מסלול עבודה חכם / גמר אמבטיה" — פס קבוע-מזויף (38% לכל משתמש) בלי provider-התקדמות ובלי עץ-4-שלבים לחבר אליו (מאמת-D: היעד לא-נבנה). החלטת-בעלים "2א"=להסיר; הכרטיס נשאר טיזר-כן (badge+כותרת+תת-כותרת). הנחיה `DIRECTIVE-fake-data-sweep.md` (H1). גארד: `smart_home_screen.dart:::!value: 0.38`.
 

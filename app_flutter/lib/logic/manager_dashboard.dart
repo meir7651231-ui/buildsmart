@@ -279,7 +279,8 @@ List<ManagerCustomer> mgrCustomerList([List<ManagerOrder>? orders]) {
         name: o.who,
         orderCount: 1,
         totalSpend: o.sum,
-        creditLimit: contractorCredit(o.who),
+        // fake-data-sweep 1א: real credit comes from computeCredit (customerCreditProvider); the sync seed is 0 ("לא רשומה"), never the name-hash.
+        creditLimit: 0,
       );
     } else {
       byBuyer[o.who] = ManagerCustomer(

@@ -2217,7 +2217,9 @@ class _CustomerCard extends ConsumerWidget {
                   _CreditBar(pct: pct, color: statusColor),
                   const SizedBox(height: 6),
                   Text(
-                    'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(liveLimit)} ($pct%)',
+                    liveLimit <= 0
+                        ? 'אשראי: לא רשומה'
+                        : 'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(liveLimit)} ($pct%)',
                     style: const TextStyle(
                       color: BsTokens.mutedLight,
                       fontSize: 12.5,
@@ -2408,13 +2410,13 @@ class _CustomerDetailSheet extends ConsumerWidget {
               children: [
                 tile('$liveOrderCount', 'הזמנות'),
                 tile('₪${_grouped(liveTotalSpend)}', 'סך רכש'),
-                tile('$livePct%', 'אשראי'),
+                tile(creditLimit <= 0 ? '—' : '$livePct%', 'אשראי'),
               ],
             ),
             const SizedBox(height: BsTokens.space4),
-            row('מסגרת אשראי', '₪${_grouped(creditLimit)}'),
+            row('מסגרת אשראי', creditLimit <= 0 ? 'לא רשומה' : '₪${_grouped(creditLimit)}'),
             row('נוצל', '₪${_grouped(liveTotalSpend)}'),
-            row('יתרה זמינה', '₪${_grouped(balance)}'),
+            row('יתרה זמינה', creditLimit <= 0 ? '—' : '₪${_grouped(balance)}'),
             row('אתרי בנייה', '$liveSites'),
             // #ai-credit-explain — when AI is live, explain what this utilisation
             // means before approving the next order. gateway null (demo) → not in

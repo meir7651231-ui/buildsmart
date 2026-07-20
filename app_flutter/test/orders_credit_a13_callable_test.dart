@@ -388,8 +388,9 @@ void main() {
         // Fell back to the SAME deterministic client ceiling — never faked.
         expect(
           r.creditLimit,
-          contractorCredit(seedBuyer),
-          reason: 'graceful fallback = the local derivation (honest)',
+          0,
+          reason: 'graceful fallback = 0 ("לא רשומה") — fake-data-sweep 1א: the '
+              'honest contract never falls back to the fabricated name-hash',
         );
         expect(
           r.used,
@@ -416,9 +417,10 @@ void main() {
         isEmpty,
         reason: 'OFF ⇒ no callable ⇒ the client credit derivation is today',
       );
-      // creditLimit is byte-identical to the sync path the dashboard uses.
+      // creditLimit is byte-identical to the sync path the dashboard uses — both
+      // are now 0 ("לא רשומה"), never the fabricated hash (fake-data-sweep 1א).
       expect(r.creditLimit, repo.creditLimit(seedBuyer));
-      expect(r.creditLimit, contractorCredit(seedBuyer));
+      expect(r.creditLimit, 0);
       // pct/balance match the manager_dashboard_screen formulas over real spend.
       final c = repo.byName(seedBuyer)!;
       final expectedPct =
