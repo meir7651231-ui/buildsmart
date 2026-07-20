@@ -31,3 +31,9 @@ lib/screens/rewards_hub_screen.dart:::Clipboard.setData
 #  F1-F4 — finance demo values FX-gated (the server-note ids landed; gate keys off the backend flag):
 lib/screens/finance_hub_sheets.dart:::roi_server_note
 lib/screens/finance_hub_sheets.dart:::index_server_note
+#
+# Regression — fake-data-sweep STORE slice (2026-07-20): killed fakes must never return:
+#  S1 — the 5 static demo orders (BS-1234…) that polluted the "open orders" counter are gone:
+lib/screens/store_screen.dart:::!_kContractorDemoOrders
+#  S3 — the "ההזמנות שלי" tile derives from real orders (not the old const '#1234' / badge 1):
+lib/screens/store_screen.dart:::ordersPreview

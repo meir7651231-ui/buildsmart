@@ -578,11 +578,15 @@ class _SummaryRow extends ConsumerWidget {
             label: '📦 $openOrders הזמנות פתוחות',
             color: const Color(0xFF4CAF50),
           ),
-          const SizedBox(width: 8),
-          _SummaryChip(
-            label: '📨 $offers הצעות ספקים',
-            color: const Color(0xFFFF9800),
-          ),
+          // 📨 supplier-offers chip: a fake const (_kSupplierOffersCount) with no
+          // offers-repo behind it — hidden until a real source exists (fake-data-sweep S2).
+          if (!kHideUnderConstruction) ...[
+            const SizedBox(width: 8),
+            _SummaryChip(
+              label: '📨 $offers הצעות ספקים',
+              color: const Color(0xFFFF9800),
+            ),
+          ],
         ],
       ),
     );
@@ -1121,6 +1125,12 @@ class _AllList extends ConsumerWidget {
       ref.watch(cartQtysProvider),
       ref.watch(smartCartProvider),
     );
+    final storeOrders = ref.watch(storeOrdersProvider);
+    final openOrdersCount =
+        storeOrders.where((o) => isOrderOpen(o.stage)).length;
+    final ordersPreview = storeOrders.isEmpty
+        ? 'אין הזמנות פעילות'
+        : 'הזמנה ${storeOrders.first.id} · ${storeOrders.first.stageLabel}';
     // Drive view-mode from settings (list vs grid).
     final displayMode = ref.watch(
       storeSettingsProvider.select((s) => s.displayMode),
@@ -1140,7 +1150,15 @@ class _AllList extends ConsumerWidget {
                         time: m.time,
                         badge: cartCount,
                       )
-                      : m,
+                      : m.emoji == '📦'
+                          ? (
+                            emoji: m.emoji,
+                            title: m.title,
+                            preview: ordersPreview,
+                            time: m.time,
+                            badge: openOrdersCount,
+                          )
+                          : m,
             )
             .toList();
     var items =
@@ -3641,81 +3659,18 @@ _Order _orderViewOf(Order o) => (
       stageColor: _stageColorFor(o.stage),
     );
 
-///// Static contractor demo orders shown before any real orders are placed.
-/// These are the historical demo rows the contractor UI seeded with; they are
-/// NOT in the engine seed (different IDs) so the manager analytics are
-/// unaffected. Kept here so the contractor sees a realistic starting state.
-const List<_Order> _kContractorDemoOrders = [
-  (
-    id: 'BS-1234',
-    items: '12 פריטים',
-    total: '₪5,420',
-    stage: 'transit',
-    stageLabel: 'בדרך 🚛',
-    time: '24.5, 14:00',
-    stageColor: Color(0xFF4CAF50),
-  ),
-  (
-    id: 'BS-1221',
-    items: '5 פריטים',
-    total: '₪1,890',
-    stage: 'ready',
-    stageLabel: 'מוכן 📦',
-    time: '24.5, 09:30',
-    stageColor: Color(0xFF2196F3),
-  ),
-  (
-    id: 'BS-1198',
-    items: '3 פריטים',
-    total: '₪630',
-    stage: 'preparing',
-    stageLabel: 'בהכנה 🔧',
-    time: '23.5',
-    stageColor: Color(0xFFFF9800),
-  ),
-  (
-    id: 'BS-1171',
-    items: '8 פריטים',
-    total: '₪2,240',
-    stage: 'delivered',
-    stageLabel: 'נמסר ✓',
-    time: '21.5',
-    stageColor: const Color(0xFF888888),
-  ),
-  (
-    id: 'BS-1155',
-    items: '2 פריטים',
-    total: '₪310',
-    stage: 'delivered',
-    stageLabel: 'נמסר ✓',
-    time: '19.5',
-    stageColor: const Color(0xFF888888),
-  ),
-];
-
-/// The contractor order list — a merge of:
-///   • The live engine orders placed via checkout (stage is always read LIVE so
-///     manager/courier advances are reflected), filtered to exclude the manager
-///     demo seed (which the contractor didn't place).
-///   • The static demo contractor rows for orders not in the engine (shown
-///     as-is; stage is static demo data, consistent with the legacy behavior).
+/// The contractor order list — the live engine orders only (stage is always
+/// read LIVE so manager/courier advances are reflected). A fresh contractor
+/// with no checkouts sees an honest empty list (fake-data-sweep S1).
 ///
 /// New orders from `placeOrder` prepend into the engine, so they appear first.
 /// Persistence comes free from `bs.orders.v1` for all real orders.
 final storeOrdersProvider = Provider<List<_Order>>((ref) {
   final engineOrders = ref.watch(ordersEngineProvider);
-  // Live engine orders that were placed by the contractor (have createdAt),
-  // mapped to _Order with their LIVE stage.
-  final liveOrders = engineOrders
+  return engineOrders
       .where((o) => o.createdAt != null)
       .map(_orderViewOf)
       .toList(growable: false);
-  // Demo rows not already present in the live list.
-  final liveIds = {for (final o in liveOrders) o.id};
-  final demoOrders = _kContractorDemoOrders
-      .where((o) => !liveIds.contains(o.id))
-      .toList(growable: false);
-  return [...liveOrders, ...demoOrders];
 });
 
 // ─── orders list ──────────────────────────────────────────────────────────────

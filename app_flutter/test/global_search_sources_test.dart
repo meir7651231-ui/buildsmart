@@ -10,7 +10,7 @@ import 'package:buildsmart/screens/notifications_screen.dart'
     show activeNotifViewsProvider;
 import 'package:buildsmart/screens/store_screen.dart' show storeOrdersProvider;
 import 'package:buildsmart/state/orders_engine.dart'
-    show managerCustomersProvider;
+    show managerCustomersProvider, ordersEngineProvider;
 import 'package:buildsmart/state/tasks_engine.dart' show tasksProvider;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,13 +126,25 @@ void main() {
   testWidgets('orders / notifications / tasks sources each contribute their '
       'items into the merged index (phase 4)', (tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    // fake-data-sweep S1 removed the static demo orders, so a fresh container now
+    // has none — place a REAL order to keep the orders search-source covered here.
+    container.read(ordersEngineProvider.notifier).placeOrder(
+      who: 'קבלן חיפוש',
+      site: 'אתר בדיקה',
+      items: 3,
+      sum: 900,
+      id: 'BS-7777',
+    );
     late GlobalSearchIndex idx;
     String? orderId; // order number (o.id)
     String? notifTitle; // notification title
     String? taskName; // task name
     String? custName; // customer name
     await tester.pumpWidget(
-      ProviderScope(
+      UncontrolledProviderScope(
+        container: container,
         child: Consumer(
           builder: (context, ref, _) {
             idx = buildGlobalSearchIndex(ref);
