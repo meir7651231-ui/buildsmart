@@ -33,7 +33,7 @@ export function ReportPrefsSection() {
     const low = db.enrollments.filter((e) => e.plan === 'punch' && e.purchased - e.used <= 2);
     const abs = db.enrollments.reduce((a, e) => a + e.absences.length, 0);
     const L = [
-      'דו"ח ' + label + ' — ' + (db.orgName || 'מאור החסד'),
+      'דו"ח ' + label + ' — ' + (useApp.getState().config.orgName || db.orgName || 'העמותה'),
       'הופק: ' + hebDateFull(isoToday()) + ' · ' + new Date().toLocaleString('he-IL'),
       '',
       'משפחות: ' +

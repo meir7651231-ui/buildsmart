@@ -36,7 +36,7 @@ export function DonationModal(props: { supporter: Supporter; onClose: () => void
     addDonation(props.supporter.id, { date, amount: amt, cur, cat: cat.trim() });
     downloadReceipt({
       rid,
-      orgName: useApp.getState().db.orgName,
+      orgName: useApp.getState().config.orgName || useApp.getState().db.orgName,
       payer: props.supporter.name,
       amount: amt,
       currency: cur,

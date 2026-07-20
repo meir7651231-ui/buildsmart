@@ -99,7 +99,7 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
     addPayment(en.id, { date, amount: amt, method });
     downloadReceipt({
       rid,
-      orgName: db.orgName,
+      orgName: useApp.getState().config.orgName || db.orgName,
       payer: ((m?.first ?? '') + ' ' + (m?.famName ?? '')).trim() || '—',
       amount: amt,
       method,
