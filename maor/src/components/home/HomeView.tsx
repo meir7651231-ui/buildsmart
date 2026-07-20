@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { useApp } from '../../store/useApp';
 import { Btn, PageHead } from '../ui';
 import { hebDateFull, holidayOf } from '../../lib/hebrew';
+import { moduleOn } from '../../lib/config';
 import {
   attentionItems,
   birthdaysOn,
@@ -182,7 +183,14 @@ function Carousel(props: { items: CarouselItem[]; navTo: (nav: AttentionNav) => 
 
 export function HomeView() {
   const db = useApp((s) => s.db);
-  const cfgName = useApp((s) => s.config.orgName);
+  const config = useApp((s) => s.config);
+  const cfgName = config.orgName;
+  // חוזה המודולים (types/config.ts): מודול כבוי מוסתר מכל משטחי הבית — בלי למחוק נתונים
+  const coursesOn = moduleOn(config, 'courses');
+  const calendarOn = moduleOn(config, 'calendar');
+  const diaryOn = moduleOn(config, 'diary');
+  const supportersOn = moduleOn(config, 'supporters');
+  const reportsOn = moduleOn(config, 'reports');
   const go = useApp((s) => s.go);
   const selectFamily = useApp((s) => s.selectFamily);
   const selectCourse = useApp((s) => s.selectCourse);
@@ -196,17 +204,17 @@ export function HomeView() {
   const c = useMemo(
     () => ({
       stats: homeStats(db, new Date(todayIso + 'T12:00:00')),
-      sessions: todaySessions(db, now),
+      sessions: coursesOn ? todaySessions(db, now) : [],
       events: eventsOnDate(db, now),
       bdays: birthdaysOn(db, now),
-      attention: attentionItems(db, now),
-      digest: digestLines(db, now),
+      attention: attentionItems(db, now, config.modules),
+      digest: digestLines(db, now, config.modules),
       carousel: carouselItems(db, now),
       recent: recentFamilies(db, 5),
       holiday: holidayOf(now),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [db, todayIso],
+    [db, todayIso, config.modules, coursesOn],
   );
 
   // מרכז טיפול: הפרדת פריטים פתוחים מפריטים שסומנו "טופל"
@@ -214,11 +222,13 @@ export function HomeView() {
   const openAttn = c.attention.filter((a) => !attnDone[a.key]);
   const doneAttn = c.attention.filter((a) => attnDone[a.key]);
 
+  // ניווט ממוגן-מודולים: לעולם לא מנווט למסך של מודול כבוי (no-op במקום קריסה/דליפה)
   const navTo = (nav: AttentionNav) => {
     if (nav.kind === 'course') selectCourse(nav.id);
     else if (nav.kind === 'family') selectFamily(nav.id);
-    else if (nav.kind === 'supporters') go('supporters');
-    else go('calendar');
+    else if (nav.kind === 'supporters') {
+      if (supportersOn) go('supporters');
+    } else if (calendarOn) go('calendar');
   };
 
   const hour = now.getHours();
@@ -275,42 +285,50 @@ export function HomeView() {
           sub={`מהם ${s.childrenTotal} ילדים`}
           onClick={() => go('families')}
         />
-        <StatCard
-          icon="🎨"
-          label="חוגים פעילים"
-          value={String(s.activeCourses)}
-          sub={`${s.activeEnrollments} שיבוצים פעילים מתוך ${s.enrollTotal}`}
-          onClick={() => go('courses')}
-        />
-        <StatCard
-          icon="📅"
-          label="אירועים פתוחים"
-          value={String(s.eventsToday)}
-          sub={`היום · ${s.eventsWeek} השבוע`}
-          onClick={() => go('calendar')}
-        />
-        <StatCard
-          icon="💛"
-          label="תרומות"
-          value={'₪' + s.donIls.toLocaleString('he-IL')}
-          sub={(s.donUsd ? `+ $${s.donUsd.toLocaleString('he-IL')} · ` : '') + `${s.supportersTotal} תורמים`}
-          onClick={() => go('supporters')}
-        />
+        {coursesOn && (
+          <StatCard
+            icon="🎨"
+            label="חוגים פעילים"
+            value={String(s.activeCourses)}
+            sub={`${s.activeEnrollments} שיבוצים פעילים מתוך ${s.enrollTotal}`}
+            onClick={() => go('courses')}
+          />
+        )}
+        {calendarOn && (
+          <StatCard
+            icon="📅"
+            label="אירועים פתוחים"
+            value={String(s.eventsToday)}
+            sub={`היום · ${s.eventsWeek} השבוע`}
+            onClick={() => go('calendar')}
+          />
+        )}
+        {supportersOn && (
+          <StatCard
+            icon="💛"
+            label="תרומות"
+            value={'₪' + s.donIls.toLocaleString('he-IL')}
+            sub={(s.donUsd ? `+ $${s.donUsd.toLocaleString('he-IL')} · ` : '') + `${s.supportersTotal} תורמים`}
+            onClick={() => go('supporters')}
+          />
+        )}
       </div>
 
-      {/* פעולות מהירות */}
+      {/* פעולות מהירות — כפתור של מודול כבוי מוסתר */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <Btn kind="primary" onClick={() => go('families')}>+ משפחה חדשה</Btn>
-        <Btn
-          onClick={() => (c.sessions.length ? selectCourse(c.sessions[0].course.id) : go('courses'))}
-          title={c.sessions.length ? 'ניקוב מהיר — ' + c.sessions[0].course.name : 'אין מפגשים היום'}
-        >
-          ניקוב מהיר
-        </Btn>
-        <Btn onClick={() => go('calendar')}>מי חוגג השבוע?</Btn>
-        <Btn onClick={() => go('diary')}>יומן חדרים</Btn>
-        <Btn onClick={() => go('supporters')}>תורמים</Btn>
-        <Btn onClick={() => go('reports')}>דוחות</Btn>
+        {coursesOn && (
+          <Btn
+            onClick={() => (c.sessions.length ? selectCourse(c.sessions[0].course.id) : go('courses'))}
+            title={c.sessions.length ? 'ניקוב מהיר — ' + c.sessions[0].course.name : 'אין מפגשים היום'}
+          >
+            ניקוב מהיר
+          </Btn>
+        )}
+        {calendarOn && <Btn onClick={() => go('calendar')}>מי חוגג השבוע?</Btn>}
+        {diaryOn && <Btn onClick={() => go('diary')}>יומן חדרים</Btn>}
+        {supportersOn && <Btn onClick={() => go('supporters')}>תורמים</Btn>}
+        {reportsOn && <Btn onClick={() => go('reports')}>דוחות</Btn>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>

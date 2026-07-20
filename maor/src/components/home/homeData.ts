@@ -14,6 +14,10 @@ import {
 } from '../../types/domain';
 import { allMembers, type MemberWithFamily } from '../../store/useApp';
 import { hebParts, type HebParts } from '../../lib/hebrew';
+import type { ModuleKey, OrgConfig } from '../../types/config';
+
+/** מפת המודולים הפעילים (config.modules) — חסר = פעיל; false = כבוי. */
+export type ModulesMap = OrgConfig['modules'];
 
 /** ISO מקומי (ללא הזחת אזור זמן של toISOString). */
 export function isoOf(d: Date): string {
@@ -226,8 +230,12 @@ function payBal(totalDue: number, payments: { amount: number }[]): number {
  * משפחות הממתינות לאישור · תורמים שעבר יעד הקשר שלהם ·
  * ספח ת"ז חסר · מדד אמינות אדום · חוגים שכמעט מלאים.
  * הפריטים ממוינים כך שהקריטיים מוצגים ראשונים.
+ *
+ * modules — חוזה המודולים (types/config.ts): פריטים של מודול כבוי מושמטים
+ * (חוגים: room/debt/punch/fill · תורמים: supnext) בלי לגעת בנתונים עצמם.
  */
-export function attentionItems(db: Db, now: Date): AttentionItem[] {
+export function attentionItems(db: Db, now: Date, modules: ModulesMap): AttentionItem[] {
+  const on = (m: ModuleKey) => modules[m] !== false;
   const todayIso = isoOf(now);
   const members = allMembers(db);
   const out: AttentionItem[] = [];
@@ -259,8 +267,8 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     });
   }
 
-  // חוגים המשויכים לחדר כבוי
-  for (const c of db.courses) {
+  // חוגים המשויכים לחדר כבוי (מודול חוגים בלבד)
+  for (const c of on('courses') ? db.courses : []) {
     const room = db.rooms.find((r) => r.id === c.roomId);
     if (room && !room.active) {
       out.push({
@@ -275,8 +283,8 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     }
   }
 
-  // שיבוצים עם יתרת תשלום שעבר מועדה
-  for (const e of db.enrollments) {
+  // שיבוצים עם יתרת תשלום שעבר מועדה (שיבוצים = נתוני מודול החוגים)
+  for (const e of on('courses') ? db.enrollments : []) {
     const bal = payBal(e.totalDue, e.payments);
     if (bal > 0 && e.dueDate && e.dueDate <= todayIso) {
       const m = members.find((x) => x.id === e.memberId);
@@ -295,8 +303,8 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     }
   }
 
-  // כרטיסיות שכמעט נוצלו (נותר ניקוב אחד או פחות)
-  const low = db.enrollments
+  // כרטיסיות שכמעט נוצלו (נותר ניקוב אחד או פחות) — מודול חוגים בלבד
+  const low = (on('courses') ? db.enrollments : [])
     .filter(
       (e) => e.plan === 'punch' && e.status === 'active' && e.purchased > 0 && e.used >= e.purchased - 1,
     )
@@ -338,8 +346,8 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     });
   }
 
-  // תורמים שעבר יעד הקשר שלהם — פריט לכל תורם (עד 3), אחר כך צבירה
-  const lateSup = db.supporters
+  // תורמים שעבר יעד הקשר שלהם — פריט לכל תורם (עד 3), אחר כך צבירה — מודול תורמים בלבד
+  const lateSup = (on('supporters') ? db.supporters : [])
     .filter((sp) => sp.nextDate && sp.nextDate < todayIso)
     .map((sp) => ({ sp, late: daysBetween(sp.nextDate, todayIso) }))
     .sort((a, b) => b.late - a.late);
@@ -401,8 +409,8 @@ export function attentionItems(db: Db, now: Date): AttentionItem[] {
     });
   }
 
-  // חוגים שכמעט מלאים (80% ומעלה מהמקומות) — פריט לכל חוג (עד 3), אחר כך צבירה
-  const filling = db.courses
+  // חוגים שכמעט מלאים (80% ומעלה מהמקומות) — פריט לכל חוג (עד 3), אחר כך צבירה — מודול חוגים בלבד
+  const filling = (on('courses') ? db.courses : [])
     .filter((c) => c.maxStudents > 0)
     .map((c) => ({
       c,
@@ -458,14 +466,18 @@ export interface DigestLine {
  * תזכורות טלפון פתוחות · אירועים מיוחדים השבוע · ימי הולדת היום.
  * כשיש פריטים קריטיים ב"דורש טיפול" — שורת "שבוע דחוף" נוספת בראש.
  * סימוני "טופל" (attnDone) מוחרגים מספירת הקריטיים.
+ *
+ * modules — חוזה המודולים: שורות של מודול כבוי מושמטות (חוגים: punch/today),
+ * וספירת הקריטיים עוברת דרך attentionItems עם אותה מפה — כך אין אי-התאמה.
  */
-export function digestLines(db: Db, now: Date): DigestLine[] {
+export function digestLines(db: Db, now: Date, modules: ModulesMap): DigestLine[] {
+  const on = (m: ModuleKey) => modules[m] !== false;
   const members = allMembers(db);
   const out: DigestLine[] = [];
 
   // שבוע דחוף — פריטים קריטיים שטרם סומנו כטופלו
   const done = db.attnDone ?? {};
-  const crit = attentionItems(db, now).filter((a) => a.sev === 'crit' && !done[a.key]);
+  const crit = attentionItems(db, now, modules).filter((a) => a.sev === 'crit' && !done[a.key]);
   if (crit.length) {
     out.push({
       key: 'urgent',
@@ -478,8 +490,8 @@ export function digestLines(db: Db, now: Date): DigestLine[] {
     });
   }
 
-  // כרטיסייה שכמעט נגמרה — כדאי להציע חידוש
-  const low = db.enrollments
+  // כרטיסייה שכמעט נגמרה — כדאי להציע חידוש (מודול חוגים בלבד)
+  const low = (on('courses') ? db.enrollments : [])
     .filter(
       (e) => e.plan === 'punch' && e.status === 'active' && e.purchased > 0 && e.used >= e.purchased - 1,
     )
@@ -513,8 +525,8 @@ export function digestLines(db: Db, now: Date): DigestLine[] {
     });
   }
 
-  // מפגשי החוגים של היום
-  const sessions = todaySessions(db, now);
+  // מפגשי החוגים של היום (מודול חוגים בלבד)
+  const sessions = on('courses') ? todaySessions(db, now) : [];
   if (sessions.length) {
     out.push({
       key: 'today',

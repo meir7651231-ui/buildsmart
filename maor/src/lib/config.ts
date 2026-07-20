@@ -6,9 +6,14 @@
  * 2. fetch('./config.json') — קובץ סטטי יחסי ל-base (פר-פריסה של ארגון).
  * 3. DEFAULT_CONFIG — כשאין קובץ / הקובץ פגום (404, JSON שבור).
  */
-import { DEFAULT_CONFIG, type OrgConfig } from '../types/config';
+import { DEFAULT_CONFIG, type ModuleKey, type OrgConfig } from '../types/config';
 
 const LS_CONFIG_KEY = 'maor_org_config';
+
+/** האם מודול פעיל בקונפיגורציה — מפתח חסר = פעיל; רק false מכבה. */
+export function moduleOn(cfg: OrgConfig, m: ModuleKey): boolean {
+  return cfg.modules[m] !== false;
+}
 
 /** נרמול קלט לא-אמין (localStorage / רשת) לצורת OrgConfig מלאה, או null אם לא שמיש. */
 function normalize(raw: unknown): OrgConfig | null {
