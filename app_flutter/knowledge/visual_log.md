@@ -2055,3 +2055,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** **אפס (answer-equivalent).** Batch-11 — 3 כפתורי-צ'יפ בקטלוג → CfgText: '📋 הצעה'·'✨ נסח'·'🔌 איך לגשר?' → `catalog.action.{proposal/draft/howToBridge}`. (היו `Text(` לא-const עם args-const ⇒ עטפתי כ-`const CfgText`, analyze אישר.) +3 registry rows. **17 תוויות-קטלוג ניתנות-לעריכה — אימוץ-הטקסט-הסטטי בקטלוג הושלם מהותית.** הנותר בקטלוג = interpolated/`Text.rich` (out-of-v1).
 **אימות (אוטומטי):** `gate_118_test` (ids⊆registry) · `zero_regression` · analyze 0.
 **הפיכות:** `CfgText→Text` (3) + הסר 3 registry rows.
+
+## manager-dashboard-live-pill — חיווי "חי" → צבע-לפי-סטטוס-קישוריות — שינוי-נראה: כן — 2026-07-20
+**שינוי נראה:** הפיל בכותרת לוח-המנהל היה **ירוק "חי" קבוע תמיד**. עכשיו הוא קורא `connectionStatusProvider` ומשנה צבע+טקסט לפי המצב: 🟢 ירוק "חי" (מחובר · רקע `0xFFE7F6EC`/טקסט `0xFF1B7A3D`) · 🔴 אדום "מנותק" (רקע `0xFFFCE9E7`/טקסט `0xFFB23B3B`) · ⚪ אפור "דמו" (רקע `0xFFEDEAE3`/טקסט `0xFF6F6656` — מסלול Firebase-free/test). `_Dot` מקבל את צבע-המצב. הטקסט קוצר למילה-אחת (חי/מנותק/דמו) — נתפס בעין overflow של RenderFlex 32px ב-Row-הכותרת ותוקן (הכותרת כבר `Expanded`).
+**אימות (עין + אוטומטי):** רונדר בטסט — `manager_dashboard_screen_test` (30 ירוקים) מאמת שבמסלול-דמו הפיל = **'דמו'** (לא "חי"), והתיקון-אחרי-overflow הוכיח שה-Row נפרש נכון ללא פסים צהובים-שחורים. mutation-verify: hardcode `connected` ⇒ 0 'דמו' (הראה "חי") ⇒ אדום ⇒ שחזור. analyze 0 errors.
+**הפיכות:** `_LivePill`→StatelessWidget-הירוק-הקבוע + `_Dot` חזרה ל-const-ירוק + הסר import `connection_status`.

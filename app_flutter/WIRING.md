@@ -1,5 +1,10 @@
 # WIRING CONTRACT — app_flutter
 
+## #manager-dashboard-live-pill — חיווי-חי אמיתי (סטטוס-קישוריות) — 2026-07-20
+`screens/manager_dashboard_screen.dart` `_LivePill` → `ConsumerWidget` הקורא `connectionStatusProvider`: 🟢חי / 🔴מנותק / אפור-דמו, לא "חי" קבוע. פריט 3 בהנחיית `DIRECTIVE-manager-console-live.md`. נותר: onTap-drill לאריחים · קו-פיילוט (CLAUDE_AI) · אימות טאבים 1/2/3 מול Firestore חי.
+
+---
+
 ## #manager-dashboard-live-kpi — 4 מדדי-לוח → קריאות חיות (לא קבועים) — 2026-07-20
 `state/orders_engine.dart` `managerAnalyticsProvider`: 📦/🧰/✅ מ-`catalogRepositoryProvider` (ספירה חיה, 1,867 · accessory=קטגוריות-'אביזר'), 🏪 מ-`stockRepositoryProvider` (seed 3/3 מקומי · **ריק-כן על backend חי**, לא "3/3" מזויף). 🚚 הזמנות כבר-חי. `ManagerAnalytics` לא-נגוע. **נותר מההנחיה `DIRECTIVE-manager-console-live.md`:** onTap-drill לאריחים · `_LivePill` לסטטוס-קישוריות אמיתי · קו-פיילוט (CLAUDE_AI) · אימות טאבים 1/2/3 מול Firestore חי.
 

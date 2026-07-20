@@ -55,7 +55,7 @@ void main() {
 
   group('manager dashboard SHELL (M1)', () {
     testWidgets('builds as a LIGHT frame — bgLight scaffold, white AppBar, '
-        'title + subtitle + "חי" pill', (t) async {
+        'title + subtitle + live-status pill', (t) async {
       await pumpScreen(t);
 
       // Light scaffold.
@@ -66,10 +66,12 @@ void main() {
       final appBar = t.widget<AppBar>(find.byType(AppBar));
       expect(appBar.backgroundColor, BsTokens.cardLight);
 
-      // Title + subtitle + the live pill text.
+      // Title + subtitle + the LIVE status pill. The pill now reads
+      // connectionStatusProvider; the Firebase-free test path is honestly
+      // 'דמו' (never a fabricated "חי"), which is the wiring under test.
       expect(find.text('מרכז השליטה'), findsOneWidget);
       expect(find.text('מנהל המערכת'), findsOneWidget);
-      expect(find.text('חי'), findsOneWidget);
+      expect(find.text('דמו'), findsOneWidget);
     });
 
     testWidgets('the 4 tab pills are present (verbatim labels)', (t) async {

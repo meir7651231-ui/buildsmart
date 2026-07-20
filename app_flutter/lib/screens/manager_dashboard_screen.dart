@@ -38,6 +38,8 @@ import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
+import 'package:buildsmart/state/connection_status.dart'
+    show ConnectionStatus, connectionStatusProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider, kHrRelocationFlag;
 import 'package:buildsmart/state/intel/intel_event.dart' show IntelEvent;
@@ -274,30 +276,50 @@ class ManagerDashboardScreen extends ConsumerWidget {
 
 /// A small green "חי" status pill in the AppBar — signals the dashboard is on
 /// the LIVE shared data (the orders engine), mirroring the role drawer's tone.
-class _LivePill extends StatelessWidget {
+/// The status pill — now bound to the LIVE [connectionStatusProvider] (the same
+/// always-on truth the top-of-screen connection indicator reads), never a fixed
+/// "חי". 🟢 connected · 🔴 disconnected (actions won't persist) · grey demo/test.
+class _LivePill extends ConsumerWidget {
   const _LivePill();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(connectionStatusProvider);
+    final Color bg;
+    final Color fg;
+    final String text;
+    switch (status) {
+      case ConnectionStatus.connected:
+        bg = const Color(0xFFE7F6EC);
+        fg = const Color(0xFF1B7A3D);
+        text = 'חי';
+      case ConnectionStatus.disconnected:
+        bg = const Color(0xFFFCE9E7);
+        fg = const Color(0xFFB23B3B);
+        text = 'מנותק';
+      case ConnectionStatus.demo:
+        bg = const Color(0xFFEDEAE3);
+        fg = const Color(0xFF6F6656);
+        text = 'דמו';
+    }
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: BsTokens.space3,
         vertical: 5,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFE7F6EC),
+        color: bg,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _Dot(),
-          SizedBox(width: 6),
-          CfgText(
-            'manager_dashboard_screen.hi_pill',
-            'חי',
+          _Dot(color: fg),
+          const SizedBox(width: 6),
+          Text(
+            text,
             style: TextStyle(
-              color: Color(0xFF1B7A3D),
+              color: fg,
               fontWeight: FontWeight.w800,
               fontSize: 12.5,
             ),
@@ -309,15 +331,17 @@ class _LivePill extends StatelessWidget {
 }
 
 class _Dot extends StatelessWidget {
-  const _Dot();
+  const _Dot({this.color = const Color(0xFF22A75A)});
+
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 8,
       height: 8,
-      decoration: const BoxDecoration(
-        color: Color(0xFF22A75A),
+      decoration: BoxDecoration(
+        color: color,
         shape: BoxShape.circle,
       ),
     );

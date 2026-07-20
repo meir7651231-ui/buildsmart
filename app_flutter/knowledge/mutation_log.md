@@ -1460,3 +1460,9 @@
 - **הלוגיקה (`state/orders_engine.dart`):** `managerAnalyticsProvider` עכשיו `watch`-ים את `catalogRepositoryProvider` (📦/🧰/✅ — ספירה-לפי-קטגוריה חיה מ-1,867 מוצרי-הקטלוג האמיתיים; קטגוריות-'אביזר' מקופלות ל-bucket שהאנליטיקה כבר קוראת → accessory 264 / catalog 1,603 / available 1,867) + `stockRepositoryProvider` (🏪 — seed מקומי 3/3, **ריק-כן על backend חי**). אפס-קבוע-מזויף: מקור-ריק → ריק-כן (עקרון ההנחיה). `ManagerAnalytics` **לא-שונה** → כל בדיקות-ה-const נשארו ירוקות.
 - **טסט-נעיצה:** `manager_dashboard_screen_test` — `the 5 mdMetric tiles render their LIVE numbers`: עוגן למקור-החי (`totalProducts == catalogRepository.allProducts().length`, accessory == ספירת-קטגוריות-'אביזר'), בלי literal.
 - **mutation-verify:** baseline 30 ירוק → `catalogCategories: catCounts` ↦ `kManagerCatalogCategories` → הבדיקה **אדומה** (Expected 1867, Actual 202) → שחזור → 30 ירוק. analyze 0.
+
+## #manager-dashboard-live-pill — חיווי "חי" קבוע → סטטוס-קישוריות אמיתי — 2026-07-20
+- **הרקע (הנחיה `DIRECTIVE-manager-console-live.md` · פריט 3):** `_LivePill` הציג "חי" **קבוע** תמיד — גם כשמנותק/דמו. חיווי-שקר.
+- **הלוגיקה (`screens/manager_dashboard_screen.dart`):** `_LivePill` → `ConsumerWidget` הקורא `connectionStatusProvider` (התשתית הקיימת — אותה אמת-קישוריות ש-`connection_indicator` קורא): 🟢 חי (connected) · 🔴 מנותק (disconnected) · אפור דמו (demo/test). `_Dot` פורמט לצבע-לפי-מצב. אפס "חי" מזויף.
+- **טסט-נעיצה:** `manager_dashboard_screen_test` — `title + subtitle + live-status pill`: במסלול Firebase-free (demo) הפיל = 'דמו', לא "חי".
+- **mutation-verify:** baseline ירוק → `status = ConnectionStatus.connected` קבוע (מתעלם מה-provider) → הבדיקה **אדומה** (0 'דמו' — הראה 'חי') → שחזור → ירוק. analyze 0.
