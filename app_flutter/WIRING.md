@@ -1,5 +1,10 @@
 # WIRING CONTRACT — app_flutter
 
+## #manager-dashboard-drill — אריחי-KPI + שורות-pipeline לחיצים (drill) — 2026-07-20
+`screens/manager_dashboard_screen.dart`: `_MetricTile`/`_PipelineRow` +`onTap?` (InkWell). `_MetricGrid`/`_OrderPipeline`→`ConsumerWidget`, מחווטים `managerTabProvider`: 🚚→הזמנות(1) · 📦/🧰/✅/🏪→ניהול(3) · pipeline→הזמנות(1). פריט 2 בהנחיית `DIRECTIVE-manager-console-live.md`. **נותר:** סינון-לפי-שלב ב-drill (deferred — filter מקומי) · אימות טאבים מול Firestore חי (דורש deploy).
+
+---
+
 ## #manager-dashboard-live-pill — חיווי-חי אמיתי (סטטוס-קישוריות) — 2026-07-20
 `screens/manager_dashboard_screen.dart` `_LivePill` → `ConsumerWidget` הקורא `connectionStatusProvider`: 🟢חי / 🔴מנותק / אפור-דמו, לא "חי" קבוע. פריט 3 בהנחיית `DIRECTIVE-manager-console-live.md`. נותר: onTap-drill לאריחים · קו-פיילוט (CLAUDE_AI) · אימות טאבים 1/2/3 מול Firestore חי.
 

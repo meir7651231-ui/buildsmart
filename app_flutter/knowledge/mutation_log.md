@@ -1466,3 +1466,9 @@
 - **הלוגיקה (`screens/manager_dashboard_screen.dart`):** `_LivePill` → `ConsumerWidget` הקורא `connectionStatusProvider` (התשתית הקיימת — אותה אמת-קישוריות ש-`connection_indicator` קורא): 🟢 חי (connected) · 🔴 מנותק (disconnected) · אפור דמו (demo/test). `_Dot` פורמט לצבע-לפי-מצב. אפס "חי" מזויף.
 - **טסט-נעיצה:** `manager_dashboard_screen_test` — `title + subtitle + live-status pill`: במסלול Firebase-free (demo) הפיל = 'דמו', לא "חי".
 - **mutation-verify:** baseline ירוק → `status = ConnectionStatus.connected` קבוע (מתעלם מה-provider) → הבדיקה **אדומה** (0 'דמו' — הראה 'חי') → שחזור → ירוק. analyze 0.
+
+## #manager-dashboard-drill — 5 אריחי-KPI + שורות-pipeline → drill לטאב הרלוונטי — 2026-07-20
+- **הרקע (הנחיה `DIRECTIVE-manager-console-live.md` · פריט 2):** אריחי-ה-KPI ושורות-ה-pipeline לא היו לחיצים (`onTap` חסר) — מבוי-סתום.
+- **הלוגיקה (`screens/manager_dashboard_screen.dart`):** `_MetricTile` + `_PipelineRow` קיבלו `onTap?` אופציונלי (עטיפת `InkWell` שקוף באותו radius + `Semantics.button`; `null` ⇒ לא-אינטראקטיבי, golden-safe). `_MetricGrid` + `_OrderPipeline` → `ConsumerWidget`, מחווטים דרך `managerTabProvider`: 🚚→טאב-הזמנות(1) · 📦/🧰/✅/🏪→טאב-ניהול(3) · שורות-pipeline→טאב-הזמנות(1). (סינון-לפי-שלב ב-drill נדחה: ה-filter של טאב-הזמנות הוא state מקומי — refactor מסוכן לטאב-עובד.)
+- **טסט-נעיצה:** `manager_dashboard_screen_test` — `KPI tiles drill down`: לחיצה על 🚚 ⇒ `managerTabProvider==1`, על 📦 ⇒ `==3` (הניווט באמת קורה).
+- **mutation-verify:** baseline ירוק → 🚚 `onTap: go(1)` ↦ `go(0)` → הבדיקה **אדומה** (Expected 1, Actual 0) → שחזור → ירוק. analyze 0.

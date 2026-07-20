@@ -679,43 +679,52 @@ class _StudioHero extends ConsumerWidget {
 /// grid of WHITE cards. Each shows the emoji, the LIVE number, and the Hebrew
 /// label — labels VERBATIM from the legacy tiles (🚚 הזמנות פתוחות · 📦 מוצרים
 /// בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת · 🏪 חנויות פעילות).
-class _MetricGrid extends StatelessWidget {
+class _MetricGrid extends ConsumerWidget {
   const _MetricGrid({required this.analytics});
 
   final ManagerAnalytics analytics;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Drill-down: each KPI tile jumps to the tab that details it — 🚚 to the
+    // הזמנות tab (1); 📦/🧰/✅/🏪 (catalog · accessories · available · stores) to
+    // the ניהול tab (3, the live category + system view). Sets managerTabProvider.
+    void go(int tab) => ref.read(managerTabProvider.notifier).state = tab;
     final tiles = <_MetricTile>[
       _MetricTile(
         emoji: '🚚',
         value: '${analytics.openOrders}',
         label: 'הזמנות פתוחות',
         cfgId: 'manager.cockpit.kpi.openOrders',
+        onTap: () => go(1),
       ),
       _MetricTile(
         emoji: '📦',
         value: '${analytics.catalogCount}',
         label: 'מוצרים בקטלוג',
         cfgId: 'manager.cockpit.kpi.products',
+        onTap: () => go(3),
       ),
       _MetricTile(
         emoji: '🧰',
         value: '${analytics.accessoryCount}',
         label: 'אביזרים נלווים',
         cfgId: 'manager.cockpit.kpi.accessories',
+        onTap: () => go(3),
       ),
       _MetricTile(
         emoji: '✅',
         value: '${analytics.availableCount}',
         label: 'זמינים כעת',
         cfgId: 'manager.cockpit.kpi.available',
+        onTap: () => go(3),
       ),
       _MetricTile(
         emoji: '🏪',
         value: analytics.storesLabel,
         label: 'חנויות פעילות',
         cfgId: 'manager.cockpit.kpi.stores',
+        onTap: () => go(3),
       ),
     ];
 
@@ -742,6 +751,7 @@ class _MetricTile extends StatelessWidget {
     required this.value,
     required this.label,
     required this.cfgId,
+    this.onTap,
   });
 
   final String emoji;
@@ -751,52 +761,69 @@ class _MetricTile extends StatelessWidget {
   /// Studio element id for the editable label (step 14 pilot).
   final String cfgId;
 
+  /// Drill-down: tapping the tile navigates to the relevant tab. Null → the tile
+  /// stays non-interactive (no ripple, not announced as a button) — golden-safe.
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
+    final radius = cfgRadius(context);
+    final card = Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space4,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 22)),
+          const SizedBox(height: BsTokens.space2),
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.brand,
+              fontWeight: FontWeight.w800,
+              fontSize: 26,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          // Step-14 pilot: the KPI label is studio-editable. Empty doc ⇒ the
+          // literal `label` verbatim with this exact style ⇒ golden-identical.
+          CfgText(
+            cfgId,
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: BsTokens.mutedLight,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
     return Semantics(
       label: '$emoji $label: $value',
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: BsTokens.space4,
-          vertical: BsTokens.space4,
-        ),
-        decoration: BoxDecoration(
-          color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(cfgRadius(context)),
-          border: Border.all(color: const Color(0xFFEDEDED)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: BsTokens.space2),
-            Text(
-              value,
-              style: const TextStyle(
-                color: BsTokens.brand,
-                fontWeight: FontWeight.w800,
-                fontSize: 26,
-                height: 1.1,
+      button: onTap != null,
+      child: onTap == null
+          ? card
+          : Material(
+              type: MaterialType.transparency,
+              borderRadius: BorderRadius.circular(radius),
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(radius),
+                child: card,
               ),
             ),
-            const SizedBox(height: 2),
-            // Step-14 pilot: the KPI label is studio-editable. Empty doc ⇒ the
-            // literal `label` verbatim with this exact style ⇒ golden-identical.
-            CfgText(
-              cfgId,
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: BsTokens.mutedLight,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -805,7 +832,7 @@ class _MetricTile extends StatelessWidget {
 /// every [kManagerOrderFlow] stage with its LIVE count and a proportional bar.
 /// Labels are the short pipeline forms the legacy `md-pipe` uses (התקבלה ·
 /// בהכנה · מוכן · בדרך · נמסר), plus נאסף for the pickup stage — all six stages.
-class _OrderPipeline extends StatelessWidget {
+class _OrderPipeline extends ConsumerWidget {
   const _OrderPipeline({required this.byStage});
 
   final Map<String, int> byStage;
@@ -837,7 +864,7 @@ class _OrderPipeline extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // The legacy `maxStage=Math.max(1, …)` denominator for the bar widths.
     final maxStage = byStage.values.fold<int>(1, (m, n) => n > m ? n : m);
 
@@ -867,6 +894,7 @@ class _OrderPipeline extends StatelessWidget {
               count: byStage[stage] ?? 0,
               max: maxStage,
               color: _stageColor[stage] ?? BsTokens.brand,
+              onTap: () => ref.read(managerTabProvider.notifier).state = 1,
             ),
         ],
       ),
@@ -882,6 +910,7 @@ class _PipelineRow extends StatelessWidget {
     required this.count,
     required this.max,
     required this.color,
+    this.onTap,
   });
 
   final String label;
@@ -889,16 +918,17 @@ class _PipelineRow extends StatelessWidget {
   final int max;
   final Color color;
 
+  /// Drill-down: tapping a stage row opens the הזמנות tab. Null → non-interactive.
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final fraction = max <= 0 ? 0.0 : (count / max).clamp(0.0, 1.0);
-    return Semantics(
-      label: '$label: $count',
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: BsTokens.space3),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    final row = Padding(
+      padding: const EdgeInsets.only(bottom: BsTokens.space3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             Row(
               children: [
                 Expanded(
@@ -933,7 +963,16 @@ class _PipelineRow extends StatelessWidget {
             ),
           ],
         ),
-      ),
+    );
+    return Semantics(
+      label: '$label: $count',
+      button: onTap != null,
+      child: onTap == null
+          ? row
+          : Material(
+              type: MaterialType.transparency,
+              child: InkWell(onTap: onTap, child: row),
+            ),
     );
   }
 }

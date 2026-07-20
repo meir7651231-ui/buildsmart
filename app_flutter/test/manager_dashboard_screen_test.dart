@@ -189,6 +189,26 @@ void main() {
       expect(find.text(a.storesLabel), findsOneWidget); // "3/3"
     });
 
+    testWidgets('KPI tiles drill down — 🚚 → הזמנות (1), 📦 → ניהול (3)',
+        (t) async {
+      final c = await pumpScreen(t);
+      expect(c.read(managerTabProvider), 0); // start on 📊 לוח בקרה
+
+      // 🚚 open-orders tile → the הזמנות tab (index 1).
+      await t.tap(find.text('הזמנות פתוחות'));
+      await settle(t);
+      expect(c.read(managerTabProvider), 1,
+          reason: '🚚 tile drills to the orders tab');
+
+      // Back to 📊, then the 📦 catalog tile → the ניהול tab (index 3).
+      c.read(managerTabProvider.notifier).state = 0;
+      await settle(t);
+      await t.tap(find.text('מוצרים בקטלוג'));
+      await settle(t);
+      expect(c.read(managerTabProvider), 3,
+          reason: '📦 catalog tile drills to the manage tab');
+    });
+
     testWidgets('the order pipeline shows a per-stage count across the 6 '
         'kManagerOrderFlow stages (live engine)', (t) async {
       final c = await pumpScreen(t);
