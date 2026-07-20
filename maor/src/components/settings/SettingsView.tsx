@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import type { NotifPrefs } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { Btn, Chip, Field, FormError, PageHead, TextInput } from '../ui';
 import { Section, SectionNote, Toggle } from './lib';
 import { TeachersSection } from './TeachersSection';
@@ -15,25 +16,30 @@ import { ImportSection } from './ImportSection';
 import { AccessSection } from './AccessSection';
 import { ThemeSection } from './ThemeSection';
 
-const SECTIONS: { id: string; label: string }[] = [
+/** feature key פר-סעיף — סעיף בלי מפתח (ארגון/ערכה/התראות/גיבוי/נגישות) לעולם אינו מוסתר. */
+const SECTIONS: { id: string; label: string; feature?: string }[] = [
   { id: 'sec-org', label: 'ארגון' },
   { id: 'sec-theme', label: 'ערכת נושא' },
-  { id: 'sec-teachers', label: 'מורים' },
-  { id: 'sec-rooms', label: 'חדרים' },
+  { id: 'sec-teachers', label: 'מורים', feature: 'settings.teachers' },
+  { id: 'sec-rooms', label: 'חדרים', feature: 'settings.rooms' },
   { id: 'sec-notif', label: 'התראות' },
   { id: 'sec-backup', label: 'גיבוי ושחזור' },
-  { id: 'sec-export', label: 'ייצוא נתונים' },
-  { id: 'sec-import', label: 'ייבוא נתונים' },
+  { id: 'sec-export', label: 'ייצוא נתונים', feature: 'settings.export' },
+  { id: 'sec-import', label: 'ייבוא נתונים', feature: 'settings.import' },
   { id: 'sec-access', label: 'נגישות' },
-  { id: 'sec-reset', label: 'איפוס' },
+  { id: 'sec-reset', label: 'איפוס', feature: 'settings.reset' },
 ];
 
 export function SettingsView() {
+  const config = useApp((s) => s.config);
+  const sections = SECTIONS.filter((s) => !s.feature || featureOn(config, s.feature));
+  const secOn = (id: string) => sections.some((s) => s.id === id);
+
   return (
     <div>
       <PageHead title="הגדרות" sub="ניהול המערכת, התראות ומשתמשים" />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }} className="no-print">
-        {SECTIONS.map((s) => (
+        {sections.map((s) => (
           <Chip key={s.id} onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' })}>
             {s.label}
           </Chip>
@@ -42,14 +48,15 @@ export function SettingsView() {
 
       <OrgSection />
       <ThemeSection />
-      <TeachersSection />
-      <RoomsSection />
+      {secOn('sec-teachers') && <TeachersSection />}
+      {secOn('sec-rooms') && <RoomsSection />}
       <NotifSection />
+      {/* גיבוי ושחזור לעולם אינו מוסתר — בטיחות נתונים */}
       <BackupSection />
-      <ExportSection />
-      <ImportSection />
+      {secOn('sec-export') && <ExportSection />}
+      {secOn('sec-import') && <ImportSection />}
       <AccessSection />
-      <ResetSection />
+      {secOn('sec-reset') && <ResetSection />}
     </div>
   );
 }

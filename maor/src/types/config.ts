@@ -26,6 +26,12 @@ export interface OrgConfig {
   accent?: string;
   /** מודולים פעילים — מפתח חסר = פעיל; false = מוסתר מהניווט. */
   modules: Partial<Record<ModuleKey, boolean>>;
+  /**
+   * פיצ'רים עדינים פר-יכולת (מפתחות מ-types/features.ts) — מפתח חסר = פעיל;
+   * false = כבוי. הבדיקה תמיד דרך featureOn() ב-lib/config.ts, שגם משרשרת
+   * כיבוי מודול-אב אל הפיצ'רים שלו.
+   */
+  features?: Record<string, boolean>;
   /** מילון מונחים מותאם (למשל "חוגים" ← "שיעורים"). */
   terms?: Record<string, string>;
   /** אינטגרציות עתידיות לפי שם. */
@@ -37,4 +43,5 @@ export const DEFAULT_CONFIG: OrgConfig = {
   orgName: '',
   theme: 'or-rishon',
   modules: {},
+  features: {},
 };

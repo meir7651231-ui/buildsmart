@@ -8,6 +8,7 @@
  */
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { allMembers, useApp, type View } from '../../store/useApp';
+import { featureOn, moduleOn } from '../../lib/config';
 import { levenshtein, smartFilter } from '../../lib/search';
 import { normSearch } from '../../lib/validate';
 
@@ -77,6 +78,17 @@ export function CommandPalette() {
   const exportBackup = useApp((s) => s.exportBackup);
   const punch = useApp((s) => s.punch);
   const toast = useApp((s) => s.toast);
+  const config = useApp((s) => s.config);
+
+  // גייטים למודולים ופיצ'רים — פריט של מודול/פיצ'ר כבוי לא מאונדקס בפלטה.
+  // featureOn מחזיר false גם כשמודול האב כבוי, לכן אין צורך בבדיקה כפולה.
+  const coursesOn = moduleOn(config, 'courses');
+  const wheelOn = featureOn(config, 'courses.wheel');
+  const punchOn = featureOn(config, 'courses.punch');
+  const supportersOn = moduleOn(config, 'supporters');
+  const calendarOn = moduleOn(config, 'calendar');
+  const teachersOn = featureOn(config, 'settings.teachers');
+  const famDocsOn = featureOn(config, 'families.docs');
 
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
@@ -118,7 +130,10 @@ export function CommandPalette() {
           setPalette(false);
         },
       },
-      {
+    ];
+    // גלגל החוגים — דורש מודול חוגים + פיצ'ר courses.wheel
+    if (wheelOn) {
+      actions.push({
         key: 'act-wheel',
         icon: '🎡',
         title: 'גלגל החוגים',
@@ -135,13 +150,15 @@ export function CommandPalette() {
           window.dispatchEvent(new Event('maor:open-wheel'));
           setPalette(false);
         },
-      },
-    ];
+      });
+    }
     return [...nav, ...actions];
-  }, [go, selectFamily, exportBackup, setPalette]);
+  }, [go, selectFamily, exportBackup, setPalette, wheelOn]);
 
   /** כרטיסיות מסתיימות — שיבוצי כרטיסייה פעילים עם ≤2 ניקובים שנותרו. */
   const expiringCmds = useMemo<Cmd[]>(() => {
+    // דורש מודול חוגים + פיצ'ר courses.punch
+    if (!punchOn) return [];
     const members = allMembers(db);
     const out: Cmd[] = [];
     for (const e of db.enrollments) {
@@ -175,7 +192,7 @@ export function CommandPalette() {
       if (out.length >= 5) break;
     }
     return out;
-  }, [db, punch, toast, selectCourse, setPalette]);
+  }, [db, punch, toast, selectCourse, setPalette, punchOn]);
 
   /** ישויות מהנתונים — משפחות, בני משפחה, חוגים, מורים, תורמים, מסמכים ואירועים פתוחים. */
   const entityCmds = useMemo<Cmd[]>(() => {
@@ -215,7 +232,7 @@ export function CommandPalette() {
         },
       });
     }
-    for (const c of db.courses) {
+    for (const c of coursesOn ? db.courses : []) {
       const teacher = db.teachers.find((t) => t.id === c.teacherId);
       out.push({
         key: 'crs-' + c.id,
@@ -229,7 +246,7 @@ export function CommandPalette() {
         },
       });
     }
-    for (const t of db.teachers) {
+    for (const t of teachersOn ? db.teachers : []) {
       out.push({
         key: 'tch-' + t.id,
         icon: '🧑‍🏫',
@@ -252,7 +269,7 @@ export function CommandPalette() {
         },
       });
     }
-    for (const sp of db.supporters) {
+    for (const sp of supportersOn ? db.supporters : []) {
       out.push({
         key: 'sup-' + sp.id,
         icon: '💛',
@@ -265,7 +282,7 @@ export function CommandPalette() {
         },
       });
     }
-    for (const f of db.families) {
+    for (const f of famDocsOn ? db.families : []) {
       for (const doc of f.docs) {
         out.push({
           key: 'doc-' + f.id + '-' + doc.id,
@@ -280,7 +297,7 @@ export function CommandPalette() {
         });
       }
     }
-    for (const ev of db.events) {
+    for (const ev of calendarOn ? db.events : []) {
       if (ev.done) continue;
       out.push({
         key: 'ev-' + ev.id,
@@ -295,7 +312,7 @@ export function CommandPalette() {
       });
     }
     return out;
-  }, [db, go, selectFamily, selectCourse, setPalette]);
+  }, [db, go, selectFamily, selectCourse, setPalette, coursesOn, teachersOn, supportersOn, famDocsOn, calendarOn]);
 
   /** דירוג חכם (smartFilter) על מונחי החיפוש המנורמלים. עד 12 תוצאות.
    * שאילתה ריקה: ניווט + פעולות ואחריהם "כרטיסיות מסתיימות".
@@ -308,7 +325,8 @@ export function CommandPalette() {
     }
     const pre: Cmd[] = [];
     const t = q.trim().toLowerCase();
-    if (/^e\d+$/.test(t)) {
+    // חיפוש שיבוץ לפי מזהה — רק כשמודול החוגים פעיל
+    if (coursesOn && /^e\d+$/.test(t)) {
       const e = db.enrollments.find((x) => x.id.toLowerCase() === t);
       const c = e && db.courses.find((x) => x.id === e.courseId);
       if (e && c) {
@@ -330,7 +348,7 @@ export function CommandPalette() {
       0,
       MAX_RESULTS,
     );
-  }, [q, baseCmds, entityCmds, expiringCmds, db, selectCourse, setPalette]);
+  }, [q, baseCmds, entityCmds, expiringCmds, db, selectCourse, setPalette, coursesOn]);
 
   /** "אולי התכוונת" — שאילתה ≥3 תווים בלי תוצאות: עד 3 מילים קרובות
    * (levenshtein ≤ 2) מתוך כותרות כל הפריטים המאונדקסים. */

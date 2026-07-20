@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import type { Course, Enrollment } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { smartFilter } from '../../lib/search';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
 import { enrollCount, groupOptionsOf, isoToday } from './lib';
@@ -14,6 +15,10 @@ export function EnrollModal(props: { course: Course; onClose: () => void }) {
   const upsertEnrollment = useApp((s) => s.upsertEnrollment);
   const nextId = useApp((s) => s.nextId);
   const toast = useApp((s) => s.toast);
+  const cfg = useApp((s) => s.config);
+
+  const punchOn = featureOn(cfg, 'courses.punch');
+  const groupsOn = featureOn(cfg, 'courses.groups');
 
   const c = props.course;
   const [q, setQ] = useState('');
@@ -23,7 +28,7 @@ export function EnrollModal(props: { course: Course; onClose: () => void }) {
   const [group, setGroup] = useState('');
   const [error, setError] = useState('');
 
-  const groups = groupOptionsOf(c);
+  const groups = groupsOn ? groupOptionsOf(c) : [];
 
   /** מועמדים לשיבוץ — כל בני המשפחות שעדיין לא משובצים לקורס הזה. */
   const options = useMemo(() => {
@@ -140,7 +145,7 @@ export function EnrollModal(props: { course: Course; onClose: () => void }) {
           />
         </Field>
       )}
-      {c.model === 'punch' && (
+      {punchOn && c.model === 'punch' && (
         <Field label="ניקובים בכרטיסייה">
           <TextInput value={purchased} onChange={setPurchased} placeholder="12" dir="ltr" />
         </Field>

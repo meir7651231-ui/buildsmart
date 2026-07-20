@@ -5,6 +5,7 @@
  */
 import { useMemo, type CSSProperties } from 'react';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { Btn, Empty, Modal } from '../ui';
 import { hebDateFull, holidayOf } from '../../lib/hebrew';
 import type { OrgEvent } from '../../types/domain';
@@ -56,13 +57,15 @@ export function DayModal(props: {
 }) {
   const { iso, filters, onClose, onShift, onAdd, onEdit } = props;
   const db = useApp((s) => s.db);
+  const config = useApp((s) => s.config);
   const selectCourse = useApp((s) => s.selectCourse);
   const selectFamily = useApp((s) => s.selectFamily);
 
   const d = useMemo(() => new Date(iso + 'T12:00:00'), [iso]);
   const items = useMemo(() => dayItems(db, d).filter((it) => allowItem(it, filters)), [db, d, filters]);
   const holiday = holidayOf(d);
-  const block = blockReason(d, 'course');
+  // calendar.blocking כבוי — באנר "יום חסום" מוסתר
+  const block = featureOn(config, 'calendar.blocking') ? blockReason(d, 'course') : null;
 
   // "כל היום": חג + השכבות ללא שעה (ימי הולדת · הצטרפויות · הרשמות)
   const allDay = items.filter((it) => it.sort === 2 || it.sort === 2.4 || it.sort === 2.6);

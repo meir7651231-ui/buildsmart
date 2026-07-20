@@ -4,6 +4,7 @@
  */
 import { useEffect, useState, type JSX } from 'react';
 import { useApp, type View } from './store/useApp';
+import { termOf } from './lib/config';
 import { BuilderWizard } from './components/builder/BuilderWizard';
 import { HomeView } from './components/home/HomeView';
 import { FamiliesView } from './components/families/FamiliesView';
@@ -120,7 +121,10 @@ export default function App() {
         {nav.map((n) => (
           <button key={n.view} className={view === n.view ? 'active' : ''} onClick={() => go(n.view)}>
             <span aria-hidden>{n.icon}</span>
-            {n.label}
+            {/* מונח מותאם מהמילון לששת מסכי המודולים; בית והגדרות נשארים קבועים */}
+            {n.view === 'home' || n.view === 'settings'
+              ? n.label
+              : termOf(config, `nav.${n.view}`, n.label)}
           </button>
         ))}
         <div className="spacer" />

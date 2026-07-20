@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Gender, Member } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { validIsraeliId } from '../../lib/validate';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Chip, Field, FormError, Modal, Select, TextInput } from '../ui';
@@ -64,6 +65,8 @@ export function MemberForm(props: { famId: string; member: Member | null; onClos
   const upsertMember = useApp((s) => s.upsertMember);
   const nextId = useApp((s) => s.nextId);
   const toast = useApp((s) => s.toast);
+  const config = useApp((s) => s.config);
+  const mediaOn = featureOn(config, 'families.media');
 
   const [f, setF] = useState<MemberFormState>(() => initState(props.member));
   const [error, setError] = useState('');
@@ -163,15 +166,17 @@ export function MemberForm(props: { famId: string; member: Member | null; onClos
       <Field label="רגישויות / מידע רפואי">
         <TextInput value={f.health} onChange={(v) => set({ health: v })} placeholder="אלרגיות, תרופות, מגבלות…" />
       </Field>
-      <Field label="תיעוד ומדיה — מה קיים בתיק?">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-          {MEDIA.map((mc) => (
-            <Chip key={mc.key} on={f[mc.key]} onClick={() => set({ [mc.key]: !f[mc.key] } as Partial<MemberFormState>)}>
-              {mc.label}
-            </Chip>
-          ))}
-        </div>
-      </Field>
+      {mediaOn && (
+        <Field label="תיעוד ומדיה — מה קיים בתיק?">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+            {MEDIA.map((mc) => (
+              <Chip key={mc.key} on={f[mc.key]} onClick={() => set({ [mc.key]: !f[mc.key] } as Partial<MemberFormState>)}>
+                {mc.label}
+              </Chip>
+            ))}
+          </div>
+        </Field>
+      )}
       <Field label="הערות">
         <textarea rows={2} value={f.notes} onChange={(e) => set({ notes: e.target.value })} />
       </Field>

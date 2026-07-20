@@ -4,6 +4,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
 import { HebDateInput } from '../HebDateInput';
 import { hebDateFull } from '../../lib/hebrew';
@@ -60,6 +61,7 @@ export function EventModal(props: {
 }) {
   const { ev, date, prefill, saveToast, onClose } = props;
   const db = useApp((s) => s.db);
+  const config = useApp((s) => s.config);
   const rooms = useApp((s) => s.db.rooms);
   const families = useApp((s) => s.db.families);
   const upsertEvent = useApp((s) => s.upsertEvent);
@@ -119,18 +121,21 @@ export function EventModal(props: {
       setError('מחיר האירוע חייב להיות מספר');
       return;
     }
-    // התנגשות חדר — אירוע אחר או מפגש חוג באותה שעה (כמו במקור)
-    const clash = roomClashError(db, f, ev?.id);
-    if (clash) {
-      setError(clash);
-      return;
-    }
-    // אירוע ארגוני אסור בשבת ובחג מלא
-    if (f.type === 'org') {
-      const blocked = orgBlockError(f.date);
-      if (blocked) {
-        setError(blocked);
+    // ולידציות חסימה — מדולגות כשהפיצ'ר calendar.blocking כבוי
+    if (featureOn(config, 'calendar.blocking')) {
+      // התנגשות חדר — אירוע אחר או מפגש חוג באותה שעה (כמו במקור)
+      const clash = roomClashError(db, f, ev?.id);
+      if (clash) {
+        setError(clash);
         return;
+      }
+      // אירוע ארגוני אסור בשבת ובחג מלא
+      if (f.type === 'org') {
+        const blocked = orgBlockError(f.date);
+        if (blocked) {
+          setError(blocked);
+          return;
+        }
       }
     }
     const next: OrgEvent = {

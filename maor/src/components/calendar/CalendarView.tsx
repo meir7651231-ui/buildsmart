@@ -5,6 +5,7 @@
  */
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { Btn, Chip, Empty, PageHead } from '../ui';
 import type { OrgEvent } from '../../types/domain';
 import {
@@ -135,6 +136,7 @@ const FILTER_CHIPS: { key: keyof Omit<CalFilters, 'urgentOnly'>; label: string }
 
 export function CalendarView() {
   const db = useApp((s) => s.db);
+  const config = useApp((s) => s.config);
   const selectCourse = useApp((s) => s.selectCourse);
   const selectFamily = useApp((s) => s.selectFamily);
   const upsertEvent = useApp((s) => s.upsertEvent);
@@ -148,13 +150,22 @@ export function CalendarView() {
   const [dayIso, setDayIso] = useState<string | null>(null);
   const [filters, setFilters] = useState<CalFilters>(DEFAULT_FILTERS);
 
+  // גייטים ברמת פיצ'ר: תצוגת יום (calendar.dayview) ושכבות נגזרות (calendar.layers)
+  const dayviewOn = featureOn(config, 'calendar.dayview');
+  const layersOn = featureOn(config, 'calendar.layers');
+  // כשהשכבות כבויות — ימי הולדת / הצטרפויות / הרשמות נכבים בכוח (אירועים וחוגים נשארים)
+  const effFilters = useMemo<CalFilters>(
+    () => (layersOn ? filters : { ...filters, bdays: false, joins: false, enrolls: false }),
+    [filters, layersOn],
+  );
+
   const grid = useMemo(
     () => (hebMode ? buildHebrewGrid(db, hebAnchor) : buildGregorianGrid(db, ym.y, ym.m)),
     [db, hebMode, hebAnchor, ym],
   );
   const cells = useMemo(
-    () => grid.cells.map((c) => ({ ...c, items: c.items.filter((it) => allowItem(it, filters)) })),
-    [grid, filters],
+    () => grid.cells.map((c) => ({ ...c, items: c.items.filter((it) => allowItem(it, effFilters)) })),
+    [grid, effFilters],
   );
   const upcoming = useMemo(() => upcomingRows(db, 14), [db]);
 
@@ -226,7 +237,7 @@ export function CalendarView() {
 
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 14 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-faint)' }}>שכבות:</span>
-        {FILTER_CHIPS.map((fc) => (
+        {FILTER_CHIPS.filter((fc) => layersOn || fc.key === 'events' || fc.key === 'courses').map((fc) => (
           <Chip
             key={fc.key}
             on={filters[fc.key]}
@@ -261,7 +272,8 @@ export function CalendarView() {
             <DayCell
               key={cell.iso}
               cell={cell}
-              onOpen={() => setDayIso(cell.iso)}
+              // calendar.dayview כבוי — לחיצה על תא פותחת אירוע חדש ישירות (ההתנהגות הישנה)
+              onOpen={() => (dayviewOn ? setDayIso(cell.iso) : setModal({ ev: null, date: cell.iso }))}
               onItem={onItem}
             />
           ))}
@@ -365,7 +377,7 @@ export function CalendarView() {
       {dayIso && (
         <DayModal
           iso={dayIso}
-          filters={filters}
+          filters={effFilters}
           onClose={() => setDayIso(null)}
           onShift={(iso) => setDayIso(iso)}
           onAdd={(iso) => setModal({ ev: null, date: iso })}

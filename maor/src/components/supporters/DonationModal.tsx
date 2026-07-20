@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { downloadReceipt } from '../../lib/receipt';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
 import { HebDateInput } from '../HebDateInput';
@@ -14,6 +15,8 @@ import { isoToday } from './lib';
 export function DonationModal(props: { supporter: Supporter; onClose: () => void }) {
   const addDonation = useApp((s) => s.addDonation);
   const toast = useApp((s) => s.toast);
+  const config = useApp((s) => s.config);
+  const receiptsOn = featureOn(config, 'core.receipts');
 
   const [date, setDate] = useState(isoToday());
   const [amount, setAmount] = useState('');
@@ -34,24 +37,26 @@ export function DonationModal(props: { supporter: Supporter; onClose: () => void
     // מספר האסמכתה נגזר מה-seq הנוכחי — בדיוק כפי ש-addDonation שב-store מחשב אותו
     const rid = 'D-' + useApp.getState().db.seq;
     addDonation(props.supporter.id, { date, amount: amt, cur, cat: cat.trim() });
-    downloadReceipt({
-      rid,
-      orgName: useApp.getState().config.orgName || useApp.getState().db.orgName,
-      payer: props.supporter.name,
-      amount: amt,
-      currency: cur,
-      date,
-      forWhat: 'תרומה — ' + (cat.trim() || 'כללי'),
-    });
+    // core.receipts כבוי — התרומה נרשמת כרגיל, רק הורדת הקבלה והטוסט שלה מדולגים
+    if (receiptsOn) {
+      downloadReceipt({
+        rid,
+        orgName: useApp.getState().config.orgName || useApp.getState().db.orgName,
+        payer: props.supporter.name,
+        amount: amt,
+        currency: cur,
+        date,
+        forWhat: 'תרומה — ' + (cat.trim() || 'כללי'),
+      });
+    }
     toast(
       'נרשמה תרומה ' +
         (cur === '$' ? '$' : '₪') +
         amt.toLocaleString('he-IL') +
-        ' — קבלה ' +
-        rid +
+        (receiptsOn ? ' — קבלה ' + rid : '') +
         ' · הציון עודכן',
     );
-    toast('הקבלה ירדה למחשב ✓');
+    if (receiptsOn) toast('הקבלה ירדה למחשב ✓');
     props.onClose();
   }
 

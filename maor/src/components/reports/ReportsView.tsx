@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useApp } from '../../store/useApp';
+import { moduleOn } from '../../lib/config';
 import { Btn, Field, FormError, PageHead, TextInput } from '../ui';
 import { fmtDate, isoToday, rangeLabel, type DateRange } from './lib';
 import { AttendanceSection, EnrollmentSection } from './sections1';
@@ -30,6 +31,10 @@ function presets(): { label: string; range: DateRange }[] {
 
 export function ReportsView() {
   const db = useApp((s) => s.db);
+  const config = useApp((s) => s.config);
+  // סעיפי הדוחות נגזרים מדגלי המודולים: רישום/נוכחות/כרטיסיות ← חוגים · תרומות ← תומכות
+  const coursesOn = moduleOn(config, 'courses');
+  const supportersOn = moduleOn(config, 'supporters');
   const [range, setRange] = useState<DateRange>({ from: '', to: '' });
   const [printing, setPrinting] = useState<SectionId | 'all' | null>(null);
 
@@ -90,23 +95,29 @@ export function ReportsView() {
         </div>
       </div>
 
-      <EnrollmentSection
-        db={db}
-        range={range}
-        rangeText={rangeText}
-        hidden={hide('enroll')}
-        onPrint={() => setPrinting('enroll')}
-      />
-      <AttendanceSection db={db} hidden={hide('attend')} onPrint={() => setPrinting('attend')} />
-      <DonationsSection
-        db={db}
-        range={range}
-        rangeText={rangeText}
-        hidden={hide('donations')}
-        onPrint={() => setPrinting('donations')}
-      />
+      {coursesOn && (
+        <EnrollmentSection
+          db={db}
+          range={range}
+          rangeText={rangeText}
+          hidden={hide('enroll')}
+          onPrint={() => setPrinting('enroll')}
+        />
+      )}
+      {coursesOn && (
+        <AttendanceSection db={db} hidden={hide('attend')} onPrint={() => setPrinting('attend')} />
+      )}
+      {supportersOn && (
+        <DonationsSection
+          db={db}
+          range={range}
+          rangeText={rangeText}
+          hidden={hide('donations')}
+          onPrint={() => setPrinting('donations')}
+        />
+      )}
       <FamiliesSection db={db} hidden={hide('families')} onPrint={() => setPrinting('families')} />
-      <PunchSection db={db} hidden={hide('punch')} onPrint={() => setPrinting('punch')} />
+      {coursesOn && <PunchSection db={db} hidden={hide('punch')} onPrint={() => setPrinting('punch')} />}
 
       <ReportPrefsSection />
     </div>

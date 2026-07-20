@@ -1,22 +1,19 @@
 /**
- * אשף ההרכבה — המסך של המטמיע בלבד (נפתח עם #builder בכתובת).
+ * אשף ההרכבה ברזולוציה מלאה — המסך של המטמיע בלבד (נפתח עם #builder בכתובת).
  *
- * פאנל צף מעל האפליקציה החיה: כל שינוי (שם, ערכה, צבע, מודולים) מוחל
- * מיידית דרך setConfig — הלקוח רואה את המערכת שלו נולדת מולו.
- * בסיום: "📦 צור חבילה" מוריד config.json + דף מסירה בעברית.
+ * זרימת העבודה: יושבים עם הלקוח, עוברים מסך-מסך (מקטע לכל מודול), מוסיפים /
+ * מסירים יכולות ומשנים מונחים — וכל שינוי מוחל מיידית דרך setConfig, כך
+ * שהלקוח רואה את המערכת שלו נולדת מולו. בסיום: "📦 צור חבילה" מוריד
+ * config.json (כולל features + terms) + דף מסירה בעברית.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useApp } from '../../store/useApp';
 import { clearConfigOverride } from '../../lib/config';
 import { DEFAULT_CONFIG, type ModuleKey, type OrgConfig } from '../../types/config';
+import { FEATURES, TERM_DEFS, type FeatureDef, type TermDef } from '../../types/features';
 import { Btn, Chip, Field, TextInput } from '../ui';
-import {
-  buildHandoffHtml,
-  downloadTextFile,
-  INTEGRATION_LABELS,
-  MODULE_LABELS,
-  THEME_LABELS,
-} from './handoff';
+import { buildHandoffHtml, downloadTextFile, INTEGRATION_LABELS, THEME_LABELS } from './handoff';
+import { featureEffectiveOn, WIZARD_SECTIONS, type WizardSectionDef } from './sections';
 
 const DEFAULT_APP_URL = 'https://meir7651231-ui.github.io/buildsmart/maor/';
 
@@ -36,6 +33,113 @@ function suggestSlug(name: string): string {
     .slice(0, 30);
 }
 
+/* ————— רכיבי מקטע (ברמת המודול — יציבות פוקוס בשדות בזמן הקלדה) ————— */
+
+/** מעטפת מקטע מתקפל: כותרת-כפתור (חץ + שם + ספירה) + טוגל-אב אופציונלי. */
+function SectionShell(props: {
+  emoji: string;
+  title: string;
+  meta?: string;
+  open: boolean;
+  onToggleOpen: () => void;
+  headerEnd?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        border: '1px solid var(--line)',
+        borderRadius: 10,
+        marginBottom: 8,
+        background: 'var(--panel)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px' }}>
+        <button
+          type="button"
+          onClick={props.onToggleOpen}
+          aria-expanded={props.open}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            textAlign: 'start',
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: 'var(--ink)',
+            padding: 2,
+          }}
+        >
+          <span aria-hidden style={{ fontSize: 10, color: 'var(--ink-faint)', width: 10 }}>
+            {props.open ? '▼' : '◀'}
+          </span>
+          <span>
+            {props.emoji} {props.title}
+          </span>
+          {props.meta && (
+            <span style={{ fontSize: 11.5, fontWeight: 400, color: 'var(--ink-faint)' }}>{props.meta}</span>
+          )}
+        </button>
+        {props.headerEnd}
+      </div>
+      {props.open && <div style={{ padding: '0 12px 10px' }}>{props.children}</div>}
+    </section>
+  );
+}
+
+/** שורת יכולת — checkbox + תווית + תיאור קטן. */
+function FeatureRow(props: { f: FeatureDef; on: boolean; onToggle: (on: boolean) => void }) {
+  return (
+    <label
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 8,
+        padding: '5px 2px',
+        fontSize: 13,
+        cursor: 'pointer',
+        borderTop: '1px solid var(--line-soft)',
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={props.on}
+        onChange={(e) => props.onToggle(e.target.checked)}
+        style={{ width: 'auto', marginTop: 2, accentColor: 'var(--accent-deep)' }}
+      />
+      <span style={{ lineHeight: 1.35 }}>
+        <span style={{ color: 'var(--ink)' }}>{props.f.label}</span>
+        <span style={{ display: 'block', fontSize: 11.5, color: 'var(--ink-faint)' }}>{props.f.desc}</span>
+      </span>
+    </label>
+  );
+}
+
+/** שורת מונח — ✏️ + תווית + שדה שינוי-שם (placeholder = ברירת המחדל). */
+function TermRow(props: { t: TermDef; value: string; onChange: (v: string) => void }) {
+  return (
+    <label
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '3px 2px',
+        fontSize: 12.5,
+        color: 'var(--ink-soft)',
+      }}
+    >
+      <span style={{ flex: '0 0 128px' }}>✏️ {props.t.label}</span>
+      <input
+        value={props.value}
+        placeholder={props.t.fallback}
+        onChange={(e) => props.onChange(e.target.value)}
+        style={{ flex: 1, minWidth: 0, fontSize: 13, padding: '4px 8px' }}
+      />
+    </label>
+  );
+}
+
 export function BuilderWizard({ onClose }: { onClose: () => void }) {
   const config = useApp((s) => s.config);
   const setConfig = useApp((s) => s.setConfig);
@@ -45,8 +149,23 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
   const [appUrl, setAppUrl] = useState(DEFAULT_APP_URL);
   const [installer, setInstaller] = useState('מאיר — הקמת מערכות לעמותות');
   const [slugTouched, setSlugTouched] = useState(config.slug !== 'default');
+  const [query, setQuery] = useState('');
+  /** אילו מקטעים פתוחים — 'branding' פתוח כברירת מחדל, השאר מקופלים. */
+  const [open, setOpen] = useState<Record<string, boolean>>({ branding: true });
 
-  /** עדכון קונפיגורציה חלקי — מוחל חי + נשמר כדריסת ריצה. */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  /**
+   * עדכון קונפיגורציה חלקי — מוחל חי + נשמר כדריסת ריצה.
+   * זהו צינור ה-live-apply היחיד: כל אינטראקציה (גם "סמן הכול" על מקטע שלם)
+   * מזוקקת ל-patch() אחד = קריאת setConfig אחת = render + שמירה אחת.
+   */
   const patch = (p: Partial<OrgConfig>) => setConfig({ ...config, ...p });
 
   const setName = (orgName: string) =>
@@ -54,6 +173,23 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
 
   const toggleModule = (k: ModuleKey) =>
     patch({ modules: { ...config.modules, [k]: config.modules[k] === false } });
+
+  /** הדלקה = מחיקת המפתח (חסר = פעיל) — שומר על config.json נקי מרעש. */
+  const setFeatures = (keys: string[], on: boolean) => {
+    const features = { ...(config.features ?? {}) };
+    for (const k of keys) {
+      if (on) delete features[k];
+      else features[k] = false;
+    }
+    patch({ features });
+  };
+
+  const setTerm = (key: string, value: string) => {
+    const terms = { ...(config.terms ?? {}) };
+    if (value) terms[key] = value;
+    else delete terms[key];
+    patch({ terms });
+  };
 
   const toggleIntegration = (k: string) => {
     const cur = config.integrations?.[k]?.enabled ?? false;
@@ -77,6 +213,8 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
     [config],
   );
 
+  const activeCount = useMemo(() => FEATURES.filter((f) => featureEffectiveOn(config, f)).length, [config]);
+
   const createPackage = () => {
     if (!config.orgName.trim()) {
       toast('חסר שם ארגון — זה הדבר היחיד שחובה');
@@ -95,6 +233,97 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
     toast('האשף אופס — חזרה לברירת המחדל');
   };
 
+  const isOpen = (id: string, def = false) => open[id] ?? def;
+  const flipOpen = (id: string, def = false) =>
+    setOpen((o) => ({ ...o, [id]: !(o[id] ?? def) }));
+
+  const q = query.trim();
+  const searching = q.length > 0;
+
+  /** מקטע מודול אחד — יכולות + מונחים, מסונן לפי החיפוש. */
+  const renderModuleSection = (sec: WizardSectionDef) => {
+    const mk = sec.module;
+    const feats = FEATURES.filter((f) => f.module === sec.id);
+    const terms = TERM_DEFS.filter((t) => sec.termKeys.includes(t.key));
+    const visFeats = searching ? feats.filter((f) => f.label.includes(q) || f.desc.includes(q)) : feats;
+    const visTerms = searching ? terms.filter((t) => t.label.includes(q) || t.fallback.includes(q)) : terms;
+    if (searching && !visFeats.length && !visTerms.length) return null;
+
+    const modOn = mk ? config.modules[mk] !== false : true;
+    const onCount = feats.filter((f) => config.features?.[f.key] !== false).length;
+    const sectionOpen = searching || isOpen(sec.id);
+
+    return (
+      <SectionShell
+        key={sec.id}
+        emoji={sec.emoji}
+        title={sec.title}
+        meta={feats.length ? `${onCount}/${feats.length} יכולות` : undefined}
+        open={sectionOpen}
+        onToggleOpen={() => flipOpen(sec.id)}
+        headerEnd={
+          mk ? (
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                fontSize: 12,
+                cursor: 'pointer',
+                color: modOn ? 'var(--ink-soft)' : 'var(--ink-faint)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={modOn}
+                onChange={() => toggleModule(mk)}
+                aria-label={`מודול ${sec.title} פעיל`}
+                style={{ width: 'auto', accentColor: 'var(--accent-deep)' }}
+              />
+              {modOn ? 'פעיל' : 'כבוי'}
+            </label>
+          ) : undefined
+        }
+      >
+        <div style={{ opacity: mk && !modOn ? 0.55 : 1 }}>
+          {visFeats.length > 0 && (
+            <>
+              <div style={{ display: 'flex', gap: 6, padding: '4px 0 6px' }}>
+                <Btn sm onClick={() => setFeatures(feats.map((f) => f.key), true)}>
+                  סמן הכול
+                </Btn>
+                <Btn sm onClick={() => setFeatures(feats.map((f) => f.key), false)}>
+                  נקה הכול
+                </Btn>
+              </div>
+              {visFeats.map((f) => (
+                <FeatureRow
+                  key={f.key}
+                  f={f}
+                  on={config.features?.[f.key] !== false}
+                  onToggle={(on) => setFeatures([f.key], on)}
+                />
+              ))}
+            </>
+          )}
+          {visTerms.length > 0 && (
+            <div style={{ borderTop: '1px solid var(--line-soft)', marginTop: 6, paddingTop: 6 }}>
+              {visTerms.map((t) => (
+                <TermRow
+                  key={t.key}
+                  t={t}
+                  value={config.terms?.[t.key] ?? ''}
+                  onChange={(v) => setTerm(t.key, v)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </SectionShell>
+    );
+  };
+
   return (
     <div
       style={{
@@ -102,129 +331,172 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
         top: 0,
         bottom: 0,
         insetInlineEnd: 0,
-        width: 'min(420px, 92vw)',
+        width: 'min(560px, 96vw)',
         background: 'var(--panel)',
         borderInlineStart: '3px solid var(--accent)',
         boxShadow: 'var(--shadow-lift)',
         zIndex: 300,
-        overflowY: 'auto',
-        padding: '18px 20px 40px',
+        display: 'flex',
+        flexDirection: 'column',
       }}
       aria-label="אשף ההרכבה"
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <h2 style={{ fontSize: 18, flex: 1 }}>🎛️ אשף ההרכבה</h2>
-        <Btn sm onClick={onClose}>✕ סגירה</Btn>
-      </div>
-      <p style={{ fontSize: 12.5, color: 'var(--ink-faint)', marginBottom: 14 }}>
-        כל שינוי מוחל חי על המערכת שמאחור — הלקוח רואה את העמותה שלו נולדת.
-      </p>
-
-      <Field label="שם הארגון">
-        <TextInput value={config.orgName} onChange={setName} placeholder="למשל: מאור החסד" />
-      </Field>
-      <Field label="מזהה לקוח (לועזי, לכתובת)">
-        <TextInput
-          value={config.slug}
-          onChange={(v) => {
-            setSlugTouched(true);
-            patch({ slug: v.toLowerCase().replace(/[^a-z0-9-]/g, '-') });
-          }}
-          dir="ltr"
-        />
-      </Field>
-      <Field label="לוגו (לא חובה)">
-        <input type="file" accept="image/*" onChange={(e) => onLogo(e.target.files?.[0])} />
-        {config.logoDataUri && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-            <img src={config.logoDataUri} alt="לוגו" style={{ height: 34, borderRadius: 8 }} />
-            <Btn sm onClick={() => patch({ logoDataUri: undefined })}>הסרה</Btn>
-          </div>
-        )}
-      </Field>
-
-      <Field label="ערכת נושא">
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {Object.entries(THEME_LABELS).map(([k, label]) => (
-            <Chip key={k} on={config.theme === k} onClick={() => pickTheme(k)}>
-              {label.split(' ')[0]}
-            </Chip>
-          ))}
+      {/* כותרת + מונה + חיפוש — נשארים למעלה בזמן גלילה */}
+      <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid var(--line)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+          <h2 style={{ fontSize: 18, flex: 1 }}>🎛️ אשף ההרכבה</h2>
+          <Btn sm onClick={onClose}>✕ סגירה</Btn>
         </div>
-      </Field>
-      <Field label="צבע מותאם (לא חובה)">
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <p style={{ fontSize: 12, color: 'var(--ink-faint)', marginBottom: 8 }}>
+          עוברים מסך-מסך עם הלקוח: מוסיפים, מסירים ומשנים שמות — הכול מוחל חי על המערכת שמאחור.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <input
-            type="color"
-            value={config.accent ?? '#f3c76b'}
-            onChange={(e) => {
-              patch({ accent: e.target.value });
-              setAccent(e.target.value);
-            }}
-            style={{ width: 46, height: 32, padding: 2 }}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="🔍 חיפוש יכולת או מונח…"
+            aria-label="חיפוש יכולת או מונח"
+            style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
           />
-          <Btn sm onClick={() => { patch({ accent: undefined }); setAccent(undefined); }}>
-            צבע הערכה
-          </Btn>
+          <span
+            style={{
+              fontSize: 11.5,
+              fontWeight: 600,
+              padding: '4px 10px',
+              borderRadius: 999,
+              background: 'var(--accent)',
+              color: 'var(--dark)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {activeCount} יכולות פעילות מתוך {FEATURES.length}
+          </span>
         </div>
-      </Field>
-
-      <Field label="מודולים בחבילה">
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {(Object.keys(MODULE_LABELS) as ModuleKey[]).map((k) => (
-            <Chip key={k} on={config.modules[k] !== false} onClick={() => toggleModule(k)}>
-              {MODULE_LABELS[k]}
-            </Chip>
-          ))}
-        </div>
-      </Field>
-
-      <Field label="הרחבות שנמכרו (יופעלו בפגישת המשך)">
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {Object.entries(INTEGRATION_LABELS).map(([k, label]) => (
-            <Chip key={k} on={config.integrations?.[k]?.enabled ?? false} onClick={() => toggleIntegration(k)}>
-              {label}
-            </Chip>
-          ))}
-        </div>
-      </Field>
-
-      <div style={{ borderTop: '1px dashed var(--line)', margin: '14px 0', paddingTop: 12 }}>
-        <Field label="כתובת האתר (לדף המסירה)">
-          <TextInput value={appUrl} onChange={setAppUrl} dir="ltr" />
-        </Field>
-        <Field label="חתימת המטמיע">
-          <TextInput value={installer} onChange={setInstaller} />
-        </Field>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <Btn kind="primary" onClick={createPackage}>📦 צור חבילה — config + דף מסירה</Btn>
-        <Btn onClick={resetToDefault}>איפוס האשף לברירת מחדל</Btn>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 18px 40px' }}>
+        {/* מיתוג — שם, מזהה, לוגו, ערכה וצבע (מוסתר בזמן חיפוש יכולות) */}
+        {!searching && (
+          <SectionShell
+            emoji="🏷️"
+            title="מיתוג"
+            open={isOpen('branding', true)}
+            onToggleOpen={() => flipOpen('branding', true)}
+          >
+            <Field label="שם הארגון">
+              <TextInput value={config.orgName} onChange={setName} placeholder="למשל: מאור החסד" />
+            </Field>
+            <Field label="מזהה לקוח (לועזי, לכתובת)">
+              <TextInput
+                value={config.slug}
+                onChange={(v) => {
+                  setSlugTouched(true);
+                  patch({ slug: v.toLowerCase().replace(/[^a-z0-9-]/g, '-') });
+                }}
+                dir="ltr"
+              />
+            </Field>
+            <Field label="לוגו (לא חובה)">
+              <input type="file" accept="image/*" onChange={(e) => onLogo(e.target.files?.[0])} />
+              {config.logoDataUri && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                  <img src={config.logoDataUri} alt="לוגו" style={{ height: 34, borderRadius: 8 }} />
+                  <Btn sm onClick={() => patch({ logoDataUri: undefined })}>הסרה</Btn>
+                </div>
+              )}
+            </Field>
+            <Field label="ערכת נושא">
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {Object.entries(THEME_LABELS).map(([k, label]) => (
+                  <Chip key={k} on={config.theme === k} onClick={() => pickTheme(k)}>
+                    {label.split(' ')[0]}
+                  </Chip>
+                ))}
+              </div>
+            </Field>
+            <Field label="צבע מותאם (לא חובה)">
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  type="color"
+                  value={config.accent ?? '#f3c76b'}
+                  onChange={(e) => {
+                    patch({ accent: e.target.value });
+                    setAccent(e.target.value);
+                  }}
+                  style={{ width: 46, height: 32, padding: 2 }}
+                />
+                <Btn sm onClick={() => { patch({ accent: undefined }); setAccent(undefined); }}>
+                  צבע הערכה
+                </Btn>
+              </div>
+            </Field>
+          </SectionShell>
+        )}
+
+        {/* מקטע לכל מסך — בסדר המסכים באפליקציה */}
+        {WIZARD_SECTIONS.map(renderModuleSection)}
+
+        {/* הרחבות — נשארות כ-chips (מוסתר בזמן חיפוש יכולות) */}
+        {!searching && (
+          <SectionShell
+            emoji="🔌"
+            title="הרחבות שנמכרו"
+            meta="יופעלו בפגישת המשך"
+            open={isOpen('integrations')}
+            onToggleOpen={() => flipOpen('integrations')}
+          >
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', paddingTop: 6 }}>
+              {Object.entries(INTEGRATION_LABELS).map(([k, label]) => (
+                <Chip
+                  key={k}
+                  on={config.integrations?.[k]?.enabled ?? false}
+                  onClick={() => toggleIntegration(k)}
+                >
+                  {label}
+                </Chip>
+              ))}
+            </div>
+          </SectionShell>
+        )}
+
+        <div style={{ borderTop: '1px dashed var(--line)', margin: '14px 0', paddingTop: 12 }}>
+          <Field label="כתובת האתר (לדף המסירה)">
+            <TextInput value={appUrl} onChange={setAppUrl} dir="ltr" />
+          </Field>
+          <Field label="חתימת המטמיע">
+            <TextInput value={installer} onChange={setInstaller} />
+          </Field>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Btn kind="primary" onClick={createPackage}>📦 צור חבילה — config + דף מסירה</Btn>
+          <Btn onClick={resetToDefault}>איפוס האשף לברירת מחדל</Btn>
+        </div>
+
+        <details style={{ marginTop: 14, fontSize: 12 }}>
+          <summary style={{ cursor: 'pointer', color: 'var(--ink-faint)' }}>config.json (תצוגה)</summary>
+          <pre
+            dir="ltr"
+            style={{
+              background: 'var(--bg)',
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              padding: 10,
+              overflowX: 'auto',
+              fontSize: 11,
+            }}
+          >
+            {configJson}
+          </pre>
+        </details>
+
+        <p style={{ fontSize: 11.5, color: 'var(--ink-faint)', marginTop: 12 }}>
+          פרסום ללקוח: מעלים את הקובץ ל-<code dir="ltr">maor/public/c/{config.slug}/config.json</code>{' '}
+          בריפו ודוחפים — הכתובת <code dir="ltr">?org={config.slug}</code> חיה תוך דקות. הנתונים של כל
+          לקוח מבודדים אוטומטית.
+        </p>
       </div>
-
-      <details style={{ marginTop: 14, fontSize: 12 }}>
-        <summary style={{ cursor: 'pointer', color: 'var(--ink-faint)' }}>config.json (תצוגה)</summary>
-        <pre
-          dir="ltr"
-          style={{
-            background: 'var(--bg)',
-            border: '1px solid var(--line)',
-            borderRadius: 8,
-            padding: 10,
-            overflowX: 'auto',
-            fontSize: 11,
-          }}
-        >
-          {configJson}
-        </pre>
-      </details>
-
-      <p style={{ fontSize: 11.5, color: 'var(--ink-faint)', marginTop: 12 }}>
-        פרסום ללקוח: מעלים את הקובץ ל-<code dir="ltr">maor/public/c/{config.slug}/config.json</code>{' '}
-        בריפו ודוחפים — הכתובת <code dir="ltr">?org={config.slug}</code> חיה תוך דקות. הנתונים של כל
-        לקוח מבודדים אוטומטית.
-      </p>
     </div>
   );
 }

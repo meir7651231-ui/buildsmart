@@ -3,7 +3,9 @@
  * מה קיבלתם, הכתובת, כללי הגיבוי, מדריך מזכירה מקוצר, וטבלת החשבונות
  * החיצוניים שנפתחים על שם העמותה.
  */
-import type { OrgConfig } from '../../types/config';
+import type { ModuleKey, OrgConfig } from '../../types/config';
+import { FEATURES, type FeatureDef } from '../../types/features';
+import { featureModuleKey, WIZARD_SECTIONS } from './sections';
 
 export const MODULE_LABELS: Record<string, string> = {
   families: 'משפחות ובני משפחה',
@@ -40,12 +42,44 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/** שם מודול לתצוגה — דריסת מונח (nav.*) של הלקוח גוברת על התווית הכללית. */
+function moduleDisplayName(cfg: OrgConfig, k: ModuleKey): string {
+  const override = cfg.terms?.[`nav.${k}`]?.trim();
+  return override || MODULE_LABELS[k] || k;
+}
+
+/** שם הקבוצה של פיצ'ר (כולל home/settings/core שאין להם מודול). */
+function featureGroupName(cfg: OrgConfig, m: FeatureDef['module']): string {
+  const mk = featureModuleKey(m);
+  if (mk) return moduleDisplayName(cfg, mk);
+  return WIZARD_SECTIONS.find((s) => s.id === m)?.title ?? m;
+}
+
+/**
+ * מה הוסר מהחבילה — פיצ'רים שאינם פעילים בפועל: כובו במפורש (features[key]=false)
+ * או שהמודול-האב שלהם כבוי. הרשימה נמסרת ללקוח כ"ניתן להפעלה בעתיד".
+ */
+export function removedFeatures(cfg: OrgConfig): FeatureDef[] {
+  return FEATURES.filter((f) => {
+    const mk = featureModuleKey(f.module);
+    return (mk && cfg.modules[mk] === false) || cfg.features?.[f.key] === false;
+  });
+}
+
 export function buildHandoffHtml(cfg: OrgConfig, appUrl: string, installerName: string): string {
   const url = cfg.slug === 'default' ? appUrl : `${appUrl}${appUrl.includes('?') ? '&' : '?'}org=${cfg.slug}`;
-  const modules = Object.entries(MODULE_LABELS)
-    .filter(([k]) => cfg.modules[k as keyof typeof cfg.modules] !== false)
-    .map(([, v]) => `<li>✅ ${esc(v)}</li>`)
+  const modules = (Object.keys(MODULE_LABELS) as ModuleKey[])
+    .filter((k) => cfg.modules[k] !== false)
+    .map((k) => `<li>✅ ${esc(moduleDisplayName(cfg, k))}</li>`)
     .join('');
+  const removed = removedFeatures(cfg);
+  const removedHtml = removed.length
+    ? `<h2>➖ מה הוסר מהחבילה</h2>
+       <p>היכולות הבאות הוסרו בהתאמה אישית. אפשר להפעיל כל אחת מהן בעתיד — ללא אובדן נתונים:</p>
+       <ul>${removed
+         .map((f) => `<li>✖ ${esc(f.label)} <small>(${esc(featureGroupName(cfg, f.module))})</small></li>`)
+         .join('')}</ul>`
+    : '';
   const sold = Object.entries(cfg.integrations ?? {}).filter(([, v]) => v.enabled);
   const integrations = sold.length
     ? `<h2>🔌 הרחבות שנרכשו</h2>
@@ -81,6 +115,8 @@ export function buildHandoffHtml(cfg: OrgConfig, appUrl: string, installerName: 
 <h2>📦 מה כלול בחבילה</h2>
 <ul>${modules}</ul>
 <p>ערכת עיצוב: <b>${esc(THEME_LABELS[cfg.theme] ?? cfg.theme)}</b></p>
+
+${removedHtml}
 
 ${integrations}
 

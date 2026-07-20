@@ -15,6 +15,44 @@ export function moduleOn(cfg: OrgConfig, m: ModuleKey): boolean {
   return cfg.modules[m] !== false;
 }
 
+/** ששת מודולי הניווט הניתנים לכיבוי — קידומות של פיצ'רים שכפופות לטוגל מודול. */
+const NAV_MODULE_KEYS: readonly ModuleKey[] = [
+  'families',
+  'courses',
+  'calendar',
+  'diary',
+  'supporters',
+  'reports',
+];
+
+/**
+ * האם פיצ'ר עדין פעיל — מפתח חסר = פעיל; רק false מכבה.
+ * בנוסף, אם קידומת המפתח (הקטע שלפני הנקודה) היא אחד מששת מודולי הניווט
+ * והמודול כבוי — הפיצ'ר כבוי גם הוא (כיבוי מודול משורשר לילדיו).
+ * קידומות 'core' / 'home' / 'settings' אינן כפופות לטוגל מודול.
+ */
+export function featureOn(cfg: OrgConfig, key: string): boolean {
+  if (cfg.features?.[key] === false) return false;
+  const prefix = key.split('.')[0] ?? '';
+  if ((NAV_MODULE_KEYS as readonly string[]).includes(prefix) && !moduleOn(cfg, prefix as ModuleKey)) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * מונח מותאם מהמילון — cfg.terms[key] אחרי trim אם אינו ריק, אחרת fallback.
+ * דריסה ריקה / רווחים בלבד נחשבת "אין דריסה".
+ */
+export function termOf(cfg: OrgConfig, key: string, fallback: string): string {
+  const v = cfg.terms?.[key];
+  if (typeof v === 'string') {
+    const t = v.trim();
+    if (t) return t;
+  }
+  return fallback;
+}
+
 /** נרמול קלט לא-אמין (localStorage / רשת) לצורת OrgConfig מלאה, או null אם לא שמיש. */
 function normalize(raw: unknown): OrgConfig | null {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
@@ -29,6 +67,12 @@ function normalize(raw: unknown): OrgConfig | null {
     orgName: typeof c.orgName === 'string' ? c.orgName : DEFAULT_CONFIG.orgName,
     theme: typeof c.theme === 'string' && c.theme ? c.theme : DEFAULT_CONFIG.theme,
     modules: c.modules && typeof c.modules === 'object' ? { ...c.modules } : {},
+    features:
+      c.features && typeof c.features === 'object' && !Array.isArray(c.features)
+        ? { ...c.features }
+        : {},
+    terms:
+      c.terms && typeof c.terms === 'object' && !Array.isArray(c.terms) ? { ...c.terms } : {},
   };
 }
 

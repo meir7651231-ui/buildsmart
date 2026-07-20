@@ -6,6 +6,7 @@
 import { useState, type ReactNode } from 'react';
 import type { Db, Family, FamilyDoc } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty, TextInput } from '../ui';
 import { downloadText } from '../reports/csv';
@@ -186,6 +187,8 @@ export function CredPanel(props: { fam: Family }) {
 export function EnrollPanel(props: { fam: Family }) {
   const courses = useApp((s) => s.db.courses);
   const enrollments = useApp((s) => s.db.enrollments);
+  const config = useApp((s) => s.config);
+  const joinOn = featureOn(config, 'families.join');
   const [joinOpen, setJoinOpen] = useState(false);
   const memberIds = new Set(props.fam.members.map((m) => m.id));
   const list = enrollments.filter((e) => memberIds.has(e.memberId));
@@ -195,10 +198,10 @@ export function EnrollPanel(props: { fam: Family }) {
   return (
     <SectionCard
       title="קורסים פעילים וניקובים"
-      actions={<Btn onClick={() => setJoinOpen(true)}>+ שיבוץ לחוג</Btn>}
+      actions={joinOn ? <Btn onClick={() => setJoinOpen(true)}>+ שיבוץ לחוג</Btn> : undefined}
     >
       {list.length === 0 ? (
-        <Empty>אין שיבוצים פעילים — לחצו על "+ שיבוץ לחוג"</Empty>
+        <Empty>{joinOn ? 'אין שיבוצים פעילים — לחצו על "+ שיבוץ לחוג"' : 'אין שיבוצים פעילים'}</Empty>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="table">
@@ -242,7 +245,7 @@ export function EnrollPanel(props: { fam: Family }) {
           </table>
         </div>
       )}
-      {joinOpen && <JoinModal family={props.fam} onClose={() => setJoinOpen(false)} />}
+      {joinOn && joinOpen && <JoinModal family={props.fam} onClose={() => setJoinOpen(false)} />}
     </SectionCard>
   );
 }
@@ -250,6 +253,8 @@ export function EnrollPanel(props: { fam: Family }) {
 /** אירועים מיוחדים המקושרים למשפחה (אזכרה/שמחה/תזכורת) — תצוגה בלבד. */
 export function EventsPanel(props: { fam: Family }) {
   const events = useApp((s) => s.db.events);
+  const config = useApp((s) => s.config);
+  const historyOn = featureOn(config, 'families.history');
   const list = events.filter((e) => e.famId === props.fam.id && !e.done);
 
   // פאנל ההיסטוריה מרונדר כאן כדי להופיע בכרטיס המשפחה בלי לגעת ב-FamilyDetail
@@ -287,7 +292,7 @@ export function EventsPanel(props: { fam: Family }) {
           })
         )}
       </SectionCard>
-      <HistoryPanel fam={props.fam} />
+      {historyOn && <HistoryPanel fam={props.fam} />}
     </>
   );
 }
@@ -372,6 +377,8 @@ function familyReportLines(db: Db, f: Family): string[] {
 function HistoryPanel(props: { fam: Family }) {
   const db = useApp((s) => s.db);
   const toast = useApp((s) => s.toast);
+  const config = useApp((s) => s.config);
+  const reportOn = featureOn(config, 'families.report');
   const [open, setOpen] = useState(false);
 
   const hist = famHistoryOf(db, props.fam);
@@ -386,9 +393,11 @@ function HistoryPanel(props: { fam: Family }) {
       title={'היסטוריה (' + hist.length + ')'}
       actions={
         <div style={{ display: 'flex', gap: 6 }}>
-          <Btn sm onClick={exportReport}>
-            ⬇ דוח משפחה
-          </Btn>
+          {reportOn && (
+            <Btn sm onClick={exportReport}>
+              ⬇ דוח משפחה
+            </Btn>
+          )}
           <Btn sm onClick={() => setOpen((v) => !v)}>
             {open ? '▲ סגירה' : '▼ הצגה'}
           </Btn>

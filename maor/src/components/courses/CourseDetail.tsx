@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Course, Enrollment, Weekday } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { downloadCsv, type Cell } from '../../lib/csvx';
 import { Btn, Empty } from '../ui';
@@ -48,6 +49,12 @@ export function CourseDetail(props: { course: Course }) {
   const punch = useApp((s) => s.punch);
   const addCred = useApp((s) => s.addCred);
   const toast = useApp((s) => s.toast);
+  const cfg = useApp((s) => s.config);
+
+  const punchOn = featureOn(cfg, 'courses.punch');
+  const groupsOn = featureOn(cfg, 'courses.groups');
+  const printoutOn = featureOn(cfg, 'courses.printout');
+  const discountsOn = featureOn(cfg, 'courses.discounts');
 
   const c = props.course;
   const [modal, setModal] = useState<ModalState>(null);
@@ -61,7 +68,8 @@ export function CourseDetail(props: { course: Course }) {
   const enrolled = db.enrollments.filter((e) => e.courseId === c.id);
   const members = allMembers(db);
   const sessions = sessionsOf(c);
-  const groups = groupOptionsOf(c);
+  // קבוצות כבויות בקונפיגורציה → התנהגות קבוצה-יחידה (אין בוררי קבוצה ואין עורך)
+  const groups = groupsOn ? groupOptionsOf(c) : [];
   const mm = modelMeta(c);
   const tint = TINTS[Math.max(0, db.courses.indexOf(c)) % TINTS.length];
   const full = enrolled.length >= (c.maxStudents || 999);
@@ -209,9 +217,11 @@ export function CourseDetail(props: { course: Course }) {
                 <span style={{ fontSize: 12, color: 'var(--ink-faint)', fontWeight: 600 }}>
                   {enrolled.length + '/' + (c.maxStudents || '∞') + ' רשומים'}
                 </span>
-                <Btn sm disabled={!enrolled.length} onClick={exportStudents} title="הורדת רשימת התלמידים כ-CSV למורה — כולל רגישויות">
-                  ⬇ תדפיס למורה
-                </Btn>
+                {printoutOn && (
+                  <Btn sm disabled={!enrolled.length} onClick={exportStudents} title="הורדת רשימת התלמידים כ-CSV למורה — כולל רגישויות">
+                    ⬇ תדפיס למורה
+                  </Btn>
+                )}
                 <Btn sm disabled={full} onClick={() => setModal({ kind: 'enroll' })}>
                   {full ? 'הקורס מלא' : '+ שיבוץ תלמיד'}
                 </Btn>
@@ -286,7 +296,9 @@ export function CourseDetail(props: { course: Course }) {
                             )}
                           </td>
                           <td>
-                            {isPunch ? (
+                            {!punchOn ? (
+                              <span style={{ fontSize: 12 }}>{planLabelOf(e)}</span>
+                            ) : isPunch ? (
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <div
                                   style={{
@@ -317,9 +329,11 @@ export function CourseDetail(props: { course: Course }) {
                           </td>
                           <td>
                             <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                              <Btn sm kind={noBalance ? 'plain' : 'primary'} onClick={() => doPunch(e)}>
-                                {noBalance ? 'חידוש ←' : 'ניקוב'}
-                              </Btn>
+                              {punchOn && (
+                                <Btn sm kind={noBalance ? 'plain' : 'primary'} onClick={() => doPunch(e)}>
+                                  {noBalance ? 'חידוש ←' : 'ניקוב'}
+                                </Btn>
+                              )}
                               <Btn
                                 sm
                                 title="ניהול שיבוץ: קניית כרטיסייה, מסלול, הקפאה, הסרה"
@@ -345,6 +359,7 @@ export function CourseDetail(props: { course: Course }) {
             )}
           </section>
 
+          {groupsOn && (
           <section className="card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <h2 style={{ fontSize: 15, fontWeight: 800 }}>שעות פעילות וקבוצות</h2>
@@ -408,6 +423,7 @@ export function CourseDetail(props: { course: Course }) {
               </Btn>
             </div>
           </section>
+          )}
         </div>
 
         <section className="card">
@@ -417,8 +433,8 @@ export function CourseDetail(props: { course: Course }) {
             {detailRow('מורה', teacher?.name ?? '—')}
             {detailRow('טלפון המורה', teacher?.phone || '—')}
             {detailRow('מחיר מלא', c.price ? '₪' + c.price + ' לחודש' : '—')}
-            {detailRow(c.price1Name || 'הנחה 1', c.price1 ? '₪' + c.price1 : '—', '#12803c')}
-            {detailRow(c.price2Name || 'הנחה 2', c.price2 ? '₪' + c.price2 : '—', '#7c3aed')}
+            {discountsOn && detailRow(c.price1Name || 'הנחה 1', c.price1 ? '₪' + c.price1 : '—', '#12803c')}
+            {discountsOn && detailRow(c.price2Name || 'הנחה 2', c.price2 ? '₪' + c.price2 : '—', '#7c3aed')}
             {detailRow('מסלול', mm.label)}
             {detailRow('סמסטר', c.semester || 'שנתי')}
             {detailRow('חדר פעילות', room?.name ?? '—')}

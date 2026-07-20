@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Course, Gender, Teacher, Weekday } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { normalizePhone } from '../../lib/validate';
 import { Btn, Field, FormError, Modal, Select, TextInput } from '../ui';
 import { HebDateInput } from '../HebDateInput';
@@ -106,6 +107,9 @@ export function CourseForm(props: { course: Course | null; onClose: () => void }
   const selectCourse = useApp((s) => s.selectCourse);
   const nextId = useApp((s) => s.nextId);
   const toast = useApp((s) => s.toast);
+  const cfg = useApp((s) => s.config);
+
+  const discountsOn = featureOn(cfg, 'courses.discounts');
 
   const [f, setF] = useState<CourseFormState>(() =>
     initState(props.course, db.teachers[0]?.id ?? '', db.rooms[0]?.id ?? ''),
@@ -249,18 +253,22 @@ export function CourseForm(props: { course: Course | null; onClose: () => void }
         <Field label="מחיר מלא (₪)">
           <TextInput value={f.price} onChange={(v) => set({ price: v })} placeholder="180" dir="ltr" />
         </Field>
-        <Field label="שם הנחה 1">
-          <TextInput value={f.price1Name} onChange={(v) => set({ price1Name: v })} placeholder="לדוגמה: אחיות / מלגה" />
-        </Field>
-        <Field label="מחיר הנחה 1 (₪)">
-          <TextInput value={f.price1} onChange={(v) => set({ price1: v })} placeholder="—" dir="ltr" />
-        </Field>
-        <Field label="שם הנחה 2">
-          <TextInput value={f.price2Name} onChange={(v) => set({ price2Name: v })} placeholder="לדוגמה: אלמנות" />
-        </Field>
-        <Field label="מחיר הנחה 2 (₪)">
-          <TextInput value={f.price2} onChange={(v) => set({ price2: v })} placeholder="—" dir="ltr" />
-        </Field>
+        {discountsOn && (
+          <>
+            <Field label="שם הנחה 1">
+              <TextInput value={f.price1Name} onChange={(v) => set({ price1Name: v })} placeholder="לדוגמה: אחיות / מלגה" />
+            </Field>
+            <Field label="מחיר הנחה 1 (₪)">
+              <TextInput value={f.price1} onChange={(v) => set({ price1: v })} placeholder="—" dir="ltr" />
+            </Field>
+            <Field label="שם הנחה 2">
+              <TextInput value={f.price2Name} onChange={(v) => set({ price2Name: v })} placeholder="לדוגמה: אלמנות" />
+            </Field>
+            <Field label="מחיר הנחה 2 (₪)">
+              <TextInput value={f.price2} onChange={(v) => set({ price2: v })} placeholder="—" dir="ltr" />
+            </Field>
+          </>
+        )}
         {f.model === 'punch' && (
           <Field label="ניקובים בכרטיסייה *">
             <TextInput value={f.size} onChange={(v) => set({ size: v })} placeholder="10" dir="ltr" />

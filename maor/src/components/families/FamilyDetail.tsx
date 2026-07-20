@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Family, Member } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty } from '../ui';
 import { ageOf, chipStyle, fmtDate, STATUS_META } from './lib';
@@ -108,6 +109,9 @@ export function FamilyDetail(props: { family: Family }) {
   const deleteFamily = useApp((s) => s.deleteFamily);
   const deleteMember = useApp((s) => s.deleteMember);
   const toast = useApp((s) => s.toast);
+  const config = useApp((s) => s.config);
+  const credOn = featureOn(config, 'families.cred');
+  const docsOn = featureOn(config, 'families.docs');
 
   const [showIds, setShowIds] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -240,10 +244,12 @@ export function FamilyDetail(props: { family: Family }) {
         )}
       </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
-        <CredPanel fam={fam} />
-        <DocsPanel fam={fam} />
-      </div>
+      {(credOn || docsOn) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+          {credOn && <CredPanel fam={fam} />}
+          {docsOn && <DocsPanel fam={fam} />}
+        </div>
+      )}
 
       <EnrollPanel fam={fam} />
       <EventsPanel fam={fam} />

@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Course } from '../../types/domain';
 import { useApp, useCourse } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { normSearch } from '../../lib/validate';
 import { Btn, Empty, PageHead, Select, TextInput } from '../ui';
 import { CourseForm } from './CourseForm';
@@ -15,6 +16,8 @@ import { DAY_LETTERS, TINTS, chipStyle, enrollCount, modelMeta } from './lib';
 export function CoursesView() {
   const selCourseId = useApp((s) => s.selCourseId);
   const selected = useCourse(selCourseId);
+  const cfg = useApp((s) => s.config);
+  const wheelOn = featureOn(cfg, 'courses.wheel');
   const [wheelOpen, setWheelOpen] = useState(false);
 
   // פלטת הפקודות מסמנת דגל ב-sessionStorage (וגם משדרת אירוע, למקרה
@@ -38,7 +41,7 @@ export function CoursesView() {
   return (
     <>
       {selected ? <CourseDetail course={selected} /> : <CoursesList onOpenWheel={() => setWheelOpen(true)} />}
-      {wheelOpen && <CourseWheel onClose={() => setWheelOpen(false)} />}
+      {wheelOn && wheelOpen && <CourseWheel onClose={() => setWheelOpen(false)} />}
     </>
   );
 }
@@ -47,6 +50,8 @@ function CoursesList(props: { onOpenWheel: () => void }) {
   const db = useApp((s) => s.db);
   const setDb = useApp((s) => s.setDb);
   const selectCourse = useApp((s) => s.selectCourse);
+  const cfg = useApp((s) => s.config);
+  const wheelOn = featureOn(cfg, 'courses.wheel');
 
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('all');
@@ -90,9 +95,11 @@ function CoursesList(props: { onOpenWheel: () => void }) {
         }
         actions={
           <>
-            <Btn onClick={props.onOpenWheel} title="גלגל מזל שבוחר חוג לפי הסינון שלכם">
-              🎡 מצא חוג
-            </Btn>
+            {wheelOn && (
+              <Btn onClick={props.onOpenWheel} title="גלגל מזל שבוחר חוג לפי הסינון שלכם">
+                🎡 מצא חוג
+              </Btn>
+            )}
             <Btn onClick={toggleView} title="החלפת תצוגה: גריד / רשימה">
               {view === 'list' ? '▦ גריד' : '☰ רשימה'}
             </Btn>

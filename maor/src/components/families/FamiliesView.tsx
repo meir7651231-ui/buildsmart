@@ -5,6 +5,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { Family } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { smartFilter } from '../../lib/search';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty, PageHead, Select, TextInput } from '../ui';
@@ -38,6 +39,8 @@ export function FamiliesView() {
   const setDb = useApp((s) => s.setDb);
   const selFamilyId = useApp((s) => s.selFamilyId);
   const selectFamily = useApp((s) => s.selectFamily);
+  const config = useApp((s) => s.config);
+  const credOn = featureOn(config, 'families.cred');
 
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('all');
@@ -149,7 +152,7 @@ export function FamiliesView() {
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <TierDot f={f} />
+                  {credOn && <TierDot f={f} />}
                   <span style={{ fontWeight: 700, fontSize: 15, flex: 1 }}>משפחת {f.name}</span>
                   <span style={chipStyle(st.bg, st.c)}>{st.label}</span>
                 </div>
@@ -198,7 +201,7 @@ export function FamiliesView() {
                   >
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                        <TierDot f={f} />
+                        {credOn && <TierDot f={f} />}
                         <span style={{ fontWeight: 700 }}>משפחת {f.name}</span>
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--ink-faint)' }}>{kidsLine}</div>

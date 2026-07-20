@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty, Field } from '../ui';
 import { HebDateInput } from '../HebDateInput';
@@ -39,6 +40,9 @@ export function SupporterDetail(props: { supporter: Supporter; onBack: () => voi
   const deleteEvent = useApp((s) => s.deleteEvent);
   const nextId = useApp((s) => s.nextId);
   const toast = useApp((s) => s.toast);
+  const config = useApp((s) => s.config);
+  const rfmOn = featureOn(config, 'supporters.rfm');
+  const nextOn = featureOn(config, 'supporters.nextdate');
 
   const [editOpen, setEditOpen] = useState(false);
   const [donOpen, setDonOpen] = useState(false);
@@ -153,9 +157,11 @@ export function SupporterDetail(props: { supporter: Supporter; onBack: () => voi
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 800, fontSize: 19 }}>{sp.name}</span>
-            <span style={chipStyle(tier.bg, tier.c)} title={'ציון משוקלל (R·F·M): ' + score}>
-              {tier.label}
-            </span>
+            {rfmOn && (
+              <span style={chipStyle(tier.bg, tier.c)} title={'ציון משוקלל (R·F·M): ' + score}>
+                {tier.label}
+              </span>
+            )}
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--ink-soft)', marginTop: 2 }}>{statsLine}</div>
         </div>
@@ -174,12 +180,14 @@ export function SupporterDetail(props: { supporter: Supporter; onBack: () => voi
       </div>
 
       {/* פס ציון משוקלל */}
-      <div
-        className="card"
-        style={{ background: tier.bg, color: tier.c, fontSize: 13.5, fontWeight: 600, padding: '10px 16px' }}
-      >
-        ציון משוקלל: {score}/1000 · דרגת {tier.label} — משוקלל לפי טריות (R), תדירות (F) וסכום (M)
-      </div>
+      {rfmOn && (
+        <div
+          className="card"
+          style={{ background: tier.bg, color: tier.c, fontSize: 13.5, fontWeight: 600, padding: '10px 16px' }}
+        >
+          ציון משוקלל: {score}/1000 · דרגת {tier.label} — משוקלל לפי טריות (R), תדירות (F) וסכום (M)
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
         {/* פרטי קשר */}
@@ -195,24 +203,26 @@ export function SupporterDetail(props: { supporter: Supporter; onBack: () => voi
         </div>
 
         {/* קשר הבא */}
-        <div className="card">
-          <h3 style={{ fontSize: 15, marginBottom: 8 }}>קשר הבא 🎯</h3>
-          <Field label="תאריך יעד ליצירת קשר">
-            <HebDateInput value={sp.nextDate || ''} onChange={setNextDate} />
-          </Field>
-          {sp.nextDate ? (
-            <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-              {sp.nextDate <= isoToday() ? '🔔 תאריך היעד עבר — הגיע הזמן להתקשר' : hebDateFull(sp.nextDate)}
-              {sp.nextEventId && events.some((e) => e.id === sp.nextEventId)
-                ? ' · תזכורת 📞 מקושרת בלוח השנה'
-                : ''}
-            </div>
-          ) : (
-            <div style={{ fontSize: 12.5, color: 'var(--ink-faint)' }}>
-              קביעת תאריך תציע להוסיף תזכורת שיחה ללוח השנה
-            </div>
-          )}
-        </div>
+        {nextOn && (
+          <div className="card">
+            <h3 style={{ fontSize: 15, marginBottom: 8 }}>קשר הבא 🎯</h3>
+            <Field label="תאריך יעד ליצירת קשר">
+              <HebDateInput value={sp.nextDate || ''} onChange={setNextDate} />
+            </Field>
+            {sp.nextDate ? (
+              <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
+                {sp.nextDate <= isoToday() ? '🔔 תאריך היעד עבר — הגיע הזמן להתקשר' : hebDateFull(sp.nextDate)}
+                {sp.nextEventId && events.some((e) => e.id === sp.nextEventId)
+                  ? ' · תזכורת 📞 מקושרת בלוח השנה'
+                  : ''}
+              </div>
+            ) : (
+              <div style={{ fontSize: 12.5, color: 'var(--ink-faint)' }}>
+                קביעת תאריך תציע להוסיף תזכורת שיחה ללוח השנה
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* היסטוריית תרומות */}

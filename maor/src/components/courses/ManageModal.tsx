@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { Course, Enrollment, OrgEvent } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { downloadReceipt } from '../../lib/receipt';
 import { Btn, Field, Modal, Select, TextInput } from '../ui';
 import { HebDateInput } from '../HebDateInput';
@@ -29,6 +30,12 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
   const addCred = useApp((s) => s.addCred);
   const nextId = useApp((s) => s.nextId);
   const toast = useApp((s) => s.toast);
+  const cfg = useApp((s) => s.config);
+
+  const punchOn = featureOn(cfg, 'courses.punch');
+  const paymentsOn = featureOn(cfg, 'courses.payments');
+  const groupsOn = featureOn(cfg, 'courses.groups');
+  const receiptsOn = featureOn(cfg, 'core.receipts');
 
   const en = db.enrollments.find((e) => e.id === props.enrollmentId);
   const c = props.course;
@@ -45,7 +52,7 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
   const famOf = () => db.families.find((f) => f.members.some((mm) => mm.id === en.memberId));
   const rem = en.purchased - en.used;
   const st = enrollStatusMeta(en);
-  const groups = groupOptionsOf(c);
+  const groups = groupsOn ? groupOptionsOf(c) : [];
   const paid = paidOf(en);
   const bal = payBal(en);
 
@@ -97,19 +104,22 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
     const date = payDate || isoToday();
     const method = payMethod || 'מזומן';
     addPayment(en.id, { date, amount: amt, method });
-    downloadReceipt({
-      rid,
-      orgName: useApp.getState().config.orgName || db.orgName,
-      payer: ((m?.first ?? '') + ' ' + (m?.famName ?? '')).trim() || '—',
-      amount: amt,
-      method,
-      date,
-      forWhat: c.name,
-    });
+    // קבלות כבויות בקונפיגורציה → התשלום נרשם, אך ללא הורדת קבלה וללא טוסט הקבלה
+    if (receiptsOn) {
+      downloadReceipt({
+        rid,
+        orgName: useApp.getState().config.orgName || db.orgName,
+        payer: ((m?.first ?? '') + ' ' + (m?.famName ?? '')).trim() || '—',
+        amount: amt,
+        method,
+        date,
+        forWhat: c.name,
+      });
+    }
     setPayAmt('');
     const newBal = Math.max(0, (en.totalDue || 0) - (paid + amt));
     toast('התקבל ₪' + amt + (en.totalDue ? ' · יתרה: ₪' + newBal : '') + ' — קבלה ' + rid);
-    toast('הקבלה ירדה למחשב ✓');
+    if (receiptsOn) toast('הקבלה ירדה למחשב ✓');
     const fam = famOf();
     if (fam) addCred(fam.id, 5, 'תשלום התקבל (₪' + amt + ')');
   }
@@ -215,6 +225,7 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
         </div>
       </Field>
 
+      {paymentsOn && (
       <div
         style={{
           border: '1.5px solid #b9dfc8',
@@ -270,7 +281,9 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
           </Btn>
         </div>
       </div>
+      )}
 
+      {punchOn && (
       <div
         style={{
           border: '1.5px solid #f3c76b',
@@ -295,9 +308,10 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
           </Btn>
         </div>
       </div>
+      )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {en.plan === 'punch' && (
+        {punchOn && en.plan === 'punch' && (
           <Btn
             sm
             onClick={() => {
@@ -308,9 +322,11 @@ export function ManageModal(props: { enrollmentId: string; course: Course; onClo
             מעבר למנוי חודשי
           </Btn>
         )}
-        <Btn sm onClick={undoPunch} title="מבטל את הניקוב האחרון ומחזיר את היתרה">
-          ↩ ביטול ניקוב אחרון
-        </Btn>
+        {punchOn && (
+          <Btn sm onClick={undoPunch} title="מבטל את הניקוב האחרון ומחזיר את היתרה">
+            ↩ ביטול ניקוב אחרון
+          </Btn>
+        )}
         <Btn sm onClick={togglePause}>
           {en.status === 'paused' ? '▶ הפשרה — חזרה לפעילות' : '⏸ הקפאה זמנית'}
         </Btn>

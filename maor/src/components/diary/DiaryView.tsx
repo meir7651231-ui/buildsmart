@@ -5,6 +5,7 @@
  */
 import { useState } from 'react';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Chip, Empty, PageHead, TextInput } from '../ui';
 import {
@@ -34,6 +35,10 @@ interface Booking {
 export function DiaryView() {
   const db = useApp((s) => s.db);
   const selectCourse = useApp((s) => s.selectCourse);
+  const cfg = useApp((s) => s.config);
+
+  const bookingOn = featureOn(cfg, 'diary.booking');
+  const utilizationOn = featureOn(cfg, 'diary.utilization');
 
   const [roomSel, setRoomSel] = useState('');
   const [date, setDate] = useState(isoToday());
@@ -181,7 +186,7 @@ export function DiaryView() {
                 <div key={sl.key} style={{ borderBottom: '1px solid #ece7db' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px' }}>
                     <span style={{ width: 46, flex: 'none', fontWeight: 800, fontSize: 13 }}>{sl.time}</span>
-                    {sl.kind === 'free' ? (
+                    {sl.kind === 'free' && bookingOn ? (
                       <button
                         type="button"
                         style={{
@@ -232,6 +237,7 @@ export function DiaryView() {
         </div>
       )}
 
+      {utilizationOn && (
       <div className="card">
         <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>ניצולת חדרים — מפגשים בשבוע</h2>
         {db.rooms.length === 0 ? (
@@ -263,6 +269,7 @@ export function DiaryView() {
           })
         )}
       </div>
+      )}
 
       {booking && (
         <EventModal

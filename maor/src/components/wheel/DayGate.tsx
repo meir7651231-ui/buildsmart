@@ -6,6 +6,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn } from '../ui';
 
@@ -18,6 +19,7 @@ function isoToday(): string {
 
 export function DayGate() {
   const famCount = useApp((s) => s.db.families.length);
+  const config = useApp((s) => s.config);
   const go = useApp((s) => s.go);
 
   /** init → open (פעם אחת) → closed; closed לא נפתח שוב בסשן הזה. */
@@ -38,6 +40,8 @@ export function DayGate() {
     }
   }, [phase, famCount]);
 
+  // הפיצ'ר core.daygate כבוי — בלי טקס פתיחת יום (אחרי ה-hooks, לפי חוקי React)
+  if (!featureOn(config, 'core.daygate')) return null;
   if (phase !== 'open') return null;
 
   const today = isoToday();

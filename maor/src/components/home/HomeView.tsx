@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { useApp } from '../../store/useApp';
 import { Btn, PageHead } from '../ui';
 import { hebDateFull, holidayOf } from '../../lib/hebrew';
-import { moduleOn } from '../../lib/config';
+import { featureOn, moduleOn } from '../../lib/config';
 import {
   attentionItems,
   birthdaysOn,
@@ -191,6 +191,10 @@ export function HomeView() {
   const diaryOn = moduleOn(config, 'diary');
   const supportersOn = moduleOn(config, 'supporters');
   const reportsOn = moduleOn(config, 'reports');
+  // גייטים ברמת פיצ'ר — מפתח חסר = פעיל (featureOn), בלי למחוק נתונים
+  const digestOn = featureOn(config, 'home.digest');
+  const carouselOn = featureOn(config, 'home.carousel');
+  const careOn = featureOn(config, 'home.care');
   const go = useApp((s) => s.go);
   const selectFamily = useApp((s) => s.selectFamily);
   const selectCourse = useApp((s) => s.selectCourse);
@@ -246,28 +250,30 @@ export function HomeView() {
         }
       />
 
-      {/* תקציר הבוקר */}
-      <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 14 }}>
-        <h2 style={{ fontSize: 16.5, marginBottom: 4 }}>☀️ תקציר הבוקר</h2>
-        {c.digest.map((l) => (
-          <button
-            key={l.key}
-            type="button"
-            style={{
-              ...rowBtn,
-              padding: '4px 6px',
-              ...(l.urgent ? { color: '#b91c1c', fontWeight: 600 } : null),
-            }}
-            onClick={() => navTo(l.nav)}
-          >
-            {!l.urgent && <span aria-hidden style={{ color: 'var(--ink-faint)' }}>•</span>}
-            <span>{l.text}</span>
-          </button>
-        ))}
-      </section>
+      {/* תקציר הבוקר — מוסתר כשהפיצ'ר home.digest כבוי */}
+      {digestOn && (
+        <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 14 }}>
+          <h2 style={{ fontSize: 16.5, marginBottom: 4 }}>☀️ תקציר הבוקר</h2>
+          {c.digest.map((l) => (
+            <button
+              key={l.key}
+              type="button"
+              style={{
+                ...rowBtn,
+                padding: '4px 6px',
+                ...(l.urgent ? { color: '#b91c1c', fontWeight: 600 } : null),
+              }}
+              onClick={() => navTo(l.nav)}
+            >
+              {!l.urgent && <span aria-hidden style={{ color: 'var(--ink-faint)' }}>•</span>}
+              <span>{l.text}</span>
+            </button>
+          ))}
+        </section>
+      )}
 
-      {/* קרוסלת אירועים קרובים */}
-      <Carousel items={c.carousel} navTo={navTo} />
+      {/* קרוסלת אירועים קרובים — מוסתרת כשהפיצ'ר home.carousel כבוי */}
+      {carouselOn && <Carousel items={c.carousel} navTo={navTo} />}
 
       {/* כרטיסי נתונים */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 12 }}>
@@ -401,7 +407,8 @@ export function HomeView() {
           ))}
         </Panel>
 
-        {/* דורש טיפול */}
+        {/* דורש טיפול — מוסתר כולו כשהפיצ'ר home.care כבוי */}
+        {careOn && (
         <Panel title="דורש טיפול" badge={openAttn.length ? String(openAttn.length) : undefined}>
           {openAttn.length === 0 && (
             <div style={{ ...softEmpty, color: 'var(--green)', fontWeight: 600 }}>הכל מטופל ✓</div>
@@ -448,6 +455,7 @@ export function HomeView() {
               </div>
             ))}
         </Panel>
+        )}
       </div>
 
       {/* משפחות אחרונות */}

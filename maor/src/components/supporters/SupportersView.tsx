@@ -5,6 +5,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
+import { featureOn } from '../../lib/config';
 import { normSearch } from '../../lib/validate';
 import { Btn, Chip, Empty, PageHead, Select, TextInput } from '../ui';
 import { chipStyle, fmtDate, isoToday, supScore, supTier, TIER_ORDER, totalLabel } from './lib';
@@ -55,6 +56,9 @@ function TierChip(props: { sp: Supporter }) {
 
 export function SupportersView() {
   const db = useApp((s) => s.db);
+  const config = useApp((s) => s.config);
+  const rfmOn = featureOn(config, 'supporters.rfm');
+  const nextOn = featureOn(config, 'supporters.nextdate');
 
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('all');
@@ -138,14 +142,16 @@ export function SupportersView() {
         />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12.5, color: 'var(--ink-faint)' }}>דרגות (לחיצה מסננת):</span>
-        {TIER_ORDER.map((t) => (
-          <Chip key={t} on={tierF === t} onClick={() => setTierF(tierF === t ? null : t)}>
-            {t + ' · ' + tierCounts[t]}
-          </Chip>
-        ))}
-      </div>
+      {rfmOn && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12.5, color: 'var(--ink-faint)' }}>דרגות (לחיצה מסננת):</span>
+          {TIER_ORDER.map((t) => (
+            <Chip key={t} on={tierF === t} onClick={() => setTierF(tierF === t ? null : t)}>
+              {t + ' · ' + tierCounts[t]}
+            </Chip>
+          ))}
+        </div>
+      )}
 
       {db.supporters.length === 0 ? (
         <Empty>עדיין אין משפחות תומכות — הוסיפו תומכת ראשונה עם "+ תומכת חדשה"</Empty>
@@ -156,7 +162,7 @@ export function SupportersView() {
           <table className="table">
             <thead>
               <tr>
-                {HEAD.map((h) => {
+                {HEAD.filter((h) => nextOn || h.key !== 'nextDate').map((h) => {
                   const dir = sort && sort.key === h.key ? sort.dir : 0;
                   return (
                     <th
@@ -171,7 +177,7 @@ export function SupportersView() {
                     </th>
                   );
                 })}
-                <th>דרגה</th>
+                {rfmOn && <th>דרגה</th>}
               </tr>
             </thead>
             <tbody>
@@ -196,20 +202,24 @@ export function SupportersView() {
                   <td>{sp.ils ? '₪' + sp.ils.toLocaleString('he-IL') : '—'}</td>
                   <td>{sp.usd ? '$' + sp.usd.toLocaleString('he-IL') : '—'}</td>
                   <td title={totalLabel(sp)}>{sp.last ? fmtDate(sp.last) : '—'}</td>
-                  <td style={{ whiteSpace: 'nowrap' }}>
-                    {sp.nextDate ? (
-                      sp.nextDate <= today ? (
-                        <span style={{ color: 'var(--red)', fontWeight: 700 }}>🔔 יעד עבר</span>
+                  {nextOn && (
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      {sp.nextDate ? (
+                        sp.nextDate <= today ? (
+                          <span style={{ color: 'var(--red)', fontWeight: 700 }}>🔔 יעד עבר</span>
+                        ) : (
+                          '🎯 ' + fmtDate(sp.nextDate)
+                        )
                       ) : (
-                        '🎯 ' + fmtDate(sp.nextDate)
-                      )
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td>
-                    <TierChip sp={sp} />
-                  </td>
+                        '—'
+                      )}
+                    </td>
+                  )}
+                  {rfmOn && (
+                    <td>
+                      <TierChip sp={sp} />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
