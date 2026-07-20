@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fake-sweep-batch-1 — honest-display fixes (S4 · H3 · F1-F4) — 2026-07-20
+`screens/suppliers_screen.dart`: אריח-ליפסקי קורא `$kLipskeyProductCount` (const חדש ב-`data/lipskey_catalog.dart` = `kLipskeyCatalog.length` ≈923) במקום ליטרל "66"; screens לא קוראים `kLipskeyCatalog` ישירות (gate 114/לקח #69). `screens/rewards_hub_screen.dart`: כפתור "📤 שתף את הקוד" onTap → `Clipboard.setData(kReferralCode)` (+ import `flutter/services.dart`) — האישור "הועתק" עכשיו אמת. `screens/finance_hub_sheets.dart`: 4 גיליונות (מדד/קבלני-משנה/ROI/פיצול-חשבונית) מגודרים `useFirebaseBackend ? ריק : דמו` בתבנית `_openFx` + 4 `CfgText` server-note ids ב-`state/studio/element_registry.dart`. הנחיה `DIRECTIVE-fake-data-sweep.md` (S4·H3·F1-F4). **נותר:** store S1+S3 · M2 credit (החלטת-בעלים) · H1 progress (החלטת-בעלים) · F5 approval-rewire (defer-large).
+
 ## #manager-dashboard-drill — אריחי-KPI + שורות-pipeline לחיצים (drill) — 2026-07-20
 `screens/manager_dashboard_screen.dart`: `_MetricTile`/`_PipelineRow` +`onTap?` (InkWell). `_MetricGrid`/`_OrderPipeline`→`ConsumerWidget`, מחווטים `managerTabProvider`: 🚚→הזמנות(1) · 📦/🧰/✅/🏪→ניהול(3) · pipeline→הזמנות(1). פריט 2 בהנחיית `DIRECTIVE-manager-console-live.md`. **נותר:** סינון-לפי-שלב ב-drill (deferred — filter מקומי) · אימות טאבים מול Firestore חי (דורש deploy).
 

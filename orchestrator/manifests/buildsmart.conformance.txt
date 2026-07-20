@@ -20,3 +20,14 @@ lib/screens/store_screen.dart:::!~/ 1000}
 # Regression — H3: the order-detail sheet must keep reconciling its line column to the grand total
 # (subtotal + VAT/delivery shown), so the items visibly add up — never a bare total over mismatched lines:
 lib/screens/store_screen.dart:::lineSubtotal
+#
+# Regression — fake-data-sweep BATCH-1 (2026-07-20): killed fakes must never return:
+#  S4 — the Lipskey supplier tile shows the LIVE count via a lib/data const (gate-114 safe: screens must not read kLipskeyCatalog), never the old literal "66 מוצרים":
+lib/screens/suppliers_screen.dart:::kLipskeyProductCount
+lib/screens/suppliers_screen.dart:::!66 מוצרים
+lib/data/lipskey_catalog.dart:::kLipskeyProductCount
+#  H3 — the share-code button actually writes to the clipboard (no false "הועתק" without a copy):
+lib/screens/rewards_hub_screen.dart:::Clipboard.setData
+#  F1-F4 — finance demo values FX-gated (the server-note ids landed; gate keys off the backend flag):
+lib/screens/finance_hub_sheets.dart:::roi_server_note
+lib/screens/finance_hub_sheets.dart:::index_server_note

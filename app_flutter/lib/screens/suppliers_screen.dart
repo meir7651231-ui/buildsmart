@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbSuppliersNodes;
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
@@ -39,7 +40,7 @@ class SuppliersScreen extends StatelessWidget {
             _SupplierTile(
               emoji: '🏭',
               title: 'ליפסקי ברקן',
-              subtitle: 'אינסטלציה וסניטציה • 66 מוצרים',
+              subtitle: 'אינסטלציה וסניטציה • $kLipskeyProductCount מוצרים',
               onTap: () => Navigator.push(context, LipskeyBrandScreen.route()),
             ),
           ],

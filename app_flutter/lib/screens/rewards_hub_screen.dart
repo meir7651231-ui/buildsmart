@@ -6,6 +6,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 🎮 מועדון BuildSmart — the rewards/loyalty hub (T3.G).
@@ -337,7 +338,10 @@ class _Referral extends StatelessWidget {
         const SizedBox(height: BsTokens.space3),
         _Primary(
           label: '📤 שתף את הקוד',
-          onTap: () => showToast(context, 'קוד ההזמנה הועתק — שתף אותו עם חברים'),
+          onTap: () {
+            Clipboard.setData(const ClipboardData(text: kReferralCode));
+            showToast(context, 'קוד ההזמנה הועתק — שתף אותו עם חברים');
+          },
         ),
       ],
     );

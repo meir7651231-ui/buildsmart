@@ -467,7 +467,22 @@ void _openIndex(BuildContext context) {
             // proto: BUILD_INDEX.label + ' — עדכון אוטומטי של ערכי החוזה.'
             sub: 'מדד תשומות הבנייה — עדכון אוטומטי של ערכי החוזה.',
           ),
-          _FinRows([
+          // proto `.ca-server-note`
+          Container(
+            padding: const EdgeInsets.all(BsTokens.space3),
+            margin: const EdgeInsets.only(bottom: BsTokens.space4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8E1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFE0A3)),
+            ),
+            child: const CfgText(
+              'finance_hub_sheets.index_server_note',
+              '⚙️ נתוני המדד מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+            ),
+          ),
+          _FinRows(useFirebaseBackend ? const <Widget>[] : [
             _FinRow(
               'מדד בסיס (חתימת חוזה)',
               kBuildIndex.base.toStringAsFixed(1),
@@ -479,7 +494,7 @@ void _openIndex(BuildContext context) {
               valueColor: up ? _kUp : _kDn,
             ),
           ]),
-          _FinCallout(
+          if (!useFirebaseBackend) _FinCallout(
             label: 'תקציב מקורי',
             value: fMoney(budget),
             secondLabel: 'תקציב צמוד-מדד',
@@ -628,13 +643,29 @@ void _openSubs(BuildContext context) {
             title: 'קבלני משנה',
             sub: 'חלוקת תקציב הפרויקט בין קבלני המשנה ומעקב ניצול.',
           ),
-          _FinCallout(
+          // proto `.ca-server-note`
+          Container(
+            padding: const EdgeInsets.all(BsTokens.space3),
+            margin: const EdgeInsets.only(bottom: BsTokens.space4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8E1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFE0A3)),
+            ),
+            child: const CfgText(
+              'finance_hub_sheets.subs_server_note',
+              '⚙️ נתוני קבלני המשנה מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+            ),
+          ),
+          if (!useFirebaseBackend) _FinCallout(
             label: 'סך הוקצה לקבלני משנה',
             value: fMoney(totAlloc),
             note: 'נוצל: ${fMoney(totSpent)} ($totPct%)',
           ),
           const SizedBox(height: BsTokens.space4),
-          for (final s in kSubcontractors) _SubRow(sub: s),
+          if (!useFirebaseBackend)
+            for (final s in kSubcontractors) _SubRow(sub: s),
         ],
       ),
     ),
@@ -1038,13 +1069,30 @@ void _openRoi(BuildContext context) {
             title: 'ניתוח ROI',
             sub: 'תשואה צפויה על ההשקעה בפרויקט.',
           ),
+          // proto `.ca-server-note`
+          Container(
+            padding: const EdgeInsets.all(BsTokens.space3),
+            margin: const EdgeInsets.only(bottom: BsTokens.space4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8E1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFE0A3)),
+            ),
+            child: const CfgText(
+              'finance_hub_sheets.roi_server_note',
+              '⚙️ נתוני ה-ROI מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+            ),
+          ),
           _FinRows([
             _FinRow('תקציב הפרויקט', fMoney(financeRepo().budgetTotal())),
             _FinRow('הושקע עד כה', fMoney(invested)),
-            _FinRow('שווי חוזה צפוי', fMoney(r.contractValue)),
-            _FinRow('רווח גולמי צפוי', fMoney(r.profit), valueColor: _kUp),
+            if (!useFirebaseBackend)
+              _FinRow('שווי חוזה צפוי', fMoney(r.contractValue)),
+            if (!useFirebaseBackend)
+              _FinRow('רווח גולמי צפוי', fMoney(r.profit), valueColor: _kUp),
           ]),
-          _FinCallout(
+          if (!useFirebaseBackend) _FinCallout(
             label: 'ROI צפוי',
             value: '${r.roiPct.toStringAsFixed(1)}%',
             big: true,
@@ -1074,13 +1122,30 @@ void _openInvoiceSplit(BuildContext context) {
           _FinHead(
             ic: '🧾',
             title: 'פיצול חשבונית',
-            sub: 'פיצול חשבונית בסך ${fMoney(kInvoiceTotal)} לסעיפי התקציב.',
+            sub: useFirebaseBackend
+                ? 'פיצול חשבונית לסעיפי התקציב.'
+                : 'פיצול חשבונית בסך ${fMoney(kInvoiceTotal)} לסעיפי התקציב.',
           ),
-          _FinRows([
+          // proto `.ca-server-note`
+          Container(
+            padding: const EdgeInsets.all(BsTokens.space3),
+            margin: const EdgeInsets.only(bottom: BsTokens.space4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8E1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFE0A3)),
+            ),
+            child: const CfgText(
+              'finance_hub_sheets.invoice_server_note',
+              '⚙️ נתוני פיצול החשבונית מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+            ),
+          ),
+          _FinRows(useFirebaseBackend ? const <Widget>[] : [
             for (final c in cats)
               _FinRow('${c.icon} ${c.name}', fMoney(split[c.name] ?? 0)),
           ]),
-          _FinCallout(
+          if (!useFirebaseBackend) _FinCallout(
             label: 'סך החשבונית',
             value: fMoney(kInvoiceTotal),
             note: 'פוצלה ל-${cats.length} סעיפי תקציב לפי משקל',

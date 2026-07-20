@@ -7150,3 +7150,10 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   // full PDF-parity entries live in the main toilet-seat block (page 53–55).
   LipskeyCatalogProduct(sku: '186666', nameHe: 'חלקים למוצרים סניטריים', nameEn: '', categoryHe: 'חלקים סניטריים', categoryEn: 'Sanitary Parts', categoryEmoji: '🔧', page: 56, imageFile: '186666.jpeg', brand: 'ליפסקי', dims: {'תיאור': 'חלקים למוצרים סניטריים'}),
 ];
+
+/// Live product count for the Lipskey (ליפסקי ברקן) catalog — the single source for
+/// any UI that shows "N products". Screens must NOT read `kLipskeyCatalog` directly
+/// (gate 114 / lesson #69: cross-cutting reads of it miss Huliot/PPR → white cards);
+/// a supplier tile that shows the Lipskey product count reads THIS. Mirrors the list
+/// length (~923) so the tile can never drift back to a hardcoded literal.
+final int kLipskeyProductCount = kLipskeyCatalog.length;

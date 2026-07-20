@@ -1,3 +1,9 @@
+# 🧹 Fake-data-sweep (Stage-1) — Batch-1: honest-display fixes (v7.00)
+Owner: this session
+Scope: `lib/screens/suppliers_screen.dart` (S4 count) · `lib/screens/rewards_hub_screen.dart` (H3 clipboard) · `lib/screens/finance_hub_sheets.dart` (F1-F4 FX-gate) · `lib/data/lipskey_catalog.dart` (+`kLipskeyProductCount`) · `lib/state/studio/element_registry.dart` (+4 CfgText ids). NO push עד "תדחוף". S1/S3 (store) · M2 credit · H1 progress = פרוסות/החלטות נפרדות — לא ב-batch הזה.
+
+מקור-אמת: `DIRECTIVE-fake-data-sweep.md` (סריקת-6-עדשות מאומתת). באטצ'-1 = 3 התיקונים שהמאמתים (נחיל 9×9: 4 auditors→validate→fixers→gate) אישרו כבטוחים; ~15 מ-24-האתרים קרסו ל-DONE/legacy-faithful/false-positive/F-48. גארדים: 6 חוקי-byte-conformance + `lipskey_product_count_test`, mutation-verified.
+
 # 👔 Manager rebuild — M5: 🛠️ ניהול tab — the 5 management tools (manager screen COMPLETE) (v6.02)
 Owner: this session
 Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-🛠️ tab + קריאת
