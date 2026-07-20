@@ -1454,3 +1454,9 @@
 - **הלוגיקה (`data/huliot_catalog.dart` → גייט 42/44):** הזרקה כירורגית של `imageFile` ל-70 הרשומות שהבעלים בחר (SKU→קובץ מ-`us_sku2file`, כל 46 הקבצים הייחודיים מאומתים R2=200; אין regen → אפס-drift, diff=70 שורות בלבד). brand='Huliot' ⇒ imageAsset=`assets/huliot/products/{file}`. 789 מוצרים ללא-שינוי; 714→**784** עם תמונה; 5 (2 משפחות "אין") נשארו אמוג׳י.
 - **טסט-נעיצה:** `huliot_catalog_test` — `789 new products; 784 with an owner-picked image` (הספירה 784).
 - **mutation-verify:** baseline ירוק → הסרת שורת `imageFile` מרשומה אחת (5901100100) → הבדיקה **אדומה** (Expected 784, Actual 783) → שחזור (re-insert 70) → 9/9 ירוק. analyze 0.
+
+## #manager-dashboard-live-kpi — 4 מדדי-לוח מזויפים → קריאות-קטלוג/מלאי חיות — 2026-07-20
+- **הרקע (הנחיה `DIRECTIVE-manager-console-live.md` · מאומת file:line):** טאב 📊 לוח-בקרה הראה 4/5 מספרים קבועים-בקוד (`kManagerStores` "3/3" · `kManagerCatalogCategories` 148/202) **גם כשהבקאנד חי**, כי `managerAnalyticsProvider` קרא קבועים במקום repo. באג-קוד, לא דגל.
+- **הלוגיקה (`state/orders_engine.dart`):** `managerAnalyticsProvider` עכשיו `watch`-ים את `catalogRepositoryProvider` (📦/🧰/✅ — ספירה-לפי-קטגוריה חיה מ-1,867 מוצרי-הקטלוג האמיתיים; קטגוריות-'אביזר' מקופלות ל-bucket שהאנליטיקה כבר קוראת → accessory 264 / catalog 1,603 / available 1,867) + `stockRepositoryProvider` (🏪 — seed מקומי 3/3, **ריק-כן על backend חי**). אפס-קבוע-מזויף: מקור-ריק → ריק-כן (עקרון ההנחיה). `ManagerAnalytics` **לא-שונה** → כל בדיקות-ה-const נשארו ירוקות.
+- **טסט-נעיצה:** `manager_dashboard_screen_test` — `the 5 mdMetric tiles render their LIVE numbers`: עוגן למקור-החי (`totalProducts == catalogRepository.allProducts().length`, accessory == ספירת-קטגוריות-'אביזר'), בלי literal.
+- **mutation-verify:** baseline 30 ירוק → `catalogCategories: catCounts` ↦ `kManagerCatalogCategories` → הבדיקה **אדומה** (Expected 1867, Actual 202) → שחזור → 30 ירוק. analyze 0.

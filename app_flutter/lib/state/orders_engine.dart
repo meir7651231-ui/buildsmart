@@ -25,10 +25,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:buildsmart/data/repositories/backend.dart' show kServerCallables, useFirebaseBackend;
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
 import 'package:buildsmart/data/repositories/customers_local.dart';
 import 'package:buildsmart/data/repositories/order_functions.dart';
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart';
+import 'package:buildsmart/data/repositories/stock_local.dart'
+    show stockRepositoryProvider;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/logic/offline_order_queue.dart';
 
@@ -672,15 +676,34 @@ final ordersEngineProvider =
   },
 );
 
-/// Live manager analytics over the engine's orders — the same five tile numbers
-/// the dashboard reads, now derived from the LIVE list instead of the static
-/// seed. Identical to `managerAnalytics` while the engine holds the seed.
+/// Live manager analytics — every one of the five dashboard KPIs is a REAL read,
+/// never a compile-time const:
+///   • 🚚 open orders → the live [ordersEngineProvider] (unchanged).
+///   • 📦 catalog · 🧰 accessories · ✅ available → the LIVE catalog
+///     ([catalogRepositoryProvider]) — counted per-category at read time, so the
+///     number tracks the real catalog (change the catalog → the tile changes).
+///     Every accessory category (name contains 'אביזר') folds into the single
+///     [kManagerAccessoryCategory] bucket the analytics already reads.
+///   • 🏪 stores → the [stockRepositoryProvider]. On the live Firebase backend the
+///     store aggregate is honestly EMPTY (no store source populated yet) — never
+///     the const "3/3". Locally it is the seed store list, unchanged.
+/// No fabricated figure survives: a source with no data yields an honest empty,
+/// per the directive (`knowledge/DIRECTIVE-manager-console-live.md`).
 final managerAnalyticsProvider = Provider<ManagerAnalytics>((ref) {
   final orders = ref.watch(ordersEngineProvider);
+  final stock = ref.watch(stockRepositoryProvider);
+  final catalog = ref.watch(catalogRepositoryProvider);
+  final catCounts = <String, int>{};
+  for (final p in catalog.allProducts()) {
+    final key = p.categoryHe.contains('אביזר')
+        ? kManagerAccessoryCategory
+        : p.categoryHe;
+    catCounts[key] = (catCounts[key] ?? 0) + 1;
+  }
   return ManagerAnalytics(
     orders: orders.map((o) => o.toManagerOrder()).toList(growable: false),
-    stores: kManagerStores,
-    catalogCategories: kManagerCatalogCategories,
+    stores: stock.stores(),
+    catalogCategories: catCounts,
   );
 });
 

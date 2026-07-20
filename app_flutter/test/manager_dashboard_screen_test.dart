@@ -7,6 +7,8 @@
 // drill. Tabs are PLACEHOLDERS (M2–M5 fill them).
 
 import 'package:buildsmart/data/brands.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
@@ -166,14 +168,18 @@ void main() {
         expect(find.text(label), findsOneWidget, reason: 'tile $label missing');
       }
 
-      // Each tile shows the LIVE number the analytics provider derives over the
-      // engine's orders — NOT a hard-coded literal. With the seed: 4 / 54 / 148
-      // / 202 / 3/3 (asserted via the provider so the test tracks the engine).
-      // 📦 catalog == every non-accessory product (the verbatim index.html
-      // distribution), i.e. total − accessories.
+      // Each tile shows a LIVE number — NOT a const. 📦/🧰/✅ now count the REAL
+      // catalog the repo serves; anchor to that source so the assertion tracks
+      // the data, not a magic literal. 🚚 open-orders stays the seed's 4; 🏪 is
+      // the local seed store list (3/3) — the live backend returns empty instead.
+      final liveCatalog = c.read(catalogRepositoryProvider).allProducts();
+      final acc =
+          liveCatalog.where((p) => p.categoryHe.contains('אביזר')).length;
       expect(a.openOrders, 4, reason: 'seed open-orders');
+      expect(a.totalProducts, liveCatalog.length, reason: 'live catalog total');
+      expect(a.accessoryCount, acc, reason: 'live accessory-category count');
       expect(a.catalogCount, a.totalProducts - a.accessoryCount);
-      expect(a.catalogCount, 54, reason: 'seed catalog count (202 − 148)');
+      expect(a.catalogCount, liveCatalog.length - acc);
       expect(find.text('${a.openOrders}'), findsWidgets);
       expect(find.text('${a.catalogCount}'), findsWidgets);
       expect(find.text('${a.accessoryCount}'), findsWidgets);

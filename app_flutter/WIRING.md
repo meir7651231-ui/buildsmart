@@ -1,5 +1,10 @@
 # WIRING CONTRACT — app_flutter
 
+## #manager-dashboard-live-kpi — 4 מדדי-לוח → קריאות חיות (לא קבועים) — 2026-07-20
+`state/orders_engine.dart` `managerAnalyticsProvider`: 📦/🧰/✅ מ-`catalogRepositoryProvider` (ספירה חיה, 1,867 · accessory=קטגוריות-'אביזר'), 🏪 מ-`stockRepositoryProvider` (seed 3/3 מקומי · **ריק-כן על backend חי**, לא "3/3" מזויף). 🚚 הזמנות כבר-חי. `ManagerAnalytics` לא-נגוע. **נותר מההנחיה `DIRECTIVE-manager-console-live.md`:** onTap-drill לאריחים · `_LivePill` לסטטוס-קישוריות אמיתי · קו-פיילוט (CLAUDE_AI) · אימות טאבים 1/2/3 מול Firestore חי.
+
+---
+
 ## #ultra-silent-images — 70 תמונות למוצרי Ultra Silent החדשים — 2026-07-19
 `data/huliot_catalog.dart`: 70 מרשומות ה-Huliot החדשות שהיו אמוג׳י קיבלו `imageFile` (משחק-שיבוץ שני `ultra-silent-game.html`: 46 בחירות → 70 מק"טים; כל קובץ מאומת R2=200). 714→784 עם תמונה; 5 נשארו אמוג׳י (2 משפחות "אין"). brand='Huliot' ⇒ `assets/huliot/products/{file}`. מאחורי `CATALOG_SOURCE=v2` כמו שאר ה-789 החדשים.
 
