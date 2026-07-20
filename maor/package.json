@@ -13,6 +13,7 @@
     "e2e": "node e2e/toggle-matrix.mjs"
   },
   "dependencies": {
+    "firebase": "^12.16.0",
     "idb": "^8.0.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
