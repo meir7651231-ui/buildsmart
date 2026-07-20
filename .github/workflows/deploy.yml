@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - claude/whats-happening-LyY9G
+      - claude/phone-connection-opaerc
   workflow_dispatch:
 
 permissions:
@@ -38,6 +39,20 @@ jobs:
         run: npm run build
         env:
           GITHUB_PAGES: '1'
+
+      # ─── Maor HaChesed app (live at /buildsmart/maor/) ──────────
+      - name: Install Maor deps
+        working-directory: maor
+        run: npm ci
+
+      - name: Build Maor app
+        working-directory: maor
+        run: npm run build
+
+      - name: Stage Maor under /maor/
+        run: |
+          mkdir -p app/dist/maor
+          cp -r maor/dist/* app/dist/maor/
 
       # ─── Flutter app (preview at /buildsmart/flutter/) ──────────
       - name: Setup Flutter
