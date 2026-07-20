@@ -89,6 +89,7 @@ export function CommandPalette() {
   const calendarOn = moduleOn(config, 'calendar');
   const teachersOn = featureOn(config, 'settings.teachers');
   const famDocsOn = featureOn(config, 'families.docs');
+  const wallOn = featureOn(config, 'home.impactwall');
 
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
@@ -152,8 +153,22 @@ export function CommandPalette() {
         },
       });
     }
+    // קיר ההשפעה — מצב ראווה במסך מלא (feature: home.impactwall)
+    if (wallOn) {
+      actions.push({
+        key: 'act-wall',
+        icon: '🖥️',
+        title: 'קיר ההשפעה',
+        sub: 'מצב ראווה — שידור חי למסך גדול',
+        terms: toTerms(['קיר ההשפעה', 'קיר', 'מצב ראווה', 'שידור חי', 'תצוגה', 'מסך גדול', 'wall']),
+        run: () => {
+          window.location.hash = '#wall';
+          setPalette(false);
+        },
+      });
+    }
     return [...nav, ...actions];
-  }, [go, selectFamily, exportBackup, setPalette, wheelOn]);
+  }, [go, selectFamily, exportBackup, setPalette, wheelOn, wallOn]);
 
   /** כרטיסיות מסתיימות — שיבוצי כרטיסייה פעילים עם ≤2 ניקובים שנותרו. */
   const expiringCmds = useMemo<Cmd[]>(() => {

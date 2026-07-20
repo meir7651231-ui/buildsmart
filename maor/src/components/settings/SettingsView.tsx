@@ -61,27 +61,40 @@ export function SettingsView() {
   );
 }
 
-/** (1) פרטי הארגון — שם, אתר ועמוד תרומות. */
+/** (1) פרטי הארגון — שם, אתר, עמוד תרומות ויעד גיוס שנתי (קיר ההשפעה). */
 function OrgSection() {
   const orgName = useApp((s) => s.db.orgName);
   const orgSite = useApp((s) => s.db.orgSite);
   const orgDonate = useApp((s) => s.db.orgDonate);
+  const orgGoal = useApp((s) => s.db.orgGoal);
   const setDb = useApp((s) => s.setDb);
   const toast = useApp((s) => s.toast);
 
-  const [f, setF] = useState({ name: orgName, site: orgSite, donate: orgDonate });
+  const [f, setF] = useState({
+    name: orgName,
+    site: orgSite,
+    donate: orgDonate,
+    goal: orgGoal > 0 ? String(orgGoal) : '',
+  });
   const [error, setError] = useState('');
 
   // סנכרון אחרי שחזור מגיבוי / ייבוא
   useEffect(() => {
-    setF({ name: orgName, site: orgSite, donate: orgDonate });
-  }, [orgName, orgSite, orgDonate]);
+    setF({ name: orgName, site: orgSite, donate: orgDonate, goal: orgGoal > 0 ? String(orgGoal) : '' });
+  }, [orgName, orgSite, orgDonate, orgGoal]);
 
   function save() {
     const name = f.name.trim();
     if (!name) return setError('שם הארגון הוא שדה חובה');
+    const goalNum = Number(f.goal.trim() || 0);
+    if (!Number.isFinite(goalNum) || goalNum < 0) return setError('יעד הגיוס חייב להיות מספר חיובי (או ריק)');
     setError('');
-    setDb({ orgName: name, orgSite: f.site.trim(), orgDonate: f.donate.trim() });
+    setDb({
+      orgName: name,
+      orgSite: f.site.trim(),
+      orgDonate: f.donate.trim(),
+      orgGoal: Math.round(goalNum),
+    });
     toast('פרטי הארגון נשמרו ✓');
   }
 
@@ -106,6 +119,15 @@ function OrgSection() {
             onChange={(v) => setF((p) => ({ ...p, donate: v }))}
             dir="ltr"
             placeholder="https://"
+          />
+        </Field>
+        <Field label="יעד גיוס שנתי (₪)">
+          <TextInput
+            type="number"
+            value={f.goal}
+            onChange={(v) => setF((p) => ({ ...p, goal: v }))}
+            dir="ltr"
+            placeholder="0 = ללא יעד — קיר ההשפעה יציג את הסכום בלבד"
           />
         </Field>
       </div>

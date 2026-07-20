@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useApp } from '../../store/useApp';
-import { moduleOn } from '../../lib/config';
+import { featureOn, moduleOn } from '../../lib/config';
 import { Btn, Field, FormError, PageHead, TextInput } from '../ui';
 import { fmtDate, isoToday, rangeLabel, type DateRange } from './lib';
 import { AttendanceSection, EnrollmentSection } from './sections1';
@@ -61,7 +61,17 @@ export function ReportsView() {
         title="דוחות"
         sub={'סיכומי רישום, נוכחות, תרומות ומשפחות · הופק: ' + fmtDate(isoToday())}
         actions={
-          <span className="no-print">
+          <span className="no-print" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {featureOn(config, 'home.impactwall') && (
+              <Btn
+                onClick={() => {
+                  window.location.hash = '#wall';
+                }}
+                title="קיר ההשפעה — תצוגה חיה למסך גדול"
+              >
+                🖥️ מצב ראווה
+              </Btn>
+            )}
             <Btn kind="primary" onClick={() => setPrinting('all')}>
               🖨 הדפסת כל הדוחות
             </Btn>
