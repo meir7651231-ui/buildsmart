@@ -23,9 +23,10 @@ import {
   type Supporter,
   type Teacher,
 } from '../types/domain';
-import { DEFAULT_CONFIG, type OrgConfig } from '../types/config';
+import { DEFAULT_CONFIG, type FirebaseOrgConfig, type OrgConfig } from '../types/config';
 import { applyTheme, loadOrgConfig, saveConfigOverride } from '../lib/config';
 import { dailySnapshot, exportBackupFile, loadDb, saveDb, setPersistNamespace } from './persist';
+import type { CloudStatus, CloudUser } from './cloudSync';
 
 export type View =
   | 'home'
@@ -42,6 +43,16 @@ export interface Toast {
   text: string;
 }
 
+/** מצב הענן — קיים תמיד; enabled=false = מקומי בלבד (התנהגות זהה להיום). */
+export interface CloudState {
+  /** לארגון יש config.firebase — נדרשת התחברות וסנכרון פעיל. */
+  enabled: boolean;
+  /** Firebase כבר דיווח מצב התחברות ראשוני (מונע הבזק מסך כניסה). */
+  authReady: boolean;
+  user: CloudUser | null;
+  status: CloudStatus;
+}
+
 interface AppState {
   db: Db;
   ready: boolean;
@@ -55,6 +66,13 @@ interface AppState {
   paletteOpen: boolean;
   /** קונפיגורציית הארגון — localStorage ← config.json ← ברירת מחדל. */
   config: OrgConfig;
+  /** מצב חיבור הענן (Firebase) — ראו CloudState. */
+  cloud: CloudState;
+
+  // ענן — כניסה/יציאה (זמינים רק כש-cloud.enabled)
+  cloudSignIn: (email: string, password: string) => Promise<void>;
+  cloudSignOut: () => Promise<void>;
+  cloudResetPassword: (email: string) => Promise<void>;
 
   // מחזור חיים
   init: () => Promise<void>;
@@ -122,6 +140,13 @@ interface AppState {
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let toastSeq = 1;
 
+/**
+ * מודול הענן — נטען דינמית ב-init רק כשלארגון יש config.firebase, כדי
+ * ש-firebase לא ייכנס ל-bundle (ולריצה) של ארגון מקומי-בלבד. null = אין ענן.
+ */
+type CloudSyncModule = typeof import('./cloudSync');
+let cloudMod: CloudSyncModule | null = null;
+
 function isoToday(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -158,8 +183,51 @@ export const useApp = create<AppState>()((set, get) => {
   }
 
   function setDb(patch: Partial<Db> | ((db: Db) => Partial<Db>)) {
+    const prev = get().db;
     set((s) => ({ db: { ...s.db, ...(typeof patch === 'function' ? patch(s.db) : patch) } }));
     scheduleSave();
+    // דחיפה לענן (debounced במודול הענן) — no-op כשאין ענן / בזמן החלת שינוי מרוחק
+    cloudMod?.cloudOnDbChange(prev, get().db);
+  }
+
+  /** עדכון שדה cloud חלקי. */
+  function setCloud(patch: Partial<CloudState>) {
+    set((s) => ({ cloud: { ...s.cloud, ...patch } }));
+  }
+
+  /**
+   * חיבור הענן — נקרא מ-init רק כשיש config.firebase. אסינכרוני ולא חוסם:
+   * כל כשל כאן מחזיר את המערכת למצב מקומי-בלבד עם טוסט, בלי לפגוע בעבודה.
+   */
+  async function connectCloud(fb: FirebaseOrgConfig) {
+    try {
+      const mod = await import('./cloudSync');
+      cloudMod = mod;
+      mod.initCloud(fb);
+      mod.watchAuth((user) => {
+        const hadUser = get().cloud.user !== null;
+        setCloud({ authReady: true, user, ...(user ? {} : { status: 'idle' as const }) });
+        if (user && !hadUser) {
+          void mod.startCloudSync({
+            getDb: () => get().db,
+            // נתיב החלת-מרוחק: שמירה מקומית כרגיל, בלי cloudOnDbChange (אין הד)
+            setDbFromRemote: (db) => {
+              set({ db });
+              scheduleSave();
+            },
+            toast: (t) => get().toast(t),
+            setStatus: (status) => setCloud({ status }),
+          });
+        } else if (!user && hadUser) {
+          mod.stopCloudSync();
+        }
+      });
+    } catch {
+      // טעינת firebase נכשלה (רשת/חסימה) — ממשיכים מקומית, בלי מסך כניסה
+      cloudMod = null;
+      setCloud({ enabled: false, authReady: true, status: 'error' });
+      get().toast('⚠ טעינת חיבור הענן נכשלה — עובדים מקומית בלבד');
+    }
   }
 
   /** upsert גנרי לפי id — חדש נכנס לראש הרשימה (כמו במקור). */
@@ -182,13 +250,23 @@ export const useApp = create<AppState>()((set, get) => {
     toasts: [],
     paletteOpen: false,
     config: DEFAULT_CONFIG,
+    cloud: { enabled: false, authReady: true, user: null, status: 'idle' },
 
     async init() {
       const config = await loadOrgConfig();
       // בידוד נתונים בין לקוחות על אותו host — חייב לקרות לפני loadDb
       setPersistNamespace(config.slug);
       const { db, corrupt } = await loadDb();
-      set({ db, corrupt, config, ready: true });
+      const cloudOn = !!config.firebase;
+      set({
+        db,
+        corrupt,
+        config,
+        ready: true,
+        cloud: { enabled: cloudOn, authReady: !cloudOn, user: null, status: 'idle' },
+      });
+      // חיבור ענן — opt-in פר-ארגון; בלי config.firebase שום דבר לא משתנה
+      if (config.firebase) void connectCloud(config.firebase);
       // ערכת הנושא: העדפת משתמש (db.ui) גוברת על ברירת המחדל של הארגון
       applyTheme(db.ui.theme ?? config.theme, db.ui.accent ?? config.accent);
       void dailySnapshot(db);
@@ -229,6 +307,22 @@ export const useApp = create<AppState>()((set, get) => {
       const seq = get().db.seq;
       setDb({ seq: seq + 1 });
       return prefix + seq;
+    },
+
+    async cloudSignIn(email, password) {
+      if (!cloudMod) throw new Error('חיבור הענן עדיין נטען — נסו שוב בעוד רגע');
+      await cloudMod.signIn(email, password);
+      // watchAuth יקלוט את המשתמש ויפעיל startCloudSync
+    },
+    async cloudSignOut() {
+      if (!cloudMod) return;
+      cloudMod.stopCloudSync();
+      await cloudMod.signOutCloud();
+      get().toast('התנתקת מהענן — הנתונים נשארים שמורים במכשיר');
+    },
+    async cloudResetPassword(email) {
+      if (!cloudMod) throw new Error('חיבור הענן עדיין נטען — נסו שוב בעוד רגע');
+      await cloudMod.resetPassword(email);
     },
 
     go: (view) => set({ view }),
@@ -452,14 +546,19 @@ export const useApp = create<AppState>()((set, get) => {
       get().toast('קובץ גיבוי מלא ירד למחשב ✓');
     },
     restoreDb(db) {
+      const prev = get().db;
       set({ db });
       scheduleSave();
+      cloudMod?.cloudOnDbChange(prev, db);
       void dailySnapshot(db);
       get().toast('הנתונים שוחזרו מהגיבוי ✓');
     },
     resetAll() {
-      set({ db: emptyDb() });
+      const prev = get().db;
+      const db = emptyDb();
+      set({ db });
       scheduleSave();
+      cloudMod?.cloudOnDbChange(prev, db);
       get().toast('המערכת אופסה — כל הנתונים נמחקו');
     },
   };

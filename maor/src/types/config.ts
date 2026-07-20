@@ -36,7 +36,22 @@ export interface OrgConfig {
   terms?: Record<string, string>;
   /** אינטגרציות עתידיות לפי שם. */
   integrations?: Record<string, { enabled: boolean }>;
+  /**
+   * חיבור ענן (Firebase) — opt-in פר-ארגון. מפתח חסר = המערכת מקומית בלבד,
+   * בדיוק כמו היום. קיים = נדרשת התחברות (אימייל+סיסמה) וסנכרון Firestore.
+   */
+  firebase?: {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    storageBucket?: string;
+    messagingSenderId?: string;
+    appId: string;
+  };
 }
+
+/** קונפיגורציית Firebase של ארגון — קיצור נוחות. */
+export type FirebaseOrgConfig = NonNullable<OrgConfig['firebase']>;
 
 export const DEFAULT_CONFIG: OrgConfig = {
   slug: 'default',

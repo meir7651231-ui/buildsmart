@@ -11,11 +11,38 @@ import { useApp } from '../../store/useApp';
 import { clearConfigOverride } from '../../lib/config';
 import { DEFAULT_CONFIG, type ModuleKey, type OrgConfig } from '../../types/config';
 import { FEATURES, TERM_DEFS, type FeatureDef, type TermDef } from '../../types/features';
-import { Btn, Chip, Field, TextInput } from '../ui';
+import { Btn, Chip, Field, FormError, TextInput } from '../ui';
 import { buildHandoffHtml, downloadTextFile, INTEGRATION_LABELS, THEME_LABELS } from './handoff';
 import { featureEffectiveOn, WIZARD_SECTIONS, type WizardSectionDef } from './sections';
 
 const DEFAULT_APP_URL = 'https://meir7651231-ui.github.io/buildsmart/maor/';
+
+/**
+ * חילוץ סלחני של קונפיגורציית Firebase מהטקסט שמדביקים מהקונסולה —
+ * מקבל גם את קטע ה-JS (const firebaseConfig = {...}) וגם JSON נקי.
+ * ארבעת שדות החובה: apiKey, authDomain, projectId, appId.
+ */
+function parseFirebaseSnippet(text: string): NonNullable<OrgConfig['firebase']> | null {
+  const pick = (key: string): string | undefined => {
+    const m = text.match(new RegExp(`["']?${key}["']?\\s*[:=]\\s*["']([^"']+)["']`));
+    return m?.[1];
+  };
+  const apiKey = pick('apiKey');
+  const authDomain = pick('authDomain');
+  const projectId = pick('projectId');
+  const appId = pick('appId');
+  if (!apiKey || !authDomain || !projectId || !appId) return null;
+  const storageBucket = pick('storageBucket');
+  const messagingSenderId = pick('messagingSenderId');
+  return {
+    apiKey,
+    authDomain,
+    projectId,
+    appId,
+    ...(storageBucket ? { storageBucket } : {}),
+    ...(messagingSenderId ? { messagingSenderId } : {}),
+  };
+}
 
 /** slug לטיני מהשם — מספיק טוב כברירת מחדל, ניתן לעריכה ידנית. */
 function suggestSlug(name: string): string {
@@ -152,6 +179,9 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('');
   /** אילו מקטעים פתוחים — 'branding' פתוח כברירת מחדל, השאר מקופלים. */
   const [open, setOpen] = useState<Record<string, boolean>>({ branding: true });
+  /** חיבור ענן: הטקסט שהודבק מקונסולת Firebase + שגיאת פענוח. */
+  const [fbText, setFbText] = useState('');
+  const [fbErr, setFbErr] = useState('');
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -431,6 +461,88 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
                 </Btn>
               </div>
             </Field>
+
+            {/* חיבור ענן — הדבקת ה-firebaseConfig מהקונסולה; מתקפל, לא חובה */}
+            <details style={{ marginTop: 4 }}>
+              <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--ink-soft)', padding: '4px 0' }}>
+                ☁️ חיבור ענן (Firebase) — לא חובה
+              </summary>
+              <div style={{ padding: '6px 0 2px' }}>
+                {config.firebase ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        padding: '4px 10px',
+                        borderRadius: 999,
+                        border: '1px solid #3fae5a',
+                        color: '#3fae5a',
+                        direction: 'ltr',
+                      }}
+                    >
+                      ✓ מחובר: {config.firebase.projectId}
+                    </span>
+                    <Btn
+                      sm
+                      onClick={() => {
+                        const next = { ...config };
+                        delete next.firebase;
+                        setConfig(next);
+                        setFbText('');
+                        setFbErr('');
+                      }}
+                    >
+                      הסרה
+                    </Btn>
+                  </div>
+                ) : (
+                  <>
+                    <textarea
+                      value={fbText}
+                      onChange={(e) => setFbText(e.target.value)}
+                      dir="ltr"
+                      rows={6}
+                      placeholder={'הדביקו כאן את קטע ה-firebaseConfig מקונסולת Firebase, למשל:\nconst firebaseConfig = {\n  apiKey: "...",\n  authDomain: "...",\n  projectId: "...",\n  ...\n};'}
+                      style={{
+                        width: '100%',
+                        fontSize: 11.5,
+                        fontFamily: 'monospace',
+                        padding: 8,
+                        borderRadius: 8,
+                        border: '1px solid var(--line)',
+                        background: 'var(--bg)',
+                        color: 'var(--ink)',
+                        resize: 'vertical',
+                      }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                      <Btn
+                        sm
+                        kind="primary"
+                        onClick={() => {
+                          const fb = parseFirebaseSnippet(fbText);
+                          if (!fb) {
+                            setFbErr('לא זוהתה קונפיגורציה — ודאו שהודבקו apiKey, authDomain, projectId ו-appId');
+                            return;
+                          }
+                          setFbErr('');
+                          setFbText('');
+                          patch({ firebase: fb });
+                          toast('☁️ חיבור הענן נשמר — ייכנס לתוקף ב-config.json של הלקוח');
+                        }}
+                      >
+                        חיבור
+                      </Btn>
+                      <span style={{ fontSize: 11.5, color: 'var(--ink-faint)' }}>
+                        מחייב פרויקט Firebase נפרד לכל לקוח
+                      </span>
+                    </div>
+                    <FormError error={fbErr} />
+                  </>
+                )}
+              </div>
+            </details>
           </SectionShell>
         )}
 

@@ -6,7 +6,7 @@
  * 2. fetch('./config.json') — קובץ סטטי יחסי ל-base (פר-פריסה של ארגון).
  * 3. DEFAULT_CONFIG — כשאין קובץ / הקובץ פגום (404, JSON שבור).
  */
-import { DEFAULT_CONFIG, type ModuleKey, type OrgConfig } from '../types/config';
+import { DEFAULT_CONFIG, type FirebaseOrgConfig, type ModuleKey, type OrgConfig } from '../types/config';
 
 const LS_CONFIG_KEY = 'maor_org_config';
 
@@ -53,6 +53,25 @@ export function termOf(cfg: OrgConfig, key: string, fallback: string): string {
   return fallback;
 }
 
+/** נרמול שדה ה-firebase — נשמר רק אם ארבעת שדות החובה הם מחרוזות לא-ריקות. */
+function normalizeFirebase(raw: unknown): FirebaseOrgConfig | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const f = raw as Partial<FirebaseOrgConfig>;
+  const req = [f.apiKey, f.authDomain, f.projectId, f.appId];
+  if (!req.every((v) => typeof v === 'string' && v.length > 0)) return undefined;
+  const out: FirebaseOrgConfig = {
+    apiKey: f.apiKey as string,
+    authDomain: f.authDomain as string,
+    projectId: f.projectId as string,
+    appId: f.appId as string,
+  };
+  if (typeof f.storageBucket === 'string' && f.storageBucket) out.storageBucket = f.storageBucket;
+  if (typeof f.messagingSenderId === 'string' && f.messagingSenderId) {
+    out.messagingSenderId = f.messagingSenderId;
+  }
+  return out;
+}
+
 /** נרמול קלט לא-אמין (localStorage / רשת) לצורת OrgConfig מלאה, או null אם לא שמיש. */
 function normalize(raw: unknown): OrgConfig | null {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
@@ -60,7 +79,7 @@ function normalize(raw: unknown): OrgConfig | null {
   if (typeof c.slug !== 'string' && typeof c.orgName !== 'string' && typeof c.theme !== 'string') {
     return null;
   }
-  return {
+  const cfg: OrgConfig = {
     ...DEFAULT_CONFIG,
     ...c,
     slug: typeof c.slug === 'string' && c.slug ? c.slug : DEFAULT_CONFIG.slug,
@@ -74,6 +93,10 @@ function normalize(raw: unknown): OrgConfig | null {
     terms:
       c.terms && typeof c.terms === 'object' && !Array.isArray(c.terms) ? { ...c.terms } : {},
   };
+  const fb = normalizeFirebase(c.firebase);
+  if (fb) cfg.firebase = fb;
+  else delete cfg.firebase;
+  return cfg;
 }
 
 /** דריסת הריצה השמורה בדפדפן, אם קיימת ותקינה. */

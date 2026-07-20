@@ -18,6 +18,15 @@ import { SettingsView } from './components/settings/SettingsView';
 import { CommandPalette } from './components/palette/CommandPalette';
 import { DemoDrop } from './components/DemoDrop';
 import { DayGate } from './components/wheel/DayGate';
+import { LoginScreen } from './components/cloud/LoginScreen';
+
+/** צבע נקודת הסטטוס של סנכרון הענן — ירוק = synced. */
+const SYNC_DOT: Record<string, { color: string; title: string }> = {
+  synced: { color: '#3fae5a', title: 'מסונכרן עם הענן' },
+  connecting: { color: '#e2b93b', title: 'מתחבר לענן…' },
+  error: { color: '#e05252', title: 'שגיאת סנכרון — הנתונים שמורים מקומית' },
+  idle: { color: '#9aa0a6', title: 'סנכרון לא פעיל' },
+};
 
 const NAV: { view: View; icon: string; label: string }[] = [
   { view: 'home', icon: '🏠', label: 'בית' },
@@ -53,6 +62,8 @@ export default function App() {
   const setPalette = useApp((s) => s.setPalette);
   const init = useApp((s) => s.init);
   const exportBackup = useApp((s) => s.exportBackup);
+  const cloud = useApp((s) => s.cloud);
+  const cloudSignOut = useApp((s) => s.cloudSignOut);
 
   useEffect(() => {
     void init();
@@ -106,7 +117,29 @@ export default function App() {
 
   if (!ready) return <div className="empty">טוען…</div>;
 
+  const toastsEl = (
+    <div className="toasts" role="status" aria-live="polite">
+      {toasts.map((t) => (
+        <div key={t.id} className="toast">
+          {t.text}
+        </div>
+      ))}
+    </div>
+  );
+
+  // שער הענן: ארגון עם config.firebase מחייב התחברות לפני הכניסה לאפליקציה
+  if (cloud.enabled && !cloud.authReady) return <div className="empty">מתחבר…</div>;
+  if (cloud.enabled && !cloud.user) {
+    return (
+      <>
+        <LoginScreen />
+        {toastsEl}
+      </>
+    );
+  }
+
   const Current = VIEWS[view];
+  const syncDot = SYNC_DOT[cloud.status] ?? SYNC_DOT.idle;
 
   // מיתוג: שם מהקונפיגורציה גובר על השם השמור בנתונים
   const orgName = config.orgName || dbOrgName;
@@ -134,6 +167,52 @@ export default function App() {
           </button>
         ))}
         <div className="spacer" />
+        {cloud.enabled && cloud.user && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              padding: '4px 12px 6px',
+              fontSize: 12,
+              color: 'var(--nav-ink-soft)',
+              minWidth: 0,
+            }}
+          >
+            <span
+              aria-hidden
+              title={syncDot.title}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 99,
+                background: syncDot.color,
+                flex: '0 0 auto',
+              }}
+            />
+            <span
+              title={cloud.user.email}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                direction: 'ltr',
+                textAlign: 'end',
+              }}
+            >
+              {cloud.user.email}
+            </span>
+            <button
+              onClick={() => void cloudSignOut()}
+              title="יציאה מהחשבון — הנתונים נשארים במכשיר"
+              style={{ padding: '2px 8px', fontSize: 12, borderRadius: 8, flex: '0 0 auto' }}
+            >
+              יציאה
+            </button>
+          </div>
+        )}
         <button onClick={() => setPalette(true)} title="Ctrl+K">
           <span aria-hidden>⌨️</span>חיפוש מהיר
         </button>
@@ -165,13 +244,7 @@ export default function App() {
         />
       )}
 
-      <div className="toasts" role="status" aria-live="polite">
-        {toasts.map((t) => (
-          <div key={t.id} className="toast">
-            {t.text}
-          </div>
-        ))}
-      </div>
+      {toastsEl}
     </div>
   );
 }
