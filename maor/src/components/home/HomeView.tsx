@@ -6,7 +6,6 @@
  */
 import { Fragment, useMemo, useState } from 'react';
 import { useApp } from '../../store/useApp';
-import { Btn } from '../ui';
 import { holidayOf } from '../../lib/hebrew';
 import { featureOn, moduleOn } from '../../lib/config';
 import {
@@ -21,7 +20,14 @@ import {
   todaySessions,
   type AttentionNav,
 } from './homeData';
-import { defaultLayoutFor, HOME_WIDGETS, sanitizeLayout, type HomeCtx, type WidgetId } from './widgets';
+import {
+  defaultLayoutFor,
+  HOME_WIDGETS,
+  sanitizeLayout,
+  THEME_TEMPLATES,
+  type HomeCtx,
+  type WidgetId,
+} from './widgets';
 import { BoardEditor } from './BoardEdit';
 
 export function HomeView() {
@@ -119,12 +125,18 @@ export function HomeView() {
     unmarkAttnDone,
     toast,
     exportBackup,
-    // כפתור בולט על רצועת ה-hero (עוצב ב-.hm-hero .btn) — גילוי קל של מצב העריכה
+    // ✏️ קישור-אייקון שקט בפינת העמוד (מוצמד ל-.hm-hero) — כניסה למצב העריכה
     headActions:
       boardOn && !editing ? (
-        <Btn onClick={startEdit} title="הוספה, הסרה וסידור מחדש של ווידג'טים בלוח הבית">
-          עריכת הלוח ✏️
-        </Btn>
+        <button
+          type="button"
+          className="hm-edit-link"
+          onClick={startEdit}
+          title="עריכת הלוח — הוספה, הסרה וסידור מחדש של ווידג'טים בלוח הבית"
+          aria-label="עריכת הלוח"
+        >
+          <span aria-hidden>✏️</span>
+        </button>
       ) : undefined,
   };
 
@@ -143,7 +155,44 @@ export function HomeView() {
 
   /* ── מצב תצוגה — הפריסה השמורה, בדילוג על ווידג'טים לא-visible ── */
 
-  const shown = savedLayout.filter((id) => HOME_WIDGETS[id].visible(config));
+  const visible = (id: WidgetId) => HOME_WIDGETS[id].visible(config);
+
+  // תבנית שתי-העמודות של המוקאפ — רק לפריסת ברירת המחדל של הערכה
+  // (פריסה מותאמת שמורה גוברת ומתרנדרת בגריד הגנרי למטה)
+  // הערכה המוחלת בפועל — העדפת המשתמש גוברת על ערכת הארגון (כמו applyTheme)
+  const tpl = !boardOn || !db.ui.homeLayout ? THEME_TEMPLATES[db.ui.theme ?? config.theme] : undefined;
+  if (tpl) {
+    const colA = tpl.colA.filter(visible);
+    const colB = tpl.colB.filter(visible);
+    // עמודה שהתרוקנה כולה (מודולים כבויים) — נופלים לגריד הגנרי במקום חצי לוח ריק
+    if (colA.length && colB.length) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {HOME_WIDGETS.hero.render(ctx)}
+          {tpl.pre.filter(visible).map((id) => (
+            <Fragment key={id}>{HOME_WIDGETS[id].render(ctx)}</Fragment>
+          ))}
+          <div className="hm-cols">
+            <div className="hm-col">
+              {colA.map((id) => (
+                <Fragment key={id}>{HOME_WIDGETS[id].render(ctx)}</Fragment>
+              ))}
+            </div>
+            <div className="hm-col">
+              {colB.map((id) => (
+                <Fragment key={id}>{HOME_WIDGETS[id].render(ctx)}</Fragment>
+              ))}
+            </div>
+          </div>
+          {tpl.post.filter(visible).map((id) => (
+            <Fragment key={id}>{HOME_WIDGETS[id].render(ctx)}</Fragment>
+          ))}
+        </div>
+      );
+    }
+  }
+
+  const shown = savedLayout.filter(visible);
   // רצפים של ווידג'טים "חצי רוחב" (היום/דורש טיפול) מקובצים לשורת גריד אחת —
   // בדיוק הפריסה המקורית (auto-fit minmax(320px,1fr)) כשהם סמוכים
   const groups: WidgetId[][] = [];

@@ -52,6 +52,18 @@ const tagStyle = (bg: string, c: string): CSSProperties => ({
   flexShrink: 0,
 });
 
+/**
+ * צ'יפ ממוגן-ערכה לווידג'טי הבית: בהיכל המוקאפ מונוכרום זהב-קלף —
+ * צ'יפ רגיל = רקע חום-זהב כהה עם דיו קלף; צ'יפ קריטי שומר בורדו עמום
+ * (כמו "עבר יעד" במוקאפ). שאר הערכות מקבלות את הצבעים המקוריים ללא שינוי.
+ */
+function chipStyle(ctx: HomeCtx, bg: string, c: string, crit = false): CSSProperties {
+  if (themeOf(ctx) !== 'heichal') return tagStyle(bg, c);
+  return crit
+    ? { ...tagStyle('transparent', '#e58a75'), border: '1px solid rgba(229, 138, 117, 0.4)' }
+    : tagStyle('#2a2517', '#d9c289');
+}
+
 const softEmpty: CSSProperties = { color: 'var(--ink-faint)', fontSize: 13.5, padding: '6px 6px' };
 
 /**
@@ -257,6 +269,12 @@ function Carousel(props: { items: CarouselItem[]; navTo: (nav: AttentionNav) => 
  * רצועת ה-hero — באנר גרדיאנט ברוחב מלא (משתני --hero-* פר-ערכה):
  * ברכה לפי שעה, שורת משנה (תאריך עברי · מפגשים · ימי הולדת) ופעולות מהירות.
  * תמיד ראשון, לא ניתן להסרה. כפתור של מודול כבוי מוסתר (כמו במקור).
+ *
+ * ניסוח הברכה ופעולות ה-hero — פר-ערכה, אחד-לאחד מהמוקאפים:
+ * היכל/אור ראשון — "בוקר טוב, מאור החסד" בלי אמוג'י ובלי סימן קריאה;
+ * צֹהַר — "בוקר טוב 👋" (הפעולות יושבות בשורת הכותרת של השלד, לא ב-hero);
+ * קהילה — "בוקר טוב! יום שני שמח 🌞" בלי כפתורים ב-hero;
+ * אור ראשון — סט הכפתורים של המוקאפ בדיוק (בלי "תורמים", עם אייקונים).
  */
 function HeroWidget({ ctx }: { ctx: HomeCtx }) {
   const { db, config, now, todayIso, data, go, selectCourse } = ctx;
@@ -269,6 +287,10 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
   const hour = now.getHours();
   const greet = hour < 12 ? 'בוקר טוב' : hour < 18 ? 'צהריים טובים' : 'ערב טוב';
   const mood = hour < 12 ? '🌞' : hour < 18 ? '🌤️' : '🌙';
+  const theme = themeOf(ctx);
+  const isOrRishon = theme === 'or-rishon';
+  // במוקאפים של היכל/קהילה אין כפתורים ב-hero; בצֹהַר הפעולות בשורת הכותרת
+  const actionsOn = theme !== 'heichal' && theme !== 'kehila' && theme !== 'tsohar';
 
   // שורת המשנה — תאריך עברי · חג · N מפגשים היום · N ימי הולדת היום (רק אמת מה-Db)
   const subParts: string[] = [
@@ -284,42 +306,60 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
           : `${data.sessions.length} מפגשים היום`,
     );
   }
+  // בלי אמוג'י עוגה — שורת המשנה במוקאפים היא טקסט שקט בלבד
   if (data.bdays.length) {
     subParts.push(
-      data.bdays.length === 1 ? 'יום הולדת אחד היום 🎂' : `${data.bdays.length} ימי הולדת היום 🎂`,
+      data.bdays.length === 1 ? 'יום הולדת אחד היום' : `${data.bdays.length} ימי הולדת היום`,
     );
   }
 
+  // כותרת הברכה — נוסח המוקאפ של כל ערכה (ראו הערת הפונקציה)
+  const title =
+    theme === 'tsohar' ? (
+      <>
+        {greet} <span aria-hidden>👋</span>
+      </>
+    ) : theme === 'kehila' ? (
+      <>
+        {greet}! יום {DAY_NAMES[now.getDay()]} שמח <span aria-hidden>{mood}</span>
+      </>
+    ) : (
+      <>
+        {greet}, {config.orgName || db.orgName}
+      </>
+    );
+
   return (
     <section className="hm-hero">
+      {/* ✏️ עריכת הלוח — קישור-אייקון שקט בפינת העמוד (לא כפתור בולט) */}
+      {ctx.headActions}
       <div className="hm-hero-top">
         <div>
-          <h1 className="hm-hero-title">
-            {greet}, {config.orgName || db.orgName}! <span aria-hidden>{mood}</span>
-          </h1>
+          <h1 className="hm-hero-title">{title}</h1>
           <p className="hm-hero-sub">{subParts.join(' · ')}</p>
         </div>
-        {ctx.headActions && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{ctx.headActions}</div>}
       </div>
 
-      {/* פעולות מהירות — כפתור של מודול כבוי מוסתר */}
-      <div className="hm-hero-actions">
-        {familiesOn && (
-          <Btn kind="primary" onClick={() => go('families')}>+ משפחה חדשה</Btn>
-        )}
-        {coursesOn && (
-          <Btn
-            onClick={() => (data.sessions.length ? selectCourse(data.sessions[0].course.id) : go('courses'))}
-            title={data.sessions.length ? 'ניקוב מהיר — ' + data.sessions[0].course.name : 'אין מפגשים היום'}
-          >
-            ניקוב מהיר
-          </Btn>
-        )}
-        {calendarOn && <Btn onClick={() => go('calendar')}>מי חוגג השבוע?</Btn>}
-        {diaryOn && <Btn onClick={() => go('diary')}>יומן חדרים</Btn>}
-        {supportersOn && <Btn onClick={() => go('supporters')}>תורמים</Btn>}
-        {reportsOn && <Btn onClick={() => go('reports')}>דוחות</Btn>}
-      </div>
+      {/* פעולות מהירות — רק בערכות שהמוקאפ שלהן מציג אותן; מודול כבוי מוסתר */}
+      {actionsOn && (
+        <div className="hm-hero-actions">
+          {familiesOn && (
+            <Btn kind="primary" onClick={() => go('families')}>+ משפחה חדשה</Btn>
+          )}
+          {coursesOn && (
+            <Btn
+              onClick={() => (data.sessions.length ? selectCourse(data.sessions[0].course.id) : go('courses'))}
+              title={data.sessions.length ? 'ניקוב מהיר — ' + data.sessions[0].course.name : 'אין מפגשים היום'}
+            >
+              {isOrRishon ? '✓ ניקוב מהיר' : 'ניקוב מהיר'}
+            </Btn>
+          )}
+          {calendarOn && <Btn onClick={() => go('calendar')}>{isOrRishon ? '🎂 מי חוגג השבוע?' : 'מי חוגג השבוע?'}</Btn>}
+          {diaryOn && <Btn onClick={() => go('diary')}>{isOrRishon ? '📖 יומן חדרים' : 'יומן חדרים'}</Btn>}
+          {supportersOn && !isOrRishon && <Btn onClick={() => go('supporters')}>תורמים</Btn>}
+          {reportsOn && <Btn onClick={() => go('reports')}>{isOrRishon ? '📊 דוחות' : 'דוחות'}</Btn>}
+        </div>
+      )}
     </section>
   );
 }
@@ -514,11 +554,16 @@ function sessionStatus(time: string | undefined, now: Date): { label: string; bg
 function TodayWidget({ ctx }: { ctx: HomeCtx }) {
   const { db, config, now, data, go, selectFamily, selectCourse } = ctx;
   const famName = (id: string) => db.families.find((f) => f.id === id)?.name ?? '';
-  const isTsohar = themeOf(ctx) === 'tsohar';
+  const theme = themeOf(ctx);
+  const isTsohar = theme === 'tsohar';
+  // כותרת הפאנל בשפת המוקאפ של הערכה: היכל "סדר היום" · קהילה "☀️ המפגשים של היום"
+  const isKehila = theme === 'kehila';
   return (
     <Panel
-      icon="📅"
-      title={`היום · יום ${DAY_NAMES[now.getDay()]}`}
+      icon={isKehila ? '☀️' : '📅'}
+      title={
+        theme === 'heichal' ? 'סדר היום' : isKehila ? 'המפגשים של היום' : `היום · יום ${DAY_NAMES[now.getDay()]}`
+      }
       badge={data.holiday ?? undefined}
       action={
         isTsohar && moduleOn(config, 'calendar') ? (
@@ -528,7 +573,10 @@ function TodayWidget({ ctx }: { ctx: HomeCtx }) {
         ) : undefined
       }
     >
-      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)' }}>המפגשים של היום</div>
+      {/* בקהילה הכותרת עצמה היא "המפגשים של היום" — בלי תת-כותרת כפולה */}
+      {!isKehila && (
+        <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)' }}>המפגשים של היום</div>
+      )}
       {data.sessions.length === 0 && <div style={softEmpty}>אין מפגשי חוגים היום</div>}
       {isTsohar && data.sessions.length > 0 && (
         /* הטבלה גוללת בתוך עצמה במסך צר — הגוף לעולם לא גולל אופקית */
@@ -626,7 +674,7 @@ function TodayWidget({ ctx }: { ctx: HomeCtx }) {
           onClick={() => (ev.famId ? selectFamily(ev.famId) : go('calendar'))}
           title={ev.famId ? 'לכרטיס המשפחה' : 'ללוח השנה'}
         >
-          <span style={tagStyle(EV_META[ev.type].bg, EV_META[ev.type].c)}>{evLabel(ev)}</span>
+          <span style={chipStyle(ctx, EV_META[ev.type].bg, EV_META[ev.type].c)}>{evLabel(ev)}</span>
           <span>
             {(ev.time ? ev.time + ' · ' : '') + ev.title}
             {ev.famId ? ' · משפחת ' + famName(ev.famId) : ''}
@@ -654,7 +702,7 @@ function TodayWidget({ ctx }: { ctx: HomeCtx }) {
           onClick={() => selectFamily(b.member.famId)}
           title="לכרטיס המשפחה"
         >
-          <span style={tagStyle('#fbeef3', '#be185d')}>יום הולדת</span>
+          <span style={chipStyle(ctx, '#fbeef3', '#be185d')}>יום הולדת</span>
           <span>
             {b.member.first} ({b.age}) · משפחת {b.member.famName}
           </span>
@@ -672,9 +720,16 @@ function AttentionWidget({ ctx }: { ctx: HomeCtx }) {
   const attnDone = db.attnDone ?? {};
   const openAttn = data.attention.filter((a) => !attnDone[a.key]);
   const doneAttn = data.attention.filter((a) => attnDone[a.key]);
+  // שפת המוקאפ: היכל "נר תמיד" (עם 🕯️ בכל שורה) · קהילה "שווה לטפל"
+  const theme = themeOf(ctx);
+  const isHeichal = theme === 'heichal';
 
   return (
-    <Panel icon="🔔" title="דורש טיפול" badge={openAttn.length ? String(openAttn.length) : undefined}>
+    <Panel
+      icon="🔔"
+      title={isHeichal ? 'נר תמיד — דורש טיפול' : theme === 'kehila' ? 'שווה לטפל' : 'דורש טיפול'}
+      badge={openAttn.length ? String(openAttn.length) : undefined}
+    >
       {openAttn.length === 0 && (
         <div style={{ ...softEmpty, color: 'var(--green)', fontWeight: 600 }}>הכל מטופל ✓</div>
       )}
@@ -686,7 +741,8 @@ function AttentionWidget({ ctx }: { ctx: HomeCtx }) {
             style={{ flex: 1, minWidth: 0 }}
             onClick={() => navTo(a.nav)}
           >
-            <span style={tagStyle(a.tagBg, a.tagC)}>{a.tag}</span>
+            {isHeichal && <span aria-hidden>🕯️</span>}
+            <span style={chipStyle(ctx, a.tagBg, a.tagC, a.sev === 'crit')}>{a.tag}</span>
             <span style={{ minWidth: 0 }}>{a.title}</span>
             <span className="hm-arrow" aria-hidden>לטפל ←</span>
           </button>
@@ -713,7 +769,7 @@ function AttentionWidget({ ctx }: { ctx: HomeCtx }) {
             key={a.key}
             style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.55, fontSize: 13.5, padding: '4px 6px' }}
           >
-            <span style={tagStyle(a.tagBg, a.tagC)}>{a.tag}</span>
+            <span style={chipStyle(ctx, a.tagBg, a.tagC, a.sev === 'crit')}>{a.tag}</span>
             <span style={{ textDecoration: 'line-through', minWidth: 0 }}>{a.title}</span>
             <span
               style={{ marginInlineStart: 'auto', fontSize: 12, color: 'var(--ink-faint)', whiteSpace: 'nowrap', flexShrink: 0 }}
@@ -767,7 +823,7 @@ function RecentWidget({ ctx }: { ctx: HomeCtx }) {
                   <td>{f.city || '—'}</td>
                   <td>{f.members.filter((m) => !m.isParent).length}</td>
                   <td>
-                    <span style={tagStyle(ST_META[f.status].bg, ST_META[f.status].c)}>
+                    <span style={chipStyle(ctx, ST_META[f.status].bg, ST_META[f.status].c)}>
                       {ST_META[f.status].label}
                     </span>
                   </td>
@@ -794,7 +850,7 @@ function GoldbookWidget({ ctx }: { ctx: HomeCtx }) {
   return (
     <Panel
       icon="🏆"
-      title="ספר הזהב"
+      title={themeOf(ctx) === 'heichal' ? 'ספר הזהב · תורמים' : 'ספר הזהב'}
       badge={podium.rows.length ? podium.scopeLabel : undefined}
       action={<Btn sm onClick={() => go('supporters')}>לתורמים ←</Btn>}
     >
@@ -858,10 +914,11 @@ function CommunityWidget({ ctx }: { ctx: HomeCtx }) {
   const s = credSummary(db, (score) => tierOf(score).key);
   // מטא של ארבע הדרגות — ציון מייצג לכל טווח מחזיר את התווית/צבע המקוריים
   const meta = [tierOf(960), tierOf(850), tierOf(600), tierOf(100)];
+  const isKehila = themeOf(ctx) === 'kehila';
   return (
     <Panel
-      icon="🤝"
-      title="אמינות קהילתית"
+      icon={isKehila ? '🏅' : '🤝'}
+      title={isKehila ? 'הקהילה שלנו' : 'אמינות קהילתית'}
       badge={s.total > 0 ? `ממוצע ${s.avg}` : undefined}
       action={<Btn sm onClick={() => go('families')}>למשפחות ←</Btn>}
     >
@@ -906,7 +963,7 @@ function ContactsWidget({ ctx }: { ctx: HomeCtx }) {
       )}
       {due.slice(0, 6).map((c) => (
         <button key={c.id} type="button" className="hm-row" onClick={() => go('supporters')} title="למסך התורמים">
-          <span style={tagStyle(c.late > 7 ? '#fdeaea' : '#fdf1d4', c.late > 7 ? '#b91c1c' : '#9a6414')}>
+          <span style={chipStyle(ctx, c.late > 7 ? '#fdeaea' : '#fdf1d4', c.late > 7 ? '#b91c1c' : '#9a6414', c.late > 7)}>
             {fmtD(c.date)}
           </span>
           <span style={{ fontWeight: 600 }}>{c.name}</span>
@@ -932,7 +989,7 @@ function PunchlowWidget({ ctx }: { ctx: HomeCtx }) {
       )}
       {items.slice(0, 6).map((p) => (
         <button key={p.key} type="button" className="hm-row" onClick={() => navTo(p.nav)} title="לכרטיס המשפחה">
-          <span style={tagStyle('#efe7f3', '#7c3aed')}>{p.left}/{p.total}</span>
+          <span style={chipStyle(ctx, '#efe7f3', '#7c3aed')}>{p.left}/{p.total}</span>
           <span style={{ minWidth: 0 }}>
             {p.member} ({p.famName}) · {p.course}
           </span>
@@ -1181,14 +1238,39 @@ export const HOME_WIDGETS: Record<WidgetId, HomeWidget> = {
  * פריסה שמורה של המשתמש תמיד גוברת; ווידג'ט שהמודול/פיצ'ר שלו כבוי פשוט מדולג.
  */
 export const THEME_LAYOUTS: Record<string, readonly WidgetId[]> = {
-  /* אור ראשון — הסדר הקלאסי + באנר ימי ההולדת */
-  'or-rishon': ['hero', 'bdays', 'digest', 'stats', 'today', 'attention', 'carousel', 'recent'],
-  /* היכל — "ערב גאלה": נתונים, ספר הזהב והלוח העברי */
-  heichal: ['hero', 'bdays', 'stats', 'today', 'goldbook', 'hebcal', 'attention'],
-  /* צֹהַר — דשבורד תפעולי נקי */
-  tsohar: ['hero', 'bdays', 'stats', 'today', 'attention', 'recent'],
-  /* קהילה — חם וקהילתי: כרטיסים "נעוצים" ב-hero (מוקאפ), תקציר, אמינות וקרוסלה */
-  kehila: ['hero', 'stats', 'bdays', 'digest', 'today', 'community', 'carousel'],
+  /* אור ראשון (mock-desktop) — hero, אריחים, קרוסלה, ואז שתי עמודות */
+  'or-rishon': ['hero', 'stats', 'carousel', 'today', 'recent', 'attention', 'community'],
+  /* היכל (mock-heichal) — "ערב גאלה": רצועת נתונים ושתי עמודות שקטות */
+  heichal: ['hero', 'stats', 'today', 'attention', 'goldbook', 'hebcal'],
+  /* צֹהַר (mock-tsohar) — דשבורד תפעולי נקי: נתונים, היום 2:1 מול דורש טיפול */
+  tsohar: ['hero', 'stats', 'today', 'attention', 'recent'],
+  /* קהילה (mock-kehila) — נתונים "נעוצים" ב-hero, באנר יום הולדת, ואז עמודות */
+  kehila: ['hero', 'stats', 'bdays', 'today', 'attention', 'community'],
+};
+
+/**
+ * תבנית שתי-עמודות פר-ערכה — בדיוק סידור המוקאפ: pre = שורות מלאות אחרי
+ * ה-hero, ואז colA (העמודה הימנית, הרחבה) מול colB (השמאלית), ואז post.
+ * חלה רק על פריסת ברירת המחדל (אין db.ui.homeLayout שמור) — פריסה מותאמת
+ * של המשתמש ממשיכה להתרנדר בגריד הגנרי, ו-BoardEdit עובד כרגיל.
+ * הסדר השטוח (pre+colA+colB+post) זהה לסדר ה-preset ב-THEME_LAYOUTS.
+ */
+export interface ThemeBoardTemplate {
+  pre: readonly WidgetId[];
+  colA: readonly WidgetId[];
+  colB: readonly WidgetId[];
+  post: readonly WidgetId[];
+}
+
+export const THEME_TEMPLATES: Record<string, ThemeBoardTemplate> = {
+  /* mock-desktop: ימין היום+משפחות אחרונות · שמאל דורש טיפול+אמינות (1.25fr/1fr) */
+  'or-rishon': { pre: ['stats', 'carousel'], colA: ['today', 'recent'], colB: ['attention', 'community'], post: [] },
+  /* mock-heichal: ימין סדר היום+נר תמיד · שמאל ספר הזהב+הלוח העברי (1.3fr/1fr) */
+  heichal: { pre: ['stats'], colA: ['today', 'attention'], colB: ['goldbook', 'hebcal'], post: [] },
+  /* mock-tsohar: היום כטבלה רחבה (2fr) מול דורש טיפול (1fr) */
+  tsohar: { pre: ['stats'], colA: ['today'], colB: ['attention'], post: ['recent'] },
+  /* mock-kehila: ימין המפגשים של היום · שמאל שווה לטפל+הקהילה שלנו (1.3fr/1fr) */
+  kehila: { pre: ['stats', 'bdays'], colA: ['today'], colB: ['attention', 'community'], post: [] },
 };
 
 /** סדר ברירת המחדל הקלאסי (אור ראשון) — fallback לערכה לא מוכרת. */

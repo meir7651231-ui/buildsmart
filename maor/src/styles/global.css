@@ -59,7 +59,17 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  /* גוף 15px/1.55 כמו במוקאפים (צֹהַר 14.5 — דריסה למטה) — לא 16px הדפדפני */
+  font-size: 15px;
+  line-height: 1.55;
   min-height: 100vh;
+  /* באנר הבית של קהילה נמתח לרוחב הצג (50% − 50vw) — חותך את שארית פס הגלילה */
+  overflow-x: clip;
+}
+
+:root[data-theme="tsohar"] body {
+  font-size: 14.5px;
+  line-height: 1.5;
 }
 
 #root {
@@ -143,7 +153,8 @@ button:focus-visible {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px 14px;
-  padding: 10px 22px;
+  /* שורת הניווט מיושרת לעמודת התוכן (1200px) — כמו במוקאפים של היכל/קהילה */
+  padding: 10px max(22px, calc(50% - 600px));
   background: var(--nav2-bg);
   color: var(--nav2-ink);
   border-bottom: 1px solid var(--nav2-line);
@@ -295,9 +306,15 @@ button:focus-visible {
 .app-main {
   flex: 1;
   padding: 24px 28px 64px;
-  max-width: 1280px;
+  /* עמודת תוכן ~1200px ממורכזת עם אוויר בצדדים — כמו במוקאפים (1120–1180px) */
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+}
+
+/* אור ראשון (mock-desktop): התוכן צמוד לסרגל-הצד — לא ממורכז בתוך side-body */
+.app-side.side-wide + .side-body .app-main {
+  margin-inline: 0;
 }
 
 @media (max-width: 760px) {
@@ -1614,6 +1631,72 @@ h1,
   color: var(--ink);
 }
 
+/* ── ✏️ עריכת הלוח — קישור-אייקון שקט בפינת העמוד (לא כפתור בולט) ── */
+
+/* הסלקטור המלא מנצח את `.hm-hero > *` (position: relative של קהילה) */
+.hm-hero > .hm-edit-link {
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 12px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0.4;
+  color: inherit;
+  cursor: pointer;
+}
+
+.hm-hero > .hm-edit-link:hover,
+.hm-hero > .hm-edit-link:focus-visible {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+/* ── שתי עמודות המוקאפ (פריסת ברירת המחדל בלבד) — ימין רחבה, שמאל צרה ── */
+
+.hm-cols {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.hm-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+:root[data-theme="heichal"] .hm-cols {
+  grid-template-columns: 1.3fr 1fr;
+  gap: 18px;
+}
+
+:root[data-theme="heichal"] .hm-col {
+  gap: 18px;
+}
+
+:root[data-theme="kehila"] .hm-cols {
+  grid-template-columns: 1.3fr 1fr;
+}
+
+:root[data-theme="tsohar"] .hm-cols {
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .hm-cols {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 760px) {
   .hm-hero {
     padding: 18px 16px 20px;
@@ -1789,6 +1872,11 @@ h1,
   letter-spacing: 0.5px;
 }
 
+/* כותרות הפאנל במוקאפ הן טקסט זהב נקי — בלי אמוג'י ("סדר היום", "ספר הזהב") */
+:root[data-theme="heichal"] .hm-head h2 > span[aria-hidden] {
+  display: none;
+}
+
 :root[data-theme="heichal"] .hm-head::after {
   content: "";
   flex: 1;
@@ -1884,14 +1972,22 @@ h1,
   margin-top: 0;
 }
 
-/* "בוקר טוב 👋" — Rubik 600 21px (head h1 במוקאפ) */
+/* "בוקר טוב 👋" — Rubik 600 21px, והתאריך באותה שורה (head במוקאפ) */
 :root[data-theme="tsohar"] .hm-hero-title {
   font-size: 21px;
   font-weight: 600;
 }
 
+:root[data-theme="tsohar"] .hm-hero-top > div {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 :root[data-theme="tsohar"] .hm-hero-sub {
   font-size: 13.5px;
+  margin-top: 0;
 }
 
 :root[data-theme="tsohar"] .hm-hero-actions {
@@ -1987,12 +2083,13 @@ h1,
   border-color: transparent;
 }
 
-/* הבאנר נמשך מהסרגל העליון לרוחב מלא — שוליים שליליים כנגד ריפוד ה-main
-   (מסך הבית בלבד; שאר המסכים שומרים על הריפוד הרגיל) */
+/* הבאנר נמשך מהסרגל העליון לרוחב הצג המלא — שוליים שליליים עד קצות החלון
+   (50% − 50vw), והריפוד הפנימי מיישר את הברכה חזרה לעמודת התוכן (1200px).
+   הגלישה האופקית הזעירה (רוחב פס הגלילה) נחתכת ע"י overflow-x: clip על body. */
 :root[data-theme="kehila"] .app-main > div > .hm-hero {
-  margin: -24px -28px 0;
+  margin: -24px calc(50% - 50vw) 0;
   border-radius: 0 0 34px 34px;
-  padding: 20px 30px 64px;
+  padding: 20px max(30px, calc(50vw - 572px)) 64px;
 }
 
 @media (max-width: 760px) {
@@ -2030,10 +2127,10 @@ h1,
   z-index: 1;
 }
 
-/* "בוקר טוב! יום שני שמח 🌞" — Suez One 400 (hello h1 במוקאפ) */
+/* "בוקר טוב! יום שני שמח 🌞" — Suez One 400 36px (hello h1 במוקאפ) */
 :root[data-theme="kehila"] .hm-hero-title {
   font-weight: 400;
-  font-size: 34px;
+  font-size: 36px;
 }
 
 /* הכרטיסים נעוצים בתחתית הבאנר (main margin-top -44px במוקאפ) */
