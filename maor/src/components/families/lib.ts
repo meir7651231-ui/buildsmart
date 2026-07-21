@@ -57,6 +57,21 @@ export function famEnrollments(db: Db, fam: Family): Enrollment[] {
   return db.enrollments.filter((e) => ids.has(e.memberId));
 }
 
+/**
+ * התאמת מספר לתחביר סינון עמודות — "3" בדיוק, "3+" לפחות, "2-4" טווח.
+ * קלט לא-מספרי אינו מסנן (מחזיר true), כמו במקור.
+ */
+export function numMatch(q: string, n: number): boolean {
+  q = String(q || '').trim();
+  if (!q) return true;
+  let m = q.match(/^(\d+)\s*\+$/);
+  if (m) return n >= +m[1];
+  m = q.match(/^(\d+)\s*-\s*(\d+)$/);
+  if (m) return n >= +m[1] && n <= +m[2];
+  if (/^\d+$/.test(q)) return n === +q;
+  return true;
+}
+
 /** רשומת היסטוריה משפחתית — נגזרת מהנתונים הקיימים, לא נשמרת בנפרד. */
 export interface FamHistoryEntry {
   date: string;

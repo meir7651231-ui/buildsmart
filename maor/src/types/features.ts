@@ -35,6 +35,7 @@ export const FEATURES: FeatureDef[] = [
   { key: 'families.join', label: 'שיבוץ מכרטיס המשפחה', desc: 'שיבוץ בן משפחה לחוג ישירות מכרטיס המשפחה', module: 'families' },
   { key: 'families.media', label: 'הסכמות מדיה בטופס', desc: 'שדות הסכמת צילום ופרסום בטופס המשפחה', module: 'families' },
   { key: 'families.report', label: 'דוח משפחה להורדה', desc: 'הורדת דוח מרוכז על משפחה כקובץ', module: 'families' },
+  { key: 'families.finder', label: 'גלגל מאתר המשפחות', desc: 'גלגל סינון חי בתוך מסך המשפחות — צלילה ציר אחרי ציר', module: 'families' },
 
   // ——— חוגים ———
   { key: 'courses.punch', label: 'כרטיסיות ניקוב', desc: 'מכירת כרטיסיות וניקוב כניסות במקום מנוי', module: 'courses' },

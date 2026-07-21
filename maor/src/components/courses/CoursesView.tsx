@@ -8,10 +8,15 @@ import { useApp, useCourse } from '../../store/useApp';
 import { featureOn, termOf } from '../../lib/config';
 import { normSearch } from '../../lib/validate';
 import { Btn, Empty, PageHead, Select, TextInput } from '../ui';
+import { numMatch } from '../families/lib';
 import { CourseForm } from './CourseForm';
 import { CourseDetail } from './CourseDetail';
 import { CourseWheel } from '../wheel/CourseWheel';
 import { DAY_LETTERS, TINTS, chipStyle, enrollCount, modelMeta } from './lib';
+
+type CrsSortKey = 'name' | 'audience' | 'teacher' | 'model' | 'count' | 'price' | 'price1' | 'price2';
+
+const EMPTY_CRS_COLF = { name: '', audience: '', teacher: '', model: 'all', count: '', price: '' };
 
 export function CoursesView() {
   const selCourseId = useApp((s) => s.selCourseId);
@@ -56,6 +61,9 @@ function CoursesList(props: { onOpenWheel: () => void }) {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('all');
   const [sem, setSem] = useState('all');
+  const [sort, setSort] = useState<{ key: CrsSortKey; dir: 1 | -1 } | null>(null);
+  const [colFOn, setColFOn] = useState(false);
+  const [colF, setColF] = useState(EMPTY_CRS_COLF);
   const [formOpen, setFormOpen] = useState(false);
 
   const view = db.ui.crsView;
@@ -66,16 +74,69 @@ function CoursesList(props: { onOpenWheel: () => void }) {
 
   const shown = useMemo(() => {
     const nq = normSearch(q);
-    return db.courses.filter((c) => {
+    const list = db.courses.filter((c) => {
       if (cat !== 'all' && c.cat !== cat) return false;
       if (sem !== 'all' && c.semester !== sem) return false;
+      if (colF.name.trim() && !normSearch(c.name).includes(normSearch(colF.name))) return false;
+      if (colF.audience.trim() && !normSearch(c.audience || '').includes(normSearch(colF.audience))) return false;
+      if (colF.teacher.trim() && !normSearch(teacherName(c.teacherId)).includes(normSearch(colF.teacher))) return false;
+      if (colF.model !== 'all' && c.model !== colF.model) return false;
+      if (!numMatch(colF.count, enrollCount(db, c.id))) return false;
+      if (!numMatch(colF.price, c.price || 0)) return false;
       if (nq) {
         const hay = normSearch([c.name, teacherName(c.teacherId), c.cat, c.audience ?? ''].join(' '));
         if (!hay.includes(nq)) return false;
       }
       return true;
     });
-  }, [db.courses, db.teachers, q, cat, sem]);
+    if (!sort) return list;
+    const val = (c: Course): string | number =>
+      sort.key === 'name' ? c.name
+      : sort.key === 'audience' ? c.audience || ''
+      : sort.key === 'teacher' ? teacherName(c.teacherId)
+      : sort.key === 'model' ? c.model
+      : sort.key === 'count' ? enrollCount(db, c.id)
+      : sort.key === 'price1' ? c.price1 || 0
+      : sort.key === 'price2' ? c.price2 || 0
+      : c.price || 0;
+    return [...list].sort((a, b) => {
+      const va = val(a);
+      const vb = val(b);
+      const cc = typeof va === 'string' ? va.localeCompare(String(vb), 'he') : va - (vb as number);
+      return cc * sort.dir;
+    });
+  }, [db, q, cat, sem, colF, sort]);
+
+  const clickSort = (key: CrsSortKey) =>
+    setSort((s) => (s?.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
+
+  const thSort = (key: CrsSortKey, label: string) => (
+    <th
+      onClick={() => clickSort(key)}
+      title="מיון לפי העמודה — לחיצה נוספת הופכת כיוון"
+      style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+    >
+      {label}{' '}
+      <span style={{ fontSize: 10, opacity: sort?.key === key ? 1 : 0.35 }}>
+        {sort?.key === key ? (sort.dir === 1 ? '▲' : '▼') : '↕'}
+      </span>
+    </th>
+  );
+
+  const colInput = (field: 'name' | 'audience' | 'teacher' | 'count' | 'price', placeholder: string) => (
+    <th style={{ padding: '4px 8px' }}>
+      <input
+        value={colF[field]}
+        onChange={(e) => setColF({ ...colF, [field]: e.target.value })}
+        placeholder={placeholder}
+        style={{ width: '100%', minWidth: 56, padding: '5px 8px', fontSize: 12 }}
+      />
+    </th>
+  );
+
+  const colFActive =
+    colF.name.trim() !== '' || colF.audience.trim() !== '' || colF.teacher.trim() !== '' ||
+    colF.model !== 'all' || colF.count.trim() !== '' || colF.price.trim() !== '';
 
   function toggleView() {
     setDb((d) => ({ ui: { ...d.ui, crsView: d.ui.crsView === 'grid' ? 'list' : 'grid' } }));
@@ -128,6 +189,15 @@ function CoursesList(props: { onOpenWheel: () => void }) {
             options={[{ value: 'all', label: 'כל הסמסטרים' }, ...sems.map((x) => ({ value: x, label: x }))]}
           />
         </div>
+        {view === 'list' && (
+          <Btn
+            onClick={() => setColFOn(!colFOn)}
+            title="שורת סינון מתחת לכל עמודה: שם, קהל, מורה, מסלול, תלמידים (3 / 3+ / 2-4) ומחיר"
+            kind={colFOn || colFActive ? 'primary' : undefined}
+          >
+            ⏷ סינון עמודות
+          </Btn>
+        )}
       </div>
 
       {shown.length === 0 ? (
@@ -201,16 +271,39 @@ function CoursesList(props: { onOpenWheel: () => void }) {
           <table className="table">
             <thead>
               <tr>
-                <th>שם חוג</th>
-                <th>קהל</th>
-                <th>מורה</th>
-                <th>מסלול</th>
+                {thSort('name', 'שם חוג')}
+                {thSort('audience', 'קהל')}
+                {thSort('teacher', 'מורה')}
+                {thSort('model', 'מסלול')}
                 <th>יום</th>
-                <th>תלמידים</th>
-                <th>מחיר</th>
-                <th>הנחה 1</th>
-                <th>הנחה 2</th>
+                {thSort('count', 'תלמידים')}
+                {thSort('price', 'מחיר')}
+                {thSort('price1', 'הנחה 1')}
+                {thSort('price2', 'הנחה 2')}
               </tr>
+              {colFOn && (
+                <tr>
+                  {colInput('name', 'שם…')}
+                  {colInput('audience', 'קהל…')}
+                  {colInput('teacher', 'מורה…')}
+                  <th style={{ padding: '4px 8px' }}>
+                    <select
+                      value={colF.model}
+                      onChange={(e) => setColF({ ...colF, model: e.target.value })}
+                      style={{ width: '100%', padding: '5px 6px', fontSize: 12 }}
+                    >
+                      <option value="all">הכל</option>
+                      <option value="monthly">מנוי חודשי</option>
+                      <option value="punch">כרטיסייה</option>
+                    </select>
+                  </th>
+                  <th />
+                  {colInput('count', '3 / 3+')}
+                  {colInput('price', '150 / 100-200')}
+                  <th />
+                  <th />
+                </tr>
+              )}
             </thead>
             <tbody>
               {shown.map((c) => {
