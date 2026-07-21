@@ -50,9 +50,10 @@ html {
 }
 
 body {
-  background: var(--bg);
+  /* רקע הדף וגופן הגוף מתחלפים פר-ערכה (--page-bg / --font-body ב-themes.css) */
+  background: var(--page-bg, var(--bg));
   color: var(--ink);
-  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body, 'Heebo'), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
 }
 
@@ -501,19 +502,25 @@ button:focus-visible {
 /* רכיבים משותפים */
 
 .card {
-  background: var(--panel);
+  /* רקע הכרטיס פר-ערכה — היכל מקבל גרדיאנט "גאלה" עדין (--card-bg ב-themes.css) */
+  background: var(--card-bg, var(--panel));
   border: 1px solid var(--panel-line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px;
 }
 
-/* טיפוגרפיית תצוגה — סריף בהיכל, Heebo בשאר הערכות (--font-display פר-ערכה) */
+/* טיפוגרפיית תצוגה — סריף Frank Ruhl Libre באור ראשון/היכל, Rubik בצֹהַר,
+   Suez One בקהילה (--font-display פר-ערכה, themes.css) */
 h1,
 .page-title,
-.hm-hero-title,
-.hm-stat-value {
+.hm-hero-title {
   font-family: var(--font-display);
+}
+
+/* מספרי הנתונים — גופן נפרד פר-ערכה (סריף בהיכל, Suez One בקהילה, גוף בשאר) */
+.hm-stat-value {
+  font-family: var(--font-stat, var(--font-body));
 }
 
 .page-title {
@@ -1264,7 +1271,7 @@ h1,
 
 /* 🎉 "לברך במפגש" (קהילה) — גלולה צבעונית שמנווטת לחוג של היום */
 .hm-bday-cta {
-  background: var(--bday-ink);
+  background: var(--bday-cta-bg, var(--bday-ink));
   color: #fff;
   border-radius: 999px;
   padding: 7px 14px;
@@ -1388,7 +1395,7 @@ h1,
 }
 
 .hm-stat-spark i:last-child {
-  background: var(--accent-deep);
+  background: var(--spark-hot, var(--accent-deep));
 }
 
 /* ── כותרות מקטע אחידות — אמוג'י + כותרת מודגשת + קו דק ── */
