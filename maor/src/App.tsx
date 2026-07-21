@@ -1,10 +1,18 @@
 /**
  * שלד האפליקציה: ניווט, החלפת מסכים, טוסטים, פלטת פקודות (Ctrl+K)
  * וגיבוי סוף-יום אוטומטי.
+ *
+ * שלד פר-ערכה (סבב 3): ערכת צֹהַר מקבלת סרגל-צד אייקונים בצד ימין (RTL)
+ * + שורת כותרת עם חיפוש רחב ופעולות; שאר הערכות נשארות עם הסרגל העליון.
+ * במובייל (≤760px) גם צֹהַר חוזרת לשלד העליון — הפתרון הפשוט והעמיד
+ * לגלילה אופקית. הקישורים/גייטינג/מונחים זהים בשני השלדים (מערך NAV אחד).
  */
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX, type ReactNode } from 'react';
 import { useApp, type View } from './store/useApp';
-import { featureOn, termOf } from './lib/config';
+import { featureOn, moduleOn, termOf } from './lib/config';
+import { hebDateFull } from './lib/hebrew';
+import { todaySessions } from './components/home/homeData';
+import { Btn } from './components/ui';
 import { BuilderWizard } from './components/builder/BuilderWizard';
 import { ImpactWall } from './components/wall/ImpactWall';
 import { HomeView } from './components/home/HomeView';
@@ -64,10 +72,25 @@ export default function App() {
   const exportBackup = useApp((s) => s.exportBackup);
   const cloud = useApp((s) => s.cloud);
   const cloudSignOut = useApp((s) => s.cloudSignOut);
+  // הערכה המוחלת בפועל — העדפת המשתמש (db.ui.theme) גוברת על ערכת הארגון
+  const uiTheme = useApp((s) => s.db.ui.theme);
+  const openFamilyForm = useApp((s) => s.openFamilyForm);
+  const selectCourse = useApp((s) => s.selectCourse);
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  // מובייל: מתחת ל-760px ערכת צֹהַר חוזרת לשלד הסרגל העליון (ראו הערת הקובץ)
+  const [narrow, setNarrow] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 760px)');
+    const onChange = () => setNarrow(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   // אשף ההרכבה — למטמיע בלבד, נפתח עם #builder בכתובת
   const [builderOpen, setBuilderOpen] = useState(() => window.location.hash === '#builder');
@@ -144,14 +167,59 @@ export default function App() {
   // מיתוג: שם מהקונפיגורציה גובר על השם השמור בנתונים
   const orgName = config.orgName || dbOrgName;
   // מודולים: בית תמיד; השאר לפי config.modules (חסר = פעיל).
-  // הגדרות עברו לאייקון ⚙️ בקצה השמאלי של הסרגל העליון — לא קישור ברצועה.
+  // הגדרות עברו לאייקון/פריט ⚙️ נפרד — לא קישור ברצועה.
   const nav = NAV.filter(
     (n) => n.view !== 'settings' && (n.view === 'home' || config.modules[n.view] !== false),
   );
+  // תווית קישור — מונח מותאם מהמילון לששת מסכי המודולים; בית נשאר קבוע
+  const labelOf = (n: (typeof NAV)[number]) =>
+    n.view === 'home' ? n.label : termOf(config, `nav.${n.view}`, n.label);
 
-  return (
-    <div className="app-shell">
-      {/* סרגל עליון — הכרום מתחלף פר-ערכה דרך משתני --nav2-* (themes.css) */}
+  // מתג השלד: צֹהַר = סרגל-צד (בדסקטופ); כל השאר — הסרגל העליון הקיים
+  const theme = uiTheme ?? config.theme;
+  const shell = theme === 'tsohar' && !narrow ? 'side' : 'top';
+
+  // "ניקוב מהיר" — אותה פעולה כמו בווידג'ט הפעולות המהירות במסך הבית
+  const quickPunch = () => {
+    const sessions = todaySessions(useApp.getState().db, new Date());
+    if (sessions.length) selectCourse(sessions[0].course.id);
+    else go('courses');
+  };
+
+  // צ'יפ משתמש הענן — קיים בשני השלדים
+  const userChip: ReactNode = cloud.enabled && cloud.user && (
+    <div className="nav-user">
+      <span
+        aria-hidden
+        title={syncDot.title}
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: 99,
+          background: syncDot.color,
+          flex: '0 0 auto',
+        }}
+      />
+      <span className="nav-user-mail" title={cloud.user.email}>
+        {cloud.user.email}
+      </span>
+      <button onClick={() => void cloudSignOut()} title="יציאה מהחשבון — הנתונים נשארים במכשיר">
+        יציאה
+      </button>
+    </div>
+  );
+
+  const mainEl = (
+    <main className="app-main">
+      {famCount === 0 && <DemoDrop />}
+      <DayGate />
+      <Current />
+    </main>
+  );
+
+  // שלד עליון — הכרום מתחלף פר-ערכה דרך משתני --nav2-* (themes.css)
+  const topShell = (
+    <>
       <header className="app-top">
         <div className="brand">
           {config.logoDataUri && <img src={config.logoDataUri} alt="" />}
@@ -164,8 +232,7 @@ export default function App() {
               className={view === n.view ? 'active' : ''}
               onClick={() => go(n.view)}
             >
-              {/* מונח מותאם מהמילון לששת מסכי המודולים; בית נשאר קבוע */}
-              {n.view === 'home' ? n.label : termOf(config, `nav.${n.view}`, n.label)}
+              {labelOf(n)}
             </button>
           ))}
         </nav>
@@ -190,35 +257,93 @@ export default function App() {
           >
             <span aria-hidden>⚙️</span>
           </button>
-          {cloud.enabled && cloud.user && (
-            <div className="nav-user">
-              <span
-                aria-hidden
-                title={syncDot.title}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 99,
-                  background: syncDot.color,
-                  flex: '0 0 auto',
-                }}
-              />
-              <span className="nav-user-mail" title={cloud.user.email}>
-                {cloud.user.email}
-              </span>
-              <button onClick={() => void cloudSignOut()} title="יציאה מהחשבון — הנתונים נשארים במכשיר">
-                יציאה
-              </button>
-            </div>
-          )}
+          {userChip}
         </div>
       </header>
+      {mainEl}
+    </>
+  );
 
-      <main className="app-main">
-        {famCount === 0 && <DemoDrop />}
-        <DayGate />
-        <Current />
-      </main>
+  // שלד סרגל-צד (צֹהַר) — רצועת אייקונים בצד ימין (RTL) + שורת כותרת עם
+  // חיפוש רחב ופעולות ראשיות. כל קישור מציג אייקון + תווית קטנה מתחתיו
+  // (נגישות + התאמה לבודקי הטקסט של Playwright), בתוספת title ו-aria-label.
+  const sideShell = (
+    <>
+      <aside className="app-side">
+        {config.logoDataUri && (
+          <div className="side-logo">
+            <img src={config.logoDataUri} alt="" />
+          </div>
+        )}
+        {/* בכוונה בלי .app-nav — צבעי הרצועה העליונה (--nav2-*) לא חלים על הצד */}
+        <nav className="side-nav" aria-label="ניווט ראשי">
+          {nav.map((n) => {
+            const label = labelOf(n);
+            return (
+              <button
+                key={n.view}
+                className={'side-link' + (view === n.view ? ' active' : '')}
+                onClick={() => go(n.view)}
+                title={label}
+                aria-label={label}
+              >
+                <span className="side-ico" aria-hidden>{n.icon}</span>
+                <span className="nav-label">{label}</span>
+              </button>
+            );
+          })}
+        </nav>
+        <button
+          type="button"
+          className={'side-link side-gear' + (view === 'settings' ? ' active' : '')}
+          onClick={() => go('settings')}
+          title="הגדרות"
+          aria-label="הגדרות"
+        >
+          <span className="side-ico" aria-hidden>⚙️</span>
+          <span className="nav-label">הגדרות</span>
+        </button>
+      </aside>
+      <div className="side-body">
+        <header className="side-head">
+          <div className="brand">
+            {config.logoDataUri && <img src={config.logoDataUri} alt="" />}
+            <span className="brand-name">
+              {orgName}
+              <span className="side-brand-sub">{hebDateFull(new Date().toISOString().slice(0, 10))}</span>
+            </span>
+          </div>
+          {/* צ'יפ חיפוש-פקודה רחב — אותו מנגנון בדיוק כמו Ctrl+K */}
+          <button
+            type="button"
+            className="side-search"
+            onClick={() => setPalette(true)}
+            title="חיפוש בכל המערכת (Ctrl+K)"
+          >
+            <span aria-hidden>🔍</span>
+            <span className="side-search-label">חיפוש או פקודה — משפחה, חוג, תורם, דוח…</span>
+            <kbd aria-hidden>Ctrl K</kbd>
+          </button>
+          <div className="side-actions">
+            <Btn kind="primary" onClick={openFamilyForm} title="פתיחת טופס הוספת משפחה">
+              + משפחה חדשה
+            </Btn>
+            {moduleOn(config, 'courses') && (
+              <Btn onClick={quickPunch} title="ניקוב מהיר — לחוג הקרוב של היום">
+                ניקוב מהיר
+              </Btn>
+            )}
+            {userChip}
+          </div>
+        </header>
+        {mainEl}
+      </div>
+    </>
+  );
+
+  return (
+    <div className={'app-shell' + (shell === 'side' ? ' shell-side' : '')}>
+      {shell === 'side' ? sideShell : topShell}
 
       {paletteOpen && <CommandPalette />}
 

@@ -84,6 +84,15 @@ interface AppState {
   selectFamily: (id: string | null) => void;
   selectCourse: (id: string | null) => void;
   setPalette: (open: boolean) => void;
+  /**
+   * דגל בקשת "משפחה חדשה" מהכרום (כותרת צֹהַר) — FamiliesView צורך אותו
+   * ופותח את אותו טופס הוספה בדיוק כמו הכפתור שבמסך עצמו.
+   */
+  famFormReq: boolean;
+  /** ניווט למסך המשפחות + פתיחת טופס ההוספה (זרימה אחת לכל נקודות הכניסה). */
+  openFamilyForm: () => void;
+  /** איפוס הדגל אחרי שהטופס נפתח. */
+  ackFamilyForm: () => void;
 
   // ערכת נושא וקונפיגורציה
   /** קביעת קונפיגורציה חדשה + שמירתה כדריסת ריצה ב-localStorage. */
@@ -329,6 +338,10 @@ export const useApp = create<AppState>()((set, get) => {
     selectFamily: (id) => set({ selFamilyId: id, view: 'families' }),
     selectCourse: (id) => set({ selCourseId: id, view: 'courses' }),
     setPalette: (open) => set({ paletteOpen: open }),
+    famFormReq: false,
+    // מנקה בחירה קודמת כדי שרשימת המשפחות (והטופס) יוצגו — לא כרטיס משפחה
+    openFamilyForm: () => set({ view: 'families', selFamilyId: null, famFormReq: true }),
+    ackFamilyForm: () => set({ famFormReq: false }),
 
     setConfig(cfg) {
       set({ config: cfg });

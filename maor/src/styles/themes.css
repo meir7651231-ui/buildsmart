@@ -30,6 +30,14 @@
   --nav2-line: #e4dcc9;
   --font-display: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --panel-line: var(--line);
+  /* ── שלד סרגל-צד (סבב 3) — בשימוש בפועל רק בצֹהַר; fallback לכל ערכה ── */
+  --side-bg: #fbf6ea;
+  --side-ink: #35302a;
+  --side-ink-soft: #6a5c40;
+  --side-hover-bg: rgba(243, 199, 107, 0.22);
+  --side-active-bg: #f3c76b;
+  --side-active-ink: #211d17;
+  --side-line: #e4dcc9;
 }
 
 /* ── אור ראשון — שמנת, ענבר וזהב (המראה הקלאסי; זהה לברירת המחדל) ── */
@@ -80,6 +88,13 @@
   --nav2-line: #e4dcc9;
   --font-display: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --panel-line: var(--line);
+  --side-bg: #fbf6ea;
+  --side-ink: #35302a;
+  --side-ink-soft: #6a5c40;
+  --side-hover-bg: rgba(243, 199, 107, 0.22);
+  --side-active-bg: #f3c76b;
+  --side-active-ink: #211d17;
+  --side-line: #e4dcc9;
 }
 
 /* ── היכל — כהה ויוקרתי: זהב על שחור-חום, קווי שיער מוזהבים ── */
@@ -139,6 +154,13 @@
   --nav2-line: rgba(233, 189, 99, 0.35);
   --font-display: 'Frank Ruhl Libre', 'David', 'Noto Serif Hebrew', 'Times New Roman', serif;
   --panel-line: rgba(233, 189, 99, 0.18);
+  --side-bg: #0b0906;
+  --side-ink: #f2ead8;
+  --side-ink-soft: #b5a884;
+  --side-hover-bg: rgba(233, 189, 99, 0.1);
+  --side-active-bg: rgba(233, 189, 99, 0.16);
+  --side-active-ink: #e9bd63;
+  --side-line: rgba(233, 189, 99, 0.35);
 }
 
 /* ── צֹהַר — SaaS בהיר ונקי: לבן, אפור חם וטורקיז ── */
@@ -191,6 +213,14 @@
   --nav2-line: rgba(255, 255, 255, 0.001);
   --font-display: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --panel-line: var(--line);
+  /* שלד סרגל-הצד של צֹהַר: רצועה לבנה, גלולה פעילה טורקיז מלאה (מוקאפ סבב 3) */
+  --side-bg: #ffffff;
+  --side-ink: #1c1a17;
+  --side-ink-soft: #5f594f;
+  --side-hover-bg: rgba(14, 122, 108, 0.08);
+  --side-active-bg: #0e7a6c;
+  --side-active-ink: #ffffff;
+  --side-line: #e6e3dd;
 }
 
 /* ── קהילה — חם ומשחקי: שמנת חמה, טורקיז ופינות מעוגלות ── */
@@ -242,4 +272,11 @@
   --nav2-line: rgba(255, 255, 255, 0.001);
   --font-display: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --panel-line: var(--line);
+  --side-bg: #ffffff;
+  --side-ink: #26221c;
+  --side-ink-soft: #4d463c;
+  --side-hover-bg: rgba(23, 143, 128, 0.1);
+  --side-active-bg: #178f80;
+  --side-active-ink: #ffffff;
+  --side-line: #eadfc9;
 }

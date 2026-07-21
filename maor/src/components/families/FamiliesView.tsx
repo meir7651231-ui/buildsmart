@@ -3,7 +3,7 @@
  * הקלדה ולתעתיק) + צ'יפים של חיזוי, סינון סטטוס/עיר/קהילה, מיון בלחיצה על
  * כותרת עמודה, שורת סינון-עמודות, פאנל סינון מורחב וגלגל מאתר המשפחות.
  */
-import { useState, type KeyboardEvent } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import type { Family } from '../../types/domain';
 import { useApp } from '../../store/useApp';
 import { featureOn } from '../../lib/config';
@@ -81,6 +81,16 @@ export function FamiliesView() {
   const [fwLocks, setFwLocks] = useState<Record<string, string>>({});
   const [fwRot, setFwRot] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
+
+  // בקשת "משפחה חדשה" מהכרום (כותרת צֹהַר / פעולות מהירות) — אותו טופס בדיוק
+  const famFormReq = useApp((s) => s.famFormReq);
+  const ackFamilyForm = useApp((s) => s.ackFamilyForm);
+  useEffect(() => {
+    if (famFormReq) {
+      setFormOpen(true);
+      ackFamilyForm();
+    }
+  }, [famFormReq, ackFamilyForm]);
 
   const selected = db.families.find((f) => f.id === selFamilyId);
   if (selected) return <FamilyDetail family={selected} />;

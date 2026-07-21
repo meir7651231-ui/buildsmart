@@ -54,6 +54,15 @@ const tagStyle = (bg: string, c: string): CSSProperties => ({
 
 const softEmpty: CSSProperties = { color: 'var(--ink-faint)', fontSize: 13.5, padding: '6px 6px' };
 
+/**
+ * הערכה המוחלת בפועל — העדפת המשתמש (db.ui.theme) גוברת על ערכת הארגון,
+ * בדיוק כמו applyTheme ב-init. משמש לענפי-רינדור פר-ערכה בתוך ווידג'טים
+ * (הנתונים והגייטינג אינם משתנים — רק צורת ההצגה).
+ */
+function themeOf(ctx: HomeCtx): string {
+  return ctx.db.ui.theme ?? ctx.config.theme;
+}
+
 /* ── קונטקסט משותף לכל הווידג'טים — מחושב פעם אחת ב-HomeView ── */
 
 /** כל הנתונים הנגזרים של מסך הבית (useMemo ב-HomeView). */
@@ -316,9 +325,11 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
  * 🎂 ימי הולדת היום — באנר חם מתחת ל-hero (משתני --bday-* פר-ערכה).
  * אין חוגגים היום ⇒ לא מרונדר כלום. שורת המשנה מוסיפה חוג + שעה
  * רק אם החוגג/ת משובצ/ת לחוג שמתקיים היום (דרך data.sessions — כבר ממוגן-מודול).
+ * קהילה: כשלחוגג/ת יש מפגש היום מתווסף כפתור "🎉 לברך במפגש" — ניווט לחוג.
  */
 function BdaysWidget({ ctx }: { ctx: HomeCtx }) {
-  const { db, data, selectFamily } = ctx;
+  const { db, data, selectFamily, selectCourse } = ctx;
+  const isKehila = themeOf(ctx) === 'kehila';
   if (!data.bdays.length) return null;
   return (
     <section className="hm-bday" aria-label="ימי הולדת היום">
@@ -329,24 +340,35 @@ function BdaysWidget({ ctx }: { ctx: HomeCtx }) {
         const ts = data.sessions.find((s) => courseIds.has(s.course.id));
         const verb = b.member.gender === 'f' ? 'חוגגת' : 'חוגג';
         return (
-          <button
-            key={b.member.id}
-            type="button"
-            className="hm-bday-row"
-            onClick={() => selectFamily(b.member.famId)}
-            title="לכרטיס המשפחה"
-          >
-            <span className="hm-bday-ico" aria-hidden>🎂</span>
-            <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, textAlign: 'right' }}>
-              <span className="hm-bday-title">
-                {b.member.first} {verb} היום {b.age}!
+          <div key={b.member.id} className="hm-bday-row">
+            <button
+              type="button"
+              className="hm-bday-main"
+              onClick={() => selectFamily(b.member.famId)}
+              title="לכרטיס המשפחה"
+            >
+              <span className="hm-bday-ico" aria-hidden>🎂</span>
+              <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, textAlign: 'right' }}>
+                <span className="hm-bday-title">
+                  {b.member.first} {verb} היום {b.age}!
+                </span>
+                <span className="hm-bday-sub">
+                  {'משפחת ' + b.member.famName +
+                    (ts ? ` · ${ts.course.name}${ts.session.time ? ' · ' + ts.session.time : ''}` : '')}
+                </span>
               </span>
-              <span className="hm-bday-sub">
-                {'משפחת ' + b.member.famName +
-                  (ts ? ` · ${ts.course.name}${ts.session.time ? ' · ' + ts.session.time : ''}` : '')}
-              </span>
-            </span>
-          </button>
+            </button>
+            {isKehila && ts && (
+              <button
+                type="button"
+                className="hm-bday-cta"
+                onClick={() => selectCourse(ts.course.id)}
+                title={'לחוג ' + ts.course.name + ' — לברך במפגש של היום'}
+              >
+                🎉 לברך במפגש
+              </button>
+            )}
+          </div>
         );
       })}
     </section>
@@ -459,40 +481,130 @@ function StatsWidget({ ctx }: { ctx: HomeCtx }) {
   );
 }
 
-/** פאנל "היום" — המפגשים של היום ככרטיסי-שורה (גלולת שעה + נוכחות), אירועים וימי הולדת. */
+/**
+ * גלולת סטטוס מפגש — נגזרת אך ורק מהשעה האמיתית של המפגש מול השעה הנוכחית:
+ * הסתיים / מתקיים כעת (±45 דק') / בהמשך היום. אין שעה ⇒ אין גלולה.
+ */
+function sessionStatus(time: string | undefined, now: Date): { label: string; bg: string; c: string } | null {
+  if (!time) return null;
+  const [h, m] = time.split(':').map(Number);
+  if (!Number.isFinite(h)) return null;
+  const diff = h * 60 + (Number.isFinite(m) ? m : 0) - (now.getHours() * 60 + now.getMinutes());
+  if (diff < -45) return { label: 'הסתיים', bg: 'var(--line-soft)', c: 'var(--ink-faint)' };
+  if (diff <= 45) return { label: 'מתקיים כעת', bg: 'color-mix(in srgb, var(--green) 14%, var(--panel))', c: 'var(--green)' };
+  return { label: 'בהמשך היום', bg: 'var(--stat-tint)', c: 'var(--accent-deep)' };
+}
+
+/**
+ * פאנל "היום" — המפגשים של היום, אירועים וימי הולדת.
+ * צֹהַר (SaaS): המפגשים כטבלה נקייה (שעה · מה · איפה · רשומות · סטטוס · נוכחות)
+ * + קישור "ללוח המלא ←"; שאר הערכות: כרטיסי-שורה (גלולת שעה + נוכחות).
+ * הנתונים (data.sessions וכו') זהים בשני הענפים — רק צורת ההצגה שונה.
+ */
 function TodayWidget({ ctx }: { ctx: HomeCtx }) {
-  const { db, now, data, go, selectFamily, selectCourse } = ctx;
+  const { db, config, now, data, go, selectFamily, selectCourse } = ctx;
   const famName = (id: string) => db.families.find((f) => f.id === id)?.name ?? '';
+  const isTsohar = themeOf(ctx) === 'tsohar';
   return (
-    <Panel icon="📅" title={`היום · יום ${DAY_NAMES[now.getDay()]}`} badge={data.holiday ?? undefined}>
+    <Panel
+      icon="📅"
+      title={`היום · יום ${DAY_NAMES[now.getDay()]}`}
+      badge={data.holiday ?? undefined}
+      action={
+        isTsohar && moduleOn(config, 'calendar') ? (
+          <Btn sm onClick={() => go('calendar')} title="ללוח השנה המלא">
+            ללוח המלא ←
+          </Btn>
+        ) : undefined
+      }
+    >
       <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)' }}>המפגשים של היום</div>
       {data.sessions.length === 0 && <div style={softEmpty}>אין מפגשי חוגים היום</div>}
-      {data.sessions.map((ts, i) => {
-        const room = db.rooms.find((r) => r.id === ts.course.roomId)?.name ?? '';
-        const teacher = db.teachers.find((t) => t.id === ts.course.teacherId)?.name ?? '';
-        const enrolled = db.enrollments.filter((e) => e.courseId === ts.course.id && e.status === 'active').length;
-        const sub = [room, teacher, `${enrolled} רשומים`].filter(Boolean).join(' · ');
-        return (
-          <div key={ts.course.id + '-' + i} className="hm-meet">
-            <span className="hm-time">{ts.session.time || '—'}</span>
-            <button type="button" className="hm-meet-main" onClick={() => selectCourse(ts.course.id)} title="לכרטיס החוג">
-              <span className="hm-meet-title">
-                {ts.course.name}
-                {ts.session.label ? ' · ' + ts.session.label : ''}
-              </span>
-              <span className="hm-meet-sub">{sub}</span>
-            </button>
-            <button
-              type="button"
-              className="hm-pill-btn"
-              onClick={() => selectCourse(ts.course.id)}
-              title="פתיחת כרטיס החוג לניהול נוכחות"
-            >
-              נוכחות ✓
-            </button>
-          </div>
-        );
-      })}
+      {isTsohar && data.sessions.length > 0 && (
+        /* הטבלה גוללת בתוך עצמה במסך צר — הגוף לעולם לא גולל אופקית */
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>שעה</th>
+                <th>מה</th>
+                <th>איפה</th>
+                <th>רשומות</th>
+                <th>סטטוס</th>
+                <th>נוכחות</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.sessions.map((ts, i) => {
+                const room = db.rooms.find((r) => r.id === ts.course.roomId)?.name ?? '';
+                const enrolled = db.enrollments.filter(
+                  (e) => e.courseId === ts.course.id && e.status === 'active',
+                ).length;
+                const st = sessionStatus(ts.session.time, now);
+                return (
+                  <tr
+                    key={ts.course.id + '-' + i}
+                    onClick={() => selectCourse(ts.course.id)}
+                    style={{ cursor: 'pointer' }}
+                    title="לכרטיס החוג"
+                  >
+                    <td>
+                      <span className="hm-time">{ts.session.time || '—'}</span>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>
+                      {ts.course.name}
+                      {ts.session.label ? ' · ' + ts.session.label : ''}
+                    </td>
+                    <td>{room || '—'}</td>
+                    <td>{enrolled}</td>
+                    <td>{st ? <span style={tagStyle(st.bg, st.c)}>{st.label}</span> : '—'}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="hm-pill-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectCourse(ts.course.id);
+                        }}
+                        title="פתיחת כרטיס החוג לניהול נוכחות"
+                      >
+                        נוכחות ✓
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {!isTsohar &&
+        data.sessions.map((ts, i) => {
+          const room = db.rooms.find((r) => r.id === ts.course.roomId)?.name ?? '';
+          const teacher = db.teachers.find((t) => t.id === ts.course.teacherId)?.name ?? '';
+          const enrolled = db.enrollments.filter((e) => e.courseId === ts.course.id && e.status === 'active').length;
+          const sub = [room, teacher, `${enrolled} רשומים`].filter(Boolean).join(' · ');
+          return (
+            <div key={ts.course.id + '-' + i} className="hm-meet">
+              <span className="hm-time">{ts.session.time || '—'}</span>
+              <button type="button" className="hm-meet-main" onClick={() => selectCourse(ts.course.id)} title="לכרטיס החוג">
+                <span className="hm-meet-title">
+                  {ts.course.name}
+                  {ts.session.label ? ' · ' + ts.session.label : ''}
+                </span>
+                <span className="hm-meet-sub">{sub}</span>
+              </button>
+              <button
+                type="button"
+                className="hm-pill-btn"
+                onClick={() => selectCourse(ts.course.id)}
+                title="פתיחת כרטיס החוג לניהול נוכחות"
+              >
+                נוכחות ✓
+              </button>
+            </div>
+          );
+        })}
 
       <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)', marginTop: 6 }}>אירועים</div>
       {data.events.length === 0 && data.bdays.length === 0 && <div style={softEmpty}>אין אירועים היום</div>}
@@ -1061,8 +1173,8 @@ export const THEME_LAYOUTS: Record<string, readonly WidgetId[]> = {
   heichal: ['hero', 'bdays', 'stats', 'today', 'goldbook', 'hebcal', 'attention'],
   /* צֹהַר — דשבורד תפעולי נקי */
   tsohar: ['hero', 'bdays', 'stats', 'today', 'attention', 'recent'],
-  /* קהילה — חם וקהילתי: תקציר, אמינות קהילתית וקרוסלה */
-  kehila: ['hero', 'bdays', 'digest', 'today', 'community', 'carousel'],
+  /* קהילה — חם וקהילתי: כרטיסים "נעוצים" ב-hero (מוקאפ), תקציר, אמינות וקרוסלה */
+  kehila: ['hero', 'stats', 'bdays', 'digest', 'today', 'community', 'carousel'],
 };
 
 /** סדר ברירת המחדל הקלאסי (אור ראשון) — fallback לערכה לא מוכרת. */

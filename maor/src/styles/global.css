@@ -314,6 +314,190 @@ button:focus-visible {
   }
 }
 
+/* ═══════════ שלד סרגל-צד — ערכת צֹהַר (מוקאפ סבב 3) ═══════════
+   רצועת אייקונים דקה בצד ימין (RTL) + שורת כותרת עם חיפוש-פקודה רחב.
+   הצבעים דרך משתני --side-* (themes.css). מתחת ל-760px App.tsx מרנדר
+   את שלד הסרגל העליון במקום (matchMedia) — אין צורך ב-media כאן. */
+
+.app-shell.shell-side {
+  flex-direction: row;
+}
+
+.app-side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 72px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 7px 10px;
+  background: var(--side-bg);
+  border-inline-end: 1px solid var(--side-line);
+  z-index: 50;
+}
+
+.side-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.side-logo img {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.side-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* קישור = אייקון + תווית קטנה מתחתיו (נגישות + בודקי טקסט); פעיל = גלולה מלאה */
+.side-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 2px 6px;
+  border-radius: 12px;
+  color: var(--side-ink-soft);
+  flex-shrink: 0;
+}
+
+.side-link .side-ico {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.side-link .nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.side-link:hover {
+  background: var(--side-hover-bg);
+  color: var(--side-ink);
+}
+
+.side-link.active {
+  background: var(--side-active-bg);
+  color: var(--side-active-ink);
+  font-weight: 700;
+}
+
+/* ⚙️ הגדרות — נעוץ לתחתית הרצועה */
+.side-gear {
+  margin-top: auto;
+}
+
+.side-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* שורת הכותרת: מיתוג ימין · חיפוש-פקודה רחב במרכז · פעולות ראשיות שמאל */
+.side-head {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 22px;
+  background: var(--side-bg);
+  border-bottom: 1px solid var(--side-line);
+}
+
+/* בשורת הכותרת הרקע בהיר — הדיו של המיתוג/משתמש מגיע מהערכה, לא מ---nav2-* */
+.side-head .brand {
+  color: var(--side-ink);
+}
+
+.side-brand-sub {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.side-head .nav-user {
+  color: var(--ink-soft);
+}
+
+.side-head .nav-user > button {
+  border-color: var(--line);
+}
+
+.side-head .nav-user > button:hover {
+  background: var(--hover-bg);
+}
+
+/* צ'יפ החיפוש הרחב — נראה כשדה קלט, פותח את פלטת הפקודות (Ctrl+K) */
+.side-search {
+  flex: 1 1 240px;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--ink-faint);
+  font-size: 13.5px;
+  text-align: right;
+  min-width: 0;
+}
+
+.side-search:hover {
+  border-color: var(--accent);
+  color: var(--ink-soft);
+}
+
+.side-search-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-search kbd {
+  margin-inline-start: auto;
+  font: inherit;
+  font-size: 11px;
+  direction: ltr;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.side-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
 /* רכיבים משותפים */
 
 .card {
@@ -584,6 +768,8 @@ h1,
 
 @media print {
   .app-top,
+  .app-side,
+  .side-head,
   .toasts,
   .no-print {
     display: none !important;
@@ -1056,15 +1242,41 @@ h1,
   flex-direction: column;
 }
 
+/* השורה — עוטפת את הכפתור הראשי + כפתור פעולה אופציונלי (קהילה) */
 .hm-bday-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
+}
+
+.hm-bday-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
   text-align: right;
   padding: 8px 6px;
   border-radius: 10px;
   cursor: pointer;
+}
+
+/* 🎉 "לברך במפגש" (קהילה) — גלולה צבעונית שמנווטת לחוג של היום */
+.hm-bday-cta {
+  background: var(--bday-ink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-inline-end: 6px;
+}
+
+.hm-bday-cta:hover {
+  filter: brightness(1.15);
 }
 
 .hm-bday-ico {
@@ -1514,4 +1726,59 @@ h1,
   letter-spacing: 5px;
   color: var(--accent);
   font-family: 'Heebo', sans-serif;
+}
+
+/* היכל — ליטוש גאלה: גלולות "נוכחות" במתאר זהב דק (מוקאפ סבב 3) */
+:root[data-theme='heichal'] .hm-pill-btn {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  color: var(--accent);
+}
+
+:root[data-theme='heichal'] .hm-pill-btn:hover {
+  background: rgba(233, 189, 99, 0.14);
+  border-color: var(--accent);
+}
+
+/* ═══════════ 🪟 צֹהַר — דשבורד SaaS (מוקאפ סבב 3) ═══════════
+   צ'יפי "דורש טיפול" (עבר יעד / מחר / נותר 1) בסגנון טבלה — רוחב אחיד
+   ופינות עדינות במקום גלולה (הרדיוס נקבע inline ולכן נדרש important). */
+
+:root[data-theme='tsohar'] .hm-row > span:first-child {
+  border-radius: 7px !important;
+  min-width: 74px;
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* ═══════════ 🧸 קהילה — חם ומשחקי (מוקאפ סבב 3) ═══════════
+   כרטיסי הנתונים "נעוצים" בתחתית רצועת ה-hero: לבנים, צל רך,
+   אייקון בעיגול פסטל; חצי הפעולה הופכים לכפתורי-קישור צבעוניים. */
+
+:root[data-theme='kehila'] .hm-hero:has(+ .hm-stats) {
+  padding-bottom: 86px;
+}
+
+:root[data-theme='kehila'] .hm-hero + .hm-stats {
+  margin-top: -66px;
+  padding-inline: 14px;
+}
+
+:root[data-theme='kehila'] .hm-stat {
+  border-color: transparent;
+  border-radius: 16px;
+  box-shadow: 0 8px 22px rgba(20, 85, 77, 0.14);
+}
+
+:root[data-theme='kehila'] .hm-stat-ico {
+  background: var(--stat-tint);
+  color: var(--accent-deep);
+}
+
+/* חץ "לטפל ←" ככפתור-קישור צבעוני */
+:root[data-theme='kehila'] .hm-arrow {
+  background: var(--stat-tint);
+  color: var(--accent-deep);
+  border-radius: 999px;
+  padding: 3px 10px;
 }
