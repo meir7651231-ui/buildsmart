@@ -143,80 +143,76 @@ export default function App() {
 
   // מיתוג: שם מהקונפיגורציה גובר על השם השמור בנתונים
   const orgName = config.orgName || dbOrgName;
-  // מודולים: בית והגדרות תמיד; השאר לפי config.modules (חסר = פעיל)
+  // מודולים: בית תמיד; השאר לפי config.modules (חסר = פעיל).
+  // הגדרות עברו לאייקון ⚙️ בקצה השמאלי של הסרגל העליון — לא קישור ברצועה.
   const nav = NAV.filter(
-    (n) => n.view === 'home' || n.view === 'settings' || config.modules[n.view] !== false,
+    (n) => n.view !== 'settings' && (n.view === 'home' || config.modules[n.view] !== false),
   );
 
   return (
     <div className="app-shell">
-      <nav className="app-nav" aria-label="ניווט ראשי">
-        <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {config.logoDataUri && (
-            <img src={config.logoDataUri} alt="" style={{ height: 26, borderRadius: 6 }} />
-          )}
-          {orgName}
+      {/* סרגל עליון — הכרום מתחלף פר-ערכה דרך משתני --nav2-* (themes.css) */}
+      <header className="app-top">
+        <div className="brand">
+          {config.logoDataUri && <img src={config.logoDataUri} alt="" />}
+          <span className="brand-name">{orgName}</span>
         </div>
-        {nav.map((n) => (
-          <button key={n.view} className={view === n.view ? 'active' : ''} onClick={() => go(n.view)}>
-            <span aria-hidden>{n.icon}</span>
-            {/* מונח מותאם מהמילון לששת מסכי המודולים; בית והגדרות נשארים קבועים */}
-            {n.view === 'home' || n.view === 'settings'
-              ? n.label
-              : termOf(config, `nav.${n.view}`, n.label)}
-          </button>
-        ))}
-        <div className="spacer" />
-        {cloud.enabled && cloud.user && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 7,
-              padding: '4px 12px 6px',
-              fontSize: 12,
-              color: 'var(--nav-ink-soft)',
-              minWidth: 0,
-            }}
-          >
-            <span
-              aria-hidden
-              title={syncDot.title}
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 99,
-                background: syncDot.color,
-                flex: '0 0 auto',
-              }}
-            />
-            <span
-              title={cloud.user.email}
-              style={{
-                flex: 1,
-                minWidth: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                direction: 'ltr',
-                textAlign: 'end',
-              }}
-            >
-              {cloud.user.email}
-            </span>
+        <nav className="app-nav" aria-label="ניווט ראשי">
+          {nav.map((n) => (
             <button
-              onClick={() => void cloudSignOut()}
-              title="יציאה מהחשבון — הנתונים נשארים במכשיר"
-              style={{ padding: '2px 8px', fontSize: 12, borderRadius: 8, flex: '0 0 auto' }}
+              key={n.view}
+              className={view === n.view ? 'active' : ''}
+              onClick={() => go(n.view)}
             >
-              יציאה
+              {/* מונח מותאם מהמילון לששת מסכי המודולים; בית נשאר קבוע */}
+              {n.view === 'home' ? n.label : termOf(config, `nav.${n.view}`, n.label)}
             </button>
-          </div>
-        )}
-        <button onClick={() => setPalette(true)} title="Ctrl+K">
-          <span aria-hidden>⌨️</span>חיפוש מהיר
-        </button>
-      </nav>
+          ))}
+        </nav>
+        <div className="top-tools">
+          {/* צ'יפ החיפוש — פותח את פלטת הפקודות, אותו מנגנון כמו Ctrl+K */}
+          <button
+            type="button"
+            className="nav-search"
+            onClick={() => setPalette(true)}
+            title="חיפוש בכל המערכת (Ctrl+K)"
+          >
+            <span aria-hidden>🔍</span>
+            <span className="nav-search-label">חיפוש בכל המערכת</span>
+            <kbd aria-hidden>Ctrl K</kbd>
+          </button>
+          <button
+            type="button"
+            className={'nav-gear' + (view === 'settings' ? ' active' : '')}
+            onClick={() => go('settings')}
+            title="הגדרות"
+            aria-label="הגדרות"
+          >
+            <span aria-hidden>⚙️</span>
+          </button>
+          {cloud.enabled && cloud.user && (
+            <div className="nav-user">
+              <span
+                aria-hidden
+                title={syncDot.title}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 99,
+                  background: syncDot.color,
+                  flex: '0 0 auto',
+                }}
+              />
+              <span className="nav-user-mail" title={cloud.user.email}>
+                {cloud.user.email}
+              </span>
+              <button onClick={() => void cloudSignOut()} title="יציאה מהחשבון — הנתונים נשארים במכשיר">
+                יציאה
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
 
       <main className="app-main">
         {famCount === 0 && <DemoDrop />}

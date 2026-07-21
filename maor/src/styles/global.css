@@ -119,58 +119,171 @@ button:focus-visible {
   }
 }
 
-/* פריסת האפליקציה */
+/* פריסת האפליקציה — סרגל עליון (מוקאפים סבב 2): הכרום מתחלף פר-ערכה
+   דרך משתני --nav2-* / --font-display המוגדרים ב-themes.css. */
 
 .app-shell {
   display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 100vh;
 }
 
-.app-nav {
-  width: 216px;
-  background: var(--nav-bg);
-  color: var(--nav-ink);
-  display: flex;
-  flex-direction: column;
-  padding: 16px 10px;
-  gap: 4px;
+.app-top {
   position: sticky;
   top: 0;
-  height: 100vh;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 10px 22px;
+  background: var(--nav2-bg);
+  color: var(--nav2-ink);
+  border-bottom: 1px solid var(--nav2-line);
 }
 
-.app-nav .brand {
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--accent);
-  padding: 6px 12px 18px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  white-space: nowrap;
+  color: var(--nav2-ink);
+}
+
+.brand img {
+  height: 26px;
+  border-radius: 6px;
+}
+
+.brand-name {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+/* רצועת הקישורים — גלולה פעילה, גלילה אופקית במסכים צרים (390px נשאר שמיש) */
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .app-nav button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: var(--nav-ink-soft);
-  font-size: 15px;
-  text-align: right;
+  padding: 7px 13px;
+  border-radius: 999px;
+  color: var(--nav2-ink-soft);
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .app-nav button:hover {
-  background: var(--nav-hover-bg);
-  color: var(--nav-ink);
+  background: var(--nav2-hover-bg);
+  color: var(--nav2-ink);
 }
 
 .app-nav button.active {
-  background: var(--nav-active-bg);
-  color: var(--nav-active-ink);
-  font-weight: 600;
+  background: var(--nav2-active-bg);
+  color: var(--nav2-active-ink);
+  font-weight: 700;
 }
 
-.app-nav .spacer {
-  flex: 1;
+/* כלים בקצה השמאלי — חיפוש, הגדרות, משתמש הענן */
+.top-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+  min-width: 0;
+}
+
+.nav-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--nav2-ink) 26%, transparent);
+  color: var(--nav2-ink-soft);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.nav-search:hover {
+  background: var(--nav2-hover-bg);
+  color: var(--nav2-ink);
+}
+
+.nav-search kbd {
+  font: inherit;
+  font-size: 11px;
+  direction: ltr;
+  border: 1px solid color-mix(in srgb, var(--nav2-ink) 22%, transparent);
+  border-radius: 6px;
+  padding: 0 6px;
+}
+
+.nav-gear {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+  color: var(--nav2-ink-soft);
+}
+
+.nav-gear:hover {
+  background: var(--nav2-hover-bg);
+}
+
+.nav-gear.active {
+  background: var(--nav2-active-bg);
+  color: var(--nav2-active-ink);
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--nav2-ink-soft);
+  min-width: 0;
+}
+
+.nav-user-mail {
+  direction: ltr;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-user > button {
+  padding: 2px 9px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--nav2-ink) 26%, transparent);
+  flex-shrink: 0;
+}
+
+.nav-user > button:hover {
+  background: var(--nav2-hover-bg);
 }
 
 .app-main {
@@ -182,32 +295,22 @@ button:focus-visible {
 }
 
 @media (max-width: 760px) {
-  .app-shell {
-    flex-direction: column;
+  .app-top {
+    padding: 8px 12px;
+    gap: 4px 10px;
   }
+  /* הרצועה יורדת לשורה שנייה ברוחב מלא ונגללת אופקית */
   .app-nav {
-    width: 100%;
-    height: auto;
-    position: fixed;
-    bottom: 0;
-    top: auto;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 6px;
-    z-index: 50;
+    order: 10;
+    flex-basis: 100%;
   }
-  .app-nav .brand,
-  .app-nav .spacer {
+  .nav-search-label,
+  .nav-search kbd,
+  .nav-user-mail {
     display: none;
   }
-  .app-nav button {
-    flex-direction: column;
-    gap: 2px;
-    font-size: 12px;
-    padding: 8px 10px;
-  }
   .app-main {
-    padding: 16px 14px 96px;
+    padding: 16px 14px 64px;
   }
 }
 
@@ -215,10 +318,18 @@ button:focus-visible {
 
 .card {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 1px solid var(--panel-line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px;
+}
+
+/* טיפוגרפיית תצוגה — סריף בהיכל, Heebo בשאר הערכות (--font-display פר-ערכה) */
+h1,
+.page-title,
+.hm-hero-title,
+.hm-stat-value {
+  font-family: var(--font-display);
 }
 
 .page-title {
@@ -457,7 +568,7 @@ button:focus-visible {
 }
 
 @media print {
-  .app-nav,
+  .app-top,
   .toasts,
   .no-print {
     display: none !important;
@@ -1269,4 +1380,123 @@ button:focus-visible {
   letter-spacing: 0.03em;
   word-spacing: 0.08em;
   line-height: 1.75;
+}
+
+/* ═══════════ ✨ היכל — אופי "ערב גאלה" (מוקאפ סבב 2) ═══════════
+   ברכה ממורכזת בסריף עם קו שיער זהב דקורטיבי מעליה, ורצועת נתונים
+   אחת עם מפרידים אנכיים דקים במקום כרטיסים נפרדים. שאר המסכים
+   מקבלים את האופי דרך ההפניה של --panel / --line / --font-display. */
+
+:root[data-theme='heichal'] .hm-hero {
+  text-align: center;
+  padding-top: 36px;
+}
+
+/* קו השיער הזהוב הדקורטיבי מעל הברכה */
+:root[data-theme='heichal'] .hm-hero::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  inset-inline: 24%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(233, 189, 99, 0.8) 50%, transparent 100%);
+}
+
+:root[data-theme='heichal'] .hm-hero-top {
+  flex-direction: column;
+  align-items: center;
+}
+
+:root[data-theme='heichal'] .hm-hero-title {
+  font-size: 31px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+:root[data-theme='heichal'] .hm-hero-actions {
+  justify-content: center;
+}
+
+/* רצועת הנתונים — פס אחד עם מפרידי קו-שיער אנכיים, בלי כרטיסים צפים */
+:root[data-theme='heichal'] .hm-hero:has(+ .hm-stats) {
+  padding-bottom: 30px;
+}
+
+:root[data-theme='heichal'] .hm-hero + .hm-stats {
+  margin-top: 0;
+}
+
+:root[data-theme='heichal'] .hm-stats {
+  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+:root[data-theme='heichal'] .hm-stat {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border-inline-start: 1px solid var(--panel-line);
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  padding: 18px 12px 16px;
+}
+
+:root[data-theme='heichal'] .hm-stat:first-child {
+  border-inline-start: 0;
+}
+
+/* תווית קטנה מעל, מספר זהב גדול בסריף, דלתא ירוקה מתחת — בלי עיגול אייקון */
+:root[data-theme='heichal'] .hm-stat-ico,
+:root[data-theme='heichal'] .hm-stat-spark {
+  display: none;
+}
+
+:root[data-theme='heichal'] .hm-stat-head {
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+:root[data-theme='heichal'] .hm-stat-meta {
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+:root[data-theme='heichal'] .hm-stat-value {
+  color: var(--accent);
+  font-size: 30px;
+  font-weight: 600;
+}
+
+:root[data-theme='heichal'] .hm-stat-label {
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
+:root[data-theme='heichal'] .hm-stat-chip {
+  margin-inline-start: 0;
+  align-self: center;
+  background: transparent;
+  padding: 0 8px;
+}
+
+:root[data-theme='heichal'] .hm-stat-sub {
+  color: var(--ink-faint);
+}
+
+/* כיתוב "היכל" קטן מתחת לשם הארגון בסרגל העליון (כמו במוקאפ) */
+:root[data-theme='heichal'] .brand-name::after {
+  content: 'היכל';
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 5px;
+  color: var(--accent);
+  font-family: 'Heebo', sans-serif;
 }
