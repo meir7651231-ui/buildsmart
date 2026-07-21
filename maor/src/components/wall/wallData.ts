@@ -119,8 +119,9 @@ function sessionsHeldEstimate(db: Db, todayIso: string): number {
   return total;
 }
 
-/** ספר הזהב — top-3 לפי החודש, נפילה לשנה ואז לסה"כ מצטבר. */
-function buildPodium(db: Db, monthKey: string, yearKey: string): WallPodium {
+/** ספר הזהב — top-3 לפי החודש, נפילה לשנה ואז לסה"כ מצטבר.
+ *  (exported — ווידג'ט "ספר הזהב" במסך הבית משתמש באותה נוסחה בדיוק.) */
+export function buildPodium(db: Db, monthKey: string, yearKey: string): WallPodium {
   const dons = allIlsDonations(db);
   const agg = (filter: (d: DonRow) => boolean) => {
     const m = new Map<string, { name: string; amount: number; count: number }>();
@@ -207,8 +208,10 @@ function holidayEmoji(name: string): string {
   return name.includes('צום') || name === 'תשעה באב' || name === 'יום כיפור' ? '📿' : '🎉';
 }
 
-/** 7 הימים הבאים — חגים, אירועים (כולל חזרה עברית) ומפגשי חוגים. עד 7 שורות. */
-function buildWeek(db: Db, now: Date): WallWeekRow[] {
+/** 7 הימים הבאים — חגים, אירועים (כולל חזרה עברית) ומפגשי חוגים. עד 7 שורות.
+ *  (exported — ווידג'ט "הלוח העברי" במסך הבית משתמש באותה נגזרת;
+ *  שורות מפגשי חוגים מזוהות לפי key המסתיים ב-'-crs' לסינון כשמודול החוגים כבוי.) */
+export function buildWeek(db: Db, now: Date): WallWeekRow[] {
   const out: WallWeekRow[] = [];
   for (let i = 0; i < 7 && out.length < 7; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);

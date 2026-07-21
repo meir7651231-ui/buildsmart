@@ -7,6 +7,7 @@ import type { Supporter } from '../../types/domain';
 import { useApp } from '../../store/useApp';
 import { featureOn } from '../../lib/config';
 import { normSearch } from '../../lib/validate';
+import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Chip, Empty, PageHead, Select, TextInput } from '../ui';
 import { chipStyle, fmtDate, isoToday, supScore, supTier, TIER_ORDER, totalLabel } from './lib';
 import { SupporterForm } from './SupporterForm';
@@ -201,14 +202,22 @@ export function SupportersView() {
                   <td title="מתי וכמה בכל תרומה — בכרטיס">{sp.count}</td>
                   <td>{sp.ils ? '₪' + sp.ils.toLocaleString('he-IL') : '—'}</td>
                   <td>{sp.usd ? '$' + sp.usd.toLocaleString('he-IL') : '—'}</td>
-                  <td title={totalLabel(sp)}>{sp.last ? fmtDate(sp.last) : '—'}</td>
+                  <td title={totalLabel(sp) + (sp.last ? ' · ' + hebDateFull(sp.last) : '')}>
+                    {sp.last ? fmtDate(sp.last) : '—'}
+                  </td>
                   {nextOn && (
                     <td style={{ whiteSpace: 'nowrap' }}>
                       {sp.nextDate ? (
                         sp.nextDate <= today ? (
                           <span style={{ color: 'var(--red)', fontWeight: 700 }}>🔔 יעד עבר</span>
                         ) : (
-                          '🎯 ' + fmtDate(sp.nextDate)
+                          // התאריך העברי ראשי — הלועזי בשורת משנה (חובה אצל הקהל החרדי)
+                          <span title={fmtDate(sp.nextDate)}>
+                            🎯 {hebDateFull(sp.nextDate)}
+                            <span style={{ display: 'block', fontSize: 11, color: 'var(--ink-faint)' }}>
+                              {fmtDate(sp.nextDate)}
+                            </span>
+                          </span>
                         )
                       ) : (
                         '—'

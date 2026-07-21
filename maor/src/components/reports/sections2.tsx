@@ -1,6 +1,7 @@
 /** סעיפי דוח: תרומות, מבט-על משפחות וכרטיסיות ניקוב. */
 
 import type { Db, Donation } from '../../types/domain';
+import { useApp } from '../../store/useApp';
 import type { Cell } from './csv';
 import { ReportTable, Section, type Row } from './parts';
 import {
@@ -142,6 +143,7 @@ export function FamiliesSection(props: SectionProps) {
 /** 5. מצב כרטיסיות ניקוב — יתרה נמוכה (≤2) מודגשת באדום, כמו במקור. */
 export function PunchSection(props: SectionProps) {
   const { db } = props;
+  const selectFamily = useApp((s) => s.selectFamily);
   const idx = nameIndex(db);
 
   const head = ['תלמיד/ה', 'משפחה', 'חוג', 'נרכשו', 'נוצלו', 'יתרה', 'מצב'];
@@ -164,6 +166,7 @@ export function PunchSection(props: SectionProps) {
             left <= 0 ? 'נוצלה במלואה' : left <= 2 ? 'יתרה נמוכה' : 'פעילה',
           ],
           warn: left <= 2,
+          open: m ? () => selectFamily(m.famId) : undefined,
         } as Row,
       };
     })

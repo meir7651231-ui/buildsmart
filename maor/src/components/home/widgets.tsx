@@ -3,23 +3,32 @@
  * { id, label, icon, render, visible } — הסדר וההצגה נשלטים ע"י db.ui.homeLayout.
  *
  * חוזה:
- * - 'hero' (ברכה + פעולות מהירות) תמיד ראשון ואינו ניתן להסרה.
+ * - 'hero' (רצועת הברכה + פעולות מהירות) תמיד ראשון ואינו ניתן להסרה.
  * - visible(cfg) משמר את כל הגייטינג הקיים (featureOn / moduleOn) — ווידג'ט
  *   שאינו visible מדולג ברינדור גם אם הוא מופיע ב-homeLayout, בלי לגעת בנתונים.
- * - הרינדור עצמו זהה אחד-לאחד למסך הבית המקורי (re-plumbing, לא redesign).
+ * - ברירת המחדל תלוית-ערכה (THEME_LAYOUTS) — פריסה שמורה תמיד גוברת עליה.
+ * - כל הנתונים המוצגים נגזרים מה-Db האמיתי בלבד (homeData / wallData) —
+ *   לעולם אין מספרים מומצאים; אין נתונים חודשיים אמיתיים ⇒ אין ספארקליין.
  */
 import { useEffect, useMemo, useState, type CSSProperties, type ReactElement, type ReactNode } from 'react';
 import type { View } from '../../store/useApp';
 import type { Db, Family, OrgEvent } from '../../types/domain';
 import type { OrgConfig } from '../../types/config';
-import { Btn, PageHead } from '../ui';
+import { Btn } from '../ui';
 import { hebDateFull } from '../../lib/hebrew';
 import { featureOn, moduleOn } from '../../lib/config';
+import { tierOf } from '../families/lib';
+import { buildPodium, buildWeek, fmtIls } from '../wall/wallData';
 import {
+  credSummary,
   DAY_NAMES,
+  dueContacts,
   EV_META,
   evLabel,
   fmtD,
+  monthDonationSum,
+  monthlySeries,
+  punchLow,
   ST_META,
   type AttentionItem,
   type AttentionNav,
@@ -30,19 +39,7 @@ import {
   type TodaySession,
 } from './homeData';
 
-/* ── סגנונות משותפים (verbatim מ-HomeView המקורי) ── */
-
-const rowBtn: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-  width: '100%',
-  padding: '7px 6px',
-  borderRadius: 8,
-  textAlign: 'right',
-  fontSize: 14,
-  cursor: 'pointer',
-};
+/* ── סגנונות משותפים (הצ'יפים הצבעוניים נשארים data-driven מ-homeData) ── */
 
 const tagStyle = (bg: string, c: string): CSSProperties => ({
   background: bg,
@@ -86,35 +83,58 @@ export interface HomeCtx {
   selectCourse: (id: string | null) => void;
   markAttnDone: (key: string) => void;
   unmarkAttnDone: (key: string) => void;
-  /** כפתורי כותרת הבית (למשל "עריכת הלוח ✏️") — מוצגים בווידג'ט hero. */
+  toast: (text: string) => void;
+  /** הורדת קובץ גיבוי מלא — אותה פעולה כמו בהגדרות ← גיבוי. */
+  exportBackup: () => void;
+  /** כפתורי כותרת הבית (למשל "עריכת הלוח ✏️") — מוצגים ברצועת ה-hero. */
   headActions?: ReactNode;
 }
 
-/* ── רכיבי עזר (verbatim מ-HomeView המקורי) ── */
+/* ── רכיבי עזר ── */
 
-function StatCard(props: { icon: string; label: string; value: string; sub: string; onClick: () => void }) {
+/** כרטיס נתון — אייקון בעיגול מגוון, מספר גדול, צ'יפ מגמה וספארקליין (רק מנתונים אמיתיים). */
+function StatCard(props: {
+  icon: string;
+  label: string;
+  value: string;
+  sub: string;
+  onClick: () => void;
+  /** צ'יפ מגמה קטן ("+3 החודש") — רק כשנגזר בזול מנתונים אמיתיים. */
+  chip?: string;
+  /** 6 ערכים חודשיים (ישן→חדש) — מוצג רק אם יש בהם תוכן אמיתי. */
+  spark?: number[];
+}) {
+  const hasSpark = !!props.spark && props.spark.some((v) => v > 0);
+  const max = hasSpark ? Math.max(...(props.spark as number[])) : 1;
   return (
-    <button
-      type="button"
-      className="card"
-      onClick={props.onClick}
-      title={'מעבר: ' + props.label}
-      style={{ textAlign: 'right', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 3, padding: 14 }}
-    >
-      <span style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
-        <span aria-hidden>{props.icon}</span> {props.label}
+    <button type="button" className="card hm-stat" onClick={props.onClick} title={'מעבר: ' + props.label}>
+      <span className="hm-stat-head">
+        <span className="hm-stat-ico" aria-hidden>{props.icon}</span>
+        <span className="hm-stat-meta">
+          <span className="hm-stat-value">{props.value}</span>
+          <span className="hm-stat-label">{props.label}</span>
+        </span>
+        {props.chip && <span className="hm-stat-chip">{props.chip}</span>}
       </span>
-      <span style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.1 }}>{props.value}</span>
-      <span style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}>{props.sub}</span>
+      <span className="hm-stat-sub">{props.sub}</span>
+      {hasSpark && (
+        <span className="hm-stat-spark" aria-hidden>
+          {(props.spark as number[]).map((v, i) => (
+            <i key={i} style={{ height: `${Math.round((v / max) * 100)}%` }} />
+          ))}
+        </span>
+      )}
     </button>
   );
 }
 
-function Panel(props: { title: string; badge?: string; action?: ReactNode; children: ReactNode }) {
+/** מסגרת פאנל אחידה — אמוג'י + כותרת מודגשת + קו דק (שפת הכותרות של המוקאפ). */
+function Panel(props: { title: string; icon?: string; badge?: string; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <h2 style={{ fontSize: 16.5, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="hm-head" style={{ justifyContent: 'space-between' }}>
+        <h2>
+          {props.icon && <span aria-hidden>{props.icon}</span>}
           {props.title}
           {props.badge && <span className="chip">{props.badge}</span>}
         </h2>
@@ -224,7 +244,11 @@ function Carousel(props: { items: CarouselItem[]; navTo: (nav: AttentionNav) => 
 
 /* ── רכיבי הווידג'טים עצמם ── */
 
-/** ברכה (PageHead) + שורת פעולות מהירות — תמיד ראשון, לא ניתן להסרה. */
+/**
+ * רצועת ה-hero — באנר גרדיאנט ברוחב מלא (משתני --hero-* פר-ערכה):
+ * ברכה לפי שעה, שורת משנה (תאריך עברי · מפגשים · ימי הולדת) ופעולות מהירות.
+ * תמיד ראשון, לא ניתן להסרה. כפתור של מודול כבוי מוסתר (כמו במקור).
+ */
 function HeroWidget({ ctx }: { ctx: HomeCtx }) {
   const { db, config, now, todayIso, data, go, selectCourse } = ctx;
   const coursesOn = moduleOn(config, 'courses');
@@ -234,20 +258,42 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
   const reportsOn = moduleOn(config, 'reports');
   const hour = now.getHours();
   const greet = hour < 12 ? 'בוקר טוב' : hour < 18 ? 'צהריים טובים' : 'ערב טוב';
+  const mood = hour < 12 ? '🌞' : hour < 18 ? '🌤️' : '🌙';
+
+  // שורת המשנה — תאריך עברי · חג · N מפגשים היום · N ימי הולדת היום (רק אמת מה-Db)
+  const subParts: string[] = [
+    `יום ${DAY_NAMES[now.getDay()]}, ${hebDateFull(todayIso)} · ${fmtD(todayIso)}`,
+  ];
+  if (data.holiday) subParts.push(data.holiday);
+  if (coursesOn) {
+    subParts.push(
+      data.sessions.length === 0
+        ? 'אין מפגשים היום'
+        : data.sessions.length === 1
+          ? 'מפגש אחד היום'
+          : `${data.sessions.length} מפגשים היום`,
+    );
+  }
+  if (data.bdays.length) {
+    subParts.push(
+      data.bdays.length === 1 ? 'יום הולדת אחד היום 🎂' : `${data.bdays.length} ימי הולדת היום 🎂`,
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <PageHead
-        title={`${greet}, ${config.orgName || db.orgName}`}
-        sub={
-          `יום ${DAY_NAMES[now.getDay()]}, ${hebDateFull(todayIso)} · ${fmtD(todayIso)}` +
-          (data.holiday ? ` · ${data.holiday}` : '')
-        }
-        actions={ctx.headActions}
-      />
+    <section className="hm-hero">
+      <div className="hm-hero-top">
+        <div>
+          <h1 className="hm-hero-title">
+            {greet}, {config.orgName || db.orgName}! <span aria-hidden>{mood}</span>
+          </h1>
+          <p className="hm-hero-sub">{subParts.join(' · ')}</p>
+        </div>
+        {ctx.headActions && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{ctx.headActions}</div>}
+      </div>
 
       {/* פעולות מהירות — כפתור של מודול כבוי מוסתר */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className="hm-hero-actions">
         <Btn kind="primary" onClick={() => go('families')}>+ משפחה חדשה</Btn>
         {coursesOn && (
           <Btn
@@ -262,7 +308,48 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
         {supportersOn && <Btn onClick={() => go('supporters')}>תורמים</Btn>}
         {reportsOn && <Btn onClick={() => go('reports')}>דוחות</Btn>}
       </div>
-    </div>
+    </section>
+  );
+}
+
+/**
+ * 🎂 ימי הולדת היום — באנר חם מתחת ל-hero (משתני --bday-* פר-ערכה).
+ * אין חוגגים היום ⇒ לא מרונדר כלום. שורת המשנה מוסיפה חוג + שעה
+ * רק אם החוגג/ת משובצ/ת לחוג שמתקיים היום (דרך data.sessions — כבר ממוגן-מודול).
+ */
+function BdaysWidget({ ctx }: { ctx: HomeCtx }) {
+  const { db, data, selectFamily } = ctx;
+  if (!data.bdays.length) return null;
+  return (
+    <section className="hm-bday" aria-label="ימי הולדת היום">
+      {data.bdays.map((b) => {
+        const courseIds = new Set(
+          db.enrollments.filter((e) => e.memberId === b.member.id && e.status === 'active').map((e) => e.courseId),
+        );
+        const ts = data.sessions.find((s) => courseIds.has(s.course.id));
+        const verb = b.member.gender === 'f' ? 'חוגגת' : 'חוגג';
+        return (
+          <button
+            key={b.member.id}
+            type="button"
+            className="hm-bday-row"
+            onClick={() => selectFamily(b.member.famId)}
+            title="לכרטיס המשפחה"
+          >
+            <span className="hm-bday-ico" aria-hidden>🎂</span>
+            <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, textAlign: 'right' }}>
+              <span className="hm-bday-title">
+                {b.member.first} {verb} היום {b.age}!
+              </span>
+              <span className="hm-bday-sub">
+                {'משפחת ' + b.member.famName +
+                  (ts ? ` · ${ts.course.name}${ts.session.time ? ' · ' + ts.session.time : ''}` : '')}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </section>
   );
 }
 
@@ -270,15 +357,19 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
 function DigestWidget({ ctx }: { ctx: HomeCtx }) {
   return (
     <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 14 }}>
-      <h2 style={{ fontSize: 16.5, marginBottom: 4 }}>☀️ תקציר הבוקר</h2>
+      <div className="hm-head" style={{ marginBottom: 4 }}>
+        <h2>
+          <span aria-hidden>☀️</span> תקציר הבוקר
+        </h2>
+      </div>
       {ctx.data.digest.map((l: DigestLine) => (
         <button
           key={l.key}
           type="button"
+          className="hm-row"
           style={{
-            ...rowBtn,
             padding: '4px 6px',
-            ...(l.urgent ? { color: '#b91c1c', fontWeight: 600 } : null),
+            ...(l.urgent ? { color: 'var(--red)', fontWeight: 600 } : null),
           }}
           onClick={() => ctx.navTo(l.nav)}
         >
@@ -290,20 +381,42 @@ function DigestWidget({ ctx }: { ctx: HomeCtx }) {
   );
 }
 
-/** כרטיסי נתונים — כרטיס של מודול כבוי מוסתר (כמו במקור). */
+/**
+ * כרטיסי נתונים — כרטיס של מודול כבוי מוסתר (כמו במקור).
+ * צ'יפ מגמה וספארקליין רק כשהם נגזרים בזול מנתונים אמיתיים:
+ * משפחות — לפי createdAt; תרומות — לפי תאריכי התרומות (₪ בלבד).
+ */
 function StatsWidget({ ctx }: { ctx: HomeCtx }) {
-  const { config, go } = ctx;
+  const { db, config, now, go } = ctx;
   const s = ctx.data.stats;
   const coursesOn = moduleOn(config, 'courses');
   const calendarOn = moduleOn(config, 'calendar');
   const supportersOn = moduleOn(config, 'supporters');
+
+  // משפחות חדשות פר-חודש (6 חודשים) — אמיתי מ-createdAt
+  const famSpark = monthlySeries(
+    db.families.map((f) => ({ date: f.createdAt || '', value: 1 })),
+    now,
+  );
+  const famNew = famSpark[famSpark.length - 1];
+
+  // תרומות ₪ פר-חודש — אמיתי מתאריכי התרומות
+  const donPoints: { date: string; value: number }[] = [];
+  for (const sp of db.supporters) {
+    for (const dn of sp.donations) if (dn.cur !== '$') donPoints.push({ date: dn.date, value: dn.amount });
+  }
+  const donSpark = monthlySeries(donPoints, now);
+  const donMonth = monthDonationSum(db, now);
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 12 }}>
+    <div className="hm-stats">
       <StatCard
         icon="👨‍👩‍👧‍👦"
         label="משפחות"
         value={String(s.famTotal)}
         sub={`${s.famActive} פעילות · ${s.famPending} ממתינות · ${s.famInactive} לא פעילות`}
+        chip={famNew > 0 ? `+${famNew} החודש` : undefined}
+        spark={famSpark}
         onClick={() => go('families')}
       />
       <StatCard
@@ -337,6 +450,8 @@ function StatsWidget({ ctx }: { ctx: HomeCtx }) {
           label="תרומות"
           value={'₪' + s.donIls.toLocaleString('he-IL')}
           sub={(s.donUsd ? `+ $${s.donUsd.toLocaleString('he-IL')} · ` : '') + `${s.supportersTotal} תורמים`}
+          chip={donMonth > 0 ? `+${fmtIls(donMonth)} החודש` : undefined}
+          spark={donSpark}
           onClick={() => go('supporters')}
         />
       )}
@@ -344,32 +459,40 @@ function StatsWidget({ ctx }: { ctx: HomeCtx }) {
   );
 }
 
-/** פאנל "היום" — מפגשי חוגים (כשהמודול פעיל), אירועים וימי הולדת. */
+/** פאנל "היום" — המפגשים של היום ככרטיסי-שורה (גלולת שעה + נוכחות), אירועים וימי הולדת. */
 function TodayWidget({ ctx }: { ctx: HomeCtx }) {
   const { db, now, data, go, selectFamily, selectCourse } = ctx;
   const famName = (id: string) => db.families.find((f) => f.id === id)?.name ?? '';
   return (
-    <Panel title={`היום · יום ${DAY_NAMES[now.getDay()]}`} badge={data.holiday ?? undefined}>
-      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)' }}>מפגשי חוגים</div>
+    <Panel icon="📅" title={`היום · יום ${DAY_NAMES[now.getDay()]}`} badge={data.holiday ?? undefined}>
+      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)' }}>המפגשים של היום</div>
       {data.sessions.length === 0 && <div style={softEmpty}>אין מפגשי חוגים היום</div>}
-      {data.sessions.map((ts, i) => (
-        <button
-          key={ts.course.id + '-' + i}
-          type="button"
-          style={rowBtn}
-          onClick={() => selectCourse(ts.course.id)}
-          title="לכרטיס החוג"
-        >
-          <span style={tagStyle('#fdf1d4', '#9a6414')}>{ts.session.time || '—'}</span>
-          <span>
-            {ts.course.name}
-            {ts.session.label ? ' · ' + ts.session.label : ''}
-          </span>
-          <span style={{ color: 'var(--ink-faint)', fontSize: 12.5, marginInlineStart: 'auto' }}>
-            {db.rooms.find((r) => r.id === ts.course.roomId)?.name ?? ''}
-          </span>
-        </button>
-      ))}
+      {data.sessions.map((ts, i) => {
+        const room = db.rooms.find((r) => r.id === ts.course.roomId)?.name ?? '';
+        const teacher = db.teachers.find((t) => t.id === ts.course.teacherId)?.name ?? '';
+        const enrolled = db.enrollments.filter((e) => e.courseId === ts.course.id && e.status === 'active').length;
+        const sub = [room, teacher, `${enrolled} רשומים`].filter(Boolean).join(' · ');
+        return (
+          <div key={ts.course.id + '-' + i} className="hm-meet">
+            <span className="hm-time">{ts.session.time || '—'}</span>
+            <button type="button" className="hm-meet-main" onClick={() => selectCourse(ts.course.id)} title="לכרטיס החוג">
+              <span className="hm-meet-title">
+                {ts.course.name}
+                {ts.session.label ? ' · ' + ts.session.label : ''}
+              </span>
+              <span className="hm-meet-sub">{sub}</span>
+            </button>
+            <button
+              type="button"
+              className="hm-pill-btn"
+              onClick={() => selectCourse(ts.course.id)}
+              title="פתיחת כרטיס החוג לניהול נוכחות"
+            >
+              נוכחות ✓
+            </button>
+          </div>
+        );
+      })}
 
       <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-faint)', marginTop: 6 }}>אירועים</div>
       {data.events.length === 0 && data.bdays.length === 0 && <div style={softEmpty}>אין אירועים היום</div>}
@@ -377,7 +500,7 @@ function TodayWidget({ ctx }: { ctx: HomeCtx }) {
         <button
           key={ev.id}
           type="button"
-          style={rowBtn}
+          className="hm-row"
           onClick={() => (ev.famId ? selectFamily(ev.famId) : go('calendar'))}
           title={ev.famId ? 'לכרטיס המשפחה' : 'ללוח השנה'}
         >
@@ -405,7 +528,7 @@ function TodayWidget({ ctx }: { ctx: HomeCtx }) {
         <button
           key={b.member.id}
           type="button"
-          style={rowBtn}
+          className="hm-row"
           onClick={() => selectFamily(b.member.famId)}
           title="לכרטיס המשפחה"
         >
@@ -429,15 +552,21 @@ function AttentionWidget({ ctx }: { ctx: HomeCtx }) {
   const doneAttn = data.attention.filter((a) => attnDone[a.key]);
 
   return (
-    <Panel title="דורש טיפול" badge={openAttn.length ? String(openAttn.length) : undefined}>
+    <Panel icon="🔔" title="דורש טיפול" badge={openAttn.length ? String(openAttn.length) : undefined}>
       {openAttn.length === 0 && (
         <div style={{ ...softEmpty, color: 'var(--green)', fontWeight: 600 }}>הכל מטופל ✓</div>
       )}
       {openAttn.slice(0, 8).map((a) => (
         <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <button type="button" style={{ ...rowBtn, flex: 1, minWidth: 0 }} onClick={() => navTo(a.nav)}>
+          <button
+            type="button"
+            className="hm-row"
+            style={{ flex: 1, minWidth: 0 }}
+            onClick={() => navTo(a.nav)}
+          >
             <span style={tagStyle(a.tagBg, a.tagC)}>{a.tag}</span>
-            <span>{a.title}</span>
+            <span style={{ minWidth: 0 }}>{a.title}</span>
+            <span className="hm-arrow" aria-hidden>לטפל ←</span>
           </button>
           <Btn sm onClick={() => markAttnDone(a.key)} title="סימון הפריט כטופל">
             ✓ טופל
@@ -483,6 +612,7 @@ function RecentWidget({ ctx }: { ctx: HomeCtx }) {
   const { data, go, selectFamily } = ctx;
   return (
     <Panel
+      icon="👨‍👩‍👧‍👦"
       title="משפחות אחרונות"
       action={<Btn sm onClick={() => go('families')}>כל המשפחות ←</Btn>}
     >
@@ -527,13 +657,239 @@ function RecentWidget({ ctx }: { ctx: HomeCtx }) {
   );
 }
 
+/**
+ * 🏆 ספר הזהב — התורמים המובילים, אותה נוסחה בדיוק כמו בקיר ההשפעה
+ * (buildPodium: החודש ← נפילה לשנה ← סה"כ מצטבר). פס התקדמות יחסי למוביל.
+ */
+function GoldbookWidget({ ctx }: { ctx: HomeCtx }) {
+  const { db, todayIso, go } = ctx;
+  const podium = buildPodium(db, todayIso.slice(0, 7), todayIso.slice(0, 4));
+  const max = podium.rows[0]?.amount ?? 0;
+  const medals = ['🥇', '🥈', '🥉'];
+  return (
+    <Panel
+      icon="🏆"
+      title="ספר הזהב"
+      badge={podium.rows.length ? podium.scopeLabel : undefined}
+      action={<Btn sm onClick={() => go('supporters')}>לתורמים ←</Btn>}
+    >
+      {podium.rows.length === 0 && <div style={softEmpty}>אין תרומות עדיין</div>}
+      {podium.rows.map((r, i) => (
+        <div key={r.name + i} className="hm-gold-row">
+          <div className="hm-gold-line">
+            <span aria-hidden>{medals[i]}</span>
+            <b>{r.name}</b>
+            <span style={{ color: 'var(--ink-faint)', fontSize: 12.5 }}>{r.sub}</span>
+            <b style={{ marginInlineStart: 'auto', whiteSpace: 'nowrap' }}>{fmtIls(r.amount)}</b>
+          </div>
+          <div className="hm-gold-bar" aria-hidden>
+            <i style={{ width: `${max > 0 ? Math.max(6, Math.round((r.amount / max) * 100)) : 0}%` }} />
+          </div>
+        </div>
+      ))}
+      {podium.othersCount > 0 && (
+        <div style={softEmpty}>
+          +{podium.othersCount} תורמים נוספים · {fmtIls(podium.othersAmount)}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/**
+ * 📜 הלוח העברי — 4 הפריטים הקרובים (חגים, אירועים, מפגשים) עם תאריך עברי,
+ * מאותה נגזרת כמו בקיר ההשפעה (buildWeek). שורות מפגשי חוגים ('-crs')
+ * מסוננות כשמודול החוגים כבוי — אין דליפת נתוני מודול כבוי.
+ */
+function HebcalWidget({ ctx }: { ctx: HomeCtx }) {
+  const { db, config, now, go } = ctx;
+  const coursesOn = moduleOn(config, 'courses');
+  const rows = buildWeek(db, now)
+    .filter((r) => coursesOn || !r.key.endsWith('-crs'))
+    .slice(0, 4);
+  return (
+    <Panel icon="📜" title="הלוח העברי" action={<Btn sm onClick={() => go('calendar')}>ללוח השנה ←</Btn>}>
+      {rows.length === 0 && <div style={softEmpty}>שבוע שקט — אין אירועים קרובים</div>}
+      {rows.map((r) => (
+        <div key={r.key} className="hm-row" style={{ cursor: 'default' }}>
+          <span className="hm-time" style={{ direction: 'rtl' }}>{r.hd}</span>
+          <span aria-hidden>{r.emoji}</span>
+          <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <span style={{ fontWeight: 700, fontSize: 13.5 }}>{r.title}</span>
+            {r.sub && <span style={{ fontSize: 12.5, color: 'var(--ink-faint)' }}>{r.sub}</span>}
+          </span>
+        </div>
+      ))}
+    </Panel>
+  );
+}
+
+/**
+ * 🤝 אמינות קהילתית — ממוצע מדד האמינות (כמו בקיר ההשפעה) + ספירה לכל דרגה.
+ * דרגות/צבעים — reuse של tierOf ממודול המשפחות (950/800/500), בלי לשכפל נוסחה.
+ */
+function CommunityWidget({ ctx }: { ctx: HomeCtx }) {
+  const { db, go } = ctx;
+  const s = credSummary(db, (score) => tierOf(score).key);
+  // מטא של ארבע הדרגות — ציון מייצג לכל טווח מחזיר את התווית/צבע המקוריים
+  const meta = [tierOf(960), tierOf(850), tierOf(600), tierOf(100)];
+  return (
+    <Panel
+      icon="🤝"
+      title="אמינות קהילתית"
+      badge={s.total > 0 ? `ממוצע ${s.avg}` : undefined}
+      action={<Btn sm onClick={() => go('families')}>למשפחות ←</Btn>}
+    >
+      {s.total === 0 ? (
+        <div style={softEmpty}>אין משפחות עדיין</div>
+      ) : (
+        <div className="hm-tier-grid">
+          {meta.map((t) => (
+            <div key={t.key} className="hm-tier">
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span aria-hidden style={{ width: 8, height: 8, borderRadius: 99, background: t.dot, flexShrink: 0 }} />
+                <span style={{ fontSize: 12.5, color: 'var(--ink-faint)', fontWeight: 600 }}>{t.label}</span>
+              </span>
+              <b style={{ fontSize: 20 }}>{s.counts[t.key]}</b>
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/** 💛 תורמים · יעדי קשר — יעדים שהגיעו/עברו (שם, תאריך, טלפון) + נתרם החודש. */
+function ContactsWidget({ ctx }: { ctx: HomeCtx }) {
+  const { db, now, go } = ctx;
+  const due = dueContacts(db, now);
+  const monthSum = monthDonationSum(db, now);
+  return (
+    <Panel
+      icon="💛"
+      title="תורמים · יעדי קשר"
+      badge={due.length ? String(due.length) : undefined}
+      action={<Btn sm onClick={() => go('supporters')}>לתורמים ←</Btn>}
+    >
+      {monthSum > 0 && (
+        <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
+          נתרמו החודש: <b>{fmtIls(monthSum)}</b>
+        </div>
+      )}
+      {due.length === 0 && (
+        <div style={{ ...softEmpty, color: 'var(--green)', fontWeight: 600 }}>אין יעדי קשר פתוחים ✓</div>
+      )}
+      {due.slice(0, 6).map((c) => (
+        <button key={c.id} type="button" className="hm-row" onClick={() => go('supporters')} title="למסך התורמים">
+          <span style={tagStyle(c.late > 7 ? '#fdeaea' : '#fdf1d4', c.late > 7 ? '#b91c1c' : '#9a6414')}>
+            {fmtD(c.date)}
+          </span>
+          <span style={{ fontWeight: 600 }}>{c.name}</span>
+          {c.phone && (
+            <span dir="ltr" style={{ color: 'var(--ink-faint)', fontSize: 12.5 }}>{c.phone}</span>
+          )}
+          <span className="hm-arrow" aria-hidden>לטפל ←</span>
+        </button>
+      ))}
+      {due.length > 6 && <div style={softEmpty}>+{due.length - 6} יעדי קשר נוספים</div>}
+    </Panel>
+  );
+}
+
+/** 🎫 מלאי כרטיסיות — כרטיסיות פעילות עם ≤2 ניקובים שנותרו (בן משפחה, חוג, יתרה). */
+function PunchlowWidget({ ctx }: { ctx: HomeCtx }) {
+  const { db, navTo } = ctx;
+  const items = punchLow(db);
+  return (
+    <Panel icon="🎫" title="מלאי כרטיסיות" badge={items.length ? String(items.length) : undefined}>
+      {items.length === 0 && (
+        <div style={{ ...softEmpty, color: 'var(--green)', fontWeight: 600 }}>כל הכרטיסיות במלאי תקין ✓</div>
+      )}
+      {items.slice(0, 6).map((p) => (
+        <button key={p.key} type="button" className="hm-row" onClick={() => navTo(p.nav)} title="לכרטיס המשפחה">
+          <span style={tagStyle('#efe7f3', '#7c3aed')}>{p.left}/{p.total}</span>
+          <span style={{ minWidth: 0 }}>
+            {p.member} ({p.famName}) · {p.course}
+          </span>
+          <span className="hm-arrow" aria-hidden>לחידוש ←</span>
+        </button>
+      ))}
+      {items.length > 6 && <div style={softEmpty}>+{items.length - 6} כרטיסיות נוספות</div>}
+    </Panel>
+  );
+}
+
+/**
+ * ⚡ פעולות מהירות — קיצורי הפעולות הנפוצות, מחווטים לאותן זרימות קיימות:
+ * + משפחה ← מסך המשפחות · ✓ ניקוב ← החוג הקרוב (כמו "ניקוב מהיר" ב-hero) ·
+ * 🧾 קבלה ← תורמים/חוגים (שם מפיקים קבלות) · ⬇ גיבוי ← exportBackup מההגדרות.
+ * כפתור של מודול/פיצ'ר כבוי מוסתר.
+ */
+function QuickWidget({ ctx }: { ctx: HomeCtx }) {
+  const { config, data, go, selectCourse, exportBackup, toast } = ctx;
+  const coursesOn = moduleOn(config, 'courses');
+  const punchOn = coursesOn && featureOn(config, 'courses.punch');
+  const supportersOn = moduleOn(config, 'supporters');
+  const receiptsOn = featureOn(config, 'core.receipts') && (supportersOn || coursesOn);
+  return (
+    <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 14 }}>
+      <div className="hm-head">
+        <h2>
+          <span aria-hidden>⚡</span> פעולות מהירות
+        </h2>
+      </div>
+      <div className="hm-quick">
+        <Btn kind="primary" onClick={() => go('families')} title="למסך המשפחות — הוספת משפחה">
+          👨‍👩‍👧‍👦 + משפחה
+        </Btn>
+        {punchOn && (
+          <Btn
+            onClick={() => (data.sessions.length ? selectCourse(data.sessions[0].course.id) : go('courses'))}
+            title={data.sessions.length ? 'ניקוב מהיר — ' + data.sessions[0].course.name : 'למסך החוגים'}
+          >
+            ✓ ניקוב
+          </Btn>
+        )}
+        {receiptsOn && (
+          <Btn onClick={() => go(supportersOn ? 'supporters' : 'courses')} title="הפקת קבלה על תרומה או תשלום">
+            🧾 קבלה
+          </Btn>
+        )}
+        <Btn
+          onClick={() => {
+            exportBackup();
+            toast('קובץ גיבוי מלא ירד למחשב ✓');
+          }}
+          title="הורדת קובץ גיבוי מלא — כמו בהגדרות ← גיבוי"
+        >
+          ⬇ גיבוי
+        </Btn>
+      </div>
+    </section>
+  );
+}
+
 /* ── הרישום עצמו ── */
 
-export type WidgetId = 'hero' | 'digest' | 'carousel' | 'stats' | 'today' | 'attention' | 'recent';
+export type WidgetId =
+  | 'hero'
+  | 'bdays'
+  | 'digest'
+  | 'carousel'
+  | 'stats'
+  | 'today'
+  | 'attention'
+  | 'recent'
+  | 'goldbook'
+  | 'hebcal'
+  | 'community'
+  | 'contacts'
+  | 'punchlow'
+  | 'quick';
 
 export interface HomeWidget {
   id: WidgetId;
-  /** שם תצוגה — למסגרת העריכה ולצ'יפים של "הוספת ווידג'ט". */
+  /** שם תצוגה — למסגרת העריכה ולספריית "הוספת ווידג'ט". */
   label: string;
   icon: string;
   /**
@@ -557,6 +913,16 @@ export const HOME_WIDGETS: Record<WidgetId, HomeWidget> = {
     removable: false,
     visible: () => true,
     render: (ctx) => <HeroWidget ctx={ctx} />,
+  },
+  bdays: {
+    id: 'bdays',
+    label: 'ימי הולדת היום',
+    icon: '🎂',
+    slot: 'full',
+    removable: true,
+    // נתוני המשפחות הם ליבת המערכת — הבאנר עצמו לא מרונדר כשאין חוגגים היום
+    visible: () => true,
+    render: (ctx) => <BdaysWidget ctx={ctx} />,
   },
   digest: {
     id: 'digest',
@@ -618,17 +984,108 @@ export const HOME_WIDGETS: Record<WidgetId, HomeWidget> = {
     visible: () => true,
     render: (ctx) => <RecentWidget ctx={ctx} />,
   },
+  goldbook: {
+    id: 'goldbook',
+    label: 'ספר הזהב',
+    icon: '🏆',
+    slot: 'half',
+    removable: true,
+    // נתוני תורמים — מוסתר כשמודול התורמים כבוי
+    visible: (cfg) => moduleOn(cfg, 'supporters'),
+    render: (ctx) => <GoldbookWidget ctx={ctx} />,
+  },
+  hebcal: {
+    id: 'hebcal',
+    label: 'הלוח העברי',
+    icon: '📜',
+    slot: 'half',
+    removable: true,
+    // נתוני לוח השנה — מוסתר כשמודול לוח השנה כבוי
+    visible: (cfg) => moduleOn(cfg, 'calendar'),
+    render: (ctx) => <HebcalWidget ctx={ctx} />,
+  },
+  community: {
+    id: 'community',
+    label: 'אמינות קהילתית',
+    icon: '🤝',
+    slot: 'half',
+    removable: true,
+    // featureOn משרשר גם את מודול המשפחות (קידומת 'families')
+    visible: (cfg) => featureOn(cfg, 'families.cred'),
+    render: (ctx) => <CommunityWidget ctx={ctx} />,
+  },
+  contacts: {
+    id: 'contacts',
+    label: 'תורמים · יעדי קשר',
+    icon: '💛',
+    slot: 'half',
+    removable: true,
+    // featureOn משרשר גם את מודול התורמים (קידומת 'supporters')
+    visible: (cfg) => featureOn(cfg, 'supporters.nextdate'),
+    render: (ctx) => <ContactsWidget ctx={ctx} />,
+  },
+  punchlow: {
+    id: 'punchlow',
+    label: 'מלאי כרטיסיות',
+    icon: '🎫',
+    slot: 'half',
+    removable: true,
+    // featureOn משרשר גם את מודול החוגים (קידומת 'courses')
+    visible: (cfg) => featureOn(cfg, 'courses.punch'),
+    render: (ctx) => <PunchlowWidget ctx={ctx} />,
+  },
+  quick: {
+    id: 'quick',
+    label: 'פעולות מהירות',
+    icon: '⚡',
+    slot: 'full',
+    removable: true,
+    // תמיד זמין — כפתורים בודדים בתוכו כפופים למודול/פיצ'ר שלהם
+    visible: () => true,
+    render: (ctx) => <QuickWidget ctx={ctx} />,
+  },
 };
 
-/** סדר ברירת המחדל — זהה לסדר המסך המקורי. */
-export const DEFAULT_LAYOUT: readonly WidgetId[] = [
+/**
+ * פריסות ברירת מחדל פר-ערכה — כשאין פריסה שמורה (db.ui.homeLayout === undefined)
+ * החלפת ערכה מחליפה את אופי הלוח כולו, כמו במוקאפים.
+ * פריסה שמורה של המשתמש תמיד גוברת; ווידג'ט שהמודול/פיצ'ר שלו כבוי פשוט מדולג.
+ */
+export const THEME_LAYOUTS: Record<string, readonly WidgetId[]> = {
+  /* אור ראשון — הסדר הקלאסי + באנר ימי ההולדת */
+  'or-rishon': ['hero', 'bdays', 'digest', 'stats', 'today', 'attention', 'carousel', 'recent'],
+  /* היכל — "ערב גאלה": נתונים, ספר הזהב והלוח העברי */
+  heichal: ['hero', 'bdays', 'stats', 'today', 'goldbook', 'hebcal', 'attention'],
+  /* צֹהַר — דשבורד תפעולי נקי */
+  tsohar: ['hero', 'bdays', 'stats', 'today', 'attention', 'recent'],
+  /* קהילה — חם וקהילתי: תקציר, אמינות קהילתית וקרוסלה */
+  kehila: ['hero', 'bdays', 'digest', 'today', 'community', 'carousel'],
+};
+
+/** סדר ברירת המחדל הקלאסי (אור ראשון) — fallback לערכה לא מוכרת. */
+export const DEFAULT_LAYOUT: readonly WidgetId[] = THEME_LAYOUTS['or-rishon'];
+
+/** פריסת ברירת המחדל של ערכה — ערכה לא מוכרת מקבלת את הקלאסית. */
+export function defaultLayoutFor(theme: string): readonly WidgetId[] {
+  return THEME_LAYOUTS[theme] ?? DEFAULT_LAYOUT;
+}
+
+/** ספריית הווידג'טים המלאה — הסדר שבו מוצעים אבני הבניין במצב עריכה. */
+export const WIDGET_LIBRARY: readonly WidgetId[] = [
   'hero',
+  'bdays',
   'digest',
   'carousel',
   'stats',
   'today',
   'attention',
   'recent',
+  'goldbook',
+  'hebcal',
+  'community',
+  'contacts',
+  'punchlow',
+  'quick',
 ];
 
 function isWidgetId(id: string): id is WidgetId {
@@ -637,10 +1094,14 @@ function isWidgetId(id: string): id is WidgetId {
 
 /**
  * נרמול פריסה שמורה (db.ui.homeLayout) לרשימת מזהים תקפה:
- * undefined/ריק → ברירת המחדל; מזהים לא מוכרים/כפולים מסוננים; hero תמיד ראשון.
+ * undefined/ריק → ברירת המחדל (fallback — פריסת הערכה הנוכחית);
+ * מזהים לא מוכרים/כפולים מסוננים; hero תמיד ראשון.
  */
-export function sanitizeLayout(raw: readonly string[] | undefined): WidgetId[] {
-  if (!raw || raw.length === 0) return [...DEFAULT_LAYOUT];
+export function sanitizeLayout(
+  raw: readonly string[] | undefined,
+  fallback: readonly WidgetId[] = DEFAULT_LAYOUT,
+): WidgetId[] {
+  if (!raw || raw.length === 0) return [...fallback];
   const out: WidgetId[] = [];
   for (const id of raw) {
     if (isWidgetId(id) && !out.includes(id)) out.push(id);

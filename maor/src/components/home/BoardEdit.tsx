@@ -7,8 +7,8 @@
  * "ביטול" זורק את ה-draft, "איפוס לברירת המחדל" מחזיר את ה-draft לסדר המקורי.
  */
 import { Fragment, useState, type CSSProperties, type DragEvent } from 'react';
-import { Chip } from '../ui';
-import { DEFAULT_LAYOUT, HOME_WIDGETS, type HomeCtx, type WidgetId } from './widgets';
+import { Btn } from '../ui';
+import { HOME_WIDGETS, WIDGET_LIBRARY, type HomeCtx, type WidgetId } from './widgets';
 
 /* ── סגנונות — לפי המוקאפ (סרגל לילה + זהב, מסגרות מקווקוות) ── */
 
@@ -161,8 +161,9 @@ export function BoardEditor(props: {
     );
   };
 
-  // ווידג'טים שהוסרו מהלוח — מוצעים להחזרה כצ'יפים (רק כאלה שה-config מציג)
-  const removed = DEFAULT_LAYOUT.filter(
+  // ספריית אבני הבניין — כל ווידג'ט שאינו על הלוח מוצע ככרטיס "+ הוספה"
+  // (רק כאלה שה-config מציג — ווידג'ט של מודול/פיצ'ר כבוי מוסתר מהספרייה)
+  const removed = WIDGET_LIBRARY.filter(
     (id) => HOME_WIDGETS[id].removable && HOME_WIDGETS[id].visible(ctx.config) && !draft.includes(id),
   );
 
@@ -253,18 +254,16 @@ export function BoardEditor(props: {
           );
         })}
 
-      {/* מגש "+ הוספת ווידג'ט" — ווידג'טים שהוסרו ממתינים כאן כצ'יפים */}
+      {/* ספריית הווידג'טים — אבני בניין ככרטיסים עם "+ הוספה" (כמו במוקאפ) */}
       <div
         style={{
           border: '2px dashed var(--line, #d8ccb4)',
           borderRadius: 14,
           minHeight: 64,
           display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          padding: '12px 16px',
+          flexDirection: 'column',
+          gap: 10,
+          padding: '14px 16px',
           color: 'var(--ink-faint)',
           fontSize: 13,
           background: 'rgba(243, 199, 107, .05)',
@@ -272,15 +271,22 @@ export function BoardEditor(props: {
       >
         {removed.length ? (
           <>
-            <span style={{ fontWeight: 600 }}>+ הוספת ווידג'ט:</span>
-            {removed.map((id) => (
-              <Chip key={id} onClick={() => add(id)}>
-                + {HOME_WIDGETS[id].icon} {HOME_WIDGETS[id].label}
-              </Chip>
-            ))}
+            <span style={{ fontWeight: 700, color: 'var(--ink-soft)' }}>➕ ספריית הווידג'טים — הוסיפו אבני בניין ללוח:</span>
+            <div className="hm-lib">
+              {removed.map((id) => (
+                <div key={id} className="hm-lib-card">
+                  <b>
+                    <span aria-hidden>{HOME_WIDGETS[id].icon}</span> {HOME_WIDGETS[id].label}
+                  </b>
+                  <Btn sm onClick={() => add(id)} title={`הוספת "${HOME_WIDGETS[id].label}" לסוף הלוח`}>
+                    + הוספה
+                  </Btn>
+                </div>
+              ))}
+            </div>
           </>
         ) : (
-          <span>כל הווידג'טים מוצגים על הלוח — ✕ מסיר ווידג'ט לכאן</span>
+          <span style={{ textAlign: 'center' }}>כל הווידג'טים מוצגים על הלוח — ✕ מסיר ווידג'ט לכאן</span>
         )}
       </div>
     </div>

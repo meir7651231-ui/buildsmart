@@ -21,7 +21,7 @@ import {
   todaySessions,
   type AttentionNav,
 } from './homeData';
-import { DEFAULT_LAYOUT, HOME_WIDGETS, sanitizeLayout, type HomeCtx, type WidgetId } from './widgets';
+import { defaultLayoutFor, HOME_WIDGETS, sanitizeLayout, type HomeCtx, type WidgetId } from './widgets';
 import { BoardEditor } from './BoardEdit';
 
 export function HomeView() {
@@ -40,6 +40,7 @@ export function HomeView() {
   const markAttnDone = useApp((s) => s.markAttnDone);
   const unmarkAttnDone = useApp((s) => s.unmarkAttnDone);
   const toast = useApp((s) => s.toast);
+  const exportBackup = useApp((s) => s.exportBackup);
 
   const now = new Date();
   const todayIso = isoOf(now);
@@ -71,16 +72,18 @@ export function HomeView() {
 
   /* ── פריסת הלוח + מצב עריכה ── */
 
+  // ברירת המחדל תלוית-ערכה (THEME_LAYOUTS) — פריסה שמורה תמיד גוברת עליה
+  const defaultLayout = defaultLayoutFor(config.theme);
   // הפריסה השמורה של הארגון — מנורמלת; כשהפיצ'ר כבוי מתעלמים ממנה לגמרי
   const savedLayout = useMemo(
-    () => (boardOn ? sanitizeLayout(db.ui.homeLayout) : [...DEFAULT_LAYOUT]),
-    [boardOn, db.ui.homeLayout],
+    () => (boardOn ? sanitizeLayout(db.ui.homeLayout, defaultLayout) : [...defaultLayout]),
+    [boardOn, db.ui.homeLayout, defaultLayout],
   );
   // ברירת המחדל בפועל — רק ווידג'טים שה-config מציג (להשוואת "האם השתנה")
-  const defaultVisible = DEFAULT_LAYOUT.filter((id) => HOME_WIDGETS[id].visible(config));
+  const defaultVisible = defaultLayout.filter((id) => HOME_WIDGETS[id].visible(config));
 
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<WidgetId[]>([...DEFAULT_LAYOUT]);
+  const [draft, setDraft] = useState<WidgetId[]>([...defaultLayout]);
 
   const startEdit = () => {
     // ה-draft כולל רק ווידג'טים visible — כך אינדקסי הגרירה/חצים פשוטים ואמינים
@@ -112,9 +115,12 @@ export function HomeView() {
     selectCourse,
     markAttnDone,
     unmarkAttnDone,
+    toast,
+    exportBackup,
+    // כפתור בולט על רצועת ה-hero (עוצב ב-.hm-hero .btn) — גילוי קל של מצב העריכה
     headActions:
       boardOn && !editing ? (
-        <Btn sm onClick={startEdit} title="הוספה, הסרה וסידור מחדש של ווידג'טים בלוח הבית">
+        <Btn onClick={startEdit} title="הוספה, הסרה וסידור מחדש של ווידג'טים בלוח הבית">
           עריכת הלוח ✏️
         </Btn>
       ) : undefined,

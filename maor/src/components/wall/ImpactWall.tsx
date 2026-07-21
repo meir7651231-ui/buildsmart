@@ -120,7 +120,9 @@ export function ImpactWall(props: { onClose: () => void }) {
             )}
             <div>
               <h1>{orgName}</h1>
-              <small>קיר ההשפעה · שידור חי</small>
+              <small title="המספרים נשאבים מהנתונים החיים — כל תרומה או רישום מתעדכנים כאן מיד">
+                קיר ההשפעה · שידור חי <span className="iw-live" aria-hidden />
+              </small>
             </div>
           </div>
           <div className="iw-clock">
@@ -340,6 +342,8 @@ const WALL_CSS = `
 .impact-wall .iw-brand svg,.impact-wall .iw-brand img{width:54px;height:54px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 0 18px rgba(243,199,107,.6))}
 .impact-wall .iw-brand h1{font-weight:900;font-size:30px;line-height:1.15;color:var(--iw-gold-hi)}
 .impact-wall .iw-brand small{display:block;font-weight:400;font-size:12.5px;color:var(--iw-soft);letter-spacing:3px}
+.impact-wall .iw-live{display:inline-block;width:8px;height:8px;border-radius:99px;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.9);animation:iwLive 1.6s ease-in-out infinite;vertical-align:middle}
+@keyframes iwLive{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
 .impact-wall .iw-clock{margin-inline-start:auto;text-align:left}
 .impact-wall .iw-clock .t{font-weight:900;font-size:34px;line-height:1.1;color:var(--iw-gold-hi)}
 .impact-wall .iw-clock .d{color:var(--iw-soft);font-size:14px}

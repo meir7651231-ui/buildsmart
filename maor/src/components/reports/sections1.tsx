@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Db } from '../../types/domain';
+import { useApp } from '../../store/useApp';
 import { Chip } from '../ui';
 import type { Cell } from './csv';
 import { ReportTable, Section, type Row } from './parts';
@@ -16,6 +17,7 @@ interface SectionProps {
 /** 1. סיכום רישום לפי חוג — רשומים/תפוסה, הכנסות בטווח, יתרות חוב. */
 export function EnrollmentSection(props: SectionProps & { range: DateRange; rangeText: string }) {
   const { db, range } = props;
+  const selectCourse = useApp((s) => s.selectCourse);
   const head = ['חוג', 'מורה', 'רשומים', 'מקסימום', 'תפוסה', 'הכנסות בטווח (₪)', 'יתרת חוב (₪)'];
 
   let totEnrolled = 0;
@@ -40,6 +42,7 @@ export function EnrollmentSection(props: SectionProps & { range: DateRange; rang
         out,
       ],
       warn: c.maxStudents > 0 && ens.length > c.maxStudents,
+      open: () => selectCourse(c.id),
     };
   });
   const foot: Cell[] = ['סה"כ', '', totEnrolled, '', '', totIncome, totOut];
@@ -61,6 +64,8 @@ export function EnrollmentSection(props: SectionProps & { range: DateRange; rang
 /** 2. נוכחות וחיסורים — לפי חוג או לפי תלמיד/ה (מתוך enrollments.absences). */
 export function AttendanceSection(props: SectionProps) {
   const { db } = props;
+  const selectCourse = useApp((s) => s.selectCourse);
+  const selectFamily = useApp((s) => s.selectFamily);
   const [mode, setMode] = useState<'course' | 'member'>('course');
   const idx = nameIndex(db);
 
@@ -84,7 +89,7 @@ export function AttendanceSection(props: SectionProps) {
     tNoshow += noshow;
     tMakeup += makeup;
     const teacher = db.teachers.find((t) => t.id === c.teacherId);
-    return { cells: [c.name, teacher?.name ?? '', ens.length, abs, noshow, makeup] };
+    return { cells: [c.name, teacher?.name ?? '', ens.length, abs, noshow, makeup], open: () => selectCourse(c.id) };
   });
   const courseFoot: Cell[] = ['סה"כ', '', db.enrollments.length, tAbs, tNoshow, tMakeup];
 
@@ -109,6 +114,7 @@ export function AttendanceSection(props: SectionProps) {
             makeup,
             fmtDate(last),
           ],
+          open: m ? () => selectFamily(m.famId) : undefined,
         } as Row,
       };
     })

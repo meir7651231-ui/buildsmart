@@ -592,6 +592,122 @@ export function digestLines(db: Db, now: Date, modules: ModulesMap): DigestLine[
   return out;
 }
 
+/* ── נגזרות חזותיות חדשות (מוקאפים) — כולן מנתונים אמיתיים בלבד ── */
+
+/** מפתח חודש YYYY-MM במרחק delta חודשים מהעוגן. */
+function monthKeyOf(anchor: Date, delta: number): string {
+  const d = new Date(anchor.getFullYear(), anchor.getMonth() + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * סדרה חודשית ל-months החודשים האחרונים (ישן→חדש, האחרון = החודש הנוכחי) —
+ * לספארקליין בכרטיסי הנתונים. נקודות ללא תאריך תקין נזרקות; אין המצאת נתונים.
+ */
+export function monthlySeries(
+  points: readonly { date: string; value: number }[],
+  now: Date,
+  months = 6,
+): number[] {
+  const idx = new Map<string, number>();
+  for (let i = 0; i < months; i++) idx.set(monthKeyOf(now, i - (months - 1)), i);
+  const out = new Array<number>(months).fill(0);
+  for (const p of points) {
+    const i = idx.get((p.date || '').slice(0, 7));
+    if (i !== undefined) out[i] += p.value;
+  }
+  return out;
+}
+
+/** סכום תרומות השקל בחודש הנוכחי — לצ'יפ המגמה בכרטיס התרומות. */
+export function monthDonationSum(db: Db, now: Date): number {
+  const key = monthKeyOf(now, 0);
+  let sum = 0;
+  for (const sp of db.supporters) {
+    for (const dn of sp.donations) if (dn.cur !== '$' && dn.date.startsWith(key)) sum += dn.amount;
+  }
+  return sum;
+}
+
+/** סיכום מדד האמינות הקהילתי — ממוצע (כמו בקיר ההשפעה) + ספירה לכל דרגה. */
+export interface CredSummary {
+  avg: number;
+  /** ספירות לפי מפתח דרגה (titan/lion/pale/red) — reuse של tierOf ממודול המשפחות. */
+  counts: Record<'titan' | 'lion' | 'pale' | 'red', number>;
+  total: number;
+}
+
+export function credSummary(db: Db, tierKeyOf: (score: number) => 'titan' | 'lion' | 'pale' | 'red'): CredSummary {
+  const counts = { titan: 0, lion: 0, pale: 0, red: 0 };
+  let sum = 0;
+  for (const f of db.families) {
+    const score = f.cred?.score ?? 700;
+    sum += score;
+    counts[tierKeyOf(score)]++;
+  }
+  const total = db.families.length;
+  return { avg: total > 0 ? Math.round(sum / total) : 0, counts, total };
+}
+
+/** תורם עם יעד קשר שהגיע/עבר — לווידג'ט "יעדי קשר". */
+export interface DueContact {
+  id: string;
+  name: string;
+  date: string;
+  phone: string;
+  /** ימי איחור (0 = היעד היום). */
+  late: number;
+}
+
+/** יעדי קשר שהגיעו או עברו (nextDate ≤ היום), מהדחוף לפחות דחוף. */
+export function dueContacts(db: Db, now: Date): DueContact[] {
+  const todayIso = isoOf(now);
+  return db.supporters
+    .filter((sp) => sp.nextDate && sp.nextDate <= todayIso)
+    .map((sp) => ({
+      id: sp.id,
+      name: sp.name,
+      date: sp.nextDate,
+      phone: sp.phone,
+      late: Math.max(0, daysBetween(sp.nextDate, todayIso)),
+    }))
+    .sort((a, b) => b.late - a.late);
+}
+
+/** כרטיסייה שנותרו בה מעט ניקובים — לווידג'ט "מלאי כרטיסיות". */
+export interface PunchLowItem {
+  key: string;
+  member: string;
+  famName: string;
+  course: string;
+  left: number;
+  total: number;
+  nav: AttentionNav;
+}
+
+/** כרטיסיות פעילות עם ≤ maxLeft ניקובים שנותרו, מהנמוך לגבוה. */
+export function punchLow(db: Db, maxLeft = 2): PunchLowItem[] {
+  const members = allMembers(db);
+  return db.enrollments
+    .filter(
+      (e) =>
+        e.plan === 'punch' && e.status === 'active' && e.purchased > 0 && e.purchased - e.used <= maxLeft,
+    )
+    .map((e) => {
+      const m = members.find((x) => x.id === e.memberId);
+      return {
+        key: e.id,
+        member: m?.first ?? '',
+        famName: m?.famName ?? '',
+        course: db.courses.find((c) => c.id === e.courseId)?.name ?? '',
+        left: Math.max(0, e.purchased - e.used),
+        total: e.purchased,
+        nav: (m ? { kind: 'family', id: m.famId } : { kind: 'calendar' }) as AttentionNav,
+      };
+    })
+    .sort((a, b) => a.left - b.left);
+}
+
 /** פריט בקרוסלת האירועים הקרובים. */
 export interface CarouselItem {
   key: string;
