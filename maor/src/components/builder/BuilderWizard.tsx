@@ -256,8 +256,10 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
   };
 
   const resetToDefault = () => {
+    // עותק טרי — לא מוסרים את אובייקט ברירת המחדל עצמו ל-store (הגנה ממוטציה)
+    setConfig({ ...DEFAULT_CONFIG, modules: {}, features: {}, terms: {}, integrations: {} });
+    // setConfig שומר דריסה ב-localStorage — מוחקים אותה אחריו כדי שהאיפוס יהיה אמיתי
     clearConfigOverride();
-    setConfig(DEFAULT_CONFIG);
     setTheme(DEFAULT_CONFIG.theme);
     setAccent(undefined);
     toast('האשף אופס — חזרה לברירת המחדל');
