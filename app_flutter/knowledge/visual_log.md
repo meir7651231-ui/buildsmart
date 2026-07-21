@@ -2121,3 +2121,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **F7 (ניקוי הערות):** 4 הערות-השרת (מדד/משנה/ROI/חשבונית) הורידו את "— כאן מוצגים נתוני דמו" המבלבל (שקרי כשריק על השרת) → "⚙️ נתוני X מתעדכנים מהשרת" (נכון בשני המצבים); עודכנו גם 4 ה-labelHe ברישום.
 **אימות:** analyze 0 (מחזור-import Dart-legal מתקמפל) · **98 בדיקות ירוקות** — finance_hub_state (ctor-אופציונלי, no-arg עדיין ירוק) · budget_server_empty (fake+3 stubs) · finance_firebase_repo (@override) · studio_registry_view (labelHe) · phaseb_seeds (לא-נגע). שער מלא בשער-ה-commit.
 **הפיכות:** להסיר 3 חברי-הממשק + חזרה ל-`ApprovalQueueNotifier()` ללא-repo + החזרת ה-dual-write הידני + החזרת סיומת-ההערות.
+
+## fake-sweep-site-hub — תווית "(דמו)" ל-4 מקטעי-האתר הזרועים — שינוי-נראה: כן — 2026-07-20
+**רקע (`/swarm` · site_hub · מאמת @HEAD acc48469):** `site_hub_screen.dart` הציג 4 const-דמו כמצב-אתר-חי **בלי שום תווית** — בניגוד לבני-הדוד המסומנים (תגמולים/AI/פיננסים/persona) ול-`legal_texts.dart:42` (מסכי-דמו מסומנים בכוונה). כל 4 = דמו-בלבד, אין מקור-אמת (מאמת: WIRE בלתי-אפשרי לכולם; מלכודת שנמנעה: archive→`kProjects` = סמנטיקה-שגויה active≠archived + עדיין-מזויף).
+**שינוי נראה:** נוסף ווידג'ט מקומי `_SiteServerNote` (העתק idiom-ה-`_ServerNote` של תגמולים; radius ליטרלי כי site_hub בלי `cfgRadius`; `Text` רגיל — אין CfgText/רישום), ושורת-תווית מתחת לראש כל מקטע: מבנה-האתר (`kSiteTree` :591) · תלויות (`kSiteDeps` :944) · צילומים (`kSitePhotoPairs` :1024) · ארכיון (`kArchivedProjects` :1227). **תווית-בלבד** — ערכי ה-const (verbatim proto) לא-נגעו.
+**אימות:** analyze 0 · בדיקות ירוקות — `phaseb_seeds_test`+`site_hub_state_test` (נועלים values/lengths, לא render) · `apple_readiness_*` (allowlist, site_hub לא-רשום; note לא-מגודר תואם תקדים-תגמולים) · אין widget-test שמרנדר את המקטעים. **1 קובץ · 0 שינויי-בדיקה/רישום.** גארד: `site_hub_screen.dart:::class _SiteServerNote`.
+**הפיכות:** להסיר את ווידג'ט `_SiteServerNote` + 4 שורות-התווית.

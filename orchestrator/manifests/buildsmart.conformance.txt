@@ -58,3 +58,6 @@ lib/screens/persona_portal.dart:::ניהול צי חי יתחבר
 lib/data/repositories/finance_repository.dart:::approvals()
 lib/state/finance_hub_state.dart:::_repo?.decide
 lib/screens/finance_hub_sheets.dart:::!כאן מוצגים נתוני דמו
+#
+# Regression — fake-data-sweep SITE-HUB (2026-07-20): the 4 demo-seed site sections (tree/deps/photos/archive) stay demo-labeled:
+lib/screens/site_hub_screen.dart:::class _SiteServerNote

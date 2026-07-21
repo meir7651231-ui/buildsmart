@@ -307,6 +307,32 @@ class _CaEmpty extends StatelessWidget {
       );
 }
 
+/// fake-data-sweep: a gray "(דמו)" server-note — a copy of the rewards
+/// `_ServerNote` idiom (ungated, like its cousins) — that labels the demo-seed
+/// site sections (kSiteTree / kSiteDeps / kSitePhotoPairs / kArchivedProjects) as
+/// demo, per the `legal_texts` in-app-marking disclosure. Literal radius because
+/// site_hub imports no `cfgRadius`.
+class _SiteServerNote extends StatelessWidget {
+  const _SiteServerNote(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+      ),
+    );
+  }
+}
+
 /// `.ca-pill` (default brand / `.done` grey).
 class _CaPill extends StatelessWidget {
   const _CaPill(this.label, {this.done = false});
@@ -589,6 +615,9 @@ class _SiteLocations extends StatelessWidget {
       title: 'קומה · דירה · חדר',
       sub: 'מבנה האתר ההיררכי — לשיוך משימות למיקום מדויק.',
       children: [
+        const _SiteServerNote(
+            '⚙️ בפרודקשן: מבנה האתר מסונכרן מהשרת — כאן מבנה דמו'),
+        const SizedBox(height: BsTokens.space3),
         for (final f in kSiteTree) _floor(f),
       ],
     );
@@ -942,6 +971,9 @@ class _SiteDeps extends StatelessWidget {
       title: 'תלויות חומרים בין משימות',
       sub: 'משימה לא יכולה להתחיל לפני שהמשימות התלויות הושלמו.',
       children: [
+        const _SiteServerNote(
+            '⚙️ בפרודקשן: תלויות מחושבות מלוח המשימות החי — כאן נתוני דמו'),
+        const SizedBox(height: BsTokens.space3),
         for (final d in kSiteDeps) _dep(d),
       ],
     );
@@ -1022,6 +1054,9 @@ class _SitePhotosState extends State<_SitePhotos> {
       title: 'צילום לפני / אחרי',
       sub: 'תיעוד ויזואלי של ההתקדמות — השוואת מצב לפני ואחרי.',
       children: [
+        const _SiteServerNote(
+            '⚙️ בפרודקשן: תמונות מהשטח מהשרת — כאן צילומי דמו'),
+        const SizedBox(height: BsTokens.space3),
         for (final p in _pairs) _pair(p),
         const SizedBox(height: 4),
         _CaPrimary(
@@ -1225,6 +1260,9 @@ class _SiteArchive extends StatelessWidget {
       title: 'ארכיון פרויקטים',
       sub: 'פרויקטים שהושלמו — לעיון והפקת לקחים.',
       children: [
+        const _SiteServerNote(
+            '⚙️ בפרודקשן: ארכיון פרויקטים מהשרת — כאן נתוני דמו'),
+        const SizedBox(height: BsTokens.space3),
         for (final p in kArchivedProjects)
           _CaCard(
             child: Column(

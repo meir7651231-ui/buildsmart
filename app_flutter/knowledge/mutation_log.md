@@ -1513,3 +1513,9 @@
 - **mutation-verify (מבוצע):** גארד `finance_hub_state.dart:::_repo?.decide` — הסרתי את הכתיבה-לריפו → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
 - **אימות נוסף:** analyze 0 · **98 בדיקות ירוקות** — finance_hub_state (ctor-אופציונלי שומר no-arg ירוק) · budget_server_empty (_FakeFinanceRepo +3 stubs) · finance_firebase_repo · studio_registry_view (labelHe) · phaseb_seeds (לא-נגע). גארדים: approvals() + _repo?.decide + !"כאן מוצגים נתוני דמו". שער מלא בשער-ה-commit.
 - **סיכון-מקובל:** מסלול-ON (בקאנד-דלוק, מה שהבעלים רואה) — אישורים אמיתיים; אימות-חי-סופי דורש עין-הבעלים על הבניה + נתוני Firestore אמיתיים.
+
+## #fake-sweep-site-hub — תווית "(דמו)" ל-4 מקטעי-האתר הזרועים (/swarm) — 2026-07-20
+- **הרקע:** `site_hub_screen.dart` — 4 const-דמו (kSiteTree/kSiteDeps/kSitePhotoPairs/kArchivedProjects) כמצב-אתר-חי בלי תווית; `legal_texts.dart:42` מחייב סימון. מאמת: כל 4 דמו-בלבד, WIRE בלתי-אפשרי; מלכודת archive→kProjects נמנעה.
+- **הפתרון:** ווידג'ט מקומי `_SiteServerNote` (העתק `_ServerNote` של תגמולים, Text רגיל אין-רישום) + 4 שורות-תווית מתחת לראש כל מקטע. const לא-נגעו.
+- **mutation-verify (מבוצע):** גארד `site_hub_screen.dart:::class _SiteServerNote` — הסרתי את הווידג'ט → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
+- **אימות נוסף:** analyze 0 · phaseb_seeds_test+site_hub_state_test ירוקים (נועלים values/lengths) · apple_readiness (allowlist) · אין widget-test למקטעים. 1 קובץ, 0 שינויי-בדיקה. שער מלא בשער-ה-commit.
