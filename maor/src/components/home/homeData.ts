@@ -726,7 +726,8 @@ const CAR_ICONS: Partial<Record<EventType, string>> = { memorial: '🕯️', bda
  * birthdaysOn) ואירועים מיוחדים (כולל חזרה עברית דרך eventsOnDate).
  * עד 10 פריטים, בסדר כרונולוגי.
  */
-export function carouselItems(db: Db, now: Date): CarouselItem[] {
+export function carouselItems(db: Db, now: Date, modules: ModulesMap = {}): CarouselItem[] {
+  const on = (m: ModuleKey) => modules[m] !== false;
   const SPECIAL: ReadonlySet<EventType> = new Set([
     'wedding',
     'memorial',
@@ -739,7 +740,7 @@ export function carouselItems(db: Db, now: Date): CarouselItem[] {
   for (let i = 0; i < 14 && out.length < 10; i++) {
     const dd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
     const when = i === 0 ? 'היום!' : i === 1 ? 'מחר' : `בעוד ${i} ימים`;
-    for (const b of birthdaysOn(db, dd)) {
+    for (const b of on('families') ? birthdaysOn(db, dd) : []) {
       out.push({
         key: `bd:${b.member.id}:${i}`,
         icon: '🎂',
@@ -749,7 +750,7 @@ export function carouselItems(db: Db, now: Date): CarouselItem[] {
         nav: { kind: 'family', id: b.member.famId },
       });
     }
-    for (const ev of eventsOnDate(db, dd)) {
+    for (const ev of on('calendar') ? eventsOnDate(db, dd) : []) {
       if (!SPECIAL.has(ev.type)) continue;
       out.push({
         key: `ev:${ev.id}:${i}`,

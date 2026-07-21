@@ -260,6 +260,7 @@ function Carousel(props: { items: CarouselItem[]; navTo: (nav: AttentionNav) => 
  */
 function HeroWidget({ ctx }: { ctx: HomeCtx }) {
   const { db, config, now, todayIso, data, go, selectCourse } = ctx;
+  const familiesOn = moduleOn(config, 'families');
   const coursesOn = moduleOn(config, 'courses');
   const calendarOn = moduleOn(config, 'calendar');
   const diaryOn = moduleOn(config, 'diary');
@@ -303,7 +304,9 @@ function HeroWidget({ ctx }: { ctx: HomeCtx }) {
 
       {/* פעולות מהירות — כפתור של מודול כבוי מוסתר */}
       <div className="hm-hero-actions">
-        <Btn kind="primary" onClick={() => go('families')}>+ משפחה חדשה</Btn>
+        {familiesOn && (
+          <Btn kind="primary" onClick={() => go('families')}>+ משפחה חדשה</Btn>
+        )}
         {coursesOn && (
           <Btn
             onClick={() => (data.sessions.length ? selectCourse(data.sessions[0].course.id) : go('courses'))}
@@ -411,9 +414,12 @@ function DigestWidget({ ctx }: { ctx: HomeCtx }) {
 function StatsWidget({ ctx }: { ctx: HomeCtx }) {
   const { db, config, now, go } = ctx;
   const s = ctx.data.stats;
+  const familiesOn = moduleOn(config, 'families');
   const coursesOn = moduleOn(config, 'courses');
   const calendarOn = moduleOn(config, 'calendar');
   const supportersOn = moduleOn(config, 'supporters');
+  // כל המודולים של הכרטיסים כבויים ⇒ אין מה להציג — הגריד כולו נעלם
+  if (!familiesOn && !coursesOn && !calendarOn && !supportersOn) return null;
 
   // משפחות חדשות פר-חודש (6 חודשים) — אמיתי מ-createdAt
   const famSpark = monthlySeries(
@@ -432,22 +438,26 @@ function StatsWidget({ ctx }: { ctx: HomeCtx }) {
 
   return (
     <div className="hm-stats">
-      <StatCard
-        icon="👨‍👩‍👧‍👦"
-        label="משפחות"
-        value={String(s.famTotal)}
-        sub={`${s.famActive} פעילות · ${s.famPending} ממתינות · ${s.famInactive} לא פעילות`}
-        chip={famNew > 0 ? `+${famNew} החודש` : undefined}
-        spark={famSpark}
-        onClick={() => go('families')}
-      />
-      <StatCard
-        icon="🧒"
-        label="בני משפחה"
-        value={String(s.membersTotal)}
-        sub={`מהם ${s.childrenTotal} ילדים`}
-        onClick={() => go('families')}
-      />
+      {familiesOn && (
+        <StatCard
+          icon="👨‍👩‍👧‍👦"
+          label="משפחות"
+          value={String(s.famTotal)}
+          sub={`${s.famActive} פעילות · ${s.famPending} ממתינות · ${s.famInactive} לא פעילות`}
+          chip={famNew > 0 ? `+${famNew} החודש` : undefined}
+          spark={famSpark}
+          onClick={() => go('families')}
+        />
+      )}
+      {familiesOn && (
+        <StatCard
+          icon="🧒"
+          label="בני משפחה"
+          value={String(s.membersTotal)}
+          sub={`מהם ${s.childrenTotal} ילדים`}
+          onClick={() => go('families')}
+        />
+      )}
       {coursesOn && (
         <StatCard
           icon="🎨"
@@ -942,6 +952,7 @@ function PunchlowWidget({ ctx }: { ctx: HomeCtx }) {
  */
 function QuickWidget({ ctx }: { ctx: HomeCtx }) {
   const { config, data, go, selectCourse, exportBackup, toast } = ctx;
+  const familiesOn = moduleOn(config, 'families');
   const coursesOn = moduleOn(config, 'courses');
   const punchOn = coursesOn && featureOn(config, 'courses.punch');
   const supportersOn = moduleOn(config, 'supporters');
@@ -954,9 +965,11 @@ function QuickWidget({ ctx }: { ctx: HomeCtx }) {
         </h2>
       </div>
       <div className="hm-quick">
-        <Btn kind="primary" onClick={() => go('families')} title="למסך המשפחות — הוספת משפחה">
-          👨‍👩‍👧‍👦 + משפחה
-        </Btn>
+        {familiesOn && (
+          <Btn kind="primary" onClick={() => go('families')} title="למסך המשפחות — הוספת משפחה">
+            👨‍👩‍👧‍👦 + משפחה
+          </Btn>
+        )}
         {punchOn && (
           <Btn
             onClick={() => (data.sessions.length ? selectCourse(data.sessions[0].course.id) : go('courses'))}
@@ -1035,8 +1048,8 @@ export const HOME_WIDGETS: Record<WidgetId, HomeWidget> = {
     icon: '🎂',
     slot: 'full',
     removable: true,
-    // נתוני המשפחות הם ליבת המערכת — הבאנר עצמו לא מרונדר כשאין חוגגים היום
-    visible: () => true,
+    // ימי ההולדת נגזרים מבני המשפחה — כבוי כשמודול המשפחות כבוי
+    visible: (cfg) => moduleOn(cfg, 'families'),
     render: (ctx) => <BdaysWidget ctx={ctx} />,
   },
   digest: {
@@ -1096,7 +1109,8 @@ export const HOME_WIDGETS: Record<WidgetId, HomeWidget> = {
     icon: '👨‍👩‍👧‍👦',
     slot: 'full',
     removable: true,
-    visible: () => true,
+    // טבלת משפחות — כבויה כשמודול המשפחות כבוי
+    visible: (cfg) => moduleOn(cfg, 'families'),
     render: (ctx) => <RecentWidget ctx={ctx} />,
   },
   goldbook: {

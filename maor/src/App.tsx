@@ -325,9 +325,11 @@ export default function App() {
             <kbd aria-hidden>Ctrl K</kbd>
           </button>
           <div className="side-actions">
-            <Btn kind="primary" onClick={openFamilyForm} title="פתיחת טופס הוספת משפחה">
-              + משפחה חדשה
-            </Btn>
+            {moduleOn(config, 'families') && (
+              <Btn kind="primary" onClick={openFamilyForm} title="פתיחת טופס הוספת משפחה">
+                + משפחה חדשה
+              </Btn>
+            )}
             {moduleOn(config, 'courses') && (
               <Btn onClick={quickPunch} title="ניקוב מהיר — לחוג הקרוב של היום">
                 ניקוב מהיר

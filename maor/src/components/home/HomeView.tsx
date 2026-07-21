@@ -29,6 +29,7 @@ export function HomeView() {
   const config = useApp((s) => s.config);
   const setDb = useApp((s) => s.setDb);
   // חוזה המודולים (types/config.ts): מודול כבוי מוסתר מכל משטחי הבית — בלי למחוק נתונים
+  const familiesOn = moduleOn(config, 'families');
   const coursesOn = moduleOn(config, 'courses');
   const calendarOn = moduleOn(config, 'calendar');
   const supportersOn = moduleOn(config, 'supporters');
@@ -49,16 +50,17 @@ export function HomeView() {
     () => ({
       stats: homeStats(db, new Date(todayIso + 'T12:00:00')),
       sessions: coursesOn ? todaySessions(db, now) : [],
-      events: eventsOnDate(db, now),
-      bdays: birthdaysOn(db, now),
+      // מודול כבוי ⇒ הנגזרת ריקה — כך כל צרכני data במורד מוגנים אוטומטית
+      events: calendarOn ? eventsOnDate(db, now) : [],
+      bdays: familiesOn ? birthdaysOn(db, now) : [],
       attention: attentionItems(db, now, config.modules),
       digest: digestLines(db, now, config.modules),
-      carousel: carouselItems(db, now),
-      recent: recentFamilies(db, 5),
+      carousel: carouselItems(db, now, config.modules),
+      recent: familiesOn ? recentFamilies(db, 5) : [],
       holiday: holidayOf(now),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [db, todayIso, config.modules, coursesOn],
+    [db, todayIso, config.modules, coursesOn, calendarOn, familiesOn],
   );
 
   // ניווט ממוגן-מודולים: לעולם לא מנווט למסך של מודול כבוי (no-op במקום קריסה/דליפה)

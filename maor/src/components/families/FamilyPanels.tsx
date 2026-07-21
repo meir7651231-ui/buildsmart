@@ -6,7 +6,7 @@
 import { useState, type ReactNode } from 'react';
 import type { Db, Family, FamilyDoc } from '../../types/domain';
 import { useApp } from '../../store/useApp';
-import { featureOn } from '../../lib/config';
+import { featureOn, moduleOn } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { Btn, Empty, TextInput } from '../ui';
 import { downloadText } from '../reports/csv';
@@ -192,6 +192,9 @@ export function EnrollPanel(props: { fam: Family }) {
   const [joinOpen, setJoinOpen] = useState(false);
   const memberIds = new Set(props.fam.members.map((m) => m.id));
   const list = enrollments.filter((e) => memberIds.has(e.memberId));
+
+  // מודול החוגים כבוי ⇒ אין פאנל שיבוצים בכרטיס המשפחה (החוזה: כבוי = מוסתר בכל המשטחים)
+  if (!moduleOn(config, 'courses')) return null;
 
   const STATUS: Record<string, string> = { active: 'פעיל', paused: 'מוקפא ⏸', ended: 'הסתיים' };
 
