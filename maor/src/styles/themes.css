@@ -5,8 +5,36 @@
  * ולכן גובר על כל ערכה — --nav-active-bg ו---primary-* נגזרים ממנו.
  */
 
+/* ── משתני מסך הבית (hm-*) — fallback גלובלי = ערכת "אור ראשון" ──
+ * הקובץ הזה נטען לפני global.css, אבל המשתנים האלה מוגדרים רק כאן,
+ * ולכן ה-fallback שורד; כל ערכה דורסת אותם בבלוק שלה למטה. */
+:root {
+  --hero-bg: linear-gradient(120deg, #fdf8ec 0%, #f9e8c3 45%, #f3c76b 130%);
+  --hero-ink: #211d17;
+  --hero-ink-soft: #6a5c40;
+  --hero-btn-bg: rgba(255, 253, 248, 0.72);
+  --hero-btn-ink: #4d463c;
+  --hero-btn-line: rgba(160, 80, 8, 0.28);
+  --stat-tint: #f7ecd2;
+  --stat-bar: #e5d3a6;
+  --bday-bg: linear-gradient(120deg, #fbeef3 0%, #fdf1d4 100%);
+  --bday-ink: #9d2450;
+  --bday-ink-soft: #6a5c40;
+}
+
 /* ── אור ראשון — שמנת, ענבר וזהב (המראה הקלאסי; זהה לברירת המחדל) ── */
 :root[data-theme='or-rishon'] {
+  --hero-bg: linear-gradient(120deg, #fdf8ec 0%, #f9e8c3 45%, #f3c76b 130%);
+  --hero-ink: #211d17;
+  --hero-ink-soft: #6a5c40;
+  --hero-btn-bg: rgba(255, 253, 248, 0.72);
+  --hero-btn-ink: #4d463c;
+  --hero-btn-line: rgba(160, 80, 8, 0.28);
+  --stat-tint: #f7ecd2;
+  --stat-bar: #e5d3a6;
+  --bday-bg: linear-gradient(120deg, #fbeef3 0%, #fdf1d4 100%);
+  --bday-ink: #9d2450;
+  --bday-ink-soft: #6a5c40;
   --bg: #f6f3ec;
   --panel: #fffdf8;
   --ink: #2e2c26;
@@ -36,6 +64,19 @@
 
 /* ── היכל — כהה ויוקרתי: זהב על שחור-חום, קווי שיער מוזהבים ── */
 :root[data-theme='heichal'] {
+  --hero-bg:
+    radial-gradient(120% 170% at 88% -30%, rgba(233, 189, 99, 0.38) 0%, rgba(233, 189, 99, 0) 55%),
+    linear-gradient(120deg, #0d0b07 0%, #1c1710 55%, #322710 100%);
+  --hero-ink: #f6efdd;
+  --hero-ink-soft: #cdbf9d;
+  --hero-btn-bg: rgba(233, 189, 99, 0.12);
+  --hero-btn-ink: #ecdcb4;
+  --hero-btn-line: rgba(233, 189, 99, 0.38);
+  --stat-tint: rgba(233, 189, 99, 0.14);
+  --stat-bar: #55462a;
+  --bday-bg: linear-gradient(120deg, #2d1e26 0%, #33270f 100%);
+  --bday-ink: #f3c9dd;
+  --bday-ink-soft: #cdbf9d;
   --bg: #12100c;
   --panel: #1b1812;
   --ink: #f2ead8;
@@ -70,6 +111,17 @@
 
 /* ── צֹהַר — SaaS בהיר ונקי: לבן, אפור חם וטורקיז ── */
 :root[data-theme='tsohar'] {
+  --hero-bg: linear-gradient(120deg, #14887a 0%, #0a5d53 70%, #084b43 100%);
+  --hero-ink: #ffffff;
+  --hero-ink-soft: rgba(255, 255, 255, 0.82);
+  --hero-btn-bg: rgba(255, 255, 255, 0.14);
+  --hero-btn-ink: #ffffff;
+  --hero-btn-line: rgba(255, 255, 255, 0.38);
+  --stat-tint: #e3f1ee;
+  --stat-bar: #bdded8;
+  --bday-bg: linear-gradient(120deg, #fdeff5 0%, #fff7ee 100%);
+  --bday-ink: #a81c5f;
+  --bday-ink-soft: #6b6459;
   --bg: #faf9f7;
   --panel: #ffffff;
   --ink: #1c1a17;
@@ -101,6 +153,17 @@
 
 /* ── קהילה — חם ומשחקי: שמנת חמה, טורקיז ופינות מעוגלות ── */
 :root[data-theme='kehila'] {
+  --hero-bg: linear-gradient(120deg, #23b09d 0%, #1a9c8b 45%, #0e6f63 100%);
+  --hero-ink: #ffffff;
+  --hero-ink-soft: rgba(255, 255, 255, 0.86);
+  --hero-btn-bg: rgba(255, 255, 255, 0.16);
+  --hero-btn-ink: #ffffff;
+  --hero-btn-line: rgba(255, 255, 255, 0.42);
+  --stat-tint: #e0f2ef;
+  --stat-bar: #bfe5df;
+  --bday-bg: linear-gradient(120deg, #ffeef5 0%, #fff6e8 100%);
+  --bday-ink: #b01e63;
+  --bday-ink-soft: #7b7264;
   --bg: #fdf8ef;
   --panel: #ffffff;
   --ink: #26221c;
