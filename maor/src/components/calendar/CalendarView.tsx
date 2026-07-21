@@ -50,7 +50,13 @@ interface ModalState {
   date: string;
 }
 
-function DayCell(props: { cell: CalCell; onOpen: () => void; onItem: (it: DayItem) => void }) {
+function DayCell(props: {
+  cell: CalCell;
+  onOpen: () => void;
+  onItem: (it: DayItem) => void;
+  /** במסך מגע (pointer: coarse) הגלולות מכסות את התא — נגיעה בהן פותחת את תצוגת היום. */
+  pillsOpenDay: boolean;
+}) {
   const { cell, onOpen, onItem } = props;
   const pills = cell.items.slice(0, MAX_PILLS);
   const more = cell.items.length - MAX_PILLS;
@@ -107,7 +113,8 @@ function DayCell(props: { cell: CalCell; onOpen: () => void; onItem: (it: DayIte
             title={it.title}
             onClick={(e) => {
               e.stopPropagation();
-              onItem(it);
+              if (props.pillsOpenDay) onOpen();
+              else onItem(it);
             }}
             style={{
               ...pillStyle(it.bg, it.c, it.prC),
@@ -153,6 +160,12 @@ export function CalendarView() {
   // גייטים ברמת פיצ'ר: תצוגת יום (calendar.dayview) ושכבות נגזרות (calendar.layers)
   const dayviewOn = featureOn(config, 'calendar.dayview');
   const layersOn = featureOn(config, 'calendar.layers');
+  // מסך מגע: הגלולות ממלאות את התא ובולעות כל נגיעה — נפתח דרכן את תצוגת היום,
+  // והפריטים עצמם נגישים מתוכה עם שטחי מגע גדולים
+  const coarsePointer = useMemo(
+    () => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches,
+    [],
+  );
   // כשהשכבות כבויות — ימי הולדת / הצטרפויות / הרשמות נכבים בכוח (אירועים וחוגים נשארים)
   const effFilters = useMemo<CalFilters>(
     () => (layersOn ? filters : { ...filters, bdays: false, joins: false, enrolls: false }),
@@ -275,6 +288,7 @@ export function CalendarView() {
               // calendar.dayview כבוי — לחיצה על תא פותחת אירוע חדש ישירות (ההתנהגות הישנה)
               onOpen={() => (dayviewOn ? setDayIso(cell.iso) : setModal({ ev: null, date: cell.iso }))}
               onItem={onItem}
+              pillsOpenDay={dayviewOn && coarsePointer}
             />
           ))}
         </div>
