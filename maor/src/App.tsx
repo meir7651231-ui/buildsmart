@@ -175,9 +175,16 @@ export default function App() {
   const labelOf = (n: (typeof NAV)[number]) =>
     n.view === 'home' ? n.label : termOf(config, `nav.${n.view}`, n.label);
 
-  // מתג השלד: צֹהַר = סרגל-צד (בדסקטופ); כל השאר — הסרגל העליון הקיים
+  // מתג השלד (מוקאפים): צֹהַר = רצועת אייקונים 64px; אור ראשון = פס "לילה" רחב
+  // 212px (mock-desktop); היכל וקהילה — הסרגל העליון. במובייל כולם עליון.
   const theme = uiTheme ?? config.theme;
-  const shell = theme === 'tsohar' && !narrow ? 'side' : 'top';
+  const shell = narrow
+    ? 'top'
+    : theme === 'tsohar'
+      ? 'side'
+      : theme === 'or-rishon'
+        ? 'side-wide'
+        : 'top';
 
   // "ניקוב מהיר" — אותה פעולה כמו בווידג'ט הפעולות המהירות במסך הבית
   const quickPunch = () => {
@@ -264,17 +271,76 @@ export default function App() {
     </>
   );
 
+  // שלד סרגל-צד רחב (אור ראשון, mock-desktop) — פס "לילה" 212px בצד ימין:
+  // מיתוג בסריף זהב + קו-שיער זוהר, קישורי אייקון+תווית, הגדרות כקישור רגיל,
+  // וצ'יפ חיפוש (Ctrl+K) בתחתית. אין שורת כותרת — ה-hero הוא ראש העמוד.
+  const sideWideShell = (
+    <>
+      <aside className="app-side side-wide">
+        <div className="side-brand">
+          {config.logoDataUri && <img src={config.logoDataUri} alt="" />}
+          {orgName}
+          <small>מ ע ר כ ת &nbsp; נ י ה ו ל</small>
+        </div>
+        <div className="side-glow" aria-hidden />
+        <nav className="side-nav" aria-label="ניווט ראשי">
+          {nav.map((n) => {
+            const label = labelOf(n);
+            return (
+              <button
+                key={n.view}
+                className={'side-link' + (view === n.view ? ' active' : '')}
+                onClick={() => go(n.view)}
+                title={label}
+              >
+                <span className="side-ico" aria-hidden>{n.icon}</span>
+                <span className="nav-label">{label}</span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            className={'side-link' + (view === 'settings' ? ' active' : '')}
+            onClick={() => go('settings')}
+            title="הגדרות"
+          >
+            <span className="side-ico" aria-hidden>⚙️</span>
+            <span className="nav-label">הגדרות</span>
+          </button>
+        </nav>
+        <div className="side-sp" aria-hidden />
+        <button
+          type="button"
+          className="side-k"
+          onClick={() => setPalette(true)}
+          title="חיפוש בכל המערכת (Ctrl+K)"
+        >
+          <span aria-hidden>🔍</span>
+          <span>חיפוש מהיר</span>
+          <kbd aria-hidden>Ctrl K</kbd>
+        </button>
+        {userChip}
+      </aside>
+      <div className="side-body">{mainEl}</div>
+    </>
+  );
+
   // שלד סרגל-צד (צֹהַר) — רצועת אייקונים בצד ימין (RTL) + שורת כותרת עם
   // חיפוש רחב ופעולות ראשיות. כל קישור מציג אייקון + תווית קטנה מתחתיו
   // (נגישות + התאמה לבודקי הטקסט של Playwright), בתוספת title ו-aria-label.
   const sideShell = (
     <>
       <aside className="app-side">
-        {config.logoDataUri && (
-          <div className="side-logo">
+        {/* לוגו הארגון; באין לוגו — ריבוע accent עם האות הראשונה (כמו במוקאפ) */}
+        <div className="side-logo">
+          {config.logoDataUri ? (
             <img src={config.logoDataUri} alt="" />
-          </div>
-        )}
+          ) : (
+            <span className="side-logo-fallback" aria-hidden>
+              {(orgName || 'מ').trim().charAt(0)}
+            </span>
+          )}
+        </div>
         {/* בכוונה בלי .app-nav — צבעי הרצועה העליונה (--nav2-*) לא חלים על הצד */}
         <nav className="side-nav" aria-label="ניווט ראשי">
           {nav.map((n) => {
@@ -344,8 +410,8 @@ export default function App() {
   );
 
   return (
-    <div className={'app-shell' + (shell === 'side' ? ' shell-side' : '')}>
-      {shell === 'side' ? sideShell : topShell}
+    <div className={'app-shell' + (shell === 'top' ? '' : ' shell-side')}>
+      {shell === 'side' ? sideShell : shell === 'side-wide' ? sideWideShell : topShell}
 
       {paletteOpen && <CommandPalette />}
 

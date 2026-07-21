@@ -13,8 +13,16 @@
 :root {
   /* hero במוקאפ אור ראשון: כרטיס שמנת עם זוהר זהב רדיאלי בפינה העליונה */
   --hero-bg:
-    radial-gradient(420px 190px at 88% -30%, rgba(243, 199, 107, 0.34), transparent 70%),
-    radial-gradient(300px 150px at 65% -20%, rgba(249, 229, 187, 0.5), transparent 70%),
+    radial-gradient(
+      420px 190px at 88% -30%,
+      rgba(243, 199, 107, 0.34),
+      transparent 70%
+    ),
+    radial-gradient(
+      300px 150px at 65% -20%,
+      rgba(249, 229, 187, 0.5),
+      transparent 70%
+    ),
     #fffdf8;
   --hero-ink: #241f18;
   --hero-ink-soft: #57503f;
@@ -37,8 +45,10 @@
   --nav2-active-ink: #211d17;
   --nav2-line: #3a332a;
   /* טיפוגרפיה: גוף Heebo, כותרות תצוגה Frank Ruhl Libre (המוקאפ), מספרי נתונים Heebo */
-  --font-body: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Frank Ruhl Libre', 'David', 'Noto Serif Hebrew', 'Times New Roman', serif;
+  --font-body:
+    "Heebo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display:
+    "Frank Ruhl Libre", "David", "Noto Serif Hebrew", "Times New Roman", serif;
   --font-stat: var(--font-body);
   --page-bg: var(--bg);
   --card-bg: var(--panel);
@@ -54,10 +64,18 @@
 }
 
 /* ── אור ראשון — שמנת, ענבר וזהב (mock-or-rishon: נייר חם + סרגל-צד לילה) ── */
-:root[data-theme='or-rishon'] {
+:root[data-theme="or-rishon"] {
   --hero-bg:
-    radial-gradient(420px 190px at 88% -30%, rgba(243, 199, 107, 0.34), transparent 70%),
-    radial-gradient(300px 150px at 65% -20%, rgba(249, 229, 187, 0.5), transparent 70%),
+    radial-gradient(
+      420px 190px at 88% -30%,
+      rgba(243, 199, 107, 0.34),
+      transparent 70%
+    ),
+    radial-gradient(
+      300px 150px at 65% -20%,
+      rgba(249, 229, 187, 0.5),
+      transparent 70%
+    ),
     #fffdf8;
   --hero-ink: #241f18;
   --hero-ink-soft: #57503f;
@@ -100,7 +118,8 @@
   --overlay: rgba(33, 29, 23, 0.45);
   --overlay-soft: rgba(33, 29, 23, 0.35);
   --radius: 14px;
-  --shadow: 0 1px 3px rgba(36, 31, 24, 0.07), 0 8px 24px -18px rgba(36, 31, 24, 0.25);
+  --shadow:
+    0 1px 3px rgba(36, 31, 24, 0.07), 0 8px 24px -18px rgba(36, 31, 24, 0.25);
   --shadow-lift: 0 6px 24px rgba(33, 29, 23, 0.14);
   --nav2-bg: #211d17;
   --nav2-ink: #efe7d6;
@@ -109,8 +128,10 @@
   --nav2-active-bg: #f3c76b;
   --nav2-active-ink: #211d17;
   --nav2-line: #3a332a;
-  --font-body: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Frank Ruhl Libre', 'David', 'Noto Serif Hebrew', 'Times New Roman', serif;
+  --font-body:
+    "Heebo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display:
+    "Frank Ruhl Libre", "David", "Noto Serif Hebrew", "Times New Roman", serif;
   --font-stat: var(--font-body);
   --page-bg: var(--bg);
   --card-bg: var(--panel);
@@ -125,7 +146,7 @@
 }
 
 /* ── היכל — כהה ויוקרתי: זהב על שחור-חום, קווי שיער מוזהבים (mock-heichal) ── */
-:root[data-theme='heichal'] {
+:root[data-theme="heichal"] {
   /* ה"כתר" במוקאפ אינו כרטיס — global.css מרוקן את הרקע; הערך כאן ל-fallback בלבד */
   --hero-bg: transparent;
   --hero-ink: #f7dfa8;
@@ -181,10 +202,13 @@
   --nav2-active-bg: linear-gradient(180deg, #2c2618, #241f14);
   --nav2-active-ink: #f7dfa8;
   --nav2-line: #332d21;
-  --font-body: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Frank Ruhl Libre', 'David', 'Noto Serif Hebrew', 'Times New Roman', serif;
+  --font-body:
+    "Heebo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display:
+    "Frank Ruhl Libre", "David", "Noto Serif Hebrew", "Times New Roman", serif;
   /* מספרי הנתונים ברצועה — סריף חגיגי כמו במוקאפ (kpi .v) */
-  --font-stat: 'Frank Ruhl Libre', 'David', 'Noto Serif Hebrew', 'Times New Roman', serif;
+  --font-stat:
+    "Frank Ruhl Libre", "David", "Noto Serif Hebrew", "Times New Roman", serif;
   --panel-line: #332d21;
   --side-bg: #0b0906;
   --side-ink: #f2ead8;
@@ -196,7 +220,7 @@
 }
 
 /* ── צֹהַר — SaaS בהיר ונקי: לבן, אפור חם וטורקיז (mock-tsohar) ── */
-:root[data-theme='tsohar'] {
+:root[data-theme="tsohar"] {
   /* במוקאפ אין באנר — הברכה יושבת ישירות על רקע הדף (global.css מרוקן את הכרטיס) */
   --hero-bg: transparent;
   --hero-ink: #1c1a17;
@@ -250,8 +274,10 @@
   --nav2-active-bg: #e2f1ee;
   --nav2-active-ink: #0a5d53;
   --nav2-line: #e8e4dc;
-  --font-body: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body:
+    "Rubik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display:
+    "Rubik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-stat: var(--font-body);
   --page-bg: var(--bg);
   --card-bg: var(--panel);
@@ -267,7 +293,7 @@
 }
 
 /* ── קהילה — חם ומשחקי: שמנת חמה, טורקיז ופינות מעוגלות (mock-kehila) ── */
-:root[data-theme='kehila'] {
+:root[data-theme="kehila"] {
   --hero-bg: linear-gradient(135deg, #178f80, #1da28f 55%, #3fb3a0);
   --hero-ink: #ffffff;
   --hero-ink-soft: rgba(255, 255, 255, 0.9);
@@ -317,9 +343,10 @@
   --nav2-active-bg: #ffffff;
   --nav2-active-ink: #178f80;
   --nav2-line: rgba(255, 255, 255, 0.001);
-  --font-body: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Suez One', 'David', 'Noto Serif Hebrew', serif;
-  --font-stat: 'Suez One', 'David', 'Noto Serif Hebrew', serif;
+  --font-body:
+    "Rubik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Suez One", "David", "Noto Serif Hebrew", serif;
+  --font-stat: "Suez One", "David", "Noto Serif Hebrew", serif;
   --page-bg: var(--bg);
   --card-bg: var(--panel);
   /* הכרטיסים במוקאפ ללא מסגרת — צל רך בלבד */

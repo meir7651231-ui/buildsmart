@@ -18,6 +18,24 @@ import { featureEffectiveOn, WIZARD_SECTIONS, type WizardSectionDef } from './se
 const DEFAULT_APP_URL = 'https://meir7651231-ui.github.io/buildsmart/maor/';
 
 /**
+ * "פלטפורמה אחת — אלפי עמותות" (רצועת ה-white-label ממוקאפ צֹהַר):
+ * ארבעה ארגוני הדגמה — לחיצה מלבישה שם+צבע+ערכה על המערכת החיה (patch),
+ * כדי שהמטמיע יראה בפגישה את "המערכת מתלבשת" על הלקוח. הדגמה בלבד.
+ */
+const PLATFORM_DEMOS: {
+  org: string;
+  colorName: string;
+  desc: string;
+  accent: string;
+  theme: string;
+}[] = [
+  { org: 'מאור החסד', colorName: 'ירוק צהר', desc: 'הארגון שלך', accent: '#0e7a6c', theme: 'tsohar' },
+  { org: 'יד ביד ת״א', colorName: 'סגול רויאל', desc: 'ארגון חונכות', accent: '#8a3ffc', theme: 'tsohar' },
+  { org: 'לב פתוח', colorName: 'אדום שני', desc: 'בית תמחוי', accent: '#b3362a', theme: 'tsohar' },
+  { org: 'אופק לילדים', colorName: 'כחול עומק', desc: 'קרן מלגות', accent: '#1554b0', theme: 'tsohar' },
+];
+
+/**
  * חילוץ סלחני של קונפיגורציית Firebase מהטקסט שמדביקים מהקונסולה —
  * מקבל גם את קטע ה-JS (const firebaseConfig = {...}) וגם JSON נקי.
  * ארבעת שדות החובה: apiKey, authDomain, projectId, appId.
@@ -182,6 +200,12 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
   /** חיבור ענן: הטקסט שהודבק מקונסולת Firebase + שגיאת פענוח. */
   const [fbText, setFbText] = useState('');
   const [fbErr, setFbErr] = useState('');
+  /** הדגמת הפלטפורמה: תצלום המיתוג שלפני ההדגמה — ל"החזרה" בלחיצה אחת. */
+  const [demoPrev, setDemoPrev] = useState<{
+    orgName: string;
+    accent: string | undefined;
+    theme: string;
+  } | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -263,6 +287,25 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
     setTheme(DEFAULT_CONFIG.theme);
     setAccent(undefined);
     toast('האשף אופס — חזרה לברירת המחדל');
+  };
+
+  /** לחיצה על כרטיס ארגון — מלביש שם+צבע+ערכה חיים; התצלום נשמר פעם אחת. */
+  const applyPlatformDemo = (d: (typeof PLATFORM_DEMOS)[number]) => {
+    if (!demoPrev) setDemoPrev({ orgName: config.orgName, accent: config.accent, theme: config.theme });
+    patch({ orgName: d.org, accent: d.accent, theme: d.theme });
+    setTheme(d.theme);
+    setAccent(d.accent);
+    toast(`🎪 המערכת התלבשה על "${d.org}" — לחצו "החזרה" כדי לחזור`);
+  };
+
+  /** החזרת המיתוג שלפני ההדגמה — שם, צבע וערכה כפי שהיו. */
+  const restorePlatformDemo = () => {
+    if (!demoPrev) return;
+    patch({ orgName: demoPrev.orgName, accent: demoPrev.accent, theme: demoPrev.theme });
+    setTheme(demoPrev.theme);
+    setAccent(demoPrev.accent);
+    setDemoPrev(null);
+    toast('המיתוג שלפני ההדגמה הוחזר ✓');
   };
 
   const isOpen = (id: string, def = false) => open[id] ?? def;
@@ -587,6 +630,105 @@ export function BuilderWizard({ onClose }: { onClose: () => void }) {
           <Btn kind="primary" onClick={createPackage}>📦 צור חבילה — config + דף מסירה</Btn>
           <Btn onClick={resetToDefault}>איפוס האשף לברירת מחדל</Btn>
         </div>
+
+        {/* רצועת ה-white-label ממוקאפ צֹהַר — הדגמת "המערכת מתלבשת" בפגישה */}
+        <section
+          aria-label="הדגמת הפלטפורמה"
+          style={{
+            marginTop: 16,
+            border: '1px solid var(--line)',
+            borderRadius: 12,
+            padding: '12px 14px',
+            background: 'linear-gradient(180deg, var(--bg), var(--panel))',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, flex: 1, minWidth: 0 }}>
+              🎪 פלטפורמה אחת — אלפי עמותות, כל אחת בצבעים שלה
+            </h3>
+            <span
+              style={{
+                fontSize: 10.5,
+                fontWeight: 700,
+                borderRadius: 999,
+                padding: '1px 8px',
+                border: '1px solid var(--line)',
+                color: 'var(--ink-faint)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              הדגמה
+            </span>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--ink-soft)', margin: '3px 0 10px' }}>
+            אותה מערכת בדיוק; כל ארגון בוחר צבע, לוגו ושם — והמערכת כולה מתלבשת עליו.
+            לחצו על כרטיס כדי לראות את זה חי:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 8 }}>
+            {PLATFORM_DEMOS.map((d) => {
+              const on = config.orgName === d.org && config.accent === d.accent;
+              return (
+                <button
+                  key={d.org}
+                  type="button"
+                  onClick={() => applyPlatformDemo(d)}
+                  title={`להלביש את המערכת על "${d.org}"`}
+                  style={{
+                    border: on ? '1.5px solid var(--accent)' : '1.5px solid var(--line)',
+                    boxShadow: on ? '0 0 0 3px var(--stat-tint)' : undefined,
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    background: 'var(--panel)',
+                    textAlign: 'right',
+                    padding: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <span
+                    style={{
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0 10px',
+                      gap: 6,
+                      color: '#fff',
+                      fontWeight: 600,
+                      fontSize: 11.5,
+                      background: d.accent,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <span
+                      aria-hidden
+                      style={{
+                        width: 13,
+                        height: 13,
+                        borderRadius: 4,
+                        background: 'rgba(255,255,255,.35)',
+                        flexShrink: 0,
+                      }}
+                    />
+                    {d.org}
+                  </span>
+                  <span style={{ padding: '7px 10px', fontSize: 10.5, color: 'var(--ink-faint)' }}>
+                    <b style={{ display: 'block', color: 'var(--ink)', fontSize: 11.5, fontWeight: 600 }}>
+                      {d.colorName}
+                    </b>
+                    {d.desc}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {demoPrev && (
+            <div style={{ marginTop: 10 }}>
+              <Btn sm onClick={restorePlatformDemo} title="חזרה לשם, לצבע ולערכה שלפני ההדגמה">
+                ⤴ החזרה — {demoPrev.orgName || 'המיתוג הקודם'}
+              </Btn>
+            </div>
+          )}
+        </section>
 
         <details style={{ marginTop: 14, fontSize: 12 }}>
           <summary style={{ cursor: 'pointer', color: 'var(--ink-faint)' }}>config.json (תצוגה)</summary>
