@@ -49,3 +49,7 @@ lib/screens/manager_dashboard_screen.dart:::אשראי: לא רשומה
 #
 # Regression — fake-data-sweep REWARDS (2026-07-20): fabricated leaderboard rivals / badges / shared invite code must stay demo-labeled:
 lib/screens/rewards_hub_screen.dart:::דירוג חי מהשרת
+#
+# Regression — fake-data-sweep COURIER+SUPPLIER (2026-07-20): demo fleet/ratings gated; the honest server-pending rows must stay (no fake, no blank in the review build):
+lib/screens/persona_portal.dart:::דירוגי ספקים חיים יתווספו
+lib/screens/persona_portal.dart:::ניהול צי חי יתחבר

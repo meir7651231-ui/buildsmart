@@ -176,17 +176,24 @@ class CourierPortalTab extends ConsumerWidget {
     _sheet(context, tile.title, tile.sub, [
       for (final h in kHaulTypes)
         _row(
-          '${h.ic} ${h.name} · תוספת ${fMoney(h.extra)} · '
-          'זמינים היום: ${kHaulAvailabilityDemo[h.id] ?? 0}',
+          // fake-data-sweep: tier + price are real static config (keep, always);
+          // the demo "זמינים היום" availability is gated with its label below.
+          '${h.ic} ${h.name} · תוספת ${fMoney(h.extra)}'
+          '${kHideUnderConstruction ? '' : ' · זמינים היום: ${kHaulAvailabilityDemo[h.id] ?? 0}'}',
         ),
       // ביושר: הזמינות לעיל היא demo seed (SERVER-SWAP בקובץ זה). מוסתר
       // ל-Apple review (אין הצגת "הדגמה"); הנתונים נשארים. הפיך.
       if (!kHideUnderConstruction)
         _note('זמינות להדגמה — תוחלף בנתוני צי חיים עם חיבור השרת'),
-      const SizedBox(height: BsTokens.space2),
-      _subhead('רכבי הצי'),
-      for (final v in kFleet)
-        _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
+      // fake-data-sweep: kFleet (V14/V08 + named drivers) is a demo seed with no
+      // live source — gate the whole section; the tiers above keep the sheet
+      // non-empty in the review build.
+      if (!kHideUnderConstruction) ...[
+        const SizedBox(height: BsTokens.space2),
+        _subhead('רכבי הצי'),
+        for (final v in kFleet)
+          _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
+      ],
     ]);
   }
 
@@ -207,8 +214,9 @@ class CourierPortalTab extends ConsumerWidget {
       _subhead('אזורי שירות'),
       for (final z in kDistZones)
         _row('${z.name} · ${z.eta} · משלוח ${fMoney(z.fee)}'),
-      // ביושר: אין מפה בדמו — רשימה בלבד. (מפה/ניווט = C6 location fleet — לא נגעתי.)
-      _note('תצוגת מפה אינה זמינה בדמו — מפה חיה תחובר עם חיבור השרת'),
+      // ביושר: רשימת אזורים בלבד (מפה/ניווט = C6 location fleet — לא נגעתי).
+      // fake-data-sweep: ניסוח נקי — ההערה מוצגת גם ב-review, בלי מילת-הדגמה.
+      _note('תצוגת מפה חיה תחובר עם חיבור השרת'),
     ]);
   }
 

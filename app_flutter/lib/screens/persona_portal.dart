@@ -244,15 +244,17 @@ class _PortalSheet extends ConsumerWidget {
   List<Widget> _content(BuildContext context, WidgetRef ref) {
     switch (tile.kind) {
       case PortalKind.ratings:
+        // fake-data-sweep: kSupplierRatings is a demo seed with no live source —
+        // gate the DATA rows together with the label (not just the note), so the
+        // review build never shows fake ratings; show an honest server-pending
+        // row instead of a blank sheet.
         return [
-          for (final r in kSupplierRatings)
-            _row('⭐ ${r.score} · ${r.orders} הזמנות · ${r.onTime}% בזמן'),
-          // F-48 — ביושר: kSupplierRatings הוא seed קבוע מהפרוטוטייפ, לא נגזרת
-          // של מנוע ההזמנות החי (SERVER-SWAP) — אותו דפוס _note כמו בפורטל
-          // השליח (courier_portal_tab.dart). מוסתר ל-Apple review (הערת "הדגמה"
-          // אינה מוצגת); השורות עצמן נשארות. הפיך — flip kHideUnderConstruction.
-          if (!kHideUnderConstruction)
+          if (!kHideUnderConstruction) ...[
+            for (final r in kSupplierRatings)
+              _row('⭐ ${r.score} · ${r.orders} הזמנות · ${r.onTime}% בזמן'),
             _note('נתוני הדגמה (seed מהפרוטוטייפ) — יוחלפו בנתונים חיים עם חיבור השרת'),
+          ] else
+            _row('דירוגי ספקים חיים יתווספו עם חיבור השרת'),
         ];
       case PortalKind.zones:
         return [
@@ -268,9 +270,14 @@ class _PortalSheet extends ConsumerWidget {
           for (final t in kBulkTiers) _row('${t.min}+ יח׳ · ${t.discount}% הנחה'),
         ];
       case PortalKind.fleet:
+        // fake-data-sweep: kFleet is a demo seed with no live source — gate it and
+        // show an honest server-pending row instead of fabricated vehicles.
         return [
-          for (final v in kFleet)
-            _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
+          if (!kHideUnderConstruction) ...[
+            for (final v in kFleet)
+              _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
+          ] else
+            _row('ניהול צי חי יתחבר עם חיבור השרת'),
         ];
       case PortalKind.autoStock:
         // Live out-of-stock list — the supplier's [storeOosProvider] set, the

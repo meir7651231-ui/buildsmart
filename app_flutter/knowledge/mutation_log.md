@@ -1500,3 +1500,9 @@
 - **הפתרון:** 3 שורות `_ServerNote` (Text רגיל, אין CfgText/רישום) :209/:247/:346. תווית-בלבד — const לא-נגעו.
 - **mutation-verify (מבוצע):** גארד `rewards_hub_screen.dart:::דירוג חי מהשרת` — הסרתי את התווית → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
 - **אימות נוסף:** analyze 0 · `t3_ghi_rewards_ai_home_test` ירוק (asserts const values/lengths, לא render) · אין טסט שמרנדר RewardsHubScreen. site_hub_screen נדחה. שער מלא בשער-ה-commit.
+
+## #fake-sweep-courier-supplier — גידור צי/דירוגים/זמינות + שורות "יתחבר עם השרת" (הנחיה-2) — 2026-07-20
+- **הרקע:** פורטל שליח/ספק — שורות-דאטה מזויפות (kFleet/kSupplierRatings/kHaulAvailabilityDemo) רונדרו ללא-תנאי; רק תוויות ה-_note מגודרות → ב-review אפל מזויף-בלי-תווית (F-48). אין מקור-חי (const-דמו) → גידור.
+- **הפתרון:** courier — זמינות מגודרת בשורה (מחיר נשאר), kFleet מגודר; persona — kSupplierRatings+kFleet מגודרים יחד-עם-התווית + `else` שורת "יתחבר עם חיבור השרת"; courier :219 בלי "בדמו".
+- **mutation-verify (מבוצע):** גארד `persona_portal.dart:::דירוגי ספקים חיים יתווספו` — הסרתי את שורת-ה-else → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
+- **אימות נוסף:** analyze 0 · 0 שינויי-בדיקה — `t9_supplier_personas` (const kFleet.first.driver) לא-מושפע · `apple_readiness_hide_pass` ירוק (התוויות נשמרו). גארדים: else-rows של persona. שער מלא בשער-ה-commit.

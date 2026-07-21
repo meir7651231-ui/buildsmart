@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fake-sweep-courier-supplier — גידור צי/דירוגים/זמינות + שורות "יתחבר עם השרת" — 2026-07-20
+`screens/courier_portal_tab.dart`: זמינות-דמו מגודרת בתוך השורה (סוג-רכב+מחיר נשארים תמיד) · `kFleet` מגודר `if(!kHideUnderConstruction) ...[]` (הטירים שומרים על הגיליון לא-ריק) · הערת-מפה :219 נוסחה בלי "בדמו". `screens/persona_portal.dart`: `kSupplierRatings`+`kFleet` מגודרים **יחד-עם-התווית** + `else` שורת "…חי יתחבר עם חיבור השרת" (במקום גיליון-ריק). אין מקור-חי (kFleet=supplier_data.dart:225 · kSupplierRatings:274 · availability const) → גידור, לא חיווט. ב-review אפל: לא-מזויף ולא-ריק. הנחיה-2 (שליח+ספק). 0 שינויי-בדיקה (t9_supplier_personas + apple_readiness_hide_pass ירוקים). persona_portal.dart:257-269 (zones/sla/bulk = config סטטי) — לא בהיקף. גארדים: `persona_portal.dart:::דירוגי ספקים חיים יתווספו` + `:::ניהול צי חי יתחבר`.
+
 ## #fake-sweep-rewards — תווית "(דמו)" ללוח-מובילים · תגים · קוד-הזמנה — 2026-07-20
 `screens/rewards_hub_screen.dart`: 3 שורות `_ServerNote` (Text רגיל — אין CfgText/רישום) מתחת לראש כל אחד — לוח-המובילים :209 (הדירוג חי אך המתחרים const-דמו) · תגים ירוקים :247 (earned קבועים, אין tracker) · קוד-הזמנה :346 (`BUILD-7K29` משותף מוצג כ"שלך"). תווית-בלבד; ערכי ה-const לא-נגעו (`t3_ghi` נועל values/lengths). מנומק ב-`legal_texts.dart:42` (מסכי-דמו מסומנים בכוונה). הנחיה-2 (פרוסת-תגמולים). `site_hub_screen.dart` (48KB, seed לא-מסומן) — נדחה לפרויקט-נפרד. גארד: `rewards_hub_screen.dart:::דירוג חי מהשרת`.
 
