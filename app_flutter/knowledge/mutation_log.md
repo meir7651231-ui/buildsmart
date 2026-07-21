@@ -1506,3 +1506,10 @@
 - **הפתרון:** courier — זמינות מגודרת בשורה (מחיר נשאר), kFleet מגודר; persona — kSupplierRatings+kFleet מגודרים יחד-עם-התווית + `else` שורת "יתחבר עם חיבור השרת"; courier :219 בלי "בדמו".
 - **mutation-verify (מבוצע):** גארד `persona_portal.dart:::דירוגי ספקים חיים יתווספו` — הסרתי את שורת-ה-else → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
 - **אימות נוסף:** analyze 0 · 0 שינויי-בדיקה — `t9_supplier_personas` (const kFleet.first.driver) לא-מושפע · `apple_readiness_hide_pass` ירוק (התוויות נשמרו). גארדים: else-rows של persona. שער מלא בשער-ה-commit.
+
+## #fake-sweep-finance-approval — חיווט תור-אישורים לריפו (server-אמיתי) + F7 ניקוי-הערות (הנחיה-2) — 2026-07-20
+- **הרקע:** `approvalQueueProvider` תמיד זרע מ-`kApprovalQueue` (דמו) → גם על השרת אישורי-רכש מזויפים. impl אמיתי (`FirebaseFinanceRepository.approvals()/decide()`) קיים אך לא-מחובר.
+- **הפתרון:** 3 חברי-ממשק `FinanceRepository` (approvals/decide/approvalsListenable); Local=זרע-דמו, Firebase=Firestore + listenable; `ApprovalQueueNotifier` ctor-אופציונלי זורע+מתעדכן מ-`financeRepo()`, decide נכתב-כפול, dispose מסיר listener; provider=`ApprovalQueueNotifier(financeRepo())`; מחיקת dual-write ידני. F7: 4 הערות בלי "כאן מוצגים נתוני דמו" (+4 labelHe). מחזור-import Dart-legal (analyze נקי). Slice B (4 ערכים) דולג — אין מקור-אמת (החלטת-בעלים).
+- **mutation-verify (מבוצע):** גארד `finance_hub_state.dart:::_repo?.decide` — הסרתי את הכתיבה-לריפו → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
+- **אימות נוסף:** analyze 0 · **98 בדיקות ירוקות** — finance_hub_state (ctor-אופציונלי שומר no-arg ירוק) · budget_server_empty (_FakeFinanceRepo +3 stubs) · finance_firebase_repo · studio_registry_view (labelHe) · phaseb_seeds (לא-נגע). גארדים: approvals() + _repo?.decide + !"כאן מוצגים נתוני דמו". שער מלא בשער-ה-commit.
+- **סיכון-מקובל:** מסלול-ON (בקאנד-דלוק, מה שהבעלים רואה) — אישורים אמיתיים; אימות-חי-סופי דורש עין-הבעלים על הבניה + נתוני Firestore אמיתיים.

@@ -478,7 +478,7 @@ void _openIndex(BuildContext context) {
             ),
             child: const CfgText(
               'finance_hub_sheets.index_server_note',
-              '⚙️ נתוני המדד מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              '⚙️ נתוני המדד מתעדכנים מהשרת',
               style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
@@ -654,7 +654,7 @@ void _openSubs(BuildContext context) {
             ),
             child: const CfgText(
               'finance_hub_sheets.subs_server_note',
-              '⚙️ נתוני קבלני המשנה מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              '⚙️ נתוני קבלני המשנה מתעדכנים מהשרת',
               style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
@@ -784,13 +784,10 @@ void _decide(BuildContext context, WidgetRef ref, FinanceApproval a, bool ok) {
     showToast(context, '⛔ אין הרשאה לאישור בקשת רכש');
     return;
   }
+  // fake-data-sweep: the notifier now owns the dual-write — decide() flips the
+  // local state AND persists to the repo (Firebase → Firestore). No manual
+  // backend call here (it would double-write).
   ref.read(approvalQueueProvider.notifier).decide(a.id, ok);
-  // S-connect: persist the decision on the live backend too (the notifier is
-  // the demo path; connected reads come from financeRepo()).
-  if (useFirebaseBackend) {
-    final r = financeRepo();
-    if (r is FirebaseFinanceRepository) r.decide(a.id, ok);
-  }
   // proto auditLog('החלטת רכש', id+': '+(ok?'אושר':'נדחה'))
   ref
       .read(auditTrailProvider.notifier)
@@ -1080,7 +1077,7 @@ void _openRoi(BuildContext context) {
             ),
             child: const CfgText(
               'finance_hub_sheets.roi_server_note',
-              '⚙️ נתוני ה-ROI מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              '⚙️ נתוני ה-ROI מתעדכנים מהשרת',
               style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
@@ -1137,7 +1134,7 @@ void _openInvoiceSplit(BuildContext context) {
             ),
             child: const CfgText(
               'finance_hub_sheets.invoice_server_note',
-              '⚙️ נתוני פיצול החשבונית מתעדכנים מהשרת — כאן מוצגים נתוני דמו',
+              '⚙️ נתוני פיצול החשבונית מתעדכנים מהשרת',
               style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),

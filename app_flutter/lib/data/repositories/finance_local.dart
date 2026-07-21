@@ -46,12 +46,13 @@ import 'package:buildsmart/data/contractor_seeds.dart'
         kBudgetSpent,
         kBudgetTotal;
 import 'package:buildsmart/data/menu_trees.dart' show kFinanceHub;
-import 'package:buildsmart/data/phaseb_seeds.dart' show budgetPct;
+import 'package:buildsmart/data/phaseb_seeds.dart' show budgetPct, kApprovalQueue;
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/finance_firebase.dart'
     show FirebaseFinanceRepository;
 import 'package:buildsmart/data/repositories/finance_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
+import 'package:buildsmart/state/finance_hub_state.dart' show FinanceApproval;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,6 +139,32 @@ class LocalFinanceRepository implements FinanceRepository {
         .where((o) => o.isOpen)
         .fold<int>(0, (s, o) => s + o.sum);
   }
+
+  // ── purchase-approval queue (const-backed demo seed; server on Firebase) ─────
+
+  /// The demo approval seed (`kApprovalQueue`) — byte-identical to what the
+  /// notifier seeded from before this wiring. The Firebase impl returns the
+  /// persisted Firestore list instead.
+  @override
+  List<FinanceApproval> approvals() => [
+        for (final a in kApprovalQueue)
+          FinanceApproval(
+            id: a.id,
+            what: a.what,
+            amount: a.amount,
+            by: a.by,
+            status: a.status,
+          ),
+      ];
+
+  /// No-op on the const path — the demo decision flip lives in the notifier
+  /// (like [setBudget]); the const seed has nothing to persist.
+  @override
+  void decide(String id, bool ok) {}
+
+  /// Nothing streams on the const-backed local impl (like [budgetListenable]).
+  @override
+  Listenable? get approvalsListenable => null;
 }
 
 /// The shared `const` instance backing the global [financeRepo] accessor on the

@@ -53,3 +53,8 @@ lib/screens/rewards_hub_screen.dart:::דירוג חי מהשרת
 # Regression — fake-data-sweep COURIER+SUPPLIER (2026-07-20): demo fleet/ratings gated; the honest server-pending rows must stay (no fake, no blank in the review build):
 lib/screens/persona_portal.dart:::דירוגי ספקים חיים יתווספו
 lib/screens/persona_portal.dart:::ניהול צי חי יתחבר
+#
+# Regression — fake-data-sweep FINANCE-APPROVAL (2026-07-20): the approval queue is wired to the repo (real on server, not the AP-201/202 demo seed); the misleading "demo shown" note is gone:
+lib/data/repositories/finance_repository.dart:::approvals()
+lib/state/finance_hub_state.dart:::_repo?.decide
+lib/screens/finance_hub_sheets.dart:::!כאן מוצגים נתוני דמו

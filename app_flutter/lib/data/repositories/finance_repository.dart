@@ -18,6 +18,7 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart' show BudgetCategory;
 import 'package:buildsmart/data/sections.dart' show Section;
+import 'package:buildsmart/state/finance_hub_state.dart' show FinanceApproval;
 import 'package:flutter/foundation.dart' show Listenable;
 
 /// Server-ready contract over the project budget + finance hub. The current
@@ -61,4 +62,22 @@ abstract class FinanceRepository {
   /// arrived OR our own optimistic write landed — so the budget editor can re-seed
   /// from the live reads. Null on the const-backed local impl (nothing streams).
   Listenable? get budgetListenable;
+
+  // ── purchase-approval queue (server-connect: the persisted approval list) ────
+
+  /// The live purchase-approval queue. The const-backed local impl returns the
+  /// demo seed (`kApprovalQueue`); the Firebase impl returns the persisted
+  /// Firestore list — so on the connected build the manager sees REAL approvals,
+  /// not the AP-201/202 demo seed.
+  List<FinanceApproval> approvals();
+
+  /// Set request [id]'s decision — `ok` → 'אושר', else 'נדחה'. The const-backed
+  /// local impl is a no-op (the demo flip lives in the notifier); the Firebase
+  /// impl persists it.
+  void decide(String id, bool ok);
+
+  /// A [Listenable] that fires when the persisted approvals change (a snapshot
+  /// arrived / our own write landed) so the approval-queue notifier re-seeds.
+  /// Null on the const-backed local impl (nothing streams).
+  Listenable? get approvalsListenable;
 }

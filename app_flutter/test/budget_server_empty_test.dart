@@ -10,6 +10,7 @@ import 'package:buildsmart/data/repositories/finance_local.dart';
 import 'package:buildsmart/data/repositories/finance_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/screens/budget_screen.dart';
+import 'package:buildsmart/state/finance_hub_state.dart' show FinanceApproval;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -58,6 +59,12 @@ class _FakeFinanceRepo extends ChangeNotifier implements FinanceRepository {
   List<Section> financeHub() => const [];
   @override
   int activeRevenue() => 0;
+  @override
+  List<FinanceApproval> approvals() => const [];
+  @override
+  void decide(String id, bool ok) {}
+  @override
+  Listenable? get approvalsListenable => null;
 }
 
 void main() {

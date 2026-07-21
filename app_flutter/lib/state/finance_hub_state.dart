@@ -15,6 +15,10 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart' show caToday;
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
+import 'package:buildsmart/data/repositories/finance_repository.dart'
+    show FinanceRepository;
+import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,30 +59,61 @@ class FinanceApproval {
 }
 
 class ApprovalQueueNotifier extends StateNotifier<List<FinanceApproval>> {
-  ApprovalQueueNotifier()
-      : super([
-          for (final a in kApprovalQueue)
-            FinanceApproval(
-              id: a.id,
-              what: a.what,
-              amount: a.amount,
-              by: a.by,
-              status: a.status,
-            ),
-        ]);
+  /// Optional-repo constructor. With a [repo] the queue SEEDS from — and RE-SEEDS
+  /// on — the repo's persisted approvals (so on the connected build the manager
+  /// sees the REAL Firestore list, not the demo seed); `decide` is mirrored to
+  /// the repo. With NO repo (the no-arg default/test path) it falls back to the
+  /// const `kApprovalQueue` seed — byte-identical to before this wiring. Mirrors
+  /// the `BudgetNotifier(financeRepo())` seed+listen pattern.
+  ApprovalQueueNotifier([FinanceRepository? repo])
+      : _repo = repo,
+        super(repo?.approvals() ??
+            [
+              for (final a in kApprovalQueue)
+                FinanceApproval(
+                  id: a.id,
+                  what: a.what,
+                  amount: a.amount,
+                  by: a.by,
+                  status: a.status,
+                ),
+            ]) {
+    final l = repo?.approvalsListenable;
+    if (l != null) _listenable = l..addListener(_syncFromRepo);
+  }
+
+  final FinanceRepository? _repo;
+  Listenable? _listenable;
+
+  /// Re-seed from the repo when its persisted approvals change (a snapshot
+  /// arrived / our own optimistic write landed). No-op once disposed.
+  void _syncFromRepo() {
+    if (!mounted) return;
+    final r = _repo;
+    if (r != null) state = r.approvals();
+  }
 
   /// Set a request's decision — `ok` → 'אושר', else 'נדחה' (proto 19622).
+  /// Flips the local state optimistically AND persists to the repo (Firebase
+  /// writes to Firestore; the const-local impl is a no-op).
   void decide(String id, bool ok) {
     state = [
       for (final a in state)
         a.id == id ? a.copyWith(status: ok ? 'אושר' : 'נדחה') : a,
     ];
+    _repo?.decide(id, ok);
+  }
+
+  @override
+  void dispose() {
+    _listenable?.removeListener(_syncFromRepo);
+    super.dispose();
   }
 }
 
 final approvalQueueProvider =
     StateNotifierProvider<ApprovalQueueNotifier, List<FinanceApproval>>(
-        (ref) => ApprovalQueueNotifier());
+        (ref) => ApprovalQueueNotifier(financeRepo()));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // T1.8 — the late-penalty ledger. Empty at start (proto `let penaltyLedger=[]`);

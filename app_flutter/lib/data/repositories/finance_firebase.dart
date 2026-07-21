@@ -410,7 +410,14 @@ class FirebaseFinanceRepository implements FinanceRepository {
   // ── PERSISTED lists (extra concrete members — the seed() precedent) ─────────
 
   /// The live purchase-approval queue (synchronous, from the cache).
+  @override
   List<FinanceApproval> approvals() => _approvals.cached();
+
+  /// The approvals cache IS a [ChangeNotifier] (fires on every snapshot + our own
+  /// optimistic write) — mirrors [budgetListenable] so the approval-queue notifier
+  /// re-seeds when the persisted list changes.
+  @override
+  Listenable? get approvalsListenable => _approvals;
 
   /// The live late-penalty ledger (synchronous, from the cache, newest-first).
   List<Penalty> penalties() => _penalties.cached();
@@ -423,6 +430,7 @@ class FirebaseFinanceRepository implements FinanceRepository {
   /// Set request [id]'s decision — `ok` → 'אושר', else 'נדחה'. Verbatim port of
   /// `ApprovalQueueNotifier.decide` (proto `decideApproval` @19622) over the
   /// cache: replace-by-id with the new status, no-op on an unknown id.
+  @override
   void decide(String id, bool ok) {
     FinanceApproval? found;
     for (final a in _approvals.cached()) {
