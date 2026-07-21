@@ -203,6 +203,11 @@ class _Leaderboard extends ConsumerWidget {
           sub: 'דירוג הקבלנים לפי BuildCoins החודש.',
         ),
         const SizedBox(height: BsTokens.space3),
+        // fake-data-sweep: the ranking is live (your row syncs to real coins) but
+        // the rival contractors are demo seed — label it (legal_texts discloses
+        // demo screens are marked; matches the _Coupons/_ServerNote idiom).
+        const _ServerNote('⚙️ בפרודקשן: דירוג חי מהשרת — כאן מוצג לוח דמו'),
+        const SizedBox(height: BsTokens.space2),
         for (var i = 0; i < sorted.length; i++)
           _LbRow(
             rank: i == 0
@@ -237,6 +242,10 @@ class _Green extends StatelessWidget {
           sub: 'תגים על בנייה בת-קיימא ושמירה על הסביבה.',
         ),
         const SizedBox(height: BsTokens.space3),
+        // fake-data-sweep: the "N/4" count is computed, but the earned flags are
+        // demo consts (no achievement tracker exists) — label as demo.
+        const _ServerNote('⚙️ בפרודקשן: תגים מנוטרים מהשרת — כאן נתוני דמו'),
+        const SizedBox(height: BsTokens.space2),
         _Callout(label: 'תגים ירוקים שנצברו', value: '$earned / ${kGreenBadges.length}'),
         const SizedBox(height: BsTokens.space2),
         for (final b in kGreenBadges)
@@ -331,6 +340,10 @@ class _Referral extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: BsTokens.space2),
+        // fake-data-sweep: a single shared const code shown under "קוד ההזמנה שלך"
+        // (implies a personal code) — label it demo (const value unchanged: t3_ghi).
+        const _ServerNote('⚙️ בפרודקשן: קוד אישי לכל משתמש — כאן קוד דמו משותף'),
         const SizedBox(height: BsTokens.space3),
         const _FinRow(label: 'חבר נרשם', value: '+50 🪙', up: true),
         const _FinRow(label: 'הזמנה ראשונה של החבר', value: '+100 🪙', up: true),

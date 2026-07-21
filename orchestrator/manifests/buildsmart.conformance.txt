@@ -46,3 +46,6 @@ lib/screens/smart_home_screen.dart:::!value: 0.38
 lib/logic/manager_dashboard.dart:::!creditLimit: contractorCredit
 #  the honest "not registered" render must stay on the customer card:
 lib/screens/manager_dashboard_screen.dart:::אשראי: לא רשומה
+#
+# Regression — fake-data-sweep REWARDS (2026-07-20): fabricated leaderboard rivals / badges / shared invite code must stay demo-labeled:
+lib/screens/rewards_hub_screen.dart:::דירוג חי מהשרת

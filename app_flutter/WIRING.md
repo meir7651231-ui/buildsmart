@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fake-sweep-rewards — תווית "(דמו)" ללוח-מובילים · תגים · קוד-הזמנה — 2026-07-20
+`screens/rewards_hub_screen.dart`: 3 שורות `_ServerNote` (Text רגיל — אין CfgText/רישום) מתחת לראש כל אחד — לוח-המובילים :209 (הדירוג חי אך המתחרים const-דמו) · תגים ירוקים :247 (earned קבועים, אין tracker) · קוד-הזמנה :346 (`BUILD-7K29` משותף מוצג כ"שלך"). תווית-בלבד; ערכי ה-const לא-נגעו (`t3_ghi` נועל values/lengths). מנומק ב-`legal_texts.dart:42` (מסכי-דמו מסומנים בכוונה). הנחיה-2 (פרוסת-תגמולים). `site_hub_screen.dart` (48KB, seed לא-מסומן) — נדחה לפרויקט-נפרד. גארד: `rewards_hub_screen.dart:::דירוג חי מהשרת`.
+
 ## #fake-sweep-M2 — אשראי-לקוח: hash-מהשם → אמת-מהשרת / "לא רשומה" (1א) — 2026-07-20
 `logic/manager_dashboard.dart:282`: `creditLimit: contractorCredit(o.who)` → `0` (הפונקציה contractorCredit :256-264 **נשמרה** — נעולה כ"ערך-אסור" ע"י credit_never_invented_test; רק הקריאה הוסרה). `data/repositories/customers_local.dart`: `creditLimit()`→`0`, `_localCredit` מחזיר ceiling 0/balance 0/pct 0 עם `used`/`orderCount` אמיתיים (מראָה FirebaseCustomersRepository, שכבר-כן). `screens/manager_dashboard_screen.dart` (B4-B7): כרטיס `liveLimit<=0?'אשראי: לא רשומה'`, גיליון tile `'—'`, שורת מסגרת `'לא רשומה'`, שורת יתרה `'—'`. המקור-החי = `customerCreditProvider`→`computeCredit` (server-canonical). דליפת-קו-פיילוט נסגרה ע"י A1 (מקור=managerCustomersProvider). הנחיה `DIRECTIVE-fake-data-sweep.md` (M2·M3·1א). **תוצאה:** תג/פילטר "⚠️ אשראי גבוה" רדומים בדמו (fired רק על תקרת-שרת אמיתית). **טסטים שוכתבו:** orders_credit_a13 (expect 0) · manager_credit_computecredit_consumer (לא רשומה) · manager_dashboard_screen (לא רשומה + פילטר עם override-מוזרק + הסרת ÷0). גארד: `manager_dashboard.dart:::!contractorCredit(o.who)`.
 

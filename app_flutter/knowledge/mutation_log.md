@@ -1494,3 +1494,9 @@
 - **mutation-verify (מבוצע):** גארד `manager_dashboard.dart:::!creditLimit: contractorCredit` — הזרקתי `creditLimit: contractorCredit(o.who)` בחזרה ל-:282 → `assert-manifest` **אדום** (should-be-absent x1) → שחזור → ירוק (`creditLimit: 0` count 1).
 - **אימות נוסף:** analyze 0 · **96 בדיקות-אשראי ירוקות** כולל `credit_never_invented` (הנעילה) + הפילטר-המשוכתב · גארדים חדשים: `!creditLimit: contractorCredit` + `אשראי: לא רשומה`. הסוויטה המלאה — בשער-ה-commit.
 - **סיכון-מקובל מתועד לבעלים:** תג/פילטר "⚠️ אשראי גבוה" רדומים בדמו (היו מבוססי-hash; יֵצְאוּ רק על תקרת-שרת אמיתית). מסלול-ON (בקאנד-דלוק, מה שהבעלים רואה) — התצוגה כעת כנה; אימות-חי דורש עין-הבעלים.
+
+## #fake-sweep-rewards — תווית "(דמו)" ללוח-מובילים · תגים · קוד-הזמנה (הנחיה-2) — 2026-07-20
+- **הרקע:** `rewards_hub_screen.dart` — לוח-מובילים (דירוג חי, מתחרים const-מזויף), תגים "2/4" (earned קבוע, אין tracker), קוד `BUILD-7K29` משותף מוצג כ"שלך". `legal_texts.dart:42` מגלה משפטית שמסכי-דמו מסומנים → חובה תווית.
+- **הפתרון:** 3 שורות `_ServerNote` (Text רגיל, אין CfgText/רישום) :209/:247/:346. תווית-בלבד — const לא-נגעו.
+- **mutation-verify (מבוצע):** גארד `rewards_hub_screen.dart:::דירוג חי מהשרת` — הסרתי את התווית → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
+- **אימות נוסף:** analyze 0 · `t3_ghi_rewards_ai_home_test` ירוק (asserts const values/lengths, לא render) · אין טסט שמרנדר RewardsHubScreen. site_hub_screen נדחה. שער מלא בשער-ה-commit.
