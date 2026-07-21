@@ -208,7 +208,8 @@ export function CourseDetail(props: { course: Course }) {
         <Btn onClick={() => setModal({ kind: 'edit' })}>✎ עריכת קורס</Btn>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 16, alignItems: 'start' }}>
+      {/* הגריד רספונסיבי (global.css) — במובייל הסרגל הצדדי יורד מתחת לעמודה הראשית */}
+      <div className="crs-detail-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
           <section className="card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>

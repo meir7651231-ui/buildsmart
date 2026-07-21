@@ -485,6 +485,21 @@ h1,
   max-width: 420px;
 }
 
+/* כרטיס חוג — עמודה ראשית גמישה + סרגל צד 340px; במסך צר (מובייל)
+   הסרגל היה מוחץ את העמודה הראשית לרוחב אפסי — נערמים לעמודה אחת */
+.crs-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .crs-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* טבלאות */
 
 .table {

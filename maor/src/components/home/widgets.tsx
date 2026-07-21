@@ -624,34 +624,37 @@ function RecentWidget({ ctx }: { ctx: HomeCtx }) {
           </div>
         </div>
       ) : (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>משפחה</th>
-              <th>טלפון</th>
-              <th>עיר</th>
-              <th>ילדים</th>
-              <th>סטטוס</th>
-              <th>הצטרפה</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.recent.map((f) => (
-              <tr key={f.id} onClick={() => selectFamily(f.id)} style={{ cursor: 'pointer' }} title="לכרטיס המשפחה">
-                <td style={{ fontWeight: 600 }}>משפחת {f.name}</td>
-                <td dir="ltr" style={{ textAlign: 'right' }}>{f.phone || '—'}</td>
-                <td>{f.city || '—'}</td>
-                <td>{f.members.filter((m) => !m.isParent).length}</td>
-                <td>
-                  <span style={tagStyle(ST_META[f.status].bg, ST_META[f.status].c)}>
-                    {ST_META[f.status].label}
-                  </span>
-                </td>
-                <td>{fmtD(f.createdAt)}</td>
+        /* הטבלה רחבה מ-390px — גוללת בתוך עצמה כדי שהגוף לא יגלול אופקית במובייל */
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>משפחה</th>
+                <th>טלפון</th>
+                <th>עיר</th>
+                <th>ילדים</th>
+                <th>סטטוס</th>
+                <th>הצטרפה</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.recent.map((f) => (
+                <tr key={f.id} onClick={() => selectFamily(f.id)} style={{ cursor: 'pointer' }} title="לכרטיס המשפחה">
+                  <td style={{ fontWeight: 600 }}>משפחת {f.name}</td>
+                  <td dir="ltr" style={{ textAlign: 'right' }}>{f.phone || '—'}</td>
+                  <td>{f.city || '—'}</td>
+                  <td>{f.members.filter((m) => !m.isParent).length}</td>
+                  <td>
+                    <span style={tagStyle(ST_META[f.status].bg, ST_META[f.status].c)}>
+                      {ST_META[f.status].label}
+                    </span>
+                  </td>
+                  <td>{fmtD(f.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Panel>
   );
