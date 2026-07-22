@@ -71,12 +71,14 @@ export function phoneIssue(p: string | undefined): string | null {
 export function runAudit(db: Db): AuditIssue[] {
   const issues: AuditIssue[] = [];
   const add = (cat: AuditCategory, title: string, famId?: string) => issues.push({ cat, title, famId });
+  // הגנה מפני נתונים מיובאים פגומים — כלי הבדיקה לעולם לא קורס על מה שהוא בודק
+  const members = (f: Family) => (Array.isArray(f.members) ? f.members : []);
 
   // ——— כפילויות משפחה: שם+אם · טלפון משותף · ת"ז משותפת ———
   const g1: Record<string, Family[]> = {};
   const g2: Record<string, Family[]> = {};
   const g3: Record<string, Family[]> = {};
-  for (const f of db.families) {
+  for (const f of (Array.isArray(db.families) ? db.families : [])) {
     const k1 = normName(f.name) + '|' + normName(f.mother || '');
     (g1[k1] = g1[k1] || []).push(f);
     for (const p of [f.phone, f.phone2]) {
@@ -110,7 +112,7 @@ export function runAudit(db: Db): AuditIssue[] {
   }
 
   // ——— בדיקות פר-משפחה ———
-  for (const f of db.families) {
+  for (const f of (Array.isArray(db.families) ? db.families : [])) {
     for (const [idn, who] of [[f.fatherId, 'אב'], [f.motherId, 'אם']] as [string, string][]) {
       const d = digits(idn);
       if (d.length && !validIsraeliId(d)) add('ת"ז', 'משפחת ' + f.name + ': ת"ז ' + who + ' לא עוברת ספרת ביקורת (' + idn + ')', f.id);
@@ -134,7 +136,7 @@ export function runAudit(db: Db): AuditIssue[] {
     if (!digits(f.phone) && !digits(f.phone2) && !f.email) add('קשר', 'משפחת ' + f.name + ': אין שום פרט קשר (טלפון או אימייל)', f.id);
 
     const seenKid = new Set<string>();
-    for (const m of f.members) {
+    for (const m of members(f)) {
       if (m.isParent) {
         if (m.idNum && !validIsraeliId(m.idNum)) add('ת"ז', 'משפחת ' + f.name + ': ת"ז של ' + m.first + ' (הורה) לא תקינה', f.id);
         continue;
@@ -154,17 +156,17 @@ export function runAudit(db: Db): AuditIssue[] {
   }
 
   // ——— לוגיקה: תשלום-יתר בשיבוצים ———
-  for (const e of db.enrollments) {
+  for (const e of (Array.isArray(db.enrollments) ? db.enrollments : [])) {
     const paid = (e.payments || []).reduce((a, x) => a + x.amount, 0);
     if (e.totalDue && paid > e.totalDue) {
-      const fam = db.families.find((f2) => f2.members.some((m2) => m2.id === e.memberId));
+      const fam = db.families.find((f2) => members(f2).some((m2) => m2.id === e.memberId));
       if (fam) add('לוגיקה', 'משפחת ' + fam.name + ': שולם ₪' + paid + ' — יותר מסה"כ העסקה (₪' + e.totalDue + '). בדקו החזר או עדכנו את הסכום', fam.id);
     }
   }
 
   // ——— תומכים: ת"ז לא תקינה · טלפון · כפילות שם ———
   const supByName: Record<string, string[]> = {};
-  for (const sp of db.supporters) {
+  for (const sp of (Array.isArray(db.supporters) ? db.supporters : [])) {
     if (sp.idNum && digits(sp.idNum).length && !validIsraeliId(sp.idNum))
       issues.push({ cat: 'ת"ז', title: 'תומכ/ת ' + sp.name + ': ת"ז לא תקינה (' + sp.idNum + ')', spId: sp.id });
     const pi = phoneIssue(sp.phone);
