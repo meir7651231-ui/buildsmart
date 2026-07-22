@@ -223,14 +223,16 @@ for (let i = 0; i < 60; i++) {
   for (let k = 0; k < kidCount; k++) {
     const gender = rng() < 0.5 ? 'm' : 'f';
     const age = between(4, 15);
-    // ל-12 המשפחות הראשונות: לילד הראשון יום הולדת בתוך 14 הימים הקרובים
-    const bdaySoon = i < 12 && k === 0;
-    if (bdaySoon) bdaySoonCount++;
+    // המשפחה הראשונה: לילד הראשון יום הולדת *היום* — מדליק את באנר יום
+    // ההולדת במסך הבית בכל הדגמה. ל-11 הבאות: בתוך 14 הימים הקרובים.
+    const bdayToday = i === 0 && k === 0;
+    const bdaySoon = i > 0 && i < 12 && k === 0;
+    if (bdayToday || bdaySoon) bdaySoonCount++;
     members.push({
       id: nextId('m'),
       first: gender === 'm' ? pick(BOYS) : pick(GIRLS),
       gender,
-      birth: bdaySoon ? birthAtAge(age, 1 + (i % 14)) : birthAtAge(age, -between(15, 350)),
+      birth: bdayToday ? birthAtAge(age, 0) : bdaySoon ? birthAtAge(age, 1 + (i % 14)) : birthAtAge(age, -between(15, 350)),
       idNum: makeIdNum(),
       phone: age >= 13 ? phone() : '',
       phone2: '',
