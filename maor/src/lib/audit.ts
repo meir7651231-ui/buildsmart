@@ -164,7 +164,7 @@ export function runAudit(db: Db): AuditIssue[] {
     }
   }
 
-  // ——— תומכים: ת"ז לא תקינה · טלפון · כפילות שם ———
+  // ——— תומכים: ת"ז לא תקינה · טלפון · כפילות שם · אי-התאמת מצבור/פירוט ———
   const supByName: Record<string, string[]> = {};
   for (const sp of (Array.isArray(db.supporters) ? db.supporters : [])) {
     if (sp.idNum && digits(sp.idNum).length && !validIsraeliId(sp.idNum))
@@ -172,6 +172,21 @@ export function runAudit(db: Db): AuditIssue[] {
     const pi = phoneIssue(sp.phone);
     if (pi) issues.push({ cat: 'טלפון', title: 'תומכ/ת ' + sp.name + ': ' + pi, spId: sp.id });
     if (sp.email && !EMAIL_RE.test(sp.email)) issues.push({ cat: 'אימייל', title: 'תומכ/ת ' + sp.name + ': אימייל לא תקין (' + sp.email + ')', spId: sp.id });
+    // עקביות מצבור מול פירוט התרומות — הכרטיס מציג sp.ils/usd אך לוח הבית סוכם את
+    // sp.donations; פער ביניהם (מיובא/נערך ידנית) גורם לשני מסכים להראות סכומים שונים.
+    const dons = Array.isArray(sp.donations) ? sp.donations : [];
+    const sumIls = dons.filter((d) => d.cur !== '$').reduce((a, d) => a + (Number.isFinite(d.amount) ? d.amount : 0), 0);
+    const sumUsd = dons.filter((d) => d.cur === '$').reduce((a, d) => a + (Number.isFinite(d.amount) ? d.amount : 0), 0);
+    const off = (a: number, b: number) => Math.abs((a || 0) - (b || 0)) > 0.5;
+    if (off(sp.ils, sumIls) || off(sp.usd, sumUsd) || (sp.count || 0) !== dons.length)
+      issues.push({
+        cat: 'לוגיקה',
+        title:
+          'תומכ/ת ' + sp.name + ': הסכום המצטבר הרשום (₪' + (sp.ils || 0) +
+          (sp.usd ? ' + $' + sp.usd : '') + ' · ' + (sp.count || 0) + ' תרומות) לא תואם את פירוט התרומות (₪' +
+          sumIls + (sumUsd ? ' + $' + sumUsd : '') + ' · ' + dons.length + ' תרומות)',
+        spId: sp.id,
+      });
     const nk = normName(sp.name);
     if (nk) (supByName[nk] = supByName[nk] || []).push(sp.id);
   }
