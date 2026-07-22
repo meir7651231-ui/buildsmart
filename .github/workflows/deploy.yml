@@ -6,6 +6,7 @@ on:
       - main
       - claude/whats-happening-LyY9G
       - claude/phone-connection-opaerc
+      - claude/maor-system
   workflow_dispatch:
 
 permissions:
