@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# צילומי מעבר הדמו (נוצרים בהרצה)
+e2e/shots/
