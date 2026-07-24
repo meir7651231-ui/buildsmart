@@ -755,7 +755,7 @@ export const useApp = create<AppState>()((set, get) => {
             // הקיר והביקורת, כך שאף תרומה לא נופלת בין הכיסאות בסכומים.
             ils: s.ils + (donation.cur !== '$' ? donation.amount : 0),
             usd: s.usd + (donation.cur === '$' ? donation.amount : 0),
-            first: s.first || donation.date,
+            first: !s.first || donation.date < s.first ? donation.date : s.first,
             last: donation.date > (s.last || '') ? donation.date : s.last,
           };
         }),

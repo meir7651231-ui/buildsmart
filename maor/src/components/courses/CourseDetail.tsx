@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import type { Course, Enrollment, Weekday } from '../../types/domain';
 import { allMembers, useApp } from '../../store/useApp';
-import { featureOn } from '../../lib/config';
+import { featureOn, termOf } from '../../lib/config';
 import { hebDateFull } from '../../lib/hebrew';
 import { downloadCsv, type Cell } from '../../lib/csvx';
 import { buildCourseDailyRows } from '../../lib/courseDaily';
@@ -230,7 +230,7 @@ export function CourseDetail(props: { course: Course }) {
           <Btn onClick={() => setExpOpen(true)} title='דו"ח מותאם — בחירת טווח ונתונים'>
             📊 דו"ח מותאם
           </Btn>
-          <Btn onClick={() => setModal({ kind: 'edit' })}>✎ עריכת קורס</Btn>
+          <Btn onClick={() => setModal({ kind: 'edit' })}>{'✎ עריכת ' + termOf(cfg, 'entity.course', 'חוג')}</Btn>
           <Btn
             kind="danger"
             onClick={() => {
@@ -271,7 +271,7 @@ export function CourseDetail(props: { course: Course }) {
                   ⬇ דו"ח יומי מפורט
                 </Btn>
                 <Btn sm disabled={full} onClick={() => setModal({ kind: 'enroll' })}>
-                  {full ? 'הקורס מלא' : '+ שיבוץ תלמיד'}
+                  {full ? 'ה' + termOf(cfg, 'entity.course', 'חוג') + ' מלא' : '+ שיבוץ תלמיד'}
                 </Btn>
               </div>
             </div>

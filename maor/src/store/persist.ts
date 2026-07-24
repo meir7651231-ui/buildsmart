@@ -318,13 +318,24 @@ export async function changeEncryptionPassword(oldPw: string, newPw: string): Pr
 /** כתיבת מעטפת מוצפנת לשתי השכבות. */
 async function writeEnvelope(env: EncEnvelope): Promise<void> {
   const json = JSON.stringify(env);
+  let lsOk = false;
   try {
     localStorage.setItem(LS_KEY, json);
+    lsOk = true;
   } catch {
     /* מכסה מלאה */
   }
   try {
     await (await getIdb()).put(IDB_STORE, env, 'current');
+    // LS נכשל אך IDB הצליח → מוחקים את העותק הישן ב-LS כדי ש-readRaw ייפול
+    // לעותק הטרי ב-IndexedDB במקום להחזיר snapshot מיושן וקריא.
+    if (!lsOk) {
+      try {
+        localStorage.removeItem(LS_KEY);
+      } catch {
+        /* חסום — אין מה לעשות */
+      }
+    }
   } catch {
     /* IndexedDB נכשל */
   }
@@ -338,15 +349,27 @@ export async function saveDb(db: Db): Promise<boolean> {
   const payload: string = dek && envelope ? JSON.stringify((envelope = await reencryptDb(envelope, dek, json))) : json;
   const idbValue: unknown = dek && envelope ? envelope : doc;
   let ok = false;
+  let lsOk = false;
   try {
     localStorage.setItem(LS_KEY, payload);
     ok = true;
+    lsOk = true;
   } catch {
     /* מכסה מלאה / מצב פרטי */
   }
   try {
     await (await getIdb()).put(IDB_STORE, idbValue, 'current');
     ok = true;
+    // LS נכשל (מכסה מלאה) אך IDB הצליח → מוחקים את העותק הישן ב-LS. אחרת
+    // readRaw היה מחזיר את ה-snapshot הקריא שקדם למכסה, וכל עריכה שנשמרה
+    // רק ל-IndexedDB לאחר מכן הייתה נעלמת בטעינה הבאה (איבוד נתונים שקט).
+    if (!lsOk) {
+      try {
+        localStorage.removeItem(LS_KEY);
+      } catch {
+        /* חסום — אין מה לעשות */
+      }
+    }
   } catch {
     /* IndexedDB נכשל */
   }
