@@ -20,6 +20,7 @@ import {
   TINTS,
   ageOf,
   chipStyle,
+  enrollCount,
   fmtDate,
   groupLabelOf,
   groupOptionsOf,
@@ -77,7 +78,7 @@ export function CourseDetail(props: { course: Course }) {
   const groups = groupsOn ? groupOptionsOf(c) : [];
   const mm = modelMeta(c);
   const tint = TINTS[Math.max(0, db.courses.indexOf(c)) % TINTS.length];
-  const full = enrolled.length >= (c.maxStudents || 999);
+  const full = enrollCount(db, c.id) >= (c.maxStudents || 999);
 
   function doPunch(e: Enrollment) {
     if (e.status === 'paused') return toast('השיבוץ מוקפא — הפשירו אותו בניהול השיבוץ (⚙)');
@@ -259,7 +260,7 @@ export function CourseDetail(props: { course: Course }) {
               <h2 style={{ fontSize: 15, fontWeight: 800 }}>תלמידים רשומים</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 12, color: 'var(--ink-faint)', fontWeight: 600 }}>
-                  {enrolled.length + '/' + (c.maxStudents || '∞') + ' רשומים'}
+                  {enrollCount(db, c.id) + '/' + (c.maxStudents || '∞') + ' רשומים'}
                 </span>
                 {printoutOn && (
                   <Btn sm disabled={!enrolled.length} onClick={exportStudents} title="הורדת רשימת התלמידים כ-CSV למורה — כולל רגישויות">
@@ -485,7 +486,7 @@ export function CourseDetail(props: { course: Course }) {
             {detailRow('מסלול', mm.label)}
             {detailRow('סמסטר', c.semester || 'שנתי')}
             {detailRow('חדר פעילות', room?.name ?? '—')}
-            {detailRow('תפוסה', enrolled.length + ' מתוך ' + (c.maxStudents || '∞'))}
+            {detailRow('תפוסה', enrollCount(db, c.id) + ' מתוך ' + (c.maxStudents || '∞'))}
             {detailRow(
               'תקופת פעילות (עברי)',
               (c.start ? hebDateFull(c.start) : '—') + ' – ' + (c.end ? hebDateFull(c.end) : '—'),

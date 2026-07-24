@@ -257,6 +257,25 @@ export async function decryptAndLoad(secret: string, via: 'pass' | 'rec'): Promi
   }
 }
 
+/**
+ * ניקוי טבעת הצילומים היומיים. dailySnapshot כותב עותקי DB מלאים, ובמעבר בין
+ * גלוי למוצפן (או להפך) נשארים בטבעת צילומים בעלי סיווג-הצפנה מעורב: הפעלת
+ * הצפנה הייתה מותירה עד 30 צילומים גלויים קריאים ב-IndexedDB (משפחות, תורמים,
+ * טלפונים), וכיבוי הצפנה מותיר צילומים מוצפנים שאין להם עוד DEK לפענוח.
+ * צילומים אינם גיבוי אמיתי (ראה BackupSection) — מוחקים את כולם, כך שאין עותק
+ * בסיווג הישן ששורד את החלפת מצב ההצפנה. עוטפים ב-try/catch: לא קריטי.
+ */
+async function purgeSnapshots(): Promise<void> {
+  try {
+    const d = await getIdb();
+    for (const key of await d.getAllKeys(IDB_SNAPSHOTS)) {
+      await d.delete(IDB_SNAPSHOTS, key);
+    }
+  } catch {
+    /* לא קריטי — יש עוד שכבות */
+  }
+}
+
 /** הפעלת הצפנה על DB קיים — מייצר מעטפת + מפתח שחזור, כותב, ומחזיר את המפתח. */
 export async function beginEncryption(db: Db, password: string): Promise<string> {
   const recoveryKey = genRecoveryKey();
@@ -266,6 +285,8 @@ export async function beginEncryption(db: Db, password: string): Promise<string>
   dek = key;
   envelope = env;
   await writeEnvelope(env);
+  // צילומים גלויים ישנים בטבעת ינגחו את ההצפנה — מנקים אותם.
+  await purgeSnapshots();
   return recoveryKey;
 }
 
@@ -280,6 +301,8 @@ export async function stopEncryption(db: Db): Promise<void> {
   } catch {
     /* לא קריטי */
   }
+  // צילומים מוצפנים ישנים כבר לא ניתנים לפענוח (אין DEK) — מנקים לשם סימטריה.
+  await purgeSnapshots();
 }
 
 /** החלפת סיסמה — מאמת ישן, עוטף מחדש את ה-DEK בסיסמה חדשה. false = ישן שגוי. */
