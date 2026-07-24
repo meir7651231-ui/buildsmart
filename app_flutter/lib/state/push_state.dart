@@ -55,6 +55,7 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
@@ -124,7 +125,7 @@ const List<PushChannel> kPushChannels = <PushChannel>[
   PushChannel(
     id: kDefaultPushChannelId,
     name: 'כללי',
-    description: 'התראות כלליות מ-BuildSmart',
+    description: 'התראות כלליות מ-${AppBrand.name}',
   ),
   PushChannel(
     id: kOrdersPushChannelId,

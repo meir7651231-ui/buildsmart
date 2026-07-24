@@ -2,6 +2,7 @@
 // Covers: bottom-nav tabs, BS personas + sub-trees, menu tabs + sub-trees,
 // settings groups + all deep leaves, catalog categories, search tools.
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/state/under_construction.dart';
 
 enum SearchType {
@@ -307,7 +308,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🎧', title: 'הזמנה',          breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
   SearchEntry(emoji: '🎧', title: 'תקציב',          breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
   SearchEntry(emoji: '🎧', title: 'משימות ואתר',    breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
-  SearchEntry(emoji: '🎧', title: 'מועדון BuildSmart', breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
+  SearchEntry(emoji: '🎧', title: AppBrand.club, breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
   SearchEntry(emoji: '🎧', title: 'מוכנים!',        breadcrumb: 'הגדרות › שירות ותמיכה › מרכז השירות › סיור היכרות', type: SearchType.setting),
 
   // משלוח ותשלום leaves

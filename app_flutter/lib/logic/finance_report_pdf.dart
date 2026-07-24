@@ -6,6 +6,7 @@
 // renders. RTL Hebrew, so the document is typeset with the app's bundled Heebo
 // font (the PDF default Helvetica has no Hebrew glyphs).
 
+import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/data/contractor_seeds.dart' show BudgetCategory, fMoney;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
@@ -88,7 +89,7 @@ Future<pw.Document> buildFinanceReportPdf(FinanceReportData data) async {
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
           pw.Text(
-            'BuildSmart — דוח פיננסי לפרויקט',
+            '${AppBrand.name} — דוח פיננסי לפרויקט',
             style: pw.TextStyle(fontSize: 20, font: bold),
           ),
           pw.SizedBox(height: 4),
@@ -112,7 +113,7 @@ Future<pw.Document> buildFinanceReportPdf(FinanceReportData data) async {
             kv(_pdfSafe(c.name), fMoney(c.amount)),
           pw.SizedBox(height: 24),
           pw.Text(
-            'הופק על ידי מערכת BuildSmart · ${data.today}',
+            'הופק על ידי מערכת ${AppBrand.name} · ${data.today}',
             style: pw.TextStyle(fontSize: 10, font: regular),
           ),
         ],

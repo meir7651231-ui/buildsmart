@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/catalog_paged.dart'
@@ -513,7 +514,7 @@ class BuildSmartApp extends ConsumerWidget {
       BsLang.en => const Locale('en', 'US'),
     };
     return MaterialApp(
-      title: 'BuildSmart',
+      title: AppBrand.name,
       // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
       scaffoldMessengerKey: bsMessengerKey,
       // Root navigator key — lets the app-global floating keyboard (kKbGlobal)

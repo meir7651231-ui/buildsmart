@@ -50,6 +50,7 @@
 // only ever sees a plain `List<String>` — the destination-vs-word mapping lives
 // in the floating keyboard, never here and never in the pure widget.
 
+import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/logic/system_division.dart'
     show catalogSystemFilterProvider;
 import 'package:buildsmart/screens/ai_hub_screen.dart' show AIHubScreen;
@@ -539,10 +540,10 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
             Navigator.of(context).push(HomeContentReorder.route()),
       ),
       KbDestination(
-        label: 'מועדון BuildSmart',
+        label: AppBrand.club,
         keywords: const [
           'מועדון',
-          'מועדון BuildSmart',
+          AppBrand.club,
           'נקודות',
           'הטבות',
           'תגמולים',

@@ -1553,3 +1553,9 @@
 - **mutation-verify (מבוצע ×3):** M1 default→'buildsmart' → `app_profile_flags_test` **אדום** (-2: demo-pin + literals) → שחזור. M2 עמודת-buildsmart במראה GLOBAL_SEARCH→false → part-b **אדום** (-2) → שחזור → 7/7. M3 strip `defaultValue: kProfileCatalogBaseUrl` → `assert-manifest` **אדום** → שחזור → VERIFIED.
 - **אימות נוסף:** analyze 0 · **90 בדיקות ירוקות** (הבדיקה-החדשה + כל סוויטות-נעילת-ברירות-המחדל: backend_flag · gate_123 · email_password_door · app_keyboard_only · finder_front · store_comparison · user_system_flag_off · app_check_providers · floating_card_keyboard(מותאם-שורה) · studio_gating) · סריקת-הסט-הסגור עברה 1:1 (0 לא-מסווגים, 0 stale). שער מלא בשער-ה-commit.
 - **הערת-לולאה:** 4 "כשלים" ראשונים היו נתיבים-שגויים בפקודת-ההרצה שלי (Does not exist) — אומתו בנתיב-הנכון, 26/26.
+
+## #stage3-app-brand — AppBrand זהות-חברה במקור-אחד (פרוסת-3.2) — 2026-07-24
+- **הרקע:** ~30 מחרוזות "BuildSmart" קשיחות (PDF/שיתוף/מועדון/onboarding/push/בוט/legal/דומיין) — חברה-#2 הייתה דורשת ציד-ידני. הלוגו/palette כבר config (Studio/BsTokens).
+- **הפתרון:** `config/app_brand.dart` (name/club/shareDomain, static const) + 30 ניתובים ב-19 קבצים באינטרפולציה-קבועה (כל const נשאר const). CfgText-fallbacks/registry/prompts לא-נגעו. + `BRAND_SWAP_CHECKLIST.md` למעטפות.
+- **mutation-verify (מבוצע, התנהגותי):** name→'CleanCo' → `keyboard_destinations_test` **אדום** (-2, אסרטי-מחרוזת-חיים) → שחזור → 19/19. ההוכחה החזקה: שינוי-הקבוע משנה מסכים אמיתיים והבדיקות תופסות.
+- **אימות נוסף:** analyze 0 · 85 (סוללה) + 41 (בדיקות-הליטרלים בזמן-ריצה: deep_link/keyboard_destinations/login_sheet) — הכל ירוק ללא-שינוי = הוכחת-זהות-בייטים בפועל. גארדים ×3. שער מלא בשער-ה-commit.

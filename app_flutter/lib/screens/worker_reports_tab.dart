@@ -32,6 +32,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
@@ -382,7 +383,7 @@ class WorkerReportsTab extends ConsumerWidget {
             HelpTarget(
               title: 'BuildCoins',
               body:
-                  'מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד). לחיצה פותחת פירוט.',
+                  'מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד). לחיצה פותחת פירוט.',
               child: _KpiBox(
                 value: '${rewards.coins}',
                 label: 'BuildCoins (מועדון משותף) 🪙',
@@ -404,8 +405,8 @@ class WorkerReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space2),
         Text(
           submitted.isEmpty
-              ? 'אישור-ראשון = הגשות שאושרו בלי דחייה מתוך כלל ההגשות — עדיין אין הגשות. מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).'
-              : 'אישור-ראשון: $firstPass מתוך ${submitted.length} הגשות אושרו בלי דחייה. מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).',
+              ? 'אישור-ראשון = הגשות שאושרו בלי דחייה מתוך כלל ההגשות — עדיין אין הגשות. מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).'
+              : 'אישור-ראשון: $firstPass מתוך ${submitted.length} הגשות אושרו בלי דחייה. מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
         const SizedBox(height: BsTokens.space4),

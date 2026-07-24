@@ -2,6 +2,7 @@
 // smart-tree / variants. Used by the unified product card to render four
 // informational strips: מאתר · תאימות · ערכת התקנה · דומים.
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/catalog_source.dart'
     show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -1203,7 +1204,7 @@ String? pairConnectionWarningHe(
 /// `https://buildsmart.app/p/<key>?brand=<name>`. Pure & URL-encoded.
 String deepLinkFor(SmartProduct sp, [int? brandIndex]) {
   final buf =
-      StringBuffer('https://buildsmart.app/p/${Uri.encodeComponent(sp.key)}');
+      StringBuffer('${AppBrand.shareDomain}/p/${Uri.encodeComponent(sp.key)}');
   if (brandIndex != null &&
       brandIndex >= 0 &&
       brandIndex < sp.brands.length) {
@@ -1231,7 +1232,7 @@ String quoteTextFor(SmartProduct sp, int brandIndex) {
     lines.add('מחיר: ~₪${b.price}');
   }
   lines.add('🔗 ${deepLinkFor(sp, idx)}');
-  lines.add('— נוצר ב-BuildSmart');
+  lines.add('— נוצר ב-${AppBrand.name}');
   return lines.join('\n');
 }
 

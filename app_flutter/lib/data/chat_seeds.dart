@@ -23,6 +23,7 @@
 // Timestamps are fixed (not `DateTime.now()`) so the seed is deterministic for
 // tests and stable across rebuilds — only user-sent messages use the wall clock.
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 
 /// A stable seed instant so ordering/ids are deterministic (the demo "today").
@@ -251,7 +252,7 @@ final List<ChatThread> kChatThreads = [
       BsRole.store,
       BsRole.bot,
     ],
-    name: 'צ׳אטבוט BuildSmart',
+    name: 'צ׳אטבוט ${AppBrand.name}',
     avatar: '🤖',
     isBot: true,
     messages: [

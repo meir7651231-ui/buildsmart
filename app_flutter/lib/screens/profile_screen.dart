@@ -1,3 +1,4 @@
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbProfileNodes;
@@ -297,7 +298,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: BsTokens.space2),
             ],
             _LinkRow(
-              label: '🎮 מועדון BuildSmart',
+              label: '🎮 ${AppBrand.club}',
               onTap: () =>
                   Navigator.of(context).push(RewardsHubScreen.route()),
             ),

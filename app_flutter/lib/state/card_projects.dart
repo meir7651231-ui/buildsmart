@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/data/smart_tree.dart';
@@ -88,7 +89,7 @@ String projectQuoteText(String project, List<ProjectItem> items) {
     lines.add('• ${it.location}: ${it.brandName} ×${it.qty} — ~₪$sub');
   }
   lines.add('סה"כ משוער: ~₪$total');
-  lines.add('— נוצר ב-BuildSmart');
+  lines.add('— נוצר ב-${AppBrand.name}');
   return lines.join('\n');
 }
 

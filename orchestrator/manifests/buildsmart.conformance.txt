@@ -98,3 +98,8 @@ lib/data/fuzzy_search.dart:::!kCatalogProducts
 lib/state/app_profile.dart:::defaultValue: 'demo'
 lib/data/repositories/backend.dart:::defaultValue: kProfileCatalogBaseUrl
 lib/data/product_images.dart:::defaultValue: kProfileImageBaseUrl
+#
+# Regression — STAGE-3.2 (2026-07-24): company identity routes through AppBrand (one file per company):
+lib/config/app_brand.dart:::static const String name = 'BuildSmart'
+lib/main.dart:::title: AppBrand.name
+lib/data/related_info.dart:::AppBrand.shareDomain

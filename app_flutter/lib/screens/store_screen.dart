@@ -1,5 +1,6 @@
 import 'dart:async' show unawaited;
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/repositories/backend.dart' show kUserSystem;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
@@ -3346,7 +3347,7 @@ class _CartActionsRow extends ConsumerWidget {
               // Real share — hand the cart summary to the native/Web share sheet
               // (via the injectable seam so a test captures the exact text).
               final total = lines.fold<int>(0, (s, l) => s + l.total);
-              final text = 'סל BuildSmart:\n$items\n\nסה״כ: ₪$total';
+              final text = 'סל ${AppBrand.name}:\n$items\n\nסה״כ: ₪$total';
               await ref.read(shareTextProvider)(text);
             },
             icon: const Icon(Icons.share_outlined, size: 16),

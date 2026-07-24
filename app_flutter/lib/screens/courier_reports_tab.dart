@@ -39,6 +39,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
@@ -327,8 +328,8 @@ class CourierReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space2),
         Text(
           measuredDelivered.isEmpty
-              ? 'מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף ו-% מסירה-ראשונה נמדדים מחותמות שעון-המשלוחים — עדיין אין מסירות שנמדדו.'
-              : 'מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף נמדד מחותמות שעון-המשלוחים. מסירה-ראשונה: $firstAttempt מתוך ${measuredDelivered.length} מסירות שנמדדו — ללא ניסיון חוזר.',
+              ? 'מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף ו-% מסירה-ראשונה נמדדים מחותמות שעון-המשלוחים — עדיין אין מסירות שנמדדו.'
+              : 'מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף נמדד מחותמות שעון-המשלוחים. מסירה-ראשונה: $firstAttempt מתוך ${measuredDelivered.length} מסירות שנמדדו — ללא ניסיון חוזר.',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
         const SizedBox(height: BsTokens.space3),

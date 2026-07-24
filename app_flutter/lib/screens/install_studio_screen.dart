@@ -6,6 +6,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'dart:math' as math;
 import 'package:buildsmart/data/product_images.dart';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -3117,7 +3118,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
 
   void _copyBom(BuildContext context, InstallationPlan plan) {
     final buf = StringBuffer();
-    buf.writeln('רשימת קנייה — BuildSmart 🔧');
+    buf.writeln('רשימת קנייה — ${AppBrand.name} 🔧');
     buf.writeln('──────────────────────────');
 
     // ── BOM grouped by zone or flat list ──────────────────────────────────
@@ -3221,7 +3222,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
 
     buf.writeln('');
     buf.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    buf.writeln('נוצר ע"י BuildSmart');
+    buf.writeln('נוצר ע"י ${AppBrand.name}');
 
     Clipboard.setData(ClipboardData(text: buf.toString()));
     showToast(context, '📋 הועתק — שתף ב-WhatsApp עם האינסטלטור שלך');

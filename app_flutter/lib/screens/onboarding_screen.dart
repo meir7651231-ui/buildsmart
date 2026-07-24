@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/profession_screen.dart';
@@ -33,7 +34,7 @@ class OnboardingSlide {
 const List<OnboardingSlide> kOnboardingSlides = [
   OnboardingSlide(
     icon: Icons.waving_hand_outlined,
-    title: 'ברוכים הבאים ל-BuildSmart',
+    title: 'ברוכים הבאים ל-${AppBrand.name}',
     body: 'הקטלוג החכם לאינסטלציה ובנייה — אלפי מוצרים, מותגים '
         'וחיבורים, במקום אחד.',
   ),

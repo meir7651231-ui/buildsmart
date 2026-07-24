@@ -19,6 +19,7 @@
 //   • openFinanceHub(context)            — the 10-tile grid (parent `fin-hub`).
 //   • openFinanceLeaf(context, id)       — dispatch a single `fin-*` leaf.
 
+import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
 // Const budget data (total/spent/categories/pct) is read THROUGH the finance
 // repository's GLOBAL, Ref-free accessor `financeRepo()` (the server-ready seam,
@@ -1424,7 +1425,7 @@ class _FinReportView extends ConsumerWidget {
                 );
                 await ref.read(pdfPrintProvider)(
                   doc,
-                  name: 'BuildSmart-finance-report',
+                  name: '${AppBrand.name}-finance-report',
                 );
               },
               icon: const Icon(Icons.print, size: 18),
@@ -1496,7 +1497,7 @@ class _FinReportView extends ConsumerWidget {
                     ),
                     const SizedBox(height: BsTokens.space6),
                     Text(
-                      'הופק על ידי מערכת BuildSmart · $today',
+                      'הופק על ידי מערכת ${AppBrand.name} · $today',
                       style: const TextStyle(
                         color: Color(0xFF888888),
                         fontSize: 11,

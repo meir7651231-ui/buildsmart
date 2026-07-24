@@ -8,6 +8,8 @@
 // so this body stays a pure string builder that compiles + unit-tests on the
 // Dart VM (mirrors logic/input_validators.dart).
 
+import 'package:buildsmart/config/app_brand.dart';
+
 /// HTML-escapes the five entity-significant characters so a user-supplied value
 /// can never break out of an attribute or inject markup (`&` first, so the
 /// replacements it produces are not re-escaped).
@@ -97,7 +99,7 @@ String buildPrintableHtml({
     b.write('" alt="חתימה"/></div>');
   }
 
-  b.write('<footer>מסמך דיגיטלי — BuildSmart · ');
+  b.write('<footer>מסמך דיגיטלי — ${AppBrand.name} · ');
   b.write(safeTitle);
   b.write('</footer>');
 
