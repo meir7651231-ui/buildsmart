@@ -11,7 +11,7 @@ export function csvEscape(x: Cell): string {
   let v = String(x ?? '');
   // תא שמתחיל בתו נוסחה מקבל גרש מוביל — כמו ב-reports/csv.ts
   if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
-  return v.includes(',') || v.includes('"') || v.includes('\n')
+  return v.includes(',') || v.includes('"') || v.includes('\n') || v.includes('\r')
     ? '"' + v.replace(/"/g, '""') + '"'
     : v;
 }
@@ -94,7 +94,7 @@ export function parseAnyDate(v: string): string {
     if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== mon - 1 || probe.getUTCDate() !== day) return '';
     return y + '-' + String(mon).padStart(2, '0') + '-' + String(day).padStart(2, '0');
   }
-  if (/^\d{4,5}$/.test(s)) {
+  if (/^\d{5}$/.test(s)) {
     const b = new Date(Date.UTC(1899, 11, 30));
     b.setUTCDate(b.getUTCDate() + +s);
     return b.toISOString().slice(0, 10);

@@ -166,12 +166,24 @@ export function migrate(raw: unknown): Db | null {
   // היה גורם למחיקת בן-משפחה באחת למחוק בטעות את שיבוצי השנייה. משכפלים →
   // מזהה חדש ייחודי (השיבוצים הדו-משמעיים נשארים על ההופעה הראשונה).
   const seenMember = new Set<string>();
+  // סורקים מראש את כל מזהי בני-המשפחה הגולמיים. 'mx'N נשמרים ל-DB וחוזרים
+  // למיגרציה, ו-mSeq מתאפס בכל ריצה — לכן מזהה מחודש עלול להיווצר כ-'mx'N
+  // שכבר שייך לבן-משפחה אמיתי שטרם בוקר ב-map. שער כפול: seenMember (מזהים
+  // שכבר הוקצו בריצה) + allMemberIds (מזהים אמיתיים שטרם בוקרו) — מזהה חדש
+  // חייב להימנע משניהם, אחרת נשחית מזהה אמיתי ונייתם את שיבוציו.
+  const allMemberIds = new Set<string>();
+  for (const f of merged.families) {
+    if (!f) continue;
+    for (const m of Array.isArray(f.members) ? f.members : []) {
+      if (m?.id) allMemberIds.add(m.id);
+    }
+  }
   let mSeq = 0;
   const freshMemberId = (): string => {
     let id: string;
     do {
       id = 'mx' + mSeq++;
-    } while (seenMember.has(id));
+    } while (seenMember.has(id) || allMemberIds.has(id));
     return id;
   };
   merged.families = merged.families
@@ -295,7 +307,9 @@ export async function beginEncryption(db: Db, password: string): Promise<string>
 export async function stopEncryption(db: Db): Promise<void> {
   dek = null;
   envelope = null;
-  await saveDb(db); // נכתב גלוי (אין DEK)
+  // כיבוי מכוון — עוקפים את שער ה-multi-tab של saveDb (שאחרת היה מסרב לדרוס
+  // את המעטפת המוצפנת בטקסט גלוי) כדי שהכיבוי אכן ייכתב.
+  await saveDb(db, { plaintext: true }); // נכתב גלוי (אין DEK)
   try {
     // ודא שהעותק המוצפן הישן לא נשאר ב-IndexedDB
     await (await getIdb()).put(IDB_STORE, { ...db, savedAt: new Date().toISOString() }, 'current');
@@ -342,10 +356,38 @@ async function writeEnvelope(env: EncEnvelope): Promise<void> {
   }
 }
 
-/** שמירה לשתי השכבות. מחזיר false אם שתיהן נכשלו. מצפין אם ההצפנה פעילה. */
-export async function saveDb(db: Db): Promise<boolean> {
+/**
+ * שמירה לשתי השכבות. מחזיר false אם שתיהן נכשלו. מצפין אם ההצפנה פעילה.
+ * opts.plaintext=true = כתיבה גלויה מכוונת (stopEncryption) שעוקפת את שער
+ * ה-multi-tab למטה.
+ */
+export async function saveDb(db: Db, opts?: { plaintext?: boolean }): Promise<boolean> {
   const doc: Db = { ...db, savedAt: new Date().toISOString() };
   const json = JSON.stringify(doc);
+  // ⚠️ רב-טאבי: מצב ההצפנה (dek/envelope) הוא ברמת-מודול ולכן פרטי לכל טאב,
+  // בלי סנכרון בין טאבים. לפני שדורסים את הערך המאוחסן, קוראים אותו מחדש:
+  //  • טאב גלוי (dek==null) שרואה מעטפת מוצפנת = טאב אחר הפעיל הצפנה → אסור
+  //    לדרוס אותה בטקסט גלוי (היה מדליף משפחות/טלפונים/תורמים בגלוי).
+  //  • טאב מוצפן שהמעטפת בזיכרונו התיישנה (טאב אחר החליף סיסמה) → מאמצים את
+  //    עטיפת-הסיסמה הטרייה מהמאוחסן, אחרת reencryptDb היה משחזר את הסיסמה הישנה.
+  if (!opts?.plaintext) {
+    const stored = await readRaw();
+    if (dek && envelope) {
+      if (isEncrypted(stored)) {
+        // wrapRec/saltRec זהים ⇒ אותו DEK (רק החלפת סיסמה) → מאמצים את עטיפת
+        // הסיסמה הטרייה. שונים ⇒ הצפנה הופעלה מחדש עם DEK אחר בטאב אחר; ה-DEK
+        // שבידינו מיושן וכתיבה תשחית — נמנעים מדריסה.
+        if (stored.wrapRec === envelope.wrapRec && stored.saltRec === envelope.saltRec) {
+          envelope = { ...envelope, saltPass: stored.saltPass, wrapPass: stored.wrapPass, iter: stored.iter };
+        } else {
+          return false;
+        }
+      }
+      // stored גלוי/חסר → המעטפת שבזיכרון מוסמכת (למשל מיד אחרי beginEncryption)
+    } else if (isEncrypted(stored)) {
+      return false; // טאב גלוי מול מעטפת מוצפנת של טאב אחר — לא דורסים
+    }
+  }
   // הצפנה פעילה → כותבים מעטפת מוצפנת (אותו DEK, data מעודכן)
   const payload: string = dek && envelope ? JSON.stringify((envelope = await reencryptDb(envelope, dek, json))) : json;
   const idbValue: unknown = dek && envelope ? envelope : doc;
@@ -460,7 +502,12 @@ export function parseBackupFile(text: string): Db {
   return db;
 }
 
-/** ייבוא קובץ גיבוי מוצפן עם סיסמה/מפתח שחזור. null = קוד שגוי / קובץ פגום. */
+/**
+ * ייבוא קובץ גיבוי מוצפן עם סיסמה/מפתח שחזור.
+ * null = הסוד שגוי (openDek נכשל) → המסך יציע לנסות מפתח שחזור.
+ * זריקה = הסוד נכון אך התוכן המפוענח פגום או מגרסה חדשה מדי → אין טעם לנסות
+ * מפתח שחזור; המסך מציג את הודעת השגיאה כפי שהיא (במקום "סיסמה שגויה").
+ */
 export async function decryptBackupFile(text: string, secret: string, via: 'pass' | 'rec'): Promise<Db | null> {
   let raw: unknown;
   try {
@@ -470,10 +517,20 @@ export async function decryptBackupFile(text: string, secret: string, via: 'pass
   }
   if (!isEncrypted(raw)) return null;
   const key = await openDek(raw, secret, via);
-  if (!key) return null;
+  if (!key) return null; // סוד שגוי — הבחנה שנשמרת עבור זרימת ה-fallback במסך
+  // מכאן הסוד נכון: כישלון פענוח/JSON/מיגרציה = קובץ פגום/חדש מדי, לא סוד שגוי.
+  let json: string;
   try {
-    return migrate(JSON.parse(await decryptDb(raw, key)));
+    json = await decryptDb(raw, key);
   } catch {
-    return null;
+    throw new Error('הקובץ המוצפן פוענח אך תוכנו פגום — לא ניתן לשחזר ממנו');
   }
+  let parsed: Db | null;
+  try {
+    parsed = migrate(JSON.parse(json));
+  } catch {
+    throw new Error('הקובץ המוצפן פוענח אך תוכנו פגום — לא ניתן לשחזר ממנו');
+  }
+  if (!parsed) throw new Error('הקובץ אינו קובץ גיבוי של מאור החסד (או גרסה חדשה מדי)');
+  return parsed;
 }

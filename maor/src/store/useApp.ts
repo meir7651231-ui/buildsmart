@@ -933,6 +933,13 @@ export const useApp = create<AppState>()((set, get) => {
       if (!db) return false;
       if (db.security?.primary || db.security?.secondary || db.security?.zones) db.security = {};
       set({ db, encrypted: true, needDecrypt: false, corrupt: false });
+      // חיבור ענן לארגון מוצפן: init חוזר מוקדם במסלול res.encrypted (לפני
+      // connectCloud), ולכן החיבור לא נעשה שם. בלי זה, ארגון עם config.firebase
+      // שהופעלה בו הצפנה נתקע לצמיתות על "מתחבר…" (cloud.enabled && !authReady)
+      // אחרי הפענוח, כי watchAuth שמעדכן authReady לעולם לא רץ. cloud.enabled
+      // כבר נקבע ב-init; כאן משלימים את החיבור בפועל (פעם אחת).
+      const cfg = get().config;
+      if (cfg.firebase && !cloudMod) void connectCloud(cfg.firebase);
       postLoad(db, false);
       return true;
     },
@@ -971,6 +978,11 @@ export const useApp = create<AppState>()((set, get) => {
 
     restoreDb(db) {
       const prev = get().db;
+      // ניקוי security כמו ב-init/decryptUnlock: גיבוי/צילום/עותק-ענן ישן עלול
+      // עדיין לשאת קודי נעילה מגובבים ב-db.security. בלי הניקוי הם היו נשמרים,
+      // מסונכרנים ומצולמים (הדליפה שהמיגרציה נועדה למנוע), וה-init הבא היה מאמץ
+      // אותם כנעילת מכשיר — קובע PIN שהמשתמש אינו יודע ועלול לנעול אותו בחוץ.
+      if (db.security?.primary || db.security?.secondary || db.security?.zones) db.security = {};
       set({ db });
       scheduleSave();
       cloudMod?.cloudOnDbChange(prev, db);
@@ -995,6 +1007,20 @@ useApp.subscribe((s, prev) => {
     applyTheme(s.db.ui.theme ?? s.config.theme, s.db.ui.accent ?? s.config.accent);
   }
 });
+
+// סנכרון קוד הנעילה בין טאבים פתוחים: הנעילה נטענת פעם אחת ב-init (readLock)
+// ומוחזקת ב-state, אך setLockCode/setLockZones/clearLock בטאב אחר כותבים
+// למפתח ה-localStorage המשותף ('maor_lock'). בלי מאזין, טאב שכבר פתוח היה
+// ממשיך להחזיק את הנעילה הישנה — אזור שהוגן זה עתה בטאב אחר נשאר פתוח אצלו
+// עד רענון. אירוע 'storage' מתפרסם רק לטאבים האחרים (לא לזה שכתב) — טוענים
+// מחדש מהמקור המשותף. e.key === null = localStorage.clear() → גם אז נטען מחדש.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'maor_lock' || e.key === null) {
+      useApp.setState({ lock: readLock() });
+    }
+  });
+}
 
 /** בוחרי עזר נפוצים. */
 
