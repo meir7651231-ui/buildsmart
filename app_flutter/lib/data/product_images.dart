@@ -72,6 +72,18 @@ Widget _productImagePlaceholder(
   return const ColoredBox(color: Color(0x14000000));
 }
 
+/// DEFAULT `errorBuilder` for [productImage]: a failed load (offline / CDN
+/// error / bad bytes) collapses to nothing instead of a stuck skeleton plus
+/// FlutterError noise. A caller that passes its own `errorBuilder` (all
+/// current call-sites do — emoji fallbacks) keeps full control.
+Widget _productImageErrorFallback(
+  BuildContext context,
+  Object error,
+  StackTrace? stackTrace,
+) {
+  return const SizedBox.shrink();
+}
+
 /// Drop-in replacement for `Image.asset(path, ...)` that routes through
 /// [resolveProductImage] (CDN + cache, or bundled fallback). Accepts the common
 /// `Image` arguments so call-sites migrate by replacing `Image.asset(` →
@@ -79,7 +91,9 @@ Widget _productImagePlaceholder(
 ///
 /// When the caller does not supply a [frameBuilder], a shared loading
 /// placeholder + fade-in ([_productImagePlaceholder]) is used so slow CDN
-/// fetches show a subtle grey skeleton instead of a blank box.
+/// fetches show a subtle grey skeleton instead of a blank box. Likewise, when
+/// no [errorBuilder] is supplied, a failed load renders nothing
+/// ([_productImageErrorFallback]) instead of a stuck skeleton.
 Widget productImage(
   String assetPath, {
   Key? key,
@@ -108,7 +122,7 @@ Widget productImage(
     colorBlendMode: colorBlendMode,
     gaplessPlayback: gaplessPlayback,
     filterQuality: filterQuality,
-    errorBuilder: errorBuilder,
+    errorBuilder: errorBuilder ?? _productImageErrorFallback,
     frameBuilder: frameBuilder ?? _productImagePlaceholder,
     semanticLabel: semanticLabel,
     // Most product images sit beside the product name as text, so an unlabelled

@@ -17,6 +17,7 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
     show RemoteDoc;
+import 'package:flutter/foundation.dart' show debugPrint;
 
 /// A minimal persistent string KV — the only two ops the gate needs. A fake map in
 /// tests; a SharedPreferences/Hive adapter in prod (added at 1-B).
@@ -39,8 +40,10 @@ class CatalogSyncGate {
 
   /// C5.5 — the LAST resort: the bundled const catalog. When the server is down AND
   /// there is no cache (a cold offline start), the app serves this instead of
-  /// bricking — server → cache → bundled, never a blank screen. Null ⇒ the old
-  /// behaviour (surface the error). In prod this is `() => kCatalogProducts`.
+  /// bricking — server → cache → bundled, never a blank screen. A CORRUPT persisted
+  /// cache counts as no cache (logged, degrades to the re-sync / bundled — never a
+  /// decode crash). Null ⇒ the old behaviour (surface the error). In prod this is
+  /// `() => kCatalogProducts`.
   final List<LipskeyCatalogProduct> Function()? bundledFallback;
 
   /// The persistence seam.
@@ -85,7 +88,13 @@ class CatalogSyncGate {
     // Unchanged, or offline-but-cached → the local copy, ZERO catalog fetches.
     if (cached != null &&
         (serverVersion == null || serverVersion == syncedVersion)) {
-      return _decode(cached);
+      try {
+        return _decode(cached);
+      } on Object catch (e) {
+        // A corrupt persisted blob is a cache MISS, not a crash (C5.5) — fall
+        // through to the re-sync (whose own failure path reaches bundled).
+        debugPrint('CatalogSyncGate: corrupt cache (re-syncing): $e');
+      }
     }
 
     // First open or a version bump → one re-sync, then persist.
@@ -98,7 +107,14 @@ class CatalogSyncGate {
     } on Object {
       // The fetch failed (dropped mid-open). Fallback chain (C5.5): a stale cache
       // beats a blank screen; failing that, the bundled catalog beats bricking.
-      if (cached != null) return _decode(cached);
+      if (cached != null) {
+        try {
+          return _decode(cached);
+        } on Object catch (e) {
+          // Corrupt cache — skip this level, keep falling down the chain.
+          debugPrint('CatalogSyncGate: corrupt cache (skipped → bundled): $e');
+        }
+      }
       final bundled = bundledFallback;
       if (bundled != null) return bundled(); // server↓ + no cache → bundled
       rethrow; // no cache + no bundled fallback — nothing to serve, surface it.

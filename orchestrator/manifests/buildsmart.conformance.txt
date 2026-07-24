@@ -61,3 +61,13 @@ lib/screens/finance_hub_sheets.dart:::!כאן מוצגים נתוני דמו
 #
 # Regression — fake-data-sweep SITE-HUB (2026-07-20): the 4 demo-seed site sections (tree/deps/photos/archive) stay demo-labeled:
 lib/screens/site_hub_screen.dart:::class _SiteServerNote
+#
+# Regression — STAGE-2 slice A (2026-07-24 · iron-rules 1+3): resilience hardening must never regress:
+#  one corrupt persisted order is skipped (never resets the engine to seed):
+lib/state/orders_engine.dart:::skipped corrupt persisted order
+#  a corrupt catalog cache degrades to re-sync/bundled (never a decode crash):
+lib/data/repositories/catalog_sync.dart:::corrupt cache (re-syncing)
+#  productImage has a silent default errorBuilder (no FlutterError noise on failed loads):
+lib/data/product_images.dart:::_productImageErrorFallback
+#  share-log persistence is guarded (storage failure never an unhandled async error):
+lib/state/share_log.dart:::ShareLog: persist failed

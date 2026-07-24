@@ -9,3 +9,6 @@ test/acceptance_stage_test.dart
 # live manager order tab + god-advance is now covered by the dashboard screen test.
 test/manager_dashboard_screen_test.dart
 test/worker_tasks_persistence_test.dart
+# stage-2 resilience contract (DIRECTIVE-buildsmart-clean §2) — iron-rules 1+3, each in its own suite:
+test/stage2_data_tolerance_test.dart
+test/stage2_safety_net_test.dart

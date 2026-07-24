@@ -365,6 +365,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     super.dispose();
   }
 
+  /// Load persisted orders — one corrupt entry is skipped, the rest survive.
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -373,9 +374,22 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
         _loaded = true;
         return;
       }
-      final list = (jsonDecode(raw) as List<dynamic>)
-          .map((e) => Order.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final entries = jsonDecode(raw) as List<dynamic>;
+      final list = <Order>[];
+      for (final e in entries) {
+        try {
+          list.add(Order.fromJson(e as Map<String, dynamic>));
+        } on Object catch (err) {
+          debugPrint(
+            'OrdersEngine: skipped corrupt persisted order (rest kept): $err',
+          );
+        }
+      }
+      if (entries.isNotEmpty && list.isEmpty) {
+        // Every entry was corrupt — keep the seed (same as a corrupt payload).
+        _loaded = true;
+        return;
+      }
       if (!_loaded) {
         super.state = list; // bypass re-persisting the value we just loaded
         _loaded = true;

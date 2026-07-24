@@ -1519,3 +1519,10 @@
 - **הפתרון:** ווידג'ט מקומי `_SiteServerNote` (העתק `_ServerNote` של תגמולים, Text רגיל אין-רישום) + 4 שורות-תווית מתחת לראש כל מקטע. const לא-נגעו.
 - **mutation-verify (מבוצע):** גארד `site_hub_screen.dart:::class _SiteServerNote` — הסרתי את הווידג'ט → `assert-manifest` **אדום** (should-be-present) → שחזור → ירוק (count 1).
 - **אימות נוסף:** analyze 0 · phaseb_seeds_test+site_hub_state_test ירוקים (נועלים values/lengths) · apple_readiness (allowlist) · אין widget-test למקטעים. 1 קובץ, 0 שינויי-בדיקה. שער מלא בשער-ה-commit.
+
+## #stage2-slice-A — חוסן: סבילות-דאטה + רשת-ביטחון (חוקי-ברזל 1+3) — 2026-07-24
+- **הרקע (שלב-2, `DIRECTIVE-buildsmart-clean §2` · 4 מאמתים):** הבסיס כבר עמיד ברובו; 4 חורים: F1 פענוח-הזמנות whole-payload (רשומה-פגומה-אחת מחקה הכל) · F2 מטמון-קטלוג-פגום קורס לפני ה-bundled · G3 errorBuilder ברירת-מחדל null · F3 share_log לא-מגודר.
+- **הפתרון:** F1 פר-רשומה (idiom ה-queue) + all-corrupt→seed · F2 שתי עטיפות decode→cache-MISS · G3 `_productImageErrorFallback` · F3 getInstance-בפנים + persist מגודר. 2 קבצי-בדיקה חדשים ב-required-tests.
+- **mutation-verify (3/3 מבוצע):** (1) orders: `if (1==2) list.add(...)` ↦ סימולציית-skip-all → `stage2_data_tolerance` **אדום** (-2) → שחזור → ירוק. (2) catalog_sync: debugPrint↦`rethrow` → `stage2_safety_net` **אדום** (-2) → שחזור → ירוק. (3) product_images: הסרת `?? _productImageErrorFallback` → **הבדיקה המקורית נשארה ירוקה — נתפסה חלשה!** (תזמון-asset לא-דטרמיניסטי) → הוחלפה בבדיקת-חיווט דטרמיניסטית (img.errorBuilder isNotNull + builder→SizedBox 0×0) → מוטציה **אדומה** (-1) → שחזור → ירוק 14/14. לקח: mutation-verify תפס בדיקה-שלא-יכולה-להאדים — בדיוק תפקידו.
+- **אימות נוסף:** analyze 0 · 89 בדיקות (חדשות+שכנות-נעולות: orders_engine/catalog_sync/offline_queue/finance_repo/cached_repo) ירוקות · 4 גארדי-בייט חדשים ב-conformance · שער מלא בשער-ה-commit.
+- **סיכונים-מקובלים מתועדים:** G4 (ErrorWidget.builder) דולג — invariant מסלול-דמו · S21 (~40 getInstance) defer · site-mapper מכוסה ע"י מנגנון-הבסיס (generic pin) + הוכחת-mapper-אמיתי דרך orders+finance.
