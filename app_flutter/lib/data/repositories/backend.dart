@@ -1,3 +1,5 @@
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileCatalogBaseUrl, kProfileStudioSharedSync;
 import 'package:firebase_core/firebase_core.dart' show Firebase;
 
 /// Master switch for the LIVE Firebase backend. Repository providers route to
@@ -30,7 +32,9 @@ bool get useFirebaseBackend =>
 /// [kUseFirebaseBackendFlag]). Tests never initialise Firebase, so the local path
 /// ignores this flag. Flip on at build time once the rules are deployed:
 ///   flutter build web --dart-define=STUDIO_SHARED_SYNC=true
-const bool kStudioSharedSync = bool.fromEnvironment('STUDIO_SHARED_SYNC');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kStudioSharedSync = bool.fromEnvironment('STUDIO_SHARED_SYNC',
+    defaultValue: kProfileStudioSharedSync);
 
 /// True only when [kStudioSharedSync] is set AND Firebase actually initialised
 /// (so it can never activate offline / in the Firebase-free test suite).
@@ -228,7 +232,9 @@ const bool kCatalogServerSearch =
 /// non-empty value is REQUIRED before any server route activates. The empty
 /// default is load-bearing — a non-empty default would point the OFF build at a
 /// remote and break byte-identity.
-const String kCatalogBaseUrl = String.fromEnvironment('CATALOG_BASE_URL');
+// stage-3.4: profile-aware default (explicit define still wins).
+const String kCatalogBaseUrl = String.fromEnvironment('CATALOG_BASE_URL',
+    defaultValue: kProfileCatalogBaseUrl);
 
 /// True only when server-search is flagged ON *and* the backend is live —
 /// mirrors [useFirebaseBackend], so the flag can't activate offline / in tests.

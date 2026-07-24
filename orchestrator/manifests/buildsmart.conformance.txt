@@ -93,3 +93,8 @@ lib/data/related_info.dart:::resolvedCatalogProducts
 lib/data/related_info.dart:::!kCatalogProducts
 lib/data/fuzzy_search.dart:::resolvedCatalogProducts
 lib/data/fuzzy_search.dart:::!kCatalogProducts
+#
+# Regression — STAGE-3.4 (2026-07-24): APP_PROFILE exists with demo default; the two company-VALUE defines ride the profile:
+lib/state/app_profile.dart:::defaultValue: 'demo'
+lib/data/repositories/backend.dart:::defaultValue: kProfileCatalogBaseUrl
+lib/data/product_images.dart:::defaultValue: kProfileImageBaseUrl

@@ -1546,3 +1546,10 @@
 - **הפתרון:** 4 החלפות-שורה ל-`resolvedCatalogProducts` (related_info ×3 + fuzzy_search ×1) + imports + תיקוני-doc. זהה-בייטים תחת v1.
 - **mutation-verify (מבוצע, ברמת-בייט — התופס הכן לריפקטור שזהה-התנהגותית תחת v1):** re-pin של הגשר ל-kCatalogProducts → `assert-manifest` **אדום** (should-be-absent x1) → שחזור → BYTES VERIFIED. בדיקה-התנהגותית לא-יכולה-לתפוס תחת v1 (אותו אובייקט) — מתועד ביושר; הבדיקה-החדשה הופכת load-bearing תחת v2.
 - **אימות נוסף:** analyze 0 · 20 בדיקות-צרכנים ירוקות (fuzzy/huliot_search/barcode/dedup/compat_memo/suggestions) · `stage3_catalog_source_consistency_test` (2/2, נוסף ל-required) · שער מלא בשער-ה-commit.
+
+## #stage3-app-profile — דגל-פרופיל APP_PROFILE (פרוסת-3.4) — 2026-07-24
+- **הרקע (מלאי-מלא):** 34 דגלים מפוזרים; ה-Play בונה בלי-דגלים (=דמו); שני ה-live-web workflows חייבים תיאום-ידני. פרופיל-אחד = מקור-אחד.
+- **הפתרון:** `app_profile.dart` (13 kProfile* + מראה) + 13 rewires `defaultValue:` ב-8 קבצים. מפורש-גובר (סמנטיקת-fromEnvironment) → אפס-שינוי-workflows; בלי-פרופיל=demo=היום. חימוש-14 הוחרג (governance) · ניסויים/חוגות passthrough.
+- **mutation-verify (מבוצע ×3):** M1 default→'buildsmart' → `app_profile_flags_test` **אדום** (-2: demo-pin + literals) → שחזור. M2 עמודת-buildsmart במראה GLOBAL_SEARCH→false → part-b **אדום** (-2) → שחזור → 7/7. M3 strip `defaultValue: kProfileCatalogBaseUrl` → `assert-manifest` **אדום** → שחזור → VERIFIED.
+- **אימות נוסף:** analyze 0 · **90 בדיקות ירוקות** (הבדיקה-החדשה + כל סוויטות-נעילת-ברירות-המחדל: backend_flag · gate_123 · email_password_door · app_keyboard_only · finder_front · store_comparison · user_system_flag_off · app_check_providers · floating_card_keyboard(מותאם-שורה) · studio_gating) · סריקת-הסט-הסגור עברה 1:1 (0 לא-מסווגים, 0 stale). שער מלא בשער-ה-commit.
+- **הערת-לולאה:** 4 "כשלים" ראשונים היו נתיבים-שגויים בפקודת-ההרצה שלי (Does not exist) — אומתו בנתיב-הנכון, 26/26.

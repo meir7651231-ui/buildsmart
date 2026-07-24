@@ -20,6 +20,8 @@ import 'package:buildsmart/data/repositories/store_inventory_firestore.dart'
     show StoreInventoryFirestoreSource;
 import 'package:buildsmart/data/repositories/store_repo.dart'
     show StoreInventoryRepository;
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileStoreComparisonUi;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,7 +29,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// C3.4 UI gate — default OFF ⇒ byte-identical (a top-level const, tree-shaken out of
 /// the sheet). The owner flips `SERVER_STORE_UI` at go-live, alongside
 /// `useServerCatalog` (the data master) — the UI never shows a price with no data.
-const bool kStoreComparisonUi = bool.fromEnvironment('STORE_COMPARISON_UI');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kStoreComparisonUi = bool.fromEnvironment('STORE_COMPARISON_UI',
+    defaultValue: kProfileStoreComparisonUi);
 
 /// The store/inventory repository. With the server catalog live it reads the seeded
 /// `stores` + `inventory` from Firestore ([StoreInventoryFirestoreSource]); gated on

@@ -20,13 +20,16 @@
 // zero-regression invariant every other launch flag uses.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/state/app_profile.dart' show kProfileGlobalSearch;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Master switch for the unified global search. Default OFF → the keyboard
 /// prediction row is byte-identical to today; flip on at build time with
 /// `--dart-define=GLOBAL_SEARCH=true`.
-const bool kGlobalSearch = bool.fromEnvironment('GLOBAL_SEARCH');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kGlobalSearch =
+    bool.fromEnvironment('GLOBAL_SEARCH', defaultValue: kProfileGlobalSearch);
 
 /// What a [SearchResult] points at — drives its icon + grouping, and (as the
 /// declaration order) the deterministic tie-break when two hits score equally.

@@ -16,3 +16,5 @@ test/stage2_scale_test.dart
 test/stage2_tenant_isolation_test.dart
 # stage-3 engine↔data separation — list/bridge/search single-source invariant:
 test/stage3_catalog_source_consistency_test.dart
+# stage-3.4 — the APP_PROFILE contract (demo≡today · matrix · mirror-consistency · closed-set sweep):
+test/app_profile_flags_test.dart

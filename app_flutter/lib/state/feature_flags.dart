@@ -1,3 +1,6 @@
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileAppKbOnly, kProfileRingDive, kProfileSmartInput,
+        kProfileWordFinder;
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,8 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// --dart-define to library consts (the repo drives such ON branches
 /// explicitly), so the ON path is not unit-testable here; `flutter build web`
 /// DOES forward it — that is what the deploy uses.
-const bool kEnableWordFinderDemo =
-    bool.fromEnvironment('ENABLE_WORD_FINDER');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kEnableWordFinderDemo = bool.fromEnvironment('ENABLE_WORD_FINDER',
+    defaultValue: kProfileWordFinder);
 
 /// True iff the build passed `--dart-define=ENABLE_CARD_KEYBOARD=true` — the
 /// A/B demo build for the unified card-keyboard (#38). SAME idiom as
@@ -28,8 +32,9 @@ const bool kEnableCardKeyboardDemo =
 /// `SizedBox.shrink`) → byte-identical. The live deploy workflows do NOT pass it
 /// (the cut-over stays owner-gated); a demo build flips it on to A/B the dial
 /// beside the smart keyboard.
+// stage-3.4: profile-aware default (explicit define still wins).
 const bool kEnableRingDiveDemo =
-    bool.fromEnvironment('ENABLE_RING_DIVE');
+    bool.fromEnvironment('ENABLE_RING_DIVE', defaultValue: kProfileRingDive);
 
 /// True iff the build passed `--dart-define=SMART_INPUT=true` — the owner's
 /// "APP KEYBOARD ONLY" switch: our in-app `BsKeyboard` REPLACES the device's
@@ -53,7 +58,9 @@ const bool kEnableRingDiveDemo =
 ///
 /// A11Y: `useCustomKeyboard` ALSO requires `!accessibleNavigation`, so a screen
 /// reader keeps the OS keyboard even with this ON — the fallback is preserved.
-const bool kSmartInputDemo = bool.fromEnvironment('SMART_INPUT');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kSmartInputDemo =
+    bool.fromEnvironment('SMART_INPUT', defaultValue: kProfileSmartInput);
 
 /// True iff the build passed `--dart-define=APP_KB_ONLY=true` — the SECOND half
 /// of the owner's "app keyboard only" demand, and the one that actually makes it
@@ -74,7 +81,9 @@ const bool kSmartInputDemo = bool.fromEnvironment('SMART_INPUT');
 ///
 /// A11Y: the layer ALSO gates on `useCustomKeyboard`, so a screen reader keeps
 /// the platform keyboard even with this on — the control is never installed.
-const bool kAppKbOnly = bool.fromEnvironment('APP_KB_ONLY');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kAppKbOnly =
+    bool.fromEnvironment('APP_KB_ONLY', defaultValue: kProfileAppKbOnly);
 
 /// Whether the app offers EMAIL + PASSWORD sign-in at all.
 ///

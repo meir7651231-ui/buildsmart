@@ -15,6 +15,7 @@
 // the Hebrew and English letter layers (for typing English product names).
 
 import 'package:buildsmart/screens/keyboard_tool_actions.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileKbLiveMirror;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/smart_input/caret.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart';
@@ -58,7 +59,9 @@ const bool kKeyboardToolStrip = true;
 /// ([kKbLiveMirrorFlag] in state/feature_flags.dart) — the floating keyboard's
 /// guard is `kKbLiveMirror || featureFlags.isOn(kKbLiveMirrorFlag)`, so either
 /// path enables it and BOTH default OFF.
-const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR',
+    defaultValue: kProfileKbLiveMirror);
 
 /// FLAG — owner button-spec v2 (see New folder/KEYBOARD-BUTTON-SPEC.md): buttons
 /// 2/4/6/7 take their owner-defined behaviour —

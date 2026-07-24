@@ -1325,7 +1325,7 @@ void main() {
         ).readAsStringSync();
         expect(
           host.contains(
-              "const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR')"),
+              "const bool kKbLiveMirror = bool.fromEnvironment('KB_LIVE_MIRROR'"),
           isTrue,
           reason: 'kKbLiveMirror is a const bool.fromEnvironment — off unless the '
               'demo define is set, which is what lets the catalog branch shake out',

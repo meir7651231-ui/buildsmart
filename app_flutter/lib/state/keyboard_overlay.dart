@@ -12,6 +12,7 @@
 // Lives behind the same compile-time flag as the rest of the surface
 // ([kKeyboardToolStrip]); nothing reads this provider unless that flag is on, so
 // with the flag OFF the shell is byte-identical to before the go-live.
+import 'package:buildsmart/state/app_profile.dart' show kProfileKbGlobal;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// FLAG — "keyboard on every screen" (owner: extend the floating keyboard beyond
@@ -28,7 +29,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// (see floating_card_keyboard.dart `_onGrid`): turning on KB_GLOBAL gives the
 /// tab-aware grid even without KB_BUTTONS_V2. Ship the two together — KB_GLOBAL
 /// requires the v2 tab behaviour to make sense.
-const bool kKbGlobal = bool.fromEnvironment('KB_GLOBAL');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kKbGlobal =
+    bool.fromEnvironment('KB_GLOBAL', defaultValue: kProfileKbGlobal);
 
 /// Whether the floating card-keyboard overlay is currently shown.
 ///

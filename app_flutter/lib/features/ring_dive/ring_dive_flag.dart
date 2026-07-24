@@ -1,3 +1,6 @@
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileAxisDive, kProfilePlainDive;
+
 /// Feature-flag name for the RingDive rotary product-finder (צלילת-טבעות).
 ///
 /// RingDive is a NEW PRESENTATION of the SAME unified drill-down the smart
@@ -15,10 +18,13 @@ const String kRingDiveFlag = 'kRingDive';
 /// ALONGSIDE (never replacing) the pro RingDive. Const-false by default ⇒ the
 /// PlainDive screen + its entry point tree-shake out ⇒ the live app is
 /// byte-identical. Turned on with `--dart-define=PLAIN_DIVE=true`.
-const bool kPlainDive = bool.fromEnvironment('PLAIN_DIVE');
+// stage-3.4: profile-aware default (explicit define still wins).
+const bool kPlainDive =
+    bool.fromEnvironment('PLAIN_DIVE', defaultValue: kProfilePlainDive);
 
 /// Compile-time flag for the AXIS-DIVE catalog wheel — the owner's "pick which of
 /// the ~15 wheels to start from" finder (a constraint engine over [catAxesOf], any
 /// axis in any order). Const-false ⇒ the screen + its entry tree-shake out ⇒
 /// byte-identical. Turned on with `--dart-define=AXIS_DIVE=true`.
-const bool kAxisDive = bool.fromEnvironment('AXIS_DIVE');
+const bool kAxisDive =
+    bool.fromEnvironment('AXIS_DIVE', defaultValue: kProfileAxisDive);

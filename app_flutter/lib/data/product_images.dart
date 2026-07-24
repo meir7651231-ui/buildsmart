@@ -1,13 +1,17 @@
+import 'package:buildsmart/state/app_profile.dart' show kProfileImageBaseUrl;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 /// Base URL of the cloud image store (Cloudflare R2). Full-quality product/page
 /// images live here; the app does NOT bundle them, so it stays light. Override
-/// at build time with --dart-define=IMAGE_BASE_URL=... ; empty → bundled assets.
+/// at build time with --dart-define=IMAGE_BASE_URL=... ; empty → bundled assets
+/// — the default follows the build profile ([kProfileImageBaseUrl]): today's
+/// R2 base on demo/buildsmart, empty (bundled assets) on clean.
+// stage-3.4: profile-aware default (explicit define still wins).
 const String kImageBaseUrl = String.fromEnvironment(
   'IMAGE_BASE_URL',
-  defaultValue: 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev',
+  defaultValue: kProfileImageBaseUrl,
 );
 
 /// Bounded on-device cache so the device never fills up — even with a 60k+

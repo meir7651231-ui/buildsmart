@@ -2132,3 +2132,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **רקע (שלב-2 חוק-4 · B3):** רשימות-ההזמנות של לוח-המנהל (`_OrdersTab`) ולוח-החנות (`_homeTab`) נבנו eager — `ListView(children:[for …])` — כל השורות נבנות בכל rebuild (ב-10k הזמנות = 10k ווידג'טים). הומרו ל-`ListView.builder` (רק הנראות נבנות): manager — דפוס head+offset (תקדים `manager_copilot_screen.dart:167`); store — שני "האתרים" התגלו כ-scrollable אחד → השורות הועברו ל-builder החיצוני (nested-shrinkWrap אינו עצל), `_pipeline` פוצל ל-`_shownOrders`+`_pipelineHead`.
 **מה רואים:** **שום שינוי** — אותם ווידג'טים, אותם strings (כולל `₪120` הנעול), אותו padding/סדר; בנייה עצלה בלבד. `manager_dashboard_screen_test` (101 ירוקות כולל drill/פילטרים) + `apple_readiness_missed_leaks` מאשרים.
 **הפיכות:** להחזיר את שתי ה-`ListView(children:)` + לאחד את `_pipeline`.
+
+## stage3-app-profile — ברירות-מחדל מודעות-פרופיל — שינוי-נראה: **לא** (plumbing בלבד) — 2026-07-24
+**רקע (פרוסת-3.4):** 13 הצהרות-דגל ב-8 קבצים (בהם 2 קבצי-widgets: `bs_keyboard_host` · `store_comparison_line`) קיבלו `defaultValue: kProfile…` מ-`app_profile.dart` החדש. **מה רואים: שום שינוי** — בבניה ללא-פרופיל (וכל הסוויטה) כל ברירת-מחדל שווה לליטרל-של-היום; define-מפורש ממשיך-לגבור. 90 בדיקות ירוקות כולל כל סוויטות-נעילת-ברירות-המחדל. **הפיכות:** הסרת ה-`defaultValue:` וה-imports + מחיקת `app_profile.dart`.
