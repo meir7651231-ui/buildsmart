@@ -77,3 +77,13 @@ lib/state/share_log.dart:::ShareLog: persist failed
 lib/data/repositories/chat_firebase.dart:::descending: true).limit(500)
 #  the source adapter keeps the optional bound seam:
 lib/data/repositories/firestore_cached_repo.dart:::_bound
+#
+# Regression — STAGE-2 slice C (2026-07-24 · iron-rule 2): tenant isolation load-bearers (paths ../ = repo root):
+#  the two previously-catch-all-denied collections keep their explicit rules blocks:
+../firestore.rules:::match /material_requests/
+../firestore.rules:::match /financeBudget/
+#  users self-writes can never mint privilege (the freeze list, orgId included):
+../firestore.rules:::'storeUid', 'orgId', 'status'
+#  the customers client stamps + scopes by ownerId (the orders-A3 precedent):
+lib/data/repositories/customers_firebase.dart:::_ownerUid
+lib/data/repositories/customers_local.dart:::_customersScopeFor

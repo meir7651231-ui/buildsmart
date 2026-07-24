@@ -1533,3 +1533,10 @@
 - **mutation-verify (מבוצע):** (1) `descending: true`↦`false` בגבול-הצ'אט → `stage2_scale_test` (named-bounds) **אדום** (-1) → שחזור → ירוק 6/6. (2) **הוכחת-RED חיה של משמר-הגבולות:** בריצה הראשונה הוא תפס 6 קבצי-מקור לא-מתועדים (orders_firebase/studio_config/users_lookup/auth_state/push_state/role_requests) → אדום → תועדו כחריגים-עם-סיבה → ירוק. משמר שיודע להאדים על מציאות אמיתית.
 - **אימות נוסף:** analyze 0 · 101 בדיקות ירוקות (scale+screens+repos) · `stage2_scale_test` נוסף ל-required-tests · גארדים: `descending: true).limit(500)` + `_bound`. שער מלא בשער-ה-commit.
 - **סיכון-מקובל:** תקרת-500 לצ'אט משנה איזה הודעות-עתיקות זמינות בקאש בת'רדים ענקיים — pagination-פר-thread = היוזמה המתועדת הבאה. גבולות פעילים רק בבניית-שרת (דגלים OFF כברירת-מחדל).
+
+## #stage2-slice-C — בידוד-דייר (חוק-ברזל 2) — 2026-07-24
+- **הרקע:** יחידת-הדייר=משתמש; הרשת קיימת אך: 2 אוספים בלי-חוק (נחסמו-בשקט) · customers לא-חתום/לא-סקופי · אפס הוכחה-בבדיקות-אצלנו.
+- **הפתרון:** C1 שני בלוקי-חוקים (mirrors מדויקים) · C2 חותמת-ownerId + `_customersScopeFor` (תקדים A3, `kUidScopedQueries`-gated, OFF=בייט-זהה) · בדיקת-3-רמות `stage2_tenant_isolation_test` (required) · מסירת-בעלים ב-LAUNCH_READINESS.
+- **mutation-verify (מבוצע ×2):** (א) הסרת `'orgId'` מרשימת-ההקפאה בחוקים → הבדיקה **אדומה** (-1) → שחזור → 12/12. (ב) מחיקת `_ownerUid` → `assert-manifest` **אדום** → שחזור → BYTES VERIFIED. + RED-חי שלישי של משמר-הסקייל (תפס את customers_local) → חריגה-מתועדת.
+- **אימות נוסף:** analyze 0 · 50 בדיקות ירוקות (isolation 12 · scale · customers/credit מלא) · גארדי-`../` על קובץ-החוקים בשורש — קובץ-החוקים מוגן-שער מעכשיו. שער מלא בשער-ה-commit.
+- **גבול-כנות מתועד:** אכיפת-שרת-חיה לא-ניתנת-להוכחה בסנדבוקס — מסירה מפורשת לבעלים/CI (אמולטור+deploy+דגל-בנייה). **שלב-2 שלם: 4 חוקים × 4 בדיקות-required + חוק-5=השער.**

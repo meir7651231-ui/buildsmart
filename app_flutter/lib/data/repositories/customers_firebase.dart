@@ -42,17 +42,23 @@
 //
 // A11 (launch uid-migration) — `ownerId` is now MAPPED through `ManagerCustomer.
 // ownerId` (forward-ready), written GUARDED (only when non-empty) and read
-// tolerantly (default '') — the A3 `contractorUid` discipline. ⚠️ FINDING: on
-// THIS path `ownerId` is ALWAYS '' — the customer list is DERIVED from the orders
-// engine (`mgrCustomerList` over `Order.who` display names, not uids) and the
-// [CustomersRepository] interface carries NO public write method that creates a
-// customer doc. So there is currently NOWHERE to stamp an owner uid (no write
-// path is fabricated). The field is wired through end-to-end so that (a) a doc
-// the schema/console writes with `ownerId` round-trips losslessly, and (b) a
-// FUTURE customer-write path can stamp it from `currentUidProvider`. Until then
-// every `toDoc` omits it and the seed round-trips byte-identical (zero
-// regression). The eventual `ownerId` scoping activates later via the firestore
-// rules (forward-ready, just landed).
+// tolerantly (default '') — the A3 `contractorUid` discipline. The customer list
+// is DERIVED from the orders engine (`mgrCustomerList` over `Order.who` display
+// names, not uids) and the [CustomersRepository] interface carries NO public
+// write method that creates a customer doc — so the MODEL's `ownerId` is always
+// '' on this path. C2 (stage-2 iron-rule-2, the orders-A3 precedent) therefore
+// stamps the SESSION uid instead: the provider injects [ownerUid] from
+// `currentUidProvider` (the same stamp source as orders A3 / chat A8) and
+// [toDoc] writes it whenever the model carries no owner of its own — so any doc
+// this repo ever writes (the dev-seed push / an optimistic upsert) lands
+// owner-stamped, giving the `ownerId` read branch in `firestore.rules` and the
+// (ownerId ASC, used DESC) composite index (firestore.indexes.json #4) real
+// bytes to match. Signed-out / Firebase-free → '' → omitted, and the seed
+// round-trips byte-identical (zero regression). A doc that ALREADY carries an
+// owner (round-tripped via [fromDoc], which stays tolerant of a missing
+// `ownerId`) keeps it — the stamp never clobbers a real owner. The matching
+// owner-SCOPED listen is gated in the provider (customers_local.dart, behind
+// `kUidScopedQueries`).
 //
 // Comment density/voice mirrors `orders_firebase.dart` — the S2.3 template.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -78,12 +84,20 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   /// callable is routed only when the flag is ON (default the compile-time
   /// [kServerCallables]) AND a gateway is bound. OFF / no gateway → the sync
   /// client derivation (byte-identical).
+  ///
+  /// C2 — [ownerUid] is the session's `auth.uid` (injected by the provider from
+  /// `currentUidProvider`; '' when signed-out / Firebase-free / in tests), the
+  /// uid [toDoc] stamps as `ownerId` when the model carries no owner of its own
+  /// — the A3 `contractorUid` stamp, taken at construction because this derived
+  /// surface has no `placeOrder`-style write call-site to stamp at.
   FirebaseCustomersRepository({
     RemoteCollectionSource? source,
     bool? serverCallables,
     OrderFunctionsGateway? functions,
+    String ownerUid = '',
   })  : _serverCallables = serverCallables,
         _functions = functions,
+        _ownerUid = ownerUid,
         super(source ?? FirestoreCollectionSource('customers'));
 
   /// A13 — null means "use the compile-time default" ([kServerCallables]).
@@ -91,6 +105,9 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
 
   /// A13 — the injectable callable seam (null off the live backend).
   final OrderFunctionsGateway? _functions;
+
+  /// C2 — the session uid [toDoc] stamps as `ownerId` ('' = nothing to stamp).
+  final String _ownerUid;
 
   // ── base contract: seed · mapping · ordering · fresh-backend hook ───────────
 
@@ -110,10 +127,13 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   /// (`totalSpend`→`used`, `balance` derived) per the `customers` schema; the
   /// name is the doc-id, not a field. `orderCount` is carried as an extra field
   /// so `all()` returns a full aggregate without a join (mirrors how `orders`
-  /// carries `items`). A11 — `ownerId` is written GUARDED (only when non-empty);
-  /// on this derived path it is always '' (see the header finding), so it is
-  /// omitted and the seed round-trips byte-identical (zero regression). The
-  /// schema's `phone` carries no model value, so it is omitted (tolerant).
+  /// carries `items`). A11/C2 — `ownerId` is written GUARDED (only when a
+  /// non-empty uid is known — the A3 `contractorUid` discipline): the model's
+  /// own owner wins (a doc round-tripped through [fromDoc] keeps its real owner
+  /// — the stamp never clobbers it), else the injected session [_ownerUid] is
+  /// stamped. Both empty (signed-out / Firebase-free / tests) → omitted, and
+  /// the seed round-trips byte-identical (zero regression). The schema's
+  /// `phone` carries no model value, so it is omitted (tolerant).
   @override
   Map<String, dynamic> toDoc(ManagerCustomer c) => {
         'name': c.name,
@@ -121,7 +141,10 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
         'creditLimit': c.creditLimit,
         'balance': c.creditLimit - c.totalSpend,
         'orderCount': c.orderCount,
-        if (c.ownerId.isNotEmpty) 'ownerId': c.ownerId,
+        if (c.ownerId.isNotEmpty)
+          'ownerId': c.ownerId
+        else if (_ownerUid.isNotEmpty)
+          'ownerId': _ownerUid,
       };
 
   /// Firestore doc → `ManagerCustomer`. Inverse of [toDoc]: the doc-id becomes

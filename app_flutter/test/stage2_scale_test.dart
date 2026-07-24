@@ -129,6 +129,7 @@ void main() {
       'lib/data/repositories/orders_local.dart', // ts-trap → pagination initiative
       'lib/data/repositories/orders_firebase.dart', // same orders listen (ts-trap)
       'lib/data/repositories/customers_firebase.dart', // manager-only, small
+      'lib/data/repositories/customers_local.dart', // same small customers listen — C2 provider-scoped construction (orders_local precedent)
       'lib/data/repositories/finance_firebase.dart', // 4 tiny finance lists
       'lib/data/repositories/stock_firebase.dart', // tiny
       'lib/data/repositories/site_firebase.dart', // tasks BOUNDED; stage tiny → checked below

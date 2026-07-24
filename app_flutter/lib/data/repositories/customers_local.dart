@@ -14,9 +14,15 @@
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/customers_firebase.dart';
 import 'package:buildsmart/data/repositories/customers_repository.dart';
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
+    show FirestoreCollectionSource;
 import 'package:buildsmart/data/repositories/order_functions.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/state/auth_state.dart'
+    show currentUidProvider, roleProvider;
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show CollectionReference, Query;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -145,13 +151,33 @@ class LocalCustomersRepository implements CustomersRepository {
 /// `aggregate(orders)`, the Firestore impl serves its cached aggregates via `all()`.
 final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
   if (useFirebaseBackend) {
+    // C2 — UID-SCOPED listen (behind `kUidScopedQueries`, default OFF). With the
+    // flag OFF the source is constructed with NO scope → the WHOLE-collection
+    // listen, BYTE-IDENTICAL to today (the zero-regression invariant). Only when
+    // the flag is ON *and* a uid is known do we build the owner-scoped query the
+    // Security Rules can prove (the customers read branch `ownerId == uid` in
+    // firestore.rules, served by the forward-ready (ownerId ASC, used DESC)
+    // composite index — firestore.indexes.json #4; manager/admin stay unscoped —
+    // the god view).
+    final scope = kUidScopedQueries
+        ? _customersScopeFor(
+            role: ref.watch(roleProvider),
+            uid: ref.watch(currentUidProvider),
+          )
+        : null;
     // A13 — inject the callable seam so the Firestore impl can reach the
     // `computeCredit` callable (mirrors the local branch below; `serverCallables`
     // is left at its compile-time default). Without this the gateway is null and
     // the credit callable is unreachable even when the flag is ON.
     final repo =
         FirebaseCustomersRepository(
+            source: scope == null
+                ? FirestoreCollectionSource('customers')
+                : FirestoreCollectionSource('customers', scope: scope),
             functions: ref.read(orderFunctionsGatewayProvider),
+            // C2 — the session uid `toDoc` stamps as `ownerId` (guarded,
+            // A3-style: only when known; '' when signed-out → nothing stamped).
+            ownerUid: ref.read(currentUidProvider) ?? '',
           )
           ..attach();
     ref.onDispose(repo.dispose);
@@ -165,3 +191,29 @@ final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
     functions: ref.read(orderFunctionsGatewayProvider),
   );
 });
+
+/// C2 — build the owner-scoped customers [Query], or `null` for NO scope (the
+/// whole collection — manager/admin, or any case where there is no uid to scope
+/// to so we must NOT silently hide the seed/legacy data). The builder is what
+/// `FirestoreCollectionSource(scope:)` calls with the live
+/// `CollectionReference`. Mirrors `_ordersScopeFor` (orders_local.dart). Each
+/// branch is exactly what the matching Security Rule proves (see
+/// `firestore.rules` customers read: manager/admin, OR `ownerId == uid`; the
+/// scoped listen is served by the forward-ready (ownerId ASC, used DESC)
+/// composite index — firestore.indexes.json #4):
+///   • manager/admin / no-uid → null (unscoped — the god view);
+///   • every other role → `ownerId == uid` (their own credit record; a
+///     legacy/seed doc with no `ownerId` never equals an auth.uid, so it stays
+///     manager/admin-only — the rules' backward-tolerant default).
+Query<Map<String, dynamic>> Function(
+        CollectionReference<Map<String, dynamic>>)?
+    _customersScopeFor({required String? role, required String? uid}) {
+  if (uid == null || uid.isEmpty) return null; // no identity → do not hide data
+  switch (role) {
+    case 'manager':
+    case 'admin':
+      return null; // god view — the whole collection
+    default: // contractor (null) + store/courier/worker + any unknown role
+      return (c) => c.where('ownerId', isEqualTo: uid);
+  }
+}

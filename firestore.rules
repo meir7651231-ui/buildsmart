@@ -537,6 +537,19 @@ service cloud.firestore {
       allow write: if hasRole('worker') || isManager();
     }
 
+    // material_requests — the worker material-request queue: worker files a
+    // request, the reviewing board advances `status`
+    // (requested→ordered→supplied/declined); both ride the same docs — the
+    // `tasks` posture above (the review side rides the manager/admin gate: the
+    // contractor identity carries no role claim, see the orders Phase-G note).
+    // stage-2 C1: this collection previously had NO block, so the final
+    // catch-all denied the repo's whole-collection listen and the client
+    // silently served its seed cache forever.
+    match /material_requests/{requestId} {
+      allow read: if isSignedIn();
+      allow write: if hasRole('worker') || isManager();
+    }
+
     // siteStageProgress — per-product install-stage done-flags (doc existence
     // == done), toggled from the contractor's site tools (and the worker's
     // install flow).
@@ -568,6 +581,21 @@ service cloud.firestore {
     }
 
     match /financePaymentTerms/{termId} {
+      allow read: if isManager()
+          || (isSignedIn()
+              && resource.data.get('ownerId', '') == request.auth.uid);
+      allow write: if isManager();
+    }
+
+    // financeBudget — the manager's editable project budget, persisted as the
+    // single `financeBudget/active` doc {total, spent, cats[]} that
+    // FirebaseFinanceRepository's `setBudget` upserts and the budget reads
+    // serve. Same manager-only posture + forward-ready ownerId read branch as
+    // the finance* blocks above (the current doc carries no ownerId, so it is
+    // manager-only today). stage-2 C1: this collection previously had NO block,
+    // so the final catch-all denied the budget listen and the client silently
+    // served its seed cache forever.
+    match /financeBudget/{budgetId} {
       allow read: if isManager()
           || (isSignedIn()
               && resource.data.get('ownerId', '') == request.auth.uid);

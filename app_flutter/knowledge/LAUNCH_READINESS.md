@@ -172,8 +172,7 @@ _צעדים: 11 שכבות · 12 Riverpod/scoping/autoDispose · 13 logic-ב-wid
   חוזה-JSON טהור, TimeOfDay רק ב-getters לא-נשמרים; שער 25 מכובד); אין coupling הפוך data→screens, אין circular.
 - **F-B3 (P1, צעד 12):** **`autoDispose` לא בשימוש כלל** — ~48 providers (13 StateProvider + 33 StateNotifier;
   0 Future/Stream) חיים-לעד. state-UI חולף (search/dial/menu) ראוי ל-autoDispose. צריכת-זיכרון.
-- **F-B4 (P1, צעד 19):** **אין global error handler** — אין `FlutterError.onError`/`runZonedGuarded`/`ErrorWidget.builder`.
-  קריסות → red-screen/console; **`crash_log.dart` קיים אך שום-דבר לא מזין אותו** מ-handler גלובלי. תיקון זול+חשוב.
+- **F-B4 — ✅ סגור (תוקן לפני; עודכן 2026-07-24 בשלב-2):** ה-handlers הגלובליים **כן נחתו** — `FlutterError.onError` + `PlatformDispatcher.onError` ב-`main.dart:109-116` (תחת Firebase; מוזנים ל-crash-טלמטריה, נבדק ב-`telemetry_test`). מסלול-הדמו נשאר framework-default **בכוונה** (invariant-אפס-רגרסיה מתועד ב-`main.dart:227-230`); `ErrorWidget.builder` לא-הוגדר בכוונה מאותה סיבה (הוערך ונדחה בשלב-2 פרוסה-A).
 - **F-B5 (P2, צעד 24):** async-init race — כל 6 notifiers-persistence עושים `unawaited(_load())` ב-ctor →
   ה-UI עלול לקרוא defaults 50-200ms לפני הידרציה (flash; קושר ל-F-A3 dark). אין `AsyncValue`/FutureProvider.
 - **F-B6 (P2, צעד 19):** silent-swallow — `catch(_){}` ב-SharedPreferences/jsonDecode נופל ל-defaults ללא log/UI.
@@ -359,6 +358,14 @@ _95 ריכוז backlog · 96 סיווג P0/P1/P2 · 97 go/no-go criteria · 98 �
 - **F-A6 (פתוח):** פרשנות מודל-הניווט ב-Flutter (מסכי-מלא ל-settings + modal-sheets) — מאושר? (הספק §5/§7.3 מתעד shell בסגנון WhatsApp; 5-FABs לא ממומש פיזית.)
 
 ---
+
+## 🛡️ שלב-2 (חוסן) — מסירת-בעלים/CI (2026-07-24) — מה שרק אתה/CI יכולים לאמת
+> חוקי-הברזל 1·3·4 מוכחים-בבדיקות אצלנו (stage2_*_test, required). חוק-2 (בידוד-דייר) מוכח כאן ברמת קובץ-החוקים + הלקוח; **אכיפת-שרת-חיה ניתנת להוכחה רק מולך/CI:**
+1. **פריסת חוקים+אינדקסים:** `firebase deploy --only firestore:rules,firestore:indexes` — כולל 2 הבלוקים החדשים (`material_requests` · `financeBudget` — היו נחסמים-בשקט ע"י ה-catch-all) + אינדקס-customers-ownerId (#4).
+2. **ריצת חבילת-האמולטור:** `npm --prefix rules_test install && npm --prefix rules_test run test:emulator` — ולהרחיב את `orders.test.js` במקרה מפורש "קבלן-A קורא הזמנה-של-B → assertFails" (חבילת ה-store-isolation הקיימת = התבנית).
+3. **⚠️ דגל-הסקופינג בבנייה:** `--dart-define=UID_SCOPED_QUERIES=true` — **ברירת-המחדל-בקומפילציה כבויה!** בלעדיו, מאזינים-לא-מנהל על אוספים-סקופיים נחסמים-בשקט ע"י החוקים והמשתמש רואה seed-cache. חובה בצ'ק-ליסט ה-LAUNCH_PACKAGE (לצד `USE_FIREBASE_BACKEND=true`).
+4. **App Check** (S5.7) — אכיפה בקונסולה.
+5. הערה: תקרות-הסקייל (chat 500-אחרונות · material_requests/tasks 500) פעילות רק בבניית-שרת; orders הוחרג בכוונה (מלכודת-ts) — pagination = יוזמת Pillar-5.
 
 ## יומן-התקדמות (steps)
 - ✅ **סריקת כל 9 הפאזות הושלמה** — A (1–10) · B (11–25) · C (26–40) · D (41–52) ·
