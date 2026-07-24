@@ -1540,3 +1540,9 @@
 - **mutation-verify (מבוצע ×2):** (א) הסרת `'orgId'` מרשימת-ההקפאה בחוקים → הבדיקה **אדומה** (-1) → שחזור → 12/12. (ב) מחיקת `_ownerUid` → `assert-manifest` **אדום** → שחזור → BYTES VERIFIED. + RED-חי שלישי של משמר-הסקייל (תפס את customers_local) → חריגה-מתועדת.
 - **אימות נוסף:** analyze 0 · 50 בדיקות ירוקות (isolation 12 · scale · customers/credit מלא) · גארדי-`../` על קובץ-החוקים בשורש — קובץ-החוקים מוגן-שער מעכשיו. שער מלא בשער-ה-commit.
 - **גבול-כנות מתועד:** אכיפת-שרת-חיה לא-ניתנת-להוכחה בסנדבוקס — מסירה מפורשת לבעלים/CI (אמולטור+deploy+דגל-בנייה). **שלב-2 שלם: 4 חוקים × 4 בדיקות-required + חוק-5=השער.**
+
+## #stage3-catalog-unpin — un-pin גשר-מק"טים + חיפוש (באג-רדום v2) — 2026-07-24
+- **הרקע (מיפוי-3.1):** הגשר והחיפוש נעולים-v1 בעוד הרשימות v2-aware → תחת CATALOG_SOURCE=v2 מוצרים מופיעים-אך-לא-נפתרים (ברקוד/עגלה/BOM) ולא-נמצאים-בחיפוש. degrade-כן, בלי-קריסה — אבל פיצ'ר-שבור.
+- **הפתרון:** 4 החלפות-שורה ל-`resolvedCatalogProducts` (related_info ×3 + fuzzy_search ×1) + imports + תיקוני-doc. זהה-בייטים תחת v1.
+- **mutation-verify (מבוצע, ברמת-בייט — התופס הכן לריפקטור שזהה-התנהגותית תחת v1):** re-pin של הגשר ל-kCatalogProducts → `assert-manifest` **אדום** (should-be-absent x1) → שחזור → BYTES VERIFIED. בדיקה-התנהגותית לא-יכולה-לתפוס תחת v1 (אותו אובייקט) — מתועד ביושר; הבדיקה-החדשה הופכת load-bearing תחת v2.
+- **אימות נוסף:** analyze 0 · 20 בדיקות-צרכנים ירוקות (fuzzy/huliot_search/barcode/dedup/compat_memo/suggestions) · `stage3_catalog_source_consistency_test` (2/2, נוסף ל-required) · שער מלא בשער-ה-commit.

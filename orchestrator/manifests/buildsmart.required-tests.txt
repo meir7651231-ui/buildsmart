@@ -14,3 +14,5 @@ test/stage2_data_tolerance_test.dart
 test/stage2_safety_net_test.dart
 test/stage2_scale_test.dart
 test/stage2_tenant_isolation_test.dart
+# stage-3 engine↔data separation — list/bridge/search single-source invariant:
+test/stage3_catalog_source_consistency_test.dart

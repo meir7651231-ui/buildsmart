@@ -1,5 +1,6 @@
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
 
 /// Forgiving search over the catalog: returns products whose [nameHe] contains
 /// every word of the query (case-insensitive, whitespace-tolerant), ranked by
@@ -11,8 +12,8 @@ import 'package:buildsmart/data/polyroll_catalog.dart';
 /// highest, otherwise products with words closer together rank higher. Within
 /// the same rank, catalog order is preserved (stable sort).
 ///
-/// Default source is the UNIFIED catalog (`kCatalogProducts` = Lipskey +
-/// Polyroll) — searching `kLipskeyCatalog` alone would silently miss PPR.
+/// Default source is the ACTIVE catalog (`resolvedCatalogProducts`, v2-aware)
+/// — searching `kLipskeyCatalog` alone would silently miss PPR.
 List<LipskeyCatalogProduct> fuzzySearchProducts(String query,
     {Iterable<LipskeyCatalogProduct>? products, int limit = 20}) {
   final q = query.trim();
@@ -22,7 +23,8 @@ List<LipskeyCatalogProduct> fuzzySearchProducts(String query,
   if (words.isEmpty) return const [];
   final phrase = q.toLowerCase();
 
-  final source = (products ?? kCatalogProducts).toList();
+  // stage-3.1 — search follows the active catalog source.
+  final source = (products ?? resolvedCatalogProducts).toList();
   final ranked = <({LipskeyCatalogProduct p, int score, int order})>[];
 
   for (var i = 0; i < source.length; i++) {

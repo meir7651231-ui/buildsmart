@@ -2,6 +2,8 @@
 // smart-tree / variants. Used by the unified product card to render four
 // informational strips: מאתר · תאימות · ערכת התקנה · דומים.
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
@@ -69,7 +71,9 @@ Map<String, LipskeyCatalogProduct>? _skuToProduct;
 Map<String, LipskeyCatalogProduct> get _skuIndex =>
     // Index the UNIFIED catalog (Lipskey + Polyroll) so a SmartBrand SKU
     // resolves regardless of which catalog the product lives in.
-    _skuToProduct ??= {for (final p in kCatalogProducts) p.sku: p};
+    // stage-3.1 — the bridge follows the ACTIVE catalog source (v2-aware),
+    // not the v1 list.
+    _skuToProduct ??= {for (final p in resolvedCatalogProducts) p.sku: p};
 
 /// The unified catalog product with this [sku], or null when unknown.
 LipskeyCatalogProduct? catalogProductForSku(String? sku) =>
@@ -86,7 +90,7 @@ LipskeyCatalogProduct? catalogProductForSmart(SmartProduct sp) =>
 
 // ─── אינדקס משפחות וריאנטים (canonical-key → family size) ────────────────────
 // `productCanonicalKey` runs a `RegExp(r'\s+')` split per product, so counting a
-// product's family by rescanning all of `kCatalogProducts` per call is O(catalog)
+// product's family by rescanning all of `resolvedCatalogProducts` per call is O(catalog)
 // with a regex on every element. Build the key→count tally ONCE (single
 // O(catalog) group-by) and look it up in O(1). Byte-equivalent: the count for a
 // key is exactly how many catalog rows share that canonical key.
@@ -94,7 +98,7 @@ Map<String, int>? _canonKeyCount;
 Map<String, int> get _canonKeyCountIndex {
   if (_canonKeyCount != null) return _canonKeyCount!;
   final m = <String, int>{};
-  for (final p in kCatalogProducts) {
+  for (final p in resolvedCatalogProducts) {
     final k = productCanonicalKey(p);
     m[k] = (m[k] ?? 0) + 1;
   }
@@ -473,7 +477,7 @@ int variantSiblingsCountFor(LipskeyCatalogProduct p) =>
 List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
   final key = productCanonicalKey(p);
   final out = <LipskeyCatalogProduct>[];
-  for (final q in kCatalogProducts) {
+  for (final q in resolvedCatalogProducts) {
     if (productCanonicalKey(q) == key) out.add(q);
   }
   out.sort((a, b) => a.sku.compareTo(b.sku));

@@ -87,3 +87,9 @@ lib/data/repositories/firestore_cached_repo.dart:::_bound
 #  the customers client stamps + scopes by ownerId (the orders-A3 precedent):
 lib/data/repositories/customers_firebase.dart:::_ownerUid
 lib/data/repositories/customers_local.dart:::_customersScopeFor
+#
+# Regression — STAGE-3.1-lite (2026-07-24): the SKU bridge + search default follow the ACTIVE catalog source (v2-aware), never re-pinned to the v1 list:
+lib/data/related_info.dart:::resolvedCatalogProducts
+lib/data/related_info.dart:::!kCatalogProducts
+lib/data/fuzzy_search.dart:::resolvedCatalogProducts
+lib/data/fuzzy_search.dart:::!kCatalogProducts
