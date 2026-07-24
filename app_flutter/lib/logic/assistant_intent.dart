@@ -16,7 +16,8 @@
 
 import 'dart:convert';
 
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/smart_tree.dart' show kSmartProducts;
 import 'package:buildsmart/logic/prompt_sanitize.dart';
 
@@ -47,9 +48,10 @@ class AssistantIntent {
 }
 
 /// The distinct catalog categories — the CLOSED set `findProduct` may pick from
-/// (same source as the finder: `kCatalogProducts.categoryHe`).
+/// (same source as the finder: `resolvedCatalogProducts.categoryHe`).
 List<String> assistantCategories() {
-  final set = <String>{for (final p in kCatalogProducts) p.categoryHe};
+  // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+  final set = <String>{for (final p in resolvedCatalogProducts) p.categoryHe};
   return set.toList()..sort();
 }
 

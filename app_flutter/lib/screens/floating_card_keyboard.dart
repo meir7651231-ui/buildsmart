@@ -51,9 +51,10 @@
 // (appended). The empty field at tab 0 still shows product opening-words ONLY (no
 // destinations), unchanged.
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/features/card_keyboard/find_keyboard_panel.dart'
     show FindKeyboardPanel;
@@ -138,12 +139,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// catalog deriver tell a product-leaf from a smart/dead leaf WITHOUT importing
 /// the product list at the tap site (mirrors `_TreeDrill`'s `p.categoryHe`
 /// test). Hoisted to a module-level lazy `final` (top-level vars are lazy — no
-/// `late` needed) so the ~928-element `kCatalogProducts` scan runs ONCE, not on
-/// every keystroke rebuild of the tab==0 branch (the scan's result is identical
-/// per build — the catalog is const — so recomputing it each build was pure
-/// waste while typing).
+/// `late` needed) so the whole-catalog `resolvedCatalogProducts` scan runs
+/// ONCE, not on every keystroke rebuild of the tab==0 branch (the scan's
+/// result is identical per build — the resolved catalog is fixed per run — so
+/// recomputing it each build was pure waste while typing).
 final Set<String> _kCatalogProductCats = <String>{
-  for (final p in kCatalogProducts) p.categoryHe,
+  // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+  for (final p in resolvedCatalogProducts) p.categoryHe,
 };
 
 /// The persistent floating card-keyboard panel: a read-only field driven by the

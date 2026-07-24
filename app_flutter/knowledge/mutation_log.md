@@ -1559,3 +1559,8 @@
 - **הפתרון:** `config/app_brand.dart` (name/club/shareDomain, static const) + 30 ניתובים ב-19 קבצים באינטרפולציה-קבועה (כל const נשאר const). CfgText-fallbacks/registry/prompts לא-נגעו. + `BRAND_SWAP_CHECKLIST.md` למעטפות.
 - **mutation-verify (מבוצע, התנהגותי):** name→'CleanCo' → `keyboard_destinations_test` **אדום** (-2, אסרטי-מחרוזת-חיים) → שחזור → 19/19. ההוכחה החזקה: שינוי-הקבוע משנה מסכים אמיתיים והבדיקות תופסות.
 - **אימות נוסף:** analyze 0 · 85 (סוללה) + 41 (בדיקות-הליטרלים בזמן-ריצה: deep_link/keyboard_destinations/login_sheet) — הכל ירוק ללא-שינוי = הוכחת-זהות-בייטים בפועל. גארדים ×3. שער מלא בשער-ה-commit.
+
+## #stage3-catalog-reroute — ניתוב כל הצרכנים-הישירים (המשך-3.1) — 2026-07-24
+- **הפתרון:** ~35 אתרים/9 קבצים → `resolvedCatalogProducts` (3 מתקנים מקבילים + 2 קבצי-data ידניים: task_skus_local נתיב-ברקוד + variant_families). kLipskeyCatalog לא-נגוע. imports יתומים הוסרו.
+- **משמר:** סריקת-סט-סגור בבדיקת-העקביות — 18 קוראי-תשתית מותרים בלבד (מסנן שורות-הערה). mutation: re-pin → **אדום** (-1) → שחזור → ירוק.
+- **אימות:** analyze 0 · 49 בדיקות-צרכנים (ai_finder/assistant/huliot_render/barcode/lens/dedup) · שער מלא בשער-ה-commit.

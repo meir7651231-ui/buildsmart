@@ -8,16 +8,18 @@
 // catalog CATEGORY (`categoryHe`) — or NONE. It cannot name a product or invent a
 // category. `matchCategory` validates the reply against the real category set and
 // drops anything outside it; the products shown come straight from
-// `kCatalogProducts.where(categoryHe == …)` — always real, never invented.
+// `resolvedCatalogProducts.where(categoryHe == …)` — always real, never
+// invented.
 //
 // Gated by `claudeGatewayProvider` (null unless useFirebaseBackend && kClaudeAi):
 // OFF → an honest "requires connection" state; the demo/test build is unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/fuzzy_search.dart' show fuzzySearchProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/logic/prompt_sanitize.dart';
@@ -34,7 +36,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The distinct catalog categories — the CLOSED set the model must pick from.
 List<String> finderCategories() {
-  final set = <String>{for (final p in kCatalogProducts) p.categoryHe};
+  // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+  final set = <String>{for (final p in resolvedCatalogProducts) p.categoryHe};
   return set.toList()..sort();
 }
 
@@ -79,7 +82,7 @@ String? matchCategory(String aiReply) {
 
 /// The REAL products in [cat] (never invented).
 List<LipskeyCatalogProduct> productsInCategory(String cat) =>
-    kCatalogProducts.where((p) => p.categoryHe == cat).toList();
+    resolvedCatalogProducts.where((p) => p.categoryHe == cat).toList();
 
 class AiFinderScreen extends ConsumerStatefulWidget {
   const AiFinderScreen({super.key, this.initialQuery});

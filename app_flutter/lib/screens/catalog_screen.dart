@@ -3,6 +3,8 @@ import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/fuzzy_search.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart'
@@ -13,7 +15,6 @@ import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
@@ -310,11 +311,12 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
   if (key.startsWith('lip:')) {
     final sku = key.substring(4);
     // Unified catalog: a cart line keyed 'lip:<sku>' may be a Huliot/PPR product
-    // (they share the lip: prefix), so resolve + sibling-list over kCatalogProducts.
-    final i = kCatalogProducts.indexWhere((p) => p.sku == sku);
+    // (they share the lip: prefix), so resolve + sibling-list over resolvedCatalogProducts.
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    final i = resolvedCatalogProducts.indexWhere((p) => p.sku == sku);
     if (i >= 0) {
-      final product = kCatalogProducts[i];
-      final siblings = kCatalogProducts
+      final product = resolvedCatalogProducts[i];
+      final siblings = resolvedCatalogProducts
           .where((p) => p.categoryHe == product.categoryHe)
           .toList();
       showLipskeyProductSheet(context, product, siblings);
@@ -335,9 +337,9 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
   if (line.productKey.startsWith('lip:')) {
     final sku = line.productKey.substring(4);
     // Unified: cart-line display must resolve Huliot/PPR 'lip:'-keyed lines too.
-    final i = kCatalogProducts.indexWhere((p) => p.sku == sku);
+    final i = resolvedCatalogProducts.indexWhere((p) => p.sku == sku);
     if (i >= 0) {
-      final p = kCatalogProducts[i];
+      final p = resolvedCatalogProducts[i];
       final type = p.productType;
       String name;
       if (type != null) {
@@ -396,7 +398,7 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   if (query.length < 2) return const [];
   final sort = ref.watch(catalogProductSortProvider);
   final systemFilter = ref.watch(catalogSystemFilterProvider);
-  var matched = kCatalogProducts
+  var matched = resolvedCatalogProducts
       .where((p) => catalogProductMatchesQuery(p, query))
       .toList();
   // Query RESCUE ([kGlobalSearch] const-false-FIRST ⇒ the whole block folds out
@@ -414,7 +416,7 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
     if (variants.isNotEmpty) {
       final seen = <String>{};
       final union = <LipskeyCatalogProduct>[];
-      for (final p in kCatalogProducts) {
+      for (final p in resolvedCatalogProducts) {
         for (final v in variants) {
           if (catalogProductMatchesQuery(p, v)) {
             if (seen.add(p.sku)) union.add(p);
@@ -426,7 +428,7 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
     }
   }
   if (matched.isEmpty) {
-    matched = kCatalogProducts
+    matched = resolvedCatalogProducts
         .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
         .toList();
   }
@@ -560,7 +562,7 @@ List<LipskeyCatalogProduct> _subtreeProducts(CatalogNode node) {
 
   walk(node);
   if (cats.isEmpty) return const [];
-  return kCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
+  return resolvedCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
 }
 
 /// Apply the first [sel].length facet groups to [base].
@@ -1927,7 +1929,7 @@ List<Section> _catsForSystem(WaterSystem? system) {
 
   collect(node);
   final count = filterBySystem(
-          kCatalogProducts.where((p) => leafCats.contains(p.categoryHe)).toList(),
+          resolvedCatalogProducts.where((p) => leafCats.contains(p.categoryHe)).toList(),
           system)
       .length;
   final subs = [
@@ -2107,7 +2109,7 @@ int _treeNodeCount(CatalogNode node, [WaterSystem? system]) {
   }
   if (node.lipskeyCategory != null) {
     return filterBySystem(
-            kCatalogProducts
+            resolvedCatalogProducts
                 .where((p) => p.categoryHe == node.lipskeyCategory)
                 .toList(),
             system)
@@ -2132,7 +2134,7 @@ String _treeNodeDesc(CatalogNode node, [WaterSystem? system]) {
     // Preview of what's inside (characterizing words / sample names) rather
     // than a bare product count.
     final prods = filterBySystem(
-        kCatalogProducts
+        resolvedCatalogProducts
             .where((p) => p.categoryHe == node.lipskeyCategory)
             .toList(),
         system);

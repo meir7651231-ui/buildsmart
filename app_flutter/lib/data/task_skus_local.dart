@@ -4,7 +4,7 @@
 //
 // DEMO-SEED: the mapping itself is demo wiring (a manager does not attach
 // products to tasks yet), but every SKU below is a REAL product from the
-// unified catalog ([kCatalogProducts] = Lipskey + Polyroll + Huliot), picked
+// unified catalog ([resolvedCatalogProducts] = the active source), picked
 // to match the seeded task's trade — verified against `lipskey_catalog.dart`
 // and `huliot_smartlock_catalog.dart`. No invented products (אין המצאות).
 //
@@ -12,7 +12,8 @@
 // and this local map is replaced by the task's own product list.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 
 /// Seeded task id (`kPersonaTasks` / `tasksProvider`) → catalog SKUs.
 ///
@@ -49,7 +50,8 @@ const Map<int, List<String>> kTaskSkus = {
 /// product (callers show an honest "not found" state, never a fake product).
 LipskeyCatalogProduct? productBySku(String sku) {
   final s = sku.trim();
-  for (final p in kCatalogProducts) {
+  // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+  for (final p in resolvedCatalogProducts) {
     if (p.sku == s) return p;
   }
   return null;
@@ -72,4 +74,4 @@ List<LipskeyCatalogProduct> productsForTask(int taskId) {
 /// All catalog products sharing [p]'s category — the sibling list the product
 /// sheet's variant pager expects (same shape the catalog screens pass).
 List<LipskeyCatalogProduct> catalogSiblingsFor(LipskeyCatalogProduct p) =>
-    kCatalogProducts.where((x) => x.categoryHe == p.categoryHe).toList();
+    resolvedCatalogProducts.where((x) => x.categoryHe == p.categoryHe).toList();

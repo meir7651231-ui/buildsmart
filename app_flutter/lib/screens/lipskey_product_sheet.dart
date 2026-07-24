@@ -2,6 +2,8 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'dart:math';
 import 'package:buildsmart/data/product_images.dart';
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -11,7 +13,6 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/screens/paired_explain_screen.dart'
     show PairedExplainScreen;
-import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
@@ -3075,7 +3076,8 @@ class _InteractiveChips extends StatelessWidget {
     final frame = _colorFrame(p);
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = q.colorVariant;
       if (v == null || v.isEmpty) continue;
@@ -3100,7 +3102,7 @@ class _InteractiveChips extends StatelessWidget {
         .join(' ');
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = variantValue(q, kind);
       if (v.isEmpty) continue;
@@ -3152,7 +3154,7 @@ class _InteractiveChips extends StatelessWidget {
     final compound = _resolveCompoundType(p);
     if (compound.isEmpty) return [];
     final byCompound = <String, LipskeyCatalogProduct>{compound: p};
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final qc = _resolveCompoundType(q);
       if (qc.isEmpty || byCompound.containsKey(qc)) continue;
@@ -3171,7 +3173,7 @@ class _InteractiveChips extends StatelessWidget {
   static List<LipskeyCatalogProduct> _variantsModel(LipskeyCatalogProduct p) {
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final m = q.brandModel;
       if (m == null || m.isEmpty) continue;
@@ -3199,7 +3201,7 @@ class _InteractiveChips extends StatelessWidget {
         .join(' ');
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = variantValue(q, kind);
       if (v.isEmpty) continue;
@@ -3230,7 +3232,7 @@ class _InteractiveChips extends StatelessWidget {
         final myVal = p.colorVariant;
         if (myVal == null || myVal.isEmpty) return false;
         final frame = _colorFrame(p);
-        return kCatalogProducts.any((q) {
+        return resolvedCatalogProducts.any((q) {
           final qv = q.colorVariant;
           return q.categoryHe == p.categoryHe &&
               q.sku != p.sku &&

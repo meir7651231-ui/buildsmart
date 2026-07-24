@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_lens.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
@@ -116,7 +118,7 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
     final cur = _swap[orig.sku];
     if (cur == null || cur == orig.sku) return orig;
     // T6.3: route through the catalog repository (returns the same const
-    // `kCatalogProducts`). `ref.read` (not `.watch`) — this is a build-helper,
+    // `resolvedCatalogProducts`). `ref.read` (not `.watch`) — this is a build-helper,
     // the const never changes, and `.read` is valid in every lifecycle phase.
     return ref.read(catalogRepositoryProvider).allProducts().firstWhere(
       (q) => q.sku == cur,
@@ -827,7 +829,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     // (kPolyrollCatalog excluded Huliot → dead picker — lesson T4).
     final sibs = findHierarchySiblings(
       p, chipIndex,
-      // T6.3: route through the catalog repository (same const `kCatalogProducts`).
+      // T6.3: route through the catalog repository (same const `resolvedCatalogProducts`).
       all: ref.read(catalogRepositoryProvider).allProducts(),
       nameOf: (q) => q.nameHe,
       brandOf: (q) => q.brand,
@@ -1808,7 +1810,8 @@ List<LipskeyCatalogProduct> findAttrSiblings(
     final sig = _makerSignature(p);
     final seen = <String>{};
     final res = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+    for (final q in resolvedCatalogProducts) {
       if (q.brand != kPolyrollBrand || _makerSignature(q) != sig) continue;
       final m = _makerOf(q);
       if (m.isEmpty || !seen.add(m)) continue;
@@ -1830,7 +1833,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
     final sameLineOnly = kind == AttrKind.size;
     final seen = <String>{};
     final res = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.brand != kPolyrollBrand || _getCompoundType(q) != pType) continue;
       if (sameLineOnly && q.categoryHe != p.categoryHe) continue;
       final v = q.nameHe
@@ -1846,7 +1849,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
     // Category-wide: one representative per distinct model word.
     final seen = <String>{};
     final result = <LipskeyCatalogProduct>[];
-    for (final q in kCatalogProducts) {
+    for (final q in resolvedCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final modelWord = q.nameHe
           .split(RegExp(r'\s+'))
@@ -1860,7 +1863,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
 
   final pFrame = _stripWordsOfKind(p.nameHe, kind);
   if (pFrame.length < 2) return [p];
-  return kCatalogProducts.where((q) {
+  return resolvedCatalogProducts.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
     if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
     if (kind == AttrKind.colorMod) return true;
@@ -1942,7 +1945,7 @@ List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
   String keyOf(LipskeyCatalogProduct q) => ppr ? _leadingType(q) : _getCompoundType(q);
   final byCompound = <String, LipskeyCatalogProduct>{};
   byCompound[keyOf(p)] = p;
-  for (final q in kCatalogProducts) {
+  for (final q in resolvedCatalogProducts) {
     if (q.categoryHe != p.categoryHe) continue;
     final qc = keyOf(q);
     if (qc.isEmpty) continue;

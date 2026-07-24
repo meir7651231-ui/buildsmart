@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/data/catalog.dart' show kCatalogCats;
+import 'package:buildsmart/data/catalog_source.dart'
+    show resolvedCatalogProducts;
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
-import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/repositories/orders_local.dart'
     show visibleOrderIdsProvider;
 import 'package:buildsmart/data/supplier_data.dart';
@@ -783,7 +784,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     var catalogMatchTotal = 0;
     if (q.isNotEmpty) {
       final names = {for (final i in matched) i.name};
-      for (final p in kCatalogProducts) {
+      // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
+      for (final p in resolvedCatalogProducts) {
         if (names.contains(p.nameHe)) continue;
         if (p.nameHe.contains(q) ||
             p.sku.contains(q) ||
@@ -992,7 +994,7 @@ class _InvItem {
 /// Huliot) — built once; used to enrich the order-line inventory with real
 /// מק"ט + category (אין המצאות).
 final Map<String, LipskeyCatalogProduct> _catalogByName = {
-  for (final p in kCatalogProducts) p.nameHe: p,
+  for (final p in resolvedCatalogProducts) p.nameHe: p,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,9 @@
 # WIRING CONTRACT — app_flutter
 
+## #stage3-catalog-reroute — כל צרכני-הקטלוג הישירים → המקור-הפעיל + סריקת-סט-סגור — 2026-07-24
+המשך-3.1 (אחרי ה-un-pin): **~35 אתרי-קוד ב-9 קבצים** הוחלפו `kCatalogProducts` → `resolvedCatalogProducts` (זהה-בייטים תחת v1): `catalog_screen` (13 — פתיחת-שורת-עגלה/dive-search/קיפולי-עץ) · `lipskey_product_sheet` (6) + `lipskey_products_screen` (7) — **בלי לגעת ב-`kLipskeyCatalog`** (סאבסט-מותג, פריט-זהיר נפרד) · `floating_card_keyboard` · `store_dashboard` · `ai_finder` · `assistant_intent` · `task_skus_local` (**נתיב-הברקוד**) · `variant_families`. imports יתומים נמחקו. **משמר חדש בבדיקת-העקביות (required):** סריקת-סט-סגור — קריאת-`kCatalogProducts` בקוד (לא-הערות) מותרת רק ל-18 קבצי-תשתית/מנוע מתועדים (הגדרות · שכבת-fallback · fixtures · brand-screen · harness); כל קורא-חדש מאדים. mutation: re-pin ב-ai_finder → הסריקה אדומה → שחזור ירוק. 49 בדיקות-צרכנים ירוקות.
+
+
 ## #stage3-app-brand — זהות-חברה במקור-אחד AppBrand (מיתוג→config) — 2026-07-24
 פרוסת-3.2. **חדש:** `lib/config/app_brand.dart` — `AppBrand.name`/`club`/`shareDomain` (static const → אינטרפולציה-קבועה שומרת כל אתר const). **30 אתרים ב-19 קבצים** נותבו (כותרת-MaterialApp · onboarding · מועדון ×7 → `AppBrand.club` · שיתופים/ייצוא ×5 · PDF+שם-קובץ+footers ×5 · מסבירי-דוחות ×6 · ערוץ-push · שם-בוט · legal ×3 · דומיין-שיתוף). **זהות-בייטים מוכחת בזמן-ריצה** (41 אסרטי-מחרוזת קיימים עברו ללא-שינוי) + **מוטציה-התנהגותית**: name→'CleanCo' ⇒ keyboard_destinations אדום (-2) ⇒ שחזור ירוק — המיתוג באמת מחווט. **לא-נגעו (מכוון):** fallback-י CfgText (שכבת-Studio + registry-parity) · element_registry · LLM prompts · pubspec/applicationId/firebase_options/מעטפות. **חדש:** `knowledge/BRAND_SWAP_CHECKLIST.md` — מה מחליפים ידנית פר-חברה (מעטפות web/android/iOS · Firebase · פרופיל · store-listing) ומה כבר-בקוד. phase-2 מתועד: 79 ליטרלי-אלפא-hex ב-21 קבצים (tokens-לפי-מותג). גארדים: name-const · title-ניתוב · shareDomain.
 
