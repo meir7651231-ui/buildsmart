@@ -2127,3 +2127,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 **שינוי נראה:** נוסף ווידג'ט מקומי `_SiteServerNote` (העתק idiom-ה-`_ServerNote` של תגמולים; radius ליטרלי כי site_hub בלי `cfgRadius`; `Text` רגיל — אין CfgText/רישום), ושורת-תווית מתחת לראש כל מקטע: מבנה-האתר (`kSiteTree` :591) · תלויות (`kSiteDeps` :944) · צילומים (`kSitePhotoPairs` :1024) · ארכיון (`kArchivedProjects` :1227). **תווית-בלבד** — ערכי ה-const (verbatim proto) לא-נגעו.
 **אימות:** analyze 0 · בדיקות ירוקות — `phaseb_seeds_test`+`site_hub_state_test` (נועלים values/lengths, לא render) · `apple_readiness_*` (allowlist, site_hub לא-רשום; note לא-מגודר תואם תקדים-תגמולים) · אין widget-test שמרנדר את המקטעים. **1 קובץ · 0 שינויי-בדיקה/רישום.** גארד: `site_hub_screen.dart:::class _SiteServerNote`.
 **הפיכות:** להסיר את ווידג'ט `_SiteServerNote` + 4 שורות-התווית.
+
+## stage2-slice-B — רשימות-הזמנות עצלות (builder) — שינוי-נראה: **לא** (ניטרלי-חזותית) — 2026-07-24
+**רקע (שלב-2 חוק-4 · B3):** רשימות-ההזמנות של לוח-המנהל (`_OrdersTab`) ולוח-החנות (`_homeTab`) נבנו eager — `ListView(children:[for …])` — כל השורות נבנות בכל rebuild (ב-10k הזמנות = 10k ווידג'טים). הומרו ל-`ListView.builder` (רק הנראות נבנות): manager — דפוס head+offset (תקדים `manager_copilot_screen.dart:167`); store — שני "האתרים" התגלו כ-scrollable אחד → השורות הועברו ל-builder החיצוני (nested-shrinkWrap אינו עצל), `_pipeline` פוצל ל-`_shownOrders`+`_pipelineHead`.
+**מה רואים:** **שום שינוי** — אותם ווידג'טים, אותם strings (כולל `₪120` הנעול), אותו padding/סדר; בנייה עצלה בלבד. `manager_dashboard_screen_test` (101 ירוקות כולל drill/פילטרים) + `apple_readiness_missed_leaks` מאשרים.
+**הפיכות:** להחזיר את שתי ה-`ListView(children:)` + לאחד את `_pipeline`.

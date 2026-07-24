@@ -1062,45 +1062,52 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
             ? all
             : all.where((o) => o.stage == effectiveFilter).toList();
 
-    return ListView(
+    // The fixed widgets above the rows (summary · chips · the empty note);
+    // the order rows themselves build lazily via ListView.builder below, so
+    // only the on-screen rows are constructed — not the whole filtered list.
+    final head = <Widget>[
+      _OrderSummary(total: all.length, open: open, revenue: revenue),
+      const SizedBox(height: BsTokens.space4),
+      _OrderStageChips(
+        active: effectiveFilter,
+        allCount: all.length,
+        counts: counts,
+        onSelect: (st) => setState(() => _filter = st),
+      ),
+      const SizedBox(height: BsTokens.space4),
+      if (list.isEmpty)
+        // The legacy empty line (@index.html:16983 `md-empty`).
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+          child: CfgText(
+            'manager.orders.empty',
+            'לא נמצאו הזמנות תואמות.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+          ),
+        ),
+    ];
+
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
         BsTokens.space4,
         BsTokens.space4,
         BsTokens.space5,
       ),
-      children: [
-        _OrderSummary(total: all.length, open: open, revenue: revenue),
-        const SizedBox(height: BsTokens.space4),
-        _OrderStageChips(
-          active: effectiveFilter,
-          allCount: all.length,
-          counts: counts,
-          onSelect: (st) => setState(() => _filter = st),
-        ),
-        const SizedBox(height: BsTokens.space4),
-        if (list.isEmpty)
-          // The legacy empty line (@index.html:16983 `md-empty`).
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
-            child: CfgText(
-              'manager.orders.empty',
-              'לא נמצאו הזמנות תואמות.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
-            ),
-          )
-        else
-          for (final o in list)
-            Padding(
-              padding: const EdgeInsets.only(bottom: BsTokens.space3),
-              child: _OrderRow(
-                order: o,
-                onAdvance: () => _advance(o),
-                onTap: () => _openDetail(o),
-              ),
-            ),
-      ],
+      itemCount: head.length + list.length,
+      itemBuilder: (_, i) {
+        if (i < head.length) return head[i];
+        final o = list[i - head.length];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: BsTokens.space3),
+          child: _OrderRow(
+            order: o,
+            onAdvance: () => _advance(o),
+            onTap: () => _openDetail(o),
+          ),
+        );
+      },
     );
   }
 

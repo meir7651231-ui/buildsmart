@@ -88,8 +88,10 @@ abstract class _SeedingRepo<T> extends FirestoreCachedRepo<T> {
 /// so `toDoc` round-trips the whole task and `fromDoc` is tolerant of the seed
 /// shape. Doc-id = the task's int id as a string (`'3'`).
 class _TasksRepo extends _SeedingRepo<PersonaTask> {
+  // Stage-2 scale — plain limit(500) growth-bound; no orderBy, no doc excluded.
   _TasksRepo({RemoteCollectionSource? source})
-      : super(source ?? FirestoreCollectionSource('tasks'));
+      : super(source ??
+            FirestoreCollectionSource('tasks', bound: (q) => q.limit(500)));
 
   /// The cache is born with the verbatim worker-task seed so the app is
   /// non-empty before the first snapshot — identical genesis to the local engine.

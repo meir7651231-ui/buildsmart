@@ -71,3 +71,9 @@ lib/data/repositories/catalog_sync.dart:::corrupt cache (re-syncing)
 lib/data/product_images.dart:::_productImageErrorFallback
 #  share-log persistence is guarded (storage failure never an unhandled async error):
 lib/state/share_log.dart:::ShareLog: persist failed
+#
+# Regression — STAGE-2 slice B (2026-07-24 · iron-rule 4): the capped listens stay capped:
+#  chatMessages — the one unbounded-growth listen — newest-500 by ts:
+lib/data/repositories/chat_firebase.dart:::descending: true).limit(500)
+#  the source adapter keeps the optional bound seam:
+lib/data/repositories/firestore_cached_repo.dart:::_bound

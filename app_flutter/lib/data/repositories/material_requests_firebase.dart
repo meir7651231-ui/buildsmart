@@ -36,8 +36,13 @@ import 'package:buildsmart/state/material_requests_engine.dart';
 /// with a fake.
 class FirebaseMaterialRequestsRepository
     extends FirestoreCachedRepo<MaterialRequest> {
+  // Stage-2 scale — plain limit(500) growth-bound; no orderBy, no doc excluded.
   FirebaseMaterialRequestsRepository({RemoteCollectionSource? source})
-      : super(source ?? FirestoreCollectionSource('material_requests'));
+      : super(source ??
+            FirestoreCollectionSource(
+              'material_requests',
+              bound: (q) => q.limit(500),
+            ));
 
   // ── base contract: seed · mapping · ordering · fresh-backend hook ───────────
 

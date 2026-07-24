@@ -89,8 +89,10 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
     Query<Map<String, dynamic>> Function(
             CollectionReference<Map<String, dynamic>>)?
         scope,
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)? bound,
   })  : _injected = firestore,
-        _scope = scope;
+        _scope = scope,
+        _bound = bound;
 
   /// The collection name (e.g. `orders`).
   final String collectionPath;
@@ -111,6 +113,16 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
   final Query<Map<String, dynamic>> Function(
       CollectionReference<Map<String, dynamic>>)? _scope;
 
+  /// Stage-2 scale — an OPTIONAL result bound (e.g.
+  /// `(q) => q.orderBy('ts', descending: true).limit(500)`), applied ON TOP of
+  /// the scoped/whole query so a named call-site can cap its listen. When null
+  /// the source keeps today's UNBOUNDED listen, so adding this parameter is a
+  /// ZERO-REGRESSION change. Deliberately separate from [_scope]: a size bound
+  /// is NOT a tenant scope, so it must never affect [isScoped] (and thus the
+  /// first-empty-snapshot policy). Writes are by doc-id and are unaffected.
+  final Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+      _bound;
+
   /// Lazily-resolved Firestore handle — `FirebaseFirestore.instance` is read
   /// ONLY here, on demand, never at construction (so a Firebase-free app/test
   /// can construct the repo without initialising Firebase).
@@ -120,8 +132,12 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
       _db.collection(collectionPath);
 
   /// The query actually listened to: the scoped [_scope] when supplied,
-  /// otherwise the whole collection (default — unchanged behaviour).
-  Query<Map<String, dynamic>> get _ref => _scope?.call(_col) ?? _col;
+  /// otherwise the whole collection (default — unchanged behaviour), with the
+  /// optional [_bound] applied ON TOP of either (null = unbounded, as today).
+  Query<Map<String, dynamic>> get _ref {
+    final base = _scope?.call(_col) ?? _col;
+    return _bound?.call(base) ?? base;
+  }
 
   @override
   Stream<List<RemoteDoc>> snapshots() => _ref.snapshots().map(

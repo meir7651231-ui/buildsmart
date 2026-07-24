@@ -238,8 +238,16 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
 /// the engine's own [ChatMessage] — untouched, so the drop-in is preserved
 /// exactly as the pilot keeps `Order` untouched.
 class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
+  // Stage-2 scale — the app's ONE unbounded-growth listen, capped to the
+  // newest 500 by `ts` (ALWAYS written — see `toDoc` — so the orderBy excludes
+  // nothing; a thread view needs the RECENT messages). Per-thread cursor
+  // pagination is the documented later initiative.
   _ChatMessagesRepo({RemoteCollectionSource? source})
-      : super(source ?? FirestoreCollectionSource('chatMessages'));
+      : super(source ??
+            FirestoreCollectionSource(
+              'chatMessages',
+              bound: (q) => q.orderBy('ts', descending: true).limit(500),
+            ));
 
   /// Born with every seed message (flattened across threads) so each seeded
   /// conversation is non-empty before the first snapshot.

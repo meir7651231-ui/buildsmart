@@ -444,195 +444,221 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           return f != null && f.heldForMissing;
         }).toList();
 
-    return ListView(
+    // B3 — the visible pipeline slice, computed once per build. Every fixed
+    // home widget lives in `head`; the ListView.builder below then constructs
+    // only the on-screen order cards (the old ListView(children:) built every
+    // card of `shown` eagerly on each rebuild).
+    final shown = _shownOrders(orders);
+
+    final head = <Widget>[
+      const CfgText(
+        'store.home.greeting',
+        'שלום 👋',
+        style: TextStyle(
+          color: BsTokens.inkLight,
+          fontWeight: FontWeight.w800,
+          fontSize: 22,
+        ),
+      ),
+      const SizedBox(height: 2),
+      // F-20 — the SAME live identity as the AppBar title (profile override
+      // → displayName → demo seed); F-41 — bounded against a long override.
+      Text(
+        '🏪 $storeName — מה שצריך טיפול עכשיו',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+      ),
+      const SizedBox(height: BsTokens.space4),
+
+      // Primary action card — jumps the pipeline below to the 'new' filter.
+      if (toApprove > 0)
+        _ActionCard(
+          color: BsTokens.brand,
+          badge: '$toApprove',
+          title: 'הזמנות ממתינות לאישור',
+          sub: 'הקש כדי לאשר ולהתחיל הכנה',
+          onTap: () => setState(() => _orderFilter = 'new'),
+        )
+      else
+        _FlatCard(
+          child: CfgText(
+            'store_dashboard_screen.t01',
+            '✓ אין הזמנות שממתינות לאישור',
+            style: TextStyle(
+              color: BsTokens.inkLight.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      const SizedBox(height: BsTokens.space3),
+
+      // Held-for-missing card (proto §2.2 [L17116]).
+      if (held.isNotEmpty) ...[
+        _ActionCard(
+          color: const Color(0xFFE08A00),
+          badge: '${held.length}',
+          title: 'הזמנות ממתינות לבחירת הקבלן',
+          sub: 'פריט חסר — ממתין להחלטה (החלפה / ביטול)',
+          onTap: () => showPickingSheet(context, held.first.id),
+        ),
+        const SizedBox(height: BsTokens.space3),
+      ],
+
+      // Quick stats (3).
+      Row(
+        children: [
+          _Stat(value: '$inPrep', label: 'בהכנה 🔧'),
+          _Stat(value: '$ready', label: 'מוכן לאיסוף 📦'),
+          _Stat(value: fMoney(revenue), label: 'מחזור פעיל 💰'),
+        ],
+      ),
+      const SizedBox(height: BsTokens.space2),
+      // #87.2 (F-23) — the completed side of the pipeline next to the
+      // active one, derived live from sysOrdersProvider (deliveredRevenue,
+      // supplier_data.dart — Σ של o.sum בלבד, אפס מספרים קשיחים).
+      // by-design: ללוח החנות הסטטיסטיקה כלל-חנותית — כל ההזמנות שייכות
+      // לחנות אחת (kStores.first); אין כאן צורך בסינון per-username
+      // (להבדיל מפרופיל-השליח, ראה Fulfillment.courierUser).
+      Row(
+        children: [
+          _Stat(
+            value: '${orders.countAt(OrderStage.delivered)}',
+            label: 'נמסרו ✓',
+          ),
+          _Stat(
+            value: fMoney(orders.deliveredRevenue),
+            label: 'מחזור שנמסר 💰',
+          ),
+        ],
+      ),
+      const SizedBox(height: BsTokens.space3),
+
+      // Stock alert.
+      InkWell(
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        onTap: () => setState(() => _tab = 1),
+        child: _FlatCard(
+          child: Text(
+            outCount > 0
+                ? '⚠️ $outCount מוצרים אזלו מהמלאי — הקש לעדכון'
+                : '✓ כל המוצרים זמינים במלאי',
+            style: TextStyle(
+              color:
+                  outCount > 0
+                      ? BsTokens.brandDark
+                      : BsTokens.inkLight.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: BsTokens.space4),
+
+      // #78 — quick actions moved here FROM the portal: fleet (local
+      // DEMO-SEED sheet — the kFleet rows) + stock-update (jump to מלאי).
+      Row(
+        children: [
+          Expanded(
+            child: _BigButton(
+              label: '🚛 ניהול צי רכב',
+              onTap:
+                  () => showPortalSheet(
+                    context,
+                    kStorePortalTiles.firstWhere(
+                      (t) => t.kind == PortalKind.fleet,
+                    ),
+                  ),
+            ),
+          ),
+          const SizedBox(width: BsTokens.space2),
+          Expanded(
+            child: _BigButton(
+              label: '🔄 עדכון מלאי',
+              onTap: () => setState(() => _tab = 1),
+            ),
+          ),
+        ],
+      ),
+      // Demo tool — a self-declared "(כלי הדגמה)" affordance. Hidden for App
+      // Store review (kHideUnderConstruction); the simulateIncomingOrder seam
+      // stays in code, so flipping the flag restores the button as before.
+      if (!kHideUnderConstruction) ...[
+        const SizedBox(height: BsTokens.space3),
+        OutlinedButton(
+          onPressed: () {
+            final id =
+                ref.read(sysOrdersProvider.notifier).simulateIncomingOrder();
+            showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
+          },
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            side: const BorderSide(color: Color(0xFFE0E0E0)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
+            ),
+          ),
+          child: const CfgText(
+            'store_dashboard_screen.t02',
+            '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
+            style: TextStyle(
+              color: BsTokens.mutedLight,
+              fontWeight: FontWeight.w600,
+              fontSize: 13.5,
+            ),
+          ),
+        ),
+      ],
+      const SizedBox(height: BsTokens.space4),
+
+      // ── #78 · the הזמנות pipeline IS the home (default) tab ──────────────
+      const CfgText(
+        'store.section.orders',
+        '📥 הזמנות',
+        style: TextStyle(
+          color: BsTokens.inkLight,
+          fontWeight: FontWeight.w800,
+          fontSize: 17,
+        ),
+      ),
+      const SizedBox(height: BsTokens.space2),
+      ..._pipelineHead(shown),
+    ];
+
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
         BsTokens.space4,
         BsTokens.space4,
         BsTokens.space5,
       ),
-      children: [
-        const CfgText(
-          'store.home.greeting',
-          'שלום 👋',
-          style: TextStyle(
-            color: BsTokens.inkLight,
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
-          ),
-        ),
-        const SizedBox(height: 2),
-        // F-20 — the SAME live identity as the AppBar title (profile override
-        // → displayName → demo seed); F-41 — bounded against a long override.
-        Text(
-          '🏪 $storeName — מה שצריך טיפול עכשיו',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-        ),
-        const SizedBox(height: BsTokens.space4),
-
-        // Primary action card — jumps the pipeline below to the 'new' filter.
-        if (toApprove > 0)
-          _ActionCard(
-            color: BsTokens.brand,
-            badge: '$toApprove',
-            title: 'הזמנות ממתינות לאישור',
-            sub: 'הקש כדי לאשר ולהתחיל הכנה',
-            onTap: () => setState(() => _orderFilter = 'new'),
-          )
-        else
-          _FlatCard(
-            child: CfgText(
-              'store_dashboard_screen.t01',
-              '✓ אין הזמנות שממתינות לאישור',
-              style: TextStyle(
-                color: BsTokens.inkLight.withValues(alpha: 0.8),
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        const SizedBox(height: BsTokens.space3),
-
-        // Held-for-missing card (proto §2.2 [L17116]).
-        if (held.isNotEmpty) ...[
-          _ActionCard(
-            color: const Color(0xFFE08A00),
-            badge: '${held.length}',
-            title: 'הזמנות ממתינות לבחירת הקבלן',
-            sub: 'פריט חסר — ממתין להחלטה (החלפה / ביטול)',
-            onTap: () => showPickingSheet(context, held.first.id),
-          ),
-          const SizedBox(height: BsTokens.space3),
-        ],
-
-        // Quick stats (3).
-        Row(
-          children: [
-            _Stat(value: '$inPrep', label: 'בהכנה 🔧'),
-            _Stat(value: '$ready', label: 'מוכן לאיסוף 📦'),
-            _Stat(value: fMoney(revenue), label: 'מחזור פעיל 💰'),
-          ],
-        ),
-        const SizedBox(height: BsTokens.space2),
-        // #87.2 (F-23) — the completed side of the pipeline next to the
-        // active one, derived live from sysOrdersProvider (deliveredRevenue,
-        // supplier_data.dart — Σ של o.sum בלבד, אפס מספרים קשיחים).
-        // by-design: ללוח החנות הסטטיסטיקה כלל-חנותית — כל ההזמנות שייכות
-        // לחנות אחת (kStores.first); אין כאן צורך בסינון per-username
-        // (להבדיל מפרופיל-השליח, ראה Fulfillment.courierUser).
-        Row(
-          children: [
-            _Stat(
-              value: '${orders.countAt(OrderStage.delivered)}',
-              label: 'נמסרו ✓',
-            ),
-            _Stat(
-              value: fMoney(orders.deliveredRevenue),
-              label: 'מחזור שנמסר 💰',
-            ),
-          ],
-        ),
-        const SizedBox(height: BsTokens.space3),
-
-        // Stock alert.
-        InkWell(
-          borderRadius: BorderRadius.circular(cfgRadius(context)),
-          onTap: () => setState(() => _tab = 1),
-          child: _FlatCard(
-            child: Text(
-              outCount > 0
-                  ? '⚠️ $outCount מוצרים אזלו מהמלאי — הקש לעדכון'
-                  : '✓ כל המוצרים זמינים במלאי',
-              style: TextStyle(
-                color:
-                    outCount > 0
-                        ? BsTokens.brandDark
-                        : BsTokens.inkLight.withValues(alpha: 0.8),
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: BsTokens.space4),
-
-        // #78 — quick actions moved here FROM the portal: fleet (local
-        // DEMO-SEED sheet — the kFleet rows) + stock-update (jump to מלאי).
-        Row(
-          children: [
-            Expanded(
-              child: _BigButton(
-                label: '🚛 ניהול צי רכב',
-                onTap:
-                    () => showPortalSheet(
-                      context,
-                      kStorePortalTiles.firstWhere(
-                        (t) => t.kind == PortalKind.fleet,
-                      ),
-                    ),
-              ),
-            ),
-            const SizedBox(width: BsTokens.space2),
-            Expanded(
-              child: _BigButton(
-                label: '🔄 עדכון מלאי',
-                onTap: () => setState(() => _tab = 1),
-              ),
-            ),
-          ],
-        ),
-        // Demo tool — a self-declared "(כלי הדגמה)" affordance. Hidden for App
-        // Store review (kHideUnderConstruction); the simulateIncomingOrder seam
-        // stays in code, so flipping the flag restores the button as before.
-        if (!kHideUnderConstruction) ...[
-          const SizedBox(height: BsTokens.space3),
-          OutlinedButton(
-            onPressed: () {
-              final id =
-                  ref.read(sysOrdersProvider.notifier).simulateIncomingOrder();
-              showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
-            },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: const BorderSide(color: Color(0xFFE0E0E0)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(cfgRadius(context)),
-              ),
-            ),
-            child: const CfgText(
-              'store_dashboard_screen.t02',
-              '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
-              style: TextStyle(
-                color: BsTokens.mutedLight,
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
-              ),
-            ),
-          ),
-        ],
-        const SizedBox(height: BsTokens.space4),
-
-        // ── #78 · the הזמנות pipeline IS the home (default) tab ──────────────
-        const CfgText(
-          'store.section.orders',
-          '📥 הזמנות',
-          style: TextStyle(
-            color: BsTokens.inkLight,
-            fontWeight: FontWeight.w800,
-            fontSize: 17,
-          ),
-        ),
-        const SizedBox(height: BsTokens.space2),
-        ..._pipeline(orders),
-      ],
+      itemCount: head.length + shown.length,
+      itemBuilder: (_, i) {
+        if (i < head.length) return head[i];
+        final o = shown[i - head.length];
+        if (o.stage == OrderStage.delivered) {
+          return _DeliveredCard(
+            order: o,
+            fulfillment: fulfillment[o.id] ?? const Fulfillment(),
+            onTap: () => showPickingSheet(context, o.id),
+          );
+        }
+        return _StoreOrderCard(
+          order: o,
+          fulfillment: fulfillment[o.id] ?? const Fulfillment(),
+          onAdvance: _advance,
+          onOpenPick: () => showPickingSheet(context, o.id),
+        );
+      },
     );
   }
 
-  /// The order work-queue: filter chips (incl. the delivered surface — COURIER
-  /// v2(a): the POD lands where the STORE can see it) + the order cards.
-  List<Widget> _pipeline(List<SysOrder> orders) {
+  /// The visible work-queue slice for the active filter chip, sorted by
+  /// pipeline stage — feeds both [_pipelineHead] (empty note) and the lazy
+  /// order-card rows in [_homeTab]'s ListView.builder.
+  List<SysOrder> _shownOrders(List<SysOrder> orders) {
     bool match(SysOrder o) {
       switch (_orderFilter) {
         case 'new':
@@ -656,8 +682,14 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               .indexOf(a.stage)
               .compareTo(kOrderFlow.indexOf(b.stage)),
         );
-    final fulfillment = ref.watch(fulfillmentProvider);
+    return shown;
+  }
 
+  /// The order work-queue head: filter chips (incl. the delivered surface —
+  /// COURIER v2(a): the POD lands where the STORE can see it) + the empty note.
+  /// The order cards themselves are NOT built here — [_homeTab]'s
+  /// ListView.builder constructs them lazily from [_shownOrders].
+  List<Widget> _pipelineHead(List<SysOrder> shown) {
     return [
       SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -691,22 +723,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
             ),
           ),
-        )
-      else
-        for (final o in shown)
-          if (o.stage == OrderStage.delivered)
-            _DeliveredCard(
-              order: o,
-              fulfillment: fulfillment[o.id] ?? const Fulfillment(),
-              onTap: () => showPickingSheet(context, o.id),
-            )
-          else
-            _StoreOrderCard(
-              order: o,
-              fulfillment: fulfillment[o.id] ?? const Fulfillment(),
-              onAdvance: _advance,
-              onOpenPick: () => showPickingSheet(context, o.id),
-            ),
+        ),
     ];
   }
 
