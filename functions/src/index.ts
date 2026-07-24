@@ -216,3 +216,4 @@ export { publishConfig, revertIllegalConfigWrite } from "./studio";
 // now provisioned on buildsmart-b0b78. See `.github/workflows/firebase-deploy.yml`
 // "Required APIs/roles" and `app_flutter/knowledge/STUDIO_GA.md`.
 export { rollupAnalyticsDaily, rollupPresenceSummary } from "./analytics";
+export { setOrg } from "./setOrg";

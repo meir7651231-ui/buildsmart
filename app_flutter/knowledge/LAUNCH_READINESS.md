@@ -362,6 +362,7 @@ _95 ריכוז backlog · 96 סיווג P0/P1/P2 · 97 go/no-go criteria · 98 �
 ## 🛡️ שלב-2 (חוסן) — מסירת-בעלים/CI (2026-07-24) — מה שרק אתה/CI יכולים לאמת
 > חוקי-הברזל 1·3·4 מוכחים-בבדיקות אצלנו (stage2_*_test, required). חוק-2 (בידוד-דייר) מוכח כאן ברמת קובץ-החוקים + הלקוח; **אכיפת-שרת-חיה ניתנת להוכחה רק מולך/CI:**
 1. **פריסת חוקים+אינדקסים:** `firebase deploy --only firestore:rules,firestore:indexes` — כולל 2 הבלוקים החדשים (`material_requests` · `financeBudget` — היו נחסמים-בשקט ע"י ה-catch-all) + אינדקס-customers-ownerId (#4).
+1b. **(שלב-3.3) פריסת setOrg:** `firebase deploy --only functions:setOrg` — ה-callable האדמיני שמקצה/שולל שיוך-ארגון (claim+mirror+audit). שיוך ראשון: קריאה ידנית כמו bootstrap-האדמין.
 2. **ריצת חבילת-האמולטור:** `npm --prefix rules_test install && npm --prefix rules_test run test:emulator` — ולהרחיב את `orders.test.js` במקרה מפורש "קבלן-A קורא הזמנה-של-B → assertFails" (חבילת ה-store-isolation הקיימת = התבנית).
 3. **⚠️ דגל-הסקופינג בבנייה:** `--dart-define=UID_SCOPED_QUERIES=true` — **ברירת-המחדל-בקומפילציה כבויה!** בלעדיו, מאזינים-לא-מנהל על אוספים-סקופיים נחסמים-בשקט ע"י החוקים והמשתמש רואה seed-cache. חובה בצ'ק-ליסט ה-LAUNCH_PACKAGE (לצד `USE_FIREBASE_BACKEND=true`).
 4. **App Check** (S5.7) — אכיפה בקונסולה.

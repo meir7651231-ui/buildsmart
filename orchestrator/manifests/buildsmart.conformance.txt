@@ -103,3 +103,11 @@ lib/data/product_images.dart:::defaultValue: kProfileImageBaseUrl
 lib/config/app_brand.dart:::static const String name = 'BuildSmart'
 lib/main.dart:::title: AppBrand.name
 lib/data/related_info.dart:::AppBrand.shareDomain
+#
+# Regression — STAGE-3.3 St1+St2 (2026-07-24): org membership plumbing (inert until an admin assigns):
+#  the admin-only callable exists and is exported (../ = repo root):
+../functions/src/setOrg.ts:::export const setOrg
+../functions/src/index.ts:::from "./setOrg"
+#  the client parses + exposes the claim (null default — zero-regression):
+lib/state/auth_state.dart:::orgIdFromClaims
+lib/state/auth_state.dart:::currentOrgIdProvider

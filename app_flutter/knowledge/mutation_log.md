@@ -1564,3 +1564,9 @@
 - **הפתרון:** ~35 אתרים/9 קבצים → `resolvedCatalogProducts` (3 מתקנים מקבילים + 2 קבצי-data ידניים: task_skus_local נתיב-ברקוד + variant_families). kLipskeyCatalog לא-נגוע. imports יתומים הוסרו.
 - **משמר:** סריקת-סט-סגור בבדיקת-העקביות — 18 קוראי-תשתית מותרים בלבד (מסנן שורות-הערה). mutation: re-pin → **אדום** (-1) → שחזור → ירוק.
 - **אימות:** analyze 0 · 49 בדיקות-צרכנים (ai_finder/assistant/huliot_render/barcode/lens/dedup) · שער מלא בשער-ה-commit.
+
+## #stage3-setorg — St1+St2 תשתית-ארגונים (callable+claim, רדום) — 2026-07-24
+- **הפתרון:** setOrg.ts (אדמיני, merge-claims-only-orgId, users-mirror, audit, charset-guard) + re-export; auth_state: orgIdFromClaims + AuthSnapshot.orgId(null-default) + חילוץ ×2 אתרים + currentOrgIdProvider. הכל additive-רדום.
+- **mutation-verify (מבוצע):** orgIdFromClaims↦always-null → `org_claim_test` **אדום** (-1: trimmed-id case) → שחזור → 5/5.
+- **אימות:** functions `tsc --noEmit` strict **0** (node_modules הותקן) · flutter analyze 0 · 55 בדיקות (org_claim+auth_state+board_auth_server) ירוקות · 6 אתרי-AuthSnapshot לא-נגעו (null-default) · גארדים ×4 (כולל ../functions — שכבת-ה-functions מוגנת-שער מעתה). שער מלא בשער-ה-commit.
+- **גבול-כנות:** ריצת-emulator + פריסה = מסירת-בעלים (שורה נוספה ל-LAUNCH_READINESS §שלב-2/3.3).

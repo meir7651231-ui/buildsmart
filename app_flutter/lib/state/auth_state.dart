@@ -451,11 +451,28 @@ List<String> rolesFromClaims(Map<String, dynamic>? claims) {
   return const [];
 }
 
+/// Parse the org membership out of a custom-claims map (stage-3.3 St2): the
+/// `orgId` string claim, trimmed — null when absent/blank. Inert until an
+/// admin runs setOrg (no consumer flips behavior; ORG_SCOPED_QUERIES lands
+/// later). Pure → unit-testable.
+String? orgIdFromClaims(Map<String, dynamic>? claims) {
+  if (claims == null || claims.isEmpty) return null;
+  final value = claims['orgId'];
+  if (value is! String) return null;
+  final trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
 /// The auth state every surface reads: user + server roles + the
 /// `_loaded`-guard flag.
 @immutable
 class AuthSnapshot {
-  const AuthSnapshot({this.user, this.roles = const [], this.loaded = false});
+  const AuthSnapshot({
+    this.user,
+    this.roles = const [],
+    this.orgId,
+    this.loaded = false,
+  });
 
   /// The signed-in user (null = signed out — today's behavior).
   final AuthUser? user;
@@ -463,6 +480,12 @@ class AuthSnapshot {
   /// Server roles from custom claims ([rolesFromClaims]); empty when signed
   /// out, claims-less, or Firebase-free.
   final List<String> roles;
+
+  /// Org membership from the `orgId` custom claim ([orgIdFromClaims]); null
+  /// when signed out, claim-less, or Firebase-free. Stage-3.3 St2 — inert
+  /// until an admin runs setOrg (no consumer flips behavior;
+  /// ORG_SCOPED_QUERIES lands later).
+  final String? orgId;
 
   /// The `_loaded` guard (§S1 DoD): true once the FIRST auth event has fully
   /// resolved (user + claims) — or immediately when there is no gateway
@@ -563,15 +586,18 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     // settles, so the UI never acts on a half-resolved identity.
     state = AuthSnapshot(user: user);
     var roles = const <String>[];
+    String? orgId; // stage-3.3 St2 — carried alongside roles, inert downstream
     try {
-      roles = rolesFromClaims(await _gateway!.idTokenClaims());
+      final claims = await _gateway!.idTokenClaims();
+      roles = rolesFromClaims(claims);
+      orgId = orgIdFromClaims(claims);
     } on Object catch (e) {
       // Claims failure (offline token refresh, etc.) — roles stay empty
       // (signed-out role behavior), never thrown into the UI.
       debugPrint('AuthStateNotifier: claims fetch failed (roles empty): $e');
     }
     if (!mounted || gen != _gen) return; // stale — a newer event won
-    state = AuthSnapshot(user: user, roles: roles, loaded: true);
+    state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true);
   }
 
   AuthGateway _required() {
@@ -664,14 +690,17 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     if (g == null || user == null) return;
     final gen = ++_gen;
     List<String> roles;
+    String? orgId; // stage-3.3 St2 — re-read with roles so a refresh keeps it
     try {
-      roles = rolesFromClaims(await g.idTokenClaims(forceRefresh: true));
+      final claims = await g.idTokenClaims(forceRefresh: true);
+      roles = rolesFromClaims(claims);
+      orgId = orgIdFromClaims(claims);
     } on Object catch (e) {
       debugPrint('AuthStateNotifier: reloadRole claims failed (kept): $e');
       return;
     }
     if (!mounted || gen != _gen) return;
-    state = AuthSnapshot(user: user, roles: roles, loaded: true);
+    state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true);
   }
 
   /// The S1.7/S1.8 local wipe: identity-coupled state only (user profile +
@@ -727,6 +756,14 @@ final authStateProvider =
 /// (zero regression — no consumer has flipped to scoped queries yet).
 final currentUidProvider = Provider<String?>((ref) {
   return ref.watch(authStateProvider).user?.uid;
+});
+
+/// Stage-3.3 St2 — the current user's `orgId` custom claim, or null when
+/// signed-out / claim-less / Firebase-free. Derived from [authStateProvider]
+/// (the [currentUidProvider] seam, org-shaped); inert until an admin runs
+/// setOrg — no consumer flips behavior on it (ORG_SCOPED_QUERIES lands later).
+final currentOrgIdProvider = Provider<String?>((ref) {
+  return ref.watch(authStateProvider).orgId;
 });
 
 /// S1.5/S1.6 — the EFFECTIVE role, in the [activePersonaProvider] dialect
