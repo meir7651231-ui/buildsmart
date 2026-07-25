@@ -28,16 +28,21 @@ import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/features/word_finder/narrow_axis.dart';
+import 'package:buildsmart/state/app_profile.dart';
 
 /// The deduped UNION of every product corpus the app carries, built fresh
-/// (NOT reusing `kCatalogProducts`, which omits hot-water).
+/// (NOT reusing `kCatalogProducts`, which omits hot-water). EMPTY on the clean
+/// shell ([kProfileEmptyCatalog]) — the dive/word-finder/keyboard pool is
+/// BuildSmart product content, and the engines are already empty-safe
+/// (word_finder_engine:512 · narrow_axis:59).
 ///
 /// Order of sources is the dedupe priority — FIRST WINS on a sku collision:
 ///   Lipskey → Polyroll → Huliot/SmartLock → HotWater.
 /// So a Lipskey entry shadows any later duplicate of the same sku. Because the
 /// hot-water skus are synthetic ('HW-…') they never collide with the numeric
 /// supplier skus, so this pool is strictly a superset of `kCatalogProducts`.
-final List<LipskeyCatalogProduct> kDivePool = _buildDivePool();
+final List<LipskeyCatalogProduct> kDivePool =
+    kProfileEmptyCatalog ? const <LipskeyCatalogProduct>[] : _buildDivePool();
 
 List<LipskeyCatalogProduct> _buildDivePool() {
   final seen = <String>{};

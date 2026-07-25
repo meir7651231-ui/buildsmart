@@ -22,6 +22,8 @@
 // BS-dial widget reads the metrics via [managerAnalytics] (a const-folded
 // singleton) and renders them inline (R2 — dial-drill, no new screen).
 
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
+
 /// @legacy index.html:16943
 ///   `const ORDER_FLOW=['new','preparing','ready','pickup','transit','delivered'];`
 /// The ordered stages an order moves through. Foundation for M2 (the 6 `mo-*`
@@ -105,7 +107,12 @@ class ManagerOrder {
 
 /// @legacy index.html:11970-12001 — verbatim port of the four seed orders.
 /// Stages: new · preparing · ready · transit (none delivered) → 4 open.
-const List<ManagerOrder> kManagerOrderSeed = [
+/// clean/company2 ([kProfileEmptySeeds]): a company starts with NO orders — the
+/// four seed orders are demo/buildsmart content, so the orders engine, the
+/// repository seeds and every analytics fold below start honestly empty.
+const List<ManagerOrder> kManagerOrderSeed = kProfileEmptySeeds
+    ? <ManagerOrder>[]
+    : [
   ManagerOrder(
     id: 'BS-1042',
     who: 'יוסי כהן',

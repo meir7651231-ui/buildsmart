@@ -111,6 +111,7 @@ import 'package:buildsmart/screens/worker_settings_screen.dart'
     show WorkerSettingsScreen;
 import 'package:buildsmart/screens/worker_task_board_screen.dart'
     show WorkerTaskBoardScreen;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider;
@@ -1247,14 +1248,16 @@ List<KbToolNode> kbProjectsNodes() => <KbToolNode>[
       ),
     ];
 
-/// SuppliersScreen tools: ליפסקי ברקן.
+/// SuppliersScreen tools: ליפסקי ברקן (hidden on the clean shell — no catalog,
+/// no brand entry).
 List<KbToolNode> kbSuppliersNodes() => <KbToolNode>[
-      KbToolNode.leaf(
-        icon: Icons.factory_outlined,
-        label: 'ליפסקי ברקן',
-        action: (ref, context) =>
-            Navigator.of(context).push(LipskeyBrandScreen.route()),
-      ),
+      if (!kProfileEmptyCatalog)
+        KbToolNode.leaf(
+          icon: Icons.factory_outlined,
+          label: 'ליפסקי ברקן',
+          action: (ref, context) =>
+              Navigator.of(context).push(LipskeyBrandScreen.route()),
+        ),
     ];
 
 /// ProfileScreen tools: מועדון · החלפת תפקיד · בקשת תפקיד.

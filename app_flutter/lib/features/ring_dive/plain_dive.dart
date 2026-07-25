@@ -23,6 +23,13 @@ import 'package:buildsmart/features/word_finder/narrow_axis.dart'
     show productHasChip, sizeTokensIn;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
+
+/// The catalog pool the drill reaches products through — the RAW
+/// `kCatalogProducts` union (this module is a sanctioned raw reader), emptied
+/// on the clean shell ([kProfileEmptyCatalog]): no BuildSmart product content.
+final List<LipskeyCatalogProduct> _pool =
+    kProfileEmptyCatalog ? const <LipskeyCatalogProduct>[] : kCatalogProducts;
 
 /// One row of the owner's dictionary: its place in the tree (superCat →
 /// classification → technical), plus the layman label (slang) + English + usage.
@@ -99,11 +106,11 @@ List<LipskeyCatalogProduct> plainProductsFor(PlainNode n) {
   // Coverage node: reach the whole catalog category/categories exactly (no fuzz).
   if (n.categoriesExact != null) {
     final cats = n.categoriesExact!.toSet();
-    return _cache[key] = kCatalogProducts
+    return _cache[key] = _pool
         .where((p) => cats.contains(p.categoryHe))
         .toList();
   }
-  var ps = kCatalogProducts
+  var ps = _pool
       .where((p) => catalogProductMatchesQuery(p, n.technical))
       .toList();
   // A bare-number technical ('16','40','110') is a CALIBER, but the catalog search
@@ -117,7 +124,7 @@ List<LipskeyCatalogProduct> plainProductsFor(PlainNode n) {
         .toList();
   }
   if (ps.isEmpty) {
-    ps = kCatalogProducts
+    ps = _pool
         .where((p) => catalogProductMatchesQuery(p, n.slang))
         .toList();
   }
@@ -142,7 +149,7 @@ List<PlainNode> _allNodes() {
     }
   }
   final leftover = <String>{};
-  for (final p in kCatalogProducts) {
+  for (final p in _pool) {
     if (!reached.contains(p.sku)) leftover.add(p.categoryHe);
   }
   final auto = <PlainNode>[

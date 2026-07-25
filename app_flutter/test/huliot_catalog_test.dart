@@ -16,6 +16,7 @@ import 'package:buildsmart/data/lipski_image_overrides.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/data/related_info.dart'
     show compatibleProductsFor, variantSiblingsOf;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -52,7 +53,10 @@ void main() {
         kCatalogProducts.length + kHuliotProducts.length,
       );
       expect(catalogSource, CatalogSource.v1);
-      expect(resolvedCatalogProducts.length, kCatalogProducts.length);
+      // The clean profile is an EMPTY SHELL (owner 2026-07-25): the resolved
+      // universe is [] there by design — the profile gate outranks the source.
+      expect(resolvedCatalogProducts.length,
+          kProfileEmptyCatalog ? 0 : kCatalogProducts.length);
     });
 
     test('picked images resolve under huliot/products/', () {

@@ -127,3 +127,29 @@ lib/screens/finance_hub_sheets.dart:::נתוני המדד מהשרת — כאן 
 lib/state/app_profile.dart:::_bs || _clean || _c2
 lib/config/app_brand.dart:::'BuildMax'
 ../.github/workflows/clean-two-links.yml:::profile: company2
+#
+# Regression — CLEAN EMPTY-SHELL (2026-07-25 · owner: "לא — הקטלוג גם צריך להיות נקי"): clean ships the
+# engine with ZERO content (no catalog, no demo records); company2 keeps a catalog (the own-catalog
+# proof) but zero records; demo/buildsmart stay byte-identical. The two derived gates + the ONE-point
+# catalog gate (clean branch FIRST so CATALOG_SOURCE=v2 can never leak past the shell):
+lib/state/app_profile.dart:::kProfileEmptyCatalog = _clean;
+lib/state/app_profile.dart:::kProfileEmptySeeds = _clean || _c2;
+lib/data/catalog_source.dart:::kProfileEmptyCatalog
+#  fixture pools ride the catalog gate (word-finder/dives · plain-dive · compat · smart-tree):
+lib/features/word_finder/dive_pool.dart:::kProfileEmptyCatalog
+lib/features/ring_dive/plain_dive.dart:::kProfileEmptyCatalog
+lib/data/lipskey_hotwater.dart:::kProfileEmptyCatalog
+lib/data/smart_tree.dart:::kProfileEmptyCatalog
+#  the suppliers screen keeps the honest clean empty-state (never a bare background):
+lib/screens/suppliers_screen.dart:::אין ספקים עדיין
+#  record-seed families ride the seeds gate (orders+customers · tasks · rewards · site · projects ·
+#  chat · notifications · finance rows · store projects):
+lib/logic/manager_dashboard.dart:::kProfileEmptySeeds
+lib/data/persona_data.dart:::kProfileEmptySeeds
+lib/state/rewards_state.dart:::kProfileEmptySeeds
+lib/data/phaseb_seeds.dart:::kProfileEmptySeeds
+lib/data/projects.dart:::kProfileEmptySeeds
+lib/data/chat_seeds.dart:::kProfileEmptySeeds
+lib/screens/notifications_screen.dart:::kProfileEmptySeeds
+lib/screens/finance_hub_sheets.dart:::kProfileEmptySeeds
+lib/screens/store_screen.dart:::kProfileEmptySeeds

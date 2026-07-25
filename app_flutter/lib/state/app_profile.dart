@@ -93,6 +93,20 @@ const String kProfileImageBaseUrl = (_clean || _c2)
     ? ''
     : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev';
 
+// ── content gates (owner directive 2026-07-25 · empty-shell clean) ───────────
+
+/// clean ships NO product catalog — an empty shell; company2/BuildMax KEEPS
+/// one (the own-catalog proof, riding CATALOG_SOURCE=v2 in the two-links
+/// workflow); demo+buildsmart keep today's catalog byte-identical. A derived
+/// const, NOT a dart-define — no `fromEnvironment`, so the closed-set flag
+/// sweep is untouched.
+const bool kProfileEmptyCatalog = _clean;
+
+/// clean + company2 ship NO demo record seeds (orders · tasks · rewards ·
+/// site · chat · notifications) — a company's app starts life empty and fills
+/// through real use; demo+buildsmart keep today's seeds byte-identical.
+const bool kProfileEmptySeeds = _clean || _c2;
+
 // ── pure test mirror ─────────────────────────────────────────────────────────
 
 /// The per-profile default matrix, re-stated at runtime for the proof test
@@ -122,3 +136,10 @@ Map<String, Object> profileDefaultsFor(String profile) {
         : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev',
   };
 }
+
+/// Pure mirrors of the two content gates, re-stated per profile string for
+/// the proof test. NOT consumed by app code — the consts above are the single
+/// source at compile time.
+bool catalogEmptyForProfile(String profile) => profile == 'clean';
+bool seedsEmptyForProfile(String profile) =>
+    profile == 'clean' || profile == 'company2';

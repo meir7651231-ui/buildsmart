@@ -1586,3 +1586,9 @@
 - **הפתרון:** 4 הערות מותנות-מצב (דמו מצהיר-דמו · שרת כן-ריק) + labelHe ·· company2-פרופיל + AppBrand מודע-פרופיל ('BuildMax') + wordmark מנותב + workflow שני-ערוצים (dispatch-בלבד).
 - **mutation-verify (×2):** clause-דמו-מדד הוסר → גארד-ספציפי **אדום** → שחזור → ירוק. mirror-c2 ux מושמט → app_profile_flags **אדום** (-1) → שחזור → 8/8. + 2 תפיסות-חיות: גארד-workflow (ליטרל-matrix) וגארד-3.2 (name→ternary) נוסחו מחדש.
 - **אימות:** analyze 0 · 74 (סוללה) + 8 ירוקים · BYTES VERIFIED מלא · שער-מלא בשער-ה-commit. גבול-כנות: הלינקים-החיים עצמם = ריצת-ה-workflow שלך (secrets ב-CI).
+## #clean-empty-shell — שערי-תוכן (קטלוג+זרעים) — 2026-07-25
+- **הפתרון:** 2 שערים נגזרים (app_profile) · שער-קטלוג-נקודה-אחת (resolvedCatalogProducts, ענף-clean-ראשון) · 4 fixtures · 10 משפחות-זרעים · 4 config-untouchable · בדיקת-חוזה דו-עולמית `stage_clean_empty_test`(17) + סריקות-סט-סגור ×2.
+- **mutation-verify (×2, מבוצע):** M1 קוטביות-הקבוע `= _clean`→`= !_clean` → **אדום** (-2: live-pins + mirror-consistency) → שחזור → ירוק. M2 סחף-מראה (catalogEmptyForProfile += 'company2') → **אדום** (-1: עמודת-המטריצה) → שחזור → 17/17.
+- **תקרית-ולקח:** שחזור-M2 בוצע בטעות עם `git checkout <file>` — שמחק גם את תוספות-הקובץ הטרם-committed; שוחזר בייט-בייט מהדיף-המתועד-בשיחה ואומת ירוק (17/17 + מראה-עקביות). **לקח: כשיש עבודה לא-committed, שחזור-מוטציה = היפוך-sed נקודתי בלבד, לעולם לא checkout.**
+- **תפיסות-חיות:** NaN.round() ב-_openSubs (0/0 על kSubcontractors ריק — היה מקריס את גיליון-קבלני-המשנה על clean) → משמר `totAlloc > 0` זהה-דמו · ציפיית-dsync-QA הפוכה על clean → מודע-פרופיל · kPaymentTerms זוהה-כ-options ודולג-מגידור.
+- **אימות:** analyze 0 · 133 ממוקדות ירוקות · ריצות-מפרופלות: clean 20+skip-מכוון · company2 9 · build-clean ✓ · גארדים ×19 במניפסט. שער מלא בשער-ה-commit.

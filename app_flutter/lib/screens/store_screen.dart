@@ -10,6 +10,7 @@ import 'package:buildsmart/screens/login_sheet.dart' show showLoginSheet;
 import 'package:buildsmart/screens/order_notif_sheet.dart';
 import 'package:buildsmart/screens/role_request_sheet.dart'
     show showRoleRequestSheet;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/rbac.dart'
     show CheckoutBlock, checkoutBlock, pendingApprovalProvider;
@@ -333,7 +334,11 @@ typedef _CItem =
 // No injected demo items.
 const List<_CItem> _kCItems = [];
 
-const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
+// clean/company2 (kProfileEmptySeeds): only the FUNCTIONAL 'ללא פרויקט' bucket
+// survives — the two named projects are demo/buildsmart content.
+const _kProjects = kProfileEmptySeeds
+    ? ['ללא פרויקט']
+    : ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
 
 /// DEPRECATED / VESTIGIAL. The store-local project list. As of the
 /// projects-engine unification, the checkout picker reads the PROJECTS ENGINE

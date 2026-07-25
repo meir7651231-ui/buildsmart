@@ -18,3 +18,5 @@ test/stage2_tenant_isolation_test.dart
 test/stage3_catalog_source_consistency_test.dart
 # stage-3.4 — the APP_PROFILE contract (demo≡today · matrix · mirror-consistency · closed-set sweep):
 test/app_profile_flags_test.dart
+# clean empty-shell — the content gates (matrix · live pins in both worlds · consumer registry):
+test/stage_clean_empty_test.dart

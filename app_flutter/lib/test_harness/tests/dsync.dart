@@ -5,6 +5,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/state/app_profile.dart';
 import 'package:buildsmart/test_harness/types.dart';
 
 const _validPersonaIds = <String>{
@@ -56,9 +57,15 @@ TestResult _coreChecks() {
     add('קטגוריה ${cat.id} עם emoji', cat.emoji.isNotEmpty, got: cat.emoji);
   }
 
+  // Clean shell: the smart-product pool is EMPTY by design there — the QA
+  // expectation flips with the profile so the harness stays honest-green.
   add(
-    'kSmartProducts אינו ריק',
-    kSmartProducts.isNotEmpty,
+    kProfileEmptyCatalog
+        ? 'kSmartProducts ריק (קונכייה נקייה)'
+        : 'kSmartProducts אינו ריק',
+    kProfileEmptyCatalog
+        ? kSmartProducts.isEmpty
+        : kSmartProducts.isNotEmpty,
     got: '${kSmartProducts.length}',
   );
 

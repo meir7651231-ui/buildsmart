@@ -1,3 +1,4 @@
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:flutter/foundation.dart';
 
 @immutable
@@ -150,7 +151,11 @@ SmartProduct? smartProductForSku(String sku) {
   return idx[sku];
 }
 
-const List<SmartProduct> kSmartProducts = [
+/// Const-gated: EMPTY on the clean shell ([kProfileEmptyCatalog]) — the guided
+/// smart-tree recipes are BuildSmart product content.
+const List<SmartProduct> kSmartProducts = kProfileEmptyCatalog
+    ? <SmartProduct>[]
+    : [
   // ===== ניקוז — סיפונים =====
   SmartProduct(
     key: 'basinTrap',

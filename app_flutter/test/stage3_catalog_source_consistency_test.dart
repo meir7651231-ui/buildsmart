@@ -80,6 +80,12 @@ void main() {
     // Sample the head/middle/tail — identity, not just equality, since both
     // sides must share one source (no forked copies drifting).
     final list = resolvedCatalogProducts;
+    if (list.isEmpty) {
+      // clean/empty-catalog profile: identity sampling is vacuous on [] —
+      // the sweep + every-product-resolves tests above still run (over 0).
+      markTestSkipped('empty-catalog profile — nothing to sample');
+      return;
+    }
     for (final p in [list.first, list[list.length ~/ 2], list.last]) {
       expect(identical(catalogProductForSku(p.sku), p), isTrue,
           reason: 'bridge and list must share one source object');

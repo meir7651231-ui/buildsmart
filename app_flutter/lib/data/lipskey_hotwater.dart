@@ -9,6 +9,7 @@
 // AQUATEC HDPE catalogue does not carry these items.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/state/app_profile.dart';
 
 const _catHe   = 'מים חמים ו-recirculation';
 const _catEn   = 'Hot Water & Recirculation';
@@ -142,8 +143,11 @@ const Set<String> kHotWaterAccessorySkus = {
 };
 
 /// Catalog used by the compatibility / chain-builder screen: the full HDPE
-/// cold-water catalogue plus the hot-water family.
-final List<LipskeyCatalogProduct> kCompatCatalog = [
-  ...kLipskeyCatalog,
-  ...kHotWaterCatalog,
-];
+/// cold-water catalogue plus the hot-water family. EMPTY on the clean shell
+/// ([kProfileEmptyCatalog]) — its consumers are all guarded on an empty list.
+final List<LipskeyCatalogProduct> kCompatCatalog = kProfileEmptyCatalog
+    ? const <LipskeyCatalogProduct>[]
+    : [
+        ...kLipskeyCatalog,
+        ...kHotWaterCatalog,
+      ];

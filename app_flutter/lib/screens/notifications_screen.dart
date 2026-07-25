@@ -3,6 +3,7 @@ import 'package:buildsmart/data/repositories/backend.dart'
     show useFirebaseBackend;
 import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -253,7 +254,9 @@ const List<_Notif> _kNotifs = [
 /// is ON there is no notifications source yet, so the honest answer is an EMPTY
 /// feed (mirrors `site_firebase` `projects() => const []`); when it is OFF (demo)
 /// the verbatim `_kNotifs` is returned unchanged, so the demo path is identical.
-List<_Notif> get _activeNotifs => useFirebaseBackend ? const [] : _kNotifs;
+/// clean/company2 ([kProfileEmptySeeds]) start with the same honest EMPTY feed.
+List<_Notif> get _activeNotifs =>
+    (useFirebaseBackend || kProfileEmptySeeds) ? const [] : _kNotifs;
 
 /// PUBLIC projection of the active feed to [NotifLite] views — the load-bearing
 /// seam (plan section 10) the floating keyboard's deriver consumes to build the

@@ -20,6 +20,7 @@
 
 import 'dart:convert';
 
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,7 +34,9 @@ const String kRewardsKey = 'bs.rewards.v1';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Starting coin balance — proto `var buildCoins=340` @21409.
-const int kBuildCoinsSeed = 340;
+/// clean/company2 ([kProfileEmptySeeds]): a company starts at 0 coins — the
+/// 340 is demo/buildsmart content.
+const int kBuildCoinsSeed = kProfileEmptySeeds ? 0 : 340;
 
 /// Consecutive active days — proto `var loginStreak=4` @21410.
 const int kLoginStreak = 4;
@@ -61,7 +64,10 @@ class RwChallenge {
 }
 
 /// proto `monthlyChallenges` @21412-21416 — VERBATIM.
-const List<RwChallenge> kMonthlyChallengesSeed = [
+/// clean/company2 ([kProfileEmptySeeds]): starts with no challenges.
+const List<RwChallenge> kMonthlyChallengesSeed = kProfileEmptySeeds
+    ? <RwChallenge>[]
+    : [
   RwChallenge(id: 'ch1', name: 'בצע 5 הזמנות החודש', goal: 5, progress: 3, reward: 80),
   RwChallenge(id: 'ch2', name: 'הזמן 3 קטגוריות שונות', goal: 3, progress: 2, reward: 60),
   RwChallenge(id: 'ch3', name: 'אפס חריגות תקציב', goal: 1, progress: 1, reward: 100),
@@ -83,7 +89,11 @@ class RwLeader {
 }
 
 /// proto `leaderboard` @21417-21423 — VERBATIM.
-const List<RwLeader> kLeaderboardSeed = [
+/// clean/company2 ([kProfileEmptySeeds]): starts with no leaderboard rows
+/// ([RewardsNotifier._syncMe] iterates, so an empty board stays empty-safe).
+const List<RwLeader> kLeaderboardSeed = kProfileEmptySeeds
+    ? <RwLeader>[]
+    : [
   RwLeader(name: 'קבלן לוי ובניו', coins: 1240, rank: 1),
   RwLeader(name: 'שיפוצי הצפון', coins: 980, rank: 2),
   RwLeader(name: 'אתה', coins: 340, rank: 3, me: true),

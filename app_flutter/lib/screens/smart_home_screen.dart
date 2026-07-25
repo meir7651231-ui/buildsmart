@@ -290,6 +290,9 @@ class _SmartTreeRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Clean shell: no smart products → no row (a title over an empty 192px
+    // strip would lie about content that isn't there).
+    if (kSmartProducts.isEmpty) return const SizedBox.shrink();
     final m = _metrics(context, ref);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

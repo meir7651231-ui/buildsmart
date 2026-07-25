@@ -8,6 +8,12 @@
 // decisions, penalty ledger, stock moves, task status) belongs in StateNotifiers
 // that START from these seeds — these are the genesis values, not live state.
 //
+// clean/company2 (`kProfileEmptySeeds`, state/app_profile.dart): the RECORD
+// seeds below ship EMPTY — a company's app starts life empty and fills through
+// real use. The demo/buildsmart literals are the else-arm, byte-identical.
+// Config lists (kBuildIndex · kPaymentTerms · kFxRates · kSiteTree · kTaskSteps)
+// are OPTIONS, not records — they stay on every profile.
+//
 // Reuse note (grep-verified, T0/manager already shipped — NOT duplicated here):
 //   • PROJECTS(3) + activeProjectId → `data/projects.dart` (`kProjects`).
 //   • TASKS(5) rows + WORKERS(2) + status labels → `data/persona_data.dart`
@@ -22,6 +28,7 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart'
     show kBudgetTotal, kBudgetSpent, kBudgetCategories;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 
 // ═════════════════════════════════════════════════════════════════════════════
 // FINANCE HUB (Category B) seeds — index.html:19459-19482
@@ -82,7 +89,10 @@ class Subcontractor {
   final int spent;
 }
 
-const List<Subcontractor> kSubcontractors = [
+// clean/company2: no subcontractor records until real ones are added.
+const List<Subcontractor> kSubcontractors = kProfileEmptySeeds
+    ? <Subcontractor>[]
+    : [
   Subcontractor(id: 'sub1', name: 'אינסטלציה — דוד לוי', ic: '🔧', allocated: 18000, spent: 11200),
   Subcontractor(id: 'sub2', name: 'חשמל — מ. כהן בע״מ', ic: '⚡', allocated: 14000, spent: 9600),
   Subcontractor(id: 'sub3', name: 'גמר וצבע — שיא הצבע', ic: '🎨', allocated: 9000, spent: 3100),
@@ -106,7 +116,10 @@ class ApprovalItem {
   final String status;
 }
 
-const List<ApprovalItem> kApprovalQueue = [
+// clean/company2: the approval queue starts empty — real requests fill it.
+const List<ApprovalItem> kApprovalQueue = kProfileEmptySeeds
+    ? <ApprovalItem>[]
+    : [
   ApprovalItem(id: 'AP-201', what: 'הזמנת ברזל זיון', amount: 8400, by: 'מנהל עבודה', status: 'ממתין'),
   ApprovalItem(id: 'AP-202', what: '40 שק דבק אריחים', amount: 2600, by: 'רכש', status: 'ממתין'),
 ];
@@ -141,7 +154,10 @@ class GanttTask {
   final int done; // percent complete
 }
 
-const List<GanttTask> kGanttTasks = [
+// clean/company2: no schedule rows — ganttSpan()'s fold starts at 0, stays 0.
+const List<GanttTask> kGanttTasks = kProfileEmptySeeds
+    ? <GanttTask>[]
+    : [
   GanttTask(name: 'יסודות וחפירה', start: 0, len: 5, done: 100),
   GanttTask(name: 'שלד וקירות', start: 4, len: 8, done: 100),
   GanttTask(name: 'אינסטלציה גסה', start: 10, len: 6, done: 70),
@@ -173,7 +189,10 @@ class SnagItem {
   final String status;
 }
 
-const List<SnagItem> kSnagList = [
+// clean/company2: the snagging list starts empty (site_hub_state iterates).
+const List<SnagItem> kSnagList = kProfileEmptySeeds
+    ? <SnagItem>[]
+    : [
   SnagItem(id: 'SNG-01', what: 'סדק בקיר חדר שינה', loc: 'קומה 3 · דירה 7', severity: 'בינוני', status: 'פתוח'),
   SnagItem(id: 'SNG-02', what: 'נזילה מתחת לכיור', loc: 'קומה 2 · דירה 4', severity: 'חמור', status: 'פתוח'),
 ];
@@ -194,7 +213,10 @@ class Inspection {
   final String status;
 }
 
-const List<Inspection> kInspections = [
+// clean/company2: no inspection reminders until the company schedules real ones.
+const List<Inspection> kInspections = kProfileEmptySeeds
+    ? <Inspection>[]
+    : [
   Inspection(id: 'INS-1', what: 'ביקורת מהנדס — שלד', due: 'בעוד 3 ימים', status: 'מתוכננת'),
   Inspection(id: 'INS-2', what: 'ביקורת כיבוי אש', due: 'בעוד 8 ימים', status: 'מתוכננת'),
 ];
@@ -245,7 +267,10 @@ class ArchivedProject {
   final String status;
 }
 
-const List<ArchivedProject> kArchivedProjects = [
+// clean/company2: a fresh company has no completed-project archive yet.
+const List<ArchivedProject> kArchivedProjects = kProfileEmptySeeds
+    ? <ArchivedProject>[]
+    : [
   ArchivedProject(name: 'מגדל הרצליה — שלב א׳', year: '2024', units: 24, status: 'הושלם'),
   ArchivedProject(name: 'בית פרטי רעננה', year: '2023', units: 1, status: 'הושלם'),
   ArchivedProject(name: 'שיפוץ משרדים תל-אביב', year: '2023', units: 6, status: 'הושלם'),
@@ -312,7 +337,10 @@ class WorkLogDay {
   final List<WorkLogItem> items;
 }
 
-const List<WorkLogDay> kWorkLog = [
+// clean/company2: no work-log history — only the live 'היום' bucket accrues.
+const List<WorkLogDay> kWorkLog = kProfileEmptySeeds
+    ? <WorkLogDay>[]
+    : [
   WorkLogDay(date: 'אתמול', items: [
     WorkLogItem(worker: 'רן', task: 'בניית מחיצת גבס — חדר רחצה', status: 'done'),
     WorkLogItem(worker: 'רן', task: 'העברת קו ביוב ראשי', status: 'done'),
@@ -328,7 +356,11 @@ const List<WorkLogDay> kWorkLog = [
 // STOCK_DEMO (11) — index.html:6202. name → location ('warehouse' | 'site').
 //   The inventory screen filters by tab; `moveStock` flips a key's location.
 // ─────────────────────────────────────────────────────────────────────────────
-const Map<String, String> kStockDemo = {
+// clean/company2: the inventory starts empty (the 📦 screen shows its per-tab
+// empty state; the Firestore seed projection maps zero rows).
+const Map<String, String> kStockDemo = kProfileEmptySeeds
+    ? <String, String>{}
+    : {
   'סרט טפלון': 'warehouse',
   'סרט טפלון (גליל)': 'warehouse',
   'סרט טפלון לאיטום': 'warehouse',
@@ -360,7 +392,10 @@ class ReorderHistoryItem {
   final String ago;
 }
 
-const List<ReorderHistoryItem> kDemoHistory = [
+// clean/company2: no order history yet — the reorder block starts empty.
+const List<ReorderHistoryItem> kDemoHistory = kProfileEmptySeeds
+    ? <ReorderHistoryItem>[]
+    : [
   ReorderHistoryItem(name: 'מקדחה רוטטת בוש GBH', price: 640, icon: '🔩', cat: 'כלי עבודה', ago: 'הוזמן לפני 9 ימים'),
   ReorderHistoryItem(name: 'שק מלט אפור 25 ק"ג', price: 31, icon: '🪨', cat: 'בנייה', ago: 'הוזמן לפני 6 ימים'),
 ];

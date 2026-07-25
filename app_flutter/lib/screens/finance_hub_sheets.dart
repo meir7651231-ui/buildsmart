@@ -35,6 +35,7 @@ import 'package:buildsmart/data/repositories/finance_firebase.dart'
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/logic/finance_report_pdf.dart';
 import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/finance_hub_state.dart';
 import 'package:buildsmart/state/pdf_print_seam.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -485,7 +486,10 @@ void _openIndex(BuildContext context) {
               style: const TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
-          _FinRows(useFirebaseBackend ? const <Widget>[] : [
+          // clean/company2: the demo index rows are profile-gated too.
+          _FinRows((useFirebaseBackend || kProfileEmptySeeds)
+              ? const <Widget>[]
+              : [
             _FinRow(
               'מדד בסיס (חתימת חוזה)',
               kBuildIndex.base.toStringAsFixed(1),
@@ -633,7 +637,9 @@ class _PayOpt extends StatelessWidget {
 void _openSubs(BuildContext context) {
   final totAlloc = kSubcontractors.fold<int>(0, (s, x) => s + x.allocated);
   final totSpent = kSubcontractors.fold<int>(0, (s, x) => s + x.spent);
-  final totPct = (totSpent / totAlloc * 100).round();
+  // Empty-safe (clean/company2 gate kSubcontractors): zero allocation → 0%
+  // (the budgetPct() idiom), never NaN.round().
+  final totPct = totAlloc > 0 ? (totSpent / totAlloc * 100).round() : 0;
   _showFinSheet(
     context,
     child: SingleChildScrollView(
@@ -1147,7 +1153,10 @@ void _openInvoiceSplit(BuildContext context) {
               style: const TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
-          _FinRows(useFirebaseBackend ? const <Widget>[] : [
+          // clean/company2: the demo split rows are profile-gated too.
+          _FinRows((useFirebaseBackend || kProfileEmptySeeds)
+              ? const <Widget>[]
+              : [
             for (final c in cats)
               _FinRow('${c.icon} ${c.name}', fMoney(split[c.name] ?? 0)),
           ]),
@@ -1600,8 +1609,9 @@ class _ReportTable extends StatelessWidget {
 /// user as if they were live server rates — return an EMPTY map there. With the
 /// backend OFF (the shipped demo path) this is byte-identical to reading
 /// `kFxRates` directly (zero regression). The seed const itself is untouched.
+/// clean/company2 ([kProfileEmptySeeds]) get the same empty map — no demo rates.
 Map<String, double> _fxRatesToShow() =>
-    useFirebaseBackend ? const {} : kFxRates;
+    (useFirebaseBackend || kProfileEmptySeeds) ? const {} : kFxRates;
 
 void _openFx(BuildContext context) {
   _showFinSheet(

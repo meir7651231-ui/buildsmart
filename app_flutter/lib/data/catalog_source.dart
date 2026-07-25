@@ -11,11 +11,16 @@
 // EXPANSION (the 789 new products): the product universe is unchanged until the
 // flag flips. The flip is owner-gated (gradual 5%→100%) and set at launch via
 // `--dart-define=CATALOG_SOURCE=v2`.
+//
+// On the 'clean' profile ([kProfileEmptyCatalog]) the resolved universe is
+// EMPTY (empty shell) — the getter is the ONE point every consumer inherits,
+// so CATALOG_SOURCE=v2 can never leak a catalog past it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/huliot_catalog.dart' show kHuliotProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 
 /// The two catalog sources. [v1] is the live baseline (already image-upgraded);
 /// [v2] is the staging catalog that ALSO includes the 789 new Huliot products.
@@ -42,5 +47,8 @@ CatalogSource get catalogSource =>
 /// The resolved product universe for the active source. Opt-in consumers read
 /// THIS instead of `kCatalogProducts` directly. Under the default (v1) this
 /// returns the existing image-upgraded list; v2 appends the 789 new products.
-List<LipskeyCatalogProduct> get resolvedCatalogProducts =>
-    catalogSource == CatalogSource.v2 ? kCatalogProductsV2 : kCatalogProducts;
+/// On 'clean' ([kProfileEmptyCatalog]) it is EMPTY — that branch is checked
+/// FIRST, so CATALOG_SOURCE=v2 can never leak past the empty shell.
+List<LipskeyCatalogProduct> get resolvedCatalogProducts => kProfileEmptyCatalog
+    ? const <LipskeyCatalogProduct>[]
+    : catalogSource == CatalogSource.v2 ? kCatalogProductsV2 : kCatalogProducts;

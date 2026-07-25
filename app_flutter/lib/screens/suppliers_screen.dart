@@ -3,6 +3,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbSuppliersNodes;
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -37,12 +38,40 @@ class SuppliersScreen extends StatelessWidget {
         ),
         body: ListView(
           children: [
-            _SupplierTile(
-              emoji: '🏭',
-              title: 'ליפסקי ברקן',
-              subtitle: 'אינסטלציה וסניטציה • $kLipskeyProductCount מוצרים',
-              onTap: () => Navigator.push(context, LipskeyBrandScreen.route()),
-            ),
+            // Clean shell: no catalog → no brand entry (the tile would open a
+            // brand screen with nothing behind it) — an honest empty state
+            // instead of a bare background.
+            if (kProfileEmptyCatalog)
+              const Padding(
+                padding: EdgeInsets.only(top: 120),
+                child: Column(
+                  children: [
+                    Text('🏪', style: TextStyle(fontSize: 40)),
+                    SizedBox(height: 10),
+                    Text(
+                      'אין ספקים עדיין',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'ספקים ומותגים יופיעו כשקטלוג החברה ייטען',
+                      style: TextStyle(color: Colors.black38, fontSize: 12),
+                    ),
+                  ],
+                ),
+              )
+            else
+              _SupplierTile(
+                emoji: '🏭',
+                title: 'ליפסקי ברקן',
+                subtitle: 'אינסטלציה וסניטציה • $kLipskeyProductCount מוצרים',
+                onTap: () =>
+                    Navigator.push(context, LipskeyBrandScreen.route()),
+              ),
           ],
         ),
       ),

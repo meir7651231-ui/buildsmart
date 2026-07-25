@@ -24,6 +24,7 @@
 // tests and stable across rebuilds — only user-sent messages use the wall clock.
 
 import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/sys_chat.dart';
 
 /// A stable seed instant so ordering/ids are deterministic (the demo "today").
@@ -45,7 +46,11 @@ ChatMessage _seed(
 
 /// The verbatim seed threads. Re-applied under the persisted message overlay on
 /// load (see `sys_chat.dart` `_load`).
-final List<ChatThread> kChatThreads = [
+/// clean/company2 ([kProfileEmptySeeds]): a company starts with NO chats — the
+/// demo threads are demo/buildsmart content (the screens show 'אין שיחות').
+final List<ChatThread> kChatThreads = kProfileEmptySeeds
+    ? const []
+    : [
   // 👷 ↔ 🏪 — contractor & building-materials supplier (legacy t1/t2 tone).
   ChatThread(
     id: 'th-contractor-store',

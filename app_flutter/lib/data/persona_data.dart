@@ -5,6 +5,8 @@
 // knowledge/port/preact/03-persona-dashboards.md §3.2. Every Hebrew string and
 // number is verbatim from the prototype — do NOT invent (R6/R8).
 
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
+
 /// One field-crew task — mirrors the prototype `TASKS[i]`
 /// `{id, name, worker, status, days, steps, note}`.
 class PersonaTask {
@@ -80,7 +82,11 @@ class PersonaTask {
 const List<String> kWorkers = ['רן (עובד)', 'עומר (עובד)'];
 
 /// @source proto 06 §4.1 TASKS [L8023] — 5 demo tasks, verbatim.
-const List<PersonaTask> kPersonaTasks = [
+/// clean/company2 ([kProfileEmptySeeds]): a company starts with NO tasks — the
+/// five demo tasks are demo/buildsmart content.
+const List<PersonaTask> kPersonaTasks = kProfileEmptySeeds
+    ? <PersonaTask>[]
+    : [
   PersonaTask(
     id: 1,
     name: 'התקנת קו מים חם — חדר רחצה',
