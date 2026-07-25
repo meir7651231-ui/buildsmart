@@ -1,0 +1,64 @@
+# stage-5 · "שני לינקים · קוד אחד" (DIRECTIVE-clean-finish mission 2)
+#
+# Manually-triggered ONLY (workflow_dispatch) — the live site's own workflows
+# are untouched and this deploys to SEPARATE preview channels, never `live`.
+# Two jobs from the SAME commit:
+#   • clean    → APP_PROFILE=clean                       → channel `clean`
+#   • company2 → APP_PROFILE=company2 + CATALOG_SOURCE=v2 → channel `company2`
+# The VISIBLE difference (the whole point): brand name (BuildSmart Clean vs
+# BuildMax — tab title, wordmark, club, PDFs) AND the catalog (v1 ~1,877
+# products vs v2 ~2,666 — the +789 Huliot set, resolvable end-to-end since the
+# stage-3.1 un-pinning). Each job prints its live link in the run summary.
+name: clean-two-links
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    strategy:
+      matrix:
+        include:
+          - profile: clean
+            channel: clean
+            extra_defines: ''
+          - profile: company2
+            channel: company2
+            extra_defines: '--dart-define=CATALOG_SOURCE=v2'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Gen version
+        run: bash scripts/gen_version.sh
+
+      - name: Build (${{ matrix.profile }})
+        working-directory: app_flutter
+        run: >
+          flutter build web --release --base-href "/"
+          --dart-define=APP_PROFILE=${{ matrix.profile }}
+          ${{ matrix.extra_defines }}
+
+      - name: Deploy to channel `${{ matrix.channel }}`
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: buildsmart-b0b78
+          channelId: ${{ matrix.channel }}
+
+      - name: Link in run summary
+        run: |
+          echo "## 🔗 ${{ matrix.profile }} — live link" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.details_url }}" >> "$GITHUB_STEP_SUMMARY"
