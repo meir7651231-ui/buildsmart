@@ -116,3 +116,8 @@ lib/state/auth_state.dart:::currentOrgIdProvider
 lib/state/orders_engine.dart:::if (orgId.isNotEmpty) 'orgId'
 lib/data/repositories/orders_firebase.dart:::if (o.orgId.isNotEmpty) 'orgId'
 lib/data/repositories/stock_firebase.dart:::if (_orgId.isNotEmpty) 'orgId'
+#
+# Regression — STAGE-3.3 St4+St5 (2026-07-25): the org scope layer + rules branches (flag OFF = byte-identical):
+lib/data/repositories/backend.dart:::kOrgScopedQueries
+../firestore.rules:::function sameOrg()
+../firestore.rules:::orgId', '') != ''

@@ -28,6 +28,8 @@
 
 import 'package:buildsmart/data/phaseb_seeds.dart' show kStockDemo;
 import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
+    show FirestoreCollectionSource;
 import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart'
@@ -93,11 +95,26 @@ class LocalStockRepository implements StockRepository {
 /// [StockRepository] contract → providers + UI are unchanged.
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
   if (useFirebaseBackend) {
-    final repo = FirebaseStockRepository(
-      // stage-3.3 St3 — the session org claim `toDoc` stamps as `orgId`
-      // (guarded: only when a claim is known; '' → nothing stamped).
-      orgId: ref.read(currentOrgIdProvider) ?? '',
-    )..attach();
+    // stage-3.3 St4 — ORG-SCOPED listen (behind `kOrgScopedQueries`, default
+    // OFF). With the flag OFF `org` is null (NO org watch executes) and the
+    // repo is constructed EXACTLY as today — the whole-collection listen,
+    // BYTE-IDENTICAL (the zero-regression invariant). Only when the flag is ON
+    // *and* the session carries an orgId claim does the source get — for the
+    // first time — the org-wide scope (`orgId == claim`) the St5 rules branch
+    // proves (mirrors `ordersRepositoryProvider`'s scoped construction).
+    final org = kOrgScopedQueries ? ref.watch(currentOrgIdProvider) : null;
+    final repo = (org != null && org.isNotEmpty
+        ? FirebaseStockRepository(
+            orgId: org,
+            source: FirestoreCollectionSource('stock',
+                scope: (c) => c.where('orgId', isEqualTo: org)),
+          )
+        : FirebaseStockRepository(
+            // stage-3.3 St3 — the session org claim `toDoc` stamps as `orgId`
+            // (guarded: only when a claim is known; '' → nothing stamped).
+            orgId: ref.read(currentOrgIdProvider) ?? '',
+          ))
+      ..attach();
     ref.onDispose(repo.dispose);
     return repo;
   }

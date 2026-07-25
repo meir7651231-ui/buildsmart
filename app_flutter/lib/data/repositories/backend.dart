@@ -59,6 +59,24 @@ bool get useStudioSharedSync =>
 /// Tests never initialise Firebase, so the local path ignores this flag.
 const bool kUidScopedQueries = bool.fromEnvironment('UID_SCOPED_QUERIES');
 
+/// stage-3.3 St4 (org-scoping) — master switch for ORG-SCOPED Firestore
+/// queries. Deliberately a NEW flag, NOT a reuse of [kUidScopedQueries] — that
+/// flag is already in the owner's flip-ready handoff, and one flag means one
+/// behaviour. Default OFF: every scope builder / repo construction keeps its
+/// exact uid-layer result (no `currentOrgIdProvider` watch even executes), so
+/// flipping this flag is the ONLY thing that changes behaviour — with it OFF
+/// the build is BYTE-IDENTICAL to today (zero regression, the
+/// [kUidScopedQueries] invariant). When ON (and the session carries an `orgId`
+/// custom claim) the orders/customers scope builders and the stock source
+/// PREFER an org-wide `where('orgId' == claim)` scope over the per-uid scope —
+/// every member of the org shares one tenant view — and FALL BACK to the uid
+/// scope when no claim is present. Manager/admin stay unscoped (the god view)
+/// in BOTH layers. Ships ONLY together with the St5 rules branches + the St6
+/// deploy order (see WIRING); flip on at build time once those are live:
+///   flutter build web --dart-define=ORG_SCOPED_QUERIES=true
+/// Tests never initialise Firebase, so the local path ignores this flag.
+const bool kOrgScopedQueries = bool.fromEnvironment('ORG_SCOPED_QUERIES');
+
 /// A13 (launch server-connect) — master switch for ROUTING the canonical
 /// order-stage advance + contractor-credit through their Cloud Functions
 /// CALLABLES (`advanceOrderStage` / `computeCredit`, region [me-west1]) instead

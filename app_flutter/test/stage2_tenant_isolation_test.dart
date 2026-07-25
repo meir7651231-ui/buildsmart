@@ -78,6 +78,17 @@ void main() {
       );
     });
 
+    test('sameOrg keeps its empty-claim guard (stage-3.3 St5)', () {
+      expect(rules, contains('function sameOrg()'),
+          reason: 'the org read-branch helper exists');
+      expect(
+        rules,
+        contains("request.auth.token.get('orgId', '') != ''"),
+        reason: 'LOAD-BEARING: without the != guard a claimless user matches '
+            "every legacy ''-doc",
+      );
+    });
+
     test('material_requests + financeBudget have explicit blocks (stage-2 C1)',
         () {
       expect(rules, contains('match /material_requests/'),

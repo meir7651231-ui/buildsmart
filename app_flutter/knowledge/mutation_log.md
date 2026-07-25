@@ -1575,3 +1575,9 @@
 - **הפתרון:** Order.orgId (A4-idiom) + threading-בריאה placeOrder→checkout · copyWith-משמר (לא-פרמטר) · toDoc-מהמודל-בלבד (הזמנות) / ctor-session מגודר (לקוחות/מלאי — אין diff-קפוא). ללא-claim = זהות-בייטים.
 - **mutation-verify (מבוצע):** copyWith↦drops-stamp → `stage3_org_stamp_test` **אדום** (-1: שימור-בקידום) → שחזור → 5/5.
 - **אימות:** analyze 0 · 91 בדיקות (org_stamp+orders_engine+cached_repo+uid_a4_a6+customers/stock repos+checkout) ירוקות · גארדים ×3. שער מלא בשער-ה-commit.
+
+## #stage3-org-scope — St4+St5 (דגל+builders+sameOrg) — 2026-07-25
+- **הפתרון:** kOrgScopedQueries חדש · ענף-org-מועדף בשני-builders (uid-fallback מילה-במילה, manager/admin נעולים-null) · stock scope-seam ראשון · sameOrg()+6 ענפי-קריאה additive.
+- **mutation-verify (מבוצע):** משמר-`!= ''`↦`true` → `stage2_tenant_isolation_test` **אדום** (-1) → שחזור → 13/13. + באג-תחביר-מניפסט נתפס-חי (תבנית-`!`-פותחת=absent) → נוסחה.
+- **אימות:** analyze 0 · 58 בדיקות (isolation+profile-sweep+scope-diag+backend_flag+repos+org_stamp) · OFF=זהות (const-fold, אפס-watches) · גארדים ×3. שער מלא בשער-ה-commit.
+- **גבול-כנות:** מקרה-חיובי-emulator (token-עם-claim קורא דוק-חתום) + St6-הצמצום = בעלים/CI בלבד.

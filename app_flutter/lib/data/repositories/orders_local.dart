@@ -21,7 +21,7 @@ import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_repository.dart';
 import 'package:buildsmart/state/auth_state.dart'
-    show currentUidProvider, roleProvider;
+    show currentOrgIdProvider, currentUidProvider, roleProvider;
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'
     show CollectionReference, Filter, Query;
@@ -49,6 +49,7 @@ const String kOrdersCourierScopeField = 'courierUid';
 /// builder uses the SAME constants, so this is a faithful descriptor of the
 /// live wiring, not a parallel copy. Manager/admin scope on nothing (the god
 /// view) → null.
+/// stage-3.3 St4 — the org layer (kOrgScopedQueries) sits ABOVE this uid layer.
 @visibleForTesting
 String? debugOrdersScopeField(String? role) {
   switch (role) {
@@ -161,6 +162,9 @@ final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
         ? _ordersScopeFor(
             role: ref.watch(roleProvider),
             uid: ref.watch(currentUidProvider),
+            // stage-3.3 St4 — flag-gated so with ORG_SCOPED_QUERIES OFF (the
+            // default) NO org watch executes and the call is byte-identical.
+            orgId: kOrgScopedQueries ? ref.watch(currentOrgIdProvider) : null,
           )
         : null;
     final repo = FirebaseOrdersRepository(
@@ -199,8 +203,21 @@ const List<String> _kCourierPoolStages = ['ready', 'pickup', 'transit'];
 ///   • manager/admin / unknown-role / no-uid → null (unscoped).
 Query<Map<String, dynamic>> Function(
         CollectionReference<Map<String, dynamic>>)?
-    _ordersScopeFor({required String? role, required String? uid}) {
+    _ordersScopeFor(
+        {required String? role, required String? uid, String? orgId}) {
   if (uid == null || uid.isEmpty) return null; // no identity → do not hide data
+  // stage-3.3 St4 — the ORG layer sits ABOVE the uid layer: when the flag is
+  // ON and the session carries an orgId claim, every NON-god role prefers the
+  // org-wide tenant scope (`orgId == claim`) the St5 rules branch proves;
+  // manager/admin keep the god view below, and with the flag OFF (default) /
+  // no claim every role falls through to the uid branches VERBATIM.
+  if (kOrgScopedQueries &&
+      orgId != null &&
+      orgId.isNotEmpty &&
+      role != 'manager' &&
+      role != 'admin') {
+    return (c) => c.where('orgId', isEqualTo: orgId);
+  }
   switch (role) {
     case 'store':
       return (c) => c.where(

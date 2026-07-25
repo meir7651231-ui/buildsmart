@@ -41,6 +41,7 @@ const Set<String> kProfileOwned = {
 const Set<String> kArmingLayer = {
   'USE_FIREBASE_BACKEND',
   'UID_SCOPED_QUERIES',
+  'ORG_SCOPED_QUERIES',
   'SERVER_CALLABLES',
   'CLOUD_PHOTOS',
   'SEED_FRESH_BACKEND',

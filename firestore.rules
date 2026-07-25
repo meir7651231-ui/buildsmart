@@ -135,6 +135,22 @@ service cloud.firestore {
           && request.auth.token.get('email', '') == 'meir7651231@gmail.com';
     }
 
+    /// ORG membership — stage-3.3 St5. The caller's `orgId` CUSTOM CLAIM
+    /// (server-assigned — the users rule below freezes `orgId`, so it is never
+    /// self-claimed) matches the doc's stamped `orgId`. THE LOAD-BEARING GUARD
+    /// is `!= ''`: legacy docs carry no orgId (→ '') and a claimless token
+    /// yields '' too, so without it every claimless user would match every
+    /// legacy doc ('' == ''). With it, ''-docs stay on their existing gates
+    /// (backward-tolerant) and only a real org claim ever widens a read.
+    /// Consumed as an ADDITIVE `|| sameOrg()` read branch on the org-stampable
+    /// collections (orders / customers / finance*) — never a write gate.
+    function sameOrg() {
+      return isSignedIn()
+          && request.auth.token.get('orgId', '') != ''
+          && request.auth.token.get('orgId', '')
+              == resource.data.get('orgId', '');
+    }
+
     // ── users/{uid} — S5.1 / U0 · doc-id = auth uid · {displayName, phone, email,
     //    role, storeUid, orgId, status, createdAt, lastSeen, fcmToken} ────────────
     // read: self or admin. write: self may maintain the own MIRROR doc
@@ -297,7 +313,9 @@ service cloud.firestore {
     match /customers/{customerId} {
       allow read: if isManager()
           || (isSignedIn()
-              && resource.data.get('ownerId', '') == request.auth.uid);
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
       allow write: if isManager();
     }
 
@@ -464,6 +482,8 @@ service cloud.firestore {
                   || resource.data.get('courierId', '') == request.auth.uid
                   || (hasRole('store') && inStorePool())
                   || (hasRole('courier') && inCourierPool())))
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg()
           ;
       // An order is a commercial act, so the caller must be an APPROVED PERSON —
       // not merely a session. `isSignedIn()` alone admitted both the anonymous
@@ -569,21 +589,27 @@ service cloud.firestore {
     match /financeApprovals/{approvalId} {
       allow read: if isManager()
           || (isSignedIn()
-              && resource.data.get('ownerId', '') == request.auth.uid);
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
       allow write: if isManager();
     }
 
     match /financePenalties/{penaltyId} {
       allow read: if isManager()
           || (isSignedIn()
-              && resource.data.get('ownerId', '') == request.auth.uid);
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
       allow write: if isManager();
     }
 
     match /financePaymentTerms/{termId} {
       allow read: if isManager()
           || (isSignedIn()
-              && resource.data.get('ownerId', '') == request.auth.uid);
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
       allow write: if isManager();
     }
 
@@ -598,7 +624,9 @@ service cloud.firestore {
     match /financeBudget/{budgetId} {
       allow read: if isManager()
           || (isSignedIn()
-              && resource.data.get('ownerId', '') == request.auth.uid);
+              && resource.data.get('ownerId', '') == request.auth.uid)
+          // stage-3.3 St5: org members may read their org's docs (legacy ''-docs excluded by the != '' guard).
+          || sameOrg();
       allow write: if isManager();
     }
 

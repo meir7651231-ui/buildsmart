@@ -163,6 +163,9 @@ final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
         ? _customersScopeFor(
             role: ref.watch(roleProvider),
             uid: ref.watch(currentUidProvider),
+            // stage-3.3 St4 — flag-gated so with ORG_SCOPED_QUERIES OFF (the
+            // default) NO org watch executes and the call is byte-identical.
+            orgId: kOrgScopedQueries ? ref.watch(currentOrgIdProvider) : null,
           )
         : null;
     // A13 — inject the callable seam so the Firestore impl can reach the
@@ -210,8 +213,22 @@ final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
 ///     manager/admin-only — the rules' backward-tolerant default).
 Query<Map<String, dynamic>> Function(
         CollectionReference<Map<String, dynamic>>)?
-    _customersScopeFor({required String? role, required String? uid}) {
+    _customersScopeFor(
+        {required String? role, required String? uid, String? orgId}) {
   if (uid == null || uid.isEmpty) return null; // no identity → do not hide data
+  // stage-3.3 St4 — the ORG layer sits ABOVE the uid layer (mirrors
+  // `_ordersScopeFor`): when the flag is ON and the session carries an orgId
+  // claim, every NON-god role prefers the org-wide tenant scope
+  // (`orgId == claim`) the St5 rules branch proves; manager/admin keep the god
+  // view below, and with the flag OFF (default) / no claim the uid branch
+  // stays VERBATIM.
+  if (kOrgScopedQueries &&
+      orgId != null &&
+      orgId.isNotEmpty &&
+      role != 'manager' &&
+      role != 'admin') {
+    return (c) => c.where('orgId', isEqualTo: orgId);
+  }
   switch (role) {
     case 'manager':
     case 'admin':
