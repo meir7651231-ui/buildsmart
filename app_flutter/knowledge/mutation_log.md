@@ -1581,3 +1581,8 @@
 - **mutation-verify (מבוצע):** משמר-`!= ''`↦`true` → `stage2_tenant_isolation_test` **אדום** (-1) → שחזור → 13/13. + באג-תחביר-מניפסט נתפס-חי (תבנית-`!`-פותחת=absent) → נוסחה.
 - **אימות:** analyze 0 · 58 בדיקות (isolation+profile-sweep+scope-diag+backend_flag+repos+org_stamp) · OFF=זהות (const-fold, אפס-watches) · גארדים ×3. שער מלא בשער-ה-commit.
 - **גבול-כנות:** מקרה-חיובי-emulator (token-עם-claim קורא דוק-חתום) + St6-הצמצום = בעלים/CI בלבד.
+
+## #clean-finish — פיננסים-4 + שני-לינקים (DIRECTIVE-clean-finish) — 2026-07-25
+- **הפתרון:** 4 הערות מותנות-מצב (דמו מצהיר-דמו · שרת כן-ריק) + labelHe ·· company2-פרופיל + AppBrand מודע-פרופיל ('BuildMax') + wordmark מנותב + workflow שני-ערוצים (dispatch-בלבד).
+- **mutation-verify (×2):** clause-דמו-מדד הוסר → גארד-ספציפי **אדום** → שחזור → ירוק. mirror-c2 ux מושמט → app_profile_flags **אדום** (-1) → שחזור → 8/8. + 2 תפיסות-חיות: גארד-workflow (ליטרל-matrix) וגארד-3.2 (name→ternary) נוסחו מחדש.
+- **אימות:** analyze 0 · 74 (סוללה) + 8 ירוקים · BYTES VERIFIED מלא · שער-מלא בשער-ה-commit. גבול-כנות: הלינקים-החיים עצמם = ריצת-ה-workflow שלך (secrets ב-CI).

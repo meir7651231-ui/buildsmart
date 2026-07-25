@@ -139,6 +139,16 @@ void main() {
       expect(c['CATALOG_BASE_URL'], '', reason: 'no company server baked in');
       expect(c['IMAGE_BASE_URL'], '', reason: 'no company CDN baked in');
     });
+
+    test('company2 column (stage-5): capabilities ON, no company values', () {
+      final c2 = profileDefaultsFor('company2');
+      expect(c2['ENABLE_WORD_FINDER'], isTrue);
+      expect(c2['GLOBAL_SEARCH'], isTrue);
+      expect(c2['STUDIO_SHARED_SYNC'], isFalse);
+      expect(c2['CATALOG_BASE_URL'], '');
+      expect(c2['IMAGE_BASE_URL'], '',
+          reason: 'company #2 brings its own CDN (bundled until then)');
+    });
   });
 
   group('c · mirror ↔ const self-consistency', () {

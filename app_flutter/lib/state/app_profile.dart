@@ -49,24 +49,30 @@ const String kAppProfile =
 
 const bool _bs = kAppProfile == 'buildsmart';
 const bool _clean = kAppProfile == 'clean';
+const bool _c2 = kAppProfile == 'company2';
+
+/// Shipped-UX capabilities are ON for every non-demo profile (stage-5: the
+/// second-company proof rides the same capability set as clean).
+const bool _ux = _bs || _clean || _c2;
 
 /// Guard for typos: an unknown profile string silently behaves as 'demo'
 /// (every derived default below is the demo value) — the proof test asserts
 /// this const so CI catches a misspelled profile early.
-const bool kAppProfileKnown = kAppProfile == 'demo' || _bs || _clean;
+const bool kAppProfileKnown =
+    kAppProfile == 'demo' || _bs || _clean || _c2;
 
 // ── shipped-UX capability flags (buildsmart + clean ON · demo OFF) ───────────
 
-const bool kProfileWordFinder = _bs || _clean;
-const bool kProfileKbLiveMirror = _bs || _clean;
-const bool kProfileKbGlobal = _bs || _clean;
-const bool kProfileRingDive = _bs || _clean;
-const bool kProfilePlainDive = _bs || _clean;
-const bool kProfileAxisDive = _bs || _clean;
-const bool kProfileGlobalSearch = _bs || _clean;
-const bool kProfileStoreComparisonUi = _bs || _clean;
-const bool kProfileSmartInput = _bs || _clean;
-const bool kProfileAppKbOnly = _bs || _clean;
+const bool kProfileWordFinder = _ux;
+const bool kProfileKbLiveMirror = _ux;
+const bool kProfileKbGlobal = _ux;
+const bool kProfileRingDive = _ux;
+const bool kProfilePlainDive = _ux;
+const bool kProfileAxisDive = _ux;
+const bool kProfileGlobalSearch = _ux;
+const bool kProfileStoreComparisonUi = _ux;
+const bool kProfileSmartInput = _ux;
+const bool kProfileAppKbOnly = _ux;
 
 // ── buildsmart-only: the owner's published-Studio mirror ─────────────────────
 
@@ -83,8 +89,9 @@ const String kProfileCatalogBaseUrl =
 /// Image CDN base — the buildsmart R2 bucket for demo+buildsmart (today's
 /// value, byte-identical); empty on clean (a generic app bundles its assets
 /// until a company CDN is configured).
-const String kProfileImageBaseUrl =
-    _clean ? '' : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev';
+const String kProfileImageBaseUrl = (_clean || _c2)
+    ? ''
+    : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev';
 
 // ── pure test mirror ─────────────────────────────────────────────────────────
 
@@ -95,7 +102,8 @@ const String kProfileImageBaseUrl =
 Map<String, Object> profileDefaultsFor(String profile) {
   final bs = profile == 'buildsmart';
   final clean = profile == 'clean';
-  final ux = bs || clean;
+  final c2 = profile == 'company2';
+  final ux = bs || clean || c2;
   return {
     'ENABLE_WORD_FINDER': ux,
     'KB_LIVE_MIRROR': ux,
@@ -109,7 +117,8 @@ Map<String, Object> profileDefaultsFor(String profile) {
     'APP_KB_ONLY': ux,
     'STUDIO_SHARED_SYNC': bs,
     'CATALOG_BASE_URL': bs ? 'https://buildsmart-b0b78.firebaseapp.com' : '',
-    'IMAGE_BASE_URL':
-        clean ? '' : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev',
+    'IMAGE_BASE_URL': (clean || c2)
+        ? ''
+        : 'https://pub-51f8c6ddf2de47e6b63e0f9588211cba.r2.dev',
   };
 }

@@ -100,7 +100,7 @@ lib/data/repositories/backend.dart:::defaultValue: kProfileCatalogBaseUrl
 lib/data/product_images.dart:::defaultValue: kProfileImageBaseUrl
 #
 # Regression — STAGE-3.2 (2026-07-24): company identity routes through AppBrand (one file per company):
-lib/config/app_brand.dart:::static const String name = 'BuildSmart'
+lib/config/app_brand.dart:::: 'BuildSmart';
 lib/main.dart:::title: AppBrand.name
 lib/data/related_info.dart:::AppBrand.shareDomain
 #
@@ -121,3 +121,9 @@ lib/data/repositories/stock_firebase.dart:::if (_orgId.isNotEmpty) 'orgId'
 lib/data/repositories/backend.dart:::kOrgScopedQueries
 ../firestore.rules:::function sameOrg()
 ../firestore.rules:::orgId', '') != ''
+#
+# Regression — DIRECTIVE-clean-finish (2026-07-25): finance-4 demo honesty + the two-links machinery:
+lib/screens/finance_hub_sheets.dart:::נתוני המדד מהשרת — כאן נתוני דמו
+lib/state/app_profile.dart:::_bs || _clean || _c2
+lib/config/app_brand.dart:::'BuildMax'
+../.github/workflows/clean-two-links.yml:::profile: company2

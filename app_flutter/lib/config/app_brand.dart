@@ -23,12 +23,20 @@
 // already owns it (product-manufacturer profiles: Polyroll/Huliot/Lipskey).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/state/app_profile.dart' show kAppProfile;
+
 /// The app's company identity. Swap per company; defaults = BuildSmart,
 /// byte-identical to the pre-3.2 hardcodes.
 abstract final class AppBrand {
   /// The product/company display name — interpolated into titles, the club
   /// cluster, share/export texts, PDF headers/footers and legal mentions.
-  static const String name = 'BuildSmart';
+  /// stage-5: profile-aware — the two-links proof needs a VISIBLE brand
+  /// difference per link; the default build stays byte-identical 'BuildSmart'.
+  static const String name = kAppProfile == 'clean'
+      ? 'BuildSmart Clean'
+      : kAppProfile == 'company2'
+          ? 'BuildMax'
+          : 'BuildSmart';
 
   /// The share deep-link origin (product links: `$shareDomain/p/<sku>`).
   static const String shareDomain = 'https://buildsmart.app';

@@ -477,10 +477,12 @@ void _openIndex(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFFFE0A3)),
             ),
-            child: const CfgText(
+            child: CfgText(
               'finance_hub_sheets.index_server_note',
-              '⚙️ נתוני המדד מתעדכנים מהשרת',
-              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+              useFirebaseBackend
+                  ? '⚙️ נתוני המדד מתעדכנים מהשרת'
+                  : '⚙️ בפרודקשן: נתוני המדד מהשרת — כאן נתוני דמו',
+              style: const TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
           _FinRows(useFirebaseBackend ? const <Widget>[] : [
@@ -653,10 +655,12 @@ void _openSubs(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFFFE0A3)),
             ),
-            child: const CfgText(
+            child: CfgText(
               'finance_hub_sheets.subs_server_note',
-              '⚙️ נתוני קבלני המשנה מתעדכנים מהשרת',
-              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+              useFirebaseBackend
+                  ? '⚙️ נתוני קבלני המשנה מתעדכנים מהשרת'
+                  : '⚙️ בפרודקשן: נתוני קבלני המשנה מהשרת — כאן נתוני דמו',
+              style: const TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
           if (!useFirebaseBackend) _FinCallout(
@@ -1076,10 +1080,12 @@ void _openRoi(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFFFE0A3)),
             ),
-            child: const CfgText(
+            child: CfgText(
               'finance_hub_sheets.roi_server_note',
-              '⚙️ נתוני ה-ROI מתעדכנים מהשרת',
-              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+              useFirebaseBackend
+                  ? '⚙️ נתוני ה-ROI מתעדכנים מהשרת'
+                  : '⚙️ בפרודקשן: נתוני ה-ROI מהשרת — כאן נתוני דמו',
+              style: const TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
           _FinRows([
@@ -1133,10 +1139,12 @@ void _openInvoiceSplit(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFFFE0A3)),
             ),
-            child: const CfgText(
+            child: CfgText(
               'finance_hub_sheets.invoice_server_note',
-              '⚙️ נתוני פיצול החשבונית מתעדכנים מהשרת',
-              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+              useFirebaseBackend
+                  ? '⚙️ נתוני פיצול החשבונית מתעדכנים מהשרת'
+                  : '⚙️ בפרודקשן: נתוני פיצול החשבונית מהשרת — כאן נתוני דמו',
+              style: const TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
             ),
           ),
           _FinRows(useFirebaseBackend ? const <Widget>[] : [

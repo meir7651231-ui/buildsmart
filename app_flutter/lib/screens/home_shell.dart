@@ -2,6 +2,7 @@ import 'package:buildsmart/data/repositories/backend.dart'
     show kIntelLive, kUserSystem;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
+import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -653,7 +654,9 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           'סוגי המשתמשים באפליקציה.',
                       child: CfgText(
                         'home.topbar.brand',
-                        'BuildSmart',
+                        // stage-5: profile-aware wordmark (default byte-identical
+                        // 'BuildSmart'; Studio overrides still win at runtime).
+                        AppBrand.name,
                         style: TextStyle(
                           color: BsTokens.brand,
                           fontWeight: FontWeight.w800,
