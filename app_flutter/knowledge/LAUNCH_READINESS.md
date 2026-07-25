@@ -368,6 +368,14 @@ _95 ריכוז backlog · 96 סיווג P0/P1/P2 · 97 go/no-go criteria · 98 �
 4. **App Check** (S5.7) — אכיפה בקונסולה.
 5. הערה: תקרות-הסקייל (chat 500-אחרונות · material_requests/tasks 500) פעילות רק בבניית-שרת; orders הוחרג בכוונה (מלכודת-ts) — pagination = יוזמת Pillar-5.
 
+## 📦 שלב-4 (Clean) — מסירת-בעלים (2026-07-25)
+> הפרופיל קיים ומוכח (app_profile_flags_test); הבנייה מקומפלת ירוק (`scripts/build_clean.sh`). **הלינק החי = הצעדים שלך:**
+1. **בניית-Clean:** `bash scripts/build_clean.sh` (או ידנית: `flutter build web --release --dart-define=APP_PROFILE=clean`).
+2. **פריסה לערוץ נפרד (לא נוגע באתר-החי!):** `firebase hosting:channel:deploy clean --project buildsmart-b0b78` → מתקבל **לינק-ערוץ נפרד** לפתוח בדפדפן. (לחברה-אמיתית: פרויקט-Firebase משלה + `flutterfire configure`.)
+3. **מיתוג לחברה:** עריכת `lib/config/app_brand.dart` (קובץ-אחד) + מעטפות לפי `knowledge/BRAND_SWAP_CHECKLIST.md`.
+4. **גבול-כנות מתועד:** Clean-v1 נושא את קטלוג-האינסטלציה כקטלוג-הגנרי (מנועי-החישוב צריכים מוצרים; "קטלוג-ריק" מתנגש בהם) — החלפת-קטלוג-מלאה = seam-3.1(c) (קובץ-const-שני או server-profile) · פירוק-מודולרי = שלב-6.
+5. **שלב-5 (הוכחת-שכפול):** חזרה על 1-3 עם שם+קטלוג של חברת-דמו → **שני לינקים חיים, קוד אחד.**
+
 ## יומן-התקדמות (steps)
 - ✅ **סריקת כל 9 הפאזות הושלמה** — A (1–10) · B (11–25) · C (26–40) · D (41–52) ·
   E (53–64) · F (65–74) · G (75–89) · H (90–94).
