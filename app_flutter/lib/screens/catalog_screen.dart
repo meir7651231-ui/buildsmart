@@ -4,7 +4,9 @@ import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_source.dart'
-    show resolvedCatalogProducts;
+    show companyCatalogActive, resolvedCatalogProducts;
+import 'package:buildsmart/data/company_categories.dart'
+    show companyCategorySections, companyCategorySummaries;
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/fuzzy_search.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart'
@@ -1902,6 +1904,16 @@ bool _categoryHasContent(String title) {
 /// node's dominant system (fixtures show in both), consistent with the tree
 /// drill. null → all. Content-less categories (B4) are always filtered out.
 List<Section> _catsForSystem(WaterSystem? system) {
+  // Company overlay (import feature): the rows ARE the imported catalog's
+  // categories — the company's own taxonomy, system-agnostic (imported data
+  // carries no WaterSystem mapping; every live filter setter writes null).
+  if (companyCatalogActive) {
+    return companyCategorySections(resolvedCatalogProducts);
+  }
+  // Empty shell, nothing imported yet: an honest blank under the import
+  // card — never the 0-count plumbing maze. (Dead branch on demo/buildsmart:
+  // the compile-time catalog there is never empty.)
+  if (resolvedCatalogProducts.isEmpty) return const [];
   final out = <Section>[];
   for (final c in kCatalogCats) {
     if (!_categoryHasContent(c.title)) continue;
@@ -1954,6 +1966,12 @@ List<Section> _catsForSystem(WaterSystem? system) {
 final categorySummaryProvider =
     Provider<Map<String, ({int count, String desc})>>((ref) {
   final system = ref.watch(catalogSystemFilterProvider);
+  // Company overlay: summaries derive from the imported list (same shape,
+  // same '$count מוצרים' idiom) — the const-tree walk has nothing to say
+  // about a company's categories.
+  if (companyCatalogActive) {
+    return companyCategorySummaries(resolvedCatalogProducts);
+  }
   return {
     for (final c in kCatalogCats) c.title: _categorySummary(c.title, system),
   };
@@ -1991,17 +2009,31 @@ CatalogNode? _findCatalogTreeNodeByTitle(String title) {
 /// tapped category suggestion takes the user straight to those products.
 void openCatalogCategory(WidgetRef ref, String categoryTitle) {
   ref.read(mainTabProvider.notifier).state = 0; // catalog tab
+  // Company overlay: an imported category resolves to a synthetic product
+  // leaf (same fallback as _CatalogRow.onTap) — never the "בקרוב" placeholder.
   final node = _findCatalogTreeNodeByTitle(categoryTitle) ??
-      CatalogNode(
-        id: 'placeholder.$categoryTitle',
-        title: categoryTitle,
-        emoji: kCatalogCats
-            .firstWhere(
-              (c) => c.title == categoryTitle,
-              orElse: () => const Section(id: '', emoji: '', title: ''),
+      (companyCatalogActive
+          ? CatalogNode(
+              id: 'company.$categoryTitle',
+              title: categoryTitle,
+              emoji: companyCategorySections(resolvedCatalogProducts)
+                  .firstWhere(
+                    (c) => c.title == categoryTitle,
+                    orElse: () => const Section(id: '', emoji: '📦', title: ''),
+                  )
+                  .emoji,
+              lipskeyCategory: categoryTitle,
             )
-            .emoji,
-      );
+          : CatalogNode(
+              id: 'placeholder.$categoryTitle',
+              title: categoryTitle,
+              emoji: kCatalogCats
+                  .firstWhere(
+                    (c) => c.title == categoryTitle,
+                    orElse: () => const Section(id: '', emoji: '', title: ''),
+                  )
+                  .emoji,
+            ));
   ref.read(catalogTreePathProvider.notifier).state = [node];
 }
 
@@ -2020,13 +2052,23 @@ class _CatalogRow extends ConsumerWidget {
       onTap: () {
         // Categories without tree data drill into a designed "coming soon"
         // screen via a childless placeholder node, so the experience stays
-        // consistent across every main category.
+        // consistent across every main category. With a COMPANY catalog live,
+        // a derived row instead becomes a synthetic PRODUCT leaf
+        // (lipskeyCategory = the row title) — the existing drill serves it
+        // end-to-end (isProductLeaf → system base → auto-facets → list).
         final node = _findCatalogTreeNodeByTitle(cat.title) ??
-            CatalogNode(
-              id: 'placeholder.${cat.title}',
-              title: cat.title,
-              emoji: cat.emoji,
-            );
+            (companyCatalogActive
+                ? CatalogNode(
+                    id: 'company.${cat.title}',
+                    title: cat.title,
+                    emoji: cat.emoji,
+                    lipskeyCategory: cat.title,
+                  )
+                : CatalogNode(
+                    id: 'placeholder.${cat.title}',
+                    title: cat.title,
+                    emoji: cat.emoji,
+                  ));
         ref.read(catalogTreePathProvider.notifier).state = [node];
       },
       child: Padding(

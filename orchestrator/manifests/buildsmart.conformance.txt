@@ -168,3 +168,16 @@ lib/screens/company_catalog_import_sheet.dart:::טעינת קטלוג החברה
 lib/screens/catalog_screen.dart:::_CompanyCatalogImportCard
 lib/screens/suppliers_screen.dart:::טעינת קטלוג החברה
 lib/services/file_transfer.dart:::downloadTextFileProvider
+#
+# Regression — CLEAN-100 (2026-07-25 · owner "תוצאה 100 לא 99" · E2E-driven catches): derived rows + brand honesty:
+#  the overlay-activity getter + the pure derived-categories module:
+lib/data/catalog_source.dart:::companyCatalogActive
+lib/data/company_categories.dart:::companyCategorySections
+#  the rows seam serves the company taxonomy; a derived row is a PRODUCT leaf (never "בקרוב"):
+lib/screens/catalog_screen.dart:::companyCategorySections(resolvedCatalogProducts)
+lib/screens/catalog_screen.dart:::lipskeyCategory: cat.title
+#  the welcome hero + terms ride AppBrand (E2E catch: the hero said 'BuildSmart' on a clean build):
+lib/screens/welcome_screen.dart:::AppBrand.name
+lib/screens/welcome_screen.dart:::!'BuildSmart',
+#  the shell's onboarding never promises BuildSmart's thousands-of-products:
+lib/screens/onboarding_screen.dart:::kProfileEmptyCatalog

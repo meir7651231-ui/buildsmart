@@ -65,6 +65,16 @@ void setCompanyCatalog(List<LipskeyCatalogProduct>? items) {
   _companyCatalog = items;
 }
 
+/// TRUE when a company catalog is the live universe (the import overlay is
+/// installed and non-empty). UI derivations (category rows, drill fallbacks)
+/// key off THIS — not the profile const — so the define-less demo suite can
+/// prove them with [setCompanyCatalog] alone, and the closed-set profile
+/// sweep stays untouched.
+bool get companyCatalogActive {
+  final c = _companyCatalog;
+  return c != null && c.isNotEmpty;
+}
+
 /// The resolved product universe for the active source. Opt-in consumers read
 /// THIS instead of `kCatalogProducts` directly. Under the default (v1) this
 /// returns the existing image-upgraded list; v2 appends the 789 new products.

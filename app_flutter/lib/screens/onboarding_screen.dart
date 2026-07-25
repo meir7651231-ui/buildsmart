@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:buildsmart/screens/profession_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
@@ -35,8 +36,14 @@ const List<OnboardingSlide> kOnboardingSlides = [
   OnboardingSlide(
     icon: Icons.waving_hand_outlined,
     title: 'ברוכים הבאים ל-${AppBrand.name}',
-    body: 'הקטלוג החכם לאינסטלציה ובנייה — אלפי מוצרים, מותגים '
-        'וחיבורים, במקום אחד.',
+    // The empty shell must not promise BuildSmart's "thousands of products"
+    // (E2E honesty catch 2026-07-25) — it states the ENGINE's true offer;
+    // demo/buildsmart keep the verbatim marketing line.
+    body: kProfileEmptyCatalog
+        ? 'קטלוג, חיפוש חכם, סל והזמנות — הכול במקום אחד. '
+            'טוענים את קטלוג החברה ומתחילים לעבוד.'
+        : 'הקטלוג החכם לאינסטלציה ובנייה — אלפי מוצרים, מותגים '
+            'וחיבורים, במקום אחד.',
   ),
   OnboardingSlide(
     icon: Icons.search,

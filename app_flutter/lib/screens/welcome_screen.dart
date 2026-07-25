@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/logic/input_validators.dart';
@@ -676,9 +677,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                     ),
                     const SizedBox(height: BsTokens.space4),
+                    // Company identity rides AppBrand (stage-3.2): demo keeps
+                    // 'BuildSmart' byte-identical; clean/company2 show their
+                    // own name (E2E catch 2026-07-25: the hero said
+                    // 'BuildSmart' on a clean build).
                     const CfgText(
                       'welcome.hero.title',
-                      'BuildSmart',
+                      AppBrand.name,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w900,
@@ -1008,7 +1013,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           ),
                           const CfgText(
                             'welcome_screen.terms_suffix',
-                            ' של BuildSmart',
+                            ' של ${AppBrand.name}',
                             style: TextStyle(
                               color: BsTokens.mutedLight,
                               fontSize: 12,

@@ -59,6 +59,9 @@ const Set<String> kCatalogGateConsumers = {
   // import feature (owner "כן" 2026-07-25) — the company-catalog pour-in:
   'lib/state/company_catalog_store.dart', // hydrate guard (clean-only)
   'lib/screens/catalog_screen.dart', // clean-only import-card mount
+  // clean-100 (E2E honesty catch): the shell's onboarding must not promise
+  // BuildSmart's "thousands of products" — the body line is profile-gated:
+  'lib/screens/onboarding_screen.dart',
 };
 
 /// Files consuming [kProfileEmptySeeds] in CODE: the declaration + the eight

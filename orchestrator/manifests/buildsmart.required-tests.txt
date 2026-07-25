@@ -22,3 +22,6 @@ test/app_profile_flags_test.dart
 test/stage_clean_empty_test.dart
 # company-catalog import — template/parser/codec/seam/store (two-world hydration proof):
 test/company_catalog_import_test.dart
+# clean-100 — derived category rows over the imported catalog (pure + widget tiers):
+test/company_categories_test.dart
+test/company_catalog_rows_test.dart
