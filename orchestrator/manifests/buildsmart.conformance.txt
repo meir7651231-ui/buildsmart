@@ -111,3 +111,8 @@ lib/data/related_info.dart:::AppBrand.shareDomain
 #  the client parses + exposes the claim (null default — zero-regression):
 lib/state/auth_state.dart:::orgIdFromClaims
 lib/state/auth_state.dart:::currentOrgIdProvider
+#
+# Regression — STAGE-3.3 St3 (2026-07-25): org stamps are CREATE-only + round-trip-preserved (never a toDoc session-stamp on orders):
+lib/state/orders_engine.dart:::if (orgId.isNotEmpty) 'orgId'
+lib/data/repositories/orders_firebase.dart:::if (o.orgId.isNotEmpty) 'orgId'
+lib/data/repositories/stock_firebase.dart:::if (_orgId.isNotEmpty) 'orgId'

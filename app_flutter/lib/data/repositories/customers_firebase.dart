@@ -90,14 +90,22 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   /// uid [toDoc] stamps as `ownerId` when the model carries no owner of its own
   /// — the A3 `contractorUid` stamp, taken at construction because this derived
   /// surface has no `placeOrder`-style write call-site to stamp at.
+  ///
+  /// stage-3.3 St3 — [orgId] is the session's `orgId` custom claim (injected by
+  /// the provider from `currentOrgIdProvider`; '' when signed-out / claim-less /
+  /// Firebase-free / in tests), the org [toDoc] stamps as `orgId` — GUARDED
+  /// (only when non-empty), the same taken-at-construction discipline as
+  /// [ownerUid].
   FirebaseCustomersRepository({
     RemoteCollectionSource? source,
     bool? serverCallables,
     OrderFunctionsGateway? functions,
     String ownerUid = '',
+    String orgId = '',
   })  : _serverCallables = serverCallables,
         _functions = functions,
         _ownerUid = ownerUid,
+        _orgId = orgId,
         super(source ?? FirestoreCollectionSource('customers'));
 
   /// A13 — null means "use the compile-time default" ([kServerCallables]).
@@ -108,6 +116,10 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
 
   /// C2 — the session uid [toDoc] stamps as `ownerId` ('' = nothing to stamp).
   final String _ownerUid;
+
+  /// stage-3.3 St3 — the session org claim [toDoc] stamps as `orgId` ('' = no
+  /// claim, nothing to stamp).
+  final String _orgId;
 
   // ── base contract: seed · mapping · ordering · fresh-backend hook ───────────
 
@@ -145,6 +157,14 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
           'ownerId': c.ownerId
         else if (_ownerUid.isNotEmpty)
           'ownerId': _ownerUid,
+        // stage-3.3 St3 — org stamp, GUARDED ('' → omitted, so with no claim
+        // the doc stays byte-identical — zero regression). [ManagerCustomer]
+        // carries no orgId field, so the SESSION claim is the only source —
+        // SAFE here because every write this repo fires is a manager-only
+        // upsert (the fresh-backend seed push / an optimistic credit upsert),
+        // never a diff-frozen advance path that must round-trip a foreign doc
+        // unchanged.
+        if (_orgId.isNotEmpty) 'orgId': _orgId,
       };
 
   /// Firestore doc → `ManagerCustomer`. Inverse of [toDoc]: the doc-id becomes

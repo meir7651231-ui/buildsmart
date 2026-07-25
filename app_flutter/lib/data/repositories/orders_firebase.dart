@@ -79,6 +79,8 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
         if (o.shipTo.isNotEmpty) 'shipTo': o.shipTo,
         if (o.notes.isNotEmpty) 'notes': o.notes,
         if (o.contractorUid.isNotEmpty) 'contractorUid': o.contractorUid,
+        // stage-3.3 St3: org stamped at CREATE only (advance diffs stay {stage,claim} — rules hasOnly).
+        if (o.orgId.isNotEmpty) 'orgId': o.orgId,
         // A4 (claim-on-first-advance) — the claiming store/courier uids, written
         // only when non-empty so the seed + every pre-A4 doc round-trips
         // unchanged (mirrors `contractorUid`). The `set(merge:true)` write path
@@ -115,6 +117,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       shipTo: (j['shipTo'] as String?) ?? '',
       notes: (j['notes'] as String?) ?? '',
       contractorUid: (j['contractorUid'] as String?) ?? '',
+      orgId: (j['orgId'] as String?) ?? '',
       storeUid: (j['storeUid'] as String?) ?? '',
       courierUid: (j['courierUid'] as String?) ?? '',
       customerPhone: (j['customerPhone'] as String?) ?? '',
@@ -200,6 +203,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     String shipTo = '',
     String notes = '',
     String contractorUid = '',
+    String orgId = '',
     String customerPhone = '',
   }) {
     final order = Order(
@@ -214,6 +218,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       shipTo: shipTo,
       notes: notes,
       contractorUid: contractorUid,
+      orgId: orgId,
       customerPhone: customerPhone,
     );
     upsert(order); // optimistic prepend + background set

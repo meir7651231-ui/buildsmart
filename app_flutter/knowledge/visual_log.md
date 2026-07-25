@@ -2141,3 +2141,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## stage3-catalog-reroute — ניתוב צרכני-קטלוג למקור-הפעיל — שינוי-נראה: **לא** (זהה-בייטים v1) — 2026-07-24
 **רקע (המשך-3.1):** ~35 אתרי-קוד ב-9 קבצים (בהם 7 מסכים: catalog_screen · lipskey×2 · floating_card_keyboard · store_dashboard · ai_finder · worker-path דרך task_skus) הוחלפו `kCatalogProducts`→`resolvedCatalogProducts`. **מה רואים: שום שינוי** — תחת v1 ה-getter מחזיר את אותו אובייקט-const בדיוק; 49 בדיקות-צרכנים עברו ללא-עדכון. משמר-סט-סגור חדש מוכח-מוטציה. **הפיכות:** שחזור הליטרלים + ה-imports.
+
+## stage3-org-stamp — חותמת-ארגון בצ'קאאוט — שינוי-נראה: **לא** (שדה-מודל רדום) — 2026-07-25
+**רקע (St3):** `store_screen.dart` — קריאת `placeOrder` בצ'קאאוט מעבירה עכשיו גם `orgId: currentOrgIdProvider ?? ''` (לצד contractorUid, אותו idiom-A3). **מה רואים: שום שינוי** — אין משתמש עם claim עד ש-setOrg יופעל; ללא-claim השדה ריק ולא-מסודרל. 91 בדיקות ירוקות. **הפיכות:** הסרת השורה.

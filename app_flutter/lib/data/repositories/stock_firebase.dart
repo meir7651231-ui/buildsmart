@@ -109,8 +109,19 @@ class FirebaseStockRepository extends FirestoreCachedRepo<StockItem>
   /// instance is resolved LAZILY by [FirestoreCollectionSource] (never here), so
   /// construction does not require Firebase to be initialised. Pass [source] in
   /// tests to drive the cache with a fake.
-  FirebaseStockRepository({RemoteCollectionSource? source})
-      : super(source ?? FirestoreCollectionSource('stock'));
+  ///
+  /// stage-3.3 St3 — [orgId] is the session's `orgId` custom claim (injected by
+  /// the provider from `currentOrgIdProvider`; '' when signed-out / claim-less /
+  /// Firebase-free / in tests), the org [toDoc] stamps as `orgId` — GUARDED
+  /// (only when non-empty), the C2 `ownerUid` discipline
+  /// (`customers_firebase.dart`).
+  FirebaseStockRepository({RemoteCollectionSource? source, String orgId = ''})
+      : _orgId = orgId,
+        super(source ?? FirestoreCollectionSource('stock'));
+
+  /// stage-3.3 St3 — the session org claim [toDoc] stamps as `orgId` ('' = no
+  /// claim, nothing to stamp).
+  final String _orgId;
 
   // ── base contract: seed · mapping · ordering · fresh-backend hook ───────────
 
@@ -135,6 +146,11 @@ class FirebaseStockRepository extends FirestoreCachedRepo<StockItem>
         'qty': v.qty,
         'location': v.location,
         'projectId': v.projectId,
+        // stage-3.3 St3 — org stamp, GUARDED ('' → omitted, so with no claim
+        // the doc stays byte-identical — zero regression). [StockItem] carries
+        // no orgId field, so the SESSION claim is the only source; every write
+        // here is the fresh-backend seed push / an optimistic `move` upsert.
+        if (_orgId.isNotEmpty) 'orgId': _orgId,
       };
 
   /// Firestore doc → `StockItem`. Inverse of [toDoc]: `sku` is the surrogate

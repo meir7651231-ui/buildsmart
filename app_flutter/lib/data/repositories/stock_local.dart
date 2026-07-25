@@ -38,6 +38,7 @@ import 'package:buildsmart/logic/manager_dashboard.dart'
         kManagerCatalogCategories,
         kManagerStores,
         managerAnalytics;
+import 'package:buildsmart/state/auth_state.dart' show currentOrgIdProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local (const-backed) implementation of [StockRepository]. Every read
@@ -92,7 +93,11 @@ class LocalStockRepository implements StockRepository {
 /// [StockRepository] contract → providers + UI are unchanged.
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
   if (useFirebaseBackend) {
-    final repo = FirebaseStockRepository()..attach();
+    final repo = FirebaseStockRepository(
+      // stage-3.3 St3 — the session org claim `toDoc` stamps as `orgId`
+      // (guarded: only when a claim is known; '' → nothing stamped).
+      orgId: ref.read(currentOrgIdProvider) ?? '',
+    )..attach();
     ref.onDispose(repo.dispose);
     return repo;
   }

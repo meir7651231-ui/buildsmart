@@ -1570,3 +1570,8 @@
 - **mutation-verify (מבוצע):** orgIdFromClaims↦always-null → `org_claim_test` **אדום** (-1: trimmed-id case) → שחזור → 5/5.
 - **אימות:** functions `tsc --noEmit` strict **0** (node_modules הותקן) · flutter analyze 0 · 55 בדיקות (org_claim+auth_state+board_auth_server) ירוקות · 6 אתרי-AuthSnapshot לא-נגעו (null-default) · גארדים ×4 (כולל ../functions — שכבת-ה-functions מוגנת-שער מעתה). שער מלא בשער-ה-commit.
 - **גבול-כנות:** ריצת-emulator + פריסה = מסירת-בעלים (שורה נוספה ל-LAUNCH_READINESS §שלב-2/3.3).
+
+## #stage3-org-stamp — St3 חותמות-רשומות (בריאה-בלבד) — 2026-07-25
+- **הפתרון:** Order.orgId (A4-idiom) + threading-בריאה placeOrder→checkout · copyWith-משמר (לא-פרמטר) · toDoc-מהמודל-בלבד (הזמנות) / ctor-session מגודר (לקוחות/מלאי — אין diff-קפוא). ללא-claim = זהות-בייטים.
+- **mutation-verify (מבוצע):** copyWith↦drops-stamp → `stage3_org_stamp_test` **אדום** (-1: שימור-בקידום) → שחזור → 5/5.
+- **אימות:** analyze 0 · 91 בדיקות (org_stamp+orders_engine+cached_repo+uid_a4_a6+customers/stock repos+checkout) ירוקות · גארדים ×3. שער מלא בשער-ה-commit.

@@ -3003,6 +3003,11 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 // the order (additive; '' when signed-out / Firebase-free). The
                 // display still uses [who]; A4 will scope the listen on this.
                 final contractorUid = ref.read(currentUidProvider) ?? '';
+                // stage-3.3 St3 — stamp the placer's `orgId` custom claim at
+                // CREATE time only ('' when signed-out / claim-less). It
+                // round-trips on the model from here on, so stage-advance
+                // diffs stay {stage,claim} (the rules' hasOnly gate).
+                final orgId = ref.read(currentOrgIdProvider) ?? '';
                 // The placer's phone (profile `contact`) — stamped so the
                 // store/courier/manager order card can show the 📞/💬 buttons
                 // reaching the contractor who placed this order. Empty (e.g. a
@@ -3021,6 +3026,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       shipTo: shipTo,
                       notes: notes,
                       contractorUid: contractorUid,
+                      orgId: orgId,
                       customerPhone: customerPhone,
                     );
                 // G4 — key funnel event: a contractor completed checkout. Only

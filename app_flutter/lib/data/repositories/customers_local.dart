@@ -19,7 +19,7 @@ import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
 import 'package:buildsmart/data/repositories/order_functions.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/state/auth_state.dart'
-    show currentUidProvider, roleProvider;
+    show currentOrgIdProvider, currentUidProvider, roleProvider;
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'
     show CollectionReference, Query;
@@ -178,6 +178,9 @@ final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
             // C2 — the session uid `toDoc` stamps as `ownerId` (guarded,
             // A3-style: only when known; '' when signed-out → nothing stamped).
             ownerUid: ref.read(currentUidProvider) ?? '',
+            // stage-3.3 St3 — the session org claim `toDoc` stamps as `orgId`
+            // (guarded: only when a claim is known; '' → nothing stamped).
+            orgId: ref.read(currentOrgIdProvider) ?? '',
           )
           ..attach();
     ref.onDispose(repo.dispose);

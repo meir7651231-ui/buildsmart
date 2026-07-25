@@ -91,6 +91,7 @@ class Order {
     this.shipTo = '',
     this.notes = '',
     this.contractorUid = '',
+    this.orgId = '',
     this.storeUid = '',
     this.courierUid = '',
     this.customerPhone = '',
@@ -107,6 +108,16 @@ class Order {
   /// every UI; A4 will scope the orders listen on this field. Written only when
   /// non-empty so the seed + legacy docs round-trip unchanged (zero regression).
   final String contractorUid;
+
+  /// Stage-3.3 St3 (org-scoped orders) — the placing contractor's `orgId`
+  /// custom claim, stamped ONCE at `placeOrder` time (CREATE only) and
+  /// round-tripped on the model from then on — NEVER re-derived from session
+  /// state, so a store/courier stage-advance re-sends the stamp it read (or
+  /// omits it) and the write diff stays `{stage[,claim]}` (the rules' hasOnly
+  /// gate). Additive and display-neutral: written only when non-empty so the
+  /// seed + every pre-org doc round-trips byte-identical (mirrors
+  /// [contractorUid] exactly).
+  final String orgId;
 
   /// A4 (launch uid · claim-on-first-advance) — the STORE's `auth.uid` that
   /// CLAIMED this order. Empty until the first store party advances it from the
@@ -184,6 +195,9 @@ class Order {
         shipTo: shipTo ?? this.shipTo,
         notes: notes ?? this.notes,
         contractorUid: contractorUid,
+        // stage-3.3 St3 — org stamp preserved across every copy (advance/
+        // setStage go through copyWith); stamped ONLY at placeOrder.
+        orgId: orgId,
         // A4 — claim fields preserved across every copy (advance/setStage go
         // through copyWith), and set when a claim stamps them.
         storeUid: storeUid ?? this.storeUid,
@@ -217,6 +231,7 @@ class Order {
         if (shipTo.isNotEmpty) 'shipTo': shipTo,
         if (notes.isNotEmpty) 'notes': notes,
         if (contractorUid.isNotEmpty) 'contractorUid': contractorUid,
+        if (orgId.isNotEmpty) 'orgId': orgId,
         if (storeUid.isNotEmpty) 'storeUid': storeUid,
         if (courierUid.isNotEmpty) 'courierUid': courierUid,
         if (customerPhone.isNotEmpty) 'customerPhone': customerPhone,
@@ -240,6 +255,7 @@ class Order {
         shipTo: (j['shipTo'] as String?) ?? '',
         notes: (j['notes'] as String?) ?? '',
         contractorUid: (j['contractorUid'] as String?) ?? '',
+        orgId: (j['orgId'] as String?) ?? '',
         storeUid: (j['storeUid'] as String?) ?? '',
         courierUid: (j['courierUid'] as String?) ?? '',
         customerPhone: (j['customerPhone'] as String?) ?? '',
@@ -454,6 +470,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     String shipTo = '',
     String notes = '',
     String contractorUid = '',
+    String orgId = '',
     String customerPhone = '',
   }) {
     // S4.4 — bound to Firestore: the repo's verbatim port places the order
@@ -472,6 +489,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
         shipTo: shipTo,
         notes: notes,
         contractorUid: contractorUid,
+        orgId: orgId,
         customerPhone: customerPhone,
       );
     }
@@ -487,6 +505,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       shipTo: shipTo,
       notes: notes,
       contractorUid: contractorUid,
+      orgId: orgId,
       customerPhone: customerPhone,
     );
     state = [order, ...state];
