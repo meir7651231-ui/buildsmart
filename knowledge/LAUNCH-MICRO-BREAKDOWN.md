@@ -176,6 +176,8 @@
 > • **BuildMax** (company2 · +789 קטלוג): `https://buildsmart-b0b78--company2-mwzxe4po.web.app`
 > (ערוצי-preview · תפוגה 2026-08-01). **פיננסים-4 סגור (מאומת).** ⚠️ CI f977eb09 = **6✅/3❌** — Protocol-Enforcement + Android-Play + GH-Pages **זהים בדיוק לקומיט-הקודם (וגם ל-commit-בלי-קוד) → קיימים-מראש, לא באשמת-Clean** (2 לא-חוסמים היסטורית · Android-Play = חוסם-Play אמיתי אך **נפרד**). **החזון מוכח end-to-end. נשאר להשקה: (א) Android-Play הקיים-מראש · (ב) קטלוג-לפי-חברה מלא (seam 3.1c) + שלב-6 · (ג) הדלקות/keystore/R2 של הבעלים.**
 
+> 🏁 **25/7 — "clean-100": Clean = empty-shell אמיתי + ייבוא-קטלוג-לחברה (CSV).** 3 קומיטים (`f977eb09..6761dea1`). ✅ **Clean ships ZERO content** (`app_profile.dart:143` `catalogEmptyForProfile` · company2/BuildMax שומר קטלוג) `d13d01b7` — **סוגר את גבול-היושר של שלב-4.** ✅ **ייבוא-קטלוג-לחברה** — template + CSV → seam-נקודה-אחת (`company_catalog_import.dart` + sheet + store + `scripts/catalog_import.py`) `196138a1` — **סוגר את "קטלוג-לפי-חברה מלא".** ✅ E2E-דפדפן-אמיתי + brand-honesty `6761dea1`. CI: web + catalog-qa + **clean-two-links ירוקים שוב** (5✅); 3 שערי-הבעיה (Protocol/Android-Play/GH-Pages) **בתהליך** — אדומים עקבית על כל קומיט קודם (כולל commit-בלי-קוד) → **צפוי אדום-קיים-מראש שוב**. **ה-white-label עכשיו מלא:** מנוע + empty-shell + העלאת-קטלוג-לחברה + מיתוג + רב-דיירות + 2-לינקים-מוכחים. **נשאר: Android-Play הקיים-מראש · שלב-6 מודולריזציה · הדלקות/keystore/R2 של הבעלים.**
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
