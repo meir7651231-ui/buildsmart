@@ -171,6 +171,11 @@
 
 > 🎯 **25/7 — הנחיית-clean-finish בוצעה בקוד (`f977eb09`): פיננסים-4 ✅ + מכונת-2-הלינקים ✅.** **משימה-1:** 4 הערות-פיננסים MODE-CONDITIONAL — בדמו "כאן נתוני דמו" (מדד `:484`/משנה `:662`/ROI `:1087`/חשבונית), mutation-verify ×2. **פיננסים-4 סגור סוף-סוף (אחרי 4 דילוגים)** — אומת-בייטים. **משימה-2:** פרופיל `company2`='**BuildMax**' · `AppBrand.name` פר-פרופיל (demo=זהה-בייטים) · workflow **`clean-two-links.yml`** (ידני/workflow_dispatch): מטריצה בונה clean+company2 (+CATALOG_SOURCE=v2, +789) **מאותו-commit** → 2 ערוצי-preview → מדפיס 2 לינקים. הבדל-נראה: שם+גודל-קטלוג. 82 טסטים (טענת-צי). **⚠️ CI (יושר):** f977eb09 **עדיין רץ**; על `9f6503ba` הקודם (שהסתיים) **3 כשלים** — GitHub-Pages + Protocol-Enforcement (**היסטורית לא-חוסמים**: legacy-Preact + שער-markdown-פנימי) + **Android-Play** (נכשל על commit-בלי-קוד → **כנראה קיים-מראש/flaky**). **הלינקים עדיין לא-חיים** — ה-workflow ידני, הבעלים מריץ. **TODO: לאמת שוב כשה-CI של f977eb09 יסיים — לוודא 3 השערים.**
 
+> 🎉 **25/7 — 2 הלינקים חיים! הוכחת "קוד-אחד → 2 אפליקציות" הושגה.** הבעלים הפעיל `clean-two-links` (run `30172385413`) = **SUCCESS** — 2 jobs ירוקים, **מאותו commit `f977eb09`**, האתר-החי לא-נגע:
+> • **Clean:** `https://buildsmart-b0b78--clean-oc6r3fm8.web.app`
+> • **BuildMax** (company2 · +789 קטלוג): `https://buildsmart-b0b78--company2-mwzxe4po.web.app`
+> (ערוצי-preview · תפוגה 2026-08-01). **פיננסים-4 סגור (מאומת).** ⚠️ CI f977eb09 = **6✅/3❌** — Protocol-Enforcement + Android-Play + GH-Pages **זהים בדיוק לקומיט-הקודם (וגם ל-commit-בלי-קוד) → קיימים-מראש, לא באשמת-Clean** (2 לא-חוסמים היסטורית · Android-Play = חוסם-Play אמיתי אך **נפרד**). **החזון מוכח end-to-end. נשאר להשקה: (א) Android-Play הקיים-מראש · (ב) קטלוג-לפי-חברה מלא (seam 3.1c) + שלב-6 · (ג) הדלקות/keystore/R2 של הבעלים.**
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
