@@ -20,3 +20,5 @@ test/stage3_catalog_source_consistency_test.dart
 test/app_profile_flags_test.dart
 # clean empty-shell — the content gates (matrix · live pins in both worlds · consumer registry):
 test/stage_clean_empty_test.dart
+# company-catalog import — template/parser/codec/seam/store (two-world hydration proof):
+test/company_catalog_import_test.dart

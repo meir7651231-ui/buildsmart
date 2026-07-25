@@ -15,6 +15,13 @@
 // On the 'clean' profile ([kProfileEmptyCatalog]) the resolved universe is
 // EMPTY (empty shell) — the getter is the ONE point every consumer inherits,
 // so CATALOG_SOURCE=v2 can never leak a catalog past it.
+//
+// Company-catalog overlay (import feature): ONE code, each company pours its
+// OWN catalog into this ONE point at runtime — [setCompanyCatalog] installs an
+// imported list (hydrated from prefs BEFORE runApp by
+// `state/company_catalog_store.dart`) and the getter serves it overlay-first.
+// Phase B swaps the LOADER for the server chain (catalog_sync); the sink stays
+// this same seam, unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/huliot_catalog.dart' show kHuliotProducts;
@@ -44,11 +51,35 @@ const String _kCatalogSourceDefine =
 CatalogSource get catalogSource =>
     _kCatalogSourceDefine == 'v2' ? CatalogSource.v2 : CatalogSource.v1;
 
+/// The runtime company-catalog overlay (import feature). `null` until a
+/// company catalog is imported/hydrated; a non-empty list here REPLACES the
+/// compile-time universe in [resolvedCatalogProducts].
+List<LipskeyCatalogProduct>? _companyCatalog;
+
+/// Install — or, with `null`/empty, turn OFF — the company-catalog overlay.
+/// The ONE write point for the ONE read point ([resolvedCatalogProducts]):
+/// the import store (`state/company_catalog_store.dart`) calls this on
+/// hydrate / import / clear. Phase B pours the server chain into this same
+/// sink.
+void setCompanyCatalog(List<LipskeyCatalogProduct>? items) {
+  _companyCatalog = items;
+}
+
 /// The resolved product universe for the active source. Opt-in consumers read
 /// THIS instead of `kCatalogProducts` directly. Under the default (v1) this
 /// returns the existing image-upgraded list; v2 appends the 789 new products.
 /// On 'clean' ([kProfileEmptyCatalog]) it is EMPTY — that branch is checked
 /// FIRST, so CATALOG_SOURCE=v2 can never leak past the empty shell.
-List<LipskeyCatalogProduct> get resolvedCatalogProducts => kProfileEmptyCatalog
-    ? const <LipskeyCatalogProduct>[]
-    : catalogSource == CatalogSource.v2 ? kCatalogProductsV2 : kCatalogProducts;
+///
+/// Company-catalog overlay (import feature): when [setCompanyCatalog] has
+/// installed a non-empty imported list, THAT list is the universe — checked
+/// before the compile-time branches, so ONE code serves each company's own
+/// catalog. With no overlay (demo/buildsmart, or clean before an import) the
+/// branches below return the SAME objects as before — identity included.
+List<LipskeyCatalogProduct> get resolvedCatalogProducts {
+  final company = _companyCatalog;
+  if (company != null && company.isNotEmpty) return company;
+  return kProfileEmptyCatalog
+      ? const <LipskeyCatalogProduct>[]
+      : catalogSource == CatalogSource.v2 ? kCatalogProductsV2 : kCatalogProducts;
+}

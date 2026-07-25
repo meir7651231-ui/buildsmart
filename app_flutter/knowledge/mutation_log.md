@@ -1592,3 +1592,8 @@
 - **תקרית-ולקח:** שחזור-M2 בוצע בטעות עם `git checkout <file>` — שמחק גם את תוספות-הקובץ הטרם-committed; שוחזר בייט-בייט מהדיף-המתועד-בשיחה ואומת ירוק (17/17 + מראה-עקביות). **לקח: כשיש עבודה לא-committed, שחזור-מוטציה = היפוך-sed נקודתי בלבד, לעולם לא checkout.**
 - **תפיסות-חיות:** NaN.round() ב-_openSubs (0/0 על kSubcontractors ריק — היה מקריס את גיליון-קבלני-המשנה על clean) → משמר `totAlloc > 0` זהה-דמו · ציפיית-dsync-QA הפוכה על clean → מודע-פרופיל · kPaymentTerms זוהה-כ-options ודולג-מגידור.
 - **אימות:** analyze 0 · 133 ממוקדות ירוקות · ריצות-מפרופלות: clean 20+skip-מכוון · company2 9 · build-clean ✓ · גארדים ×19 במניפסט. שער מלא בשער-ה-commit.
+
+## #company-catalog-import — משפך תבנית+העלאה אל ה-seam — 2026-07-25
+- **הפתרון:** overlay-נקודה-אחת (setCompanyCatalog + גטר-בודק-ראשון, זהות-נשמרת) · hydrate-לפני-runApp (שער clean-בלבד) · domain-טהור (BOM-תבנית · parser-RFC-ish · שגיאות-עברית-פר-שורה · canCommit-אטומי · brand-''-לא-ליפסקי · codec-סובלני) · file_transfer-טריו (אפס-deps) · sheet+2-mounts.
+- **mutation-verify (×2, מבוצע):** M1 היפוך תנאי-ה-overlay (isNotEmpty→isEmpty) → `company_catalog_import_test` **אדום** (-2: seam-identity + hydration) → שחזור-sed → ירוק. M2 נטרול בדיקת-dup-sku (`&& false`) → **אדום** (-1: per-row errors) → שחזור-sed → 17/17. (שחזורי-sed בלבד — לקח-ה-checkout מהפרוסה הקודמת מיושם.)
+- **אימות:** analyze 0-errors · define-less 17+20 · clean-מפרופל **26** (כולל hydrate-חי: מוצר-מיובא מוגש דרך-הצינור) · company2 17 · רישום-סריקה +2 (store+catalog_screen; אזכור-ה-sheet הערה-בלבד — לא-נרשם) · build-clean ✓ · גארדים ×10.

@@ -56,6 +56,9 @@ const Set<String> kCatalogGateConsumers = {
   'lib/screens/suppliers_screen.dart', // brand-entry hide + honest empty
   'lib/screens/keyboard_tool_tree.dart', // brand-entry hide
   'lib/test_harness/tests/dsync.dart', // in-app QA: expectation flips
+  // import feature (owner "כן" 2026-07-25) — the company-catalog pour-in:
+  'lib/state/company_catalog_store.dart', // hydrate guard (clean-only)
+  'lib/screens/catalog_screen.dart', // clean-only import-card mount
 };
 
 /// Files consuming [kProfileEmptySeeds] in CODE: the declaration + the eight

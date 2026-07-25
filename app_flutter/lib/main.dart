@@ -12,6 +12,8 @@ import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/company_catalog_store.dart'
+    show hydrateCompanyCatalog;
 import 'package:buildsmart/state/feature_flags.dart' show kAppKbOnly;
 import 'package:buildsmart/state/intel/intel_bus.dart' show intelBusProvider;
 import 'package:buildsmart/state/intel/screen_view.dart' show IntelRouteObserver;
@@ -256,6 +258,10 @@ Future<void> main() async {
   final guestBrowsing = await loadGuestBrowsing();
   // Benzi #4: seed the one-time ship-to-prompt flag (absent → false → prompt).
   final shipToPrompted = await loadShipToPrompted();
+  // Import feature: the company-catalog overlay must hydrate BEFORE the first
+  // resolvedCatalogProducts read — every lazy snapshot (_skuIndex ·
+  // _catalogByName · _kCatalogProductCats) then sees the imported list.
+  await hydrateCompanyCatalog();
   runApp(
     ProviderScope(
       overrides: [

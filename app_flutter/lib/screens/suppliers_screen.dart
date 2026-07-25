@@ -1,5 +1,7 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/company_catalog_import_sheet.dart'
+    show showCompanyCatalogImportSheet;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbSuppliersNodes;
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
@@ -42,13 +44,13 @@ class SuppliersScreen extends StatelessWidget {
             // brand screen with nothing behind it) — an honest empty state
             // instead of a bare background.
             if (kProfileEmptyCatalog)
-              const Padding(
-                padding: EdgeInsets.only(top: 120),
+              Padding(
+                padding: const EdgeInsets.only(top: 120),
                 child: Column(
                   children: [
-                    Text('🏪', style: TextStyle(fontSize: 40)),
-                    SizedBox(height: 10),
-                    Text(
+                    const Text('🏪', style: TextStyle(fontSize: 40)),
+                    const SizedBox(height: 10),
+                    const Text(
                       'אין ספקים עדיין',
                       style: TextStyle(
                         color: BsTokens.inkLight,
@@ -56,10 +58,24 @@ class SuppliersScreen extends StatelessWidget {
                         fontSize: 15,
                       ),
                     ),
-                    SizedBox(height: 4),
-                    Text(
+                    const SizedBox(height: 4),
+                    const Text(
                       'ספקים ומותגים יופיעו כשקטלוג החברה ייטען',
                       style: TextStyle(color: Colors.black38, fontSize: 12),
+                    ),
+                    const SizedBox(height: 12),
+                    // Owner-approved import flow: opens the CSV template +
+                    // upload sheet — the clean shell's way to load a catalog.
+                    TextButton(
+                      onPressed: () => showCompanyCatalogImportSheet(context),
+                      child: const Text(
+                        '📦 טעינת קטלוג החברה',
+                        style: TextStyle(
+                          color: BsTokens.brandDark,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ],
                 ),

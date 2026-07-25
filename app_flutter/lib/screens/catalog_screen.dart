@@ -55,6 +55,8 @@ import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/adapter_explain_screen.dart'
     show AdapterExplainScreen;
+import 'package:buildsmart/screens/company_catalog_import_sheet.dart'
+    show showCompanyCatalogImportSheet;
 import 'package:buildsmart/screens/quote_polish_screen.dart'
     show QuotePolishScreen;
 import 'package:buildsmart/screens/smart_home_screen.dart';
@@ -63,6 +65,7 @@ import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/brand_history.dart';
@@ -742,6 +745,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
     return Column(
       children: [
+        // CLEAN-ONLY ([kProfileEmptyCatalog], const-false on demo/buildsmart —
+        // the entry folds out, byte-identical): the company-catalog import
+        // card, pinned above the catalog body. Opens the template/upload sheet.
+        if (kProfileEmptyCatalog) const _CompanyCatalogImportCard(),
         // OWNER: the app's search BAR + panel are deleted — the floating keyboard
         // IS the search now (its 🔍 חיפוש tool starts a fresh typed search, and the
         // live dive narrows the catalog underneath). No separate search chrome.
@@ -7397,6 +7404,61 @@ class _VariantFamilyView extends ConsumerWidget {
         ),
         Expanded(child: LipskeyProductsList(products: family.products)),
       ],
+    );
+  }
+}
+
+// ── CLEAN-ONLY · company-catalog import entry ────────────────────────────────
+// Mounted at the top of the catalog tab body ONLY under [kProfileEmptyCatalog]
+// (const-false on demo/buildsmart — the mount folds out, byte-identical).
+// A compact card (the _SupplierTile idiom) that opens the import sheet:
+// download the CSV template / upload company data.
+class _CompanyCatalogImportCard extends StatelessWidget {
+  const _CompanyCatalogImportCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => showCompanyCatalogImportSheet(context),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFFEEEEEE),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '📦 טעינת קטלוג החברה',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    resolvedCatalogProducts.isNotEmpty
+                        ? 'נטענו ${resolvedCatalogProducts.length} מוצרים'
+                        : 'הורידו תבנית, מלאו והעלו — והאפליקציה תעבוד על הקטלוג שלכם',
+                    style: const TextStyle(color: Colors.black38, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_left, color: Colors.black38, size: 22),
+          ],
+        ),
+      ),
     );
   }
 }
