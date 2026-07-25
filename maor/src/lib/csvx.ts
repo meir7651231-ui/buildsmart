@@ -81,7 +81,18 @@ export function parseCsv(text: string): string[][] {
 export function parseAnyDate(v: string): string {
   const s = String(v || '').trim();
   if (!s) return '';
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // ISO: אותה אימות-קיום כמו ענף ה-D/M/Y למטה — אחרת '2015-06-31'/'2019-02-30'
+  // היו נשמרים כתאריך בלתי-אפשרי (זיהום נתונים בייבוא).
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) {
+    const y = +iso[1];
+    const mon = +iso[2];
+    const day = +iso[3];
+    if (mon < 1 || mon > 12 || day < 1 || day > 31) return '';
+    const probe = new Date(Date.UTC(y, mon - 1, day));
+    if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== mon - 1 || probe.getUTCDate() !== day) return '';
+    return s;
+  }
   const m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
   if (m) {
     const day = +m[1];
