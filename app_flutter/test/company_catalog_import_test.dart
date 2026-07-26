@@ -209,6 +209,68 @@ void main() {
     });
   });
 
+  group('g · template v2 — the FULL product card from one file', () {
+    test('every unrecognized column becomes a spec row (file order)', () {
+      final r = parseCompanyCatalogCsv(
+        'מק"ט,שם המוצר,קטגוריה,חומר,תקן ישראלי,קצה 1\n'
+        'V-1,ברז קיר,ברזים,פליז,ת"י 1205,תבריג זכר 3/4\n',
+      );
+      expect(r.errors, isEmpty);
+      expect(r.valid.single.dims, {
+        'חומר': 'פליז',
+        'תקן ישראלי': 'ת"י 1205',
+        'קצה 1': 'תבריג זכר 3/4',
+      });
+    });
+
+    test('image columns: single + |-lists, URL or filename stored AS-IS', () {
+      final r = parseCompanyCatalogCsv(
+        'מק"ט,שם המוצר,קטגוריה,תמונה,תמונות נוספות,תמונת מפרט\n'
+        'V-2,כיור שיש,כיורים,https://x.co.il/a.jpg,b.jpg|https://x.co.il/c.jpg,'
+        'שרטוט.png\n',
+      );
+      final p = r.valid.single;
+      expect(p.imageFile, 'https://x.co.il/a.jpg');
+      expect(p.imageFiles, ['b.jpg', 'https://x.co.il/c.jpg']);
+      expect(p.specImageFile, 'שרטוט.png');
+    });
+
+    test('codec round-trips images + open spec rows (survives restart)', () {
+      final r = parseCompanyCatalogCsv(
+        'מק"ט,שם המוצר,קטגוריה,תמונה,תמונות נוספות,חומר\n'
+        'V-3,מתאם,מתאמים,https://x.co.il/m.jpg,n1.jpg|n2.jpg,ניקל\n',
+      );
+      final back = decodeCompanyCatalog(encodeCompanyCatalog(r.valid))!;
+      final p = back.single;
+      expect(p.imageFile, 'https://x.co.il/m.jpg');
+      expect(p.imageFiles, ['n1.jpg', 'n2.jpg']);
+      expect(p.dims?['חומר'], 'ניקל');
+    });
+
+    test('URL passthrough: the model serves links verbatim, filenames keep '
+        'the asset path (demo byte-identical)', () {
+      final url = parseCompanyCatalogCsv(
+        'מק"ט,שם המוצר,קטגוריה,תמונה\nV-4,ברז,ברזים,https://x.co.il/u.jpg\n',
+      ).valid.single;
+      expect(url.imageAsset, 'https://x.co.il/u.jpg');
+      final file = parseCompanyCatalogCsv(
+        'מק"ט,שם המוצר,קטגוריה,תמונה\nV-5,ברז,ברזים,u.jpg\n',
+      ).valid.single;
+      expect(file.imageAsset, 'assets/lipskey/products/u.jpg',
+          reason: 'brand "" maps to the lipskey dir — the original path shape');
+    });
+
+    test('template v2: image columns + the open-columns legend, still zero '
+        'rows', () {
+      final t = companyCatalogTemplateCsv();
+      expect(t, contains('תמונה'));
+      expect(t, contains('כל עמודה נוספת שתוסיפו תופיע ככרטיס-מפרט'));
+      final r = parseCompanyCatalogCsv(t);
+      expect(r.errors, isEmpty);
+      expect(r.valid, isEmpty);
+    });
+  });
+
   group('f · file-transfer seams', () {
     test('the providers are overridable test surfaces (no platform touched)',
         () async {

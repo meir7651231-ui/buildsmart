@@ -38,9 +38,16 @@ String productImageUrl(String assetPath) {
 
 /// Single source of truth for resolving a product/page image given its bundled
 /// asset path (e.g. 'assets/lipskey/products/116635.jpeg').
+/// - absolute http(s) URL → network image verbatim on every profile: company-import images arrive as absolute links; the existing silent errorBuilder keeps failures honest (iron-rule-1).
 /// - [kImageBaseUrl] set  → full-quality image from the CDN, cached on-device.
 /// - [kImageBaseUrl] empty → the bundled asset (unchanged).
 ImageProvider resolveProductImage(String assetPath) {
+  if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) {
+    return CachedNetworkImageProvider(
+      assetPath,
+      cacheManager: productImageCache,
+    );
+  }
   if (kImageBaseUrl.isEmpty) {
     return AssetImage(assetPath);
   }

@@ -4,7 +4,7 @@ import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_lens.dart';
 import 'package:buildsmart/data/catalog_source.dart'
-    show resolvedCatalogProducts;
+    show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
 import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
@@ -52,15 +52,27 @@ class LipskeyProductsScreen extends StatelessWidget {
   static void openWordSearch(BuildContext context, String word) {
     final w = word.trim();
     if (w.isEmpty) return;
-    final indexed = (lipskeyWordIndex()[w] ?? const <String>[]).toSet();
-    final hits = indexed.isNotEmpty
-        ? kLipskeyCatalog.where((p) => indexed.contains(p.sku)).toList()
-        : kLipskeyCatalog.where((p) => p.nameHe.contains(w)).toList();
+    final hits = _wordHits(w);
     if (hits.isEmpty) return;
     Navigator.push(
       context,
       route(category: 'תוצאות: $w', products: hits),
     );
+  }
+
+  /// Company build — the vocabulary is the company's: with an imported catalog
+  /// active, resolve [w] by a direct scan over [resolvedCatalogProducts]
+  /// (nameHe.contains — what the index provides); else the const-index path.
+  static List<LipskeyCatalogProduct> _wordHits(String w) {
+    if (companyCatalogActive) {
+      return resolvedCatalogProducts
+          .where((p) => p.nameHe.contains(w))
+          .toList();
+    }
+    final indexed = (lipskeyWordIndex()[w] ?? const <String>[]).toSet();
+    return indexed.isNotEmpty
+        ? lipskeyScanPool.where((p) => indexed.contains(p.sku)).toList()
+        : lipskeyScanPool.where((p) => p.nameHe.contains(w)).toList();
   }
 
   @override

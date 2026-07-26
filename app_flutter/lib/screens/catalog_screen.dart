@@ -4,7 +4,7 @@ import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_source.dart'
-    show companyCatalogActive, resolvedCatalogProducts;
+    show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
 import 'package:buildsmart/data/company_categories.dart'
     show companyCategorySections, companyCategorySummaries;
 import 'package:buildsmart/data/catalog_tree.dart';
@@ -272,8 +272,9 @@ List<String> searchSuggestions(String query,
   final fragN = _normForSearch(frag);
   if (fragN.length < 2) return const [];
   // Frequency of product-name words the fragment is a prefix of.
+  // Company build — the vocabulary is the company's; else the const catalog.
   final freq = <String, int>{}; // original word → count
-  for (final p in filterBySystem(kLipskeyCatalog, system)) {
+  for (final p in filterBySystem(lipskeyScanPool, system)) {
     for (final w in p.nameHe.split(RegExp(r'\s+'))) {
       final wN = _normForSearch(w);
       if (wN.length < 2 || wN == fragN || !wN.startsWith(fragN)) continue;

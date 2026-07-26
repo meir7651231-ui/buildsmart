@@ -45,17 +45,20 @@ const String _kReplacementChar = '�';
 /// (load-bearing: without it Excel mis-decodes the Hebrew columns); line 1 is
 /// the canonical header (מק"ט is RFC-4180-quoted — the cell itself contains a
 /// '"'); the rest are '#'-comment rows — the legend (חובה = מק"ט · שם המוצר ·
-/// קטגוריה), the no-prices-yet note, and two realistic example rows — all
-/// skipped by [parseCompanyCatalogCsv], so re-uploading the untouched template
-/// parses to zero errors and zero rows ([CompanyImportReport.canCommit] stays
-/// false — nothing is fabricated).
+/// קטגוריה), the no-prices-yet note, the image-link note, the open-spec-column
+/// note, and two realistic example rows — all skipped by
+/// [parseCompanyCatalogCsv], so re-uploading the untouched template parses to
+/// zero errors and zero rows ([CompanyImportReport.canCommit] stays false —
+/// nothing is fabricated).
 String companyCatalogTemplateCsv() {
   final header = [for (final col in _kCols) _csvCell(col.he)].join(',');
   return '$_kBom$header\n'
       '# חובה = מק"ט · שם המוצר · קטגוריה, השאר רשות\n'
       '# מחירים — יתווספו בשלב חיבור-השרת\n'
-      '# ABC-100,ברז מטבח נשלף,ברזים,אלפא,כרום,1,48,,Kitchen Faucet,Faucets,🚰\n'
-      '# ABC-205,סיפון לכיור מטבח,ניקוז,אלפא,לבן,6,144,קוטר 40 מ"מ,Kitchen Trap,Drainage,🚿';
+      '# תמונה/תמונות — קישור מלא (https://…) או שם קובץ\n'
+      '# כל עמודה נוספת שתוסיפו תופיע ככרטיס-מפרט: חומר, תקן, קצה 1, קצה 2, מחלקה, ברקוד…\n'
+      '# ABC-100,ברז מטבח נשלף,ברזים,אלפא,כרום,1,48,,Kitchen Faucet,Faucets,🚰,https://example.co.il/p/abc.jpg,https://example.co.il/p/abc-2.jpg|https://example.co.il/p/abc-3.jpg,,\n'
+      '# ABC-205,סיפון לכיור מטבח,ניקוז,אלפא,לבן,6,144,קוטר 40 מ"מ,Kitchen Trap,Drainage,🚿,ABC-205.jpg,,https://example.co.il/p/abc-205-spec.jpg,';
 }
 
 /// One validation failure. [row] is the 1-based PHYSICAL line number in the
@@ -96,9 +99,16 @@ class CompanyImportReport {
 /// wins (tie → ','). Header cells accept the canonical Hebrew names AND the
 /// English aliases (case-insensitive, trimmed): sku · name/name_he ·
 /// category/category_he · brand · color · qty_pack · qty_pallet · dims ·
-/// name_en · category_en · emoji. Unknown extra columns are ignored silently,
-/// but each missing REQUIRED column (מק"ט · שם המוצר · קטגוריה) stops the
-/// parse with its own 'חסרה עמודת חובה: <עמודה>' error at row 1.
+/// name_en · category_en · emoji · image · images · spec_image · spec_images.
+/// The four image cells take a full http(s) URL or a bare filename, stored
+/// AS-IS (the image-resolution chain handles both); the plural cells are
+/// '|'-separated lists (parts trimmed, empties dropped). Every UNRECOGNIZED
+/// non-empty header is an OPEN SPEC COLUMN: its non-empty cells land in the
+/// product's dims as 'title → cell' (file order, after מידות, the title
+/// verbatim) — a company adds חומר / תקן / DN / ברקוד… columns and they show
+/// on the product sheet with zero code. Each missing REQUIRED column
+/// (מק"ט · שם המוצר · קטגוריה) still stops the parse with its own
+/// 'חסרה עמודת חובה: <עמודה>' error at row 1.
 ///
 /// Per data row (blank and '#' rows are skipped): required cells present,
 /// else 'שורה N — חסר <עמודה>'; an in-file duplicate מק"ט →
@@ -140,19 +150,30 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
   final errors = <CompanyImportRowError>[];
 
   // ── the header: canonical Hebrew titles / English aliases → column index.
-  // First occurrence wins on a duplicated title; unknown columns are ignored
-  // silently — only a MISSING required column is an error.
+  // First occurrence wins on a duplicated title; every UNRECOGNIZED non-empty
+  // header is an OPEN SPEC COLUMN (index → title, insertion order = file
+  // order) whose cells land in dims — only a MISSING required column is an
+  // error.
   final colIndex = <String, int>{};
+  final openCols = <int, String>{};
   if (headerIdx >= 0) {
     final headerCells = records[headerIdx].cells;
     for (var i = 0; i < headerCells.length; i++) {
       final h = _normHeader(headerCells[i]);
       if (h.isEmpty) continue;
+      var known = false;
       for (final col in _kCols) {
         if (col.match.contains(h)) {
           colIndex.putIfAbsent(col.key, () => i);
+          known = true;
           break;
         }
+      }
+      if (!known) {
+        // The title as the company typed it (BOM-stripped + trimmed, NOT
+        // lowercased — 'DN' stays 'DN'): it becomes the dims key the product
+        // sheet renders verbatim.
+        openCols[i] = headerCells[i].replaceAll(_kBom, '').trim();
       }
     }
   }
@@ -250,6 +271,23 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
     final colorCell = cell('color');
     final dimsCell = cell('dims');
     final emojiCell = cell('emoji');
+    // Image cells — a full http(s) URL or a bare filename, stored AS-IS (the
+    // image-resolution chain handles both); the plural cells are '|'-lists.
+    final imageCell = cell('imageFile');
+    final specImageCell = cell('specImageFile');
+    final imageFiles = _splitImageCell(cell('imageFiles'));
+    final specImageFiles = _splitImageCell(cell('specImageFiles'));
+    // The spec map: the free-text מידות cell first, under its own Hebrew key
+    // as always, then every OPEN SPEC COLUMN as 'title → cell' in file order
+    // (empty cells contribute nothing) — the product sheet renders dims
+    // entries as 'key: value' rows verbatim.
+    final dims = <String, dynamic>{
+      if (dimsCell.isNotEmpty) 'מידות': dimsCell,
+    };
+    for (final open in openCols.entries) {
+      final v = open.key < cells.length ? cells[open.key].trim() : '';
+      if (v.isNotEmpty) dims[open.value] = v;
+    }
     valid.add(
       LipskeyCatalogProduct(
         sku: sku,
@@ -262,9 +300,11 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
         categoryEn: cell('categoryEn'),
         categoryEmoji: emojiCell.isEmpty ? '📦' : emojiCell,
         page: 0, // not a catalog-book product — no page to point at
-        // The free-text מידות cell lands under its own Hebrew key — the
-        // product sheet renders dims entries as 'key: value' rows verbatim.
-        dims: dimsCell.isEmpty ? null : <String, dynamic>{'מידות': dimsCell},
+        dims: dims.isEmpty ? null : dims,
+        imageFile: imageCell.isEmpty ? null : imageCell,
+        imageFiles: imageFiles,
+        specImageFile: specImageCell.isEmpty ? null : specImageCell,
+        specImageFiles: specImageFiles,
         // The cell verbatim, or EXPLICITLY '' when absent — a company product
         // must NEVER silently become 'ליפסקי'-branded (the ctor default is
         // BuildSmart catalog content, not company content).
@@ -279,8 +319,9 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
 /// Persistence codec — encode. Compact `{"v":1,"items":[…]}` JSON; per-item
 /// keys mirror the repo's toDoc/fromDoc naming so the server codec and this
 /// local one stay one vocabulary, and nulls are OMITTED (the sparse-product
-/// round-trip idiom). The image fields are deliberately absent — a v1 company
-/// import carries no images.
+/// round-trip idiom). dims rides whole (the מידות cell AND every open spec
+/// column) and the four image fields ride along — the import persists the
+/// FULL product card.
 String encodeCompanyCatalog(List<LipskeyCatalogProduct> items) =>
     jsonEncode(<String, dynamic>{
       'v': 1,
@@ -299,6 +340,10 @@ String encodeCompanyCatalog(List<LipskeyCatalogProduct> items) =>
             if (p.qtyPack != null) 'qtyPack': p.qtyPack,
             if (p.qtyPallet != null) 'qtyPallet': p.qtyPallet,
             if (p.dims != null) 'dims': p.dims,
+            if (p.imageFile != null) 'imageFile': p.imageFile,
+            if (p.imageFiles != null) 'imageFiles': p.imageFiles,
+            if (p.specImageFile != null) 'specImageFile': p.specImageFile,
+            if (p.specImageFiles != null) 'specImageFiles': p.specImageFiles,
           },
       ],
     });
@@ -344,6 +389,10 @@ List<LipskeyCatalogProduct>? decodeCompanyCatalog(String raw) {
           categoryEmoji: (item['categoryEmoji'] as String?) ?? '📦',
           page: (item['page'] as num?)?.toInt() ?? 0,
           dims: (item['dims'] as Map?)?.cast<String, dynamic>(),
+          imageFile: item['imageFile'] as String?,
+          imageFiles: _decodeImageList(item['imageFiles']),
+          specImageFile: item['specImageFile'] as String?,
+          specImageFiles: _decodeImageList(item['specImageFiles']),
           // '' (not the ctor's 'ליפסקי' default) — the same company-brand
           // rule as the parser: absent stays absent.
           brand: (item['brand'] as String?) ?? '',
@@ -384,6 +433,10 @@ const List<_Col> _kCols = [
   _Col('nameEn', 'שם באנגלית', {'שם באנגלית', 'name_en'}),
   _Col('categoryEn', 'קטגוריה באנגלית', {'קטגוריה באנגלית', 'category_en'}),
   _Col('emoji', "אימוג'י", {"אימוג'י", 'emoji'}),
+  _Col('imageFile', 'תמונה', {'תמונה', 'image'}),
+  _Col('imageFiles', 'תמונות נוספות', {'תמונות נוספות', 'תמונות', 'images'}),
+  _Col('specImageFile', 'תמונת מפרט', {'תמונת מפרט', 'spec_image'}),
+  _Col('specImageFiles', 'תמונות מפרט', {'תמונות מפרט', 'spec_images'}),
 ];
 
 /// RFC-4180 cell quoting for the TEMPLATE side: a cell containing a quote /
@@ -401,6 +454,28 @@ String _csvCell(String s) {
 /// Header-cell normalization: stray BOMs out, trimmed, lowercased (the
 /// English aliases are case-insensitive; Hebrew is untouched by lowercase).
 String _normHeader(String s) => s.replaceAll(_kBom, '').trim().toLowerCase();
+
+/// A multi-image cell is a '|'-separated list: parts trimmed, empties
+/// dropped, each part stored AS-IS (a full http(s) URL or a bare filename —
+/// the image-resolution chain handles both); null when nothing survives, so
+/// an empty cell stays an absent field (the sparse-product idiom).
+List<String>? _splitImageCell(String cell) {
+  final parts = <String>[
+    for (final part in cell.split('|'))
+      if (part.trim().isNotEmpty) part.trim(),
+  ];
+  return parts.isEmpty ? null : parts;
+}
+
+/// Tolerant image-list decode (the per-item iron rule, list edition): any
+/// List becomes a List<String> via per-element '$…' toString — never a cast
+/// throw; not-a-list / nothing inside → null, so absent stays absent and an
+/// encode→decode→encode round-trip is byte-stable (nulls are omitted).
+List<String>? _decodeImageList(Object? v) {
+  if (v is! List) return null;
+  final out = <String>[for (final e in v) '$e'];
+  return out.isEmpty ? null : out;
+}
 
 /// A record whose every cell is whitespace — skipped silently.
 bool _isBlank(List<String> cells) => cells.every((c) => c.trim().isEmpty);

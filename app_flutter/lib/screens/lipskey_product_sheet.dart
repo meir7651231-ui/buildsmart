@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_source.dart'
-    show resolvedCatalogProducts;
+    show lipskeyScanPool, resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -120,6 +120,13 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
   );
 }
 
+/// Candidate pool for the compat/finder scans in this sheet. Company overlay
+/// (import feature): an imported product must suggest parts from ITS OWN
+/// catalog — never BuildSmart's — so scan [resolvedCatalogProducts] when the
+/// overlay is live. Without an overlay (demo/buildsmart) this stays the
+/// Lipskey subset the rankings were tuned on — results byte-identical.
+List<LipskeyCatalogProduct> get _scanPool => lipskeyScanPool;
+
 class LipskeyProductSheet extends ConsumerStatefulWidget {
   const LipskeyProductSheet({
     super.key,
@@ -228,7 +235,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     final method = p.connectionMethod;
     final seen = <String>{p.sku};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
+    for (final q in _scanPool) {
       if (q.categoryHe == p.categoryHe) continue; // cross-category only
       if (!seen.add(q.sku)) continue;
       if (!_sizeSet(q.nameHe).contains(size)) continue;
@@ -277,7 +284,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     // צעד 68: prepend confirmed manual pairings the size match missed.
     final overrideSkus = kLipskeyCompatPairOverride[p.sku] ?? const [];
     if (overrideSkus.isNotEmpty) {
-      final extra = kLipskeyCatalog
+      final extra = _scanPool
           .where((q) => overrideSkus.contains(q.sku))
           .toList();
       if (extra.isNotEmpty) {
@@ -987,8 +994,11 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                           e.key,
                                           '${e.value}',
                                           ref.watch(catalogSettingsProvider))),
-                            _SpecRow('📄', 'עמוד בקטלוג',
-                                'עמוד ${p.page}'),
+                            // Imported products carry page 0 — no bogus
+                            // 'עמוד 0' row (BuildSmart pages are all >= 1).
+                            if (p.page > 0)
+                              _SpecRow('📄', 'עמוד בקטלוג',
+                                  'עמוד ${p.page}'),
                           ],
                         ),
                       ),
@@ -1130,7 +1140,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                               onTap: () => showLipskeyProductSheet(
                                 context,
                                 g.parts[i],
-                                kLipskeyCatalog
+                                _scanPool
                                     .where((x) =>
                                         x.categoryHe == g.parts[i].categoryHe)
                                     .toList(),
@@ -2444,7 +2454,7 @@ class _StripPanel extends StatelessWidget {
     // We re-use the existing _kFinderGroups indirectly: a product belongs to
     // the same finder group when its layman label matches. So pull every
     // product whose finderGroupFor() has the same label.
-    final peers = kLipskeyCatalog
+    final peers = _scanPool
         .where((q) =>
             q.sku != product.sku && finderGroupFor(q)?.label == f.label)
         .take(20)

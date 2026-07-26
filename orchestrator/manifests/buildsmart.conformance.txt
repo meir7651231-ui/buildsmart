@@ -181,3 +181,19 @@ lib/screens/welcome_screen.dart:::AppBrand.name
 lib/screens/welcome_screen.dart:::!'BuildSmart',
 #  the shell's onboarding never promises BuildSmart's thousands-of-products:
 lib/screens/onboarding_screen.dart:::kProfileEmptyCatalog
+#
+# Regression — TEMPLATE-V2 (2026-07-26 · owner "אני רוצה 100 אחוז"): the FULL product card from one file:
+#  open spec columns + image columns + the image codec keys:
+lib/data/company_catalog_import.dart:::תמונות נוספות
+lib/data/company_catalog_import.dart:::כל עמודה נוספת שתוסיפו תופיע ככרטיס-מפרט
+#  URL passthrough in the model + the network resolver (a company's images arrive as links):
+lib/data/lipskey_catalog.dart:::_isUrl
+lib/data/product_images.dart:::startsWith('http
+#  the sheet: no bogus page-0 row; the two scan pools ride the company overlay:
+lib/screens/lipskey_product_sheet.dart:::if (p.page > 0)
+lib/screens/lipskey_product_sheet.dart:::_scanPool
+#  suggestion/word-tap vocabulary is the company's when a catalog is imported:
+lib/screens/lipskey_products_screen.dart:::_wordHits
+#  the barcode alias resolves in BOTH resolvers (identity preserved):
+lib/data/task_skus_local.dart:::ברקוד
+lib/data/related_info.dart:::ברקוד

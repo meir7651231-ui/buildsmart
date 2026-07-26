@@ -25,7 +25,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/huliot_catalog.dart' show kHuliotProducts;
-import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
+import 'package:buildsmart/data/lipskey_catalog.dart'
+    show LipskeyCatalogProduct, kLipskeyCatalog;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 
@@ -74,6 +75,14 @@ bool get companyCatalogActive {
   final c = _companyCatalog;
   return c != null && c.isNotEmpty;
 }
+
+/// The BRAND-SUBSET scan pool for the legacy Lipskey surfaces (compat-by-size,
+/// finder peers, suggestion vocabulary, word-taps): the company overlay when
+/// active, else the const Lipskey subset — NOT the unified list (a plain swap
+/// would change demo's ranked results). Lives in the DATA layer so screens
+/// never touch `kLipskeyCatalog` directly (gate-114).
+List<LipskeyCatalogProduct> get lipskeyScanPool =>
+    companyCatalogActive ? resolvedCatalogProducts : kLipskeyCatalog;
 
 /// The resolved product universe for the active source. Opt-in consumers read
 /// THIS instead of `kCatalogProducts` directly. Under the default (v1) this

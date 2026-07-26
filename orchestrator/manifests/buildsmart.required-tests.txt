@@ -25,3 +25,5 @@ test/company_catalog_import_test.dart
 # clean-100 — derived category rows over the imported catalog (pure + widget tiers):
 test/company_categories_test.dart
 test/company_catalog_rows_test.dart
+# template v2 — barcode alias resolves with object identity (own isolate — memo order):
+test/barcode_alias_test.dart

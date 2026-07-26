@@ -69,12 +69,25 @@ const List<_FinderGroup> _kFinderGroups = [
 // points at, so a unified card can pull the catalog's spec / chips / compat for
 // the brand the user picked. Memoised sku→product map for O(1) lookups.
 Map<String, LipskeyCatalogProduct>? _skuToProduct;
-Map<String, LipskeyCatalogProduct> get _skuIndex =>
-    // Index the UNIFIED catalog (Lipskey + Polyroll) so a SmartBrand SKU
-    // resolves regardless of which catalog the product lives in.
-    // stage-3.1 — the bridge follows the ACTIVE catalog source (v2-aware),
-    // not the v1 list.
-    _skuToProduct ??= {for (final p in resolvedCatalogProducts) p.sku: p};
+
+/// v2 barcode alias — dims['ברקוד'] resolves alongside the sku.
+Map<String, LipskeyCatalogProduct> get _skuIndex {
+  // Index the UNIFIED catalog (Lipskey + Polyroll) so a SmartBrand SKU
+  // resolves regardless of which catalog the product lives in.
+  // stage-3.1 — the bridge follows the ACTIVE catalog source (v2-aware),
+  // not the v1 list.
+  if (_skuToProduct != null) return _skuToProduct!;
+  final products = resolvedCatalogProducts;
+  final m = {for (final p in products) p.sku: p};
+  // Alias keys join the SAME map, pointing at the SAME product objects (never
+  // copies) — and only where the key isn't taken, so sku entries win on
+  // collision.
+  for (final p in products) {
+    final barcode = p.dims?['ברקוד']?.toString().trim() ?? '';
+    if (barcode.isNotEmpty && !m.containsKey(barcode)) m[barcode] = p;
+  }
+  return _skuToProduct = m;
+}
 
 /// The unified catalog product with this [sku], or null when unknown.
 LipskeyCatalogProduct? catalogProductForSku(String? sku) =>

@@ -60,11 +60,16 @@ class LipskeyCatalogProduct {
     return 'lipskey';
   }
 
+  /// A company's images come as links (owner 2026-07-26) — URLs pass as-is.
+  static bool _isUrl(String s) =>
+      s.startsWith('http://') || s.startsWith('https://');
+
   // Filenames starting with `page_` live under `pages/` (full catalog page,
   // used as fallback for Huliot/SmartLock where per-product crops don't exist
   // yet); everything else is a per-product crop under `products/`.
-  static String _imgPath(String dir, String file) =>
-      'assets/$dir/${file.startsWith('page_') ? 'pages' : 'products'}/$file';
+  static String _imgPath(String dir, String file) => _isUrl(file)
+      ? file
+      : 'assets/$dir/${file.startsWith('page_') ? 'pages' : 'products'}/$file';
 
   String? get imageAsset =>
       imageAssetOverride ??
@@ -88,7 +93,11 @@ class LipskeyCatalogProduct {
   String get specImageAsset {
     final dir = _brandDir(brand);
     // A cropped diagram (spec only) wins over the full catalog page.
-    if (specImageFile != null) return 'assets/$dir/products/$specImageFile';
+    if (specImageFile != null) {
+      return _isUrl(specImageFile!)
+          ? specImageFile!
+          : 'assets/$dir/products/$specImageFile';
+    }
     final p = page.toString().padLeft(2, '0');
     // Polyroll products flip to their own catalog page (where the dimension
     // diagram defining d/z/l/A/B… lives); everything else is Lipskey.
@@ -102,10 +111,12 @@ class LipskeyCatalogProduct {
     final dir = _brandDir(brand);
     final out = <String>[];
     for (final f in specImageFiles ?? const <String>[]) {
-      out.add('assets/$dir/products/$f');
+      out.add(_isUrl(f) ? f : 'assets/$dir/products/$f');
     }
     if (specImageFile != null) {
-      out.add('assets/$dir/products/$specImageFile');
+      out.add(_isUrl(specImageFile!)
+          ? specImageFile!
+          : 'assets/$dir/products/$specImageFile');
     }
     final pageAsset = 'assets/$dir/pages/page_${page.toString().padLeft(2, '0')}.jpg';
     if (!out.contains(pageAsset)) out.add(pageAsset);

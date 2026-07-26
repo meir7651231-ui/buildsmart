@@ -48,11 +48,19 @@ const Map<int, List<String>> kTaskSkus = {
 
 /// Exact-SKU lookup over the unified catalog — null when the code matches no
 /// product (callers show an honest "not found" state, never a fake product).
+///
+/// v2 barcode alias — dims['ברקוד'] resolves alongside the sku.
 LipskeyCatalogProduct? productBySku(String sku) {
   final s = sku.trim();
   // stage-3.1 — follows the ACTIVE catalog source (v2-aware).
   for (final p in resolvedCatalogProducts) {
     if (p.sku == s) return p;
+  }
+  // Second pass, only after the exact sku missed (sku wins on collision): a
+  // company may put the scannable code in a 'ברקוד' spec column, so real-EAN
+  // scanning still resolves the product when sku != barcode.
+  for (final p in resolvedCatalogProducts) {
+    if (p.dims?['ברקוד']?.toString().trim() == s) return p;
   }
   return null;
 }
