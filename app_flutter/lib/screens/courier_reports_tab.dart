@@ -48,6 +48,7 @@ import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart'
     show DailyReportScreen;
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -328,8 +329,8 @@ class CourierReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space2),
         Text(
           measuredDelivered.isEmpty
-              ? 'מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף ו-% מסירה-ראשונה נמדדים מחותמות שעון-המשלוחים — עדיין אין מסירות שנמדדו.'
-              : 'מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף נמדד מחותמות שעון-המשלוחים. מסירה-ראשונה: $firstAttempt מתוך ${measuredDelivered.length} מסירות שנמדדו — ללא ניסיון חוזר.',
+              ? 'מטבעות — מאזן ${orgTerm(ref, 'brand.club', AppBrand.club)} המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף ו-% מסירה-ראשונה נמדדים מחותמות שעון-המשלוחים — עדיין אין מסירות שנמדדו.'
+              : 'מטבעות — מאזן ${orgTerm(ref, 'brand.club', AppBrand.club)} המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף נמדד מחותמות שעון-המשלוחים. מסירה-ראשונה: $firstAttempt מתוך ${measuredDelivered.length} מסירות שנמדדו — ללא ניסיון חוזר.',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
         const SizedBox(height: BsTokens.space3),

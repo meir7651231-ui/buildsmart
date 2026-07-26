@@ -25,6 +25,7 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart'
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/org_config_store.dart'
     show hydrateOrgConfig, orgConfigProvider;
+import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/push_routing.dart'
     show afterThisFrame, pendingPushThreadProvider, threadIdFromLaunchUrl;
 import 'package:buildsmart/state/push_state.dart';
@@ -526,7 +527,7 @@ class BuildSmartApp extends ConsumerWidget {
       BsLang.en => const Locale('en', 'US'),
     };
     return MaterialApp(
-      title: AppBrand.name,
+      title: orgTerm(ref, 'brand.name', AppBrand.name),
       // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
       scaffoldMessengerKey: bsMessengerKey,
       // Root navigator key — lets the app-global floating keyboard (kKbGlobal)

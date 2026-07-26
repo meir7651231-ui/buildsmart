@@ -1643,3 +1643,8 @@
 - **הפתרון:** KbDestination.gate ('core' ברירת-מחדל · 21 תגים) + kbDestAllowed-טהור + matchDestinations(cfg?)-אופציונלי (רישום נשאר מלא+ref-less — חוט-הביטחון של בדיקת-התוויות) · דרייברים עם בוליאנים-טהורים (servicesOn/chatOn/searchOn/compatOn — סינון לפני-השורש-הזורק) · floating: watch-אחד-ב-build · tool-tree: read-בסגירות + dive-AND (const-ראשון) + שומרי-dispatch לעלים-חסרי-ref ('לא זמין') · search: overlay+אייקון+finder-fallback · פוש-צ'אט: צריכה-חד-פעמית+טוסט-כן ('שיחות אינן פעילות בחברה זו') · clamps בבורדים (ספק tab2→0 · עובד tab1→0, מיפוי-דו-כיווני) · intel מקונן ב-4 אתרי-lockstep (_kManagerTabs-const לא-נגוע).
 - **mutation ×2:** M1 kbDestAllowed≡true → אדום(-3) · M2 השמטת-chip-מתה → אדום(-1) → ירוק. (+שתילה-שבורה-פסיק נתפסה-בעין ותוקנה לפני-ריצה.)
 - **אימות:** analyze 0 · 152 (מטריצה-8-רגליים כולל search-fallback+push-toast · כל סוללות-המקלדת) · גארדים ×11. **נדחה-במוצהר:** עלי-store חסרי-ref (מגודרי-raw ממילא) · global_search_sources cfg (מסלול-חמוש) · ניסוח-עזרה-worker.
+
+## #giant-v3-w1 — מילון-המונחים: המותג והניווט מצייתים — 2026-07-26
+- **הפתרון:** orgTerm/orgTermNow תאומי-termOf ב-org_gates (watch-ב-build · read-לנתיבי-פתיחת-sheet) · שכבת-מונחים ב-CfgText **מתחת** לסטודיו (`n.text ?? termOf(org,id,fallback)` — watch-לא-מותנה, מחוץ לזרוע-העצלה של ??) · 11 המרות אתרי-מותג (brand.name×2 · brand.club×9; AppBrand נשאר-ה-fallback) · 4 תוויות-ניווט → nav.* · טבלת-מפתחות ב-org_config.
+- **mutation ×2:** M1 termOf≡fallback → אדום(+1 −5, רק-רגל-ברירת-המחדל שורדת) · M2 היפוך-קדימות (termOf עוטף את n.text) → אדום(+5 −1, **בדיוק** רגל-סטודיו-מנצח) → ירוק +6 · אפס-שאריות.
+- **אימות:** analyze 0 · 59 ירוקות (org_terms-6 · מטריצה-8 · widget · login · app_brand · help · safety) · גארדים ×11.

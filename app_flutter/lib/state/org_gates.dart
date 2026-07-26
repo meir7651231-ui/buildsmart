@@ -18,7 +18,7 @@
 //     true ⇒ the un-overridden (define-less) suite stays byte-identical.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:buildsmart/config/org_config.dart' show featureOn, moduleOn;
+import 'package:buildsmart/config/org_config.dart' show featureOn, moduleOn, termOf;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,3 +31,16 @@ bool modOn(WidgetRef ref, String module) =>
 /// build() only. Module-off cascades false, per [featureOn].
 bool featOn(WidgetRef ref, String module, String feature) =>
     featureOn(ref.watch(orgConfigProvider), module, feature);
+
+/// The org's wording for [key] — LIVE (`watch`), build() only: when the V5
+/// wizard swaps [orgConfigProvider], every termed label re-renders. Absent /
+/// empty override ⇒ [fallback] IDENTITY (the byte-identical default).
+String orgTerm(WidgetRef ref, String key, String fallback) =>
+    termOf(ref.watch(orgConfigProvider), key, fallback);
+
+/// One-shot term read for strings composed OUTSIDE build() — sheet-open
+/// paths and event handlers, where `watch` is Riverpod misuse and a live
+/// swap cannot re-compose an already-shown string anyway. Never call this
+/// in build(): it does not subscribe, so the label would go stale.
+String orgTermNow(WidgetRef ref, String key, String fallback) =>
+    termOf(ref.read(orgConfigProvider), key, fallback);

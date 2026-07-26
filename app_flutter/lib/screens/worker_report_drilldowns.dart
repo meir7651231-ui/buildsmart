@@ -20,6 +20,7 @@
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/worker_reports_tab.dart';
+import 'package:buildsmart/state/org_gates.dart' show orgTermNow;
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -281,7 +282,7 @@ Future<void> showCoinsDrilldown(BuildContext context, WidgetRef ref) {
                 : '${c.progress}/${c.goal} · +${c.reward} 🪙',
           ),
       _disclaimer(
-        'מאזן המטבעות הוא מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר הזה '
+        'מאזן המטבעות הוא מאזן ${orgTermNow(ref, 'brand.club', AppBrand.club)} המשותף לכל התפקידים במכשיר הזה '
         '(bs.rewards.v1) — אינו נצבר לעובד בנפרד. ניהול נקודות per-עובד יחובר עם '
         'חיבור השרת.',
       ),

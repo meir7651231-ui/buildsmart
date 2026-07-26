@@ -274,3 +274,16 @@ lib/screens/worker_app_screen.dart:::modOn(ref, 'chat')
 lib/screens/manager_dashboard_screen.dart:::kIntelLive && intelTabOn
 lib/screens/home_shell.dart:::kGlobalSearch && modOn(ref, 'search')
 lib/screens/catalog_screen.dart:::modOn(ref, 'dive')
+#
+# Regression — GIANT-SYSTEM V3 wave-1 (2026-07-26): org terms — nav/brand/CfgText rebrand, Studio wins:
+lib/state/org_gates.dart:::String orgTerm(WidgetRef ref, String key, String fallback) =>
+lib/state/org_gates.dart:::termOf(ref.watch(orgConfigProvider), key, fallback);
+lib/state/org_gates.dart:::String orgTermNow(WidgetRef ref, String key, String fallback) =>
+lib/state/org_gates.dart:::termOf(ref.read(orgConfigProvider), key, fallback);
+lib/widgets/studio/cfg_text.dart:::final org = ref.watch(orgConfigProvider);
+lib/widgets/studio/cfg_text.dart:::final txt = n.text ?? termOf(org, id, fallback);
+lib/config/org_config.dart:::V3 term-key registry
+lib/screens/home_shell.dart:::orgTerm(ref, 'nav.catalog', 'מחלקות')
+lib/screens/profile_screen.dart:::orgTerm(ref, 'brand.club', AppBrand.club)
+lib/main.dart:::orgTerm(ref, 'brand.name', AppBrand.name)
+lib/screens/worker_report_drilldowns.dart:::orgTermNow(ref, 'brand.club', AppBrand.club)

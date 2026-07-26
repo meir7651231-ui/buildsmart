@@ -8,6 +8,8 @@
 // token-driven style on top, and (in edit-mode) wraps the result in EditHandle.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/config/org_config.dart' show termOf;
+import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/studio/config_node.dart' show CfgStyle;
 import 'package:buildsmart/state/studio/config_store.dart'
     show resolvedNodeProvider;
@@ -146,7 +148,13 @@ class CfgText extends StatelessWidget {
     return Consumer(
       builder: (context, ref, _) {
         final n = ref.watch(resolvedNodeProvider(id));
-        final txt = n.text ?? fallback;
+        // giant-v3 — org terms slot UNDER Studio: a published override
+        // (n.text) still wins; the org term re-words only un-overridden
+        // labels; the compiled fallback stays the last word. The watch is
+        // unconditional — a watch inside `??`'s lazy arm would flap the
+        // subscription between builds.
+        final org = ref.watch(orgConfigProvider);
+        final txt = n.text ?? termOf(org, id, fallback);
         final display = n.emoji == null ? txt : '${n.emoji} $txt';
         return EditHandle.maybe(
           ref,

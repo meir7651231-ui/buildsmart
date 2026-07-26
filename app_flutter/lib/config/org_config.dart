@@ -175,6 +175,14 @@ bool featureOn(OrgConfig c, String module, String feature) {
   return c.features['$module.$feature'] != false;
 }
 
+// ── V3 term-key registry — the map is OPEN (any key rides the codec); these
+// are the keys the app actually consults, so a wizard/pack knows what works:
+//   brand.name · brand.club — the brand wordage (runtime label sites)
+//   nav.home · nav.catalog · nav.updates · nav.store — the 4 bottom tabs
+//   <any CfgText id> — site-level: every Studio-wrapped label terms by its
+//     own id, UNDER a published Studio override and above the fallback
+//   RESERVED (plan V3.2 — wired by V4 vertical packs): nav.customers ·
+//   entity.customer · entity.order · entity.supplier
 /// The org's wording for [key]: a non-empty `terms[key]` wins; anything else
 /// returns the SAME [fallback] object — identity, not a copy (cheap AND
 /// provable: `identical(termOf(c, k, fb), fb)` holds on the unbranded path).

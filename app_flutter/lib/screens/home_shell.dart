@@ -867,6 +867,9 @@ class _BottomNav extends ConsumerWidget {
     // ring) AND pops a bubble out of the tab itself, consistent with the app-bar
     // icons (the old BottomNavigationBar couldn't carry per-item HelpTargets).
     // Outside help mode the InkWell navigates exactly as before.
+    // giant-v3 — nav.* terms swap the DISPLAYED label only; _kTabHelp stays
+    // INDEX-keyed with the default vocabulary (help copy speaks the app's
+    // canonical names in wave-1 — a declared, documented seam).
     Widget tab(int i, Widget icon, String label) => Expanded(
       child: HelpTarget(
         title: _kTabHelp[i].$1,
@@ -891,9 +894,9 @@ class _BottomNav extends ConsumerWidget {
               tab(
                 0,
                 Icon(currentIndex == 0 ? Icons.home : Icons.home_outlined),
-                'בית',
+                orgTerm(ref, 'nav.home', 'בית'),
               ),
-              tab(1, const Icon(Icons.apps), 'מחלקות'),
+              tab(1, const Icon(Icons.apps), orgTerm(ref, 'nav.catalog', 'מחלקות')),
               tab(
                 2,
                 _BadgedIcon(
@@ -903,9 +906,9 @@ class _BottomNav extends ConsumerWidget {
                           : Icons.notifications_outlined,
                   count: unreadCount,
                 ),
-                'עדכונים',
+                orgTerm(ref, 'nav.updates', 'עדכונים'),
               ),
-              tab(3, const Icon(Icons.shopping_cart_outlined), 'חנות'),
+              tab(3, const Icon(Icons.shopping_cart_outlined), orgTerm(ref, 'nav.store', 'חנות')),
             ],
           ),
         ),

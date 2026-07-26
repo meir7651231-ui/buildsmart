@@ -1,4 +1,5 @@
 import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
@@ -46,7 +47,7 @@ class RewardsHubScreen extends ConsumerWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
-        appBar: _hubAppBar(context, '🎮 ${AppBrand.club}'),
+        appBar: _hubAppBar(context, '🎮 ${orgTerm(ref, 'brand.club', AppBrand.club)}'),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
             BsTokens.space4,
@@ -55,9 +56,9 @@ class RewardsHubScreen extends ConsumerWidget {
             BsTokens.space5,
           ),
           children: [
-            const _MdHead(
+            _MdHead(
               ic: '🎮',
-              title: AppBrand.club,
+              title: orgTerm(ref, 'brand.club', AppBrand.club),
               sub: 'צבור מטבעות, השלם אתגרים וקבל הטבות.',
             ),
             const SizedBox(height: BsTokens.space3),

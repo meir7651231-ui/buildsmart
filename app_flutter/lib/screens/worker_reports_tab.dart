@@ -40,6 +40,7 @@ import 'package:buildsmart/logic/calendar_days.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart'
     show DailyReportScreen;
 import 'package:buildsmart/screens/worker_report_drilldowns.dart';
+import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -383,7 +384,7 @@ class WorkerReportsTab extends ConsumerWidget {
             HelpTarget(
               title: 'BuildCoins',
               body:
-                  'מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד). לחיצה פותחת פירוט.',
+                  'מאזן ${orgTerm(ref, 'brand.club', AppBrand.club)} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד). לחיצה פותחת פירוט.',
               child: _KpiBox(
                 value: '${rewards.coins}',
                 label: 'BuildCoins (מועדון משותף) 🪙',
@@ -405,8 +406,8 @@ class WorkerReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space2),
         Text(
           submitted.isEmpty
-              ? 'אישור-ראשון = הגשות שאושרו בלי דחייה מתוך כלל ההגשות — עדיין אין הגשות. מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).'
-              : 'אישור-ראשון: $firstPass מתוך ${submitted.length} הגשות אושרו בלי דחייה. מטבעות — מאזן ${AppBrand.club} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).',
+              ? 'אישור-ראשון = הגשות שאושרו בלי דחייה מתוך כלל ההגשות — עדיין אין הגשות. מטבעות — מאזן ${orgTerm(ref, 'brand.club', AppBrand.club)} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).'
+              : 'אישור-ראשון: $firstPass מתוך ${submitted.length} הגשות אושרו בלי דחייה. מטבעות — מאזן ${orgTerm(ref, 'brand.club', AppBrand.club)} המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
         const SizedBox(height: BsTokens.space4),

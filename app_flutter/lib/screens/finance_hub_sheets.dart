@@ -37,6 +37,7 @@ import 'package:buildsmart/logic/finance_report_pdf.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/finance_hub_state.dart';
+import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/pdf_print_seam.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
@@ -1514,7 +1515,7 @@ class _FinReportView extends ConsumerWidget {
                     ),
                     const SizedBox(height: BsTokens.space6),
                     Text(
-                      'הופק על ידי מערכת ${AppBrand.name} · $today',
+                      'הופק על ידי מערכת ${orgTerm(ref, 'brand.name', AppBrand.name)} · $today',
                       style: const TextStyle(
                         color: Color(0xFF888888),
                         fontSize: 11,
