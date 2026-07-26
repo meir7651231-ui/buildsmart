@@ -178,6 +178,8 @@
 
 > 🏁 **25/7 — "clean-100": Clean = empty-shell אמיתי + ייבוא-קטלוג-לחברה (CSV).** 3 קומיטים (`f977eb09..6761dea1`). ✅ **Clean ships ZERO content** (`app_profile.dart:143` `catalogEmptyForProfile` · company2/BuildMax שומר קטלוג) `d13d01b7` — **סוגר את גבול-היושר של שלב-4.** ✅ **ייבוא-קטלוג-לחברה** — template + CSV → seam-נקודה-אחת (`company_catalog_import.dart` + sheet + store + `scripts/catalog_import.py`) `196138a1` — **סוגר את "קטלוג-לפי-חברה מלא".** ✅ E2E-דפדפן-אמיתי + brand-honesty `6761dea1`. CI: web + catalog-qa + **clean-two-links ירוקים שוב** (5✅); 3 שערי-הבעיה (Protocol/Android-Play/GH-Pages) **בתהליך** — אדומים עקבית על כל קומיט קודם (כולל commit-בלי-קוד) → **צפוי אדום-קיים-מראש שוב**. **ה-white-label עכשיו מלא:** מנוע + empty-shell + העלאת-קטלוג-לחברה + מיתוג + רב-דיירות + 2-לינקים-מוכחים. **נשאר: Android-Play הקיים-מראש · שלב-6 מודולריזציה · הדלקות/keystore/R2 של הבעלים.**
 
+> 🧩 **26/7 — תוכנית "חבילות-ורטיקל + טוגלי-פיצ'רים ל-בנייה-חכמה" נכתבה+נדחפה** (`PLAN-verticals-and-toggles.md`, בקשת-בעלים בהשראת מאור). **הגשר:** קומפילציה→ריצה — שכבת-`OrgConfig` (modules+features+terms) מעל `APP_PROFILE`/`AppBrand`/`orgId` הקיימים. **6 שלבים:** V1 יסוד-config-ריצתי null-safe → **V2 טוגלי-פיצ'רים גרנולריים** (`featureOn` + מיפוי-מודולים + **toggle-matrix e2e**) → V3 מילון-מונחים (`termOf`) → V4 חבילות-ורטיקל (`applyVerticalPack`) → V5 אשף-הקמה (מנהל) → V6 הוכחה (2 ורטיקלים). additive · דגל `ORG_CONFIG` · הקיים זהה-בייטים · דו-קיום-עם-Studio. הערת-יושר: ורטיקל באותו-עולם=זול · תעשייה-שונה=גִּנֵּרוּג-מנוע (נפרד). **מבוסס על מאור verticalPacks.ts (מוכח-בפרודקשן).**
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
