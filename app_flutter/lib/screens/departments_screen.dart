@@ -1,11 +1,17 @@
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, resolvedCatalogProducts;
 import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/company_categories.dart'
+    show companyDepartments;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/repositories/catalog_local.dart';
+import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/logic/category_division.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
@@ -120,6 +126,33 @@ class DepartmentsScreen extends ConsumerWidget {
     // A live department selected → a scope bar (department · system + clear) over
     // the catalog finder, all scoped to its water system (shell chrome stays).
     final active = ref.watch(homeDepartmentProvider);
+    // Raw shell: the open department is a DERIVED one (the company's own
+    // taxonomy) — scope the imported catalog by its `dims['מחלקה']` value (by
+    // `categoryHe` when the deriver fell back to categories) and render the
+    // flat products list. The const plumbing tree/headings (`_DeptCatGroups` /
+    // `kDeptCatHeadings`) never render here. (Dead branch on demo/buildsmart:
+    // `kProfileRawShell` is const false there.)
+    if (kProfileRawShell && active != null) {
+      final products = resolvedCatalogProducts;
+      final hasDeptColumn = products.any((p) {
+        final dept = p.dims?['מחלקה'];
+        return dept is String && dept.isNotEmpty;
+      });
+      final scoped = products
+          .where((p) => hasDeptColumn
+              ? (p.dims?['מחלקה'] == active)
+              : p.categoryHe == active)
+          .toList();
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            _DeptScopeBar(name: active, system: null, showFlatToggle: false),
+            Expanded(child: LipskeyProductsList(products: scoped)),
+          ],
+        ),
+      );
+    }
     if (active != null) {
       final dept = departments.firstWhere((d) => d.name == active,
           orElse: () => departments.first);
@@ -154,6 +187,14 @@ class DepartmentsScreen extends ConsumerWidget {
     }
 
     final theme = Theme.of(context);
+    // Raw shell: the grid derives from the imported catalog — the company's
+    // own departments (`dims['מחלקה']`, category fallback via
+    // `companyDepartments`), honest-empty before an import. The const
+    // `departments` list is BuildSmart's demo/buildsmart taxonomy and never
+    // renders on raw.
+    final rawDepts = kProfileRawShell && companyCatalogActive
+        ? companyDepartments(resolvedCatalogProducts)
+        : const <Section>[];
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
@@ -170,23 +211,49 @@ class DepartmentsScreen extends ConsumerWidget {
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                padding: const EdgeInsets.fromLTRB(
-                    BsTokens.space4, 0, BsTokens.space4, BsTokens.space5),
-                mainAxisSpacing: BsTokens.space3,
-                crossAxisSpacing: BsTokens.space3,
-                childAspectRatio: 1.15,
-                // Only live departments render (owner decision — hide, not
-                // "בקרוב"). Non-live rows stay in `departments` so re-enabling
-                // later is a one-line flip of `live: true`.
-                children: [
-                  for (final d in departments.where((d) => d.live))
-                    _DeptTile(dept: d),
-                ],
+            if (kProfileRawShell && rawDepts.isEmpty)
+              // Honest empty state (the suppliers_screen precedent): no
+              // catalog yet → no departments to show; never the const
+              // plumbing grid. Same Center/emoji idiom as the in-department
+              // empty state below.
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🗂️', style: TextStyle(fontSize: 48)),
+                      const SizedBox(height: 12),
+                      Text(
+                        'אין מחלקות עדיין — יופיעו עם טעינת קטלוג החברה',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  padding: const EdgeInsets.fromLTRB(
+                      BsTokens.space4, 0, BsTokens.space4, BsTokens.space5),
+                  mainAxisSpacing: BsTokens.space3,
+                  crossAxisSpacing: BsTokens.space3,
+                  childAspectRatio: 1.15,
+                  // Only live departments render (owner decision — hide, not
+                  // "בקרוב"). Non-live rows stay in `departments` so re-enabling
+                  // later is a one-line flip of `live: true`.
+                  children: [
+                    if (kProfileRawShell)
+                      for (final s in rawDepts) _CompanyDeptTile(section: s)
+                    else
+                      for (final d in departments.where((d) => d.live))
+                        _DeptTile(dept: d),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -271,14 +338,70 @@ class _DeptTile extends ConsumerWidget {
   }
 }
 
+/// Raw shell — a DERIVED department tile (the company's own taxonomy from the
+/// imported catalog). Mirrors [_DeptTile]'s card visuals with the catalog's
+/// emoji in place of a const icon; tapping opens the department's flat
+/// products list (never the const plumbing tree).
+class _CompanyDeptTile extends ConsumerWidget {
+  const _CompanyDeptTile({required this.section});
+
+  final Section section;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(cfgRadius(context)),
+      elevation: 1,
+      shadowColor: Colors.black26,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        onTap: () =>
+            ref.read(homeDepartmentProvider.notifier).state = section.title,
+        child: Semantics(
+          label: section.title,
+          button: true,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(section.emoji, style: const TextStyle(fontSize: 40)),
+                const SizedBox(height: BsTokens.space3),
+                Text(
+                  section.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Context bar shown above the catalog while a department is open: names the
 /// active department + water-system scope, and clears back to the grid. Makes
 /// the clean-water/sewage division visible (Benzi #1) instead of silent.
 class _DeptScopeBar extends ConsumerWidget {
-  const _DeptScopeBar({required this.name, required this.system});
+  const _DeptScopeBar(
+      {required this.name, required this.system, this.showFlatToggle = true});
 
   final String name;
   final WaterSystem? system;
+
+  /// Raw shell passes false: a derived department is ALWAYS the flat list, so
+  /// the Benzi #5 toggle would have nothing to switch to (honest — hidden,
+  /// not a dead control). Demo/buildsmart call sites keep the default.
+  final bool showFlatToggle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -308,39 +431,41 @@ class _DeptScopeBar extends ConsumerWidget {
               ),
             ),
             // Benzi #5 — toggle the flat "all products" list ↔ catalog view.
-            InkWell(
-              onTap: () =>
-                  ref.read(deptFlatProductsProvider.notifier).state = !flat,
-              borderRadius: BorderRadius.circular(cfgRadius(context)),
-              // ≥48dp tap target (a11y) — the visible label is unchanged.
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(minWidth: 48, minHeight: 48),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(BsTokens.space1),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                            flat
-                                ? Icons.account_tree_outlined
-                                : Icons.view_list,
-                            size: 16,
-                            color: BsTokens.brand),
-                        const SizedBox(width: 2),
-                        Text(flat ? 'קטלוג' : 'כל המוצרים',
-                            style: const TextStyle(
-                                color: BsTokens.brand,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600)),
-                      ],
+            if (showFlatToggle) ...[
+              InkWell(
+                onTap: () =>
+                    ref.read(deptFlatProductsProvider.notifier).state = !flat,
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
+                // ≥48dp tap target (a11y) — the visible label is unchanged.
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(minWidth: 48, minHeight: 48),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(BsTokens.space1),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                              flat
+                                  ? Icons.account_tree_outlined
+                                  : Icons.view_list,
+                              size: 16,
+                              color: BsTokens.brand),
+                          const SizedBox(width: 2),
+                          Text(flat ? 'קטלוג' : 'כל המוצרים',
+                              style: const TextStyle(
+                                  color: BsTokens.brand,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: BsTokens.space3),
+              const SizedBox(width: BsTokens.space3),
+            ],
             InkWell(
               onTap: () {
                 ref.read(deptFlatProductsProvider.notifier).state = false;

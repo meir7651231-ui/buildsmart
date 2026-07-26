@@ -30,6 +30,28 @@ List<Section> companyCategorySections(List<LipskeyCatalogProduct> products) {
   return out;
 }
 
+/// The distinct DEPARTMENTS of a company catalog as grid [Section]s — the
+/// open-spec column `dims['מחלקה']`, distinct non-empty values in
+/// FIRST-APPEARANCE order (the company's own file order is its taxonomy;
+/// never re-sorted), id 'companyDept.<name>', emoji from the first product of
+/// the department (template default '📦' when the cell was left empty). When
+/// NO product carries the column, falls back to [companyCategorySections] —
+/// after an import the departments tab is never dead.
+List<Section> companyDepartments(List<LipskeyCatalogProduct> products) {
+  final out = <Section>[];
+  final seen = <String>{};
+  for (final p in products) {
+    final dept = p.dims?['מחלקה'];
+    if (dept is! String || dept.isEmpty || !seen.add(dept)) continue;
+    out.add(Section(
+      id: 'companyDept.$dept',
+      emoji: p.categoryEmoji.isEmpty ? '📦' : p.categoryEmoji,
+      title: dept,
+    ));
+  }
+  return out.isEmpty ? companyCategorySections(products) : out;
+}
+
 /// Per-category (count, desc) map in the shape `categorySummaryProvider`
 /// serves — desc keeps the tree idiom '$count מוצרים' (no invented copy).
 Map<String, ({int count, String desc})> companyCategorySummaries(

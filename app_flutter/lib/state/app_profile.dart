@@ -102,6 +102,12 @@ const String kProfileImageBaseUrl = (_clean || _c2)
 /// sweep is untouched.
 const bool kProfileEmptyCatalog = _clean;
 
+/// Raw shell: clean ships NO BuildSmart content CHROME (trade picker,
+/// departments taxonomy, teasers, marketing copy) — engine chrome only;
+/// company2/BuildMax stays FALSE (it ships the plumbing catalog as the
+/// own-catalog proof); demo+buildsmart keep today's chrome byte-identical.
+const bool kProfileRawShell = _clean;
+
 /// clean + company2 ship NO demo record seeds (orders · tasks · rewards ·
 /// site · chat · notifications) — a company's app starts life empty and fills
 /// through real use; demo+buildsmart keep today's seeds byte-identical.
@@ -143,3 +149,8 @@ Map<String, Object> profileDefaultsFor(String profile) {
 bool catalogEmptyForProfile(String profile) => profile == 'clean';
 bool seedsEmptyForProfile(String profile) =>
     profile == 'clean' || profile == 'company2';
+
+/// Pure mirror of the raw-shell gate, re-stated per profile string for the
+/// proof test. NOT consumed by app code — the consts above are the single
+/// source at compile time.
+bool rawShellForProfile(String profile) => profile == 'clean';

@@ -6,6 +6,7 @@ import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/login_sheet.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/feature_flags.dart' show kEmailPasswordAuth;
@@ -692,9 +693,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                     ),
                     const SizedBox(height: BsTokens.space2),
+                    // The tagline is BuildSmart's construction pitch — the
+                    // raw shell states the engine's true offer instead,
+                    // verbatim the clean onboarding clause (E2E catch
+                    // 2026-07-25); demo/buildsmart stay byte-identical.
                     const CfgText(
                       'welcome.hero.tagline',
-                      'מהשרטוט עד האתר — בלי לשכוח כלום',
+                      kProfileRawShell
+                          ? 'קטלוג, חיפוש חכם, סל והזמנות — הכול במקום אחד'
+                          : 'מהשרטוט עד האתר — בלי לשכוח כלום',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xE6FFFFFF),

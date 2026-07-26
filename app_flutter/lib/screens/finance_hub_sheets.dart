@@ -1421,7 +1421,7 @@ class _FinReportView extends ConsumerWidget {
           elevation: 0.5,
           title: const CfgText(
             'finance_hub_sheets.report_appbar',
-            'דוח פיננסי — BuildSmart',
+            'דוח פיננסי — ${AppBrand.name}',
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
           ),
           actions: [
@@ -1476,7 +1476,7 @@ class _FinReportView extends ConsumerWidget {
                   children: [
                     const CfgText(
                       'finance_hub_sheets.report_title',
-                      'BuildSmart — דוח פיננסי לפרויקט',
+                      '${AppBrand.name} — דוח פיננסי לפרויקט',
                       style: TextStyle(
                         color: Color(0xFF16191D),
                         fontWeight: FontWeight.w800,

@@ -9,6 +9,7 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
@@ -500,7 +501,7 @@ class _StorePriceComparisonSheet extends StatelessWidget {
           const SizedBox(height: 14),
           CfgText(
             'contractor_tools_sheets.compare_prices_note',
-            '💰 המחירים נמשכים מ-3 חנויות שותפות. BuildSmart בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
+            '💰 המחירים נמשכים מ-3 חנויות שותפות. ${AppBrand.name} בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
             style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
           ),
         ],
@@ -761,7 +762,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       const SizedBox(height: 6),
       CfgText(
         'contractor_tools_sheets.scan_prices_note',
-        '💰 המחירים נמשכים מ-3 חנויות שותפות. BuildSmart בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
+        '💰 המחירים נמשכים מ-3 חנויות שותפות. ${AppBrand.name} בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
         style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2)),
       ),
       const SizedBox(height: 8),

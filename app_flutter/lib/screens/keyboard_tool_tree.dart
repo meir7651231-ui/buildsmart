@@ -61,7 +61,7 @@ import 'package:buildsmart/screens/defects_sheet.dart' show showDefectsSheet;
 import 'package:buildsmart/screens/finance_hub_sheets.dart' show openFinanceHub;
 import 'package:buildsmart/screens/home_shell.dart' show openNewChatSheet;
 import 'package:buildsmart/screens/keyboard_destinations.dart'
-    show kbDestinationByLabel;
+    show companyDeptDestinations, kbDestinationByLabel;
 import 'package:buildsmart/screens/keyboard_tool_actions.dart'
     show runKeyboardTool;
 import 'package:buildsmart/screens/legal_screen.dart'
@@ -111,7 +111,8 @@ import 'package:buildsmart/screens/worker_settings_screen.dart'
     show WorkerSettingsScreen;
 import 'package:buildsmart/screens/worker_task_board_screen.dart'
     show WorkerTaskBoardScreen;
-import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileEmptyCatalog, kProfileRawShell;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider;
@@ -575,12 +576,23 @@ KbToolNode? _destNode(String label, IconData icon) {
 /// the two sub-tabs · tab 3 (חנות) = the store sections + כספים. [ref] is accepted
 /// for parity with the other node-list factories (future per-tab live reads).
 List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
+  // Raw shell ([kProfileRawShell], const): the 4 department chip names below
+  // are BuildSmart taxonomy — phantom on a company shell — so tab 1 drops them
+  // (const-empty ⇒ tree-shaken) and, after an import, carries the COMPANY's
+  // own departments instead (derived in the else-branch below). Demo /
+  // buildsmart: the spread folds the same 4 tuples back in place —
+  // byte-identical.
+  const deptChips = kProfileRawShell
+      ? <(String, IconData)>[]
+      : <(String, IconData)>[
+          ('אינסטלציה', Icons.plumbing),
+          ('ברזים וסניטריים', Icons.water_drop_outlined),
+          ('כלי עבודה ידני', Icons.handyman),
+          ('כלי עבודה חשמלי', Icons.bolt),
+        ];
   const lists = <int, List<(String, IconData)>>{
     1: <(String, IconData)>[
-      ('אינסטלציה', Icons.plumbing),
-      ('ברזים וסניטריים', Icons.water_drop_outlined),
-      ('כלי עבודה ידני', Icons.handyman),
-      ('כלי עבודה חשמלי', Icons.bolt),
+      ...deptChips,
       ('עץ חכם', Icons.account_tree),
       ('מאתר', Icons.gps_fixed),
     ],
@@ -669,6 +681,23 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
       ),
     );
   } else {
+    // Raw shell tab 1 + company import: the COMPANY's departments lead as
+    // chips — the SAME derived destinations the typed path scans
+    // ([companyDeptDestinations]: label = department title, run = the
+    // registry's department opener), so chip and typed nav can never disagree.
+    // A bare shell gets none (deptChips above is already empty). Demo /
+    // buildsmart: const-false gate ⇒ tree-shaken.
+    if (kProfileRawShell && tab == 1) {
+      for (final d in companyDeptDestinations()) {
+        out.add(
+          KbToolNode.leaf(
+            icon: Icons.category_outlined,
+            label: d.label,
+            action: d.run,
+          ),
+        );
+      }
+    }
     for (final (label, icon) in lists[tab] ?? const <(String, IconData)>[]) {
       final node = _destNode(label, icon);
       if (node != null) out.add(node);

@@ -80,6 +80,22 @@ const Set<String> kSeedsGateConsumers = {
   'lib/screens/store_screen.dart', // storeProjectsProvider seed
 };
 
+/// Files consuming [kProfileRawShell] in CODE: the gate's declaration + the
+/// raw-shell chrome hides (home strip/teaser/scan-row · departments grid+tap ·
+/// profession auto-skip · welcome tagline · keyboard dept chips/destinations/
+/// deriver · search-index content rows).
+const Set<String> kRawShellGateConsumers = {
+  'lib/state/app_profile.dart', // the gate's declaration
+  'lib/screens/smart_home_screen.dart',
+  'lib/screens/departments_screen.dart',
+  'lib/screens/onboarding_screen.dart',
+  'lib/screens/welcome_screen.dart',
+  'lib/screens/keyboard_destinations.dart',
+  'lib/screens/keyboard_tool_tree.dart',
+  'lib/screens/keyboard_dept_deriver.dart', // crash-guard arm (loud root)
+  'lib/data/search_index.dart',
+};
+
 void main() {
   group('a · matrix — the pure mirrors pin all four profiles', () {
     test('catalog: empty ONLY on clean (company2 keeps the own-catalog proof)',
@@ -109,6 +125,19 @@ void main() {
     test('mirror ↔ const self-consistency at the active profile', () {
       expect(kProfileEmptyCatalog, catalogEmptyForProfile(kAppProfile));
       expect(kProfileEmptySeeds, seedsEmptyForProfile(kAppProfile));
+      expect(kProfileRawShell, rawShellForProfile(kAppProfile));
+    });
+
+    test('raw shell: ONLY clean (BuildMax keeps its chrome-proof) + coherence',
+        () {
+      expect(rawShellForProfile('demo'), isFalse);
+      expect(rawShellForProfile('buildsmart'), isFalse);
+      expect(rawShellForProfile('clean'), isTrue);
+      expect(rawShellForProfile('company2'), isFalse);
+      for (final p in ['demo', 'buildsmart', 'clean', 'company2']) {
+        expect(!rawShellForProfile(p) || catalogEmptyForProfile(p), isTrue,
+            reason: '$p: a raw shell implies an empty catalog');
+      }
     });
   });
 
@@ -190,6 +219,12 @@ void main() {
       expect(consumersOf('kProfileEmptySeeds'), kSeedsGateConsumers,
           reason: 'a new record-seed gate must consciously join the registry '
               '(and get a live pin in group b)');
+    });
+
+    test('every kProfileRawShell consumer is registered', () {
+      expect(consumersOf('kProfileRawShell'), kRawShellGateConsumers,
+          reason: 'a new raw-shell chrome hide must consciously join the '
+              'registry');
     });
   });
 }

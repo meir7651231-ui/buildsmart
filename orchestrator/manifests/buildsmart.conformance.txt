@@ -216,3 +216,18 @@ lib/logic/install_engine.dart:::_fittingTypes
 #  honest provenance wording (verified stays verbatim):
 lib/screens/lipskey_product_sheet.dart:::לפי נתוני היבוא
 lib/screens/spec_copilot_screen.dart:::לפי נתוני היבוא
+#
+# Regression — RAW SHELL (2026-07-26 · owner: "זה עדיין לא נקי זה לא גולמי"): clean = engine chrome only:
+lib/state/app_profile.dart:::kProfileRawShell = _clean;
+#  the three home hides + the profession auto-skip + the honest tagline:
+lib/screens/smart_home_screen.dart:::kProfileRawShell
+lib/screens/onboarding_screen.dart:::kProfileRawShell ? const OnboardingScreen()
+lib/screens/welcome_screen.dart:::קטלוג, חיפוש חכם, סל והזמנות
+#  departments: honest-empty before an import, COMPANY-derived after (dims['מחלקה']):
+lib/data/company_categories.dart:::companyDepartments
+lib/screens/departments_screen.dart:::אין מחלקות עדיין
+#  keyboard: no phantom const departments; derived destinations share ONE definition:
+lib/screens/keyboard_destinations.dart:::companyDeptDestinations
+lib/screens/keyboard_dept_deriver.dart:::companyDeptDestinations
+#  search index: content rows raw-dropped, order-preserving segments (383 = 366+17):
+lib/data/search_index.dart:::_kEngineRowsHead

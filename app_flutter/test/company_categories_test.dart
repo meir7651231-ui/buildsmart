@@ -43,6 +43,31 @@ void main() {
     });
   });
 
+  group('companyDepartments (raw-shell grid deriver)', () {
+    test('distinct dims[מחלקה] values, first-appearance order, 📦 fallback',
+        () {
+      LipskeyCatalogProduct d(String sku, String dept, {String emoji = ''}) =>
+          LipskeyCatalogProduct(
+            sku: sku, nameHe: 'מ$sku', nameEn: '', categoryHe: 'כ',
+            categoryEn: '', categoryEmoji: emoji, page: 0, brand: '',
+            dims: {'מחלקה': dept},
+          );
+      final s = companyDepartments(
+          [d('1', 'צנרת', emoji: '🔧'), d('2', 'כלים'), d('3', 'צנרת')]);
+      expect(s.map((x) => x.title).toList(), ['צנרת', 'כלים']);
+      expect(s[0].id, 'companyDept.צנרת');
+      expect(s[0].emoji, '🔧');
+      expect(s[1].emoji, '📦');
+    });
+
+    test('no מחלקה column anywhere → falls back to categories (never a dead '
+        'tab)', () {
+      final s = companyDepartments([_p('9', 'ברזים', emoji: '🚰')]);
+      expect(s.single.title, 'ברזים');
+      expect(s.single.id, 'company.ברזים');
+    });
+  });
+
   group('companyCategorySummaries', () {
     test('counts per category, tree-idiom desc', () {
       final m = companyCategorySummaries([

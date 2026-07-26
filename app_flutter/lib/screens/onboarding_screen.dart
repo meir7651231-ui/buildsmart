@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/screens/home_shell.dart';
-import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileEmptyCatalog, kProfileRawShell;
 import 'package:buildsmart/screens/profession_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
@@ -126,7 +127,9 @@ class _OpeningFlow extends ConsumerWidget {
     final step = ref.watch(startupStepProvider);
     final child = switch (step) {
       0 => const WelcomeScreen(),
-      1 => const ProfessionScreen(),
+      // Raw shell — no trades to pick: the flow walks 0→slides→done, and
+      // PopScope's step-1 back still lands on welcome.
+      1 => kProfileRawShell ? const OnboardingScreen() : const ProfessionScreen(),
       _ => const OnboardingScreen(),
     };
     // The whole opening flow lives on ONE route (the steps are provider

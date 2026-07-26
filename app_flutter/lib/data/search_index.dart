@@ -3,6 +3,7 @@
 // settings groups + all deep leaves, catalog categories, search tools.
 
 import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/under_construction.dart';
 
 enum SearchType {
@@ -43,7 +44,14 @@ class SearchEntry {
       };
 }
 
-const List<SearchEntry> kSearchIndex = [
+// ── ENGINE vs CONTENT segments (raw shell) ─────────────────────────────────
+// [kSearchIndex] is assembled from const segments so the raw shell
+// ([kProfileRawShell]) drops the two CONTENT blocks (BuildSmart taxonomy)
+// while every ENGINE row — screens · actions · settings · menu chrome —
+// stays typed-dive reachable. Off the raw shell the final concat reproduces
+// today's list element-for-element (demo byte-identical).
+
+const List<SearchEntry> _kEngineRowsHead = [
   // ── Bottom nav screens ─────────────────────────────────────────────────
   SearchEntry(emoji: '📋', title: 'קטלוג',  breadcrumb: '',  type: SearchType.screen),
   SearchEntry(emoji: '💬', title: 'שיחות',  breadcrumb: '',  type: SearchType.screen),
@@ -70,7 +78,13 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '⚙️', title: 'פילטרים',     breadcrumb: 'חיפוש', type: SearchType.action),
   SearchEntry(emoji: '↕️', title: 'מיון',        breadcrumb: 'חיפוש', type: SearchType.action),
   SearchEntry(emoji: '▦',  title: 'קטלוג',       breadcrumb: 'חיפוש', type: SearchType.action),
+];
 
+// CONTENT — the catalog category rows (BuildSmart plumbing taxonomy), dropped
+// on the raw shell. Derive-when-imported is DEFERRED: on raw the imported
+// company's categories stay reachable via the derived 'קטגוריות' browse, so
+// the typed-dive search chips stay engine-only for now.
+const List<SearchEntry> _kContentCategoryRows = [
   // ── Catalog categories (11 verbatim) ───────────────────────────────────
   SearchEntry(emoji: '🚰',  title: 'ברזים וכיורים',       breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🚽',  title: 'אסלות',               breadcrumb: 'קטלוג', type: SearchType.category),
@@ -84,7 +98,9 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🎨',  title: 'גמר',                 breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🧰',  title: 'אביזרים נלווים',       breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🌱',  title: 'גינון והשקיה',         breadcrumb: 'קטלוג', type: SearchType.category),
+];
 
+const List<SearchEntry> _kEngineRowsMid = [
   // ── Catalog sections (sortable / smart views) ──────────────────────────
   SearchEntry(emoji: '🔄',  title: 'וריאנטים',             breadcrumb: 'קטלוג', type: SearchType.menu),
   SearchEntry(emoji: '⭐',  title: 'מועדפים',              breadcrumb: 'קטלוג', type: SearchType.menu),
@@ -188,11 +204,20 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🌦️', title: 'אוטומציית מזג אוויר',     breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🔧',  title: 'זיהוי בלאי',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '📊',  title: 'Analytics חכם',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+];
+
+// CONTENT — the plan-scan rows (תפריט › בית): the sheet plus its four
+// BuildSmart discipline chips, dropped on the raw shell.
+const List<SearchEntry> _kContentPlanScanRows = [
   SearchEntry(emoji: '📐',  title: 'סרוק תוכנית עבודה',       breadcrumb: 'תפריט › בית',                           type: SearchType.menu),
   SearchEntry(emoji: '🚿',  title: 'אינסטלציה',               breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '⚡',  title: 'חשמל',                    breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '🏛️', title: 'אדריכלות',                breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '🎨',  title: 'גמר',                     breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
+];
+
+const List<SearchEntry> _kEngineRowsTail = [
+  // ── Menu › בית (continued) ─────────────────────────────────────────────
   SearchEntry(emoji: '📦',  title: 'המלאי שלי',               breadcrumb: 'תפריט › בית',                           type: SearchType.menu),
   SearchEntry(emoji: '🏬',  title: 'המחסן',                   breadcrumb: 'תפריט › בית › המלאי שלי',               type: SearchType.menu),
   SearchEntry(emoji: '🏗️', title: 'האתר',                    breadcrumb: 'תפריט › בית › המלאי שלי',               type: SearchType.menu),
@@ -494,6 +519,20 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '📦', title: 'משלוח רגיל',                    breadcrumb: 'חנות › סל',    type: SearchType.action),
   SearchEntry(emoji: '🏪', title: 'איסוף עצמי',                    breadcrumb: 'חנות › סל',    type: SearchType.action),
 ];
+
+/// Const-gated: on the raw shell ([kProfileRawShell]) the two CONTENT
+/// segments (catalog categories + plan-scan rows — BuildSmart taxonomy) drop
+/// out, so typed-dive navigation chips stay engine-only; otherwise the concat
+/// is today's full index element-for-element (demo byte-identical).
+const List<SearchEntry> kSearchIndex = kProfileRawShell
+    ? [..._kEngineRowsHead, ..._kEngineRowsMid, ..._kEngineRowsTail]
+    : [
+        ..._kEngineRowsHead,
+        ..._kContentCategoryRows,
+        ..._kEngineRowsMid,
+        ..._kContentPlanScanRows,
+        ..._kEngineRowsTail,
+      ];
 
 /// The live search index actually shown to users. For Apple review
 /// ([kHideUnderConstruction]) it drops entries that point at a now-hidden,

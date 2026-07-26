@@ -51,6 +51,10 @@
 // in the floating keyboard, never here and never in the pure widget.
 
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, resolvedCatalogProducts;
+import 'package:buildsmart/data/company_categories.dart'
+    show companyDepartments;
 import 'package:buildsmart/logic/system_division.dart'
     show catalogSystemFilterProvider;
 import 'package:buildsmart/screens/ai_hub_screen.dart' show AIHubScreen;
@@ -92,6 +96,7 @@ import 'package:buildsmart/screens/store_screen.dart'
     show StoreSection, storeSectionProvider;
 import 'package:buildsmart/screens/updates_screen.dart'
     show updatesSubTabProvider;
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard.dart'
     show KbTool;
@@ -161,6 +166,9 @@ void _openUpdatesSub(WidgetRef ref, int sub) {
 ///
 /// [name] MUST be one of `DepartmentsScreen.departments` where `live == true`
 /// (verified at the call sites below); a non-live name would just toast 'בקרוב'.
+/// Raw shell + company import: [name] is a COMPANY department title instead
+/// ([companyDeptDestinations]) — the derived departments grid resolves it from
+/// the same provider.
 void _openDepartment(WidgetRef ref, String name) {
   ref.read(catalogSystemFilterProvider.notifier).state = null;
   ref.read(catalogTreePathProvider.notifier).state = const [];
@@ -191,7 +199,11 @@ List<KbDestination>? _kbDestinationsCache;
 /// Memoized: the registry is built ONCE then reused — avoids re-allocating the
 /// full list + every `run` closure on each keystroke (matchDestinations and the
 /// floating keyboard both call this per text/tab/drill change). All call sites
-/// read it, never mutate it, so a single shared instance is safe.
+/// read it, never mutate it, so a single shared instance is safe. FIXED entries
+/// only: the raw-shell derived department destinations are deliberately NOT in
+/// this memo (nor in [_byLabelCache]) — [matchDestinations] concats
+/// [companyDeptDestinations] per call instead, so an in-session import/clear
+/// can never bake into (or linger after) the cache.
 List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>[
       // ── The 4 bottom-nav tabs ───────────────────────────────────────────────
       KbDestination(
@@ -225,59 +237,65 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
       // lands directly on it, no extra tap. Non-live departments (חשמל / חומרי
       // בניין / צבע / גבס / אספקה) are intentionally absent: their tiles only
       // toast 'בקרוב', so they are not real destinations (see stillDeferred).
-      KbDestination(
-        label: 'אינסטלציה',
-        keywords: const [
-          'אינסטלציה',
-          'מחלקת אינסטלציה',
-          'צנרת',
-          'צינורות',
-          'שפכים',
-          'ניקוז',
-          'אינסטלטור',
-          'plumbing',
-        ],
-        run: (ref, context) => _openDepartment(ref, 'אינסטלציה'),
-      ),
-      KbDestination(
-        label: 'ברזים וסניטריים',
-        keywords: const [
-          'ברזים וסניטריים',
-          'ברזים',
-          'סניטריים',
-          'כלים סניטריים',
-          'אסלות',
-          'כיורים',
-          'מקלחות',
-          'אמבטיה',
-          'faucets',
-          'sanitary',
-        ],
-        run: (ref, context) => _openDepartment(ref, 'ברזים וסניטריים'),
-      ),
-      KbDestination(
-        label: 'כלי עבודה ידני',
-        keywords: const [
-          'כלי עבודה ידני',
-          'כלים ידניים',
-          'כלי יד',
-          'חותך צינורות',
-          'hand tools',
-        ],
-        run: (ref, context) => _openDepartment(ref, 'כלי עבודה ידני'),
-      ),
-      KbDestination(
-        label: 'כלי עבודה חשמלי',
-        keywords: const [
-          'כלי עבודה חשמלי',
-          'כלים חשמליים',
-          'כלי ריתוך',
-          'ריתוך PPR',
-          'מכונת ריתוך',
-          'power tools',
-        ],
-        run: (ref, context) => _openDepartment(ref, 'כלי עבודה חשמלי'),
-      ),
+      // Raw shell ([kProfileRawShell], const): these four names are BuildSmart
+      // taxonomy — phantom departments on a company shell — so they drop out
+      // (tree-shaken); after an import the COMPANY's own departments join the
+      // typed scan via [companyDeptDestinations] instead.
+      if (!kProfileRawShell) ...<KbDestination>[
+        KbDestination(
+          label: 'אינסטלציה',
+          keywords: const [
+            'אינסטלציה',
+            'מחלקת אינסטלציה',
+            'צנרת',
+            'צינורות',
+            'שפכים',
+            'ניקוז',
+            'אינסטלטור',
+            'plumbing',
+          ],
+          run: (ref, context) => _openDepartment(ref, 'אינסטלציה'),
+        ),
+        KbDestination(
+          label: 'ברזים וסניטריים',
+          keywords: const [
+            'ברזים וסניטריים',
+            'ברזים',
+            'סניטריים',
+            'כלים סניטריים',
+            'אסלות',
+            'כיורים',
+            'מקלחות',
+            'אמבטיה',
+            'faucets',
+            'sanitary',
+          ],
+          run: (ref, context) => _openDepartment(ref, 'ברזים וסניטריים'),
+        ),
+        KbDestination(
+          label: 'כלי עבודה ידני',
+          keywords: const [
+            'כלי עבודה ידני',
+            'כלים ידניים',
+            'כלי יד',
+            'חותך צינורות',
+            'hand tools',
+          ],
+          run: (ref, context) => _openDepartment(ref, 'כלי עבודה ידני'),
+        ),
+        KbDestination(
+          label: 'כלי עבודה חשמלי',
+          keywords: const [
+            'כלי עבודה חשמלי',
+            'כלים חשמליים',
+            'כלי ריתוך',
+            'ריתוך PPR',
+            'מכונת ריתוך',
+            'power tools',
+          ],
+          run: (ref, context) => _openDepartment(ref, 'כלי עבודה חשמלי'),
+        ),
+      ],
 
       KbDestination(
         label: 'עדכונים',
@@ -738,6 +756,31 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
       ),
     ];
 
+/// Raw shell + company import: the COMPANY's departments as destinations — one
+/// per derived department ([companyDepartments] over the live universe,
+/// first-appearance order), label = the department title, run = the SAME
+/// [_openDepartment] writes the fixed four use, with the derived title (the
+/// derived departments grid resolves a company title from
+/// [homeDepartmentProvider]). Built PER CALL and NEVER memoized — neither into
+/// [_kbDestinationsCache] nor [_byLabelCache] — so an in-session import/clear
+/// reflects on the very next keystroke / grid build. Empty off-raw and on the
+/// bare shell (const-false gate ⇒ demo/buildsmart tree-shake it out entirely).
+List<KbDestination> companyDeptDestinations() {
+  if (!kProfileRawShell || !companyCatalogActive) {
+    return const <KbDestination>[];
+  }
+  return <KbDestination>[
+    for (final s in companyDepartments(resolvedCatalogProducts))
+      KbDestination(
+        label: s.title,
+        // An imported taxonomy carries no synonym vocabulary — the title is the
+        // search term (matched exactly like a label by [matchDestinations]).
+        keywords: <String>[s.title],
+        run: (ref, context) => _openDepartment(ref, s.title),
+      ),
+  ];
+}
+
 /// PURE matcher: the [query] (case-insensitive, trimmed) against each
 /// destination's `label` + `keywords`, by prefix OR contains. Returns up to
 /// [max] destinations, de-duplicated (a destination matched on several of its
@@ -745,15 +788,24 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
 /// returns an empty list (the floating keyboard shows product opening-words
 /// then, unchanged).
 ///
-/// DETERMINISTIC + widget-free: same (query, max) in ⇒ identical list out. The
-/// floating keyboard maps each returned destination back to its `run` action;
-/// the pure keyboard only ever sees the resulting `List<String>` of labels.
+/// DETERMINISTIC + widget-free: same (query, max) in ⇒ identical list out —
+/// on the raw shell the scan also spans [companyDeptDestinations], so the
+/// import state is part of that "in". The floating keyboard maps each returned
+/// destination back to its `run` action; the pure keyboard only ever sees the
+/// resulting `List<String>` of labels.
 List<KbDestination> matchDestinations(String query, {int max = 4}) {
   final q = query.trim().toLowerCase();
   if (q.isEmpty) return const <KbDestination>[];
 
+  // Raw shell: the derived company-department destinations join the scan PER
+  // CALL, after the fixed registry ([companyDeptDestinations] — never
+  // memoized, so an in-session import/clear reflects on the next keystroke).
+  // Off-raw the const-false gate folds this to the memoized registry alone.
+  final all = kProfileRawShell
+      ? <KbDestination>[...kbDestinations(), ...companyDeptDestinations()]
+      : kbDestinations();
   final out = <KbDestination>[];
-  for (final d in kbDestinations()) {
+  for (final d in all) {
     if (out.length >= max) break;
     // Build the haystack: the label + every keyword, lower-cased.
     final terms = <String>[d.label, ...d.keywords];

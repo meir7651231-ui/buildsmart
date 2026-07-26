@@ -13,6 +13,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/home_content_order.dart';
@@ -234,6 +235,9 @@ class _Departments extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Raw shell: the const department names are BuildSmart content — the
+    // departments TAB carries the derived (imported-catalog) grid instead.
+    if (kProfileRawShell) return const SizedBox.shrink();
     final m = _metrics(context, ref);
     // 3 departments + the "עוד" tile = 4 cells fill a stable 2×2.
     // Only live departments render (owner decision — hide, not dim+"בקרוב");
@@ -423,6 +427,9 @@ class _WorkPath extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Raw shell: the גמר-אמבטיה path is BuildSmart recipe content — hidden
+    // even after a catalog import.
+    if (kProfileRawShell) return const SizedBox.shrink();
     return _Pad(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -485,12 +492,14 @@ class _QuickTools extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pal = _pal(context);
     final rows = <({String emoji, String title, String sub, VoidCallback tap})>[
-      (
-        emoji: '📐',
-        title: 'סרוק תוכנית עבודה',
-        sub: 'צלם שרטוט אינסטלציה — נזהה מה צריך להזמין',
-        tap: () => openScanPlanSheet(context),
-      ),
+      // Raw shell: the scan sheet narrates a fabricated work plan — drop it.
+      if (!kProfileRawShell)
+        (
+          emoji: '📐',
+          title: 'סרוק תוכנית עבודה',
+          sub: 'צלם שרטוט אינסטלציה — נזהה מה צריך להזמין',
+          tap: () => openScanPlanSheet(context),
+        ),
       (
         emoji: '📦',
         title: 'המלאי שלי',

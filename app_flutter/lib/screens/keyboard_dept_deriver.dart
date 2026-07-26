@@ -42,7 +42,8 @@
 // CONSTRUCTION here (asserted in the reused [KbPredRow] ctor).
 
 import 'package:buildsmart/screens/keyboard_destinations.dart'
-    show KbDestination, kbDestinations;
+    show KbDestination, companyDeptDestinations, kbDestinations;
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbDeptNodes;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
@@ -109,6 +110,20 @@ KbUpdatesContext deriveDeptContext(DeptLocation location) {
     case DeptRoot():
       final chips = <String>[];
       final destByChip = <String, KbDestination>{};
+      // Raw shell: the four const departments are gated OUT of the registry
+      // (R6), so the by-construction guarantee below no longer holds there —
+      // the loud throw would crash the bare shell. The company's derived
+      // departments (self-gated: empty pre-import) are the row instead.
+      if (kProfileRawShell) {
+        for (final d in companyDeptDestinations()) {
+          chips.add(d.label);
+          destByChip[d.label] = d;
+        }
+        return KbUpdatesContext(
+          row: KbPredRow(chips, destByChip),
+          toolBase: kbDeptNodes(),
+        );
+      }
       for (final label in _kDeptLabels) {
         // Registry presence is guaranteed BY CONSTRUCTION (every live department
         // owns a KbDestination in keyboard_destinations.dart). Fail LOUD rather
