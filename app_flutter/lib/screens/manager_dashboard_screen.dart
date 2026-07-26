@@ -17,7 +17,10 @@ import 'package:buildsmart/logic/attention_engine.dart'
     show AttentionItem, AttentionSev;
 import 'package:buildsmart/logic/customer_score.dart' show CustomerScore;
 import 'package:buildsmart/logic/fuzzy_match.dart' show fuzzyNameMatch;
+import 'package:buildsmart/logic/invoice.dart'
+    show buildInvoiceRows, invoiceTitle;
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/logic/printable_docs.dart' show buildPrintableHtml;
 import 'package:buildsmart/logic/studio/co_editor_gate.dart'
     show studioCoEditorProvider;
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
@@ -45,6 +48,7 @@ import 'package:buildsmart/screens/welcome_screen.dart';
 // of the approval: the worker sheet and this dashboard).
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
+import 'package:buildsmart/services/doc_print.dart' show printDocument;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/connection_status.dart'
@@ -1677,6 +1681,9 @@ class _OrderDetailSheet extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    // Non-null capture for the (async) invoice closure — a mutable local isn't
+    // promoted inside a closure.
+    final invoiceOrder = order;
     final stageIdx = kManagerOrderFlow.indexOf(order.stage);
     final stageLabel = _kOrderStageLabel[order.stage] ?? order.stage;
     // L7: guard stageIdx >= 0 to avoid index crash on unknown/corrupt stage.
@@ -1809,6 +1816,41 @@ class _OrderDetailSheet extends ConsumerWidget {
                   ),
                 ),
               ),
+            // GIANT Phase-2 wave-3 (documents) — invoice/receipt on the
+            // existing printable_docs rail, behind the opt-in `orders.invoicing`
+            // gate; absent by default ⇒ the order sheet is byte-identical.
+            if (featEnabled(ref, 'orders', 'invoicing')) ...[
+              const SizedBox(height: BsTokens.space3),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final title = invoiceTitle(invoiceOrder, receipt: false);
+                  final ok = await printDocument(
+                    title: title,
+                    html: buildPrintableHtml(
+                      title: title,
+                      rows: buildInvoiceRows(invoiceOrder),
+                    ),
+                  );
+                  if (!ok && context.mounted) {
+                    showToast(context, 'הדפסה זמינה בדפדפן');
+                  }
+                },
+                icon: const Icon(Icons.receipt_long, size: 18),
+                label: const Text('🧾 הפק חשבונית'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
