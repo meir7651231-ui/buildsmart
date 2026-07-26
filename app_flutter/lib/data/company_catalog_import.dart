@@ -27,19 +27,9 @@
 
 import 'dart:convert' show jsonDecode, jsonEncode;
 
+import 'package:buildsmart/data/csv_kernel.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
-
-/// The UTF-8 BOM (U+FEFF), spelled ONCE — the invisible codepoint sits
-/// between the quotes; do NOT "clean" it away. It is load-bearing: as the
-/// template's FIRST char it makes Excel decode the Hebrew columns as UTF-8,
-/// and the parser strips it back off uploaded files.
-const String _kBom = '﻿';
-
-/// U+FFFD REPLACEMENT CHARACTER — what `utf8.decode(…, allowMalformed: true)`
-/// leaves behind when the bytes were not valid UTF-8. Its presence anywhere
-/// fails the whole file honestly instead of importing mojibake names.
-const String _kReplacementChar = '�';
 
 /// The downloadable CSV template. The FIRST char is the UTF-8 BOM
 /// (load-bearing: without it Excel mis-decodes the Hebrew columns); line 1 is
@@ -52,7 +42,7 @@ const String _kReplacementChar = '�';
 /// nothing is fabricated).
 String companyCatalogTemplateCsv() {
   final header = [for (final col in _kCols) _csvCell(col.he)].join(',');
-  return '$_kBom$header\n'
+  return '$kCsvBom$header\n'
       '# חובה = מק"ט · שם המוצר · קטגוריה, השאר רשות\n'
       '# מחירים — יתווספו בשלב חיבור-השרת\n'
       '# תמונה/תמונות — קישור מלא (https://…) או שם קובץ\n'
@@ -119,14 +109,14 @@ class CompanyImportReport {
 CompanyImportReport parseCompanyCatalogCsv(String raw) {
   // A leading BOM (our own template ships one) is transport, not data.
   var text = raw;
-  while (text.startsWith(_kBom)) {
+  while (text.startsWith(kCsvBom)) {
     text = text.substring(1);
   }
 
   // Honest encoding check — U+FFFD means the bytes were NOT valid UTF-8 (the
   // caller decodes with allowMalformed: true); refuse the whole file rather
   // than import mojibake product names.
-  if (text.contains(_kReplacementChar)) {
+  if (text.contains(kCsvReplacementChar)) {
     return const CompanyImportReport(
       valid: [],
       errors: [
@@ -140,12 +130,8 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
 
   // Separator auto-detect: Hebrew Excel often saves ';'-CSV — pick whichever
   // of ',' / ';' makes the header line match more known columns (tie → ',').
-  final byComma = _parseRecords(text, ',');
-  final bySemicolon = _parseRecords(text, ';');
-  final records = _headerScore(bySemicolon) > _headerScore(byComma)
-      ? bySemicolon
-      : byComma;
-  final headerIdx = _headerIndex(records);
+  final records = tokenizeCsvAutodetect(text, _kKnownHeaders);
+  final headerIdx = csvHeaderIndex(records);
 
   final errors = <CompanyImportRowError>[];
 
@@ -159,7 +145,7 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
   if (headerIdx >= 0) {
     final headerCells = records[headerIdx].cells;
     for (var i = 0; i < headerCells.length; i++) {
-      final h = _normHeader(headerCells[i]);
+      final h = normHeader(headerCells[i]);
       if (h.isEmpty) continue;
       var known = false;
       for (final col in _kCols) {
@@ -173,7 +159,7 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
         // The title as the company typed it (BOM-stripped + trimmed, NOT
         // lowercased — 'DN' stays 'DN'): it becomes the dims key the product
         // sheet renders verbatim.
-        openCols[i] = headerCells[i].replaceAll(_kBom, '').trim();
+        openCols[i] = headerCells[i].replaceAll(kCsvBom, '').trim();
       }
     }
   }
@@ -199,7 +185,7 @@ CompanyImportReport parseCompanyCatalogCsv(String raw) {
   // matches the row the user sees in Excel.
   for (var r = headerIdx + 1; r < records.length; r++) {
     final rec = records[r];
-    if (_isBlank(rec.cells) || _isComment(rec.cells)) continue;
+    if (csvIsBlank(rec.cells) || csvIsComment(rec.cells)) continue;
 
     dataRows++;
     if (dataRows > 5000) {
@@ -439,6 +425,10 @@ const List<_Col> _kCols = [
   _Col('specImageFiles', 'תמונות מפרט', {'תמונות מפרט', 'spec_images'}),
 ];
 
+/// Every recognized header alias, flattened — the separator-detection set the
+/// shared [tokenizeCsvAutodetect] scores against (was the inlined per-col loop).
+final Set<String> _kKnownHeaders = {for (final col in _kCols) ...col.match};
+
 /// RFC-4180 cell quoting for the TEMPLATE side: a cell containing a quote /
 /// separator / newline is wrapped in '"' with inner quotes doubled — this is
 /// what puts מק"ט on the wire as "מק""ט".
@@ -450,10 +440,6 @@ String _csvCell(String s) {
   if (!needsQuoting) return s;
   return '"${s.replaceAll('"', '""')}"';
 }
-
-/// Header-cell normalization: stray BOMs out, trimmed, lowercased (the
-/// English aliases are case-insensitive; Hebrew is untouched by lowercase).
-String _normHeader(String s) => s.replaceAll(_kBom, '').trim().toLowerCase();
 
 /// A multi-image cell is a '|'-separated list: parts trimmed, empties
 /// dropped, each part stored AS-IS (a full http(s) URL or a bare filename —
@@ -477,113 +463,3 @@ List<String>? _decodeImageList(Object? v) {
   return out.isEmpty ? null : out;
 }
 
-/// A record whose every cell is whitespace — skipped silently.
-bool _isBlank(List<String> cells) => cells.every((c) => c.trim().isEmpty);
-
-/// A '#'-comment record (first non-space char is '#') — the template's
-/// legend / example rows; skipped silently.
-bool _isComment(List<String> cells) =>
-    cells.isNotEmpty && cells.first.trimLeft().startsWith('#');
-
-/// Index of the header record — the first that is neither blank nor a
-/// '#'-comment; -1 when the file has none (headers then read as missing).
-int _headerIndex(List<_CsvRecord> records) {
-  for (var i = 0; i < records.length; i++) {
-    if (_isBlank(records[i].cells) || _isComment(records[i].cells)) continue;
-    return i;
-  }
-  return -1;
-}
-
-/// How many header cells match a known column under this tokenization — the
-/// separator-detection score ([parseCompanyCatalogCsv] picks the winner).
-int _headerScore(List<_CsvRecord> records) {
-  final idx = _headerIndex(records);
-  if (idx < 0) return 0;
-  var score = 0;
-  for (final c in records[idx].cells) {
-    final h = _normHeader(c);
-    for (final col in _kCols) {
-      if (col.match.contains(h)) {
-        score++;
-        break;
-      }
-    }
-  }
-  return score;
-}
-
-/// One parsed CSV record: [line] is the 1-based PHYSICAL file line it starts
-/// on (newlines inside quoted cells advance the count), [cells] the raw
-/// cells, unquoted and unescaped.
-class _CsvRecord {
-  const _CsvRecord(this.line, this.cells);
-
-  final int line;
-  final List<String> cells;
-}
-
-/// The RFC-4180-ish tokenizer (zero deps, never throws): '"'-quoted cells
-/// with '""' escapes may contain [sep] and newlines; CRLF and LF both end a
-/// record; a '"' NOT at cell start is a literal (so an unquoted hand-typed
-/// מק"ט survives); an unterminated quote just flushes what accumulated.
-/// Empty physical lines produce NO record but still advance the line count.
-List<_CsvRecord> _parseRecords(String text, String sep) {
-  final out = <_CsvRecord>[];
-  var cells = <String>[];
-  final cell = StringBuffer();
-  var inQuotes = false;
-  var atCellStart = true;
-  var wroteAny = false;
-  var line = 1;
-  var recordLine = 1;
-
-  void endCell() {
-    cells.add(cell.toString());
-    cell.clear();
-    atCellStart = true;
-  }
-
-  void endRecord() {
-    endCell();
-    out.add(_CsvRecord(recordLine, cells));
-    cells = <String>[];
-    wroteAny = false;
-  }
-
-  for (var i = 0; i < text.length; i++) {
-    final c = text[i];
-    if (inQuotes) {
-      if (c == '"') {
-        if (i + 1 < text.length && text[i + 1] == '"') {
-          cell.write('"'); // the '""' escape
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        if (c == '\n') line++;
-        if (c != '\r') cell.write(c);
-      }
-      continue;
-    }
-    if (c == '"' && atCellStart) {
-      inQuotes = true;
-      atCellStart = false;
-      wroteAny = true;
-    } else if (c == sep) {
-      endCell();
-      wroteAny = true;
-    } else if (c == '\n') {
-      line++;
-      if (wroteAny) endRecord();
-      recordLine = line;
-    } else if (c != '\r') {
-      cell.write(c);
-      atCellStart = false;
-      wroteAny = true;
-    }
-  }
-  if (wroteAny) endRecord(); // a last record without a trailing newline
-  return out;
-}

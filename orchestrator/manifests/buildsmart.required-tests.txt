@@ -60,3 +60,5 @@ test/customer_score_gate_test.dart
 # giant Phase-2 wave-3a — data-quality warnings lane (pure auditRows + gated non-blocking report on catalog import):
 test/data_quality_test.dart
 test/data_quality_gate_test.dart
+# giant Phase-2 wave-3b — shared CSV kernel (tokenizer + header helpers extracted from the catalog parser):
+test/csv_kernel_test.dart

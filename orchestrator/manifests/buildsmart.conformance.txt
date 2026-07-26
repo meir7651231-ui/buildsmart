@@ -372,3 +372,8 @@ lib/logic/data_quality.dart:::kind: 'dup-name',
 lib/logic/data_quality.dart:::kind: 'near-key',
 lib/screens/company_catalog_import_sheet.dart:::if (featEnabled(ref, 'catalog', 'validation')) {
 lib/screens/company_catalog_import_sheet.dart:::if (_quality != null && _quality!.flagged > 0) ...[
+#
+# Regression — GIANT Phase-2 wave-3b (2026-07-26): shared CSV kernel extracted from the catalog parser (byte-identical, pinned suite proves it):
+lib/data/csv_kernel.dart:::List<CsvRecord> parseCsvRecords(String text, String sep) {
+lib/data/csv_kernel.dart:::List<CsvRecord> tokenizeCsvAutodetect(String text, Set<String> knownHeaders) {
+lib/data/company_catalog_import.dart:::final records = tokenizeCsvAutodetect(text, _kKnownHeaders);
