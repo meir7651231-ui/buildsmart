@@ -9,7 +9,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../store/useApp';
-import { termOf } from '../../lib/config';
+import { featureOn, termOf } from '../../lib/config';
 import { Btn, Modal } from '../ui';
 
 const LS_KEY = 'maor_timer_collections';
@@ -161,6 +161,16 @@ export function MoneyTimer({ onClose }: { onClose: () => void }) {
     toast('נגבה ' + money(amt) + (rec.client ? ' · ' + rec.client : ''));
     reset();
     setClient('');
+    // אם הקופה הרושמת פעילה — ממשיכים אליה עם הסכום מוכן (עודף + חשבונית).
+    if (featureOn(config, 'core.cashbox')) {
+      try {
+        sessionStorage.setItem('maor_cashbox_amount', String(amt));
+      } catch {
+        /* חסום */
+      }
+      onClose();
+      window.location.hash = '#cashbox';
+    }
   }
 
   const todayIso = new Date().toISOString().slice(0, 10);
