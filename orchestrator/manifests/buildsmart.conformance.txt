@@ -377,3 +377,9 @@ lib/screens/company_catalog_import_sheet.dart:::if (_quality != null && _quality
 lib/data/csv_kernel.dart:::List<CsvRecord> parseCsvRecords(String text, String sep) {
 lib/data/csv_kernel.dart:::List<CsvRecord> tokenizeCsvAutodetect(String text, Set<String> knownHeaders) {
 lib/data/company_catalog_import.dart:::final records = tokenizeCsvAutodetect(text, _kKnownHeaders);
+#
+# Regression — GIANT Phase-2 wave-3c (2026-07-26): pure customer bulk-import parser on the shared CSV kernel:
+lib/data/customer_import.dart:::CustomerImportReport parseCustomerCsv(String raw) {
+lib/data/customer_import.dart:::bool get canCommit => errors.isEmpty && valid.isNotEmpty;
+lib/data/customer_import.dart:::id: 'imp:${_dedupKey(name, phone)}',
+lib/data/customer_import.dart:::'שורה $n — לקוח כפול: $name'

@@ -62,3 +62,5 @@ test/data_quality_test.dart
 test/data_quality_gate_test.dart
 # giant Phase-2 wave-3b — shared CSV kernel (tokenizer + header helpers extracted from the catalog parser):
 test/csv_kernel_test.dart
+# giant Phase-2 wave-3c — pure customer bulk-import parser (name required · phone/email validated · deterministic dedup-key ids · atomic gate):
+test/customer_import_test.dart
