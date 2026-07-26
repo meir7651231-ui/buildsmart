@@ -231,3 +231,13 @@ lib/screens/keyboard_destinations.dart:::companyDeptDestinations
 lib/screens/keyboard_dept_deriver.dart:::companyDeptDestinations
 #  search index: content rows raw-dropped, order-preserving segments (383 = 366+17):
 lib/data/search_index.dart:::_kEngineRowsHead
+#
+# Regression — COMPLETION ROUND (2026-07-26 · owner "למה לא הכל?"): every file-feedable engine closes:
+lib/data/company_categories.dart:::companyComplementsFor
+lib/screens/lipskey_product_sheet.dart:::מוצרים משלימים
+lib/features/word_finder/dive_pool.dart:::companyCatalogActive
+lib/features/ring_dive/plain_dive.dart:::companyCatalogActive
+lib/screens/install_studio_screen.dart:::_pickerCats
+lib/screens/ai_hub_screen.dart:::_rawHiddenToolIds
+lib/screens/store_screen.dart:::kProfileRawShell
+lib/data/search_index.dart:::_kContentProjectRows

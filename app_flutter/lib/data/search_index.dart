@@ -3,7 +3,8 @@
 // settings groups + all deep leaves, catalog categories, search tools.
 
 import 'package:buildsmart/config/app_brand.dart';
-import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileEmptySeeds, kProfileRawShell;
 import 'package:buildsmart/state/under_construction.dart';
 
 enum SearchType {
@@ -48,8 +49,10 @@ class SearchEntry {
 // [kSearchIndex] is assembled from const segments so the raw shell
 // ([kProfileRawShell]) drops the two CONTENT blocks (BuildSmart taxonomy)
 // while every ENGINE row — screens · actions · settings · menu chrome —
-// stays typed-dive reachable. Off the raw shell the final concat reproduces
-// today's list element-for-element (demo byte-identical).
+// stays typed-dive reachable. A third, SEED segment (the three demo project
+// rows) self-gates on [kProfileEmptySeeds] inside the tail, mirroring
+// [kProjects] (data/projects.dart). Off the raw shell the final concat
+// reproduces today's list element-for-element (demo byte-identical).
 
 const List<SearchEntry> _kEngineRowsHead = [
   // ── Bottom nav screens ─────────────────────────────────────────────────
@@ -198,12 +201,17 @@ const List<SearchEntry> _kEngineRowsMid = [
   SearchEntry(emoji: '📦',  title: 'חיזוי מלאי',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '📷',  title: 'סורק ברקוד',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🎙️', title: 'דיבור למשימה',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
-  SearchEntry(emoji: '💡',  title: 'חלופות זולות',             breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
-  SearchEntry(emoji: '📐',  title: 'סריקת תוכניות',           breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+  // completion round: these two name AI-hub tiles that are raw-hidden — the
+  // chips must not point at absent tools on the bare shell.
+  if (!kProfileRawShell) ...const <SearchEntry>[
+    SearchEntry(emoji: '💡',  title: 'חלופות זולות',             breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+    SearchEntry(emoji: '📐',  title: 'סריקת תוכניות',           breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+  ],
   SearchEntry(emoji: '🔗',  title: 'התאמה משולשת',             breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🌦️', title: 'אוטומציית מזג אוויר',     breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
   SearchEntry(emoji: '🔧',  title: 'זיהוי בלאי',              breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
-  SearchEntry(emoji: '📊',  title: 'Analytics חכם',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
+  if (!kProfileRawShell)
+    SearchEntry(emoji: '📊',  title: 'Analytics חכם',            breadcrumb: 'תפריט › בית › בינה מלאכותית ואוטומציה', type: SearchType.menu),
 ];
 
 // CONTENT — the plan-scan rows (תפריט › בית): the sheet plus its four
@@ -214,6 +222,20 @@ const List<SearchEntry> _kContentPlanScanRows = [
   SearchEntry(emoji: '⚡',  title: 'חשמל',                    breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '🏛️', title: 'אדריכלות',                breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
   SearchEntry(emoji: '🎨',  title: 'גמר',                     breadcrumb: 'תפריט › בית › סרוק תוכנית עבודה',       type: SearchType.menu),
+];
+
+// SEED — the three demo project-name rows (תפריט › הפרויקטים), mirroring
+// [kProjects] (data/projects.dart): clean/company2 ([kProfileEmptySeeds])
+// start with NO projects, so search must not surface them either;
+// demo/buildsmart keep the rows verbatim. Spread INSIDE the tail at their
+// exact position, so the order-preserving concat stays element-identical
+// off the gate.
+const List<SearchEntry> _kContentProjectRows = kProfileEmptySeeds
+    ? <SearchEntry>[]
+    : [
+  SearchEntry(emoji: '🏗️', title: 'מגדל הרצליה — קומה 4',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+  SearchEntry(emoji: '🏗️', title: 'וילה כפר שמריהו',        breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+  SearchEntry(emoji: '🏗️', title: 'שיפוץ משרדים — רעננה',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
 ];
 
 const List<SearchEntry> _kEngineRowsTail = [
@@ -234,9 +256,7 @@ const List<SearchEntry> _kEngineRowsTail = [
   SearchEntry(emoji: '🗄️', title: 'ארכיון פרויקטים',         breadcrumb: 'תפריט › בית › משימות העבודה',            type: SearchType.menu),
 
   // ── Menu › הפרויקטים ──────────────────────────────────────────────────
-  SearchEntry(emoji: '🏗️', title: 'מגדל הרצליה — קומה 4',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
-  SearchEntry(emoji: '🏗️', title: 'וילה כפר שמריהו',        breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
-  SearchEntry(emoji: '🏗️', title: 'שיפוץ משרדים — רעננה',  breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
+  ..._kContentProjectRows,
   SearchEntry(emoji: '📊',  title: 'מרכז פיננסים',           breadcrumb: 'תפריט › הפרויקטים',                type: SearchType.menu),
   SearchEntry(emoji: '📈',  title: 'הצמדה למדד',             breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
   SearchEntry(emoji: '🗓️', title: 'תנאי תשלום',             breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
@@ -522,8 +542,10 @@ const List<SearchEntry> _kEngineRowsTail = [
 
 /// Const-gated: on the raw shell ([kProfileRawShell]) the two CONTENT
 /// segments (catalog categories + plan-scan rows — BuildSmart taxonomy) drop
-/// out, so typed-dive navigation chips stay engine-only; otherwise the concat
-/// is today's full index element-for-element (demo byte-identical).
+/// out, so typed-dive navigation chips stay engine-only; the SEED segment
+/// ([_kContentProjectRows], spread inside the tail) drops on
+/// [kProfileEmptySeeds]; otherwise the concat is today's full index
+/// element-for-element (demo byte-identical).
 const List<SearchEntry> kSearchIndex = kProfileRawShell
     ? [..._kEngineRowsHead, ..._kEngineRowsMid, ..._kEngineRowsTail]
     : [

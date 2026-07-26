@@ -29,3 +29,5 @@ test/company_catalog_rows_test.dart
 test/barcode_alias_test.dart
 # slice-B — the connections brain pours in (bridge parsing · registration discipline · engine payoff):
 test/company_spec_bridge_test.dart
+# completion round — pools overlay identity · AI-hub raw pins · complements order:
+test/company_pools_overlay_test.dart

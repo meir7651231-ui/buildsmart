@@ -648,49 +648,59 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           MaterialPageRoute<void>(builder: (_) => const AuditScreen()),
         ),
       ),
-      KbDestination(
-        label: 'חלופות זולות',
-        keywords: const [
-          'חלופות זולות',
-          'חלופות',
-          'זול יותר',
-          'חיסכון',
-          'מוצר זול',
-          'cheaper',
-        ],
-        // openCheaperAlternativesSheet(context) (contractor_tools_sheets.dart:34)
-        // — the same sheet the AI hub's '💡 חלופות זולות' row opens
-        // (ai_hub_screen.dart:164).
-        run: (ref, context) => openCheaperAlternativesSheet(context),
-      ),
-      KbDestination(
-        label: 'השוואת מחירים',
-        keywords: const [
-          'השוואת מחירים',
-          'השוואה',
-          'מחירים',
-          'השוואת ספקים',
-          'price compare',
-        ],
-        // openPriceCompareSheet(context) (contractor_tools_sheets.dart:47) — the
-        // same sheet the store services grid's price-comparison tile opens
-        // (store_screen.dart:3277).
-        run: (ref, context) => openPriceCompareSheet(context),
-      ),
-      KbDestination(
-        label: 'סריקת תוכנית',
-        keywords: const [
-          'סריקת תוכנית',
-          'סרוק תוכנית',
-          'תוכנית עבודה',
-          'סריקת תוכניות',
-          'scan plan',
-        ],
-        // openScanPlanSheet(context) (contractor_tools_sheets.dart:21) — the same
-        // sheet the smart home 'כלים מהירים → 📐 סרוק תוכנית עבודה' row and the
-        // keyboard 'מהירים → סריקת תוכנית' leaf open (keyboard_tool_tree.dart:138).
-        run: (ref, context) => openScanPlanSheet(context),
-      ),
+      // Raw shell ([kProfileRawShell], const): the three contractor tool sheets
+      // narrate fabricated BuildSmart demo data (contractor_seeds plan types /
+      // price tiers) — phantom on a company shell — so their typed destinations
+      // drop out (tree-shaken; const-folded BEFORE [_kbDestinationsCache] bakes,
+      // so the memo holds the profile's fixed shape and can never cache a
+      // phantom entry). Demo / buildsmart: the spread folds the same three
+      // entries back in place — byte-identical. Mirrors the gated tool leaves
+      // in keyboard_tool_tree.dart (מהירים / store orders+services).
+      if (!kProfileRawShell) ...<KbDestination>[
+        KbDestination(
+          label: 'חלופות זולות',
+          keywords: const [
+            'חלופות זולות',
+            'חלופות',
+            'זול יותר',
+            'חיסכון',
+            'מוצר זול',
+            'cheaper',
+          ],
+          // openCheaperAlternativesSheet(context) (contractor_tools_sheets.dart:34)
+          // — the same sheet the AI hub's '💡 חלופות זולות' row opens
+          // (ai_hub_screen.dart:164).
+          run: (ref, context) => openCheaperAlternativesSheet(context),
+        ),
+        KbDestination(
+          label: 'השוואת מחירים',
+          keywords: const [
+            'השוואת מחירים',
+            'השוואה',
+            'מחירים',
+            'השוואת ספקים',
+            'price compare',
+          ],
+          // openPriceCompareSheet(context) (contractor_tools_sheets.dart:47) — the
+          // same sheet the store services grid's price-comparison tile opens
+          // (store_screen.dart:3277).
+          run: (ref, context) => openPriceCompareSheet(context),
+        ),
+        KbDestination(
+          label: 'סריקת תוכנית',
+          keywords: const [
+            'סריקת תוכנית',
+            'סרוק תוכנית',
+            'תוכנית עבודה',
+            'סריקת תוכניות',
+            'scan plan',
+          ],
+          // openScanPlanSheet(context) (contractor_tools_sheets.dart:21) — the same
+          // sheet the smart home 'כלים מהירים → 📐 סרוק תוכנית עבודה' row and the
+          // keyboard 'מהירים → סריקת תוכנית' leaf open (keyboard_tool_tree.dart:138).
+          run: (ref, context) => openScanPlanSheet(context),
+        ),
+      ],
       KbDestination(
         label: 'תנאי שימוש',
         keywords: const [

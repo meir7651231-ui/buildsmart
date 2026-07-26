@@ -221,12 +221,19 @@ List<KbToolNode> kbHomeNodes() => <KbToolNode>[
         icon: Icons.bolt,
         label: 'מהירים',
         children: <KbToolNode>[
-          KbToolNode.leaf(
-            icon: Icons.description_outlined,
-            label: 'סריקת תוכנית',
-            // smart_home_screen.dart:490 — openScanPlanSheet(context).
-            action: (ref, context) => openScanPlanSheet(context),
-          ),
+          // Raw shell ([kProfileRawShell], const): the scan sheet narrates a
+          // fabricated BuildSmart work plan (contractor_seeds) — phantom on a
+          // company shell — so the leaf drops out (tree-shaken), keeping the
+          // mirror true to the SAME gate on its _QuickTools row
+          // (smart_home_screen.dart:496). Demo / buildsmart: const-false gate
+          // ⇒ byte-identical.
+          if (!kProfileRawShell)
+            KbToolNode.leaf(
+              icon: Icons.description_outlined,
+              label: 'סריקת תוכנית',
+              // smart_home_screen.dart:490 — openScanPlanSheet(context).
+              action: (ref, context) => openScanPlanSheet(context),
+            ),
           KbToolNode.leaf(
             icon: Icons.inventory_2_outlined,
             label: 'המלאי שלי',
@@ -446,6 +453,12 @@ List<KbToolNode> kbUpdatesChatsNodes() => <KbToolNode>[
 ///   • [StoreSection.all]   — the hub root: 📦 הזמנות jumps to the orders section
 ///     (the SAME pairing keyboard_destinations.dart's `_openStoreSection` does:
 ///     tab 3 + storeSectionProvider = orders) + 💰 כספים ([openFinanceHub]).
+/// Raw shell ([kProfileRawShell], const): the two demo sheets (השוואת מחירים /
+/// חלופות זולות — contractor_seeds data) drop out of orders/services; services
+/// then derives EMPTY, which the keyboard's base sync treats as "no base" and
+/// shows the letters (floating_card_keyboard.dart `_syncContextToolBase`) —
+/// never a blank grid. Demo / buildsmart: const-false gates fold the leaves
+/// back in place — byte-identical.
 /// Keep-floating throughout: a section-jump swaps the screen underneath; a sheet
 /// opener pushes over everything (the keyboard reappears when it pops).
 List<KbToolNode> kbStoreNodes(StoreSection section) => switch (section) {
@@ -472,23 +485,39 @@ List<KbToolNode> kbStoreNodes(StoreSection section) => switch (section) {
             label: 'התראות הזמנות',
             action: (ref, context) => showOrderNotifSheet(context),
           ),
-          KbToolNode.leaf(
-            icon: Icons.compare_arrows,
-            label: 'השוואת מחירים',
-            action: (ref, context) => openPriceCompareSheet(context),
-          ),
+          // Raw shell: the compare sheet narrates fabricated BuildSmart price
+          // tiers (contractor_seeds) — phantom on a company shell — so the
+          // leaf drops out (tree-shaken). Demo / buildsmart: const-false gate
+          // ⇒ byte-identical.
+          if (!kProfileRawShell)
+            KbToolNode.leaf(
+              icon: Icons.compare_arrows,
+              label: 'השוואת מחירים',
+              action: (ref, context) => openPriceCompareSheet(context),
+            ),
         ],
       StoreSection.services => <KbToolNode>[
-          KbToolNode.leaf(
-            icon: Icons.compare_arrows,
-            label: 'השוואת מחירים',
-            action: (ref, context) => openPriceCompareSheet(context),
-          ),
-          KbToolNode.leaf(
-            icon: Icons.lightbulb_outline,
-            label: 'חלופות זולות',
-            action: (ref, context) => openCheaperAlternativesSheet(context),
-          ),
+          // Raw shell ([kProfileRawShell], const): both service sheets narrate
+          // fabricated BuildSmart demo data (contractor_seeds price tiers /
+          // alternatives) — phantom on a company shell — so both leaves drop
+          // out (tree-shaken) and this toolBase is EMPTY. Benign by design:
+          // the keyboard's base sync treats an empty base as "no base" and
+          // shows the letters (floating_card_keyboard.dart
+          // `_syncContextToolBase`, the `effective.isEmpty` teardown) — never
+          // a blank ▦ grid. Demo / buildsmart: the spread folds the same two
+          // leaves back in place — byte-identical.
+          if (!kProfileRawShell) ...<KbToolNode>[
+            KbToolNode.leaf(
+              icon: Icons.compare_arrows,
+              label: 'השוואת מחירים',
+              action: (ref, context) => openPriceCompareSheet(context),
+            ),
+            KbToolNode.leaf(
+              icon: Icons.lightbulb_outline,
+              label: 'חלופות זולות',
+              action: (ref, context) => openCheaperAlternativesSheet(context),
+            ),
+          ],
         ],
       StoreSection.all => <KbToolNode>[
           KbToolNode.leaf(

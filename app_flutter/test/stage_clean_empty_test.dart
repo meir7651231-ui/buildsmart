@@ -78,6 +78,8 @@ const Set<String> kSeedsGateConsumers = {
   'lib/screens/notifications_screen.dart', // _activeNotifs extension
   'lib/screens/finance_hub_sheets.dart', // 3 demo-row extensions
   'lib/screens/store_screen.dart', // storeProjectsProvider seed
+  // completion round: the 3 demo project-name SEARCH rows ride the seeds gate
+  'lib/data/search_index.dart',
 };
 
 /// Files consuming [kProfileRawShell] in CODE: the gate's declaration + the
@@ -94,6 +96,11 @@ const Set<String> kRawShellGateConsumers = {
   'lib/screens/keyboard_tool_tree.dart',
   'lib/screens/keyboard_dept_deriver.dart', // crash-guard arm (loud root)
   'lib/data/search_index.dart',
+  // completion round: the install-picker chips derive from the live universe
+  'lib/screens/install_studio_screen.dart',
+  // completion final wave: AI-hub price/plan/analytics tiles + store svc-5
+  'lib/screens/ai_hub_screen.dart',
+  'lib/screens/store_screen.dart',
 };
 
 void main() {

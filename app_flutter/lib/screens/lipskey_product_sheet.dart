@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_source.dart'
-    show lipskeyScanPool, resolvedCatalogProducts;
+    show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
+import 'package:buildsmart/data/company_categories.dart'
+    show companyComplementsFor;
 import 'package:buildsmart/data/company_spec_bridge.dart'
     show kCompanySpecSkus;
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -2063,7 +2065,7 @@ class _QuickInfoStrips extends ConsumerStatefulWidget {
   ConsumerState<_QuickInfoStrips> createState() => _QuickInfoStripsState();
 }
 
-enum _StripKind { finder, compat, kit, variants, compliance, spec, price, info, hygiene }
+enum _StripKind { finder, compat, complements, kit, variants, compliance, spec, price, info, hygiene }
 
 /// Socket-fusion welding plan per nominal diameter (catalog p.9):
 /// (insertion depth mm, heating sec, cooling min). Plate temp 260°C.
@@ -2138,6 +2140,7 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
     String endsSummary,
     double? minBoreMm,
   })? _spec;
+  late List<LipskeyCatalogProduct> _companyComplements;
 
   /// Recompute the cached per-product facts when [p] differs from the cached
   /// product (or on first build). Same single source as the inline calls.
@@ -2150,6 +2153,10 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
     _famCount = variantSiblingsCountFor(p);
     _compliance = complianceTriggersFor(p);
     _spec = engineeringSpecFor(p);
+    // Company template column 'מוצרים משלימים' resolved against the live
+    // universe — const [] on demo (no product carries the column), so the
+    // demo strips render byte-identical.
+    _companyComplements = companyComplementsFor(p, resolvedCatalogProducts);
   }
 
   @override
@@ -2193,6 +2200,17 @@ class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
           label: 'מוצרים תואמים',
           value: '$compat מוצרים',
           tint: const Color(0xFF7FD0FF),
+        ),
+      // The company's OWN declared complements (template column 'מוצרים
+      // משלימים') — only on an active company catalog whose skus resolved;
+      // on demo companyCatalogActive is false, so the rows are unchanged.
+      if (companyCatalogActive && _companyComplements.isNotEmpty)
+        _StripDef(
+          kind: _StripKind.complements,
+          emoji: '🧩',
+          label: 'מוצרים משלימים',
+          value: '${_companyComplements.length} מוצרים',
+          tint: const Color(0xFFEC4899),
         ),
       if (kit != null)
         _StripDef(
@@ -2442,6 +2460,7 @@ class _StripPanel extends StatelessWidget {
       child: switch (kind) {
         _StripKind.finder => _buildFinder(),
         _StripKind.compat => _buildCompat(),
+        _StripKind.complements => _buildComplements(),
         _StripKind.kit => _buildKit(),
         _StripKind.variants => _buildVariants(),
         _StripKind.compliance => _buildCompliance(),
@@ -2492,6 +2511,16 @@ class _StripPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [_infoHead('לפי נתוני היבוא'), carousel],
     );
+  }
+
+  // ── מוצרים משלימים: the company's OWN declared complements — the template
+  // column 'מוצרים משלימים' (|-separated skus) resolved against the live
+  // universe. The strip only exists when the list is non-empty, so the hint
+  // is a stale-panel guard only.
+  Widget _buildComplements() {
+    final hits = companyComplementsFor(product, resolvedCatalogProducts);
+    if (hits.isEmpty) return const _EmptyHint('אין מוצרים משלימים');
+    return _miniCarousel(hits);
   }
 
   // ── ערכת התקנה: smart-tree accessories + auto-derived install tools ─────

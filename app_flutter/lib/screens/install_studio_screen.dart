@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -26,6 +28,7 @@ import 'package:buildsmart/logic/pressure_drop.dart';
 import 'package:buildsmart/logic/price_estimate.dart';
 import 'package:buildsmart/screens/audit_screen.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart';
@@ -269,6 +272,30 @@ const _kCats = [
   _PickerCategory('🔀', 'מחלק (כמה ברזים)', {'מחלקים'}),
   _PickerCategory('🔧', 'חיבורים', null), // null = catch-all
 ];
+
+/// The picker categories actually rendered. Raw shell ([kProfileRawShell]):
+/// the const plumbing [_kCats] never renders — with an imported company
+/// catalog active ([companyCatalogActive]) the chips derive from the LIVE
+/// [chainUniverse]'s distinct `categoryHe` values (FIRST-APPEARANCE order,
+/// the company_categories idiom; emoji from the first product of the
+/// category, template default '📦'), capped at the const grid's own count so
+/// the non-scrollable 2-col grid keeps today's visual budget; before an
+/// import there are no categories to offer — honest empty, never the const
+/// plumbing chips. Demo/buildsmart: [_kCats] verbatim.
+List<_PickerCategory> _pickerCats() {
+  if (!kProfileRawShell) return _kCats;
+  if (!companyCatalogActive) return const <_PickerCategory>[];
+  final out = <_PickerCategory>[];
+  final seen = <String>{};
+  for (final p in chainUniverse) {
+    final cat = p.categoryHe;
+    if (cat.isEmpty || !seen.add(cat)) continue;
+    out.add(_PickerCategory(
+        p.categoryEmoji.isEmpty ? '📦' : p.categoryEmoji, cat, {cat}));
+    if (out.length >= _kCats.length) break;
+  }
+  return out;
+}
 
 bool _inCategory(_PickerCategory cat, LipskeyCatalogProduct p) {
   if (cat.cats == null) {
@@ -3631,6 +3658,10 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
 
   // 2×3 grid of category buttons
   Widget _categoryGrid() {
+    // Raw shell: derived company chips (honest-empty before an import) — the
+    // const plumbing [_kCats] renders only on demo/buildsmart (byte-identical
+    // there: _pickerCats() returns the same const list).
+    final cats = _pickerCats();
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       child: Column(
@@ -3651,9 +3682,9 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                 mainAxisSpacing: 10,
                 childAspectRatio: 2.4,
               ),
-              itemCount: _kCats.length,
+              itemCount: cats.length,
               itemBuilder: (_, i) {
-                final cat = _kCats[i];
+                final cat = cats[i];
                 final count = chainUniverse
                     .where((p) =>
                         productSuitableForTemp(p, widget.lineTemp) &&

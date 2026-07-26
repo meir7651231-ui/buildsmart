@@ -68,3 +68,23 @@ Map<String, ({int count, String desc})> companyCategorySummaries(
       e.key: (count: e.value, desc: '${e.value} מוצרים'),
   };
 }
+
+/// The company's own complements: dims['מוצרים משלימים'] (|-separated skus)
+/// resolved against [pool] — order kept, unknown skus dropped honestly.
+List<LipskeyCatalogProduct> companyComplementsFor(
+    LipskeyCatalogProduct p, List<LipskeyCatalogProduct> pool) {
+  final cell = p.dims?['מוצרים משלימים'];
+  if (cell is! String || cell.isEmpty) return const [];
+  final out = <LipskeyCatalogProduct>[];
+  for (final part in cell.split('|')) {
+    final sku = part.trim();
+    if (sku.isEmpty) continue;
+    for (final q in pool) {
+      if (q.sku == sku) {
+        out.add(q);
+        break; // first match wins; a miss simply contributes nothing
+      }
+    }
+  }
+  return out;
+}

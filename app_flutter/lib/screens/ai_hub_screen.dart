@@ -23,6 +23,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/services/weather.dart';
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
@@ -95,13 +96,25 @@ class AIHubScreen extends ConsumerWidget {
   /// The DEFERRED (backend-blocked) tool ids — exposed for tests/guards.
   static Set<String> get deferredToolIds => _deferredToolIds;
 
+  /// The tools a RAW company shell must not offer ([kProfileRawShell]) —
+  /// 💡 חלופות זולות + 📐 סריקת תוכניות claim partner-store prices, and a
+  /// company shell holds no price data (the imported catalog model carries
+  /// none); 📊 Analytics' savings line folds the same invented
+  /// `kHomeProductBrands` scan. Dropped from [_visibleTiles], so the grid, the
+  /// keyboard mirror [_kbNodes] and [visibleToolIds] can't diverge; the tile
+  /// data + dispatch stay in code (reversible). Demo/buildsmart: const-false
+  /// gate ⇒ byte-identical.
+  static const Set<String> _rawHiddenToolIds = {'alt', 'plan', 'analytics'};
+
   /// The visible tiles for this build — all 9 unless we are hiding the deferred
-  /// (backend-blocked) ones for Apple review.
+  /// (backend-blocked) ones for Apple review, minus [_rawHiddenToolIds] on the
+  /// raw company shell (both gates const ⇒ the drop is compile-time).
   static List<({String id, String ic, String t, String s})> get _visibleTiles =>
-      kHideUnderConstruction
+      kHideUnderConstruction || kProfileRawShell
           ? [
             for (final t in _tiles)
-              if (!_deferredToolIds.contains(t.id)) t,
+              if (!(kHideUnderConstruction && _deferredToolIds.contains(t.id)))
+                if (!(kProfileRawShell && _rawHiddenToolIds.contains(t.id))) t,
           ]
           : _tiles;
 

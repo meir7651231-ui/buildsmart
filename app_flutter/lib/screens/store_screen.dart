@@ -10,7 +10,8 @@ import 'package:buildsmart/screens/login_sheet.dart' show showLoginSheet;
 import 'package:buildsmart/screens/order_notif_sheet.dart';
 import 'package:buildsmart/screens/role_request_sheet.dart'
     show showRoleRequestSheet;
-import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
+import 'package:buildsmart/state/app_profile.dart'
+    show kProfileEmptySeeds, kProfileRawShell;
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/rbac.dart'
     show CheckoutBlock, checkoutBlock, pendingApprovalProvider;
@@ -300,13 +301,18 @@ const List<_Meta> _kServiceItems = [
     time: '19.5',
     badge: 0,
   ),
-  (
-    emoji: '📊',
-    title: 'השוואת מחירים',
-    preview: '4 ספקים עדכנו מחירים',
-    time: '19.5',
-    badge: 2,
-  ),
+  // raw shell (kProfileRawShell): 📊 השוואת מחירים routes to the real
+  // partner-store comparison sheet, which narrates supplier prices that don't
+  // exist on the bare shell — no row there; demo/buildsmart/company2 keep the
+  // grid byte-identical.
+  if (!kProfileRawShell)
+    (
+      emoji: '📊',
+      title: 'השוואת מחירים',
+      preview: '4 ספקים עדכנו מחירים',
+      time: '19.5',
+      badge: 2,
+    ),
 ];
 
 List<_Meta> _itemsForSection(StoreSection s) => switch (s) {

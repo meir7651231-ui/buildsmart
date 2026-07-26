@@ -13,6 +13,8 @@
 // Pure + deterministic. Behind [kPlainDive] at the wiring layer; this data module
 // is inert until a screen reads it.
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
 import 'package:buildsmart/features/ring_dive/plain_dive_coverage.dart'
@@ -25,11 +27,15 @@ import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogProductMatchesQuery;
 import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 
-/// The catalog pool the drill reaches products through — the RAW
-/// `kCatalogProducts` union (this module is a sanctioned raw reader), emptied
-/// on the clean shell ([kProfileEmptyCatalog]): no BuildSmart product content.
-final List<LipskeyCatalogProduct> _pool =
-    kProfileEmptyCatalog ? const <LipskeyCatalogProduct>[] : kCatalogProducts;
+/// The catalog pool the drill reaches products through — the company overlay
+/// when active ([companyCatalogActive]: the drill runs on the imported
+/// catalog), else the RAW `kCatalogProducts` union (this module is a
+/// sanctioned raw reader), emptied on the clean shell
+/// ([kProfileEmptyCatalog]): no BuildSmart product content.
+/// Top-level lazy final — hydration runs pre-runApp, so first access sees the overlay.
+final List<LipskeyCatalogProduct> _pool = companyCatalogActive
+    ? resolvedCatalogProducts
+    : (kProfileEmptyCatalog ? const <LipskeyCatalogProduct>[] : kCatalogProducts);
 
 /// One row of the owner's dictionary: its place in the tree (superCat →
 /// classification → technical), plus the layman label (slang) + English + usage.

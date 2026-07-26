@@ -21,6 +21,8 @@
 ///   can auto-wire" (`hasSpec`) or "items with a guided install" (`hasSmart`).
 library;
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive, resolvedCatalogProducts;
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
@@ -41,8 +43,14 @@ import 'package:buildsmart/state/app_profile.dart';
 /// So a Lipskey entry shadows any later duplicate of the same sku. Because the
 /// hot-water skus are synthetic ('HW-…') they never collide with the numeric
 /// supplier skus, so this pool is strictly a superset of `kCatalogProducts`.
-final List<LipskeyCatalogProduct> kDivePool =
-    kProfileEmptyCatalog ? const <LipskeyCatalogProduct>[] : _buildDivePool();
+///
+/// Company-catalog overlay: when an imported catalog is active
+/// ([companyCatalogActive]) THAT is the pool — the dives run on the company's
+/// own products; without an import the branches below are byte-identical.
+/// Top-level lazy final — hydration runs pre-runApp, so first access sees the overlay.
+final List<LipskeyCatalogProduct> kDivePool = companyCatalogActive
+    ? resolvedCatalogProducts
+    : (kProfileEmptyCatalog ? const <LipskeyCatalogProduct>[] : _buildDivePool());
 
 List<LipskeyCatalogProduct> _buildDivePool() {
   final seen = <String>{};
