@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -79,6 +80,16 @@ class _RolePickerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(activePersonaProvider);
+    // Org module gates — a board whose module is off gets NO row here, and
+    // this picker is the ONE mount per board, so every entry path degrades
+    // together. Keyed by persona id; contractor is deliberately absent (the
+    // user's own app is never gated). Default all-on ⇒ all 5 rows unchanged.
+    final moduleOn = <String, bool>{
+      'manager': modOn(ref, 'manager'),
+      'store': modOn(ref, 'supplier'),
+      'courier': modOn(ref, 'courier'),
+      'worker': modOn(ref, 'worker'),
+    };
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
@@ -113,7 +124,8 @@ class _RolePickerCard extends ConsumerWidget {
           ),
           const SizedBox(height: BsTokens.space3),
           for (final p in kPersonas)
-            _RoleRow(persona: p, isActive: active == p.id),
+            if (moduleOn[p.id] ?? true)
+              _RoleRow(persona: p, isActive: active == p.id),
         ],
       ),
     );

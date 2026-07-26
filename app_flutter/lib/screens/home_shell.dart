@@ -25,6 +25,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/intel/screen_view.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
+import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -619,6 +620,10 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabIndex = ref.watch(mainTabProvider);
+    // Giant-system V2 — the `chat` module gate, watched ONCE here in build();
+    // the updates-tab ⋮ ternary below uses the captured boolean (absent=on ⇒
+    // the all-on default keeps the bar byte-identical).
+    final chatOn = modOn(ref, 'chat');
     // Registered user's first name → chip beside the logo (guest/demo → none).
     final profile = ref.watch(userProfileProvider);
     final firstName =
@@ -796,7 +801,9 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           )
         else if (tabIndex == 2)
           // עדכונים — menu follows the active sub-toggle (התראות / שיחות).
-          (ref.watch(updatesSubTabProvider) == 1
+          // `chat` module off ⇒ the whole chats branch is dark and the
+          // notifications menu stands for the tab (org_gates, absent=on).
+          (chatOn && ref.watch(updatesSubTabProvider) == 1
               ? const HelpTarget(
                 title: 'תפריט השיחות',
                 body:
@@ -950,26 +957,35 @@ class _CatalogMenuButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Giant-system V2 — the `ai` module gate, watched ONCE here in build();
+    // the itemBuilder/onSelected closures below use the CAPTURED boolean
+    // (absent=on ⇒ the all-on default keeps the menu byte-identical — the
+    // list merely drops its const, a behavioral no-op; entries stay const).
+    final aiOn = modOn(ref, 'ai');
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, color: Colors.black54),
       tooltip: 'תפריט',
       color: const Color(0xFFFFFFFF),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      onSelected: (value) => _onSelected(context, ref, value),
+      onSelected: (value) => _onSelected(context, ref, value, aiOn: aiOn),
       itemBuilder:
-          (_) => const [
+          (_) => [
             // 🏠 home-tab tools, surfaced natively (mirror the menu-dial 🏠 branch).
-            PopupMenuItem<String>(
-              value: 'ai_hub',
-              child: _MenuRow(
-                emoji: '🤖',
-                label: 'בינה מלאכותית ואוטומציה',
-                cfgId: 'home.catalogmenu.aihub',
+            // `ai` module off ⇒ the AI row goes dark (its divider with it —
+            // no orphan rule above 'הגדרות').
+            if (aiOn) ...const [
+              PopupMenuItem<String>(
+                value: 'ai_hub',
+                child: _MenuRow(
+                  emoji: '🤖',
+                  label: 'בינה מלאכותית ואוטומציה',
+                  cfgId: 'home.catalogmenu.aihub',
+                ),
               ),
-            ),
-            PopupMenuDivider(),
-            PopupMenuItem<String>(
+              PopupMenuDivider(),
+            ],
+            const PopupMenuItem<String>(
               value: 'settings',
               child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
             ),
@@ -977,10 +993,17 @@ class _CatalogMenuButton extends ConsumerWidget {
     );
   }
 
-  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+  void _onSelected(
+    BuildContext context,
+    WidgetRef ref,
+    String value, {
+    required bool aiOn,
+  }) {
     switch (value) {
       case 'ai_hub':
-        Navigator.of(context).push(AIHubScreen.route());
+        // `ai` module off ⇒ the dispatch is dark too (belt over the hidden
+        // row — a stale open menu can't push the hub).
+        if (aiOn) Navigator.of(context).push(AIHubScreen.route());
       case 'settings':
         Navigator.of(context).push(CatalogSettingsScreen.route());
     }
@@ -994,35 +1017,45 @@ class _ChatsMenuButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Giant-system V2 — the `chat` module gate, watched ONCE here in build();
+    // the itemBuilder/onSelected closures below use the CAPTURED boolean
+    // (absent=on ⇒ the all-on default keeps the menu byte-identical).
+    final chatOn = modOn(ref, 'chat');
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, color: Colors.black54),
       tooltip: 'תפריט',
       color: const Color(0xFFFFFFFF),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      onSelected: (value) => _onSelected(context, ref, value),
+      onSelected: (value) => _onSelected(context, ref, value, chatOn: chatOn),
       itemBuilder: (_) {
         final allMuted = allChatsMuted(ref);
         return [
-          const PopupMenuItem<String>(
-            value: 'new_chat',
-            child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'archive',
-            child: _MenuRow(
-              emoji: '🗂️',
-              label: 'ארכיון שיחות',
-              cfgId: 'home.chatsmenu.archive',
+          // `chat` module off ⇒ every row here is dark (the list goes empty
+          // and the popup simply doesn't open) — the CAPTURED chatOn decides,
+          // never a watch inside the closure; allMuted stays the read-at-open
+          // precedent.
+          if (chatOn) ...[
+            const PopupMenuItem<String>(
+              value: 'new_chat',
+              child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה'),
             ),
-          ),
-          PopupMenuItem<String>(
-            value: 'mute_all',
-            child: _MenuRow(
-              emoji: allMuted ? '🔔' : '🔇',
-              label: allMuted ? 'בטל השתקת הכל' : 'השתק הכל',
+            const PopupMenuItem<String>(
+              value: 'archive',
+              child: _MenuRow(
+                emoji: '🗂️',
+                label: 'ארכיון שיחות',
+                cfgId: 'home.chatsmenu.archive',
+              ),
             ),
-          ),
+            PopupMenuItem<String>(
+              value: 'mute_all',
+              child: _MenuRow(
+                emoji: allMuted ? '🔔' : '🔇',
+                label: allMuted ? 'בטל השתקת הכל' : 'השתק הכל',
+              ),
+            ),
+          ],
           // 'הגדרות' (→ ChatSettingsScreen) REMOVED: that screen was the dead
           // call-settings tree (read receipts / typing / video compression /
           // call ringtone / cloud backup — none real). The screen file is kept
@@ -1035,8 +1068,12 @@ class _ChatsMenuButton extends ConsumerWidget {
   Future<void> _onSelected(
     BuildContext context,
     WidgetRef ref,
-    String value,
-  ) async {
+    String value, {
+    required bool chatOn,
+  }) async {
+    // `chat` module off ⇒ every action here is dark — belt over the hidden
+    // entry point + the empty item list (a stale open menu can't dispatch).
+    if (!chatOn) return;
     switch (value) {
       case 'new_chat':
         showModalBottomSheet<void>(

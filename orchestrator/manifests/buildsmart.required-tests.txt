@@ -34,3 +34,5 @@ test/company_pools_overlay_test.dart
 # giant-system Phase 1 / V1 — the runtime OrgConfig layer (pure + store tiers):
 test/org_config_test.dart
 test/org_config_store_test.dart
+# giant-system V2 wave-1 — the toggle matrix (every combo wired · live-swap wizard contract):
+test/org_toggle_matrix_test.dart

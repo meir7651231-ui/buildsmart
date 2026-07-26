@@ -250,3 +250,14 @@ lib/state/org_config_store.dart:::kOrgConfigKey
 lib/state/org_config_store.dart:::corrupt cache (ignored
 lib/main.dart:::hydrateOrgConfig
 test/app_profile_flags_test.dart:::'ORG_CONFIG'
+#
+# Regression — GIANT-SYSTEM V2 wave-1 (2026-07-26): runtime module gates are LIVE on 9 surfaces:
+lib/state/org_gates.dart:::ref.watch(orgConfigProvider)
+lib/screens/role_picker_sheet.dart:::modOn(ref
+lib/screens/home_shell.dart:::modOn(ref, 'chat')
+lib/screens/home_shell.dart:::modOn(ref, 'ai')
+lib/screens/updates_screen.dart:::modOn(ref, 'chat')
+lib/screens/store_screen.dart:::modOn(ref, 'finance')
+lib/screens/store_screen.dart:::featOn(ref, 'orders', 'services')
+lib/screens/smart_home_screen.dart:::modOn(ref, 'site')
+lib/screens/profile_screen.dart:::modOn(ref, 'rewards')

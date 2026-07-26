@@ -11,6 +11,7 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/org_gates.dart' show modOn;
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -186,6 +187,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final auth = ref.watch(authStateProvider);
     final hasAuthGateway = ref.watch(authGatewayProvider) != null;
     final roleLocked = ref.watch(roleSwitchLockedProvider);
+    // Org gate: the 🎮 club row renders only when the active org has the
+    // 'rewards' module on (always on in demo — the demo render is unchanged).
+    final rewardsOn = modOn(ref, 'rewards');
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -297,11 +301,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: BsTokens.space2),
             ],
-            _LinkRow(
-              label: '🎮 ${AppBrand.club}',
-              onTap: () =>
-                  Navigator.of(context).push(RewardsHubScreen.route()),
-            ),
+            if (rewardsOn)
+              _LinkRow(
+                label: '🎮 ${AppBrand.club}',
+                onTap: () =>
+                    Navigator.of(context).push(RewardsHubScreen.route()),
+              ),
             // ── S1 חשבון — login (guest / signed out) vs. account actions.
             //
             // The test is "is there a REAL person here", not "is there a user".

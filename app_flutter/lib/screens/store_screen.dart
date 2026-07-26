@@ -21,6 +21,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/intel/intel_bus.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/org_gates.dart' show featOn, modOn;
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/share_seam.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -677,7 +678,10 @@ class _SectionChipsRow extends ConsumerWidget {
             // 🔧 שירותים — the whole section is "🚧 בבנייה" placeholder rows
             // (backend-blocked). Hidden for Apple review (kHideUnderConstruction);
             // the StoreSection enum + grid + sheets stay in code (reversible).
-            if (!kHideUnderConstruction) ...[
+            // ORG GATE — entry also requires the orders module's 'services'
+            // feature; org turned it OFF ⇒ no pill (demo/all-on: unchanged).
+            if (!kHideUnderConstruction &&
+                featOn(ref, 'orders', 'services')) ...[
               const SizedBox(width: 8),
               _Pill(
                 label: '🔧 שירותים',
@@ -778,7 +782,7 @@ class _QuickActionsRow extends ConsumerWidget {
           // מועדים / תזמון / שיחה open all-"בבנייה" placeholder sheets
           // (every _SheetTile toasts "$label — בבנייה"). Hidden for Apple
           // review; the sheets stay in code (reversible). מועדפים + כספים are
-          // real and always shown.
+          // real — מועדפים always shown; כספים also org-gated (finance module).
           if (!kHideUnderConstruction) ...[
             Expanded(
               child: _QuickAction(
@@ -802,13 +806,16 @@ class _QuickActionsRow extends ConsumerWidget {
               ),
             ),
           ],
-          Expanded(
-            child: _QuickAction(
-              icon: Icons.account_balance_wallet_outlined,
-              label: 'כספים',
-              onTap: () => openFinanceHub(context),
+          // ORG GATE — כספים (openFinanceHub) renders only while the org's
+          // finance module is ON (demo/all-on: unchanged).
+          if (modOn(ref, 'finance'))
+            Expanded(
+              child: _QuickAction(
+                icon: Icons.account_balance_wallet_outlined,
+                label: 'כספים',
+                onTap: () => openFinanceHub(context),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1093,7 +1100,13 @@ class _StoreListState extends ConsumerState<_StoreList> {
       backgroundColor: const Color(0xFFF5F5F5),
       onRefresh: _onRefresh,
       child: switch (section) {
-        StoreSection.services => const _ServicesGrid(),
+        // ORG GATE — services reached while orders.services is OFF (stale
+        // selection / external jump, e.g. home_shell or the keyboard) falls
+        // back to the default 'הכל' list honestly, never the gated grid.
+        StoreSection.services =>
+          featOn(ref, 'orders', 'services')
+              ? const _ServicesGrid()
+              : const _AllList(section: StoreSection.all),
         StoreSection.orders => const _OrdersList(),
         StoreSection.cart => const _CartView(),
         _ => _AllList(section: section),

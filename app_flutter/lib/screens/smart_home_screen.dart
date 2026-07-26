@@ -17,6 +17,7 @@ import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/home_content_order.dart';
+import 'package:buildsmart/state/org_gates.dart' show featOn, modOn;
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/sys_orders.dart';
@@ -108,6 +109,9 @@ class SmartHomeBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(homeContentOrderProvider);
+    // Org gate: the תכנון-חיבור hero is the 'compat' module's home entry —
+    // orgs that switch the module off lose it (demo org: all-on, identical).
+    final compatOn = modOn(ref, 'compat');
     return ListView(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
@@ -118,8 +122,10 @@ class SmartHomeBody extends ConsumerWidget {
           smartHomeSectionFor(s),
           const SizedBox(height: BsTokens.space4),
         ],
-        const _InstallStudioHero(),
-        const SizedBox(height: BsTokens.space4),
+        if (compatOn) ...[
+          const _InstallStudioHero(),
+          const SizedBox(height: BsTokens.space4),
+        ],
         const _Favorites(),
       ],
     );
@@ -491,6 +497,10 @@ class _QuickTools extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pal = _pal(context);
+    // Org gates: משימות העבודה rides the 'site' module; המלאי שלי is its
+    // 'stock' feature (demo org: all-on → rows render identical).
+    final siteOn = modOn(ref, 'site');
+    final stockOn = featOn(ref, 'site', 'stock');
     final rows = <({String emoji, String title, String sub, VoidCallback tap})>[
       // Raw shell: the scan sheet narrates a fabricated work plan — drop it.
       if (!kProfileRawShell)
@@ -500,19 +510,25 @@ class _QuickTools extends ConsumerWidget {
           sub: 'צלם שרטוט אינסטלציה — נזהה מה צריך להזמין',
           tap: () => openScanPlanSheet(context),
         ),
-      (
-        emoji: '📦',
-        title: 'המלאי שלי',
-        sub: 'מה כבר יש לך — במחסן ובאתר',
-        tap: () => Navigator.of(context).push(StockScreen.route()),
-      ),
-      (
-        emoji: '📋',
-        title: 'משימות העבודה',
-        sub: 'חלק משימות לעובדים ועקוב אחרי הביצוע',
-        tap: () => openSiteHub(context),
-      ),
+      if (stockOn)
+        (
+          emoji: '📦',
+          title: 'המלאי שלי',
+          sub: 'מה כבר יש לך — במחסן ובאתר',
+          tap: () => Navigator.of(context).push(StockScreen.route()),
+        ),
+      if (siteOn)
+        (
+          emoji: '📋',
+          title: 'משימות העבודה',
+          sub: 'חלק משימות לעובדים ועקוב אחרי הביצוע',
+          tap: () => openSiteHub(context),
+        ),
     ];
+    // Raw shell + org gates can empty the list — then drop the whole section;
+    // a 'כלים מהירים' title over nothing would lie about tools that aren't
+    // there (same rule as the empty עץ-חכם strip above).
+    if (rows.isEmpty) return const SizedBox.shrink();
     return _Pad(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
