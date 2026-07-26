@@ -70,7 +70,19 @@ export function MoneyTimer({ onClose }: { onClose: () => void }) {
 
   const [mode, setMode] = useState<Mode>('stopwatch');
   const [rate, setRate] = useState(String(defaultRate || ''));
-  const [client, setClient] = useState('');
+  // שם לקוח מוזן-מראש (מכרטיס הלקוח) — נקרא פעם אחת מ-sessionStorage.
+  const [client, setClient] = useState(() => {
+    try {
+      const v = sessionStorage.getItem('maor_timer_client');
+      if (v) {
+        sessionStorage.removeItem('maor_timer_client');
+        return v;
+      }
+    } catch {
+      /* חסום */
+    }
+    return '';
+  });
   const [timerMin, setTimerMin] = useState('30'); // יעד לטיימר (דק׳)
   const [timeCapMin, setTimeCapMin] = useState(''); // תקרת זמן (שעון-עצר)
   const [moneyCap, setMoneyCap] = useState(''); // תקרת סכום
