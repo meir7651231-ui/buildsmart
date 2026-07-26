@@ -1648,3 +1648,9 @@
 - **הפתרון:** orgTerm/orgTermNow תאומי-termOf ב-org_gates (watch-ב-build · read-לנתיבי-פתיחת-sheet) · שכבת-מונחים ב-CfgText **מתחת** לסטודיו (`n.text ?? termOf(org,id,fallback)` — watch-לא-מותנה, מחוץ לזרוע-העצלה של ??) · 11 המרות אתרי-מותג (brand.name×2 · brand.club×9; AppBrand נשאר-ה-fallback) · 4 תוויות-ניווט → nav.* · טבלת-מפתחות ב-org_config.
 - **mutation ×2:** M1 termOf≡fallback → אדום(+1 −5, רק-רגל-ברירת-המחדל שורדת) · M2 היפוך-קדימות (termOf עוטף את n.text) → אדום(+5 −1, **בדיוק** רגל-סטודיו-מנצח) → ירוק +6 · אפס-שאריות.
 - **אימות:** analyze 0 · 59 ירוקות (org_terms-6 · מטריצה-8 · widget · login · app_brand · help · safety) · גארדים ×11.
+
+## #giant-v4 — חבילות-ורטיקל: מנגנון-החלה דטרמיניסטי — 2026-07-26
+- **הפתרון:** VerticalPack const + kVerticalPacks (6, רשימת-התוכנית) + applyVerticalPack = החלפה-מלאה של terms+modules, שימור-השאר. תוכן=נקודות-פתיחה (compat כבוי רק היכן שהוא עובדת-דומיין).
+- **mutation ×2:** M1 merge-במקום-replace → אדום(+5 −2: אפס-שאריות+הפיכוּת) · M2 orgName נמחק → אדום(+5 −2: שימור+הפיכוּת) → ירוק +7 · אפס-שאריות.
+- **לקח:** קובץ-חדש-לא-נעקב ⇒ git-diff ריק — אימות-שתילה ב-grep ישיר על הקובץ (ה-assert הפייתוני נשאר השומר הראשון).
+- **אימות:** analyze 0 · 17 ירוקות (packs-7 + org_config-10) · גארדים ×7.

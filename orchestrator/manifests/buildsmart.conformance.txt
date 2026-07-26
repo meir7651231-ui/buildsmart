@@ -287,3 +287,12 @@ lib/screens/home_shell.dart:::orgTerm(ref, 'nav.catalog', 'מחלקות')
 lib/screens/profile_screen.dart:::orgTerm(ref, 'brand.club', AppBrand.club)
 lib/main.dart:::orgTerm(ref, 'brand.name', AppBrand.name)
 lib/screens/worker_report_drilldowns.dart:::orgTermNow(ref, 'brand.club', AppBrand.club)
+#
+# Regression — GIANT-SYSTEM V4 (2026-07-26): vertical packs — full-replace apply, identity preserved:
+lib/config/vertical_packs.dart:::class VerticalPack
+lib/config/vertical_packs.dart:::const List<VerticalPack> kVerticalPacks = [
+lib/config/vertical_packs.dart:::id: 'building_supplier',
+lib/config/vertical_packs.dart:::modules: pack.modules,
+lib/config/vertical_packs.dart:::terms: pack.terms,
+lib/config/vertical_packs.dart:::orgName: cfg.orgName,
+lib/config/vertical_packs.dart:::features: cfg.features,

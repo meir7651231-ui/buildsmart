@@ -38,3 +38,5 @@ test/org_config_store_test.dart
 test/org_toggle_matrix_test.dart
 # giant-system V3 wave-1 — org terms (nav/brand/CfgText rebrand · Studio-wins coexistence · live swap):
 test/org_terms_test.dart
+# giant-system V4 — vertical packs (closed-set registry · full-replace apply · reversibility):
+test/vertical_packs_test.dart
