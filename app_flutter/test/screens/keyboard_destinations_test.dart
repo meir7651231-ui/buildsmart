@@ -9,6 +9,7 @@
 // convention, even though the pure matcher does not read prefs — it keeps these
 // safe if a future assertion touches a provider-backed helper.
 
+import 'package:buildsmart/config/org_config.dart' show OrgConfig;
 import 'package:buildsmart/screens/keyboard_destinations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -221,6 +222,80 @@ void main() {
       final a = matchDestinations('מ').map((d) => d.label).toList();
       final b = matchDestinations('מ').map((d) => d.label).toList();
       expect(a, equals(b), reason: 'pure: identical input ⇒ identical output');
+    });
+  });
+
+  group('kbDestAllowed + the optional org-gate filter (cfg)', () {
+    // Hand-built configs — PURE values (no providers), absent=on semantics:
+    // only an explicit false turns a module/feature off.
+    const chatOff = OrgConfig(modules: {'chat': false});
+    const servicesOff = OrgConfig(features: {'orders.services': false});
+
+    test('the all-on default allows EVERY destination (absent=on identity)',
+        () {
+      const cfg = OrgConfig();
+      for (final d in kbDestinations()) {
+        expect(kbDestAllowed(d, cfg), isTrue,
+            reason: '"${d.label}" must read allowed under the all-on default');
+      }
+    });
+
+    test('parses a bare MODULE gate: chat off gates שיחות only', () {
+      final chats = kbDestinations().firstWhere((d) => d.label == 'שיחות');
+      expect(chats.gate, 'chat', reason: 'שיחות rides the chat module gate');
+      expect(kbDestAllowed(chats, chatOff), isFalse);
+      expect(kbDestAllowed(chats, servicesOff), isTrue,
+          reason: 'a services-off config leaves the chat module on');
+    });
+
+    test("parses a 'm.f' FEATURE gate: orders.services off gates its pair",
+        () {
+      final services =
+          kbDestinations().firstWhere((d) => d.label == 'שירותים');
+      expect(services.gate, 'orders.services');
+      expect(kbDestAllowed(services, servicesOff), isFalse);
+      expect(kbDestAllowed(services, chatOff), isTrue,
+          reason: 'a chat-off config leaves the services pair on');
+    });
+
+    test('no cfg (the default) is the IDENTITY path — scan unchanged', () {
+      expect(matchDestinations('שיחות').map((d) => d.label),
+          contains('שיחות'),
+          reason: 'the cfg-less call keeps the legacy behaviour');
+    });
+
+    test(
+        'chat OFF drops שיחות + ארכיון שיחות from the scan; the registry '
+        'itself stays FULL', () {
+      expect(matchDestinations('שיחות', cfg: chatOff).map((d) => d.label),
+          isNot(contains('שיחות')),
+          reason: 'a dark chat module hides its destination from typing');
+      expect(
+          matchDestinations('ארכיון שיחות', cfg: chatOff)
+              .map((d) => d.label),
+          isNot(contains('ארכיון שיחות')),
+          reason: 'the chats archive rides the same chat gate');
+      // The memoized registry is NEVER filtered (no memo ever holds a config).
+      final labels = {for (final d in kbDestinations()) d.label};
+      expect(labels, containsAll(<String>['שיחות', 'ארכיון שיחות']),
+          reason: 'the FULL registry keeps the gated entries');
+    });
+
+    test('core (untagged) destinations are untouched by a dark config', () {
+      const dark = OrgConfig(modules: {
+        'chat': false,
+        'ai': false,
+        'site': false,
+        'finance': false,
+        'rewards': false,
+        'search': false,
+        'compat': false,
+      });
+      for (final q in const <String>['בית', 'חנות', 'קבלן', 'הגדרות']) {
+        expect(matchDestinations(q, cfg: dark).map((d) => d.label),
+            contains(q),
+            reason: '"$q" is core/untagged — a dark config never gates it');
+      }
     });
   });
 }

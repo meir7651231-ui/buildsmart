@@ -181,6 +181,14 @@ KbUpdatesContext deriveStoreContext(
   StoreLocation location, {
   List<SmartCartLine> cart = const <SmartCartLine>[],
   List<Order> orders = const <Order>[],
+  // ORG-GATE (giant-system V2): is the org's `orders.services` feature on? A
+  // PURE boolean — the keyboard's build computes `featureOn(cfg, 'orders',
+  // 'services')` from its single orgConfigProvider watch and passes the VALUE
+  // in, so this leaf stays widget-free and no config object ever reaches (or
+  // bakes into) the deriver. Default true ⇒ every existing caller + unit test
+  // is byte-identical (absent=on). False drops the שירותים chip from the
+  // [StoreRoot] row.
+  bool servicesOn = true,
 }) {
   switch (location) {
     // ── Root / 'all' hub: section chips + the section's tools ──────────────────
@@ -188,6 +196,12 @@ KbUpdatesContext deriveStoreContext(
       final chips = <String>[];
       final destByChip = <String, KbDestination>{};
       for (final label in _kStoreSectionLabels) {
+        // ORG-GATE: a dark services feature drops the שירותים chip — filtered
+        // HERE, BEFORE the throwing lookup below (the dept-deriver raw-arm
+        // precedent: the LABEL LIST is what narrows, the registry is never
+        // filtered, and the loud throw stays for real programmer errors only —
+        // a gated-off label can never fire it).
+        if (!servicesOn && label == 'שירותים') continue;
         // Registry presence is guaranteed BY CONSTRUCTION (every store-section
         // label owns a KbDestination in keyboard_destinations.dart). Fail LOUD
         // rather than silently dropping the chip: if a future StoreSection is

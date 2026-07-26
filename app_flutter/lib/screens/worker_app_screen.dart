@@ -25,6 +25,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -131,6 +132,17 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
       });
     }
 
+    // Giant-system V2 — the `chat` module gate, watched ONCE here in build()
+    // (the home_shell precedent); the nav + body below use the captured
+    // boolean. Index safety (the updates_screen clamp precedent): שיחות is
+    // LOGICAL tab 1 and `_tab` may still hold it (a stale value from before
+    // the org turned chat off), so with `chat` off the EFFECTIVE index clamps
+    // to 0 (משימות) — the hidden pane is unreachable and the logical ids
+    // 0 משימות · 1 שיחות · 2 דוחות · 3 אזור אישי never renumber. All-on:
+    // `tab == _tab`, byte-for-byte behavior.
+    final chatOn = modOn(ref, 'chat');
+    final tab = !chatOn && _tab == 1 ? 0 : _tab;
+
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -231,7 +243,7 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
         // #85ה: HelpModeScaffold shows the orange 'מצב היכרות' ribbon above the
         // tab body while help mode is on (the home_shell pattern, task #30).
         body: HelpModeScaffold(
-          child: switch (_tab) {
+          child: switch (tab) {
             // 🔒 ISOLATION (SPEC §2.5): the chats tab embeds the worker-audience
             // ChatsScreen body (contract §3) — no route out of this board.
             1 => const ChatsScreen(persona: BsRole.worker, audience: 'worker'),
@@ -251,7 +263,8 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
               'ארבעת אזורי הלוח: משימות — העבודה שלך; שיחות — קבלן, מנהל '
               'ובוט; דוחות — היסטוריית ההגשות; אזור אישי — פרופיל ויציאה.',
           child: _WorkerNav(
-            currentIndex: _tab,
+            currentIndex: tab,
+            chatOn: chatOn,
             onTap: (i) => setState(() => _tab = i),
           ),
         ),
@@ -1116,39 +1129,61 @@ String _fmtJournalDate(DateTime d) => '${d.day}.${d.month}';
 /// The board's bottom bar (#67) — the contractor home_shell tab-bar style
 /// (white, fixed, brand selected).
 class _WorkerNav extends StatelessWidget {
-  const _WorkerNav({required this.currentIndex, required this.onTap});
+  const _WorkerNav({
+    required this.currentIndex,
+    required this.onTap,
+    required this.chatOn,
+  });
 
   final int currentIndex;
   final void Function(int) onTap;
 
+  /// Giant-system V2 — the `chat` module gate (computed in the board's
+  /// build(), captured here): false hides the שיחות item. The LOGICAL tab ids
+  /// (0 משימות · 1 שיחות · 2 דוחות · 3 אזור אישי) NEVER renumber — the bar's
+  /// contiguous VISUAL index is mapped back to the logical id below, so the
+  /// body switch and [onTap] keep the #67 contract untouched.
+  final bool chatOn;
+
   @override
   Widget build(BuildContext context) {
+    // logical→visual: with שיחות hidden every logical id past 1 sits one
+    // visual slot earlier (the parent build clamps logical 1 to 0 before it
+    // ever reaches [currentIndex]). All-on: visual == logical, byte-for-byte.
+    final visual =
+        chatOn || currentIndex < 2 ? currentIndex : currentIndex - 1;
     return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
+      currentIndex: visual,
+      // visual→logical: the mirror of the mapping above, so a tap always
+      // reports the STABLE logical id whether or not שיחות is showing.
+      onTap: (i) => onTap(chatOn || i == 0 ? i : i + 1),
       type: BottomNavigationBarType.fixed,
       backgroundColor: const Color(0xFFFFFFFF),
       selectedItemColor: BsTokens.brand,
       unselectedItemColor: const Color(0xFF888888),
       selectedFontSize: 12,
       unselectedFontSize: 11,
-      items: const [
-        BottomNavigationBarItem(
+      items: [
+        const BottomNavigationBarItem(
           icon: Icon(Icons.handyman_outlined),
           activeIcon: Icon(Icons.handyman),
           label: 'משימות',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          activeIcon: Icon(Icons.chat_bubble),
-          label: 'שיחות',
-        ),
-        BottomNavigationBarItem(
+        // Giant-system V2 — `chat` off hides the שיחות item (the store-board
+        // cell treatment); the index mapping above keeps the siblings' logical
+        // ids stable.
+        if (chatOn)
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat_bubble),
+            label: 'שיחות',
+          ),
+        const BottomNavigationBarItem(
           icon: Icon(Icons.assignment_outlined),
           activeIcon: Icon(Icons.assignment),
           label: 'דוחות',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
           label: 'אזור אישי',

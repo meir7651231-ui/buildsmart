@@ -21,6 +21,8 @@
 // imports NOTHING from here (it only knows pure [KbTile]s), so the keyboard
 // widget stays screen-agnostic.
 
+import 'package:buildsmart/config/org_config.dart'
+    show featureOn, moduleOn;
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
     show kAxisDive, kPlainDive;
 import 'package:buildsmart/features/word_finder/word_finder_flag.dart'
@@ -118,6 +120,8 @@ import 'package:buildsmart/state/feature_flags.dart'
     show featureFlagsProvider;
 import 'package:buildsmart/state/hidden_catalog_sections.dart'
     show hiddenCatalogSectionsProvider;
+import 'package:buildsmart/state/org_config_store.dart'
+    show orgConfigProvider;
 import 'package:buildsmart/state/sys_chat.dart' show BsRole;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:buildsmart/widgets/confirm_dialog.dart' show confirmDestructive;
@@ -238,14 +242,32 @@ List<KbToolNode> kbHomeNodes() => <KbToolNode>[
             icon: Icons.inventory_2_outlined,
             label: 'המלאי שלי',
             // smart_home_screen.dart:496 — push StockScreen.route().
-            action: (ref, context) =>
-                Navigator.of(context).push(StockScreen.route()),
+            // ORG-GATE (dispatch-time, [_toolOff]): this factory is ref-less
+            // and its list shape is static, so a dark site.stock feature gates
+            // the TAP instead — the same pure featureOn the smart-home row
+            // consults (smart_home_screen.dart:503).
+            action: (ref, context) {
+              if (!featureOn(ref.read(orgConfigProvider), 'site', 'stock')) {
+                _toolOff(context, 'המלאי שלי');
+                return;
+              }
+              Navigator.of(context).push(StockScreen.route());
+            },
           ),
           KbToolNode.leaf(
             icon: Icons.checklist_rtl,
             label: 'משימות',
             // smart_home_screen.dart:502 — openSiteHub(context).
-            action: (ref, context) => openSiteHub(context),
+            // ORG-GATE (dispatch-time, [_toolOff]): a dark site module gates
+            // the TAP — the same pure moduleOn the smart-home row consults
+            // (smart_home_screen.dart:502).
+            action: (ref, context) {
+              if (!moduleOn(ref.read(orgConfigProvider), 'site')) {
+                _toolOff(context, 'משימות');
+                return;
+              }
+              openSiteHub(context);
+            },
           ),
         ],
       ),
@@ -310,8 +332,17 @@ List<KbToolNode> kbKbdNodes() => <KbToolNode>[
           KbToolNode.leaf(
             icon: Icons.smart_toy,
             label: 'בינה',
-            action: (ref, context) =>
-                Navigator.of(context).push(AIHubScreen.route()),
+            // ORG-GATE (dispatch-time, [_toolOff]): this factory is ref-less
+            // and its list shape is static, so a dark ai module gates the TAP
+            // — the same pure moduleOn the home shell's AI entry consults
+            // (home_shell.dart, aiOn).
+            action: (ref, context) {
+              if (!moduleOn(ref.read(orgConfigProvider), 'ai')) {
+                _toolOff(context, 'בינה');
+                return;
+              }
+              Navigator.of(context).push(AIHubScreen.route());
+            },
           ),
           KbToolNode.leaf(
             icon: Icons.settings,
@@ -357,6 +388,22 @@ void _toolSoon(BuildContext context, String label) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text('$label — בקרוב')));
+}
+
+/// Shows the honest "<label> — לא זמין" SnackBar for a leaf whose module/feature
+/// the ORG CONFIG turned OFF (giant-system V2) — the DISPATCH-TIME twin of
+/// [_toolSoon]. Some gated leaves live in ref-less factories whose list shape is
+/// STATIC (built once by their adopter — the `KbScreen` identity contract, see
+/// the PUSHED-ROUTE header below), so a dark module cannot drop the tile at
+/// build time; instead the leaf ACTION re-reads the live config at tap time
+/// (`ref.read(orgConfigProvider)` — an event handler, so read-not-watch per the
+/// org_gates rules) and blocks the nav with this observable hint — never a
+/// silent dead button, never an open door into a dark wing. Default all-on
+/// (absent=on) ⇒ every guard passes ⇒ the un-overridden build is byte-identical.
+void _toolOff(BuildContext context, String label) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text('$label — לא זמין')));
 }
 
 /// התראות tools (owner steps 1 + 4): 🔕 סמן הכל כנקרא + ⚙️ הגדרות התראות. Both
@@ -459,6 +506,12 @@ List<KbToolNode> kbUpdatesChatsNodes() => <KbToolNode>[
 /// shows the letters (floating_card_keyboard.dart `_syncContextToolBase`) —
 /// never a blank grid. Demo / buildsmart: const-false gates fold the leaves
 /// back in place — byte-identical.
+/// ORG-GATE — DEFERRED here: this factory is ref-less (the pure derivers call
+/// it), so the orders.services / ai runtime AND cannot ride these raw gates;
+/// the root's שירותים chip is already gated upstream (`deriveStoreContext`'s
+/// `servicesOn`) and the store screen gates its own section pills
+/// (store_screen.dart:684/1107). Threading a boolean here would break the pure
+/// deriver call sites, so it waits for a dedicated pass.
 /// Keep-floating throughout: a section-jump swaps the screen underneath; a sheet
 /// opener pushes over everything (the keyboard reappears when it pops).
 List<KbToolNode> kbStoreNodes(StoreSection section) => switch (section) {
@@ -605,6 +658,14 @@ KbToolNode? _destNode(String label, IconData icon) {
 /// the two sub-tabs · tab 3 (חנות) = the store sections + כספים. [ref] is accepted
 /// for parity with the other node-list factories (future per-tab live reads).
 List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
+  // ORG-GATE (giant-system V2): the org config in force, read ONCE per list
+  // build (read-not-watch — the ▦ grid rebuilds each time it re-opens, the
+  // same one-shot idiom as the featureFlags / hidden-sections reads below).
+  // Only PURE booleans leave this line — the node-list never holds the config.
+  // Default all-on (absent=on) ⇒ both read true ⇒ byte-identical.
+  final cfg = ref.read(orgConfigProvider);
+  final diveOn = moduleOn(cfg, 'search');
+  final servicesOn = featureOn(cfg, 'orders', 'services');
   // Raw shell ([kProfileRawShell], const): the 4 department chip names below
   // are BuildSmart taxonomy — phantom on a company shell — so tab 1 drops them
   // (const-empty ⇒ tree-shaken) and, after an import, carries the COMPANY's
@@ -649,7 +710,10 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
     // OWNER (12/7): the flag-gated FINDERS lead — right after 'בית', BEFORE the
     // section chips — so 'מאתר חכם / מאתר פשוט / מאתר-על' are the FIRST tiles the
     // compact ▦ grid shows, not buried past ~8 sections where it clips them.
-    if (ref.read(featureFlagsProvider).contains(kWordFinderFlag)) {
+    // ORG-GATE (`&& diveOn`, all three dive chips): a dark search module drops
+    // the finder tiles; the flag/const stays FIRST so an off-flag build still
+    // tree-shakes the whole block (diveOn is then never read there).
+    if (ref.read(featureFlagsProvider).contains(kWordFinderFlag) && diveOn) {
       out.add(
         KbToolNode.leaf(
           icon: Icons.auto_awesome,
@@ -664,7 +728,7 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
     // OWNER · a SEPARATE 'מאתר פשוט' chip next to 'מאתר חכם' — the layman 4-ring
     // dictionary drill (PlainDive). Behind [kPlainDive] (const-false ⇒ this block
     // tree-shakes out ⇒ the keyboard grid is byte-identical by default).
-    if (kPlainDive) {
+    if (kPlainDive && diveOn) {
       out.add(
         KbToolNode.leaf(
           icon: Icons.spoke_outlined,
@@ -681,7 +745,7 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
     }
     // OWNER · the AXIS-DIVE super-wheel chip (kAxisDive; const-false ⇒ this block
     // tree-shakes ⇒ byte-identical). Pick which of the ~15 wheels to start from.
-    if (kAxisDive) {
+    if (kAxisDive && diveOn) {
       out.add(
         KbToolNode.leaf(
           icon: Icons.hub_outlined,
@@ -728,6 +792,10 @@ List<KbToolNode> kbTabToolNodes(int tab, WidgetRef ref) {
       }
     }
     for (final (label, icon) in lists[tab] ?? const <(String, IconData)>[]) {
+      // ORG-GATE: a dark orders.services feature drops the store's שירותים
+      // chip — the runtime AND on top of the const list (the same pure
+      // featureOn the store's own section pills consult, store_screen.dart:684).
+      if (label == 'שירותים' && !servicesOn) continue;
       final node = _destNode(label, icon);
       if (node != null) out.add(node);
     }
@@ -1124,11 +1192,21 @@ List<KbToolNode> kbManagerDashboardNodes() => <KbToolNode>[
       KbToolNode.leaf(
         icon: Icons.chat_bubble_outline,
         label: 'שיחות',
-        action: (ref, context) => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const ChatsScreen(persona: BsRole.manager),
-          ),
-        ),
+        // ORG-GATE (dispatch-time, [_toolOff]): this factory is ref-less and
+        // its list is built ONCE by its adopter (the static-list contract), so
+        // a dark chat module gates the TAP — the same pure moduleOn the
+        // updates/home-shell chat surfaces consult (updates_screen.dart, chatOn).
+        action: (ref, context) {
+          if (!moduleOn(ref.read(orgConfigProvider), 'chat')) {
+            _toolOff(context, 'שיחות');
+            return;
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const ChatsScreen(persona: BsRole.manager),
+            ),
+          );
+        },
       ),
       KbToolNode.leaf(
         icon: Icons.person_outline,

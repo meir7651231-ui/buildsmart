@@ -264,6 +264,15 @@ KbUpdatesContext deriveUpdatesContext(
   // unit test stays green (not `required` — that cannot carry a default, and the
   // prod call site is owned by the keyboard, not this leaf).
   List<NotifSection> notifs = const <NotifSection>[],
+  // ORG-GATE (giant-system V2): is the org's `chat` module on? A PURE boolean —
+  // the keyboard's build computes `moduleOn(cfg, 'chat')` from its single
+  // orgConfigProvider watch and passes the VALUE in, so this leaf stays
+  // widget-free and no config object ever reaches (or bakes into) the deriver.
+  // Default true ⇒ every existing caller + unit test is byte-identical
+  // (absent=on). False drops the שיחות chip from the [UpdatesRoot] row and
+  // forces the notif tools even at sub-tab 1 (the screen clamps its own
+  // IndexedStack to התראות there — updates_screen.dart).
+  bool chatOn = true,
 }) {
   switch (location) {
     // ── Entry / root: section chips + the active sub-tab's tools ──────────────
@@ -271,15 +280,23 @@ KbUpdatesContext deriveUpdatesContext(
       final chips = <String>[];
       final destByChip = <String, KbDestination>{};
       for (final label in _kEntrySectionLabels) {
+        // ORG-GATE: a dark chat module drops the שיחות chip — the LABEL LIST is
+        // what narrows, BEFORE the registry lookup (the registry itself is
+        // never filtered, so the memoized map never bakes a config).
+        if (!chatOn && label == 'שיחות') continue;
         final d = _entrySectionByLabel[label];
         if (d == null) continue; // registry presence is guaranteed; deref-safe.
         chips.add(label);
         destByChip[label] = d;
       }
       // Tools reflect the active sub-tab (default sub 0 = התראות), so the root
-      // already offers the right actions before the user picks a section.
-      final toolBase =
-          subTab == 1 ? kbUpdatesChatsNodes() : kbUpdatesNotifNodes();
+      // already offers the right actions before the user picks a section. Chat
+      // OFF forces the notif tools even at sub 1: the screen clamps its
+      // IndexedStack to התראות there (updates_screen.dart), so the mirror must
+      // never offer chat tools for a pane that cannot render.
+      final toolBase = chatOn && subTab == 1
+          ? kbUpdatesChatsNodes()
+          : kbUpdatesNotifNodes();
       return KbUpdatesContext(
         row: KbPredRow(chips, destByChip),
         toolBase: toolBase,

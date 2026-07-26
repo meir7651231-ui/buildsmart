@@ -51,6 +51,8 @@
 // (appended). The empty field at tab 0 still shows product opening-words ONLY (no
 // destinations), unchanged.
 
+import 'package:buildsmart/config/org_config.dart'
+    show OrgConfig, featureOn, moduleOn;
 import 'package:buildsmart/data/catalog_source.dart'
     show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart'
@@ -117,6 +119,8 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show currentScreenTools, keyboardScreenToolsProvider;
 import 'package:buildsmart/state/orders_engine.dart'
     show Order, ordersEngineProvider;
+import 'package:buildsmart/state/org_config_store.dart'
+    show orgConfigProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/state/store_location.dart'
@@ -363,8 +367,10 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   /// text here only for tab 0, where [matchDestinations] returns empty for the
   /// blank query, so the row is product opening-words ONLY (empty destByChip) —
   /// byte-identical to the legacy empty-field behaviour. Pure: no side effects,
-  /// no provider/context reads.
-  _PredRow _buildRow(String text) {
+  /// no provider/context reads — [orgCfg] is the config VALUE [build] watched
+  /// once, passed down so the org-gate filter rides the scan without this
+  /// method ever touching a provider.
+  _PredRow _buildRow(String text, OrgConfig orgCfg) {
     // Product WORDS for the query. We RESERVE one row slot for a word when any
     // exists, so a flood of nav matches never fully hides the catalogue words —
     // destinations still LEAD, they just cannot take the very last slot.
@@ -373,7 +379,9 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     final destCap = _kRowCap - reserve;
 
     // DESTINATIONS lead, up to destCap (leaving the reserved word slot free).
-    final dests = matchDestinations(text, max: destCap);
+    // ORG-GATE: the live config filters gated-off destinations from the typed
+    // scan (kbDestAllowed); the default all-on config is the identity.
+    final dests = matchDestinations(text, max: destCap, cfg: orgCfg);
     final chips = <String>[];
     final destByChip = <String, KbDestination>{};
     for (final d in dests) {
@@ -474,6 +482,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   _PredRow _rowFor({
     required String text,
     required int tab,
+    required OrgConfig orgCfg,
     KbUpdatesContext? ctx,
   }) {
     // (1) TYPED row. Typed text never enters the LIVE-MIRROR branch (the deriver
@@ -485,7 +494,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // path below is byte-identical (the whole [_wordsRow] call + its imports fold).
     if (text.isNotEmpty) {
       if (kGlobalSearch) return _wordsRow(text);
-      return _buildRow(text);
+      return _buildRow(text, orgCfg);
     }
 
     // (1.5) LIVE-MIRROR — folds out entirely when [kKbLiveMirror] is false (const
@@ -517,7 +526,7 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // product opening-words (today's behaviour: _buildRow('') → matchDestinations
     // ('') empty, so product words only with an empty destByChip). Tabs 1/2/3 show
     // their destination chips, sourced from the registry BY LABEL (REAL run each).
-    if (tab == 0) return _buildRow('');
+    if (tab == 0) return _buildRow('', orgCfg);
 
     // Label→destination lookup, MEMOIZED at module scope ([_kbDestinationByLabel])
     // so it is built ONCE from the registry instead of re-scanning all ~50
@@ -542,6 +551,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     final chips = <String>[];
     final destByChip = <String, KbDestination>{};
     for (final label in labelsByTab[tab] ?? const <String>[]) {
+      // ORG-GATE: a dark module/feature drops its tab chip from the empty-field
+      // row — the same pure gates the screens consult (updates_screen.dart's
+      // chatOn / store_screen.dart:684); default all-on ⇒ nothing drops
+      // (byte-identical).
+      if (label == 'שיחות' && !moduleOn(orgCfg, 'chat')) continue;
+      if (label == 'שירותים' && !featureOn(orgCfg, 'orders', 'services')) {
+        continue;
+      }
       // Defensive: cannot miss given the registry presence+uniqueness, but stays
       // deref-safe (never key a null destination).
       final d = byLabel[label];
@@ -1160,6 +1177,15 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // typed-vs-context, the tab + drill decide the context chips.
     final tab = ref.watch(mainTabProvider);
 
+    // ORG-GATE (giant-system V2): the org config in force — watched ONCE here
+    // (build() only, the org_gates rule) and passed DOWN as a value / as pure
+    // moduleOn·featureOn booleans (the typed-scan filter in [_buildRow], the
+    // empty-field tab chips in [_rowFor], the deriver params below), so no memo
+    // ever holds a config and a live wizard swap rebuilds the whole row.
+    // Default all-on ([kDefaultOrgConfig], absent=on) ⇒ every gate reads true ⇒
+    // the un-overridden build stays byte-identical.
+    final orgCfg = ref.watch(orgConfigProvider);
+
     // A DELIBERATE tab switch means the user navigated, so the ambient live-mirror
     // should re-appear: clear the typing-suppression (and the find panel) so the
     // mirror follows navigation instead of staying stuck on the LETTERS / finder.
@@ -1252,7 +1278,13 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
       if (live) {
         final UpdatesLocation upd = ref.watch(updatesLocationProvider);
         final List<ThreadLite> threads = ref.watch(visibleThreadsProvider);
-        ctx = deriveUpdatesContext(upd, threads: threads);
+        // ORG-GATE: the pure chat-module boolean rides in from the single
+        // [orgCfg] watch above — the deriver stays widget-free.
+        ctx = deriveUpdatesContext(
+          upd,
+          threads: threads,
+          chatOn: moduleOn(orgCfg, 'chat'),
+        );
       }
     } else if (tab == 3) {
       // PARALLEL חנות mirror — byte-for-byte the same two-tier gate + atomic
@@ -1277,7 +1309,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
         final StoreLocation st = ref.watch(storeLocationProvider);
         final List<SmartCartLine> cart = ref.watch(smartCartProvider);
         final List<Order> orders = ref.watch(ordersEngineProvider);
-        ctx = deriveStoreContext(st, cart: cart, orders: orders);
+        // ORG-GATE: the pure orders.services boolean rides in from the single
+        // [orgCfg] watch above — the deriver stays widget-free.
+        ctx = deriveStoreContext(
+          st,
+          cart: cart,
+          orders: orders,
+          servicesOn: featureOn(orgCfg, 'orders', 'services'),
+        );
       }
     } else if (tab == 0) {
       // PARALLEL קטלוג mirror — the FOURTH mirrored tab, the same two-tier gate as
@@ -1323,12 +1362,19 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
         if (live) {
           // The product-category set is the module-level [_kCatalogProductCats]
           // (computed ONCE — the catalog is const), not rebuilt on every keystroke.
-          ctx = deriveCatalogContext(loc, productCats: _kCatalogProductCats);
+          // ORG-GATE: the pure search/compat booleans ride in from the single
+          // [orgCfg] watch above — the deriver stays widget-free.
+          ctx = deriveCatalogContext(
+            loc,
+            productCats: _kCatalogProductCats,
+            searchOn: moduleOn(orgCfg, 'search'),
+            compatOn: moduleOn(orgCfg, 'compat'),
+          );
         }
       }
     }
 
-    var row = _rowFor(text: _controller.text, tab: tab, ctx: ctx);
+    var row = _rowFor(text: _controller.text, tab: tab, orgCfg: orgCfg, ctx: ctx);
     // JOB-KIT option ([kGlobalSearch], const-false ⇒ the block + the provider
     // watch fold out, byte-identical). When a job is open (a task screen seeded
     // [keyboardJobSkusProvider]), prepend a DISTINCT run-chip to the search row

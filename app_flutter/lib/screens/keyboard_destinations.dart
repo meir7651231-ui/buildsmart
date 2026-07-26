@@ -51,6 +51,8 @@
 // in the floating keyboard, never here and never in the pure widget.
 
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
+import 'package:buildsmart/config/org_config.dart'
+    show OrgConfig, featureOn, moduleOn;
 import 'package:buildsmart/data/catalog_source.dart'
     show companyCatalogActive, resolvedCatalogProducts;
 import 'package:buildsmart/data/company_categories.dart'
@@ -119,6 +121,7 @@ class KbDestination {
     required this.label,
     required this.keywords,
     required this.run,
+    this.gate = 'core',
   });
 
   /// The Hebrew display label (also matched by [matchDestinations]).
@@ -131,6 +134,15 @@ class KbDestination {
   /// Performs the real navigation for this destination. Pure side-effect: set a
   /// provider, push a route, or open a sheet — exactly as the app itself does.
   final void Function(WidgetRef ref, BuildContext context) run;
+
+  /// The ORG-CONFIG gate this destination rides behind (giant-system V2): a
+  /// bare module id ('chat'), a '<module>.<feature>' pair ('orders.services'),
+  /// or 'core' — the default, never gated. A plain const-friendly TAG string,
+  /// so the registry stays fully memoizable and NO memo ever holds a config;
+  /// [kbDestAllowed] parses it against a live [OrgConfig] at filter time.
+  /// Absent=on semantics ride in from [moduleOn]/[featureOn], so the default
+  /// (all-on) config keeps every destination visible — byte-identity.
+  final String gate;
 }
 
 /// Brings the catalog tab (index 0) forward and selects [section] on it — the
@@ -319,6 +331,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
       KbDestination(
         label: 'שיחות',
         keywords: const ['שיחות', 'צאט', "צ'אט", 'הודעות', 'chat', 'chats'],
+        gate: 'chat',
         run: (ref, context) => _openUpdatesSub(ref, 1),
       ),
 
@@ -342,6 +355,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
       KbDestination(
         label: 'שירותים',
         keywords: const ['שירותים', 'השכרת כלים', 'services'],
+        gate: 'orders.services',
         run: (ref, context) => _openStoreSection(ref, StoreSection.services),
       ),
 
@@ -357,6 +371,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'מצא מוצר',
           'finder',
         ],
+        gate: 'search',
         // → FinderScreen (catalog_screen.dart:2292). Reuse the tool seam.
         run: (ref, context) => runKeyboardTool(ref, context, KbTool.finder),
       ),
@@ -391,6 +406,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'אינסטלציה',
           'install studio',
         ],
+        gate: 'compat',
         // The catalog section 'תכנון חיבור' renders InstallStudioScreen inline
         // (catalog_screen.dart:2302); the connect tool pushes it as a route.
         // Use the section so the keyboard keeps floating over the catalog tab,
@@ -465,6 +481,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'חיזוי',
           'ai hub',
         ],
+        gate: 'ai',
         // AIHubScreen.route() (ai_hub_screen.dart:44) — same route the kbd
         // תפריט → בינה branch and the catalog menu push.
         run: (ref, context) => Navigator.of(context).push(AIHubScreen.route()),
@@ -479,6 +496,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'stock',
           'inventory',
         ],
+        gate: 'site.stock',
         // StockScreen.route() (stock_screen.dart:139) — the same route the smart
         // home 'כלים מהירים → 📦 המלאי שלי' row pushes.
         run: (ref, context) => Navigator.of(context).push(StockScreen.route()),
@@ -495,6 +513,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'tasks',
           'site',
         ],
+        gate: 'site',
         // openSiteHub(context) (site_hub_screen.dart:60) — the site/tasks hub the
         // smart home 'כלים מהירים → 📋 משימות העבודה' row opens. The hub is the
         // verified single entry (the team-tasks board sits one tap inside it).
@@ -509,6 +528,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'בנה רשימה',
           'BOM',
         ],
+        gate: 'compat',
         // InstallStudioScreen has NO route() — push via MaterialPageRoute exactly
         // as keyboard_tool_actions.dart:67 and smart_home_screen.dart:563 do.
         // (Distinct from the inline 'תכנון חיבור' catalog section above: this is
@@ -522,6 +542,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
       KbDestination(
         label: 'ארכיון שיחות',
         keywords: const ['ארכיון שיחות', 'ארכיון', 'שיחות שמורות', 'archive'],
+        gate: 'chat',
         // ChatsArchiveScreen.route() (chats_screen.dart:2326) — the same route
         // the chats 3-dot menu 'ארכיון שיחות' pushes.
         run: (ref, context) =>
@@ -569,6 +590,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'rewards',
           'club',
         ],
+        gate: 'rewards',
         // RewardsHubScreen.route() (rewards_hub_screen.dart:24) — the same route
         // profile's '🎮 מועדון BuildSmart' row pushes (profile_screen.dart:288).
         run: (ref, context) =>
@@ -583,6 +605,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'אתרים',
           'projects',
         ],
+        gate: 'site.projects',
         // openProjects(context) (projects_screen.dart:28) pushes
         // ProjectsScreen.route() — the projects dial/menu leaf. The budget +
         // smart-project tiles live one tap inside it.
@@ -597,6 +620,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'התקדמות פרויקט',
           'smart project',
         ],
+        gate: 'site.projects',
         // openSmartProject(context) (smart_project_screen.dart:20) pushes
         // SmartProjectScreen.route() — the same opener the projects screen's
         // smart-project tile uses (projects_screen.dart:90).
@@ -612,6 +636,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'כסף',
           'budget',
         ],
+        gate: 'finance',
         // BudgetScreen.route() (budget_screen.dart:138) — the same route the
         // projects screen's '💰 תקציב' tile pushes (projects_screen.dart:79).
         run: (ref, context) =>
@@ -628,6 +653,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'הכנסות',
           'finance',
         ],
+        gate: 'finance',
         // openFinanceHub(context) (finance_hub_sheets.dart:60) — the same opener
         // the store hub's 'כספים' quick action uses (store_screen.dart:811).
         run: (ref, context) => openFinanceHub(context),
@@ -641,6 +667,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'תאימות',
           'audit',
         ],
+        gate: 'compat',
         // AuditScreen has NO route() — push via MaterialPageRoute exactly as the
         // install studio's '🧪 אודיט' button does (install_studio_screen.dart:
         // 799-801). The screen is self-contained (const ctor, no required args).
@@ -667,6 +694,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
             'מוצר זול',
             'cheaper',
           ],
+          gate: 'ai',
           // openCheaperAlternativesSheet(context) (contractor_tools_sheets.dart:34)
           // — the same sheet the AI hub's '💡 חלופות זולות' row opens
           // (ai_hub_screen.dart:164).
@@ -681,6 +709,7 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
             'השוואת ספקים',
             'price compare',
           ],
+          gate: 'orders.services',
           // openPriceCompareSheet(context) (contractor_tools_sheets.dart:47) — the
           // same sheet the store services grid's price-comparison tile opens
           // (store_screen.dart:3277).
@@ -747,21 +776,25 @@ List<KbDestination> kbDestinations() => _kbDestinationsCache ??= <KbDestination>
           'manager',
           'admin',
         ],
+        gate: 'manager',
         run: (ref, context) => showRolePicker(context),
       ),
       KbDestination(
         label: 'חנות ספק',
         keywords: const ['חנות ספק', 'ספק', 'לוח חנות', 'store board', 'supplier'],
+        gate: 'supplier',
         run: (ref, context) => showRolePicker(context),
       ),
       KbDestination(
         label: 'שליח',
         keywords: const ['שליח', 'לוח שליח', 'משלוחים', 'courier', 'delivery'],
+        gate: 'courier',
         run: (ref, context) => showRolePicker(context),
       ),
       KbDestination(
         label: 'עובד',
         keywords: const ['עובד', 'לוח עובד', 'אפליקציית עובד', 'worker', 'employee'],
+        gate: 'worker',
         run: (ref, context) => showRolePicker(context),
       ),
     ];
@@ -791,6 +824,21 @@ List<KbDestination> companyDeptDestinations() {
   ];
 }
 
+/// PURE org-gate check: is destination [d] allowed under [cfg]? Parses the
+/// destination's [KbDestination.gate] tag — 'core' (the default) is never
+/// gated; a bare module id consults [moduleOn]; a '<module>.<feature>' pair
+/// consults [featureOn] (module-off cascades). Deterministic + widget-free:
+/// it reads NO providers (the org_gates.dart discipline stays with the CALLER
+/// — watch `orgConfigProvider` in build, pass the VALUE down), so
+/// [matchDestinations] filters per call and no memo ever holds a config.
+bool kbDestAllowed(KbDestination d, OrgConfig cfg) {
+  final gate = d.gate;
+  if (gate == 'core') return true;
+  final dot = gate.indexOf('.');
+  if (dot < 0) return moduleOn(cfg, gate);
+  return featureOn(cfg, gate.substring(0, dot), gate.substring(dot + 1));
+}
+
 /// PURE matcher: the [query] (case-insensitive, trimmed) against each
 /// destination's `label` + `keywords`, by prefix OR contains. Returns up to
 /// [max] destinations, de-duplicated (a destination matched on several of its
@@ -798,12 +846,21 @@ List<KbDestination> companyDeptDestinations() {
 /// returns an empty list (the floating keyboard shows product opening-words
 /// then, unchanged).
 ///
-/// DETERMINISTIC + widget-free: same (query, max) in ⇒ identical list out —
-/// on the raw shell the scan also spans [companyDeptDestinations], so the
+/// DETERMINISTIC + widget-free: same (query, max, cfg) in ⇒ identical list out
+/// — on the raw shell the scan also spans [companyDeptDestinations], so the
 /// import state is part of that "in". The floating keyboard maps each returned
 /// destination back to its `run` action; the pure keyboard only ever sees the
 /// resulting `List<String>` of labels.
-List<KbDestination> matchDestinations(String query, {int max = 4}) {
+///
+/// ORG-GATE ([cfg], optional): null is the IDENTITY path — every existing
+/// caller is byte-identical. A caller that passes the live [OrgConfig] drops
+/// gated-off destinations from the scan via [kbDestAllowed]; the memoized
+/// registry itself is NEVER filtered (so the memo never bakes a config).
+List<KbDestination> matchDestinations(
+  String query, {
+  int max = 4,
+  OrgConfig? cfg,
+}) {
   final q = query.trim().toLowerCase();
   if (q.isEmpty) return const <KbDestination>[];
 
@@ -817,6 +874,9 @@ List<KbDestination> matchDestinations(String query, {int max = 4}) {
   final out = <KbDestination>[];
   for (final d in all) {
     if (out.length >= max) break;
+    // ORG-GATE: a dark module/feature drops its destination from the scan —
+    // only when the caller passed a config (null keeps today's path).
+    if (cfg != null && !kbDestAllowed(d, cfg)) continue;
     // Build the haystack: the label + every keyword, lower-cased.
     final terms = <String>[d.label, ...d.keywords];
     final hit = terms.any((t) {

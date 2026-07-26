@@ -1,7 +1,10 @@
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/state/org_gates.dart';
+import 'package:buildsmart/state/push_routing.dart'
+    show afterThisFrame, consumePendingThread, pendingPushThreadProvider;
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/toast.dart' show showGlobalToast;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +27,22 @@ class UpdatesScreen extends ConsumerWidget {
     // With `chat` off the effective index is clamped to 0 (התראות) so the
     // IndexedStack can never point at the hidden pane.
     final sub = chatOn ? ref.watch(updatesSubTabProvider) : 0;
+    // PUSH-CHAT degrade: with `chat` off the שיחות pane never mounts, so its
+    // consumer (ChatsScreen — the chats_screen.dart consumePendingThread site)
+    // can't take a tapped notification's pending thread id and it would sit
+    // forever. This screen IS always built (the shell IndexedStack keeps every
+    // tab alive), so the OFF arm consumes it honestly here — the single
+    // off-path consume site, dark on the all-on path (`&&` short-circuits, no
+    // extra dependency). Frame-deferred per the main.dart afterThisFrame
+    // discipline — never a provider write or toast mid-build; the null-guard
+    // inside the callback keeps a double-scheduled frame from toasting twice.
+    if (!chatOn && ref.watch(pendingPushThreadProvider) != null) {
+      afterThisFrame(() {
+        if (consumePendingThread(ref) != null) {
+          showGlobalToast('שיחות אינן פעילות בחברה זו');
+        }
+      });
+    }
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Column(

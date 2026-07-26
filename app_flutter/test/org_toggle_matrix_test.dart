@@ -12,9 +12,14 @@
 
 import 'package:buildsmart/config/org_config.dart';
 import 'package:buildsmart/main.dart';
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show catalogSectionProvider;
+import 'package:buildsmart/screens/finder_screen.dart' show FinderScreen;
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/org_config_store.dart';
+import 'package:buildsmart/state/push_routing.dart'
+    show pendingPushThreadProvider;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,6 +103,29 @@ void main() {
     await _boot(
         t, const OrgConfig(modules: {'catalog': false, 'orders': false}));
     _expectShellAlive(t);
+  });
+
+  testWidgets('search off → the מאתר section falls to the honest empty '
+      'body (no finder, no crash)', (t) async {
+    await _boot(t, const OrgConfig(modules: {'search': false}));
+    final c = ProviderScope.containerOf(t.element(find.byType(HomeShell)));
+    c.read(catalogSectionProvider.notifier).state = 'מאתר';
+    await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
+    expect(find.byType(FinderScreen), findsNothing);
+  });
+
+  testWidgets('chat off + a pending push thread → consumed with an honest '
+      'toast (never a parked deep link)', (t) async {
+    await _boot(t, const OrgConfig(modules: {'chat': false}));
+    final c = ProviderScope.containerOf(t.element(find.byType(HomeShell)));
+    c.read(pendingPushThreadProvider.notifier).state = 'thread-9';
+    _goTab(t, 2);
+    await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
+    expect(c.read(pendingPushThreadProvider), isNull,
+        reason: 'consumed exactly once');
+    expect(find.text('שיחות אינן פעילות בחברה זו'), findsOneWidget);
   });
 
   testWidgets('LIVE SWAP (the wizard contract): chat flips off with no '

@@ -1638,3 +1638,8 @@
 - **מלכודת-Riverpod נתפסה ותועדה:** ProviderScope לא מחליף overrides על אלמנט קיים — boot-שני שומר בשקט את הקונפיג הראשון ⇒ UniqueKey-פר-boot במטריצה. + ניווט-בבדיקה: טקסט-הטאב דו-משמעי ⇒ כתיבת-mainTabProvider (המסלול האמיתי :207).
 - **mutation ×2:** M1 modOn≡true → אדום(-3) · M2 watch→read → אדום(-1: **רגל-האשף בדיוק**) → 6/6.
 - **אימות:** analyze 0 · 100 ירוקות (מטריצה+org+widget+login+apple+store+manager+favorite) · גארדים ×9. גל-2 (מקלדת-כמכלול · search · dive-AND · push-degrade · טאבי-בורדים) — הבא.
+
+## #giant-v2-w2 — המקלדת מצייתת · פוש-מתכלה · בורדים-פנימה — 2026-07-26
+- **הפתרון:** KbDestination.gate ('core' ברירת-מחדל · 21 תגים) + kbDestAllowed-טהור + matchDestinations(cfg?)-אופציונלי (רישום נשאר מלא+ref-less — חוט-הביטחון של בדיקת-התוויות) · דרייברים עם בוליאנים-טהורים (servicesOn/chatOn/searchOn/compatOn — סינון לפני-השורש-הזורק) · floating: watch-אחד-ב-build · tool-tree: read-בסגירות + dive-AND (const-ראשון) + שומרי-dispatch לעלים-חסרי-ref ('לא זמין') · search: overlay+אייקון+finder-fallback · פוש-צ'אט: צריכה-חד-פעמית+טוסט-כן ('שיחות אינן פעילות בחברה זו') · clamps בבורדים (ספק tab2→0 · עובד tab1→0, מיפוי-דו-כיווני) · intel מקונן ב-4 אתרי-lockstep (_kManagerTabs-const לא-נגוע).
+- **mutation ×2:** M1 kbDestAllowed≡true → אדום(-3) · M2 השמטת-chip-מתה → אדום(-1) → ירוק. (+שתילה-שבורה-פסיק נתפסה-בעין ותוקנה לפני-ריצה.)
+- **אימות:** analyze 0 · 152 (מטריצה-8-רגליים כולל search-fallback+push-toast · כל סוללות-המקלדת) · גארדים ×11. **נדחה-במוצהר:** עלי-store חסרי-ref (מגודרי-raw ממילא) · global_search_sources cfg (מסלול-חמוש) · ניסוח-עזרה-worker.

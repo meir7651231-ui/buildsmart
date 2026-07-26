@@ -24,6 +24,7 @@ import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/store_profile_store.dart';
 import 'package:buildsmart/state/store_stock.dart';
@@ -183,6 +184,15 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             : (session.displayName.trim().isNotEmpty
                 ? session.displayName.trim()
                 : _store.name);
+    // Giant-system V2 — the `chat` module gate, watched ONCE here in build()
+    // (the home_shell precedent); the nav row + body below use the captured
+    // boolean. Index safety (the updates_screen clamp precedent): the שיחות
+    // pane sits at index 2 and `_tab` may still hold it (a stale value from
+    // before the org turned chat off), so with `chat` off the EFFECTIVE index
+    // clamps to 0 (בית) — the hidden pane is unreachable and the cell indices
+    // 0–4 never renumber. All-on: `tab == _tab`, byte-for-byte behavior.
+    final chatOn = modOn(ref, 'chat');
+    final tab = !chatOn && _tab == 2 ? 0 : _tab;
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -281,7 +291,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           ],
         ),
-        body: _body(storeName),
+        body: _body(storeName, tab),
         // #77 — the tabs moved to the BOTTOM (the courier-board pattern).
         // #31 — each tab wrapped in HelpTarget (orange ring + bubble out of the
         // tab), consistent with the app-bar; a custom Material+Row replaces
@@ -301,10 +311,10 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
                       body: _kStoreTabHelp[0].$2,
                       child: BottomNavCell(
                         icon: Icon(
-                          _tab == 0 ? Icons.home : Icons.home_outlined,
+                          tab == 0 ? Icons.home : Icons.home_outlined,
                         ),
                         label: 'בית',
-                        selected: _tab == 0,
+                        selected: tab == 0,
                         onTap: () => setState(() => _tab = 0),
                       ),
                     ),
@@ -315,32 +325,36 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
                       body: _kStoreTabHelp[1].$2,
                       child: BottomNavCell(
                         icon: Icon(
-                          _tab == 1
+                          tab == 1
                               ? Icons.inventory_2
                               : Icons.inventory_2_outlined,
                         ),
                         label: 'מלאי',
-                        selected: _tab == 1,
+                        selected: tab == 1,
                         onTap: () => setState(() => _tab = 1),
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: HelpTarget(
-                      title: _kStoreTabHelp[2].$1,
-                      body: _kStoreTabHelp[2].$2,
-                      child: BottomNavCell(
-                        icon: Icon(
-                          _tab == 2
-                              ? Icons.chat_bubble
-                              : Icons.chat_bubble_outline,
+                  // Giant-system V2 — `chat` off hides the שיחות cell; the
+                  // sibling cells keep their indices (0–4, never renumbered)
+                  // and the build-time clamp above keeps index 2 unreachable.
+                  if (chatOn)
+                    Expanded(
+                      child: HelpTarget(
+                        title: _kStoreTabHelp[2].$1,
+                        body: _kStoreTabHelp[2].$2,
+                        child: BottomNavCell(
+                          icon: Icon(
+                            tab == 2
+                                ? Icons.chat_bubble
+                                : Icons.chat_bubble_outline,
+                          ),
+                          label: 'שיחות',
+                          selected: tab == 2,
+                          onTap: () => setState(() => _tab = 2),
                         ),
-                        label: 'שיחות',
-                        selected: _tab == 2,
-                        onTap: () => setState(() => _tab = 2),
                       ),
                     ),
-                  ),
                   Expanded(
                     child: HelpTarget(
                       title: _kStoreTabHelp[3].$1,
@@ -348,7 +362,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
                       child: BottomNavCell(
                         icon: const Icon(Icons.apps),
                         label: 'פורטל',
-                        selected: _tab == 3,
+                        selected: tab == 3,
                         onTap: () => setState(() => _tab = 3),
                       ),
                     ),
@@ -361,10 +375,10 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
                       body: _kStoreTabHelp[4].$2,
                       child: BottomNavCell(
                         icon: Icon(
-                          _tab == 4 ? Icons.person : Icons.person_outline,
+                          tab == 4 ? Icons.person : Icons.person_outline,
                         ),
                         label: 'אזור אישי',
-                        selected: _tab == 4,
+                        selected: tab == 4,
                         onTap: () => setState(() => _tab = 4),
                       ),
                     ),
@@ -395,8 +409,10 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     ref.read(boardAuthProvider.notifier).logout();
   }
 
-  Widget _body(String storeName) {
-    switch (_tab) {
+  /// [tab] is the EFFECTIVE index computed in build() — `_tab` clamped away
+  /// from the שיחות pane when the `chat` module is off (V2 gate).
+  Widget _body(String storeName, int tab) {
+    switch (tab) {
       case 1:
         return _stockTab();
       case 2:

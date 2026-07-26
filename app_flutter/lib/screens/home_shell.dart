@@ -142,7 +142,10 @@ class HomeShell extends ConsumerWidget {
           // layer + the global keyboard, so results replace the screen content while
           // the floating keyboard keeps working. The child watches the live query
           // and paints the opaque panel only once a query is present.
-          if (kGlobalSearch)
+          // Giant-system V2 — AND'd with the `search` module gate (const FIRST,
+          // so kGlobalSearch off still folds the branch out; absent=on ⇒ the
+          // all-on default keeps the mount byte-identical).
+          if (kGlobalSearch && modOn(ref, 'search'))
             const Positioned.fill(child: _GlobalSearchOverlay()),
           // "מצב היכרות": freezes the content + a banner. Explainable elements
           // (📷 in the app-bar, the cart FAB) sit above this and stay tappable.
@@ -761,7 +764,9 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
       actions: [
         // Search icon — appears when the active tab's header is scrolled away.
-        if (ref.watch(tabHeaderHiddenProvider))
+        // Giant-system V2 — AND'd with the `search` module gate (absent=on ⇒
+        // the all-on default keeps the bar byte-identical).
+        if (ref.watch(tabHeaderHiddenProvider) && modOn(ref, 'search'))
           HelpTarget(
             title: 'חיפוש',
             body:

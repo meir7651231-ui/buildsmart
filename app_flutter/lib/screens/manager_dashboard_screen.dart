@@ -1,3 +1,4 @@
+import 'package:buildsmart/config/org_config.dart' show moduleOn;
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
@@ -46,6 +47,7 @@ import 'package:buildsmart/state/intel/intel_event.dart' show IntelEvent;
 import 'package:buildsmart/state/intel/intel_log.dart' show intelLogProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/role_requests.dart'
     show pendingRoleRequestsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -94,6 +96,10 @@ class ManagerDashboardScreen extends ConsumerWidget {
   /// [IndexedStack] children can NEVER drift out of lockstep: all four carry the
   /// SAME one `if (kIntelLive)`-gated 5th element (step 98). const-false
   /// `kIntelLive` ⇒ 4 (byte-identical demo); INTEL_LIVE on ⇒ 5, all four together.
+  /// Giant-system V2: this stays the COMPILE-floor count — the runtime `intel`
+  /// org gate is ANDed at the lockstep CONSUMERS (toggle · IndexedStack ·
+  /// journey), so an INTEL_LIVE build with `intel` off RENDERS 4 while the
+  /// const lists (and this ceiling) keep 5.
   static int get tabCount => _kManagerTabs.length;
 
   @override
@@ -105,7 +111,21 @@ class ManagerDashboardScreen extends ConsumerWidget {
     if (ref.watch(boardAuthProvider)?.role != BoardRole.manager) {
       return WelcomeScreen(boardRole: BoardRole.manager);
     }
-    final active = ref.watch(managerTabProvider);
+    // Giant-system V2 — the runtime `intel` org gate ANDed onto the step-98
+    // compile floor: pure [moduleOn] over the live org config, watched ONCE
+    // here in build(). const-false `kIntelLive` (every normal/test build)
+    // short-circuits both lines below back to the plain watch — byte-identical
+    // demo by construction. Index safety (the updates_screen clamp precedent):
+    // in an INTEL_LIVE build with `intel` off, a stale managerTabProvider=4
+    // must not point the IndexedStack past its last child — clamp to לוח בקרה
+    // (0). The intel tab is the LAST index, so tabs 0–3 never renumber.
+    final intelTabOn =
+        kIntelLive && moduleOn(ref.watch(orgConfigProvider), 'intel');
+    final rawTab = ref.watch(managerTabProvider);
+    final active =
+        kIntelLive && !intelTabOn && rawTab == _kManagerTabs.length - 1
+            ? 0
+            : rawTab;
 
     final Widget scaffold = Scaffold(
       backgroundColor: BsTokens.bgLight,
@@ -244,23 +264,25 @@ class ManagerDashboardScreen extends ConsumerWidget {
           Expanded(
             child: IndexedStack(
               index: active,
-              children: const [
+              children: [
                 // The manager screen is now COMPLETE — every tab is real, NO
                 // "בקרוב" placeholder remains. 📊 לוח בקרה (M2) — the dashboard
                 // cockpit, live over the shared orders engine. 🚚 הזמנות (M3) —
                 // the live order list + the manager's god-mode stage-advance.
                 // 👥 לקוחות (M4) — the live customer list + credit. 🛠️ ניהול
                 // (M5) — the 5 management tools (the FINAL tab).
-                _DashboardTab(),
-                _OrdersTab(),
-                _CustomersTab(),
-                _ManageTab(),
+                const _DashboardTab(),
+                const _OrdersTab(),
+                const _CustomersTab(),
+                const _ManageTab(),
                 // Step 98 — the 5th tab (📡 מודיעין לקוחות) is COMPILE-GATED behind
                 // `kIntelLive` (const-false in every normal/test build ⇒ tree-shaken
                 // out, so the shipped dashboard is byte-identical with 4 tabs). In
                 // LOCKSTEP with `_kManagerTabs` / `_kManagerTabHelp` / `tabCount` —
-                // all four share this one `if (kIntelLive)`.
-                if (kIntelLive) IntelTab(),
+                // all four share this one `if (kIntelLive)`. Giant-system V2 —
+                // `intelTabOn` ANDs the runtime `intel` org gate in (the IndexedStack
+                // keeps children ALIVE, so a dark tab must not even mount).
+                if (kIntelLive && intelTabOn) const IntelTab(),
               ],
             ),
           ),
@@ -360,6 +382,16 @@ class _ManagerToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Giant-system V2 — the runtime `intel` org gate ANDed at the CONSUMER
+    // (the top-level const lists `_kManagerTabs`/`_kManagerTabHelp` stay
+    // untouched): with the module off, an INTEL_LIVE build renders one pill
+    // fewer — the LAST index, so nothing renumbers and the per-index help
+    // lockstep holds. const-false `kIntelLive` (every normal/test build)
+    // folds this back to `_kManagerTabs.length` — byte-identical demo.
+    final count =
+        kIntelLive && !moduleOn(ref.watch(orgConfigProvider), 'intel')
+            ? _kManagerTabs.length - 1
+            : _kManagerTabs.length;
     Widget seg(int i, String emoji, String label) {
       final on = active == i;
       return Expanded(
@@ -369,10 +401,7 @@ class _ManagerToggle extends ConsumerWidget {
           // correctly (gate 62 — no hard-coded edge inset).
           padding: EdgeInsetsDirectional.only(
             start: i == 0 ? 0 : BsTokens.space2 / 2,
-            end:
-                i == ManagerDashboardScreen.tabCount - 1
-                    ? 0
-                    : BsTokens.space2 / 2,
+            end: i == count - 1 ? 0 : BsTokens.space2 / 2,
           ),
           // #31 — each tab wrapped in its OWN HelpTarget (orange ring + bubble
           // out of the tab); the four pills are built in this one seg() loop so
@@ -430,7 +459,7 @@ class _ManagerToggle extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          for (var i = 0; i < _kManagerTabs.length; i++)
+          for (var i = 0; i < count; i++)
             seg(i, _kManagerTabs[i].emoji, _kManagerTabs[i].label),
         ],
       ),
@@ -2501,11 +2530,15 @@ class _CustomerDetailSheet extends ConsumerWidget {
             // ADDITIVE + COMPILE-GATED behind `kIntelLive` (const-false in every
             // normal / test build ⇒ this whole block AND JourneyTimeline + its
             // widget tree tree-shake out ⇒ the customer sheet is BYTE-IDENTICAL to
-            // today; the step-98 IntelTab gating pattern). JOINED BY the owner-side
+            // today; the step-98 IntelTab gating pattern). Giant-system V2 — the
+            // runtime `intel` org gate ANDed in (the inline-watch idiom of the
+            // credit-explain block above), so an INTEL_LIVE build with `intel` off
+            // darks the journey too. JOINED BY the owner-side
             // stable key (uid/actorKey), NEVER the display name (R2-#12); today the
             // derived customer carries no key (`_resolveCustomerKey` → null) so the
             // section shows its honest empty state instead of ever joining by name.
-            if (kIntelLive) ...[
+            if (kIntelLive &&
+                moduleOn(ref.watch(orgConfigProvider), 'intel')) ...[
               const SizedBox(height: BsTokens.space4),
               JourneyTimeline(
                 customerKey: _resolveCustomerKey(c),

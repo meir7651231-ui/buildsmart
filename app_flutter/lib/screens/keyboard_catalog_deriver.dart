@@ -219,11 +219,20 @@ KbUpdatesContext deriveCatalogContext(
   CatalogLocation loc, {
   List<CatalogNode> tree = kCatalogTree,
   Set<String> productCats = const <String>{},
+  // ORG-GATE (giant-system V2): are the org's `search` / `compat` modules on?
+  // PURE booleans — the keyboard's build computes `moduleOn(cfg, 'search')` /
+  // `moduleOn(cfg, 'compat')` from its single orgConfigProvider watch and
+  // passes the VALUES in, so this leaf stays widget-free and no config object
+  // ever reaches (or bakes into) the deriver. Both default true ⇒ every
+  // existing caller + unit test is byte-identical (absent=on). False drops the
+  // מאתר / תכנון חיבור section chips from the entry rows.
+  bool searchOn = true,
+  bool compatOn = true,
 }) {
   switch (loc) {
     // ── 'בית': the section entry chips (real registry destinations) ────────────
     case CatalogHome():
-      return _sectionEntryContext();
+      return _sectionEntryContext(searchOn: searchOn, compatOn: compatOn);
 
     // ── a user list section: the section entry chips (same registry set) ───────
     //
@@ -234,7 +243,11 @@ KbUpdatesContext deriveCatalogContext(
     // DROP the current section from the row (see [_sectionEntryContext]'s
     // `exclude`). The remaining chips all genuinely move the location.
     case CatalogSection(:final section):
-      return _sectionEntryContext(exclude: section);
+      return _sectionEntryContext(
+        exclude: section,
+        searchOn: searchOn,
+        compatOn: compatOn,
+      );
 
     // ── 'עץ חכם': the smart-tree grid, or a category's product list + back ──────
     case CatalogSmartTree(:final smartCat):
@@ -291,6 +304,8 @@ KbUpdatesContext deriveCatalogContext(
         pathIds: pathIds,
         pathTitles: pathTitles,
         productCats: productCats,
+        searchOn: searchOn,
+        compatOn: compatOn,
       );
   }
 }
@@ -300,11 +315,23 @@ KbUpdatesContext deriveCatalogContext(
 /// catalog-level tools. [exclude] drops the section the user is already on so the
 /// row never carries a dead re-assert chip (review #20). PARITY-SAFE: a label with
 /// no registry destination is skipped (continue-on-miss), never a crash.
-KbUpdatesContext _sectionEntryContext({String? exclude}) {
+/// [searchOn]/[compatOn] are the ORG-GATE booleans threaded from
+/// [deriveCatalogContext]: false drops מאתר / תכנון חיבור from the LABEL LIST —
+/// filtered BEFORE the lookup for coherence with the store/updates roots (this
+/// root is continue-on-miss anyway, so the filter is intent, not crash-safety).
+KbUpdatesContext _sectionEntryContext({
+  String? exclude,
+  bool searchOn = true,
+  bool compatOn = true,
+}) {
   final chips = <String>[];
   final destByChip = <String, KbDestination>{};
   for (final label in _kCatalogSectionLabels) {
     if (label == exclude) continue; // no dead re-assert of the current section.
+    // ORG-GATE: a dark module drops its section chip (the registry is never
+    // filtered, so the memoized by-label map never bakes a config).
+    if (!searchOn && label == 'מאתר') continue;
+    if (!compatOn && label == 'תכנון חיבור') continue;
     final d = _catalogSectionByLabel[label];
     if (d == null) continue; // PARITY-SAFE: user-custom label, no destination.
     if (destByChip.containsKey(label)) continue; // de-dup by visible label.
@@ -330,12 +357,17 @@ KbUpdatesContext _drillContext({
   required List<String> pathIds,
   required List<String> pathTitles,
   required Set<String> productCats,
+  bool searchOn = true,
+  bool compatOn = true,
 }) {
   final node = _resolvePath(tree, pathIds);
 
   // Fully-corrupt path (not even the root id resolved): fall back to the home
   // section chips rather than an empty trap (never a blank, never a throw).
-  if (node == null) return _sectionEntryContext();
+  // The ORG-GATE booleans ride along so the fallback row is filtered too.
+  if (node == null) {
+    return _sectionEntryContext(searchOn: searchOn, compatOn: compatOn);
+  }
 
   final chips = <String>[];
   final runByChip = <String, KbRunByChip>{};

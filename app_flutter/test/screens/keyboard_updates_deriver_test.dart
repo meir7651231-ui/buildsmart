@@ -146,6 +146,34 @@ void main() {
       expect(_toolLabels(ctx), _kChatToolLabels,
           reason: 'at sub 1 (שיחות) the root offers the chat tools');
     });
+
+    test('ORG-GATE chatOn:false ⇒ chips EXACTLY [התראות] (שיחות drops)', () {
+      final ctx = deriveUpdatesContext(root, threads: const [], chatOn: false);
+      expect(ctx.row.chips, <String>['התראות'],
+          reason: 'a dark chat module drops the שיחות chip from the root row');
+      expect(ctx.row.destByChip.keys.toSet(), {'התראות'},
+          reason: 'the surviving chip still dispatches via the registry');
+    });
+
+    test('ORG-GATE chatOn:false forces the notif tools even at subTab 1', () {
+      const rootChats = UpdatesRoot(
+        persona: _kPersona,
+        audience: _kAudience,
+        subTab: 1, // שיחות active — but the pane cannot render chat-off
+      );
+      final ctx =
+          deriveUpdatesContext(rootChats, threads: const [], chatOn: false);
+      expect(_toolLabels(ctx), _kNotifToolLabels,
+          reason: 'chat off ⇒ never the chat tools (the screen clamps its '
+              'IndexedStack to התראות, so the mirror must not offer tools '
+              'for a pane that cannot render)');
+    });
+
+    test('ORG-GATE chatOn:true (the default) is the identity', () {
+      expect(deriveUpdatesContext(root, threads: const [], chatOn: true),
+          deriveUpdatesContext(root, threads: const []),
+          reason: 'the optional org-gate param defaults to the identity');
+    });
   });
 
   group('deriveUpdatesContext — NotifsLocation arm (the 6 type chips)', () {

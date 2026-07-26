@@ -261,3 +261,16 @@ lib/screens/store_screen.dart:::modOn(ref, 'finance')
 lib/screens/store_screen.dart:::featOn(ref, 'orders', 'services')
 lib/screens/smart_home_screen.dart:::modOn(ref, 'site')
 lib/screens/profile_screen.dart:::modOn(ref, 'rewards')
+#
+# Regression — GIANT-SYSTEM V2 wave-2 (2026-07-26): the keyboard obeys the config; push degrades honestly:
+lib/screens/keyboard_destinations.dart:::kbDestAllowed
+lib/screens/keyboard_destinations.dart:::gate: 'chat'
+lib/screens/floating_card_keyboard.dart:::cfg: orgCfg
+lib/screens/keyboard_store_deriver.dart:::servicesOn
+lib/screens/keyboard_updates_deriver.dart:::chatOn
+lib/screens/updates_screen.dart:::שיחות אינן פעילות בחברה זו
+lib/screens/store_dashboard_screen.dart:::modOn(ref, 'chat')
+lib/screens/worker_app_screen.dart:::modOn(ref, 'chat')
+lib/screens/manager_dashboard_screen.dart:::kIntelLive && intelTabOn
+lib/screens/home_shell.dart:::kGlobalSearch && modOn(ref, 'search')
+lib/screens/catalog_screen.dart:::modOn(ref, 'dive')

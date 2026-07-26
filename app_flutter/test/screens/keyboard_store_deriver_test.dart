@@ -142,6 +142,27 @@ void main() {
       expect(_toolLabels(ctx), _nodeLabels(StoreSection.all),
           reason: 'the root installs kbStoreNodes(all)');
     });
+
+    test(
+        'ORG-GATE servicesOn:false ⇒ chips EXACTLY [הסל שלי, ההזמנות שלי] — '
+        'filtered BEFORE the throwing lookup, so no throw can fire', () {
+      final ctx = deriveStoreContext(root, servicesOn: false);
+      expect(ctx.row.chips, <String>['הסל שלי', 'ההזמנות שלי'],
+          reason: 'a dark orders.services feature drops the שירותים chip');
+      expect(ctx.row.destByChip.keys.toSet(), {'הסל שלי', 'ההזמנות שלי'},
+          reason: 'the surviving chips still dispatch via the registry');
+      expect(ctx.row.runByChip, isEmpty,
+          reason: 'the gate never re-routes a chip to the dynamic map');
+    });
+
+    test('ORG-GATE servicesOn:true (the default) keeps the pinned root row',
+        () {
+      expect(deriveStoreContext(root, servicesOn: true),
+          deriveStoreContext(root),
+          reason: 'the optional org-gate param defaults to the identity');
+      expect(deriveStoreContext(root).row.chips, _kEntrySections,
+          reason: 'default all-on = the unchanged root pin');
+    });
   });
 
   group('deriveStoreContext — CartLocation arm (real cart-line chips)', () {

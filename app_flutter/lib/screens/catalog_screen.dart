@@ -87,6 +87,7 @@ import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/intel/intel_bus.dart';
 import 'package:buildsmart/state/intel/intel_events.dart';
 import 'package:buildsmart/state/keyboard_job_context.dart';
+import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
@@ -1701,7 +1702,10 @@ class _CatalogBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'בית') return SmartHomeBody(scrollCtrl: scrollCtrl);
-    if (active == 'מאתר') return const FinderScreen();
+    // Giant-system V2 — `search` module off ⇒ skip the finder branch, so 'מאתר'
+    // falls through to the section-absent tail below (header + 📋 empty state),
+    // never a crash (absent=on ⇒ the all-on default keeps this byte-identical).
+    if (active == 'מאתר' && modOn(ref, 'search')) return const FinderScreen();
     // OWNER-REVIEW · kWordFinder seam — routes the flag-gated 'מאתר חכם' pill to
     // the two-mode word-finder host. Unreachable when kWordFinderFlag is off
     // (the pill that sets this active section never renders), so this branch is
@@ -1718,19 +1722,22 @@ class _CatalogBody extends ConsumerWidget {
     // OWNER · the AXIS-DIVE super-wheel ([kAxisDive], const-false ⇒ folds out ⇒
     // byte-identical). Its OWN 'מאתר-על' chip: the first wheel picks WHICH of the
     // ~15 axes to start from, then any axis in any order down to the product.
-    if (kAxisDive && active == 'מאתר-על') {
+    // Giant-system V2 — the three dive branches also AND the `dive` module gate
+    // (const flags stay FIRST, so a false const still folds the branch out; off
+    // at runtime ⇒ fall through to the section-absent tail, never a crash).
+    if (kAxisDive && active == 'מאתר-על' && modOn(ref, 'dive')) {
       return const Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(child: CatalogWheelScreen()),
       );
     }
-    if (kPlainDive && active == 'מאתר פשוט') {
+    if (kPlainDive && active == 'מאתר פשוט' && modOn(ref, 'dive')) {
       return const Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(child: PlainDiveScreen()),
       );
     }
-    if (active == 'מאתר חכם') {
+    if (active == 'מאתר חכם' && modOn(ref, 'dive')) {
       // kRingDive demo → the rotary RingDive dial; otherwise the two-mode
       // word-finder host. Flag off (default) → WordFinderHome (byte-identical).
       if (ref.watch(featureFlagsProvider).contains(kRingDiveFlag)) {
