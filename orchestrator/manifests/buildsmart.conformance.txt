@@ -343,3 +343,11 @@ lib/logic/text_normalize.dart:::String normName(String s) => normSearch(s).repla
 lib/logic/fuzzy_match.dart:::int damerauLevenshtein(String a, String b) {
 lib/logic/fuzzy_match.dart:::int fuzzyTolerance(int len) => (len ~/ 3) + 1;
 lib/logic/workflow_engine.dart:::import 'package:buildsmart/logic/text_normalize.dart' show normName;
+#
+# Regression — GIANT Phase-2 wave-2b (2026-07-26): saved customer entity — dedup-on-input, gated augmentation:
+lib/state/customers_store.dart:::class SavedCustomer {
+lib/state/customers_store.dart:::List<SavedCustomer> upsertCustomer(
+lib/state/customers_store.dart:::final idx = list.indexWhere((c) => c.id == incoming.id || c.dedupKey == key);
+lib/state/customers_store.dart:::SavedCustomer? customerForName(List<SavedCustomer> list, String displayName) {
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'customers'))
+lib/screens/manager_dashboard_screen.dart:::class _SavedCustomerSection extends ConsumerWidget {

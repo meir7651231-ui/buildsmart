@@ -53,8 +53,10 @@ import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/attention_source.dart'
     show attentionItemsProvider;
+import 'package:buildsmart/state/customers_store.dart'
+    show SavedCustomer, savedCustomerForProvider, savedCustomersProvider;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
-import 'package:buildsmart/state/org_gates.dart' show featEnabled;
+import 'package:buildsmart/state/org_gates.dart' show featEnabled, orgTerm;
 import 'package:buildsmart/state/role_requests.dart'
     show pendingRoleRequestsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -2559,6 +2561,11 @@ class _CustomerDetailSheet extends ConsumerWidget {
             row('נוצל', '₪${_grouped(liveTotalSpend)}'),
             row('יתרה זמינה', creditLimit <= 0 ? '—' : '₪${_grouped(balance)}'),
             row('אתרי בנייה', '$liveSites'),
+            // GIANT Phase-2 — the SAVED customer entity (phone/notes/tags) rides
+            // the opt-in gate `manager.customers`; default-OFF ⇒ this sheet is
+            // byte-identical (the block is compiled in but the gate is false).
+            if (featEnabled(ref, 'manager', 'customers'))
+              _SavedCustomerSection(displayName: c.name),
             // #ai-credit-explain — when AI is live, explain what this utilisation
             // means before approving the next order. gateway null (demo) → not in
             // the tree → the detail sheet is byte-identical.
@@ -2771,6 +2778,217 @@ class JourneyTimeline extends StatelessWidget {
                       ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// GIANT Phase-2 — the SAVED-customer block inside the detail sheet (gated
+/// `manager.customers`). Shows the saved phone/notes/tags for this contractor
+/// name (joined by [customerForName]), or an empty prompt — plus an add/edit
+/// button. Watch-only; the write goes through [_openSavedCustomerEditor].
+class _SavedCustomerSection extends ConsumerWidget {
+  const _SavedCustomerSection({required this.displayName});
+
+  final String displayName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final saved = ref.watch(savedCustomerForProvider(displayName));
+    Widget row(String label, String value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(label,
+                    style: const TextStyle(
+                        color: BsTokens.mutedLight, fontSize: 13)),
+              ),
+              Flexible(
+                child: Text(value,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: BsTokens.space3),
+        const Divider(height: 1, color: Color(0xFFEDEDED)),
+        const SizedBox(height: BsTokens.space2),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            orgTerm(ref, 'entity.customer', 'פרטי לקוח'),
+            style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 14),
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        if (saved != null) ...[
+          if (saved.phone.isNotEmpty) row('טלפון', saved.phone),
+          if (saved.email.isNotEmpty) row('מייל', saved.email),
+          if (saved.notes.isNotEmpty) row('הערות', saved.notes),
+          if (saved.tags.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final t in saved.tags)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: BsTokens.space2, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: BsTokens.brand.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(t,
+                          style: const TextStyle(
+                              color: BsTokens.brand,
+                              fontSize: BsTokens.typeLabel,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                ],
+              ),
+            ),
+        ] else
+          const Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Text('אין פרטי לקוח שמורים עדיין',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+          ),
+        const SizedBox(height: BsTokens.space2),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () =>
+                _openSavedCustomerEditor(context, ref, displayName, saved),
+            icon: Text(saved == null ? '➕' : '✏️'),
+            label: Text(saved == null ? 'הוסף פרטי לקוח' : 'ערוך פרטי לקוח'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Opens the saved-customer editor sheet. New id from the wall clock when
+/// creating; the existing id is kept on edit (so a re-save is an edit, not a
+/// duplicate — reinforced by the store's name+phone dedup).
+void _openSavedCustomerEditor(
+    BuildContext context, WidgetRef ref, String displayName, SavedCustomer? existing) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: BsTokens.cardLight,
+    builder: (_) => _SavedCustomerEditor(displayName: displayName, existing: existing),
+  );
+}
+
+class _SavedCustomerEditor extends ConsumerStatefulWidget {
+  const _SavedCustomerEditor({required this.displayName, required this.existing});
+
+  final String displayName;
+  final SavedCustomer? existing;
+
+  @override
+  ConsumerState<_SavedCustomerEditor> createState() =>
+      _SavedCustomerEditorState();
+}
+
+class _SavedCustomerEditorState extends ConsumerState<_SavedCustomerEditor> {
+  late final TextEditingController _phone;
+  late final TextEditingController _email;
+  late final TextEditingController _notes;
+  late final TextEditingController _tags;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    _phone = TextEditingController(text: e?.phone ?? '');
+    _email = TextEditingController(text: e?.email ?? '');
+    _notes = TextEditingController(text: e?.notes ?? '');
+    _tags = TextEditingController(text: e?.tags.join(', ') ?? '');
+  }
+
+  @override
+  void dispose() {
+    _phone.dispose();
+    _email.dispose();
+    _notes.dispose();
+    _tags.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final tags = _tags.text
+        .split(RegExp('[,·]'))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
+    final id = widget.existing?.id ??
+        DateTime.now().microsecondsSinceEpoch.toString();
+    ref.read(savedCustomersProvider.notifier).upsert(SavedCustomer(
+          id: id,
+          name: widget.displayName,
+          phone: _phone.text.trim(),
+          email: _email.text.trim(),
+          notes: _notes.text.trim(),
+          tags: tags,
+        ));
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
+            BsTokens.space4, BsTokens.space4 + bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('👷 ${widget.displayName}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w800, fontSize: 16)),
+            const SizedBox(height: BsTokens.space3),
+            TextField(
+              controller: _phone,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: 'טלפון'),
+            ),
+            TextField(
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(labelText: 'מייל'),
+            ),
+            TextField(
+              controller: _notes,
+              maxLines: 2,
+              decoration: const InputDecoration(labelText: 'הערות'),
+            ),
+            TextField(
+              controller: _tags,
+              decoration: const InputDecoration(
+                  labelText: 'תגיות (מופרדות בפסיק)'),
+            ),
+            const SizedBox(height: BsTokens.space4),
+            FilledButton(onPressed: _save, child: const Text('שמור')),
+          ],
+        ),
       ),
     );
   }

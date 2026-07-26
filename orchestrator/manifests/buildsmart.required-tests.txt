@@ -49,3 +49,6 @@ test/attention_gate_test.dart
 test/workflow_engine_test.dart
 # giant Phase-2 wave-2a — CRM shared core (ח"פ check-digit · phone/Hebrew normalize · Damerau fuzzy primitive):
 test/crm_core_test.dart
+# giant Phase-2 wave-2b — the saved customer entity (dedup-on-input · by-name join · gated detail-sheet augmentation):
+test/customers_store_test.dart
+test/customers_gate_test.dart
