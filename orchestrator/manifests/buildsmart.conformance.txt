@@ -334,3 +334,12 @@ lib/logic/workflow_engine.dart:::WfAdvancePlan? planWfAdvance(OrgConfig cfg, Str
 lib/logic/workflow_engine.dart:::if (!a.dispatchPushed) {
 lib/logic/workflow_engine.dart:::String wfNormName(String s) => _normSearch(s).replaceAll(RegExp(r'\s'), '');
 lib/logic/workflow_engine.dart:::String wfStageLabel(OrgConfig cfg, WfStage s) =>
+#
+# Regression — GIANT Phase-2 wave-2a (2026-07-26): CRM shared core — ח"פ check-digit fix, phone/text normalize, fuzzy:
+lib/logic/input_validators.dart:::return sum % 10 == 0;
+lib/logic/input_validators.dart:::String normalizePhone(String input) {
+lib/logic/text_normalize.dart:::String normSearch(String t) {
+lib/logic/text_normalize.dart:::String normName(String s) => normSearch(s).replaceAll(RegExp(r'\s'), '');
+lib/logic/fuzzy_match.dart:::int damerauLevenshtein(String a, String b) {
+lib/logic/fuzzy_match.dart:::int fuzzyTolerance(int len) => (len ~/ 3) + 1;
+lib/logic/workflow_engine.dart:::import 'package:buildsmart/logic/text_normalize.dart' show normName;

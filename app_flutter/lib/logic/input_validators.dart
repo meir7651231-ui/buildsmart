@@ -19,11 +19,38 @@ bool validEmail(String input) {
   return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(s);
 }
 
-/// Israeli business id (ח"פ / ע.מ.): exactly 9 digits.
+/// Israeli business id (ח"פ / ע.מ.): exactly 9 digits AND a valid check digit.
 /// Dashes and spaces are allowed in the input and stripped before the check.
+///
+/// Phase-2 bug-fix (was 9-digits-only, so a mistyped id slipped through): the
+/// standard Israeli 1-2-1-2 weighted checksum — each digit times its weight,
+/// products over 9 fold (sum their digits, i.e. −9), and the total must be
+/// ≡ 0 (mod 10). A pure tightening; no toggle (a bug fix, not a feature).
 bool validBusinessId(String input) {
   final digits = input.replaceAll(RegExp(r'[\s-]'), '');
-  return RegExp(r'^\d{9}$').hasMatch(digits);
+  if (!RegExp(r'^\d{9}$').hasMatch(digits)) return false;
+  var sum = 0;
+  for (var i = 0; i < 9; i++) {
+    final product = (digits.codeUnitAt(i) - 0x30) * (i.isEven ? 1 : 2);
+    sum += product > 9 ? product - 9 : product;
+  }
+  return sum % 10 == 0;
+}
+
+/// Normalize a free-text Israeli phone to a CANONICAL LOCAL form for storage
+/// and dedup/lookup: digits only, a single leading `0`, no separators. Pure.
+///   • strip everything that isn't a digit (spaces, dashes, parens, `+`);
+///   • an international `972…` / `00972…` / `+972…` maps back to a local `0…`;
+///   • an already-local `05…` keeps its shape.
+/// Returns `''` when there are no digits (the caller decides what empty means).
+/// This is the CRM key [waMeDigits] is NOT — waMeDigits produces the outbound
+/// `972…` wa.me form; this produces the stored `05…` identity.
+String normalizePhone(String input) {
+  var digits = input.replaceAll(RegExp(r'\D'), '');
+  if (digits.isEmpty) return '';
+  if (digits.startsWith('00')) digits = digits.substring(2);
+  if (digits.startsWith('972')) digits = '0${digits.substring(3)}';
+  return digits;
 }
 
 /// Board login code (task #65): exactly 4 digits — the seeded board-account

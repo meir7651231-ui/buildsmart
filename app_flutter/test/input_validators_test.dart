@@ -98,13 +98,22 @@ void main() {
     expect(waMeDigits('0501234567'), '972501234567');
   });
 
-  // ─── validBusinessId ───────────────────────────────────────────────────────
-  test('business id — exactly 9 digits is valid', () {
-    expect(validBusinessId('512345678'), true);
+  // ─── validBusinessId (9 digits + Israeli 1-2-1-2 check digit) ───────────────
+  // 512345679 is check-VALID (weighted sum 40 ≡ 0 mod 10); 512345678 is
+  // check-INVALID (sum 39) — the exact case the pre-fix validator wrongly let
+  // through.
+  test('business id — a check-VALID 9-digit id passes', () {
+    expect(validBusinessId('512345679'), true);
   });
 
   test('business id — dashes/spaces are stripped before the check', () {
-    expect(validBusinessId('51-234 5678'), true);
+    expect(validBusinessId('51-234 5679'), true);
+  });
+
+  test('business id — a wrong CHECK DIGIT is rejected (the Phase-2 fix)', () {
+    expect(validBusinessId('512345678'), false,
+        reason: 'weighted sum 39 — was wrongly accepted before the fix');
+    expect(validBusinessId('123456789'), false, reason: 'sum 47');
   });
 
   test('business id — 8 digits is invalid', () {
@@ -117,6 +126,22 @@ void main() {
 
   test('business id — letters are invalid', () {
     expect(validBusinessId('51234567a'), false);
+  });
+
+  // ─── normalizePhone (canonical local 0… form for CRM dedup) ────────────────
+  test('phone normalize — strips separators, keeps local 05…', () {
+    expect(normalizePhone('050-123 4567'), '0501234567');
+    expect(normalizePhone('(050) 123-4567'), '0501234567');
+  });
+
+  test('phone normalize — international 972/+972/00972 → local 0…', () {
+    expect(normalizePhone('+972-50-123-4567'), '0501234567');
+    expect(normalizePhone('972501234567'), '0501234567');
+    expect(normalizePhone('00972501234567'), '0501234567');
+  });
+
+  test('phone normalize — empty when no digits', () {
+    expect(normalizePhone('  -- '), '');
   });
 
   // ─── validPositiveAmount ───────────────────────────────────────────────────

@@ -16,6 +16,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/config/org_config.dart' show OrgConfig, termOf;
+import 'package:buildsmart/logic/text_normalize.dart' show normName;
 
 /// חמשת השלבים בסדר קבוע (אינדקס 0..4). המפתחות מסתדרים ל-'new'..'done'.
 enum WfStage { intake, prep, ready, dispatch, done }
@@ -238,8 +239,8 @@ WfCase wfRevertPatch(WfCase a, WfStage to) => a.copyWith(
           a.dispatchPushed,
     );
 
-/// נרמול-שם ל-dedup: נרמול-חיפוש-עברי + הסרת **כל** רווח.
-String wfNormName(String s) => _normSearch(s).replaceAll(RegExp(r'\s'), '');
+/// נרמול-שם ל-dedup: מ-ליבת-הטקסט המשותפת ([normName] = normSearch + הסרת-רווח).
+String wfNormName(String s) => normName(s);
 
 /// הוספת-שם טהורה: dedup לפי wfNormName; רשומת-log רק אם ניתנה כמות.
 /// מחזיר או ({names, log?}) או שגיאה.
@@ -298,24 +299,5 @@ List<List<Object>> wfDailyRows(
   return rows;
 }
 
-// נרמול-חיפוש-עברי (port של Maor validate.ts normSearch): lower · הסרת ניקוד ·
-// קיפול אותיות-סופיות · הסרת גרשיים/מקפים/נקודות · trim. (מקומי לקרנל בגל הזה;
-// גל-3 מחלץ אותו לליבה משותפת.)
-const Map<String, String> _kFinalFold = {
-  'ך': 'כ',
-  'ם': 'מ',
-  'ן': 'נ',
-  'ף': 'פ',
-  'ץ': 'צ',
-};
-
-String _normSearch(String t) {
-  var s = t.toLowerCase();
-  s = s.replaceAll(RegExp('[֑-ׇ]'), ''); // ניקוד עברי
-  final b = StringBuffer();
-  for (final ch in s.split('')) {
-    b.write(_kFinalFold[ch] ?? ch);
-  }
-  s = b.toString().replaceAll(RegExp('[\'"׳״\\-–._]'), '');
-  return s.trim();
-}
+// (נרמול-החיפוש-העברי חולץ ל-lib/logic/text_normalize.dart — נקודת-אמת אחת
+// שגם ה-CRM צורך; ההתנהגות זהה-בייטים לפונקציה שהייתה כאן.)

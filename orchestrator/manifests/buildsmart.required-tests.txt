@@ -47,3 +47,5 @@ test/attention_engine_test.dart
 test/attention_gate_test.dart
 # giant Phase-2 wave-1b — the workflow kernel (nameable 5-stage machine · 2-press dispatch · dedup · handled-today):
 test/workflow_engine_test.dart
+# giant Phase-2 wave-2a — CRM shared core (ח"פ check-digit · phone/Hebrew normalize · Damerau fuzzy primitive):
+test/crm_core_test.dart
