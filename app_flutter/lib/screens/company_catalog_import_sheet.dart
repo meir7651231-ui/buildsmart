@@ -15,6 +15,8 @@ import 'package:buildsmart/data/catalog_source.dart'
     show resolvedCatalogProducts, setCompanyCatalog;
 import 'package:buildsmart/data/company_catalog_import.dart'
     show CompanyImportReport, companyCatalogTemplateCsv, parseCompanyCatalogCsv;
+import 'package:buildsmart/data/company_spec_bridge.dart'
+    show registerCompanySpecs;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider, reloadAppProvider;
 import 'package:buildsmart/state/company_catalog_store.dart'
@@ -95,6 +97,8 @@ class _CompanyCatalogImportSheetState
       return;
     }
     setCompanyCatalog(report.valid);
+    // Mid-session registration; full coherence still arrives with the reload this sheet prompts.
+    registerCompanySpecs(report.valid);
     setState(() {
       _busy = false;
       _committedCount = report.valid.length;

@@ -16,6 +16,8 @@
 // The caller only renders the entry button when the gateway is live.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/company_spec_bridge.dart'
+    show kCompanySpecSkus;
 import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show EndType, kVerifiedSpecs;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
@@ -45,16 +47,23 @@ String endTypeHe(EndType t) {
   }
 }
 
+/// True when [sku]'s spec was bridged from a company import (kCompanySpecSkus)
+/// rather than hand-verified — the wording must then say so, not claim verified.
+bool _isCompanySpec(String sku) => kCompanySpecSkus.contains(sku);
+
 /// The grounded prompt — hands the model the REAL ends + material and asks ONLY
 /// for a type-level "why + which adapter"; it may not invent a product.
+/// [sku] routes the provenance wording (import-bridged vs hand-verified).
 String adapterExplainPrompt({
   required String product,
   required List<String> ends,
   required String material,
+  String sku = '',
 }) {
   final endList = ends.join(', ');
+  final source = _isCompanySpec(sku) ? 'מנתוני היבוא' : 'מנתוני-המפרט-המאומת';
   return 'החלק: "$product".\n'
-      'הקצוות שלו (מנתוני-המפרט-המאומת): $endList.\n'
+      'הקצוות שלו ($source): $endList.\n'
       'חומר: $material.\n'
       'אין לו חיבור ישיר תואם בקטלוג — צריך מתאם.\n\n'
       'הסבר לאינסטלטור בקצרה: (1) למה הקצוות האלה לא מתחברים ישירות לחיבור-תקני '
@@ -122,7 +131,10 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
     try {
       final r = await gw.ask(
         prompt: adapterExplainPrompt(
-            product: widget.productName, ends: ends, material: _material),
+            product: widget.productName,
+            ends: ends,
+            material: _material,
+            sku: widget.sku),
         system: _kSystem,
         maxTokens: 320,
       );

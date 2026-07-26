@@ -4,6 +4,8 @@ import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_source.dart'
     show lipskeyScanPool, resolvedCatalogProducts;
+import 'package:buildsmart/data/company_spec_bridge.dart'
+    show kCompanySpecSkus;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -2408,6 +2410,12 @@ class _StripRowState extends State<_StripRow> {
   }
 }
 
+/// True when [sku]'s spec was bridged from a company import (kCompanySpecSkus)
+/// rather than hand-verified — spec-derived panels then get a 'לפי נתוני היבוא'
+/// header so imported data never reads as verified. The set is empty until a
+/// company import runs, so the demo renders byte-identical.
+bool _isCompanySpec(String sku) => kCompanySpecSkus.contains(sku);
+
 /// The data payload that opens beneath a strip when it's tapped. Each kind
 /// pulls its content from the matching helper (related_info.dart / smart-tree
 /// / variant-families) and renders it as a compact horizontal carousel of
@@ -2475,8 +2483,15 @@ class _StripPanel extends StatelessWidget {
     if (hits.isEmpty) {
       return const _EmptyHint('לא נמצאו מוצרים שמשלימים את הקצוות');
     }
-    return _miniCarousel(hits,
+    final carousel = _miniCarousel(hits,
         labelFor: (q) => connectionExplainHe(product, q));
+    // Import-bridged spec → title the section honestly; a hand-verified spec
+    // renders exactly as before (kCompanySpecSkus is empty without an import).
+    if (!_isCompanySpec(product.sku)) return carousel;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [_infoHead('לפי נתוני היבוא'), carousel],
+    );
   }
 
   // ── ערכת התקנה: smart-tree accessories + auto-derived install tools ─────
@@ -2730,6 +2745,8 @@ class _StripPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Import-bridged spec → header says so; hand-verified: unchanged.
+        if (_isCompanySpec(product.sku)) _infoHead('לפי נתוני היבוא'),
         row('חומר', s.material),
         if (s.pressureRating != null) row('דירוג לחץ', s.pressureRating!),
         if ((product.dims?['לחץ עבודה (50 שנה)'] as String?)?.isNotEmpty ?? false)

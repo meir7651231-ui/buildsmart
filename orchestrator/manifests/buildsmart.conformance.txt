@@ -197,3 +197,22 @@ lib/screens/lipskey_products_screen.dart:::_wordHits
 #  the barcode alias resolves in BOTH resolvers (identity preserved):
 lib/data/task_skus_local.dart:::ברקוד
 lib/data/related_info.dart:::ברקוד
+#
+# Regression — SLICE-B CONNECTIONS POUR-IN (2026-07-26 · owner: "זה נטו מנוע"): the verified layer is DATA:
+#  the bridge exists with the inch-mark rule + call-site-only registration (the 890-pin):
+lib/data/company_spec_bridge.dart:::kCompanySpecSkus
+lib/data/company_spec_bridge.dart:::putIfAbsent
+#  the two registration call sites (hydrate + post-commit) — and ONLY they:
+lib/state/company_catalog_store.dart:::registerCompanySpecs
+lib/screens/company_catalog_import_sheet.dart:::registerCompanySpecs
+#  the chain tool rides the company universe (data-layer getter; demo = the same const object):
+lib/data/lipskey_hotwater.dart:::chainUniverse
+lib/logic/install_engine.dart:::chainUniverse
+lib/logic/install_engine.dart:::!kCompatCatalog
+lib/screens/install_studio_screen.dart:::chainUniverse
+lib/logic/pressure_drop.dart:::chainUniverse
+#  raw fitting fallback is overlay-gated; the verified-only auto-BOM gate stays:
+lib/logic/install_engine.dart:::_fittingTypes
+#  honest provenance wording (verified stays verbatim):
+lib/screens/lipskey_product_sheet.dart:::לפי נתוני היבוא
+lib/screens/spec_copilot_screen.dart:::לפי נתוני היבוא

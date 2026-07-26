@@ -13,6 +13,8 @@
 // note instead of the phrased explanation. So the demo/test build is unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/company_spec_bridge.dart'
+    show kCompanySpecSkus;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show VerifiedSpec, kVerifiedSpecs;
@@ -22,6 +24,10 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// True when [sku]'s spec was bridged from a company import (kCompanySpecSkus)
+/// rather than hand-verified — the wording must then say so, not claim "מאומת".
+bool _isCompanySpec(String sku) => kCompanySpecSkus.contains(sku);
 
 /// The verified temperature verdict for [product] at [tempC] — pure, the single
 /// source of truth (`VerifiedSpec.suitableForTemp`). `ok` is null when the product
@@ -41,8 +47,11 @@ String specCopilotPrompt(LipskeyCatalogProduct product, int tempC, VerifiedSpec 
   final ok = spec.suitableForTemp(tempC.toDouble());
   final pressure =
       spec.pressureRating != null ? 'דירוג-לחץ: ${spec.pressureRating}. ' : '';
+  final maxTempLabel = _isCompanySpec(product.sku)
+      ? 'טמפ׳ מקסימום לפי נתוני היבוא'
+      : 'טמפ׳-מקסימום מאומתת';
   return 'מוצר: ${product.nameHe}. חומר: ${spec.material}. '
-      'טמפ׳-מקסימום מאומתת: ${spec.maxTempC}°C. $pressure'
+      '$maxTempLabel: ${spec.maxTempC}°C. $pressure'
       'השאלה: האם הוא מתאים לקו של $tempC°C? '
       'התשובה הדטרמיניסטית (חושבה מראש): ${ok ? 'כן' : 'לא'} '
       '($tempC ${ok ? '≤' : '>'} ${spec.maxTempC}). '
@@ -177,9 +186,16 @@ class _SpecCopilotState extends ConsumerState<SpecCopilotScreen> {
                   borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                 ),
                 child: Text(
-                  v.ok!
-                      ? '✓ כן — מחזיק $_temp°C (מקס׳ מאומת ${v.maxTempC!.toInt()}°C)'
-                      : '✗ לא — מעבר למקס׳ המאומת (${v.maxTempC!.toInt()}°C)',
+                  // Import-bridged spec → say so; a hand-verified spec keeps
+                  // the exact verified wording (kCompanySpecSkus is empty
+                  // until a company import runs, so the demo is unchanged).
+                  _isCompanySpec(widget.product.sku)
+                      ? (v.ok!
+                          ? '✓ כן — מחזיק $_temp°C (מקס׳ לפי נתוני היבוא ${v.maxTempC!.toInt()}°C)'
+                          : '✗ לא — מעבר למקס׳ לפי נתוני היבוא (${v.maxTempC!.toInt()}°C)')
+                      : (v.ok!
+                          ? '✓ כן — מחזיק $_temp°C (מקס׳ מאומת ${v.maxTempC!.toInt()}°C)'
+                          : '✗ לא — מעבר למקס׳ המאומת (${v.maxTempC!.toInt()}°C)'),
                   style: TextStyle(
                       // a11y (swarm): *Dark token for TEXT — success/danger fail
                       // WCAG AA on the light tint; the tint background stays.

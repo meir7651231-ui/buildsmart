@@ -493,7 +493,9 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     if (words.isEmpty) return null;
     LipskeyCatalogProduct? best;
     var bestScore = 0;
-    for (final p in kCompatCatalog) {
+    // chainUniverse = the imported company catalog when one is active, else
+    // kCompatCatalog (same object) — so תכנון חיבור serves the company universe.
+    for (final p in chainUniverse) {
       if (!productSuitableForTemp(p, temp)) continue;
       final name = p.nameHe.toLowerCase();
       final cat = p.categoryHe.toLowerCase();
@@ -1547,11 +1549,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   void _loadProject(SavedProject p) {
     final found = <LipskeyCatalogProduct>[];
     for (final sku in p.anchorSkus) {
-      // Resolve against the UNIFIED kCompatCatalog (Lipskey + hot-water) — the
+      // Resolve against the UNIFIED chainUniverse (Lipskey + hot-water) — the
       // same superset the anchor pickers add from. Resolving against
       // kLipskeyCatalog alone silently DROPPED saved hot-water (HW-*) anchors,
       // which the auto-BOM `found.length >= 2` gate then turned into a no-BOM.
-      final hits = kCompatCatalog.where((q) => q.sku == sku);
+      final hits = chainUniverse.where((q) => q.sku == sku);
       if (hits.isNotEmpty) found.add(hits.first);
     }
     if (found.isEmpty) {
@@ -2063,7 +2065,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
         s.addProductSku != null) {
       // UNIFIED catalog (incl. hot-water) — a recommended HW-* accessory was
       // falsely reported "not in the catalog" when resolved against Lipskey only.
-      final hits = kCompatCatalog.where((p) => p.sku == s.addProductSku);
+      final hits = chainUniverse.where((p) => p.sku == s.addProductSku);
       if (hits.isEmpty) {
         showToast(context, 'המוצר המומלץ אינו זמין במאגר');
         return;
@@ -3516,7 +3518,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
       }).take(120).toList();
     }
     final q = _q.trim();
-    return kCompatCatalog.where((p) {
+    return chainUniverse.where((p) {
       if (!productSuitableForTemp(p, widget.lineTemp)) return false;
       if (_cat != null && !_inCategory(_cat!, p)) return false;
       if (q.isEmpty) return true;
@@ -3652,7 +3654,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               itemCount: _kCats.length,
               itemBuilder: (_, i) {
                 final cat = _kCats[i];
-                final count = kCompatCatalog
+                final count = chainUniverse
                     .where((p) =>
                         productSuitableForTemp(p, widget.lineTemp) &&
                         _inCategory(cat, p))

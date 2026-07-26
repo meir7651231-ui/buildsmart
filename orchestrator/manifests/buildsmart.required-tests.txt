@@ -27,3 +27,5 @@ test/company_categories_test.dart
 test/company_catalog_rows_test.dart
 # template v2 — barcode alias resolves with object identity (own isolate — memo order):
 test/barcode_alias_test.dart
+# slice-B — the connections brain pours in (bridge parsing · registration discipline · engine payoff):
+test/company_spec_bridge_test.dart

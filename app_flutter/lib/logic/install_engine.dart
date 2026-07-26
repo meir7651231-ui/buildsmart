@@ -3,6 +3,8 @@
 // Extracted from compat_screen.dart so the UI can be rebuilt on top of it.
 import 'dart:collection';
 
+import 'package:buildsmart/data/catalog_source.dart'
+    show companyCatalogActive;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -12,10 +14,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ── O(1) catalog lookup ──────────────────────────────────────────────────────
-// Built once on first use; avoids repeated O(n) scans across kCompatCatalog.
+// Built once on first use; avoids repeated O(n) scans across chainUniverse.
+// Safe as a lazy cache: the company overlay hydrates BEFORE runApp
+// (company_catalog_store), so the first read already sees the live universe.
 Map<String, LipskeyCatalogProduct>? _skuCache;
 LipskeyCatalogProduct? _skuOf(String sku) {
-  _skuCache ??= {for (final p in kCompatCatalog) p.sku: p};
+  _skuCache ??= {for (final p in chainUniverse) p.sku: p};
   return _skuCache![sku];
 }
 
@@ -600,12 +604,13 @@ String? pipeConnectionDn(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return null;
 }
 
-// Memoized: the result depends only on (anchor.sku, tempC) because the catalog
-// is const, so this avoids a full O(N) catalog scan on every BFS expansion.
+// Memoized: the result depends only on (anchor.sku, tempC) because the
+// universe is fixed for the run (overlay hydrates pre-runApp), so this avoids
+// a full O(N) catalog scan on every BFS expansion.
 final _compatCache = <String, List<LipskeyCatalogProduct>>{};
 List<LipskeyCatalogProduct> compatibleWith(
         LipskeyCatalogProduct anchor, {int tempC = 20}) =>
-    _compatCache.putIfAbsent('${anchor.sku}|$tempC', () => kCompatCatalog
+    _compatCache.putIfAbsent('${anchor.sku}|$tempC', () => chainUniverse
         .where((p) => canConnect(anchor, p) && productSuitableForTemp(p, tempC))
         .toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
@@ -800,7 +805,17 @@ const _fittingCats = {
   'פקקים וצינורות', 'זקיף אסלה',
 };
 
-bool isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
+/// Name-derived fitting nouns — the fallback vocabulary for an IMPORTED
+/// company catalog, whose category names never match [_fittingCats]. Gated on
+/// [companyCatalogActive], so demo/off-overlay cost surfaces are untouched.
+const _fittingTypes = {
+  'מצמד', 'מחבר', 'מופה', 'ניפל', 'בושינג', 'רקורד', 'מתאם',
+  'ברך', 'זווית', 'מסעף', 'מעבר', 'אביזר',
+};
+
+bool isFitting(LipskeyCatalogProduct p) =>
+    _fittingCats.contains(p.categoryHe) ||
+    (companyCatalogActive && _fittingTypes.contains(p.productType));
 
 const _pipeCats = {
   'צינורות אפורות', 'צינורות PP', 'צינורות', 'צינורות רב שכבתי',
@@ -1159,7 +1174,7 @@ LipskeyCatalogProduct? _findBridge(
   if (shared.isEmpty) return null;
   LipskeyCatalogProduct? best;
   bool bestVerified = false;
-  for (final p in kCompatCatalog) {
+  for (final p in chainUniverse) {
     if (!isFitting(p)) continue;
     if (!productSuitableForTemp(p, tempC)) continue;
     if (!canConnect(from, p) || !canConnect(p, to)) continue;
@@ -1191,7 +1206,7 @@ const _kDrainageFamily = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
 /// compatible with [mats]. Null when no catalog pipe fits (e.g. supply lines —
 /// HDPE/PEX pipe is bought by the metre, not stocked as a SKU).
 LipskeyCatalogProduct? _realPipeOf(String dn, Set<String> mats) {
-  for (final p in kCompatCatalog) {
+  for (final p in chainUniverse) {
     if (!_isPipeProductE(p)) continue;
     final s = kVerifiedSpecs[p.sku];
     if (s == null) continue;
@@ -1243,7 +1258,7 @@ LipskeyCatalogProduct _syntheticPipe(String material, String dn) {
 /// ends); falls back to any compatible fitting with such an end.
 LipskeyCatalogProduct? _couplingFor(String dn, Set<String> mats) {
   LipskeyCatalogProduct? fallback;
-  for (final p in kCompatCatalog) {
+  for (final p in chainUniverse) {
     if (_isPipeProductE(p)) continue;
     final s = kVerifiedSpecs[p.sku];
     if (s == null) continue;
@@ -1417,7 +1432,7 @@ InstallationPlan buildInstallation(
         .fold<int>(0, (s, p) => s + (qty[p.sku] ?? 1));
     for (final accSku in accessories) {
       LipskeyCatalogProduct? prod;
-      for (final p in kCompatCatalog) {
+      for (final p in chainUniverse) {
         if (p.sku == accSku) { prod = p; break; }
       }
       if (prod == null) continue;

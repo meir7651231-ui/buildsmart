@@ -20,6 +20,8 @@
 import 'package:buildsmart/data/catalog_source.dart' show setCompanyCatalog;
 import 'package:buildsmart/data/company_catalog_import.dart'
     show decodeCompanyCatalog, encodeCompanyCatalog;
+import 'package:buildsmart/data/company_spec_bridge.dart'
+    show registerCompanySpecs;
 import 'package:buildsmart/data/lipskey_catalog.dart' show LipskeyCatalogProduct;
 import 'package:buildsmart/state/app_profile.dart' show kProfileEmptyCatalog;
 import 'package:flutter/foundation.dart' show debugPrint;
@@ -50,6 +52,8 @@ Future<void> hydrateCompanyCatalog() async {
       return;
     }
     setCompanyCatalog(items);
+    // The connections brain pours in with the catalog — pre-runApp, so every engine cache sees it.
+    registerCompanySpecs(items);
   } on Object catch (_) {/* no prefs platform → overlay stays OFF */}
 }
 
