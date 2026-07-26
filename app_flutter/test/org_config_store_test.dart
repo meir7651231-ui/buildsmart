@@ -48,6 +48,36 @@ void main() {
     expect(prefs.getString(kOrgConfigKey), isNull);
   });
 
+  // ── V6 — the deploy-baked COMPANY lane (owner → company → default) ──
+  const companyDiveOff = '{"v":1,"modules":{"dive":false}}';
+
+  test('V6: no owner saved + companyJson → the company slice boots', () async {
+    SharedPreferences.setMockInitialValues({});
+    final c = await hydrateOrgConfig(enabled: true, companyJson: companyDiveOff);
+    expect(moduleOn(c, 'dive'), isFalse, reason: 'the baked slice is in force');
+    expect(moduleOn(c, 'chat'), isTrue);
+  });
+
+  test('V6: a saved owner BEATS the company slice — whole-doc, not a merge',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      kOrgConfigKey: encodeOrgConfig(const OrgConfig(modules: {'chat': false})),
+    });
+    final c = await hydrateOrgConfig(enabled: true, companyJson: companyDiveOff);
+    expect(moduleOn(c, 'chat'), isFalse, reason: 'the owner lane won');
+    expect(moduleOn(c, 'dive'), isTrue,
+        reason: 'whole-doc replace: the company dive-off does NOT bleed in');
+  });
+
+  test('V6: corrupt owner + companyJson → the company slice (not the '
+      'default), blob still NOT cleared', () async {
+    SharedPreferences.setMockInitialValues({kOrgConfigKey: 'garbage{'});
+    final c = await hydrateOrgConfig(enabled: true, companyJson: companyDiveOff);
+    expect(moduleOn(c, 'dive'), isFalse, reason: 'fell to the company lane');
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(kOrgConfigKey), 'garbage{');
+  });
+
   test('un-overridden provider = the default (the whole suite = today)', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);

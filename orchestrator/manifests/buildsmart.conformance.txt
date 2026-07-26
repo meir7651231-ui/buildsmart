@@ -308,3 +308,13 @@ lib/screens/org_setup_wizard_screen.dart:::מצב לא-חמוש
 lib/screens/org_setup_wizard_screen.dart:::קובץ לא-תקין — שום דבר לא יובא
 lib/screens/manager_dashboard_screen.dart:::if (kOrgConfigFlag)
 lib/screens/manager_dashboard_screen.dart:::OrgSetupWizardScreen.route()
+#
+# Regression — GIANT-SYSTEM V6 (2026-07-26): the baked company lane + the plumbing channel:
+lib/config/org_config.dart:::const String kOrgCompanyJson = String.fromEnvironment('ORG_CONFIG_JSON');
+lib/state/org_config_store.dart:::String? companyJson,
+lib/state/org_config_store.dart:::companyJson: companyJson,
+lib/state/org_config_store.dart:::ownerJson: rawValid ? raw : null,
+lib/main.dart:::companyJson: kOrgCompanyJson.isEmpty ? null : kOrgCompanyJson,
+.github/workflows/clean-two-links.yml:::channel: plumbing
+.github/workflows/clean-two-links.yml:::dart-define=ORG_CONFIG=true
+test/app_profile_flags_test.dart:::'ORG_CONFIG_JSON',

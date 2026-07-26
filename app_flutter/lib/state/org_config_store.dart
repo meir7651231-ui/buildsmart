@@ -48,23 +48,30 @@ final orgConfigProvider = StateProvider<OrgConfig>((_) => kDefaultOrgConfig);
 /// build stays byte-identical. A corrupt blob is IGNORED, never cleared
 /// (iron-rule-1, the company_catalog_store spirit): the default stays in
 /// force and the owner simply re-saves.
-Future<OrgConfig> hydrateOrgConfig({bool enabled = kOrgConfigFlag}) async {
+Future<OrgConfig> hydrateOrgConfig({
+  bool enabled = kOrgConfigFlag,
+  String? companyJson,
+}) async {
   if (!enabled) return kDefaultOrgConfig; // flag OFF: hydration never engages
   try {
     // getInstance INSIDE the guard (the company_catalog_store precedent): a
     // missing prefs platform degrades to "the default", never a crash.
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(kOrgConfigKey);
-    if (raw == null) return kDefaultOrgConfig; // nothing saved yet
-    if (decodeOrgConfig(raw) == null) {
+    final rawValid = raw != null && decodeOrgConfig(raw) != null;
+    if (raw != null && !rawValid) {
       // DO NOT clear: keep the blob for a re-save / post-mortem (iron-rule-1).
-      debugPrint('OrgConfig: corrupt cache (ignored — default in force)');
-      return kDefaultOrgConfig;
+      debugPrint('OrgConfig: corrupt cache (ignored — lower lanes in force)');
     }
-    // The blob decodes — feed the RESOLVER's owner channel rather than the
-    // decoded value, so precedence stays in the one seam that later also
-    // takes the server `companyJson`.
-    return resolveOrgConfig(ownerJson: raw);
+    // V6 — a readable blob rides the OWNER lane; the deploy-baked
+    // [companyJson] (main passes [kOrgCompanyJson]) rides the COMPANY lane
+    // UNDER it. Precedence lives in the ONE resolver seam: a corrupt/absent
+    // owner falls to the company slice, and only then to the default — so a
+    // baked channel boots branded even before the wizard ever saves.
+    return resolveOrgConfig(
+      ownerJson: rawValid ? raw : null,
+      companyJson: companyJson,
+    );
   } on Object catch (_) {
     // No prefs platform → hydration degrades to the default, never a crash.
     return kDefaultOrgConfig;

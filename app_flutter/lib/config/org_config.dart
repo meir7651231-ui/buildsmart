@@ -39,6 +39,12 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 /// profile never expands to it, per-flag rollback = drop the define.
 const bool kOrgConfigFlag = bool.fromEnvironment('ORG_CONFIG');
 
+/// V6 — פרוסת-החברה האפויה-בפריסה: JSON פר-ערוץ שמוזן לנתיב-ה-COMPANY של
+/// [resolveOrgConfig] בהידרציה — מתחת לשמירת-האשף המקומית (owner) ומעל
+/// ברירת-המחדל. ריק (ברירת-המחדל) = הנתיב חשוך. רדום-לחלוטין בלי ORG_CONFIG
+/// (ההידרציה לא רצה לא-חמושה) — מסווג passthrough בסריקת-הדגלים.
+const String kOrgCompanyJson = String.fromEnvironment('ORG_CONFIG_JSON');
+
 /// The owner-prefs persistence key the V2 loader reads/writes (the
 /// `bs.<domain>.v1` key family — trades_store's `bs.trades.v1`). Unused in
 /// V1: reserving the name now is what keeps the V2 loader a pure addition.

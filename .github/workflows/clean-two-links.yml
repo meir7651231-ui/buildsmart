@@ -25,6 +25,19 @@ jobs:
           - profile: company2
             channel: company2
             extra_defines: '--dart-define=CATALOG_SOURCE=v2'
+          # giant-system V6 — the SAME commit, a THIRD identity: the clean
+          # shell, ARMED (ORG_CONFIG) with a deploy-baked plumbing company
+          # slice riding the resolver's COMPANY lane (dive+intel off out of
+          # the box; the in-app wizard save still wins above it). The two
+          # existing channels stay define-identical.
+          - profile: clean
+            channel: plumbing
+            # The JSON define is single-quoted for the shell: unquoted braces-
+            # with-commas would brace-expand and the Hebrew space would split
+            # the word.
+            extra_defines: >-
+              --dart-define=ORG_CONFIG=true
+              '--dart-define=ORG_CONFIG_JSON={"v":1,"orgName":"אינסטלציה דמו","modules":{"dive":false,"intel":false}}'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

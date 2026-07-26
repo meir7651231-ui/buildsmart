@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
+import 'package:buildsmart/config/org_config.dart' show kOrgCompanyJson;
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/catalog_paged.dart'
@@ -263,7 +264,9 @@ Future<void> main() async {
   final shipToPrompted = await loadShipToPrompted();
   // Runtime-config layer hydrates FIRST (a future module gate over the catalog
   // overlay must see it; flag OFF ⇒ returns the default with zero I/O).
-  final orgCfg = await hydrateOrgConfig();
+  final orgCfg = await hydrateOrgConfig(
+    companyJson: kOrgCompanyJson.isEmpty ? null : kOrgCompanyJson,
+  );
   // Import feature: the company-catalog overlay must hydrate BEFORE the first
   // resolvedCatalogProducts read — every lazy snapshot (_skuIndex ·
   // _catalogByName · _kCatalogProductCats) then sees the imported list.

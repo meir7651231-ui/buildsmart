@@ -69,6 +69,9 @@ const Set<String> kPassthrough = {
   'CATALOG_SOURCE',
   'SERVER_CATALOG_ROLLOUT',
   'APP_CHECK_RECAPTCHA_SITE_KEY',
+  // giant-system V6: the deploy-baked company config slice — a per-channel
+  // VALUE (inert without ORG_CONFIG, which stays arming-classified above).
+  'ORG_CONFIG_JSON',
 };
 
 /// The profile define itself.
