@@ -351,3 +351,9 @@ lib/state/customers_store.dart:::final idx = list.indexWhere((c) => c.id == inco
 lib/state/customers_store.dart:::SavedCustomer? customerForName(List<SavedCustomer> list, String displayName) {
 lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'customers'))
 lib/screens/manager_dashboard_screen.dart:::class _SavedCustomerSection extends ConsumerWidget {
+#
+# Regression — GIANT Phase-2 wave-2c (2026-07-26): fuzzy customer search — gated, composes with the status chips:
+lib/logic/fuzzy_match.dart:::bool fuzzyNameMatch(String query, String candidate) {
+lib/screens/manager_dashboard_screen.dart:::final searchOn = featEnabled(ref, 'search', 'fuzzy');
+lib/screens/manager_dashboard_screen.dart:::if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
+lib/screens/manager_dashboard_screen.dart:::if (searchOn) ...[

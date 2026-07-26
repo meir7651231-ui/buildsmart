@@ -63,6 +63,16 @@ bool fuzzyMatch(String query, String candidate) {
   return damerauLevenshtein(q, c) <= fuzzyTolerance(q.length);
 }
 
+/// התאמה מודעת-מילים לשמות: המחרוזת-השלמה תואמת ([fuzzyMatch]) — או כל **מילה**
+/// בתוכה (כך שגיאת-הקלדה במילה-אחת פוגעת בשם רב-מילים: 'כוהן' → 'יוסי כהן').
+bool fuzzyNameMatch(String query, String candidate) {
+  if (fuzzyMatch(query, candidate)) return true;
+  for (final word in candidate.split(RegExp(r'\s+'))) {
+    if (word.isNotEmpty && fuzzyMatch(query, word)) return true;
+  }
+  return false;
+}
+
 /// ציון-קרבה (נמוך=טוב): 0 להתאמת-מצע, אחרת מרחק-העריכה. -1 = לא-תואם (מעל הסף)
 /// — לסינון ומיון בשכבת-החיפוש.
 int fuzzyScore(String query, String candidate) {

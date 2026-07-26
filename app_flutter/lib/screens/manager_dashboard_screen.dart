@@ -15,6 +15,7 @@ import 'package:buildsmart/data/repositories/order_functions.dart'
     show CreditResult;
 import 'package:buildsmart/logic/attention_engine.dart'
     show AttentionItem, AttentionSev;
+import 'package:buildsmart/logic/fuzzy_match.dart' show fuzzyNameMatch;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/logic/studio/co_editor_gate.dart'
     show studioCoEditorProvider;
@@ -2035,11 +2036,27 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
   /// legacy `mc-pill` surfaces). Local widget state; no engine/global write.
   String _filter = 'all';
 
+  /// GIANT Phase-2 — the fuzzy search query (opt-in `search.fuzzy`). Local
+  /// state, EMPTY by default (the live-reflow test depends on empty =
+  /// pass-through); no debounce — the customer set is tiny.
+  final TextEditingController _searchCtl = TextEditingController();
+  String _search = '';
+
+  @override
+  void dispose() {
+    _searchCtl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // PERF-M2: single ref.watch on the pre-computed provider — O(N) derivation
     // runs once per engine tick in the provider, not on every build call.
     final views = ref.watch(_customerViewsProvider);
+    // Fuzzy search rides the opt-in gate; OFF ⇒ q is '' ⇒ pass-through ⇒ the
+    // list is byte-identical to today (the box is also absent, below).
+    final searchOn = featEnabled(ref, 'search', 'fuzzy');
+    final q = searchOn ? _search.trim() : '';
 
     // Summary (@index.html:16570-16578): contractor count, total spend
     // (Σ used), and the fleet credit-utilisation % (Σ used / Σ limit).
@@ -2066,10 +2083,13 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     final effectiveFilter =
         _filter == 'all' || (counts[_filter] ?? 0) > 0 ? _filter : 'all';
 
-    final list =
-        effectiveFilter == 'all'
-            ? views
-            : views.where((v) => v.status == effectiveFilter).toList();
+    // The status chip AND the fuzzy name query compose (never replace). An
+    // empty query passes every row, so the chip filter alone is unchanged.
+    final list = [
+      for (final v in views)
+        if (effectiveFilter == 'all' || v.status == effectiveFilter)
+          if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
+    ];
 
     return ListView(
       // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
@@ -2094,6 +2114,32 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
           onSelect: (st) => setState(() => _filter = st),
         ),
         const SizedBox(height: BsTokens.space4),
+        // GIANT Phase-2 — the fuzzy search box rides `search.fuzzy` (opt-in);
+        // absent by default ⇒ the tab is byte-identical. Typo-tolerant name
+        // match (Damerau-Levenshtein) over the derived contractor names.
+        if (searchOn) ...[
+          TextField(
+            controller: _searchCtl,
+            textDirection: TextDirection.rtl,
+            onChanged: (v) => setState(() => _search = v),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: 'חיפוש ${orgTerm(ref, 'nav.customers', 'לקוחות')}',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: _search.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      tooltip: 'נקה',
+                      onPressed: () => setState(() {
+                        _searchCtl.clear();
+                        _search = '';
+                      }),
+                    ),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
         if (list.isEmpty)
           // The legacy empty line (@index.html:16586 `md-empty`).
           const Padding(

@@ -52,3 +52,5 @@ test/crm_core_test.dart
 # giant Phase-2 wave-2b — the saved customer entity (dedup-on-input · by-name join · gated detail-sheet augmentation):
 test/customers_store_test.dart
 test/customers_gate_test.dart
+# giant Phase-2 wave-2c — fuzzy customer search (gated search.fuzzy · Damerau name match · composes with chips):
+test/customers_search_test.dart

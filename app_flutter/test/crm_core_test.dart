@@ -75,5 +75,13 @@ void main() {
       expect(fuzzyMatch('כהן', ''), isFalse);
       expect(fuzzyScore('', ''), -1);
     });
+
+    test('fuzzyNameMatch — a one-word typo hits a word inside a multi-word name',
+        () {
+      expect(fuzzyNameMatch('כוהן', 'יוסי כהן'), isTrue,
+          reason: "'כוהן' ≈ the word 'כהן' (one edit)");
+      expect(fuzzyNameMatch('לוי', 'דוד לוי'), isTrue, reason: 'exact word');
+      expect(fuzzyNameMatch('מזרחי', 'יוסי כהן'), isFalse);
+    });
   });
 }
