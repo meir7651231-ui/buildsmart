@@ -42,3 +42,6 @@ test/org_terms_test.dart
 test/vertical_packs_test.dart
 # giant-system V5 — the setup wizard (composed save · self-lockout guard · honest no-op import):
 test/org_setup_wizard_test.dart
+# giant Phase-2 wave-1a — the attention engine (pure fan-in ranker + opt-in gated cockpit mount):
+test/attention_engine_test.dart
+test/attention_gate_test.dart

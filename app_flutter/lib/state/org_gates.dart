@@ -18,7 +18,8 @@
 //     true ⇒ the un-overridden (define-less) suite stays byte-identical.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:buildsmart/config/org_config.dart' show featureOn, moduleOn, termOf;
+import 'package:buildsmart/config/org_config.dart'
+    show featureEnabled, featureOn, moduleOn, termOf;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,6 +32,12 @@ bool modOn(WidgetRef ref, String module) =>
 /// build() only. Module-off cascades false, per [featureOn].
 bool featOn(WidgetRef ref, String module, String feature) =>
     featureOn(ref.watch(orgConfigProvider), module, feature);
+
+/// Phase-2 opt-IN feature gate — LIVE (`watch`), build() only. A NET-NEW
+/// surface reads false until the org explicitly enables it, so the live app
+/// ships byte-identical. Delegates to [featureEnabled].
+bool featEnabled(WidgetRef ref, String module, String feature) =>
+    featureEnabled(ref.watch(orgConfigProvider), module, feature);
 
 /// The org's wording for [key] — LIVE (`watch`), build() only: when the V5
 /// wizard swaps [orgConfigProvider], every termed label re-renders. Absent /

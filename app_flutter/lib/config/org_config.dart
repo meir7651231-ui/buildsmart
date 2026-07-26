@@ -181,6 +181,16 @@ bool featureOn(OrgConfig c, String module, String feature) {
   return c.features['$module.$feature'] != false;
 }
 
+/// Phase-2 opt-IN gate for a NET-NEW additive surface: OFF unless the org
+/// EXPLICITLY enables it (`features['$module.$feature'] == true`) AND the
+/// module is on. This is the inverse default of [featureOn] (opt-out,
+/// absent=on) — a new engine must ship DARK on the live app (byte-identical)
+/// and light up only when a company/vertical opts in.
+bool featureEnabled(OrgConfig c, String module, String feature) {
+  if (!moduleOn(c, module)) return false;
+  return c.features['$module.$feature'] == true;
+}
+
 // ── V3 term-key registry — the map is OPEN (any key rides the codec); these
 // are the keys the app actually consults, so a wizard/pack knows what works:
 //   brand.name · brand.club — the brand wordage (runtime label sites)

@@ -13,6 +13,8 @@ import 'package:buildsmart/data/repositories/customers_local.dart'
     show customersRepositoryProvider;
 import 'package:buildsmart/data/repositories/order_functions.dart'
     show CreditResult;
+import 'package:buildsmart/logic/attention_engine.dart'
+    show AttentionItem, AttentionSev;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/logic/studio/co_editor_gate.dart'
     show studioCoEditorProvider;
@@ -49,7 +51,10 @@ import 'package:buildsmart/state/intel/intel_event.dart' show IntelEvent;
 import 'package:buildsmart/state/intel/intel_log.dart' show intelLogProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/state/attention_source.dart'
+    show attentionItemsProvider;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
+import 'package:buildsmart/state/org_gates.dart' show featEnabled;
 import 'package:buildsmart/state/role_requests.dart'
     show pendingRoleRequestsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -521,6 +526,11 @@ class _DashboardTab extends ConsumerWidget {
         // Owner-only Studio entry — SizedBox.shrink for everyone else, so the
         // cockpit is unchanged unless the signed-in owner-manager is looking.
         const StudioEntryCard(),
+        // GIANT Phase-2 — the attention engine ("needs attention") rides the
+        // opt-IN gate `manager.attention`: OFF unless a company enables it, so
+        // the live cockpit is byte-identical (a NET-NEW surface, never on by
+        // absence).
+        if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),
         _MetricGrid(analytics: analytics),
         const SizedBox(height: BsTokens.space5),
         _OrderPipeline(byStage: byStage),
@@ -700,6 +710,99 @@ class _StudioHero extends ConsumerWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// GIANT Phase-2 — the attention card ("needs attention"): the ranked list from
+/// [attentionItemsProvider], crit rows first. Empty ⇒ nothing (`SizedBox.shrink`),
+/// so an all-clear cockpit shows no empty frame. Each row drills to its manager
+/// tab (the existing KPI-drill idiom — writes [managerTabProvider]).
+class _AttentionCard extends ConsumerWidget {
+  const _AttentionCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(attentionItemsProvider);
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: BsTokens.space4),
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: BsTokens.space2),
+            child: Text(
+              '🔔 דורש טיפול',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: BsTokens.typeSubhead,
+              ),
+            ),
+          ),
+          for (final it in items) _AttentionRow(item: it),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttentionRow extends ConsumerWidget {
+  const _AttentionRow({required this.item});
+
+  final AttentionItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final crit = item.sev == AttentionSev.crit;
+    final c = crit ? BsTokens.danger : BsTokens.warnText;
+    return InkWell(
+      onTap: () => ref.read(managerTabProvider.notifier).state = item.navTab,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BsTokens.space2,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: c.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                item.tag,
+                style: TextStyle(
+                  color: c,
+                  fontSize: BsTokens.typeLabel,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Expanded(
+              child: Text(
+                item.title,
+                style: const TextStyle(fontSize: BsTokens.typeBody),
+              ),
+            ),
+            const Icon(Icons.chevron_left, size: 18),
+          ],
         ),
       ),
     );

@@ -318,3 +318,12 @@ lib/main.dart:::companyJson: kOrgCompanyJson.isEmpty ? null : kOrgCompanyJson,
 .github/workflows/clean-two-links.yml:::channel: plumbing
 .github/workflows/clean-two-links.yml:::dart-define=ORG_CONFIG=true
 test/app_profile_flags_test.dart:::'ORG_CONFIG_JSON',
+#
+# Regression — GIANT Phase-2 wave-1a (2026-07-26): attention engine — opt-in gate, ranked fan-in:
+lib/config/org_config.dart:::bool featureEnabled(OrgConfig c, String module, String feature) {
+lib/config/org_config.dart:::return c.features['$module.$feature'] == true;
+lib/state/org_gates.dart:::bool featEnabled(WidgetRef ref, String module, String feature) =>
+lib/logic/attention_engine.dart:::List<AttentionItem> attentionItems(AttentionInput inp, {required OrgConfig cfg}) {
+lib/logic/attention_engine.dart:::...out.where((a) => a.sev == AttentionSev.crit),
+lib/state/attention_source.dart:::final attentionItemsProvider = Provider<List<AttentionItem>>((ref) {
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),

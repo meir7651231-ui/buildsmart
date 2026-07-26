@@ -61,6 +61,33 @@ void main() {
       expect(featureOn(hostile, 'catalog', 'import'), isFalse);
       expect(featureOn(hostile, 'catalog', 'browse'), isTrue);
     });
+
+    test('featureEnabled is opt-IN (Phase-2): absent=OFF · true=on · '
+        'false=off · module-off cascades', () {
+      // The live default: a NET-NEW surface is DARK unless explicitly enabled.
+      expect(featureEnabled(kDefaultOrgConfig, 'manager', 'attention'), isFalse,
+          reason: 'absent ⇒ off (the byte-identical live app)');
+      expect(
+          featureEnabled(const OrgConfig(features: {'manager.attention': true}),
+              'manager', 'attention'),
+          isTrue);
+      expect(
+          featureEnabled(
+              const OrgConfig(features: {'manager.attention': false}),
+              'manager',
+              'attention'),
+          isFalse);
+      expect(
+          featureEnabled(
+              const OrgConfig(
+                modules: {'manager': false},
+                features: {'manager.attention': true},
+              ),
+              'manager',
+              'attention'),
+          isFalse,
+          reason: 'a dark module forces its opt-in feature off too');
+    });
   });
 
   group('codec — tolerant per-field, structural-null only', () {
