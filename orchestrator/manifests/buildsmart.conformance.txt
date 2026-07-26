@@ -241,3 +241,12 @@ lib/screens/install_studio_screen.dart:::_pickerCats
 lib/screens/ai_hub_screen.dart:::_rawHiddenToolIds
 lib/screens/store_screen.dart:::kProfileRawShell
 lib/data/search_index.dart:::_kContentProjectRows
+#
+# Regression — GIANT-SYSTEM V1 (2026-07-26 · PLAN-giant-system-master Phase 1): the runtime-config layer:
+lib/config/org_config.dart:::bool.fromEnvironment('ORG_CONFIG')
+lib/config/org_config.dart:::kCoreModules
+lib/config/org_config.dart:::bs.org-config.v1
+lib/state/org_config_store.dart:::kOrgConfigKey
+lib/state/org_config_store.dart:::corrupt cache (ignored
+lib/main.dart:::hydrateOrgConfig
+test/app_profile_flags_test.dart:::'ORG_CONFIG'

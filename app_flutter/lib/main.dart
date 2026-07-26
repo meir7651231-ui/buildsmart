@@ -23,6 +23,8 @@ import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/keyboard_screen_tools.dart'
     show keyboardScreenToolsProvider;
 import 'package:buildsmart/state/onboarding_gate.dart';
+import 'package:buildsmart/state/org_config_store.dart'
+    show hydrateOrgConfig, orgConfigProvider;
 import 'package:buildsmart/state/push_routing.dart'
     show afterThisFrame, pendingPushThreadProvider, threadIdFromLaunchUrl;
 import 'package:buildsmart/state/push_state.dart';
@@ -258,6 +260,9 @@ Future<void> main() async {
   final guestBrowsing = await loadGuestBrowsing();
   // Benzi #4: seed the one-time ship-to-prompt flag (absent → false → prompt).
   final shipToPrompted = await loadShipToPrompted();
+  // Runtime-config layer hydrates FIRST (a future module gate over the catalog
+  // overlay must see it; flag OFF ⇒ returns the default with zero I/O).
+  final orgCfg = await hydrateOrgConfig();
   // Import feature: the company-catalog overlay must hydrate BEFORE the first
   // resolvedCatalogProducts read — every lazy snapshot (_skuIndex ·
   // _catalogByName · _kCatalogProductCats) then sees the imported list.
@@ -268,6 +273,7 @@ Future<void> main() async {
         welcomeSeenProvider.overrideWith((ref) => welcomeSeen),
         guestBrowsingProvider.overrideWith((ref) => guestBrowsing),
         shipToPromptedProvider.overrideWith((ref) => shipToPrompted),
+        orgConfigProvider.overrideWith((ref) => orgCfg),
       ],
       child: const BuildSmartApp(),
     ),

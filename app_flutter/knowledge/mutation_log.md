@@ -1626,3 +1626,9 @@
 - **mutation ×2 (שתילה-מאומתת):** M1 split '|'→',' → אדום(-1) · M2 kill-overlay-branch ב-kDivePool → אדום(-1: פין-הזהות) → 3/3.
 - **אימות:** analyze 0 · 151 define-less · clean 14 · company2 3 · BYTES VERIFIED (8 גארדים) · 2 רישומים הורחבו-במודע (seeds+search_index; rawshell+studio/ai_hub/store).
 - **נדחה-סופית-במוצהר (מטבע-שונה):** קבצי-תוכן עתידיים (מסלולים·ערכות) · שרת (מחירים·מלאי·השוואה·שיתוף) · משפחת-kBudget (₪15,000 בתקציב/כספים — DEFER-LARGE הבא אם-יתבקש) · services-typed-UC (פער-Apple-hide קודם).
+
+## #giant-v1 — שכבת-הקונפיג הריצתית (תוכנית-הענק Phase 1/V1) — 2026-07-26
+- **הפתרון:** org_config.dart טהור (מודל+default-ריק=הכל-דלוק · codec-סובלני-פר-שדה · resolver-טוטאלי בעלים→חברה→default · moduleOn/featureOn: חסר=דלוק·רק-false·שרשור·core-תמיד · termOf-זהות-fallback) · store משובט-catalog-store (guard-first · corrupt-נשמר-לא-נמחק · persist-bool) · חיווט-boot (הידרציה לפני-הקטלוג + override) · ORG_CONFIG סווג-במודע ל-arming (אטומי עם הקבוע). אפס-צרכנים-חיים ב-V1 = אפס-רגרסיה by-construction.
+- **איחוי-חוזה חי:** B הניח toJson — אוחה ל-encodeOrgConfig (אחרת persist-תקין היה נקרא "שבור" מול מעטפת-{"v":1}).
+- **mutation ×2 (פייתון-בלבד; ה-classifier חסם בצדק git-checkout בשרשרת — הלקח נאכף):** M1 הסרת-שרשור-הקסקייד → אדום(-1) · M2 היפוך-קדימות-resolver (שמירת-גוף-מקורי לקובץ-צד) → אדום(-1) → 10/10.
+- **אימות:** analyze 0 · 37 (pure+store+flags-sweep+stage+brand) · גארדים ×6. חתימות V2/V3 קפואות בדוח-המיפוי.

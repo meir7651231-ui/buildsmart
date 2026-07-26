@@ -54,6 +54,9 @@ const Set<String> kArmingLayer = {
   'STUDIO_CO_EDITOR',
   'INTEL_LIVE',
   'USER_SYSTEM',
+  // giant-system Phase 1: arms the runtime OrgConfig layer (owner-staged,
+  // per-flag rollback = drop the define — the STUDIO/USER_SYSTEM shape).
+  'ORG_CONFIG',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

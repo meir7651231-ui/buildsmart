@@ -31,3 +31,6 @@ test/barcode_alias_test.dart
 test/company_spec_bridge_test.dart
 # completion round — pools overlay identity · AI-hub raw pins · complements order:
 test/company_pools_overlay_test.dart
+# giant-system Phase 1 / V1 — the runtime OrgConfig layer (pure + store tiers):
+test/org_config_test.dart
+test/org_config_store_test.dart
