@@ -64,3 +64,5 @@ test/data_quality_gate_test.dart
 test/csv_kernel_test.dart
 # giant Phase-2 wave-3c — pure customer bulk-import parser (name required · phone/email validated · deterministic dedup-key ids · atomic gate):
 test/customer_import_test.dart
+# giant Phase-2 wave-3d — customer import UI (gated tab trigger · sheet upload→commit→quality · bulk importAll):
+test/customer_import_gate_test.dart

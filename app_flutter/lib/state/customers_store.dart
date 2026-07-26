@@ -170,6 +170,18 @@ class CustomersStore extends StateNotifier<List<SavedCustomer>> {
   /// Add or edit — dedups on name+phone (see [upsertCustomer]).
   void upsert(SavedCustomer c) => state = upsertCustomer(state, c);
 
+  /// Bulk import — fold every [incoming] row through the SAME dedup as
+  /// [upsert], then assign ONCE so prefs is written a single time (a per-row
+  /// upsert would persist N times and interleave). Empty input is a no-op.
+  void importAll(List<SavedCustomer> incoming) {
+    if (incoming.isEmpty) return;
+    var next = state;
+    for (final c in incoming) {
+      next = upsertCustomer(next, c);
+    }
+    state = next;
+  }
+
   /// Forget a saved customer by id.
   void remove(String id) => state = [for (final c in state) if (c.id != id) c];
 }

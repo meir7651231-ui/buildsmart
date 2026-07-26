@@ -24,6 +24,8 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart'
     show CreditExplainScreen;
+import 'package:buildsmart/screens/customer_import_sheet.dart'
+    show showCustomerImportSheet;
 import 'package:buildsmart/screens/intel/intel_tab.dart' show IntelTab;
 import 'package:buildsmart/screens/intel/journey_labels.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
@@ -2117,6 +2119,29 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
           onSelect: (st) => setState(() => _filter = st),
         ),
         const SizedBox(height: BsTokens.space4),
+        // GIANT Phase-2 wave-3d — CSV bulk-import, behind the same opt-in
+        // `manager.customers` gate as the saved-customer block it feeds;
+        // absent by default ⇒ the tab is byte-identical.
+        if (featEnabled(ref, 'manager', 'customers')) ...[
+          OutlinedButton.icon(
+            onPressed: () => showCustomerImportSheet(context),
+            icon: const Icon(Icons.upload_file, size: 18),
+            label: const Text('⬆️ ייבוא לקוחות מ-CSV'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(height: BsTokens.space4),
+        ],
         // GIANT Phase-2 — the fuzzy search box rides `search.fuzzy` (opt-in);
         // absent by default ⇒ the tab is byte-identical. Typo-tolerant name
         // match (Damerau-Levenshtein) over the derived contractor names.

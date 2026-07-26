@@ -1717,3 +1717,9 @@
 - **mutation ×2:** M1 ולידציית-טלפון כבויה → אדום(+8 −1) · M2 dedup-בקובץ כבוי → אדום(+8 −1) → ירוק +20 · אפס-שאריות.
 - **לקח:** id-שעון בלולאת-bulk הוא באג-web שקט (ms-collision → כיווץ upsert); id-דטרמיניסטי-מ-dedupKey פותר גם התנגשות וגם אידמפוטנטיות-re-import. ח"פ נשאר מחוץ (לא שדה-לקוח) ⇒ אפס-שינוי-ישות ⇒ בדיקות-2ב שלמות.
 - **אימות:** analyze 0 · 20 ירוקות · guards ×4.
+
+## #p2-w3d — UI ייבוא-לקוחות (trigger + גיליון + importAll) — 2026-07-26
+- **הפתרון:** importAll (bulk, persist-יחיד, reuse dedup) · גיליון clone-מותאם (upload→commit→אזהרות-איכות) · trigger מגודר manager.customers.
+- **mutation ×2:** M1 trigger תמיד-דלוק → אדום(+4 −1, טאב-כבוי מוצא כפתור) · M2 importAll no-op → אדום(+3 −2, store נשאר ריק) → ירוק +34 · אפס-שאריות.
+- **לקח:** importAll במקום לולאת-upsert = persist יחיד (לא N). אזהרות-איכות עושות reuse ל-auditNumber עם key=טלפון (CRM-appropriate) — אותו kernel, ישות אחרת.
+- **אימות:** analyze 0 · 34 ירוקות · guards ×4.

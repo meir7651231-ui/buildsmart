@@ -383,3 +383,9 @@ lib/data/customer_import.dart:::CustomerImportReport parseCustomerCsv(String raw
 lib/data/customer_import.dart:::bool get canCommit => errors.isEmpty && valid.isNotEmpty;
 lib/data/customer_import.dart:::id: 'imp:${_dedupKey(name, phone)}',
 lib/data/customer_import.dart:::'שורה $n — לקוח כפול: $name'
+#
+# Regression — GIANT Phase-2 wave-3d (2026-07-26): customer CSV import UI — gated trigger + sheet + bulk importAll:
+lib/screens/customer_import_sheet.dart:::void showCustomerImportSheet(BuildContext context) {
+lib/screens/customer_import_sheet.dart:::ref.read(savedCustomersProvider.notifier).importAll(report.valid);
+lib/state/customers_store.dart:::void importAll(List<SavedCustomer> incoming) {
+lib/screens/manager_dashboard_screen.dart:::⬆️ ייבוא לקוחות מ-CSV
