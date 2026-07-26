@@ -57,3 +57,6 @@ test/customers_search_test.dart
 # giant Phase-2 wave-2d — RFM customer scoring (pure kernel · recency from Order.createdAt · gated tier badge):
 test/customer_score_test.dart
 test/customer_score_gate_test.dart
+# giant Phase-2 wave-3a — data-quality warnings lane (pure auditRows + gated non-blocking report on catalog import):
+test/data_quality_test.dart
+test/data_quality_gate_test.dart

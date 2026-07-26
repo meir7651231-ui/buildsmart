@@ -365,3 +365,10 @@ lib/logic/customer_score.dart:::final maxPoints = hasR ? 6 : 4;
 lib/state/customer_score_source.dart:::final customerScoreProvider = Provider.family<CustomerScore, String>((ref, name) {
 lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'scoring')) ...[
 lib/screens/manager_dashboard_screen.dart:::class _RfmPill extends ConsumerWidget {
+#
+# Regression — GIANT Phase-2 wave-3a (2026-07-26): data-quality warnings lane on the catalog import (gated):
+lib/logic/data_quality.dart:::QualityReport auditRows(List<QualityRow> rows) {
+lib/logic/data_quality.dart:::kind: 'dup-name',
+lib/logic/data_quality.dart:::kind: 'near-key',
+lib/screens/company_catalog_import_sheet.dart:::if (featEnabled(ref, 'catalog', 'validation')) {
+lib/screens/company_catalog_import_sheet.dart:::if (_quality != null && _quality!.flagged > 0) ...[

@@ -17,6 +17,9 @@ import 'package:buildsmart/data/company_catalog_import.dart'
     show CompanyImportReport, companyCatalogTemplateCsv, parseCompanyCatalogCsv;
 import 'package:buildsmart/data/company_spec_bridge.dart'
     show registerCompanySpecs;
+import 'package:buildsmart/logic/data_quality.dart'
+    show QualityReport, QualityRow, auditRows;
+import 'package:buildsmart/state/org_gates.dart' show featEnabled;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider, reloadAppProvider;
 import 'package:buildsmart/state/company_catalog_store.dart'
@@ -59,6 +62,11 @@ class _CompanyCatalogImportSheetState
   /// the reload prompt) replaces the two action buttons.
   int? _committedCount;
 
+  /// GIANT Phase-2 wave-3 — the NON-BLOCKING data-quality report over the
+  /// committed rows, computed only when `catalog.validation` is opted in.
+  /// Null/empty ⇒ the sheet is byte-identical to today.
+  QualityReport? _quality;
+
   Future<void> _downloadTemplate() async {
     final ok = await ref.read(downloadTextFileProvider)(
       'catalog-template.csv',
@@ -99,9 +107,24 @@ class _CompanyCatalogImportSheetState
     setCompanyCatalog(report.valid);
     // Mid-session registration; full coherence still arrives with the reload this sheet prompts.
     registerCompanySpecs(report.valid);
+    // Wave-3: a NON-BLOCKING quality pass over the just-committed rows —
+    // normName duplicates the raw-sku dedup misses. Opt-in `catalog.validation`
+    // (default OFF ⇒ _quality stays null ⇒ no extra render, byte-identical).
+    QualityReport? quality;
+    if (featEnabled(ref, 'catalog', 'validation')) {
+      quality = auditRows([
+        for (var i = 0; i < report.valid.length; i++)
+          QualityRow(
+            line: i + 1,
+            key: report.valid[i].sku,
+            name: report.valid[i].nameHe,
+          ),
+      ]);
+    }
     setState(() {
       _busy = false;
       _committedCount = report.valid.length;
+      _quality = quality;
     });
   }
 
@@ -207,6 +230,42 @@ class _CompanyCatalogImportSheetState
                     style: _brandFill(context),
                     child: const Text('🔄 רענן להחלת הקטלוג בכל המסכים'),
                   ),
+                  if (_quality != null && _quality!.flagged > 0) ...[
+                    const SizedBox(height: BsTokens.space3),
+                    Text(
+                      '⚠️ ${_quality!.flagged} אזהרות איכות (לא חוסמות) — כדאי לבדוק',
+                      style: const TextStyle(
+                        color: BsTokens.warnText,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: BsTokens.space2),
+                    Flexible(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF8EC),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(BsTokens.space3),
+                          itemCount: _quality!.warnings.length,
+                          separatorBuilder: (_, __) => const Divider(
+                            height: 12,
+                            color: BsTokens.divider,
+                          ),
+                          itemBuilder: (context, i) => Text(
+                            _quality!.warnings[i].message,
+                            style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ] else ...[
                   OutlinedButton(
                     onPressed: _busy ? null : _downloadTemplate,
