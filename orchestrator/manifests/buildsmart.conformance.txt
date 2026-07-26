@@ -296,3 +296,15 @@ lib/config/vertical_packs.dart:::modules: pack.modules,
 lib/config/vertical_packs.dart:::terms: pack.terms,
 lib/config/vertical_packs.dart:::orgName: cfg.orgName,
 lib/config/vertical_packs.dart:::features: cfg.features,
+#
+# Regression — GIANT-SYSTEM V5 (2026-07-26): the setup wizard — composed save, locked manager, honest arming:
+lib/config/org_modules.dart:::const List<OrgModuleInfo> kOrgModules = [
+lib/config/org_modules.dart:::const Set<String> kWizardLockedModules = {'manager'};
+lib/screens/org_setup_wizard_screen.dart:::class OrgSetupWizardScreen
+lib/screens/org_setup_wizard_screen.dart:::ref.read(orgConfigProvider.notifier).state = _draft;
+lib/screens/org_setup_wizard_screen.dart:::final ok = await persistOrgConfig(_draft);
+lib/screens/org_setup_wizard_screen.dart:::applyVerticalPack(_draft,
+lib/screens/org_setup_wizard_screen.dart:::מצב לא-חמוש
+lib/screens/org_setup_wizard_screen.dart:::קובץ לא-תקין — שום דבר לא יובא
+lib/screens/manager_dashboard_screen.dart:::if (kOrgConfigFlag)
+lib/screens/manager_dashboard_screen.dart:::OrgSetupWizardScreen.route()

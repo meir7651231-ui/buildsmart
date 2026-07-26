@@ -1,4 +1,5 @@
-import 'package:buildsmart/config/org_config.dart' show moduleOn;
+import 'package:buildsmart/config/org_config.dart'
+    show kOrgConfigFlag, moduleOn;
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
@@ -26,6 +27,7 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart'
 import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
+import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/role_requests_inbox_screen.dart'
     show RoleRequestsInboxScreen;
@@ -3137,6 +3139,28 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
             open: false,
             onTap: () =>
                 Navigator.of(context).push(TradeBuilderHomeScreen.route()),
+            child: const SizedBox.shrink(),
+          ),
+        ],
+
+        // 8. 🔌 אשף הקמת חברה (giant-system V5) — the org-config authoring
+        // entry. A collection-`if` on the COMPILE-CONST [kOrgConfigFlag]
+        // (ships OFF — `--dart-define=ORG_CONFIG=true` arms it), so every
+        // define-less build drops the entry at compile time and the ניהול tab
+        // stays byte-identical (out of the pinned manager tests' way). Same
+        // NAVIGATION-tile idiom as בונה ענפים above (`open: false`, no
+        // accordion body): tapping the header pushes the setup wizard.
+        if (kOrgConfigFlag) ...[
+          const SizedBox(height: BsTokens.space3),
+          _ManageSection(
+            sectionKey: 'orgWizard',
+            titleCfgId: 'manager.manage.orgWizard.title',
+            emoji: '🔌',
+            title: 'אשף הקמת חברה',
+            sub: 'הרכבת חברה — ורטיקל, מודולים ומונחים',
+            open: false,
+            onTap: () =>
+                Navigator.of(context).push(OrgSetupWizardScreen.route()),
             child: const SizedBox.shrink(),
           ),
         ],
