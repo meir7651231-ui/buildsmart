@@ -54,3 +54,6 @@ test/customers_store_test.dart
 test/customers_gate_test.dart
 # giant Phase-2 wave-2c — fuzzy customer search (gated search.fuzzy · Damerau name match · composes with chips):
 test/customers_search_test.dart
+# giant Phase-2 wave-2d — RFM customer scoring (pure kernel · recency from Order.createdAt · gated tier badge):
+test/customer_score_test.dart
+test/customer_score_gate_test.dart

@@ -357,3 +357,11 @@ lib/logic/fuzzy_match.dart:::bool fuzzyNameMatch(String query, String candidate)
 lib/screens/manager_dashboard_screen.dart:::final searchOn = featEnabled(ref, 'search', 'fuzzy');
 lib/screens/manager_dashboard_screen.dart:::if (q.isEmpty || fuzzyNameMatch(q, v.customer.name)) v,
 lib/screens/manager_dashboard_screen.dart:::if (searchOn) ...[
+#
+# Regression — GIANT Phase-2 wave-2d (2026-07-26): RFM customer scoring — pure kernel + gated tier badge:
+lib/logic/customer_score.dart:::CustomerScore scoreCustomer(RfmInput input) {
+lib/logic/customer_score.dart:::final atRisk = hasR && r == 0 && (f + m) >= 3;
+lib/logic/customer_score.dart:::final maxPoints = hasR ? 6 : 4;
+lib/state/customer_score_source.dart:::final customerScoreProvider = Provider.family<CustomerScore, String>((ref, name) {
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'scoring')) ...[
+lib/screens/manager_dashboard_screen.dart:::class _RfmPill extends ConsumerWidget {

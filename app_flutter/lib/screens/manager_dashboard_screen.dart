@@ -15,6 +15,7 @@ import 'package:buildsmart/data/repositories/order_functions.dart'
     show CreditResult;
 import 'package:buildsmart/logic/attention_engine.dart'
     show AttentionItem, AttentionSev;
+import 'package:buildsmart/logic/customer_score.dart' show CustomerScore;
 import 'package:buildsmart/logic/fuzzy_match.dart' show fuzzyNameMatch;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/logic/studio/co_editor_gate.dart'
@@ -54,6 +55,8 @@ import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/attention_source.dart'
     show attentionItemsProvider;
+import 'package:buildsmart/state/customer_score_source.dart'
+    show customerScoreProvider;
 import 'package:buildsmart/state/customers_store.dart'
     show SavedCustomer, savedCustomerForProvider, savedCustomersProvider;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
@@ -2320,6 +2323,56 @@ class _CustomerStatusChips extends StatelessWidget {
 /// a utilisation bar (green, or amber `hot` at pct≥90) and the line
 /// `ניצול אשראי: ₪used / ₪limit (pct%)`. A WHITE card; tapping it opens the
 /// detail sheet.
+/// GIANT Phase-2 — the RFM tier label/emoji per score key. Hebrew defaults; the
+/// widget wraps each in `orgTerm` so a vertical can rename them.
+const Map<String, String> _kRfmTierEmoji = {
+  'champion': '🏆',
+  'loyal': '⭐',
+  'occasional': '🔹',
+  'dormant': '💤',
+};
+const Map<String, String> _kRfmTierLabel = {
+  'champion': 'לקוח מוביל',
+  'loyal': 'לקוח קבוע',
+  'occasional': 'לקוח מזדמן',
+  'dormant': 'רדום',
+};
+
+/// The RFM tier badge — a compact light-token pill (never a progress bar). Shows
+/// the tier; when [CustomerScore.atRisk] it flips to a warning "בסיכון".
+class _RfmPill extends ConsumerWidget {
+  const _RfmPill({required this.score});
+
+  final CustomerScore score;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final atRisk = score.atRisk;
+    final emoji = atRisk ? '⚠️' : (_kRfmTierEmoji[score.tier] ?? '🔹');
+    final label = atRisk
+        ? 'בסיכון'
+        : orgTerm(ref, 'scoring.tier.${score.tier}',
+            _kRfmTierLabel[score.tier] ?? score.tier);
+    final color = atRisk ? const Color(0xFFB54708) : BsTokens.brand;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: BsTokens.space2, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        '$emoji $label · ${score.points}/${score.maxPoints}',
+        style: TextStyle(
+          color: color,
+          fontSize: BsTokens.typeLabel,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
 class _CustomerCard extends ConsumerWidget {
   const _CustomerCard({required this.view, required this.onTap});
 
@@ -2402,6 +2455,18 @@ class _CustomerCard extends ConsumerWidget {
                       _StagePill(label: statusLabel, color: statusColor),
                     ],
                   ),
+                  // GIANT Phase-2 — the RFM tier badge rides the opt-in gate
+                  // `manager.scoring`; default-OFF ⇒ the card is byte-identical
+                  // (a pill, never a progress bar — the per-customer bar count
+                  // is pinned).
+                  if (featEnabled(ref, 'manager', 'scoring')) ...[
+                    const SizedBox(height: BsTokens.space2),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: _RfmPill(
+                          score: ref.watch(customerScoreProvider(c.name))),
+                    ),
+                  ],
                   const SizedBox(height: BsTokens.space3),
                   _CreditBar(pct: pct, color: statusColor),
                   const SizedBox(height: 6),
