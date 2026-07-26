@@ -184,6 +184,8 @@
 
 > 🏗️ **26/7 — הצי בונה את "המערכת-הענקית": 12 קומיטים `giant-v1→v6.1` (עוקב אחרי תוכנית-האב בשמות!).** מאומת-בייטים: **Phase-1** config-ריצתי (`config/org_config.dart` + `state/org_config_store.dart` + featureOn + termOf) · **Phase-2** מסכים+מקלדת מצייתים + `test/org_toggle_matrix_test.dart` (+ טסטי-gate) · **Phase-3** 6 חבילות-ורטיקל (`config/vertical_packs.dart`) + אשף (`screens/org_setup_wizard_screen.dart`) · **Phase-5** נתיב-חברת-אינסטלציה מאותו-commit + live-proof (giant-v6/v6.1) · **בונוס:** מנוע-חכם **data-driven פר-חברה** (specs/verified-connections ב-CSV + `connection_rule_studio.dart`) — פותר את חשש-גִּנֵּרוּג-המנוע. **🛡️ לא-שובר-קיים מאומת:** `org_config.dart:8` "ZERO REGRESSION BY CONSTRUCTION" · `kOrgConfigFlag` **default OFF** → הכל רדום, הקיים **זהה-בייטים**. **CI c5b8376a:** web **3/3 ירוק** (הקוד-הענק מתקמפל+עובר-גייטים, **אפס-שבירה-חדשה**); Android/Protocol/GH-Pages בתהליך (snapshot 3ש' אחרי push) → צפוי 3-אדומים-קיימים-מראש. **נשאר בתוכנית: Phase-2 superset-הפיצ'רים-החדשים (CRM·attention·workflow·dataDoctor·RFM·קבלות) · Phase-4 מודולריזציה · 🔴 Android-Play.**
 
+> 📋 **26/7 — הנחיית Phase-2 "למלא את הענק" נכתבה+נדחפה** (`DIRECTIVE-giant-phase2-features.md`): superset-הפיצ'רים, כל אחד **בתוך המנוע תחת `featureOn`, default-OFF-לחי (זהה-בייטים)**. **4 גלים:** ג1 מנוע-התראות→מנהל + מנוע-workflow→גבייה · ג2 CRM (ישות-לקוח+dedup · חיפוש-סובל-שגיאות · finder · RFM) · ג3 איכות+מסמכים (רופא-נתונים · validators+תיקון-ח"פ · קבלות · ייצוא) · ג4 משאבים/תזמון (תזמון-משאב חדר≈רכב · מכסה-מראש · חזרתיות · ציר-זמן). כל אחד: toggle-matrix + mutation-verify + שער-ירוק + לא-נוגעים-בקיים. **מבהיר לבעלים: השלד בנוי · זה ה*מילוי* · מאור=דפוס-מומש-ב-Dart, לא-מועתק.**
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
