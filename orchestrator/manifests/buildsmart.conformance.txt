@@ -327,3 +327,10 @@ lib/logic/attention_engine.dart:::List<AttentionItem> attentionItems(AttentionIn
 lib/logic/attention_engine.dart:::...out.where((a) => a.sev == AttentionSev.crit),
 lib/state/attention_source.dart:::final attentionItemsProvider = Provider<List<AttentionItem>>((ref) {
 lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),
+#
+# Regression — GIANT Phase-2 wave-1b (2026-07-26): the workflow kernel (nameable 5-stage machine, pure):
+lib/logic/workflow_engine.dart:::enum WfStage { intake, prep, ready, dispatch, done }
+lib/logic/workflow_engine.dart:::WfAdvancePlan? planWfAdvance(OrgConfig cfg, String name, WfCase a) {
+lib/logic/workflow_engine.dart:::if (!a.dispatchPushed) {
+lib/logic/workflow_engine.dart:::String wfNormName(String s) => _normSearch(s).replaceAll(RegExp(r'\s'), '');
+lib/logic/workflow_engine.dart:::String wfStageLabel(OrgConfig cfg, WfStage s) =>
