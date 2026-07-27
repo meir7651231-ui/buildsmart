@@ -4,6 +4,14 @@
 
 ---
 
+## s0c-fix — 🙈 הסתרה עובדת על תוויות-טקסט + toggle הצג/הסתר — 2026-07-27
+
+**באג (לקח #39):** מתג-ההסתרה כתב `SetHidden` לטיוטה, אבל `CfgText` (עטיפת 117 תוויות-הטקסט) לא קרא `n.hidden` — רק `CfgVisible` (56 composite) כיבד אותו ⇒ הסתרת תווית = "לא קורה כלום".
+
+**שינוי-UI:** (1) `cfg_text.dart` — פלט-העריכה נעטף כעת ב-`CfgVisible(id, …)` ⇒ כל תווית מכבדת הסתרה: ghost-35%+"מוסתר" בעריכה · `SizedBox` למשתמש-קצה · critical לעולם-לא-מוסתר · בלי-override→child verbatim (זהה-בייטים). (2) `edit_handle.dart` — הכפתור הפך ל-**toggle**: רכיב-מוסתר→"הצג רכיב" (ירוק, `SetHidden(id,null)`); אחרת "הסתר רכיב" (אדום).
+
+**אימות-ויזואלי:** `cfg_wrappers_test` מרנדר בפועל את מצבי-ה-`CfgVisible`: hidden+editing⇒ghost+"מוסתר" · hidden+not-editing⇒removed · critical⇒shown · no-override⇒verbatim. 193 בדיקות-סטודיו ירוקות · analyze 0. **eyeball חי על buildsmart-il.com ממתין לבעלים** (Chromium חסום מסביבת-הסוכן; ה-widget-test מנהיג את מסלול-הרינדור המדויק).
+
 ## s0c — 🙈 מתג "הסתר רכיב" בעורך-החי (WYSIWYG) — 2026-07-27
 
 **שינוי-UI:** `edit_handle.dart` — חלון-העריכה-החי (`_openInlineEditor`) קיבל כפתור **"הסתר רכיב"** (אדום, `BsTokens.danger`) לצד ביטול/שמור; כותרת 'עריכת טקסט'→'עריכת רכיב'. tap→`SetHidden(id,true)` על הטיוטה. הגנה: `cfgOpError(SetHidden, criticalIds:criticalIdsProvider)` חוסם רכיב-חובה (`kImmutable`) → snackbar-שגיאה, לא-מוסתר.

@@ -15,6 +15,7 @@ import 'package:buildsmart/state/studio/config_node.dart' show CfgStyle;
 import 'package:buildsmart/state/studio/config_store.dart'
     show resolvedNodeProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
+import 'package:buildsmart/widgets/studio/cfg_visible.dart' show CfgVisible;
 import 'package:buildsmart/widgets/studio/edit_handle.dart' show EditHandle;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -163,17 +164,25 @@ class CfgText extends StatelessWidget {
         if (!elementVisible(ref, id)) return const SizedBox.shrink();
         final txt = n.text ?? termOf(org, id, fallback);
         final display = n.emoji == null ? txt : '${n.emoji} $txt';
-        return EditHandle.maybe(
-          ref,
+        // CfgVisible honours the Studio inline `hidden` override (SetHidden) —
+        // gone for end-users, a restorable ghost in edit-mode. Without this wrap
+        // a `hidden` override on a text label had NO render effect (only composite
+        // CfgVisible sites respected it), so "הסתר רכיב" on a label did nothing.
+        // No override ⇒ CfgVisible returns the child verbatim ⇒ byte-identical.
+        return CfgVisible(
           id,
-          editText: txt,
-          child: Text(
-            display,
-            style: applyCfgTextStyle(context, style, n.style),
-            textAlign: textAlign,
-            maxLines: maxLines,
-            overflow: overflow,
-            softWrap: softWrap,
+          child: EditHandle.maybe(
+            ref,
+            id,
+            editText: txt,
+            child: Text(
+              display,
+              style: applyCfgTextStyle(context, style, n.style),
+              textAlign: textAlign,
+              maxLines: maxLines,
+              overflow: overflow,
+              softWrap: softWrap,
+            ),
           ),
         );
       },

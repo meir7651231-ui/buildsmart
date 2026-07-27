@@ -19,7 +19,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/state/studio/config_store.dart'
-    show SetHidden, SetText, cfgOpError, configStoreProvider, kCfgMaxTextLen;
+    show
+        SetHidden,
+        SetText,
+        cfgOpError,
+        configStoreProvider,
+        kCfgMaxTextLen,
+        resolvedNodeProvider;
 import 'package:buildsmart/state/studio/edit_mode.dart' show editModeProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
     show criticalIdsProvider;
@@ -112,7 +118,11 @@ Future<void> _openInlineEditor(
 ) async {
   final controller = TextEditingController(text: current);
   final criticalIds = ref.read(criticalIdsProvider);
-  var hideRequested = false;
+  // Current hidden state → the button is a TOGGLE: hide if shown, restore if
+  // already hidden (a one-way hide would strand the element behind its ghost).
+  final isHidden =
+      ref.read(resolvedNodeProvider(id).select((n) => n.hidden)) ?? false;
+  var toggleVisibility = false;
   final result = await showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -133,16 +143,18 @@ Future<void> _openInlineEditor(
         ),
       ),
       actions: [
-        // "הסתר רכיב" — apply SetHidden after the dialog closes (mirrors the
-        // save-path error handling, which uses the outer [context] messenger).
+        // "הסתר רכיב" / "הצג רכיב" — flip the hidden override after the dialog
+        // closes (mirrors the save-path error handling via the outer messenger).
         TextButton(
           onPressed: () {
-            hideRequested = true;
+            toggleVisibility = true;
             Navigator.pop(ctx);
           },
-          child: const Text(
-            'הסתר רכיב',
-            style: TextStyle(color: BsTokens.danger),
+          child: Text(
+            isHidden ? 'הצג רכיב' : 'הסתר רכיב',
+            style: TextStyle(
+              color: isHidden ? BsTokens.success : BsTokens.danger,
+            ),
           ),
         ),
         TextButton(
@@ -156,8 +168,9 @@ Future<void> _openInlineEditor(
       ],
     ),
   );
-  if (hideRequested) {
-    final op = SetHidden(id, true);
+  if (toggleVisibility) {
+    // Hide ⇒ true; restore ⇒ null (drop the override, matching the inspector).
+    final op = SetHidden(id, isHidden ? null : true);
     final err = cfgOpError(op, criticalIds: criticalIds);
     if (err != null) {
       if (context.mounted) {

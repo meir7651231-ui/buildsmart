@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #wizard-studio-s0c — תיקון: הסתרה עובדת גם על תוויות-טקסט + toggle הצג/הסתר — 2026-07-27
+**באג (מאומת, לקח #39):** מתג "הסתר רכיב" (s0b) נכתב `SetHidden` לטיוטה אבל `CfgText` (עטיפת 117 תוויות-הטקסט) **לא קרא `n.hidden`** — רק `CfgVisible` (56 composite) כיבד הסתרה. ⇒ הסתרת תווית = "לא קורה כלום". **תיקון:** `CfgText` עוטף כעת את פלט-העריכה ב-`CfgVisible(id, …)` (לוגיקה קיימת ובדוקה: גון-רפאים 35%+"מוסתר" בעריכה · SizedBox למשתמש-קצה · critical אף-פעם-לא-מוסתר) — בלי override מוחזר הילד verbatim ⇒ **זהה-בייטים**. בנוסף `_openInlineEditor` הפך ל-**toggle**: רכיב-מוסתר → כפתור "הצג רכיב" (ירוק, `SetHidden(id, null)`); אחרת "הסתר רכיב" (אדום, `SetHidden(id, true)`) — הגנת-`kImmutable` דרך `cfgOpError(criticalIds:)`. אימות: analyze 0 · 193 בדיקות-סטודיו ירוקות (כולל cfg_wrappers החדש + zero_regression).
+
 ## #wizard-studio-s0c — מתג "הסתר רכיב" בעורך-החי (WYSIWYG) — 2026-07-27
 **דירקטיבה "האשף=הסטודיו" · הרחבת פרוסה-0.** חלון-העריכה-החי (`edit_handle._openInlineEditor`) — שנתן עד כה **רק** `SetText` — קיבל כפתור **"הסתר רכיב"** (אדום) שמחיל `SetHidden(id,true)` על הטיוטה, חי. הבטיחות זהה למפקח: `cfgOpError(SetHidden, criticalIds: criticalIdsProvider)` חוסם הסתרת רכיב-חובה (`kImmutable`) → snackbar-שגיאה, לא-מוסתר. הכותרת שונתה 'עריכת טקסט'→'עריכת רכיב'. **reuse מלא** של המנוע+הרינדור הקיימים (SetHidden ממומש · CfgVisible מכסה app-wide ~200 עטיפות) — רק חיווט-UI. בדיקות: הרחבת cfg_wrappers (בדיקה חדשה tap→"הסתר רכיב"→hidden=true בטיוטה · תיקון בדיקת-הכותרת) · analyze 0. **זהה-בייטים כבוי** (edit_handle short-circuits ל-child כש-!editing).
 
