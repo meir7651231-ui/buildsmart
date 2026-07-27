@@ -196,6 +196,8 @@
 
 > 🗺️ **27/7 — מצאי מלא של מרכז-השליטה (Explore) · הממצא ה"אהה": הכלים שהבעלים חיפש קיימים *פעמיים* — stub-קריאה-בלבד + עורך-אמיתי-חבוי.** מבנה: AppBar (chats/profile/CatalogSettings/impersonate) · 5 טאבים (לוח/הזמנות/לקוחות/ניהול/intel). **🔴 הקריטי:** בטאב-ניהול — 🗂️קטגוריות(`:4329`) · ⚙️הגדרות(`:4360`, fee/VAT/credit const) · 🌳עץ-מוצרים(`:4399`) · 🏷️מותגים+מחירים(`:4437`) = **כולם READ-ONLY stubs, אפס-עריכה** → לכן "לא עושים כלום". **✅ העורכים-האמיתיים קיימים ב-Trade-Builder** (F1-F7, גדור `kTradeBuilderFlag`-off): category-tree · attribute-schema · product-authoring(+CSV) · accessory-rules(+price) · connection-rules · publish · +CatalogSettings(toggles-אמיתיים) +wizard. **כפילויות:** קטגוריות×2 · מוצרים×3 · מותגים×2 · מחירים×4 · הגדרות×3 · **Studio×2** (root-3tab `kStudioCoEditor` + subdir-5pane `kStudioFlag`) · תפקידים×3. **מפת-איחוד:** אשף=דלת-כניסה(תמיד-דלוק) → דומיין(Trade-Builder) → מראה(Studio-מאוחד) → קונפיג(settings+wizard) → דאטה(CSV) → זהות(roles). **המהלך: לא לבנות — לפרק stubs, לפרוש עורכים-אמיתיים, לאחד תחת האשף.**
 
+> 📖 **27/7 — מסמך-אב מאוחד "המערכת-הענקית + הסדר" נכתב+נדחף** (`MASTER-giant-system-order.md`): מאגד הכל — חזון · מצאי-מאומת (Clean · giant-v1..v6.1 · Phase-2 · מרכז-שליטה: stubs-מתים מול עורכים-חבויים · 2-Studios · פירוק-שטחי 13+8-בלי-registry) · עקרונות · **הסדר המדויק:** 0 registry · **0.5 חבר-גולמי-נקי-כבסיס** (חברה=clean+קונפיג+דאטה) · 1 חבר-הכל-app-wide דרך Studio-registry + פרק-stubs · 2 פרק-טוגלים+matrix (הצג/הסתר ב-Studio) · **2.5 אַחֵד 2-Studios→אחד** · 3 מרכז-שליטה-מאוחד (אשף→Trade-Builder→Studio→קונפיג→דאטה→זהות) · 4 ורטיקל+חברה-שנייה · 5 שמירה. בטיחות: default-on+toggle-matrix+degrade. מחוץ: Android-Play/R2/keystore/iOS.
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
