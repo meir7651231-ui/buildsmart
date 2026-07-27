@@ -1785,3 +1785,9 @@
 - **אין-mutation-חדש:** אותו מנגנון (mutation r2a + scope-tolerance r2d).
 - **לקח:** עטיפת wrapper משותף פעם-אחת מכסה N מופעים (יעיל). studio-editor הוחרג במכוון (לא אלמנט-אפליקציה).
 - **אימות:** analyze 0 · 65 בדיקות-מושפעות · שער מלא.
+
+## #wizard-studio-s0 — WYSIWYG edit בתצוגה (מחזור) — 2026-07-27
+- **הפתרון:** STUDIO=true בבניית-preview + רלקסציית-שער-בעלים לתצוגה (kStudioFlag && kProfileRawShell → manager-context מספיק).
+- **בטיחות:** compile-gated → live tree-shakes. שער isOwnerEmail עומד על live. studio_gating ירוק.
+- **מגבלת-בדיקה כנה:** ענף-הרלקסציה compile-gated (kStudioFlag/kProfileRawShell false בסוויטה define-less) → לא-בר-unit-test; ה-else (owner-gate) נבדק ב-studio_gating; הענף מאומת חי על ה-preview.
+- **אימות:** analyze 0 · studio_gating + cfg_wrappers + zero_regression ירוקים.

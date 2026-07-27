@@ -424,3 +424,6 @@ lib/config/screen_labels_he.dart:::String screenLabelHe(String
 lib/widgets/studio/cfg_visible.dart:::if (!elementVisible(ref, id)) return const SizedBox.shrink();
 lib/screens/manager_dashboard_screen.dart:::if (!elementVisible(ref, cfgId)) return const SizedBox.shrink();
 lib/screens/store_screen.dart:::return CfgVisible(
+#
+# Regression — wizard-is-studio slice-0 (2026-07-27): arm WYSIWYG edit on the STUDIO+clean preview channel only (owner-gate relaxation, live tree-shakes out):
+lib/state/studio/edit_mode.dart:::if (kStudioFlag && kProfileRawShell) return inManager;

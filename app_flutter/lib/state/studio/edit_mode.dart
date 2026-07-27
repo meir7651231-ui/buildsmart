@@ -30,6 +30,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/board_accounts_local.dart' show isOwnerEmail;
+import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/auth_state.dart'
     show authStateProvider, roleProvider;
 import 'package:buildsmart/state/board_auth.dart'
@@ -75,11 +76,18 @@ final studioInManagerContextProvider = Provider<bool>((ref) {
 /// for SHOWING the Studio entry (s20), which stages the flag on tap. Splitting it
 /// out lets the owner reach the entry before the flag is active, while still
 /// keeping non-owners out (isOwnerEmail is un-spoofable).
-final studioOwnerManagerProvider = Provider<bool>(
-  (ref) =>
-      isOwnerEmail(ref.watch(studioOwnerEmailProvider)) &&
-      ref.watch(studioInManagerContextProvider),
-);
+final studioOwnerManagerProvider = Provider<bool>((ref) {
+  final inManager = ref.watch(studioInManagerContextProvider);
+  // Preview-only relaxation (directive "wizard = the studio", slice-0, owner-
+  // approved): the STUDIO-armed CLEAN preview channel has no Google login, so an
+  // owner-email can never be proven — allow view-only edit-open there for any
+  // manager-context viewer. Scoped to the compile consts `kStudioFlag`
+  // (STUDIO=true, set ONLY on the preview build) && `kProfileRawShell` (clean),
+  // so the LIVE app (buildsmart, no STUDIO) tree-shakes this branch out and the
+  // un-spoofable owner-email gate below stands byte-identical.
+  if (kStudioFlag && kProfileRawShell) return inManager;
+  return isOwnerEmail(ref.watch(studioOwnerEmailProvider)) && inManager;
+});
 
 /// The #84 gate as a reactive provider — true iff the viewer MAY edit AND publish:
 /// Studio active ∧ owner ∧ manager. The SINGLE source of truth for the
