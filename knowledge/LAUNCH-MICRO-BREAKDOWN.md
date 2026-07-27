@@ -188,6 +188,8 @@
 
 > 🧱 **26/7 — Phase-2 מילוי-הענק: גלים 1-3 נחתו (11 קומיטים `p2-w1a→w3e`).** מאומת-בייטים: **ג1** מנוע-התראות (`logic/attention_engine.dart`+`state/attention_source.dart`) + **workflow-kernel** (`logic/workflow_engine.dart`, ayin-pattern) · **ג2 CRM ("complete"):** ישות-לקוח+dedup · חיפוש-סובל-שגיאות · RFM · **תיקון-באג-ח"פ** (`input_validators.dart:29` — עכשיו checksum 1-2-1-2 אמיתי `sum%10==0`, לא 9-ספרות!) + `normalizePhone` · **ג3:** data-quality-warnings · CSV-kernel-משותף · ייבוא-לקוחות (`data/customer_import.dart`+sheet) · קבלה/חשבונית. **🛡️ גיטור מצוין:** `state/org_gates.dart` — `featEnabled` = opt-IN (net-new reads false עד שהחברה מדליקה) → **החי זהה-בייטים "by construction"**; default-all-on. **CI `ccdee47e` 8/8:** 5✅/3❌ — ה-3 = **בדיוק ה-trio הקיים-מראש** (Protocol/Android-Play/GH-Pages); **אפס-שבירה-חדשה** (2 Android-TEST + כל-web ✅). **נשאר: Phase-2 גל-4 (משאבים/תזמון: חדר≈רכב · מכסה · חזרתיות · ציר-זמן) + tails · Phase-4 מודולריזציה · 🔴 Android-Play.**
 
+> 🔌 **27/7 — הנחיה "הדלק את האשף ראשון" נכתבה+נדחפה** (`DIRECTIVE-arm-wizard-preview.md`): **משימה-1 (קודם, מאושרת-לדחיפה):** preview עם `--dart-define=ORG_CONFIG=true` לערוץ-נפרד (מטריצה נוספת ב-`clean-two-links` או `wizard-preview.yml`) → **לינק חי שבו האשף (giant-V5) לחיץ** במנהל (`manager_dashboard_screen.dart:3652`), האתר-הראשי לא-נגע · **משימה-2 (אחר-כך):** המשך רגיל — `DIRECTIVE-giant-phase2-features` גל-4. הגנה: ORG_CONFIG=true רק ב-preview, החי OFF זהה-בייטים.
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
