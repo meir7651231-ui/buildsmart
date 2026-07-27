@@ -30,6 +30,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -216,22 +217,27 @@ class PersonaPickingSheet extends ConsumerWidget {
               const SizedBox(height: BsTokens.space3),
 
               // Always: delivery note.
-              OutlinedButton(
-                onPressed: () => _showDeliveryNote(context, order, f),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  side: const BorderSide(color: Color(0xFFE0E0E0)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              // composite-hide: hiding this element drops the whole button
+              // (not just its label — no empty chrome).
+              CfgVisible(
+                'persona_picking_sheet.t02',
+                child: OutlinedButton(
+                  onPressed: () => _showDeliveryNote(context, order, f),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    side: const BorderSide(color: Color(0xFFE0E0E0)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    ),
                   ),
-                ),
-                child: const CfgText(
-                  'persona_picking_sheet.t02',
-                  '📄 הצג תעודת משלוח',
-                  style: TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
+                  child: const CfgText(
+                    'persona_picking_sheet.t02',
+                    '📄 הצג תעודת משלוח',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
                   ),
                 ),
               ),
@@ -339,20 +345,25 @@ class PersonaPickingSheet extends ConsumerWidget {
         order.stage == OrderStage.transit ||
         order.stage == OrderStage.delivered) {
       return [
-        Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(vertical: 13),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF2F3F5),
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          ),
-          child: const CfgText(
-            'persona_picking_sheet.t03',
-            '🛵 ההזמנה מוכנה — ממתינה לאיסוף השליח',
-            style: TextStyle(
-              color: BsTokens.mutedLight,
-              fontWeight: FontWeight.w700,
-              fontSize: 13.5,
+        // composite-hide: hiding this element drops the whole status pill
+        // (not just its label — no empty chrome).
+        CfgVisible(
+          'persona_picking_sheet.t03',
+          child: Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F3F5),
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            ),
+            child: const CfgText(
+              'persona_picking_sheet.t03',
+              '🛵 ההזמנה מוכנה — ממתינה לאיסוף השליח',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w700,
+                fontSize: 13.5,
+              ),
             ),
           ),
         ),
@@ -822,45 +833,53 @@ class _DecisionLine extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: FilledButton(
-                    onPressed: onReplace,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: BsTokens.brand,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
+                  // composite-hide: hiding this element drops the whole button.
+                  child: CfgVisible(
+                    'persona_picking_sheet.t08',
+                    child: FilledButton(
+                      onPressed: onReplace,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: BsTokens.brand,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(BsTokens.radiusPill),
+                        ),
                       ),
-                    ),
-                    child: const CfgText(
-                      'persona_picking_sheet.t08',
-                      '🔁 החלף מוצר',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13.5,
+                      child: const CfgText(
+                        'persona_picking_sheet.t08',
+                        '🔁 החלף מוצר',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13.5,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: BsTokens.space2),
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: onRemove,
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      side: const BorderSide(color: Color(0xFFE0E0E0)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
+                  // composite-hide: hiding this element drops the whole button.
+                  child: CfgVisible(
+                    'persona_picking_sheet.t09',
+                    child: OutlinedButton(
+                      onPressed: onRemove,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(BsTokens.radiusPill),
+                        ),
                       ),
-                    ),
-                    child: const CfgText(
-                      'persona_picking_sheet.t09',
-                      'הסר מההזמנה',
-                      style: TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13.5,
+                      child: const CfgText(
+                        'persona_picking_sheet.t09',
+                        'הסר מההזמנה',
+                        style: TextStyle(
+                          color: BsTokens.inkLight,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13.5,
+                        ),
                       ),
                     ),
                   ),
@@ -941,24 +960,28 @@ class _PickLine extends StatelessWidget {
                           ),
                           if (status == LineStatus.replaced) ...[
                             const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE7F0FF),
-                                borderRadius: BorderRadius.circular(
-                                  BsTokens.radiusPill,
+                            // composite-hide: hiding this drops the whole badge.
+                            CfgVisible(
+                              'persona_picking_sheet.t10',
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
                                 ),
-                              ),
-                              child: const CfgText(
-                                'persona_picking_sheet.t10',
-                                'מוצר חלופי',
-                                style: TextStyle(
-                                  color: Color(0xFF2B6CB0),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE7F0FF),
+                                  borderRadius: BorderRadius.circular(
+                                    BsTokens.radiusPill,
+                                  ),
+                                ),
+                                child: const CfgText(
+                                  'persona_picking_sheet.t10',
+                                  'מוצר חלופי',
+                                  style: TextStyle(
+                                    color: Color(0xFF2B6CB0),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1023,29 +1046,33 @@ class _PickLine extends StatelessWidget {
                 ),
                 const SizedBox(width: BsTokens.space2),
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: onMiss,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: missing
-                          ? const Color(0xFFFFE3E3)
-                          : Colors.transparent,
-                      side: BorderSide(
-                        color: missing
-                            ? BsTokens.brandDark
-                            : const Color(0xFFE0E0E0),
+                  // composite-hide: hiding this element drops the whole button.
+                  child: CfgVisible(
+                    'persona_picking_sheet.t11',
+                    child: OutlinedButton(
+                      onPressed: onMiss,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: missing
+                            ? const Color(0xFFFFE3E3)
+                            : Colors.transparent,
+                        side: BorderSide(
+                          color: missing
+                              ? BsTokens.brandDark
+                              : const Color(0xFFE0E0E0),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                      ),
-                    ),
-                    child: CfgText(
-                      'persona_picking_sheet.t11',
-                      'חסר',
-                      style: TextStyle(
-                        color: missing ? BsTokens.brandDark : BsTokens.inkLight,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13.5,
+                      child: CfgText(
+                        'persona_picking_sheet.t11',
+                        'חסר',
+                        style: TextStyle(
+                          color: missing ? BsTokens.brandDark : BsTokens.inkLight,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13.5,
+                        ),
                       ),
                     ),
                   ),

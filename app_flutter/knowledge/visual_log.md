@@ -2236,3 +2236,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## swarm-r2c — סגירת כיסוי-composites + בטיחות-יציאה — 2026-07-27
 **ברירת-מחדל:** אפס — כל ~64 הכפתורים/כרטיסים/pills במסכי profiles·worker/courier-ops·dashboards-2·trade_builder·tasks מרונדרים כרגיל. **org שמסתיר element.<id>:** הכפתור/כרטיס/pill השלם נעלם (לא chrome-ריק). **בטיחות:** 7 כפתורי-יציאה/חזרה `critical:true` — לעולם לא-מוסתרים (org לא מתקיע משתמש). **הפיכות:** הסרת עטיפות-CfgVisible / ה-critical.
+
+## swarm-r2d — כיסוי-composites מלא — שינוי-נראה: **לא (ברירת-מחדל) / כן (org מסתיר)** — 2026-07-27
+**ברירת-מחדל:** אפס — כל 74 הכפתורים/pills/chips ב-catalog·entry·settings·worker-sheets·contractor מרונדרים כרגיל. **org שמסתיר:** הפריט השלם נעלם. **בטיחות:** 3 CTAs-login (welcome) `critical:true` — org לא חוסם כניסה. **הפיכות:** הסרת עטיפות.

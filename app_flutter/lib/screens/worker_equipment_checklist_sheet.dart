@@ -40,6 +40,7 @@ import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -294,9 +295,13 @@ class _EquipmentChecklistSheetState
           onTap: _sent ? null : _sendToContractor,
         ),
         const SizedBox(height: BsTokens.space2),
-        OutlinedButton(
+        // composite hide: whole button gone when the org hides this element
+        CfgVisible(
+          'worker_equipment_checklist_sheet.t04',
+          child: OutlinedButton(
           onPressed: () => Navigator.of(context).pop(),
           child: CfgText('worker_equipment_checklist_sheet.t04', 'סגור'),
+        ),
         ),
       ],
     );

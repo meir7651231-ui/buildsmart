@@ -99,6 +99,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart' show CfgText;
+import 'package:buildsmart/widgets/studio/cfg_visible.dart' show CfgVisible;
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1044,14 +1045,16 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
           ),
         ),
         actions: [
-          TextButton(
+          // composite-hide: org hiding this id drops the whole cancel button, not orphaned chrome
+          CfgVisible('catalog_screen.t04', child: TextButton(
             onPressed: () => Navigator.pop(dCtx),
-            child: const CfgText('catalog_screen.t04', 
+            child: const CfgText('catalog_screen.t04',
               'ביטול',
               style: TextStyle(color: Color(0xFF888888)),
             ),
-          ),
-          TextButton(
+          )),
+          // composite-hide: org hiding this id drops the whole add button, not orphaned chrome
+          CfgVisible('catalog_screen.t05', child: TextButton(
             onPressed: () {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
@@ -1062,11 +1065,11 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               }
               Navigator.pop(dCtx);
             },
-            child: const CfgText('catalog_screen.t05', 
+            child: const CfgText('catalog_screen.t05',
               'הוספה',
               style: TextStyle(color: BsTokens.brand),
             ),
-          ),
+          )),
         ],
       ),
     ).whenComplete(() => controller.dispose());
@@ -1106,14 +1109,16 @@ void _showRenameDialog(
         ),
       ),
       actions: [
-        TextButton(
+        // composite-hide: org hiding this id drops the whole cancel button, not orphaned chrome
+        CfgVisible('catalog_screen.t07', child: TextButton(
           onPressed: () => Navigator.pop(dCtx),
-          child: const CfgText('catalog_screen.t07', 
+          child: const CfgText('catalog_screen.t07',
             'ביטול',
             style: TextStyle(color: Color(0xFF888888)),
           ),
-        ),
-        TextButton(
+        )),
+        // composite-hide: org hiding this id drops the whole save button, not orphaned chrome
+        CfgVisible('catalog_screen.t08', child: TextButton(
           onPressed: () {
             final name = controller.text.trim();
             if (name.isNotEmpty && name != current) {
@@ -1137,11 +1142,11 @@ void _showRenameDialog(
             }
             Navigator.pop(dCtx);
           },
-          child: const CfgText('catalog_screen.t08', 
+          child: const CfgText('catalog_screen.t08',
             'שמירה',
             style: TextStyle(color: BsTokens.brand),
           ),
-        ),
+        )),
       ],
     ),
   ).whenComplete(() => controller.dispose());
@@ -1225,20 +1230,22 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
           ),
         ),
         actions: [
-          TextButton(
+          // composite-hide: org hiding this id drops the whole cancel button, not orphaned chrome
+          CfgVisible('catalog_screen.t10', child: TextButton(
             onPressed: () => Navigator.pop(dCtx),
-            child: const CfgText('catalog_screen.t10', 
+            child: const CfgText('catalog_screen.t10',
               'ביטול',
               style: TextStyle(color: Color(0xFF888888)),
             ),
-          ),
-          TextButton(
+          )),
+          // composite-hide: org hiding this id drops the whole save button, not orphaned chrome
+          CfgVisible('catalog_screen.t11', child: TextButton(
             onPressed: () => Navigator.pop(dCtx, controller.text.trim()),
-            child: const CfgText('catalog_screen.t11', 
+            child: const CfgText('catalog_screen.t11',
               'שמירה',
               style: TextStyle(color: BsTokens.brand),
             ),
-          ),
+          )),
         ],
       ),
     );
@@ -1287,9 +1294,10 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
+                // composite-hide: org hiding this id drops the whole save button, not orphaned chrome
+                CfgVisible('catalog_screen.t12', child: TextButton(
                   onPressed: _save,
-                  child: const CfgText('catalog_screen.t12', 
+                  child: const CfgText('catalog_screen.t12',
                     'שמירה',
                     style: TextStyle(
                       color: BsTokens.brand,
@@ -1297,7 +1305,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                )),
                 InkWell(
                   onTap: _rename,
                   borderRadius: BorderRadius.circular(6),
@@ -2704,14 +2712,15 @@ class _TreeComingSoon extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            // composite-hide: org hiding this id drops the whole "בקרוב" pill, not orphaned chrome
+            CfgVisible('catalog_screen.t21', child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 color: BsTokens.brand,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: CfgText('catalog_screen.t21', 
+              child: CfgText('catalog_screen.t21',
                 'בקרוב',
                 style: TextStyle(
                   color: bsOnAccent(context),
@@ -2719,7 +2728,7 @@ class _TreeComingSoon extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
+            )),
             const SizedBox(height: 12),
             const CfgText('catalog_screen.t22', 
               'הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.',
@@ -3776,14 +3785,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       ),
                       if (b.rec) ...[
                         const SizedBox(width: 8),
-                        Container(
+                        // composite-hide: org hiding this id drops the whole "מומלץ" badge, not orphaned chrome
+                        CfgVisible('catalog_screen.t23', child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: BsTokens.brand,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const CfgText('catalog_screen.t23', 
+                          child: const CfgText('catalog_screen.t23',
                             'מומלץ',
                             style: TextStyle(
                               color: Colors.white,
@@ -3791,7 +3801,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
+                        )),
                       ],
                     ],
                   ),
@@ -3940,9 +3950,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
             ),
           ),
           actions: [
-            TextButton(
+            // composite-hide: org hiding this id drops the whole close button, not orphaned chrome
+            CfgVisible('catalog_screen.t24', child: TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const CfgText('catalog_screen.t24', 'סגור')),
+                child: const CfgText('catalog_screen.t24', 'סגור'))),
           ],
         ),
       ),
@@ -3984,9 +3995,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
             ),
           ),
           actions: [
-            TextButton(
+            // composite-hide: org hiding this id drops the whole close button, not orphaned chrome
+            CfgVisible('catalog_screen.t25', child: TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const CfgText('catalog_screen.t25', 'סגור')),
+                child: const CfgText('catalog_screen.t25', 'סגור'))),
           ],
         ),
       ),
@@ -4506,7 +4518,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               );
                             }),
                             // Roadmap step 48 — copy a shareable price quote.
-                            Tooltip(
+                            // composite-hide: org hiding this id drops the whole "📋 הצעה" action, not orphaned chrome
+                            CfgVisible('catalog.action.proposal', child: Tooltip(
                               message:
                                   'העתק הצעת מחיר לזיכרון — מחיר + מק"ט + מותג, מוכן ל-WhatsApp',
                               child: GestureDetector(
@@ -4534,7 +4547,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   ),
                                 ),
                               ),
-                            ),
+                            )),
                             // #ai-quote-polish — when AI is live, turn the raw
                             // quote into a professional customer message (every
                             // number preserved). gateway null → not in the tree
@@ -4543,7 +4556,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               if (ref.watch(claudeGatewayProvider) == null) {
                                 return const SizedBox.shrink();
                               }
-                              return Tooltip(
+                              // composite-hide: org hiding this id drops the whole "✨ נסח" action, not orphaned chrome
+                              return CfgVisible('catalog.action.draft', child: Tooltip(
                                 message:
                                     'נסח הצעה מקצועית עם AI — מוכן לשליחה ללקוח',
                                 // a11y (swarm): expose a button role to a11y.
@@ -4571,7 +4585,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     ),
                                   ),
                                 ),
-                              );
+                              ));
                             }),
                             Tooltip(
                               message: expert
@@ -4683,7 +4697,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 // in the tree → byte-identical demo.
                                 if (aiOn)
                                   // a11y (swarm): expose a button role to a11y.
-                                  Semantics(
+                                  // composite-hide: org hiding this id drops the whole "🔌 איך לגשר?" action, not orphaned chrome
+                                  CfgVisible('catalog.action.howToBridge', child: Semantics(
                                     button: true,
                                     label: 'הסבר איזה מתאם מגשר',
                                     child: GestureDetector(
@@ -4705,7 +4720,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  )),
                               ],
                             ),
                           );
@@ -4953,7 +4968,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
-                          Semantics(
+                          // composite-hide: org hiding this id drops the whole "🔧 בנה לי קו (BOM)" action, not orphaned chrome
+                          CfgVisible('catalog.action.buildBom', child: Semantics(
                             button: true,
                             label: 'פתח קו פריטים מומחש',
                             child: GestureDetector(
@@ -4978,7 +4994,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 ),
                               ),
                             ),
-                          ),
+                          )),
                           // Roadmap step 25 — engine-derived auto safety kit.
                           if (expert)
                             Builder(builder: (_) {
@@ -5035,7 +5051,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     // Roadmap step 46 — add line + safety to cart.
                                     Padding(
                                       padding: const EdgeInsets.only(top: 6),
-                                      child: Semantics(
+                                      // composite-hide: org hiding this id drops the whole "🛒 + בטיחות לסל" action, not orphaned chrome
+                                      child: CfgVisible('catalog_screen.t28', child: Semantics(
                                         button: true,
                                         label:
                                             'הוסף את הקו לסל כולל פריטי בטיחות',
@@ -5090,7 +5107,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                 color:
                                                     const Color(0xFFFCD34D)),
                                           ),
-                                          child: const CfgText('catalog_screen.t28', 
+                                          child: const CfgText('catalog_screen.t28',
                                               '🛒 + בטיחות לסל',
                                               style: TextStyle(
                                                   color: Color(0xFFB45309),
@@ -5098,7 +5115,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                   fontWeight: FontWeight.w700)),
                                         ),
                                       ),
-                                      ),
+                                      )),
                                     ),
                                   ],
                                 ),
@@ -5128,7 +5145,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Semantics(
+                                  // composite-hide: org hiding this id drops the whole "➕ הוסף לפרויקט" action, not orphaned chrome
+                                  CfgVisible('catalog.action.addToProject', child: Semantics(
                                     button: true,
                                     label: 'הוסף את המוצר לפרויקט',
                                     child: GestureDetector(
@@ -5161,9 +5179,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       ),
                                     ),
                                   ),
-                                  ),
+                                  )),
                                   const SizedBox(width: 8),
-                                  GestureDetector(
+                                  // composite-hide: org hiding this id drops the whole "×3 חדרים" pill, not orphaned chrome
+                                  CfgVisible('catalog_screen.t30', child: GestureDetector(
                                     onTap: () {
                                       notifier.addToLocations(
                                           mk(loc), ['חדר 1', 'חדר 2', 'חדר 3']);
@@ -5188,7 +5207,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
-                                  ),
+                                  )),
                                 ],
                               ),
                               // Roadmap step 80 — ready project templates.
@@ -5255,7 +5274,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               if (units > 0)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
-                                  child: GestureDetector(
+                                  // composite-hide: org hiding this id drops the whole "📋 BOM פרויקט מלא" action, not orphaned chrome
+                                  child: CfgVisible('catalog_screen.t31', child: GestureDetector(
                                     onTap: () => _showProjectBom(proj),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -5267,20 +5287,21 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFA5B4FC)),
                                       ),
-                                      child: const CfgText('catalog_screen.t31', 
+                                      child: const CfgText('catalog_screen.t31',
                                           '📋 BOM פרויקט מלא',
                                           style: TextStyle(
                                               color: Color(0xFF3730A3),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
-                                  ),
+                                  )),
                                 ),
                               // Roadmap step 75 — customer quote for the project.
                               if (units > 0)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
-                                  child: GestureDetector(
+                                  // composite-hide: org hiding this id drops the whole "📋 הצעת מחיר לפרויקט" action, not orphaned chrome
+                                  child: CfgVisible('catalog_screen.t33', child: GestureDetector(
                                     onTap: () {
                                       Clipboard.setData(ClipboardData(
                                           text: projectQuoteText(
@@ -5301,14 +5322,14 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         border: Border.all(
                                             color: const Color(0xFFA7F3D0)),
                                       ),
-                                      child: const CfgText('catalog_screen.t33', 
+                                      child: const CfgText('catalog_screen.t33',
                                           '📋 הצעת מחיר לפרויקט',
                                           style: TextStyle(
                                               color: Color(0xFF047857),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
-                                  ),
+                                  )),
                                 ),
                             ],
                           );
@@ -5534,7 +5555,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 children: [
                                   Row(
                                     children: [
-                                      Semantics(
+                                      // composite-hide: org hiding this id drops the whole "💾 שמור גרסה" action, not orphaned chrome
+                                      CfgVisible('catalog.action.saveVersion', child: Semantics(
                                         button: true,
                                         label: 'שמור גרסת תצורה',
                                         child: GestureDetector(
@@ -5572,7 +5594,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           ),
                                         ),
                                       ),
-                                      ),
+                                      )),
                                       const SizedBox(width: 8),
                                       if (versions.isNotEmpty)
                                         Text('${versions.length} גרסאות',
@@ -6531,13 +6553,14 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
               // (maps to right edge in RTL layouts, left in LTR).
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: TextButton(
+                // composite-hide: org hiding this id drops the whole close button, not orphaned chrome
+                child: CfgVisible('catalog_screen.t39', child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const CfgText('catalog_screen.t39', 
+                  child: const CfgText('catalog_screen.t39',
                     'סגור',
                     style: TextStyle(color: BsTokens.brand, fontSize: 14),
                   ),
-                ),
+                )),
               ),
             ],
           ),
@@ -6658,7 +6681,8 @@ class _RecentSearchesSection extends ConsumerWidget {
                       color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w700)),
-              TextButton(
+              // composite-hide: org hiding this id drops the whole "נקה הכל" button, not orphaned chrome
+              CfgVisible('catalog.search.clearAll', child: TextButton(
                 onPressed: () async {
                   final ok = await confirmDestructive(
                     context,
@@ -6674,7 +6698,7 @@ class _RecentSearchesSection extends ConsumerWidget {
                   'נקה הכל',
                   style: TextStyle(color: BsTokens.brand, fontSize: 13),
                 ),
-              ),
+              )),
             ],
           ),
         ),

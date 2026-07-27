@@ -13,6 +13,7 @@ import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,14 +107,24 @@ class CatalogSettingsScreen extends ConsumerWidget {
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const CfgText('catalog_settings_screen.t04', 'ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'catalog_settings_screen.t04',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const CfgText('catalog_settings_screen.t04', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const CfgText('catalog_settings_screen.t05', 'אפס'),
+              // composite hide: whole reset button vanishes, not just its label.
+              CfgVisible(
+                'catalog_settings_screen.t05',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: const CfgText('catalog_settings_screen.t05', 'אפס'),
+                ),
               ),
             ],
           ),

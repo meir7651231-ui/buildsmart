@@ -23,6 +23,7 @@ import 'package:buildsmart/state/employer_stock.dart';
 import 'package:buildsmart/state/material_requests_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -160,9 +161,13 @@ class _EmployerStockSheetState extends ConsumerState<_EmployerStockSheet> {
         ],
 
         const SizedBox(height: BsTokens.space4),
-        OutlinedButton(
+        // composite hide: whole button gone when the org hides this element
+        CfgVisible(
+          'worker_employer_stock_sheet.t05',
+          child: OutlinedButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const CfgText('worker_employer_stock_sheet.t05', 'סגור'),
+        ),
         ),
       ],
     );
@@ -347,7 +352,10 @@ class _RequestComposer extends StatelessWidget {
     if (!composing) {
       return SizedBox(
         width: double.infinity,
-        child: FilledButton.icon(
+        // composite hide: whole button gone when the org hides this element
+        child: CfgVisible(
+          'worker_employer_stock_sheet.t06',
+          child: FilledButton.icon(
           onPressed: onToggle,
           style: FilledButton.styleFrom(
             backgroundColor: BsTokens.brand,
@@ -359,6 +367,7 @@ class _RequestComposer extends StatelessWidget {
             'בקש חומרים',
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
+        ),
         ),
       );
     }
@@ -417,7 +426,10 @@ class _RequestComposer extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: FilledButton(
+                // composite hide: whole button gone when the org hides this element
+                child: CfgVisible(
+                  'worker_employer_stock_sheet.t09',
+                  child: FilledButton(
                   onPressed: onSend,
                   style: FilledButton.styleFrom(
                     backgroundColor: BsTokens.brand,
@@ -429,14 +441,19 @@ class _RequestComposer extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.w800),
                   ),
                 ),
+                ),
               ),
               const SizedBox(width: BsTokens.space2),
-              OutlinedButton(
+              // composite hide: whole button gone when the org hides this element
+              CfgVisible(
+                'worker_employer_stock_sheet.t10',
+                child: OutlinedButton(
                 onPressed: onToggle,
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(48, 48),
                 ),
                 child: const CfgText('worker_employer_stock_sheet.t10', 'בטל'),
+              ),
               ),
             ],
           ),

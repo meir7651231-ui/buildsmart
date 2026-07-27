@@ -26,6 +26,7 @@ import 'package:buildsmart/state/feature_flags.dart' show kEmailPasswordAuth;
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -535,16 +536,20 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         // [kEmailPasswordAuth] off the button is not built at all, so [_step]
         // can never become [_LoginStep.email].
         if (kEmailPasswordAuth)
-          TextButton(
-            onPressed: _busy
-                ? null
-                : () => setState(() => _step = _LoginStep.email),
-            child: CfgText(
-              'login_sheet.t02',
-              'כניסה עם אימייל וסיסמה',
-              style: TextStyle(
-                color: BsTokens.mutedLight,
-                fontWeight: FontWeight.w600,
+          // composite-hide: hiding this element drops the whole button.
+          CfgVisible(
+            'login_sheet.t02',
+            child: TextButton(
+              onPressed: _busy
+                  ? null
+                  : () => setState(() => _step = _LoginStep.email),
+              child: CfgText(
+                'login_sheet.t02',
+                'כניסה עם אימייל וסיסמה',
+                style: TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -567,30 +572,38 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
-              onPressed: _busy ? null : _onResendTapped,
-              child: CfgText(
-                'login_sheet.t03',
-                'שליחת קוד חדש',
-                style: TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontWeight: FontWeight.w600,
+            // composite-hide: hiding this element drops the whole button.
+            CfgVisible(
+              'login_sheet.t03',
+              child: TextButton(
+                onPressed: _busy ? null : _onResendTapped,
+                child: CfgText(
+                  'login_sheet.t03',
+                  'שליחת קוד חדש',
+                  style: TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-            TextButton(
-              onPressed: _busy
-                  ? null
-                  : () => setState(() {
-                        _code.clear();
-                        _step = _LoginStep.phone;
-                      }),
-              child: CfgText(
-                'login_sheet.t04',
-                'החלפת מספר',
-                style: TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontWeight: FontWeight.w600,
+            // composite-hide: hiding this element drops the whole button.
+            CfgVisible(
+              'login_sheet.t04',
+              child: TextButton(
+                onPressed: _busy
+                    ? null
+                    : () => setState(() {
+                          _code.clear();
+                          _step = _LoginStep.phone;
+                        }),
+                child: CfgText(
+                  'login_sheet.t04',
+                  'החלפת מספר',
+                  style: TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -668,28 +681,36 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         // "שכחתי סיסמה" — only in sign-in mode (a create flow has no password to
         // reset yet). Sends a reset email via _resetPassword (no enumeration).
         if (!_emailCreateMode)
-          TextButton(
-            onPressed: _busy ? null : _resetPassword,
-            child: CfgText(
-              'login_sheet.t05',
-              'שכחתי סיסמה',
-              style: TextStyle(
-                color: BsTokens.mutedLight,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+          // composite-hide: hiding this element drops the whole button.
+          CfgVisible(
+            'login_sheet.t05',
+            child: TextButton(
+              onPressed: _busy ? null : _resetPassword,
+              child: CfgText(
+                'login_sheet.t05',
+                'שכחתי סיסמה',
+                style: TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
-        TextButton(
-          onPressed: _busy
-              ? null
-              : () => setState(() => _step = _LoginStep.phone),
-          child: CfgText(
-            'login_sheet.t06',
-            'חזרה לכניסה עם טלפון',
-            style: TextStyle(
-              color: BsTokens.mutedLight,
-              fontWeight: FontWeight.w600,
+        // composite-hide: hiding this element drops the whole button.
+        CfgVisible(
+          'login_sheet.t06',
+          child: TextButton(
+            onPressed: _busy
+                ? null
+                : () => setState(() => _step = _LoginStep.phone),
+            child: CfgText(
+              'login_sheet.t06',
+              'חזרה לכניסה עם טלפון',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),

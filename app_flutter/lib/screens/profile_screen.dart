@@ -18,6 +18,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -124,23 +125,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             style: TextStyle(color: _ink),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: CfgText(
-                'profile_screen.t03',
-                'ביטול',
-                style: TextStyle(color: BsTokens.mutedLight),
+            // composite-hide: the whole ביטול button hides on this element id
+            // (dialog cancel → critical:false; the dialog stays dismissible).
+            CfgVisible(
+              'profile_screen.t03',
+              child: TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: CfgText(
+                  'profile_screen.t03',
+                  'ביטול',
+                  style: TextStyle(color: BsTokens.mutedLight),
+                ),
               ),
             ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFD32F2F),
-              ),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: CfgText(
-                'profile_screen.t04',
-                'מחק לצמיתות',
-                style: TextStyle(fontWeight: FontWeight.w800),
+            // composite-hide: the whole מחק-לצמיתות button hides on this element
+            // id (dialog action → critical:false; ביטול / back still exit).
+            CfgVisible(
+              'profile_screen.t04',
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFD32F2F),
+                ),
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: CfgText(
+                  'profile_screen.t04',
+                  'מחק לצמיתות',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
               ),
             ),
           ],
@@ -267,26 +278,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
             const SizedBox(height: BsTokens.space5),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                // task #64: block save while a filled field is badly formatted.
-                onPressed: formValid ? _save : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: BsTokens.brand,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: BsTokens.space3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(cfgRadius(context)),
+            // composite-hide: the whole full-width שמור button hides on this
+            // element id (an action, not navigation → critical:false).
+            CfgVisible(
+              'profile_screen.t06',
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  // task #64: block save while a filled field is badly formatted.
+                  onPressed: formValid ? _save : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: BsTokens.brand,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: BsTokens.space3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(cfgRadius(context)),
+                    ),
                   ),
-                ),
-                child: CfgText(
-                  'profile_screen.t06',
-                  'שמור',
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                  child: CfgText(
+                    'profile_screen.t06',
+                    'שמור',
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),

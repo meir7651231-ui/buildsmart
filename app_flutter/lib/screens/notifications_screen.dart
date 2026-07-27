@@ -9,6 +9,7 @@ import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -433,14 +434,19 @@ void showNotifActionSheet(
                     ),
                   ),
                 const SizedBox(height: 14),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.of(sheetCtx).pop();
-                    showToast(context, 'התדריך אושר');
-                  },
-                  child: const CfgText(
-                    'notifications_screen.approve_brief',
-                    'אשר תדריך',
+                // composite-hide: the whole "אשר תדריך" button hides on this
+                // element id (a sheet action, not navigation → critical:false).
+                CfgVisible(
+                  'notifications_screen.approve_brief',
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.of(sheetCtx).pop();
+                      showToast(context, 'התדריך אושר');
+                    },
+                    child: const CfgText(
+                      'notifications_screen.approve_brief',
+                      'אשר תדריך',
+                    ),
                   ),
                 ),
               ] else ...[

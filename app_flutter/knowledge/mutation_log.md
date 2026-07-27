@@ -1773,3 +1773,9 @@
 - **אין-mutation-חדש:** אותו מנגנון-CfgVisible (mutation-מאומת r2a) + critical-path (בדיקת "critical⇒shown" ב-cfg_wrappers). זהה-בייטים · gate_118 מוודא id-רשום.
 - **לקח:** critical:true הוא כלי-הבטיחות לניווט — הוחל על יציאות/חזרות שלא-במסגרת ה-5 kImmutable. fixers סרקו const + דילגו נכון על plain/multi-child/Dropdown.
 - **אימות:** analyze 0 · 56 בדיקות-מפתח + gate_118 ירוקים · שער מלא.
+
+## #swarm-r2d — כיסוי-composites מלא + CfgVisible סביל-scope — 2026-07-27
+- **הפתרון:** 5 fixers עטפו 74 composites (26 קבצים · const-מודע · plain מושאר · 3 CTAs-login critical). CfgVisible→StatelessWidget+fallback-חסר-scope (מראה CfgText).
+- **אין-mutation-חדש:** אותו מנגנון (mutation-מאומת r2a). תיקון-scope הוא robustness (לא לוגיקת-הסתרה).
+- **לקח:** ConsumerWidget עטיפתי דורש scope → שובר test-pumps חסרי-scope; StatelessWidget+try-containerOf (כמו CfgText) פותר גלובלית. עדיף לתקן במנגנון מ-whack-a-mole per-test.
+- **אימות:** analyze 0 · cfg_wrappers 24 + t6 ירוק · 133 בדיקות-מסך · gate_118 · שער מלא.

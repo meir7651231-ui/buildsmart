@@ -24,6 +24,7 @@ import 'package:buildsmart/widgets/smart_input/keyboard/kb_field_mode.dart';
 import 'package:buildsmart/widgets/smart_input/models.dart';
 import 'package:buildsmart/widgets/smart_input/smart_suggestion_strip.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -2053,17 +2054,21 @@ class _DeliveryStatus extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 13, color: Colors.red),
             const SizedBox(width: 3),
-            GestureDetector(
-              onTap: onRetry,
-              child: const CfgText(
-                'chats_screen.retry',
-                'נסה שוב',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.red,
+            // composite hide: whole "נסה שוב" retry link vanishes, not just its label.
+            CfgVisible(
+              'chats_screen.retry',
+              child: GestureDetector(
+                onTap: onRetry,
+                child: const CfgText(
+                  'chats_screen.retry',
+                  'נסה שוב',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.red,
+                  ),
                 ),
               ),
             ),
@@ -2207,9 +2212,13 @@ void _showVoiceUnavailable(BuildContext context) {
             textAlign: TextAlign.right,
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogCtx),
-              child: const CfgText('chats_screen.voice_ok', 'הבנתי'),
+            // composite hide: whole "הבנתי" button vanishes, not just its label.
+            CfgVisible(
+              'chats_screen.voice_ok',
+              child: TextButton(
+                onPressed: () => Navigator.pop(dialogCtx),
+                child: const CfgText('chats_screen.voice_ok', 'הבנתי'),
+              ),
             ),
           ],
         ),

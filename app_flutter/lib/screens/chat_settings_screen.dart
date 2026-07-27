@@ -3,6 +3,7 @@ import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,14 +78,24 @@ class ChatSettingsScreen extends ConsumerWidget {
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: CfgText('chat_settings_screen.t04', 'ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t04',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: CfgText('chat_settings_screen.t04', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: CfgText('chat_settings_screen.t05', 'אפס'),
+              // composite hide: whole reset button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t05',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: CfgText('chat_settings_screen.t05', 'אפס'),
+                ),
               ),
             ],
           ),
@@ -121,9 +132,13 @@ class _QuickReplyBanner extends StatelessWidget {
           textAlign: TextAlign.right,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: CfgText('chat_settings_screen.t07', 'הבנתי'),
+          // composite hide: whole "הבנתי" button vanishes, not just its label.
+          CfgVisible(
+            'chat_settings_screen.t07',
+            child: TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: CfgText('chat_settings_screen.t07', 'הבנתי'),
+            ),
           ),
         ],
       ),
@@ -160,19 +175,23 @@ class _QuickReplyBanner extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _showEditInfo(context),
-                // ≥48dp tap target around the small link (a11y), without
-                // enlarging the visible text.
-                child: SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Center(
-                    child: CfgText(
-                      'chat_settings_screen.t09',
-                      'ערוך',
-                      style: TextStyle(color: BsTokens.brand, fontSize: 13),
+              // composite hide: whole "ערוך" tap-link vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t09',
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _showEditInfo(context),
+                  // ≥48dp tap target around the small link (a11y), without
+                  // enlarging the visible text.
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: CfgText(
+                        'chat_settings_screen.t09',
+                        'ערוך',
+                        style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                      ),
                     ),
                   ),
                 ),
@@ -438,14 +457,24 @@ class _ChatPrivacySection extends ConsumerWidget {
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: CfgText('chat_settings_screen.t12', 'ביטול'),
+              // composite hide: whole cancel button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t12',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: CfgText('chat_settings_screen.t12', 'ביטול'),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: CfgText('chat_settings_screen.t13', 'מחק'),
+              // composite hide: whole delete button vanishes, not just its label.
+              CfgVisible(
+                'chat_settings_screen.t13',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                  ),
+                  child: CfgText('chat_settings_screen.t13', 'מחק'),
+                ),
               ),
             ],
           ),

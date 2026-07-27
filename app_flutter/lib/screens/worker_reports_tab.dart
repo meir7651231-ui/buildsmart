@@ -49,6 +49,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -647,7 +648,10 @@ class WorkerReportsTab extends ConsumerWidget {
           title: 'שלח דוח יומי לקבלן',
           body:
               "שולח לקבלן בצ'אט סיכום אמיתי של מצבי-המשימות הנוכחי שלך — בלי המצאות.",
-          child: Semantics(
+          // composite hide: whole button gone when the org hides this element
+          child: CfgVisible(
+            'worker.reports.send_daily_button',
+            child: Semantics(
             button: true,
             label: 'שלח דוח יומי לקבלן',
             child: Material(
@@ -673,6 +677,7 @@ class WorkerReportsTab extends ConsumerWidget {
               ),
             ),
           ),
+          ),
         ),
         // #ai-daily-report — when AI is live, narrate the SAME live counts into a
         // flowing report. gateway null (demo) → not in the tree → byte-identical.
@@ -680,10 +685,14 @@ class WorkerReportsTab extends ConsumerWidget {
           const SizedBox(height: BsTokens.space2),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker.reports.ai_button',
+              child: OutlinedButton.icon(
               onPressed: () => _openAiDailyReport(context, ref),
               icon: const Text('✨'),
               label: const CfgText('worker.reports.ai_button', 'נסח דוח עם AI'),
+            ),
             ),
           ),
         ],

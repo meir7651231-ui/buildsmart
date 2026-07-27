@@ -27,6 +27,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -500,22 +501,26 @@ class _RadioGroupRow<T> extends StatelessWidget {
                 ),
                 if (!o.enabled) ...[
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2F3F5),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const CfgText(
-                      'courier_settings_screen.soon',
-                      'בקרוב',
-                      style: TextStyle(
-                        color: BsTokens.mutedLight,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                  // composite hide: whole "בקרוב" pill vanishes, not just its label.
+                  CfgVisible(
+                    'courier_settings_screen.soon',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F3F5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const CfgText(
+                        'courier_settings_screen.soon',
+                        'בקרוב',
+                        style: TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),

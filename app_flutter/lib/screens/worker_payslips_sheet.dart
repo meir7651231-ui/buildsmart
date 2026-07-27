@@ -1,5 +1,6 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 
 /// 💰 תלושי שכר (cluster #85ח) — SERVER-READY sheet: the complete months UI
@@ -167,7 +168,10 @@ class _MonthRow extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
+            // composite hide: whole status pill gone when the org hides this element
+            CfgVisible(
+              'worker_payslips_sheet.t02',
+              child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -183,6 +187,7 @@ class _MonthRow extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+            ),
             ),
           ],
         ),

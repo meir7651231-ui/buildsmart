@@ -26,6 +26,7 @@ import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/worker_attendance.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -235,7 +236,12 @@ class _PresentRow extends StatelessWidget {
           // clock-in (mapsQueryForDay → null → no pill, never invented).
           if (mapsQueryForDay(day) != null) ...[
             const SizedBox(height: BsTokens.space2),
-            _LocationPill(day: day),
+            // composite-hide: hiding this element removes the WHOLE 📍 nav pill
+            // (chrome + label), keyed on the pill's CfgText id — not just its text.
+            CfgVisible(
+              'contractor_attendance_sheet.location',
+              child: _LocationPill(day: day),
+            ),
           ],
         ],
       ),

@@ -11,6 +11,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -188,7 +189,10 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                     Row(
                       children: [
                         if (unread > 0)
-                          TextButton(
+                          // composite hide: whole button gone when the org hides this element
+                          CfgVisible(
+                            'worker_notifs_sheet.t03',
+                            child: TextButton(
                             onPressed:
                                 username == null
                                     ? null
@@ -205,8 +209,12 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                               ),
                             ),
                           ),
+                          ),
                         const Spacer(),
-                        TextButton(
+                        // composite hide: whole button gone when the org hides this element
+                        CfgVisible(
+                          'worker_notifs_sheet.t04',
+                          child: TextButton(
                           onPressed:
                               username == null
                                   ? null
@@ -232,6 +240,7 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                               fontSize: 13,
                             ),
                           ),
+                        ),
                         ),
                       ],
                     ),

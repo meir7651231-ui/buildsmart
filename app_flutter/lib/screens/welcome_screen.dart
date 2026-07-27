@@ -19,6 +19,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -389,44 +390,54 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           title: 'כניסה עם Google',
           body: 'נכנסים עם חשבון ה-Google של הבעלים. גוגל מאמתת את הזהות '
               '(כולל אימות דו-שלבי אם מוגדר) — לא נשמרת סיסמה במכשיר.',
-          child: FilledButton.icon(
-            onPressed: _busy ? null : _managerGoogleLogin,
-            icon: _busy
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.login_rounded),
-            label: const CfgText(
-              'welcome_screen.mgr_continue_google',
-              'המשך עם Google',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: BsTokens.brand,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+          // composite-hide (critical: manager's only login CTA — never
+          // hideable, so the org can't strand the owner at the gate).
+          child: CfgVisible(
+            'welcome_screen.mgr_continue_google',
+            critical: true,
+            child: FilledButton.icon(
+              onPressed: _busy ? null : _managerGoogleLogin,
+              icon: _busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.login_rounded),
+              label: const CfgText(
+                'welcome_screen.mgr_continue_google',
+                'המשך עם Google',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
         )
       else
-        Container(
-          padding: const EdgeInsets.all(BsTokens.space4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF4D6),
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          ),
-          child: const CfgText(
-            'welcome_screen.mgr_needs_connection',
-            'כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.',
-            style: TextStyle(color: Color(0xFF8A6D00), fontSize: 13),
+        // composite-hide: hiding this element drops the whole notice card.
+        CfgVisible(
+          'welcome_screen.mgr_needs_connection',
+          child: Container(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF4D6),
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+            ),
+            child: const CfgText(
+              'welcome_screen.mgr_needs_connection',
+              'כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.',
+              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 13),
+            ),
           ),
         ),
     ];
@@ -589,14 +600,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         HelpTarget(
           title: 'מצב דמו',
           body: 'כניסה ללוח בלי חשבון — לסיור מהיר עם נתוני דוגמה בלבד.',
-          child: TextButton(
-            onPressed: _demo,
-            child: const CfgText(
-              'welcome_screen.board_demo_mode',
-              'מצב דמו',
-              style: TextStyle(
-                color: BsTokens.mutedLight,
-                fontWeight: FontWeight.w600,
+          // composite-hide: hiding this element drops the whole button.
+          child: CfgVisible(
+            'welcome_screen.board_demo_mode',
+            child: TextButton(
+              onPressed: _demo,
+              child: const CfgText(
+                'welcome_screen.board_demo_mode',
+                'מצב דמו',
+                style: TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -751,24 +766,30 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           title: 'כניסה עם Google (בעלים/מנהל)',
                           body: 'בעל המערכת נכנס עם חשבון ה-Google שלו — הדרך '
                               'המהירה להיכנס מחובר. רק חשבון הבעלים מורשה.',
-                          child: FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: BsTokens.brand,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: BsTokens.space4,
+                          // composite-hide (critical: the owner's login CTA —
+                          // never hideable, so the org can't strand the owner).
+                          child: CfgVisible(
+                            'welcome_screen.owner_google_login',
+                            critical: true,
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: BsTokens.brand,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: BsTokens.space4,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            onPressed: _busy ? null : _managerGoogleLogin,
-                            child: const CfgText(
-                              'welcome_screen.owner_google_login',
-                              'כניסה עם Google (בעלים)',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
+                              onPressed: _busy ? null : _managerGoogleLogin,
+                              child: const CfgText(
+                                'welcome_screen.owner_google_login',
+                                'כניסה עם Google (בעלים)',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),
@@ -784,27 +805,33 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                 'טלפון או אימייל.'
                             : 'מיועד למי שכבר נרשם — כניסה ישירה פנימה. כרגע '
                                 'אין שרת התחברות, כך שבפועל זה נכנס כאורח.',
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: BsTokens.brandDark,
-                            side: const BorderSide(
-                              color: BsTokens.brand,
-                              width: 1.5,
+                        // composite-hide (critical: the existing-customer login
+                        // CTA — never hideable, so the org can't strand a user).
+                        child: CfgVisible(
+                          'welcome_screen.existing_login_btn',
+                          critical: true,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: BsTokens.brandDark,
+                              side: const BorderSide(
+                                color: BsTokens.brand,
+                                width: 1.5,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: BsTokens.space4,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: BsTokens.space4,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: _busy ? null : _existingLogin,
-                          child: const CfgText(
-                            'welcome_screen.existing_login_btn',
-                            'כניסה ללקוח קיים',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
+                            onPressed: _busy ? null : _existingLogin,
+                            child: const CfgText(
+                              'welcome_screen.existing_login_btn',
+                              'כניסה ללקוח קיים',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
@@ -980,18 +1007,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               fontSize: 12,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).push(
-                              LegalScreen.route(initialTab: LegalTab.terms),
-                            ),
-                            child: const CfgText(
-                              'welcome_screen.terms_of_use',
-                              'תנאי השימוש',
-                              style: TextStyle(
-                                color: BsTokens.brandDark,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                decoration: TextDecoration.underline,
+                          // composite-hide: hiding this element drops the whole
+                          // tappable link.
+                          CfgVisible(
+                            'welcome_screen.terms_of_use',
+                            child: GestureDetector(
+                              onTap: () => Navigator.of(context).push(
+                                LegalScreen.route(initialTab: LegalTab.terms),
+                              ),
+                              child: const CfgText(
+                                'welcome_screen.terms_of_use',
+                                'תנאי השימוש',
+                                style: TextStyle(
+                                  color: BsTokens.brandDark,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ),
@@ -1003,18 +1035,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               fontSize: 12,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).push(
-                              LegalScreen.route(initialTab: LegalTab.privacy),
-                            ),
-                            child: const CfgText(
-                              'welcome_screen.privacy_policy',
-                              'מדיניות הפרטיות',
-                              style: TextStyle(
-                                color: BsTokens.brandDark,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                decoration: TextDecoration.underline,
+                          // composite-hide: hiding this element drops the whole
+                          // tappable link.
+                          CfgVisible(
+                            'welcome_screen.privacy_policy',
+                            child: GestureDetector(
+                              onTap: () => Navigator.of(context).push(
+                                LegalScreen.route(initialTab: LegalTab.privacy),
+                              ),
+                              child: const CfgText(
+                                'welcome_screen.privacy_policy',
+                                'מדיניות הפרטיות',
+                                style: TextStyle(
+                                  color: BsTokens.brandDark,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ),

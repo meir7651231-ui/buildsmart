@@ -15,6 +15,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -172,15 +173,23 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
           ),
         ),
         actions: [
-          TextButton(
+          // composite hide: whole button gone when the org hides this element
+          CfgVisible(
+            'worker_task_detail_sheet.t04',
+            child: TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(dialogCtx, false),
             child: CfgText('worker_task_detail_sheet.t04', 'ביטול'),
           ),
-          TextButton(
+          ),
+          // composite hide: whole button gone when the org hides this element
+          CfgVisible(
+            'worker_task_detail_sheet.t05',
+            child: TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.pop(dialogCtx, true),
             child: CfgText('worker_task_detail_sheet.t05', 'שלח לאישור'),
+          ),
           ),
         ],
       ),

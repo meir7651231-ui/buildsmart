@@ -38,6 +38,7 @@ import 'package:buildsmart/widgets/pending_approval_banner.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show kKeyboardToolStrip;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1516,27 +1517,31 @@ class _ProfileCard extends ConsumerWidget {
             const SizedBox(height: BsTokens.space4),
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).push(ProfileScreen.route());
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: BsTokens.brand,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: BsTokens.space3,
+              // composite-hide: hiding this element drops the whole button.
+              child: CfgVisible(
+                'home.profilecard.editCta',
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(ProfileScreen.route());
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: BsTokens.brand,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: BsTokens.space3,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                  ),
-                ),
-                child: CfgText(
-                  'home.profilecard.editCta',
-                  'ערוך פרופיל',
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                  child: CfgText(
+                    'home.profilecard.editCta',
+                    'ערוך פרופיל',
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
