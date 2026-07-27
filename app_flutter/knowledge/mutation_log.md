@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s2 — ניהול-מסכים באשף (2 מפלסים) — 2026-07-27
+- **הפונקציות:** `_SectionManagerList` (row · reorder · toggle · reset) · `_ScreenManagerScreen` (רמה-1) · `_ScreenSectionEditor` (רמה-2) · `kManagedScreens` (screen_registry).
+- **תקלה שהוזרקה (mutation-sensitivity):** ה-switch `value: !hidden` → `value: hidden` ⇒ בדיקת הסתרת-מסך/סקציה (`isHidden`==true אחרי tap) אדומה (ה-toggle מתחיל הפוך ⇒ ה-tap מציג במקום מסתיר).
+- **בטיחות:** persist דרך slice-1 (canonical-minimal) · ברירת-מחדל **זהה-בייטים** · placeholder כן למסכים לא-בנויים (בלי סקציות מומצאות). עדיין לא-חי על המסכים (slice-5).
+- **אימות:** analyze 0 · org_setup_wizard 20/20.
+
 ## #screen-mgmt-s1 — מודל-סקציות-פר-מסך (סדר + הסתר) — 2026-07-27
 - **הפונקציות:** `ScreenSectionsNotifier` (`orderedIds`/`visibleIds`/`hide`/`show`/`toggle`/`reorder`/`moveUp`/`moveDown`/`resetScreen`) + `ScreenLayout` (order+hidden · JSON).
 - **תקלה שהוזרקה (mutation-sensitivity):** `visibleIds` מחזיר `orderedIds` בלי סינון-`hidden` ⇒ בדיקת hide (`visibleIds==['a','c']`) אדומה.

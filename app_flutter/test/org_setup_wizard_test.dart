@@ -11,7 +11,10 @@ import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
     show FindReplacePane;
 import 'package:buildsmart/screens/studio/panes/history_pane.dart'
     show HistoryPane;
+import 'package:buildsmart/config/screen_registry.dart' show kScreensRootKey;
 import 'package:buildsmart/state/org_config_store.dart';
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/state/studio/config_store.dart'
     show configStoreProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
@@ -383,5 +386,44 @@ void main() {
     expect(find.byType(HistoryPane), findsOneWidget);
     expect(find.textContaining('עדיין לא פורסמו גרסאות'), findsOneWidget,
         reason: 'the pane is live and reading configStore.history');
+  });
+
+  // ── screen-mgmt slice-2 — the "ניהול מסכים" 2-level manager ──
+  testWidgets('screen manager — launcher opens level-1 (screens); hiding a '
+      'screen persists; drilling into home opens level-2 (its sections)',
+      (t) async {
+    final c = await _pump(t);
+    final launcher = find.byKey(const Key('open-screen-manager'));
+    await t.ensureVisible(launcher);
+    await t.tap(launcher);
+    await t.pumpAndSettle();
+    // level-1: the managed screens (home + 3), each a keyed row.
+    expect(find.text('ניהול מסכים'), findsOneWidget); // AppBar
+    expect(find.byKey(const Key('sec-show-__screens__-home')), findsOneWidget);
+    expect(find.byKey(const Key('sec-enter-home')), findsOneWidget);
+    // hide a whole screen (store) → persists to the screen-list layout.
+    await t.tap(find.byKey(const Key('sec-show-__screens__-store')));
+    await t.pumpAndSettle();
+    expect(
+      c.read(screenSectionsProvider.notifier).isHidden(kScreensRootKey, 'store'),
+      isTrue,
+      reason: 'hiding a screen persists to the root layout',
+    );
+    // drill into home → level-2 section editor with its 5 real sections.
+    await t.tap(find.byKey(const Key('sec-enter-home')));
+    await t.pumpAndSettle();
+    expect(find.textContaining('מסך הבית — סקציות'), findsOneWidget);
+    expect(find.byKey(const Key('sec-show-home-workPath')), findsOneWidget);
+    // hide a section → persists per-screen.
+    await t.tap(find.byKey(const Key('sec-show-home-workPath')));
+    await t.pumpAndSettle();
+    expect(c.read(screenSectionsProvider.notifier).isHidden('home', 'workPath'),
+        isTrue);
+    expect(c.read(screenSectionsProvider.notifier).visibleIds(
+          'home',
+          const ['categories', 'products', 'workPath', 'promise', 'reorderHistory'],
+        ),
+        isNot(contains('workPath')),
+        reason: 'the hidden section drops from the visible order');
   });
 }

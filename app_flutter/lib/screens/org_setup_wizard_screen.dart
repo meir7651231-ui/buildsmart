@@ -41,6 +41,8 @@ import 'package:buildsmart/config/org_modules.dart'
         moduleForScreen;
 import 'package:buildsmart/config/screen_labels_he.dart'
     show normalizeScreen, screenLabelHe;
+import 'package:buildsmart/config/screen_registry.dart'
+    show ManagedScreen, kManagedScreens, kScreensRootKey;
 import 'package:buildsmart/config/vertical_packs.dart'
     show applyVerticalPack, kVerticalPacks;
 import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
@@ -51,6 +53,8 @@ import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
 import 'package:buildsmart/state/org_config_store.dart'
     show orgConfigProvider, persistOrgConfig;
+import 'package:buildsmart/state/screen_sections.dart'
+    show ScreenSectionsNotifier, screenSectionsProvider;
 import 'package:buildsmart/state/studio/config_node.dart' show CfgStyle;
 import 'package:buildsmart/state/studio/config_store.dart'
     show
@@ -486,6 +490,13 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     );
   }
 
+  /// screen-mgmt slice-2 — משגר את "ניהול מסכים" (רמה-1 רשימת-מסכים).
+  void _openScreenManager() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const _ScreenManagerScreen()),
+    );
+  }
+
   /// גוף-מודול: קבוצות-מסך (screenLabelHe) + מתגי-הרכיבים. נבנה **רק כשהמודול
   /// פתוח** (lazy — ~896 מתגים לא נבנים בסקציות סגורות). ממויין לפי נפח.
   Widget _moduleBody(Map<String, List<ElementDescriptor>> byScreen) {
@@ -917,6 +928,18 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                 ],
               ),
               const SizedBox(height: BsTokens.space2),
+              // ניהול-מסכים (screen-mgmt slice-2) — רשימת-מסכים → עורך-סקציות
+              // (סדר + הסתר), על מודל-הסקציות-פר-מסך (slice-1).
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('open-screen-manager'),
+                  onPressed: _openScreenManager,
+                  icon: const Text('🖥️', style: TextStyle(fontSize: 15)),
+                  label: const Text('ניהול מסכים (סדר · הסתר)'),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space2),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
@@ -1321,6 +1344,188 @@ class _WizardHistoryScreen extends StatelessWidget {
           title: const Text('גרסאות והיסטוריה'),
         ),
         body: const HistoryPane(),
+      ),
+    );
+  }
+}
+
+// ─── ניהול-מסכים באשף (screen-mgmt slice-2) — רמה-1 מסכים → רמה-2 סקציות ─────────
+// שני מפלסים על מודל-הסקציות-פר-מסך (slice-1): רמה-1 מסדרת/מסתירה מסך-שלם
+// (rootKey=kScreensRootKey), רמה-2 מסדרת/מסתירה את הסקציות של מסך (rootKey=id).
+// ברירת-מחדל (בלי התאמה) = סדר קנוני, הכל מוצג ⇒ זהה-בייטים. persist דרך slice-1.
+
+/// רשימה נגררת+מוסתרת מעל `screenSectionsProvider` — משותפת לשני המפלסים.
+class _SectionManagerList extends ConsumerWidget {
+  const _SectionManagerList({
+    required this.rootKey,
+    required this.defaults,
+    required this.meta,
+    this.onEnter,
+  });
+
+  final String rootKey;
+  final List<String> defaults;
+
+  /// id → (emoji · label · האם ניתן להיכנס פנימה [רמה-2]).
+  final Map<String, ({String emoji, String label, bool canEnter})> meta;
+  final void Function(String id)? onEnter;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(screenSectionsProvider); // rebuild on any layout change
+    final n = ref.read(screenSectionsProvider.notifier);
+    final ids = n.orderedIds(rootKey, defaults);
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
+      children: [
+        ReorderableListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          onReorder: (o, nw) => n.reorder(rootKey, defaults, o, nw),
+          children: [
+            for (var i = 0; i < ids.length; i++) _row(n, i, ids[i]),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          child: OutlinedButton.icon(
+            onPressed: () => n.resetScreen(rootKey),
+            icon: const Icon(Icons.restart_alt, size: 18),
+            label: const Text('אפס סדר/הסתרה'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _row(ScreenSectionsNotifier n, int i, String id) {
+    final m = meta[id];
+    final hidden = n.isHidden(rootKey, id);
+    return Container(
+      key: ValueKey(id),
+      margin: const EdgeInsets.fromLTRB(
+          BsTokens.space4, BsTokens.space1, BsTokens.space4, BsTokens.space1),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Row(
+        children: [
+          ReorderableDragStartListener(
+            index: i,
+            child: const Padding(
+              padding: EdgeInsets.all(BsTokens.space3),
+              child: Icon(Icons.drag_indicator, color: BsTokens.mutedLight),
+            ),
+          ),
+          Text(m?.emoji ?? '•', style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              m?.label ?? id,
+              style: TextStyle(
+                color: hidden ? BsTokens.mutedLight : BsTokens.inkLight,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                decoration: hidden ? TextDecoration.lineThrough : null,
+              ),
+            ),
+          ),
+          Switch(
+            key: Key('sec-show-$rootKey-$id'),
+            value: !hidden,
+            activeColor: BsTokens.brand,
+            onChanged: (_) => n.toggle(rootKey, id),
+          ),
+          if (m?.canEnter ?? false)
+            IconButton(
+              key: Key('sec-enter-$id'),
+              icon: const Icon(Icons.chevron_left),
+              tooltip: 'ערוך סקציות',
+              onPressed: () => onEnter?.call(id),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// רמה-1 — רשימת המסכים (סדר / הסתר מסך-שלם), חץ → עורך-הסקציות של המסך.
+class _ScreenManagerScreen extends StatelessWidget {
+  const _ScreenManagerScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.brand,
+          foregroundColor: Colors.white,
+          title: const Text('ניהול מסכים'),
+        ),
+        body: _SectionManagerList(
+          rootKey: kScreensRootKey,
+          defaults: [for (final s in kManagedScreens) s.id],
+          meta: {
+            for (final s in kManagedScreens)
+              s.id: (emoji: s.emoji, label: s.labelHe, canEnter: true),
+          },
+          onEnter: (id) {
+            final screen = kManagedScreens.firstWhere((s) => s.id == id);
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => _ScreenSectionEditor(screen: screen),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// רמה-2 — עורך-הסקציות של מסך אחד (סדר + הסתר). מסך שטרם-נבנה-כסקציות מציג
+/// placeholder כן (slice-5), בלי סקציות מומצאות.
+class _ScreenSectionEditor extends StatelessWidget {
+  const _ScreenSectionEditor({required this.screen});
+
+  final ManagedScreen screen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.brand,
+          foregroundColor: Colors.white,
+          title: Text('${screen.emoji} ${screen.labelHe} — סקציות'),
+        ),
+        body: screen.isSectionBuilt
+            ? _SectionManagerList(
+                rootKey: screen.id,
+                defaults: [for (final s in screen.sections) s.id],
+                meta: {
+                  for (final s in screen.sections)
+                    s.id: (emoji: s.emoji, label: s.labelHe, canEnter: false),
+                },
+              )
+            : const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(BsTokens.space5),
+                  child: Text(
+                    'המסך הזה טרם נבנה כסקציות.\n'
+                    'עריכת-הסקציות תיפתח כשהמסך יומר למבנה-סקציות (slice-5).',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: BsTokens.mutedLight, height: 1.4),
+                  ),
+                ),
+              ),
       ),
     );
   }

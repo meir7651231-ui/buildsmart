@@ -1,5 +1,7 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s2 — האשף → "ניהול מסכים" (2 מפלסים) — 2026-07-27
+**דירקטיבה "ניהול-מסכים באשף" · פרוסה-2.** כפתור **"🖥️ ניהול מסכים"** (`Key('open-screen-manager')`) → מסלול 2-מפלסים על מודל-slice-1: **רמה-1** `_ScreenManagerScreen` — רשימת-המסכים (`kManagedScreens`) **נגררת+מוסתרת** (rootKey=`kScreensRootKey`), חץ (`Key('sec-enter-<id>')`) → **רמה-2** `_ScreenSectionEditor` — עורך-הסקציות של מסך (סדר+הסתר, rootKey=screen.id). widget משותף `_SectionManagerList` (`ReorderableListView` · drag-handle · switch-הצג/הסתר `Key('sec-show-<root>-<id>')` · "אפס סדר/הסתרה"). `config/screen_registry.dart`: **home מלא** (5 סקציות-אמת · ids==`HomeSection.name`) + contractor/manager/store **מוצהרים** (רמה-1) עם **placeholder כן** ל-level-2 ("טרם-נבנה-כסקציות · slice-5" — בלי סקציות מומצאות). **persist דרך slice-1** · ברירת-מחדל **זהה-בייטים**. **תשתית**: עדיין לא-חי על המסכים עצמם (הם קוראים את המודלים הישנים) — ההזרמה-לחי = slice-5. 20/20 · analyze 0.
 ## #owner-never-pending-authemail — זיהוי הבעלים גם לפי auth-email — 2026-07-27
 **המשך-תיקון (#247 היה no-op):** `withOwnerApproval` בדק `user.email` **ממסמך-המשתמש** — ריק כשהרישום היה ללא email → הבעלים לא זוהה, הפס נשאר. עכשיו `currentUserProvider` מעביר גם את ה-**auth email** (`authStateProvider.user?.email` — הגוגל-לוגין, תמיד קיים) ו-`withOwnerApproval(user,[authEmail])` מזהה לפי שניהם. הפס נעלם, permitAction עובר. אימות: analyze 0 · 6 owner_approval + rbac_providers ירוקות.
 
