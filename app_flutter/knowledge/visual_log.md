@@ -4,6 +4,14 @@
 
 ---
 
+## #screen-mgmt-s0 — כיבוי chrome-העריכה-על-המסך (הוקפא) — 2026-07-27
+
+**שינוי-UI:** `studio_overlay.dart` — המעטפת-על-המסך (**נווט⇄ערוך** + **🔀 בורד**) **הוקפאה** → `StudioOverlay` מרנדר `SizedBox.shrink()` תמיד. אין יותר טריגר-עריכה על המסך; העריכה עוברת **כולה לאשף** (org_setup_wizard = הכניסה היחידה).
+
+**אימות:** `zero_regression` **20/20** — overlay: off-gate inert + **on-gate-owner עדיין-inert** (נווט/ערוך/בורד `findsNothing`, `SegmentedButton` נעדר, edit-mode לא-ניתן-להפעלה-מהמסך) · 192 studio · analyze 0 · לא-בעלים **זהה-בייטים** (kStudioFlag const-off ⇒ tree-shake).
+
+---
+
 ## #wizard-studio-s5 — גרסאות והיסטוריה באשף (מיחזור HistoryPane) — 2026-07-27 ✅ דירקטיבה הושלמה
 
 **שינוי-UI:** כפתור **"🕘 גרסאות"** (ב-Row עם מצא-והחלף) → מסלול-מלא `_WizardHistoryScreen` המארח את **`HistoryPane` של הסטודיו (verbatim)** — רשימת גרסאות + "שחזר".

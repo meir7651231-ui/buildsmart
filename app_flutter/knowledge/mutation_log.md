@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s0 — כיבוי טריגר-עריכה-על-המסך — 2026-07-27
+- **השינוי:** `StudioOverlay.build` → `SizedBox.shrink()` **תמיד**; הוסרו הטוגל נווט⇄ערוך / בורר-הבורדים / publish + ה-imports המתים (analyze 0).
+- **תקלה שהוזרקה (mutation-sensitivity):** להחזיר את הטוגל (on-gate מרנדר נווט/ערוך) ⇒ בדיקת "on-gate-owner עדיין-inert" (`find.text('ערוך') findsNothing`) אדומה.
+- **בטיחות:** אין קורא-אחר ל-`enterEdit` בכל הקוד ⇒ freeze מלא (edit-mode לא-ניתן-להפעלה-מהמסך). `main.dart` mount לא-נגע. שער-#84 לא-שונה. לא-בעלים זהה-בייטים (tree-shake). re-enable = git revert.
+- **אימות:** analyze 0 · zero_regression 20/20 · studio 192.
+
 ## X4 — StockNotifier.move delegation ל-FirebaseStockRepository (server-connect wave) — 2026-06-16
 
 - **קובץ:** `test/stock_firebase_repo_test.dart` (קייס חדש: `move() routes through the repo + mirrors its cache`).

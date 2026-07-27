@@ -166,7 +166,7 @@ void main() {
     });
   });
 
-  group('StudioOverlay — inert off-gate + navigate⇄edit chrome (#13 · slice-0)', () {
+  group('StudioOverlay — FROZEN inert chrome (screen-mgmt · slice-0)', () {
     testWidgets('off-gate ⇒ SizedBox.shrink, no chrome (answer-equivalent)', (
       tester,
     ) async {
@@ -188,14 +188,13 @@ void main() {
         ),
       );
       expect(find.byType(StudioOverlay), findsOneWidget);
-      // No chrome at all off-gate — not even the navigate/edit toggle.
       expect(find.text('נווט'), findsNothing);
       expect(find.text('ערוך'), findsNothing);
     });
 
-    testWidgets('on-gate ⇒ the persistent נווט⇄ערוך chrome (default נווט)', (
-      tester,
-    ) async {
+    testWidgets(
+        'on-gate + owner ⇒ STILL no on-screen chrome — slice-0 froze the '
+        'trigger; edit-mode cannot be entered from the screen', (tester) async {
       final c = ProviderContainer(
         overrides: [
           studioActiveProvider.overrideWithValue(true),
@@ -212,39 +211,15 @@ void main() {
           ),
         ),
       );
-      // The toggle is present even when NOT editing (persistent chrome), so the
-      // owner is never stranded in edit-mode with no visible way back to navigate.
-      expect(find.text('נווט'), findsOneWidget);
-      expect(find.text('ערוך'), findsOneWidget);
-      expect(c.read(editModeProvider).isEditing, isFalse); // default = navigate
-    });
-
-    testWidgets('the נווט⇄ערוך toggle flips edit-mode (the un-trap fix)', (
-      tester,
-    ) async {
-      final c = ProviderContainer(
-        overrides: [
-          studioActiveProvider.overrideWithValue(true),
-          studioOwnerEmailProvider.overrideWithValue(owner),
-          studioInManagerContextProvider.overrideWithValue(true),
-        ],
-      );
-      addTearDown(c.dispose);
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: c,
-          child: const MaterialApp(
-            home: Stack(children: [StudioOverlay()]),
-          ),
-        ),
-      );
+      expect(find.byType(StudioOverlay), findsOneWidget);
+      // The on-screen trigger is frozen: no toggle, no board selector — even for
+      // the owner in an active manager context. Editing lives in the wizard now.
+      expect(find.text('נווט'), findsNothing);
+      expect(find.text('ערוך'), findsNothing);
+      expect(find.text('בורד'), findsNothing);
+      expect(find.byType(SegmentedButton<bool>), findsNothing);
+      // No on-screen affordance can flip edit-mode.
       expect(c.read(editModeProvider).isEditing, isFalse);
-      await tester.tap(find.text('ערוך'));
-      await tester.pump();
-      expect(c.read(editModeProvider).isEditing, isTrue); // armed edit
-      await tester.tap(find.text('נווט'));
-      await tester.pump();
-      expect(c.read(editModeProvider).isEditing, isFalse); // back to navigate
     });
   });
 
