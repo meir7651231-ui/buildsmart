@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s1 — מודל-סקציות-פר-מסך (סדר + הסתר) — 2026-07-27
+- **הפונקציות:** `ScreenSectionsNotifier` (`orderedIds`/`visibleIds`/`hide`/`show`/`toggle`/`reorder`/`moveUp`/`moveDown`/`resetScreen`) + `ScreenLayout` (order+hidden · JSON).
+- **תקלה שהוזרקה (mutation-sensitivity):** `visibleIds` מחזיר `orderedIds` בלי סינון-`hidden` ⇒ בדיקת hide (`visibleIds==['a','c']`) אדומה.
+- **בטיחות:** default ריק ⇒ `orderedIds==defaults` · אפס-persist ⇒ **זהה-בייטים**. non-destructive (order שומר את ה-id, רק visible מסנן). canonical-minimal (`resetScreen`→remove key). לא-נוגע בשני-המקורות החיים (home_content_order · hidden_catalog_sections).
+- **אימות:** analyze 0 · screen_sections 7/7.
+
 ## #screen-mgmt-s0 — כיבוי טריגר-עריכה-על-המסך — 2026-07-27
 - **השינוי:** `StudioOverlay.build` → `SizedBox.shrink()` **תמיד**; הוסרו הטוגל נווט⇄ערוך / בורר-הבורדים / publish + ה-imports המתים (analyze 0).
 - **תקלה שהוזרקה (mutation-sensitivity):** להחזיר את הטוגל (on-gate מרנדר נווט/ערוך) ⇒ בדיקת "on-gate-owner עדיין-inert" (`find.text('ערוך') findsNothing`) אדומה.
