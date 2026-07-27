@@ -19,6 +19,7 @@ import 'package:buildsmart/screens/alt_explain_screen.dart'
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -337,26 +338,30 @@ class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
                           }
                           return Align(
                             alignment: Alignment.centerRight,
-                            child: TextButton.icon(
-                              onPressed: () => Navigator.of(context).push(
-                                AltExplainScreen.route(
-                                  product: a.product,
-                                  recName: a.recName,
-                                  recPrice: a.recPrice,
-                                  altName: a.altName,
-                                  altPrice: a.altPrice,
+                            // composite hide: whole button gone when the org hides this element
+                            child: CfgVisible(
+                              'contractor_tools_sheets.why_worth',
+                              child: TextButton.icon(
+                                onPressed: () => Navigator.of(context).push(
+                                  AltExplainScreen.route(
+                                    product: a.product,
+                                    recName: a.recName,
+                                    recPrice: a.recPrice,
+                                    altName: a.altName,
+                                    altPrice: a.altPrice,
+                                  ),
                                 ),
-                              ),
-                              icon: const Text('🤔'),
-                              label: CfgText(
-                                'contractor_tools_sheets.why_worth',
-                                'למה כדאי?',
-                              ),
-                              // a11y (swarm): ≥48dp tap target (was 32dp+shrinkWrap).
-                              style: TextButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                minimumSize: const Size(0, 48),
+                                icon: const Text('🤔'),
+                                label: CfgText(
+                                  'contractor_tools_sheets.why_worth',
+                                  'למה כדאי?',
+                                ),
+                                // a11y (swarm): ≥48dp tap target (was 32dp+shrinkWrap).
+                                style: TextButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  minimumSize: const Size(0, 48),
+                                ),
                               ),
                             ),
                           );
@@ -787,15 +792,19 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
         ),
       ),
       Center(
-        child: TextButton(
-          onPressed:
-              () => setState(() {
-                _plan = null;
-                _scanning = false;
-              }),
-          child: CfgText(
-            'contractor_tools_sheets.scan_another',
-            'סרוק תוכנית אחרת',
+        // composite hide: whole button gone when the org hides this element
+        child: CfgVisible(
+          'contractor_tools_sheets.scan_another',
+          child: TextButton(
+            onPressed:
+                () => setState(() {
+                  _plan = null;
+                  _scanning = false;
+                }),
+            child: CfgText(
+              'contractor_tools_sheets.scan_another',
+              'סרוק תוכנית אחרת',
+            ),
           ),
         ),
       ),

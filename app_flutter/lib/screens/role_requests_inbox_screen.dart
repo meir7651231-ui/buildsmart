@@ -14,6 +14,7 @@ import 'package:buildsmart/screens/reject_reason_screen.dart'
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -179,25 +180,33 @@ class _RequestCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onApprove,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: BsTokens.brand,
-                      foregroundColor: Colors.white,
+                  // composite hide: whole button gone when the org hides this element
+                  child: CfgVisible(
+                    'role_requests_inbox_screen.t02',
+                    child: FilledButton.icon(
+                      onPressed: onApprove,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: BsTokens.brand,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.check, size: 18),
+                      label: CfgText('role_requests_inbox_screen.t02', 'אישור'),
                     ),
-                    icon: const Icon(Icons.check, size: 18),
-                    label: CfgText('role_requests_inbox_screen.t02', 'אישור'),
                   ),
                 ),
                 const SizedBox(width: BsTokens.space3),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onDeny,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: BsTokens.mutedLight,
+                  // composite hide: whole button gone when the org hides this element
+                  child: CfgVisible(
+                    'role_requests_inbox_screen.t03',
+                    child: OutlinedButton.icon(
+                      onPressed: onDeny,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: BsTokens.mutedLight,
+                      ),
+                      icon: const Icon(Icons.close, size: 18),
+                      label: CfgText('role_requests_inbox_screen.t03', 'דחייה'),
                     ),
-                    icon: const Icon(Icons.close, size: 18),
-                    label: CfgText('role_requests_inbox_screen.t03', 'דחייה'),
                   ),
                 ),
               ],
@@ -213,11 +222,15 @@ class _RequestCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: BsTokens.space2),
               child: SizedBox(
                 width: double.infinity,
-                child: TextButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                      RejectReasonScreen.route(role: role, name: name ?? '')),
-                  icon: const Text('✨'),
-                  label: CfgText('role_requests_inbox_screen.t04', 'נסח סיבת-דחייה'),
+                // composite hide: whole button gone when the org hides this element
+                child: CfgVisible(
+                  'role_requests_inbox_screen.t04',
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                        RejectReasonScreen.route(role: role, name: name ?? '')),
+                    icon: const Text('✨'),
+                    label: CfgText('role_requests_inbox_screen.t04', 'נסח סיבת-דחייה'),
+                  ),
                 ),
               ),
             );

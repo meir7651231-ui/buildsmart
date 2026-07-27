@@ -26,6 +26,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,20 +61,28 @@ class ProjectsScreen extends ConsumerWidget {
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const CfgText('projects_screen.exit', '‹ יציאה',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+            // composite hide: whole button gone when the org hides this element
+            CfgVisible(
+              'projects_screen.exit',
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const CfgText('projects_screen.exit', '‹ יציאה',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+              ),
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: BsTokens.brand,
-          onPressed: () => _addSheet(context, ref),
-          icon: Icon(Icons.add, color: bsOnAccent(context)),
-          label: CfgText('projects_screen.new_project', 'פרויקט חדש',
-              style: TextStyle(
-                  color: bsOnAccent(context), fontWeight: FontWeight.w800)),
+        // composite hide: whole FAB gone when the org hides this element
+        floatingActionButton: CfgVisible(
+          'projects_screen.new_project',
+          child: FloatingActionButton.extended(
+            backgroundColor: BsTokens.brand,
+            onPressed: () => _addSheet(context, ref),
+            icon: Icon(Icons.add, color: bsOnAccent(context)),
+            label: CfgText('projects_screen.new_project', 'פרויקט חדש',
+                style: TextStyle(
+                    color: bsOnAccent(context), fontWeight: FontWeight.w800)),
+          ),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
@@ -123,16 +132,20 @@ class ProjectsScreen extends ConsumerWidget {
                       style: TextStyle(color: Color(0xFF888888), fontSize: 13),
                     ),
                     const SizedBox(height: BsTokens.space3),
-                    TextButton.icon(
-                      onPressed: () => _addSheet(context, ref),
-                      icon: const Icon(Icons.add,
-                          size: 18, color: BsTokens.brand),
-                      label: const CfgText(
-                        'projects_screen.empty_cta',
-                        'פרויקט חדש',
-                        style: TextStyle(
-                            color: BsTokens.brand,
-                            fontWeight: FontWeight.w800),
+                    // composite hide: whole button gone when the org hides this element
+                    CfgVisible(
+                      'projects_screen.empty_cta',
+                      child: TextButton.icon(
+                        onPressed: () => _addSheet(context, ref),
+                        icon: const Icon(Icons.add,
+                            size: 18, color: BsTokens.brand),
+                        label: const CfgText(
+                          'projects_screen.empty_cta',
+                          'פרויקט חדש',
+                          style: TextStyle(
+                              color: BsTokens.brand,
+                              fontWeight: FontWeight.w800),
+                        ),
                       ),
                     ),
                   ],
@@ -306,13 +319,17 @@ class _SiteCard extends StatelessWidget {
                   ),
                 ]),
                 const SizedBox(height: BsTokens.space2),
-                GestureDetector(
-                  onTap: onStatus,
-                  child: const CfgText('projects_screen.status_hint', '📊 הקש לסטטוס האתר המלא',
-                      style: TextStyle(
-                          color: BsTokens.brandDark,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12.5)),
+                // composite hide: whole tappable gone when the org hides this element
+                CfgVisible(
+                  'projects_screen.status_hint',
+                  child: GestureDetector(
+                    onTap: onStatus,
+                    child: const CfgText('projects_screen.status_hint', '📊 הקש לסטטוס האתר המלא',
+                        style: TextStyle(
+                            color: BsTokens.brandDark,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.5)),
+                  ),
                 ),
               ],
             ),
@@ -462,28 +479,32 @@ class _StatusSheet extends ConsumerWidget {
               _kvTile('🛒 ${p.cart.length} פריטים בעגלה'),
               _kvTile('🌳 ${p.treeCount} עצי מוצרים בעבודה'),
               const SizedBox(height: BsTokens.space3),
-              Material(
-                color: BsTokens.brand,
-                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                child: InkWell(
+              // composite hide: whole pill button gone when the org hides this element
+              CfgVisible(
+                'projects_screen.edit_site',
+                child: Material(
+                  color: BsTokens.brand,
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    showModalBottomSheet<void>(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      isScrollControlled: true,
-                      builder: (_) => _EditSheet(projectId: p.id),
-                    );
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: CfgText('projects_screen.edit_site', '✏️ עריכת פרטי האתר',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14)),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      showModalBottomSheet<void>(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        isScrollControlled: true,
+                        builder: (_) => _EditSheet(projectId: p.id),
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: CfgText('projects_screen.edit_site', '✏️ עריכת פרטי האתר',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14)),
+                    ),
                   ),
                 ),
               ),

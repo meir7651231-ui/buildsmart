@@ -1784,22 +1784,27 @@ class _ProjectSelector extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              GestureDetector(
-                onTap: () => _addProjectDialog(context, ref),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF444444)),
-                  ),
-                  child: const CfgText(
-                    'store_screen.proj_add_chip',
-                    '+ הוסף',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+              // composite hide: hiding 'store_screen.proj_add_chip' removes the
+              // whole chip (not an empty shell); absent config ⇒ verbatim.
+              CfgVisible(
+                'store_screen.proj_add_chip',
+                child: GestureDetector(
+                  onTap: () => _addProjectDialog(context, ref),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF444444)),
+                    ),
+                    child: const CfgText(
+                      'store_screen.proj_add_chip',
+                      '+ הוסף',
+                      style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                    ),
                   ),
                 ),
               ),
@@ -1830,27 +1835,37 @@ class _ProjectSelector extends ConsumerWidget {
               decoration: const InputDecoration(hintText: 'שם הפרויקט'),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const CfgText(
-                  'store_screen.proj_add_cancel',
-                  'ביטול',
-                  style: TextStyle(color: Colors.black38),
+              // composite hide: hiding 'store_screen.proj_add_cancel' removes the
+              // whole button (not an empty shell); absent config ⇒ verbatim.
+              CfgVisible(
+                'store_screen.proj_add_cancel',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const CfgText(
+                    'store_screen.proj_add_cancel',
+                    'ביטול',
+                    style: TextStyle(color: Colors.black38),
+                  ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  final name = controller.text.trim();
-                  if (name.isEmpty) return;
-                  // Add through the canonical projects engine (saveProject), so
-                  // the new site is a real LiveProject the picker, app-bar and
-                  // projects screen all see. Then select it for this checkout.
-                  ref.read(projectsProvider.notifier).addProject(name: name);
-                  ref.read(cartProjectProvider.notifier).state = name;
-                  Navigator.pop(ctx);
-                },
-                style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-                child: const CfgText('store_screen.proj_add_confirm', 'הוסף'),
+              // composite hide: hiding 'store_screen.proj_add_confirm' removes the
+              // whole button (not an empty shell); absent config ⇒ verbatim.
+              CfgVisible(
+                'store_screen.proj_add_confirm',
+                child: TextButton(
+                  onPressed: () {
+                    final name = controller.text.trim();
+                    if (name.isEmpty) return;
+                    // Add through the canonical projects engine (saveProject), so
+                    // the new site is a real LiveProject the picker, app-bar and
+                    // projects screen all see. Then select it for this checkout.
+                    ref.read(projectsProvider.notifier).addProject(name: name);
+                    ref.read(cartProjectProvider.notifier).state = name;
+                    Navigator.pop(ctx);
+                  },
+                  style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+                  child: const CfgText('store_screen.proj_add_confirm', 'הוסף'),
+                ),
               ),
             ],
           ),
@@ -2353,23 +2368,33 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(sheetCtx),
-                      child: const CfgText('store_screen.shipto_skip', 'דלג'),
+                    // composite hide: hiding 'store_screen.shipto_skip' removes
+                    // the whole button; absent config ⇒ verbatim.
+                    child: CfgVisible(
+                      'store_screen.shipto_skip',
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(sheetCtx),
+                        child: const CfgText('store_screen.shipto_skip', 'דלג'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: BsTokens.brand,
+                    // composite hide: hiding 'store_screen.shipto_save' removes
+                    // the whole button; absent config ⇒ verbatim.
+                    child: CfgVisible(
+                      'store_screen.shipto_save',
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: BsTokens.brand,
+                        ),
+                        onPressed: () {
+                          ref.read(shipToProvider.notifier).state =
+                              ctrl.text.trim();
+                          Navigator.pop(sheetCtx);
+                        },
+                        child: const CfgText('store_screen.shipto_save', 'שמירה'),
                       ),
-                      onPressed: () {
-                        ref.read(shipToProvider.notifier).state =
-                            ctrl.text.trim();
-                        Navigator.pop(sheetCtx);
-                      },
-                      child: const CfgText('store_screen.shipto_save', 'שמירה'),
                     ),
                   ),
                 ],
@@ -2761,14 +2786,24 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
                   style: const TextStyle(color: Colors.black54),
                 ),
                 actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: const CfgText('store_screen.large_order_cancel', 'ביטול'),
+                  // composite hide: hiding 'store_screen.large_order_cancel'
+                  // removes the whole button; absent config ⇒ verbatim.
+                  CfgVisible(
+                    'store_screen.large_order_cancel',
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const CfgText('store_screen.large_order_cancel', 'ביטול'),
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-                    child: const CfgText('store_screen.large_order_confirm', 'אשר והמשך'),
+                  // composite hide: hiding 'store_screen.large_order_confirm'
+                  // removes the whole button; absent config ⇒ verbatim.
+                  CfgVisible(
+                    'store_screen.large_order_confirm',
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+                      child: const CfgText('store_screen.large_order_confirm', 'אשר והמשך'),
+                    ),
                   ),
                 ],
               ),
@@ -2954,7 +2989,12 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            // composite hide: an org that hides 'shop.checkout.confirm' removes
+            // the whole confirm button (not an empty shell); absent config ⇒
+            // child verbatim ⇒ byte-identical.
+            CfgVisible(
+              'shop.checkout.confirm',
+              child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: BsTokens.brand,
                 foregroundColor: Color(0xFFFFFFFF),
@@ -3104,6 +3144,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -3146,15 +3187,25 @@ class _CartActionsRow extends ConsumerWidget {
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const CfgText(
-                  'store_screen.save_list_cancel',
-                  'ביטול',
-                  style: TextStyle(color: Colors.black38),
+              // composite hide: hiding 'store_screen.save_list_cancel' removes
+              // the whole button; absent config ⇒ verbatim.
+              CfgVisible(
+                'store_screen.save_list_cancel',
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const CfgText(
+                    'store_screen.save_list_cancel',
+                    'ביטול',
+                    style: TextStyle(color: Colors.black38),
+                  ),
                 ),
               ),
-              TextButton(
+              // composite hide: an org that hides 'store_screen.save_list_confirm'
+              // removes the whole button (not an empty shell); absent config ⇒
+              // child verbatim ⇒ byte-identical.
+              CfgVisible(
+                'store_screen.save_list_confirm',
+                child: TextButton(
                 onPressed: () {
                   if (controller.text.trim().isEmpty) {
                     showToast(context, 'שם הרשימה לא יכול להיות ריק');
@@ -3187,6 +3238,7 @@ class _CartActionsRow extends ConsumerWidget {
                   'שמור',
                   style: TextStyle(color: BsTokens.brand),
                 ),
+              ),
               ),
             ],
           ),
@@ -3351,17 +3403,27 @@ class _CartActionsRow extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TextButton.icon(
-          onPressed: () => _showSavedListsSheet(context, ref),
-          icon: const Icon(Icons.folder_open_outlined, size: 16),
-          label: const CfgText('store_screen.actions_lists', 'רשימות'),
-          style: TextButton.styleFrom(foregroundColor: Colors.black38),
+        // composite hide: hiding 'store_screen.actions_lists' removes the whole
+        // button (not an empty shell); absent config ⇒ verbatim.
+        CfgVisible(
+          'store_screen.actions_lists',
+          child: TextButton.icon(
+            onPressed: () => _showSavedListsSheet(context, ref),
+            icon: const Icon(Icons.folder_open_outlined, size: 16),
+            label: const CfgText('store_screen.actions_lists', 'רשימות'),
+            style: TextButton.styleFrom(foregroundColor: Colors.black38),
+          ),
         ),
-        TextButton.icon(
-          onPressed: () => _showSaveDialog(context, ref),
-          icon: const Icon(Icons.bookmark_border, size: 16),
-          label: const CfgText('store_screen.actions_save', 'שמור'),
-          style: TextButton.styleFrom(foregroundColor: Colors.black38),
+        // composite hide: hiding 'store_screen.actions_save' removes the whole
+        // button (not an empty shell); absent config ⇒ verbatim.
+        CfgVisible(
+          'store_screen.actions_save',
+          child: TextButton.icon(
+            onPressed: () => _showSaveDialog(context, ref),
+            icon: const Icon(Icons.bookmark_border, size: 16),
+            label: const CfgText('store_screen.actions_save', 'שמור'),
+            style: TextButton.styleFrom(foregroundColor: Colors.black38),
+          ),
         ),
         // 'שיתוף סל עם צוות' (storeSettings.shareCartWithTeam) gates the cart
         // 'שתף' button: off (the default) ⇒ the button is not shown, so the
@@ -3369,7 +3431,12 @@ class _CartActionsRow extends ConsumerWidget {
         // button appears and shares the real summary. This is the live client
         // effect of that toggle.
         if (shareCartWithTeam)
-          TextButton.icon(
+          // composite hide: an org that hides 'store_screen.actions_share'
+          // removes the whole button (not an empty shell); absent config ⇒
+          // child verbatim ⇒ byte-identical.
+          CfgVisible(
+            'store_screen.actions_share',
+            child: TextButton.icon(
             onPressed: () async {
               final lines = ref.read(smartCartProvider);
               if (lines.isEmpty) {
@@ -3392,7 +3459,12 @@ class _CartActionsRow extends ConsumerWidget {
             label: const CfgText('store_screen.actions_share', 'שתף'),
             style: TextButton.styleFrom(foregroundColor: Colors.black38),
           ),
-        TextButton.icon(
+          ),
+        // composite hide: an org that hides 'store_screen.actions_clear' removes
+        // the whole button (not an empty shell); absent config ⇒ verbatim.
+        CfgVisible(
+          'store_screen.actions_clear',
+          child: TextButton.icon(
           onPressed: () async {
             final ok = await confirmDestructive(
               context,
@@ -3424,6 +3496,7 @@ class _CartActionsRow extends ConsumerWidget {
           style: TextButton.styleFrom(
             foregroundColor: Colors.redAccent.withValues(alpha: 0.8),
           ),
+        ),
         ),
       ],
     );
@@ -3614,7 +3687,12 @@ class _ServiceSheet extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
-              trailing: Container(
+              // composite hide: an org that hides
+              // 'store_screen.service_under_construction' drops the whole badge
+              // (not an empty chip); absent config ⇒ child verbatim ⇒ identical.
+              trailing: CfgVisible(
+                'store_screen.service_under_construction',
+                child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 6,
                   vertical: 2,
@@ -3633,6 +3711,7 @@ class _ServiceSheet extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
               ),
               // Non-actionable: tapping shows the placeholder toast but the
               // disabled visual (muted colors + badge) signals it clearly.
@@ -3814,11 +3893,16 @@ class _OrdersHidden extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  OutlinedButton(
+                  // composite hide: hiding 'store_screen.orders_hidden_show'
+                  // removes the whole button; absent config ⇒ verbatim.
+                  CfgVisible(
+                    'store_screen.orders_hidden_show',
+                    child: OutlinedButton(
                     onPressed: () => ref
                         .read(storeSettingsProvider.notifier)
                         .update((s) => s.copyWith(purchaseHistory: true)),
                     child: const CfgText('store_screen.orders_hidden_show', 'הצג היסטוריה'),
+                  ),
                   ),
                 ],
               ),
@@ -4182,11 +4266,17 @@ class _OrderSheet extends ConsumerWidget {
             // "(OCR) — בקרוב"). Hidden for Apple review; restored with the flag.
             if (!kHideUnderConstruction) ...[
               const SizedBox(height: 18),
-              OutlinedButton.icon(
+              // composite hide: an org that hides
+              // 'store_screen.order_scan_delivery' removes the whole button
+              // (not an empty shell); absent config ⇒ child verbatim ⇒ identical.
+              CfgVisible(
+                'store_screen.order_scan_delivery',
+                child: OutlinedButton.icon(
                 onPressed: () =>
                     showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
                 icon: const Text('📄', style: TextStyle(fontSize: 16)),
                 label: const CfgText('store_screen.order_scan_delivery', 'סרוק תעודת-משלוח'),
+              ),
               ),
             ],
           ],

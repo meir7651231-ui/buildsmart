@@ -88,6 +88,7 @@ import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -270,12 +271,16 @@ class ManagerDashboardScreen extends ConsumerWidget {
           // מנהל = חשבון הבעלים: אין התנתקות (דרישת מוצר — "המנהל לא מתנתק").
           // ה-session נשאר קבוע; אין כפתור logout. '‹ יציאה' למטה היא
           // ניווט-בלבד (Navigator.maybePop) — חוזרת אחורה בלי לנקות את ה-session.
-          TextButton(
-            onPressed: () => Navigator.of(context).maybePop(),
-            child: const CfgText(
-              'manager.dash.exit',
-              '‹ יציאה',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+          // composite hide: the whole exit button goes when the org hides it.
+          CfgVisible(
+            'manager.dash.exit',
+            child: TextButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              child: const CfgText(
+                'manager.dash.exit',
+                '‹ יציאה',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+              ),
             ),
           ),
         ],
@@ -1630,21 +1635,28 @@ class _AdvanceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: BsTokens.brand,
-      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-      child: InkWell(
+    // giant · composite hide: an org that hides 'manager.orders.advance'
+    // removes the WHOLE advance pill (not an empty shell — CfgText alone would
+    // blank only the label). CfgVisible wraps the outer button; absent config
+    // ⇒ child verbatim ⇒ byte-identical.
+    return CfgVisible(
+      'manager.orders.advance',
+      child: Material(
+        color: BsTokens.brand,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: CfgText(
-            'manager.orders.advance',
-            'קדם שלב ›',
-            style: TextStyle(
-              color: bsOnAccent(context),
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: CfgText(
+              'manager.orders.advance',
+              'קדם שלב ›',
+              style: TextStyle(
+                color: bsOnAccent(context),
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ),
@@ -2825,21 +2837,25 @@ class _CustomerDetailSheet extends ConsumerWidget {
               const SizedBox(height: BsTokens.space3),
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed:
-                      () => Navigator.of(context).push(
-                        CreditExplainScreen.route(
-                          name: c.name,
-                          creditLimit: creditLimit,
-                          used: liveTotalSpend,
-                          balance: balance,
-                          pct: livePct,
+                // composite hide: whole button (icon + label) gone when hidden.
+                child: CfgVisible(
+                  'manager_dashboard_screen.credit_explain_btn',
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        () => Navigator.of(context).push(
+                          CreditExplainScreen.route(
+                            name: c.name,
+                            creditLimit: creditLimit,
+                            used: liveTotalSpend,
+                            balance: balance,
+                            pct: livePct,
+                          ),
                         ),
-                      ),
-                  icon: const Text('💳'),
-                  label: const CfgText(
-                    'manager_dashboard_screen.credit_explain_btn',
-                    'הסבר אשראי',
+                    icon: const Text('💳'),
+                    label: const CfgText(
+                      'manager_dashboard_screen.credit_explain_btn',
+                      'הסבר אשראי',
+                    ),
                   ),
                 ),
               ),
@@ -4607,22 +4623,30 @@ class _RegressionBody extends StatelessWidget {
         HelpTarget(
           title: 'בדיקות רגרסיה',
           body: 'פותח את מרכז בדיקות הרגרסיה (כלי פיתוח). קיים רק בבילד debug.',
-          child: Material(
-            color: BsTokens.brand,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
+          // giant · composite hide: an org that hides
+          // 'manager.manage.regression.open' removes the WHOLE button (not an
+          // empty shell — CfgText alone would blank only the label). CfgVisible
+          // wraps the outer button; absent config ⇒ child verbatim ⇒
+          // byte-identical.
+          child: CfgVisible(
+            'manager.manage.regression.open',
+            child: Material(
+              color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: onOpen,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: CfgText(
-                  'manager.manage.regression.open',
-                  '🔬 פתח מרכז בדיקות רגרסיה',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: onOpen,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: CfgText(
+                    'manager.manage.regression.open',
+                    '🔬 פתח מרכז בדיקות רגרסיה',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -4682,23 +4706,31 @@ class _NewAccountApprovalsBody extends ConsumerWidget {
           title: 'בקשות אישור',
           body: 'פותח את תיבת הבקשות: מי ממתין, ואישור או דחייה לכל אחד. '
               'אישור נותן את התפקיד ומשחרר את החשבון מהמתנה.',
-          child: Material(
-            color: BsTokens.brand,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
-              key: const ValueKey('open-approvals'),
+          // giant · composite hide: an org that hides
+          // 'manager.manage.approvals.open' removes the WHOLE button (not an
+          // empty shell — CfgText alone would blank only the label). CfgVisible
+          // wraps the outer button; absent config ⇒ child verbatim ⇒
+          // byte-identical.
+          child: CfgVisible(
+            'manager.manage.approvals.open',
+            child: Material(
+              color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: onOpen,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: CfgText(
-                  'manager.manage.approvals.open',
-                  '📋 פתח בקשות אישור',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+              child: InkWell(
+                key: const ValueKey('open-approvals'),
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: onOpen,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: CfgText(
+                    'manager.manage.approvals.open',
+                    '📋 פתח בקשות אישור',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -4738,23 +4770,30 @@ class _RoleAssignBody extends StatelessWidget {
           body:
               'פותח את גיליון שיוך התפקידים: הקצאת תפקיד (חנות/שליח/עובד/מנהל) '
               'למשתמש לפי טלפון או מזהה. השיוך מבוצע דרך השרת של בעל המערכת.',
-          child: Material(
-            color: BsTokens.brand,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
-              key: const ValueKey('open-role-assign'),
+          // giant · composite hide: an org that hides 'manager.manage.roles.open'
+          // removes the WHOLE button (not an empty shell — CfgText alone would
+          // blank only the label). CfgVisible wraps the outer button; absent
+          // config ⇒ child verbatim ⇒ byte-identical.
+          child: CfgVisible(
+            'manager.manage.roles.open',
+            child: Material(
+              color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: onOpen,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: CfgText(
-                  'manager.manage.roles.open',
-                  '🔑 פתח שיוך תפקידים',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: bsOnAccent(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+              child: InkWell(
+                key: const ValueKey('open-role-assign'),
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: onOpen,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: CfgText(
+                    'manager.manage.roles.open',
+                    '🔑 פתח שיוך תפקידים',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),

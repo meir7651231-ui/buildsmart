@@ -1761,3 +1761,9 @@
 - **mutation ×1:** שער-CfgVisible off → composite נשאר → אדום(+20 −2) → ירוק +22 · אפס-שאריות.
 - **לקח:** CfgVisible היה קוד-מת מושלם למחזור — עיטוף ה-outer-widget מסיר chrome-שלם (מה ש-CfgText לתווית-בלבד לא יכול). ~50 sites נוספים = מכני, לריצות-הבאות.
 - **אימות:** analyze 0 · byte-verify · cfg_wrappers 22 ירוקות · שער מלא.
+
+## #swarm-r2b — כיסוי-composites (~36 עיטופים) — 2026-07-27
+- **הפתרון:** 3 fixers מקבילים עטפו כל composite-CfgText (כפתור/כרטיס/pill) ב-CfgVisible; תוויות-plain הושארו.
+- **אין-mutation-חדש:** מנגנון ה-CfgVisible כבר mutation-מאומת ב-r2a; r2b = עיטופים מכניים על אותו מנגנון. זהה-בייטים (config ריק ⇒ child verbatim).
+- **לקח:** ה-grep הראשוני פספס `const CfgText` — הושלם ידנית (dash.exit · credit) + F1/F3 סרקו const מיוזמתם. עתיד: לכלול const בתבנית.
+- **אימות:** analyze 0 · 59 בדיקות-מסך-מושפעות ירוקות · שער מלא.

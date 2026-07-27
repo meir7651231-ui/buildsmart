@@ -4,6 +4,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,13 +64,17 @@ class ProfessionScreen extends ConsumerWidget {
                   HelpTarget(
                     title: 'חזרה',
                     body: 'חוזר אחורה למסך הקודם (מסך הפתיחה / ההרשמה).',
-                    child: TextButton.icon(
-                      onPressed: () =>
-                          ref.read(startupStepProvider.notifier).state = 0,
-                      icon: const Icon(Icons.chevron_right,
-                          color: BsTokens.mutedLight),
-                      label: CfgText('profession_screen.t01', 'חזור',
-                          style: TextStyle(color: BsTokens.mutedLight)),
+                    // composite hide: whole button gone when the org hides this element
+                    child: CfgVisible(
+                      'profession_screen.t01',
+                      child: TextButton.icon(
+                        onPressed: () =>
+                            ref.read(startupStepProvider.notifier).state = 0,
+                        icon: const Icon(Icons.chevron_right,
+                            color: BsTokens.mutedLight),
+                        label: CfgText('profession_screen.t01', 'חזור',
+                            style: TextStyle(color: BsTokens.mutedLight)),
+                      ),
                     ),
                   ),
                   const Spacer(),

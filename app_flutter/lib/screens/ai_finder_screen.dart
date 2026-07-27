@@ -31,6 +31,7 @@ import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -271,10 +272,14 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                     const SizedBox(height: BsTokens.space3),
                     SizedBox(
                       width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: _loading ? null : _search,
-                        icon: const Text('🔎'),
-                        label: CfgText('ai_finder_screen.t04', 'מצא לי'),
+                      // composite hide: whole button gone when the org hides this element
+                      child: CfgVisible(
+                        'ai_finder_screen.t04',
+                        child: FilledButton.icon(
+                          onPressed: _loading ? null : _search,
+                          icon: const Text('🔎'),
+                          label: CfgText('ai_finder_screen.t04', 'מצא לי'),
+                        ),
                       ),
                     ),
                     const SizedBox(height: BsTokens.space4),

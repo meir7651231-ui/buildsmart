@@ -26,6 +26,7 @@ import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -195,10 +196,14 @@ class _DescribeToCartState extends ConsumerState<DescribeToCartScreen> {
               const SizedBox(height: BsTokens.space3),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _loading ? null : _find,
-                  icon: const Text('🔎'),
-                  label: CfgText('describe_to_cart_screen.t04', 'מצא לי את הסל'),
+                // composite hide: whole button gone when the org hides this element
+                child: CfgVisible(
+                  'describe_to_cart_screen.t04',
+                  child: FilledButton.icon(
+                    onPressed: _loading ? null : _find,
+                    icon: const Text('🔎'),
+                    label: CfgText('describe_to_cart_screen.t04', 'מצא לי את הסל'),
+                  ),
                 ),
               ),
               const SizedBox(height: BsTokens.space4),
