@@ -45,6 +45,8 @@ import 'package:buildsmart/config/vertical_packs.dart'
     show applyVerticalPack, kVerticalPacks;
 import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
     show FindReplacePane;
+import 'package:buildsmart/screens/studio/panes/history_pane.dart'
+    show HistoryPane;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
 import 'package:buildsmart/state/org_config_store.dart'
@@ -477,6 +479,13 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     );
   }
 
+  /// slice-5 — משגר את מסך גרסאות-והיסטוריה (מיחזור `HistoryPane` verbatim).
+  void _openHistory() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const _WizardHistoryScreen()),
+    );
+  }
+
   /// גוף-מודול: קבוצות-מסך (screenLabelHe) + מתגי-הרכיבים. נבנה **רק כשהמודול
   /// פתוח** (lazy — ~896 מתגים לא נבנים בסקציות סגורות). ממויין לפי נפח.
   Widget _moduleBody(Map<String, List<ElementDescriptor>> byScreen) {
@@ -883,17 +892,29 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                 ),
                 const SizedBox(height: BsTokens.space3),
               ],
-              // ── מצא-והחלף (giant slice-4) — משגר את FindReplacePane של הסטודיו
-              // (מיחזור verbatim) במסלול-מלא + פעולת "פרסם לכולם (חי)".
+              // ── כלי-סטודיו (giant slice-4/5) — מיחזור verbatim של פאנלי-הסטודיו
+              // במסלול-מלא: מצא-והחלף (+publish חי) · גרסאות-והיסטוריה (שחזור).
               const SizedBox(height: BsTokens.space2),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  key: const Key('open-find-replace'),
-                  onPressed: _openFindReplace,
-                  icon: const Text('🔎', style: TextStyle(fontSize: 15)),
-                  label: const Text('מצא והחלף בטקסטים'),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const Key('open-find-replace'),
+                      onPressed: _openFindReplace,
+                      icon: const Text('🔎', style: TextStyle(fontSize: 15)),
+                      label: const Text('מצא והחלף'),
+                    ),
+                  ),
+                  const SizedBox(width: BsTokens.space2),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const Key('open-history'),
+                      onPressed: _openHistory,
+                      icon: const Text('🕘', style: TextStyle(fontSize: 15)),
+                      label: const Text('גרסאות'),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: BsTokens.space2),
               SizedBox(
@@ -1276,6 +1297,30 @@ class _WizardFindReplaceScreen extends ConsumerWidget {
           ],
         ),
         body: const FindReplacePane(),
+      ),
+    );
+  }
+}
+
+// ─── גרסאות והיסטוריה באשף (slice-5) — מסלול-מלא סביב `HistoryPane` של הסטודיו ──
+// מיחזור **verbatim** של הפאנל (רשימת ConfigVersion חדש-ראשון · הערה/מפרסם/זמן ·
+// "שחזר" = rollback קדימה-בלבד מאחורי דיאלוג-אישור · מצב-ריק ידידותי). כל
+// "פרסם לכולם" (מ-✎/slice-2 או מצא-והחלף/slice-4) נרשם כאן — וניתן לשחזר.
+class _WizardHistoryScreen extends StatelessWidget {
+  const _WizardHistoryScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.brand,
+          foregroundColor: Colors.white,
+          title: const Text('גרסאות והיסטוריה'),
+        ),
+        body: const HistoryPane(),
       ),
     );
   }

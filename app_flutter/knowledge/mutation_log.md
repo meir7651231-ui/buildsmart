@@ -1822,3 +1822,9 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** הכפתור `onPressed:null` (או pushing מסך-ריק) ⇒ בדיקת-ה-launcher (`find.byType(FindReplacePane)`) אדומה.
 - **בטיחות:** מיחזור **verbatim** (0 שינוי ב-`FindReplacePane`) ⇒ בדיקות-הסטודיו שלו נשארות ירוקות. ה-publish מפורש (הטיוטה לא נוגעת ב-live עד לחיצה). find-replace על overrides בלבד (labelHe לא נסרק).
 - **אימות:** analyze 0 · org_setup_wizard 18/18.
+
+## #wizard-studio-s5 — גרסאות והיסטוריה (launcher) — 2026-07-27
+- **הפונקציות:** `_openHistory` · `_WizardHistoryScreen` (עוטף `HistoryPane`).
+- **תקלה שהוזרקה (mutation-sensitivity):** הכפתור `onPressed:null` ⇒ בדיקת-ה-launcher (`find.byType(HistoryPane)`) אדומה.
+- **בטיחות:** מיחזור **verbatim** (0 שינוי ב-`HistoryPane`) ⇒ בדיקות-הסטודיו שלו ירוקות. מצב-ריק על אשף-נקי. שחזור=rollback קדימה-בלבד (ההיסטוריה לא נהרסת).
+- **אימות:** analyze 0 · org_setup_wizard 19/19.

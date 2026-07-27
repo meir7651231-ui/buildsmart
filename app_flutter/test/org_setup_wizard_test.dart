@@ -9,6 +9,8 @@ import 'package:buildsmart/config/org_modules.dart';
 import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
 import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
     show FindReplacePane;
+import 'package:buildsmart/screens/studio/panes/history_pane.dart'
+    show HistoryPane;
 import 'package:buildsmart/state/org_config_store.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configStoreProvider;
@@ -368,5 +370,18 @@ void main() {
     expect(find.byType(FindReplacePane), findsOneWidget);
     expect(find.text('מצא טקסט'), findsOneWidget);
     expect(find.text('פרסם לכולם (חי)'), findsOneWidget);
+  });
+
+  // ── giant slice-5 — versions/history launcher wires the Studio pane ──
+  testWidgets('the 🕘 launcher opens the recycled HistoryPane route (empty '
+      'state on a clean wizard — the restore logic is studio-tested)', (t) async {
+    await _pump(t);
+    final launcher = find.byKey(const Key('open-history'));
+    await t.ensureVisible(launcher);
+    await t.tap(launcher);
+    await t.pumpAndSettle();
+    expect(find.byType(HistoryPane), findsOneWidget);
+    expect(find.textContaining('עדיין לא פורסמו גרסאות'), findsOneWidget,
+        reason: 'the pane is live and reading configStore.history');
   });
 }

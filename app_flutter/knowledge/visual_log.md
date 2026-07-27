@@ -4,6 +4,14 @@
 
 ---
 
+## #wizard-studio-s5 — גרסאות והיסטוריה באשף (מיחזור HistoryPane) — 2026-07-27 ✅ דירקטיבה הושלמה
+
+**שינוי-UI:** כפתור **"🕘 גרסאות"** (ב-Row עם מצא-והחלף) → מסלול-מלא `_WizardHistoryScreen` המארח את **`HistoryPane` של הסטודיו (verbatim)** — רשימת גרסאות + "שחזר".
+
+**אימות:** `org_setup_wizard_test` **19/19** — ה-launcher פותח את `HistoryPane`, מצב-ריק 'עדיין לא פורסמו גרסאות' (הפאנל חי וקורא `configStore.history`). לוגיקת-השחזור מכוסה ב-studio. analyze 0.
+
+**5 פרוסות הושלמו:** אקורדיון (s1) · ✎ מפקח (s2) · מונחים-שזורים (s3) · מצא-והחלף (s4) · גרסאות (s5) — כולן על ה-Studio-store הקיים.
+
 ## #wizard-studio-s4 — מצא-והחלף באשף (מיחזור FindReplacePane) — 2026-07-27
 
 **שינוי-UI:** `org_setup_wizard_screen.dart` — כפתור **"🔎 מצא והחלף בטקסטים"** (מתחת למונחים) → מסלול-מלא `_WizardFindReplaceScreen` המארח את **`FindReplacePane` של הסטודיו (verbatim)** + פעולת-AppBar **"פרסם לכולם (חי)"** (`configStore.publish`).
