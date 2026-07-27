@@ -198,6 +198,8 @@
 
 > 📖 **27/7 — מסמך-אב מאוחד "המערכת-הענקית + הסדר" נכתב+נדחף** (`MASTER-giant-system-order.md`): מאגד הכל — חזון · מצאי-מאומת (Clean · giant-v1..v6.1 · Phase-2 · מרכז-שליטה: stubs-מתים מול עורכים-חבויים · 2-Studios · פירוק-שטחי 13+8-בלי-registry) · עקרונות · **הסדר המדויק:** 0 registry · **0.5 חבר-גולמי-נקי-כבסיס** (חברה=clean+קונפיג+דאטה) · 1 חבר-הכל-app-wide דרך Studio-registry + פרק-stubs · 2 פרק-טוגלים+matrix (הצג/הסתר ב-Studio) · **2.5 אַחֵד 2-Studios→אחד** · 3 מרכז-שליטה-מאוחד (אשף→Trade-Builder→Studio→קונפיג→דאטה→זהות) · 4 ורטיקל+חברה-שנייה · 5 שמירה. בטיחות: default-on+toggle-matrix+degrade. מחוץ: Android-Play/R2/keystore/iOS.
 
+> 🎛️ **27/7 — חידוד-מפתח + הנחיה: registry-ה-Studio → ~863 טוגלים-יפים באשף.** הבעלים חידד: לא "13→עשרות כמו מאור" אלא **לקחת את registry-ה-Studio (~863, שליטה פר-אלמנט שכבר קיימת) ולחשוף אותו כטוגלי-הצג/הסתר באשף — אותה כמות/שליטה — אבל מוצגים *יפה* (קיבוץ מסך→סעיף · `labelHe` · אקורדיון · חיפוש), לא הרשימה-הגולמית-הטכנית של ה-Studio.** ה-registry **קיים** (לא חסר) — מחזרים. `default-ON`=זהה-בייטים · edit-safety נעילות-ליבה · toggle-matrix. עדכנתי `MASTER-giant-system-order.md` (צעד-0: registry=של-Studio · צעד-2: חשיפה-יפה) + `DIRECTIVE-studio-registry-to-wizard-toggles.md`.
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
