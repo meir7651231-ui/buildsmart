@@ -1749,3 +1749,9 @@
 - **מגבלה כנה:** receipt:true→כותרת לא נבדק ברמת-כפתור (printDocument לא-provider); הקרנל invoiceTitle(receipt:true) כן-נבדק ב-invoice_test.
 - **לקח:** כשההבדל בין שני כפתורים הוא ליטרל-בודד וה-seam לא-בר-override — מכסים את הליטרל בבדיקת-קרנל, מתעדים את פער-הכפתור בגלוי.
 - **אימות:** analyze 0 · 7 ירוקות · guards ×2.
+
+## #swarm-r1 — ציר הצג/הסתר פר-אלמנט (registry→אשף) — 2026-07-27
+- **הפתרון:** elementShown (features['element.<id>']!=false) · elementVisible (שער + נעילת-kImmutable) ב-CfgText · אשף-אקורדיון מונחה-חיפוש · screen→עברית.
+- **mutation ×1:** M1 elementVisible→true (מתעלם מ-elementShown) → matrix אדום(+9 −1, home.topbar.brand לא-מוסתר) → ירוק · אפס-שאריות.
+- **לקח:** 889/895 כבר-wired דרך CfgText ⇒ שער במקום-אחד כיסה הכל (לא 863 חיווטים). Option A (מחזור features) עקף את מוקש-carry-through של שדה-חדש. תיקון-אינטגרציה: SwitchListTile תחת DecoratedBox-צבעוני דורש Material-עוטף (assertion).
+- **אימות:** analyze 0 · byte-verify ×7 · 63+5 בדיקות-סוללה ירוקות · שער מלא.

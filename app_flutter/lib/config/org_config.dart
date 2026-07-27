@@ -191,6 +191,16 @@ bool featureEnabled(OrgConfig c, String module, String feature) {
   return c.features['$module.$feature'] == true;
 }
 
+/// Is the Studio element [id] SHOWN under [c]? The setup-wizard's per-element
+/// show/hide axis — it recycles the element_registry as the toggle source.
+/// Stored in [features] under an `element.<id>` key so it rides the EXISTING
+/// codec + wizard/pack carry-through with ZERO schema change; ABSENT = visible
+/// (byte-identical), only an explicit `false` hides. The kImmutable core-lock
+/// (nav / mandatory screens can never be hidden) is enforced one layer up in
+/// the gate [elementVisible], which has the Riverpod registry the pure model
+/// here must not import.
+bool elementShown(OrgConfig c, String id) => c.features['element.$id'] != false;
+
 // ── V3 term-key registry — the map is OPEN (any key rides the codec); these
 // are the keys the app actually consults, so a wizard/pack knows what works:
 //   brand.name · brand.club — the brand wordage (runtime label sites)

@@ -41,6 +41,15 @@ Future<ProviderContainer> _pump(WidgetTester t,
 SwitchListTile _tile(WidgetTester t, String label) =>
     t.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, label));
 
+/// Tap "שמור והפעל" — ensure it is scrolled into view first (the element
+/// section grows the list past the fold), then settle the live-swap + persist.
+Future<void> _tapSave(WidgetTester t) async {
+  final save = find.text('שמור והפעל');
+  await t.ensureVisible(save);
+  await t.tap(save);
+  await t.pumpAndSettle();
+}
+
 void main() {
   test('kOrgModules is the wave-1 closed set exactly; manager is the locked '
       'key', () {
@@ -154,5 +163,92 @@ void main() {
     await t.pumpAndSettle();
     expect(c.read(orgConfigProvider).modules, isEmpty);
     expect(c.read(orgConfigProvider).terms, isEmpty);
+  });
+
+  // ── giant · per-element show/hide axis — the "רכיבים" section ──
+  // The wizard recycles the ~863-element Studio registry as per-element toggles
+  // (Key('elem-toggle-<id>'), title=labelHe, value=elementShown), narrowed by a
+  // search field (Key('elem-search')). kImmutable/critical ids are LOCKED. Off
+  // writes features['element.<id>']=false canonical-minimal; on removes the key.
+  testWidgets('the רכיבים section renders — a search field + registry-backed '
+      'per-element toggles (search-revealed)', (t) async {
+    await _pump(t);
+    expect(find.byKey(const Key('elem-search')), findsOneWidget);
+    await t.enterText(find.byKey(const Key('elem-search')), 'עגלה');
+    await t.pumpAndSettle();
+    final toggle = find.byKey(const Key('elem-toggle-cart.cta'));
+    expect(toggle, findsOneWidget, reason: 'a real registry id is toggleable');
+    expect(
+        find.descendant(
+            of: toggle, matching: find.text('כפתור הזמנה (עגלה)')),
+        findsOneWidget,
+        reason: 'the toggle is titled by the element labelHe');
+  });
+
+  testWidgets('search filters the toggles by labelHe — matching shows, '
+      'non-matching hides (both directions)', (t) async {
+    await _pump(t);
+    await t.enterText(find.byKey(const Key('elem-search')), 'עגלה');
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('elem-toggle-cart.cta')), findsOneWidget);
+    expect(find.byKey(const Key('elem-toggle-home.topbar.brand')), findsNothing,
+        reason: 'a לוגו-label element is filtered out by an עגלה query');
+    await t.enterText(find.byKey(const Key('elem-search')), 'לוגו');
+    await t.pumpAndSettle();
+    expect(
+        find.byKey(const Key('elem-toggle-home.topbar.brand')), findsOneWidget);
+    expect(find.byKey(const Key('elem-toggle-cart.cta')), findsNothing,
+        reason: 'the sets swap — the filter is live on the query');
+  });
+
+  testWidgets('element toggle is canonical-minimal — off writes '
+      'element.<id>:false, on removes the key', (t) async {
+    final c = await _pump(t);
+    await t.enterText(find.byKey(const Key('elem-search')), 'עגלה');
+    await t.pumpAndSettle();
+    final toggle = find.byKey(const Key('elem-toggle-cart.cta'));
+    expect(t.widget<SwitchListTile>(toggle).value, isTrue,
+        reason: 'absent ⇒ shown');
+    await t.ensureVisible(toggle);
+    await t.tap(toggle);
+    await t.pumpAndSettle();
+    expect(t.widget<SwitchListTile>(toggle).value, isFalse,
+        reason: 'draft flipped to hidden');
+    await _tapSave(t);
+    expect(c.read(orgConfigProvider).features['element.cart.cta'], isFalse,
+        reason: 'hide persists as an explicit false under the element key');
+    // flip back ON → canonical-minimal drops the key (never stores true).
+    await t.enterText(find.byKey(const Key('elem-search')), 'עגלה');
+    await t.pumpAndSettle();
+    final back = find.byKey(const Key('elem-toggle-cart.cta'));
+    expect(t.widget<SwitchListTile>(back).value, isFalse,
+        reason: 'the hide survived the save');
+    await t.ensureVisible(back);
+    await t.tap(back);
+    await t.pumpAndSettle();
+    await _tapSave(t);
+    expect(c.read(orgConfigProvider).features.containsKey('element.cart.cta'),
+        isFalse, reason: 'canonical-minimal: shown ⇒ the key is dropped');
+  });
+
+  testWidgets('kImmutable element toggle is LOCKED — nav.bottombar can never '
+      'be hidden from the wizard', (t) async {
+    final c = await _pump(t);
+    await t.enterText(find.byKey(const Key('elem-search')), 'סרגל ניווט');
+    await t.pumpAndSettle();
+    final navToggle = find.byKey(const Key('elem-toggle-nav.bottombar'));
+    expect(navToggle, findsOneWidget);
+    expect(t.widget<SwitchListTile>(navToggle).onChanged, isNull,
+        reason: 'critical ids are locked — the org axis can never hide them');
+    expect(t.widget<SwitchListTile>(navToggle).value, isTrue);
+    // a tap does nothing (disabled) and a save writes no hide for it.
+    await t.ensureVisible(navToggle);
+    await t.tap(navToggle);
+    await t.pumpAndSettle();
+    await _tapSave(t);
+    expect(
+        c.read(orgConfigProvider).features.containsKey('element.nav.bottombar'),
+        isFalse,
+        reason: 'locked ⇒ no false is ever written');
   });
 }

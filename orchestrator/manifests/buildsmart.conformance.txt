@@ -411,3 +411,11 @@ lib/data/customer_import.dart:::_CustCol('businessId', 'ח.פ', {
 # Regression — GIANT Phase-2 wave-4c (2026-07-27): receipt (קבלה) button on the order-detail sheet — same billing rail, receipt:true, under orders.invoicing:
 lib/screens/manager_dashboard_screen.dart:::final title = invoiceTitle(invoiceOrder, receipt: true);
 lib/screens/manager_dashboard_screen.dart:::label: const Text('💵 הפק קבלה'),
+#
+# Regression — SWARM run-1 (2026-07-27): Studio registry → OrgConfig per-element show/hide toggles in the wizard (default-ON byte-identical, one central CfgText gate, kImmutable-locked):
+lib/config/org_config.dart:::bool elementShown(OrgConfig c, String id) => c.features['element.$id'] != false;
+lib/state/org_gates.dart:::bool elementVisible(WidgetRef ref, String id) {
+lib/widgets/studio/cfg_text.dart:::if (!elementVisible(ref, id)) return const SizedBox.shrink();
+lib/screens/org_setup_wizard_screen.dart:::key: Key('elem-toggle-${d.id}'),
+lib/screens/org_setup_wizard_screen.dart:::void _setElementHidden(String id, {required bool hidden}) {
+lib/config/screen_labels_he.dart:::String screenLabelHe(String

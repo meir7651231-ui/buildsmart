@@ -19,8 +19,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/config/org_config.dart'
-    show featureEnabled, featureOn, moduleOn, termOf;
+    show elementShown, featureEnabled, featureOn, moduleOn, termOf;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show criticalIdsProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Is [module] on for the org in force? Reads LIVE (`watch`) — build() only.
@@ -38,6 +40,17 @@ bool featOn(WidgetRef ref, String module, String feature) =>
 /// ships byte-identical. Delegates to [featureEnabled].
 bool featEnabled(WidgetRef ref, String module, String feature) =>
     featureEnabled(ref.watch(orgConfigProvider), module, feature);
+
+/// Is the Studio element [id] VISIBLE for the org in force? LIVE (`watch`),
+/// build() only — the render gate for the wizard's per-element show/hide axis.
+/// kImmutable core elements (nav / mandatory screens, from [criticalIdsProvider])
+/// are ALWAYS visible — the org axis can never hide them, so a user can't strand
+/// themselves. Otherwise absent=visible ([elementShown]) ⇒ empty config = every
+/// element shown = byte-identical live app.
+bool elementVisible(WidgetRef ref, String id) {
+  if (ref.watch(criticalIdsProvider).contains(id)) return true;
+  return elementShown(ref.watch(orgConfigProvider), id);
+}
 
 /// The org's wording for [key] — LIVE (`watch`), build() only: when the V5
 /// wizard swaps [orgConfigProvider], every termed label re-renders. Absent /

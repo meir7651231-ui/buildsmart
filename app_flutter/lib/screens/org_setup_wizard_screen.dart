@@ -26,18 +26,23 @@ import 'package:buildsmart/config/org_config.dart'
     show
         OrgConfig,
         decodeOrgConfig,
+        elementShown,
         encodeOrgConfig,
         kDefaultOrgConfig,
         kOrgConfigFlag,
         moduleOn;
 import 'package:buildsmart/config/org_modules.dart'
     show OrgModuleInfo, kOrgModules, kWizardLockedModules;
+import 'package:buildsmart/config/screen_labels_he.dart'
+    show normalizeScreen, screenLabelHe;
 import 'package:buildsmart/config/vertical_packs.dart'
     show applyVerticalPack, kVerticalPacks;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
 import 'package:buildsmart/state/org_config_store.dart'
     show orgConfigProvider, persistOrgConfig;
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show ElementDescriptor, kElementRegistry;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -79,6 +84,14 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
   /// שומר-כפילות ל"שמור והפעל" (ה-persist הוא async).
   bool _saving = false;
 
+  /// מקטע-רכיבים: שאילתת-החיפוש החיה. הרשימה מונחית-חיפוש — ריק ⇒ לא מציגים
+  /// קבוצות (האשף נשאר קצר, כפתור-השמירה בהישג); הקלדה חושפת קבוצות תואמות.
+  String _elemQuery = '';
+
+  /// קבוצות-מסך שהמשתמש כיווץ ידנית (ברירת-המחדל בחיפוש: פתוח, כדי שהתאמות
+  /// יופיעו מיד). מפתח-מסך מנורמל ב-set = מכווץ.
+  final Set<String> _collapsedElemScreens = <String>{};
+
   late final TextEditingController _orgName;
   late final Map<String, TextEditingController> _termCtrls;
 
@@ -105,17 +118,19 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
   }
 
   /// ל-OrgConfig אין copyWith (API-V1 חתום — לא נוגעים בו); הבנייה-מחדש
-  /// המקומית שומרת slug/theme/features כפי-שהם ומחליפה רק מה שהאשף עורך.
+  /// המקומית שומרת slug/theme כפי-שהם ומחליפה רק מה שהאשף עורך — שם, מודולים,
+  /// מונחים ומפת-features (ציר הצג/הסתר הרכיבים; ברירת-מחדל = carry-through).
   OrgConfig _rebuild({
     String? orgName,
     Map<String, bool>? modules,
+    Map<String, bool>? features,
     Map<String, String>? terms,
   }) =>
       OrgConfig(
         slug: _draft.slug,
         orgName: orgName ?? _draft.orgName,
         theme: _draft.theme,
-        features: _draft.features,
+        features: features ?? _draft.features,
         modules: modules ?? _draft.modules,
         terms: terms ?? _draft.terms,
       );
@@ -156,6 +171,20 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
       next[key] = v;
     }
     setState(() => _draft = _rebuild(terms: next));
+  }
+
+  /// ציר הצג/הסתר הרכיבים — קנוני-מינימלי כמו [_setModule]: הסתרה = המפתח
+  /// 'element.<id>' → false, הצגה = **הסרת** המפתח (absent=on ⇒ קונפיג
+  /// כולו-מוצג נשאר ריק, byte-identical). ליבה (kImmutable) לעולם לא מגיעה
+  /// לכאן — ה-UI מרנדר אותה נעולה (onChanged null).
+  void _setElementHidden(String id, {required bool hidden}) {
+    final next = <String, bool>{..._draft.features};
+    if (hidden) {
+      next['element.$id'] = false;
+    } else {
+      next.remove('element.$id');
+    }
+    setState(() => _draft = _rebuild(features: next));
   }
 
   /// שמור והפעל — LIVE קודם (ה-provider), persist אחר-כך; כישלון-אחסון מדווח
@@ -280,6 +309,157 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     );
   }
 
+  /// סופר-רכיבים בקבוצת-מסך (סכום כל האזורים) — לשורת-המשנה ולמיון-לפי-נפח.
+  int _elemCount(Map<String, List<ElementDescriptor>> areas) =>
+      areas.values.fold<int>(0, (n, l) => n + l.length);
+
+  /// שורת-רכיב אחת: מתג הצג/הסתר. ליבה (kImmutable) — נעולה (onChanged null,
+  /// value=מוצג-תמיד) עם חיווי 🔒; לעולם לא מציעים לכבות ניווט/כניסה.
+  Widget _elementTile(ElementDescriptor d) {
+    final locked = d.kImmutable;
+    return SwitchListTile(
+      key: Key('elem-toggle-${d.id}'),
+      contentPadding: EdgeInsets.zero,
+      dense: true,
+      activeColor: BsTokens.brand,
+      title: Text(
+        d.labelHe,
+        style: const TextStyle(
+          color: BsTokens.inkLight,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: locked
+          ? const Text(
+              '🔒 ליבה — נעול',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
+            )
+          : null,
+      // ליבה מוצגת-תמיד (הגנת-ההצגה נאכפת גם ב-elementVisible); השאר מהטיוטה.
+      value: locked ? true : elementShown(_draft, d.id),
+      onChanged: locked ? null : (v) => _setElementHidden(d.id, hidden: !v),
+    );
+  }
+
+  /// גוף קבוצת-מסך: תוויות-אזור (raw — חופשי) + מתגי-הרכיבים. נבנה בהורה **רק
+  /// כשהקבוצה פתוחה** (lazy — 863 רכיבים לא נבנים בקבוצות סגורות).
+  Widget _elemGroupBody(Map<String, List<ElementDescriptor>> areas) {
+    final areaKeys = areas.keys.toList()..sort();
+    // Transparent Material ancestor so the SwitchListTiles have a Material to
+    // paint ink/background on — the group card is a colored DecoratedBox, and a
+    // ListTile directly under a colored DecoratedBox trips a framework assertion
+    // (its ink/bg would be hidden). Transparent ⇒ the card color still shows.
+    return Material(
+      type: MaterialType.transparency,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final area in areaKeys) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: BsTokens.space2, bottom: 2),
+              child: Text(
+                area,
+                style: const TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            for (final d in areas[area]!) _elementTile(d),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// מקטע "רכיבים" — כותרת + הסבר + שדה-חיפוש, ואז תוצאות מונחות-חיפוש. מכוון:
+  /// 863 רכיבים לא נשפכים כברירת-מחדל — האשף נשאר קצר (כפתור-השמירה בהישג),
+  /// והקלדה חושפת רק את הקבוצות התואמות.
+  List<Widget> _buildElementsSection() {
+    final q = _elemQuery.trim().toLowerCase();
+    return [
+      _sectionTitle('רכיבים'),
+      const Text(
+        'חפש רכיב כדי להציג או להסתיר אותו. ליבה (ניווט/כניסה) נעולה תמיד.',
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+      ),
+      const SizedBox(height: BsTokens.space3),
+      TextField(
+        key: const Key('elem-search'),
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+        decoration: _dec('חיפוש רכיב'),
+        onChanged: (v) => setState(() => _elemQuery = v),
+      ),
+      const SizedBox(height: BsTokens.space3),
+      ..._buildElementResults(q),
+    ];
+  }
+
+  /// תוצאות-החיפוש של מקטע-הרכיבים. ריק ⇒ רמז (בלי לבנות קבוצות). אחרת: סינון
+  /// פר-רכיב לפי labelHe/id, קיבוץ מסך→אזור (מיזוג-כפילויות ב-[normalizeScreen]),
+  /// מיון לפי נפח (יורד) עם שובר-שוויון יציב, וכל קבוצה נפתחת כברירת-מחדל.
+  List<Widget> _buildElementResults(String q) {
+    if (q.isEmpty) {
+      return const <Widget>[
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+          child: Text(
+            'הקלד שם רכיב (בעברית) כדי להציג ולהסתיר.',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+          ),
+        ),
+      ];
+    }
+    final groups = <String, Map<String, List<ElementDescriptor>>>{};
+    for (final d in kElementRegistry) {
+      if (!d.labelHe.toLowerCase().contains(q) &&
+          !d.id.toLowerCase().contains(q)) {
+        continue;
+      }
+      (groups[normalizeScreen(d.screen)] ??=
+              <String, List<ElementDescriptor>>{})
+          .putIfAbsent(d.area, () => <ElementDescriptor>[])
+          .add(d);
+    }
+    if (groups.isEmpty) {
+      return const <Widget>[
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+          child: Text(
+            'לא נמצאו רכיבים תואמים',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+          ),
+        ),
+      ];
+    }
+    final keys = groups.keys.toList()
+      ..sort((a, b) {
+        final ca = _elemCount(groups[a]!);
+        final cb = _elemCount(groups[b]!);
+        return ca != cb ? cb.compareTo(ca) : a.compareTo(b);
+      });
+    return [
+      for (final sk in keys)
+        _ElemGroup(
+          title: screenLabelHe(sk),
+          sub: '${_elemCount(groups[sk]!)} רכיבים',
+          // ברירת-מחדל פתוח (התאמות נראות מיד); המשתמש יכול לכווץ.
+          open: !_collapsedElemScreens.contains(sk),
+          onTap: () => setState(() {
+            if (!_collapsedElemScreens.remove(sk)) {
+              _collapsedElemScreens.add(sk);
+            }
+          }),
+          // הגוף נבנה רק כשפתוח — זו ה-laziness (מכווץ ⇒ אפס מתגים).
+          body: _collapsedElemScreens.contains(sk)
+              ? null
+              : _elemGroupBody(groups[sk]!),
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -377,6 +557,10 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
               _sectionTitle('מודולים'),
               for (final m in kOrgModules) _moduleTile(m),
               const SizedBox(height: BsTokens.space5),
+              // ── מקטע "רכיבים" (giant-system) — ציר הצג/הסתר על רג׳יסטרי-
+              // הסטודיו, מקובץ מסך→אזור, חיפוש-חי, אקורדיון עצל; ליבה נעולה.
+              ..._buildElementsSection(),
+              const SizedBox(height: BsTokens.space5),
               _sectionTitle('מיתוג ומונחים (ריק = ברירת-המחדל)'),
               for (final f in _kTermFields) ...[
                 TextField(
@@ -455,6 +639,102 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// מקטע-רכיבים אחד (מסך) באקורדיון — סגנון _ManageSection של לוח-המנהל,
+/// ממומש-מחדש מקומית (חוקי-בית: Text רגיל בלבד, בלי CfgText/HelpTarget). הגוף
+/// ([body]) נבנה בהורה **רק כשפתוח** ומועבר null כשסגור — כך 863 מתגי-הרכיבים
+/// לא נבנים בקבוצות סגורות.
+class _ElemGroup extends StatelessWidget {
+  const _ElemGroup({
+    required this.title,
+    required this.sub,
+    required this.open,
+    required this.onTap,
+    this.body,
+  });
+
+  final String title;
+  final String sub;
+  final bool open;
+  final VoidCallback onTap;
+  final Widget? body;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = body;
+    return Container(
+      margin: const EdgeInsets.only(bottom: BsTokens.space2),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(BsTokens.space3),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.5,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            sub,
+                            style: const TextStyle(
+                              color: BsTokens.mutedLight,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: BsTokens.space2),
+                    // ▾ פתוח · ‹ סגור — אותם גליפים של _ManageSection (RTL).
+                    Text(
+                      open ? '▾' : '‹',
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (open && content != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                BsTokens.space3,
+                0,
+                BsTokens.space3,
+                BsTokens.space3,
+              ),
+              child: content,
+            ),
+        ],
       ),
     );
   }

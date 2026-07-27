@@ -10,6 +10,7 @@
 
 import 'package:buildsmart/config/org_config.dart' show termOf;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
+import 'package:buildsmart/state/org_gates.dart' show elementVisible;
 import 'package:buildsmart/state/studio/config_node.dart' show CfgStyle;
 import 'package:buildsmart/state/studio/config_store.dart'
     show resolvedNodeProvider;
@@ -154,6 +155,12 @@ class CfgText extends StatelessWidget {
         // unconditional — a watch inside `??`'s lazy arm would flap the
         // subscription between builds.
         final org = ref.watch(orgConfigProvider);
+        // giant · setup-wizard element-visibility gate (the ONE live render
+        // point every wired element mounts through): an org that hides this
+        // element renders nothing. kImmutable core is force-visible inside
+        // elementVisible, so nav/mandatory can't be stranded. Absent config ⇒
+        // visible ⇒ byte-identical to the pre-wizard app.
+        if (!elementVisible(ref, id)) return const SizedBox.shrink();
         final txt = n.text ?? termOf(org, id, fallback);
         final display = n.emoji == null ? txt : '${n.emoji} $txt';
         return EditHandle.maybe(

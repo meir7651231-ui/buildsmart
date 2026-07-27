@@ -72,3 +72,5 @@ test/invoice_gate_test.dart
 # giant Phase-2 wave-4b — delivery-note document (goods/no-money) on the printable-docs rail, gated orders.deliveryNote:
 test/delivery_note_test.dart
 test/delivery_note_gate_test.dart
+# SWARM run-1 — screen→Hebrew map for the wizard element accordion:
+test/screen_labels_he_test.dart

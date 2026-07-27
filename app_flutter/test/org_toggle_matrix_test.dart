@@ -20,6 +20,8 @@ import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/org_config_store.dart';
 import 'package:buildsmart/state/push_routing.dart'
     show pendingPushThreadProvider;
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show criticalIdsProvider;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -149,5 +151,36 @@ void main() {
     expect(t.takeException(), isNull);
     expect(find.text('שיחות'), findsNothing,
         reason: 'the wizard saves → the app reshapes live');
+  });
+
+  testWidgets('ELEMENT-HIDE: home.topbar.brand hides app-wide via the org '
+      'element axis (empty=shown ⇒ byte-identical · false=gone)', (t) async {
+    // empty config ⇒ the wired brand renders its verbatim fallback.
+    await _boot(t, const OrgConfig());
+    expect(find.text('BuildSmart'), findsOneWidget,
+        reason:
+            'absent element key ⇒ shown, byte-identical to the pre-axis app');
+    // hide it ⇒ CfgText's render gate (elementVisible) returns SizedBox.shrink
+    // at the ONE live mount point; the shell stays whole.
+    await _boot(
+        t, const OrgConfig(features: {'element.home.topbar.brand': false}));
+    _expectShellAlive(t);
+    expect(find.text('BuildSmart'), findsNothing,
+        reason: 'the org element axis really hides the wired brand app-wide');
+  });
+
+  testWidgets('kIMMUTABLE element: element.nav.bottombar:false cannot strand — '
+      'the nav is force-visible, the shell stays whole', (t) async {
+    await _boot(
+        t, const OrgConfig(features: {'element.nav.bottombar': false}));
+    _expectShellAlive(t);
+    final c = ProviderScope.containerOf(t.element(find.byType(HomeShell)));
+    // the pure model genuinely carries the hide — but nav.bottombar is a
+    // critical id, so the render gate elementVisible force-shows it: a user can
+    // never toggle themselves out of the nav. Prove BOTH halves.
+    expect(elementShown(c.read(orgConfigProvider), 'nav.bottombar'), isFalse,
+        reason: 'the config really asks to hide it');
+    expect(c.read(criticalIdsProvider).contains('nav.bottombar'), isTrue,
+        reason: 'kImmutable ⇒ elementVisible ignores the hide (force-visible)');
   });
 }

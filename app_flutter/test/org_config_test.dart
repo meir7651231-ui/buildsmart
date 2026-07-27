@@ -8,6 +8,8 @@
 // layer is a skipped layer. This is also the toggle-matrix SEED for V2.
 
 import 'package:buildsmart/config/org_config.dart';
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show kElementRegistry;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -140,6 +142,49 @@ void main() {
               kDefaultOrgConfig),
           isTrue);
       expect(identical(resolveOrgConfig(), kDefaultOrgConfig), isTrue);
+    });
+  });
+
+  // ── giant · setup-wizard element show/hide axis (org_config.dart) ──
+  // The wizard recycles the Studio element_registry as per-element toggles,
+  // stored in [features] under an `element.<id>` key so they ride the EXISTING
+  // codec with ZERO schema change: absent=shown (byte-identical), only an
+  // explicit false hides. The kImmutable force-visible core-lock lives one
+  // layer up in the gate (org_gates.elementVisible) — see the matrix suite.
+  group('element show/hide axis — absent=shown, only false hides', () {
+    test('absent = SHOWN for every registry id (byte-identity, no enumeration)',
+        () {
+      expect(kElementRegistry, isNotEmpty, reason: 'the toggle source is real');
+      const cfg = OrgConfig();
+      for (final d in kElementRegistry) {
+        expect(elementShown(cfg, d.id), isTrue, reason: d.id);
+      }
+    });
+
+    test('explicit false hides that id ONLY; every sibling stays shown', () {
+      const cfg = OrgConfig(features: {'element.cart.cta': false});
+      expect(elementShown(cfg, 'cart.cta'), isFalse);
+      expect(elementShown(cfg, 'home.topbar.brand'), isTrue,
+          reason: 'only the named element hides');
+      expect(elementShown(cfg, 'not-in-any-registry'), isTrue,
+          reason: 'absent ⇒ shown, exactly like a registry id');
+    });
+
+    test('byte-identity: the all-shown default carries NO element key', () {
+      // every element defaults shown ⇒ the config encodes to the bare envelope
+      // (the A4 omit-empty idiom) — byte-identical to the pre-axis app, no
+      // element name ever enumerated into the persisted blob.
+      final encoded = encodeOrgConfig(const OrgConfig());
+      expect(encoded, '{"v":1}');
+      expect(encoded.contains('element.'), isFalse);
+    });
+
+    test('a hidden element rides the existing codec — round-trip stable', () {
+      const cfg = OrgConfig(features: {'element.cart.cta': false});
+      final back = decodeOrgConfig(encodeOrgConfig(cfg))!;
+      expect(back.features['element.cart.cta'], isFalse);
+      expect(elementShown(back, 'cart.cta'), isFalse,
+          reason: 'the hide survives encode→decode with zero schema change');
     });
   });
 }
