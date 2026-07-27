@@ -8,6 +8,8 @@
 
 ## 🥇 משימה 1 · קודם — preview עם האשף חי, ודחוף מיד
 > **תיקון (בעלים 27/7):** בנה על פרופיל **`clean`** — לא `demo`/`buildsmart`. clean = empty-shell (**אפס-דמו**) אבל יש בו את כל המסכים/המנוע → כך מקבלים **גם את האשף וגם אפס-נתוני-דמו**. אם ב-clean הכניסה-לאשף/דשבורד-מנהל חסומה — **חשוף אותה ב-clean** (הכניסה גדורה ב-`kOrgConfigFlag`, לא בפרופיל).
+>
+> 🔴 **סטטוס 27/7 (מאומת בבייטים):** הצי בנה את `wizard-preview.yml` (`472e7190`) **על `demo`** — לפני שהתיקון-הזה הגיע אליו. ה-workflow **רץ ירוק** (run #1 = success, ערוץ `wizard`) אבל **עדיין `--dart-define=APP_PROFILE=demo`** בראש-הענף (`4f50c40d`) — אף קומיט מאוחר לא נגע בו. **⇒ נדרש repoint:** החלף בשני ה-dart-defines ל-**`APP_PROFILE=clean`**, הרץ מחדש, ואז הלינק נקי-מדמו. מאומת: `clean` הוא הפרופיל המלא-יותר (`_ux=_bs||_clean||_c2`), לכן דשבורד-המנהל נגיש שם.
 1. בנה את האפליקציה עם **`--dart-define=APP_PROFILE=clean --dart-define=ORG_CONFIG=true`**.
 2. פרוס ל**ערוץ-Firebase-Hosting נפרד** (למשל `wizard`) — **האתר-הראשי-החי לא-נגע** — **והדפס את הלינק ב-run-summary.**
    - הכי-קל: עמודת-מטריצה נוספת ב-`clean-two-links.yml` (`ORG_CONFIG=true`), או workflow-אח קטן `wizard-preview.yml`.
