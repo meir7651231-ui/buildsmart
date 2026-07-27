@@ -121,7 +121,7 @@ void main() {
       // A tap on the live text opens the inline editor (NOT any app action).
       await tester.tap(find.text('הזמן'));
       await tester.pumpAndSettle();
-      expect(find.text('עריכת טקסט'), findsOneWidget);
+      expect(find.text('עריכת רכיב'), findsOneWidget);
 
       // Edit + save ⇒ the draft carries the new text (live preview).
       await tester.enterText(find.byType(TextField), 'שלם עכשיו');
@@ -152,6 +152,31 @@ void main() {
       await tester.tap(find.text('ביטול'));
       await tester.pumpAndSettle();
       expect(c.read(configStoreProvider).draft.isEmpty, isTrue);
+    });
+
+    testWidgets('tap → "הסתר רכיב" → applies SetHidden to the draft',
+        (tester) async {
+      final c = _store(editing: true);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(body: Center(child: CfgText('cart.cta', 'הזמן'))),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('הזמן'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('הסתר רכיב'));
+      await tester.pumpAndSettle();
+      // The draft carries hidden=true for the tapped element (a non-critical id).
+      expect(
+        c.read(configStoreProvider).draft.global['cart.cta']?.hidden,
+        isTrue,
+      );
     });
   });
 

@@ -19,8 +19,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/state/studio/config_store.dart'
-    show SetText, cfgOpError, configStoreProvider, kCfgMaxTextLen;
+    show SetHidden, SetText, cfgOpError, configStoreProvider, kCfgMaxTextLen;
 import 'package:buildsmart/state/studio/edit_mode.dart' show editModeProvider;
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show criticalIdsProvider;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,10 +98,12 @@ class _EditAffordance extends ConsumerWidget {
   }
 }
 
-/// The WYSIWYG inline editor: a small RTL dialog pre-filled with [current]; on save
-/// it validates (length / bidi via [cfgOpError]) and applies a [SetText] to the
-/// draft, so the tapped text updates LIVE (the owner sees the change immediately,
-/// then broadcasts it with "פרסם לכולם"). Cancel / no-change ⇒ a no-op.
+/// The WYSIWYG inline editor: a small RTL dialog pre-filled with [current]. On save
+/// it validates (length / bidi via [cfgOpError]) and applies a [SetText]; "הסתר
+/// רכיב" applies a [SetHidden] (blocked for a critical/`kImmutable` element via the
+/// SAME [cfgOpError]+[criticalIdsProvider] guard the inspector uses). Either edit
+/// hits the draft, so the tapped element updates LIVE (the owner sees it
+/// immediately, then broadcasts with "פרסם לכולם"). Cancel / no-change ⇒ a no-op.
 Future<void> _openInlineEditor(
   BuildContext context,
   WidgetRef ref,
@@ -107,10 +111,12 @@ Future<void> _openInlineEditor(
   String current,
 ) async {
   final controller = TextEditingController(text: current);
+  final criticalIds = ref.read(criticalIdsProvider);
+  var hideRequested = false;
   final result = await showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('עריכת טקסט', textAlign: TextAlign.right),
+      title: const Text('עריכת רכיב', textAlign: TextAlign.right),
       content: Directionality(
         textDirection: TextDirection.rtl,
         child: TextField(
@@ -127,6 +133,18 @@ Future<void> _openInlineEditor(
         ),
       ),
       actions: [
+        // "הסתר רכיב" — apply SetHidden after the dialog closes (mirrors the
+        // save-path error handling, which uses the outer [context] messenger).
+        TextButton(
+          onPressed: () {
+            hideRequested = true;
+            Navigator.pop(ctx);
+          },
+          child: const Text(
+            'הסתר רכיב',
+            style: TextStyle(color: BsTokens.danger),
+          ),
+        ),
         TextButton(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('ביטול'),
@@ -138,6 +156,19 @@ Future<void> _openInlineEditor(
       ],
     ),
   );
+  if (hideRequested) {
+    final op = SetHidden(id, true);
+    final err = cfgOpError(op, criticalIds: criticalIds);
+    if (err != null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(err)));
+      }
+      return;
+    }
+    ref.read(configStoreProvider.notifier).applyOps([op]);
+    return;
+  }
   if (result == null || result == current) return; // cancelled / unchanged
   final op = SetText(id, result);
   final err = cfgOpError(op);

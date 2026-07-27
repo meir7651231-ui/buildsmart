@@ -4,6 +4,12 @@
 
 ---
 
+## s0c — 🙈 מתג "הסתר רכיב" בעורך-החי (WYSIWYG) — 2026-07-27
+
+**שינוי-UI:** `edit_handle.dart` — חלון-העריכה-החי (`_openInlineEditor`) קיבל כפתור **"הסתר רכיב"** (אדום, `BsTokens.danger`) לצד ביטול/שמור; כותרת 'עריכת טקסט'→'עריכת רכיב'. tap→`SetHidden(id,true)` על הטיוטה. הגנה: `cfgOpError(SetHidden, criticalIds:criticalIdsProvider)` חוסם רכיב-חובה (`kImmutable`) → snackbar-שגיאה, לא-מוסתר.
+
+**אימות-ויזואלי:** `cfg_wrappers_test` — בדיקה חדשה מנהיגה את החלון בפועל: pump → `tap('הזמן')` → החלון נפתח → `tap('הסתר רכיב')` → `draft.global['cart.cta'].hidden == true` ✓. בדיקת-הכותרת עודכנה ל-'עריכת רכיב' ✓. 23/23 בסוללה · analyze 0. **eyeball חי על buildsmart-il.com ממתין לבעלים** (Chromium חסום מסביבת-הסוכן; ה-widget-test מנהיג את אותו מסלול tap→dialog→SetHidden).
+
 ## #wizard-studio-s0b — מעטפת-סטודיו קבועה: מתג נווט⇄ערוך + בורר-בורד — 2026-07-27
 
 **שינוי-UI:** `studio_overlay.dart` — המעטפת (מעל ה-Navigator) הפכה מ-banner-של-editing-בלבד ל**כרום קבוע** כש-`studioActiveProvider` דלוק: (1) מתג `SegmentedButton` `נווט⇄ערוך` (ברירת-מחדל **נווט**=edit-off ⇒ כל tap ניווט רגיל) · (2) בורר-בורד (`🔀 בורד`→`showRolePicker` דרך ה-root-navigator, מגודר `kStudioFlag`) · (3) ב-editing: מונה-טיוטה + `פרסם`. **off-gate (active=false) → `SizedBox.shrink` (זהה-בייטים).** `main.dart` — `navigatorKey` מחווט גם תחת `kStudioFlag`.
