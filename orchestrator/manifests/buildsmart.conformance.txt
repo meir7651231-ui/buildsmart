@@ -402,3 +402,8 @@ lib/logic/delivery_note.dart:::List<({String label, String value})> buildDeliver
 lib/logic/delivery_note.dart:::String deliveryNoteTitle(Order order) => 'תעודת משלוח — ${order.id}';
 lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'orders', 'deliveryNote')) ...[
 lib/screens/manager_dashboard_screen.dart:::label: const Text('📦 תעודת משלוח'),
+#
+# Regression — GIANT Phase-2 wave-4a (2026-07-27): optional ח״פ column on the customer importer (validBusinessId gets a real import row) + businessId on SavedCustomer:
+lib/state/customers_store.dart:::final String businessId; // ח"פ / עוסק מורשה — optional
+lib/data/customer_import.dart:::if (businessId.isNotEmpty && !validBusinessId(businessId)) {
+lib/data/customer_import.dart:::_CustCol('businessId', 'ח.פ', {

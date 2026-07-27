@@ -20,7 +20,7 @@
 
 import 'package:buildsmart/data/csv_kernel.dart';
 import 'package:buildsmart/logic/input_validators.dart'
-    show normalizePhone, validEmail, validIsraeliMobile;
+    show normalizePhone, validBusinessId, validEmail, validIsraeliMobile;
 import 'package:buildsmart/logic/text_normalize.dart' show normName;
 import 'package:buildsmart/state/customers_store.dart' show SavedCustomer;
 
@@ -56,6 +56,9 @@ const List<_CustCol> _kCustCols = [
   _CustCol('name', 'שם הלקוח', {'שם הלקוח', 'שם', 'name', 'name_he', 'לקוח'}),
   _CustCol('phone', 'טלפון', {'טלפון', 'נייד', 'phone', 'mobile', 'tel'}),
   _CustCol('email', 'אימייל', {'אימייל', 'email', 'mail'}),
+  _CustCol('businessId', 'ח.פ', {
+    'ח.פ', 'ח"פ', 'ח״פ', 'חפ', 'עוסק מורשה', 'businessid', 'business_id', 'tax_id',
+  }),
   _CustCol('notes', 'הערות', {'הערות', 'הערה', 'notes', 'note'}),
   _CustCol('tags', 'תגיות', {'תגיות', 'תגית', 'tags', 'tag'}),
 ];
@@ -73,13 +76,13 @@ String _dedupKey(String name, String phone) =>
 /// header, then '#'-comment legend + one example row the parser skips (so
 /// re-uploading it untouched → zero rows, canCommit false).
 String customerCatalogTemplateCsv() {
-  const header = 'שם הלקוח,טלפון,אימייל,הערות,תגיות';
+  const header = 'שם הלקוח,טלפון,אימייל,ח.פ,הערות,תגיות';
   return '$kCsvBom$header\n'
       '# חובה = שם הלקוח בלבד; השאר רשות\n'
       '# טלפון — נייד ישראלי (05XXXXXXXX); אימייל — כתובת תקינה\n'
-      '# תגיות — מופרדות בקו-אנכי, למשל: קמעונאי|VIP\n'
+      '# ח.פ — 9 ספרות עם ספרת-ביקורת; תגיות — בקו-אנכי, למשל: קמעונאי|VIP\n'
       '# דוגמה (מחקו את ה-# והחליפו בנתונים שלכם):\n'
-      '# ישראל ישראלי,0501234567,israel@example.com,לקוח קבוע,קמעונאי|VIP\n';
+      '# ישראל ישראלי,0501234567,israel@example.com,514999997,לקוח קבוע,קמעונאי|VIP\n';
 }
 
 /// Parse + validate a customer CSV. Never throws; every problem is an error row.
@@ -162,6 +165,12 @@ CustomerImportReport parseCustomerCsv(String raw) {
         CustomerImportRowError(n, 'שורה $n — אימייל לא תקין: $email'),
       );
     }
+    final businessId = cell('businessId');
+    if (businessId.isNotEmpty && !validBusinessId(businessId)) {
+      rowErrors.add(
+        CustomerImportRowError(n, 'שורה $n — ח.פ לא תקין: $businessId'),
+      );
+    }
 
     if (name.isNotEmpty) {
       final key = _dedupKey(name, phone);
@@ -186,6 +195,7 @@ CustomerImportReport parseCustomerCsv(String raw) {
       name: name,
       phone: phone,
       email: email,
+      businessId: businessId,
       notes: cell('notes'),
       tags: tags,
     ));

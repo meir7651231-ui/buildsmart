@@ -30,6 +30,7 @@ class SavedCustomer {
     required this.name,
     this.phone = '',
     this.email = '',
+    this.businessId = '',
     this.notes = '',
     this.tags = const [],
   });
@@ -38,6 +39,7 @@ class SavedCustomer {
   final String name;
   final String phone;
   final String email;
+  final String businessId; // ח"פ / עוסק מורשה — optional
   final String notes;
   final List<String> tags;
 
@@ -50,6 +52,7 @@ class SavedCustomer {
     String? name,
     String? phone,
     String? email,
+    String? businessId,
     String? notes,
     List<String>? tags,
   }) =>
@@ -58,6 +61,7 @@ class SavedCustomer {
         name: name ?? this.name,
         phone: phone ?? this.phone,
         email: email ?? this.email,
+        businessId: businessId ?? this.businessId,
         notes: notes ?? this.notes,
         tags: tags ?? this.tags,
       );
@@ -67,6 +71,7 @@ class SavedCustomer {
         'name': name,
         if (phone.isNotEmpty) 'phone': phone,
         if (email.isNotEmpty) 'email': email,
+        if (businessId.isNotEmpty) 'businessId': businessId,
         if (notes.isNotEmpty) 'notes': notes,
         if (tags.isNotEmpty) 'tags': tags,
       };
@@ -83,6 +88,8 @@ class SavedCustomer {
       name: name,
       phone: j['phone'] is String ? j['phone'] as String : '',
       email: j['email'] is String ? j['email'] as String : '',
+      businessId:
+          j['businessId'] is String ? j['businessId'] as String : '',
       notes: j['notes'] is String ? j['notes'] as String : '',
       tags: j['tags'] is List
           ? [for (final t in j['tags'] as List) if (t is String) t]
@@ -107,6 +114,7 @@ List<SavedCustomer> upsertCustomer(
     name: incoming.name,
     phone: incoming.phone,
     email: incoming.email,
+    businessId: incoming.businessId,
     notes: incoming.notes,
     tags: incoming.tags,
   );

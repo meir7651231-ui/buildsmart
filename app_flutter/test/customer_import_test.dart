@@ -87,4 +87,19 @@ void main() {
     expect(r.valid, isEmpty, reason: 'legend + example rows are all skipped');
     expect(r.canCommit, isFalse);
   });
+
+  test('optional ח״פ (businessId) — valid is stored, invalid is rejected', () {
+    final ok = parseCustomerCsv('שם הלקוח,ח.פ\nאלי בניין,512345679\n');
+    expect(ok.canCommit, isTrue);
+    expect(ok.valid.single.businessId, '512345679');
+
+    final bad = parseCustomerCsv('שם הלקוח,ח.פ\nאלי בניין,512345678\n');
+    expect(bad.canCommit, isFalse, reason: 'a bad check-digit blocks the row');
+    expect(bad.errors.single.messageHe, contains('ח.פ לא תקין'));
+  });
+
+  test('ח״פ absent → businessId is empty (the column is optional)', () {
+    final r = parseCustomerCsv('שם הלקוח,טלפון\nדנה,0501234567\n');
+    expect(r.valid.single.businessId, isEmpty);
+  });
 }
