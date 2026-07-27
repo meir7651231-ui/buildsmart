@@ -8,10 +8,15 @@
 #
 # STUDIO=true arms the existing WYSIWYG edit-live (directive "wizard = the
 # studio", slice-0). The clean preview has no Google login, so the owner-email
-# gate can never be proven there — edit_mode.dart opens view-only edit for any
-# manager-context viewer ONLY under the compile consts kStudioFlag (STUDIO=true,
-# set here alone) && kProfileRawShell (clean). The LIVE app (buildsmart, no
-# STUDIO) tree-shakes that branch out and keeps the un-spoofable owner gate.
+# gate can never be proven there — edit_mode.dart opens edit for any viewer on
+# ANY board ONLY under the compile consts kStudioFlag (STUDIO=true, set here
+# alone) && kProfileRawShell (clean). A persistent Studio chrome (StudioOverlay)
+# gives a נווט⇄ערוך toggle (default navigate — every tap is normal navigation)
+# and a board selector, so the owner browses/edits every board freely and is
+# never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
+# all of that out and keeps the un-spoofable owner gate byte-identical.
+#
+# rev: s0b — rebuild for the navigate⇄edit toggle + board selector (ae43e912).
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.
@@ -68,4 +73,4 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "מנהל → טאב ניהול → כרטיס '🔌 אשף הקמת חברה' → ורטיקל · מודולים · רכיבים · שמור והפעל." >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "עריכה-בחי (slice-0): פתח תפריט מנהל → '🎨 סטודיו' → הקש על טקסט/כפתור לעריכה במקום." >> "$GITHUB_STEP_SUMMARY"
+          echo "עריכה-בחי (slice-0b): מעטפת-הסטודיו למעלה → מתג 'נווט ⇄ ערוך' (ברירת-מחדל נווט) · '🔀 בורד' להחלפת בורד · 'ערוך' → הקש על טקסט/כפתור לעריכה במקום." >> "$GITHUB_STEP_SUMMARY"
