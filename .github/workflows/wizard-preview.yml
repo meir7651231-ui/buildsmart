@@ -1,8 +1,11 @@
 # GIANT Phase-2 · wizard-preview — a LIVE preview of the runtime OrgConfig
 # setup wizard (giant-system V5 · "🔌 אשף הקמת חברה"), ARMED with
-# ORG_CONFIG=true on the demo profile (which has the manager dashboard).
-# Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
-# untouched. Prints the live link in the run summary. Mirrors clean-two-links.
+# ORG_CONFIG=true on the CLEAN empty-shell profile (zero demo content — you see
+# a company set itself up from nothing). The wizard entry chain is NOT
+# clean-gated (manager persona is modOn(manager)=on by default; the wizard card
+# rides kOrgConfigFlag, not the profile), so ORG_CONFIG=true surfaces it on
+# clean with no code change. Deploys to the SEPARATE `wizard` Firebase Hosting
+# channel — the live site is untouched. Prints the live link in the run summary.
 name: wizard-preview
 
 on:
@@ -32,11 +35,11 @@ jobs:
       - name: Gen version
         run: bash scripts/gen_version.sh
 
-      - name: Build (demo profile · ORG_CONFIG armed)
+      - name: Build (clean empty-shell · ORG_CONFIG armed)
         working-directory: app_flutter
         run: >
           flutter build web --release --base-href "/"
-          --dart-define=APP_PROFILE=demo
+          --dart-define=APP_PROFILE=clean
           --dart-define=ORG_CONFIG=true
 
       - name: Deploy to channel `wizard`
@@ -50,7 +53,7 @@ jobs:
 
       - name: Link in run summary
         run: |
-          echo "## 🔌 אשף הקמת חברה — live preview link" >> "$GITHUB_STEP_SUMMARY"
+          echo "## 🔌 אשף הקמת חברה — live preview (clean empty-shell)" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.deploy.outputs.details_url }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "מנהל → טאב ניהול → כרטיס '🔌 אשף הקמת חברה' → בחירת ורטיקל · מודולים · שמור והפעל." >> "$GITHUB_STEP_SUMMARY"
+          echo "מנהל → טאב ניהול → כרטיס '🔌 אשף הקמת חברה' → ורטיקל · מודולים · רכיבים · שמור והפעל." >> "$GITHUB_STEP_SUMMARY"
