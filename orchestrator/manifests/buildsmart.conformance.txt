@@ -419,3 +419,8 @@ lib/widgets/studio/cfg_text.dart:::if (!elementVisible(ref, id)) return const Si
 lib/screens/org_setup_wizard_screen.dart:::key: Key('elem-toggle-${d.id}'),
 lib/screens/org_setup_wizard_screen.dart:::void _setElementHidden(String id, {required bool hidden}) {
 lib/config/screen_labels_he.dart:::String screenLabelHe(String
+#
+# Regression — SWARM run-2 phase-A (2026-07-27): composite element-hide (CfgVisible org gate; whole button/card removed, not empty chrome):
+lib/widgets/studio/cfg_visible.dart:::if (!elementVisible(ref, id)) return const SizedBox.shrink();
+lib/screens/manager_dashboard_screen.dart:::if (!elementVisible(ref, cfgId)) return const SizedBox.shrink();
+lib/screens/store_screen.dart:::return CfgVisible(

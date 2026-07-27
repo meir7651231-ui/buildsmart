@@ -68,7 +68,8 @@ import 'package:buildsmart/state/customer_score_source.dart'
 import 'package:buildsmart/state/customers_store.dart'
     show SavedCustomer, savedCustomerForProvider, savedCustomersProvider;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
-import 'package:buildsmart/state/org_gates.dart' show featEnabled, orgTerm;
+import 'package:buildsmart/state/org_gates.dart'
+    show elementVisible, featEnabled, orgTerm;
 import 'package:buildsmart/state/role_requests.dart'
     show pendingRoleRequestsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -893,7 +894,7 @@ class _MetricGrid extends ConsumerWidget {
 
 /// One metric tile — a WHITE card (`cardLight`) with the emoji, the big
 /// `brand`-orange number, and the `mutedLight` Hebrew label.
-class _MetricTile extends StatelessWidget {
+class _MetricTile extends ConsumerWidget {
   const _MetricTile({
     required this.emoji,
     required this.value,
@@ -914,7 +915,11 @@ class _MetricTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // giant · composite hide: an org that hides this KPI removes the WHOLE tile
+    // (not an empty card). One gate covers all 5 cockpit KPIs. Absent config ⇒
+    // visible ⇒ byte-identical (golden-safe).
+    if (!elementVisible(ref, cfgId)) return const SizedBox.shrink();
     final radius = cfgRadius(context);
     final card = Container(
       padding: const EdgeInsets.symmetric(

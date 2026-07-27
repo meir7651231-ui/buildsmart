@@ -1755,3 +1755,9 @@
 - **mutation ×1:** M1 elementVisible→true (מתעלם מ-elementShown) → matrix אדום(+9 −1, home.topbar.brand לא-מוסתר) → ירוק · אפס-שאריות.
 - **לקח:** 889/895 כבר-wired דרך CfgText ⇒ שער במקום-אחד כיסה הכל (לא 863 חיווטים). Option A (מחזור features) עקף את מוקש-carry-through של שדה-חדש. תיקון-אינטגרציה: SwitchListTile תחת DecoratedBox-צבעוני דורש Material-עוטף (assertion).
 - **אימות:** analyze 0 · byte-verify ×7 · 63+5 בדיקות-סוללה ירוקות · שער מלא.
+
+## #swarm-r2a — הסתרת-composite — 2026-07-27
+- **הפתרון:** CfgVisible לומד את שער-ה-org (ראשון · שני-מצבים · בלי-ghost) · cart.cta עטוף · _MetricTile→ConsumerWidget+שער (5 KPI).
+- **mutation ×1:** שער-CfgVisible off → composite נשאר → אדום(+20 −2) → ירוק +22 · אפס-שאריות.
+- **לקח:** CfgVisible היה קוד-מת מושלם למחזור — עיטוף ה-outer-widget מסיר chrome-שלם (מה ש-CfgText לתווית-בלבד לא יכול). ~50 sites נוספים = מכני, לריצות-הבאות.
+- **אימות:** analyze 0 · byte-verify · cfg_wrappers 22 ירוקות · שער מלא.

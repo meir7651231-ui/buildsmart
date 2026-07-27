@@ -8,6 +8,7 @@
 // owner could never bring it back otherwise). Generalises hidden_catalog_sections.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/state/org_gates.dart' show elementVisible;
 import 'package:buildsmart/state/studio/config_store.dart'
     show resolvedNodeProvider;
 import 'package:buildsmart/state/studio/edit_mode.dart' show editModeProvider;
@@ -31,9 +32,17 @@ class CfgVisible extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (critical) return child; // core — never hideable by either axis (first)
+    // giant · setup-wizard org-visibility axis: an org that hides this element
+    // removes the WHOLE composite (button/card chrome, not just the label a
+    // CfgText would blank) — in BOTH end-user and edit modes. This is a wizard
+    // setting, not a Studio inline hide, so no restorable ghost here; it mirrors
+    // the CfgText:163 label gate. Absent config ⇒ elementVisible true ⇒ [child]
+    // verbatim ⇒ byte-identical.
+    if (!elementVisible(ref, id)) return const SizedBox.shrink();
     final hidden =
         ref.watch(resolvedNodeProvider(id).select((n) => n.hidden)) ?? false;
-    if (critical || !hidden) return child; // visible — the zero-regression path
+    if (!hidden) return child; // visible — the zero-regression path
 
     final editing = ref.watch(editModeProvider.select((s) => s.isEditing));
     if (!editing) return const SizedBox.shrink(); // hidden for end-users

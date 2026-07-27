@@ -2,8 +2,10 @@
 // every wrapper: NO override ⇒ the child renders verbatim (the zero-regression
 // root); an owner override changes exactly one axis. The gate inputs (+ a fake sink
 // for the store) are overridden, so no auth/prefs are touched.
+import 'package:buildsmart/config/org_config.dart' show OrgConfig;
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/studio/config_doc.dart';
 import 'package:buildsmart/state/studio/config_node.dart';
 import 'package:buildsmart/state/studio/config_store.dart';
@@ -50,7 +52,7 @@ ProviderContainer _gate({required bool editing}) {
 }
 
 // Store-backed container (Cfg* wrappers). [editing] opens the gate + edit-mode.
-ProviderContainer _store({bool editing = false}) {
+ProviderContainer _store({bool editing = false, OrgConfig? org}) {
   final c = ProviderContainer(
     overrides: [
       configSinkProvider.overrideWithValue(_FakeSink()),
@@ -59,6 +61,7 @@ ProviderContainer _store({bool editing = false}) {
       studioOwnerEmailProvider
           .overrideWithValue(editing ? kOwnerEmails.first : null),
       studioInManagerContextProvider.overrideWithValue(editing),
+      if (org != null) orgConfigProvider.overrideWith((ref) => org),
     ],
   );
   addTearDown(c.dispose);
@@ -245,6 +248,62 @@ void main() {
       expect(find.text('מבצע'), findsOneWidget); // ghosted, still present
       expect(find.text('מוסתר'), findsOneWidget); // badge
       expect(find.byType(Opacity), findsWidgets);
+    });
+  });
+
+  group('CfgVisible — org (wizard) visibility axis (run-2 composite hide)', () {
+    // The wizard's per-element hide is features['element.<id>']=false. OFF ⇒ the
+    // WHOLE composite is removed (a button/card, not just its label like a bare
+    // CfgText), in BOTH modes — a wizard setting, not a Studio inline hide, so
+    // no restorable ghost. Absent ⇒ child verbatim (byte-identical).
+    testWidgets('org-hidden ⇒ the whole COMPOSITE (button) is gone, not an '
+        'empty shell', (t) async {
+      final c = _store(
+        org: const OrgConfig(features: {'element.sec.promo': false}),
+      );
+      await t.pumpWidget(_rtl(
+        c,
+        CfgVisible('sec.promo',
+            child: ElevatedButton(onPressed: () {}, child: const Text('מבצע'))),
+      ));
+      expect(find.byType(ElevatedButton), findsNothing);
+      expect(find.text('מבצע'), findsNothing);
+    });
+
+    testWidgets('absent org ⇒ the composite renders verbatim (byte-identical)',
+        (t) async {
+      final c = _store();
+      await t.pumpWidget(_rtl(
+        c,
+        CfgVisible('sec.promo',
+            child: ElevatedButton(onPressed: () {}, child: const Text('מבצע'))),
+      ));
+      expect(find.byType(ElevatedButton), findsOneWidget);
+      expect(find.text('מבצע'), findsOneWidget);
+    });
+
+    testWidgets('org-hidden + editing ⇒ STILL gone (no restorable ghost — it is '
+        'a wizard axis, not a Studio inline hide)', (t) async {
+      final c = _store(
+        editing: true,
+        org: const OrgConfig(features: {'element.sec.promo': false}),
+      );
+      await t.pumpWidget(
+        _rtl(c, const CfgVisible('sec.promo', child: Text('מבצע'))),
+      );
+      expect(find.text('מבצע'), findsNothing);
+      expect(find.text('מוסתר'), findsNothing);
+    });
+
+    testWidgets('critical ⇒ shown even when org tries to hide it', (t) async {
+      final c = _store(
+        org: const OrgConfig(features: {'element.sec.promo': false}),
+      );
+      await t.pumpWidget(_rtl(
+        c,
+        const CfgVisible('sec.promo', critical: true, child: Text('מבצע')),
+      ));
+      expect(find.text('מבצע'), findsOneWidget);
     });
   });
 

@@ -27,6 +27,7 @@ import 'package:buildsmart/state/share_seam.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/state/telemetry.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -2706,21 +2707,28 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: BsTokens.brand,
-        foregroundColor: Color(0xFFFFFFFF),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
-      onPressed: _inFlight ? null : () => _checkout(context),
-      // Studio element 'cart.cta' — an owner edit overlays the label / emoji /
-      // visibility via the canonical CfgText (resolvedNodeProvider); with no edit
-      // it renders the verbatim fallback byte-identically (zero-regression).
-      child: CfgText(
-        'cart.cta',
-        'הזמן עכשיו · ${_price(widget.total)} →',
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    // giant · composite hide: an org that hides 'cart.cta' removes the WHOLE
+    // checkout button (not an empty shell — CfgText alone would blank only the
+    // label). CfgVisible wraps the outer button; absent config ⇒ child verbatim
+    // ⇒ byte-identical.
+    return CfgVisible(
+      'cart.cta',
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: BsTokens.brand,
+          foregroundColor: Color(0xFFFFFFFF),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        onPressed: _inFlight ? null : () => _checkout(context),
+        // Studio element 'cart.cta' — an owner edit overlays the label / emoji
+        // via the canonical CfgText; with no edit it renders the verbatim
+        // fallback byte-identically (zero-regression).
+        child: CfgText(
+          'cart.cta',
+          'הזמן עכשיו · ${_price(widget.total)} →',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
       ),
     );
   }
