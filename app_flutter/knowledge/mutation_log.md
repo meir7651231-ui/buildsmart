@@ -1791,3 +1791,10 @@
 - **בטיחות:** compile-gated → live tree-shakes. שער isOwnerEmail עומד על live. studio_gating ירוק.
 - **מגבלת-בדיקה כנה:** ענף-הרלקסציה compile-gated (kStudioFlag/kProfileRawShell false בסוויטה define-less) → לא-בר-unit-test; ה-else (owner-gate) נבדק ב-studio_gating; הענף מאומת חי על ה-preview.
 - **אימות:** analyze 0 · studio_gating + cfg_wrappers + zero_regression ירוקים.
+
+## #wizard-studio-s0b — מתג נווט⇄ערוך + בורר-בורד (עריכה-בחי בלי לכידה) — 2026-07-27
+- **הפונקציה:** `StudioOverlay` — מעטפת-סטודיו קבועה עם מתג `נווט⇄ערוך` (ממחזר `enterEdit/exitEdit`) + בורר-בורד (`showRolePicker` דרך root-navigator).
+- **תקלה שהוזרקה (mutation-sensitivity):** `onSelectionChanged` של ה-`SegmentedButton` → no-op/null. הבדיקה `זה-נווט⇄ערוך toggle flips edit-mode` (tap `ערוך`→isEditing=true · tap `נווט`→false) נכשלת מיידית ⇒ המתג באמת-מפעיל edit, לא קישוט.
+- **בטיחות:** off-gate (`studioActiveProvider`=false) → `SizedBox.shrink` זהה-בייטים (נבדק). בורר-בורד מגודר `kStudioFlag` + `navigatorKey` תחת `(kKbGlobal || kStudioFlag)` → החי `null` זהה-בייטים.
+- **מגבלת-בדיקה כנה:** רלקסציית `return true` compile-gated (kStudioFlag/kProfileRawShell) → לא-בר-unit-test בסוויטה define-less; מאומתת חי על ה-preview. מניפסט-הקונפורמנס עודכן לשקף `return true`.
+- **אימות:** analyze 0 · zero_regression (off/on/אינטראקציה) + 304 בדיקות-סטודיו/שער/role-picker ירוקות.

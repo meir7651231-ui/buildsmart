@@ -166,8 +166,8 @@ void main() {
     });
   });
 
-  group('StudioOverlay — inert off-gate (#13)', () {
-    testWidgets('off-gate ⇒ SizedBox.shrink, no banner (answer-equivalent)', (
+  group('StudioOverlay — inert off-gate + navigate⇄edit chrome (#13 · slice-0)', () {
+    testWidgets('off-gate ⇒ SizedBox.shrink, no chrome (answer-equivalent)', (
       tester,
     ) async {
       final c = ProviderContainer(
@@ -188,10 +188,12 @@ void main() {
         ),
       );
       expect(find.byType(StudioOverlay), findsOneWidget);
-      expect(find.text('צא'), findsNothing); // no edit banner off-gate
+      // No chrome at all off-gate — not even the navigate/edit toggle.
+      expect(find.text('נווט'), findsNothing);
+      expect(find.text('ערוך'), findsNothing);
     });
 
-    testWidgets('on-gate (owner+manager+active, editing) ⇒ the edit banner', (
+    testWidgets('on-gate ⇒ the persistent נווט⇄ערוך chrome (default נווט)', (
       tester,
     ) async {
       final c = ProviderContainer(
@@ -202,7 +204,6 @@ void main() {
         ],
       );
       addTearDown(c.dispose);
-      c.read(editModeProvider.notifier).enterEdit();
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: c,
@@ -211,8 +212,39 @@ void main() {
           ),
         ),
       );
-      expect(find.text('✏️ מצב עריכה'), findsOneWidget);
-      expect(find.text('צא'), findsOneWidget);
+      // The toggle is present even when NOT editing (persistent chrome), so the
+      // owner is never stranded in edit-mode with no visible way back to navigate.
+      expect(find.text('נווט'), findsOneWidget);
+      expect(find.text('ערוך'), findsOneWidget);
+      expect(c.read(editModeProvider).isEditing, isFalse); // default = navigate
+    });
+
+    testWidgets('the נווט⇄ערוך toggle flips edit-mode (the un-trap fix)', (
+      tester,
+    ) async {
+      final c = ProviderContainer(
+        overrides: [
+          studioActiveProvider.overrideWithValue(true),
+          studioOwnerEmailProvider.overrideWithValue(owner),
+          studioInManagerContextProvider.overrideWithValue(true),
+        ],
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: c,
+          child: const MaterialApp(
+            home: Stack(children: [StudioOverlay()]),
+          ),
+        ),
+      );
+      expect(c.read(editModeProvider).isEditing, isFalse);
+      await tester.tap(find.text('ערוך'));
+      await tester.pump();
+      expect(c.read(editModeProvider).isEditing, isTrue); // armed edit
+      await tester.tap(find.text('נווט'));
+      await tester.pump();
+      expect(c.read(editModeProvider).isEditing, isFalse); // back to navigate
     });
   });
 

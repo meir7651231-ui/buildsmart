@@ -4,6 +4,12 @@
 
 ---
 
+## #wizard-studio-s0b — מעטפת-סטודיו קבועה: מתג נווט⇄ערוך + בורר-בורד — 2026-07-27
+
+**שינוי-UI:** `studio_overlay.dart` — המעטפת (מעל ה-Navigator) הפכה מ-banner-של-editing-בלבד ל**כרום קבוע** כש-`studioActiveProvider` דלוק: (1) מתג `SegmentedButton` `נווט⇄ערוך` (ברירת-מחדל **נווט**=edit-off ⇒ כל tap ניווט רגיל) · (2) בורר-בורד (`🔀 בורד`→`showRolePicker` דרך ה-root-navigator, מגודר `kStudioFlag`) · (3) ב-editing: מונה-טיוטה + `פרסם`. **off-gate (active=false) → `SizedBox.shrink` (זהה-בייטים).** `main.dart` — `navigatorKey` מחווט גם תחת `kStudioFlag`.
+
+**אימות-ויזואלי:** `zero_regression_test` — off-gate: אין `נווט`/`ערוך` (מעטפת נעדרת) · on-gate: `נווט`+`ערוך` נוכחים, ברירת-מחדל `isEditing=false` · **אינטראקציה:** tap `ערוך`→`isEditing=true` · tap `נווט`→`isEditing=false` (תיקון לכידת-ה-edit-mode). 304 בדיקות-סטודיו/שער/role-picker ירוקות · analyze 0.
+
 ## s49b — 🔌 7 תפרים מגודרים במסך-ההתקנות (בונה-הענפים) — 2026-07-06
 
 **שינוי-UI:** `install_studio_screen.dart` — 7 תפרי-config מגודרים ב-guard יחיד (`resolvedActiveTradeIdProvider=='plumbing'` → **null-config → כל נתיב-legacy בייט-זהה, R1-2**): צבעי-מערכת · picker · checklist · חום · canConnect · שיפוע · kit. insert-only 366+/18− (מחיקות=בליעות-משמרות-טוקנים). NEW `trade_physics_config.dart` (אינסטלציה לעולם לא קוראת).

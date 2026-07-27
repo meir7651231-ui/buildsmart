@@ -33,6 +33,7 @@ import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/server_catalog_auth.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
+import 'package:buildsmart/state/studio/studio_flags.dart' show kStudioFlag;
 import 'package:buildsmart/state/user_profile.dart' show userProfileProvider;
 import 'package:buildsmart/state/user_system_sync.dart'
     show userSystemSyncProvider;
@@ -534,14 +535,16 @@ class BuildSmartApp extends ConsumerWidget {
       // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
       scaffoldMessengerKey: bsMessengerKey,
       // Root navigator key — lets the app-global floating keyboard (kKbGlobal)
-      // push routes / open sheets from above the Navigator (see _navContext in
-      // floating_card_keyboard.dart). GATED on the flag so it tree-shakes when off,
-      // exactly like every other kKbGlobal touchpoint: with [kKbGlobal] const-false
-      // dart2js folds this ternary to `null` (= the default keyless root Navigator,
-      // the pre-monster behaviour), restoring provable byte-identity. Only the
-      // ASSIGNMENT is gated; `bsNavigatorKey`'s top-level declaration in toast.dart
-      // stays unconditional (an inert `final` global until something reads it).
-      navigatorKey: kKbGlobal ? bsNavigatorKey : null,
+      // AND the Studio chrome (kStudioFlag — the STUDIO/preview build's board
+      // selector in [StudioOverlay]) push routes / open sheets from above the
+      // Navigator. GATED on the two compile consts so it tree-shakes when both are
+      // off, exactly like every other kKbGlobal touchpoint: with [kKbGlobal] AND
+      // [kStudioFlag] const-false dart2js folds this ternary to `null` (= the
+      // default keyless root Navigator, the pre-monster behaviour), restoring
+      // provable byte-identity on the LIVE app. Only the ASSIGNMENT is gated;
+      // `bsNavigatorKey`'s top-level declaration in toast.dart stays unconditional
+      // (an inert `final` global until something reads it).
+      navigatorKey: (kKbGlobal || kStudioFlag) ? bsNavigatorKey : null,
       // Step 92 — the ONE navigator observer (empty list until now): emits
       // `screen_view` automatically on every named route push/pop, read-only.
       navigatorObservers: [intelRouteObserver],

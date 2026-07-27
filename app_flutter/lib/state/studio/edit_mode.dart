@@ -80,12 +80,17 @@ final studioOwnerManagerProvider = Provider<bool>((ref) {
   final inManager = ref.watch(studioInManagerContextProvider);
   // Preview-only relaxation (directive "wizard = the studio", slice-0, owner-
   // approved): the STUDIO-armed CLEAN preview channel has no Google login, so an
-  // owner-email can never be proven — allow view-only edit-open there for any
-  // manager-context viewer. Scoped to the compile consts `kStudioFlag`
-  // (STUDIO=true, set ONLY on the preview build) && `kProfileRawShell` (clean),
-  // so the LIVE app (buildsmart, no STUDIO) tree-shakes this branch out and the
-  // un-spoofable owner-email gate below stands byte-identical.
-  if (kStudioFlag && kProfileRawShell) return inManager;
+  // owner-email can never be proven — allow edit-open there for the viewer on ANY
+  // board (not manager-context only), so the owner can browse every persona board
+  // (contractor · manager · store · courier · worker) and edit it in place — the
+  // full-navigation flow the directive requires (the contractor board is the very
+  // one the owner needs to fix). This is the login-less preview SANDBOX; the LIVE
+  // site is a separate profile/channel and is never touched. Scoped to the compile
+  // consts `kStudioFlag` (STUDIO=true, set ONLY on the preview build) &&
+  // `kProfileRawShell` (clean), so the LIVE app (buildsmart, no STUDIO)
+  // tree-shakes this branch out and the un-spoofable owner-email gate below stands
+  // byte-identical.
+  if (kStudioFlag && kProfileRawShell) return true;
   return isOwnerEmail(ref.watch(studioOwnerEmailProvider)) && inManager;
 });
 
