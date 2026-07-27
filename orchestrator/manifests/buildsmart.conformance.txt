@@ -407,3 +407,7 @@ lib/screens/manager_dashboard_screen.dart:::label: const Text('📦 תעודת �
 lib/state/customers_store.dart:::final String businessId; // ח"פ / עוסק מורשה — optional
 lib/data/customer_import.dart:::if (businessId.isNotEmpty && !validBusinessId(businessId)) {
 lib/data/customer_import.dart:::_CustCol('businessId', 'ח.פ', {
+#
+# Regression — GIANT Phase-2 wave-4c (2026-07-27): receipt (קבלה) button on the order-detail sheet — same billing rail, receipt:true, under orders.invoicing:
+lib/screens/manager_dashboard_screen.dart:::final title = invoiceTitle(invoiceOrder, receipt: true);
+lib/screens/manager_dashboard_screen.dart:::label: const Text('💵 הפק קבלה'),

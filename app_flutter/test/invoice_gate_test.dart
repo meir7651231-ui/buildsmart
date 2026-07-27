@@ -49,11 +49,14 @@ void main() {
     await _openFirstOrder(t, const OrgConfig());
     expect(find.text('סטטוס'), findsOneWidget, reason: 'the detail sheet is open');
     expect(find.text('🧾 הפק חשבונית'), findsNothing);
+    expect(find.text('💵 הפק קבלה'), findsNothing);
   });
 
   testWidgets('ON — "🧾 הפק חשבונית" appears on the order sheet', (t) async {
     await _openFirstOrder(
         t, const OrgConfig(features: {'orders.invoicing': true}));
     expect(find.text('🧾 הפק חשבונית'), findsOneWidget);
+    expect(find.text('💵 הפק קבלה'), findsOneWidget,
+        reason: 'the receipt shares the invoicing gate');
   });
 }

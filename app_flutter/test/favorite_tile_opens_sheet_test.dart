@@ -63,21 +63,26 @@ void main() {
 
     // No sheet yet.
     expect(find.byType(LipskeyProductSheet), findsNothing);
-
-    // The favorites section renders at the bottom of the tall list; its ★ tile
-    // is built and findable without scrolling.
     expect(find.byKey(const Key('catalog-list')), findsOneWidget);
-    expect(find.byIcon(Icons.star), findsWidgets);
 
-    // Tap the favorite tile (the star-icon mini tile carrying this product).
+    // Target the favorite tile PRECISELY by its product name (the _MiniTile
+    // label), not `star-icon.first` — the star finder was order-fragile and
+    // was the flaky-under-load half of the known-failing baseline. Pump until
+    // it renders so a slow catalog build under full-suite load can't race the
+    // tap (deterministic, load-independent).
     final tile = find.ancestor(
-      of: find.byIcon(Icons.star),
+      of: find.text(product.nameHe),
       matching: find.byType(InkWell),
     );
-    await t.tap(tile.first);
-    await t.pumpAndSettle();
+    for (var i = 0; i < 80 && tile.evaluate().isEmpty; i++) {
+      await t.pump(const Duration(milliseconds: 50));
+    }
+    expect(tile, findsOneWidget, reason: 'the ★ favorite tile rendered');
 
-    // The product sheet opened — same destination as its non-favorite siblings.
+    // Tap the favorite tile → the product sheet opens (same destination as its
+    // non-favorite siblings).
+    await t.tap(tile);
+    await t.pumpAndSettle();
     expect(find.byType(LipskeyProductSheet), findsOneWidget);
   });
 }

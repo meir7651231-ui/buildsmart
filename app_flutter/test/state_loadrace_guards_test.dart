@@ -5,14 +5,19 @@
 // (mirrors UserProfileNotifier). These tests reproduce the race per notifier:
 // seed OLD prefs, construct + mutate synchronously, let _load() resolve, assert
 // the fresh user write SURVIVED.
+//
+// DETERMINISM (gate-quality, 2026-07-27): each test awaits the notifier's
+// `ready` future (the @visibleForTesting hook that completes when the
+// constructor's _load settles) instead of a fixed Future.delayed. The fixed
+// delay was load-sensitive and made this file flaky under the full-suite
+// concurrency (it was the known-failing baseline) — awaiting the real _load is
+// exact, so the guard is verified every run.
 import 'package:buildsmart/state/card_acc_state.dart';
 import 'package:buildsmart/state/card_filter_state.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-Future<void> _settle() => Future<void>.delayed(const Duration(milliseconds: 60));
 
 void main() {
   test('card_filter_state — late _load does not clobber setType', () async {
@@ -21,8 +26,9 @@ void main() {
     final c = ProviderContainer();
     addTearDown(c.dispose);
 
-    c.read(cardFilterStateProvider.notifier).setType('P1', 'חדש');
-    await _settle();
+    final n = c.read(cardFilterStateProvider.notifier);
+    n.setType('P1', 'חדש');
+    await n.ready; // deterministic: wait for the late _load to actually settle
 
     expect(c.read(cardFilterStateProvider)['P1']?.type, 'חדש',
         reason: 'fresh setType must survive the late prefs load');
@@ -34,8 +40,9 @@ void main() {
     final c = ProviderContainer();
     addTearDown(c.dispose);
 
-    c.read(cardAccStateProvider.notifier).setSelected('P1', 'a2', true);
-    await _settle();
+    final n = c.read(cardAccStateProvider.notifier);
+    n.setSelected('P1', 'a2', true);
+    await n.ready;
 
     expect(c.read(cardAccStateProvider)['P1']?['a2']?.selected, true,
         reason: 'fresh setSelected must survive the late prefs load');
@@ -47,8 +54,9 @@ void main() {
     final c = ProviderContainer();
     addTearDown(c.dispose);
 
-    c.read(productFavoritesProvider.notifier).toggle('NEW_SKU');
-    await _settle();
+    final n = c.read(productFavoritesProvider.notifier);
+    n.toggle('NEW_SKU');
+    await n.ready;
 
     expect(c.read(productFavoritesProvider).contains('NEW_SKU'), true,
         reason: 'fresh toggle must survive the late prefs load');

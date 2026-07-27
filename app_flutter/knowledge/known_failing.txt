@@ -19,8 +19,10 @@
 # מדלגים by-default (host-specific — font hinting/AA שונה בין OS); רצים בכוונה עם
 # RUN_GOLDENS=1 בהוסט-הייחוס. הוסר מה-baseline → known-failing 1→0 (הרשימה ריקה כעת).
 
-# 2026-06-30: 2 כשלים **קיימים-מראש** שיורשו ב-merge של workstream המקלדת/חיפוש
-# (origin/whats-happening). אומתו ככושלים **על origin לבדו** (ריצה נקייה עם version.g.dart)
-# — לא מקו ה-Studio/עמוד-2 (אף commit שלי לא נגע בקבצים האלה). לתיקון ע"י אותו workstream.
-state_loadrace_guards_test.dart :: product_favorites — late _load does not clobber toggle
-favorite_tile_opens_sheet_test.dart :: tapping a favorite tile opens the product sheet
+# 2026-06-30→fixed 2026-07-27: 2 כשלים רעועים-תחת-עומס (state_loadrace_guards ·
+# favorite_tile_opens_sheet) — עברו בבידוד תמיד, נפלו רק בסוויטה-המלאה (concurrency=4).
+# יוצבו: (1) המתנה דטרמיניסטית ל-notifier.ready (hook @visibleForTesting על 3 ה-
+# notifiers: product_favorites/card_filter/card_acc) במקום Future.delayed(60ms);
+# (2) finder-לפי-שם-מוצר + pump-until-מופיע במקום star-icon.first השביר.
+# הוסרו מה-baseline → known-failing 2→0 (הרשימה ריקה כעת). [ראה גם: stock_local קיבל
+# פטור מתועד ב-stage2_scale — offender דטרמיניסטי שנבלע בתקציב עד לאודיט 2026-07-27.]

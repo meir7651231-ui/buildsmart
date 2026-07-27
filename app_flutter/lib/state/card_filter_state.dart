@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,10 +31,17 @@ class CardFilterSelection {
 class CardFilterStateNotifier
     extends StateNotifier<Map<String, CardFilterSelection>> {
   CardFilterStateNotifier() : super(const {}) {
-    _load();
+    _ready = _load();
   }
 
   static const _key = 'bs.card-filter-state.v1';
+
+  /// @visibleForTesting — completes when the constructor's async [_load] settles,
+  /// so a test can deterministically await the first read (mirrors
+  /// ProductFavoritesNotifier.ready) instead of a flaky fixed delay.
+  @visibleForTesting
+  Future<void> get ready => _ready;
+  late final Future<void> _ready;
 
   /// `true` once any mutating method (setType/setSize/clear) has written state.
   /// The provider is lazy, so the constructor's async `_load()` can resolve

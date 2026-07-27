@@ -27,10 +27,17 @@ class AccState {
 class CardAccStateNotifier
     extends StateNotifier<Map<String, Map<String, AccState>>> {
   CardAccStateNotifier() : super(const {}) {
-    _load();
+    _ready = _load();
   }
 
   static const _key = 'bs.card-acc-state.v1';
+
+  /// @visibleForTesting — completes when the constructor's async [_load] settles,
+  /// so a test can deterministically await the first read (mirrors
+  /// ProductFavoritesNotifier.ready) instead of a flaky fixed delay.
+  @visibleForTesting
+  Future<void> get ready => _ready;
+  late final Future<void> _ready;
 
   /// `true` once any mutating method (setSelected/setQty) has written state.
   /// The provider is lazy, so the constructor's async `_load()` can resolve

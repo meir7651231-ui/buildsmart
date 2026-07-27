@@ -1852,6 +1852,38 @@ class _OrderDetailSheet extends ConsumerWidget {
                   ),
                 ),
               ),
+              // The receipt (קבלה) — the SAME billing rail, receipt:true; under
+              // the same orders.invoicing opt-in as the invoice above it.
+              const SizedBox(height: BsTokens.space3),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final title = invoiceTitle(invoiceOrder, receipt: true);
+                  final ok = await printDocument(
+                    title: title,
+                    html: buildPrintableHtml(
+                      title: title,
+                      rows: buildInvoiceRows(invoiceOrder),
+                    ),
+                  );
+                  if (!ok && context.mounted) {
+                    showToast(context, 'הדפסה זמינה בדפדפן');
+                  }
+                },
+                icon: const Icon(Icons.price_check, size: 18),
+                label: const Text('💵 הפק קבלה'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
             ],
             // GIANT Phase-2 wave-4 (documents) — a delivery note (goods, no
             // money) on the SAME printable_docs rail, behind its own opt-in
