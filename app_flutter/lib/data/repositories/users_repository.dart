@@ -27,6 +27,7 @@
 // (which is kept for the local cache round-trip + a privileged manager/admin write).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/board_accounts_local.dart' show isOwnerEmail;
 import 'package:buildsmart/data/bs_user.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
@@ -221,5 +222,23 @@ final currentUserProvider = Provider<BsUser?>((ref) {
     notifier.addListener(onRemoteChange);
     ref.onDispose(() => notifier.removeListener(onRemoteChange));
   }
-  return repo.currentUser();
+  return withOwnerApproval(repo.currentUser());
 });
+
+/// The OWNER (verified email) is inherently approved — the bootstrap admin.
+/// Their `users/{uid}` doc can lag at `pending` (the 2026-07-19 bootstrap set the
+/// admin claim + role but never flipped the status), which — because the pending
+/// gate blocks EVERY action even for an admin (`permitAction`, by design) — locks
+/// the superuser out of the whole app and HIDES the approve action, so they can
+/// approve NO ONE (the first-admin chicken-and-egg, surfaced live). This forces
+/// `active` for the owner so the pending gate never traps them. Scoped to the
+/// un-spoofable owner email → no other account is affected; a non-owner (or an
+/// already-active / null user) is returned verbatim. Pure — unit-tested.
+BsUser? withOwnerApproval(BsUser? user) {
+  if (user != null &&
+      isOwnerEmail(user.email) &&
+      user.status == UserStatus.pending) {
+    return user.copyWith(status: UserStatus.active);
+  }
+  return user;
+}

@@ -1827,4 +1827,8 @@
 - **הפונקציות:** `_openHistory` · `_WizardHistoryScreen` (עוטף `HistoryPane`).
 - **תקלה שהוזרקה (mutation-sensitivity):** הכפתור `onPressed:null` ⇒ בדיקת-ה-launcher (`find.byType(HistoryPane)`) אדומה.
 - **בטיחות:** מיחזור **verbatim** (0 שינוי ב-`HistoryPane`) ⇒ בדיקות-הסטודיו שלו ירוקות. מצב-ריק על אשף-נקי. שחזור=rollback קדימה-בלבד (ההיסטוריה לא נהרסת).
-- **אימות:** analyze 0 · org_setup_wizard 19/19.
+- **אימות:** analyze 0 · org_setup_wizard 19/19.## #owner-never-pending — הבעלים לא נתקע pending — 2026-07-27
+- **הפונקציה:** `withOwnerApproval(BsUser?)` (users_repository) — הבעלים (email מאומת) עם `status=pending` → מוחזר `active`; כל השאר verbatim.
+- **תקלה שהוזרקה (mutation-sensitivity):** הסרת שורת-האכיפה (`return user` תמיד). הבדיקה `owner + pending → active` נכשלת מיידית (Actual pending) ⇒ ההכרחה באמת-פועלת, לא קישוט. תקלה #2: הרחבת ה-scope (בלי `isOwnerEmail`) → הבדיקה `non-owner + pending → stays pending` נכשלת ⇒ מוכיח שהתיקון ממוקד-בעלים בלבד.
+- **בטיחות:** האינווריאנט `permitAction` לא נגע (הבדיקה `pending blocks even admin` נשארת ירוקה); רק סטטוס-הבעלים משתנה. email לא-ניתן-לזיוף.
+- **אימות:** analyze 0 · owner_approval_test 4/4 · 147 בדיקות user-system/auth ירוקות.

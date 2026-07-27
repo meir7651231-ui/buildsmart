@@ -2249,5 +2249,26 @@ void main() {
       expect(matches, isEmpty,
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
+
+    test("antipattern #110 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp('להחליש שער-הרשאה או אבטחה שיש עליו בדיקת-אינווריאנט מכוונת כדי לעקוף פער-נתונים או פער-bootstrap במקום לתקן את הנתון במקורו');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
   });
 }
