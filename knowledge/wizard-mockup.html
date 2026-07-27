@@ -1,0 +1,651 @@
+<title>אשף הרכבת החברה — הדמייה</title>
+<div class="wiz" dir="rtl" lang="he">
+
+  <header class="hdr">
+    <div class="hdr-top">
+      <button class="close" type="button" aria-label="סגירה">✕ סגירה</button>
+      <h1>🎛️ אשף הרכבת החברה</h1>
+    </div>
+    <p class="sub">עוברים מודול-מודול: מדליקים, מכבים, ומשנים שמות — <b>כל שינוי מוחל חי</b> על המערכת שמאחור.</p>
+
+    <div class="controls">
+      <div class="search">
+        <span class="mag" aria-hidden="true">🔍</span>
+        <input id="q" type="search" placeholder="חיפוש רכיב או מונח…" aria-label="חיפוש">
+      </div>
+      <div class="counter" id="counter"><b id="active">896</b> / 896 פעילות</div>
+    </div>
+
+    <div class="chips" id="chips" role="tablist" aria-label="סינון לפי מודול"></div>
+
+    <div class="tools">
+      <button class="tool" type="button" id="btn-fr">🔎 מצא והחלף</button>
+      <button class="tool" type="button" id="btn-ver">🕘 גרסאות</button>
+    </div>
+  </header>
+
+  <div class="panel" id="panel-fr" hidden>
+    <div class="panel-h">🔎 מצא והחלף — בכל האפליקציה בבת‑אחת</div>
+    <div class="fr-row">
+      <input id="fr-find" type="text" placeholder="מצא טקסט…" aria-label="מצא">
+      <input id="fr-repl" type="text" placeholder="החלף ב…" aria-label="החלף ב">
+      <button id="fr-go" class="pill gold" type="button">החלף בכל</button>
+    </div>
+    <div class="fr-status" id="fr-status">למשל: "ספק" → "חנות" — מחליף בכל הרכיבים בבת‑אחת. (בסטודיו אפשר גם לבחור אילו התאמות.)</div>
+  </div>
+  <div class="panel" id="panel-ver" hidden>
+    <div class="panel-h">🕘 גרסאות — כל "פרסם לכולם" נשמר, ואפשר לשחזר (ההיסטוריה נשמרת)</div>
+    <button id="ver-save" class="pill gold" type="button">💾 שמור גרסה נוכחית</button>
+    <div class="ver-list" id="ver-list"></div>
+  </div>
+
+  <main id="list" class="list"></main>
+
+  <p class="note">
+    <b>הדמייה.</b> המודולים, השמות והתיאורים אמיתיים מ‑BuildSmart; רשימות‑הרכיבים מוצגות כמדגם.
+    כל <b>מודול</b> = סקציה נקייה כמו מאור (שם + תיאור + טוגל‑אב). <b>פתיחת מודול → הרכיבים הדקים</b> שלו (מתוך 896 — שליטת הסטודיו).
+    לחצו כותרת כדי לפתוח/לסגור · הטוגל מדליק/מכבה · <b>לחצו ✎ ליד רכיב → הסטודיו המלא</b>
+    (שם/טקסט · 🎨 צבע · ↔ גודל · 𝐁 משקל · הצג/הסתר) — <b>לא רק הצג/הסתר.</b> הכל חי.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  // ── real BuildSmart content ─────────────────────────────────────────────
+  // modules: the 13 org-modules (emoji · label · descHe — verbatim from org_modules.dart)
+  // total: the module's element count (sums to 896) · rows: real registry labelHe samples
+  const DATA = [
+    { key:'contractor', emoji:'👷', label:'לוח קבלן', desc:'מסך הבית של הקבלן — מסלולי עבודה, כלים וסל הקנייה', total:92, open:true,
+      terms:[['שם המסך','בית'],['קבלן (יחיד)','קבלן'],['פרויקט','פרויקט']],
+      rows:[
+        ['🛁 מסלול עבודה חכם — מאפס עד גמר','מסך הבית — מסלול עבודה'],
+        ['גמר אמבטיה — מלווה שלב‑שלב','מסך הבית — מסלול עבודה'],
+        ['תכנון חיבור (Install Studio)','מסך הבית — תכנון חיבור'],
+        ['הוסף לסל','עץ חכם — כרטיס מוצר'],
+        ['💡 חלופות זולות','כלי קבלן — חלופות זולות'],
+        ['📊 השוואת מחירים','כלי קבלן — השוואת מחירים'],
+        ['📐 סרוק תוכנית עבודה','כלי קבלן — סריקת תוכנית'],
+        ['🕒 נוכחות עובדים','כלי קבלן — נוכחות עובדים'],
+        ['בקשות חומרים','כלי קבלן — בקשות חומרים'],
+        ['סדר הרכבה','מסלול עבודה — חלון סדר הרכבה'],
+      ]},
+    { key:'manager', emoji:'👔', label:'לוח מנהל', desc:'לוח‑הבקרה של מנהל המערכת', total:96, open:false,
+      terms:[['שם המסך','לוח מנהל'],['מנהל (יחיד)','מנהל'],['הזמנה','הזמנה']],
+      rows:[
+        ['חי','פס עליון — מחוון "מחובר לשרת"'],
+        ['סטודיו — ערוך את האפליקציה','כרטיס‑העל של הסטודיו'],
+        ['ניסיוני','תג "בטא" על כרטיס הסטודיו'],
+        ['✓ הושלם','שורת‑הזמנה — תגית סטטוס'],
+        ['✓ ההזמנה הושלמה ונמסרה','גיליון פרטי ההזמנה'],
+        ['הסבר אשראי','כרטיס הלקוח — פעולת AI'],
+        ['🧭 מסע הלקוח','ציר‑הזמן בכרטיס הלקוח'],
+        ['🎉 אין משימות הממתינות לאישור','טאב ניהול — מצב ריק'],
+        ['אין בקשות חופשה','טאב ניהול — מצב ריק'],
+        ['עריכת האביזרים של כל מוצר','טאב ניהול — עץ המוצרים'],
+        ['הרצת חבילת בדיקות הרגרסיה','טאב ניהול — כלי בדיקה'],
+        ['הקצאת תפקיד למשתמש','טאב ניהול — שיוך תפקידים'],
+        ['אישור נרשמים חדשים','טאב ניהול — אישור חשבונות'],
+      ]},
+    { key:'supplier', emoji:'🏪', label:'לוח ספק', desc:'פורטל חנות‑הספק בבוחר‑התפקידים', total:88, open:true,
+      terms:[['שם המסך','חנות'],['ספק (יחיד)','ספק'],['הזמנה','הזמנה']],
+      rows:[
+        ['🏗️ שיוך לפרויקט','עגלה — בוחר פרויקט'],
+        ['+ הוסף','עגלה — הוספת פרויקט'],
+        ['אספקה: יום‑יומיים','כותרת ספק בעגלה'],
+        ['לאן לשלוח?','חלונית כתובת משלוח'],
+        ['אפשר לאשר גם בלי כתובת','חלונית כתובת — הערה'],
+        ['דלג','חלונית כתובת — פעולה'],
+        ['שמירה','חלונית כתובת — פעולה'],
+        ['אישור הזמנה גדולה','דיאלוג צ׳קאאוט'],
+        ['אשר והמשך','דיאלוג צ׳קאאוט — פעולה'],
+        ['פרויקט','גיליון סיכום ההזמנה'],
+      ]},
+    { key:'dive', emoji:'🎯', label:'מסלולי עומק', desc:'מסלולי‑גילוי, חיפוש ומשחקים בקטלוג', total:72, open:false,
+      terms:[['שם המסך','קטלוג'],['רשימה','רשימה']],
+      rows:[
+        ['ניהול רשימות','מנהל הרשימות'],
+        ['יצירת רשימה מותאמת אישית','מנהל הרשימות'],
+        ['רשימה חדשה','מנהל הרשימות — פעולה'],
+        ['הוספה','מנהל הרשימות — פעולה'],
+        ['שינוי שם הרשימה','מנהל הרשימות'],
+        ['שמירה','מנהל הרשימות — פעולה'],
+      ]},
+    { key:'finance', emoji:'💰', label:'כספים', desc:'מרכז‑הפיננסים והפעולה‑המהירה בחנות', total:64, open:false,
+      terms:[['שם המסך','כספים'],['מטבע','₪']],
+      rows:[
+        ['אשר','אישור תשלום'],
+        ['דחה','דחיית תשלום'],
+        ['כמה ימי איחור?','חישוב ריבית‑פיגור'],
+        ['דוח פיננסי — BuildSmart','דוח להורדה'],
+        ['הדפסה','דוח — פעולה'],
+        ['המרת סכום','ממיר מט״ח'],
+        ['⚙️ שערי המט״ח מתעדכנים מהשרת','ממיר מט״ח — הערה'],
+      ]},
+    { key:'courier', emoji:'🛵', label:'לוח שליח', desc:'משלוחים, איסופים ופורטל‑השליח', total:57, open:false,
+      terms:[['שם המסך','שליח'],['משלוח','משלוח']], rows:[] },
+    { key:'worker', emoji:'🦺', label:'לוח עובד', desc:'משימות‑שטח ודיווחי‑העובד', total:35, open:false,
+      terms:[['שם המסך','עובד'],['משימה','משימה']], rows:[] },
+    { key:'site', emoji:'🏗️', label:'אתר ופרויקטים', desc:'פרויקטים, מלאי‑אתר ומשימות‑הבית', total:80, open:false,
+      terms:[['שם המסך','פרויקטים'],['פרויקט','פרויקט']], rows:[] },
+    { key:'ai', emoji:'🤖', label:'עוזר חכם', desc:'מרכז‑ה‑AI ושורת‑הכלים בלוח', total:78, open:false,
+      terms:[['שם הכלי','עוזר חכם']], rows:[] },
+    { key:'compat', emoji:'🔩', label:'תכנון חיבורים', desc:'מנוע תאימות‑ההברגות (צנרת)', total:60, open:false,
+      terms:[['שם המסך','תכנון חיבורים']], rows:[] },
+    { key:'rewards', emoji:'🎮', label:'מועדון', desc:'מטבעות, אתגרים והטבות', total:44, open:false,
+      terms:[['שם המועדון','מועדון'],['מטבע','מטבע']], rows:[] },
+    { key:'chat', emoji:'💬', label:'שיחות', desc:'צ׳אט ארגוני — הסגמנט בעדכונים ותאי‑הבורדים', total:48, open:false,
+      terms:[['שם המסך','שיחות']], rows:[] },
+    { key:'intel', emoji:'📊', label:'מודיעין שוק', desc:'טאב‑המודיעין בלוח‑המנהל', total:41, open:false,
+      terms:[['שם המסך','מודיעין']], rows:[] },
+    { key:'search', emoji:'🔍', label:'חיפוש‑על', desc:'החיפוש הגלובלי והמאתר', total:41, open:false,
+      terms:[['שם המסך','חיפוש']], rows:[] },
+  ];
+
+  const TOTAL = 896;
+  const off = new Set();                 // rendered element keys currently OFF
+  const listEl = document.getElementById('list');
+  const chipsEl = document.getElementById('chips');
+  const activeEl = document.getElementById('active');
+  const qEl = document.getElementById('q');
+  let filterMod = null;
+
+  function keyOf(si, ri){ return si + ':' + ri; }
+
+  function updateCounter(){
+    activeEl.textContent = (TOTAL - off.size).toLocaleString('he-IL');
+    // per-section live count (rendered sections only)
+    DATA.forEach((m, si) => {
+      if (!m.rows.length) return;
+      let o = 0;
+      m.rows.forEach((_, ri) => { if (off.has(keyOf(si, ri))) o++; });
+      const badge = document.getElementById('cnt-' + si);
+      if (badge) badge.textContent = (m.rows.length - o) + '/' + m.rows.length;
+    });
+  }
+
+  function buildChips(){
+    const all = document.createElement('button');
+    all.className = 'chip on'; all.type = 'button'; all.textContent = 'הכל';
+    all.onclick = () => setFilter(null, all);
+    chipsEl.appendChild(all);
+    DATA.forEach(m => {
+      const c = document.createElement('button');
+      c.className = 'chip'; c.type = 'button';
+      c.textContent = m.emoji + ' ' + m.label;
+      c.onclick = () => setFilter(m.key, c);
+      chipsEl.appendChild(c);
+    });
+  }
+
+  function setFilter(key, chipEl){
+    filterMod = key;
+    [...chipsEl.children].forEach(c => c.classList.remove('on'));
+    chipEl.classList.add('on');
+    applyVisibility();
+  }
+
+  function applyVisibility(){
+    const q = qEl.value.trim();
+    [...listEl.children].forEach((card, si) => {
+      const m = DATA[si];
+      let show = !filterMod || m.key === filterMod;
+      if (show && q){
+        const hitHead = (m.label + ' ' + m.desc).includes(q);
+        let hitRow = false;
+        m.rows.forEach((r, ri) => {
+          const rowEl = card.querySelector('[data-row="' + ri + '"]');
+          const match = (r[0] + ' ' + r[1]).includes(q);
+          if (rowEl) rowEl.style.display = match ? '' : 'none';
+          if (match) hitRow = true;
+        });
+        show = hitHead || hitRow;
+        if (hitRow) card.classList.add('open');   // auto-open on search hit
+      } else {
+        m.rows.forEach((r, ri) => {
+          const rowEl = card.querySelector('[data-row="' + ri + '"]');
+          if (rowEl) rowEl.style.display = '';
+        });
+      }
+      card.style.display = show ? '' : 'none';
+    });
+  }
+
+  function render(){
+    DATA.forEach((m, si) => {
+      const card = document.createElement('section');
+      card.className = 'card' + (m.open ? ' open' : '');
+      card.dataset.mod = m.key;
+
+      // header
+      const head = document.createElement('button');
+      head.className = 'head'; head.type = 'button';
+      head.setAttribute('aria-expanded', m.open ? 'true' : 'false');
+      head.innerHTML =
+        '<span class="chev" aria-hidden="true">▾</span>' +
+        '<span class="emoji" aria-hidden="true">' + m.emoji + '</span>' +
+        '<span class="htext"><span class="hlabel">' + m.label + '</span>' +
+        '<span class="hdesc">' + m.desc + '</span></span>' +
+        '<span class="hcount" id="cnt-' + si + '">' + (m.rows.length ? m.rows.length + '/' + m.rows.length : m.total) + '</span>';
+      head.onclick = () => {
+        card.classList.toggle('open');
+        head.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false');
+      };
+
+      // master switch (stops propagation so it doesn't collapse the card)
+      const master = document.createElement('span');
+      master.className = 'master on'; master.setAttribute('role','switch'); master.setAttribute('aria-checked','true');
+      master.tabIndex = 0;
+      master.innerHTML = '<span class="mtrack"><span class="mknob"></span></span><span class="mlabel">פעיל</span>';
+      const toggleMaster = (e) => {
+        if (e) e.stopPropagation();
+        const turningOff = master.classList.contains('on');
+        master.classList.toggle('on', !turningOff);
+        master.setAttribute('aria-checked', String(!turningOff));
+        master.querySelector('.mlabel').textContent = turningOff ? 'כבוי' : 'פעיל';
+        card.classList.toggle('muted', turningOff);
+        m.rows.forEach((_, ri) => {
+          const k = keyOf(si, ri);
+          const box = card.querySelector('[data-row="' + ri + '"] .box');
+          if (turningOff){ off.add(k); box && box.classList.remove('on'); }
+          else { off.delete(k); box && box.classList.add('on'); }
+        });
+        updateCounter();
+      };
+      master.onclick = toggleMaster;
+      master.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggleMaster(e); } };
+
+      const headWrap = document.createElement('div');
+      headWrap.className = 'headwrap';
+      headWrap.appendChild(head);
+      headWrap.appendChild(master);
+      card.appendChild(headWrap);
+
+      // body
+      const body = document.createElement('div');
+      body.className = 'body';
+
+      if (m.rows.length){
+        const bulk = document.createElement('div');
+        bulk.className = 'bulk';
+        const selAll = document.createElement('button'); selAll.type='button'; selAll.className='pill'; selAll.textContent='סמן הכל';
+        const clrAll = document.createElement('button'); clrAll.type='button'; clrAll.className='pill'; clrAll.textContent='נקה הכל';
+        selAll.onclick = () => bulkSet(si, false);
+        clrAll.onclick = () => bulkSet(si, true);
+        bulk.appendChild(selAll); bulk.appendChild(clrAll);
+        body.appendChild(bulk);
+
+        m.rows.forEach((r, ri) => {
+          const item = document.createElement('div');
+          item.className = 'item'; item.dataset.row = ri;
+
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML =
+            '<span class="box on" role="checkbox" aria-checked="true" tabindex="0" title="הצג/הסתר"></span>' +
+            '<span class="rtext"><span class="rname">' + r[0] + '</span>' +
+            '<span class="rloc">' + r[1] + '</span></span>' +
+            '<span class="edit" role="button" tabindex="0" title="ערוך רכיב">✎</span>';
+          const box = row.querySelector('.box');
+          const nameEl = row.querySelector('.rname');
+          const flip = (e) => {
+            if (e) e.stopPropagation();
+            const k = keyOf(si, ri);
+            const nowOn = !box.classList.contains('on');
+            box.classList.toggle('on', nowOn);
+            box.setAttribute('aria-checked', String(nowOn));
+            if (nowOn) off.delete(k); else off.add(k);
+            updateCounter();
+          };
+          box.onclick = flip;
+          box.onkeydown = (e) => { if (e.key===' '||e.key==='Enter'){ e.preventDefault(); flip(e); } };
+
+          // per-element mini-Studio: text · color · size · weight (the Studio's real edits)
+          const insp = document.createElement('div');
+          insp.className = 'insp';
+          insp.innerHTML =
+            '<label class="fld"><span class="flabel">✎ שם / טקסט</span>' +
+              '<input class="i-text" type="text"></label>' +
+            '<div class="fld"><span class="flabel">🎨 צבע</span><div class="swatches"></div></div>' +
+            '<div class="fld"><span class="flabel">↔ גודל</span><div class="segs i-size"></div></div>' +
+            '<div class="fld"><span class="flabel">𝐁 משקל</span><div class="segs i-weight"></div></div>';
+          insp.querySelector('.i-text').value = r[0];
+          insp.querySelector('.i-text').oninput = (e) => { nameEl.textContent = e.target.value || r[0]; };
+
+          const swWrap = insp.querySelector('.swatches');
+          [['',''],['#E0453A',''],['#E6852A',''],['#C9A227',''],['#2E9E5B',''],['#2F7FE0',''],['#7A52D0','']].forEach((s, idx) => {
+            const b = document.createElement('button'); b.type = 'button';
+            b.className = 'sw' + (idx === 0 ? ' sw-def on' : '');
+            if (s[0]) b.style.background = s[0]; else b.textContent = '×';
+            b.onclick = (e) => { e.stopPropagation();
+              swWrap.querySelectorAll('.sw').forEach(x => x.classList.remove('on')); b.classList.add('on');
+              nameEl.style.color = s[0] || ''; };
+            swWrap.appendChild(b);
+          });
+
+          const szWrap = insp.querySelector('.i-size');
+          [['S','13px'],['M','15px'],['L','19px']].forEach((s, idx) => {
+            const b = document.createElement('button'); b.type = 'button';
+            b.className = 'seg' + (idx === 1 ? ' on' : ''); b.textContent = s[0];
+            b.onclick = (e) => { e.stopPropagation();
+              szWrap.querySelectorAll('.seg').forEach(x => x.classList.remove('on')); b.classList.add('on');
+              nameEl.style.fontSize = s[1]; };
+            szWrap.appendChild(b);
+          });
+
+          const wtWrap = insp.querySelector('.i-weight');
+          [['רגיל','600'],['מודגש','800']].forEach((w, idx) => {
+            const b = document.createElement('button'); b.type = 'button';
+            b.className = 'seg' + (idx === 0 ? ' on' : ''); b.textContent = w[0];
+            b.onclick = (e) => { e.stopPropagation();
+              wtWrap.querySelectorAll('.seg').forEach(x => x.classList.remove('on')); b.classList.add('on');
+              nameEl.style.fontWeight = w[1]; };
+            wtWrap.appendChild(b);
+          });
+
+          const openInsp = (e) => { if (e) e.stopPropagation(); item.classList.toggle('editing'); };
+          row.querySelector('.rtext').onclick = openInsp;
+          const editBtn = row.querySelector('.edit');
+          editBtn.onclick = openInsp;
+          editBtn.onkeydown = (e) => { if (e.key===' '||e.key==='Enter'){ e.preventDefault(); openInsp(e); } };
+
+          item.appendChild(row);
+          item.appendChild(insp);
+          body.appendChild(item);
+        });
+      } else {
+        const hint = document.createElement('p');
+        hint.className = 'reg';
+        hint.textContent = m.total + ' רכיבים דקים — נטענים מה‑registry של הסטודיו.';
+        body.appendChild(hint);
+      }
+
+      // terms block (woven per section, like Maor)
+      if (m.terms && m.terms.length){
+        const tb = document.createElement('div');
+        tb.className = 'terms';
+        tb.innerHTML = '<div class="terms-h">✏️ מונחים — שנו את השמות (ריק = ברירת‑המחדל)</div>';
+        m.terms.forEach(t => {
+          const tr = document.createElement('div');
+          tr.className = 'term';
+          tr.innerHTML =
+            '<span class="tlabel">' + t[0] + '</span>' +
+            '<input class="tinput" type="text" value="' + t[1] + '" aria-label="' + t[0] + '">' +
+            '<span class="tarrow">→ ' + t[1] + '</span>';
+          const inp = tr.querySelector('.tinput');
+          const arw = tr.querySelector('.tarrow');
+          inp.oninput = () => { arw.textContent = '→ ' + (inp.value || t[1]); };
+          tb.appendChild(tr);
+        });
+        body.appendChild(tb);
+      }
+
+      card.appendChild(body);
+      listEl.appendChild(card);
+    });
+  }
+
+  function bulkSet(si, turnOff){
+    const m = DATA[si];
+    const card = listEl.children[si];
+    m.rows.forEach((_, ri) => {
+      const k = keyOf(si, ri);
+      const box = card.querySelector('[data-row="' + ri + '"] .box');
+      if (turnOff){ off.add(k); box && box.classList.remove('on'); box && box.setAttribute('aria-checked','false'); }
+      else { off.delete(k); box && box.classList.add('on'); box && box.setAttribute('aria-checked','true'); }
+    });
+    updateCounter();
+  }
+
+  buildChips();
+  render();
+  updateCounter();
+  qEl.addEventListener('input', applyVisibility);
+
+  // ── the other Studio panes: find-&-replace + versions ────────────────────
+  const $ = (id) => document.getElementById(id);
+  function toast(msg){
+    let t = $('toast');
+    if (!t){ t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.querySelector('.wiz').appendChild(t); }
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1900);
+  }
+  function togglePanel(id){
+    const p = $(id), other = id === 'panel-fr' ? $('panel-ver') : $('panel-fr');
+    other.hidden = true; p.hidden = !p.hidden;
+  }
+  $('btn-fr').onclick = () => togglePanel('panel-fr');
+  $('btn-ver').onclick = () => togglePanel('panel-ver');
+
+  $('fr-go').onclick = () => {
+    const find = $('fr-find').value.trim();
+    const repl = $('fr-repl').value;
+    if (!find){ $('fr-status').textContent = 'הקלד טקסט למצוא.'; return; }
+    let n = 0;
+    document.querySelectorAll('.rname').forEach(el => {
+      if (el.textContent.includes(find)){ el.textContent = el.textContent.split(find).join(repl); n++; }
+    });
+    $('fr-status').textContent = n
+      ? ('הוחלפו ' + n + ' רכיבים:  "' + find + '"  →  "' + repl + '"')
+      : ('לא נמצאו התאמות ל־"' + find + '".');
+  };
+
+  const verList = $('ver-list');
+  let verN = 3;
+  function verRow(name, time, current){
+    const row = document.createElement('div'); row.className = 'ver-item';
+    row.innerHTML = '<span class="ver-name">' + name + '</span><span class="ver-time">' + time + '</span>';
+    if (current){ const s = document.createElement('span'); s.className = 'ver-cur'; s.textContent = 'נוכחית'; row.appendChild(s); }
+    else { const b = document.createElement('button'); b.className = 'pill'; b.type = 'button'; b.textContent = 'שחזר';
+      b.onclick = () => toast('שוחזר ✓ — פורסם כגרסה חדשה'); row.appendChild(b); }
+    return row;
+  }
+  verList.appendChild(verRow('גרסה 3', 'היום 12:20', true));
+  verList.appendChild(verRow('גרסה 2', 'אתמול 18:04', false));
+  verList.appendChild(verRow('גרסה 1', '25/07 09:10', false));
+  $('ver-save').onclick = () => {
+    const cur = verList.querySelector('.ver-cur');
+    if (cur){ const b = document.createElement('button'); b.className = 'pill'; b.type = 'button'; b.textContent = 'שחזר';
+      b.onclick = () => toast('שוחזר ✓'); cur.replaceWith(b); }
+    verN++;
+    const d = new Date(), p = (x) => (x < 10 ? '0' : '') + x;
+    verList.insertBefore(verRow('גרסה ' + verN, 'היום ' + p(d.getHours()) + ':' + p(d.getMinutes()), true), verList.firstChild);
+    toast('💾 גרסה ' + verN + ' נשמרה');
+  };
+})();
+</script>
+
+<style>
+  .wiz{
+    --paper:#F4F1EA; --card:#FFFFFF; --ink:#2B2723; --muted:#8C8175;
+    --line:#E7E0D4; --gold:#B5851C; --gold-soft:#F1E6C7;
+    --on:#E67E22; --on-track:#F4D3B4; --off-track:#DAD3C6;
+    --shadow:0 1px 2px rgba(43,39,35,.05), 0 6px 20px rgba(43,39,35,.06);
+    font-family:'Segoe UI','Assistant','Rubik',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+    color:var(--ink); background:var(--paper);
+    max-width:540px; margin:0 auto; padding:0 14px 40px;
+    min-height:100vh; -webkit-text-size-adjust:100%;
+  }
+  @media (prefers-color-scheme:dark){
+    .wiz{
+      --paper:#16140F; --card:#201D16; --ink:#ECE5D8; --muted:#9A8F7C;
+      --line:#322D22; --gold:#E0AE44; --gold-soft:#3A331F;
+      --on:#F0904A; --on-track:#4A3320; --off-track:#3A342A;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] .wiz{
+    --paper:#16140F; --card:#201D16; --ink:#ECE5D8; --muted:#9A8F7C;
+    --line:#322D22; --gold:#E0AE44; --gold-soft:#3A331F;
+    --on:#F0904A; --on-track:#4A3320; --off-track:#3A342A;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] .wiz{
+    --paper:#F4F1EA; --card:#FFFFFF; --ink:#2B2723; --muted:#8C8175;
+    --line:#E7E0D4; --gold:#B5851C; --gold-soft:#F1E6C7;
+    --on:#E67E22; --on-track:#F4D3B4; --off-track:#DAD3C6;
+    --shadow:0 1px 2px rgba(43,39,35,.05), 0 6px 20px rgba(43,39,35,.06);
+  }
+  .wiz *{ box-sizing:border-box; }
+  .wiz h1{ margin:0; font-size:19px; font-weight:800; letter-spacing:-.2px; }
+
+  /* header */
+  .hdr{ position:sticky; top:0; z-index:5; background:var(--paper);
+    padding:14px 0 10px; margin:0 -14px; padding-inline:14px;
+    border-bottom:1px solid var(--line); }
+  .hdr-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .close{ font:inherit; font-size:12.5px; color:var(--muted); background:transparent;
+    border:1px solid var(--line); border-radius:999px; padding:5px 12px; cursor:pointer; }
+  .close:hover{ color:var(--ink); }
+  .sub{ margin:8px 0 12px; font-size:13px; line-height:1.55; color:var(--muted); }
+  .sub b{ color:var(--gold); font-weight:700; }
+
+  .controls{ display:flex; gap:8px; align-items:center; }
+  .search{ flex:1; display:flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--line); border-radius:11px; padding:0 11px; box-shadow:var(--shadow); }
+  .search .mag{ font-size:13px; opacity:.6; }
+  .search input{ flex:1; font:inherit; font-size:14px; color:var(--ink); background:transparent;
+    border:0; outline:none; padding:11px 0; }
+  .search input::placeholder{ color:var(--muted); }
+  .counter{ font-size:12.5px; color:var(--ink); background:var(--gold-soft);
+    border:1px solid var(--gold); border-radius:999px; padding:7px 12px; white-space:nowrap;
+    font-variant-numeric:tabular-nums; }
+  .counter b{ color:var(--gold); font-weight:800; }
+
+  .chips{ display:flex; gap:7px; overflow-x:auto; padding:11px 0 3px; scrollbar-width:none; }
+  .chips::-webkit-scrollbar{ display:none; }
+  .chip{ flex:0 0 auto; font:inherit; font-size:12.5px; color:var(--muted);
+    background:var(--card); border:1px solid var(--line); border-radius:999px;
+    padding:6px 13px; cursor:pointer; white-space:nowrap; transition:.15s; }
+  .chip:hover{ color:var(--ink); }
+  .chip.on{ color:#fff; background:var(--gold); border-color:var(--gold); font-weight:600; }
+  @media (prefers-color-scheme:dark){ .chip.on{ color:#16140F; } }
+  :root[data-theme="dark"] .chip.on{ color:#16140F; }
+
+  /* cards */
+  .list{ display:flex; flex-direction:column; gap:11px; padding-top:14px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); overflow:hidden; transition:opacity .2s; }
+  .card.muted{ opacity:.55; }
+
+  .headwrap{ display:flex; align-items:stretch; }
+  .head{ flex:1; display:flex; align-items:center; gap:11px; font:inherit; text-align:right;
+    background:transparent; border:0; cursor:pointer; padding:14px 15px; color:var(--ink); }
+  .chev{ color:var(--gold); font-size:12px; transition:transform .2s; transform:rotate(-90deg); }
+  .card.open .chev{ transform:rotate(0); }
+  .emoji{ font-size:20px; line-height:1; }
+  .htext{ display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+  .hlabel{ font-size:15.5px; font-weight:700; }
+  .hdesc{ font-size:12.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hcount{ font-size:12px; color:var(--gold); font-weight:700; font-variant-numeric:tabular-nums;
+    background:var(--gold-soft); border-radius:999px; padding:3px 9px; white-space:nowrap; }
+
+  .master{ display:flex; align-items:center; gap:7px; padding:0 14px 0 4px; cursor:pointer;
+    border-inline-start:1px solid var(--line); user-select:none; }
+  .mtrack{ width:38px; height:22px; border-radius:999px; background:var(--off-track);
+    position:relative; transition:.18s; flex:0 0 auto; }
+  .mknob{ position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:.18s; }
+  .master.on .mtrack{ background:var(--on); }
+  .master.on .mknob{ right:18px; }
+  .mlabel{ font-size:12px; font-weight:700; color:var(--muted); min-width:26px; }
+  .master.on .mlabel{ color:var(--on); }
+  .master:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; border-radius:8px; }
+
+  /* body */
+  .body{ display:none; padding:0 15px 15px; border-top:1px solid var(--line); }
+  .card.open .body{ display:block; }
+  .bulk{ display:flex; gap:8px; padding:12px 0 6px; }
+  .pill{ font:inherit; font-size:12px; color:var(--muted); background:transparent;
+    border:1px solid var(--line); border-radius:999px; padding:5px 13px; cursor:pointer; }
+  .pill:hover{ color:var(--ink); border-color:var(--muted); }
+
+  .item{ border-bottom:1px solid var(--line); }
+  .item:last-child{ border-bottom:0; }
+  .row{ display:flex; align-items:flex-start; gap:11px; padding:10px 2px; }
+  .rtext{ cursor:pointer; }
+  .edit{ margin-inline-start:auto; flex:0 0 auto; width:30px; height:30px; border-radius:8px;
+    border:1px solid var(--line); color:var(--muted); font-size:15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; }
+  .edit:hover{ color:var(--gold); border-color:var(--gold); }
+  .item.editing .edit{ color:var(--gold); border-color:var(--gold); background:var(--gold-soft); }
+  .insp{ display:none; padding:2px 2px 14px 33px; }
+  .item.editing .insp{ display:flex; flex-direction:column; gap:10px; }
+  .fld{ display:flex; align-items:center; gap:10px; }
+  .flabel{ font-size:12px; color:var(--muted); flex:0 0 84px; }
+  .i-text{ flex:1; min-width:0; font:inherit; font-size:13.5px; color:var(--ink); background:var(--paper);
+    border:1px solid var(--line); border-radius:8px; padding:7px 10px; outline:none; text-align:right; }
+  .i-text:focus{ border-color:var(--gold); }
+  .swatches{ display:flex; gap:6px; flex-wrap:wrap; }
+  .sw{ width:24px; height:24px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0;
+    display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; transition:.12s; }
+  .sw.on{ border-color:var(--ink); transform:scale(1.1); }
+  .sw-def{ background:var(--card); }
+  .segs{ display:flex; gap:6px; }
+  .seg{ font:inherit; font-size:12.5px; min-width:34px; color:var(--muted); background:transparent;
+    border:1px solid var(--line); border-radius:8px; padding:5px 10px; cursor:pointer; }
+  .seg.on{ color:#fff; background:var(--gold); border-color:var(--gold); font-weight:600; }
+  @media (prefers-color-scheme:dark){ .seg.on{ color:#16140F; } }
+  :root[data-theme="dark"] .seg.on{ color:#16140F; }
+  .box{ flex:0 0 auto; width:21px; height:21px; border-radius:6px; border:2px solid var(--off-track);
+    margin-top:1px; position:relative; transition:.12s; }
+  .box.on{ background:var(--on); border-color:var(--on); }
+  .box.on::after{ content:""; position:absolute; inset:0; margin:auto; width:5px; height:10px;
+    border:solid #fff; border-width:0 2px 2px 0; transform:translateY(-1px) rotate(45deg); }
+  .box:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .rtext{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .rname{ font-size:14px; font-weight:600; line-height:1.35; }
+  .rloc{ font-size:12px; color:var(--muted); line-height:1.3; }
+
+  .reg{ margin:12px 0 4px; font-size:13px; color:var(--muted); font-style:italic;
+    font-variant-numeric:tabular-nums; }
+
+  /* terms */
+  .terms{ margin-top:14px; padding-top:13px; border-top:1px dashed var(--line); }
+  .terms-h{ font-size:12px; font-weight:700; color:var(--gold); margin-bottom:9px; }
+  .term{ display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+  .tlabel{ font-size:12.5px; color:var(--muted); flex:0 0 88px; }
+  .tinput{ flex:1; min-width:0; font:inherit; font-size:13.5px; color:var(--ink); background:var(--paper);
+    border:1px solid var(--line); border-radius:8px; padding:8px 10px; outline:none; text-align:right; }
+  .tinput:focus{ border-color:var(--gold); }
+  .tarrow{ flex:0 0 auto; font-size:12px; color:var(--gold); font-weight:600; max-width:96px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* tools + panels (find-replace · versions) */
+  .tools{ display:flex; gap:8px; padding-top:9px; }
+  .tool{ font:inherit; font-size:12.5px; color:var(--ink); background:var(--card);
+    border:1px solid var(--line); border-radius:10px; padding:7px 13px; cursor:pointer; box-shadow:var(--shadow); }
+  .tool:hover{ border-color:var(--gold); color:var(--gold); }
+  .panel{ background:var(--card); border:1px solid var(--gold); border-radius:12px;
+    box-shadow:var(--shadow); padding:13px 14px; margin-top:11px; }
+  .panel-h{ font-size:12.5px; font-weight:700; color:var(--gold); margin-bottom:10px; }
+  .fr-row{ display:flex; gap:7px; flex-wrap:wrap; }
+  .fr-row input{ flex:1; min-width:110px; font:inherit; font-size:13.5px; color:var(--ink); background:var(--paper);
+    border:1px solid var(--line); border-radius:8px; padding:8px 10px; outline:none; text-align:right; }
+  .fr-row input:focus{ border-color:var(--gold); }
+  .fr-status{ margin-top:9px; font-size:12px; color:var(--muted); line-height:1.55; }
+  .pill.gold{ color:#fff; background:var(--gold); border-color:var(--gold); font-weight:600; }
+  @media (prefers-color-scheme:dark){ .pill.gold{ color:#16140F; } }
+  :root[data-theme="dark"] .pill.gold{ color:#16140F; }
+  .ver-list{ display:flex; flex-direction:column; gap:7px; margin-top:11px; }
+  .ver-item{ display:flex; align-items:center; gap:10px; padding:8px 2px; border-bottom:1px solid var(--line); }
+  .ver-item:last-child{ border-bottom:0; }
+  .ver-name{ font-size:13.5px; font-weight:600; flex:0 0 auto; }
+  .ver-time{ font-size:12px; color:var(--muted); flex:1; font-variant-numeric:tabular-nums; }
+  .ver-cur{ font-size:11.5px; color:var(--gold); font-weight:700; border:1px solid var(--gold);
+    border-radius:999px; padding:3px 9px; }
+  .toast{ position:fixed; inset-inline:0; bottom:22px; margin:auto; width:max-content; max-width:82%;
+    background:var(--ink); color:var(--paper); font-size:13px; font-weight:600; padding:10px 16px;
+    border-radius:999px; box-shadow:0 6px 24px rgba(0,0,0,.3); opacity:0; transform:translateY(8px);
+    transition:.2s; pointer-events:none; z-index:20; }
+  .toast.show{ opacity:1; transform:none; }
+  .note{ margin:20px 2px 0; font-size:12px; line-height:1.7; color:var(--muted);
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 15px; }
+  .note b{ color:var(--ink); }
+
+  @media (prefers-reduced-motion:reduce){ .wiz *{ transition:none !important; } }
+  @media (max-width:520px){
+    .controls{ flex-wrap:wrap; } .counter{ order:3; width:100%; text-align:center; }
+    .tlabel{ flex-basis:70px; } .tarrow{ max-width:70px; }
+  }
+</style>
