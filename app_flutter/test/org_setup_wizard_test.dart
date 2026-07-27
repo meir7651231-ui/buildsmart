@@ -8,6 +8,8 @@ import 'package:buildsmart/config/org_config.dart';
 import 'package:buildsmart/config/org_modules.dart';
 import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
 import 'package:buildsmart/state/org_config_store.dart';
+import 'package:buildsmart/state/studio/config_store.dart'
+    show configStoreProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
     show kElementRegistry;
 import 'package:flutter/material.dart';
@@ -305,5 +307,31 @@ void main() {
     await _tapSave(t);
     expect(c.read(orgConfigProvider).features['element.cart.cta'], isFalse,
         reason: 'bulk hide persists canonical-minimal');
+  });
+
+  // ── giant slice-2 — the ✎ full per-element inspector (not just show/hide) ──
+  testWidgets('the ✎ inspector edits text + exposes style axes and publishes '
+      'LIVE via the Studio store', (t) async {
+    final c = await _pump(t);
+    // reach cart.cta ({text,emoji,style}) on the contractor board (screen "cart").
+    await t.tap(find.text('👷 לוח קבלן'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('‹ רכיבים'));
+    await t.pumpAndSettle();
+    final edit = find.byKey(const Key('elem-edit-cart.cta'));
+    await t.ensureVisible(edit);
+    await t.tap(edit);
+    await t.pumpAndSettle();
+    // the sheet exposes the STYLE axes — "not just show/hide": צבע · גודל · משקל.
+    expect(find.text('צבע'), findsOneWidget);
+    expect(find.text('גודל'), findsOneWidget);
+    expect(find.text('משקל'), findsOneWidget);
+    // edit the text → "החל וסגור" → published LIVE (resolved==published; not editing).
+    await t.enterText(find.byKey(const Key('insp-text')), 'קנה עכשיו');
+    await t.tap(find.text('החל וסגור (חי)'));
+    await t.pumpAndSettle();
+    expect(c.read(configStoreProvider).published.global['cart.cta']?.text,
+        'קנה עכשיו',
+        reason: 'the ✎ inspector publishes the text override live');
   });
 }

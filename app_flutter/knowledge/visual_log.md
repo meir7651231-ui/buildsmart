@@ -4,6 +4,12 @@
 
 ---
 
+## #wizard-studio-s2 — מפקח מלא פר-רכיב (✎ text/color/size/weight חי) — 2026-07-27
+
+**שינוי-UI:** `org_setup_wizard_screen.dart` — כל שורת-רכיב (עם ציר text/emoji/style) קיבלה **✎** ליד מתג-ההסתרה → פותח bottom-sheet `_ElementInspectorSheet`: **טקסט · אמוג׳י · צבע · גודל · משקל** (contextual לפי `editableProps`) + תצוגה-חיה + "אפס לברירת-מחדל"/"החל וסגור (חי)". כל שינוי → `applyOps`+`publish` ל-Studio store ⇒ **חי בכל האפליקציה**. הסתרה נשארת על מתג-השורה (OrgConfig) — שני צירים נפרדים.
+
+**אימות-ויזואלי:** `org_setup_wizard_test` **16/16** — ה-✎ נפתח, חושף **צבע/גודל/משקל** ("לא רק הצג/הסתר"), ועריכת-טקסט מתפרסמת חי (`published.global['cart.cta'].text=='קנה עכשיו'`, resolved==published כי לא-edit-mode). 192 studio ירוקות · analyze 0. תצוגה-חיה מ-`applyCfgTextStyle` (מנוע-הרינדור של האפליקציה עצמה).
+
 ## #wizard-studio-s1 — אקורדיון-Maor באשף (מודול-קבלן ראשון · מונה · סמן/נקה-הכל) — 2026-07-27
 
 **שינוי-UI:** `org_setup_wizard_screen.dart` — "מודולים"+"רכיבים" הנפרדים → **אקורדיון-Maor אחד** (14 סקציות, 👷 קבלן ראשון): שער-פרסונה (13 gated · manager נעול · קבלן בלי-שער=ה-app-הבסיסי) + **מונה N/M פעילים** + רצועת-פתיחה-עצלה + **סמן/נקה-הכל** (bulk, מדלג kImmutable) + מתגי-רכיבים מקובצי-מסך; מונה גלובלי **"X מתוך Y רכיבים פעילים"**; **חיפוש+צ׳יפים = מסננים** (לא תנאי-הצגה — תיקון "התיבה-הריקה"). `org_modules.dart` — `kContractorModule` + `kWizardModules`(14) + `moduleForScreen` (כיסוי-מלא 123→14).

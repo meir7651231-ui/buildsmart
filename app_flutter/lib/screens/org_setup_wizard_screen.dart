@@ -46,10 +46,23 @@ import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
 import 'package:buildsmart/state/org_config_store.dart'
     show orgConfigProvider, persistOrgConfig;
+import 'package:buildsmart/state/studio/config_node.dart' show CfgStyle;
+import 'package:buildsmart/state/studio/config_store.dart'
+    show
+        ConfigOp,
+        SetEmoji,
+        SetStyle,
+        SetText,
+        configStoreProvider,
+        resolvedNodeProvider;
+import 'package:buildsmart/state/studio/edit_mode.dart'
+    show studioOwnerEmailProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
-    show ElementDescriptor, kElementRegistry;
+    show EditAxis, ElementDescriptor, criticalIdsProvider, kElementRegistry;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart'
+    show applyCfgTextStyle;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -381,11 +394,12 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     setState(() => _draft = _rebuild(features: next));
   }
 
-  /// שורת-רכיב אחת: מתג הצג/הסתר. ליבה (kImmutable) — נעולה (onChanged null,
-  /// value=מוצג-תמיד) עם חיווי 🔒; לעולם לא מציעים לכבות ניווט/כניסה.
+  /// שורת-רכיב אחת: מתג הצג/הסתר + ✎ מפקח (כשיש ציר-תוכן/עיצוב לערוך — "לא רק
+  /// הצג/הסתר"). ליבה (kImmutable) — המתג נעול (onChanged null, value=מוצג-תמיד)
+  /// עם 🔒; ה-✎ עדיין פתוח (טקסט/צבע/גודל — הליבה נעולה רק להסתרה, לא לעריכה).
   Widget _elementTile(ElementDescriptor d) {
     final locked = d.kImmutable;
-    return SwitchListTile(
+    final tile = SwitchListTile(
       key: Key('elem-toggle-${d.id}'),
       contentPadding: EdgeInsets.zero,
       dense: true,
@@ -407,6 +421,34 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
       // ליבה מוצגת-תמיד (הגנת-ההצגה נאכפת גם ב-elementVisible); השאר מהטיוטה.
       value: locked ? true : elementShown(_draft, d.id),
       onChanged: locked ? null : (v) => _setElementHidden(d.id, hidden: !v),
+    );
+    // ✎ מפקח פר-רכיב — רק כשיש ציר-תוכן/עיצוב (text/emoji/style), לא הסתרה-בלבד.
+    final canInspect = d.editableProps.contains(EditAxis.text) ||
+        d.editableProps.contains(EditAxis.emoji) ||
+        d.editableProps.contains(EditAxis.style);
+    if (!canInspect) return tile;
+    return Row(
+      children: [
+        Expanded(child: tile),
+        IconButton(
+          key: Key('elem-edit-${d.id}'),
+          visualDensity: VisualDensity.compact,
+          tooltip: 'ערוך רכיב (טקסט · צבע · גודל · משקל)',
+          icon: const Text('✎', style: TextStyle(fontSize: 16)),
+          onPressed: () => _openElementInspector(d),
+        ),
+      ],
+    );
+  }
+
+  /// פותח את מפקח-הרכיב (bottom-sheet) — עורך text/emoji/style חי דרך ה-Studio
+  /// config-store (applyOps→publish), contextual לפי editableProps של הרכיב.
+  void _openElementInspector(ElementDescriptor d) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: BsTokens.cardLight,
+      builder: (_) => _ElementInspectorSheet(descriptor: d),
     );
   }
 
@@ -844,6 +886,274 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                   ),
                 ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── ✎ מפקח-הרכיב (slice-2) — עורך text/emoji/style חי דרך ה-Studio store ───────
+// אוצר-המילים (token, תווית) — מקביל ל-cfgColorFromToken/Size/Weight ב-cfg_text.
+// null = "ברירת מחדל" (מוחק את הציר ⇒ CfgStyle ריק ⇒ הרכיב חוזר לבסיס).
+
+const List<(String?, String)> _kColorOpts = [
+  (null, 'ברירת מחדל'),
+  ('brand', 'מותג'),
+  ('brandDark', 'מותג כהה'),
+  ('ink', 'דיו'),
+  ('muted', 'עמום'),
+  ('success', 'ירוק'),
+  ('danger', 'אדום'),
+  ('warn', 'אזהרה'),
+];
+
+const List<(String?, String)> _kSizeOpts = [
+  (null, 'ברירת מחדל'),
+  ('sm', 'קטן'),
+  ('md', 'בינוני'),
+  ('lg', 'גדול'),
+  ('xl', 'ענק'),
+];
+
+const List<(String?, String)> _kWeightOpts = [
+  (null, 'ברירת מחדל'),
+  ('normal', 'רגיל'),
+  ('medium', 'בינוני'),
+  ('semibold', 'חצי-מודגש'),
+  ('bold', 'מודגש'),
+];
+
+/// מפקח-רכיב מלא (slice-2) — bottom-sheet contextual לפי `editableProps`: טקסט ·
+/// אמוג׳י · צבע · גודל · משקל. כל שינוי → `applyOps`+`publish` ל-Studio store ⇒
+/// **חי בכל האפליקציה** (האשף לא ב-edit-mode ⇒ רק published נראה חי). זרימת-הבסיס:
+/// dropdown ל-null / "אפס" → CfgStyle ריק → הרכיב חוזר לברירת-המחדל. תצוגה-חיה
+/// מקומית (בלי publish) עם `applyCfgTextStyle` — אותו מנוע שהאפליקציה מרנדרת בו.
+class _ElementInspectorSheet extends ConsumerStatefulWidget {
+  const _ElementInspectorSheet({required this.descriptor});
+
+  final ElementDescriptor descriptor;
+
+  @override
+  ConsumerState<_ElementInspectorSheet> createState() =>
+      _ElementInspectorSheetState();
+}
+
+class _ElementInspectorSheetState
+    extends ConsumerState<_ElementInspectorSheet> {
+  final _text = TextEditingController();
+  final _emoji = TextEditingController();
+  String? _color;
+  String? _size;
+  String? _weight;
+
+  ElementDescriptor get _d => widget.descriptor;
+  bool get _hasText => _d.editableProps.contains(EditAxis.text);
+  bool get _hasEmoji => _d.editableProps.contains(EditAxis.emoji);
+  bool get _hasStyle => _d.editableProps.contains(EditAxis.style);
+
+  @override
+  void initState() {
+    super.initState();
+    // Seed from the PUBLISHED resolved node (the wizard is not in edit-mode ⇒
+    // resolvedNode == published — exactly what the live app shows right now).
+    final n = ref.read(resolvedNodeProvider(_d.id));
+    _text.text = n.text ?? '';
+    _emoji.text = n.emoji ?? '';
+    _color = n.style?.colorToken;
+    _size = n.style?.sizeToken;
+    _weight = n.style?.weightToken;
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    _emoji.dispose();
+    super.dispose();
+  }
+
+  /// The CfgStyle from the three dropdowns — empty (all default) ⇒ null ⇒ clears.
+  CfgStyle? _style() {
+    final s = CfgStyle(
+      colorToken: _color,
+      sizeToken: _size,
+      weightToken: _weight,
+    );
+    return s.isEmpty ? null : s;
+  }
+
+  /// Apply the current fields to the draft AND publish ⇒ LIVE app-wide. Publishing
+  /// (not just draft) is required because the wizard is not in edit-mode, so only
+  /// the published layer is visible live.
+  void _applyLive() {
+    final id = _d.id;
+    final ops = <ConfigOp>[
+      if (_hasText) SetText(id, _text.text.isEmpty ? null : _text.text),
+      if (_hasEmoji) SetEmoji(id, _emoji.text.isEmpty ? null : _emoji.text),
+      if (_hasStyle) SetStyle(id, _style()),
+    ];
+    if (ops.isEmpty) return;
+    ref.read(configStoreProvider.notifier)
+      ..applyOps(ops)
+      ..publish(
+        note: 'עריכת רכיב · $id',
+        byEmail: ref.read(studioOwnerEmailProvider) ?? '',
+        nowMs: DateTime.now().millisecondsSinceEpoch,
+        criticalIds: ref.read(criticalIdsProvider),
+      );
+  }
+
+  void _reset() {
+    setState(() {
+      _text.text = '';
+      _emoji.text = '';
+      _color = null;
+      _size = null;
+      _weight = null;
+    });
+    _applyLive(); // publish the cleared (identity) node ⇒ back to default, live
+  }
+
+  InputDecoration _dec(String label) => InputDecoration(
+        labelText: label,
+        isDense: true,
+        filled: true,
+        fillColor: BsTokens.cardLight,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      );
+
+  Widget _tokenDropdown(
+    String label,
+    List<(String?, String)> opts,
+    String? value,
+    ValueChanged<String?> onChanged,
+  ) =>
+      Padding(
+        padding: const EdgeInsets.only(top: BsTokens.space3),
+        child: DropdownButtonFormField<String?>(
+          initialValue: value,
+          isExpanded: true,
+          decoration: _dec(label),
+          items: [
+            for (final o in opts)
+              DropdownMenuItem<String?>(value: o.$1, child: Text(o.$2)),
+          ],
+          onChanged: onChanged,
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final previewStyle = applyCfgTextStyle(
+      context,
+      const TextStyle(
+        color: BsTokens.inkLight,
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+      ),
+      _style(),
+    );
+    final previewTxt =
+        _hasText && _text.text.isNotEmpty ? _text.text : _d.labelHe;
+    final previewEmoji =
+        _hasEmoji && _emoji.text.isNotEmpty ? '${_emoji.text} ' : '';
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: BsTokens.space4,
+          end: BsTokens.space4,
+          top: BsTokens.space4,
+          bottom: MediaQuery.of(context).viewInsets.bottom + BsTokens.space4,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                '✎ ${_d.labelHe}',
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: BsTokens.typeSubhead,
+                ),
+              ),
+              Text(
+                _d.id,
+                style: const TextStyle(
+                    color: BsTokens.mutedLight, fontSize: BsTokens.typeCaption),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              // תצוגה-חיה (מקומית, בלי publish) — אותו מנוע-רינדור של האפליקציה.
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(BsTokens.space3),
+                decoration: BoxDecoration(
+                  color: BsTokens.bgLight,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFEDEDED)),
+                ),
+                child: Text('$previewEmoji$previewTxt', style: previewStyle),
+              ),
+              if (_hasText) ...[
+                const SizedBox(height: BsTokens.space3),
+                TextField(
+                  key: const Key('insp-text'),
+                  controller: _text,
+                  decoration: _dec('טקסט'),
+                  onChanged: (_) => setState(() {}),
+                  onEditingComplete: _applyLive,
+                ),
+              ],
+              if (_hasEmoji) ...[
+                const SizedBox(height: BsTokens.space3),
+                TextField(
+                  controller: _emoji,
+                  decoration: _dec('אמוג׳י'),
+                  onChanged: (_) => setState(() {}),
+                  onEditingComplete: _applyLive,
+                ),
+              ],
+              if (_hasStyle) ...[
+                _tokenDropdown('צבע', _kColorOpts, _color, (v) {
+                  setState(() => _color = v);
+                  _applyLive();
+                }),
+                _tokenDropdown('גודל', _kSizeOpts, _size, (v) {
+                  setState(() => _size = v);
+                  _applyLive();
+                }),
+                _tokenDropdown('משקל', _kWeightOpts, _weight, (v) {
+                  setState(() => _weight = v);
+                  _applyLive();
+                }),
+              ],
+              const SizedBox(height: BsTokens.space4),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('insp-reset'),
+                      onPressed: _reset,
+                      child: const Text('אפס לברירת-מחדל'),
+                    ),
+                  ),
+                  const SizedBox(width: BsTokens.space2),
+                  Expanded(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                          backgroundColor: BsTokens.brand),
+                      onPressed: () {
+                        _applyLive();
+                        Navigator.of(context).maybePop();
+                      },
+                      child: const Text('החל וסגור (חי)'),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

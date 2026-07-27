@@ -1804,3 +1804,9 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** (א) `moduleForScreen` → מחזיר מפתח לא-קיים ⇒ בדיקת-הכיסוי (`every registry element maps to a kWizardModules key`) אדומה מיידית. (ב) `_setModuleElementsHidden` no-op ⇒ בדיקת-ה-bulk (`נקה הכל`→`cart.cta` נסתר + נשמר false) אדומה.
 - **בטיחות:** `kOrgModules` נשאר 13 (הסט-הנעול — org_setup_wizard_test) ⇒ contractor **display-only, בלי שער** ⇒ אין נעילה-עצמית של ה-app-הבסיסי. bulk **מדלג kImmutable** (ליבה לא-מוסתרת). absent=on ⇒ ברירת-מחדל זהה-בייטים · 13 ה-SwitchListTile נשמרו ⇒ כל בדיקות-השער הקיימות ירוקות ללא-שינוי.
 - **אימות:** analyze 0 · org_setup_wizard 15/15 (12 קיימות + 3 חדשות).
+
+## #wizard-studio-s2 — מפקח ✎ פר-רכיב (publish חי) — 2026-07-27
+- **הפונקציות:** `_ElementInspectorSheet` (✎ · text/emoji/color/size/weight) · `_applyLive` (`applyOps`+`publish`) · `_openElementInspector`.
+- **תקלה שהוזרקה (mutation-sensitivity):** `_applyLive` → מדלג על `publish` (רק `applyOps`→draft) ⇒ בדיקת-ה-✎ (`published.global['cart.cta'].text=='קנה עכשיו'`) אדומה — כי בלי edit-mode `resolvedNode`=published ו-draft לא-נראה-חי. מוכיח ש-**ה-publish הוא-שעושה-חי** באשף.
+- **בטיחות:** ה-✎ מופיע **רק** כשיש ציר text/emoji/style (הסתרה-בלבד → אין ✎). ההסתרה נשארת על מתג-OrgConfig (בלי כפילות). `Key('elem-toggle-<id>')` (SwitchListTile) נשמר ⇒ כל בדיקות-הרכיבים הקיימות ירוקות. align/direction אינם ב-`CfgStyle`/`CfgText` ⇒ follow-up (value-object סגור).
+- **אימות:** analyze 0 · org_setup_wizard 16/16 · studio 192/192.
