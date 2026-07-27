@@ -4,6 +4,12 @@
 
 ---
 
+## #wizard-studio-s3 — מונחים-שזורים פר-מודול ("→ תצוגה" חיה) — 2026-07-27
+
+**שינוי-UI:** `org_setup_wizard_screen.dart` — כל סקציית-מודול קיבלה צ׳יפי-מונח **"🏷️ תווית → ערך"** (`termOf`, חי) מתחת לכותרת. `_kModuleTerms` ממפה מודול→מונחי-V3-מחווטים (`nav.*` · `entity.customer` · `brand.club`). עריכה נשארת במקטע "מיתוג ומונחים" (מקור-אמת אחד) → הצ׳יפ מתעדכן חי.
+
+**אימות:** `org_setup_wizard_test` **17/17** — קבלן מציג `שם המסך → בית`; עריכת `nav.home`→'מגורים' מעדכנת ל-`שם המסך → מגורים` (והישן נעלם — מקור-אמת אחד). analyze 0.
+
 ## #wizard-studio-s2 — מפקח מלא פר-רכיב (✎ text/color/size/weight חי) — 2026-07-27
 
 **שינוי-UI:** `org_setup_wizard_screen.dart` — כל שורת-רכיב (עם ציר text/emoji/style) קיבלה **✎** ליד מתג-ההסתרה → פותח bottom-sheet `_ElementInspectorSheet`: **טקסט · אמוג׳י · צבע · גודל · משקל** (contextual לפי `editableProps`) + תצוגה-חיה + "אפס לברירת-מחדל"/"החל וסגור (חי)". כל שינוי → `applyOps`+`publish` ל-Studio store ⇒ **חי בכל האפליקציה**. הסתרה נשארת על מתג-השורה (OrgConfig) — שני צירים נפרדים.

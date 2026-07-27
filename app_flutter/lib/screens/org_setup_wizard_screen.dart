@@ -30,7 +30,8 @@ import 'package:buildsmart/config/org_config.dart'
         encodeOrgConfig,
         kDefaultOrgConfig,
         kOrgConfigFlag,
-        moduleOn;
+        moduleOn,
+        termOf;
 import 'package:buildsmart/config/org_modules.dart'
     show
         OrgModuleInfo,
@@ -92,6 +93,21 @@ final Map<String, Map<String, List<ElementDescriptor>>> _kElementsByModule = () 
 /// מפתחות-המודולים עם שער-פרסונה (13 — kOrgModules). 'contractor' איננו כאן
 /// (ה-app-הבסיסי, בלי שער) ⇒ סקציית-תצוגה בלבד.
 final Set<String> _kGatedKeys = kOrgModules.map((m) => m.key).toSet();
+
+/// מונחים-שזורים פר-מודול (slice-3): מפתח-מודול → [(מפתח-מונח · תווית · ברירת-מחדל)].
+/// רק מונחי-רישום-V3 המחווטים בפועל (`termOf`) — הצגה-חיה "→ תצוגה" בכל סקציה.
+/// עריכה נשארת במקטע "מיתוג ומונחים" (מקור-אמת אחד ל-OrgConfig.terms).
+const Map<String, List<(String, String, String)>> _kModuleTerms = {
+  'contractor': [('nav.home', 'שם המסך', 'בית')],
+  'dive': [('nav.catalog', 'שם המסך', 'מחלקות')],
+  'chat': [('nav.updates', 'שם המסך', 'עדכונים')],
+  'supplier': [('nav.store', 'שם המסך', 'חנות')],
+  'manager': [
+    ('nav.customers', 'לקוחות', 'לקוחות'),
+    ('entity.customer', 'לקוח (יחיד)', 'לקוח'),
+  ],
+  'rewards': [('brand.club', 'שם המועדון', 'מועדון')],
+};
 
 /// 🔌 אשף הקמת חברה — giant-system V5. נקודת-הכניסה: מקטע-הניהול בלוח-המנהל,
 /// מאחורי [kOrgConfigFlag].
@@ -535,6 +551,40 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
         ),
       );
 
+  /// מונחים-שזורים (slice-3): הצגה-חיה "תווית → תצוגה" של מונחי-המודול (termOf).
+  /// ריק ⇒ SizedBox. העריכה עצמה במקטע "מיתוג ומונחים" (מקור-אמת אחד).
+  Widget _wovenTerms(String moduleKey) {
+    final terms = _kModuleTerms[moduleKey];
+    if (terms == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(
+          start: BsTokens.space3, end: BsTokens.space3, bottom: BsTokens.space2),
+      child: Wrap(
+        spacing: BsTokens.space2,
+        runSpacing: 4,
+        children: [
+          for (final (key, label, def) in terms)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: BsTokens.bgLight,
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                border: Border.all(color: const Color(0xFFEDEDED)),
+              ),
+              child: Text(
+                '🏷️ $label → ${termOf(_draft, key, def)}',
+                style: const TextStyle(
+                  color: BsTokens.brandDark,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   /// כפתור-bulk קטן (סמן/נקה-הכל).
   Widget _bulkBtn(String label, VoidCallback onTap) => TextButton(
         onPressed: onTap,
@@ -582,6 +632,8 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                   : _contractorHeader(m, counter),
             ),
           ),
+          // מונחים-שזורים (slice-3) — "תווית → תצוגה" חיה של מונחי-המודול.
+          _wovenTerms(m.key),
           // רצועת-פתיחה (עצלה) — משטח-הקשה נפרד מכפתורי ה-bulk.
           Row(
             children: [

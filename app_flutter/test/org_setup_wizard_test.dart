@@ -334,4 +334,21 @@ void main() {
         'קנה עכשיו',
         reason: 'the ✎ inspector publishes the text override live');
   });
+
+  // ── giant slice-3 — woven terms per module (termOf · live "→ תצוגה") ──
+  testWidgets('woven terms — each module shows its termOf value, and editing '
+      'the term updates the woven preview live', (t) async {
+    await _pump(t);
+    // contractor weaves nav.home (default 'בית') as a live "→ תצוגה".
+    expect(find.textContaining('שם המסך → בית'), findsWidgets);
+    // edit nav.home in the global terms section → the woven preview follows live.
+    final navHome = find.widgetWithText(TextField, 'טאב ראשון (בית)');
+    await t.ensureVisible(navHome);
+    await t.enterText(navHome, 'מגורים');
+    await t.pumpAndSettle();
+    expect(find.textContaining('שם המסך → מגורים'), findsWidgets,
+        reason: 'termOf is live — the woven chip re-reads the draft');
+    expect(find.textContaining('שם המסך → בית'), findsNothing,
+        reason: 'the old value is gone (single source of truth = draft.terms)');
+  });
 }

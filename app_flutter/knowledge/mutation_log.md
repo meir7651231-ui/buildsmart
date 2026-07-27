@@ -1810,3 +1810,9 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** `_applyLive` → מדלג על `publish` (רק `applyOps`→draft) ⇒ בדיקת-ה-✎ (`published.global['cart.cta'].text=='קנה עכשיו'`) אדומה — כי בלי edit-mode `resolvedNode`=published ו-draft לא-נראה-חי. מוכיח ש-**ה-publish הוא-שעושה-חי** באשף.
 - **בטיחות:** ה-✎ מופיע **רק** כשיש ציר text/emoji/style (הסתרה-בלבד → אין ✎). ההסתרה נשארת על מתג-OrgConfig (בלי כפילות). `Key('elem-toggle-<id>')` (SwitchListTile) נשמר ⇒ כל בדיקות-הרכיבים הקיימות ירוקות. align/direction אינם ב-`CfgStyle`/`CfgText` ⇒ follow-up (value-object סגור).
 - **אימות:** analyze 0 · org_setup_wizard 16/16 · studio 192/192.
+
+## #wizard-studio-s3 — מונחים-שזורים (termOf חי) — 2026-07-27
+- **הפונקציה:** `_wovenTerms` + `_kModuleTerms` (מודול→מונחי-V3-מחווטים).
+- **תקלה שהוזרקה (mutation-sensitivity):** `_wovenTerms` מציג את ה-`def` הקבוע במקום `termOf(_draft, key, def)` ⇒ בדיקת-ה-woven (עריכת nav.home→'מגורים' מעדכנת את הצ׳יפ) אדומה — הצ׳יפ אינו-חי.
+- **בטיחות:** read-only (העריכה במקטע "מיתוג ומונחים" — מקור-אמת אחד ל-OrgConfig.terms) ⇒ אין כפילות/סתירה. מונחים לא-מחווטים אינם מוצגים (רק ~8 המחווטים).
+- **אימות:** analyze 0 · org_setup_wizard 17/17.
