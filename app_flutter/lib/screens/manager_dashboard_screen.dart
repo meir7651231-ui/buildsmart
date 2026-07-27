@@ -17,6 +17,8 @@ import 'package:buildsmart/logic/attention_engine.dart'
     show AttentionItem, AttentionSev;
 import 'package:buildsmart/logic/customer_score.dart' show CustomerScore;
 import 'package:buildsmart/logic/fuzzy_match.dart' show fuzzyNameMatch;
+import 'package:buildsmart/logic/delivery_note.dart'
+    show buildDeliveryNoteRows, deliveryNoteTitle;
 import 'package:buildsmart/logic/invoice.dart'
     show buildInvoiceRows, invoiceTitle;
 import 'package:buildsmart/logic/manager_dashboard.dart';
@@ -1837,6 +1839,41 @@ class _OrderDetailSheet extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.receipt_long, size: 18),
                 label: const Text('🧾 הפק חשבונית'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+            // GIANT Phase-2 wave-4 (documents) — a delivery note (goods, no
+            // money) on the SAME printable_docs rail, behind its own opt-in
+            // `orders.deliveryNote` gate; absent by default ⇒ byte-identical.
+            if (featEnabled(ref, 'orders', 'deliveryNote')) ...[
+              const SizedBox(height: BsTokens.space3),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final title = deliveryNoteTitle(invoiceOrder);
+                  final ok = await printDocument(
+                    title: title,
+                    html: buildPrintableHtml(
+                      title: title,
+                      rows: buildDeliveryNoteRows(invoiceOrder),
+                    ),
+                  );
+                  if (!ok && context.mounted) {
+                    showToast(context, 'הדפסה זמינה בדפדפן');
+                  }
+                },
+                icon: const Icon(Icons.local_shipping, size: 18),
+                label: const Text('📦 תעודת משלוח'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: BsTokens.brandDark,
                   side: const BorderSide(color: BsTokens.brand),

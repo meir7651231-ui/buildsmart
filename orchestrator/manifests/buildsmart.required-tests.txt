@@ -69,3 +69,6 @@ test/customer_import_gate_test.dart
 # giant Phase-2 wave-3e — invoice/receipt document (pure VAT-reconciling kernel + gated button on the order-detail sheet):
 test/invoice_test.dart
 test/invoice_gate_test.dart
+# giant Phase-2 wave-4b — delivery-note document (goods/no-money) on the printable-docs rail, gated orders.deliveryNote:
+test/delivery_note_test.dart
+test/delivery_note_gate_test.dart
