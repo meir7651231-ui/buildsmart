@@ -43,6 +43,8 @@ import 'package:buildsmart/config/screen_labels_he.dart'
     show normalizeScreen, screenLabelHe;
 import 'package:buildsmart/config/vertical_packs.dart'
     show applyVerticalPack, kVerticalPacks;
+import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
+    show FindReplacePane;
 import 'package:buildsmart/services/file_transfer.dart'
     show downloadTextFileProvider, pickTextFileProvider;
 import 'package:buildsmart/state/org_config_store.dart'
@@ -468,6 +470,13 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     );
   }
 
+  /// slice-4 — משגר את מסך מצא-והחלף (מיחזור `FindReplacePane` verbatim).
+  void _openFindReplace() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const _WizardFindReplaceScreen()),
+    );
+  }
+
   /// גוף-מודול: קבוצות-מסך (screenLabelHe) + מתגי-הרכיבים. נבנה **רק כשהמודול
   /// פתוח** (lazy — ~896 מתגים לא נבנים בסקציות סגורות). ממויין לפי נפח.
   Widget _moduleBody(Map<String, List<ElementDescriptor>> byScreen) {
@@ -874,6 +883,18 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                 ),
                 const SizedBox(height: BsTokens.space3),
               ],
+              // ── מצא-והחלף (giant slice-4) — משגר את FindReplacePane של הסטודיו
+              // (מיחזור verbatim) במסלול-מלא + פעולת "פרסם לכולם (חי)".
+              const SizedBox(height: BsTokens.space2),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('open-find-replace'),
+                  onPressed: _openFindReplace,
+                  icon: const Text('🔎', style: TextStyle(fontSize: 15)),
+                  label: const Text('מצא והחלף בטקסטים'),
+                ),
+              ),
               const SizedBox(height: BsTokens.space2),
               SizedBox(
                 width: double.infinity,
@@ -1209,6 +1230,52 @@ class _ElementInspectorSheetState
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── מצא-והחלף באשף (slice-4) — מסלול-מלא סביב `FindReplacePane` של הסטודיו ──────
+// מיחזור **verbatim** של הפאנל (חיפוש-מצע על overrides · תצוגת before→after ·
+// applyOps אצווה→טיוטה). האשף מוסיף רק "פרסם לכולם (חי)" ב-AppBar — הצעד ההופך
+// את הטיוטה לחיה (האשף לא ב-edit-mode ⇒ publish הכרחי, בדיוק כמו ✎/slice-2).
+class _WizardFindReplaceScreen extends ConsumerWidget {
+  const _WizardFindReplaceScreen();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.brand,
+          foregroundColor: Colors.white,
+          title: const Text('מצא והחלף בטקסטים'),
+          actions: [
+            TextButton.icon(
+              onPressed: () {
+                ref.read(configStoreProvider.notifier).publish(
+                      note: 'מצא-והחלף · אשף',
+                      byEmail: ref.read(studioOwnerEmailProvider) ?? '',
+                      nowMs: DateTime.now().millisecondsSinceEpoch,
+                      criticalIds: ref.read(criticalIdsProvider),
+                    );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('פורסם — חי בכל האפליקציה ✓'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.publish, color: Colors.white),
+              label: const Text(
+                'פרסם לכולם (חי)',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        body: const FindReplacePane(),
       ),
     );
   }

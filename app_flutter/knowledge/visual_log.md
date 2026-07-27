@@ -4,6 +4,12 @@
 
 ---
 
+## #wizard-studio-s4 — מצא-והחלף באשף (מיחזור FindReplacePane) — 2026-07-27
+
+**שינוי-UI:** `org_setup_wizard_screen.dart` — כפתור **"🔎 מצא והחלף בטקסטים"** (מתחת למונחים) → מסלול-מלא `_WizardFindReplaceScreen` המארח את **`FindReplacePane` של הסטודיו (verbatim)** + פעולת-AppBar **"פרסם לכולם (חי)"** (`configStore.publish`).
+
+**אימות:** `org_setup_wizard_test` **18/18** — ה-launcher פותח את הפאנל (שדה 'מצא טקסט' נוכח) + פעולת ה-publish. לוגיקת-ההחלפה עצמה מכוסה ב-`find_replace_pane_test` (studio) — כאן רק החיווט. analyze 0.
+
 ## #wizard-studio-s3 — מונחים-שזורים פר-מודול ("→ תצוגה" חיה) — 2026-07-27
 
 **שינוי-UI:** `org_setup_wizard_screen.dart` — כל סקציית-מודול קיבלה צ׳יפי-מונח **"🏷️ תווית → ערך"** (`termOf`, חי) מתחת לכותרת. `_kModuleTerms` ממפה מודול→מונחי-V3-מחווטים (`nav.*` · `entity.customer` · `brand.club`). עריכה נשארת במקטע "מיתוג ומונחים" (מקור-אמת אחד) → הצ׳יפ מתעדכן חי.

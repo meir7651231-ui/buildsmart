@@ -1816,3 +1816,9 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** `_wovenTerms` מציג את ה-`def` הקבוע במקום `termOf(_draft, key, def)` ⇒ בדיקת-ה-woven (עריכת nav.home→'מגורים' מעדכנת את הצ׳יפ) אדומה — הצ׳יפ אינו-חי.
 - **בטיחות:** read-only (העריכה במקטע "מיתוג ומונחים" — מקור-אמת אחד ל-OrgConfig.terms) ⇒ אין כפילות/סתירה. מונחים לא-מחווטים אינם מוצגים (רק ~8 המחווטים).
 - **אימות:** analyze 0 · org_setup_wizard 17/17.
+
+## #wizard-studio-s4 — מצא-והחלף (launcher+publish) — 2026-07-27
+- **הפונקציות:** `_openFindReplace` · `_WizardFindReplaceScreen` (עוטף `FindReplacePane` + AppBar `publish`).
+- **תקלה שהוזרקה (mutation-sensitivity):** הכפתור `onPressed:null` (או pushing מסך-ריק) ⇒ בדיקת-ה-launcher (`find.byType(FindReplacePane)`) אדומה.
+- **בטיחות:** מיחזור **verbatim** (0 שינוי ב-`FindReplacePane`) ⇒ בדיקות-הסטודיו שלו נשארות ירוקות. ה-publish מפורש (הטיוטה לא נוגעת ב-live עד לחיצה). find-replace על overrides בלבד (labelHe לא נסרק).
+- **אימות:** analyze 0 · org_setup_wizard 18/18.

@@ -7,6 +7,8 @@
 import 'package:buildsmart/config/org_config.dart';
 import 'package:buildsmart/config/org_modules.dart';
 import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
+import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
+    show FindReplacePane;
 import 'package:buildsmart/state/org_config_store.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configStoreProvider;
@@ -350,5 +352,21 @@ void main() {
         reason: 'termOf is live — the woven chip re-reads the draft');
     expect(find.textContaining('שם המסך → בית'), findsNothing,
         reason: 'the old value is gone (single source of truth = draft.terms)');
+  });
+
+  // ── giant slice-4 — find-replace launcher wires the Studio pane + publish ──
+  testWidgets('the 🔎 launcher opens the recycled FindReplacePane in a route '
+      'with a publish-to-live action', (t) async {
+    await _pump(t);
+    final launcher = find.byKey(const Key('open-find-replace'));
+    await t.ensureVisible(launcher);
+    await t.tap(launcher);
+    await t.pumpAndSettle();
+    // the studio pane is recycled verbatim (its search field + the wizard's
+    // publish action are both present) — the replace logic itself is covered by
+    // the pane's own studio test; here we prove the WIRING.
+    expect(find.byType(FindReplacePane), findsOneWidget);
+    expect(find.text('מצא טקסט'), findsOneWidget);
+    expect(find.text('פרסם לכולם (חי)'), findsOneWidget);
   });
 }
