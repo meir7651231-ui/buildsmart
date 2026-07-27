@@ -32,6 +32,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -536,18 +537,22 @@ class _MustChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      label: const CfgText(
-        'accessory_rule_editor.t06',
-        'חובה',
-        style: TextStyle(
-          color: _kMustColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
+    // composite hide: whole 'חובה' chip gone when the org hides this element
+    return CfgVisible(
+      'accessory_rule_editor.t06',
+      child: Chip(
+        label: const CfgText(
+          'accessory_rule_editor.t06',
+          'חובה',
+          style: TextStyle(
+            color: _kMustColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
         ),
+        backgroundColor: _kMustColor.withValues(alpha: 0.12),
+        side: BorderSide.none,
       ),
-      backgroundColor: _kMustColor.withValues(alpha: 0.12),
-      side: BorderSide.none,
     );
   }
 }

@@ -12,6 +12,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -448,7 +449,10 @@ class _MonthCard extends StatelessWidget {
               HelpTarget(
                 title: 'חודש קודם',
                 body: 'מציג את טבלת הנוכחות של החודש הקודם.',
-                child: TextButton(
+                // composite hide: whole button gone when the org hides this element
+                child: CfgVisible(
+                  'courier.attend.prev',
+                  child: TextButton(
                   onPressed: onPrev,
                   style: TextButton.styleFrom(
                     minimumSize: const Size(48, 48),
@@ -459,6 +463,7 @@ class _MonthCard extends StatelessWidget {
                     '‹ הקודם',
                     style: TextStyle(fontSize: 13),
                   ),
+                ),
                 ),
               ),
               Expanded(
@@ -477,7 +482,10 @@ class _MonthCard extends StatelessWidget {
                 body:
                     'מציג את טבלת הנוכחות של החודש הבא — מושבת על החודש '
                     'הנוכחי (אין עתיד).',
-                child: TextButton(
+                // composite hide: whole button gone when the org hides this element
+                child: CfgVisible(
+                  'courier.attend.next',
+                  child: TextButton(
                   onPressed: canGoNext ? onNext : null,
                   style: TextButton.styleFrom(
                     minimumSize: const Size(48, 48),
@@ -488,6 +496,7 @@ class _MonthCard extends StatelessWidget {
                     'הבא ›',
                     style: TextStyle(fontSize: 13),
                   ),
+                ),
                 ),
               ),
             ],

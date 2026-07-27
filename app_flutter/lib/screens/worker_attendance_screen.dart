@@ -11,6 +11,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -564,7 +565,10 @@ class _CalendarCard extends StatelessWidget {
           // month is honestly unreachable (disabled 'הבא').
           Row(
             children: [
-              TextButton(
+              // composite hide: whole button gone when the org hides this element
+              CfgVisible(
+                'worker_attendance_screen.prev',
+                child: TextButton(
                 onPressed: onPrev,
                 style: TextButton.styleFrom(
                   minimumSize: const Size(48, 48),
@@ -572,6 +576,7 @@ class _CalendarCard extends StatelessWidget {
                 ),
                 child: CfgText('worker_attendance_screen.prev', '‹ הקודם',
                     style: TextStyle(fontSize: 13)),
+              ),
               ),
               Expanded(
                 child: Text(
@@ -584,7 +589,10 @@ class _CalendarCard extends StatelessWidget {
                   ),
                 ),
               ),
-              TextButton(
+              // composite hide: whole button gone when the org hides this element
+              CfgVisible(
+                'worker_attendance_screen.next',
+                child: TextButton(
                 onPressed: canGoNext ? onNext : null,
                 style: TextButton.styleFrom(
                   minimumSize: const Size(48, 48),
@@ -592,6 +600,7 @@ class _CalendarCard extends StatelessWidget {
                 ),
                 child: CfgText('worker_attendance_screen.next', 'הבא ›',
                     style: TextStyle(fontSize: 13)),
+              ),
               ),
             ],
           ),
@@ -890,7 +899,10 @@ class _LocationButton extends StatelessWidget {
       button: true,
       label: 'פתח ניווט למיקום',
       excludeSemantics: true,
-      child: Material(
+      // composite hide: whole button gone when the org hides this element
+      child: CfgVisible(
+        'worker_attendance_screen.open_nav',
+        child: Material(
         color: const Color(0xFFEAF3FF),
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         child: InkWell(
@@ -920,6 +932,7 @@ class _LocationButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

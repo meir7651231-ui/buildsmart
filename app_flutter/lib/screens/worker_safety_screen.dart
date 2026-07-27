@@ -10,6 +10,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -389,7 +390,10 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     const SizedBox(height: BsTokens.space3),
                     // Save — dimmed + unreactive while the awaited persist is
                     // in flight (F-38).
-                    Material(
+                    // composite hide: whole button gone when the org hides this element
+                    CfgVisible(
+                      'worker_safety_screen.save_training',
+                      child: Material(
                       color:
                           saving ? const Color(0xFFE9EAEC) : BsTokens.brand,
                       borderRadius:
@@ -415,6 +419,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
+                    ),
                     ),
                   ],
                 ),
@@ -691,7 +696,10 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     const SizedBox(height: BsTokens.space3),
                     // Save — dimmed + unreactive while the awaited persist is
                     // in flight (F-38).
-                    Material(
+                    // composite hide: whole button gone when the org hides this element
+                    CfgVisible(
+                      'worker_safety_screen.save_cert',
+                      child: Material(
                       color: saving
                           ? const Color(0xFFE9EAEC)
                           : BsTokens.brand,
@@ -718,6 +726,7 @@ class WorkerSafetyScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
+                    ),
                     ),
                   ],
                 ),
@@ -820,7 +829,10 @@ class _TrainingsCard extends StatelessWidget {
             button: true,
             label: 'הוסף הדרכה',
             excludeSemantics: true,
-            child: Material(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker_safety_screen.add_training_btn',
+              child: Material(
               color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               child: InkWell(
@@ -841,6 +853,7 @@ class _TrainingsCard extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],
@@ -1077,7 +1090,10 @@ class _CertsCard extends StatelessWidget {
             button: true,
             label: 'הוסף תעודה',
             excludeSemantics: true,
-            child: Material(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker_safety_screen.add_cert_btn',
+              child: Material(
               color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               child: InkWell(
@@ -1098,6 +1114,7 @@ class _CertsCard extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],

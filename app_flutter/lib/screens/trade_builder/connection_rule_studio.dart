@@ -42,6 +42,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -690,13 +691,17 @@ class _MethodLabelDialogState extends State<_MethodLabelDialog> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, _ctl.text),
-            style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const CfgText(
-              'connection_rule_studio.save',
-              'שמור',
-              style: TextStyle(fontWeight: FontWeight.w800),
+          // composite hide: whole save button gone when the org hides this element
+          CfgVisible(
+            'connection_rule_studio.save',
+            child: TextButton(
+              onPressed: () => Navigator.pop(context, _ctl.text),
+              style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+              child: const CfgText(
+                'connection_rule_studio.save',
+                'שמור',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
             ),
           ),
         ],
@@ -733,24 +738,32 @@ class _RuleInspectDialog extends StatelessWidget {
           style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const CfgText(
-              'connection_rule_studio.delete_rule',
-              'מחק כלל',
-              style: TextStyle(
-                color: BsTokens.dangerDark,
-                fontWeight: FontWeight.w800,
+          // composite hide: whole delete button gone when the org hides this element
+          CfgVisible(
+            'connection_rule_studio.delete_rule',
+            child: TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const CfgText(
+                'connection_rule_studio.delete_rule',
+                'מחק כלל',
+                style: TextStyle(
+                  color: BsTokens.dangerDark,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const CfgText(
-              'connection_rule_studio.close',
-              'סגור',
-              style: TextStyle(fontWeight: FontWeight.w800),
+          // composite hide: whole close button gone when the org hides this element
+          CfgVisible(
+            'connection_rule_studio.close',
+            child: TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+              child: const CfgText(
+                'connection_rule_studio.close',
+                'סגור',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
             ),
           ),
         ],

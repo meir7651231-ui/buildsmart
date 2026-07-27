@@ -35,6 +35,7 @@ import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:buildsmart/widgets/voice_dictate_button.dart';
 import 'package:flutter/material.dart';
@@ -229,13 +230,18 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
               body:
                   'סוגר את מסך לוח העובד וחוזר אחורה. אינו מנתק את החשבון — '
                   'ניתוק מלא נמצא בטאב אזור אישי.',
-              child: TextButton(
+              // composite hide: whole button gone when the org hides this element
+              child: CfgVisible(
+                'worker.action.exit',
+                critical: true, // exit/back — never hideable (don't trap the user)
+                child: TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
                 child: const CfgText(
                   'worker.action.exit',
                   '‹ יציאה',
                   style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
                 ),
+              ),
               ),
             ),
           ],
@@ -730,7 +736,10 @@ class _WeekStripCard extends ConsumerWidget {
                 child: Semantics(
                   button: true,
                   label: 'חודש מלא',
-                  child: InkWell(
+                  // composite hide: whole button gone when the org hides this element
+                  child: CfgVisible(
+                    'worker.action.fullMonth',
+                    child: InkWell(
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     onTap: onFullMonth,
                     child: const Padding(
@@ -748,6 +757,7 @@ class _WeekStripCard extends ConsumerWidget {
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ),
               ),
@@ -1049,7 +1059,10 @@ class _DayAttendanceCard extends StatelessWidget {
           ] else if (isToday) ...[
             const SizedBox(height: BsTokens.space3),
             // Day complete — honestly disabled (one shift per day).
-            Container(
+            // composite hide: whole pill gone when the org hides this element
+            CfgVisible(
+              'worker_app_screen.t01',
+              child: Container(
               constraints: const BoxConstraints(minHeight: 48),
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -1065,6 +1078,7 @@ class _DayAttendanceCard extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
+            ),
             ),
           ] else if (inTs == null) ...[
             const SizedBox(height: BsTokens.space2),
@@ -1265,7 +1279,10 @@ class _SummaryCard extends StatelessWidget {
                         if (demo) ...[
                           const SizedBox(width: BsTokens.space2),
                           // Honest 'דמו' chip (#66) — a demo session enters as רן.
-                          Container(
+                          // composite hide: whole chip gone when the org hides this element
+                          CfgVisible(
+                            'worker_app_screen.t03',
+                            child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 2,
@@ -1285,6 +1302,7 @@ class _SummaryCard extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                          ),
                           ),
                         ],
                       ],
@@ -1622,7 +1640,10 @@ class _EquipmentButton extends StatelessWidget {
           excludeSemantics: true,
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker.action.checkEquipment',
+              child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: BsTokens.brandDark,
                 side: const BorderSide(color: BsTokens.brand, width: 1.5),
@@ -1642,6 +1663,7 @@ class _EquipmentButton extends StatelessWidget {
                 'בדוק ציוד נדרש',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
+            ),
             ),
           ),
         ),
@@ -1675,7 +1697,10 @@ class _EmployerStockButton extends StatelessWidget {
           excludeSemantics: true,
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker.action.employerStock',
+              child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: BsTokens.brandDark,
                 side: const BorderSide(color: BsTokens.brand, width: 1.5),
@@ -1695,6 +1720,7 @@ class _EmployerStockButton extends StatelessWidget {
                 'מלאי הקבלן',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
+            ),
             ),
           ),
         ),
@@ -1728,7 +1754,10 @@ class _ProposeTaskButton extends StatelessWidget {
           excludeSemantics: true,
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker.action.addTask',
+              child: OutlinedButton.icon(
               key: const ValueKey('worker-propose-open'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: BsTokens.brandDark,
@@ -1749,6 +1778,7 @@ class _ProposeTaskButton extends StatelessWidget {
                 'הוסף משימה',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
+            ),
             ),
           ),
         ),
@@ -1782,7 +1812,10 @@ class _GanttButton extends StatelessWidget {
           excludeSemantics: true,
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker.action.gantt',
+              child: OutlinedButton.icon(
               key: const ValueKey('worker-gantt-entry'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: BsTokens.brandDark,
@@ -1803,6 +1836,7 @@ class _GanttButton extends StatelessWidget {
                 'גאנט משימות',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
+            ),
             ),
           ),
         ),
@@ -1837,7 +1871,10 @@ class _DefectsButton extends StatelessWidget {
           excludeSemantics: true,
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'worker.action.defects',
+              child: OutlinedButton.icon(
               key: const ValueKey('worker-defects-entry'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: BsTokens.brandDark,
@@ -1858,6 +1895,7 @@ class _DefectsButton extends StatelessWidget {
                 'ליקויים',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
+            ),
             ),
           ),
         ),
@@ -2115,7 +2153,10 @@ class _SubmitButton extends StatelessWidget {
       excludeSemantics: true,
       child: Align(
         alignment: AlignmentDirectional.centerStart,
-        child: Material(
+        // composite hide: whole button gone when the org hides this element
+        child: CfgVisible(
+          'worker.action.submit',
+          child: Material(
           color: BsTokens.brand,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
           child: InkWell(
@@ -2145,6 +2186,7 @@ class _SubmitButton extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

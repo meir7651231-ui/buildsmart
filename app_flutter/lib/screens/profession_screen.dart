@@ -67,6 +67,7 @@ class ProfessionScreen extends ConsumerWidget {
                     // composite hide: whole button gone when the org hides this element
                     child: CfgVisible(
                       'profession_screen.t01',
+                      critical: true, // exit/back — never hideable (don't trap the user)
                       child: TextButton.icon(
                         onPressed: () =>
                             ref.read(startupStepProvider.notifier).state = 0,

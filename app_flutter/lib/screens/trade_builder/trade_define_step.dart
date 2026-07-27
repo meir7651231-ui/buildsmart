@@ -25,6 +25,7 @@ import 'package:buildsmart/state/trades_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -278,26 +279,30 @@ class _SaveDraftButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: 'שמור טיוטה',
-      child: Material(
-        color: enabled ? BsTokens.brand : const Color(0xFFE2E2E2),
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        child: InkWell(
+    // composite hide: whole 'שמור טיוטה' pill gone when the org hides this element
+    return CfgVisible(
+      'trade_define_step.save_draft',
+      child: Semantics(
+        button: true,
+        enabled: enabled,
+        label: 'שמור טיוטה',
+        child: Material(
+          color: enabled ? BsTokens.brand : const Color(0xFFE2E2E2),
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: CfgText(
-              'trade_define_step.save_draft',
-              'שמור טיוטה',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: enabled ? bsOnAccent(context) : BsTokens.mutedLight,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: CfgText(
+                'trade_define_step.save_draft',
+                'שמור טיוטה',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: enabled ? bsOnAccent(context) : BsTokens.mutedLight,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),

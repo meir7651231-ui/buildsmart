@@ -40,6 +40,7 @@ import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
@@ -280,12 +281,18 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             HelpTarget(
               title: 'יציאה',
               body: 'יציאה מהלוח חזרה למסך הקודם — אינה מנתקת אותך מהחשבון.',
-              child: TextButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                child: const CfgText(
-                  'store.action.exit',
-                  '‹ יציאה',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+              // composite hide: hiding 'store.action.exit' removes the whole
+              // button (not an empty shell); absent config ⇒ verbatim.
+              child: CfgVisible(
+                'store.action.exit',
+                critical: true, // exit/back — never hideable (don't trap the user)
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: const CfgText(
+                    'store.action.exit',
+                    '‹ יציאה',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                  ),
                 ),
               ),
             ),
@@ -498,14 +505,20 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           onTap: () => setState(() => _orderFilter = 'new'),
         )
       else
-        _FlatCard(
-          child: CfgText(
-            'store_dashboard_screen.t01',
-            '✓ אין הזמנות שממתינות לאישור',
-            style: TextStyle(
-              color: BsTokens.inkLight.withValues(alpha: 0.8),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+        // composite hide: the card's sole content is this label — hiding
+        // 'store_dashboard_screen.t01' removes the whole card; absent config
+        // ⇒ verbatim.
+        CfgVisible(
+          'store_dashboard_screen.t01',
+          child: _FlatCard(
+            child: CfgText(
+              'store_dashboard_screen.t01',
+              '✓ אין הזמנות שממתינות לאישור',
+              style: TextStyle(
+                color: BsTokens.inkLight.withValues(alpha: 0.8),
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
             ),
           ),
         ),
@@ -604,26 +617,31 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
       // stays in code, so flipping the flag restores the button as before.
       if (!kHideUnderConstruction) ...[
         const SizedBox(height: BsTokens.space3),
-        OutlinedButton(
-          onPressed: () {
-            final id =
-                ref.read(sysOrdersProvider.notifier).simulateIncomingOrder();
-            showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
-          },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(cfgRadius(context)),
+        // composite hide: hiding 'store_dashboard_screen.t02' removes the whole
+        // demo button (not an empty shell); absent config ⇒ verbatim.
+        CfgVisible(
+          'store_dashboard_screen.t02',
+          child: OutlinedButton(
+            onPressed: () {
+              final id =
+                  ref.read(sysOrdersProvider.notifier).simulateIncomingOrder();
+              showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
+              ),
             ),
-          ),
-          child: const CfgText(
-            'store_dashboard_screen.t02',
-            '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
-            style: TextStyle(
-              color: BsTokens.mutedLight,
-              fontWeight: FontWeight.w600,
-              fontSize: 13.5,
+            child: const CfgText(
+              'store_dashboard_screen.t02',
+              '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.5,
+              ),
             ),
           ),
         ),
@@ -842,19 +860,24 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         const SizedBox(height: BsTokens.space3),
         // #79 — upload a NEW product (persisted overlay; appears in this list
         // tagged + joins the contractor catalog/search via the shared state).
-        FilledButton(
-          onPressed: () => _showAddProductSheet(context),
-          style: FilledButton.styleFrom(
-            backgroundColor: BsTokens.brand,
-            padding: const EdgeInsets.symmetric(vertical: 13),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        // composite hide: hiding 'store.action.newProduct' removes the whole
+        // button (not an empty shell); absent config ⇒ verbatim.
+        CfgVisible(
+          'store.action.newProduct',
+          child: FilledButton(
+            onPressed: () => _showAddProductSheet(context),
+            style: FilledButton.styleFrom(
+              backgroundColor: BsTokens.brand,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              ),
             ),
-          ),
-          child: const CfgText(
-            'store.action.newProduct',
-            '➕ הוסף מוצר חדש',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            child: const CfgText(
+              'store.action.newProduct',
+              '➕ הוסף מוצר חדש',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            ),
           ),
         ),
         const SizedBox(height: BsTokens.space3),
@@ -1229,19 +1252,24 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
               ],
             ),
             const SizedBox(height: BsTokens.space4),
-            FilledButton(
-              onPressed: _submit,
-              style: FilledButton.styleFrom(
-                backgroundColor: BsTokens.brand,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            // composite hide: hiding 'store.action.addProduct' removes the
+            // whole button (not an empty shell); absent config ⇒ verbatim.
+            CfgVisible(
+              'store.action.addProduct',
+              child: FilledButton(
+                onPressed: _submit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: BsTokens.brand,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  ),
                 ),
-              ),
-              child: const CfgText(
-                'store.action.addProduct',
-                '➕ הוסף מוצר',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                child: const CfgText(
+                  'store.action.addProduct',
+                  '➕ הוסף מוצר',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                ),
               ),
             ),
           ],
@@ -1688,41 +1716,51 @@ class _SupplierSettingsScreenState
             const SizedBox(height: BsTokens.space2),
             _LogoPreview(username: username),
             const SizedBox(height: BsTokens.space2),
-            FilledButton(
-              // F-18 — awaited capture+persist with rollback; the toast tells
-              // the truth (see _captureLogo).
-              onPressed: _saving ? null : _captureLogo,
-              style: FilledButton.styleFrom(
-                backgroundColor: BsTokens.brand,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                ),
-              ),
-              child: const CfgText(
-                'store.action.captureLogo',
-                '📷 צלם / העלה לוגו',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-              ),
-            ),
-            if (profile.logo != null) ...[
-              const SizedBox(height: BsTokens.space2),
-              OutlinedButton(
-                onPressed: _saving ? null : _removeLogo,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  side: const BorderSide(color: Color(0xFFE0E0E0)),
+            // composite hide: hiding 'store.action.captureLogo' removes the
+            // whole button (not an empty shell); absent config ⇒ verbatim.
+            CfgVisible(
+              'store.action.captureLogo',
+              child: FilledButton(
+                // F-18 — awaited capture+persist with rollback; the toast tells
+                // the truth (see _captureLogo).
+                onPressed: _saving ? null : _captureLogo,
+                style: FilledButton.styleFrom(
+                  backgroundColor: BsTokens.brand,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   ),
                 ),
                 child: const CfgText(
-                  'store_dashboard_screen.t05',
-                  '🗑️ הסר לוגו',
-                  style: TextStyle(
-                    color: BsTokens.danger,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
+                  'store.action.captureLogo',
+                  '📷 צלם / העלה לוגו',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                ),
+              ),
+            ),
+            if (profile.logo != null) ...[
+              const SizedBox(height: BsTokens.space2),
+              // composite hide: hiding 'store_dashboard_screen.t05' removes the
+              // whole button (not an empty shell); absent config ⇒ verbatim.
+              CfgVisible(
+                'store_dashboard_screen.t05',
+                child: OutlinedButton(
+                  onPressed: _saving ? null : _removeLogo,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    side: const BorderSide(color: Color(0xFFE0E0E0)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    ),
+                  ),
+                  child: const CfgText(
+                    'store_dashboard_screen.t05',
+                    '🗑️ הסר לוגו',
+                    style: TextStyle(
+                      color: BsTokens.danger,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
                   ),
                 ),
               ),
@@ -2025,42 +2063,52 @@ class _StoreNotifsSheet extends ConsumerWidget {
                     Row(
                       children: [
                         if (unread > 0)
-                          TextButton(
-                            onPressed:
-                                () => ref
-                                    .read(workerNotifsProvider.notifier)
-                                    .markAllRead(username),
-                            child: const CfgText(
-                              'store_dashboard_screen.t09',
-                              'סמן הכל כנקרא',
-                              style: TextStyle(
-                                color: BsTokens.brandDark,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                          // composite hide: hiding 'store_dashboard_screen.t09'
+                          // removes the whole button; absent config ⇒ verbatim.
+                          CfgVisible(
+                            'store_dashboard_screen.t09',
+                            child: TextButton(
+                              onPressed:
+                                  () => ref
+                                      .read(workerNotifsProvider.notifier)
+                                      .markAllRead(username),
+                              child: const CfgText(
+                                'store_dashboard_screen.t09',
+                                'סמן הכל כנקרא',
+                                style: TextStyle(
+                                  color: BsTokens.brandDark,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),
                         const Spacer(),
-                        TextButton(
-                          onPressed: () async {
-                            final ok = await confirmDestructive(
-                              context,
-                              title: 'לנקות את כל ההתראות?',
-                              message: 'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
-                              confirmLabel: 'נקה',
-                            );
-                            if (!ok) return;
-                            ref
-                                .read(workerNotifsProvider.notifier)
-                                .clear(username);
-                          },
-                          child: const CfgText(
-                            'store_dashboard_screen.t10',
-                            'נקה הכל',
-                            style: TextStyle(
-                              color: BsTokens.danger,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                        // composite hide: hiding 'store_dashboard_screen.t10'
+                        // removes the whole button; absent config ⇒ verbatim.
+                        CfgVisible(
+                          'store_dashboard_screen.t10',
+                          child: TextButton(
+                            onPressed: () async {
+                              final ok = await confirmDestructive(
+                                context,
+                                title: 'לנקות את כל ההתראות?',
+                                message: 'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
+                                confirmLabel: 'נקה',
+                              );
+                              if (!ok) return;
+                              ref
+                                  .read(workerNotifsProvider.notifier)
+                                  .clear(username);
+                            },
+                            child: const CfgText(
+                              'store_dashboard_screen.t10',
+                              'נקה הכל',
+                              style: TextStyle(
+                                color: BsTokens.danger,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
@@ -2679,24 +2727,30 @@ class _DeliveredCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD7F5DF),
-                        borderRadius: BorderRadius.circular(
-                          BsTokens.radiusPill,
+                    // composite hide: the pill's sole content is this label —
+                    // hiding 'store_dashboard_screen.t13' removes the whole
+                    // pill; absent config ⇒ verbatim.
+                    CfgVisible(
+                      'store_dashboard_screen.t13',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
                         ),
-                      ),
-                      child: const CfgText(
-                        'store_dashboard_screen.t13',
-                        'נמסר ✓',
-                        style: TextStyle(
-                          color: Color(0xFF1F8A4C),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12.5,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD7F5DF),
+                          borderRadius: BorderRadius.circular(
+                            BsTokens.radiusPill,
+                          ),
+                        ),
+                        child: const CfgText(
+                          'store_dashboard_screen.t13',
+                          'נמסר ✓',
+                          style: TextStyle(
+                            color: Color(0xFF1F8A4C),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
                     ),

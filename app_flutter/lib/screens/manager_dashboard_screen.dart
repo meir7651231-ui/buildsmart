@@ -274,6 +274,7 @@ class ManagerDashboardScreen extends ConsumerWidget {
           // composite hide: the whole exit button goes when the org hides it.
           CfgVisible(
             'manager.dash.exit',
+            critical: true, // exit/back — never hideable (don't trap the user)
             child: TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: const CfgText(

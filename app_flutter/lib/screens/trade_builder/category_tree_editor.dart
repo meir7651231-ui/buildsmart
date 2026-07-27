@@ -27,6 +27,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -498,21 +499,29 @@ class _RenameCategoryDialogState extends State<_RenameCategoryDialog> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const CfgText(
-              'category_tree_editor.t04',
-              'ביטול',
-              style: TextStyle(color: BsTokens.mutedLight),
+          // composite hide: whole cancel button gone when the org hides this element
+          CfgVisible(
+            'category_tree_editor.t04',
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const CfgText(
+                'category_tree_editor.t04',
+                'ביטול',
+                style: TextStyle(color: BsTokens.mutedLight),
+              ),
             ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, _ctl.text),
-            style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const CfgText(
-              'category_tree_editor.t05',
-              'שמור',
-              style: TextStyle(fontWeight: FontWeight.w800),
+          // composite hide: whole save button gone when the org hides this element
+          CfgVisible(
+            'category_tree_editor.t05',
+            child: TextButton(
+              onPressed: () => Navigator.pop(context, _ctl.text),
+              style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+              child: const CfgText(
+                'category_tree_editor.t05',
+                'שמור',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
             ),
           ),
         ],

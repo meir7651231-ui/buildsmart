@@ -43,6 +43,7 @@ import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -424,7 +425,10 @@ class _CourierIdentityCard extends StatelessWidget {
                     if (session.demo) ...[
                       const SizedBox(width: BsTokens.space2),
                       // צ'יפ demo אחיד עם לוח העובד.
-                      Container(
+                      CfgVisible(
+                        // כל צ'יפ ה'דמו' נעלם עם הסתרת האלמנט (לא שלד ריק).
+                        'courier_profile_screen.demo_chip',
+                        child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 2,
@@ -444,6 +448,7 @@ class _CourierIdentityCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                      ),
                       ),
                     ],
                   ],
@@ -887,13 +892,17 @@ class _EditCourierProfileSheetState
                               ),
                             ),
                             if (_photo != null)
-                              TextButton(
-                                onPressed: () => setState(() => _photo = null),
-                                child: const CfgText(
-                                  'courier_profile_screen.remove_photo',
-                                  'הסר תמונה',
-                                  // AA: redAccent על לבן נכשל — token חוזה 9.
-                                  style: TextStyle(color: BsTokens.dangerDark),
+                              CfgVisible(
+                                // כל כפתור 'הסר תמונה' נעלם עם הסתרת האלמנט (לא שלד ריק).
+                                'courier_profile_screen.remove_photo',
+                                child: TextButton(
+                                  onPressed: () => setState(() => _photo = null),
+                                  child: const CfgText(
+                                    'courier_profile_screen.remove_photo',
+                                    'הסר תמונה',
+                                    // AA: redAccent על לבן נכשל — token חוזה 9.
+                                    style: TextStyle(color: BsTokens.dangerDark),
+                                  ),
                                 ),
                               ),
                           ],
@@ -953,7 +962,10 @@ class _EditCourierProfileSheetState
                   ),
                   const SizedBox(height: BsTokens.space4),
                   // ── שמירה ──
-                  Material(
+                  CfgVisible(
+                    // כל כרטיס-הכפתור נעלם עם הסתרת האלמנט (לא שלד ריק).
+                    'courier.profile.save_action',
+                    child: Material(
                     color: BsTokens.brand,
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     child: InkWell(
@@ -976,6 +988,7 @@ class _EditCourierProfileSheetState
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -1058,14 +1071,22 @@ class _RoleSwitchCodeDialogState extends State<_RoleSwitchCodeDialog> {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const CfgText('courier_profile_screen.dialog_cancel', 'ביטול'),
+        CfgVisible(
+          // כל כפתור-הביטול נעלם עם הסתרת האלמנט (לא שלד ריק).
+          'courier_profile_screen.dialog_cancel',
+          child: TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const CfgText('courier_profile_screen.dialog_cancel', 'ביטול'),
+          ),
         ),
-        TextButton(
-          onPressed: _confirm,
-          style: TextButton.styleFrom(foregroundColor: BsTokens.brandDark),
-          child: const CfgText('courier_profile_screen.dialog_confirm', 'אישור'),
+        CfgVisible(
+          // כל כפתור-האישור נעלם עם הסתרת האלמנט (לא שלד ריק).
+          'courier_profile_screen.dialog_confirm',
+          child: TextButton(
+            onPressed: _confirm,
+            style: TextButton.styleFrom(foregroundColor: BsTokens.brandDark),
+            child: const CfgText('courier_profile_screen.dialog_confirm', 'אישור'),
+          ),
         ),
       ],
     );

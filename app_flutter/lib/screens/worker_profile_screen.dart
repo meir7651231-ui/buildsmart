@@ -26,6 +26,7 @@ import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -249,7 +250,10 @@ class _IdentityCard extends StatelessWidget {
                         if (session.demo) ...[
                           const SizedBox(width: BsTokens.space2),
                           // Honest demo-session marker (#66).
-                          Container(
+                          CfgVisible(
+                            // כל צ'יפ ה'דמו' נעלם עם הסתרת האלמנט (לא שלד ריק).
+                            'worker_profile_screen.demo',
+                            child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 2,
@@ -269,6 +273,7 @@ class _IdentityCard extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                          ),
                           ),
                         ],
                       ],
@@ -893,13 +898,21 @@ class _ActionsCard extends ConsumerWidget {
                   ],
                 ),
                 actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogCtx, false),
-                    child: const CfgText('worker_profile_screen.cancel', 'ביטול'),
+                  CfgVisible(
+                    // כל כפתור-הביטול נעלם עם הסתרת האלמנט (לא שלד ריק).
+                    'worker_profile_screen.cancel',
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(dialogCtx, false),
+                      child: const CfgText('worker_profile_screen.cancel', 'ביטול'),
+                    ),
                   ),
-                  TextButton(
-                    onPressed: submit,
-                    child: const CfgText('worker_profile_screen.confirm', 'אישור'),
+                  CfgVisible(
+                    // כל כפתור-האישור נעלם עם הסתרת האלמנט (לא שלד ריק).
+                    'worker_profile_screen.confirm',
+                    child: TextButton(
+                      onPressed: submit,
+                      child: const CfgText('worker_profile_screen.confirm', 'אישור'),
+                    ),
                   ),
                 ],
               );
@@ -1234,13 +1247,17 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                               ),
                             ),
                             if (_photo != null)
-                              TextButton(
-                                onPressed: () => setState(() => _photo = null),
-                                child: const CfgText(
-                                  'worker_profile_screen.remove_photo',
-                                  'הסר תמונה',
-                                  // AA: redAccent על לבן נכשל — token חוזה 9.
-                                  style: TextStyle(color: BsTokens.dangerDark),
+                              CfgVisible(
+                                // כל כפתור 'הסר תמונה' נעלם עם הסתרת האלמנט (לא שלד ריק).
+                                'worker_profile_screen.remove_photo',
+                                child: TextButton(
+                                  onPressed: () => setState(() => _photo = null),
+                                  child: const CfgText(
+                                    'worker_profile_screen.remove_photo',
+                                    'הסר תמונה',
+                                    // AA: redAccent על לבן נכשל — token חוזה 9.
+                                    style: TextStyle(color: BsTokens.dangerDark),
+                                  ),
                                 ),
                               ),
                           ],
@@ -1326,7 +1343,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   ),
                   const SizedBox(height: BsTokens.space4),
                   // ── save ──
-                  Material(
+                  CfgVisible(
+                    // כל כרטיס-הכפתור נעלם עם הסתרת האלמנט (לא שלד ריק).
+                    'worker.profile.save_button',
+                    child: Material(
                     color: BsTokens.brand,
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     child: InkWell(
@@ -1349,6 +1369,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ],
               ),

@@ -64,6 +64,7 @@ class ProjectsScreen extends ConsumerWidget {
             // composite hide: whole button gone when the org hides this element
             CfgVisible(
               'projects_screen.exit',
+              critical: true, // exit/back — never hideable (don't trap the user)
               child: TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
                 child: const CfgText('projects_screen.exit', '‹ יציאה',

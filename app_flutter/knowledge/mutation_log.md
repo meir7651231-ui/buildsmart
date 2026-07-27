@@ -1767,3 +1767,9 @@
 - **אין-mutation-חדש:** מנגנון ה-CfgVisible כבר mutation-מאומת ב-r2a; r2b = עיטופים מכניים על אותו מנגנון. זהה-בייטים (config ריק ⇒ child verbatim).
 - **לקח:** ה-grep הראשוני פספס `const CfgText` — הושלם ידנית (dash.exit · credit) + F1/F3 סרקו const מיוזמתם. עתיד: לכלול const בתבנית.
 - **אימות:** analyze 0 · 59 בדיקות-מסך-מושפעות ירוקות · שער מלא.
+
+## #swarm-r2c — סגירת כיסוי-composites + בטיחות-יציאה — 2026-07-27
+- **הפתרון:** 4 fixers עטפו 64 composites ב-CfgVisible (18 קבצים); 7 כפתורי-יציאה critical:true (מונע התקעה).
+- **אין-mutation-חדש:** אותו מנגנון-CfgVisible (mutation-מאומת r2a) + critical-path (בדיקת "critical⇒shown" ב-cfg_wrappers). זהה-בייטים · gate_118 מוודא id-רשום.
+- **לקח:** critical:true הוא כלי-הבטיחות לניווט — הוחל על יציאות/חזרות שלא-במסגרת ה-5 kImmutable. fixers סרקו const + דילגו נכון על plain/multi-child/Dropdown.
+- **אימות:** analyze 0 · 56 בדיקות-מפתח + gate_118 ירוקים · שער מלא.

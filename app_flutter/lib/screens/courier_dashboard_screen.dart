@@ -34,6 +34,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -425,12 +426,18 @@ class _CourierDashboardScreenState
           body:
               'יציאה מהלוח חזרה למסך הקודם — אינה מנתקת אותך מהחשבון; '
               'התנתקות מלאה נמצאת באזור האישי.',
-          child: TextButton(
-            onPressed: () => Navigator.of(context).maybePop(),
-            child: const CfgText(
-              'courier.dash.exit',
-              '‹ יציאה',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+          // composite hide: hiding 'courier.dash.exit' removes the whole
+          // button (not an empty shell); absent config ⇒ verbatim.
+          child: CfgVisible(
+            'courier.dash.exit',
+            critical: true, // exit/back — never hideable (don't trap the user)
+            child: TextButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              child: const CfgText(
+                'courier.dash.exit',
+                '‹ יציאה',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+              ),
             ),
           ),
         ),
@@ -1436,54 +1443,64 @@ class _CourierNotifsSheet extends ConsumerWidget {
                     Row(
                       children: [
                         if (unread > 0)
-                          TextButton(
+                          // composite hide: hiding 'courier.notifs.mark_all'
+                          // removes the whole button; absent config ⇒ verbatim.
+                          CfgVisible(
+                            'courier.notifs.mark_all',
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                minimumSize: const Size(64, 48),
+                              ),
+                              onPressed:
+                                  username == null
+                                      ? null
+                                      : () => ref
+                                          .read(workerNotifsProvider.notifier)
+                                          .markAllRead(username),
+                              child: const CfgText(
+                                'courier.notifs.mark_all',
+                                'סמן הכל כנקרא',
+                                style: TextStyle(
+                                  color: BsTokens.brandDark,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        // composite hide: hiding 'courier.notifs.clear_all'
+                        // removes the whole button; absent config ⇒ verbatim.
+                        CfgVisible(
+                          'courier.notifs.clear_all',
+                          child: TextButton(
                             style: TextButton.styleFrom(
                               minimumSize: const Size(64, 48),
                             ),
                             onPressed:
                                 username == null
                                     ? null
-                                    : () => ref
-                                        .read(workerNotifsProvider.notifier)
-                                        .markAllRead(username),
+                                    : () async {
+                                      final ok = await confirmDestructive(
+                                        context,
+                                        title: 'לנקות את כל ההתראות?',
+                                        message:
+                                            'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
+                                        confirmLabel: 'נקה',
+                                      );
+                                      if (!ok) return;
+                                      ref
+                                          .read(workerNotifsProvider.notifier)
+                                          .clear(username);
+                                    },
                             child: const CfgText(
-                              'courier.notifs.mark_all',
-                              'סמן הכל כנקרא',
+                              'courier.notifs.clear_all',
+                              'נקה הכל',
                               style: TextStyle(
-                                color: BsTokens.brandDark,
+                                color: BsTokens.danger,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,
                               ),
-                            ),
-                          ),
-                        const Spacer(),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            minimumSize: const Size(64, 48),
-                          ),
-                          onPressed:
-                              username == null
-                                  ? null
-                                  : () async {
-                                    final ok = await confirmDestructive(
-                                      context,
-                                      title: 'לנקות את כל ההתראות?',
-                                      message:
-                                          'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
-                                      confirmLabel: 'נקה',
-                                    );
-                                    if (!ok) return;
-                                    ref
-                                        .read(workerNotifsProvider.notifier)
-                                        .clear(username);
-                                  },
-                          child: const CfgText(
-                            'courier.notifs.clear_all',
-                            'נקה הכל',
-                            style: TextStyle(
-                              color: BsTokens.danger,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
                             ),
                           ),
                         ),

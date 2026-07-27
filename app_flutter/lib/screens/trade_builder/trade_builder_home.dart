@@ -33,6 +33,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -371,25 +372,29 @@ class _AddTradeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'הוסף ענף',
-      child: Material(
-        color: BsTokens.brand,
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        child: InkWell(
+    // composite hide: whole 'הוסף ענף' pill gone when the org hides this element
+    return CfgVisible(
+      'trade_builder_home.add',
+      child: Semantics(
+        button: true,
+        label: 'הוסף ענף',
+        child: Material(
+          color: BsTokens.brand,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: CfgText(
-              'trade_builder_home.add',
-              'הוסף ענף',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: bsOnAccent(context),
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: CfgText(
+                'trade_builder_home.add',
+                'הוסף ענף',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: bsOnAccent(context),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),

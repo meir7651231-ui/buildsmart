@@ -43,6 +43,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -259,7 +260,10 @@ class _StoreIdentityCard extends StatelessWidget {
                     if (session.demo) ...[
                       const SizedBox(width: BsTokens.space2),
                       // צ'יפ demo אחיד עם לוח העובד (F-52).
-                      Container(
+                      CfgVisible(
+                        // כל צ'יפ ה'דמו' נעלם עם הסתרת האלמנט (לא שלד ריק).
+                        'store_profile_screen.demo_chip',
+                        child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 2,
@@ -278,6 +282,7 @@ class _StoreIdentityCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                      ),
                       ),
                     ],
                   ],
@@ -809,7 +814,10 @@ class _EditStoreProfileSheetState
                               ),
                             ),
                             if (_logo != null)
-                              TextButton(
+                              CfgVisible(
+                                // כל כפתור 'הסר לוגו' נעלם עם הסתרת האלמנט (לא שלד ריק).
+                                'store_profile_screen.remove_logo',
+                                child: TextButton(
                                 onPressed: () =>
                                     setState(() => _logo = null),
                                 child: CfgText(
@@ -819,6 +827,7 @@ class _EditStoreProfileSheetState
                                   style:
                                       TextStyle(color: BsTokens.dangerDark),
                                 ),
+                              ),
                               ),
                           ],
                         ),
@@ -892,7 +901,10 @@ class _EditStoreProfileSheetState
                   ),
                   const SizedBox(height: BsTokens.space4),
                   // ── שמירה ──
-                  Material(
+                  CfgVisible(
+                    // כל כרטיס-הכפתור נעלם עם הסתרת האלמנט (לא שלד ריק).
+                    'store_profile_screen.save_profile_btn',
+                    child: Material(
                     color: BsTokens.brand,
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     child: InkWell(
@@ -917,6 +929,7 @@ class _EditStoreProfileSheetState
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -1314,7 +1327,10 @@ class StoreCertsScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: BsTokens.space3),
-                      Material(
+                      CfgVisible(
+                        // כל כרטיס-הכפתור נעלם עם הסתרת האלמנט (לא שלד ריק).
+                        'store_profile_screen.save_cert_btn',
+                        child: Material(
                         color: BsTokens.brand,
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
@@ -1337,6 +1353,7 @@ class StoreCertsScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
+                      ),
                       ),
                     ],
                   ),
@@ -1408,7 +1425,10 @@ class _StoreCertsCard extends StatelessWidget {
           else
             for (final c in certs)
               _StoreCertRow(cert: c, onRemove: () => onRemove(c)),
-          Semantics(
+          CfgVisible(
+            // כל כפתור 'הוסף תעודה' נעלם עם הסתרת האלמנט (לא שלד ריק).
+            'store_profile_screen.add_cert_btn',
+            child: Semantics(
             button: true,
             label: 'הוסף תעודה',
             // הטקסט הפנימי זהה לתווית — בלי הכרזה כפולה ל-TalkBack (F-50).
@@ -1435,6 +1455,7 @@ class _StoreCertsCard extends StatelessWidget {
                 ),
               ),
             ),
+          ),
           ),
         ],
       ),

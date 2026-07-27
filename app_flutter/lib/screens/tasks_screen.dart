@@ -33,6 +33,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -146,10 +147,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const CfgText('tasks_screen.exit', '‹ יציאה',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+            // composite hide: whole exit button gone when the org hides this element
+            CfgVisible(
+              'tasks_screen.exit',
+              critical: true, // exit/back — never hideable (don't trap the user)
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const CfgText('tasks_screen.exit', '‹ יציאה',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+              ),
             ),
           ],
         ),
@@ -458,23 +464,28 @@ class _LogButton extends StatelessWidget {
   const _LogButton({required this.onTap});
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => Material(
-        color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(cfgRadius(context)),
-        elevation: 1,
-        shadowColor: Colors.black26,
-        child: InkWell(
+  Widget build(BuildContext context) =>
+      // composite hide: whole work-log pill gone when the org hides this element
+      CfgVisible(
+        'tasks_screen.log_btn',
+        child: Material(
+          color: BsTokens.cardLight,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
-          onTap: onTap,
-          child: const Padding(
-            padding: EdgeInsets.all(BsTokens.space4),
-            child: CfgText(
-              'tasks_screen.log_btn',
-              '📅 יומן עבודה — מה בוצע בכל יום',
-              style: TextStyle(
-                color: BsTokens.inkLight,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
+          elevation: 1,
+          shadowColor: Colors.black26,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            onTap: onTap,
+            child: const Padding(
+              padding: EdgeInsets.all(BsTokens.space4),
+              child: CfgText(
+                'tasks_screen.log_btn',
+                '📅 יומן עבודה — מה בוצע בכל יום',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -488,24 +499,29 @@ class _NewTaskButton extends StatelessWidget {
   const _NewTaskButton({required this.onTap});
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => Material(
-        color: BsTokens.brand,
-        borderRadius: BorderRadius.circular(cfgRadius(context)),
-        elevation: 1,
-        shadowColor: Colors.black26,
-        child: InkWell(
-          key: const ValueKey('task-new'),
+  Widget build(BuildContext context) =>
+      // composite hide: whole 'משימה חדשה' pill gone when the org hides this element
+      CfgVisible(
+        'tasks_screen.new_task',
+        child: Material(
+          color: BsTokens.brand,
           borderRadius: BorderRadius.circular(cfgRadius(context)),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(BsTokens.space4),
-            child: CfgText(
-              'tasks_screen.new_task',
-              '＋ משימה חדשה',
-              style: TextStyle(
-                color: bsOnAccent(context),
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
+          elevation: 1,
+          shadowColor: Colors.black26,
+          child: InkWell(
+            key: const ValueKey('task-new'),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              child: CfgText(
+                'tasks_screen.new_task',
+                '＋ משימה חדשה',
+                style: TextStyle(
+                  color: bsOnAccent(context),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -554,11 +570,15 @@ class _ApprovalCard extends StatelessWidget {
                 const SizedBox(height: BsTokens.space3),
                 Row(children: [
                   Expanded(
-                    child: OutlinedButton(
-                      key: ValueKey('approval-reject-$name'),
-                      onPressed: onReject,
-                      child: const CfgText(
-                          'tasks_screen.approval_reject', '↩️ החזר לתיקון'),
+                    // composite hide: whole reject button gone when the org hides this element
+                    child: CfgVisible(
+                      'tasks_screen.approval_reject',
+                      child: OutlinedButton(
+                        key: ValueKey('approval-reject-$name'),
+                        onPressed: onReject,
+                        child: const CfgText(
+                            'tasks_screen.approval_reject', '↩️ החזר לתיקון'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -634,10 +654,14 @@ class _ProposalCard extends StatelessWidget {
                 const SizedBox(height: BsTokens.space3),
                 Row(children: [
                   Expanded(
-                    child: OutlinedButton(
-                      key: ValueKey('proposal-reject-$id'),
-                      onPressed: onReject,
-                      child: const CfgText('tasks_screen.proposal_reject', '❌ דחה'),
+                    // composite hide: whole reject button gone when the org hides this element
+                    child: CfgVisible(
+                      'tasks_screen.proposal_reject',
+                      child: OutlinedButton(
+                        key: ValueKey('proposal-reject-$id'),
+                        onPressed: onReject,
+                        child: const CfgText('tasks_screen.proposal_reject', '❌ דחה'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -757,19 +781,23 @@ class _Card extends StatelessWidget {
                     const Spacer(),
                     // Wave T2a — ✏️ edit affordance (contractor authoring only).
                     if (onEdit != null)
-                      InkWell(
-                        key: ValueKey('task-edit-${task.id}'),
-                        borderRadius:
-                            BorderRadius.circular(BsTokens.radiusPill),
-                        onTap: onEdit,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          child: CfgText('tasks_screen.edit', '✏️ ערוך',
-                              style: TextStyle(
-                                  color: BsTokens.brandDark,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12.5)),
+                      // composite hide: whole ✏️ edit pill gone when the org hides this element
+                      CfgVisible(
+                        'tasks_screen.edit',
+                        child: InkWell(
+                          key: ValueKey('task-edit-${task.id}'),
+                          borderRadius:
+                              BorderRadius.circular(BsTokens.radiusPill),
+                          onTap: onEdit,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            child: CfgText('tasks_screen.edit', '✏️ ערוך',
+                                style: TextStyle(
+                                    color: BsTokens.brandDark,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12.5)),
+                          ),
                         ),
                       ),
                   ],
@@ -959,23 +987,27 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                 const SizedBox(height: BsTokens.space3),
                 Row(children: [
                   Expanded(
-                    child: OutlinedButton(
-                      key: const ValueKey('task-reject'),
-                      onPressed: () async {
-                        // 📝 #12 — reject with an OPTIONAL reason (the shared
-                        // promptRejectReason dialog): null = cancelled, no
-                        // reject; the reason is threaded to the engine
-                        // (side-map + the worker's 🔁 bell notification).
-                        final why = await promptRejectReason(context);
-                        if (why == null || !context.mounted) return;
-                        ref
-                            .read(tasksProvider.notifier)
-                            .reject(t.id, reason: why);
-                        Navigator.of(context).pop();
-                        showToast(context, 'המשימה הוחזרה לעובד לתיקון');
-                      },
-                      child: const CfgText(
-                          'tasks_screen.sheet_reject', '↩️ החזר לתיקון'),
+                    // composite hide: whole reject button gone when the org hides this element
+                    child: CfgVisible(
+                      'tasks_screen.sheet_reject',
+                      child: OutlinedButton(
+                        key: const ValueKey('task-reject'),
+                        onPressed: () async {
+                          // 📝 #12 — reject with an OPTIONAL reason (the shared
+                          // promptRejectReason dialog): null = cancelled, no
+                          // reject; the reason is threaded to the engine
+                          // (side-map + the worker's 🔁 bell notification).
+                          final why = await promptRejectReason(context);
+                          if (why == null || !context.mounted) return;
+                          ref
+                              .read(tasksProvider.notifier)
+                              .reject(t.id, reason: why);
+                          Navigator.of(context).pop();
+                          showToast(context, 'המשימה הוחזרה לעובד לתיקון');
+                        },
+                        child: const CfgText(
+                            'tasks_screen.sheet_reject', '↩️ החזר לתיקון'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
