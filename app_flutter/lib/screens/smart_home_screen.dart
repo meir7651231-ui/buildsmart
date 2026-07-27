@@ -17,6 +17,8 @@ import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/home_content_order.dart';
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/state/org_gates.dart' show featOn, modOn;
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -109,7 +111,15 @@ class SmartHomeBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final order = ref.watch(homeContentOrderProvider);
+    // screen-mgmt slice-3: the home renders through the UNIFIED per-screen model
+    // (order + hide · 'home' key · ids == HomeSection.name). Empty layout ⇒
+    // visibleIds == the default order with nothing hidden ⇒ BYTE-IDENTICAL.
+    ref.watch(screenSectionsProvider);
+    final order = ref
+        .read(screenSectionsProvider.notifier)
+        .visibleIds(kHomeScreenKey, kHomeSectionIds)
+        .map(HomeSection.values.byName)
+        .toList();
     // Org gate: the תכנון-חיבור hero is the 'compat' module's home entry —
     // orgs that switch the module off lose it (demo org: all-on, identical).
     final compatOn = modOn(ref, 'compat');

@@ -6,6 +6,8 @@
 // Verbatim numbers/strings are anchored to index.html lines per `expect`.
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/state/home_content_order.dart';
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -181,6 +183,29 @@ void main() {
       final order = c.read(homeContentOrderProvider);
       expect(order.toSet(), HomeSection.values.toSet());
       expect(order, hasLength(HomeSection.values.length));
+    });
+
+    // screen-mgmt slice-3 — the live home now renders through the UNIFIED
+    // per-screen model (order + HIDE), keyed 'home', ids == HomeSection.name.
+    test('slice-3 — home reads screenSections: default is byte-identical; hide '
+        'drops a section from the rendered order; reorder still works', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = c.read(screenSectionsProvider.notifier);
+      // default = the full prototype order, nothing hidden (byte-identical).
+      expect(n.visibleIds(kHomeScreenKey, kHomeSectionIds),
+          [for (final s in kDefaultHomeOrder) s.name]);
+      // hide workPath → it drops from what SmartHomeBody renders.
+      n.hide(kHomeScreenKey, HomeSection.workPath.name);
+      expect(n.visibleIds(kHomeScreenKey, kHomeSectionIds),
+          isNot(contains(HomeSection.workPath.name)));
+      // order still covers every section (hide is non-destructive).
+      expect(n.orderedIds(kHomeScreenKey, kHomeSectionIds).toSet(),
+          kHomeSectionIds.toSet());
+      // reorder is per-screen.
+      n.moveDown(kHomeScreenKey, kHomeSectionIds, HomeSection.categories.name);
+      expect(n.orderedIds(kHomeScreenKey, kHomeSectionIds).first,
+          isNot(HomeSection.categories.name));
     });
   });
 }

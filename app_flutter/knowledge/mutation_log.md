@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s3 — הבית חי על מודל-הסקציות — 2026-07-27
+- **השינוי:** `smart_home` + `home_content_reorder` → `screenSections.visibleIds/orderedIds('home', kHomeSectionIds)` (במקום `homeContentOrderProvider`) + טוגל-הסתר פר-סקציה (`Key('home-hide-<id>')`).
+- **תקלה שהוזרקה (mutation-sensitivity):** `visibleIds`→`orderedIds` ב-`SmartHomeBody` ⇒ סקציה-מוסתרת עדיין מרונדרת ⇒ בדיקת slice-3 (hide נופל מהסדר) אדומה.
+- **בטיחות:** layout ריק ⇒ `visibleIds`==default ⇒ **זהה-בייטים** (62 בדיקות-בית ירוקות). `homeContentOrderProvider` נשאר ל-t3 (vestigial). `HomeSection.name`==id (מיפוי נקי דו-כיווני).
+- **אימות:** analyze 0 · t3 18/18 · screen_sections 7/7 · 62 home-render ירוקות.
+
 ## #screen-mgmt-s2 — ניהול-מסכים באשף (2 מפלסים) — 2026-07-27
 - **הפונקציות:** `_SectionManagerList` (row · reorder · toggle · reset) · `_ScreenManagerScreen` (רמה-1) · `_ScreenSectionEditor` (רמה-2) · `kManagedScreens` (screen_registry).
 - **תקלה שהוזרקה (mutation-sensitivity):** ה-switch `value: !hidden` → `value: hidden` ⇒ בדיקת הסתרת-מסך/סקציה (`isHidden`==true אחרי tap) אדומה (ה-toggle מתחיל הפוך ⇒ ה-tap מציג במקום מסתיר).

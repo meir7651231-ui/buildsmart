@@ -50,6 +50,12 @@ const List<HomeSection> kDefaultHomeOrder = [
   HomeSection.reorderHistory,
 ];
 
+/// The home screen's key + default section ids for the unified per-screen model
+/// (`screen_sections.dart`) — ids == `HomeSection.name`, so the screen-mgmt
+/// slice-3 migration maps cleanly both ways (`HomeSection.values.byName`).
+const String kHomeScreenKey = 'home';
+final List<String> kHomeSectionIds = [for (final s in kDefaultHomeOrder) s.name];
+
 class HomeContentOrderNotifier extends StateNotifier<List<HomeSection>> {
   HomeContentOrderNotifier() : super(kDefaultHomeOrder) {
     _load();

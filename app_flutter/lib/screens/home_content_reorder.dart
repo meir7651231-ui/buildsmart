@@ -1,6 +1,8 @@
 import 'package:buildsmart/screens/smart_home_screen.dart'
     show smartHomeSectionFor;
 import 'package:buildsmart/state/home_content_order.dart';
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
@@ -77,8 +79,15 @@ class _BodyState extends ConsumerState<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    final order = ref.watch(homeContentOrderProvider);
-    final notifier = ref.read(homeContentOrderProvider.notifier);
+    // screen-mgmt slice-3: the home's ORDER + HIDE live on the unified per-screen
+    // model (screen_sections · 'home' key); the old homeContentOrderProvider is
+    // retired from the UI. Empty layout ⇒ default order, nothing hidden.
+    ref.watch(screenSectionsProvider);
+    final n = ref.read(screenSectionsProvider.notifier);
+    final order = n
+        .orderedIds(kHomeScreenKey, kHomeSectionIds)
+        .map(HomeSection.values.byName)
+        .toList();
 
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -103,8 +112,8 @@ class _BodyState extends ConsumerState<_Body> {
               'home_content_reorder.t04',
               child: TextButton(
                 onPressed: () {
-                  notifier.reset();
-                  showToast(context, 'הסדר אופס לברירת מחדל');
+                  n.resetScreen(kHomeScreenKey);
+                  showToast(context, 'הסדר וההסתרות אופסו לברירת מחדל');
                 },
                 child: CfgText('home_content_reorder.t04', 'איפוס',
                     style: TextStyle(color: BsTokens.mutedLight)),
@@ -121,16 +130,25 @@ class _BodyState extends ConsumerState<_Body> {
       ),
     );
 
+    // Editing shows EVERY section (with a hide toggle so a hidden one can come
+    // back); the preview shows only the visible ones — matching the live home.
+    final shown = _editing
+        ? order
+        : order.where((s) => !n.isHidden(kHomeScreenKey, s.name)).toList();
+
     final sections = <Widget>[
-      for (var i = 0; i < order.length; i++)
+      for (var i = 0; i < shown.length; i++)
         _SectionSlot(
-          key: ValueKey(order[i]),
+          key: ValueKey(shown[i]),
           index: i,
-          total: order.length,
-          section: order[i],
+          total: shown.length,
+          section: shown[i],
           editing: _editing,
-          onUp: () => notifier.moveUp(order[i]),
-          onDown: () => notifier.moveDown(order[i]),
+          hidden: n.isHidden(kHomeScreenKey, shown[i].name),
+          onUp: () => n.moveUp(kHomeScreenKey, kHomeSectionIds, shown[i].name),
+          onDown: () =>
+              n.moveDown(kHomeScreenKey, kHomeSectionIds, shown[i].name),
+          onToggleHide: () => n.toggle(kHomeScreenKey, shown[i].name),
         ),
     ];
 
@@ -143,7 +161,8 @@ class _BodyState extends ConsumerState<_Body> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             buildDefaultDragHandles: false,
-            onReorder: notifier.reorder,
+            onReorder: (o, nw) =>
+                n.reorder(kHomeScreenKey, kHomeSectionIds, o, nw),
             children: sections,
           )
         else
@@ -161,8 +180,10 @@ class _SectionSlot extends ConsumerWidget {
     required this.total,
     required this.section,
     required this.editing,
+    required this.hidden,
     required this.onUp,
     required this.onDown,
+    required this.onToggleHide,
     super.key,
   });
 
@@ -170,8 +191,10 @@ class _SectionSlot extends ConsumerWidget {
   final int total;
   final HomeSection section;
   final bool editing;
+  final bool hidden;
   final VoidCallback onUp;
   final VoidCallback onDown;
+  final VoidCallback onToggleHide;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -220,11 +243,24 @@ class _SectionSlot extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(meta.title,
-                    style: const TextStyle(
-                      color: BsTokens.inkLight,
+                    style: TextStyle(
+                      color: hidden ? BsTokens.mutedLight : BsTokens.inkLight,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
+                      decoration:
+                          hidden ? TextDecoration.lineThrough : null,
                     )),
+              ),
+              // screen-mgmt slice-3: per-section הצג/הסתר (the hidden engine is
+              // the same per-screen model that drives the live home).
+              IconButton(
+                key: Key('home-hide-${section.name}'),
+                onPressed: onToggleHide,
+                icon: Icon(hidden
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined),
+                color: hidden ? BsTokens.mutedLight : BsTokens.brandDark,
+                tooltip: hidden ? 'הצג סקציה' : 'הסתר סקציה',
               ),
               IconButton(
                 onPressed: index == 0 ? null : onUp,
