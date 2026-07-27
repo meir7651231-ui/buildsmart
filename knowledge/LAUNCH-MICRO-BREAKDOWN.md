@@ -190,6 +190,8 @@
 
 > 🔌 **27/7 — הנחיה "הדלק את האשף ראשון" נכתבה+נדחפה** (`DIRECTIVE-arm-wizard-preview.md`): **משימה-1 (קודם, מאושרת-לדחיפה):** preview עם `--dart-define=ORG_CONFIG=true` לערוץ-נפרד (מטריצה נוספת ב-`clean-two-links` או `wizard-preview.yml`) → **לינק חי שבו האשף (giant-V5) לחיץ** במנהל (`manager_dashboard_screen.dart:3652`), האתר-הראשי לא-נגע · **משימה-2 (אחר-כך):** המשך רגיל — `DIRECTIVE-giant-phase2-features` גל-4. הגנה: ORG_CONFIG=true רק ב-preview, החי OFF זהה-בייטים.
 
+> 🎚️ **27/7 — הנחיה "להעמיק+להרחיב את הקונפיג/טוגלים" נכתבה+נדחפה** (`DIRECTIVE-deepen-toggles.md`, 2 פערים מבעלים אחרי שהאשף עבד): **פער-2 (דחוף) רוחב** — הקונפיג משנה **רק לוח-קבלן**, צריך שיגיע ל**כל משטח/persona** (סריקת-כיסוי → חווט כל surface ל-`featOn`/`orgTerm`) · **פער-1 עומק** — 13 טוגלים-גסים→**עשרות דקים** פר-ווידג'ט/סעיף (דפוס-מאור home10/cal7/rep6), עץ module→features באשף, מקונן. הגנות: default-ON=זהה-בייטים · cascade · toggle-matrix מורחב · חיווט-אמיתי-לא-דמה. סדר: קודם רוחב, אז עומק מודול-אחר-מודול.
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
