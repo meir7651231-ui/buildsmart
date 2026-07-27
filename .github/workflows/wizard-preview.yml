@@ -16,9 +16,9 @@
 # never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
 # all of that out and keeps the un-spoofable owner gate byte-identical.
 #
-# rev: s5 — rebuild for the 5 studio slices: Maor module accordion · ✎ per-element
-# inspector (text/color/size/weight live) · woven per-module terms · find-replace ·
-# versions/history — all recycling the existing Studio store (834f74d4).
+# rev: sm-s0 — rebuild after freezing the on-screen edit trigger (screen-management
+# slice-0): the נווט⇄ערוך toggle + 🔀 board selector are gone; editing is via the
+# wizard ONLY now. (Also carries the 5 wizard-studio slices.)
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.
