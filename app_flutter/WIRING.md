@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #owner-never-pending-authemail — זיהוי הבעלים גם לפי auth-email — 2026-07-27
+**המשך-תיקון (#247 היה no-op):** `withOwnerApproval` בדק `user.email` **ממסמך-המשתמש** — ריק כשהרישום היה ללא email → הבעלים לא זוהה, הפס נשאר. עכשיו `currentUserProvider` מעביר גם את ה-**auth email** (`authStateProvider.user?.email` — הגוגל-לוגין, תמיד קיים) ו-`withOwnerApproval(user,[authEmail])` מזהה לפי שניהם. הפס נעלם, permitAction עובר. אימות: analyze 0 · 6 owner_approval + rbac_providers ירוקות.
+
 ## #screen-mgmt-s1 — מודל-סקציות-פר-מסך מאוחד (סדר + הסתר) — 2026-07-27
 **דירקטיבה "ניהול-מסכים באשף" · פרוסה-1 (דחיפה-בלולאה).** נבנה `state/screen_sections.dart` — **הכללה** של שני מודלי-הסקציות החיים ל**מודל-פר-מסך אחד**: `home_content_order` (סדר · enum home-only) + `hidden_catalog_sections` (הסתר · `Set<String>` by-label) → לכל מפתח-מסך `ScreenLayout{order:List<String>, hidden:Set<String>}`. `ScreenSectionsNotifier` (`StateNotifier<Map<screen,ScreenLayout>>`): `orderedIds(screen,defaults)` (reconcile forward-compat — אלגוריתם home_content_order, מוכלל), `visibleIds` (order − hidden), `isHidden`, `hide/show/toggle`, `reorder/moveUp/moveDown`, `resetScreen`. persist ל-`bs.screen-sections.v1` (JSON map). **canonical-minimal** (מסך לא-מותאם **absent** ⇒ ברירת-מחדל · אפס-persist) ⇒ **זהה-בייטים** עד התאמה-בפועל. **תשתית בלבד** — האשף (slice-2) יחווט אליו, המסכים החיים (home/catalog) יהגרו **הדרגתית** (slice-5); שני-המקורות נשארים חיים עד-אז (מרחיבים · לא-נוגעים-בקיים). 7/7 · analyze 0.
 

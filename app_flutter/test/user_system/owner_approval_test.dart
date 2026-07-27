@@ -18,9 +18,22 @@ void main() {
       expect(withOwnerApproval(u)!.status, UserStatus.active);
     });
 
+    test('owner via AUTH email + blank doc email + pending → active', () {
+      // The real live bug: the users doc had NO email, so keying on the doc
+      // email alone missed the owner. The auth (Google) email is authoritative.
+      const u = BsUser(uid: 'o1', status: UserStatus.pending); // no doc email
+      expect(withOwnerApproval(u, owner)!.status, UserStatus.active);
+    });
+
     test('owner + already active → unchanged', () {
       final u = BsUser(uid: 'o1', email: owner, status: UserStatus.active);
       expect(withOwnerApproval(u)!.status, UserStatus.active);
+    });
+
+    test('non-owner auth email + pending → stays pending', () {
+      const u = BsUser(uid: 'u1', status: UserStatus.pending);
+      expect(withOwnerApproval(u, 'someone@else.com')!.status,
+          UserStatus.pending);
     });
 
     test('non-owner + pending → stays pending (scoped to the owner)', () {

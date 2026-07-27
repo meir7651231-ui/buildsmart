@@ -222,7 +222,12 @@ final currentUserProvider = Provider<BsUser?>((ref) {
     notifier.addListener(onRemoteChange);
     ref.onDispose(() => notifier.removeListener(onRemoteChange));
   }
-  return withOwnerApproval(repo.currentUser());
+  // The AUTH email (the signed-in Google identity) is the authoritative owner
+  // signal — the `users/{uid}` DOC may not carry an email (ensureUser writes it
+  // only when the seed had one; a phone/other-path registration leaves it blank),
+  // so keying only on the doc email missed the owner. Pass the auth email too.
+  final authEmail = ref.watch(authStateProvider).user?.email;
+  return withOwnerApproval(repo.currentUser(), authEmail);
 });
 
 /// The OWNER (verified email) is inherently approved — the bootstrap admin.
@@ -231,13 +236,14 @@ final currentUserProvider = Provider<BsUser?>((ref) {
 /// gate blocks EVERY action even for an admin (`permitAction`, by design) — locks
 /// the superuser out of the whole app and HIDES the approve action, so they can
 /// approve NO ONE (the first-admin chicken-and-egg, surfaced live). This forces
-/// `active` for the owner so the pending gate never traps them. Scoped to the
-/// un-spoofable owner email → no other account is affected; a non-owner (or an
+/// `active` for the owner so the pending gate never traps them. Recognised by the
+/// DOC email OR the [authEmail] (the un-spoofable signed-in Google identity — the
+/// doc email can be blank), so no other account is affected; a non-owner (or an
 /// already-active / null user) is returned verbatim. Pure — unit-tested.
-BsUser? withOwnerApproval(BsUser? user) {
+BsUser? withOwnerApproval(BsUser? user, [String? authEmail]) {
   if (user != null &&
-      isOwnerEmail(user.email) &&
-      user.status == UserStatus.pending) {
+      user.status == UserStatus.pending &&
+      (isOwnerEmail(user.email) || isOwnerEmail(authEmail))) {
     return user.copyWith(status: UserStatus.active);
   }
   return user;

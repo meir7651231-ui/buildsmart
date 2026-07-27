@@ -1844,3 +1844,8 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** הסרת שורת-האכיפה (`return user` תמיד). הבדיקה `owner + pending → active` נכשלת מיידית (Actual pending) ⇒ ההכרחה באמת-פועלת, לא קישוט. תקלה #2: הרחבת ה-scope (בלי `isOwnerEmail`) → הבדיקה `non-owner + pending → stays pending` נכשלת ⇒ מוכיח שהתיקון ממוקד-בעלים בלבד.
 - **בטיחות:** האינווריאנט `permitAction` לא נגע (הבדיקה `pending blocks even admin` נשארת ירוקה); רק סטטוס-הבעלים משתנה. email לא-ניתן-לזיוף.
 - **אימות:** analyze 0 · owner_approval_test 4/4 · 147 בדיקות user-system/auth ירוקות.
+## #owner-never-pending-authemail — זיהוי-בעלים לפי auth-email (תיקון no-op) — 2026-07-27
+- **הפונקציה:** `withOwnerApproval(user, [authEmail])` — הבעלים מזוהה גם ע"י ה-**auth email** (הגוגל-לוגין), לא רק מסמך-המשתמש.
+- **התקלה שהוזרקה:** הסרת ענף `isOwnerEmail(authEmail)` → הבדיקה `owner via AUTH email + blank doc email → active` נכשלת (Actual pending) ⇒ מוכיח שהמסלול-החדש load-bearing.
+- **למה:** #247 בדק `user.email` ממסמך-המשתמש — ריק כשהרישום היה בלי email → no-op. auth-email תמיד קיים לגוגל-לוגין.
+- **אימות:** analyze 0 · owner_approval_test 6/6.
