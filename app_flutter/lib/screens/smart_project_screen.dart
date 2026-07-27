@@ -14,6 +14,7 @@ import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,15 +76,25 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           actions: [
-            TextButton(
-              onPressed: () => _openDayPicker(stages, done),
-              child: const CfgText('smart_project_screen.t02', '📅 בחר יום',
-                  style: TextStyle(color: BsTokens.brandDark, fontSize: 13.5)),
+            // composite-hide: whole בחר-יום button gone when the org hides this
+            // element (opens the day picker → critical:false).
+            CfgVisible(
+              'smart_project_screen.t02',
+              child: TextButton(
+                onPressed: () => _openDayPicker(stages, done),
+                child: const CfgText('smart_project_screen.t02', '📅 בחר יום',
+                    style: TextStyle(color: BsTokens.brandDark, fontSize: 13.5)),
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const CfgText('smart_project_screen.t03', '‹ יציאה',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+            // composite-hide: the whole exit button goes when the org hides it.
+            CfgVisible(
+              'smart_project_screen.t03',
+              critical: true, // exit/back — never hideable (don't trap the user)
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const CfgText('smart_project_screen.t03', '‹ יציאה',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+              ),
             ),
           ],
         ),

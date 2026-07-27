@@ -1,5 +1,6 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 
 /// #12 — the manager's reject-with-optional-reason dialog, shared by BOTH
@@ -51,18 +52,28 @@ Future<String?> promptRejectReason(BuildContext context) async {
             ],
           ),
           actions: [
-            TextButton(
-              style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
-              onPressed: () => Navigator.pop(dialogCtx),
-              child: CfgText('reject_reason_dialog.cancel', 'ביטול'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                minimumSize: const Size(64, 48),
-                foregroundColor: Colors.redAccent,
+            // composite-hide: whole ביטול button gone when the org hides this
+            // element (dialog cancel → critical:false; dialog stays dismissible).
+            CfgVisible(
+              'reject_reason_dialog.cancel',
+              child: TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+                onPressed: () => Navigator.pop(dialogCtx),
+                child: CfgText('reject_reason_dialog.cancel', 'ביטול'),
               ),
-              onPressed: () => Navigator.pop(dialogCtx, ctrl.text.trim()),
-              child: CfgText('reject_reason_dialog.reject', 'דחה'),
+            ),
+            // composite-hide: whole דחה button gone when the org hides this
+            // element (dialog action → critical:false).
+            CfgVisible(
+              'reject_reason_dialog.reject',
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(64, 48),
+                  foregroundColor: Colors.redAccent,
+                ),
+                onPressed: () => Navigator.pop(dialogCtx, ctrl.text.trim()),
+                child: CfgText('reject_reason_dialog.reject', 'דחה'),
+              ),
             ),
           ],
         ),

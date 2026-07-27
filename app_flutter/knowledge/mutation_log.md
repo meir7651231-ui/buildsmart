@@ -1779,3 +1779,9 @@
 - **אין-mutation-חדש:** אותו מנגנון (mutation-מאומת r2a). תיקון-scope הוא robustness (לא לוגיקת-הסתרה).
 - **לקח:** ConsumerWidget עטיפתי דורש scope → שובר test-pumps חסרי-scope; StatelessWidget+try-containerOf (כמו CfgText) פותר גלובלית. עדיף לתקן במנגנון מ-whack-a-mole per-test.
 - **אימות:** analyze 0 · cfg_wrappers 24 + t6 ירוק · 133 בדיקות-מסך · gate_118 · שער מלא.
+
+## #swarm-r2e — סוף כיסוי-composite (הזנב האחרון) — 2026-07-27
+- **הפתרון:** 3 fixers · 26 עטיפות · shared-wrapper (courier _PillButton→4 · store _MonthRow→12) · critical:true ליציאות/consent/docs-gate.
+- **אין-mutation-חדש:** אותו מנגנון (mutation r2a + scope-tolerance r2d).
+- **לקח:** עטיפת wrapper משותף פעם-אחת מכסה N מופעים (יעיל). studio-editor הוחרג במכוון (לא אלמנט-אפליקציה).
+- **אימות:** analyze 0 · 65 בדיקות-מושפעות · שער מלא.

@@ -1,5 +1,6 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 
 /// "בקרוב" — an honest placeholder screen for a profession whose content
@@ -38,13 +39,18 @@ class ComingSoonScreen extends StatelessWidget {
             ),
           ),
           actions: [
-            TextButton(
+            // composite hide: whole app-bar back button gone when the org hides
+            // this element (secondary exit — the primary CTA below stays critical).
+            CfgVisible(
+              'coming_soon_screen.back',
+              child: TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: const CfgText(
                 'coming_soon_screen.back',
                 '‹ חזרה',
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
+            ),
             ),
           ],
         ),
@@ -82,7 +88,11 @@ class ComingSoonScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: BsTokens.space6),
-                ElevatedButton(
+                // composite hide: the whole "back to picker" CTA goes when hidden.
+                CfgVisible(
+                  'coming_soon_screen.back_to_picker',
+                  critical: true, // exit/back — never hideable (don't trap the user)
+                  child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: BsTokens.brand,
                     foregroundColor: Colors.white,
@@ -104,6 +114,7 @@ class ComingSoonScreen extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
+                ),
                 ),
               ],
             ),

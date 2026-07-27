@@ -15,6 +15,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -737,7 +738,10 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // excludeSemantics — the inner Text equals the label (F-50).
-    return Semantics(
+    // composite hide: whole pill gone when the org hides this element
+    return CfgVisible(
+      id,
+      child: Semantics(
       button: true,
       label: label,
       excludeSemantics: true,
@@ -768,6 +772,7 @@ class _PillButton extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

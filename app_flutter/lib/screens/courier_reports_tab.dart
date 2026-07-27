@@ -59,6 +59,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -489,7 +490,10 @@ class CourierReportsTab extends ConsumerWidget {
           title: 'שלח דוח-יומי לחנות',
           body:
               'שולח לחנות סיכום יומי כהודעת צ׳אט אמיתית + התראת-פעמון: כמה משלוחים נמסרו על-ידך, פעילים, POD וערך כספי. המספרים מיוחסים לשליח המחובר בלבד.',
-          child: Semantics(
+          // composite hide: whole button gone when the org hides this element
+          child: CfgVisible(
+            'courier.reports.send_report',
+            child: Semantics(
             button: true,
             label: 'שלח דוח יומי לחנות',
             child: Material(
@@ -515,6 +519,7 @@ class CourierReportsTab extends ConsumerWidget {
               ),
             ),
           ),
+          ),
         ),
         // #ai-daily-report — when AI is live, narrate the SAME live delivery
         // counts into a flowing report. gateway null → not in the tree → demo
@@ -523,10 +528,14 @@ class CourierReportsTab extends ConsumerWidget {
           const SizedBox(height: BsTokens.space2),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            // composite hide: whole button gone when the org hides this element
+            child: CfgVisible(
+              'courier_reports_tab.t04',
+              child: OutlinedButton.icon(
               onPressed: () => _openAiCourierReport(context, ref),
               icon: const Text('✨'),
               label: const CfgText('courier_reports_tab.t04', 'נסח דוח עם AI'),
+            ),
             ),
           ),
         ],
@@ -814,7 +823,10 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                         ),
                       ),
                     ),
-                    Container(
+                    // composite hide: whole pill gone when the org hides this element
+                    CfgVisible(
+                      'courier_reports_tab.t06',
+                      child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
@@ -835,6 +847,7 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                           fontSize: 12.5,
                         ),
                       ),
+                    ),
                     ),
                   ],
                 ),

@@ -22,6 +22,7 @@ import 'dart:ui' as ui;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 
 /// One continuous pen stroke — the ordered points from pen-down to pen-up.
@@ -216,7 +217,11 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                // composite-hide: whole נקה button gone when the org hides this
+                // element (clear action → critical:false).
+                child: CfgVisible(
+                  'signature_pad.clear_btn',
+                  child: OutlinedButton(
                   onPressed: _saving ? null : _controller.clear,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 13),
@@ -235,6 +240,7 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
                     ),
                   ),
                 ),
+                ),
               ),
               const SizedBox(width: BsTokens.space3),
               Expanded(
@@ -244,7 +250,11 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
                   animation: _controller,
                   builder: (context, _) {
                     final canSave = !_controller.isEmpty && !_saving;
-                    return FilledButton(
+                    // composite-hide: whole שמור button gone when the org hides
+                    // this element (save action → critical:false).
+                    return CfgVisible(
+                      'signature_pad.save_btn',
+                      child: FilledButton(
                       onPressed: canSave ? _save : null,
                       style: FilledButton.styleFrom(
                         backgroundColor: BsTokens.successDark,
@@ -263,6 +273,7 @@ class _SignaturePadSheetState extends State<SignaturePadSheet> {
                           fontSize: 14,
                         ),
                       ),
+                    ),
                     );
                   },
                 ),
@@ -454,7 +465,11 @@ Future<String?> showSignatureSheet(
                       button: true,
                       label: 'נקה חתימה',
                       excludeSemantics: true,
-                      child: Material(
+                      // composite-hide: whole נקה pill gone when the org hides
+                      // this element (clear action → critical:false).
+                      child: CfgVisible(
+                        'signature_pad.clear2',
+                        child: Material(
                         color: BsTokens.surfaceMid,
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
@@ -477,6 +492,7 @@ Future<String?> showSignatureSheet(
                           ),
                         ),
                       ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -486,7 +502,11 @@ Future<String?> showSignatureSheet(
                       button: true,
                       label: 'ביטול',
                       excludeSemantics: true,
-                      child: Material(
+                      // composite-hide: whole ביטול pill gone when the org hides
+                      // this element (cancel → critical:false).
+                      child: CfgVisible(
+                        'signature_pad.cancel_btn',
+                        child: Material(
                         color: BsTokens.surfaceMid,
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
@@ -509,6 +529,7 @@ Future<String?> showSignatureSheet(
                           ),
                         ),
                       ),
+                      ),
                     ),
                   ),
                 ],
@@ -521,7 +542,11 @@ Future<String?> showSignatureSheet(
                 button: true,
                 label: 'אישור חתימה',
                 excludeSemantics: true,
-                child: Material(
+                // composite-hide: whole אישור pill gone when the org hides this
+                // element (confirm action → critical:false).
+                child: CfgVisible(
+                  'signature_pad.confirm_btn',
+                  child: Material(
                   color: BsTokens.brand,
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                   child: InkWell(
@@ -557,6 +582,7 @@ Future<String?> showSignatureSheet(
                       ),
                     ),
                   ),
+                ),
                 ),
               ),
             ],

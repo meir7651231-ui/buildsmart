@@ -1,5 +1,6 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 
 /// 🧾 מסמכים — חשבוניות ודוח חודשי (#87.4, F-24) — SERVER-READY sheet for the
@@ -178,7 +179,10 @@ class _MonthRow extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
+            // composite hide: whole server-gated pill gone when the org hides this element
+            CfgVisible(
+              'store_documents_sheet.t03',
+              child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -194,6 +198,7 @@ class _MonthRow extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+            ),
             ),
           ],
         ),

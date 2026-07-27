@@ -9,6 +9,7 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,12 +70,19 @@ class DocsReadinessGate extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const CfgText(
-                'docs_readiness_gate.t02',
-                '‹ יציאה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            // composite hide: whole exit button gone when hidden. critical —
+            // '‹ יציאה' is the only in-app escape from this MANDATORY gate, so
+            // hiding it would trap the worker/courier here (never hideable).
+            CfgVisible(
+              'docs_readiness_gate.t02',
+              critical: true,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const CfgText(
+                  'docs_readiness_gate.t02',
+                  '‹ יציאה',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                ),
               ),
             ),
           ],
@@ -382,43 +390,49 @@ class _RecheckButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Semantics(
-      button: true,
-      label: '🔄 בדוק שוב',
-      excludeSemantics: true,
-      child: Center(
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: BsTokens.brandDark,
-            side: const BorderSide(color: BsTokens.brand, width: 1.5),
-            minimumSize: const Size(0, 48),
-            padding: const EdgeInsets.symmetric(
-              horizontal: BsTokens.space5,
-              vertical: 9,
+    // composite hide: whole check-again control (semantics + button) gone
+    // when hidden. NOT critical — the gate re-evaluates on the next build
+    // anyway, so hiding this explicit re-check never strands the user.
+    return CfgVisible(
+      'docs_readiness_gate.t04',
+      child: Semantics(
+        button: true,
+        label: '🔄 בדוק שוב',
+        excludeSemantics: true,
+        child: Center(
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand, width: 1.5),
+              minimumSize: const Size(0, 48),
+              padding: const EdgeInsets.symmetric(
+                horizontal: BsTokens.space5,
+                vertical: 9,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              ),
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onPressed: () {
+              // Re-read the live providers (the gate re-evaluates on the next
+              // build anyway — this makes the affordance explicit).
+              if (role == BoardRole.worker) {
+                final s = ref.read(boardAuthProvider);
+                if (s != null) {
+                  ref.invalidate(workerDocsReadyProvider(s.username));
+                }
+              } else {
+                final s = ref.read(boardAuthProvider);
+                if (s != null) {
+                  ref.invalidate(courierDocsReadyProvider(s.username));
+                }
+              }
+            },
+            child: const CfgText(
+              'docs_readiness_gate.t04',
+              '🔄 בדוק שוב',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
             ),
-          ),
-          onPressed: () {
-            // Re-read the live providers (the gate re-evaluates on the next
-            // build anyway — this makes the affordance explicit).
-            if (role == BoardRole.worker) {
-              final s = ref.read(boardAuthProvider);
-              if (s != null) {
-                ref.invalidate(workerDocsReadyProvider(s.username));
-              }
-            } else {
-              final s = ref.read(boardAuthProvider);
-              if (s != null) {
-                ref.invalidate(courierDocsReadyProvider(s.username));
-              }
-            }
-          },
-          child: const CfgText(
-            'docs_readiness_gate.t04',
-            '🔄 בדוק שוב',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
           ),
         ),
       ),

@@ -43,6 +43,7 @@ import 'package:buildsmart/state/keyboard_screen_tools.dart';
 import 'package:buildsmart/state/site_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -151,12 +152,18 @@ class _SiteScaffold extends StatelessWidget {
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: CfgText(
-                'site_hub_screen.back',
-                '‹ חזרה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            // composite hide: whole back button gone when hidden. critical:
+            // screen-level back (no default arrow) — never trap the user.
+            CfgVisible(
+              'site_hub_screen.back',
+              critical: true,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: CfgText(
+                  'site_hub_screen.back',
+                  '‹ חזרה',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                ),
               ),
             ),
           ],
@@ -471,10 +478,15 @@ Future<String?> _promptInput(
           decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(null),
-            child: CfgText('site_hub_screen.cancel', 'ביטול',
-                style: TextStyle(color: BsTokens.mutedLight)),
+          // composite hide: whole ביטול button gone when hidden
+          // (dialog cancel → critical:false; the dialog stays dismissible).
+          CfgVisible(
+            'site_hub_screen.cancel',
+            child: TextButton(
+              onPressed: () => Navigator.of(ctx).pop(null),
+              child: CfgText('site_hub_screen.cancel', 'ביטול',
+                  style: TextStyle(color: BsTokens.mutedLight)),
+            ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: _kBrand),

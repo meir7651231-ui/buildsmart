@@ -2239,3 +2239,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## swarm-r2d — כיסוי-composites מלא — שינוי-נראה: **לא (ברירת-מחדל) / כן (org מסתיר)** — 2026-07-27
 **ברירת-מחדל:** אפס — כל 74 הכפתורים/pills/chips ב-catalog·entry·settings·worker-sheets·contractor מרונדרים כרגיל. **org שמסתיר:** הפריט השלם נעלם. **בטיחות:** 3 CTAs-login (welcome) `critical:true` — org לא חוסם כניסה. **הפיכות:** הסרת עטיפות.
+
+## swarm-r2e — סוף כיסוי-composite — שינוי-נראה: **לא (ברירת-מחדל) / כן (org מסתיר)** — 2026-07-27
+**ברירת-מחדל:** אפס. **org שמסתיר:** הכפתור/כרטיס/pill השלם נעלם בכל הזנב (signature/consent/coming_soon/courier/docs/smart…). **בטיחות:** יציאות+consent-accept+docs-gate `critical:true`. **הפיכות:** הסרת עטיפות.

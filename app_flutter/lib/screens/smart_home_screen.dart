@@ -24,6 +24,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -390,7 +391,11 @@ class _SmartTreeCard extends ConsumerWidget {
           const SizedBox(height: 6),
           SizedBox(
             height: 30,
-            child: FilledButton(
+            // composite-hide: whole הוסף-לסל button gone when the org hides
+            // this element (add-to-cart action → critical:false).
+            child: CfgVisible(
+              'smart_home_screen.add_to_cart',
+              child: FilledButton(
               onPressed: () {
                 ref.read(smartCartProvider.notifier).add(
                       SmartCartLine(
@@ -419,6 +424,7 @@ class _SmartTreeCard extends ConsumerWidget {
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 12)),
+            ),
             ),
           ),
         ],

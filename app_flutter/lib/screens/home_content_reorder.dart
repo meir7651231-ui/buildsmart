@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/smart_home_screen.dart'
 import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,10 +47,15 @@ class HomeContentReorder extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: CfgText('home_content_reorder.t02', '‹ חזרה',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+            // composite-hide: the whole back button goes when the org hides it.
+            CfgVisible(
+              'home_content_reorder.t02',
+              critical: true, // exit/back — never hideable (don't trap the user)
+              child: TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: CfgText('home_content_reorder.t02', '‹ חזרה',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+              ),
             ),
           ],
         ),
@@ -91,13 +97,18 @@ class _BodyState extends ConsumerState<_Body> {
             ),
           ),
           if (_editing)
-            TextButton(
-              onPressed: () {
-                notifier.reset();
-                showToast(context, 'הסדר אופס לברירת מחדל');
-              },
-              child: CfgText('home_content_reorder.t04', 'איפוס',
-                  style: TextStyle(color: BsTokens.mutedLight)),
+            // composite-hide: whole איפוס button gone when the org hides this
+            // element (reset action → critical:false).
+            CfgVisible(
+              'home_content_reorder.t04',
+              child: TextButton(
+                onPressed: () {
+                  notifier.reset();
+                  showToast(context, 'הסדר אופס לברירת מחדל');
+                },
+                child: CfgText('home_content_reorder.t04', 'איפוס',
+                    style: TextStyle(color: BsTokens.mutedLight)),
+              ),
             ),
           TextButton.icon(
             onPressed: () => setState(() => _editing = !_editing),

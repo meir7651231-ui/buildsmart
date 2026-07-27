@@ -16,6 +16,7 @@ import 'package:buildsmart/state/app_settings.dart'
     show AppSettingsNotifier, appSettingsProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,7 +149,10 @@ class _ConsentDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: BsTokens.space3),
-                GestureDetector(
+                // composite hide: whole policy-link gone when the org hides this element
+                CfgVisible(
+                  'consent_modal.t03',
+                  child: GestureDetector(
                   onTap: () => Navigator.of(context).push(
                     LegalScreen.route(initialTab: LegalTab.privacy),
                   ),
@@ -163,17 +167,26 @@ class _ConsentDialog extends StatelessWidget {
                     ),
                   ),
                 ),
+                ),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(
+          // composite hide: whole "לא עכשיו" button gone when the org hides this element
+          CfgVisible(
+            'consent_modal.t04',
+            child: TextButton(
             onPressed: onDismiss,
             style: TextButton.styleFrom(foregroundColor: BsTokens.mutedLight),
             child: const CfgText('consent_modal.t04', 'לא עכשיו'),
           ),
-          TextButton(
+          ),
+          // composite hide: the whole "אני מסכים" consent button goes when hidden.
+          CfgVisible(
+            'consent_modal.t05',
+            critical: true, // affirmative consent — never hideable (don't strand the user)
+            child: TextButton(
             onPressed: onAgree,
             style: TextButton.styleFrom(foregroundColor: BsTokens.brandDark),
             child: const CfgText(
@@ -181,6 +194,7 @@ class _ConsentDialog extends StatelessWidget {
               'אני מסכים',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
+          ),
           ),
         ],
       ),
