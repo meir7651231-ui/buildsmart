@@ -7,7 +7,8 @@
 ---
 
 ## 🥇 משימה 1 · קודם — preview עם האשף חי, ודחוף מיד
-1. בנה את האפליקציה עם **`--dart-define=ORG_CONFIG=true`** (על פרופיל שיש בו דשבורד-מנהל — `demo`/`buildsmart`).
+> **תיקון (בעלים 27/7):** בנה על פרופיל **`clean`** — לא `demo`/`buildsmart`. clean = empty-shell (**אפס-דמו**) אבל יש בו את כל המסכים/המנוע → כך מקבלים **גם את האשף וגם אפס-נתוני-דמו**. אם ב-clean הכניסה-לאשף/דשבורד-מנהל חסומה — **חשוף אותה ב-clean** (הכניסה גדורה ב-`kOrgConfigFlag`, לא בפרופיל).
+1. בנה את האפליקציה עם **`--dart-define=APP_PROFILE=clean --dart-define=ORG_CONFIG=true`**.
 2. פרוס ל**ערוץ-Firebase-Hosting נפרד** (למשל `wizard`) — **האתר-הראשי-החי לא-נגע** — **והדפס את הלינק ב-run-summary.**
    - הכי-קל: עמודת-מטריצה נוספת ב-`clean-two-links.yml` (`ORG_CONFIG=true`), או workflow-אח קטן `wizard-preview.yml`.
 3. **דחוף/הרץ מיד** — זו המשימה הראשונה, לפני כל דבר אחר.

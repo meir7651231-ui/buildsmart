@@ -192,6 +192,8 @@
 
 > 🎚️ **27/7 — הנחיה "להעמיק+להרחיב את הקונפיג/טוגלים" נכתבה+נדחפה** (`DIRECTIVE-deepen-toggles.md`, 2 פערים מבעלים אחרי שהאשף עבד): **פער-2 (דחוף) רוחב** — הקונפיג משנה **רק לוח-קבלן**, צריך שיגיע ל**כל משטח/persona** (סריקת-כיסוי → חווט כל surface ל-`featOn`/`orgTerm`) · **פער-1 עומק** — 13 טוגלים-גסים→**עשרות דקים** פר-ווידג'ט/סעיף (דפוס-מאור home10/cal7/rep6), עץ module→features באשף, מקונן. הגנות: default-ON=זהה-בייטים · cascade · toggle-matrix מורחב · חיווט-אמיתי-לא-דמה. סדר: קודם רוחב, אז עומק מודול-אחר-מודול.
 
+> 🩹 **27/7 — תיקון wizard-preview: לבנות על `clean` לא `demo`.** הבעלים ראה נתוני-דמו ב-preview → השורש: ה-preview נבנה על `demo`/`buildsmart` (נושאי-דמו) במקום `clean` (empty-shell, אפס-דמו — כבר קיים מ-`d13d01b7`/`4d299493`). **לא צריך ניקוי-חדש — רק להצביע את ה-preview על `clean`.** תוקן ב-`DIRECTIVE-arm-wizard-preview.md`: `--dart-define=APP_PROFILE=clean --dart-define=ORG_CONFIG=true` (+ אם הכניסה-לאשף חסומה ב-clean → לחשוף, היא גדורה ב-`kOrgConfigFlag` לא בפרופיל).
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
