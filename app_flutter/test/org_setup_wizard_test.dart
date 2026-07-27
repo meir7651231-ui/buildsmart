@@ -8,6 +8,8 @@ import 'package:buildsmart/config/org_config.dart';
 import 'package:buildsmart/config/org_modules.dart';
 import 'package:buildsmart/screens/org_setup_wizard_screen.dart';
 import 'package:buildsmart/state/org_config_store.dart';
+import 'package:buildsmart/state/studio/element_registry.dart'
+    show kElementRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +23,10 @@ const _wave1 = {
 Future<ProviderContainer> _pump(WidgetTester t,
     {OrgConfig boot = const OrgConfig()}) async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
-  await t.binding.setSurfaceSize(const Size(440, 3200));
+  // Tall surface so the whole wizard builds without scrolling — the Maor module
+  // accordion (14 sections) grows the list; a short surface would leave the save
+  // + import/export buttons unbuilt (ListView is lazy).
+  await t.binding.setSurfaceSize(const Size(440, 7000));
   addTearDown(() => t.binding.setSurfaceSize(null));
   await t.pumpWidget(
     ProviderScope(
@@ -250,5 +255,55 @@ void main() {
         c.read(orgConfigProvider).features.containsKey('element.nav.bottombar'),
         isFalse,
         reason: 'locked ⇒ no false is ever written');
+  });
+
+  // ── giant slice-1 — the Maor module accordion (contractor first, browsable) ──
+  test('moduleForScreen — every registry element maps to a kWizardModules key; '
+      'contractor is display-only module #1 (never a wave-1 gate)', () {
+    final keys = kWizardModules.map((m) => m.key).toSet();
+    for (final d in kElementRegistry) {
+      final mod = moduleForScreen(d.screen);
+      expect(keys.contains(mod), isTrue,
+          reason: 'screen ${d.screen} → "$mod" ∉ kWizardModules');
+    }
+    expect(kWizardModules, hasLength(14));
+    expect(kWizardModules.first.key, 'contractor', reason: 'contractor first');
+    expect(kOrgModules.map((m) => m.key).contains('contractor'), isFalse,
+        reason: 'contractor is display-only — no gate ⇒ no self-lock of base app');
+  });
+
+  testWidgets('the contractor section is browsable WITHOUT search + a global '
+      'counter — and the base app adds no 14th gate tile', (t) async {
+    await _pump(t);
+    // 👷 לוח קבלן renders as a section header with no query — browsable, not the
+    // old empty-box (the hole the owner caught).
+    expect(find.text('לוח קבלן'), findsWidgets);
+    // global counter "X מתוך Y רכיבים פעילים".
+    expect(find.textContaining('רכיבים פעילים'), findsOneWidget);
+    // contractor has NO persona toggle (base app) ⇒ still exactly 13 gate tiles.
+    expect(find.byType(SwitchListTile), findsNWidgets(13));
+  });
+
+  testWidgets('"נקה הכל" bulk-hides a module\'s elements; canonical-minimal '
+      'persist (cart.cta lives on the contractor board)', (t) async {
+    final c = await _pump(t);
+    // isolate 👷 contractor via its filter chip (cart.cta screen "cart").
+    await t.tap(find.text('👷 לוח קבלן'));
+    await t.pumpAndSettle();
+    // open the section (closed strip reads "‹ רכיבים").
+    await t.tap(find.text('‹ רכיבים'));
+    await t.pumpAndSettle();
+    final toggle = find.byKey(const Key('elem-toggle-cart.cta'));
+    await t.ensureVisible(toggle);
+    expect(t.widget<SwitchListTile>(toggle).value, isTrue, reason: 'shown');
+    // "נקה הכל" → the whole module's non-locked elements hide.
+    await t.tap(find.text('נקה הכל'));
+    await t.pumpAndSettle();
+    await t.ensureVisible(toggle);
+    expect(t.widget<SwitchListTile>(toggle).value, isFalse,
+        reason: 'bulk-hidden');
+    await _tapSave(t);
+    expect(c.read(orgConfigProvider).features['element.cart.cta'], isFalse,
+        reason: 'bulk hide persists canonical-minimal');
   });
 }

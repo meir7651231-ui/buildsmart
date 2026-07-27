@@ -1798,3 +1798,9 @@
 - **בטיחות:** off-gate (`studioActiveProvider`=false) → `SizedBox.shrink` זהה-בייטים (נבדק). בורר-בורד מגודר `kStudioFlag` + `navigatorKey` תחת `(kKbGlobal || kStudioFlag)` → החי `null` זהה-בייטים.
 - **מגבלת-בדיקה כנה:** רלקסציית `return true` compile-gated (kStudioFlag/kProfileRawShell) → לא-בר-unit-test בסוויטה define-less; מאומתת חי על ה-preview. מניפסט-הקונפורמנס עודכן לשקף `return true`.
 - **אימות:** analyze 0 · zero_regression (off/on/אינטראקציה) + 304 בדיקות-סטודיו/שער/role-picker ירוקות.
+
+## #wizard-studio-s1 — אקורדיון-Maor + מיפוי מסך→מודול — 2026-07-27
+- **הפונקציות:** `moduleForScreen` (123 מסכים→14 מפתחות-מודול) · `_moduleCounts`/`_globalCounts` (מונים) · `_setModuleElementsHidden` (bulk סמן/נקה-הכל).
+- **תקלה שהוזרקה (mutation-sensitivity):** (א) `moduleForScreen` → מחזיר מפתח לא-קיים ⇒ בדיקת-הכיסוי (`every registry element maps to a kWizardModules key`) אדומה מיידית. (ב) `_setModuleElementsHidden` no-op ⇒ בדיקת-ה-bulk (`נקה הכל`→`cart.cta` נסתר + נשמר false) אדומה.
+- **בטיחות:** `kOrgModules` נשאר 13 (הסט-הנעול — org_setup_wizard_test) ⇒ contractor **display-only, בלי שער** ⇒ אין נעילה-עצמית של ה-app-הבסיסי. bulk **מדלג kImmutable** (ליבה לא-מוסתרת). absent=on ⇒ ברירת-מחדל זהה-בייטים · 13 ה-SwitchListTile נשמרו ⇒ כל בדיקות-השער הקיימות ירוקות ללא-שינוי.
+- **אימות:** analyze 0 · org_setup_wizard 15/15 (12 קיימות + 3 חדשות).

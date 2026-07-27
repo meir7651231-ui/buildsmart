@@ -32,7 +32,12 @@ import 'package:buildsmart/config/org_config.dart'
         kOrgConfigFlag,
         moduleOn;
 import 'package:buildsmart/config/org_modules.dart'
-    show OrgModuleInfo, kOrgModules, kWizardLockedModules;
+    show
+        OrgModuleInfo,
+        kOrgModules,
+        kWizardLockedModules,
+        kWizardModules,
+        moduleForScreen;
 import 'package:buildsmart/config/screen_labels_he.dart'
     show normalizeScreen, screenLabelHe;
 import 'package:buildsmart/config/vertical_packs.dart'
@@ -59,6 +64,22 @@ const List<({String key, String label})> _kTermFields = [
   (key: 'nav.store', label: 'טאב רביעי (חנות)'),
 ];
 
+/// כל אלמנטי-הרג׳יסטרי מקובצים `module→normScreen→elements`, מחושב **פעם-אחת**
+/// (הרג׳יסטרי const). זה הבסיס לאקורדיון-Maor: כל מודול = סקציה, בתוכה קבוצות-מסך.
+final Map<String, Map<String, List<ElementDescriptor>>> _kElementsByModule = () {
+  final m = <String, Map<String, List<ElementDescriptor>>>{};
+  for (final d in kElementRegistry) {
+    (m[moduleForScreen(d.screen)] ??= <String, List<ElementDescriptor>>{})
+        .putIfAbsent(normalizeScreen(d.screen), () => <ElementDescriptor>[])
+        .add(d);
+  }
+  return m;
+}();
+
+/// מפתחות-המודולים עם שער-פרסונה (13 — kOrgModules). 'contractor' איננו כאן
+/// (ה-app-הבסיסי, בלי שער) ⇒ סקציית-תצוגה בלבד.
+final Set<String> _kGatedKeys = kOrgModules.map((m) => m.key).toSet();
+
 /// 🔌 אשף הקמת חברה — giant-system V5. נקודת-הכניסה: מקטע-הניהול בלוח-המנהל,
 /// מאחורי [kOrgConfigFlag].
 class OrgSetupWizardScreen extends ConsumerStatefulWidget {
@@ -84,13 +105,17 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
   /// שומר-כפילות ל"שמור והפעל" (ה-persist הוא async).
   bool _saving = false;
 
-  /// מקטע-רכיבים: שאילתת-החיפוש החיה. הרשימה מונחית-חיפוש — ריק ⇒ לא מציגים
-  /// קבוצות (האשף נשאר קצר, כפתור-השמירה בהישג); הקלדה חושפת קבוצות תואמות.
+  /// אקורדיון-הרכיבים (סגנון-Maor): שאילתת-החיפוש החיה — **מסנן**, לא תנאי-הצגה.
+  /// ריק ⇒ כל 14 המודולים נגללים כסקציות (מונה לכל אחת); הקלדה מסננת אלמנטים
+  /// ופותחת-אוטומטית מודולים תואמים. (תיקון באג "התיבה הריקה".)
   String _elemQuery = '';
 
-  /// קבוצות-מסך שהמשתמש כיווץ ידנית (ברירת-המחדל בחיפוש: פתוח, כדי שהתאמות
-  /// יופיעו מיד). מפתח-מסך מנורמל ב-set = מכווץ.
-  final Set<String> _collapsedElemScreens = <String>{};
+  /// מסנן-צ׳יפ פעיל (מפתח-מודול) — null = הכל. **מסנן**, לא תנאי-הצגה.
+  String? _filterModule;
+
+  /// מפתחות-המודולים שהמשתמש פתח ידנית (אקורדיון עצל — גוף נבנה רק כשפתוח).
+  /// חיפוש פותח-אוטומטית מודולים תואמים בלי לגעת בסט הזה.
+  final Set<String> _openModules = <String>{};
 
   late final TextEditingController _orgName;
   late final Map<String, TextEditingController> _termCtrls;
@@ -284,10 +309,16 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
         ),
       );
 
-  /// שורת-מודול אחת: מתג עם אימוג׳י · שם · תיאור; 'manager' נעול (onChanged
-  /// null — הקונפיג עצמו עדיין יודע false מייבוא-JSON חיצוני, ה-UI רק מגן).
-  Widget _moduleTile(OrgModuleInfo m) {
+  /// שורת-מודול אחת (טוגל-אב "פעיל" — שער-הפרסונה): מתג עם אימוג׳י · שם · תיאור ·
+  /// מונה-רכיבים; 'manager' נעול (onChanged null — הקונפיג עצמו עדיין יודע false
+  /// מייבוא-JSON חיצוני, ה-UI רק מגן). [countSuffix] = "N/M פעילים".
+  Widget _moduleTile(OrgModuleInfo m, String countSuffix) {
     final locked = kWizardLockedModules.contains(m.key);
+    final sub = [
+      m.descHe,
+      if (locked) 'מוגן נעילה-עצמית',
+      countSuffix,
+    ].join(' · ');
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
       activeColor: BsTokens.brand,
@@ -301,7 +332,7 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
         ),
       ),
       subtitle: Text(
-        locked ? '${m.descHe} · מוגן נעילה-עצמית' : m.descHe,
+        sub,
         style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
       ),
       value: moduleOn(_draft, m.key),
@@ -309,9 +340,46 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     );
   }
 
-  /// סופר-רכיבים בקבוצת-מסך (סכום כל האזורים) — לשורת-המשנה ולמיון-לפי-נפח.
-  int _elemCount(Map<String, List<ElementDescriptor>> areas) =>
-      areas.values.fold<int>(0, (n, l) => n + l.length);
+  /// (מוצגים, סה״כ) של אלמנטי-מודול לפי הטיוטה — למונה-הסקציה.
+  (int, int) _moduleCounts(String key) {
+    var total = 0;
+    var shown = 0;
+    for (final list in (_kElementsByModule[key] ?? const {}).values) {
+      for (final d in list) {
+        total++;
+        if (elementShown(_draft, d.id)) shown++;
+      }
+    }
+    return (shown, total);
+  }
+
+  /// (מוצגים, סה״כ) על כל הרג׳יסטרי — למונה הגלובלי "X מתוך Y פעילים".
+  (int, int) _globalCounts() {
+    var total = 0;
+    var shown = 0;
+    for (final d in kElementRegistry) {
+      total++;
+      if (elementShown(_draft, d.id)) shown++;
+    }
+    return (shown, total);
+  }
+
+  /// "סמן הכל / נקה הכל" לאלמנטי-מודול — bulk הצג/הסתר. **מדלג על ליבה נעולה**
+  /// (kImmutable) — לעולם לא מסתירים ניווט/כניסה, גם לא ב-bulk.
+  void _setModuleElementsHidden(String key, {required bool hidden}) {
+    final next = <String, bool>{..._draft.features};
+    for (final list in (_kElementsByModule[key] ?? const {}).values) {
+      for (final d in list) {
+        if (d.kImmutable) continue;
+        if (hidden) {
+          next['element.${d.id}'] = false;
+        } else {
+          next.remove('element.${d.id}');
+        }
+      }
+    }
+    setState(() => _draft = _rebuild(features: next));
+  }
 
   /// שורת-רכיב אחת: מתג הצג/הסתר. ליבה (kImmutable) — נעולה (onChanged null,
   /// value=מוצג-תמיד) עם חיווי 🔒; לעולם לא מציעים לכבות ניווט/כניסה.
@@ -342,24 +410,27 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
     );
   }
 
-  /// גוף קבוצת-מסך: תוויות-אזור (raw — חופשי) + מתגי-הרכיבים. נבנה בהורה **רק
-  /// כשהקבוצה פתוחה** (lazy — 863 רכיבים לא נבנים בקבוצות סגורות).
-  Widget _elemGroupBody(Map<String, List<ElementDescriptor>> areas) {
-    final areaKeys = areas.keys.toList()..sort();
+  /// גוף-מודול: קבוצות-מסך (screenLabelHe) + מתגי-הרכיבים. נבנה **רק כשהמודול
+  /// פתוח** (lazy — ~896 מתגים לא נבנים בסקציות סגורות). ממויין לפי נפח.
+  Widget _moduleBody(Map<String, List<ElementDescriptor>> byScreen) {
+    final screens = byScreen.keys.toList()
+      ..sort((a, b) {
+        final d = byScreen[b]!.length.compareTo(byScreen[a]!.length);
+        return d != 0 ? d : a.compareTo(b);
+      });
     // Transparent Material ancestor so the SwitchListTiles have a Material to
-    // paint ink/background on — the group card is a colored DecoratedBox, and a
-    // ListTile directly under a colored DecoratedBox trips a framework assertion
-    // (its ink/bg would be hidden). Transparent ⇒ the card color still shows.
+    // paint ink/background on — the card is a colored Container, and a ListTile
+    // directly under it trips a framework assertion. Transparent ⇒ card shows.
     return Material(
       type: MaterialType.transparency,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final area in areaKeys) ...[
+          for (final sk in screens) ...[
             Padding(
               padding: const EdgeInsets.only(top: BsTokens.space2, bottom: 2),
               child: Text(
-                area,
+                screenLabelHe(sk),
                 style: const TextStyle(
                   color: BsTokens.mutedLight,
                   fontSize: 12,
@@ -367,22 +438,193 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                 ),
               ),
             ),
-            for (final d in areas[area]!) _elementTile(d),
+            for (final d in byScreen[sk]!) _elementTile(d),
           ],
         ],
       ),
     );
   }
 
-  /// מקטע "רכיבים" — כותרת + הסבר + שדה-חיפוש, ואז תוצאות מונחות-חיפוש. מכוון:
-  /// 863 רכיבים לא נשפכים כברירת-מחדל — האשף נשאר קצר (כפתור-השמירה בהישג),
-  /// והקלדה חושפת רק את הקבוצות התואמות.
-  List<Widget> _buildElementsSection() {
+  /// אלמנטי-מודול מסוננים לפי שאילתת-החיפוש [q] (ריק ⇒ הכל). מפתח=normScreen.
+  Map<String, List<ElementDescriptor>> _matchingElements(String key, String q) {
+    final byScreen = _kElementsByModule[key] ?? const {};
+    if (q.isEmpty) return byScreen;
+    final out = <String, List<ElementDescriptor>>{};
+    byScreen.forEach((screen, list) {
+      final f = [
+        for (final d in list)
+          if (d.labelHe.toLowerCase().contains(q) ||
+              d.id.toLowerCase().contains(q))
+            d,
+      ];
+      if (f.isNotEmpty) out[screen] = f;
+    });
+    return out;
+  }
+
+  /// כותרת מודול-תצוגה ללא שער (קבלן — ה-app-הבסיסי): אימוג׳י · שם · תיאור · מונה.
+  Widget _contractorHeader(OrgModuleInfo m, String countSuffix) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: Row(
+          children: [
+            Text(m.emoji, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: BsTokens.space3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    m.label,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '${m.descHe} · $countSuffix',
+                    style: const TextStyle(
+                        color: BsTokens.mutedLight, fontSize: 12.5),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
+  /// כפתור-bulk קטן (סמן/נקה-הכל).
+  Widget _bulkBtn(String label, VoidCallback onTap) => TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(
+          foregroundColor: BsTokens.brand,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Text(label,
+            style:
+                const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+      );
+
+  /// סקציית-מודול אחת באקורדיון-Maor: כותרת (שער-פרסונה למודול-שער · כותרת-בלבד
+  /// לקבלן) + מונה + רצועת-פתיחה-עצלה + סמן/נקה-הכל + מתגי-רכיבים מקובצי-מסך.
+  Widget _moduleSection(
+    OrgModuleInfo m,
+    Map<String, List<ElementDescriptor>> matched, {
+    required bool open,
+  }) {
+    final (shown, total) = _moduleCounts(m.key);
+    final gated = _kGatedKeys.contains(m.key);
+    final counter = '$shown/$total פעילים';
+    return Container(
+      margin: const EdgeInsets.only(bottom: BsTokens.space2),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Transparent Material so the header SwitchListTile paints ink over
+          // the colored card (a ListTile directly under a colored DecoratedBox
+          // trips a framework assertion) — same guard as _moduleBody.
+          Material(
+            type: MaterialType.transparency,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: BsTokens.space3),
+              child: gated
+                  ? _moduleTile(m, counter)
+                  : _contractorHeader(m, counter),
+            ),
+          ),
+          // רצועת-פתיחה (עצלה) — משטח-הקשה נפרד מכפתורי ה-bulk.
+          Row(
+            children: [
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => setState(() {
+                      if (!_openModules.remove(m.key)) _openModules.add(m.key);
+                    }),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: BsTokens.space3,
+                          vertical: BsTokens.space2),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              open ? '▾ רכיבים' : '‹ רכיבים',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: BsTokens.brandDark,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: BsTokens.space2),
+                          Flexible(
+                            child: Text(
+                              '$shown/$total',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: BsTokens.mutedLight, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (open) ...[
+                _bulkBtn('סמן הכל',
+                    () => _setModuleElementsHidden(m.key, hidden: false)),
+                _bulkBtn('נקה הכל',
+                    () => _setModuleElementsHidden(m.key, hidden: true)),
+                const SizedBox(width: BsTokens.space2),
+              ],
+            ],
+          ),
+          if (open)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                  BsTokens.space3, 0, BsTokens.space3, BsTokens.space3),
+              child: matched.isEmpty
+                  ? const Text('אין רכיבים תואמים',
+                      style: TextStyle(
+                          color: BsTokens.mutedLight, fontSize: 12.5))
+                  : _moduleBody(matched),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// מקטע "מודולים ורכיבים" — אקורדיון-Maor: מונה גלובלי · חיפוש-מסנן · צ׳יפי-
+  /// מסנן · 14 סקציות (קבלן ראשון). חיפוש/צ׳יפ = **מסננים** (לא תנאי-הצגה) —
+  /// תיקון באג "התיבה הריקה": כל המודולים נגללים תמיד, חיפוש רק מצמצם.
+  List<Widget> _buildModuleAccordion() {
     final q = _elemQuery.trim().toLowerCase();
+    final (gShown, gTotal) = _globalCounts();
     return [
-      _sectionTitle('רכיבים'),
+      _sectionTitle('מודולים ורכיבים'),
+      Text(
+        '$gShown מתוך $gTotal רכיבים פעילים',
+        style: const TextStyle(
+          color: BsTokens.brandDark,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      const SizedBox(height: BsTokens.space2),
       const Text(
-        'חפש רכיב כדי להציג או להסתיר אותו. ליבה (ניווט/כניסה) נעולה תמיד.',
+        'כל מודול = סקציה. פתח סקציה כדי להדליק/לכבות רכיבים. חיפוש וצ׳יפים מסננים. ליבה (ניווט/כניסה) נעולה תמיד.',
         style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
       ),
       const SizedBox(height: BsTokens.space3),
@@ -392,71 +634,39 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
         decoration: _dec('חיפוש רכיב'),
         onChanged: (v) => setState(() => _elemQuery = v),
       ),
+      const SizedBox(height: BsTokens.space2),
+      Wrap(
+        spacing: BsTokens.space2,
+        runSpacing: BsTokens.space2,
+        children: [
+          ChoiceChip(
+            label: const Text('הכל'),
+            selected: _filterModule == null,
+            onSelected: (_) => setState(() => _filterModule = null),
+          ),
+          for (final m in kWizardModules)
+            ChoiceChip(
+              label: Text('${m.emoji} ${m.label}'),
+              selected: _filterModule == m.key,
+              onSelected: (_) => setState(() =>
+                  _filterModule = _filterModule == m.key ? null : m.key),
+            ),
+        ],
+      ),
       const SizedBox(height: BsTokens.space3),
-      ..._buildElementResults(q),
+      for (final m in kWizardModules)
+        if (_filterModule == null || _filterModule == m.key)
+          ..._sectionOrEmpty(m, q),
     ];
   }
 
-  /// תוצאות-החיפוש של מקטע-הרכיבים. ריק ⇒ רמז (בלי לבנות קבוצות). אחרת: סינון
-  /// פר-רכיב לפי labelHe/id, קיבוץ מסך→אזור (מיזוג-כפילויות ב-[normalizeScreen]),
-  /// מיון לפי נפח (יורד) עם שובר-שוויון יציב, וכל קבוצה נפתחת כברירת-מחדל.
-  List<Widget> _buildElementResults(String q) {
-    if (q.isEmpty) {
-      return const <Widget>[
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
-          child: Text(
-            'הקלד שם רכיב (בעברית) כדי להציג ולהסתיר.',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-          ),
-        ),
-      ];
-    }
-    final groups = <String, Map<String, List<ElementDescriptor>>>{};
-    for (final d in kElementRegistry) {
-      if (!d.labelHe.toLowerCase().contains(q) &&
-          !d.id.toLowerCase().contains(q)) {
-        continue;
-      }
-      (groups[normalizeScreen(d.screen)] ??=
-              <String, List<ElementDescriptor>>{})
-          .putIfAbsent(d.area, () => <ElementDescriptor>[])
-          .add(d);
-    }
-    if (groups.isEmpty) {
-      return const <Widget>[
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
-          child: Text(
-            'לא נמצאו רכיבים תואמים',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-          ),
-        ),
-      ];
-    }
-    final keys = groups.keys.toList()
-      ..sort((a, b) {
-        final ca = _elemCount(groups[a]!);
-        final cb = _elemCount(groups[b]!);
-        return ca != cb ? cb.compareTo(ca) : a.compareTo(b);
-      });
+  /// סקציה בודדת (או ריק אם חיפוש-פעיל בלי-התאמות — המודול נעלם מהמסננת).
+  List<Widget> _sectionOrEmpty(OrgModuleInfo m, String q) {
+    final matched = _matchingElements(m.key, q);
+    if (q.isNotEmpty && matched.isEmpty) return const <Widget>[];
     return [
-      for (final sk in keys)
-        _ElemGroup(
-          title: screenLabelHe(sk),
-          sub: '${_elemCount(groups[sk]!)} רכיבים',
-          // ברירת-מחדל פתוח (התאמות נראות מיד); המשתמש יכול לכווץ.
-          open: !_collapsedElemScreens.contains(sk),
-          onTap: () => setState(() {
-            if (!_collapsedElemScreens.remove(sk)) {
-              _collapsedElemScreens.add(sk);
-            }
-          }),
-          // הגוף נבנה רק כשפתוח — זו ה-laziness (מכווץ ⇒ אפס מתגים).
-          body: _collapsedElemScreens.contains(sk)
-              ? null
-              : _elemGroupBody(groups[sk]!),
-        ),
+      _moduleSection(m, matched,
+          open: q.isNotEmpty || _openModules.contains(m.key)),
     ];
   }
 
@@ -554,12 +764,10 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
                 ],
               ),
               const SizedBox(height: BsTokens.space5),
-              _sectionTitle('מודולים'),
-              for (final m in kOrgModules) _moduleTile(m),
-              const SizedBox(height: BsTokens.space5),
-              // ── מקטע "רכיבים" (giant-system) — ציר הצג/הסתר על רג׳יסטרי-
-              // הסטודיו, מקובץ מסך→אזור, חיפוש-חי, אקורדיון עצל; ליבה נעולה.
-              ..._buildElementsSection(),
+              // ── מודולים ורכיבים (giant slice-1) — אקורדיון-Maor: 14 סקציות
+              // (קבלן ראשון), שער-פרסונה + מונה + סמן/נקה-הכל + מתגי-רכיבים
+              // מקובצי-מסך; חיפוש/צ׳יפים מסננים; ליבה נעולה.
+              ..._buildModuleAccordion(),
               const SizedBox(height: BsTokens.space5),
               _sectionTitle('מיתוג ומונחים (ריק = ברירת-המחדל)'),
               for (final f in _kTermFields) ...[
@@ -639,102 +847,6 @@ class _OrgSetupWizardState extends ConsumerState<OrgSetupWizardScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// מקטע-רכיבים אחד (מסך) באקורדיון — סגנון _ManageSection של לוח-המנהל,
-/// ממומש-מחדש מקומית (חוקי-בית: Text רגיל בלבד, בלי CfgText/HelpTarget). הגוף
-/// ([body]) נבנה בהורה **רק כשפתוח** ומועבר null כשסגור — כך 863 מתגי-הרכיבים
-/// לא נבנים בקבוצות סגורות.
-class _ElemGroup extends StatelessWidget {
-  const _ElemGroup({
-    required this.title,
-    required this.sub,
-    required this.open,
-    required this.onTap,
-    this.body,
-  });
-
-  final String title;
-  final String sub;
-  final bool open;
-  final VoidCallback onTap;
-  final Widget? body;
-
-  @override
-  Widget build(BuildContext context) {
-    final content = body;
-    return Container(
-      margin: const EdgeInsets.only(bottom: BsTokens.space2),
-      decoration: BoxDecoration(
-        color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEDEDED)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.all(BsTokens.space3),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              color: BsTokens.inkLight,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14.5,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            sub,
-                            style: const TextStyle(
-                              color: BsTokens.mutedLight,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: BsTokens.space2),
-                    // ▾ פתוח · ‹ סגור — אותם גליפים של _ManageSection (RTL).
-                    Text(
-                      open ? '▾' : '‹',
-                      style: const TextStyle(
-                        color: BsTokens.mutedLight,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          if (open && content != null)
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                BsTokens.space3,
-                0,
-                BsTokens.space3,
-                BsTokens.space3,
-              ),
-              child: content,
-            ),
-        ],
       ),
     );
   }

@@ -4,6 +4,11 @@
 
 ---
 
+## #wizard-studio-s1 — אקורדיון-Maor באשף (מודול-קבלן ראשון · מונה · סמן/נקה-הכל) — 2026-07-27
+
+**שינוי-UI:** `org_setup_wizard_screen.dart` — "מודולים"+"רכיבים" הנפרדים → **אקורדיון-Maor אחד** (14 סקציות, 👷 קבלן ראשון): שער-פרסונה (13 gated · manager נעול · קבלן בלי-שער=ה-app-הבסיסי) + **מונה N/M פעילים** + רצועת-פתיחה-עצלה + **סמן/נקה-הכל** (bulk, מדלג kImmutable) + מתגי-רכיבים מקובצי-מסך; מונה גלובלי **"X מתוך Y רכיבים פעילים"**; **חיפוש+צ׳יפים = מסננים** (לא תנאי-הצגה — תיקון "התיבה-הריקה"). `org_modules.dart` — `kContractorModule` + `kWizardModules`(14) + `moduleForScreen` (כיסוי-מלא 123→14).
+
+**אימות-ויזואלי:** `org_setup_wizard_test` **15/15** — **13 ה-SwitchListTile נשמרו** ⇒ renders(13)/pack-chip/self-lock/save/terms/reset/import/element-search ירוקות ללא-שינוי. חדשות: `moduleForScreen` כיסוי-מלא (כל אלמנט→kWizardModules) · קבלן-נגלל-בלי-חיפוש + מונה-גלובלי + עדיין-13-tiles · **נקה-הכל** bulk→`cart.cta` נסתר (canonical-minimal persist). analyze 0.
 ## s0c-fix — 🙈 הסתרה עובדת על תוויות-טקסט + toggle הצג/הסתר — 2026-07-27
 
 **באג (לקח #39):** מתג-ההסתרה כתב `SetHidden` לטיוטה, אבל `CfgText` (עטיפת 117 תוויות-הטקסט) לא קרא `n.hidden` — רק `CfgVisible` (56 composite) כיבד אותו ⇒ הסתרת תווית = "לא קורה כלום".
