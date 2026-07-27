@@ -194,6 +194,8 @@
 
 > 🩹 **27/7 — תיקון wizard-preview: לבנות על `clean` לא `demo`.** הבעלים ראה נתוני-דמו ב-preview → השורש: ה-preview נבנה על `demo`/`buildsmart` (נושאי-דמו) במקום `clean` (empty-shell, אפס-דמו — כבר קיים מ-`d13d01b7`/`4d299493`). **לא צריך ניקוי-חדש — רק להצביע את ה-preview על `clean`.** תוקן ב-`DIRECTIVE-arm-wizard-preview.md`: `--dart-define=APP_PROFILE=clean --dart-define=ORG_CONFIG=true` (+ אם הכניסה-לאשף חסומה ב-clean → לחשוף, היא גדורה ב-`kOrgConfigFlag` לא בפרופיל).
 
+> 🗺️ **27/7 — מצאי מלא של מרכז-השליטה (Explore) · הממצא ה"אהה": הכלים שהבעלים חיפש קיימים *פעמיים* — stub-קריאה-בלבד + עורך-אמיתי-חבוי.** מבנה: AppBar (chats/profile/CatalogSettings/impersonate) · 5 טאבים (לוח/הזמנות/לקוחות/ניהול/intel). **🔴 הקריטי:** בטאב-ניהול — 🗂️קטגוריות(`:4329`) · ⚙️הגדרות(`:4360`, fee/VAT/credit const) · 🌳עץ-מוצרים(`:4399`) · 🏷️מותגים+מחירים(`:4437`) = **כולם READ-ONLY stubs, אפס-עריכה** → לכן "לא עושים כלום". **✅ העורכים-האמיתיים קיימים ב-Trade-Builder** (F1-F7, גדור `kTradeBuilderFlag`-off): category-tree · attribute-schema · product-authoring(+CSV) · accessory-rules(+price) · connection-rules · publish · +CatalogSettings(toggles-אמיתיים) +wizard. **כפילויות:** קטגוריות×2 · מוצרים×3 · מותגים×2 · מחירים×4 · הגדרות×3 · **Studio×2** (root-3tab `kStudioCoEditor` + subdir-5pane `kStudioFlag`) · תפקידים×3. **מפת-איחוד:** אשף=דלת-כניסה(תמיד-דלוק) → דומיין(Trade-Builder) → מראה(Studio-מאוחד) → קונפיג(settings+wizard) → דאטה(CSV) → זהות(roles). **המהלך: לא לבנות — לפרק stubs, לפרוש עורכים-אמיתיים, לאחד תחת האשף.**
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
