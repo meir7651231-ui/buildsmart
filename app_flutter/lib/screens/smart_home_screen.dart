@@ -18,6 +18,8 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
     show kAxisDive;
+import 'package:buildsmart/features/ring_dive/catalog_wheel_screen.dart'
+    show CatalogWheelScreen;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogSectionProvider, keyboardDiveQueryProvider;
 import 'package:buildsmart/state/home_content_order.dart';
@@ -140,10 +142,12 @@ class SmartHomeBody extends ConsumerWidget {
               ? const [_InstallStudioHero(), SizedBox(height: BsTokens.space4)]
               : const <Widget>[],
           HomeSection.favorites => const [_Favorites()],
-          // מאתר-על on the home (user request) — gated on the const kAxisDive
-          // super-wheel, so an off build tree-shakes it ⇒ byte-identical.
+          // מאתר-על on the home (user request: shown OPEN, no entry card) —
+          // the axis-dive wheel + its live gallery render in place, so the dive
+          // happens right here. Gated on the const kAxisDive super-wheel, so an
+          // off build tree-shakes it ⇒ byte-identical.
           HomeSection.superFinder => kAxisDive
-              ? const [SizedBox(height: BsTokens.space4), _SuperFinderHero()]
+              ? const [SizedBox(height: BsTokens.space4), _SuperFinderOpen()]
               : const <Widget>[],
           _ => [
               smartHomeSectionFor(s),
@@ -662,10 +666,53 @@ class _InstallStudioHero extends ConsumerWidget {
   }
 }
 
-// ─── 🕸️ מאתר-על — home entry into the axis-dive super-wheel finder ───────────────
-/// Taps open the SAME 'מאתר-על' catalog section the keyboard tile does (set the
-/// section + clear any live dive query). Plain Text (not CfgText) — a section-level
-/// block, hidden/reordered/renamed via the wizard, not an element-registry id.
+// ─── 🕸️ מאתר-על — the axis-dive super-wheel, shown OPEN on the home ──────────────
+/// User request: מאתר-על "פתוח ללא כרטיס כניסה ואז נפתח" — no entry card; the wheel
+/// itself renders OPEN in place. Embeds the SAME [CatalogWheelScreen] the 'מאתר-על'
+/// catalog section opens (verbatim reuse — one finder, no fork), bounded to a fixed
+/// height so it lives inside the home ListView; picking an axis/value dives right
+/// here and a product tap opens the full product sheet. Gated on kAxisDive by the
+/// caller (childrenFor) ⇒ off-build tree-shakes it ⇒ byte-identical.
+class _SuperFinderOpen extends StatelessWidget {
+  const _SuperFinderOpen();
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = _pal(context);
+    return _Pad(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: Text('🕸️ מאתר-על',
+                style: TextStyle(
+                  color: pal.ink,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                )),
+          ),
+          Container(
+            height: 560,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
+              border: Border.all(color: const Color(0x331E88E5)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: const CatalogWheelScreen(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 🕸️ מאתר-על — the reorder-preview TOKEN (a compact card) ──────────────────────
+/// The lightweight stand-in for the wizard's home-reorder preview
+/// (`smartHomeSectionFor`), where a 560px live wheel would dwarf the drag rows. The
+/// LIVE home renders [_SuperFinderOpen] (the open wheel); this card only labels the
+/// section in the reorder list. Plain Text (not CfgText) — a section block, not an
+/// element-registry id.
 class _SuperFinderHero extends ConsumerWidget {
   const _SuperFinderHero();
 

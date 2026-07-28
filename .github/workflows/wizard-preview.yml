@@ -16,9 +16,9 @@
 # never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
 # all of that out and keeps the un-spoofable owner gate byte-identical.
 #
-# rev: sm-s9 — rebuild for screen-management s0–s9: all boards live, keyboard editor
-# wired live, a ✎ per-item rename in both editors, AND 🕸️ מאתר-על (the axis-dive
-# super-wheel) now on BOTH the home screen and the home keyboard, editable in each.
+# rev: sm-s10 — rebuild for screen-management s0–s10: all boards live, keyboard editor
+# wired live, a ✎ per-item rename in both editors, 🕸️ מאתר-על on BOTH the home screen
+# and keyboard, AND the home's מאתר-על now shows the wheel OPEN in place (no entry card).
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.

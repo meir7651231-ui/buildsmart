@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s10 — 🕸️ מאתר-על פתוח בבית (הטמעת CatalogWheelScreen) — 2026-07-28
+- **הפונקציה:** `_SuperFinderOpen` (smart_home_screen) — `Container(height:560)` → `CatalogWheelScreen`; `childrenFor(superFinder)` משתמש בו במקום הכרטיס.
+- **תקלה שהוזרקה (mutation-sensitivity):** הסרת `height:560` (גובה לא-חסום) ⇒ ה-`ListView` נותן גובה אינסופי ל-`CatalogWheelScreen` (Scaffold/GridView צריכים גובה חסום) ⇒ layout-assert/overflow בזמן-ריצה. מוכיח שהגובה-החסום load-bearing להטמעה. תקלה #2: `childrenFor` עדיין מחזיר `_SuperFinderHero` (כרטיס) ⇒ אין גלגל פתוח בבית — ה-render-check בפריוויו מראה כרטיס-כניסה במקום גלגל.
+- **בטיחות:** `kAxisDive` const-false בברירת-מחדל ⇒ tree-shake ⇒ **זהה-בייטים**; reuse **verbatim** של `CatalogWheelScreen` (בלי fork) ⇒ אותו finder בדיוק כמו מקטע-הקטלוג; `smartHomeSectionFor` נשאר כרטיס ⇒ תצוגת-סידור-הסקציות באשף לא נשברת; הבריכה `kDivePool` (built-in) ⇒ לא-ריק גם ב-clean.
+- **אימות:** analyze 0 · t3/wizard/kbd 43/43 · אימות-render בפריוויו (clean).
+
 ## #screen-mgmt-s9 — 🕸️ מאתר-על במסך-הבית + במקלדת (כפולה, נערכת) — 2026-07-28
 - **הפונקציות:** `HomeSection.superFinder` (enum+meta+order) · `_SuperFinderHero` + `childrenFor(superFinder)` (smart_home_screen) · `kbHomeNodes()` leaf (keyboard_tool_tree) · `screen_registry` home (8 sections + 9 keyboardTools).
 - **תקלה שהוזרקה (mutation-sensitivity):** הסרת שער `if (kAxisDive)` משני האתרים (מרנדר תמיד) ⇒ בדיקת byte-identity spec §4C (tab-0 OFF-flag == `_buildRow`) אדומה כי הרשת גדלה באריח נוסף ⇒ מוכיח שהשער load-bearing לזהות-הבייטים. תקלה #2: `sec-show-home-superFinder` נעדר מ-`screen_registry` sections ⇒ wizard 34 נכשל (`findsNothing`) ⇒ מוכיח שהרישום הוא-שמנפיק את שורת-העריכה.

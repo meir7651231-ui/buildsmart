@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s10 — 🕸️ מאתר-על **פתוח** במסך-הבית (בלי כרטיס-כניסה) — 2026-07-28
+**המשך (בקשת-משתמש: "מאתר-על פתוח ללא כרטיס כניסה ואז נפתח").** במקום הכרטיס (`_SuperFinderHero`) שנִיווט למקטע-קטלוג, מסך-הבית מרנדר עכשיו את הגלגל **פתוח בְּמָקוֹם**: `_SuperFinderOpen` מטמיע **verbatim** את `CatalogWheelScreen` (אותו finder בדיוק שמקטע-הקטלוג 'מאתר-על' פותח — בלי fork) בתוך `Container(height:560)` בתוך ה-`ListView` של הבית. רואים מיד את בורר-הצירים ("ממה נתחיל?") + גלריית-המוצרים החיה; בחירת ציר/ערך **צוללת במקום**, ולחיצת-מוצר פותחת גיליון-מוצר. הבריכה מ-`kDivePool` (built-in compile-time · לא הקטלוג המיובא) ⇒ מלא גם ב-clean. עדיין מגודר `kAxisDive` (ב-`childrenFor`) ⇒ off-build tree-shake ⇒ **זהה-בייטים**. `smartHomeSectionFor(superFinder)` **נשאר הכרטיס** — token קליל לתצוגת-סידור-הסקציות באשף (גלגל 560px היה מגמד את שורות-הגרירה). analyze 0 · 43/43 (t3+wizard+kbd) ירוקות · אימות-render בפריוויו (clean · kAxisDive on).
+
 ## #screen-mgmt-s9 — 🕸️ "מאתר-על" גם במסך-הבית וגם במקלדת (נערך בשניהם) — 2026-07-28
 **המשך (בקשת-משתמש: "לא גם וגם" — גם מסך-הבית **וגם** המקלדת, שניהם עם עריכה).** ה-axis-dive super-wheel ("מאתר-על") נוסף כ**כניסה כפולה**, כל אחת נשלטת מהאשף:
 - **מסך-הבית:** `HomeSection.superFinder` חדש (enum + `kHomeSectionMeta` 🕸️ + `kDefaultHomeOrder`, כעת **8** סקציות) → `smart_home_screen.dart` מרנדר `_SuperFinderHero` (ConsumerWidget · InkWell → `mainTab=0` + `catalogSection='מאתר-על'` + נקה `keyboardDiveQuery`). `childrenFor(superFinder)` **מגודר `kAxisDive`** (const-false ⇒ tree-shake ⇒ בברירת-מחדל **זהה-בייטים**). `screen_registry` home = **8 סקציות** (`ManagedSection('superFinder','🕸️','מאתר-על')`) ⇒ ניתן לסדר/הסתר/שם-מ"ניהול מסכים → בית".
