@@ -17,6 +17,15 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s11 — ✏️ טריגר-עריכה: long-press-מקלדת → ✎ מעל-הסל (un-freeze של s0) — 2026-07-28
+- **הפונקציות:** `_GlobalKeyboardOverlay` (main.dart) — long-press על ה-FAB → `toggleEdit`; `StudioOverlay` (widgets/studio) — ✎ מעל cart-FAB כש-`isEditing`.
+- **תקלות שהוזרקו (mutation-sensitivity):**
+  1. הסרת שער-`kStudioFlag` מ-`StudioOverlay` ⇒ ה-✎ נכנס ל-production build (לא tree-shaken) ⇒ ה-byte-identity proof (before==after `main.dart.js`) **נכשל** · zero_regression עדיין ירוק (כי הוא רץ off-build) — מוכיח שה-sha-proof הוא השומר האמיתי לזהות-הבייטים, לא רק הבדיקות.
+  2. שינוי `onLongPress: canEdit ? … : null` ל-`… : () => toggleEdit()` (בלי הגדרוׂן) ⇒ **לא-בעלים** בפריוויו-login-less היה מדליק עריכה ⇒ שובר את שער-#84. (בקליני-preview `studioCanEdit=true` דרך ה-sandbox-relaxation — לכן השער חייב לעטוף את ה-callback, לא רק את ה-enter.)
+  3. `AlignmentDirectional.bottomEnd` → `bottomStart` ⇒ ה-✎ קופץ לפינת ה-FAB-מקלדת (RTL-ימין) במקום מעל הסל (RTL-שמאל) ⇒ מתנגש עם המקלדת.
+- **בטיחות:** 3 שערים מקוננים (const `kStudioFlag` → runtime `studioCanEditProvider`#84 → `isEditing`); ה-FAB חולץ למשתנה משותף כך שענפי ה-`kStudioFlag ? … : fab` זהים בכל דבר חוץ מהעטיפה; `StudioTopBar` (הבאנר) לא-מותקן app-global (רק במסך-סטודיו נפרד) ⇒ "בלי באנר" מובטח.
+- **אימות:** analyze 0 · zero_regression 20/20 · studio-gate 34/34 · byte-identity sha before==after · central-verify.
+
 ## #screen-mgmt-s10 — 🕸️ מאתר-על פתוח בבית (הטמעת CatalogWheelScreen) — 2026-07-28
 - **הפונקציה:** `_SuperFinderOpen` (smart_home_screen) — `Container(height:560)` → `CatalogWheelScreen`; `childrenFor(superFinder)` משתמש בו במקום הכרטיס.
 - **תקלה שהוזרקה (mutation-sensitivity):** הסרת `height:560` (גובה לא-חסום) ⇒ ה-`ListView` נותן גובה אינסופי ל-`CatalogWheelScreen` (Scaffold/GridView צריכים גובה חסום) ⇒ layout-assert/overflow בזמן-ריצה. מוכיח שהגובה-החסום load-bearing להטמעה. תקלה #2: `childrenFor` עדיין מחזיר `_SuperFinderHero` (כרטיס) ⇒ אין גלגל פתוח בבית — ה-render-check בפריוויו מראה כרטיס-כניסה במקום גלגל.

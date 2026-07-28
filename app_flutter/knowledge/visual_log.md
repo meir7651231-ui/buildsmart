@@ -4,6 +4,16 @@
 
 ---
 
+## #screen-mgmt-s11 — ✏️ טריגר-עריכה: long-press-מקלדת → ✎ מעל-הסל (STUDIO-build בלבד / production זהה-בייטים) — 2026-07-28
+
+**שינוי-UI (מגודר `kStudioFlag` const — off-build tree-shaken ⇒ production/לא-בעלים זהה-בייטים):** ה-s0 freeze הוסר. הבעלים עושה **long-press על ה-FAB-מקלדת** (על כל מסך) → מצב-עריכה נדלק, וכפתור **✎** מופיע מעל כפתור-הסל (פינת ה-cart-FAB, מוגבּה מעליו) כאינדיקטור-הפעיל. **בלי באנר עליון.** לחיצה-רגילה על המקלדת = מקלדת כרגיל. long-press שוב (או לחיצה על ה-✎) = יציאה, ✎ נעלם. הפעולות (הצג/הסתר/סדר/ניהול-מסכים) — כמו s1-s10.
+
+**מיפוי-נראוּת:** ✎ נדלק רק כש-`kStudioFlag ∧ studioCanEdit(#84) ∧ isEditing`. production (STUDIO unset) → StudioOverlay=`SizedBox.shrink`, ה-FAB=רגיל (tree-shaken). לא-בעלים → `onLongPress=null`, אין ✎.
+
+**אימות:** `analyze` 0 · zero_regression **20/20** · studio-gate (cfg_wrappers · studio_screen · resolved_node) **34/34** · **byte-identity:** default-build `main.dart.js` before==after · אימות-ויזואלי בפריוויו (clean · STUDIO on) — long-press מדליק ✎ מעל הסל, בלי באנר.
+
+---
+
 ## #screen-mgmt-s10 — 🕸️ מאתר-על **פתוח** במסך-הבית (שינוי-נראה: לא בברירת-מחדל / כן ב-kAxisDive) — 2026-07-28
 
 **שינוי-UI (מגודר `kAxisDive`, const-false בבנייה-הנשלחת ⇒ ברירת-מחדל זהה-בייטים):** במקום כרטיס-כניסה שצריך ללחוץ, מסך-הבית מציג עכשיו את **גלגל מאתר-על פתוח** — בורר-הצירים ("ממה נתחיל?") + גלריית-המוצרים החיה — בתוך אזור בגובה 560. הצלילה (ציר→ערך→מוצרים) קורית **במקום**, ולחיצת-מוצר פותחת גיליון-מוצר. עדיין נשלט מהאשף כסקציה ("ניהול מסכים → בית" — סדר/הסתר/✎). הבריכה מ-`kDivePool` (built-in) ⇒ מלא גם ב-clean.

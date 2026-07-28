@@ -1,5 +1,13 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s11 — ✏️ טריגר-עריכה: long-press-מקלדת → ✎ מעל-הסל (בלי באנר · un-freeze של s0) — 2026-07-28
+**SSOT:** `knowledge/DIRECTIVE-edit-trigger-keyboard-longpress.md` (ענף nice-volta) · **אושר ע"י הבעלים מול ההדמיה.** מדליק חזרה את העריכה-על-המסך שהוקפאה ב-`screen-mgmt-s0` — עם טריגר טוב ואוניברסלי.
+- **הטריגר** (`main.dart` · `_GlobalKeyboardOverlay`): **long-press על ה-FAB-מקלדת הגלובלי** (`kKbGlobal`, על כל מסך) → `editModeProvider.notifier.toggleEdit()`. **לחיצה-רגילה = מקלדת כרגיל.** ה-FAB חולץ למשתנה `fab` ונעטף `kStudioFlag ? GestureDetector(onLongPress: canEdit ? toggle : null, child: fab) : fab`.
+- **✎ מעל הסל** (`widgets/studio/studio_overlay.dart` — **un-frozen + עוצב-מחדש**): כש-`isEditing` → כפתור-עיפרון brand עם מסגרת-לבן נדלק ב-`AlignmentDirectional.bottomEnd` (אותה פינה של ה-cart-FAB · endFloat), מוגבּה `navOffset+84` מעליו. לחיצה עליו = יציאה מעריכה (toggle). **בלי באנר · בלי top-toolbar.**
+- **הפעולות בעריכה נשארות s1-s10**: `CfgVisible` (201 מופעים) + `EditHandle` נדלקים מ-`isEditing` — הטריגר החדש רק מדליק את אותו `isEditing`. הבאנר הישן (`StudioTopBar`) חי רק במסך-הסטודיו הנפרד, לא app-global.
+- 🛡️ **3 שערים מקוננים:** (1) `kStudioFlag` const — production/tests (STUDIO unset) **tree-shake** → `SizedBox.shrink` / `fab` פשוט = **זהה-בייטים**; (2) `studioCanEditProvider` (#84, un-spoofable) — לא-בעלים ⇒ `onLongPress=null` · אין ✎; (3) `isEditing` — ✎ רק כשעריכה דלוקה.
+- **אימות:** analyze 0 · zero_regression **20/20** · studio-gate **34/34** · **byte-identity proof:** default-build `main.dart.js` before==after (sha256) · central-verify ירוק · אימות-ויזואלי בפריוויו.
+
 ## #screen-mgmt-s10 — 🕸️ מאתר-על **פתוח** במסך-הבית (בלי כרטיס-כניסה) — 2026-07-28
 **המשך (בקשת-משתמש: "מאתר-על פתוח ללא כרטיס כניסה ואז נפתח").** במקום הכרטיס (`_SuperFinderHero`) שנִיווט למקטע-קטלוג, מסך-הבית מרנדר עכשיו את הגלגל **פתוח בְּמָקוֹם**: `_SuperFinderOpen` מטמיע **verbatim** את `CatalogWheelScreen` (אותו finder בדיוק שמקטע-הקטלוג 'מאתר-על' פותח — בלי fork) בתוך `Container(height:560)` בתוך ה-`ListView` של הבית. רואים מיד את בורר-הצירים ("ממה נתחיל?") + גלריית-המוצרים החיה; בחירת ציר/ערך **צוללת במקום**, ולחיצת-מוצר פותחת גיליון-מוצר. הבריכה מ-`kDivePool` (built-in compile-time · לא הקטלוג המיובא) ⇒ מלא גם ב-clean. עדיין מגודר `kAxisDive` (ב-`childrenFor`) ⇒ off-build tree-shake ⇒ **זהה-בייטים**. `smartHomeSectionFor(superFinder)` **נשאר הכרטיס** — token קליל לתצוגת-סידור-הסקציות באשף (גלגל 560px היה מגמד את שורות-הגרירה). analyze 0 · 43/43 (t3+wizard+kbd) ירוקות · אימות-render בפריוויו (clean · kAxisDive on).
 

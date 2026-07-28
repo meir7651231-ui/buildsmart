@@ -33,6 +33,8 @@ import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/server_catalog_auth.dart';
 import 'package:buildsmart/state/studio/config_store.dart'
     show configThemeProvider;
+import 'package:buildsmart/state/studio/edit_mode.dart'
+    show editModeProvider, studioCanEditProvider;
 import 'package:buildsmart/state/studio/studio_flags.dart' show kStudioFlag;
 import 'package:buildsmart/state/user_profile.dart' show userProfileProvider;
 import 'package:buildsmart/state/user_system_sync.dart'
@@ -720,20 +722,36 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
     // Closed -> a global open-FAB (mirrors the home FAB but above the Navigator,
     // so it is reachable on EVERY route). Open -> the floating keyboard itself.
     if (!ref.watch(keyboardOverlayOpenProvider)) {
+      final fab = FloatingActionButton(
+        heroTag: 'keyboard-fab-global',
+        onPressed: () =>
+            ref.read(keyboardOverlayOpenProvider.notifier).state = true,
+        backgroundColor: BsTokens.brand,
+        foregroundColor: Colors.white,
+        tooltip: 'מקלדת חכמה',
+        child: const Icon(Icons.keyboard),
+      );
       return Align(
         alignment: AlignmentDirectional.bottomStart,
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, navOffset + 16),
-            child: FloatingActionButton(
-              heroTag: 'keyboard-fab-global',
-              onPressed: () =>
-                  ref.read(keyboardOverlayOpenProvider.notifier).state = true,
-              backgroundColor: BsTokens.brand,
-              foregroundColor: Colors.white,
-              tooltip: 'מקלדת חכמה',
-              child: const Icon(Icons.keyboard),
-            ),
+            // EDIT-TRIGGER (directive · owner-approved): LONG-PRESS this global
+            // keyboard FAB → toggle live edit-mode (✎ lights up above the cart;
+            // studio_overlay.dart). A normal TAP still just opens the keyboard.
+            // STUDIO-build only — `kStudioFlag` const-false on production tree-
+            // shakes this to the plain `fab`, BYTE-IDENTICAL; and even on the
+            // STUDIO build the callback is null for non-owners (#84
+            // studioCanEditProvider) ⇒ long-press does nothing for them.
+            child: kStudioFlag
+                ? GestureDetector(
+                    onLongPress: ref.watch(studioCanEditProvider)
+                        ? () =>
+                            ref.read(editModeProvider.notifier).toggleEdit()
+                        : null,
+                    child: fab,
+                  )
+                : fab,
           ),
         ),
       );

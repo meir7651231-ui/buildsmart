@@ -166,7 +166,14 @@ void main() {
     });
   });
 
-  group('StudioOverlay — FROZEN inert chrome (screen-mgmt · slice-0)', () {
+  // UN-FROZEN by the edit-trigger directive: the ✎ indicator returns to
+  // StudioOverlay, but ONLY on the STUDIO build (kStudioFlag). These tests run
+  // with kStudioFlag const-FALSE (no STUDIO define under `flutter test`), so they
+  // pin the PRODUCTION / off-build path: StudioOverlay tree-shakes to
+  // SizedBox.shrink ⇒ byte-identical, no chrome, and nothing can flip edit-mode —
+  // exactly as before. (The live ✎ + keyboard-long-press trigger are STUDIO-build
+  // only, verified in the preview + the tree-shake byte-check.)
+  group('StudioOverlay — off-build inert chrome (production byte-identical)', () {
     testWidgets('off-gate ⇒ SizedBox.shrink, no chrome (answer-equivalent)', (
       tester,
     ) async {
@@ -193,8 +200,8 @@ void main() {
     });
 
     testWidgets(
-        'on-gate + owner ⇒ STILL no on-screen chrome — slice-0 froze the '
-        'trigger; edit-mode cannot be entered from the screen', (tester) async {
+        'off-BUILD (kStudioFlag false) ⇒ no ✎, no chrome even with the owner gate '
+        'OPEN — production tree-shakes it away, edit-mode stays off', (tester) async {
       final c = ProviderContainer(
         overrides: [
           studioActiveProvider.overrideWithValue(true),
@@ -212,8 +219,9 @@ void main() {
         ),
       );
       expect(find.byType(StudioOverlay), findsOneWidget);
-      // The on-screen trigger is frozen: no toggle, no board selector — even for
-      // the owner in an active manager context. Editing lives in the wizard now.
+      // On the off-build the gate can be fully open (owner + active + manager) and
+      // there is STILL nothing on screen — kStudioFlag const-false tree-shakes the
+      // ✎ away, so production is byte-identical no matter the identity.
       expect(find.text('נווט'), findsNothing);
       expect(find.text('ערוך'), findsNothing);
       expect(find.text('בורד'), findsNothing);
