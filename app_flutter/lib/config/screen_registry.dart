@@ -77,5 +77,13 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('kpis', '📊', 'כרטיסי מדדים'),
     ManagedSection('pipeline', '📈', 'צינור ההזמנות'),
   ]),
-  ManagedScreen('store', '🏪', 'חנות ספק'),
+  // 🏪 חנות ספק — live section editor (slice-5c): ids == StoreDashSection.name.
+  // The greeting header + orders pipeline stay fixed; these content cards reorder.
+  ManagedScreen('store', '🏪', 'חנות ספק', sections: [
+    ManagedSection('approve', '✅', 'אישור הזמנות'),
+    ManagedSection('held', '⏸️', 'ממתין להחלטה'),
+    ManagedSection('stats', '📊', 'סטטיסטיקה'),
+    ManagedSection('stock', '📦', 'התראת מלאי'),
+    ManagedSection('quickActions', '⚡', 'פעולות מהירות'),
+  ]),
 ];

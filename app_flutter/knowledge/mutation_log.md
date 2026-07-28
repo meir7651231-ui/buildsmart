@@ -17,6 +17,11 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s5c — חנות חיה על מודל-הסקציות — 2026-07-28
+- **הפונקציות:** `StoreDashSection` enum · `sectionChildren` (local switch · spread per-section) · `kStoreDashScreenKey`.
+- **תקלה שהוזרקה (mutation-sensitivity):** להעביר את צינור-ההזמנות לתוך `sectionChildren` (reorderable) ⇒ הזנב-lazy (`itemCount: head.length + shown.length`) נשבר — כרטיסי-ההזמנות מופיעים אחרי head בלי הכותרת במקום; ולכן הוא **נשאר קבוע**.
+- **בטיחות:** header + orders קבועים · `sectionChildren` קוד-verbatim (spread) ⇒ ברירת-מחדל **זהה-בייטים** · בדיקות-חנות (t9/help/apple/daily) ירוקות.
+- **אימות:** analyze 0 · org_setup_wizard 23/23 · store-tests ירוקות.
 ## #screen-mgmt-s5b — לוח-מנהל חי על מודל-הסקציות — 2026-07-28
 - **הפונקציות:** `ManagerDashSection` enum · `childrenFor` (spread per-section) · `kManagerDashScreenKey`.
 - **תקלה שהוזרקה (mutation-sensitivity):** להשמיט את `if(kStudioCoEditor)` מה-`defaults` (studio תמיד-בפנים) ⇒ `studio_gating` אדום (dev-hero דולף ללייב); או `visibleIds`→`orderedIds` ⇒ סקציה-מוסתרת עדיין מרונדרת.

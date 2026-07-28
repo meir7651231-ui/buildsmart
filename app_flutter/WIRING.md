@@ -1,5 +1,10 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s5c — חנות חיה + כל 4 המסכים חיים — 2026-07-28 ✅ הדירקטיבה הושלמה
+**דירקטיבה · פרוסה-5 (חנות · הסיום).** ה-store home (`_homeTab`) הוגר: 5 בלוקי-הכרטיסים (approve/held/stats/stock/quickActions) נחתכו ל-`sectionChildren` switch מקומי (קוד verbatim + ריווח/תנאים עטופים לכל סקציה) המונע דרך `visibleIds('store', …)`; **הכותרת (ברכה) + צינור-ההזמנות (+ הזנב-lazy `ListView.builder`) נשארו קבועים** — רק הכרטיסים מסתדרים/מוסתרים. `StoreDashSection` enum + `kStoreDashScreenKey='store'`. **זהה-בייטים:** ברירת-מחדל = בדיוק אותו head. `screen_registry`: 'store' קיבל 5 סקציות ⇒ עורך-הסקציות באשף חי על החנות. 23/23 wizard (store section-built + hide) · בדיקות-חנות (t9/help/apple/daily) ירוקות (זהה-בייטים) · analyze 0.
+
+> **✅ הדירקטיבה "ניהול-מסכים באשף" הושלמה.** s0 (כיבוי-טריגר → עריכה-באשף) · s1 (מודל-סקציות-פר-מסך) · s2 (אשף 2-מפלסים) · s3 (בית חי) · s4 (עורך-מקלדת) · s5a (קבלן==בית) · s5b (מנהל חי) · s5c (חנות חיה). **כל 4 המסכים בהנחיה — בית(=קבלן) · מנהל · חנות — חיים**, נשלטים מהאשף (סדר + הסתר סקציות), **זהה-בייטים** בברירת-מחדל, שער-בעלים #84 נשמר, לא-בעלים לא-מושפע.
+
 ## #screen-mgmt-s5b — לוח-מנהל חי על מודל-הסקציות — 2026-07-28
 **דירקטיבה · פרוסה-5 (מנהל).** ה-**לוח בקרה** (`_DashboardTab`) הוגר לרנדר דרך מודל-הסקציות-פר-מסך (slice-1 · `'manager'` key): enum `ManagerDashSection{copilot·studio·studioEntry·attention·kpis·pipeline}` + `visibleIds('manager', defaults).map(byName)` → loop spread `childrenFor(s)`. **זהה-בייטים:** ה-`defaults` נושא את אותם שערים כמו הבנייה-הישנה (compile `kStudioCoEditor` · runtime `featEnabled('manager','attention')`), וכל סקציה **עוטפת את הריווח-הקדמי שלה** ונ-spread ⇒ ברירת-מחדל = בדיוק אותם children באותו סדר. `screen_registry`: 'manager' קיבל **5 סקציות** (ids==enum · `studio` מוחרג — dev-only) ⇒ עורך-הסקציות באשף (slice-2) **חי על הקוקפיט**. 22/22 wizard (מנהל section-built + hide נשמר ל-'manager') · `attention_gate`+`studio_gating` ירוקים (זהה-בייטים) · analyze 0. **נותר (slice-5):** store (MODERATE — `_homeTab` inline).
 ## #reg-first-chip — צ׳יפ-סטטוס מתחת ללוגו + הרשמה-קודם (ללא באנר) — 2026-07-28

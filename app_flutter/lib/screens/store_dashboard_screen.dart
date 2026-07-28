@@ -29,6 +29,8 @@ import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/store_profile_store.dart';
 import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
@@ -88,6 +90,16 @@ const List<(String, String)> _kStoreTabHelp = [
 /// [sysOrdersProvider] state, so an order the store marks "מוכן" appears live
 /// in the courier app. R8 — every string/number is verbatim from
 /// `supplier_data.dart`.
+/// 🏪 חנות · בית — the reorderable/hideable CARD sections of the store home
+/// (screen-mgmt slice-5c). Ids == enum name, so the wizard's "ניהול מסכים" editor
+/// (ManagedScreen 'store') drives the store home's order + hide LIVE. The greeting
+/// header and the orders pipeline (+ its lazy card tail) stay FIXED — only these
+/// content cards reorder.
+enum StoreDashSection { approve, held, stats, stock, quickActions }
+
+/// The [screenSectionsProvider] key for the store home board.
+const String kStoreDashScreenKey = 'store';
+
 class StoreDashboardScreen extends ConsumerStatefulWidget {
   const StoreDashboardScreen({super.key});
 
@@ -474,7 +486,172 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     // card of `shown` eagerly on each rebuild).
     final shown = _shownOrders(orders);
 
+    // screen-mgmt slice-5c: the store home's CARD sections (approve · held ·
+    // stats · stock · quick-actions) render through the per-screen model ('store'
+    // key). The greeting header and the orders pipeline (+ its lazy card tail)
+    // stay FIXED — only these content cards reorder/hide. `defaults` = all
+    // sections in canonical order, and each section bundles its own trailing
+    // spacing + conditionals and is spread, so an empty layout ⇒ the exact same
+    // head in the exact same order ⇒ BYTE-IDENTICAL.
+    List<Widget> sectionChildren(StoreDashSection s) => switch (s) {
+          // Primary action card — jumps the pipeline below to the 'new' filter.
+          StoreDashSection.approve => [
+              if (toApprove > 0)
+                _ActionCard(
+                  color: BsTokens.brand,
+                  badge: '$toApprove',
+                  title: 'הזמנות ממתינות לאישור',
+                  sub: 'הקש כדי לאשר ולהתחיל הכנה',
+                  onTap: () => setState(() => _orderFilter = 'new'),
+                )
+              else
+                // composite hide: the card's sole content is this label — hiding
+                // 'store_dashboard_screen.t01' removes the whole card; absent
+                // config ⇒ verbatim.
+                CfgVisible(
+                  'store_dashboard_screen.t01',
+                  child: _FlatCard(
+                    child: CfgText(
+                      'store_dashboard_screen.t01',
+                      '✓ אין הזמנות שממתינות לאישור',
+                      style: TextStyle(
+                        color: BsTokens.inkLight.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: BsTokens.space3),
+            ],
+          // Held-for-missing card (proto §2.2 [L17116]).
+          StoreDashSection.held => [
+              if (held.isNotEmpty) ...[
+                _ActionCard(
+                  color: const Color(0xFFE08A00),
+                  badge: '${held.length}',
+                  title: 'הזמנות ממתינות לבחירת הקבלן',
+                  sub: 'פריט חסר — ממתין להחלטה (החלפה / ביטול)',
+                  onTap: () => showPickingSheet(context, held.first.id),
+                ),
+                const SizedBox(height: BsTokens.space3),
+              ],
+            ],
+          // Quick stats (active 3) + the completed side (F-23).
+          StoreDashSection.stats => [
+              Row(
+                children: [
+                  _Stat(value: '$inPrep', label: 'בהכנה 🔧'),
+                  _Stat(value: '$ready', label: 'מוכן לאיסוף 📦'),
+                  _Stat(value: fMoney(revenue), label: 'מחזור פעיל 💰'),
+                ],
+              ),
+              const SizedBox(height: BsTokens.space2),
+              Row(
+                children: [
+                  _Stat(
+                    value: '${orders.countAt(OrderStage.delivered)}',
+                    label: 'נמסרו ✓',
+                  ),
+                  _Stat(
+                    value: fMoney(orders.deliveredRevenue),
+                    label: 'מחזור שנמסר 💰',
+                  ),
+                ],
+              ),
+              const SizedBox(height: BsTokens.space3),
+            ],
+          // Stock alert.
+          StoreDashSection.stock => [
+              InkWell(
+                borderRadius: BorderRadius.circular(cfgRadius(context)),
+                onTap: () => setState(() => _tab = 1),
+                child: _FlatCard(
+                  child: Text(
+                    outCount > 0
+                        ? '⚠️ $outCount מוצרים אזלו מהמלאי — הקש לעדכון'
+                        : '✓ כל המוצרים זמינים במלאי',
+                    style: TextStyle(
+                      color: outCount > 0
+                          ? BsTokens.brandDark
+                          : BsTokens.inkLight.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space4),
+            ],
+          // #78 — quick actions: fleet (local DEMO-SEED sheet) + stock-update
+          // (jump to מלאי); plus the demo-tool button (hidden for store review).
+          StoreDashSection.quickActions => [
+              Row(
+                children: [
+                  Expanded(
+                    child: _BigButton(
+                      label: '🚛 ניהול צי רכב',
+                      onTap: () => showPortalSheet(
+                        context,
+                        kStorePortalTiles.firstWhere(
+                          (t) => t.kind == PortalKind.fleet,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: BsTokens.space2),
+                  Expanded(
+                    child: _BigButton(
+                      label: '🔄 עדכון מלאי',
+                      onTap: () => setState(() => _tab = 1),
+                    ),
+                  ),
+                ],
+              ),
+              if (!kHideUnderConstruction) ...[
+                const SizedBox(height: BsTokens.space3),
+                CfgVisible(
+                  'store_dashboard_screen.t02',
+                  child: OutlinedButton(
+                    onPressed: () {
+                      final id = ref
+                          .read(sysOrdersProvider.notifier)
+                          .simulateIncomingOrder();
+                      showToast(
+                          context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: Color(0xFFE0E0E0)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(cfgRadius(context)),
+                      ),
+                    ),
+                    child: const CfgText(
+                      'store_dashboard_screen.t02',
+                      '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: BsTokens.space4),
+            ],
+        };
+
+    ref.watch(screenSectionsProvider);
+    final sectionOrder = ref
+        .read(screenSectionsProvider.notifier)
+        .visibleIds(kStoreDashScreenKey,
+            [for (final s in StoreDashSection.values) s.name])
+        .map(StoreDashSection.values.byName);
+
     final head = <Widget>[
+      // ── fixed greeting header ──
       const CfgText(
         'store.home.greeting',
         'שלום 👋',
@@ -494,161 +671,9 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
       ),
       const SizedBox(height: BsTokens.space4),
-
-      // Primary action card — jumps the pipeline below to the 'new' filter.
-      if (toApprove > 0)
-        _ActionCard(
-          color: BsTokens.brand,
-          badge: '$toApprove',
-          title: 'הזמנות ממתינות לאישור',
-          sub: 'הקש כדי לאשר ולהתחיל הכנה',
-          onTap: () => setState(() => _orderFilter = 'new'),
-        )
-      else
-        // composite hide: the card's sole content is this label — hiding
-        // 'store_dashboard_screen.t01' removes the whole card; absent config
-        // ⇒ verbatim.
-        CfgVisible(
-          'store_dashboard_screen.t01',
-          child: _FlatCard(
-            child: CfgText(
-              'store_dashboard_screen.t01',
-              '✓ אין הזמנות שממתינות לאישור',
-              style: TextStyle(
-                color: BsTokens.inkLight.withValues(alpha: 0.8),
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      const SizedBox(height: BsTokens.space3),
-
-      // Held-for-missing card (proto §2.2 [L17116]).
-      if (held.isNotEmpty) ...[
-        _ActionCard(
-          color: const Color(0xFFE08A00),
-          badge: '${held.length}',
-          title: 'הזמנות ממתינות לבחירת הקבלן',
-          sub: 'פריט חסר — ממתין להחלטה (החלפה / ביטול)',
-          onTap: () => showPickingSheet(context, held.first.id),
-        ),
-        const SizedBox(height: BsTokens.space3),
-      ],
-
-      // Quick stats (3).
-      Row(
-        children: [
-          _Stat(value: '$inPrep', label: 'בהכנה 🔧'),
-          _Stat(value: '$ready', label: 'מוכן לאיסוף 📦'),
-          _Stat(value: fMoney(revenue), label: 'מחזור פעיל 💰'),
-        ],
-      ),
-      const SizedBox(height: BsTokens.space2),
-      // #87.2 (F-23) — the completed side of the pipeline next to the
-      // active one, derived live from sysOrdersProvider (deliveredRevenue,
-      // supplier_data.dart — Σ של o.sum בלבד, אפס מספרים קשיחים).
-      // by-design: ללוח החנות הסטטיסטיקה כלל-חנותית — כל ההזמנות שייכות
-      // לחנות אחת (kStores.first); אין כאן צורך בסינון per-username
-      // (להבדיל מפרופיל-השליח, ראה Fulfillment.courierUser).
-      Row(
-        children: [
-          _Stat(
-            value: '${orders.countAt(OrderStage.delivered)}',
-            label: 'נמסרו ✓',
-          ),
-          _Stat(
-            value: fMoney(orders.deliveredRevenue),
-            label: 'מחזור שנמסר 💰',
-          ),
-        ],
-      ),
-      const SizedBox(height: BsTokens.space3),
-
-      // Stock alert.
-      InkWell(
-        borderRadius: BorderRadius.circular(cfgRadius(context)),
-        onTap: () => setState(() => _tab = 1),
-        child: _FlatCard(
-          child: Text(
-            outCount > 0
-                ? '⚠️ $outCount מוצרים אזלו מהמלאי — הקש לעדכון'
-                : '✓ כל המוצרים זמינים במלאי',
-            style: TextStyle(
-              color:
-                  outCount > 0
-                      ? BsTokens.brandDark
-                      : BsTokens.inkLight.withValues(alpha: 0.8),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ),
-      const SizedBox(height: BsTokens.space4),
-
-      // #78 — quick actions moved here FROM the portal: fleet (local
-      // DEMO-SEED sheet — the kFleet rows) + stock-update (jump to מלאי).
-      Row(
-        children: [
-          Expanded(
-            child: _BigButton(
-              label: '🚛 ניהול צי רכב',
-              onTap:
-                  () => showPortalSheet(
-                    context,
-                    kStorePortalTiles.firstWhere(
-                      (t) => t.kind == PortalKind.fleet,
-                    ),
-                  ),
-            ),
-          ),
-          const SizedBox(width: BsTokens.space2),
-          Expanded(
-            child: _BigButton(
-              label: '🔄 עדכון מלאי',
-              onTap: () => setState(() => _tab = 1),
-            ),
-          ),
-        ],
-      ),
-      // Demo tool — a self-declared "(כלי הדגמה)" affordance. Hidden for App
-      // Store review (kHideUnderConstruction); the simulateIncomingOrder seam
-      // stays in code, so flipping the flag restores the button as before.
-      if (!kHideUnderConstruction) ...[
-        const SizedBox(height: BsTokens.space3),
-        // composite hide: hiding 'store_dashboard_screen.t02' removes the whole
-        // demo button (not an empty shell); absent config ⇒ verbatim.
-        CfgVisible(
-          'store_dashboard_screen.t02',
-          child: OutlinedButton(
-            onPressed: () {
-              final id =
-                  ref.read(sysOrdersProvider.notifier).simulateIncomingOrder();
-              showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
-            },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: const BorderSide(color: Color(0xFFE0E0E0)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(cfgRadius(context)),
-              ),
-            ),
-            child: const CfgText(
-              'store_dashboard_screen.t02',
-              '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
-              style: TextStyle(
-                color: BsTokens.mutedLight,
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
-              ),
-            ),
-          ),
-        ),
-      ],
-      const SizedBox(height: BsTokens.space4),
-
-      // ── #78 · the הזמנות pipeline IS the home (default) tab ──────────────
+      // ── reorderable / hideable content cards (screen-mgmt slice-5c) ──
+      for (final s in sectionOrder) ...sectionChildren(s),
+      // ── fixed orders pipeline (+ lazy card tail below) ──
       const CfgText(
         'store.section.orders',
         '📥 הזמנות',

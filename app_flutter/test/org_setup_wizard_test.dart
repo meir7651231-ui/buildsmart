@@ -473,4 +473,22 @@ void main() {
     expect(c.read(screenSectionsProvider.notifier).isHidden('manager', 'kpis'),
         isTrue);
   });
+
+  // ── screen-mgmt slice-5c — the store home is now section-built + live ──
+  testWidgets('store home — level-2 is a live section editor (not the '
+      'placeholder); hiding a section persists to the store layout', (t) async {
+    final c = await _pump(t);
+    await t.ensureVisible(find.byKey(const Key('open-screen-manager')));
+    await t.tap(find.byKey(const Key('open-screen-manager')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('sec-enter-store'))); // → level-2 (store)
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('sec-show-store-stats')), findsOneWidget);
+    expect(find.byKey(const Key('sec-show-store-quickActions')), findsOneWidget);
+    expect(find.textContaining('טרם נבנה'), findsNothing);
+    await t.tap(find.byKey(const Key('sec-show-store-stock')));
+    await t.pumpAndSettle();
+    expect(c.read(screenSectionsProvider.notifier).isHidden('store', 'stock'),
+        isTrue);
+  });
 }
