@@ -17,6 +17,11 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s6 — הבית: 2 בלוקים-קבועים → סקציות ניתנות-להסתרה — 2026-07-28
+- **השינוי:** `HomeSection` += `installHero`, `favorites`; `smartHomeSectionFor` + `SmartHomeBody.childrenFor` (spread); `screen_registry` home = 7 סקציות.
+- **תקלה שהוזרקה (mutation-sensitivity):** `favorites` → `[_Favorites, SizedBox(space4)]` (ריווח-נגרר) ⇒ שינוי-ריווח מברירת-המחדל (לא-זהה-בייטים); או להשמיט את שער-ה-`compat` מ-installHero ⇒ ה-hero דולף כשהמודול כבוי.
+- **בטיחות:** spread + compat-gate ⇒ ברירת-מחדל **זהה-בייטים** (home-render ירוקות). ה-old-model (homeContentOrder · vestigial) + t3 עודכנו ל-7.
+- **אימות:** analyze 0 · org_setup_wizard 23/23 · t3 + widget + placeholder ירוקות.
 ## #screen-mgmt-s5c — חנות חיה על מודל-הסקציות — 2026-07-28
 - **הפונקציות:** `StoreDashSection` enum · `sectionChildren` (local switch · spread per-section) · `kStoreDashScreenKey`.
 - **תקלה שהוזרקה (mutation-sensitivity):** להעביר את צינור-ההזמנות לתוך `sectionChildren` (reorderable) ⇒ הזנב-lazy (`itemCount: head.length + shown.length`) נשבר — כרטיסי-ההזמנות מופיעים אחרי head בלי הכותרת במקום; ולכן הוא **נשאר קבוע**.

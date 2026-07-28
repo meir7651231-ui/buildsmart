@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s6 — הבית: "תכנון חיבור" + "מועדפים" הפכו סקציות ניתנות-להסתרה — 2026-07-28
+**המשך (בקשת-משתמש — הצילום הראה בלוקים לא-ניתנים-להסתרה).** שני הבלוקים שהיו **קבועים** בתחתית מסך-הבית — **"🔌 תכנון חיבור"** (`_InstallStudioHero` · org-gated `compat`) ו-**"⭐ מועדפים"** (`_Favorites`) — נוספו כ-`HomeSection`ים (enum + `kHomeSectionMeta` + `kDefaultHomeOrder`) ⇒ **ניתנים כעת לסדר + הסתר** מ"ניהול מסכים → בית". `SmartHomeBody` מרנדר את כולם דרך `childrenFor` (spread · שער-`compat` ל-installHero · מועדפים בלי-ריווח-נגרר כי היה אחרון) ⇒ ברירת-מחדל **זהה-בייטים**. `screen_registry`: home = **7 סקציות**. old-model (`homeContentOrder`) + t3 עודכנו לסדר-ברירת-מחדל בן-7. 23/23 wizard (סקציות home חדשות מוצגות) · home-render ירוקות · analyze 0.
+
 ## #screen-mgmt-s5c — חנות חיה + כל 4 המסכים חיים — 2026-07-28 ✅ הדירקטיבה הושלמה
 **דירקטיבה · פרוסה-5 (חנות · הסיום).** ה-store home (`_homeTab`) הוגר: 5 בלוקי-הכרטיסים (approve/held/stats/stock/quickActions) נחתכו ל-`sectionChildren` switch מקומי (קוד verbatim + ריווח/תנאים עטופים לכל סקציה) המונע דרך `visibleIds('store', …)`; **הכותרת (ברכה) + צינור-ההזמנות (+ הזנב-lazy `ListView.builder`) נשארו קבועים** — רק הכרטיסים מסתדרים/מוסתרים. `StoreDashSection` enum + `kStoreDashScreenKey='store'`. **זהה-בייטים:** ברירת-מחדל = בדיוק אותו head. `screen_registry`: 'store' קיבל 5 סקציות ⇒ עורך-הסקציות באשף חי על החנות. 23/23 wizard (store section-built + hide) · בדיקות-חנות (t9/help/apple/daily) ירוקות (זהה-בייטים) · analyze 0.
 

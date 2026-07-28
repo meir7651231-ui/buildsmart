@@ -415,6 +415,9 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('מסך הבית'), findsOneWidget); // level-2 AppBar
     expect(find.byKey(const Key('sec-show-home-workPath')), findsOneWidget);
+    // the previously-fixed trailing blocks are now hideable sections too.
+    expect(find.byKey(const Key('sec-show-home-installHero')), findsOneWidget);
+    expect(find.byKey(const Key('sec-show-home-favorites')), findsOneWidget);
     // hide a section → persists per-screen.
     await t.tap(find.byKey(const Key('sec-show-home-workPath')));
     await t.pumpAndSettle();

@@ -16,10 +16,9 @@
 # never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
 # all of that out and keeps the un-spoofable owner gate byte-identical.
 #
-# rev: sm-s5c — rebuild for screen-management s0–s5c: frozen on-screen trigger ·
-# unified order+hide model · wizard "🖥️ ניהול מסכים" 2-level manager · keyboard
-# editor · and ALL 4 boards live on the model — home(=contractor) · manager
-# cockpit · store home (order + hide their sections from the wizard).
+# rev: sm-s6 — rebuild for screen-management s0–s6: all 4 boards live on the model,
+# and the home's previously-fixed blocks (תכנון-חיבור hero + מועדפים) are now
+# hideable/reorderable sections too — the home is fully managed from the wizard.
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.

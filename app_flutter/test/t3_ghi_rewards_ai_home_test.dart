@@ -139,6 +139,8 @@ void main() {
         HomeSection.workPath,
         HomeSection.promise,
         HomeSection.reorderHistory,
+        HomeSection.installHero,
+        HomeSection.favorites,
       ]);
     });
 

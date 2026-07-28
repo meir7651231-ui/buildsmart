@@ -16,7 +16,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The reorderable home content sections, in prototype order. The hero + search
 /// are fixed chrome (not reorderable), matching the proto where only the content
 /// blocks below the hero vary.
-enum HomeSection { categories, products, workPath, promise, reorderHistory }
+enum HomeSection {
+  categories,
+  products,
+  workPath,
+  promise,
+  reorderHistory,
+  // Previously-fixed trailing blocks, now manageable sections (screen-mgmt):
+  installHero, // 'תכנון חיבור' — the compat module's home hero (org-gated)
+  favorites, // 'מועדפים'
+}
 
 /// Display metadata for one home section (the drag-handle row label/emoji).
 class HomeSectionMeta {
@@ -39,6 +48,10 @@ const Map<HomeSection, HomeSectionMeta> kHomeSectionMeta = {
       HomeSectionMeta(HomeSection.promise, '⚡', 'כלים מהירים'),
   HomeSection.reorderHistory: HomeSectionMeta(
       HomeSection.reorderHistory, '🔁', 'הזמנות אחרונות לאתר'),
+  HomeSection.installHero:
+      HomeSectionMeta(HomeSection.installHero, '🔌', 'תכנון חיבור'),
+  HomeSection.favorites:
+      HomeSectionMeta(HomeSection.favorites, '⭐', 'מועדפים'),
 };
 
 /// Default order — the prototype's top-to-bottom section sequence.
@@ -48,6 +61,8 @@ const List<HomeSection> kDefaultHomeOrder = [
   HomeSection.workPath,
   HomeSection.promise,
   HomeSection.reorderHistory,
+  HomeSection.installHero,
+  HomeSection.favorites,
 ];
 
 /// The home screen's key + default section ids for the unified per-screen model

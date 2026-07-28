@@ -99,6 +99,8 @@ Widget smartHomeSectionFor(HomeSection s) => switch (s) {
       HomeSection.workPath => const _WorkPath(),
       HomeSection.promise => const _QuickTools(),
       HomeSection.reorderHistory => const _RecentOrders(),
+      HomeSection.installHero => const _InstallStudioHero(),
+      HomeSection.favorites => const _Favorites(),
     };
 
 /// 🏠 גוף מסך-הבית החכם (task #32) — the 'בית' landing in the "תוכן הבית" tile
@@ -123,21 +125,29 @@ class SmartHomeBody extends ConsumerWidget {
     // Org gate: the תכנון-חיבור hero is the 'compat' module's home entry —
     // orgs that switch the module off lose it (demo org: all-on, identical).
     final compatOn = modOn(ref, 'compat');
+
+    // Per-section children with the SAME trailing spacing / compat-gate as the old
+    // inline build, spread — so an empty layout ⇒ BYTE-IDENTICAL. installHero
+    // (תכנון-חיבור) renders nothing when its 'compat' module is off; מועדפים
+    // carries no trailing gap (it was the last block).
+    List<Widget> childrenFor(HomeSection s) => switch (s) {
+          HomeSection.installHero => compatOn
+              ? const [_InstallStudioHero(), SizedBox(height: BsTokens.space4)]
+              : const <Widget>[],
+          HomeSection.favorites => const [_Favorites()],
+          _ => [
+              smartHomeSectionFor(s),
+              const SizedBox(height: BsTokens.space4),
+            ],
+        };
+
     return ListView(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
       padding: const EdgeInsets.only(bottom: BsTokens.space6),
       children: [
         const SizedBox(height: BsTokens.space2),
-        for (final s in order) ...[
-          smartHomeSectionFor(s),
-          const SizedBox(height: BsTokens.space4),
-        ],
-        if (compatOn) ...[
-          const _InstallStudioHero(),
-          const SizedBox(height: BsTokens.space4),
-        ],
-        const _Favorites(),
+        for (final s in order) ...childrenFor(s),
       ],
     );
   }

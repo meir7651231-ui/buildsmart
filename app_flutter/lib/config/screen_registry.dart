@@ -56,6 +56,8 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('workPath', '🛁', 'מסלול עבודה חכם'),
     ManagedSection('promise', '⚡', 'כלים מהירים'),
     ManagedSection('reorderHistory', '🔁', 'הזמנות אחרונות לאתר'),
+    ManagedSection('installHero', '🔌', 'תכנון חיבור'),
+    ManagedSection('favorites', '⭐', 'מועדפים'),
   ], keyboardTools: [
     // The 8 HOME keyboard tiles (kbHomeNodes) — ids == the tile LABEL.
     ManagedSection('מחלקות', '🗂️', 'מחלקות'),
