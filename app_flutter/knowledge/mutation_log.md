@@ -29,6 +29,13 @@
 - **בטיחות:** persist דרך slice-1 (canonical-minimal) · ברירת-מחדל **זהה-בייטים** · placeholder כן למסכים לא-בנויים (בלי סקציות מומצאות). עדיין לא-חי על המסכים (slice-5).
 - **אימות:** analyze 0 · org_setup_wizard 20/20.
 
+## #release-v7.01 — bump גרסה (STATUS label + versionCode) — 2026-07-28
+- אין פונקציית-עזר חדשה: שינוי release/docs בלבד — תווית `v7.00→v7.01` ב-STATUS.md
+  (מקור-האמת ל-`gen_version.sh`) + `pubspec.yaml 1.5.0+12→1.5.1+13` (versionName/Code
+  לחנויות). `version.g.dart` gitignored ונוצר-מחדש. הכיסוי הקיים (`version_g_test`)
+  ממשיך לנעול את פורמט-התווית `^v\d+\.\d+$` — v7.01 עובר.
+- מסקנה: אין mutation-test חדש (אין לוגיקה חדשה); הבדיקה הקיימת מספיקה.
+
 ## #screen-mgmt-s1 — מודל-סקציות-פר-מסך (סדר + הסתר) — 2026-07-27
 - **הפונקציות:** `ScreenSectionsNotifier` (`orderedIds`/`visibleIds`/`hide`/`show`/`toggle`/`reorder`/`moveUp`/`moveDown`/`resetScreen`) + `ScreenLayout` (order+hidden · JSON).
 - **תקלה שהוזרקה (mutation-sensitivity):** `visibleIds` מחזיר `orderedIds` בלי סינון-`hidden` ⇒ בדיקת hide (`visibleIds==['a','c']`) אדומה.
