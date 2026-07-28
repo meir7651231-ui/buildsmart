@@ -11,7 +11,8 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/feature_flags.dart' show kEmailPasswordAuth;
 import 'package:buildsmart/state/onboarding_gate.dart';
-import 'package:buildsmart/state/role_requests.dart' show submitRoleRequest;
+import 'package:buildsmart/state/role_requests.dart'
+    show promptRoleRequestProvider;
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/state/user_system_sync.dart';
@@ -332,12 +333,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             )
             .catchError((Object _) {}),
       );
-      // U2.4 — file the roleRequest that seeds the U4 admin-approval queue: every
-      // registration stays pending until an admin approves it (all-by-approval,
-      // decision #1). The welcome flow is the contractor registration; store/
-      // courier requests arrive via their own onboarding. submitRoleRequest
-      // self-handles a signed-out / write failure (returns false, never throws).
-      unawaited(submitRoleRequest(ref, 'contractor').then<void>((_) {}));
+      // U2.4 → revised (owner directive): registration NO LONGER auto-files a
+      // 'contractor' request behind the user's back. Instead we latch a one-shot
+      // prompt so the shell opens the role-request sheet ONCE right after entry —
+      // "בקשת תפקיד במסך אחד אחרי הרשמה" — and the person CHOOSES their role.
+      // The account is already created `pending` (onRegisteredLogin) and the
+      // server users-create trigger still seeds the approval queue, so nobody is
+      // stranded even if they dismiss the sheet (their chip reads 🟠 דרוש הרשמה
+      // and one tap re-opens it).
+      ref.read(promptRoleRequestProvider.notifier).state = true;
     }
     if (uid != null && writer != null) {
       final p = ref.read(userProfileProvider);

@@ -40,6 +40,20 @@
 - **בטיחות:** persist דרך slice-1 (canonical-minimal) · ברירת-מחדל **זהה-בייטים** · placeholder כן למסכים לא-בנויים (בלי סקציות מומצאות). עדיין לא-חי על המסכים (slice-5).
 - **אימות:** analyze 0 · org_setup_wizard 20/20.
 
+## #reg-first-chip — סטטוס-צ׳יפ + הרשמה-קודם (ללא באנר) — 2026-07-28
+- **הפונקציות:** `roleChipStateFor` (מיפוי טהור → 4 מצבי-צ׳יפ) · `clearAllRoleRequests`
+  (מחיקת-אצווה owner) · providers `myRoleRequestProvider`/`roleChipStateProvider`/
+  `promptRoleRequestProvider`.
+- **תקלה שהוזרקה (mutation-sensitivity):** ב-`roleChipStateFor` היפוך הסדר —
+  `requestStatus=='denied'` נבדק **לפני** `isActive` ⇒ הבדיקה "active מנצח denied ⇒ approved"
+  אדומה (מחזיר rejected במקום approved). וכן: השמטת `requestStatus=='pending'` ⇒ בדיקת
+  🟡 inProcess אדומה.
+- **בטיחות:** הצ׳יפ + ה-listen מגודרים `kUserSystem` (const-off בבילד רגיל/טסטים) ⇒
+  `SizedBox.shrink`/לא-נרשם ⇒ **זהה-בייטים** (כל טסטי HomeShell ירוקים). הבאנר הוסר
+  מה-mount בלבד — הווידג׳ט + הטסט שלו נשמרו. `clearAllRoleRequests` rule-safe (admin-delete).
+- **אימות:** analyze 0 errors · role_chip_state 8/8 · role_request 15/15 (כולל owner-clear)
+  · welcome_auth_gate + user_system_sync + pending_banner + onboarding ירוקים.
+
 ## #release-v7.01 — bump גרסה (STATUS label + versionCode) — 2026-07-28
 - אין פונקציית-עזר חדשה: שינוי release/docs בלבד — תווית `v7.00→v7.01` ב-STATUS.md
   (מקור-האמת ל-`gen_version.sh`) + `pubspec.yaml 1.5.0+12→1.5.1+13` (versionName/Code

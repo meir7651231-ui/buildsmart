@@ -17,15 +17,20 @@ import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
+import 'package:buildsmart/screens/role_request_sheet.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/screens/updates_screen.dart';
+import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/state/auth_state.dart' show authStateProvider;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/intel/screen_view.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
 import 'package:buildsmart/state/org_gates.dart';
+import 'package:buildsmart/state/role_requests.dart'
+    show RoleChipState, promptRoleRequestProvider, roleChipStateProvider;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -34,7 +39,6 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/version.g.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
-import 'package:buildsmart/widgets/pending_approval_banner.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_host.dart'
     show kKeyboardToolStrip;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -93,6 +97,22 @@ class HomeShell extends ConsumerWidget {
       }
     });
 
+    // Post-registration role prompt (owner directive): the WelcomeScreen latches
+    // [promptRoleRequestProvider] on a fresh registration; open the role-request
+    // sheet ONCE ("במסך אחד אחרי הרשמה"), then release the latch. kUserSystem-gated
+    // so the OFF build never watches it. A one-shot — dismissing it just leaves
+    // the 🟠 chip, which re-opens the same sheet on tap.
+    if (kUserSystem) {
+      ref.listen<bool>(promptRoleRequestProvider, (prev, next) {
+        if (next) {
+          ref.read(promptRoleRequestProvider.notifier).state = false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) showRoleRequestSheet(context);
+          });
+        }
+      });
+    }
+
     // Step 92 — automatic `screen_view` on every tab switch. ONE read-only
     // `ref.listen` on `mainTabProvider` (the RECONCILED real tab source, §3):
     // `listen`, never a new `watch`, so this adds ZERO rebuild on top of the tab
@@ -124,18 +144,11 @@ class HomeShell extends ConsumerWidget {
               StoreScreen(), // 3 · חנות
             ],
           ),
-          // U1.5.2 — "ממתין לאישור" strip. COMPILE-GATED behind [kUserSystem]
-          // (const-false in every normal build) → this branch AND the banner
-          // tree-shake away, so the shell is BYTE-IDENTICAL to today (the
-          // `if (kIntelLive)` consent pattern). When USER_SYSTEM is on it shows
-          // ONLY for a signed-in pending user (else SizedBox.shrink).
-          if (kUserSystem)
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: PendingApprovalBanner(),
-            ),
+          // U1.5.2 → superseded: the "ממתין לאישור" top strip was REMOVED at the
+          // owner's request ("ללא באנר"). The account/registration state now lives
+          // as a compact status chip UNDER the logo (see [_RoleStatusChip] in the
+          // app-bar), so nothing overlays the content. The status still comes from
+          // the same providers — only the presentation moved.
           // GLOBAL SEARCH (kGlobalSearch, const ⇒ this collection-if folds out when
           // off ⇒ shell byte-identical): option A — typing shows the ONE unified
           // results panel IN PLACE over WHATEVER tab is active (not just the
@@ -732,6 +745,11 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ],
                   ],
                 ),
+                // Registration / role status chip — UNDER the logo, where the
+                // version sits. Replaces the removed "ממתין לאישור" banner. Only
+                // renders under kUserSystem + a decidable state (else shrinks), so
+                // the OFF build is byte-identical.
+                const _RoleStatusChip(),
                 if (tabIndex == 0 &&
                     ref.watch(catalogSectionProvider) == 'עץ חכם')
                   const _PulsingStatus(text: 'עץ חכם הופעל')
@@ -1550,6 +1568,113 @@ class _ProfileCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// The registration / role status chip shown UNDER the logo (where the version
+/// sits), replacing the removed "ממתין לאישור" banner. Four states, each its own
+/// dot-colour + Hebrew label, exactly as the owner asked:
+///   🟠 דרוש הרשמה · 🟡 בתהליך · 🟢 מאושר · 🔴 נדחה.
+///
+/// Register-FIRST: tapping the chip while NOT registered routes to the dedicated
+/// [WelcomeScreen] (no in-app self-registration loop); once registered it opens
+/// the role-request sheet (choose a role — one screen). Approved → the role
+/// picker (switch board). Only renders under [kUserSystem]; OFF → SizedBox.shrink
+/// ⇒ byte-identical.
+class _RoleStatusChip extends ConsumerWidget {
+  const _RoleStatusChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!kUserSystem) return const SizedBox.shrink();
+    final state = ref.watch(roleChipStateProvider);
+    final (String label, Color dot, Color fg, Color bg) = switch (state) {
+      RoleChipState.needsRegistration => (
+          'דרוש הרשמה',
+          const Color(0xFFF39C12), // orange
+          const Color(0xFF9C6A08),
+          const Color(0xFFFDF1DD),
+        ),
+      RoleChipState.inProcess => (
+          'בתהליך',
+          const Color(0xFFEAC10C), // yellow
+          const Color(0xFF8A7500),
+          const Color(0xFFFBF6D6),
+        ),
+      RoleChipState.approved => (
+          'מאושר',
+          const Color(0xFF27AE60), // green
+          const Color(0xFF1B7A43),
+          const Color(0xFFDDF3E6),
+        ),
+      RoleChipState.rejected => (
+          'נדחה',
+          const Color(0xFFE74C3C), // red
+          const Color(0xFFA3271A),
+          const Color(0xFFFBE3E0),
+        ),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Semantics(
+        button: true,
+        label: 'סטטוס הרשמה: $label',
+        child: InkWell(
+          key: const Key('role_status_chip'),
+          borderRadius: BorderRadius.circular(999),
+          onTap: () => _onTap(context, ref, state),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: fg,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Contextual tap — the register-FIRST gate lives here (single source):
+  ///   • not a registered user → the dedicated registration screen (no loop);
+  ///   • registered but not-yet-requested / rejected → the role-request sheet;
+  ///   • in-process → the request sheet (see status / cancel);
+  ///   • approved → the role picker (switch board).
+  void _onTap(BuildContext context, WidgetRef ref, RoleChipState state) {
+    final registered = ref.read(authStateProvider).user?.isRealUser ?? false;
+    if (!registered) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()),
+      );
+      return;
+    }
+    switch (state) {
+      case RoleChipState.approved:
+        showRolePicker(context);
+      case RoleChipState.needsRegistration:
+      case RoleChipState.inProcess:
+      case RoleChipState.rejected:
+        showRoleRequestSheet(context);
+    }
   }
 }
 

@@ -5,14 +5,17 @@
 // reads only the tier the S5 rule lets this caller read), so it self-empties as
 // decisions land (an approved/denied doc leaves the pending query).
 
+import 'package:buildsmart/data/board_accounts_local.dart' show isOwnerEmail;
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/screens/reject_reason_screen.dart'
     show RejectReasonScreen;
+import 'package:buildsmart/state/auth_state.dart' show authStateProvider;
 import 'package:buildsmart/state/role_requests.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart' show confirmDestructive;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -36,6 +39,9 @@ class _RoleRequestsInboxScreenState
   /// uids currently being reviewed (buttons disabled, spinner shown).
   final Set<String> _busy = {};
 
+  /// True while the owner's bulk-clear is running (button disabled).
+  bool _clearing = false;
+
   Future<void> _review(String uid, {required bool approve}) async {
     final reviewer = ref.read(roleReviewerProvider);
     if (reviewer == null || _busy.contains(uid)) return;
@@ -50,9 +56,33 @@ class _RoleRequestsInboxScreenState
     }
   }
 
+  /// Owner-only bulk clear — delete EVERY pending request in one action (the
+  /// directive: "תמחק את כל הבקשות הקיימות"). Behind a destructive confirm.
+  Future<void> _clearAll() async {
+    if (_clearing) return;
+    final ok = await confirmDestructive(
+      context,
+      title: 'מחיקת כל הבקשות',
+      message: 'למחוק את כל בקשות-התפקיד הממתינות? הפעולה בלתי-הפיכה.',
+      confirmLabel: 'מחק הכל',
+    );
+    if (!ok || !mounted) return;
+    setState(() => _clearing = true);
+    try {
+      final n = await clearAllRoleRequests(ref);
+      if (mounted) showToast(context, n > 0 ? '✓ נמחקו $n בקשות' : 'אין בקשות למחיקה');
+    } finally {
+      if (mounted) setState(() => _clearing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(pendingRoleRequestsProvider);
+    // Owner-only: the bulk-clear action. Recognised by the verified auth email
+    // (isOwnerEmail) — no other reviewer sees it.
+    final isOwner = isOwnerEmail(ref.watch(authStateProvider).user?.email);
+    final count = async.valueOrNull?.length ?? 0;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -61,6 +91,26 @@ class _RoleRequestsInboxScreenState
           title: CfgText('role_requests_inbox_screen.t01', 'בקשות תפקיד'),
           backgroundColor: BsTokens.cardLight,
           foregroundColor: BsTokens.inkLight,
+          actions: [
+            if (isOwner && count > 0)
+              _clearing
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.2),
+                        ),
+                      ),
+                    )
+                  : IconButton(
+                      key: const Key('clear_all_requests'),
+                      tooltip: 'מחק את כל הבקשות',
+                      icon: const Icon(Icons.delete_sweep_outlined),
+                      onPressed: _clearAll,
+                    ),
+          ],
         ),
         body: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),

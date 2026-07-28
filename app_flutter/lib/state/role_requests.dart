@@ -10,10 +10,14 @@
 // Firebase-free test suite + the demo build get null and never touch Firestore.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/bs_user.dart' show UserStatus;
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/data/repositories/users_repository.dart'
+    show currentUserProvider;
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show FieldPath;
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -136,3 +140,99 @@ final roleReviewerProvider = Provider<RoleReviewer?>((ref) {
         <String, String>{'uid': uid, 'decision': approve ? 'approve' : 'deny'},
       );
 });
+
+/// Set true by the registration flow (`WelcomeScreen._finishAfterAuth`) the
+/// moment a NEW user finishes registering, so the shell opens the role-request
+/// sheet ONCE — "בקשת תפקיד במסך אחד אחרי הרשמה". The shell resets it after
+/// showing the sheet (a one-shot latch, not persisted). Registration no longer
+/// auto-files a 'contractor' request behind the user's back; they choose.
+final promptRoleRequestProvider = StateProvider<bool>((_) => false);
+
+// ── status chip under the logo (replaces the pending banner) ─────────────────
+
+/// The four lifecycle states shown as the status chip beneath the logo — the
+/// user asked for exactly these, in place of the old "ממתין לאישור" banner:
+///   🟠 [needsRegistration] · 🟡 [inProcess] · 🟢 [approved] · 🔴 [rejected].
+enum RoleChipState { needsRegistration, inProcess, approved, rejected }
+
+/// PURE mapping to the chip, from signals the app already holds. Order matters:
+///   • not a REGISTERED (real, non-anonymous) user      → 🟠 needsRegistration
+///   • account already active / holds a server role /
+///     own request approved                              → 🟢 approved
+///   • own roleRequest was denied                        → 🔴 rejected
+///   • own roleRequest is pending                        → 🟡 inProcess
+///   • registered but never requested a role             → 🟠 needsRegistration
+/// Firebase-free (no request doc) a registered user reads as needsRegistration —
+/// they still have to request a role, which is the honest prompt.
+RoleChipState roleChipStateFor({
+  required bool isRegistered,
+  required bool isActive,
+  required bool hasServerRole,
+  required String? requestStatus,
+}) {
+  if (!isRegistered) return RoleChipState.needsRegistration;
+  if (isActive || hasServerRole || requestStatus == 'approved') {
+    return RoleChipState.approved;
+  }
+  if (requestStatus == 'denied') return RoleChipState.rejected;
+  if (requestStatus == 'pending') return RoleChipState.inProcess;
+  return RoleChipState.needsRegistration;
+}
+
+/// The `roleRequests` listen SCOPED to the caller's OWN doc (doc-id == uid) — the
+/// `read: own` branch of the rule. Null Firebase-free / signed-out. Distinct from
+/// [roleRequestsInboxProvider] (the approver's tier view).
+final myRoleRequestSourceProvider = Provider<RemoteCollectionSource?>((ref) {
+  if (!useFirebaseBackend) return null;
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || uid.isEmpty) return null;
+  return FirestoreCollectionSource(
+    'roleRequests',
+    scope: (c) => c.where(FieldPath.documentId, isEqualTo: uid),
+  );
+});
+
+/// The caller's own role request doc (or null when none / Firebase-free). Live —
+/// so the chip flips 🟡→🟢/🔴 the moment an approver decides, with no reload.
+final myRoleRequestProvider = StreamProvider<RemoteDoc?>((ref) {
+  final src = ref.watch(myRoleRequestSourceProvider);
+  if (src == null) return Stream<RemoteDoc?>.value(null);
+  return src.snapshots().map((docs) => docs.isEmpty ? null : docs.first);
+});
+
+/// The live status chip state under the logo. Composes the pure [roleChipStateFor]
+/// over auth (registration), the users doc (active), server claims, and the own
+/// request doc. Watched only under `kUserSystem` at the call-site → OFF build
+/// byte-identical.
+final roleChipStateProvider = Provider<RoleChipState>((ref) {
+  final auth = ref.watch(authStateProvider);
+  final status = ref.watch(currentUserProvider)?.status;
+  final req = ref.watch(myRoleRequestProvider).valueOrNull;
+  return roleChipStateFor(
+    isRegistered: auth.user?.isRealUser ?? false,
+    isActive: status == UserStatus.active,
+    hasServerRole: auth.roles.isNotEmpty,
+    requestStatus: req?.data['status'] as String?,
+  );
+});
+
+/// Owner/admin bulk-clear: delete EVERY pending role request the caller can see
+/// (their inbox tier). The rule allows an admin to delete any roleRequests doc,
+/// so the owner (admin=any tier) clears the whole pending queue. Returns the count
+/// deleted. No-op Firebase-free / empty. A single failed delete is skipped, not
+/// fatal — a best-effort sweep.
+Future<int> clearAllRoleRequests(WidgetRef ref) async {
+  final writer = ref.read(roleRequestWriterProvider);
+  final docs = ref.read(pendingRoleRequestsProvider).valueOrNull ?? const [];
+  if (writer == null || docs.isEmpty) return 0;
+  var deleted = 0;
+  for (final d in docs) {
+    try {
+      await writer.delete(d.id);
+      deleted++;
+    } on Object catch (e) {
+      debugPrint('clearAllRoleRequests: skip ${d.id}: $e');
+    }
+  }
+  return deleted;
+}

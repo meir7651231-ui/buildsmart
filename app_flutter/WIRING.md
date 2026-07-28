@@ -1,5 +1,19 @@
 # WIRING CONTRACT — app_flutter
 
+## #reg-first-chip — צ׳יפ-סטטוס מתחת ללוגו + הרשמה-קודם (ללא באנר) — 2026-07-28
+**דירקטיבת הבעלים: "ללא באנר · צ׳יפ-סטטוס · הרשמה-קודם · מחיקת-בקשות".** הבאנר
+`PendingApprovalBanner` **הוסר מה-mount** ב-`home_shell` (הווידג׳ט+הטסט נשמרו). במקומו
+`_RoleStatusChip` **מתחת ללוגו** (איפה שהגרסה) — 4 מצבים: 🟠 דרוש-הרשמה · 🟡 בתהליך ·
+🟢 מאושר · 🔴 נדחה, נגזרים מ-`roleChipStateProvider` (הרכבה טהורה `roleChipStateFor` מעל
+auth/users-doc/claims + `myRoleRequestProvider` — קריאת `roleRequests/{uid}` העצמית, `read:own`).
+**הרשמה-קודם:** הקשה על הצ׳יפ כשלא-רשום → `WelcomeScreen` (מסך-הרשמה ייעודי, בלי לולאה);
+רשום → `showRoleRequestSheet` (בחירת תפקיד — מסך אחד); מאושר → `showRolePicker`. **אחרי
+הרשמה:** `_finishAfterAuth` כבר לא מגיש 'contractor' אוטומטית — נועל `promptRoleRequestProvider`
+וה-shell פותח את גיליון-הבקשה פעם אחת ("במסך אחד אחרי הרשמה"). **מחיקת-בקשות:** כפתור
+owner-only 🧹 (`Key('clear_all_requests')`) בתיבת-האישורים → `clearAllRoleRequests` (מחיקת
+כל הממתינות; admin-delete rule-safe). **זהה-בייטים:** הכל `kUserSystem`-gated → OFF shrink/
+inert. analyze 0 · role_chip_state 8/8 · role_request 15/15 (owner-clear) · pending_banner ירוק.
+
 ## #screen-mgmt-s5a — קבלן == בית (ניקוי-כן) — 2026-07-28
 **דירקטיבה · פרוסה-5 (התחלה).** מיפוי (Explore) גילה: פרסונת **👷 קבלן אין לה בורד נפרד** — בחירתה **מנקה-פרסונה** ונוחתת על `HomeShell`→`SmartHomeBody` (`role_picker_sheet.dart:151`). כלומר **הבורד של הקבלן הוא מסך-הבית** (כבר בנוי-כסקציות · slice-3). לכן `ManagedScreen('contractor')` היה **stub מיותר** עם placeholder מטעה ("טרם-נבנה"). **תיקון-כן:** ה-stub **הוסר**; ה-'home' תוּיג-מחדש **'מסך הבית (לוח הקבלן)'** — הוא-הוא הבורד. **אין המצאת-בורד.** `kManagedScreens`: home · manager · store. 21/21 · analyze 0. **הבא (slice-5):** manager (**CLEAN** — `_DashboardTab`, 6 בלוקים) · store (**MODERATE** — `_homeTab`, 11 בלוקים inline + זנב-lazy).
 
