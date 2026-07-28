@@ -494,4 +494,27 @@ void main() {
     expect(c.read(screenSectionsProvider.notifier).isHidden('store', 'stock'),
         isTrue);
   });
+
+  // ── screen-mgmt s8 — ✎ rename per item (shared by section + keyboard editors) ──
+  testWidgets('✎ rename — a row edits its label; the override persists via '
+      'setLabel (applies live to the keyboard / renames the section)', (t) async {
+    final c = await _pump(t);
+    await t.ensureVisible(find.byKey(const Key('open-screen-manager')));
+    await t.tap(find.byKey(const Key('open-screen-manager')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('sec-enter-home'))); // → level-2 (home)
+    await t.pumpAndSettle();
+    // every row has a ✎ now.
+    await t.tap(find.byKey(const Key('sec-edit-home-workPath')));
+    await t.pumpAndSettle();
+    expect(find.text('ערוך שם'), findsOneWidget); // the rename dialog
+    final field = find.descendant(
+        of: find.byType(AlertDialog), matching: find.byType(TextField));
+    await t.enterText(field, 'מסלול שלי');
+    await t.tap(find.text('שמור'));
+    await t.pumpAndSettle();
+    expect(
+        c.read(screenSectionsProvider.notifier).labelOf('home', 'workPath', 'X'),
+        'מסלול שלי');
+  });
 }

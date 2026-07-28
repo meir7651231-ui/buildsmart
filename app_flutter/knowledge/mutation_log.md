@@ -17,6 +17,11 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s8 — ✎ rename פר-פריט (סקציות + מקלדת) — 2026-07-28
+- **הפונקציות:** `labelOf`/`setLabel` (screen_sections · labels map) · `_renameItem`/`_RenameDialog` (wizard) · `_renameKbdNode` (keyboard).
+- **תקלה שהוזרקה (mutation-sensitivity):** `_renameKbdNode` בלי `if (label==node.label) return node` (בונה-מחדש תמיד) ⇒ אובדן זהות + לא-זהה-בייטים ⇒ byte-identity spec §4C אדום. (תקלה-אמת שקרתה: dispose ה-controller בבנאי-דיאלוג-plain ⇒ race-assert → תוקן ב-StatefulWidget.)
+- **בטיחות:** ברירת-מחדל `label==node.label` ⇒ אותו node ⇒ **זהה-בייטים** · canonical-minimal (ריק→revert→remove key) · `_RenameDialog` מנהל+dispose את ה-controller.
+- **אימות:** analyze 0 · org_setup_wizard 33/33 · screen_sections · kbd_home_layout · floating_card_keyboard.
 ## #screen-mgmt-s7 — מקלדת-הבית חיה על פריסת-האשף — 2026-07-28
 - **הפונקציה:** `_applyHomeKbdLayout` (filter+reorder `kbHomeNodes` לפי `visibleIds('kbd:home', labels)`).
 - **תקלה שהוזרקה (mutation-sensitivity):** להסיר את שער `tab == 0` ⇒ הסינון חל על כל הטאבים (gear/dept/store) ⇒ בדיקות-המקלדת הקיימות אדומות; או `visibleIds`→`orderedIds` ⇒ אריח-מוסתר עדיין מוצג.

@@ -266,12 +266,31 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
   /// `visibleIds` == the labels in order ⇒ the same nodes ⇒ byte-identical.
   List<KbToolNode> _applyHomeKbdLayout(List<KbToolNode> nodes) {
     ref.watch(screenSectionsProvider);
-    final labels = [for (final n in nodes) n.label];
-    final order = ref
-        .read(screenSectionsProvider.notifier)
-        .visibleIds(keyboardLayoutKey('home'), labels);
-    final byLabel = {for (final n in nodes) n.label: n};
-    return [for (final id in order) if (byLabel[id] != null) byLabel[id]!];
+    final ss = ref.read(screenSectionsProvider.notifier);
+    final key = keyboardLayoutKey('home');
+    final labels = [for (final node in nodes) node.label];
+    final order = ss.visibleIds(key, labels);
+    final byLabel = {for (final node in nodes) node.label: node};
+    return [
+      for (final id in order)
+        if (byLabel[id] != null)
+          _renameKbdNode(byLabel[id]!, ss.labelOf(key, id, id)),
+    ];
+  }
+
+  /// Rebuild a keyboard tile node with an overridden [label] (✎ rename), keeping
+  /// its icon / action / children. Same label ⇒ the SAME node ⇒ byte-identical.
+  KbToolNode _renameKbdNode(KbToolNode node, String label) {
+    if (label == node.label) return node;
+    return node.action != null
+        ? KbToolNode.leaf(
+            icon: node.icon,
+            label: label,
+            action: node.action!,
+            isVoiceInput: node.isVoiceInput,
+          )
+        : KbToolNode.branch(
+            icon: node.icon, label: label, children: node.children);
   }
 
   /// The LABELS of the LIVE-MIRROR tool base currently installed by

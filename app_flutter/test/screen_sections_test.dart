@@ -92,6 +92,21 @@ void main() {
     expect(n2.orderedIds('home', defs), ['b', 'a', 'c']);
   });
 
+  test('labels (✎ rename) — setLabel overrides, empty reverts, '
+      'canonical-minimal', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final n = notifier(c);
+    expect(n.labelOf(home, 'a', 'ברירת'), 'ברירת'); // no override ⇒ default
+    n.setLabel(home, 'a', 'חדש');
+    expect(n.labelOf(home, 'a', 'ברירת'), 'חדש');
+    // hide/order unaffected by a rename.
+    expect(n.orderedIds(home, defs), defs);
+    n.setLabel(home, 'a', '   '); // empty ⇒ revert to default
+    expect(n.labelOf(home, 'a', 'ברירת'), 'ברירת');
+    expect(c.read(screenSectionsProvider), isEmpty); // no trace once reverted
+  });
+
   test('resetScreen — drops all customization, leaves no prefs trace', () {
     final c = ProviderContainer();
     addTearDown(c.dispose);

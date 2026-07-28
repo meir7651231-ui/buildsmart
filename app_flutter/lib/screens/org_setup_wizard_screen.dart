@@ -1384,7 +1384,7 @@ class _SectionManagerList extends ConsumerWidget {
           buildDefaultDragHandles: false,
           onReorder: (o, nw) => n.reorder(rootKey, defaults, o, nw),
           children: [
-            for (var i = 0; i < ids.length; i++) _row(n, i, ids[i]),
+            for (var i = 0; i < ids.length; i++) _row(context, n, i, ids[i]),
           ],
         ),
         Padding(
@@ -1399,9 +1399,11 @@ class _SectionManagerList extends ConsumerWidget {
     );
   }
 
-  Widget _row(ScreenSectionsNotifier n, int i, String id) {
+  Widget _row(
+      BuildContext context, ScreenSectionsNotifier n, int i, String id) {
     final m = meta[id];
     final hidden = n.isHidden(rootKey, id);
+    final label = n.labelOf(rootKey, id, m?.label ?? id);
     return Container(
       key: ValueKey(id),
       margin: const EdgeInsets.fromLTRB(
@@ -1424,7 +1426,7 @@ class _SectionManagerList extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              m?.label ?? id,
+              label,
               style: TextStyle(
                 color: hidden ? BsTokens.mutedLight : BsTokens.inkLight,
                 fontWeight: FontWeight.w700,
@@ -1432,6 +1434,14 @@ class _SectionManagerList extends ConsumerWidget {
                 decoration: hidden ? TextDecoration.lineThrough : null,
               ),
             ),
+          ),
+          // ✎ עריכה — שינוי-שם הפריט (חי במקלדת · בעורך לסקציות).
+          IconButton(
+            key: Key('sec-edit-$rootKey-$id'),
+            visualDensity: VisualDensity.compact,
+            icon: const Text('✎', style: TextStyle(fontSize: 15)),
+            tooltip: 'ערוך שם',
+            onPressed: () => _renameItem(context, n, id, label),
           ),
           Switch(
             key: Key('sec-show-$rootKey-$id'),
@@ -1450,6 +1460,68 @@ class _SectionManagerList extends ConsumerWidget {
       ),
     );
   }
+
+  /// ✎ עריכת-שם: דיאלוג rename. "שמור" → override; "אפס" (או ריק) → חזרה
+  /// לברירת-המחדל. חל חי (מקלדת: האריח משתנה · סקציות: השם בעורך).
+  Future<void> _renameItem(BuildContext context, ScreenSectionsNotifier n,
+      String id, String current) async {
+    final value = await showDialog<String>(
+      context: context,
+      builder: (_) => _RenameDialog(initial: current),
+    );
+    if (value != null) n.setLabel(rootKey, id, value);
+  }
+}
+
+/// ✎ rename dialog — a StatefulWidget so it OWNS + disposes its own controller
+/// (disposing a controller a plain dialog builder created races the dismiss
+/// animation and asserts). Pops the new name, `''` to reset, or null on dismiss.
+class _RenameDialog extends StatefulWidget {
+  const _RenameDialog({required this.initial});
+
+  final String initial;
+
+  @override
+  State<_RenameDialog> createState() => _RenameDialogState();
+}
+
+class _RenameDialogState extends State<_RenameDialog> {
+  late final _ctrl = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: BsTokens.cardLight,
+          title: const Text('ערוך שם'),
+          content: TextField(
+            controller: _ctrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'שם',
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (v) => Navigator.of(context).pop(v),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(''), // ריק → ברירת-מחדל
+              child: const Text('אפס לברירת-מחדל'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: BsTokens.brand),
+              onPressed: () => Navigator.of(context).pop(_ctrl.text),
+              child: const Text('שמור'),
+            ),
+          ],
+        ),
+      );
 }
 
 /// רמה-1 — רשימת המסכים (סדר / הסתר מסך-שלם), חץ → עורך-הסקציות של המסך.

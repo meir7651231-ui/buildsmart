@@ -37,5 +37,10 @@ void main() {
     n.moveDown(keyboardLayoutKey('home'), labels, labels.first);
     expect(n.orderedIds(keyboardLayoutKey('home'), labels).first,
         isNot(labels.first));
+
+    // ✎ rename ⇒ the tile the keyboard renders shows the override (the keyboard's
+    // _renameKbdNode rebuilds the node with labelOf(...)).
+    n.setLabel(keyboardLayoutKey('home'), 'מאתר', 'חיפוש');
+    expect(n.labelOf(keyboardLayoutKey('home'), 'מאתר', 'מאתר'), 'חיפוש');
   });
 }

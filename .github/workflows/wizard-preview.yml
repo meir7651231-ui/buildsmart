@@ -16,9 +16,9 @@
 # never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
 # all of that out and keeps the un-spoofable owner gate byte-identical.
 #
-# rev: sm-s7 — rebuild for screen-management s0–s7: all 4 boards live, the home's
-# trailing blocks are hideable, AND the per-screen keyboard editor is now WIRED
-# live — hiding/reordering keyboard tiles in the wizard changes the real keyboard.
+# rev: sm-s8 — rebuild for screen-management s0–s8: all boards live, keyboard editor
+# wired live, AND a ✎ per-item rename in both the section and keyboard editors —
+# renaming a keyboard tile changes the real tile; renaming a section renames it.
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.

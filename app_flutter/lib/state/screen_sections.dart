@@ -20,7 +20,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// ⇒ "use the screen's canonical default") + the [hidden] section ids (non-
 /// destructive). Immutable; round-trips through JSON.
 class ScreenLayout {
-  const ScreenLayout({this.order = const [], this.hidden = const {}});
+  const ScreenLayout(
+      {this.order = const [], this.hidden = const {}, this.labels = const {}});
 
   factory ScreenLayout.fromJson(Map<String, dynamic> j) => ScreenLayout(
         order: (j['order'] as List<dynamic>? ?? const <dynamic>[])
@@ -28,19 +29,32 @@ class ScreenLayout {
         hidden: (j['hidden'] as List<dynamic>? ?? const <dynamic>[])
             .cast<String>()
             .toSet(),
+        labels: (j['labels'] as Map<String, dynamic>? ?? const {})
+            .map((k, v) => MapEntry(k, v as String)),
       );
 
   final List<String> order;
   final Set<String> hidden;
 
-  bool get isEmpty => order.isEmpty && hidden.isEmpty;
+  /// Per-id label OVERRIDE (rename). Absent id ⇒ the caller's default label.
+  final Map<String, String> labels;
 
-  ScreenLayout copyWith({List<String>? order, Set<String>? hidden}) =>
-      ScreenLayout(order: order ?? this.order, hidden: hidden ?? this.hidden);
+  bool get isEmpty => order.isEmpty && hidden.isEmpty && labels.isEmpty;
+
+  ScreenLayout copyWith(
+          {List<String>? order,
+          Set<String>? hidden,
+          Map<String, String>? labels}) =>
+      ScreenLayout(
+        order: order ?? this.order,
+        hidden: hidden ?? this.hidden,
+        labels: labels ?? this.labels,
+      );
 
   Map<String, dynamic> toJson() => {
         if (order.isNotEmpty) 'order': order,
         if (hidden.isNotEmpty) 'hidden': hidden.toList(),
+        if (labels.isNotEmpty) 'labels': labels,
       };
 }
 
@@ -136,6 +150,23 @@ class ScreenSectionsNotifier extends StateNotifier<Map<String, ScreenLayout>> {
 
   void toggle(String screen, String id) =>
       isHidden(screen, id) ? show(screen, id) : hide(screen, id);
+
+  /// The effective label for [id] on [screen]: the rename override, or [fallback].
+  String labelOf(String screen, String id, String fallback) =>
+      _of(screen).labels[id] ?? fallback;
+
+  /// Set (or clear, when [value] is empty) the rename override for [id].
+  void setLabel(String screen, String id, String value) {
+    final l = _of(screen);
+    final next = {...l.labels};
+    final v = value.trim();
+    if (v.isEmpty) {
+      next.remove(id); // back to the default label
+    } else {
+      next[id] = v;
+    }
+    _set(screen, l.copyWith(labels: next));
+  }
 
   /// Reorder [screen]'s sections (ReorderableListView contract), reconciled
   /// against [defaults] so a first-time reorder persists the full explicit order.
