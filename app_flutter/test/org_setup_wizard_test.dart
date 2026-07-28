@@ -418,6 +418,8 @@ void main() {
     // the previously-fixed trailing blocks are now hideable sections too.
     expect(find.byKey(const Key('sec-show-home-installHero')), findsOneWidget);
     expect(find.byKey(const Key('sec-show-home-favorites')), findsOneWidget);
+    // מאתר-על is a home SCREEN section too (user request: both keyboard + screen).
+    expect(find.byKey(const Key('sec-show-home-superFinder')), findsOneWidget);
     // hide a section → persists per-screen.
     await t.tap(find.byKey(const Key('sec-show-home-workPath')));
     await t.pumpAndSettle();
@@ -444,6 +446,8 @@ void main() {
     await t.tap(find.byKey(const Key('open-screen-keyboard')));
     await t.pumpAndSettle();
     expect(find.textContaining('מקלדת · מסך הבית'), findsOneWidget); // AppBar
+    // מאתר-על is on the home keyboard too (user request: both keyboard + screen).
+    expect(find.byKey(const Key('sec-show-kbd:home-מאתר-על')), findsOneWidget);
     // hide a keyboard tile (id == its label 'מהירים') → persists to 'kbd:home'.
     final tile = find.byKey(const Key('sec-show-kbd:home-מהירים'));
     expect(tile, findsOneWidget);

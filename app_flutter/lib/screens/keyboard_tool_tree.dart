@@ -299,6 +299,20 @@ List<KbToolNode> kbHomeNodes() => <KbToolNode>[
         action: (ref, context) =>
             runKeyboardTool(ref, context, KbTool.favorites),
       ),
+      // User-requested: מאתר-על (the axis-dive super-wheel) also on the HOME grid,
+      // for easy reach + editable via the wizard (hide/reorder/rename). Same action
+      // as its catalog-section tile ([kbTabToolNodes]); gated on the const [kAxisDive]
+      // so an off-flag build tree-shakes it ⇒ the home grid stays byte-identical.
+      if (kAxisDive)
+        KbToolNode.leaf(
+          icon: Icons.hub_outlined,
+          label: 'מאתר-על',
+          action: (ref, context) {
+            ref.read(mainTabProvider.notifier).state = 0;
+            ref.read(catalogSectionProvider.notifier).state = 'מאתר-על';
+            ref.read(keyboardDiveQueryProvider.notifier).state = '';
+          },
+        ),
     ];
 
 /// The KBD tool nodes (gear toggle): קולי / חיפוש / מצלמה / היכרות leaves (via

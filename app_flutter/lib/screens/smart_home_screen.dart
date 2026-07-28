@@ -16,6 +16,10 @@ import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
+    show kAxisDive;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show catalogSectionProvider, keyboardDiveQueryProvider;
 import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/state/screen_sections.dart'
     show screenSectionsProvider;
@@ -101,6 +105,7 @@ Widget smartHomeSectionFor(HomeSection s) => switch (s) {
       HomeSection.reorderHistory => const _RecentOrders(),
       HomeSection.installHero => const _InstallStudioHero(),
       HomeSection.favorites => const _Favorites(),
+      HomeSection.superFinder => const _SuperFinderHero(),
     };
 
 /// 🏠 גוף מסך-הבית החכם (task #32) — the 'בית' landing in the "תוכן הבית" tile
@@ -135,6 +140,11 @@ class SmartHomeBody extends ConsumerWidget {
               ? const [_InstallStudioHero(), SizedBox(height: BsTokens.space4)]
               : const <Widget>[],
           HomeSection.favorites => const [_Favorites()],
+          // מאתר-על on the home (user request) — gated on the const kAxisDive
+          // super-wheel, so an off build tree-shakes it ⇒ byte-identical.
+          HomeSection.superFinder => kAxisDive
+              ? const [SizedBox(height: BsTokens.space4), _SuperFinderHero()]
+              : const <Widget>[],
           _ => [
               smartHomeSectionFor(s),
               const SizedBox(height: BsTokens.space4),
@@ -644,6 +654,61 @@ class _InstallStudioHero extends ConsumerWidget {
                 ),
               ),
               const Icon(Icons.chevron_left, color: BsTokens.brandDark),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 🕸️ מאתר-על — home entry into the axis-dive super-wheel finder ───────────────
+/// Taps open the SAME 'מאתר-על' catalog section the keyboard tile does (set the
+/// section + clear any live dive query). Plain Text (not CfgText) — a section-level
+/// block, hidden/reordered/renamed via the wizard, not an element-registry id.
+class _SuperFinderHero extends ConsumerWidget {
+  const _SuperFinderHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pal = _pal(context);
+    return _Pad(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        onTap: () {
+          ref.read(mainTabProvider.notifier).state = 0;
+          ref.read(catalogSectionProvider.notifier).state = 'מאתר-על';
+          ref.read(keyboardDiveQueryProvider.notifier).state = '';
+        },
+        child: Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            color: const Color(0x1A1E88E5),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            border: Border.all(color: const Color(0x331E88E5)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.hub_outlined,
+                  color: BsTokens.brandDark, size: 32),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('🕸️ מאתר-על',
+                        style: TextStyle(
+                          color: pal.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        )),
+                    const SizedBox(height: 2),
+                    Text('גלגל-חיפוש-על — בחר מאיזה ציר להתחיל',
+                        style: TextStyle(color: pal.muted, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_left, color: pal.muted),
             ],
           ),
         ),

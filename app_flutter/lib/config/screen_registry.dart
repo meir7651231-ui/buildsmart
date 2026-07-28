@@ -58,6 +58,7 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('reorderHistory', '🔁', 'הזמנות אחרונות לאתר'),
     ManagedSection('installHero', '🔌', 'תכנון חיבור'),
     ManagedSection('favorites', '⭐', 'מועדפים'),
+    ManagedSection('superFinder', '🕸️', 'מאתר-על'),
   ], keyboardTools: [
     // The 8 HOME keyboard tiles (kbHomeNodes) — ids == the tile LABEL.
     ManagedSection('מחלקות', '🗂️', 'מחלקות'),
@@ -68,6 +69,7 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('מאתר', '🔎', 'מאתר'),
     ManagedSection('חיבור', '🔌', 'חיבור'),
     ManagedSection('מועדפים', '⭐', 'מועדפים'),
+    ManagedSection('מאתר-על', '🕸️', 'מאתר-על'),
   ]),
   // 👔 לוח מנהל — live section editor (slice-5b): ids == ManagerDashSection.name.
   // 'studio' is compile-dev-only (excluded here); 'attention' is opt-in (rendered

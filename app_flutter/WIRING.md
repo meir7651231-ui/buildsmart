@@ -1,5 +1,11 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s9 — 🕸️ "מאתר-על" גם במסך-הבית וגם במקלדת (נערך בשניהם) — 2026-07-28
+**המשך (בקשת-משתמש: "לא גם וגם" — גם מסך-הבית **וגם** המקלדת, שניהם עם עריכה).** ה-axis-dive super-wheel ("מאתר-על") נוסף כ**כניסה כפולה**, כל אחת נשלטת מהאשף:
+- **מסך-הבית:** `HomeSection.superFinder` חדש (enum + `kHomeSectionMeta` 🕸️ + `kDefaultHomeOrder`, כעת **8** סקציות) → `smart_home_screen.dart` מרנדר `_SuperFinderHero` (ConsumerWidget · InkWell → `mainTab=0` + `catalogSection='מאתר-על'` + נקה `keyboardDiveQuery`). `childrenFor(superFinder)` **מגודר `kAxisDive`** (const-false ⇒ tree-shake ⇒ בברירת-מחדל **זהה-בייטים**). `screen_registry` home = **8 סקציות** (`ManagedSection('superFinder','🕸️','מאתר-על')`) ⇒ ניתן לסדר/הסתר/שם-מ"ניהול מסכים → בית".
+- **מקלדת-הבית:** `kbHomeNodes()` מקבל `KbToolNode.leaf('מאתר-על')` (אותה פעולה בדיוק), גם-הוא **מגודר `kAxisDive`** ⇒ off-build לא-רואה-אותו ⇒ רשת-הבית **זהה-בייטים**. `screen_registry` `keyboardTools` = **9 אריחים** (נוסף 'מאתר-על') ⇒ נערך (הסתר/סדר/שם) מ"ניהול מסכים → בית → ⌨️ מקלדת", חי דרך s7.
+**עוגן ל-`catalog_screen`** (`catalogSectionProvider`/`keyboardDiveQueryProvider`) — אותה כניסת-קטלוג שכבר קיימת ל-`kbTabToolNodes`, בלי המצאת-מסך. **plain `Text`** (לא `CfgText`) ב-`_SuperFinderHero` — בלוק-סקציה, לא element-registry id. 43/43 wizard+t3+kbd_home_layout · byte-identity (73) ירוקות · analyze 0.
+
 ## #screen-mgmt-s8 — ✎ עריכת-שם פר-פריט (עורך-סקציות + עורך-מקלדת) — 2026-07-28
 **המשך (בקשת-משתמש: "גם עריכה", לשניהם).** ל-widget המשותף `_SectionManagerList` (מזין גם את עורך-הסקציות וגם את עורך-המקלדת) נוסף כפתור **✎** בכל שורה (`Key('sec-edit-<root>-<id>')`) → `_RenameDialog` (StatefulWidget שמחזיק+dispose את ה-controller — מניעת race-הדיסמיס שהקריס plain-dialog) → override-שם. `ScreenLayout` (slice-1) הורחב עם `labels: Map<id,label>` + `labelOf`/`setLabel` (canonical-minimal · ריק→revert). **חל חי:** המקלדת — `_applyHomeKbdLayout` בונה-מחדש את ה-`KbToolNode` עם השם החדש (`_renameKbdNode` · שומר icon/action/children · `label==node.label` ⇒ אותו node); הסקציות — השם בעורך. **זהה-בייטים** בברירת-מחדל (79 בדיקות-מקלדת + byte-identity spec §4C ירוקות). 33/33 wizard (✎→dialog→`labelOf`) · `screen_sections` (labels · revert) · `kbd_home_layout` (rename) · analyze 0.
 

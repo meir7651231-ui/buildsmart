@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s9 — 🕸️ מאתר-על במסך-הבית + במקלדת (כפולה, נערכת) — 2026-07-28
+- **הפונקציות:** `HomeSection.superFinder` (enum+meta+order) · `_SuperFinderHero` + `childrenFor(superFinder)` (smart_home_screen) · `kbHomeNodes()` leaf (keyboard_tool_tree) · `screen_registry` home (8 sections + 9 keyboardTools).
+- **תקלה שהוזרקה (mutation-sensitivity):** הסרת שער `if (kAxisDive)` משני האתרים (מרנדר תמיד) ⇒ בדיקת byte-identity spec §4C (tab-0 OFF-flag == `_buildRow`) אדומה כי הרשת גדלה באריח נוסף ⇒ מוכיח שהשער load-bearing לזהות-הבייטים. תקלה #2: `sec-show-home-superFinder` נעדר מ-`screen_registry` sections ⇒ wizard 34 נכשל (`findsNothing`) ⇒ מוכיח שהרישום הוא-שמנפיק את שורת-העריכה.
+- **בטיחות:** `kAxisDive` const-false בבנייה-הנשלחת ⇒ שני האתרים tree-shaken ⇒ **זהה-בייטים** (הבית + הרשת). `_SuperFinderHero` plain-`Text` (לא CfgText) ⇒ אפס-רישום-element. אותה פעולת-קטלוג ('מאתר-על') בשני האתרים ⇒ מקור-אמת אחד, בלי המצאת-מסך.
+- **אימות:** analyze 0 · org_setup_wizard 34/34 · t3 (order=8) · kbd_home_layout · floating_card_keyboard byte-identity (73).
+
 ## #screen-mgmt-s8 — ✎ rename פר-פריט (סקציות + מקלדת) — 2026-07-28
 - **הפונקציות:** `labelOf`/`setLabel` (screen_sections · labels map) · `_renameItem`/`_RenameDialog` (wizard) · `_renameKbdNode` (keyboard).
 - **תקלה שהוזרקה (mutation-sensitivity):** `_renameKbdNode` בלי `if (label==node.label) return node` (בונה-מחדש תמיד) ⇒ אובדן זהות + לא-זהה-בייטים ⇒ byte-identity spec §4C אדום. (תקלה-אמת שקרתה: dispose ה-controller בבנאי-דיאלוג-plain ⇒ race-assert → תוקן ב-StatefulWidget.)

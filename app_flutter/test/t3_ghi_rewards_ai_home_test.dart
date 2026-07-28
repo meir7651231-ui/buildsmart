@@ -141,6 +141,7 @@ void main() {
         HomeSection.reorderHistory,
         HomeSection.installHero,
         HomeSection.favorites,
+        HomeSection.superFinder,
       ]);
     });
 

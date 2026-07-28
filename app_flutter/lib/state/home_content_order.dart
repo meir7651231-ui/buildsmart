@@ -25,6 +25,7 @@ enum HomeSection {
   // Previously-fixed trailing blocks, now manageable sections (screen-mgmt):
   installHero, // 'תכנון חיבור' — the compat module's home hero (org-gated)
   favorites, // 'מועדפים'
+  superFinder, // 'מאתר-על' — the axis-dive super-wheel entry (kAxisDive-gated)
 }
 
 /// Display metadata for one home section (the drag-handle row label/emoji).
@@ -52,6 +53,8 @@ const Map<HomeSection, HomeSectionMeta> kHomeSectionMeta = {
       HomeSectionMeta(HomeSection.installHero, '🔌', 'תכנון חיבור'),
   HomeSection.favorites:
       HomeSectionMeta(HomeSection.favorites, '⭐', 'מועדפים'),
+  HomeSection.superFinder:
+      HomeSectionMeta(HomeSection.superFinder, '🕸️', 'מאתר-על'),
 };
 
 /// Default order — the prototype's top-to-bottom section sequence.
@@ -63,6 +66,7 @@ const List<HomeSection> kDefaultHomeOrder = [
   HomeSection.reorderHistory,
   HomeSection.installHero,
   HomeSection.favorites,
+  HomeSection.superFinder,
 ];
 
 /// The home screen's key + default section ids for the unified per-screen model
