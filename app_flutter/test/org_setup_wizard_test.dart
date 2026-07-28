@@ -413,7 +413,7 @@ void main() {
     // drill into home → level-2 section editor with its 5 real sections.
     await t.tap(find.byKey(const Key('sec-enter-home')));
     await t.pumpAndSettle();
-    expect(find.textContaining('מסך הבית — סקציות'), findsOneWidget);
+    expect(find.textContaining('מסך הבית'), findsOneWidget); // level-2 AppBar
     expect(find.byKey(const Key('sec-show-home-workPath')), findsOneWidget);
     // hide a section → persists per-screen.
     await t.tap(find.byKey(const Key('sec-show-home-workPath')));

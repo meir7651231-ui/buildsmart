@@ -44,8 +44,13 @@ String keyboardLayoutKey(String screenId) => 'kbd:$screenId';
 /// The managed screens (level-1), in default order. Home first (fully
 /// section-built — verbatim from `kHomeSectionMeta`). The rest carry screen-level
 /// order/hide now; their sections arrive gradually (slice-5).
+// NOTE (slice-5): the 👷 קבלן persona has NO separate board — picking it CLEARS
+// the persona and lands on HomeShell → SmartHomeBody (role_picker_sheet.dart), so
+// the contractor's board literally IS the home screen (already section-built ·
+// slice-3). There is therefore no distinct 'contractor' screen to manage — the
+// 'home' entry below IS the contractor's board (label reflects both).
 const List<ManagedScreen> kManagedScreens = [
-  ManagedScreen('home', '🏠', 'מסך הבית', sections: [
+  ManagedScreen('home', '🏠', 'מסך הבית (לוח הקבלן)', sections: [
     ManagedSection('categories', '🗂️', 'מחלקות'),
     ManagedSection('products', '🌳', 'עץ חכם — אינסטלציה'),
     ManagedSection('workPath', '🛁', 'מסלול עבודה חכם'),
@@ -62,7 +67,6 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('חיבור', '🔌', 'חיבור'),
     ManagedSection('מועדפים', '⭐', 'מועדפים'),
   ]),
-  ManagedScreen('contractor', '👷', 'לוח קבלן'),
   ManagedScreen('manager', '👔', 'לוח מנהל'),
   ManagedScreen('store', '🏪', 'חנות ספק'),
 ];

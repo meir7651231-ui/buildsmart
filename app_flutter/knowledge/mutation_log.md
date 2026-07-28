@@ -17,6 +17,11 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s5a — קבלן==בית (ניקוי registry) — 2026-07-28
+- **השינוי:** `screen_registry` — הוסר `ManagedScreen('contractor')` (redundant · קבלן==בית); 'home' תוּיג-מחדש 'מסך הבית (לוח הקבלן)'. אין פונקציה חדשה (שינוי-דאטה).
+- **תקלה שהוזרקה (mutation-sensitivity):** בדיקת-האשף (`textContaining('מסך הבית')` על AppBar רמה-2) — התיוג-מחדש שבר את ה-assertion הישן (`'מסך הבית — סקציות'`) ⇒ אדום עד שתוקן ⇒ מוכיח שה-label מחווט לכותרת.
+- **בטיחות:** אין test שתלוי ב-stub שהוסר. הבורד האמיתי של הקבלן (הבית) כבר חי (slice-3).
+- **אימות:** analyze 0 · org_setup_wizard 21/21.
 ## #screen-mgmt-s4 — מקלדת-פר-מסך (עורך מעורך-המסך) — 2026-07-27
 - **הפונקציות:** `_ScreenKeyboardEditor` · `keyboardLayoutKey` · `ManagedScreen.keyboardTools`/`hasKeyboard`.
 - **תקלה שהוזרקה (mutation-sensitivity):** rootKey `keyboardLayoutKey(id)`→`screen.id` ⇒ עורך-המקלדת כותב לאותו layout כמו הסקציות ⇒ בדיקת slice-4 (`isHidden('kbd:home','מהירים')`) אדומה (נשמר תחת מפתח שגוי).

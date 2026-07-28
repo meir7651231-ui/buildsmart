@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s5a — קבלן == בית (ניקוי-כן) — 2026-07-28
+**דירקטיבה · פרוסה-5 (התחלה).** מיפוי (Explore) גילה: פרסונת **👷 קבלן אין לה בורד נפרד** — בחירתה **מנקה-פרסונה** ונוחתת על `HomeShell`→`SmartHomeBody` (`role_picker_sheet.dart:151`). כלומר **הבורד של הקבלן הוא מסך-הבית** (כבר בנוי-כסקציות · slice-3). לכן `ManagedScreen('contractor')` היה **stub מיותר** עם placeholder מטעה ("טרם-נבנה"). **תיקון-כן:** ה-stub **הוסר**; ה-'home' תוּיג-מחדש **'מסך הבית (לוח הקבלן)'** — הוא-הוא הבורד. **אין המצאת-בורד.** `kManagedScreens`: home · manager · store. 21/21 · analyze 0. **הבא (slice-5):** manager (**CLEAN** — `_DashboardTab`, 6 בלוקים) · store (**MODERATE** — `_homeTab`, 11 בלוקים inline + זנב-lazy).
+
 ## #screen-mgmt-s4 — מקלדת-פר-מסך נערכת מעורך-המסך — 2026-07-27
 **דירקטיבה · פרוסה-4.** בעורך-המסך (רמה-2) נוסף כפתור **"⌨️ מקלדת"** (`Key('open-screen-keyboard')`, כשל-מסך יש `keyboardTools`) → `_ScreenKeyboardEditor`: סדר+הסתר של אריחי-המקלדת של המסך, על **אותו** מודל-סקציות (rootKey=`kbd:<screen>` · `keyboardLayoutKey`) ואותו `_SectionManagerList` (מיחזור slice-2). `screen_registry`: home קיבל **8 אריחי-מקלדת** (ids==label של `kbHomeNodes`: מחלקות/עץ-חכם/מסלול/מהירים/הזמנות/מאתר/חיבור/מועדפים). **נערך מעורך-המסך — לא מהמקלדת** (כלי לא עורך את עצמו). **תשתית:** נשמר; החלת-הסינון על המקלדת-הצפה מגודרת `kKbGlobal` (כבוי בפריוויו) → אין אפקט-חי עד שהמקלדת-הגלובלית תשוגר (באנר-כן במסך). 21/21 · analyze 0.
 
