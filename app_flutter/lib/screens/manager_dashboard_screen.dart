@@ -72,6 +72,8 @@ import 'package:buildsmart/state/org_gates.dart'
     show elementVisible, featEnabled, orgTerm;
 import 'package:buildsmart/state/role_requests.dart'
     show pendingRoleRequestsProvider;
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -513,6 +515,16 @@ class _ManagerToggle extends ConsumerWidget {
 /// Reading the providers (not the static `managerAnalytics` const) is what keeps
 /// the LIVE figures — 🚚 open-orders + the pipeline — reflowing whenever any role
 /// mutates the engine.
+/// 📊 לוח בקרה — the manager cockpit's reorderable/hideable sections (screen-mgmt
+/// slice-5b). Ids == enum name, so the wizard's "ניהול מסכים" editor (ManagedScreen
+/// 'manager') drives this board's order + hide LIVE. `studio` is COMPILE-gated
+/// (kStudioCoEditor, dev-only) — excluded from the wizard registry, still honoured
+/// here when the dev flag is on.
+enum ManagerDashSection { copilot, studio, studioEntry, attention, kpis, pipeline }
+
+/// The [screenSectionsProvider] key for the manager cockpit.
+const String kManagerDashScreenKey = 'manager';
+
 class _DashboardTab extends ConsumerWidget {
   const _DashboardTab();
 
@@ -527,6 +539,43 @@ class _DashboardTab extends ConsumerWidget {
         stage: orders.where((o) => o.stage == stage).length,
     };
 
+    // screen-mgmt slice-5b: the cockpit renders through the UNIFIED per-screen
+    // model (order + hide · 'manager' key). `defaults` carries the SAME gates as
+    // the old inline build — compile `kStudioCoEditor` (dev-only cockpit hero,
+    // tree-shaken byte-identical in live) and runtime `manager.attention` (opt-in,
+    // OFF by absence) — so an empty layout ⇒ the exact same children in the exact
+    // same order ⇒ BYTE-IDENTICAL. Each section bundles its own leading spacing
+    // and is spread, so the flat children list is preserved verbatim.
+    ref.watch(screenSectionsProvider);
+    final defaults = <String>[
+      ManagerDashSection.copilot.name,
+      if (kStudioCoEditor) ManagerDashSection.studio.name,
+      ManagerDashSection.studioEntry.name,
+      if (featEnabled(ref, 'manager', 'attention'))
+        ManagerDashSection.attention.name,
+      ManagerDashSection.kpis.name,
+      ManagerDashSection.pipeline.name,
+    ];
+    final order = ref
+        .read(screenSectionsProvider.notifier)
+        .visibleIds(kManagerDashScreenKey, defaults)
+        .map(ManagerDashSection.values.byName);
+
+    List<Widget> childrenFor(ManagerDashSection s) => switch (s) {
+          ManagerDashSection.copilot => const [_CopilotHero()],
+          ManagerDashSection.studio => const [_StudioHero()],
+          ManagerDashSection.studioEntry => const [
+              SizedBox(height: BsTokens.space4),
+              StudioEntryCard(),
+            ],
+          ManagerDashSection.attention => const [_AttentionCard()],
+          ManagerDashSection.kpis => [_MetricGrid(analytics: analytics)],
+          ManagerDashSection.pipeline => [
+              const SizedBox(height: BsTokens.space5),
+              _OrderPipeline(byStage: byStage),
+            ],
+        };
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
@@ -535,26 +584,7 @@ class _DashboardTab extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        const _CopilotHero(),
-        // Studio Pillar-4 · step 81 — COMPILE-GATED cockpit hero. `kStudioCoEditor`
-        // is a const-false `bool.fromEnvironment`, so this is a const-false branch:
-        // Dart tree-shakes BOTH the branch AND `_StudioHero` (referenced only here)
-        // out of every normal build → the shipped cockpit is BYTE-IDENTICAL to
-        // today. Visible only under --dart-define=STUDIO_CO_EDITOR=true (and a
-        // manager session — the runtime `manager` axis is re-checked inside).
-        if (kStudioCoEditor) const _StudioHero(),
-        const SizedBox(height: BsTokens.space4),
-        // Owner-only Studio entry — SizedBox.shrink for everyone else, so the
-        // cockpit is unchanged unless the signed-in owner-manager is looking.
-        const StudioEntryCard(),
-        // GIANT Phase-2 — the attention engine ("needs attention") rides the
-        // opt-IN gate `manager.attention`: OFF unless a company enables it, so
-        // the live cockpit is byte-identical (a NET-NEW surface, never on by
-        // absence).
-        if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),
-        _MetricGrid(analytics: analytics),
-        const SizedBox(height: BsTokens.space5),
-        _OrderPipeline(byStage: byStage),
+        for (final s in order) ...childrenFor(s),
       ],
     );
   }

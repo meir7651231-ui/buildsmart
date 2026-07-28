@@ -1,5 +1,7 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s5b — לוח-מנהל חי על מודל-הסקציות — 2026-07-28
+**דירקטיבה · פרוסה-5 (מנהל).** ה-**לוח בקרה** (`_DashboardTab`) הוגר לרנדר דרך מודל-הסקציות-פר-מסך (slice-1 · `'manager'` key): enum `ManagerDashSection{copilot·studio·studioEntry·attention·kpis·pipeline}` + `visibleIds('manager', defaults).map(byName)` → loop spread `childrenFor(s)`. **זהה-בייטים:** ה-`defaults` נושא את אותם שערים כמו הבנייה-הישנה (compile `kStudioCoEditor` · runtime `featEnabled('manager','attention')`), וכל סקציה **עוטפת את הריווח-הקדמי שלה** ונ-spread ⇒ ברירת-מחדל = בדיוק אותם children באותו סדר. `screen_registry`: 'manager' קיבל **5 סקציות** (ids==enum · `studio` מוחרג — dev-only) ⇒ עורך-הסקציות באשף (slice-2) **חי על הקוקפיט**. 22/22 wizard (מנהל section-built + hide נשמר ל-'manager') · `attention_gate`+`studio_gating` ירוקים (זהה-בייטים) · analyze 0. **נותר (slice-5):** store (MODERATE — `_homeTab` inline).
 ## #reg-first-chip — צ׳יפ-סטטוס מתחת ללוגו + הרשמה-קודם (ללא באנר) — 2026-07-28
 **דירקטיבת הבעלים: "ללא באנר · צ׳יפ-סטטוס · הרשמה-קודם · מחיקת-בקשות".** הבאנר
 `PendingApprovalBanner` **הוסר מה-mount** ב-`home_shell` (הווידג׳ט+הטסט נשמרו). במקומו

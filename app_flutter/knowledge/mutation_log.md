@@ -17,6 +17,11 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s5b — לוח-מנהל חי על מודל-הסקציות — 2026-07-28
+- **הפונקציות:** `ManagerDashSection` enum · `childrenFor` (spread per-section) · `kManagerDashScreenKey`.
+- **תקלה שהוזרקה (mutation-sensitivity):** להשמיט את `if(kStudioCoEditor)` מה-`defaults` (studio תמיד-בפנים) ⇒ `studio_gating` אדום (dev-hero דולף ללייב); או `visibleIds`→`orderedIds` ⇒ סקציה-מוסתרת עדיין מרונדרת.
+- **בטיחות:** spread-children + `defaults`-עם-שערים ⇒ children-flat **זהה-בייטים** לברירת-מחדל (live+dev). `attention_gate`+`studio_gating` ירוקים. `studio` מוחרג מ-registry (dev-only).
+- **אימות:** analyze 0 · org_setup_wizard 22/22 · attention_gate + studio_gating ירוקים.
 ## #screen-mgmt-s5a — קבלן==בית (ניקוי registry) — 2026-07-28
 - **השינוי:** `screen_registry` — הוסר `ManagedScreen('contractor')` (redundant · קבלן==בית); 'home' תוּיג-מחדש 'מסך הבית (לוח הקבלן)'. אין פונקציה חדשה (שינוי-דאטה).
 - **תקלה שהוזרקה (mutation-sensitivity):** בדיקת-האשף (`textContaining('מסך הבית')` על AppBar רמה-2) — התיוג-מחדש שבר את ה-assertion הישן (`'מסך הבית — סקציות'`) ⇒ אדום עד שתוקן ⇒ מוכיח שה-label מחווט לכותרת.

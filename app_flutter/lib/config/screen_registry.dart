@@ -67,6 +67,15 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('חיבור', '🔌', 'חיבור'),
     ManagedSection('מועדפים', '⭐', 'מועדפים'),
   ]),
-  ManagedScreen('manager', '👔', 'לוח מנהל'),
+  // 👔 לוח מנהל — live section editor (slice-5b): ids == ManagerDashSection.name.
+  // 'studio' is compile-dev-only (excluded here); 'attention' is opt-in (rendered
+  // only when the company enables manager.attention) but stays orderable/hideable.
+  ManagedScreen('manager', '👔', 'לוח מנהל', sections: [
+    ManagedSection('copilot', '🤖', 'קו-פיילוט'),
+    ManagedSection('studioEntry', '🎨', 'כניסת סטודיו'),
+    ManagedSection('attention', '🔔', 'דורש טיפול'),
+    ManagedSection('kpis', '📊', 'כרטיסי מדדים'),
+    ManagedSection('pipeline', '📈', 'צינור ההזמנות'),
+  ]),
   ManagedScreen('store', '🏪', 'חנות ספק'),
 ];

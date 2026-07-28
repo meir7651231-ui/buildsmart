@@ -453,4 +453,24 @@ void main() {
       isTrue,
     );
   });
+
+  // ── screen-mgmt slice-5b — the manager cockpit is now section-built + live ──
+  testWidgets('manager cockpit — level-2 is a live section editor (not the '
+      'placeholder); hiding a section persists to the manager layout', (t) async {
+    final c = await _pump(t);
+    await t.ensureVisible(find.byKey(const Key('open-screen-manager')));
+    await t.tap(find.byKey(const Key('open-screen-manager')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('sec-enter-manager'))); // → level-2 (manager)
+    await t.pumpAndSettle();
+    // section-built (NOT the "טרם נבנה" placeholder): its section switches exist.
+    expect(find.byKey(const Key('sec-show-manager-kpis')), findsOneWidget);
+    expect(find.byKey(const Key('sec-show-manager-pipeline')), findsOneWidget);
+    expect(find.textContaining('טרם נבנה'), findsNothing);
+    // hide the KPI section → persists to the 'manager' layout (live on the cockpit).
+    await t.tap(find.byKey(const Key('sec-show-manager-kpis')));
+    await t.pumpAndSettle();
+    expect(c.read(screenSectionsProvider.notifier).isHidden('manager', 'kpis'),
+        isTrue);
+  });
 }
