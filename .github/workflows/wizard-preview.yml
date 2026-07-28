@@ -16,9 +16,9 @@
 # never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
 # all of that out and keeps the un-spoofable owner gate byte-identical.
 #
-# rev: sm-s0 — rebuild after freezing the on-screen edit trigger (screen-management
-# slice-0): the נווט⇄ערוך toggle + 🔀 board selector are gone; editing is via the
-# wizard ONLY now. (Also carries the 5 wizard-studio slices.)
+# rev: sm-s3 — rebuild for screen-management s0–s3: on-screen edit trigger frozen
+# (edit via wizard only) · unified per-screen order+hide model · wizard "🖥️ ניהול
+# מסכים" 2-level manager · the HOME is live on the model (order + hide sections).
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.

@@ -42,7 +42,7 @@ import 'package:buildsmart/config/org_modules.dart'
 import 'package:buildsmart/config/screen_labels_he.dart'
     show normalizeScreen, screenLabelHe;
 import 'package:buildsmart/config/screen_registry.dart'
-    show ManagedScreen, kManagedScreens, kScreensRootKey;
+    show ManagedScreen, kManagedScreens, kScreensRootKey, keyboardLayoutKey;
 import 'package:buildsmart/config/vertical_packs.dart'
     show applyVerticalPack, kVerticalPacks;
 import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
@@ -1505,6 +1505,23 @@ class _ScreenSectionEditor extends StatelessWidget {
           backgroundColor: BsTokens.brand,
           foregroundColor: Colors.white,
           title: Text('${screen.emoji} ${screen.labelHe} — סקציות'),
+          actions: [
+            // slice-4: the per-screen keyboard is edited HERE (from the screen
+            // editor), never from the keyboard itself.
+            if (screen.hasKeyboard)
+              TextButton.icon(
+                key: const Key('open-screen-keyboard'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => _ScreenKeyboardEditor(screen: screen),
+                  ),
+                ),
+                icon: const Text('⌨️', style: TextStyle(fontSize: 15)),
+                label: const Text('מקלדת',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w700)),
+              ),
+          ],
         ),
         body: screen.isSectionBuilt
             ? _SectionManagerList(
@@ -1526,6 +1543,55 @@ class _ScreenSectionEditor extends StatelessWidget {
                   ),
                 ),
               ),
+      ),
+    );
+  }
+}
+
+/// slice-4 — עורך המקלדת של מסך אחד (סדר + הסתר אריחי-מקלדת), על אותו מודל-
+/// הסקציות (rootKey=`kbd:<screen>`) ואותו `_SectionManagerList`. נערך מכאן ולא
+/// מהמקלדת (כלי לא עורך את עצמו). **תשתית:** נשמר; החלת-הסינון על המקלדת-הצפה
+/// תחווט כשהמקלדת-הגלובלית (`kKbGlobal`) תשוגר — עד אז אין אפקט-חי.
+class _ScreenKeyboardEditor extends StatelessWidget {
+  const _ScreenKeyboardEditor({required this.screen});
+
+  final ManagedScreen screen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.brand,
+          foregroundColor: Colors.white,
+          title: Text('⌨️ מקלדת · ${screen.labelHe}'),
+        ),
+        body: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFFFF4E5),
+              padding: const EdgeInsets.all(BsTokens.space3),
+              child: const Text(
+                'סדר והסתר את אריחי-המקלדת של המסך. נשמר עכשיו; יחול על '
+                'המקלדת-הצפה כשתשוגר (kKbGlobal).',
+                style: TextStyle(color: Color(0xFF7A3E00), fontSize: 12.5),
+              ),
+            ),
+            Expanded(
+              child: _SectionManagerList(
+                rootKey: keyboardLayoutKey(screen.id),
+                defaults: [for (final k in screen.keyboardTools) k.id],
+                meta: {
+                  for (final k in screen.keyboardTools)
+                    k.id: (emoji: k.emoji, label: k.labelHe, canEnter: false),
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

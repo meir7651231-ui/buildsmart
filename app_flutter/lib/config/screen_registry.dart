@@ -20,17 +20,26 @@ class ManagedSection {
 
 /// One manageable screen (a level-1 row). [sections] empty ⇒ not yet
 /// section-built (level-2 is a placeholder until slice-5 structures it).
+/// [keyboardTools] are the screen's per-screen keyboard tiles (ids == the tool
+/// LABEL, the keyboard's own identity) — edited FROM the screen editor (slice-4),
+/// never from the keyboard itself (a tool must not edit itself).
 class ManagedScreen {
   const ManagedScreen(this.id, this.emoji, this.labelHe,
-      {this.sections = const []});
+      {this.sections = const [], this.keyboardTools = const []});
 
   final String id;
   final String emoji;
   final String labelHe;
   final List<ManagedSection> sections;
+  final List<ManagedSection> keyboardTools;
 
   bool get isSectionBuilt => sections.isNotEmpty;
+  bool get hasKeyboard => keyboardTools.isNotEmpty;
 }
+
+/// The [screenSectionsProvider] key for a screen's KEYBOARD-tool layout (order /
+/// hide of the per-screen keyboard tiles), distinct from the section layout.
+String keyboardLayoutKey(String screenId) => 'kbd:$screenId';
 
 /// The managed screens (level-1), in default order. Home first (fully
 /// section-built — verbatim from `kHomeSectionMeta`). The rest carry screen-level
@@ -42,6 +51,16 @@ const List<ManagedScreen> kManagedScreens = [
     ManagedSection('workPath', '🛁', 'מסלול עבודה חכם'),
     ManagedSection('promise', '⚡', 'כלים מהירים'),
     ManagedSection('reorderHistory', '🔁', 'הזמנות אחרונות לאתר'),
+  ], keyboardTools: [
+    // The 8 HOME keyboard tiles (kbHomeNodes) — ids == the tile LABEL.
+    ManagedSection('מחלקות', '🗂️', 'מחלקות'),
+    ManagedSection('עץ חכם', '🌳', 'עץ חכם'),
+    ManagedSection('מסלול', '🛣️', 'מסלול'),
+    ManagedSection('מהירים', '⚡', 'מהירים'),
+    ManagedSection('הזמנות', '📦', 'הזמנות'),
+    ManagedSection('מאתר', '🔎', 'מאתר'),
+    ManagedSection('חיבור', '🔌', 'חיבור'),
+    ManagedSection('מועדפים', '⭐', 'מועדפים'),
   ]),
   ManagedScreen('contractor', '👷', 'לוח קבלן'),
   ManagedScreen('manager', '👔', 'לוח מנהל'),

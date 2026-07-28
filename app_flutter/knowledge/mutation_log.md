@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s4 — מקלדת-פר-מסך (עורך מעורך-המסך) — 2026-07-27
+- **הפונקציות:** `_ScreenKeyboardEditor` · `keyboardLayoutKey` · `ManagedScreen.keyboardTools`/`hasKeyboard`.
+- **תקלה שהוזרקה (mutation-sensitivity):** rootKey `keyboardLayoutKey(id)`→`screen.id` ⇒ עורך-המקלדת כותב לאותו layout כמו הסקציות ⇒ בדיקת slice-4 (`isHidden('kbd:home','מהירים')`) אדומה (נשמר תחת מפתח שגוי).
+- **בטיחות:** מיחזור `_SectionManagerList` (slice-2) · persist דרך slice-1 · **אין שינוי בתת-מערכת-המקלדת** ⇒ אין רגרסיה. תשתית (`kKbGlobal` off ⇒ אין אפקט-חי; באנר-כן).
+- **אימות:** analyze 0 · org_setup_wizard 21/21.
+
 ## #screen-mgmt-s3 — הבית חי על מודל-הסקציות — 2026-07-27
 - **השינוי:** `smart_home` + `home_content_reorder` → `screenSections.visibleIds/orderedIds('home', kHomeSectionIds)` (במקום `homeContentOrderProvider`) + טוגל-הסתר פר-סקציה (`Key('home-hide-<id>')`).
 - **תקלה שהוזרקה (mutation-sensitivity):** `visibleIds`→`orderedIds` ב-`SmartHomeBody` ⇒ סקציה-מוסתרת עדיין מרונדרת ⇒ בדיקת slice-3 (hide נופל מהסדר) אדומה.

@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s4 — מקלדת-פר-מסך נערכת מעורך-המסך — 2026-07-27
+**דירקטיבה · פרוסה-4.** בעורך-המסך (רמה-2) נוסף כפתור **"⌨️ מקלדת"** (`Key('open-screen-keyboard')`, כשל-מסך יש `keyboardTools`) → `_ScreenKeyboardEditor`: סדר+הסתר של אריחי-המקלדת של המסך, על **אותו** מודל-סקציות (rootKey=`kbd:<screen>` · `keyboardLayoutKey`) ואותו `_SectionManagerList` (מיחזור slice-2). `screen_registry`: home קיבל **8 אריחי-מקלדת** (ids==label של `kbHomeNodes`: מחלקות/עץ-חכם/מסלול/מהירים/הזמנות/מאתר/חיבור/מועדפים). **נערך מעורך-המסך — לא מהמקלדת** (כלי לא עורך את עצמו). **תשתית:** נשמר; החלת-הסינון על המקלדת-הצפה מגודרת `kKbGlobal` (כבוי בפריוויו) → אין אפקט-חי עד שהמקלדת-הגלובלית תשוגר (באנר-כן במסך). 21/21 · analyze 0.
+
 ## #screen-mgmt-s3 — הבית חי על מודל-הסקציות (סדר + הסתר) — 2026-07-27
 **דירקטיבה · פרוסה-3 (הזרמה-לחי · "בית קודם").** ה-**בית** (`smart_home_screen` + `home_content_reorder`) הוגר לקרוא את מודל-הסקציות-פר-מסך (slice-1) לסדר **וגם הסתר** — לא עוד `homeContentOrderProvider`. `SmartHomeBody`: `visibleIds('home', kHomeSectionIds).map(HomeSection.values.byName)` (ids==`HomeSection.name`). `home_content_reorder`: reorder דרך המודל + **טוגל הצג/הסתר פר-סקציה** (`Key('home-hide-<id>')`) — עריכה מציגה הכל (עם טוגל), תצוגה מציגה רק visible (תואם-ללייב). "איפוס" → `resetScreen('home')`. **זהה-בייטים:** layout ריק ⇒ `visibleIds`==סדר-ברירת-המחדל, כלום מוסתר. **התוצאה: עורך-הסקציות של הבית באשף (slice-2) עכשיו חי.** `homeContentOrderProvider` נשאר (בדיקות-יחידה t3) — vestigial, יוסר בסוף-ההגירה. 62 בדיקות-רינדור-בית ירוקות (זהה-בייטים) · t3 18/18 (slice-3) · screen_sections 7/7 · analyze 0.
 

@@ -11,7 +11,8 @@ import 'package:buildsmart/screens/studio/panes/find_replace_pane.dart'
     show FindReplacePane;
 import 'package:buildsmart/screens/studio/panes/history_pane.dart'
     show HistoryPane;
-import 'package:buildsmart/config/screen_registry.dart' show kScreensRootKey;
+import 'package:buildsmart/config/screen_registry.dart'
+    show keyboardLayoutKey, kScreensRootKey;
 import 'package:buildsmart/state/org_config_store.dart';
 import 'package:buildsmart/state/screen_sections.dart'
     show screenSectionsProvider;
@@ -425,5 +426,31 @@ void main() {
         ),
         isNot(contains('workPath')),
         reason: 'the hidden section drops from the visible order');
+  });
+
+  // ── screen-mgmt slice-4 — per-screen keyboard, edited from the screen editor ──
+  testWidgets('screen keyboard — the level-2 editor opens the per-screen keyboard '
+      'editor; hiding a tile persists to the kbd layout', (t) async {
+    final c = await _pump(t);
+    await t.ensureVisible(find.byKey(const Key('open-screen-manager')));
+    await t.tap(find.byKey(const Key('open-screen-manager')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('sec-enter-home'))); // → level-2
+    await t.pumpAndSettle();
+    // the keyboard is edited FROM the screen editor (not the keyboard itself).
+    await t.tap(find.byKey(const Key('open-screen-keyboard')));
+    await t.pumpAndSettle();
+    expect(find.textContaining('מקלדת · מסך הבית'), findsOneWidget); // AppBar
+    // hide a keyboard tile (id == its label 'מהירים') → persists to 'kbd:home'.
+    final tile = find.byKey(const Key('sec-show-kbd:home-מהירים'));
+    expect(tile, findsOneWidget);
+    await t.tap(tile);
+    await t.pumpAndSettle();
+    expect(
+      c
+          .read(screenSectionsProvider.notifier)
+          .isHidden(keyboardLayoutKey('home'), 'מהירים'),
+      isTrue,
+    );
   });
 }
