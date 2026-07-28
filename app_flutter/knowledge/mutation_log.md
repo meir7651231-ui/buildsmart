@@ -17,6 +17,11 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## #screen-mgmt-s7 — מקלדת-הבית חיה על פריסת-האשף — 2026-07-28
+- **הפונקציה:** `_applyHomeKbdLayout` (filter+reorder `kbHomeNodes` לפי `visibleIds('kbd:home', labels)`).
+- **תקלה שהוזרקה (mutation-sensitivity):** להסיר את שער `tab == 0` ⇒ הסינון חל על כל הטאבים (gear/dept/store) ⇒ בדיקות-המקלדת הקיימות אדומות; או `visibleIds`→`orderedIds` ⇒ אריח-מוסתר עדיין מוצג.
+- **בטיחות:** tab-0 בלבד · `ref.watch(screenSectionsProvider)` לריאקטיביות · ברירת-מחדל **זהה-בייטים** (79 בדיקות-מקלדת קיימות ירוקות · byte-identity spec §4C נשמר).
+- **אימות:** analyze 0 · kbd_home_layout s7 · floating_card_keyboard + deriver + live_mirror ירוקות.
 ## #screen-mgmt-s6 — הבית: 2 בלוקים-קבועים → סקציות ניתנות-להסתרה — 2026-07-28
 - **השינוי:** `HomeSection` += `installHero`, `favorites`; `smartHomeSectionFor` + `SmartHomeBody.childrenFor` (spread); `screen_registry` home = 7 סקציות.
 - **תקלה שהוזרקה (mutation-sensitivity):** `favorites` → `[_Favorites, SizedBox(space4)]` (ריווח-נגרר) ⇒ שינוי-ריווח מברירת-המחדל (לא-זהה-בייטים); או להשמיט את שער-ה-`compat` מ-installHero ⇒ ה-hero דולף כשהמודול כבוי.

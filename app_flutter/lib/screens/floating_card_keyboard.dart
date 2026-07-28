@@ -53,6 +53,8 @@
 
 import 'package:buildsmart/config/org_config.dart'
     show OrgConfig, featureOn, moduleOn;
+import 'package:buildsmart/config/screen_registry.dart'
+    show keyboardLayoutKey;
 import 'package:buildsmart/data/catalog_source.dart'
     show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart'
@@ -121,6 +123,8 @@ import 'package:buildsmart/state/orders_engine.dart'
     show Order, ordersEngineProvider;
 import 'package:buildsmart/state/org_config_store.dart'
     show orgConfigProvider;
+import 'package:buildsmart/state/screen_sections.dart'
+    show screenSectionsProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/state/store_location.dart'
@@ -254,6 +258,21 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
 
   /// The node-list currently shown (null while the stack is empty → letters).
   List<KbToolNode>? get _currentNodes => _stack.isEmpty ? null : _stack.last;
+
+  /// screen-mgmt s7 — reorder / drop the HOME keyboard tiles per the wizard's
+  /// per-screen keyboard layout (`keyboardLayoutKey('home')` == 'kbd:home' · ids
+  /// == the tile [KbToolNode.label]). Watches [screenSectionsProvider] (called in
+  /// build) so an edit in the wizard rebuilds the keyboard LIVE. Empty layout ⇒
+  /// `visibleIds` == the labels in order ⇒ the same nodes ⇒ byte-identical.
+  List<KbToolNode> _applyHomeKbdLayout(List<KbToolNode> nodes) {
+    ref.watch(screenSectionsProvider);
+    final labels = [for (final n in nodes) n.label];
+    final order = ref
+        .read(screenSectionsProvider.notifier)
+        .visibleIds(keyboardLayoutKey('home'), labels);
+    final byLabel = {for (final n in nodes) n.label: n};
+    return [for (final id in order) if (byLabel[id] != null) byLabel[id]!];
+  }
 
   /// The LABELS of the LIVE-MIRROR tool base currently installed by
   /// [_syncContextToolBase] (null when none is installed). Used to (a) detect when
@@ -1440,7 +1459,14 @@ class _FloatingCardKeyboardState extends ConsumerState<FloatingCardKeyboard>
     // false => tabBase == ctx?.toolBase (byte-identical).
     final routePushed =
         kKbGlobal && (bsNavigatorKey.currentState?.canPop() ?? false);
-    final tabBase = routePushed ? null : ctx?.toolBase;
+    // screen-mgmt s7 — the HOME tool grid (tab 0's ambient base == kbHomeNodes())
+    // honours the wizard's per-screen keyboard layout ('kbd:home' — order + hide).
+    // ONLY tab 0's base is transformed; gear / other tabs / pushed-routes / drills
+    // are untouched. Empty layout ⇒ same tiles, same order ⇒ byte-identical.
+    final rawTabBase = routePushed ? null : ctx?.toolBase;
+    final tabBase = (tab == 0 && rawTabBase != null)
+        ? _applyHomeKbdLayout(rawTabBase)
+        : rawTabBase;
 
     // TOOL-BASE sync (LIVE-MIRROR, plan seam 5) — install the route-stack base (or
     // the deriver's toolBase) as the drill-stack base via a PLAIN in-build field

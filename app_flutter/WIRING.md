@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #screen-mgmt-s7 — עורך-המקלדת נהיה חי (המקלדת האמיתית מכבדת אותו) — 2026-07-28
+**תיקון-פספוס (בקשת-משתמש: "המקלדת בכלל לא נערכת").** s4 שמר את פריסת-המקלדת אבל **לא-חיבר** אותה למקלדת האמיתית. עכשיו: `floating_card_keyboard` — רשת-הבית (tab-0 ambient base == `kbHomeNodes()`, נקודת-חנק יחידה בבנייה `:1443`) מחילה `_applyHomeKbdLayout`: מסננת+מסדרת את האריחים לפי `visibleIds(keyboardLayoutKey('home'), labels)` (ids == `KbToolNode.label`). **רק tab-0** מושפע — gear (⚙️) / טאבים-אחרים / pushed-routes / drills **לא-נגעו** (מיפוי-Explore אימת). `ref.watch(screenSectionsProvider)` ⇒ עריכה באשף **מרעננת את המקלדת מיד**. ברירת-מחדל ⇒ אותם אריחים באותו סדר ⇒ **זהה-בייטים** (79 בדיקות-מקלדת קיימות — כולל byte-identity — ירוקות). `kKbGlobal`+`kKbLiveMirror` **דלוקים** בפריוויו-clean ⇒ **חי**: הסתרה/סידור מ"ניהול מסכים → בית → ⌨️ מקלדת" משנה את המקלדת. s7 test (kbHomeNodes labels · hide-drops · reorder) · analyze 0.
+
 ## #screen-mgmt-s6 — הבית: "תכנון חיבור" + "מועדפים" הפכו סקציות ניתנות-להסתרה — 2026-07-28
 **המשך (בקשת-משתמש — הצילום הראה בלוקים לא-ניתנים-להסתרה).** שני הבלוקים שהיו **קבועים** בתחתית מסך-הבית — **"🔌 תכנון חיבור"** (`_InstallStudioHero` · org-gated `compat`) ו-**"⭐ מועדפים"** (`_Favorites`) — נוספו כ-`HomeSection`ים (enum + `kHomeSectionMeta` + `kDefaultHomeOrder`) ⇒ **ניתנים כעת לסדר + הסתר** מ"ניהול מסכים → בית". `SmartHomeBody` מרנדר את כולם דרך `childrenFor` (spread · שער-`compat` ל-installHero · מועדפים בלי-ריווח-נגרר כי היה אחרון) ⇒ ברירת-מחדל **זהה-בייטים**. `screen_registry`: home = **7 סקציות**. old-model (`homeContentOrder`) + t3 עודכנו לסדר-ברירת-מחדל בן-7. 23/23 wizard (סקציות home חדשות מוצגות) · home-render ירוקות · analyze 0.
 
