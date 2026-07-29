@@ -2,7 +2,6 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/main.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
-import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

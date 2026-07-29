@@ -7,9 +7,6 @@ import 'package:buildsmart/data/related_info.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  LipskeyCatalogProduct bySku(String sku) =>
-      kLipskeyCatalog.firstWhere((p) => p.sku == sku);
-
   group('israeliStandardsFor', () {
     test('drainage products map to ת"י 1205', () {
       // Find any product whose spec is drainage-only.

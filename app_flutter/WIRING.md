@@ -261,3 +261,10 @@ rather than pixel rendering.
   acceptance+5 · compliance+5 · finder+5 · price+5 · variants+10). A spec'd
   connectable PPR fitting now reaches ~95 (was 90); fixture endpoints stay low.
   Guards: card_score_test (raised-bar group) + mutation_log.
+
+## ניקוי קוד מת + אפס אזהרות analyze (v5.56)
+- שום חיווט לא השתנה: כל המחיקות הן הצהרות פרטיות שאינן בשימוש (14: `_MiniPill` ×3,
+  `_VariantSelector`, `_AccRow`, `_selectVariant`, `_sizeTokens`, `_attrEmoji`, `_sizeLabel`,
+  `_firstSizeNum`, `_bySku`, `_byCat`, `_dnTok`, `bySku`), imports/משתנים מתים בטסטים,
+  ואסרטות/טיפוסים מיותרים. אימות: analyze 0/0 · 986 טסטים ירוקים · build web.
+- שער חדש: `scripts/verify-flutter.sh` (ריפו-שורש) אוכף מעתה 0 שגיאות + 0 אזהרות לפני כל commit.

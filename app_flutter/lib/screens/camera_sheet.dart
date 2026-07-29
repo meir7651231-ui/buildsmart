@@ -5,7 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 void openCameraSheet(BuildContext context) {
   Navigator.of(context).push(
-    MaterialPageRoute(
+    MaterialPageRoute<void>(
       builder: (_) => const CameraScreen(),
       fullscreenDialog: true,
     ),

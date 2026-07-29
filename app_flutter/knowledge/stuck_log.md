@@ -995,3 +995,17 @@ stuck_log ל"בעיה" שלא הייתה (זה refinement מודרך-פידבק,
 ### ג — כלל המניעה
 ANTIPATTERN: openSmartProductSheet.*group.*header$
 RULE: פעולה פר-פריט (פתיחת כרטיס) שייכת לפריט עצמו, לא לכותרת-קבוצה שפותחת אחד-לכולם. (תצפית נוספת למתחזק: IS_RETRY על סט-שמות-קבצים בלבד מתריע-יתר לפיצ׳ר חדש.)
+
+## 2026-07-29 · commit נחסם פעמיים — bookkeeping הפרוטוקול לא צורף מראש (מקבץ)
+### א — הבעיה
+commit ניקוי-אזהרות (24 קבצי dart) נחסם: שערים 24 (WIRING) + 44 (mutation_log) + 59
+(version bump). בניסיון השני נחסם שוב — שער 102 (רשומה זו). כל חסימה = ריצת שערים
+מלאה של ~10 דק' (analyze+986 טסטים+build), כלומר bookkeeping חסר עולה 10 דקות לגילוי.
+### ב — הפתרון
+צורפו בבת אחת: v5.56 ב-home_shell+STATUS · סעיף WIRING.md · רשומת mutation_log ·
+session_plan עדכני · רשומה זו. לקח מבני: לפני כל commit שנוגע ב-app_flutter/lib —
+לעבור על חמישיית ה-bookkeeping *לפני* שמריצים את השרשרת, כי השערים הזולים רצים
+אחרי היקרים ולא לפניהם.
+### ג — כלל המניעה
+ANTIPATTERN: git add app_flutter/lib[^&]*&& git commit
+RULE: נגעת ב-app_flutter/lib? צרף באותו commit: bump גרסה (home_shell+STATUS) + WIRING.md + mutation_log + session_plan + (אם retry אחרי כשל 31-45) stuck_log — ורק אז הרץ את השרשרת.

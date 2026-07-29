@@ -259,10 +259,6 @@ List<TestResult> testSettings(WidgetRef ref) {
       run: () {
         final checks = <TestCheck>[];
         final current = ref.read(appSettingsProvider);
-        checks.add(TestCheck(
-          name: 'appSettingsProvider מחזיר AppSettings',
-          pass: current is AppSettings,
-        ));
         // Values are within valid enum range (basic sanity)
         checks.add(TestCheck(
           name: 'theme הוא ערך חוקי',

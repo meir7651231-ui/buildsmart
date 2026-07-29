@@ -2544,30 +2544,6 @@ class _ServiceSheet extends StatelessWidget {
   }
 }
 
-// ─── mini pill ───────────────────────────────────────────────────────────────
-
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-        height: 36,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        alignment: Alignment.center,
-        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
-      ),
-    );
-  }
-}
-
 // ─── orders data ─────────────────────────────────────────────────────────────
 
 typedef _Order = ({

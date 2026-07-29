@@ -45,19 +45,6 @@ class _AuditScreenState extends State<AuditScreen> {
   final _results = <_ScenarioResult>[];
   bool _running = false;
 
-  LipskeyCatalogProduct? _bySku(String sku) {
-    final hits = kLipskeyCatalog.where((p) => p.sku == sku);
-    return hits.isEmpty ? null : hits.first;
-  }
-
-  LipskeyCatalogProduct? _byCat(String cat, {String? type}) {
-    final hits = kLipskeyCatalog.where((p) =>
-        p.categoryHe == cat &&
-        (type == null || p.productType == type) &&
-        !p.sku.startsWith('HW-'));
-    return hits.isEmpty ? null : hits.first;
-  }
-
   /// Pool of catalog products that have a verified spec — these are the
   /// only anchors the engine can chain reliably. Built once on first run.
   late final List<LipskeyCatalogProduct> _pool = kLipskeyCatalog
@@ -132,7 +119,7 @@ class _AuditScreenState extends State<AuditScreen> {
         items: plan.items,
       ));
       setState(() {}); // progressive update — user sees rows appear live
-      await Future.delayed(const Duration(milliseconds: 80));
+      await Future<void>.delayed(const Duration(milliseconds: 80));
     }
 
     setState(() => _running = false);

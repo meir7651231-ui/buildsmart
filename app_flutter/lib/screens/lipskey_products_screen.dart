@@ -1469,20 +1469,6 @@ AttrKind? _attrKindFor(String word) {
   return null;
 }
 
-/// Emoji marker per attribute kind (shown on the chip).
-String _attrEmoji(AttrKind k) => switch (k) {
-      AttrKind.size => '📐',
-      AttrKind.color => '🎨',
-      AttrKind.colorMod => '✨',
-      AttrKind.model => '🏷',
-      AttrKind.subtype => '📋',
-      AttrKind.type => '🔧',
-      AttrKind.material => '🧪',
-      AttrKind.pressure => '🔵',
-      AttrKind.sdr => '📊',
-      AttrKind.maker => '🏭',
-    };
-
 /// Drop every word that belongs to [kind] from a name. What remains is the
 /// "frame" — the part of the name that should match between siblings.
 /// Uses per-kind sub-word sets so that modifier words like "מוברש" (part of
@@ -1920,8 +1906,8 @@ class _NameWords extends StatelessWidget {
         onTap: onAttrTap,
         isOpen: openKind == AttrKind.maker,
       );
-      if (afterSubtypeIdx != null && afterSubtypeIdx! <= chips.length) {
-        chips.insert(afterSubtypeIdx!, makerChip);
+      if (afterSubtypeIdx != null && afterSubtypeIdx <= chips.length) {
+        chips.insert(afterSubtypeIdx, makerChip);
       } else {
         chips.add(makerChip);
       }
@@ -2211,22 +2197,5 @@ List<LipskeyCatalogProduct> findSizeSiblings(LipskeyCatalogProduct p) {
   return kLipskeyCatalog
       .where((q) => q.categoryHe == p.categoryHe && _stripSizeTokens(q.nameHe) == base)
       .toList();
-}
-
-/// Pick the first size token from a product name as a short label.
-String _sizeLabel(LipskeyCatalogProduct p) {
-  final sizeWords = p.nameHe
-      .split(RegExp(r'\s+'))
-      .where(isSizeToken)
-      .toList();
-  return sizeWords.isEmpty ? p.sku : sizeWords.join(' ');
-}
-
-/// First numeric value in a size label (e.g. "1/2\"" → 1, "DN50" → 50). Used
-/// to sort size siblings in an intuitive order.
-double _firstSizeNum(String s) {
-  final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(s);
-  if (m == null) return 0;
-  return double.tryParse(m.group(0)!) ?? 0;
 }
 

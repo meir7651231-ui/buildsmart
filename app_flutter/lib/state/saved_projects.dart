@@ -44,9 +44,9 @@ class SavedProject {
         id: j['id'] as String,
         name: j['name'] as String,
         anchorSkus: (j['anchorSkus'] as List).cast<String>(),
-        branchSkus: ((j['branchSkus'] ?? const []) as List).cast<String>(),
+        branchSkus: ((j['branchSkus'] ?? const <String>[]) as List).cast<String>(),
         tempC: j['tempC'] as int,
-        accessories: ((j['accessories'] ?? const []) as List)
+        accessories: ((j['accessories'] ?? const <String>[]) as List)
             .cast<String>()
             .toSet(),
         savedAt: DateTime.parse(j['savedAt'] as String),

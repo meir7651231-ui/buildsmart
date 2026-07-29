@@ -228,8 +228,6 @@ class LipskeyCatalogProduct {
   }
 }
 
-final _dnTok = RegExp(r'DN\s?(\d+)|(\d+)/(\d+)|(\d+)["׳״]|\b(32|40|50|60|75|90|110|130|160|200)\b');
-
 /// Normalise unicode inch fractions so the size engine recognises them
 /// (צעד 22): 1¼ → 1.25 · 1½ → 1.5 · 2½ → 2.5 · ¾ → 0.75 ...
 String _expandInchFractions(String w) => w

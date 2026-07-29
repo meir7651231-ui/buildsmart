@@ -1,7 +1,6 @@
 // Regression tests for zone-tagging (ב) and TMTV auto-per-branch (ג).
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
-import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,9 +12,6 @@ void main() {
     // trunk: ball-inlet 1" → manifold-4 (DN20 Cu inlet, 4× ½" BSP-F outlets)
     final inlet  = _find('HW-BALL-INLET-1');
     final manif4 = _find('HW-MANIFOLD-4');
-    // branch targets (½" BSP-Male faucets)
-    final faucet1 = _find('779096G');  // Kaiser kitchen faucet ½" BSP-M
-    final faucet2 = _find('77777316'); // ball valve 2" — find a ½" one
     // use two verified ½" ball valves as branch targets
     final bv1 = _find('HW-BALL-1');
     final bv2 = _find('HW-BALL-15');

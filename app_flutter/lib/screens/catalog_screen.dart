@@ -49,7 +49,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Opens the Install Studio as an immersive full-screen route (above the shell).
 void _openStudio(BuildContext context) {
   Navigator.of(context, rootNavigator: true).push(
-    MaterialPageRoute(builder: (_) => const InstallStudioScreen()),
+    MaterialPageRoute<void>(builder: (_) => const InstallStudioScreen()),
   );
 }
 

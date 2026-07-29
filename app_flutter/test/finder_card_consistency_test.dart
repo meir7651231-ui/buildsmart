@@ -1,4 +1,3 @@
-import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';

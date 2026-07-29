@@ -42,7 +42,7 @@ void main() {
         final cur = sp.brands[i];
         expect(cur.price, isNotNull, reason: '${sp.key}/${cur.name}');
         expect(alt.price, isNotNull);
-        expect(alt.price! < cur.price!, isTrue,
+        expect(alt.price < cur.price!, isTrue,
             reason: 'alt ${alt.price} not strictly < cur ${cur.price}');
       }
     }
