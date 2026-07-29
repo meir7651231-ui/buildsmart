@@ -31,7 +31,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.0'
+          # מקור האמת: קובץ FLUTTER_VERSION בשורש הריפו — לעדכן יחד!
+          flutter-version: '3.29.3'
           channel: stable
           cache: true
 

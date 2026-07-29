@@ -2,7 +2,8 @@
 # Vercel build script for the Flutter web app (app_flutter/).
 set -euo pipefail
 
-FLUTTER_VERSION="3.44.0"
+# מקור האמת לגרסה: קובץ FLUTTER_VERSION בשורש הריפו (איחוד 2026-07-29; היה 3.44.0)
+FLUTTER_VERSION="$(tr -d '[:space:]' < "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/FLUTTER_VERSION")"
 FLUTTER_HOME="$HOME/flutter"
 FLUTTER_CDN="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
 
