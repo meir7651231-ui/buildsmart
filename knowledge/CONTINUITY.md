@@ -1,7 +1,8 @@
 # CONTINUITY — חבילת-מסירה לסשן/חשבון חדש (BuildSmart)
 
-> מטרה: סשן/חשבון Claude חדש קורא את זה וממשיך **בלי לאבד הקשר**. עודכן: 2026-06-09.
+> מטרה: סשן/חשבון Claude חדש קורא את זה וממשיך **בלי לאבד הקשר**. עודכן: 2026-07-29 (רענון-אימות; קודם 2026-06-09).
 > **קודם כל:** ודא גישה ל-repo `meir7651231-ui/buildsmart`, ואז קרא את `knowledge/00-START-HERE.md` + המסמך הזה.
+> ⭐ **אימות-מול-קוד 2026-07-29:** רוב מה שהמסמכים סימנו "פתוח" כבר בוצע בקוד (whats-happening `v7.01`). הפער היה מסמכים-מיושנים, לא עבודה. **מקור-האמת לעבודה-הפתוחה: `knowledge/VERIFIED-OPEN-WORK-2026-07-29.md`** (5 אימותים מול הקוד, evidence file:line).
 
 ## 👤 מי אתה (התפקיד)
 סוכן-ידע (librarian) של BuildSmart. כותב/מארגן ידע ב-`knowledge/`. **לא נוגע בקוד-האפליקציה** (רק קבצי `knowledge/`). מאמת מול הקוד/הבייטים — **לא ממציא**. כותב/דוחף **רק** ל-`claude/nice-volta-BSbVm`. commit author = `Claude <noreply@anthropic.com>`. **אין פרוטוקול-R.**
@@ -12,15 +13,15 @@
 - **ענף-קוד:** `claude/whats-happening-LyY9G` ← הצי בונה כאן
 - הצי קורא SSOT מענף-הידע: `git show origin/claude/nice-volta-BSbVm:knowledge/<file>`
 
-## ✅ מה כבר חי (הושג — 06-09)
+## ✅ מה כבר חי (מאומת בקוד 2026-07-29)
 - **אפליקציה חיה:** `https://buildsmart-il.com` (HTTPS · PWA) + `https://buildsmart-b0b78.web.app`
-- **deploy אוטומטי:** `firebase-hosting.yml` (ענף whats-happening · commit `db920f2`) — push→live תוך ~2-3 דק'
-- **Firebase מוקם:** project `buildsmart-b0b78` · Auth (Phone+Email) · Firestore (me-west1/Tel-Aviv · production) · Web-app רשום
+- **deploy אוטומטי:** `firebase-hosting.yml` (ענף whats-happening) — push→live תוך ~2-3 דק'
+- **Firebase מוקם:** project `buildsmart-b0b78` · Auth (Phone+**Email+Google** — מאומת ב-`auth_state.dart`) · Firestore (me-west1/Tel-Aviv · production) · Web-app רשום
+- **קוד v7.01:** wizard=studio (s0–s11), ניהול-מסכים, מנוע-הזמנות, מנהל (M1–M5), personas, TASKS-to-full (B0/T1–T7) — **הכול בנוי ונבדק**. פירוט מאומת: `VERIFIED-OPEN-WORK-2026-07-29.md`.
 
-## 🔥 בתהליך — Backend (השרת)
-- הצי (**9×9 · LAW #0**) בונה את חיבור-השרת לפי `knowledge/SERVER-KICKOFF.md`.
-- **נמצא ב-שלב A** (S0.2 `flutterfire configure` — משתמש ב-`knowledge/firebase-web-config.md`).
-- מסלול: **A** (SDK) → **B** (auth) + **C** (6 repos מקבילי) + **E** → **D** (Security Rules) **לפני launch**.
+## ✅ Backend — בנוי מקצה-לקצה (S0–S9 · מאומת 2026-07-29)
+- **לא "שלב A".** כל S0–S9 מיושמים, מחווטים, נבדקי-emulator ופרוסים: `firebase_options.dart`, 10 repos `_firebase` (מתג `USE_FIREBASE_BACKEND`, ברירת-מחדל OFF=demo byte-identical), Auth מלא, `firestore.rules` (949 שורות · ~30 collections · `rules_test/`), Cloud Functions (`functions/`: setRole/deleteAccount/advanceOrderStage/computeCredit/…), FCM (`push_state.dart`+`functions/src/push.ts`), R2 (`functions/src/r2.ts`).
+- **מה שנותר = הפעלה בלבד (ops/console, לא קוד):** הדלקת הדגל `USE_FIREBASE_BACKEND=true` לפרוד · Blaze billing (מכסת-SMS) · App Check בקונסולה (F1) · rules deploy.
 - מנגנון: drop-in (`_local`דמו → `_firebase`אמיתי) דרך מתג — הדרגתי, הפיך, UI ללא-שינוי.
 
 ## 🔑 עובדות-מפתח
@@ -31,11 +32,16 @@
   - `buildsmart-il.com` — Cloudflare (registrar+DNS) → Firebase Hosting (A `199.36.158.100` **DNS-only** + TXT `hosting-site=buildsmart-b0b78`). **חי.**
   - `בניהחכמה.ישראל` — LiveDNS · `serverHold` · **נדחה** (לא לשלם ₪170; הפניה חינמית דרך Cloudflare בהמשך)
 
-## 🗺️ מה נשאר
-1. **Backend** (בתהליך · ~2-3 שבועות)
-2. **חנויות** — Apple ($99/שנה · ~שבוע לפני) · Google ($25 + 12-בודקים×14-יום · ~3 שבועות לפני). **לחכות עד שהשרת מוכן.**
-3. **דומיין עברי** (הפניה חינמית · בהמשך)
-4. **פוליש** (P-1 צבעים · P-5 ניקוי)
+## 🗺️ מה נשאר (מאומת מול קוד 2026-07-29 — ראה `VERIFIED-OPEN-WORK-2026-07-29.md`)
+**עבודת-קוד אמיתית שנותרה:**
+1. **שילוב-מאור — השארית (~40%)** = עיקר העבודה הפתוחה. פתוח: `#2` חיבור workflow_engine (kernel מוכן, זול) · `#7` הארת JourneyTimeline (בנוי, כבוי מאחורי `kIntelLive`) · `#13` מספור-מסמכים-רץ · `#8/#9/#11/#14` צי/משאבים/חזרתיות/דוח-יומי · הקשחות `C3` (injection-guard לייצוא CSV) `C4` (migrate+quarantine) `C5` (cloud-merge). מנועי-מאור-חדשים (timer/cashbox/bodymap/doncal) = additive עתידי.
+2. **שער אנטי-כפילות מערכתי** (`app_flutter/knowledge/TODO-dedup-gate.md`) — דרישת-בעלים; המקרים הנקודתיים תוקנו, הגייט האוטומטי (leaf→opener) עדיין לא מומש.
+3. **fake-data-sweep** — אתר בודד: `store_screen.dart:1093` pull-to-refresh no-op (גבולי, אין דאטה מזויפת מאחוריו).
+
+**Ops/השקה (לא קוד):**
+4. **Backend go-live** — הדלקת `USE_FIREBASE_BACKEND` · Blaze billing · App Check console.
+5. **חנויות** — Apple ($99/שנה · ~שבוע לפני) · Google ($25 + 12-בודקים×14-יום · ~3 שבועות). לחכות עד ה-go-live.
+6. **דומיין עברי** (הפניה חינמית · בהמשך) · **פוליש** (P-1 צבעים · P-5 ניקוי).
 
 ## 📚 מסמכי-מפתח (סדר-קריאה)
 1. `00-START-HERE.md` — נקודת-כניסה · מספור · גישה
@@ -61,9 +67,11 @@
 ## 🚀 Prompt-מסירה לסשן החדש (העתק)
 ```
 אתה סוכן-הידע של BuildSmart. ודא גישה ל-repo meir7651231-ui/buildsmart,
-ואז קרא: knowledge/CONTINUITY.md + knowledge/00-START-HERE.md (ענף claude/nice-volta-BSbVm).
-זה ייתן לך את כל ההקשר: מה חי (buildsmart-il.com + Firebase), מה בתהליך
-(הצי בונה Backend לפי SERVER-KICKOFF, שלב A), ומה נשאר.
-כותב ידע רק ל-nice-volta · לא נוגע בקוד · לא ממציא · אין פרוטוקול-R.
-המשך מאיפה שעצרנו.
+ואז קרא (ענף claude/nice-volta-BSbVm): knowledge/CONTINUITY.md +
+knowledge/VERIFIED-OPEN-WORK-2026-07-29.md + knowledge/00-START-HERE.md.
+זה ייתן לך את כל ההקשר: מה חי (buildsmart-il.com + Firebase + קוד v7.01),
+מה בנוי-ומאומת (Backend S0-S9, wizard=studio, מנהל, כל ה-tracks), ומה
+באמת נשאר (שילוב-מאור ~40%, שער-dedup, pull-to-refresh, ו-ops/השקה).
+כותב ידע רק ל-nice-volta · לא נוגע בקוד · מאמת מול הקוד לא ממציא · אין פרוטוקול-R.
+לפני שאתה מסמן משהו "פתוח" — אמת בקוד (git show origin/claude/whats-happening-LyY9G:<path>).
 ```
