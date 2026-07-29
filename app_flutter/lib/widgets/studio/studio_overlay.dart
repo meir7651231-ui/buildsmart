@@ -66,16 +66,17 @@ class StudioOverlay extends ConsumerWidget {
     final navOffset = routePushed ? 0.0 : _kHomeNavHeight;
 
     // Same bottom-END corner as the cart-FAB (Scaffold endFloat → bottom-LEFT under
-    // RTL), lifted one FAB-height above it (16 margin + 56 fab + 12 gap) so it reads
-    // as "above the cart". Only the ✎ is hit-testable; the Align's empty area is
-    // click-through to the screen below.
+    // RTL), lifted clear ABOVE it: 16 (cart-FAB bottom margin) + 56 (cart-FAB) + 28
+    // gap. The 28 (not 12) budgets for the cart's count-badge, which overhangs ~10px
+    // above the FAB (Positioned top:-10) — a 12px gap left only ~2px above the badge.
+    // Only the ✎ is hit-testable; the Align's empty area is click-through below.
     return Align(
       alignment: AlignmentDirectional.bottomEnd,
       child: SafeArea(
         child: Padding(
           padding: EdgeInsetsDirectional.only(
             end: 16,
-            bottom: navOffset + 16 + 56 + 12,
+            bottom: navOffset + 16 + 56 + 28,
           ),
           child: Material(
             color: BsTokens.brand,

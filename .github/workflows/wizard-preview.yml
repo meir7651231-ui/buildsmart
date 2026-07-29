@@ -16,10 +16,11 @@
 # never trapped in edit-mode. The LIVE app (buildsmart, no STUDIO) tree-shakes
 # all of that out and keeps the un-spoofable owner gate byte-identical.
 #
-# rev: sm-s11 — rebuild for screen-management s0–s11: boards live, keyboard editor,
+# rev: sm-s11b — rebuild for screen-management s0–s11: boards live, keyboard editor,
 # ✎ per-item rename, 🕸️ מאתר-על open on home+keyboard, AND the edit-trigger un-freeze:
 # LONG-PRESS the global keyboard FAB → live edit-mode, a ✎ lights above the cart-FAB
 # (no banner). Owner-only (#84) + kStudioFlag-gated ⇒ production/non-owner byte-identical.
+# s11b: nudged the ✎ gap 12→28px so it clears the cart's count-badge (was ~2px).
 #
 # Deploys to the SEPARATE `wizard` Firebase Hosting channel — the live site is
 # untouched. Prints the live link in the run summary.
