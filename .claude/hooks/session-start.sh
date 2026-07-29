@@ -17,11 +17,13 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
+# ─── אתחול סביבה מלא: מוריד Flutter אם חסר (קונטיינר טרי!) + תלויות שתי האפליקציות ───
+# תיקון אודיט 2026-07-29: הקונטיינר זמני — "/home/user/flutter כבר קיים" אינו נכון בסשן טרי.
+bash "$REPO/scripts/bootstrap-env.sh"
+
 export PATH="/home/user/flutter/bin:$PATH"
 
-# ─── תלויות ───
 cd "$REPO/app_flutter"
-flutter pub get --no-example 2>&1 | tail -3
 
 # ─── סיכום פרוטוקול ───
 echo ""

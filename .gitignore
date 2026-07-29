@@ -15,8 +15,9 @@ scripts/catalog_kpi.json
 scripts/fix_log.csv
 scripts/suspects.csv
 node_modules/
-package.json
-package-lock.json
-*.mjs
-calibrate.mjs
+# מעוגן לשורש בלבד — בלי העיגון כל package.json/*.mjs חדש בכל תת-תיקייה נבלע בשקט (מוקש אודיט 2026-07-29)
+/package.json
+/package-lock.json
+/*.mjs
+/calibrate.mjs
 screenshots/

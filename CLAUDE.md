@@ -1,8 +1,15 @@
 # BuildSmart — הוראות לכל סשן
 
 ## ענף עבודה
-`claude/whats-happening-LyY9G` — כל עבודה על ענף זה.
+`claude/architect-minimum-100-percent-ctk3w5` — כל עבודה על ענף זה.
 אין push ל-main ללא אישור מפורש מהמשתמש.
+(הענף הקודם `claude/whats-happening-LyY9G` מוזג ונמחק; אזכורים שלו בקבצי CI הם היסטוריה.)
+
+## דרך העבודה — 100% זה המינימום
+- כל commit עובר שער מלא בפקודה אחת: `bash scripts/verify-flutter.sh` (Flutter) או `bash scripts/verify-preact.sh` (Preact).
+- הסטנדרט: **0 שגיאות analyze · 0 אזהרות analyze · כל הטסטים ירוקים · build עובר · smoke 21/21**.
+- סביבה טרייה מתאתחלת לבד: `.claude/hooks/session-start.sh` ← `scripts/bootstrap-env.sh` (מוריד Flutter לפי `FLUTTER_VERSION` אם חסר, מתקין תלויות). אין להניח ש-Flutter "כבר קיים".
+- גרסת Flutter מוצמדת בקובץ `FLUTTER_VERSION` (3.29.3, Dart 3.7.2). ⚠️ חלק מקבצי ה-CI עדיין מצמידים 3.29.0/3.44.0 — איחוד שלהם דורש החלטת משתמש (משפיע על deploy).
 
 ---
 
@@ -20,13 +27,12 @@
 
 **Flutter dev loop:**
 ```bash
-export PATH="/home/user/flutter/bin:$PATH"   # already extracted to /home/user/flutter
-cd app_flutter
-flutter pub get
-flutter analyze              # clean
-flutter test                 # 10/10 PASS
-flutter build web --release  # 2.0 MB main.dart.js
-flutter run -d chrome        # dev
+bash scripts/bootstrap-env.sh          # מתקין Flutter אם חסר + תלויות (רץ אוטומטית ב-session start)
+export PATH="/home/user/flutter/bin:$PATH"
+bash scripts/verify-flutter.sh         # השער המלא: analyze (0/0) + test + build web
+bash scripts/verify-flutter.sh --fast  # analyze + test בלי build (ללולאת פיתוח)
+# baseline מאומת 2026-07-29: analyze 0 שגיאות/0 אזהרות · 986 טסטים ב-133 קבצים · main.dart.js ‎5.4MB
+cd app_flutter && flutter run -d chrome   # dev
 ```
 
 ---
@@ -36,7 +42,7 @@ flutter run -d chrome        # dev
 קרא בסדר הזה לפני שאתה נוגע בקוד:
 1. `app/knowledge/wip-menu-wiring.md` — מה בנוי
 3. `app/knowledge/inspector/checklist.md` — Inspector protocol
-4. הדוח האחרון: `app/knowledge/inspections/INSP-0040-*.md`
+4. הדוח האחרון: `app/knowledge/inspections/INSP-0044-*.md` (הארכיון INSP-0001→0044, ישן = immutable)
 
 **כל commit צריך:** typecheck + build + Inspector subagent (לפני markdown) + smoke 21/21.
 
@@ -50,7 +56,7 @@ flutter run -d chrome        # dev
 
 ## אם הגעת לכאן למשימה אחרת (לא BuildSmart)
 
-עבודת תפריט-וחיווט BuildSmart **בעיצומה** על ענף `claude/whats-happening-LyY9G`.
+עבודת תפריט-וחיווט BuildSmart הושלמה ומוזגה (הארכיון: INSP-0001→0044). הקבצים הבאים עדיין רגישים:
 
 **אל תיגע בקבצים האלה אלא אם התבקשת מפורשות:**
 - `app/src/components/menu/`
@@ -73,9 +79,10 @@ flutter run -d chrome        # dev
 > `app_flutter/knowledge/port/` (proto/ + preact/). ראה `app_flutter/knowledge/README.md`.
 
 ```bash
-cd app && npx tsc -b --noEmit       # typecheck
-cd app && npm run build              # build
-node app/smoke-settings.mjs          # 21/21 PASS חובה
+bash scripts/verify-preact.sh        # שער אחד: typecheck + build + הגשה על :8123 + smoke 21/21
+# (ידני: cd app && npx tsc -b --noEmit && npm run build ואז
+#  npx http-server app/dist -p 8123 -s &  ←  ה-smoke לא מרים שרת בעצמו!
+#  node app/smoke-settings.mjs)
 # spawn Explore subagent עם prompt פתוח (לא מצדיק)
 # המתן ל-GO לפני שכותבים markdown
 # כתוב דוח ל-app/knowledge/inspections/INSP-NNNN-*.md

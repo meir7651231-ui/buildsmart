@@ -4,6 +4,17 @@
 
 אפליקציית קטלוג אינסטלציה (Flutter) עם מנוע תאימות "מה מתחבר למה".
 
+## מבנה הריפו
+| נתיב | מה זה |
+|---|---|
+| `app_flutter/` | **הפרויקט הפעיל** — Flutter (מוצמד ב-`FLUTTER_VERSION`). שער: `bash scripts/verify-flutter.sh` |
+| `app/` | Preact PWA — ה-live בפרודקשן (GitHub Pages), תיקוני באגים בלבד. שער: `bash scripts/verify-preact.sh` |
+| `index.html` + `manifest.json` + `service-worker.js` (שורש) | **אב-הטיפוס הקפוא** (22K שורות) — ה-spec שממנו עושים port. לא עורכים. |
+| `scripts/` | כלי קטלוג (python) + `bootstrap-env.sh` (אתחול סביבה) + סקריפטי verify |
+| `app_flutter/knowledge/` · `app/knowledge/` | פרוטוקולי העבודה של כל אפליקציה |
+
+אתחול סביבה טרייה: `bash scripts/bootstrap-env.sh` (רץ אוטומטית בסשני Claude Code web).
+
 ## QA הקטלוג
 מנוע אכיפה רב-פעמי מבטיח אפס שגיאות בנתונים (גם ב-80,000 מוצרים):
 
