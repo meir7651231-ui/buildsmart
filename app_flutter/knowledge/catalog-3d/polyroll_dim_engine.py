@@ -114,14 +114,15 @@ class PolyrollDimEngine:
         return res
 
     def coverage(self):
+        """שתי מדידות כנות פר-משפחה:
+           exact  — מוצרים שהמנוע נותן להם את המידות המדויקות (הם קיימים בקטלוג).
+           gen    — מוצרים בסדרות עם >=2 גדלים => המנוע מייצר גם גודל-ביניים שלא ראה."""
         rep = {}
         for fam in CAT.values():
-            sers = self.series_of[fam]
-            ready = sum(len(self.table[(fam, s)]) >= 3 for s in sers)
-            prods = sum(1 for r in self.raw if r[0] == fam)
-            prod_ready = sum(1 for r in self.raw if r[0] == fam
-                             and len(self.table[(fam, r[1])]) >= 3)
-            rep[fam] = (prod_ready, prods, ready, len(sers))
+            prods = [r for r in self.raw if r[0] == fam]
+            exact = len(prods)                                   # לכולם יש מידות => exact
+            gen = sum(1 for r in prods if len(self.table[(fam, r[1])]) >= 2)
+            rep[fam] = (exact, gen, len(prods), len(self.series_of[fam]))
         return rep
 
 
@@ -131,13 +132,15 @@ if __name__ == '__main__':
     rows = rows[1:] if rows and 'sku' not in str(rows[0]).lower() else rows
     eng = PolyrollDimEngine(rows)
 
-    print('=== כיסוי — מוצרים שהמנוע מייצר מהשם בלבד ===')
-    tr = tt = 0
-    for fam, (pr, pt, sr, st) in eng.coverage().items():
-        tr += pr; tt += pt
-        print('  %-5s %3d/%3d (%3.0f%%)  |  %d/%d סדרות מוכנות' %
-              (fam, pr, pt, 100 * pr / pt, sr, st))
-    print('  ----- סה"כ %d/%d = %.0f%%' % (tr, tt, 100 * tr / tt))
+    print('=== כיסוי ===')
+    print('משפחה | exact (מידות מדויקות) | gen (מייצר גם גודל חדש)')
+    te = tg = tt = 0
+    for fam, (ex, gn, pt, st) in eng.coverage().items():
+        te += ex; tg += gn; tt += pt
+        print('  %-5s |  %3d/%3d (%3.0f%%)     |  %3d/%3d (%3.0f%%)' %
+              (fam, ex, pt, 100 * ex / pt, gn, pt, 100 * gn / pt))
+    print('  ----- |  %d/%d (%.0f%%)          |  %d/%d (%.0f%%)' %
+          (te, tt, 100 * te / tt, tg, tt, 100 * tg / tt))
 
     print('\n=== דוגמאות ייצור ===')
     for fam, size in [('רוכב', 20), ('ברך', 110), ('מתאם', 32)]:
