@@ -28,21 +28,46 @@
  .ctrl button{font-family:var(--fb);font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 12px}
  footer{max-width:680px;font-size:11px;color:var(--soft);text-align:center;line-height:1.6}
  :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+ .modebar{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+ .modebar button{flex:1;font-family:var(--fb);font-size:13px;cursor:pointer;border:0;background:transparent;color:var(--soft);border-radius:9px;padding:9px}
+ .modebar button.on{background:var(--accent);color:#fff;font-weight:700}
+ #add{font-family:var(--fb);font-size:13px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;padding:9px 13px;font-weight:700;min-height:42px}
+ .chain{display:flex;gap:6px;flex-wrap:wrap;min-height:22px;align-items:center}
+ .chain .empty{color:var(--soft);font-size:12px}
+ .chip{font-family:var(--fb);font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 6px 5px 11px;display:flex;align-items:center;gap:7px}
+ .chip .n{font-family:var(--fd);color:var(--accent);font-weight:700}
+ .chip button{border:0;background:var(--line);color:var(--ink);border-radius:50%;width:18px;height:18px;line-height:1;cursor:pointer;font-size:12px;padding:0}
+ .chip .arrow{color:var(--soft)}
+ .plan{display:flex;gap:9px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+ .plan button{font-family:var(--fb);font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 11px}
+ .plan label{font-size:12px;color:var(--soft);display:flex;align-items:center;gap:8px;flex:1;min-width:170px}
+ .plan input[type=range]{flex:1;accent-color:var(--accent);min-width:90px}
 </style>
 <div class="wrap">
  <div><span class="eyebrow">מנוע-חוקים · ‏0 נתונים</span>
   <h1>בוחרים אביזר — המנוע מחשב ומחבר</h1>
-  <p class="sub">אין שליפה מקטלוג. המידות מחושבות מחוקים, ה-3D נבנה מהן, והצינור נכנס לשקע.</p></div>
+  <p class="sub">אין שליפה מקטלוג. <b>אביזר בודד</b> = 3D מסתובב + מידות. <b>תכנון חיבור</b> = בונים רצף, מחברים/מנתקים, ופיצוץ-מפרקים.</p></div>
+ <div class="modebar">
+  <button id="mSingle" class="on" data-mode="single">🔩 אביזר בודד</button>
+  <button id="mPlan" data-mode="plan">🔗 תכנון חיבור</button>
+ </div>
  <div class="bar">
   <select id="fam"></select>
   <select id="size"></select>
+  <button id="add" hidden>➕ חבר לרצף</button>
   <span class="badge">מחושב מחוקים ✓</span>
  </div>
+ <div class="chain" id="chain" hidden></div>
  <div class="stage"><canvas id="c" aria-label="אביזר תלת־ממדי מחושב"></canvas></div>
+ <div class="plan" id="planctrl" hidden>
+  <button id="disc">✂️ נתק אחרון</button>
+  <button id="clear">🗑 נקה</button>
+  <label>💥 פיצוץ <input type="range" id="boom" min="0" max="100" value="0"><span id="boomv" style="font-family:var(--fd);color:var(--accent);min-width:32px">0%</span></label>
+ </div>
  <div class="readout" id="readout"></div>
  <div class="conn" id="conn"></div>
  <div class="ctrl"><button id="reset">איפוס מבט</button><span style="font-size:11px;color:var(--soft);align-self:center">גרור לסובב · גלגלת לזום</span></div>
- <footer>הגאומטריה נגזרת מחוקי-התכן בלבד (‏OD·SDR·1.33·עומק+z). דיוק ~1 מ"מ — בלתי-נראה ברינדור. הצינור והאביזר מתחברים כי שניהם נגזרים מאותו OD.</footer>
+ <footer>הגאומטריה נגזרת מחוקי-התכן בלבד (‏OD·SDR·1.33·עומק+z). דיוק ~1 מ"מ — בלתי-נראה ברינדור. במצב <b>תכנון חיבור</b>: כל אביזר מוסיף מפרק, הצינורות מחושבים, וברך מנתבת את המסלול ‎90°/45°. הכל מאותו מנוע — 0 נתונים.</footer>
 </div>
 <script>
 "use strict";
@@ -190,7 +215,7 @@ function Mesh(g){const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl
  const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,g.N,gl.STATIC_DRAW);
  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,g.I,gl.STATIC_DRAW);return {pb,nb,ib,n:g.I.length};}
 let draws=[],TGT=[0,0,0],DIST=6;
-function build(){const fam=sel.value,od=+size.value;const g=generate(fam,od);
+function build(){freeDraws();const fam=sel.value,od=+size.value;const g=generate(fam,od);
  const geo=buildGeometry(fam,g);
  draws=geo.parts.map(p=>({mesh:Mesh(p.g),model:p.model||M.id(),mat:p.mat}));
  TGT=geo.center;DIST=geo.rad*S*2.7;
@@ -201,6 +226,78 @@ function build(){const fam=sel.value,od=+size.value;const g=generate(fam,od);
  document.getElementById('readout').innerHTML=rh;
  document.getElementById('conn').innerHTML=`🔗 <b class="ok">מתחבר</b> — הצינור <code>OD=${g.OD}</code> נכנס לשקע (עומק <code>${g.F}</code> מ"מ), קדח-הזרימה <code>ID=${g.ID}</code>. הכל מחושב מגיאומטריה, אפס נתונים.`;
 }
+/* ===== שחרור באפרים ישנים (מונע דליפת GL בבנייה-מחדש) ===== */
+function freeDraws(){for(const d of draws){if(d&&d.mesh){gl.deleteBuffer(d.mesh.pb);gl.deleteBuffer(d.mesh.nb);gl.deleteBuffer(d.mesh.ib);}}}
+/* ===== מתכנן-חיבור: רצף אביזרים+צינורות, פיצוץ-מפרקים ===== */
+let CHAIN=[];const PIPELEN=58,STUB=26,GAP=36;
+function elemMeshes(fam,od){const g=generate(fam,od),F=g.F,bore=g.C/2,ID=g.ID/2,m=[];
+ if(fam==='מצמד'){m.push({g:tube(0,g.A,g.B/2,bore),mat:PP});return {m,ex:g.A,ey:0,turn:0,od};}
+ if(fam.indexOf('ברך')>=0){const l=g.l,t=(fam.indexOf('45')>=0?45:90)*Math.PI/180;
+  m.push({g:tube(0,l,g.D/2,bore),mat:PP});
+  m.push({g:sphere(g.D/2*1.02*S,18,26),mat:PP,model:M.t(l*S,0,0)});
+  m.push({g:tube(0,l,g.D/2,bore),mat:PP,model:M.mul(M.t(l*S,0,0),M.rotZ(t))});
+  return {m,ex:l+l*Math.cos(t),ey:l*Math.sin(t),turn:t,od};}
+ if(fam.indexOf('טי')>=0){const E=g.E,c=E/2,bh=g.A,up=M.mul(M.t(c*S,0,0),M.rotZ(Math.PI/2));
+  m.push({g:tube(0,E,g.B/2,bore),mat:PP});
+  m.push({g:sphere(g.B/2*1.02*S,18,26),mat:PP,model:M.t(c*S,0,0)});
+  m.push({g:tube(g.B/2*0.5,bh,g.B/2,bore),mat:PP,model:up});
+  m.push({g:tube(bh-F,bh+STUB,od/2*0.98,ID),mat:PIPE,model:up});
+  return {m,ex:E,ey:0,turn:0,od};}
+ if(fam.indexOf('מתאם')>=0){
+  m.push({g:tube(0,F+3,g.B/2,bore),mat:PP});
+  m.push({g:hexRod(6,g.hex/2,od*0.55,F+3+od*0.28),mat:BR});
+  m.push({g:tube(F+3+od*0.55,g.l,g.thread/2,ID),mat:BR});
+  return {m,ex:g.l,ey:0,turn:0,od};}
+ if(fam.indexOf('ברז')>=0){const L=2*F+od*1.6;
+  m.push({g:tube(0,L,g.D/2,bore),mat:PP});
+  m.push({g:hexRod(4,od*0.28,g.h*0.62,L/2),mat:BR,model:M.mul(M.t(0,g.D/2*S,0),M.rotZ(0.5))});
+  return {m,ex:L,ey:0,turn:0,od};}
+ if(fam.indexOf('מצרה')>=0){const s2F=g.F2;
+  m.push({g:tube(0,F,g.B/2,bore),mat:PP});
+  m.push({g:revS([[F,g.B/2],[F+4,g.B2/2],[F+4+s2F,g.B2/2],[F+4+s2F,g.C2/2],[F+4,g.C2/2],[F,g.C/2]]),mat:PP});
+  return {m,ex:F+4+s2F,ey:0,turn:0,od:g.d2};}
+ if(fam==='פקק'){m.push({g:tube(0,F,g.B/2,bore),mat:PP});
+  m.push({g:revS([[F,g.B/2],[F+g.cap,g.B/2*0.55],[F+g.cap,0],[F,0]]),mat:PP});
+  return {m,ex:F+g.cap,ey:0,turn:0,od,term:true};}
+ if(fam==='רוכב'){const runL=g.d1*0.9,c=runL/2,up=M.mul(M.t(c*S,0,0),M.rotZ(Math.PI/2));
+  m.push({g:tube(0,runL,od/2*0.98,ID),mat:PIPE});
+  m.push({g:tube(c-od*0.7,c+od*0.7,od/2*1.18,od/2*0.99),mat:PP});
+  m.push({g:tube(od/2,g.l+od/2,g.D/2,bore),mat:PP,model:up});
+  m.push({g:tube(g.l+od/2-F,g.l+od/2+STUB,od/2*0.98,ID),mat:PIPE,model:up});
+  return {m,ex:runL,ey:0,turn:0,od};}
+ if(fam==='צווארון'){const th=Math.max(4,od*0.18);
+  m.push({g:tube(0,g.A,g.D/2,bore),mat:PP});
+  m.push({g:tube(g.A,g.A+th,g.D1/2,bore),mat:PP});
+  return {m,ex:g.A+th,ey:0,turn:0,od};}
+ m.push({g:tube(0,od,g.B/2,bore),mat:PP});return {m,ex:od,ey:0,turn:0,od};}
+function buildPlan(){freeDraws();const explode=(+document.getElementById('boom').value)/100;
+ const parts=[];let px=0,py=0,dir=0,minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+ const track=(x,y,p)=>{minx=Math.min(minx,x-p);maxx=Math.max(maxx,x+p);miny=Math.min(miny,y-p);maxy=Math.max(maxy,y+p);};
+ const adv=(dx,dy)=>{px+=dx*Math.cos(dir)-dy*Math.sin(dir);py+=dx*Math.sin(dir)+dy*Math.cos(dir);};
+ const emit=(geo,mat,loc)=>{const w=M.mul(M.mul(M.t(px*S,py*S,0),M.rotZ(dir)),loc||M.id());parts.push({mesh:Mesh(geo),model:w,mat});};
+ const seq=[];
+ if(CHAIN.length){seq.push({kind:'pipe',od:CHAIN[0].od,len:STUB});let cur=CHAIN[0].od;
+  for(let i=0;i<CHAIN.length;i++){if(i>0)seq.push({kind:'pipe',od:cur,len:PIPELEN});
+   seq.push({kind:'fit',fam:CHAIN[i].fam,od:CHAIN[i].od});
+   const gg=generate(CHAIN[i].fam,CHAIN[i].od);cur=(CHAIN[i].fam.indexOf('מצרה')>=0&&gg.d2)?gg.d2:CHAIN[i].od;}
+  if(CHAIN[CHAIN.length-1].fam!=='פקק')seq.push({kind:'pipe',od:cur,len:STUB});}
+ for(let j=0;j<seq.length;j++){if(j>0)adv(explode*GAP,0);const el=seq[j];track(px,py,el.od*0.8);
+  if(el.kind==='pipe'){emit(tube(0,el.len,el.od/2*0.98,(el.od-2*el.od/6)/2),PIPE);adv(el.len,0);}
+  else{const em=elemMeshes(el.fam,el.od);em.m.forEach(mm=>emit(mm.g,mm.mat,mm.model));
+   track(px+em.ex*Math.cos(dir)-em.ey*Math.sin(dir),py+em.ex*Math.sin(dir)+em.ey*Math.cos(dir),el.od);
+   adv(em.ex,em.ey);dir+=em.turn;if(em.term)break;}
+  track(px,py,el.od*0.8);}
+ draws=parts;
+ const cx=(minx+maxx)/2,cy=(miny+maxy)/2,span=Math.max(maxx-minx,maxy-miny,60);
+ if(minx<maxx){TGT=[cx*S,cy*S,0];DIST=span*S*1.45;}
+ const rd=document.getElementById('readout');
+ rd.innerHTML=CHAIN.length?('רצף: '+CHAIN.map(c=>'<b>'+c.fam+'</b> '+c.od).join(' → ')):'רצף ריק';
+ document.getElementById('conn').innerHTML=CHAIN.length?('🔗 <b class="ok">'+CHAIN.length+' אביזרים</b> מחוברים בצנרת מחושבת. גרור 💥 לפוצץ כל מפרק. הכל מהמנוע — 0 נתונים.'):'בחר אביזר ולחץ <b>➕ חבר לרצף</b> כדי לבנות מסלול.';
+ renderChips();}
+function renderChips(){const box=document.getElementById('chain');
+ if(!CHAIN.length){box.innerHTML='<span class="empty">— רצף ריק —</span>';return;}
+ box.innerHTML=CHAIN.map((c,i)=>(i?'<span class="arrow">→</span>':'')+'<span class="chip"><span class="n">'+(i+1)+'</span>'+c.fam+' '+c.od+'<button data-i="'+i+'" aria-label="הסר">✕</button></span>').join('');
+ box.querySelectorAll('button').forEach(b=>b.onclick=()=>{CHAIN.splice(+b.dataset.i,1);buildPlan();});}
 let yaw=-0.6,pitch=0.26,W,H,lastW=0;
 const eye=()=>[TGT[0]+DIST*Math.cos(pitch)*Math.sin(yaw),TGT[1]+DIST*Math.sin(pitch),TGT[2]+DIST*Math.cos(pitch)*Math.cos(yaw)];
 function resize(){const dpr=Math.min(devicePixelRatio||1,2);const w=cv.clientWidth||320,h=Math.round(w*0.78);cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';W=cv.width;H=cv.height;gl.viewport(0,0,W,H);}
@@ -220,11 +317,24 @@ cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;cv.set
 cv.addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-px)*.008;pitch=Math.max(-1.2,Math.min(1.2,pitch+(e.clientY-py)*.008));px=e.clientX;py=e.clientY;});
 addEventListener('pointerup',()=>drag=false);
 cv.addEventListener('wheel',e=>{e.preventDefault();DIST=Math.max(2,Math.min(30,DIST+e.deltaY*.01));},{passive:false});
-document.getElementById('reset').onclick=()=>{yaw=-0.6;pitch=0.26;build();};
+let MODE='single';
+function render(){if(MODE==='plan')buildPlan();else build();}
+document.getElementById('reset').onclick=()=>{yaw=-0.6;pitch=0.26;render();};
 const sel=document.getElementById('fam'),size=document.getElementById('size');
 FAMS.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;sel.appendChild(o);});
 SIZES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s+' מ"מ';size.appendChild(o);});
 size.value=32;
-sel.onchange=build;size.onchange=build;
+sel.onchange=()=>{if(MODE==='single')build();};size.onchange=()=>{if(MODE==='single')build();};
+/* mode toggle */
+const btnS=document.getElementById('mSingle'),btnP=document.getElementById('mPlan');
+function setMode(mo){MODE=mo;btnS.classList.toggle('on',mo==='single');btnP.classList.toggle('on',mo==='plan');
+ const plan=mo==='plan';document.getElementById('add').hidden=!plan;document.getElementById('chain').hidden=!plan;document.getElementById('planctrl').hidden=!plan;
+ yaw=-0.6;pitch=0.26;render();}
+btnS.onclick=()=>setMode('single');btnP.onclick=()=>setMode('plan');
+document.getElementById('add').onclick=()=>{CHAIN.push({fam:sel.value,od:+size.value});buildPlan();};
+document.getElementById('disc').onclick=()=>{CHAIN.pop();buildPlan();};
+document.getElementById('clear').onclick=()=>{CHAIN=[];buildPlan();};
+const boom=document.getElementById('boom');let bp=false;
+boom.oninput=()=>{document.getElementById('boomv').textContent=boom.value+'%';if(MODE!=='plan')return;if(bp)return;bp=true;requestAnimationFrame(()=>{bp=false;buildPlan();});};
 resize();build();requestAnimationFrame(frame);
 </script>
