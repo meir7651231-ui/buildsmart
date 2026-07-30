@@ -82,3 +82,23 @@ if __name__ == '__main__':
                 errs.sort(); n = len(errs)
                 print('  %-6s (%s): n=%d | חציון %.2f מ"מ | ≤1מ"מ %.0f%% | ≤2מ"מ %.0f%%' %
                       (nm, ','.join(letters), n, errs[n//2], 100*sum(e <= 1 for e in errs)/n, 100*sum(e <= 2 for e in errs)/n))
+
+
+def mitered_elbow(d):
+    """ברך מחותכת גדולה (מודל B, 160-400) — גיאומטריה טהורה, ~0 סטייה.
+       מגזרים = יחס נקי לרדיוס-הכיפוף (∝d)."""
+    return {'A': round(3.0*d, 1), 'G': round(1.377*d, 1),
+            'F': round(1.186*d, 1), 'E': round(0.765*d, 1), 'D': round(0.986*d, 1)}
+
+
+def reducer(d1, d2):
+    """מצרה (d1×d2) — קומפוזיציה: כל צד לפי חוקי-הבסיס של הקוטר שלו."""
+    s1, s2 = base(d1), base(d2)
+    return {'B1': s1['B'], 'C1': s1['C'], 'F1': s1['F'],
+            'B2': s2['B'], 'C2': s2['C'], 'F2': s2['F'],
+            'A': round(s1['F'] + s2['F'] + 3, 1)}   # שני שקעים + מעבר
+
+
+# ---- בורר-דיאגרמה: משפחה × טווח-גודל -> קונסטרוקציה ----
+def elbow_auto(d, angle=90):
+    return mitered_elbow(d) if d >= 160 else elbow(d, angle)
