@@ -54,6 +54,12 @@
  <div class="bar">
   <select id="fam"></select>
   <select id="size"></select>
+  <select id="dir" hidden title="כיוון (לברך/טי)">
+   <option value="up">⬆️ מעלה</option>
+   <option value="right">➡️ ימינה</option>
+   <option value="down">⬇️ מטה</option>
+   <option value="left">⬅️ שמאלה</option>
+  </select>
   <button id="add" hidden>➕ חבר לרצף</button>
   <span class="badge">מחושב מחוקים ✓</span>
  </div>
@@ -104,6 +110,12 @@ const M={mul:(a,b)=>{const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=
    let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]],xl=Math.hypot(...x)||1;x=x.map(v=>v/xl);
    let y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
    return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]);}};
+/* בסיס 3D למיקום-אביזר: local X→Fwd, Y→Up, Z→Side, + הזזה */
+M.frame=(X,Y,Z,p)=>new Float32Array([X[0],X[1],X[2],0,Y[0],Y[1],Y[2],0,Z[0],Z[1],Z[2],0,p[0],p[1],p[2],1]);
+const V={add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+ scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+ cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+ norm:a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return [a[0]/l,a[1]/l,a[2]/l];}};
 function nrm(m){const a=m[0],b=m[1],c=m[2],d=m[4],e=m[5],f=m[6],g=m[8],h=m[9],i=m[10];const A=e*i-f*h,B=f*g-d*i,C=d*h-e*g;let det=a*A+b*B+c*C;det=det?1/det:0;
  const v=[A*det,(c*h-b*i)*det,(b*f-c*e)*det,B*det,(a*i-c*g)*det,(c*d-a*f)*det,C*det,(b*g-a*h)*det,(a*e-b*d)*det];return new Float32Array([v[0],v[3],v[6],v[1],v[4],v[7],v[2],v[5],v[8]]);}
 function revolve(prof,seg){const P=[],N=[],I=[];for(let i=0;i<prof.length;i++){const p0=prof[i],p1=prof[(i+1)%prof.length];
@@ -126,6 +138,9 @@ function hexRod(sides,r,len,cx){const P=[],N=[],I=[],hh=len/2;
 
 function tube(x0,x1,ro,ri){return revolve([[x0*S,ro*S],[x1*S,ro*S],[x1*S,ri*S],[x0*S,ri*S]],48);}
 function revS(prof){return revolve(prof.map(p=>[p[0]*S,p[1]*S]),48);}
+/* צינור-מעבר בין שני קטרים (חיבור גדלים שונים) */
+function taperGeom(len,oA,oB){const rA=oA/2*0.98,rB=oB/2*0.98,iA=(oA-2*oA/6)/2,iB=(oB-2*oB/6)/2;
+ return revS([[0,rA],[len*0.4,rA],[len*0.6,rB],[len,rB],[len,iB],[len*0.6,iB],[len*0.4,iA],[0,iA]]);}
 /* ===== build geometry from generated dims ===== */
 function buildGeometry(fam,g){
  const Ro=(g.D||g.B)/2, bore=g.OD/2, id=g.ID/2, dep=g.F, stub=Math.max(14,g.OD*0.65);
@@ -240,8 +255,8 @@ function elemMeshes(fam,od){const g=generate(fam,od),F=g.F,bore=g.C/2,ID=g.ID/2,
  if(fam.indexOf('טי')>=0){const E=g.E,c=E/2,bh=g.A,up=M.mul(M.t(c*S,0,0),M.rotZ(Math.PI/2));
   m.push({g:tube(0,E,g.B/2,bore),mat:PP});
   m.push({g:sphere(g.B/2*1.02*S,18,26),mat:PP,model:M.t(c*S,0,0)});
-  m.push({g:tube(g.B/2*0.5,bh,g.B/2,bore),mat:PP,model:up});
-  m.push({g:tube(bh-F,bh+STUB,od/2*0.98,ID),mat:PIPE,model:up});
+  m.push({g:tube(g.B/2*0.5,bh,g.B/2,bore),mat:PP,model:up,ax:'B'});
+  m.push({g:tube(bh-F,bh+STUB,od/2*0.98,ID),mat:PIPE,model:up,ax:'B'});
   return {m,ex:E,ey:0,turn:0,od};}
  if(fam.indexOf('מתאם')>=0){
   m.push({g:tube(0,F+3,g.B/2,bore),mat:PP});
@@ -262,37 +277,50 @@ function elemMeshes(fam,od){const g=generate(fam,od),F=g.F,bore=g.C/2,ID=g.ID/2,
  if(fam==='רוכב'){const runL=g.d1*0.9,c=runL/2,up=M.mul(M.t(c*S,0,0),M.rotZ(Math.PI/2));
   m.push({g:tube(0,runL,od/2*0.98,ID),mat:PIPE});
   m.push({g:tube(c-od*0.7,c+od*0.7,od/2*1.18,od/2*0.99),mat:PP});
-  m.push({g:tube(od/2,g.l+od/2,g.D/2,bore),mat:PP,model:up});
-  m.push({g:tube(g.l+od/2-F,g.l+od/2+STUB,od/2*0.98,ID),mat:PIPE,model:up});
+  m.push({g:tube(od/2,g.l+od/2,g.D/2,bore),mat:PP,model:up,ax:'B'});
+  m.push({g:tube(g.l+od/2-F,g.l+od/2+STUB,od/2*0.98,ID),mat:PIPE,model:up,ax:'B'});
   return {m,ex:runL,ey:0,turn:0,od};}
  if(fam==='צווארון'){const th=Math.max(4,od*0.18);
   m.push({g:tube(0,g.A,g.D/2,bore),mat:PP});
   m.push({g:tube(g.A,g.A+th,g.D1/2,bore),mat:PP});
   return {m,ex:g.A+th,ey:0,turn:0,od};}
  m.push({g:tube(0,od,g.B/2,bore),mat:PP});return {m,ex:od,ey:0,turn:0,od};}
+const DIRLBL={up:'⬆️',down:'⬇️',left:'⬅️',right:'➡️'};
+function isDirectional(fam){return fam.indexOf('ברך')>=0||fam.indexOf('טי')>=0||fam==='רוכב';}
+function dirVec(d,F,U){const side=V.norm(V.cross(F,U));
+ if(d==='down')return V.scale(U,-1);if(d==='right')return side;if(d==='left')return V.scale(side,-1);return U;}
 function buildPlan(){freeDraws();const explode=(+document.getElementById('boom').value)/100;
- const parts=[];let px=0,py=0,dir=0,minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
- const track=(x,y,p)=>{minx=Math.min(minx,x-p);maxx=Math.max(maxx,x+p);miny=Math.min(miny,y-p);maxy=Math.max(maxy,y+p);};
- const adv=(dx,dy)=>{px+=dx*Math.cos(dir)-dy*Math.sin(dir);py+=dx*Math.sin(dir)+dy*Math.cos(dir);};
- const emit=(geo,mat,loc)=>{const w=M.mul(M.mul(M.t(px*S,py*S,0),M.rotZ(dir)),loc||M.id());parts.push({mesh:Mesh(geo),model:w,mat});};
- const seq=[];
- if(CHAIN.length){seq.push({kind:'pipe',od:CHAIN[0].od,len:STUB});let cur=CHAIN[0].od;
-  for(let i=0;i<CHAIN.length;i++){if(i>0)seq.push({kind:'pipe',od:cur,len:PIPELEN});
-   seq.push({kind:'fit',fam:CHAIN[i].fam,od:CHAIN[i].od});
-   const gg=generate(CHAIN[i].fam,CHAIN[i].od);cur=(CHAIN[i].fam.indexOf('מצרה')>=0&&gg.d2)?gg.d2:CHAIN[i].od;}
-  if(CHAIN[CHAIN.length-1].fam!=='פקק')seq.push({kind:'pipe',od:cur,len:STUB});}
- for(let j=0;j<seq.length;j++){if(j>0)adv(explode*GAP,0);const el=seq[j];track(px,py,el.od*0.8);
-  if(el.kind==='pipe'){emit(tube(0,el.len,el.od/2*0.98,(el.od-2*el.od/6)/2),PIPE);adv(el.len,0);}
-  else{const em=elemMeshes(el.fam,el.od);em.m.forEach(mm=>emit(mm.g,mm.mat,mm.model));
-   track(px+em.ex*Math.cos(dir)-em.ey*Math.sin(dir),py+em.ex*Math.sin(dir)+em.ey*Math.cos(dir),el.od);
-   adv(em.ex,em.ey);dir+=em.turn;if(em.term)break;}
-  track(px,py,el.od*0.8);}
+ const parts=[];let P=[0,0,0],F=[1,0,0],U=[0,1,0],bb=[1e9,1e9,1e9,-1e9,-1e9,-1e9];
+ const track=(p,pad)=>{for(let k=0;k<3;k++){bb[k]=Math.min(bb[k],p[k]-pad);bb[k+3]=Math.max(bb[k+3],p[k]+pad);}};
+ const emitAt=(geo,mat,axis,loc)=>{const Z=V.norm(V.cross(F,axis));const fr=M.frame(F,axis,Z,[P[0]*S,P[1]*S,P[2]*S]);
+  parts.push({mesh:Mesh(geo),model:M.mul(fr,loc||M.id()),mat});};
+ const gap=()=>{if(explode)P=V.add(P,V.scale(F,explode*GAP));};
+ const pipe=(len,oA,oB)=>{track(P,Math.max(oA,oB)*0.7);
+  emitAt(oA===oB?tube(0,len,oA/2*0.98,(oA-2*oA/6)/2):taperGeom(len,oA,oB),PIPE,U);
+  P=V.add(P,V.scale(F,len));track(P,Math.max(oA,oB)*0.7);};
+ if(CHAIN.length){
+  pipe(STUB,CHAIN[0].od,CHAIN[0].od);let prev=CHAIN[0].od;
+  for(let i=0;i<CHAIN.length;i++){const c=CHAIN[i];
+   if(i>0){gap();pipe(PIPELEN,prev,c.od);}
+   gap();
+   const B=dirVec(c.dir||'up',F,U),em=elemMeshes(c.fam,c.od);track(P,c.od);
+   em.m.forEach(mm=>emitAt(mm.g,mm.mat,(mm.ax==='B'||em.turn)?B:U,mm.model));
+   const bendAxis=em.turn?B:U;
+   P=V.add(P,V.add(V.scale(F,em.ex),V.scale(bendAxis,em.ey)));track(P,c.od);
+   if(em.turn){const t=em.turn,nF=V.norm(V.add(V.scale(F,Math.cos(t)),V.scale(B,Math.sin(t))));
+    const nB=V.norm(V.add(V.scale(F,-Math.sin(t)),V.scale(B,Math.cos(t))));const d=c.dir||'up';
+    if(d==='up')U=nB;else if(d==='down')U=V.scale(nB,-1);
+    F=nF;U=V.norm(V.sub(U,V.scale(F,V.dot(U,F))));}
+   prev=em.od;if(em.term)break;}
+  if(CHAIN[CHAIN.length-1].fam!=='פקק'){gap();pipe(STUB,prev,prev);}
+ }
  draws=parts;
- const cx=(minx+maxx)/2,cy=(miny+maxy)/2,span=Math.max(maxx-minx,maxy-miny,60);
- if(minx<maxx){TGT=[cx*S,cy*S,0];DIST=span*S*1.45;}
+ if(bb[0]<bb[3]){const c=[(bb[0]+bb[3])/2,(bb[1]+bb[4])/2,(bb[2]+bb[5])/2];
+  const radW=0.5*Math.hypot(bb[3]-bb[0],bb[4]-bb[1],bb[5]-bb[2])*S;
+  TGT=[c[0]*S,c[1]*S,c[2]*S];DIST=Math.max(3,radW/Math.tan(0.36)*0.86);}else{TGT=[0,0,0];DIST=6;}
  const rd=document.getElementById('readout');
- rd.innerHTML=CHAIN.length?('רצף: '+CHAIN.map(c=>'<b>'+c.fam+'</b> '+c.od).join(' → ')):'רצף ריק';
- document.getElementById('conn').innerHTML=CHAIN.length?('🔗 <b class="ok">'+CHAIN.length+' אביזרים</b> מחוברים בצנרת מחושבת. גרור 💥 לפוצץ כל מפרק. הכל מהמנוע — 0 נתונים.'):'בחר אביזר ולחץ <b>➕ חבר לרצף</b> כדי לבנות מסלול.';
+ rd.innerHTML=CHAIN.length?('רצף: '+CHAIN.map(c=>'<b>'+c.fam+'</b> '+c.od+(isDirectional(c.fam)&&c.dir?(' '+DIRLBL[c.dir]):'')).join(' → ')):'רצף ריק';
+ document.getElementById('conn').innerHTML=CHAIN.length?('🔗 <b class="ok">'+CHAIN.length+' אביזרים</b> · צנרת-מעבר מחושבת בין הגדלים · ברך מנתבת לכיוון שבחרת · גרור 💥 לפוצץ. 0 נתונים.'):'בחר אביזר · גודל · כיוון — ולחץ <b>➕ חבר לרצף</b>.';
  renderChips();}
 function renderChips(){const box=document.getElementById('chain');
  if(!CHAIN.length){box.innerHTML='<span class="empty">— רצף ריק —</span>';return;}
@@ -328,10 +356,10 @@ sel.onchange=()=>{if(MODE==='single')build();};size.onchange=()=>{if(MODE==='sin
 /* mode toggle */
 const btnS=document.getElementById('mSingle'),btnP=document.getElementById('mPlan');
 function setMode(mo){MODE=mo;btnS.classList.toggle('on',mo==='single');btnP.classList.toggle('on',mo==='plan');
- const plan=mo==='plan';document.getElementById('add').hidden=!plan;document.getElementById('chain').hidden=!plan;document.getElementById('planctrl').hidden=!plan;
+ const plan=mo==='plan';document.getElementById('add').hidden=!plan;document.getElementById('dir').hidden=!plan;document.getElementById('chain').hidden=!plan;document.getElementById('planctrl').hidden=!plan;
  yaw=-0.6;pitch=0.26;render();}
 btnS.onclick=()=>setMode('single');btnP.onclick=()=>setMode('plan');
-document.getElementById('add').onclick=()=>{CHAIN.push({fam:sel.value,od:+size.value});buildPlan();};
+document.getElementById('add').onclick=()=>{CHAIN.push({fam:sel.value,od:+size.value,dir:document.getElementById('dir').value});buildPlan();};
 document.getElementById('disc').onclick=()=>{CHAIN.pop();buildPlan();};
 document.getElementById('clear').onclick=()=>{CHAIN=[];buildPlan();};
 const boom=document.getElementById('boom');let bp=false;
