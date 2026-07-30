@@ -61,6 +61,12 @@
 
 ---
 
+## 2½ · עוגני-ביצוע קונקרטיים (מ-`catalog_source.dart` · `lipskey_catalog.dart` · STATUS · GATE_REGISTRY)
+- **מודל-מוצר** `LipskeyCatalogProduct` (auto-gen, משותף לכל המותגים): `categoryHe`/`nameHe` → **`familyOf`** · `nameHe`/`dims` → **`odOf`** · `brand` ∈ {ליפסקי·פולירול·חוליות·Huliot}. **`dims` בד״כ `null`** — הפער שהמנוע ממלא (STATUS v6.57: *"קטלוג תמונתי טהור, אפס טבלת-מידה, תקרה ~87% מהשם"*).
+- **🔑 seam-ההעלאה:** `setCompanyCatalog(items)` = **"מעלים קטלוג"** · `resolvedCatalogProducts` = הרשימה-האוניברסלית לצריכה (‏T4 — לא `kLipskeyCatalog`). **`registerFamilySpecs` חייב לכסות אותה** → קטלוג-שהועלה מקבל specs מיד. *זה בדיוק "מעלים נתונים → מתחבר לבד".*
+- **שער:** הבא-הפנוי ב-`GATE_REGISTRY` = **#124** → ל-`kFittingEngine*` (שמור→טבלה→bump ל-125).
+- **ניואנס אזורי:** AQUATEC — חיבור תלוי-אזור (‏US 3/8" מול IL 1/2"; STATUS "אפס התאמה מאומתת") → המנוע גוזר לפי **תקן-אזור** (‏R13/R8).
+
 ## 3 · ההכרעות-החוצות (תלויות + סתירות שיושבו)
 1. **R1-2 keystone (מחויב):** ענף-הפיזיקה של אינסטלציה נשאר **byte-identical**. המנוע רק **מוסיף** specs דרך `putIfAbsent` — לא דורס, לא נכנס ל-resolver (השער `_authoredConfigOf:212` נשאר null לאינסטלציה).
 2. **אותה טבלה = אפס שינוי-מנוע.** ה-spec הנגזר נוחת ב-`kVerifiedSpecs` שהמנוע כבר קורא — מוכח ע״י פולירול. `canConnect`/מסלול/צ׳קליסט/BOM צורכים בלי שורת-קוד.
