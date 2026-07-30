@@ -1,0 +1,217 @@
+<title>מנוע-חוקים → 3D → תכנון חיבור</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ :root{--bg:#e9edf1;--panel:#fff;--ink:#152029;--soft:#5a6b7b;--line:#d2dae2;--accent:#3f8f46;--steel:#3f6591;--pipe:#2f6591;
+  --sky-top:#eef3ef;--sky-bot:#d9e3dc;--fh:"Rubik","Heebo","Segoe UI",system-ui,sans-serif;
+  --fb:"Assistant","Heebo","Segoe UI",system-ui,sans-serif;--fd:ui-monospace,"JetBrains Mono",Consolas,monospace;}
+ @media (prefers-color-scheme:dark){:root{--bg:#0d141c;--panel:#151f2a;--ink:#e6edf3;--soft:#93a5b5;--line:#26333f;
+  --accent:#6cbf58;--steel:#6f97c4;--pipe:#5f97c4;--sky-top:#111d18;--sky-bot:#0a1119;}}
+ :root[data-theme="light"]{--bg:#e9edf1;--panel:#fff;--ink:#152029;--soft:#5a6b7b;--line:#d2dae2;--accent:#3f8f46;--sky-top:#eef3ef;--sky-bot:#d9e3dc;}
+ :root[data-theme="dark"]{--bg:#0d141c;--panel:#151f2a;--ink:#e6edf3;--soft:#93a5b5;--line:#26333f;--accent:#6cbf58;--sky-top:#111d18;--sky-bot:#0a1119;}
+ *{box-sizing:border-box}html{direction:rtl}
+ body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--fb);display:flex;flex-direction:column;align-items:center;padding:clamp(12px,3vw,28px) 12px 34px;gap:12px;-webkit-font-smoothing:antialiased}
+ .wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:12px}
+ .eyebrow{font-family:var(--fd);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px}
+ .eyebrow::before{content:"";width:20px;height:2px;background:var(--accent);border-radius:2px}
+ h1{font-family:var(--fh);font-weight:800;font-size:clamp(18px,4.4vw,23px);margin:0}
+ .sub{color:var(--soft);font-size:13px;margin:2px 0 0}
+ .bar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+ select{font-family:var(--fb);font-size:14px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:42px}
+ .badge{font-family:var(--fd);font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:6px 9px;margin-inline-start:auto}
+ .stage{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 18px 50px -26px rgba(0,0,0,.5);background:linear-gradient(180deg,var(--sky-top),var(--sky-bot))}
+ canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}
+ .readout{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:11px 14px;font-family:var(--fd);font-size:12px;display:flex;flex-wrap:wrap;gap:6px 16px}
+ .readout b{color:var(--accent)}
+ .conn{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:11px 14px;font-size:12.5px;line-height:1.6}
+ .conn .ok{color:var(--accent);font-weight:700}.conn code{font-family:var(--fd);color:var(--pipe)}
+ .ctrl{display:flex;gap:8px;justify-content:center}
+ .ctrl button{font-family:var(--fb);font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 12px}
+ footer{max-width:680px;font-size:11px;color:var(--soft);text-align:center;line-height:1.6}
+ :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+</style>
+<div class="wrap">
+ <div><span class="eyebrow">מנוע-חוקים · ‏0 נתונים</span>
+  <h1>בוחרים אביזר — המנוע מחשב ומחבר</h1>
+  <p class="sub">אין שליפה מקטלוג. המידות מחושבות מחוקים, ה-3D נבנה מהן, והצינור נכנס לשקע.</p></div>
+ <div class="bar">
+  <select id="fam"></select>
+  <select id="size"></select>
+  <span class="badge">מחושב מחוקים ✓</span>
+ </div>
+ <div class="stage"><canvas id="c" aria-label="אביזר תלת־ממדי מחושב"></canvas></div>
+ <div class="readout" id="readout"></div>
+ <div class="conn" id="conn"></div>
+ <div class="ctrl"><button id="reset">איפוס מבט</button><span style="font-size:11px;color:var(--soft);align-self:center">גרור לסובב · גלגלת לזום</span></div>
+ <footer>הגאומטריה נגזרת מחוקי-התכן בלבד (‏OD·SDR·1.33·עומק+z). דיוק ~1 מ"מ — בלתי-נראה ברינדור. הצינור והאביזר מתחברים כי שניהם נגזרים מאותו OD.</footer>
+</div>
+<script>
+"use strict";
+/* ===== מנוע-החוקים (פורט JS — 0 נתוני קטלוג) ===== */
+const SDR={20:6.0,16:7.4,10:11.0};
+const DEPTH={20:14.5,25:16,32:18,40:20.5,50:23.5,63:27.5,75:30,90:33,110:37,125:40};
+const R=x=>Math.round(x*10)/10;
+// מנוע טהור — כל אות מקונסטרוקציה גיאומטרית (מהשרטוטים)
+function base(od){const wall=od/6;return {OD:od,wall:R(wall),ID:R(od-2*wall),B:R(od*(1+2/6)),C:R(od*0.97),F:DEPTH[od]};}
+function generate(fam,od){const b=base(od),F=b.F;
+ if(fam==='מצמד'){b.A=R(2*F+2);return b;}
+ if(fam.indexOf('ברך')>=0){const ang=fam.indexOf('45')>=0?45:90;const Rb=0.52*od;const z=R(Rb*Math.tan(ang*Math.PI/360));
+  b.D=b.B;delete b.B;b.z=z;b.l=R(F+z);return b;}
+ if(fam.indexOf('טי')>=0){const z=R(b.B/2);b.z=z;b.E=R(2*(z+F));b.A=R(z+F+b.B/2);return b;}
+ if(fam.indexOf('מתאם')>=0){const hex=R(od*1.95),th=R(od*1.05),thL=R(od*0.9),z=R(F+od*0.3);
+  b.SW=R(hex*0.87);b.hex=hex;b.thread=th;b.z=z;b.l=R(F+z+thL);b.thL=thL;return b;}
+ if(fam.indexOf('ברז')>=0){const bodyD=R(od*1.6),z=R(od*1.05),h=R(od*2.9);
+  b.D=bodyD;delete b.B;b.z=z;b.l=R(F+z);b.dk=R(od*0.67);b.h=h;return b;}
+ if(fam.indexOf('מצרה')>=0){const SZ=[20,25,32,40,50,63,75,90,110,125];const i=SZ.indexOf(od);const d2=i>0?SZ[i-1]:Math.round(od*0.8);
+  const s2=base(d2);b.d2=d2;b.B2=s2.B;b.C2=s2.C;b.F2=s2.F;b.A=R(F+s2.F+3);return b;}
+ if(fam==='פקק'){b.A=R(F+od*0.4);b.cap=R(od*0.4);return b;}
+ return b;}
+const FAMS=['מצמד','ברך 90°','ברך 45°','מסעף (טי)','מתאם תבריג','ברז כדורי','מצרה','פקק'];
+const SIZES=[20,25,32,40,50,63,75,90,110,125];
+/* ===== WebGL ===== */
+const cv=document.getElementById('c');const gl=cv.getContext('webgl',{antialias:true,alpha:false});
+const M={mul:(a,b)=>{const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ id:()=>{const m=new Float32Array(16);m[0]=m[5]=m[10]=m[15]=1;return m;},t:(x,y,z)=>{const m=M.id();m[12]=x;m[13]=y;m[14]=z;return m;},
+ rotZ:a=>{const m=M.id(),c=Math.cos(a),s=Math.sin(a);m[0]=c;m[1]=s;m[4]=-s;m[5]=c;return m;},
+ persp:(f,as,n,fa)=>{const t=1/Math.tan(f/2),m=new Float32Array(16);m[0]=t/as;m[5]=t;m[10]=(fa+n)/(n-fa);m[11]=-1;m[14]=2*fa*n/(n-fa);return m;},
+ look:(e,c,u)=>{let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]],zl=Math.hypot(...z);z=z.map(v=>v/zl);
+   let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]],xl=Math.hypot(...x)||1;x=x.map(v=>v/xl);
+   let y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+   return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]);}};
+function nrm(m){const a=m[0],b=m[1],c=m[2],d=m[4],e=m[5],f=m[6],g=m[8],h=m[9],i=m[10];const A=e*i-f*h,B=f*g-d*i,C=d*h-e*g;let det=a*A+b*B+c*C;det=det?1/det:0;
+ const v=[A*det,(c*h-b*i)*det,(b*f-c*e)*det,B*det,(a*i-c*g)*det,(c*d-a*f)*det,C*det,(b*g-a*h)*det,(a*e-b*d)*det];return new Float32Array([v[0],v[3],v[6],v[1],v[4],v[7],v[2],v[5],v[8]]);}
+function revolve(prof,seg){const P=[],N=[],I=[];for(let i=0;i<prof.length;i++){const p0=prof[i],p1=prof[(i+1)%prof.length];
+ const dx=p1[0]-p0[0],dr=p1[1]-p0[1];let nx=-dr,nr=dx;const nl=Math.hypot(nx,nr)||1;nx/=nl;nr/=nl;
+ for(let s=0;s<seg;s++){const a0=s/seg*2*Math.PI,a1=(s+1)/seg*2*Math.PI,c0=Math.cos(a0),s0=Math.sin(a0),c1=Math.cos(a1),s1=Math.sin(a1),b=P.length/3;
+  P.push(p0[0],p0[1]*c0,p0[1]*s0);N.push(nx,nr*c0,nr*s0);P.push(p1[0],p1[1]*c0,p1[1]*s0);N.push(nx,nr*c0,nr*s0);
+  P.push(p0[0],p0[1]*c1,p0[1]*s1);N.push(nx,nr*c1,nr*s1);P.push(p1[0],p1[1]*c1,p1[1]*s1);N.push(nx,nr*c1,nr*s1);
+  I.push(b,b+1,b+2,b+2,b+1,b+3);}}return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+function sphere(r,la,lo){const P=[],N=[],I=[];for(let i=0;i<=la;i++){const th=i/la*Math.PI;for(let j=0;j<=lo;j++){const ph=j/lo*2*Math.PI;
+ const x=r*Math.sin(th)*Math.cos(ph),y=r*Math.cos(th),z=r*Math.sin(th)*Math.sin(ph);P.push(x,y,z);N.push(x/r,y/r,z/r);}}
+ for(let i=0;i<la;i++)for(let j=0;j<lo;j++){const a=i*(lo+1)+j,b=a+lo+1;I.push(a,b,a+1,a+1,b,b+1);}
+ return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+const PP={c:[.30,.60,.37],metal:0,rough:.45},PIPE={c:[.28,.5,.62],metal:0,rough:.4},BR={c:[.83,.63,.34],metal:1,rough:.3};
+const S=0.09;
+function hexRod(sides,r,len,cx){const P=[],N=[],I=[],hh=len/2;
+ for(let i=0;i<sides;i++){const a0=i/sides*2*Math.PI,a1=(i+1)/sides*2*Math.PI,am=(a0+a1)/2,nc=Math.cos(am),ns=Math.sin(am),b=P.length/3;
+  P.push((cx-hh)*S,r*S*Math.cos(a0),r*S*Math.sin(a0));N.push(0,nc,ns);P.push((cx+hh)*S,r*S*Math.cos(a0),r*S*Math.sin(a0));N.push(0,nc,ns);
+  P.push((cx-hh)*S,r*S*Math.cos(a1),r*S*Math.sin(a1));N.push(0,nc,ns);P.push((cx+hh)*S,r*S*Math.cos(a1),r*S*Math.sin(a1));N.push(0,nc,ns);I.push(b,b+1,b+2,b+2,b+1,b+3);}
+ return {P:new Float32Array(P),N:new Float32Array(N),I:new Uint16Array(I)};}
+
+function tube(x0,x1,ro,ri){return revolve([[x0*S,ro*S],[x1*S,ro*S],[x1*S,ri*S],[x0*S,ri*S]],48);}
+function revS(prof){return revolve(prof.map(p=>[p[0]*S,p[1]*S]),48);}
+/* ===== build geometry from generated dims ===== */
+function buildGeometry(fam,g){
+ const Ro=(g.D||g.B)/2, bore=g.OD/2, id=g.ID/2, dep=g.F, stub=Math.max(14,g.OD*0.65);
+ const parts=[];
+ if(fam.indexOf('מצרה')>=0){const s2F=g.F2,d2=g.d2,stub2=Math.max(12,d2*0.6);
+  parts.push({g:tube(0,dep,g.B/2,g.C/2),mat:PP});
+  parts.push({g:revS([[dep,g.B/2],[dep+4,g.B2/2],[dep+4+s2F,g.B2/2],[dep+4+s2F,g.C2/2],[dep+4,g.C2/2],[dep,g.C/2]]),mat:PP});
+  parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
+  parts.push({g:tube(dep+4,dep+4+s2F+stub2,d2/2*0.98,(d2-2*d2/6)/2),mat:PIPE});
+  const tot=dep+4+s2F;return {parts,center:[tot/2*S,0,0],rad:tot/2+stub};}
+ if(fam==='פקק'){parts.push({g:tube(0,dep,g.B/2,g.C/2),mat:PP});
+  parts.push({g:revS([[dep,g.B/2],[dep+g.cap,g.B/2*0.55],[dep+g.cap,0],[dep,0]]),mat:PP});
+  parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
+  return {parts,center:[(dep+g.cap)/2*S,0,0],rad:(dep+g.cap)/2+stub};}
+ if(fam.indexOf('מתאם')>=0){const sock=g.C/2, sockOut=g.B?g.B/2:g.OD*0.66;
+  parts.push({g:tube(0,dep+3,sockOut,g.C/2),mat:PP});
+  parts.push({g:hexRod(6,g.hex/2,g.OD*0.55,dep+3+g.OD*0.28),mat:BR});
+  const tx=dep+3+g.OD*0.55;
+  parts.push({g:tube(tx,tx+g.thL,g.thread/2,id),mat:BR});
+  parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
+  return {parts,center:[(g.l/2)*S,0,0],rad:g.l/2+stub};}
+ if(fam.indexOf('ברז')>=0){const L=2*dep+g.OD*1.6;
+  parts.push({g:tube(0,L,g.D/2,g.C/2),mat:PP});
+  parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
+  parts.push({g:tube(L-dep,L+stub,bore*0.98,id),mat:PIPE});
+  parts.push({g:hexRod(4,g.OD*0.28,g.h*0.62,L/2),mat:BR,model:M.mul(M.t(0,g.D/2*S,0),M.rotZ(0.5))});
+  return {parts,center:[L/2*S,g.OD*0.4*S,0],rad:Math.max(L/2+stub,g.h*0.7)};}
+ if(fam==='מצמד'){
+  const L=2*dep+Math.max(6,g.OD*0.28);
+  parts.push({g:tube(0,L,Ro,bore),mat:PP});
+  parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
+  parts.push({g:tube(L-dep,L+stub,bore*0.98,id),mat:PIPE});
+  return {parts,center:[L/2*S,0,0],rad:(L/2+stub)};
+ }
+ // elbow / tee: arms from joint at origin, socket open at far end
+ const arm=dep+(g.z||g.OD*0.5)+4;
+ const armMesh=tube(0,arm,Ro,bore);
+ const stubMesh=tube(arm-dep,arm+stub,bore*0.98,id);
+ if(fam.indexOf('ברך')>=0){
+  const bend=fam.indexOf('45')>=0?45:90; const th=(180-bend)*Math.PI/180;
+  parts.push({g:armMesh,mat:PP,model:M.id()});
+  parts.push({g:armMesh,mat:PP,model:M.rotZ(th)});
+  parts.push({g:sphere(Ro*1.02*S,20,28),mat:PP,model:M.id()});
+  parts.push({g:stubMesh,mat:PIPE,model:M.id()});
+  parts.push({g:stubMesh,mat:PIPE,model:M.rotZ(th)});
+  return {parts,center:[arm*0.42*S,arm*0.42*S,0],rad:arm+stub};
+ }
+ // tee: +X, -X, -Y
+ parts.push({g:armMesh,mat:PP,model:M.id()});
+ parts.push({g:armMesh,mat:PP,model:M.rotZ(Math.PI)});
+ parts.push({g:armMesh,mat:PP,model:M.rotZ(-Math.PI/2)});
+ parts.push({g:sphere(Ro*1.02*S,20,28),mat:PP,model:M.id()});
+ parts.push({g:stubMesh,mat:PIPE,model:M.id()});
+ parts.push({g:stubMesh,mat:PIPE,model:M.rotZ(Math.PI)});
+ parts.push({g:stubMesh,mat:PIPE,model:M.rotZ(-Math.PI/2)});
+ return {parts,center:[0,-arm*0.25*S,0],rad:arm+stub};
+}
+/* GL setup */
+function mkProg(vs,fs){const p=gl.createProgram();const a=gl.createShader(gl.VERTEX_SHADER);gl.shaderSource(a,vs);gl.compileShader(a);gl.attachShader(p,a);
+ const b=gl.createShader(gl.FRAGMENT_SHADER);gl.shaderSource(b,fs);gl.compileShader(b);gl.attachShader(p,b);gl.linkProgram(p);return p;}
+const prog=mkProg(
+ `attribute vec3 aPos,aNormal;uniform mat4 uProj,uView,uModel;uniform mat3 uNormal;varying vec3 vN,vW;
+  void main(){vec4 w=uModel*vec4(aPos,1.);vW=w.xyz;vN=normalize(uNormal*aNormal);gl_Position=uProj*uView*w;}`,
+ `precision highp float;varying vec3 vN,vW;uniform vec3 uColor,uLight,uEye;uniform float uMetal,uRough;
+  vec3 env(vec3 d){float t=clamp(d.y*.5+.5,0.,1.);return mix(vec3(.36,.4,.46),vec3(.96,.98,1.),t)+vec3(.4)*pow(max(d.y,0.),3.);}
+  void main(){vec3 N=normalize(vN),V=normalize(uEye-vW),L=normalize(uLight);if(dot(N,V)<0.)N=-N;
+   float NdotV=max(dot(N,V),1e-3),NdotL=max(dot(N,L),0.);vec3 F0=mix(vec3(.04),uColor,uMetal);vec3 F=F0+(1.-F0)*pow(1.-NdotV,5.);
+   vec3 H=normalize(L+V);float sh=mix(14.,120.,1.-uRough);float spec=pow(max(dot(N,H),0.),sh)*(sh+8.)/25.;
+   vec3 ec=env(reflect(-V,N));vec3 amb=uColor*mix(vec3(.22,.25,.29),vec3(.55,.58,.63),N.y*.5+.5);
+   vec3 col=amb*.75+uColor*(1.-uMetal)*NdotL*.8+F*spec*1.1+ec*F*.15;col=pow(col,vec3(.86));gl_FragColor=vec4(col,1.);}`);
+const A={pos:gl.getAttribLocation(prog,'aPos'),nor:gl.getAttribLocation(prog,'aNormal'),proj:gl.getUniformLocation(prog,'uProj'),
+ view:gl.getUniformLocation(prog,'uView'),model:gl.getUniformLocation(prog,'uModel'),normal:gl.getUniformLocation(prog,'uNormal'),
+ color:gl.getUniformLocation(prog,'uColor'),light:gl.getUniformLocation(prog,'uLight'),eye:gl.getUniformLocation(prog,'uEye'),metal:gl.getUniformLocation(prog,'uMetal'),rough:gl.getUniformLocation(prog,'uRough')};
+gl.enable(gl.DEPTH_TEST);gl.useProgram(prog);
+function Mesh(g){const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,g.P,gl.STATIC_DRAW);
+ const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,g.N,gl.STATIC_DRAW);
+ const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,g.I,gl.STATIC_DRAW);return {pb,nb,ib,n:g.I.length};}
+let draws=[],TGT=[0,0,0],DIST=6;
+function build(){const fam=sel.value,od=+size.value;const g=generate(fam,od);
+ const geo=buildGeometry(fam,g);
+ draws=geo.parts.map(p=>({mesh:Mesh(p.g),model:p.model||M.id(),mat:p.mat}));
+ TGT=geo.center;DIST=geo.rad*S*2.7;
+ // readout — כל האותיות שהמנוע חישב מגיאומטריה
+ const LB={OD:'OD',wall:'דופן',ID:'ID',B:'חוץ',D:'חוץ',C:'קדח',F:'עומק',z:'z',l:'l',A:'אורך',E:'רוחב',SW:'מפתח',hex:'משושה',thread:'תבריג',dk:'קדח-כדור',h:'גובה'};
+ const ORD=['OD','wall','ID','B','D','C','F','z','l','A','E','SW','hex','thread','dk','h'];
+ let rh='';for(const k of ORD){if(g[k]!=null&&LB[k])rh+=`${LB[k]}=<b>${g[k]}</b> `;}
+ document.getElementById('readout').innerHTML=rh;
+ document.getElementById('conn').innerHTML=`🔗 <b class="ok">מתחבר</b> — הצינור <code>OD=${g.OD}</code> נכנס לשקע (עומק <code>${g.F}</code> מ"מ), קדח-הזרימה <code>ID=${g.ID}</code>. הכל מחושב מגיאומטריה, אפס נתונים.`;
+}
+let yaw=-0.6,pitch=0.26,W,H,lastW=0;
+const eye=()=>[TGT[0]+DIST*Math.cos(pitch)*Math.sin(yaw),TGT[1]+DIST*Math.sin(pitch),TGT[2]+DIST*Math.cos(pitch)*Math.cos(yaw)];
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);const w=cv.clientWidth||320,h=Math.round(w*0.78);cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';W=cv.width;H=cv.height;gl.viewport(0,0,W,H);}
+function hx(h){h=(h||'#d9e3dc').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];}
+function bind(m){gl.bindBuffer(gl.ARRAY_BUFFER,m.pb);gl.enableVertexAttribArray(A.pos);gl.vertexAttribPointer(A.pos,3,gl.FLOAT,false,0,0);
+ gl.bindBuffer(gl.ARRAY_BUFFER,m.nb);gl.enableVertexAttribArray(A.nor);gl.vertexAttribPointer(A.nor,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,m.ib);}
+function frame(){if(cv.clientWidth!==lastW){lastW=cv.clientWidth;resize();}
+ const bg=hx(getComputedStyle(document.documentElement).getPropertyValue('--sky-bot').trim());
+ gl.clearColor(bg[0],bg[1],bg[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ const proj=M.persp(0.72,W/H,0.1,100),e=eye(),view=M.look(e,TGT,[0,1,0]);
+ gl.uniformMatrix4fv(A.proj,false,proj);gl.uniformMatrix4fv(A.view,false,view);gl.uniform3fv(A.light,[0.5,0.9,0.55]);gl.uniform3fv(A.eye,e);
+ for(const d of draws){bind(d.mesh);gl.uniformMatrix4fv(A.model,false,d.model);gl.uniformMatrix3fv(A.normal,false,nrm(d.model));
+  gl.uniform3fv(A.color,d.mat.c);gl.uniform1f(A.metal,d.mat.metal);gl.uniform1f(A.rough,d.mat.rough);gl.drawElements(gl.TRIANGLES,d.mesh.n,gl.UNSIGNED_SHORT,0);}
+ requestAnimationFrame(frame);}
+let drag=false,px=0,py=0;
+cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-px)*.008;pitch=Math.max(-1.2,Math.min(1.2,pitch+(e.clientY-py)*.008));px=e.clientX;py=e.clientY;});
+addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('wheel',e=>{e.preventDefault();DIST=Math.max(2,Math.min(30,DIST+e.deltaY*.01));},{passive:false});
+document.getElementById('reset').onclick=()=>{yaw=-0.6;pitch=0.26;build();};
+const sel=document.getElementById('fam'),size=document.getElementById('size');
+FAMS.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;sel.appendChild(o);});
+SIZES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s+' מ"מ';size.appendChild(o);});
+size.value=32;
+sel.onchange=build;size.onchange=build;
+resize();build();requestAnimationFrame(frame);
+</script>

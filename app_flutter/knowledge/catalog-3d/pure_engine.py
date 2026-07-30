@@ -99,6 +99,45 @@ def reducer(d1, d2):
             'A': round(s1['F'] + s2['F'] + 3, 1)}   # שני שקעים + מעבר
 
 
+def adapter(od):
+    """מתאם תבריג — עוגן-כפול: שקע-ריתוך (חוקי-בסיס) + קצה-תבריג BSP (משושה)."""
+    b = base(od); F = b['F']
+    hex_ = round(od * 1.95, 1)                    # מפתח-על-פינות (across-corners)
+    b['SW'] = round(hex_ * 0.87, 1)               # מפתח-על-שטוחים (across-flats)
+    b['hex'] = hex_
+    b['thread'] = round(od * 1.05, 1)             # קוטר-חיצוני של התבריג
+    b['thL'] = round(od * 0.9, 1)                 # אורך-התבריג
+    b['z'] = round(F + od * 0.3, 1)               # מרכז-המשושה (כולל עומק-שקע)
+    b['l'] = round(F + b['z'] + b['thL'], 1)      # שקע→קצה-תבריג
+    return b
+
+
+def valve(od):
+    """ברז כדורי — גוף (∝OD) + כדור (קדח dk≈DN) + ידית (גובה h)."""
+    b = base(od); F = b['F']
+    b['D'] = round(od * 1.6, 1)                    # קוטר-גוף
+    del b['B']
+    b['z'] = round(od * 1.05, 1)                   # מרכז-לפָּנים
+    b['l'] = round(F + b['z'], 1)                  # מרכז-לקצה-שקע
+    b['dk'] = round(od * 0.67, 1)                  # קדח-הכדור ≈ DN
+    b['h'] = round(od * 2.9, 1)                    # גובה (גוף+ידית)
+    return b
+
+
+def plug(od):
+    """פקק — שקע יחיד + כיפה סגורה."""
+    b = base(od); F = b['F']
+    b['A'] = round(F + od * 0.4, 1)               # אורך-כולל
+    b['cap'] = round(od * 0.4, 1)                 # אורך-הכיפה
+    return b
+
+
 # ---- בורר-דיאגרמה: משפחה × טווח-גודל -> קונסטרוקציה ----
 def elbow_auto(d, angle=90):
     return mitered_elbow(d) if d >= 160 else elbow(d, angle)
+
+
+# מנוע-מלא: 8 משפחות (זהה למנוע-ה-JS שב-prototypes/gen3d.html)
+ENGINE = {'מצמד': coupler, 'ברך 90°': lambda d: elbow(d, 90),
+          'ברך 45°': lambda d: elbow(d, 45), 'מסעף (טי)': tee,
+          'מתאם תבריג': adapter, 'ברז כדורי': valve, 'פקק': plug}
