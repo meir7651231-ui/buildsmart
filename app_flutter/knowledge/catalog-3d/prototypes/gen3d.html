@@ -64,8 +64,10 @@ function generate(fam,od){const b=base(od),F=b.F;
  if(fam.indexOf('מצרה')>=0){const SZ=[20,25,32,40,50,63,75,90,110,125];const i=SZ.indexOf(od);const d2=i>0?SZ[i-1]:Math.round(od*0.8);
   const s2=base(d2);b.d2=d2;b.B2=s2.B;b.C2=s2.C;b.F2=s2.F;b.A=R(F+s2.F+3);return b;}
  if(fam==='פקק'){b.A=R(F+od*0.4);b.cap=R(od*0.4);return b;}
+ if(fam==='רוכב'){b.D=R(od*1.333);delete b.B;b.d1=R(od*2);b.z=R(od*0.64);b.l=R(F+od*0.64);return b;}
+ if(fam==='צווארון'){b.D=R(od*1.15);b.D1=R(od*1.619);delete b.B;b.A=R(od*1.478);b.E=R(od*0.6);return b;}
  return b;}
-const FAMS=['מצמד','ברך 90°','ברך 45°','מסעף (טי)','מתאם תבריג','ברז כדורי','מצרה','פקק'];
+const FAMS=['מצמד','ברך 90°','ברך 45°','מסעף (טי)','מתאם תבריג','ברז כדורי','מצרה','פקק','רוכב','צווארון'];
 const SIZES=[20,25,32,40,50,63,75,90,110,125];
 /* ===== WebGL ===== */
 const cv=document.getElementById('c');const gl=cv.getContext('webgl',{antialias:true,alpha:false});
@@ -113,6 +115,17 @@ function buildGeometry(fam,g){
   parts.push({g:revS([[dep,g.B/2],[dep+g.cap,g.B/2*0.55],[dep+g.cap,0],[dep,0]]),mat:PP});
   parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
   return {parts,center:[(dep+g.cap)/2*S,0,0],rad:(dep+g.cap)/2+stub};}
+ if(fam==='רוכב'){const rMain=g.d1/2,mIn=rMain-g.d1/6,br=g.D/2,l=g.l,stubM=Math.max(g.d1*0.75,22),up=M.rotZ(Math.PI/2);
+  parts.push({g:tube(-stubM,stubM,rMain,mIn),mat:PIPE});
+  parts.push({g:tube(-g.OD*0.7,g.OD*0.7,rMain*1.2,rMain*0.99),mat:PP});
+  parts.push({g:tube(rMain*0.85,rMain+l,br,g.C/2),mat:PP,model:up});
+  parts.push({g:tube(rMain+l-dep,rMain+l+stub,bore*0.98,id),mat:PIPE,model:up});
+  return {parts,center:[0,(rMain+l)*0.42*S,0],rad:Math.max(stubM,rMain+l+stub)};}
+ if(fam==='צווארון'){const A=g.A,hub=g.D/2,fl=g.D1/2,th=Math.max(4,g.OD*0.18);
+  parts.push({g:tube(0,A,hub,g.C/2),mat:PP});
+  parts.push({g:tube(A,A+th,fl,g.C/2),mat:PP});
+  parts.push({g:tube(-stub,dep,bore*0.98,id),mat:PIPE});
+  return {parts,center:[(A+th)/2*S,0,0],rad:Math.max(fl,(A+th)/2+stub)};}
  if(fam.indexOf('מתאם')>=0){const sock=g.C/2, sockOut=g.B?g.B/2:g.OD*0.66;
   parts.push({g:tube(0,dep+3,sockOut,g.C/2),mat:PP});
   parts.push({g:hexRod(6,g.hex/2,g.OD*0.55,dep+3+g.OD*0.28),mat:BR});
@@ -182,8 +195,8 @@ function build(){const fam=sel.value,od=+size.value;const g=generate(fam,od);
  draws=geo.parts.map(p=>({mesh:Mesh(p.g),model:p.model||M.id(),mat:p.mat}));
  TGT=geo.center;DIST=geo.rad*S*2.7;
  // readout — כל האותיות שהמנוע חישב מגיאומטריה
- const LB={OD:'OD',wall:'דופן',ID:'ID',B:'חוץ',D:'חוץ',C:'קדח',F:'עומק',z:'z',l:'l',A:'אורך',E:'רוחב',SW:'מפתח',hex:'משושה',thread:'תבריג',dk:'קדח-כדור',h:'גובה'};
- const ORD=['OD','wall','ID','B','D','C','F','z','l','A','E','SW','hex','thread','dk','h'];
+ const LB={OD:'OD',wall:'דופן',ID:'ID',B:'חוץ',D:'חוץ',C:'קדח',F:'עומק',z:'z',l:'l',A:'אורך',E:'רוחב',SW:'מפתח',hex:'משושה',thread:'תבריג',dk:'קדח-כדור',h:'גובה',d1:'צינור-ראשי',D1:'אוגן'};
+ const ORD=['OD','wall','ID','B','D','D1','C','F','z','l','A','E','SW','hex','thread','dk','h','d1'];
  let rh='';for(const k of ORD){if(g[k]!=null&&LB[k])rh+=`${LB[k]}=<b>${g[k]}</b> `;}
  document.getElementById('readout').innerHTML=rh;
  document.getElementById('conn').innerHTML=`🔗 <b class="ok">מתחבר</b> — הצינור <code>OD=${g.OD}</code> נכנס לשקע (עומק <code>${g.F}</code> מ"מ), קדח-הזרימה <code>ID=${g.ID}</code>. הכל מחושב מגיאומטריה, אפס נתונים.`;
