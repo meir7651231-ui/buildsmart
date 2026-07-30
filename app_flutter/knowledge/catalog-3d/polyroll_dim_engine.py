@@ -57,6 +57,51 @@ def nominal(o, dm):
     return float(nums[-1]) if nums else None
 
 
+def _pfield(o, label):
+    for v in o.values():
+        if isinstance(v, str):
+            m = re.search(re.escape(label) + r'[:\s]*([\d.]+)', v)
+            if m:
+                return float(m.group(1))
+    return None
+
+
+class PipeBase:
+    """שכבת-הבסיס (Layer 0): הצינור.
+       ה-OD (קוטר חיצוני) הוא הקוטר הנומינלי — ה-anchor שכל אביזר יושב עליו.
+       דופן נקבעת ע"י מחלקת-הלחץ PN (תקן SDR):  SDR = OD/דופן ,  ID = OD − 2·דופן.
+       השקע של כל אביזר מקבל את ה-OD; לכן D_socket ≈ 1.33·OD, וה-ID הוא קדח-הזרימה."""
+
+    def __init__(self, rows):
+        self.tab = {}                       # (OD, PN) -> {od, wall, id, sdr}
+        for o in rows:
+            if o.get('A') != 'פולירול' or 'צינור' not in o.get('D', ''):
+                continue
+            od = _pfield(o, 'קוטר חיצוני')
+            if od is None:
+                continue
+            self.tab[(od, _pfield(o, 'PN') or 0)] = {
+                'od': od, 'wall': _pfield(o, 'עובי דופן'),
+                'id': _pfield(o, 'קוטר פנימי'), 'sdr': _pfield(o, 'SDR')}
+
+    def pipe(self, nominal, pn=16):
+        """הצינור לגודל נומינלי + מחלקת-לחץ. נופל חזרה ל-PN כלשהו לאותו OD."""
+        if (nominal, pn) in self.tab:
+            return self.tab[(nominal, pn)]
+        for (od, _), v in self.tab.items():
+            if od == nominal:
+                return v
+        return None
+
+    def anchors(self, nominal, pn=16):
+        """הבסיס שכל אביזר בגודל הזה נשען עליו."""
+        p = self.pipe(nominal, pn)
+        if not p:
+            return None
+        return {'pipe_OD': p['od'], 'flow_ID': p['id'],
+                'socket_D≈1.33·OD': round(1.333 * p['od'], 1)}
+
+
 class PolyrollDimEngine:
     def __init__(self, rows):
         self.table = defaultdict(dict)          # (family, series) -> {size: dims}
@@ -144,7 +189,19 @@ if __name__ == '__main__':
     print('  ----- |  %d/%d (%.0f%%)          |  %d/%d (%.0f%%)' %
           (te, tt, 100 * te / tt, tg, tt, 100 * tg / tt))
 
-    print('\n=== דוגמאות ייצור ===')
+    print('\n=== שכבת-הבסיס: הצינור (Layer 0) — anchor לכל אביזר ===')
+    base = PipeBase(rows)
+    for nom in [20, 32, 50, 110]:
+        a = base.anchors(nom, pn=16)
+        # אימות: D האמיתי של אביזר מול 1.33·OD מהבסיס
+        real_D = None
+        for (f, s), tbl in eng.table.items():
+            if nom in tbl and 'D' in tbl[nom] and abs(tbl[nom]['D'] - 1.333 * nom) < 3:
+                real_D = tbl[nom]['D']; break
+        print('  צינור %3g: OD=%g · ID(זרימה)=%g · D_socket≈%g   [D אמיתי באביזר: %s]' %
+              (nom, a['pipe_OD'], a['flow_ID'], a['socket_D≈1.33·OD'], real_D))
+
+    print('\n=== דוגמאות ייצור (אביזרים על הבסיס) ===')
     for fam, size in [('רוכב', 20), ('ברך', 110), ('מתאם', 32)]:
         for ser, (nm, out) in list(eng.query(fam, size).items())[:1]:
             s = ' · '.join('%s=%g(%s)' % (L, v, src) for L, (v, src) in out.items())
