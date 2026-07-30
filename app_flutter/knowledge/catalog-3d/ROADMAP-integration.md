@@ -1,5 +1,7 @@
 # 🔌 מנוע-החוקים → תכנון-חיבור · תוכנית-האב (self-configuring · 0→100)
 
+> **סטטוס:** `draft` · 2026-07-30 · (draft→accepted→implemented→archived, D-015). טרם מאונדקס ב-`knowledge/README.md` — דורש קבלה מהפרוטוקוליסט.
+
 > **המסמך-האב.** איך מחברים את מנוע-האביזרים הפרמטרי (`pure_engine.py`, 10 משפחות) ל"תכנון חיבור"
 > (Install Studio) של הענף החי — כך שהמערכת תפסיק לתלות ב**נתונים ידניים פר-SKU** ותתחיל **לגזור הכל מחוקים**.
 > מקורקע ב-file:line מ-worktree `bs-live` (ענף `claude/whats-happening-LyY9G`). כל שלב מוגדר:
@@ -114,6 +116,12 @@
 - **בסוף:** **מעלים קטלוג → הכל קם לבד.** המערכת מקימה את עצמה.
 
 ---
+
+## 4½ · ממשל ותיאום (נלמד מהידען · `AGENT_COORDINATION` · `DECISIONS`)
+- **בעלות-סוכנים — עבודה חוצת-זונות:** ציר-הנתונים (`familySpecFor`→`kVerifiedSpecs`, `lib/data/`) = **קטלגן** · המסך+פיצ׳ר-3D (`lib/features/fittings/`, `install_studio_screen`) = **מקבץ** · מסמכי-ידע (`knowledge/`) = **פרוטוקוליסט**. **אין drop חוצה-זונה בלי תיאום דרך המשתמש.**
+- **דורמנטיות (‏D-017 · שער #123):** דגלי `kFittingEngine*` **default-OFF** · `main.dart.js` byte-identical כבוי · שער חדש (הבא פנוי אחרי #123) עם **סריקת-מקור self-maintaining** שנופלת אם דגל-עתידי חסר assertion של default-OFF.
+- **מכבד החלטות-חיות ב-Install Studio:** `D-013` (dock 3-מצבים: ריק/פריט/2+ · loop רק ב-tempC>20) · `D-012` (איכות-BOM, zero-new-SKU). **פאזה C משתלבת בהן — לא ממציאה מחדש.**
+- **תהליך (`§257`):** `git pull --rebase` ראשון + hook-sync לפני push · לא לעקוף hooks (שגיאה→פרוטוקוליסט) · **דוח-ביצוע חובה בסוף סשן** (‏6 שדות).
 
 ## 5 · כללי-ברזל (‏R1–R8)
 - **R1** כל שלב: `flutter analyze` 0 · `flutter test` · **golden מול `pure_engine.py`** · knowledge-protocol.
