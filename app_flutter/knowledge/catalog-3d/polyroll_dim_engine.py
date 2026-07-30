@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+מנוע-מידות פולירול (Polyroll dimension engine)
+==============================================
+לומד את טבלאות-המידה פר-סדרה מהקטלוג המפורק, ו*מייצר* את סט-המידות המדויק
+לכל שאילתת (משפחה, גודל) — כמו נתוני-אמת, בלי לאחסן שאילתה מראש.
+מזין את מנוע הקטלוג→3D.
+
+מקור-אמת: catalog-dump.json  (‏1,948 מוצרים; כאן: אביזרי פולירול).
+
+עקרונות:
+  • הערך של מוצר שקיים בקטלוג  -> exact (0 סטייה) — זה הערך האמיתי מהיצרן.
+  • גודל בטווח סדרה נלמדת       -> interp (אינטרפולציה בין קטרים; חלק).
+  • גודל מחוץ לטווח / סדרה לא-נלמדת -> None + סיבה. *לעולם לא מנחש.*
+
+הרצה:
+    python3 polyroll_dim_engine.py catalog-dump.json
+"""
+import json, re, sys
+from collections import defaultdict
+
+CAT = {'מתאמים PPR': 'מתאם', 'מצמדים PPR': 'מצמד', 'ברכיים PPR': 'ברך',
+       'מסעפים PPR': 'טי', 'רוכבים PPR': 'רוכב', 'פקקים PPR': 'פקק'}
+STD = {20, 25, 32, 40, 50, 63, 75, 90, 110, 125, 160, 200, 250, 315, 355, 400}
+NORM = {'I': 'l', 'I1': 'l1', 'I2': 'l2'}         # OCR: uppercase-I הוא בעצם lowercase-l
+KP = re.compile(r'(?<![A-Za-z֐-׿])([A-Za-z][0-9]?)\s*:\s*([\d.]+)')
+
+
+def parse_dims(o):
+    """כל אותיות-המידה של מוצר, מנורמלות (I->l), case-sensitive."""
+    out = {}
+    for v in o.values():
+        if isinstance(v, str):
+            for m in KP.finditer(v):
+                k = m.group(1)
+                if k in ('PN', 'SDR'):
+                    continue
+                out.setdefault(NORM.get(k, k), float(m.group(2)))
+    return out
+
+
+def nominal(o, dm):
+    """המידה הנומינלית — מ-'d', אחרת מהשם (עוקף את הזווית 45°/90°)."""
+    if 'd' in dm:
+        return dm['d']
+    nm = re.sub(r'\d+\s*°', ' ', o.get('C', ''))   # הסר זווית
+    m = re.search(r'(\d{2,3})\s*[xX×]', nm)         # "20x1/2" -> 20
+    if m:
+        return float(m.group(1))
+    nums = [int(x) for x in re.findall(r'(?<![\d./])(\d{2,3})(?![\d./])', nm)]
+    for x in reversed(nums):
+        if x in STD:
+            return float(x)
+    return float(nums[-1]) if nums else None
+
+
+class PolyrollDimEngine:
+    def __init__(self, rows):
+        self.table = defaultdict(dict)          # (family, series) -> {size: dims}
+        self.name = {}                          # (family, series) -> example name
+        self.series_of = defaultdict(set)       # family -> {series}
+        self.raw = []                           # (family, series, size, sku, dims)
+        for o in rows:
+            if o.get('A') != 'פולירול' or o.get('D') not in CAT:
+                continue
+            fam = CAT[o['D']]
+            dm = parse_dims(o)
+            size = nominal(o, dm)
+            if size is None or not dm:
+                continue
+            ser = o['B'][:6]
+            self.table[(fam, ser)][size] = dm
+            self.name[(fam, ser)] = o.get('C', '')
+            self.series_of[fam].add(ser)
+            self.raw.append((fam, ser, size, o['B'], dm))
+
+    # ---- core: produce one dimension for a series+size ----
+    def _one(self, tbl, size, letter):
+        pts = sorted((s, d[letter]) for s, d in tbl.items() if letter in d)
+        if not pts:
+            return None, 'none'
+        for s, v in pts:
+            if s == size:
+                return v, 'exact'
+        xs = [p[0] for p in pts]
+        if size < xs[0] or size > xs[-1]:
+            return None, 'out-of-range'
+        ys = [p[1] for p in pts]
+        for i in range(len(xs) - 1):
+            if xs[i] <= size <= xs[i + 1]:
+                t = (size - xs[i]) / (xs[i + 1] - xs[i])
+                return round(ys[i] + t * (ys[i + 1] - ys[i]), 2), 'interp'
+
+    def produce(self, family, size, series):
+        tbl = self.table.get((family, series), {})
+        letters = set().union(*[set(d) for d in tbl.values()]) if tbl else set()
+        out = {}
+        for L in sorted(letters):
+            v, src = self._one(tbl, size, L)
+            if v is not None:
+                out[L] = (v, src)
+        return out
+
+    def query(self, family, size):
+        """כל הסדרות של המשפחה שיודעות לתת את הגודל הזה."""
+        res = {}
+        for (fam, ser), tbl in self.table.items():
+            if fam != family:
+                continue
+            out = self.produce(family, size, ser)
+            if out:
+                res[ser] = (self.name[(fam, ser)], out)
+        return res
+
+    def coverage(self):
+        rep = {}
+        for fam in CAT.values():
+            sers = self.series_of[fam]
+            ready = sum(len(self.table[(fam, s)]) >= 3 for s in sers)
+            prods = sum(1 for r in self.raw if r[0] == fam)
+            prod_ready = sum(1 for r in self.raw if r[0] == fam
+                             and len(self.table[(fam, r[1])]) >= 3)
+            rep[fam] = (prod_ready, prods, ready, len(sers))
+        return rep
+
+
+if __name__ == '__main__':
+    path = sys.argv[1] if len(sys.argv) > 1 else 'catalog-dump.json'
+    rows = json.load(open(path, encoding='utf-8'))
+    rows = rows[1:] if rows and 'sku' not in str(rows[0]).lower() else rows
+    eng = PolyrollDimEngine(rows)
+
+    print('=== כיסוי — מוצרים שהמנוע מייצר מהשם בלבד ===')
+    tr = tt = 0
+    for fam, (pr, pt, sr, st) in eng.coverage().items():
+        tr += pr; tt += pt
+        print('  %-5s %3d/%3d (%3.0f%%)  |  %d/%d סדרות מוכנות' %
+              (fam, pr, pt, 100 * pr / pt, sr, st))
+    print('  ----- סה"כ %d/%d = %.0f%%' % (tr, tt, 100 * tr / tt))
+
+    print('\n=== דוגמאות ייצור ===')
+    for fam, size in [('רוכב', 20), ('ברך', 110), ('מתאם', 32)]:
+        for ser, (nm, out) in list(eng.query(fam, size).items())[:1]:
+            s = ' · '.join('%s=%g(%s)' % (L, v, src) for L, (v, src) in out.items())
+            print('  %s %g  [%s]  %s' % (fam, size, nm[:26], s))
