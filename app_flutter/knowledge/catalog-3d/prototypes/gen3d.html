@@ -42,6 +42,32 @@
  .plan button{font-family:var(--fb);font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 11px}
  .plan label{font-size:12px;color:var(--soft);display:flex;align-items:center;gap:8px;flex:1;min-width:170px}
  .plan input[type=range]{flex:1;accent-color:var(--accent);min-width:90px}
+ #doc{position:fixed;inset:0;background:#eceee9;color:#1a2129;overflow:auto;z-index:50;display:none}
+ #doc.on{display:block}
+ .docbar{position:sticky;top:0;background:#1f2a37;color:#fff;display:flex;gap:8px;padding:10px 14px;align-items:center;z-index:2}
+ .docbar button{font-family:var(--fb);font-size:13px;cursor:pointer;border:1px solid #ffffff44;background:#ffffff1e;color:#fff;border-radius:8px;padding:8px 13px}
+ .docbar b{margin-inline-end:auto;font-family:var(--fh);font-size:14px}
+ .page{max-width:840px;margin:16px auto;background:#fff;color:#1a2129;padding:34px 42px 48px;box-shadow:0 12px 46px -22px #0008;font-family:var(--fb);line-height:1.5}
+ .page .head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:3px solid #2f6591;padding-bottom:10px;margin-bottom:6px}
+ .page h1.t{font-family:var(--fh);font-size:23px;margin:0;font-weight:800}
+ .page .head .meta{font-size:11.5px;color:#5a6b7b;text-align:left;font-family:var(--fd);line-height:1.7}
+ .page h3{font-family:var(--fh);font-size:15px;margin:22px 0 7px;color:#20486e;border-inline-start:4px solid #3f8f46;padding-inline-start:9px}
+ .page p{margin:6px 0}
+ .page table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
+ .page th,.page td{border:1px solid #cfd6de;padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums}
+ .page th{background:#eef2f6;font-weight:700}
+ .page tbody tr:nth-child(even) td{background:#f7f9fb}
+ .page .muted{color:#5a6b7b;font-size:11.5px}
+ .page code{font-family:var(--fd);background:#eef2f6;padding:1px 5px;border-radius:4px}
+ .page .note{background:#fff7e6;border:1px solid #f0d48a;border-radius:8px;padding:9px 12px;font-size:12px;margin:8px 0}
+ .page .seq{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12.5px}
+ .page .seq .b{background:#eaf3ee;border:1px solid #b8d9c4;border-radius:7px;padding:4px 9px}
+ .page .seq .b .n{font-family:var(--fd);color:#2f7d3a;font-weight:700}
+ .page .seq .ar{color:#8a9aa8}
+ .page .foot{margin-top:26px;border-top:1px solid #cfd6de;padding-top:10px;font-size:11px;color:#5a6b7b;display:flex;justify-content:space-between;gap:16px}
+ @media print{body{background:#fff}body>.wrap,body>footer{display:none!important}
+  #doc{position:static;display:block!important;background:#fff;overflow:visible}.docbar{display:none!important}
+  .page{box-shadow:none;margin:0;max-width:100%;padding:0 6mm}h3{break-after:avoid}table{break-inside:avoid}}
 </style>
 <div class="wrap">
  <div><span class="eyebrow">מנוע-חוקים · ‏0 נתונים</span>
@@ -68,11 +94,17 @@
  <div class="plan" id="planctrl" hidden>
   <button id="disc">✂️ נתק אחרון</button>
   <button id="clear">🗑 נקה</button>
+  <button id="mkdoc" style="border-color:var(--accent);color:var(--accent);font-weight:700">📋 תוכנית בנייה</button>
   <label>💥 פיצוץ <input type="range" id="boom" min="0" max="100" value="0"><span id="boomv" style="font-family:var(--fd);color:var(--accent);min-width:32px">0%</span></label>
  </div>
  <div class="readout" id="readout"></div>
  <div class="conn" id="conn"></div>
  <div class="ctrl"><button id="reset">איפוס מבט</button><span style="font-size:11px;color:var(--soft);align-self:center">גרור לסובב · גלגלת לזום</span></div>
+ <div id="doc">
+  <div class="docbar"><b>תוכנית ביצוע — מערכת צנרת PP-R</b>
+   <button id="docPrint">🖨️ הדפס / PDF</button><button id="docClose">✕ סגור</button></div>
+  <div id="docBody"></div>
+ </div>
  <footer>הגאומטריה נגזרת מחוקי-התכן בלבד (‏OD·SDR·1.33·עומק+z). דיוק ~1 מ"מ — בלתי-נראה ברינדור. במצב <b>תכנון חיבור</b>: כל אביזר מוסיף מפרק, הצינורות מחושבים, וברך מנתבת את המסלול ‎90°/45°. הכל מאותו מנוע — 0 נתונים.</footer>
 </div>
 <script>
@@ -326,6 +358,70 @@ function renderChips(){const box=document.getElementById('chain');
  if(!CHAIN.length){box.innerHTML='<span class="empty">— רצף ריק —</span>';return;}
  box.innerHTML=CHAIN.map((c,i)=>(i?'<span class="arrow">→</span>':'')+'<span class="chip"><span class="n">'+(i+1)+'</span>'+c.fam+' '+c.od+'<button data-i="'+i+'" aria-label="הסר">✕</button></span>').join('');
  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{CHAIN.splice(+b.dataset.i,1);buildPlan();});}
+/* ===== תוכנית-בנייה לארכיטקט (מסמך מודפס) ===== */
+const WELD={16:[5,4,2],20:[5,4,2],25:[7,4,2],32:[8,6,4],40:[12,6,4],50:[18,6,4],63:[24,8,6],75:[30,8,8],90:[40,8,8],110:[50,10,8],125:[60,10,8]};
+const SUPPORT={20:[0.65,0.45],25:[0.75,0.50],32:[0.90,0.60],40:[1.00,0.70],50:[1.10,0.80],63:[1.25,0.90],75:[1.35,0.95],90:[1.45,1.05],110:[1.55,1.15],125:[1.65,1.20]};
+function cfaces(fam,od,g){const F=g.F;
+ if(fam==='מצמד')return [['שקע ×2',g.A/2]];
+ if(fam.indexOf('ברך')>=0)return [['שקע ×2',g.l]];
+ if(fam.indexOf('טי')>=0)return [['רַץ ×2',R(g.E/2)],['הסתעפות',g.A]];
+ if(fam.indexOf('ברז')>=0)return [['שקע ×2',R((2*F+od*1.6)/2)]];
+ if(fam.indexOf('מצרה')>=0)return [['שקע גדול',F],['שקע קטן',g.F2]];
+ if(fam.indexOf('מתאם')>=0)return [['שקע',F],['תבריג','BSP']];
+ if(fam==='פקק')return [['שקע',F]];
+ if(fam==='צווארון')return [['שקע',R(g.A/2)]];
+ if(fam==='רוכב')return [['הסתעפות',g.l]];
+ return [['שקע',F]];}
+function genDoc(){
+ const today=new Date().toLocaleDateString('he-IL');
+ const fitm={},pipeLen={},sizes=new Set();
+ if(CHAIN.length){const addp=(od,l)=>{pipeLen[od]=(pipeLen[od]||0)+l;sizes.add(od);};
+  addp(CHAIN[0].od,STUB);let cur=CHAIN[0].od;
+  for(let i=0;i<CHAIN.length;i++){const c=CHAIN[i],k=c.fam+'|'+c.od;
+   fitm[k]=fitm[k]||{fam:c.fam,od:c.od,q:0};fitm[k].q++;sizes.add(c.od);
+   if(i>0)addp(cur,PIPELEN);const gg=generate(c.fam,c.od);cur=(c.fam.indexOf('מצרה')>=0&&gg.d2)?gg.d2:c.od;}
+  if(CHAIN[CHAIN.length-1].fam!=='פקק')addp(cur,STUB);}
+ const uniq=Object.values(fitm);
+ const useSizes=[...sizes].sort((a,b)=>a-b),WSZ=useSizes.length?useSizes:Object.keys(WELD).map(Number);
+ let h='<div class="page"><div class="head"><div><h1 class="t">תוכנית ביצוע — מערכת צנרת PP-R</h1>'
+  +'<div class="muted">איחוי-שקע (Socket Fusion) · PN20 · SDR6 · חומר PP-R type&nbsp;3</div></div>'
+  +'<div class="meta">תאריך: '+today+'<br>מתכנן: ________<br>פרויקט: ________<br>גיליון: 1/1</div></div>';
+ h+='<h3>1 · תיאור המסלול</h3>';
+ if(CHAIN.length){h+='<div class="seq"><span class="b">כניסה</span>';
+  CHAIN.forEach((c,i)=>{h+='<span class="ar">→</span><span class="b"><span class="n">'+(i+1)+'</span> '+c.fam+' Ø'+c.od+(isDirectional(c.fam)&&c.dir?(' '+DIRLBL[c.dir]):'')+'</span>';});
+  h+='</div>';}
+ else h+='<p class="muted">— לא נבחר מסלול. הטבלאות הכלליות (ריתוך·תמיכה·תקנים) תקפות; בנה מסלול במתכנן לקבלת כתב-כמויות ומידות. —</p>';
+ h+='<h3>2 · כתב כמויות (BOM)</h3>';
+ if(uniq.length){h+='<table><thead><tr><th>#</th><th>אביזר</th><th>קוטר</th><th>כמות</th></tr></thead><tbody>';
+  uniq.forEach((u,i)=>{h+='<tr><td>'+(i+1)+'</td><td>'+u.fam+'</td><td>Ø'+u.od+'</td><td>'+u.q+'</td></tr>';});
+  h+='</tbody></table><table><thead><tr><th>צינור PP-R</th><th>אורך נומינלי</th></tr></thead><tbody>';
+  Object.keys(pipeLen).sort((a,b)=>a-b).forEach(od=>{h+='<tr><td>Ø'+od+' PN20</td><td>'+(pipeLen[od]/1000).toFixed(2)+' מ׳</td></tr>';});
+  h+='</tbody></table><p class="muted">אורכי-הצינור נומינליים לפי המתכנן; לעדכן לפי מדידות-שטח (ראה §4).</p>';}
+ else h+='<p class="muted">ימולא מהמסלול.</p>';
+ h+='<h3>3 · טבלת מידות אביזרים (מחושב ממנוע-התכן)</h3>';
+ if(uniq.length){h+='<table><thead><tr><th>אביזר</th><th>קוטר</th><th>מידות (מ״מ)</th></tr></thead><tbody>';
+  uniq.forEach(u=>{const g=generate(u.fam,u.od),s=Object.keys(g).filter(k=>typeof g[k]==='number').map(k=>k+'='+g[k]).join(' · ');
+   h+='<tr><td>'+u.fam+'</td><td>Ø'+u.od+'</td><td><code>'+s+'</code></td></tr>';});
+  h+='</tbody></table><p class="muted">מקרא: F=עומק-ריתוך · l=מרכז→קצה · z=מרכז→פנים · A=אורך/גובה · E=רוחב-רץ · B/D=קוטר-חוץ · C=קדח-שקע · ID=קדח-זרימה. סטיית-עיגול מול התקן ~1 מ״מ.</p>';}
+ else h+='<p class="muted">ימולא מהמסלול.</p>';
+ h+='<h3>4 · אורכי-חיתוך — שיטת ניכוי (Z)</h3>'
+  +'<p>אורך-חיתוך לכל קטע = <code>מרחק בין-מרכזים − Z₁ − Z₂</code>, כאשר לכל קצה-אביזר <code>Z = (מרכז→פני-שקע) − עומק-ריתוך&nbsp;F</code>. הצינור נכנס עומק <code>F</code> לכל שקע.</p>';
+ if(uniq.length){h+='<table><thead><tr><th>אביזר (קצה)</th><th>קוטר</th><th>מרכז→פנים</th><th>F</th><th>Z (ניכוי)</th></tr></thead><tbody>';
+  uniq.forEach(u=>{const g=generate(u.fam,u.od);cfaces(u.fam,u.od,g).forEach(f=>{const cf=f[1],z=(typeof cf==='number')?R(cf-g.F):'—';
+   h+='<tr><td>'+u.fam+' ('+f[0]+')</td><td>Ø'+u.od+'</td><td>'+cf+'</td><td>'+(g.F??'—')+'</td><td>'+z+'</td></tr>';});});
+  h+='</tbody></table>';}
+ h+='<table><thead><tr><th>Ø</th>'+WSZ.map(s=>'<th>'+s+'</th>').join('')+'</tr></thead><tbody><tr><td>עומק-ריתוך F</td>'+WSZ.map(s=>'<td>'+(DEPTH[s]??'—')+'</td>').join('')+'</tr></tbody></table>';
+ h+='<h3>5 · פרמטרי ריתוך-שקע (DVS 2207-11)</h3><p>טמפ׳ ראש-ריתוך <b>260°C</b>. לנקות · לסמן עומק · לחמם · לחבר · לצנן:</p>';
+ h+='<table><thead><tr><th>Ø מ״מ</th><th>חימום (שנ׳)</th><th>חיבור מרבי (שנ׳)</th><th>קירור (דק׳)</th></tr></thead><tbody>';
+ WSZ.forEach(s=>{const w=WELD[s];if(w)h+='<tr><td>'+s+'</td><td>'+w[0]+'</td><td>'+w[1]+'</td><td>'+w[2]+'</td></tr>';});
+ h+='</tbody></table><div class="note">⚠️ ערכי-ייחוס לפי DVS 2207-11 / נתוני-יצרן טיפוסיים. יש לאמת מול דף-הנתונים של הצינור הספציפי ותנאי-הסביבה (מתחת ל-5°C — להאריך חימום). ריתוך בידי מתקין מוסמך בלבד.</div>';
+ h+='<h3>6 · מרווחי-תמיכה (ייחוס)</h3><table><thead><tr><th>Ø מ״מ</th><th>אופקי — קר (מ׳)</th><th>אופקי — חם (מ׳)</th></tr></thead><tbody>';
+ WSZ.forEach(s=>{const v=SUPPORT[s];if(v)h+='<tr><td>'+s+'</td><td>'+v[0].toFixed(2)+'</td><td>'+v[1].toFixed(2)+'</td></tr>';});
+ h+='</tbody></table><p class="muted">PP-R עם התפשטות-תרמית ~0.15 מ״מ/מ׳·°C — לתכנן זרועות/לולאות-התפשטות בקווים חמים ארוכים ולעגן נקודות-קבע.</p>';
+ h+='<h3>7 · מבחן-לחץ והתקנה</h3><p>מילוי במים ושחרור-אוויר. מבחן ב-<b>1.5× לחץ-העבודה</b> (מינ׳ לפי התקן). PP-R מתרחב בלחץ — לשמור 30 דק׳ עם השלמת-שאיבה, ואז בדיקת-אטימות ~2 שעות. אין להתקין מתחת ‎5°C ללא נהלים מיוחדים.</p>';
+ h+='<h3>8 · תקנים</h3><p class="seq"><span class="b">DIN 8077/8078</span> <span class="b">ISO 15874</span> <span class="b">EN ISO 15874</span> <span class="b">DVS 2207-11 (ריתוך)</span> <span class="b">PN20 · SDR6</span></p>';
+ h+='<div class="foot"><span>מידות ממנוע-תכן פרמטרי (‏OD·SDR·עומק+z) — סטייה ~1 מ״מ מול עיגול-התקן.</span><span>אישור: ________</span></div></div>';
+ document.getElementById('docBody').innerHTML=h;document.getElementById('doc').classList.add('on');}
 let yaw=-0.6,pitch=0.26,W,H,lastW=0;
 const eye=()=>[TGT[0]+DIST*Math.cos(pitch)*Math.sin(yaw),TGT[1]+DIST*Math.sin(pitch),TGT[2]+DIST*Math.cos(pitch)*Math.cos(yaw)];
 function resize(){const dpr=Math.min(devicePixelRatio||1,2);const w=cv.clientWidth||320,h=Math.round(w*0.78);cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';W=cv.width;H=cv.height;gl.viewport(0,0,W,H);}
@@ -364,5 +460,8 @@ document.getElementById('disc').onclick=()=>{CHAIN.pop();buildPlan();};
 document.getElementById('clear').onclick=()=>{CHAIN=[];buildPlan();};
 const boom=document.getElementById('boom');let bp=false;
 boom.oninput=()=>{document.getElementById('boomv').textContent=boom.value+'%';if(MODE!=='plan')return;if(bp)return;bp=true;requestAnimationFrame(()=>{bp=false;buildPlan();});};
+document.getElementById('mkdoc').onclick=genDoc;
+document.getElementById('docClose').onclick=()=>document.getElementById('doc').classList.remove('on');
+document.getElementById('docPrint').onclick=()=>{try{window.print();}catch(e){}};
 resize();build();requestAnimationFrame(frame);
 </script>
