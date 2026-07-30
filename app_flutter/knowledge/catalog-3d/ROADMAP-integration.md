@@ -123,15 +123,20 @@
 - **מכבד החלטות-חיות ב-Install Studio:** `D-013` (dock 3-מצבים: ריק/פריט/2+ · loop רק ב-tempC>20) · `D-012` (איכות-BOM, zero-new-SKU). **פאזה C משתלבת בהן — לא ממציאה מחדש.**
 - **תהליך (`§257`):** `git pull --rebase` ראשון + hook-sync לפני push · לא לעקוף hooks (שגיאה→פרוטוקוליסט) · **דוח-ביצוע חובה בסוף סשן** (‏6 שדות).
 
-## 5 · כללי-ברזל (‏R1–R8)
-- **R1** כל שלב: `flutter analyze` 0 · `flutter test` · **golden מול `pure_engine.py`** · knowledge-protocol.
-- **R2** keystone: ענף-הפיזיקה של אינסטלציה **byte-identical** — רק `putIfAbsent`, לעולם לא דורסים ידני.
-- **R3** הכל מגודר-בדגל (`kFittingEngine*` default OFF) · הפיך.
-- **R4** מקור-אמת אחד: **חוק אחד פר-משפחה** — לא נתון פר-SKU.
-- **R5** כל טענה מקורקעת ב-file:line בקוד החי.
-- **R6** answer-equivalent מול fixtures — לא "byte-identical" על נתון-נגזר.
-- **R7** wire → helper → golden → commit. אין commit בלי בדיקה.
-- **R8** מותג בלי-מידות אינו חוסם — משפחה+גודל מספיקים.
+## 5 · כללי-ברזל (‏R1–R13 · נלמד מ-`MASTER_PROTOCOL`+`VERIFICATION_PROTOCOL`+`CARRY_FORWARD`)
+- **R1 · סולם L0–L7 לכל commit:** analyze+format (L0) · test (L1) · **מוטציה L3 לכל שינוי-לוגיקה** (`mutation_verify.sh`: אדום→שחזור→ירוק→`mutation_log`) · knowledge L6 (verdict + `knowledge_protocol_test`) · hooks L7 (‏**לא לעקוף** → פרוטוקוליסט). **+ golden מול `pure_engine.py`.**
+- **R2 · keystone:** אינסטלציה **byte-identical** — רק `putIfAbsent`, לעולם לא דורסים ידני.
+- **R3 · דגל + שער:** `kFittingEngine*` default-OFF (‏D-017) · **רישום ב-`GATE_REGISTRY.md` באותו commit** (‏T7/#66).
+- **R4 · Helper-First:** כל לוגיקה = helper טהור (בלי BuildContext/ref/side-effects) + boundary-tests + **רישום ב-`_kRequiredHelpers`** (regression_gate).
+- **R5 · `kCatalogProducts` לרוחב ה-UI, לעולם לא `kLipskeyCatalog`** (שער 114) — אחרת חוליות/PPR = כרטיס-לבן. **זו בדיוק הבעיה שהמנוע פותר** (‏T4/#69).
+- **R6 · Build Loop:** לכל שלב — שאלת-פתיחה (§ג.1: מה/מקור/תרגום/helper/verbatim/⛔) → 10-step → READ→PLAN→HELPER→TEST→WIRE→GATE→COMMIT. אין דילוג-בשקט.
+- **R7 · P-01 stuck-loop:** אותו כשל-שורש 2× → **עצור · אל תנסה שלישית · שאל את הבעלים.** (למשל רצפת ~1.3 מ״מ — לתעד ולהמשיך, לא "לנצח".)
+- **R8 · מסמך-ידע = שורה ב-README + status-header, אותו commit** (‏D-015/T6 · ≥27 יתומים נוצרו מהפרה).
+- **R9 · push רב-סוכני:** `fetch`→ahead/behind→`rebase`/`ff-only` · **לעולם לא `reset --hard`** · בדוק `.git/index.lock` (‏#63/#66).
+- **R10 · answer-equivalent** מול fixtures (`compat_50_samples`) — לא byte-identical על נתון-נגזר.
+- **R11 · file:line** לכל טענה.
+- **R12 · feedback שלילי מעורפל → שאלה-ממוקדת אחת, לא קוד** (‏#71 · הרחבת "אבחן 100% לפני פתרון").
+- **R13 · מותג בלי-מידות אינו חוסם** — משפחה+גודל מספיקים.
 
 ## 6 · אומדן ריאלי
 "‏0→100" = **טקסונומיית-משימות, לא אומדן-effort.** הרווח הגדול (‏פאזה 0+A) הוא ~תריסר commits בסיכון-אפס, ו**כבר פותח את חוליות + כל מותג עתידי**. `B/C/D/E` מוסיפים בהדרגה — אין big-bang, הכל על seams קיימים.
