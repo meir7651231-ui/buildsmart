@@ -4,6 +4,15 @@
 
 ---
 
+## #launch-g1 — 🟠 מותג + PWA: שם/כותרת עברית · RTL · splash ממותג · באנר-התקנה — 2026-08-01
+**קבוצה 1 מתוך הנחיית סגירת-האתר-להשקה** (SSOT: `knowledge/DIRECTIVE-close-web-for-launch.md` @nice-volta). **הפער האמיתי היה קטן מהמתואר** — האייקונים כבר מותגים (קסדה-כתומה, לא ה-Flutter-הכחול) וה-manifest כבר כתום `#FF7A18`; ה-SSOT תיאר "כחול-ברירת-מחדל" אך זה כבר בוצע בסבב קודם. מה שהושלם עכשיו:
+- **`web/index.html`:** `<html lang="he" dir="rtl">` · `<title>בנייה חכמה</title>` · `apple-mobile-web-app-title` + `apple-mobile-web-app-capable` + `<meta theme-color #FF7A18>` + `viewport viewport-fit=cover` + description עברית.
+- **splash ממותג:** מסך-פתיחה כתום עם לוגו-הקסדה + "בנייה חכמה" + ספינר, נמחק ב-`flutter-first-frame` (עם fallback 12s שלא ייתקע).
+- **באנר "התקן למסך הבית":** לוכד `beforeinstallprompt`, כפתור התקן/סגור, זוכר dismissal ב-localStorage, נעלם ב-`appinstalled`.
+- **`web/manifest.json`:** `name`/`short_name` = "בנייה חכמה" (היה "BuildSmart") + `lang:he`/`dir:rtl` + description עברית. צבעים/icons/display נשמרו.
+
+**byte-verified:** build web --release ✅ (Flutter **3.44.0** — לא 3.29; כל workflows-הדיפלוי מצמידים 3.44 · ה-`initialValue` API מאשר) · base-href הוחלף · **5/5 אייקונים byte-identical למקור** (לא-נגעתי) · manifest name="בנייה חכמה". גייט-commit: web-only ⇒ מדלג analyze/test · pre-push מריץ build מלא. ה-push → `firebase-hosting.yml` channel **live** ⇒ עולה לאתר-החי.
+
 ## #screen-mgmt-s11b — ✏️ דיוק-מיקום: ה-✎ מנקה את badge מספר-הפריטים — 2026-07-28
 **תיקון-דיוק (לאחר בדיקת-מספרים מול הקוד):** המרווח של ה-✎ מעל cart-FAB היה `+12px`, אך ה-badge (מספר-פריטים) בולט `top:-10` מעל הכפתור → נשארו רק **~2px** בין ה-✎ ל-badge (כמעט-נגיעה כשיש פריטים בסל). הוגדל ל-`+28px` ⇒ ~18px מעל ה-badge. שינוי בתוך גוף StudioOverlay המגודר `kStudioFlag` ⇒ production זהה-בייטים (ללא שינוי). analyze 0 · zero_regression 20/20.
 
