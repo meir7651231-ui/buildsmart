@@ -1371,7 +1371,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
               final cats = ref
                   .watch(catalogRepositoryProvider)
                   .catalogCategories()
-                  .where((c) => _categoryHasContent(c.title))
+                  .where((c) => categoryHasContent(c.title))
                   .toList();
               return ListView.builder(
                 controller: scrollCtrl,
@@ -1847,7 +1847,7 @@ class _FilteredCatalogList extends StatelessWidget {
     final indices = <int>[
       for (var i = 0; i < kCatalogCats.length; i++)
         if (selected.contains(kCatalogCats[i].title) &&
-            _categoryHasContent(kCatalogCats[i].title))
+            categoryHasContent(kCatalogCats[i].title))
           i,
     ];
     return ListView.separated(
@@ -1911,7 +1911,7 @@ class _EmptySection extends StatelessWidget {
 /// the browse list. Reversible data filter (mirrors wave-1's `where(...)`) —
 /// no `kCatalogCats`/`kCatalogTree` data is deleted; re-add a tree node and the
 /// category reappears automatically.
-bool _categoryHasContent(String title) {
+bool categoryHasContent(String title) {
   final node = _findCatalogTreeNodeByTitle(title);
   return node != null && node.children.isNotEmpty;
 }
@@ -1932,7 +1932,7 @@ List<Section> _catsForSystem(WaterSystem? system) {
   if (resolvedCatalogProducts.isEmpty) return const [];
   final out = <Section>[];
   for (final c in kCatalogCats) {
-    if (!_categoryHasContent(c.title)) continue;
+    if (!categoryHasContent(c.title)) continue;
     if (system == null) {
       out.add(c);
       continue;

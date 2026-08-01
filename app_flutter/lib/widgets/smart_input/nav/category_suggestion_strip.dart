@@ -28,7 +28,13 @@ class CategorySuggestionStrip extends ConsumerWidget {
     if (!on || a11y) {
       return const SizedBox.shrink(); // OFF / screen-reader → nothing
     }
-    final suggestions = [for (final c in kCatalogCats) Suggestion(c.title)];
+    // launch: offer ONLY categories that actually have content — a content-less
+    // category would drill into the "הקטגוריה הזו בבנייה" placeholder that the
+    // App Store rejects. Mirrors the catalog browse list's own content filter.
+    final suggestions = [
+      for (final c in kCatalogCats)
+        if (categoryHasContent(c.title)) Suggestion(c.title),
+    ];
     return SmartChipStrip(
       suggestions: suggestions,
       onPick: (s) => openCatalogCategory(ref, s.text),

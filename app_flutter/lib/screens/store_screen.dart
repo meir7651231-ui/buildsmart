@@ -1105,7 +1105,7 @@ class _StoreListState extends ConsumerState<_StoreList> {
         // selection / external jump, e.g. home_shell or the keyboard) falls
         // back to the default 'הכל' list honestly, never the gated grid.
         StoreSection.services =>
-          featOn(ref, 'orders', 'services')
+          (!kHideUnderConstruction && featOn(ref, 'orders', 'services'))
               ? const _ServicesGrid()
               : const _AllList(section: StoreSection.all),
         StoreSection.orders => const _OrdersList(),

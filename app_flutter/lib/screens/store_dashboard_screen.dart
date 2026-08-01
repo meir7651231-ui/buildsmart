@@ -1016,7 +1016,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         kStorePortalTiles
             .where(
               (t) =>
-                  t.kind != PortalKind.fleet && t.kind != PortalKind.autoStock,
+                  t.kind != PortalKind.fleet &&
+                  t.kind != PortalKind.autoStock &&
+                  // launch: hide the still-unwired barcode tool (reversible via
+                  // kHideUnderConstruction) so no public store user reaches its
+                  // "בבנייה" placeholder sheet (persona_portal barcode arm).
+                  !(kHideUnderConstruction && t.kind == PortalKind.barcode),
             )
             .toList();
     return GridView.count(

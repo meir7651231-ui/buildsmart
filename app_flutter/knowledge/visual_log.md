@@ -4,6 +4,13 @@
 
 ---
 
+## #launch-g3 — 🙈 הסתרת 3 placeholders פומביים (hide-only · fallbacks קיימים) — 2026-08-01
+**קבוצה 3 מתוך SSOT סגירת-האתר-להשקה — leak-hunt.** נחיל 4-auditors אימת נגישות; 3 placeholders "בבנייה"/"בקרוב" הגיעו למשתמש-לא-בעלים ב-web החי וגודרו. **שינויי הסתרה בלבד — אפס UI חדש**, ולכן ה-visual-verify הוא אישור *היעדר* ה-placeholder + שה-fallback הוא משטח-קיים-מאומת:
+- **store services** (מקלדת → יעד "שירותים" עקף את השער) → כעת `_AllList` (רשימת-הכל הקיימת) במקום גריד-"🚧 בבנייה".
+- **store portal "הפקת ברקודים"** → האריח סונן מהגריד תחת `kHideUnderConstruction` (בדיוק כמו fleet/autoStock שכבר מסוננים). אריח אחד פחות, אפס משטח חדש.
+- **category strip** (חי תחת `SMART_INPUT=true`) → מסונן לקטגוריות-עם-תוכן בלבד; פחות chips, ה-drill ל-`_TreeComingSoon` "הקטגוריה הזו בבנייה" (App-Store reject) לא נגיש.
+**אימות:** traces פר-נתיב של 4 auditors + `flutter analyze` **0 errors** + כל ה-fallbacks הם widgets קיימים-ומאומתים (לא נוצר UI חדש לצלם). הכול הפיך (keyed על `kHideUnderConstruction`). **שקיפות:** eye-check חי של זרימת store→services לא הורץ (דורש build עם backend מלא + persona-store); הביטחון נשען על אופי ההסתרה-בלבד + ה-fallbacks הקיימים + ה-traces.
+
 ## #launch-g1 — 🟠 מותג + PWA: שם/כותרת עברית · RTL · splash ממותג · באנר-התקנה — 2026-08-01
 **קבוצה 1 מתוך הנחיית סגירת-האתר-להשקה** (SSOT: `knowledge/DIRECTIVE-close-web-for-launch.md` @nice-volta). **הפער האמיתי היה קטן מהמתואר** — האייקונים כבר מותגים (קסדה-כתומה, לא ה-Flutter-הכחול) וה-manifest כבר כתום `#FF7A18`; ה-SSOT תיאר "כחול-ברירת-מחדל" אך זה כבר בוצע בסבב קודם. מה שהושלם עכשיו:
 - **`web/index.html`:** `<html lang="he" dir="rtl">` · `<title>בנייה חכמה</title>` · `apple-mobile-web-app-title` + `apple-mobile-web-app-capable` + `<meta theme-color #FF7A18>` + `viewport viewport-fit=cover` + description עברית.

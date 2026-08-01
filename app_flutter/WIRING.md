@@ -3610,3 +3610,10 @@ staged flag-flip → אישור-בעלים פר-שלב) · מה **לא** נכל�
 לא-נגוע** (capstone של test+docs; #123 נאכף דרך חבילת-הטסטים כמו #119/#120). **gate:** `flutter analyze` **0** ·
 `gate_123`(3/3) + `knowledge_protocol_test`(#94) ירוקים · אפס raw Color · אפס שינוי `lib/` ⇒ אפס-רגרסיה by-construction.
 **🏁🏁 הסטודיו (No-Code) הושלם 100% end-to-end — 5 עמודים בנויים, מוכחים-רדומים, byte-identical, צעד-אישור-בעלים אחד מהחיים.**
+
+### #launch-g3 — 🙈 leak-hunt: 3 placeholders פומביים גודרו — 2026-08-01
+**SSOT close-web-for-launch, קבוצה 3.** נחיל 4-auditors מצא ש-`kHideUnderConstruction` (חמוש, 47 מקומות) כבר מכסה את רוב ה-placeholders; 3 חרגו ממנו והגיעו למשתמש-לא-בעלים ב-web החי — כולם גודרו (הפיך, keyed על `kHideUnderConstruction`):
+1. **`store_screen.dart`** (services render-site) — מקטע "שירותים" מוסתר בכניסות הרגילות, אך יעד-ניווט-המקלדת ("שירותים") עקף את השער → "🚧 בבנייה". גודר ב-`!kHideUnderConstruction && featOn(...)` → סוגר מקלדת+chip+בחירה-ישנה בבת-אחת (fallback ל-`_AllList`).
+2. **`store_dashboard_screen.dart`** (`_portalTab`) — אריח "הפקת ברקודים" (לא-מחווט → `persona_portal` "יחובר בהמשך הפיתוח") סונן מגריד-הפורטל תחת השער, כמו fleet/autoStock.
+3. **`category_suggestion_strip.dart`** (חי תחת `SMART_INPUT=true`) — סונן לקטגוריות עם תוכן בלבד; קטגוריה-חסרת-תוכן הובילה ל-`_TreeComingSoon` "הקטגוריה הזו בבנייה" (App-Store reject). משתמש ב-`categoryHasContent()` שהפך public ב-`catalog_screen.dart`.
+`flutter analyze` 0 errors. פתוח לבעלים (מחוץ ל-scope): אי-דיוק מדיניות-פרטיות מול backend-חי + זהות-חברה בסוגריים + הצהרות-דמו — דורש קלט/אישור בעלים.
