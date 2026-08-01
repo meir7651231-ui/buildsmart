@@ -66,12 +66,15 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
   /// (approve/reject — UNCHANGED, its status-guard prevents a double-decide),
   /// then fire ONE 🔔 bell on the requester's per-username feed and post ONE
   /// chat line — to 'th-worker-contractor' (the contractor is the approver,
-  /// NOT the manager) — plus a contractor-side toast.
+  /// NOT the manager) — plus a contractor-side toast. On a reject, an optional
+  /// [reason] (the shared prompt) is surfaced to the worker — appended to the
+  /// bell body + chat line — so the rejection isn't reasonless.
   void _decide(
     BuildContext context,
     WidgetRef ref,
     VacationRequest r, {
     required bool approve,
+    String? reason,
   }) {
     final notifier = ref.read(vacationRequestsProvider.notifier);
     // A2 — fire the bell/chat/toast ONLY on a REAL transition (the engine returns
@@ -79,6 +82,13 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
     // deciding the same shared request — can't double-notify the worker.
     final fired = approve ? notifier.approve(r.id) : notifier.reject(r.id);
     if (!fired) return;
+    // A real rejection reason (the shared prompt) is surfaced to the worker —
+    // appended to BOTH the 🔔 bell body and the chat line — so the rejection
+    // isn't reasonless. Empty/absent (an approve, or a cancelled prompt) → no
+    // suffix, so the approve path is byte-for-byte unchanged.
+    final why = reason?.trim();
+    final reasonSuffix =
+        (!approve && why != null && why.isNotEmpty) ? ' · סיבה: $why' : '';
     // 🔔 the decision lands on the requester's bell (per-username — these are
     // worker requests, so it reaches exactly the worker who filed it). ONE
     // bell, matching the manager's single addNotification call.
@@ -86,7 +96,7 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
           username: r.username,
           emoji: approve ? '✅' : '❌',
           title: approve ? 'בקשת החופשה אושרה' : 'בקשת החופשה נדחתה',
-          body: r.range,
+          body: '${r.range}$reasonSuffix',
         );
     // The chat line goes to 'th-worker-contractor' (the worker's "קבלן"
     // thread) — the CONTRACTOR is the employer/approver here — sent as
@@ -97,7 +107,7 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
           BsRole.contractor,
           approve
               ? '✅ בקשת החופשה שלך (${r.range}) אושרה'
-              : '❌ בקשת החופשה שלך (${r.range}) נדחתה',
+              : '❌ בקשת החופשה שלך (${r.range}) נדחתה$reasonSuffix',
         );
     showToast(
       context,
@@ -265,12 +275,13 @@ class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
                         _decide(context, ref, r, approve: true),
                     onReject: () async {
                       // Optional rejection reason (the shared dialog): null =
-                      // cancelled, no reject. The reason itself is surfaced in
-                      // the toast/chat second-hand; the engine's reject is the
-                      // single source of truth (status-guarded, no double).
+                      // cancelled → no reject. A real reason is threaded into
+                      // [_decide], which surfaces it to the worker (🔔 bell body
+                      // + chat line); the engine's reject is the single source
+                      // of truth (status-guarded, no double).
                       final why = await promptRejectReason(context);
                       if (why == null || !context.mounted) return;
-                      _decide(context, ref, r, approve: false);
+                      _decide(context, ref, r, approve: false, reason: why);
                     },
                   ),
                   const SizedBox(height: BsTokens.space2),

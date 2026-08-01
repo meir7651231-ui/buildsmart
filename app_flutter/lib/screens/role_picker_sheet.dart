@@ -25,8 +25,9 @@ const Map<String, String> kPersonaDesc = {
 
 /// "מי אתה?" role picker — a top-anchored card of the 5 personas, ported from
 /// the prototype's role drawer (`toggleRoleDrawer`). Opened from the app-bar's
-/// top-right button. Tapping a role sets [activePersonaProvider] and routes to
-/// that persona's dashboard (or clears it, for contractor), then closes.
+/// top-right button. Tapping a role routes to that persona's dashboard board
+/// (behind its gate), or — for contractor — clears any active persona and
+/// returns to the main app, then closes.
 Future<void> showRolePicker(BuildContext context) {
   // S1.6 — persona = identity: when the signed-in user's custom claims carry
   // exactly ONE role, the switcher is locked (the server decides who you are;
@@ -79,7 +80,6 @@ class _RolePickerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final active = ref.watch(activePersonaProvider);
     // Org module gates — a board whose module is off gets NO row here, and
     // this picker is the ONE mount per board, so every entry path degrades
     // together. Keyed by persona id; contractor is deliberately absent (the
@@ -124,8 +124,7 @@ class _RolePickerCard extends ConsumerWidget {
           ),
           const SizedBox(height: BsTokens.space3),
           for (final p in kPersonas)
-            if (moduleOn[p.id] ?? true)
-              _RoleRow(persona: p, isActive: active == p.id),
+            if (moduleOn[p.id] ?? true) _RoleRow(persona: p),
         ],
       ),
     );
@@ -133,17 +132,16 @@ class _RolePickerCard extends ConsumerWidget {
 }
 
 class _RoleRow extends ConsumerWidget {
-  const _RoleRow({required this.persona, required this.isActive});
+  const _RoleRow({required this.persona});
 
   final Persona persona;
-  final bool isActive;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: isActive ? const Color(0x14FF7A18) : const Color(0xFFF5F5F7),
+        color: const Color(0xFFF5F5F7),
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -229,9 +227,9 @@ class _RoleRow extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  isActive ? Icons.check_circle : Icons.chevron_left,
-                  color: isActive ? BsTokens.brand : const Color(0xFFBBBBBB),
+                const Icon(
+                  Icons.chevron_left,
+                  color: Color(0xFFBBBBBB),
                 ),
               ],
             ),

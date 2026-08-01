@@ -341,8 +341,12 @@ class _TypesSection extends ConsumerWidget {
         // world (store_screen · 📦 הזמנות → OrderNotifSheet). They bind the SAME
         // notifSettingsProvider (typeOrders / typeShipments); every other type
         // below stays here.
+        // 🔑 This toggle gates the BUDGET-overrun feed ('חריגת תקציב',
+        // high-priority) via notifMutedSections (typePriceDrops →
+        // NotifSection.budget) — NOT price drops. Label matches the true
+        // effect; the persisted field name (typePriceDrops) is left unchanged.
         _SwitchRow(
-          label: 'מחירים במועדפים',
+          label: 'התראות תקציב',
           value: settings.typePriceDrops,
           onChanged:
               (v) => ref
@@ -550,10 +554,13 @@ class _ImportanceSection extends ConsumerWidget {
         _RadioGroupRow<NotifImportance>(
           label: 'רמת חשיבות',
           value: settings.importanceFilter,
+          // No 'critical' tier exists in the data model — passesImportance
+          // treats every non-'all' filter identically (== all || highPriority),
+          // so a 'קריטיות בלבד' option would behave exactly like 'חשובות בלבד'.
+          // Only the two meaningful tiers are offered.
           options: const [
             (value: NotifImportance.all, label: 'הכל'),
             (value: NotifImportance.important, label: 'חשובות בלבד'),
-            (value: NotifImportance.critical, label: 'קריטיות בלבד'),
           ],
           onChanged:
               (v) => ref

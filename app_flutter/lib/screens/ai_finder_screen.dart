@@ -283,43 +283,50 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       ),
                     ),
                     const SizedBox(height: BsTokens.space4),
-                    if (_loading)
-                      const Center(child: CircularProgressIndicator())
-                    else if (_failed)
-                      CfgText(
-                        'ai_finder_screen.t05',
-                        'משהו השתבש — נסה שוב.',
-                        // dangerDark for WCAG AA (parity with shared AiFailedState)
-                        style: TextStyle(
-                          color: BsTokens.dangerDark,
-                          fontSize: 14,
-                        ),
-                      )
-                    else if (_resultTitle != null) ...[
-                      Text(
-                        '${_resultTitle!}  ·  ${_products.length} מוצרים',
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: BsTokens.space2),
-                    ] else if (_searched)
-                      CfgText(
-                        'ai_finder_screen.t06',
-                        'לא נמצאו תוצאות — נסה מילים אחרות.',
-                        style: TextStyle(
-                          color: BsTokens.mutedLight,
-                          fontSize: 14,
-                        ),
-                      ),
                   ],
+                  // The results status renders REGARDLESS of the gateway: the
+                  // grounded literal `fuzzySearchProducts` runs FIRST in
+                  // `_search` and sets `_resultTitle` on a hit BEFORE any model
+                  // call, so a literal match surfaces even with AI off
+                  // (_loading / _failed only ever arise on the AI path).
+                  if (_loading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_failed)
+                    CfgText(
+                      'ai_finder_screen.t05',
+                      'משהו השתבש — נסה שוב.',
+                      // dangerDark for WCAG AA (parity with shared AiFailedState)
+                      style: TextStyle(
+                        color: BsTokens.dangerDark,
+                        fontSize: 14,
+                      ),
+                    )
+                  else if (_resultTitle != null) ...[
+                    Text(
+                      '${_resultTitle!}  ·  ${_products.length} מוצרים',
+                      style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: BsTokens.space2),
+                  ] else if (_searched)
+                    CfgText(
+                      'ai_finder_screen.t06',
+                      'לא נמצאו תוצאות — נסה מילים אחרות.',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 14,
+                      ),
+                    ),
                 ]),
               ),
             ),
-            // The result products — lazy, only when a search produced results.
-            if (aiAvailable && !_loading && !_failed && _resultTitle != null)
+            // The result products — lazy, only when a search produced results;
+            // gateway-INDEPENDENT so a grounded literal match shows with AI off
+            // (the AI prompt/description is the only gateway-gated part now).
+            if (!_loading && !_failed && _resultTitle != null)
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: BsTokens.space4,

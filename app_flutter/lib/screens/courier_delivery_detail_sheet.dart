@@ -11,11 +11,15 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/courier_dashboard_screen.dart'
+    show kCourierDeliveryCoins;
 import 'package:buildsmart/screens/persona_pod_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
+import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -401,6 +405,31 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
     );
     if (!context.mounted) return;
     ref.read(sysOrdersProvider.notifier).courierAdvance(order.id);
+
+    // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the courier
+    // dashboard card. Re-read to confirm the engine REALLY reached delivered
+    // (delivered is terminal + courierAdvance no-ops on it), so a no-op advance
+    // never pays out and the 🪙+🔔 pair can't double-fire for one order.
+    // stampCourier + clock already ran above — no double stamp; the bell fires
+    // only for a logged-in courier board session.
+    final after = ref.read(sysOrdersProvider);
+    final delivered =
+        wasTransit &&
+        after.any((x) => x.id == order.id && x.stage == OrderStage.delivered);
+    if (delivered) {
+      ref.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
+      final s = ref.read(boardAuthProvider);
+      if (s != null && s.role == BoardRole.courier) {
+        ref
+            .read(workerNotifsProvider.notifier)
+            .addNotification(
+              username: s.username,
+              emoji: '✅',
+              title: 'המשלוח נמסר — +$kCourierDeliveryCoins מטבעות',
+              body: '${order.id} · ${order.who}',
+            );
+      }
+    }
     showToast(context, 'המשלוח ${order.id} עודכן — מסונכרן עם החנות והמנהל ✓');
   }
 

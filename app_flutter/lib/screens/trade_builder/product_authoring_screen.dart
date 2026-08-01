@@ -27,7 +27,7 @@
 // Template → dry-run → ATOMIC commit: 'הורד תבנית' fills the paste box with
 // `generateCsvTemplate(the trade's defs)`; 'בדוק (dry-run)' runs the PURE
 // `parseAndValidateCsv` (domain/trade_import.dart) over the trade's slices +
-// its existing products and renders 'תקינים: N · שגיאות: M' plus the first 5
+// ALL authored products and renders 'תקינים: N · שגיאות: M' plus the first 5
 // error lines ('שורה R: <msg>'); 'ייבא' exists ONLY while the LAST report's
 // canCommit holds (zero errors AND ≥1 valid row — the atomicity is the gate:
 // anything less commits NOTHING), upserts every report.valid product, clears
@@ -220,8 +220,12 @@ class _ProductAuthoringState extends ConsumerState<ProductAuthoringScreen> {
   }
 
   /// s48: the dry-run — the PURE parse/validate over the paste, against the
-  /// trade's OWN slices (categories · defs · existing products). Empty paste
-  /// guards no-op (the pill is disabled-grey then anyway).
+  /// trade's OWN slices (categories · defs) but the GLOBAL product set for the
+  /// duplicate-sku check: `upsertProduct` matches by GLOBAL id (the sku IS the
+  /// id), so a sku already owned by ANOTHER trade must collide as an error
+  /// here (else the commit silently re-homes it — data loss), the same global
+  /// guard the add-form uses. Empty paste guards no-op (the pill is
+  /// disabled-grey then anyway).
   void _dryRun() {
     if (_csv.text.trim().isEmpty) return;
     final doc = ref.read(tradesStoreProvider);
@@ -231,7 +235,11 @@ class _ProductAuthoringState extends ConsumerState<ProductAuthoringScreen> {
         tradeId: widget.tradeId,
         categories: _cats(doc),
         defs: _defs(doc),
-        existingProducts: _products(doc),
+        // GLOBAL, not `_products(doc)`: `upsertProduct` matches by GLOBAL id
+        // (the sku IS the id), so a sku owned by ANOTHER trade MUST collide as
+        // an error here — else the commit silently re-homes it (data loss).
+        // Mirrors the add-form guard `doc.products.any((p) => p.id == sku)`.
+        existingProducts: doc.products,
       );
       _importedCount = null;
     });

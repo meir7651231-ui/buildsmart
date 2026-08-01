@@ -3450,11 +3450,11 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
   /// (#86.3) gets the bell only — see the inline comment below.
   void _decideVacation(VacationRequest r, {required bool approve}) {
     final notifier = ref.read(vacationRequestsProvider.notifier);
-    if (approve) {
-      notifier.approve(r.id);
-    } else {
-      notifier.reject(r.id);
-    }
+    // A2 — fire the bell/chat/toast ONLY on a REAL transition (the engine returns
+    // false on an already-decided row), so a double-tap — or the contractor
+    // deciding the same shared request — can't double-notify the requester.
+    final fired = approve ? notifier.approve(r.id) : notifier.reject(r.id);
+    if (!fired) return;
     // 🔔 #18 — the decision lands on the requester's bell (per-username, so
     // it is correct for a worker AND a courier alike).
     ref

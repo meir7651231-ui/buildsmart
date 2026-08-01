@@ -446,7 +446,7 @@ const List<SearchEntry> _kEngineRowsTail = [
   SearchEntry(emoji: '🔔', title: 'סוגי התראות',                   breadcrumb: 'הגדרות התראות',                    type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'התראות הזמנות',                 breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'התראות משלוחים',                breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'מחירים במועדפים',               breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
+  SearchEntry(emoji: '🔔', title: 'התראות תקציב',                  breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'מבצעים',                        breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'הצעות ספקים',                   breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'חזר למלאי',                     breadcrumb: 'הגדרות התראות › סוגי התראות',     type: SearchType.setting),

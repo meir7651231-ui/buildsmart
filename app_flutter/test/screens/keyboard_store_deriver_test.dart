@@ -565,26 +565,30 @@ void main() {
     });
 
     testWidgets(
-        'a service chip closure sets the services section (from all), no push',
+        'a service chip closure surfaces a "בקרוב" hint, no section change, no push',
         (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       final r = await pumpRunner(tester, container);
 
-      // Start on the default (all) so the closure makes a VISIBLE change to
-      // services — proving the runByChip closure really sets the provider.
+      // Start on the default (all); the honest hint must NOT silently navigate.
       expect(container.read(storeSectionProvider), StoreSection.all,
           reason: 'sanity: starts on the default section');
       final ctx = deriveStoreContext(const ServicesLocation());
 
       final before = r.pushed.length;
       ctx.row.runByChip['השכרת כלים']!(r.ref, r.context);
-      await tester.pump();
+      await tester.pump(); // build the SnackBar frame
 
-      expect(container.read(storeSectionProvider), StoreSection.services,
-          reason: 'the service chip sets the services section (keep-floating)');
+      expect(find.textContaining('בקרוב'), findsOneWidget,
+          reason: 'the service chip surfaces an HONEST "בקרוב" hint — never a '
+              'silent no-op (a per-service opener replaces it once a seam exists)');
+      expect(container.read(storeSectionProvider), StoreSection.all,
+          reason: 'the hint does NOT navigate — stays on the current section '
+              '(the SCREEN owns any real per-service nav)');
       expect(r.pushed.length, before,
-          reason: 'a service chip mutates a provider only — keep-floating');
+          reason: 'the chip itself pushes no route');
+      await tester.pumpAndSettle(); // drain the SnackBar timer before teardown
     });
   });
 }

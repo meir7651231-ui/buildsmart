@@ -763,6 +763,12 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       _pickerSiblings = null;
       _hPickerIndex = null;
       _hPickerTitle = null;
+      // Reset the stepper/unit state so a recycled row doesn't leak the previous
+      // product's selection; build() then re-derives _qty from the live cart for
+      // the new product (mirrors the grid card's cart-driven state).
+      _open = false;
+      _qty = 1;
+      _unit = _Unit.single;
     }
   }
 
@@ -1010,9 +1016,19 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     // Use .select so only THIS row rebuilds when its own cart membership changes
     // (not on every cart change from unrelated products). Uses the currently
     // displayed product's SKU (p = _localProduct ?? widget.product).
-    final inCart = ref.watch(
-        smartCartProvider.select((lines) => lines.any((l) => l.productKey == 'lip:${p.sku}')));
+    // Live cart qty for this product — mirrors the grid card
+    // (LipskeyProductGridCard), whose single source of truth is the live cart.
+    // .select so only THIS row rebuilds when its own cart qty changes.
+    final cartQty = ref.watch(smartCartProvider.select((lines) => lines
+        .where((l) => l.productKey == 'lip:${p.sku}')
+        .fold<int>(0, (s, l) => s + l.productQty)));
+    final inCart = cartQty > 0;
     _inCart = inCart; // cache for _image() helper which runs in the same frame
+    // Drive the stepper's local qty from the live cart so a product already in
+    // the cart (after a ListView recycle / re-entry / relaunch) shows its real
+    // quantity — the + button only renders when NOT in cart, so it can never
+    // reset an in-cart qty back to 1 (W-recycle overwrite).
+    if (inCart) _qty = max(1, cartQty ~/ _unitMult);
     final selected = inCart;
     final highlight = selected || _open;
     final surface = Theme.of(context).colorScheme.surface;
@@ -1443,10 +1459,11 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           // top zone
           SizedBox(
             height: 34,
-            child: Center(child: _open ? _unitToggle() : const SizedBox()),
+            child: Center(
+                child: (_open || _inCart) ? _unitToggle() : const SizedBox()),
           ),
           // middle zone
-          _open ? _stepper() : _plusBtn(),
+          (_open || _inCart) ? _stepper() : _plusBtn(),
           // bottom zone — details (opens sheet)
           GestureDetector(
             onTap: _openSheet,

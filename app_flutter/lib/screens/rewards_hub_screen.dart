@@ -1,6 +1,7 @@
 import 'package:buildsmart/config/app_brand.dart';
 import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/rewards_state.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show cfgRadius;
 import 'package:buildsmart/theme/tokens.dart';
@@ -290,11 +291,18 @@ class _Coupons extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
-                const SizedBox(height: 8),
-                _CardBtn(
-                  label: 'שמור קופון',
-                  onTap: () => showToast(context, 'הקופון נשמר לארנק שלך'),
-                ),
+                // 'שמור קופון' persists nothing — there is no coupon wallet to
+                // save into yet, so the toast is a fake success. Hidden for
+                // review until the wallet backend lands; the button stays in
+                // code (reversible), mirroring the kHideUnderConstruction gates
+                // used elsewhere.
+                if (!kHideUnderConstruction) ...[
+                  const SizedBox(height: 8),
+                  _CardBtn(
+                    label: 'שמור קופון',
+                    onTap: () => showToast(context, 'הקופון נשמר לארנק שלך'),
+                  ),
+                ],
               ],
             ),
           ),

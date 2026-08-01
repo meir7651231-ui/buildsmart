@@ -2415,3 +2415,10 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## swarm-r2e — סוף כיסוי-composite — שינוי-נראה: **לא (ברירת-מחדל) / כן (org מסתיר)** — 2026-07-27
 **ברירת-מחדל:** אפס. **org שמסתיר:** הכפתור/כרטיס/pill השלם נעלם בכל הזנב (signature/consent/coming_soon/courier/docs/smart…). **בטיחות:** יציאות+consent-accept+docs-gate `critical:true`. **הפיכות:** הסרת עטיפות.
+
+## #launch-verify-fixes — 🔧 17 באגי-פקד תוקנו (audit 12-lens · "עושה מה שצריך") — 2026-08-01
+נחיל 12-auditors סרק **כל ~1369 הפקדים** ב-~171 מסכים/widgets על 3 צירים (מחווט · מציג · נרשם). מ-~1369, ~1352 עשו בדיוק את עבודתם; **17 באגים אמיתיים** ("מחווט אך לא עושה את עבודתו") תוקנו — כולם הפיכים/כנים:
+- **[HIGH crash]** `catalog_screen:6541` — ⓘ אביזר עשה `acc.price!` על nullable → קריסה. גודר: `acc.price!=null ? ₪.. : 'לפי ספק'` (מראה `_AccRow`).
+- **[MED]** תגמול-משלוח (`courier_delivery_detail`+`persona_pod`) → נוסף awardCoins+פעמון (מראה כרטיס-הלוח) · vacation double-notify → `if(!fired)return` (`manager_dashboard`) · "שמור קופון" (`rewards_hub`) → מוסתר תחת kHideUnderConstruction (אין ארנק — לא toast-מזויף) · 6 צ'יפי-"שירותים" (`keyboard_store_deriver`) → `_comingSoon('פתיחת שירות')` במקום no-op שקט · CSV cross-trade (`product_authoring`) → בדיקת-כפילות גלובלית (לא דורס מסחר אחר) · cart qty (`lipskey_products` list-row) → sync מ-smartCartProvider (לא דורס 5→1) · notif toggle (`notif_settings`) → תווית 'התראות תקציב' (תואם האפקט האמיתי) + מראה ב-`search_index`.
+- **[LOW]** vacation reason מושחל לפעמון/צ'אט (`contractor_hr`) · busy-guard חי (`customer_import`) · isActive מת הוסר (`role_picker`) · sortDefault דירוג/מרחק מוסתרים (`store_settings`) · טיר 'קריטיות' כפול הוסר (`notif_settings`) · worker-attendance send-guard (`worker_attendance`) · ai-finder תוצאות-ליטרל מוצגות גם ב-AI-off (`ai_finder`).
+**אימות:** `flutter analyze` **0 errors** · `keyboard_store_deriver_test` (updated) + `legal_texts_test` ירוקים · כל fixer אימת שאין test שנשבר. visual-verify: שינויי-התנהגות/תווית/הסתרה — נבדקו דרך traces של ה-auditors + analyze + tests; ה-runtime smoke (Chromium) בשלב הבא מאשר חזותית.

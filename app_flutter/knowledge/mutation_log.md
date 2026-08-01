@@ -1944,3 +1944,9 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** החזרת ההצהרה השגויה (הסרת `Firestore`/`me-west1` מהמדיניות) → הבדיקה `privacy discloses the live Firebase backend` נכשלת מיידית ⇒ האסרשן אמת-פועל. תקלה #2: השארת `kCurrentPolicyVersion` על 1 → הבדיקה `policy version bumped to 2` נכשלת ⇒ מוכיח את חובת ה-re-notice (תיקון-13).
 - **בטיחות:** const-data בלבד — אפס לוגיקה/widget; placeholders זהות-חברה נשמרו (מילוי-בעלים).
 - **אימות:** `flutter analyze` 0 · `test/legal_texts_test.dart` (חדש) · `legal_screen_test` נשאר ירוק.
+
+## #launch-verify-search-mirror — search-index label sync (2026-08-01)
+- **הנכס:** `lib/data/search_index.dart:449` — כותרת רשומת-חיפוש `'מחירים במועדפים'` → `'התראות תקציב'` (מראה של notif_settings FIX 2; התווית תואמת כעת את האפקט האמיתי — השתקת התראות-תקציב).
+- **תקלה שהוזרקה (mutation-sensitivity):** החזרת הכותרת הישנה → חיפוש "מחירים במועדפים" מוביל להגדרה בשם "התראות תקציב" (אי-עקביות תצוגה גלויה למשתמש).
+- **בטיחות:** const-data בלבד (רשומת-חיפוש); אפס לוגיקה; analyze 0.
+- **אימות:** analyze 0 · legal_texts_test + keyboard_store_deriver_test ירוקים.

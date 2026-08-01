@@ -56,42 +56,52 @@ class _CustomerImportSheetState extends ConsumerState<_CustomerImportSheet> {
   QualityReport? _quality;
 
   Future<void> _downloadTemplate() async {
-    final ok = await ref.read(downloadTextFileProvider)(
-      'customers-template.csv',
-      customerCatalogTemplateCsv(),
-      'text/csv;charset=utf-8',
-    );
-    if (!mounted) return;
-    showToast(
-      context,
-      ok ? 'התבנית ירדה — פתחו באקסל, מלאו והעלו' : 'הורדה זמינה בגרסת-הדפדפן',
-    );
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final ok = await ref.read(downloadTextFileProvider)(
+        'customers-template.csv',
+        customerCatalogTemplateCsv(),
+        'text/csv;charset=utf-8',
+      );
+      if (!mounted) return;
+      showToast(
+        context,
+        ok ? 'התבנית ירדה — פתחו באקסל, מלאו והעלו' : 'הורדה זמינה בגרסת-הדפדפן',
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _uploadCsv() async {
     if (_busy) return;
-    final picked = await ref.read(pickTextFileProvider)('.csv');
-    if (picked == null) return; // picker dismissed — silent
-    final report = parseCustomerCsv(picked.content);
-    if (!mounted) return;
-    if (!report.canCommit) {
-      setState(() => _report = report);
-      return;
+    setState(() => _busy = true);
+    try {
+      final picked = await ref.read(pickTextFileProvider)('.csv');
+      if (picked == null) return; // picker dismissed — silent
+      final report = parseCustomerCsv(picked.content);
+      if (!mounted) return;
+      if (!report.canCommit) {
+        setState(() => _report = report);
+        return;
+      }
+      ref.read(savedCustomersProvider.notifier).importAll(report.valid);
+      setState(() {
+        _report = null;
+        _committedCount = report.valid.length;
+        _quality = auditRows([
+          for (var i = 0; i < report.valid.length; i++)
+            QualityRow(
+              line: i + 1,
+              key: report.valid[i].phone,
+              name: report.valid[i].name,
+            ),
+        ]);
+      });
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
-    ref.read(savedCustomersProvider.notifier).importAll(report.valid);
-    setState(() {
-      _busy = false;
-      _report = null;
-      _committedCount = report.valid.length;
-      _quality = auditRows([
-        for (var i = 0; i < report.valid.length; i++)
-          QualityRow(
-            line: i + 1,
-            key: report.valid[i].phone,
-            name: report.valid[i].name,
-          ),
-      ]);
-    });
   }
 
   ButtonStyle _brandFill(BuildContext context) => ElevatedButton.styleFrom(

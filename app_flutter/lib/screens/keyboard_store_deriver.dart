@@ -43,8 +43,7 @@ import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbStoreNodes;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbPredRow, KbRunByChip, KbUpdatesContext;
-import 'package:buildsmart/screens/store_screen.dart'
-    show StoreSection, storeSectionProvider;
+import 'package:buildsmart/screens/store_screen.dart' show StoreSection;
 import 'package:buildsmart/state/orders_engine.dart' show Order;
 import 'package:buildsmart/state/smart_cart.dart' show SmartCartLine;
 import 'package:buildsmart/state/store_location.dart';
@@ -71,8 +70,8 @@ const List<String> _kStoreSectionLabels = <String>[
 /// VERBATIM (same labels, same order) so the floating row matches the in-list
 /// service rows exactly. The services surface is static (backend-blocked), so —
 /// like the עדכונים notif-type chips — these are emitted from a const list. Each
-/// has no public per-service opener yet, so tapping is a SAFE keep-floating no-op
-/// (re-assert the services section; see [_keepInServices]).
+/// has no public per-service opener yet, so tapping surfaces an HONEST "בקרוב"
+/// hint (see [_comingSoon]) — never a silent no-op behind an actionable chip.
 const List<String> _kServiceLabels = <String>[
   'השכרת כלים',
   'פקדונות',
@@ -116,19 +115,7 @@ late final Map<String, KbDestination> _storeSectionByLabel =
   for (final d in kbDestinations()) d.label: d,
 };
 
-/// A SAFE keep-floating tap for a dynamic chip with no real per-item opener yet
-/// (a cart line, an order, a service): re-assert the [section] provider. This is
-/// a structural no-op when already on that section (the StateProvider skips the
-/// notify when the value is unchanged), so the overlay simply STAYS FLOATING and
-/// the screen underneath is untouched — the honest "keep-floating" deferral the
-/// plan calls for ("runByChip -> a safe action, e.g. scroll-to/keep-floating"),
-/// never a route push from the keyboard and never a crash. Wired to a real
-/// per-item opener (scroll-to-line / open-order-detail) once those expose a seam.
-void Function(WidgetRef, BuildContext) _keepInSection(StoreSection section) =>
-    (ref, context) =>
-        ref.read(storeSectionProvider.notifier).state = section;
-
-/// An HONEST deferred tap for a dynamic ITEM chip (a cart line / an order) with
+/// An HONEST deferred tap for a dynamic ITEM chip (a cart line / an order / a service) with
 /// no real per-item opener yet: surface a brief "בקרוב" hint so the tap does
 /// something OBSERVABLE and truthful — NEVER a silent no-op behind an
 /// actionable-looking chip. It never navigates, never pushes a route, and never
@@ -282,7 +269,7 @@ KbUpdatesContext deriveStoreContext(
         // here (unique labels); kept to mirror the cart/orders arm shape.
         if (runByChip.containsKey(label)) continue;
         chips.add(label);
-        runByChip[label] = _keepInSection(StoreSection.services);
+        runByChip[label] = _comingSoon('פתיחת שירות');
       }
       return KbUpdatesContext(
         row: KbPredRow(

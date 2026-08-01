@@ -6538,7 +6538,9 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                     ),
                     const Spacer(),
                     Text(
-                      '₪${groupThousands(acc.price!)}',
+                      acc.price != null
+                          ? '₪${groupThousands(acc.price!)}'
+                          : 'לפי ספק',
                       style: const TextStyle(
                         color: BsTokens.brand,
                         fontSize: 18,

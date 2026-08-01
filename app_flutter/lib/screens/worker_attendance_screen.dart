@@ -224,6 +224,15 @@ class _WorkerAttendanceScreenState
     List<AttendanceDay> monthDays,
     Duration total,
   ) {
+    // Guard: send() is a silent no-op on an unknown thread — never mark
+    // "sent" or toast a success that did not happen (mirrors worker_forms).
+    final exists = ref
+        .read(chatEngineProvider)
+        .any((t) => t.id == 'th-worker-contractor');
+    if (!exists) {
+      showToast(context, 'שיחת הקבלן לא נמצאה — הדוח לא נשלח');
+      return;
+    }
     final text = '📋 דוח נוכחות ${_month.month}/${_month.year} — '
         '${session.displayName}: ${monthDays.length} ימי עבודה, '
         'סה"כ ${_fmtDur(total)} שעות';

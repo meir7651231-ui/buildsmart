@@ -30,13 +30,17 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/courier_dashboard_screen.dart'
+    show kCourierDeliveryCoins;
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
+import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -343,6 +347,31 @@ class PersonaPodSheet extends ConsumerWidget {
                   ref
                       .read(sysOrdersProvider.notifier)
                       .courierAdvance(order.id);
+                  // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the
+                  // courier dashboard card. Re-read to confirm the engine
+                  // REALLY reached delivered (terminal + courierAdvance no-ops
+                  // on it), so a no-op never pays out and the pair can't
+                  // double-fire. stampCourier + clock already ran above — no
+                  // double stamp; the bell fires only for the logged-in courier.
+                  final after = ref.read(sysOrdersProvider);
+                  final delivered = after.any(
+                    (x) => x.id == order.id && x.stage == OrderStage.delivered,
+                  );
+                  if (delivered) {
+                    ref
+                        .read(rewardsProvider.notifier)
+                        .awardCoins(kCourierDeliveryCoins);
+                    if (s != null && s.role == BoardRole.courier) {
+                      ref
+                          .read(workerNotifsProvider.notifier)
+                          .addNotification(
+                            username: s.username,
+                            emoji: '✅',
+                            title: 'המשלוח נמסר — +$kCourierDeliveryCoins מטבעות',
+                            body: '${order.id} · ${order.who}',
+                          );
+                    }
+                  }
                   unawaited(Navigator.of(context).maybePop());
                   showToast(
                     context,

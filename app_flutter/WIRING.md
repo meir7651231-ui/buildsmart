@@ -3617,3 +3617,8 @@ staged flag-flip → אישור-בעלים פר-שלב) · מה **לא** נכל�
 2. **`store_dashboard_screen.dart`** (`_portalTab`) — אריח "הפקת ברקודים" (לא-מחווט → `persona_portal` "יחובר בהמשך הפיתוח") סונן מגריד-הפורטל תחת השער, כמו fleet/autoStock.
 3. **`category_suggestion_strip.dart`** (חי תחת `SMART_INPUT=true`) — סונן לקטגוריות עם תוכן בלבד; קטגוריה-חסרת-תוכן הובילה ל-`_TreeComingSoon` "הקטגוריה הזו בבנייה" (App-Store reject). משתמש ב-`categoryHasContent()` שהפך public ב-`catalog_screen.dart`.
 `flutter analyze` 0 errors. פתוח לבעלים (מחוץ ל-scope): אי-דיוק מדיניות-פרטיות מול backend-חי + זהות-חברה בסוגריים + הצהרות-דמו — דורש קלט/אישור בעלים.
+
+### #launch-verify-fixes — 🔧 17 באגי-פקד ("מחווט אך לא עושה את עבודתו") תוקנו — 2026-08-01
+נחיל 12-auditors סרק כל ~1369 הפקדים (~171 מסכים) על מחווט/מציג/נרשם → 17 באגים אמיתיים תוקנו, כולם הפיכים/כנים:
+- **catalog** ⓘ אביזר null-price → 'לפי ספק' (לא קורס) · **courier** תגמול-משלוח ב-3 המסלולים (detail+POD+card) · **vacation** double-notify guard (manager) + reason מושחל (contractor) · **rewards** "שמור קופון" מוסתר (אין ארנק) · **keyboard** services chips → "בקרוב" · **studio** CSV cross-trade dup גלובלי · **lipskey** cart qty sync (לא דורס 5→1) · **notif** 'התראות תקציב' + search-index mirror · **role-picker** isActive-מת הוסר · **store-settings** sortDefault inert מוסתר · **notif** importance-tier כפול הוסר · **customer-import** busy-guard חי · **worker-attendance** send-guard · **ai-finder** literal results גם ב-AI-off.
+verify: `flutter analyze` 0 errors · keyboard_store_deriver_test(updated)+legal_texts_test ירוקים.

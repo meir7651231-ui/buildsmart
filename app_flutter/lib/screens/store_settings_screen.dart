@@ -513,10 +513,15 @@ class _DisplaySection extends ConsumerWidget {
         _RadioGroupRow<StoreSortDefault>(
           label: 'מיון ברירת מחדל',
           value: settings.sortDefault,
-          options: const [
+          options: [
             (value: StoreSortDefault.priceAsc, label: 'מחיר: זול → יקר'),
-            (value: StoreSortDefault.rating, label: 'דירוג גבוה'),
-            (value: StoreSortDefault.distance, label: 'מרחק קרוב'),
+            // rating/distance persist but nothing consumes them yet — only
+            // priceAsc orders the list (store_screen). Hidden for review,
+            // kept in code (reversible) like unitSystem/showStock below.
+            if (!kHideUnderConstruction) ...[
+              (value: StoreSortDefault.rating, label: 'דירוג גבוה'),
+              (value: StoreSortDefault.distance, label: 'מרחק קרוב'),
+            ],
           ],
           onChanged:
               (v) => ref
