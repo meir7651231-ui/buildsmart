@@ -1939,3 +1939,8 @@
 - **התקלה שהוזרקה:** הסרת ענף `isOwnerEmail(authEmail)` → הבדיקה `owner via AUTH email + blank doc email → active` נכשלת (Actual pending) ⇒ מוכיח שהמסלול-החדש load-bearing.
 - **למה:** #247 בדק `user.email` ממסמך-המשתמש — ריק כשהרישום היה בלי email → no-op. auth-email תמיד קיים לגוגל-לוגין.
 - **אימות:** analyze 0 · owner_approval_test 6/6.
+## #launch-legal-v2 — מדיניות-פרטיות מדויקת מול backend חי — 2026-08-01
+- **הנכס:** `kPrivacyPolicy` + `kTermsOfUse` + `kCurrentPolicyVersion` (`lib/data/legal_texts.dart`) — שוכתבו לשקף את ה-backend החי (Firestore באזור me-west1 · GA4 · Crashlytics · חשבון-רשום מסנכרן), במקום ההצהרה השגויה "אין שרת / הכל על המכשיר".
+- **תקלה שהוזרקה (mutation-sensitivity):** החזרת ההצהרה השגויה (הסרת `Firestore`/`me-west1` מהמדיניות) → הבדיקה `privacy discloses the live Firebase backend` נכשלת מיידית ⇒ האסרשן אמת-פועל. תקלה #2: השארת `kCurrentPolicyVersion` על 1 → הבדיקה `policy version bumped to 2` נכשלת ⇒ מוכיח את חובת ה-re-notice (תיקון-13).
+- **בטיחות:** const-data בלבד — אפס לוגיקה/widget; placeholders זהות-חברה נשמרו (מילוי-בעלים).
+- **אימות:** `flutter analyze` 0 · `test/legal_texts_test.dart` (חדש) · `legal_screen_test` נשאר ירוק.
