@@ -84,6 +84,27 @@ jobs:
         # back to the bundled catalog — C5.5). Reversible: drop these two flags.
         run: flutter build web --release --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com --dart-define=STORE_COMPARISON_UI=true ${{ vars.STUDIO_DART_DEFINES }}
 
+      - name: 🚀 Launch flags → run summary (verify backend / catalog / studio)
+        # Group-2 launch-verify (SSOT close-web-for-launch). The static defines are
+        # visible in the Build step above; the INVISIBLE part is the repo var
+        # STUDIO_DART_DEFINES (real backend + studio arming). Echo it so every live
+        # deploy self-documents its effective launch flags — auditable at a glance.
+        run: |
+          {
+            echo "### 🚀 Live launch flags — verification"
+            echo ""
+            echo "**Server catalog (static):** \`CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com\` + \`STORE_COMPARISON_UI=true\`"
+            echo ""
+            echo "**Backend + studio arming — \`vars.STUDIO_DART_DEFINES\` expanded to:**"
+            echo '```'
+            echo "${{ vars.STUDIO_DART_DEFINES }}"
+            echo '```'
+            echo ""
+            echo "- Real backend ⇐ \`USE_FIREBASE_BACKEND=true\` must appear above."
+            echo "- Server catalog ⇐ non-empty \`CATALOG_BASE_URL\` + backend ON ⇒ \`useServerCatalog=TRUE\`."
+            echo "- Studio ⇐ \`STUDIO=true\` above arms the seam; owner-gating (kStudioFlag + owner #84) is enforced in-app."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Write service account credentials
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
         env:
