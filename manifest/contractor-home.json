@@ -1,0 +1,76 @@
+{
+  "screen": "contractor-home",
+  "file": "app_flutter/lib/screens/smart_home_screen.dart",
+  "persona": "contractor",
+  "_note": "כפול-תפקיד: 'now' = מיפוי-הקוד הנוכחי · 'component' = חוזה-הרכיב-הנייד לפלטפורמה (מה צריך כדי לחלץ כאטום).",
+
+  "composer": {
+    "class": "SmartHomeBody",
+    "role": "מרכיב 8 סקציות; הפריסה data-driven",
+    "reads": ["catalogSettingsProvider", "screenSectionsProvider"]
+  },
+
+  "atoms": [
+    {
+      "id": "quickTools", "class": "_QuickTools", "labelHe": "כלים מהירים", "kind": "section",
+      "now":       { "elements": ["המלאי שלי", "משימות העבודה"], "reads": [], "actions": ["nav:StockScreen", "nav:tasks"], "embeds": ["sectionTitle", "miniTile"] },
+      "component": { "extractable": "clean", "props": [{ "name": "tools", "type": "list<{labelHe, action}>" }], "untangle": [] }
+    },
+    {
+      "id": "departments", "class": "_Departments", "labelHe": "מחלקות", "kind": "section",
+      "now":       { "elements": ["(אריחי-מחלקות דינמיים)"], "reads": ["homeDepartmentProvider"], "actions": ["set:homeDepartmentProvider", "set:mainTabProvider=1"], "embeds": ["sectionTitle", "miniTile"] },
+      "component": { "extractable": "needs-untangle", "props": [{ "name": "departments", "type": "list" }, { "name": "onSelect", "type": "callback" }], "untangle": ["לחשוף departments כ-prop", "onSelect כ-callback במקום כתיבה-ישירה ל-provider"] }
+    },
+    {
+      "id": "smartTree", "class": "_SmartTreeRow>_SmartTreeCard", "labelHe": "עץ חכם", "kind": "section",
+      "now":       { "elements": ["הוסף לסל"], "reads": ["catalog-products"], "actions": ["smartCartProvider.add"], "embeds": ["sectionTitle", "pad"] },
+      "component": { "extractable": "needs-untangle", "props": [{ "name": "products", "type": "list" }, { "name": "onAddToCart", "type": "callback" }], "untangle": ["מקור-מוצרים כ-prop", "onAddToCart במקום גישה-ישירה לעגלה"] }
+    },
+    {
+      "id": "workPath", "class": "_WorkPath", "labelHe": "מסלול עבודה חכם", "kind": "section",
+      "now":       { "elements": ["🛁 חדש — מאפס עד גמר", "גמר אמבטיה — מלווה אותך שלב-שלב", "4 שלבים בסדר הנכון…"], "reads": ["work-paths"], "actions": ["open:workPath"], "embeds": ["sectionTitle"] },
+      "component": { "extractable": "needs-untangle", "props": [{ "name": "paths", "type": "list" }, { "name": "onOpen", "type": "callback" }], "untangle": ["מקור-מסלולים כ-prop"] }
+    },
+    {
+      "id": "recentOrders", "class": "_RecentOrders>_OrderCard/_EmptyCard", "labelHe": "הזמנות אחרונות", "kind": "section",
+      "now":       { "elements": ["(כרטיסי-הזמנה + מצב-ריק)"], "reads": ["orders-provider"], "actions": ["open:order"], "embeds": ["orderCard", "emptyCard"] },
+      "component": { "extractable": "needs-untangle", "props": [{ "name": "orders", "type": "list" }, { "name": "onOpen", "type": "callback" }], "untangle": ["מקור-הזמנות כ-prop"] }
+    },
+    {
+      "id": "installStudio", "class": "_InstallStudioHero", "labelHe": "תכנון חיבור", "kind": "hero",
+      "now":       { "elements": ["תכנון חיבור", "בחר מה לחבר — נכין רשימת קנייה…"], "reads": [], "actions": ["nav:compatEngine"], "embeds": [], "gate": "compatOn" },
+      "component": { "extractable": "clean", "props": [{ "name": "onOpen", "type": "callback" }], "untangle": [] }
+    },
+    {
+      "id": "favorites", "class": "_Favorites", "labelHe": "מועדפים", "kind": "section",
+      "now":       { "elements": ["(מועדפים + מצב-ריק)"], "reads": ["favorites-provider"], "actions": ["remove/open:favorite"], "embeds": [] },
+      "component": { "extractable": "needs-untangle", "props": [{ "name": "favorites", "type": "list" }], "untangle": ["מקור-מועדפים כ-prop"] }
+    },
+    {
+      "id": "superFinder", "class": "_SuperFinderHero>_SuperFinderOpen", "labelHe": "מאתר-על", "kind": "hero",
+      "now":       { "elements": ["(גלגל-צירים)"], "reads": [], "actions": ["set:mainTabProvider=0"], "embeds": ["CatalogWheelScreen"], "gate": "kAxisDive" },
+      "component": { "extractable": "embeds-shared", "props": [], "untangle": ["CatalogWheelScreen = רכיב-משותף גדול → אטום נפרד משלו"] }
+    }
+  ],
+
+  "sharedPrimitives": [
+    { "id": "sectionTitle", "class": "_SectionTitle", "role": "כותרת-סקציה" },
+    { "id": "miniTile", "class": "_MiniTile", "role": "אריח-קיצור (onTap)" },
+    { "id": "pad", "class": "_Pad", "role": "ריפוד" },
+    { "id": "metrics", "class": "_Metrics", "role": "חישובי-גודל", "reads": ["catalogSettingsProvider"] }
+  ],
+
+  "dependencyLayer": [
+    "catalogSettingsProvider", "screenSectionsProvider", "homeDepartmentProvider",
+    "mainTabProvider", "smartCartProvider", "orders-provider", "favorites-provider",
+    "CatalogWheelScreen", "StockScreen"
+  ],
+
+  "summary": {
+    "atoms": 8, "sharedPrimitives": 4,
+    "clean": ["quickTools", "installStudio"],
+    "needsUntangle": ["departments", "smartTree", "workPath", "recentOrders", "favorites"],
+    "embedsShared": ["superFinder"],
+    "verifiedAgainst": ["smart_home_screen.dart", "element_registry.dart", "screen_sections.dart"]
+  }
+}
