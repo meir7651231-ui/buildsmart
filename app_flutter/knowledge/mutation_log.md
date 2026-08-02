@@ -1950,3 +1950,9 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** החזרת הכותרת הישנה → חיפוש "מחירים במועדפים" מוביל להגדרה בשם "התראות תקציב" (אי-עקביות תצוגה גלויה למשתמש).
 - **בטיחות:** const-data בלבד (רשומת-חיפוש); אפס לוגיקה; analyze 0.
 - **אימות:** analyze 0 · legal_texts_test + keyboard_store_deriver_test ירוקים.
+
+## #launch-order-email — customerEmail על ההזמנה (2026-08-02)
+- **הנכס:** שדה `Order.customerEmail` + `toDoc` (orders_firebase) — הנתיב שדרכו הפונקציה קוראת את מייל-הלקוח מ-Firestore.
+- **תקלה שהוזרקה (mutation-sensitivity):** השמטת `customerEmail` מ-`toJson` → הבדיקה `customerEmail survives toJson→fromJson` נכשלת ⇒ ה-round-trip load-bearing. תקלה #2: כתיבת customerEmail תמיד (בלי guard) → הבדיקה `absent customerEmail NOT written` נכשלת ⇒ מוכיח את הזהה-בייטים-כבוי.
+- **בטיחות:** כבוי (`kOrderEmail`=false) ⇒ '' ⇒ אין שדה בדוק.
+- **אימות:** analyze 0 · `order_customer_email_test` 3/3.

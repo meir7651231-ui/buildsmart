@@ -3628,3 +3628,10 @@ verify: `flutter analyze` 0 errors · keyboard_store_deriver_test(updated)+legal
 - **catalog_screen**: `catPhotoAsset(label)` + `catAvatar(label,emoji,size)` — כרטיסי-קטגוריה/עץ-חכם (ראשי מקלחת · ברז למטבח…) מציגים את תמונות-הקטגוריה המצורפות (`assets/lipskey/categories/*.png`: faucets/shower_bath/pipes/drainage…) לפי keyword, fallback לאמוג'י. אתרים: `_CatalogRow`(24) · כרטיס עץ-חכם(44) · node avatar(24).
 - **store_screen**: `cartLineImageAsset(productKey)` + `cartLineThumb(...)` — thumbnail של שורת-סל `lip:<sku>` נגזר ל-`imageAsset` של המוצר מהקטלוג (סיומת+brand-dir נכונים) → תמונת-CDN אמיתית, fallback לאמוג'י. אתר: cart line thumbnail 42×42.
 imageAsset של מוצר-אמת גובר (סיפון וכו' שומרים תמונתם). `flutter analyze` 0 errors.
+
+### #launch-order-email — 📧 מייל-אישור-הזמנה (מגודר · default-off) — 2026-08-02
+SSOT: DIRECTIVE-order-confirmation-email. מייל-HTML יפה בסיום-הזמנה, מגודר-דגל, זהה-בייטים כבוי.
+- **functions/src/orderEmail.ts** (חדש): טריגר v2 `onDocumentCreated('orders/{orderId}')` → Resend → מייל-HTML RTL (מס'/תאריך/לקוח/טבלת-מוצרים/סה"כ/לוגו-כתום/תודה). נמענים: לקוח (`order.customerEmail` אם תקין) + `OWNER_EMAIL` תמיד. גודר `ORDER_EMAIL`=='true' + secret `RESEND_API_KEY` — חסר אחד ⇒ no-op best-effort (לא זורק). מיוצא ב-index.ts. dep: `resend`.
+- **Dart**: `kOrderEmail` (feature_flags, `fromEnvironment('ORDER_EMAIL')`, default-false) גודר כתיבת `customerEmail` על ההזמנה ב-store_screen placeOrder (מ-`authStateProvider.user.email`). `customerEmail` שורשר במודל `Order` (orders_engine: ctor/field/copyWith/toJson/fromJson) + 3 שכבות-repo (firebase/local/abstract) + toDoc (orders_firebase). כבוי ⇒ '' ⇒ זהה-בייטים.
+- אין מייל-לקוח → עותק-בעלים בלבד (edge). הבעלים מספק API-key בקונסול.
+gate: `flutter analyze` 0 · `order_customer_email_test` 3/3 · functions `tsc` 0.

@@ -16,6 +16,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 const bool kEnableWordFinderDemo = bool.fromEnvironment('ENABLE_WORD_FINDER',
     defaultValue: kProfileWordFinder);
 
+/// True iff the build passed `--dart-define=ORDER_EMAIL=true` — the owner's
+/// order-confirmation-email switch (SSOT: DIRECTIVE-order-confirmation-email).
+/// Default false ⇒ the checkout does NOT stamp `customerEmail` on the order ⇒
+/// byte-identical order docs. The server-side send is separately gated by the
+/// `ORDER_EMAIL` functions param + `RESEND_API_KEY` secret, so both must be on.
+const bool kOrderEmail = bool.fromEnvironment('ORDER_EMAIL');
+
 /// True iff the build passed `--dart-define=ENABLE_CARD_KEYBOARD=true` — the
 /// A/B demo build for the unified card-keyboard (#38). SAME idiom as
 /// [kEnableWordFinderDemo]: default false → 'kCardKeyboard' stays off → the new

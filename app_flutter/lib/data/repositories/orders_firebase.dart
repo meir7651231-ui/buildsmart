@@ -90,6 +90,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
         // The placer's phone for the order card's 📞/💬 — written only when
         // non-empty so the seed + every legacy doc round-trips unchanged.
         if (o.customerPhone.isNotEmpty) 'customerPhone': o.customerPhone,
+        if (o.customerEmail.isNotEmpty) 'customerEmail': o.customerEmail,
       };
 
   /// Firestore doc → `Order`. Inverse of [toDoc]: the doc-id becomes `id`,
@@ -205,6 +206,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     String contractorUid = '',
     String orgId = '',
     String customerPhone = '',
+    String customerEmail = '',
   }) {
     final order = Order(
       id: id ?? _nextId(),
@@ -220,6 +222,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       contractorUid: contractorUid,
       orgId: orgId,
       customerPhone: customerPhone,
+      customerEmail: customerEmail,
     );
     upsert(order); // optimistic prepend + background set
     return order;

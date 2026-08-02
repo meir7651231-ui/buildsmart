@@ -15,6 +15,7 @@ import 'package:buildsmart/screens/role_request_sheet.dart'
 import 'package:buildsmart/state/app_profile.dart'
     show kProfileEmptySeeds, kProfileRawShell;
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/feature_flags.dart' show kOrderEmail;
 import 'package:buildsmart/state/rbac.dart'
     show CheckoutBlock, checkoutBlock, pendingApprovalProvider;
 import 'package:buildsmart/state/cart_lists_state.dart';
@@ -3111,6 +3112,13 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 // demo user with no contact, or an email-only contact) → the
                 // card shows no buttons (ContactActions' own empty-guard).
                 final customerPhone = ref.read(userProfileProvider).contact;
+                // Buyer email for the order-confirmation email — stamped ONLY when
+                // kOrderEmail is on (else '' ⇒ byte-identical order doc). The
+                // server send is separately gated (ORDER_EMAIL + RESEND_API_KEY),
+                // so no email leaves until the owner turns both on.
+                final customerEmail = kOrderEmail
+                    ? (ref.read(authStateProvider).user?.email ?? '')
+                    : '';
                 // Single placeOrder call — ONE id, ONE stage, persisted via
                 // the engine's bs.orders.v1 key. storeOrdersProvider derives
                 // from the engine so the orders list updates automatically.
@@ -3125,6 +3133,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       contractorUid: contractorUid,
                       orgId: orgId,
                       customerPhone: customerPhone,
+                      customerEmail: customerEmail,
                     );
                 // G4 — key funnel event: a contractor completed checkout. Only
                 // forwards to FirebaseAnalytics when Firebase is up; a no-op on

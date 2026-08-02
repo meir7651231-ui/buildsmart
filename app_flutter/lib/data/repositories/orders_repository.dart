@@ -54,6 +54,7 @@ abstract class OrdersRepository {
     String notes,
     String contractorUid,
     String customerPhone,
+    String customerEmail,
   });
 
   /// Advance [orderId] to the NEXT stage in `kManagerOrderFlow` — a no-op once

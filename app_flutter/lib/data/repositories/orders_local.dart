@@ -109,6 +109,7 @@ class LocalOrdersRepository implements OrdersRepository {
     String notes = '',
     String contractorUid = '',
     String customerPhone = '',
+    String customerEmail = '',
   }) =>
       _engine.placeOrder(
         who: who,
@@ -122,6 +123,7 @@ class LocalOrdersRepository implements OrdersRepository {
         notes: notes,
         contractorUid: contractorUid,
         customerPhone: customerPhone,
+        customerEmail: customerEmail,
       );
 
   @override

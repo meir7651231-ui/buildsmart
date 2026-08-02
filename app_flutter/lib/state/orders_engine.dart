@@ -95,6 +95,7 @@ class Order {
     this.storeUid = '',
     this.courierUid = '',
     this.customerPhone = '',
+    this.customerEmail = '',
   });
 
   /// Order id, e.g. `BS-1042` (the legacy `o.id`).
@@ -170,6 +171,10 @@ class Order {
   /// empty-guard) — the zero-regression invariant.
   final String customerPhone;
 
+  /// Buyer email — the order-confirmation-email recipient. Written only when
+  /// `kOrderEmail` is on (else empty ⇒ byte-identical order docs).
+  final String customerEmail;
+
   /// Mirrors the legacy `o.stage!=='delivered'` "open order" predicate
   /// (@index.html:16951) — the same rule [ManagerOrder.isOpen] uses.
   bool get isOpen => stage != 'delivered';
@@ -182,6 +187,7 @@ class Order {
     String? storeUid,
     String? courierUid,
     String? customerPhone,
+    String? customerEmail,
   }) =>
       Order(
         id: id,
@@ -206,6 +212,7 @@ class Order {
         // (advance/setStage go through copyWith) so the order card keeps its
         // 📞/💬 target through the whole flow.
         customerPhone: customerPhone ?? this.customerPhone,
+        customerEmail: customerEmail ?? this.customerEmail,
       );
 
   /// Project to the pure [ManagerOrder] the manager analytics fold over — lets
@@ -235,6 +242,7 @@ class Order {
         if (storeUid.isNotEmpty) 'storeUid': storeUid,
         if (courierUid.isNotEmpty) 'courierUid': courierUid,
         if (customerPhone.isNotEmpty) 'customerPhone': customerPhone,
+        if (customerEmail.isNotEmpty) 'customerEmail': customerEmail,
       };
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -259,6 +267,7 @@ class Order {
         storeUid: (j['storeUid'] as String?) ?? '',
         courierUid: (j['courierUid'] as String?) ?? '',
         customerPhone: (j['customerPhone'] as String?) ?? '',
+        customerEmail: (j['customerEmail'] as String?) ?? '',
       );
 
   /// Lift a seed [ManagerOrder] into a live [Order] (no timestamp — seed).
@@ -472,6 +481,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     String contractorUid = '',
     String orgId = '',
     String customerPhone = '',
+    String customerEmail = '',
   }) {
     // S4.4 — bound to Firestore: the repo's verbatim port places the order
     // (same _nextId/stage/prepend), its optimistic cache notifies back
@@ -491,6 +501,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
         contractorUid: contractorUid,
         orgId: orgId,
         customerPhone: customerPhone,
+        customerEmail: customerEmail,
       );
     }
     final order = Order(
@@ -507,6 +518,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       contractorUid: contractorUid,
       orgId: orgId,
       customerPhone: customerPhone,
+      customerEmail: customerEmail,
     );
     state = [order, ...state];
     return order;

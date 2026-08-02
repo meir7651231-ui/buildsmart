@@ -1786,3 +1786,15 @@ RULE: שינוי const-נתונים ב-lib/data/ (טקסט משפטי/seeds) מ�
 ### ג — כלל המניעה
 ANTIPATTERN: פקד שמראה הודעת-הצלחה או נראה-לחיץ בלי לבצע את פעולתו האמיתית (no-op שקט · toast-מזויף · unwrap לא-מוגן על nullable של דאטה-אמת)
 RULE: כל פקד חייב לבצע את פעולתו המוצהרת או להיות מוסתר בכנות (kHideUnderConstruction); אין הודעת-הצלחה על פעולה שלא קרתה, ואין unwrap לא-מוגן על שדה-nullable של נתוני-אמת
+
+## מייל-אישור-הזמנה: threading customerEmail דרך 4 שכבות placeOrder (2026-08-02)
+
+### א — הבעיה
+הוספת `customerEmail` ל-Order + חיווט ב-store_screen נכשלה ב-analyze: `placeOrder` מוגדר ב-4 שכבות (engine → abstract repo → firebase/local impls), וכולן חייבות את הפרמטר — אחרת הקריאה `r.placeOrder(customerEmail:)` היא named-param לא-מזוהה.
+
+### ב — הפתרון
+שרשור `customerEmail` דרך כל 4 השכבות + Order ctor/copyWith/toJson/fromJson + toDoc, מגודר `kOrderEmail` (default-off ⇒ '' ⇒ זהה-בייטים). בדיקת round-trip מאמתת. הפונקציה `orderEmail.ts` קוראת מ-Firestore, גודרת `ORDER_EMAIL`+`RESEND_API_KEY`.
+
+### ג — כלל המניעה
+ANTIPATTERN: הוספת פרמטר ל-method רב-שכבתי (placeOrder) בשכבה אחת בלבד כשהוא מוגדר ב-engine+abstract+impls
+RULE: פרמטר חדש ב-method רב-שכבתי משורשר בכל השכבות באותו commit — engine + abstract interface + כל ה-impls + המודל וה-serialization — ומאומת ב-analyze לפני commit
