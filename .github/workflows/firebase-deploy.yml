@@ -153,6 +153,10 @@ jobs:
           {
             printf 'R2_ACCOUNT_ID=%s\n' '${{ secrets.R2_ACCOUNT_ID }}'
             printf 'R2_BUCKET=%s\n' 'buildsmart-images'
+            # Order-confirmation email ON — the owner created the RESEND_API_KEY
+            # secret in Secret Manager, so activate the flag (orderEmail.ts reads
+            # it via defineString). Non-secret feature flag; default is "" (off).
+            printf 'ORDER_EMAIL=%s\n' 'true'
           } > functions/.env.buildsmart-b0b78
 
       # --force: auto-set the Artifact Registry cleanup policy (otherwise the
