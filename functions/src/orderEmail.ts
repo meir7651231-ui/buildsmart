@@ -25,10 +25,11 @@ const resendKey = defineSecret("RESEND_API_KEY");
 const orderEmailFlag = defineString("ORDER_EMAIL", { default: "" });
 
 /** From-address. Resend's shared sender works out of the box on the free tier;
- *  swap to a verified domain sender once the owner has one. */
-const fromAddress = defineString("ORDER_EMAIL_FROM", {
-  default: "בנייה חכמה <onboarding@resend.dev>",
-});
+ *  swap to a verified domain sender once the owner has one (edit this constant).
+ *  Deliberately a plain const, NOT a defineString param: under
+ *  `firebase deploy --non-interactive` a *defaulted* string param is still
+ *  reported as "no value" and aborts the deploy, so the sender lives in code. */
+const fromAddress = "בנייה חכמה <onboarding@resend.dev>";
 
 /** Live brand icon (the deployed PWA icon) — used as the email logo. */
 const kLogoUrl = "https://buildsmart-il.com/icons/Icon-192.png";
@@ -158,7 +159,7 @@ export const onOrderCreatedEmail = onDocumentCreated(
     try {
       const resend = new Resend(apiKey);
       await resend.emails.send({
-        from: fromAddress.value(),
+        from: fromAddress,
         to,
         subject: `אישור הזמנה ${orderId} · בנייה חכמה`,
         html,
