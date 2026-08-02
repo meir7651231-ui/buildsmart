@@ -246,6 +246,13 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    // scrollUntilVisible stops the moment the lazy button is BUILT (inside the
+    // ListView cacheExtent) and finishes on a zero-duration Scrollable.ensureVisible
+    // (a jumpTo) that schedules — but does not itself pump — a frame. Without a
+    // pump the button's laid-out centre is still off-screen (y≈623 in the 600px
+    // test viewport), so the tap below lands outside the render tree and misses,
+    // _sendReport never runs, and no report posts. Pump so the tap actually hits.
+    await tester.pumpAndSettle();
     expect(find.text('📨 שלח דוח נוכחות לקבלן'), findsOneWidget,
         reason: 'the seeded month has records → the send button is active');
     expect(find.text('הדוח נשלח ✓'), findsNothing);

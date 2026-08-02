@@ -29,7 +29,7 @@
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/chat_firebase.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
-    show FirestoreCollectionSource;
+    show FirestoreCollectionSource, RemoteCollectionSource;
 import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:flutter/foundation.dart' show Listenable;
@@ -106,16 +106,37 @@ final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
   // (chatThreads read/write) and the now-flipped composite index use. Flag OFF /
   // no-uid / Firebase-free ⇒ scope == null ⇒ the source stays UNSCOPED, the
   // whole-collection listen BYTE-IDENTICAL to today (the zero-regression
-  // invariant). chatMessages already pins `threadId` per-stream (S4.2) and its
-  // rule get()s the parent thread, so the messages source is left unscoped.
+  // invariant).
   final uid = ref.watch(currentUidProvider);
-  final threadsSource = (kUidScopedQueries && uid != null && uid.isNotEmpty)
+  final scoped = kUidScopedQueries && uid != null && uid.isNotEmpty;
+  final threadsSource = scoped
       ? FirestoreCollectionSource(
           'chatThreads',
           scope: (c) => c.where('participantUids', arrayContains: uid),
         )
       : null;
-  final repo = FirebaseChatRepository(threadsSource: threadsSource)..attach();
+  // #chat-live-messages — the `chatMessages` READ rule is PER-DOC
+  // (`auth.uid in threadParticipants(resource.data.threadId)`, a get() on the
+  // parent thread), so — "rules are not filters" — the ONLY query Firestore can
+  // prove is one that PINS `threadId`. A whole-collection chatMessages listen is
+  // therefore DENIED as a whole and silently blanks live messages (the send/
+  // receive break). When scoped, hand the repo a threadId → scoped-source
+  // FACTORY: it opens one `where('threadId', isEqualTo: id)` listen per
+  // participating thread and merges them (see [_PerThreadChatMessagesSource]), so
+  // messages flow in on BOTH sides. Flag OFF / no-uid / Firebase-free ⇒ null ⇒
+  // the base whole-collection listen, BYTE-IDENTICAL to before this fix.
+  final RemoteCollectionSource Function(String threadId)? messagesSourceFor =
+      scoped
+          ? (threadId) => FirestoreCollectionSource(
+                'chatMessages',
+                scope: (c) => c.where('threadId', isEqualTo: threadId),
+                bound: (q) => q.orderBy('ts', descending: true).limit(500),
+              )
+          : null;
+  final repo = FirebaseChatRepository(
+    threadsSource: threadsSource,
+    messagesSourceFor: messagesSourceFor,
+  )..attach();
   ref.onDispose(repo.dispose);
   return repo;
 });

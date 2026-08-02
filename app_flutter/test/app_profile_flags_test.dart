@@ -57,6 +57,12 @@ const Set<String> kArmingLayer = {
   // giant-system Phase 1: arms the runtime OrgConfig layer (owner-staged,
   // per-flag rollback = drop the define — the STUDIO/USER_SYSTEM shape).
   'ORG_CONFIG',
+  // order-confirmation email (DIRECTIVE-order-confirmation-email): owner-staged
+  // in lock-step with its SERVER twin — the client define is inert until the
+  // owner also sets the ORDER_EMAIL functions param + the RESEND_API_KEY secret,
+  // so BOTH must be armed and per-flag rollback = drop the define (the
+  // CLOUD_PHOTOS / APP_CHECK_PROD backend-coordinated shape, never a profile).
+  'ORDER_EMAIL',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

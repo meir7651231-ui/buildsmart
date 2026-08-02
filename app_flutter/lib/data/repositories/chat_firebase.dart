@@ -53,6 +53,8 @@
 // Comment density/voice mirrors `orders_firebase.dart` — the S2.3 template.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'dart:async';
+
 import 'package:buildsmart/data/chat_seeds.dart';
 import 'package:buildsmart/data/repositories/chat_repository.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
@@ -246,10 +248,17 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
 /// the engine's own [ChatMessage] — untouched, so the drop-in is preserved
 /// exactly as the pilot keeps `Order` untouched.
 class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
-  // Stage-2 scale — the app's ONE unbounded-growth listen, capped to the
-  // newest 500 by `ts` (ALWAYS written — see `toDoc` — so the orderBy excludes
-  // nothing; a thread view needs the RECENT messages). Per-thread cursor
-  // pagination is the documented later initiative.
+  // #chat-live-messages — the DEFAULT source below is the WHOLE-collection
+  // listen (newest 500 by `ts`). It is used ONLY on the fallback/test path: the
+  // `chatMessages` READ rule is per-doc (`auth.uid in threadParticipants(
+  // resource.data.threadId)` via a get() on the parent thread), and "rules are
+  // not filters" means a whole-collection listen by a non-manager is DENIED as a
+  // whole (silently blanking live messages). So PRODUCTION injects a
+  // [_PerThreadChatMessagesSource] instead ([chatRepositoryProvider]) — one
+  // threadId-PINNED sub-listen per participating thread, the only query shape the
+  // deployed rule can prove. This default stays for the tests' single-fake path
+  // (isScoped:false) and any Firebase-free/flag-off construction (byte-identical
+  // to before). Per-thread cursor pagination is the documented later initiative.
   _ChatMessagesRepo({RemoteCollectionSource? source})
       : super(source ??
             FirestoreCollectionSource(
@@ -328,6 +337,116 @@ class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
   void onFirstSnapshotEmpty() => pushCacheToRemote();
 }
 
+// ─── messages · RULE-COMPLIANT per-thread listen (#chat-live-messages) ───────
+
+/// The `chatMessages` [RemoteCollectionSource] that the deployed Security Rules
+/// actually ALLOW to read.
+///
+/// The rule is `read: auth.uid in threadParticipants(resource.data.threadId)` —
+/// a PER-DOCUMENT check via a `get()` on the parent `chatThreads` doc. Because
+/// "rules are NOT filters", Firestore can only prove that rule for a query that
+/// PINS `threadId` to a single value (`where('threadId', isEqualTo: X)`), so the
+/// former WHOLE-collection `chatMessages` listen was DENIED as a whole and the
+/// base's guarded stream swallowed the error → no message ever arrived on either
+/// side (the live-chat break this fixes).
+///
+/// So this source MULTIPLEXES: it opens ONE threadId-pinned sub-listen per
+/// PARTICIPATING thread and MERGES their docs into the single stream the
+/// [_ChatMessagesRepo] cache consumes. The repo feeds it the current thread-id
+/// set ([setThreadIds]) from its SCOPED `chatThreads` cache (already = the user's
+/// own threads), so every sub-query is one the rule can prove. Writes
+/// ([set]/[delete]) go by doc-id through an UNSCOPED [_writer] (a scope only
+/// affects `snapshots()`, never `doc(id).set(...)`), so the send path is
+/// unchanged and a message still lands in the one `chatMessages` collection.
+class _PerThreadChatMessagesSource implements RemoteCollectionSource {
+  _PerThreadChatMessagesSource({
+    required RemoteCollectionSource Function(String threadId) sourceFor,
+    required RemoteCollectionSource writer,
+  })  : _sourceFor = sourceFor,
+        _writer = writer;
+
+  /// Builds a threadId-scoped read source (`where('threadId', isEqualTo: id)` +
+  /// the orderBy/limit bound) for one thread.
+  final RemoteCollectionSource Function(String threadId) _sourceFor;
+
+  /// The UNSCOPED collection used only for by-doc-id writes (create-a-message).
+  final RemoteCollectionSource _writer;
+
+  final StreamController<List<RemoteDoc>> _out =
+      StreamController<List<RemoteDoc>>.broadcast();
+  final Map<String, StreamSubscription<List<RemoteDoc>>> _subs = {};
+  final Map<String, List<RemoteDoc>> _latest = {};
+  bool _closed = false;
+
+  /// Reconcile the live per-thread listens to exactly [threadIds]: open a
+  /// threadId-pinned sub-listen for each NEW id, cancel the ones that vanished,
+  /// and (only when the set actually CHANGED — never on a mere message echo, so
+  /// the composer can never feed itself an infinite loop) re-emit the merged
+  /// snapshot. Idempotent: an unchanged id keeps its existing listen.
+  void setThreadIds(Iterable<String> threadIds) {
+    if (_closed) return;
+    final want = threadIds.toSet();
+    var changed = false;
+    for (final id in want) {
+      if (_subs.containsKey(id)) continue;
+      changed = true;
+      _subs[id] = _sourceFor(id).snapshots().listen(
+        (docs) {
+          _latest[id] = docs;
+          _emit();
+        },
+        // A single thread's denial/offline must NOT kill the other threads' live
+        // messages (or throw into the UI) — drop just this slice, exactly as the
+        // base's guarded whole-collection listen used to swallow its error.
+        onError: (Object e, StackTrace st) {
+          debugPrint('chatMessages[$id]: listen error (ignored): $e');
+        },
+      );
+    }
+    for (final id in _subs.keys.toList()) {
+      if (want.contains(id)) continue;
+      changed = true;
+      unawaited(_subs.remove(id)?.cancel());
+      _latest.remove(id);
+    }
+    if (changed) _emit();
+  }
+
+  void _emit() {
+    if (_closed || _out.isClosed) return;
+    _out.add(<RemoteDoc>[for (final slice in _latest.values) ...slice]);
+  }
+
+  @override
+  Stream<List<RemoteDoc>> snapshots() => _out.stream;
+
+  @override
+  Future<void> set(String id, Map<String, dynamic> data) =>
+      _writer.set(id, data);
+
+  @override
+  Future<void> delete(String id) => _writer.delete(id);
+
+  /// Each sub-listen IS threadId-scoped, so a first-EMPTY merged snapshot means
+  /// "this user's threads genuinely hold no messages" → the base blanks the demo
+  /// seed to honest-empty (never shows another persona's seed as the user's own),
+  /// exactly like the scoped `chatThreads` listen does for thread heads.
+  @override
+  bool get isScoped => true;
+
+  /// Cancel every per-thread sub-listen and close the merged stream (called from
+  /// [FirebaseChatRepository.dispose]).
+  void dispose() {
+    _closed = true;
+    for (final s in _subs.values) {
+      unawaited(s.cancel());
+    }
+    _subs.clear();
+    _latest.clear();
+    unawaited(_out.close());
+  }
+}
+
 // ─── the composed repository ─────────────────────────────────────────────────
 
 /// The Firestore-backed chat store: TWO composed caches (`chatThreads` +
@@ -336,13 +455,45 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
   /// Constructs the repo over the `chatThreads` + `chatMessages` collections.
   /// The real Firestore instance is resolved LAZILY by
   /// [FirestoreCollectionSource] (never here), so construction does not require
-  /// Firebase to be initialised. Pass the sources in tests to drive both caches
-  /// with fakes.
+  /// Firebase to be initialised.
+  ///
+  /// The MESSAGES backing is chosen in this precedence:
+  ///   • [messagesSource] — an explicit single source (the tests' single-fake
+  ///     path); used verbatim, per-thread multiplexing OFF (byte-identical);
+  ///   • else [messagesSourceFor] — a threadId → scoped-source FACTORY
+  ///     (#chat-live-messages, the production uid-scoped path): the repo wraps it
+  ///     in a [_PerThreadChatMessagesSource] that opens one `where('threadId')`
+  ///     listen per participating thread (the only query the rules can prove) and
+  ///     writes by doc-id through [messagesWriter] (defaulting to the unscoped
+  ///     `chatMessages` collection);
+  ///   • else — the base whole-collection listen (Firebase-free / flag-off
+  ///     fallback), byte-identical to before.
   FirebaseChatRepository({
     RemoteCollectionSource? threadsSource,
     RemoteCollectionSource? messagesSource,
-  })  : _threads = _ChatThreadsRepo(source: threadsSource),
-        _messages = _ChatMessagesRepo(source: messagesSource) {
+    RemoteCollectionSource Function(String threadId)? messagesSourceFor,
+    RemoteCollectionSource? messagesWriter,
+  }) : this._(
+          threadsSource: threadsSource,
+          messagesSource: messagesSource,
+          perThreadMessages:
+              (messagesSource == null && messagesSourceFor != null)
+                  ? _PerThreadChatMessagesSource(
+                      sourceFor: messagesSourceFor,
+                      writer: messagesWriter ??
+                          FirestoreCollectionSource('chatMessages'),
+                    )
+                  : null,
+        );
+
+  FirebaseChatRepository._({
+    required RemoteCollectionSource? threadsSource,
+    required RemoteCollectionSource? messagesSource,
+    required _PerThreadChatMessagesSource? perThreadMessages,
+  })  : _perThreadMessages = perThreadMessages,
+        _threads = _ChatThreadsRepo(source: threadsSource),
+        _messages =
+            _ChatMessagesRepo(source: messagesSource ?? perThreadMessages) {
     // EITHER cache changing (a thread head, a message — optimistic or snapshot)
     // re-fires this composer: the single subscription the engine listens on.
     _threads.addListener(_forward);
@@ -352,13 +503,43 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
   final _ChatThreadsRepo _threads;
   final _ChatMessagesRepo _messages;
 
-  void _forward() => notifyListeners();
+  /// #chat-live-messages — the per-thread messages source (production uid-scoped
+  /// path) or null (the single-`messagesSource` tests + the whole-collection
+  /// fallback). When non-null the repo feeds it the participating thread-id set
+  /// on every threads-cache change ([_syncMessageThreadIds]).
+  final _PerThreadChatMessagesSource? _perThreadMessages;
+
+  void _forward() {
+    // #chat-live-messages — a thread head arriving/leaving may change WHICH
+    // threads need a message listen; reconcile before notifying. Idempotent +
+    // no-emit-when-unchanged, so a mere message echo can never loop.
+    _syncMessageThreadIds();
+    notifyListeners();
+  }
+
+  /// #chat-live-messages — reconcile the per-thread message listens to the
+  /// threads the user PARTICIPATES in: a uid-thread carries a non-empty
+  /// `participantUids` (a seed/legacy role thread carries none and its messages
+  /// rule can't be proven, so it is skipped — matching what the rules allow). A
+  /// no-op unless the per-thread source is active (production uid-scoped path).
+  void _syncMessageThreadIds() {
+    final src = _perThreadMessages;
+    if (src == null) return;
+    src.setThreadIds([
+      for (final h in _threads.cached())
+        if (h.participantUids.isNotEmpty) h.id,
+    ]);
+  }
 
   /// Subscribe both live document streams (S4.1 threads + S4.2 messages).
-  /// Errors are guarded by the base; [dispose] cancels both.
+  /// Errors are guarded by the base; [dispose] cancels both. The per-thread
+  /// messages source is then seeded with the current thread-id set so its
+  /// sub-listens open immediately (a later threads snapshot re-syncs via
+  /// [_forward]).
   void attach() {
     _threads.attach();
     _messages.attach();
+    _syncMessageThreadIds();
   }
 
   // ── reads (SYNCHRONOUS — assembled from the two caches) ─────────────────────
@@ -554,6 +735,9 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
     _messages
       ..removeListener(_forward)
       ..dispose();
+    // #chat-live-messages — cancel every per-thread sub-listen + close the
+    // merged stream (no-op on the single-source / fallback path).
+    _perThreadMessages?.dispose();
     super.dispose();
   }
 }
