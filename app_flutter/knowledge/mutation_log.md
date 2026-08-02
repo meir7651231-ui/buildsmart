@@ -1956,3 +1956,8 @@
 - **תקלה שהוזרקה (mutation-sensitivity):** השמטת `customerEmail` מ-`toJson` → הבדיקה `customerEmail survives toJson→fromJson` נכשלת ⇒ ה-round-trip load-bearing. תקלה #2: כתיבת customerEmail תמיד (בלי guard) → הבדיקה `absent customerEmail NOT written` נכשלת ⇒ מוכיח את הזהה-בייטים-כבוי.
 - **בטיחות:** כבוי (`kOrderEmail`=false) ⇒ '' ⇒ אין שדה בדוק.
 - **אימות:** analyze 0 · `order_customer_email_test` 3/3.
+
+## #8/3a — per-user DM thread (createOrGetThread) (2026-08-02)
+- **הנכס:** `dmThreadId` (id דטרמיניסטי/דדופ) + `createOrGetThread` (create-or-get) + `threadsFor` uid-aware, ב-`chat_dm_thread_test`.
+- **תקלות מוזרקות (mutation-sensitivity):** (1) `dmThreadId` בלי sort → סדר שונה של אותם uids נותן id שונה → 'order-independent' נכשלת ⇒ הדדופ load-bearing. (2) `createOrGetThread` בלי בדיקת-קיום → קריאה שנייה מייצרת thread כפול → 'creates ONCE then GETs' נכשלת. (3) ה-uid-clause ב-`threadsFor` בלי `uid != null` → thread-uid דולף ללא-חבר/anon → 'INERT for non-member' נכשלת ⇒ מוכיח זהה-בייטים-כבוי.
+- **אימות:** `chat_dm_thread_test` 6/6 · `flutter analyze` 0.

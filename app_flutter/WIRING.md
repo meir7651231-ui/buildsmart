@@ -3647,3 +3647,11 @@ gate: `flutter analyze` 0 errors · `flutter test` ירוק. אימות auth-lin
 - **home_shell.dart** (F3): פתיחת סליק-בחירת-התפקיד תוקנה. ה-latch (`promptRoleRequestProvider`) מודלק ב-`welcome._finishAfterAuth` *לפני* ש-HomeShell נבנה, אז ה-`ref.listen` (נרשם בבנייה) לא שיחזר את השינוי שכבר קרה → הסליק לא נפתח → המשתמש נתקע בברירת-המחדל `contractor` של הטריגר-שרת. עכשיו בודקים את ה-latch גם בבנייה הראשונה (post-frame + re-check) → הסליק נפתח, המשתמש בוחר תפקיד אמיתי שדורס את ה-contractor (submitRoleRequest delete→set).
 - **welcome_screen.dart** (F5): ב-`_finishAfterAuth` — אם `profile.name` ריק, אימוץ `authUser.displayName` (מ-Google) → `users/{uid}.displayName` לא ריק → הטריגר-שרת מעתיק שם אמיתי לבקשה (במקום ריק).
 gate: `flutter analyze` 0 errors · `flutter test` ירוק. אימות פתיחת-הסליק + השם — על האתר החי.
+
+### #8/3a — per-user DM chat primitive (2026-08-02)
+- **sys_chat.dart**: `dmThreadId`/`dmThreadUids` (id דטרמיניסטי לקבוצת-uids — ממוין+דדופ) + `ChatEngineNotifier.createOrGetThread(uids,{name,avatar})` (מגודר כמו `send`: remote אם bound אחרת local; דורש ≥2 uids נבדלים; create-or-get, no-op על קיים) + `threadsFor` uid-aware (כולל thread-uid לחבר הנוכחי דרך `currentUid`; inert עם uid ריק → זהה-בייטים).
+- **chat_repository.dart / chat_firebase.dart**: `createOrGetThread` בממשק + impl (chatThreads/{id} עם participantUids אמיתיים, create-or-get); `_ChatThreadHead.fromDoc` סובל thread-uid (roles ריקים + participantUids לא-ריקים) — זורק רק כששניהם ריקים.
+- **web-deploy.yml / firebase-hosting.yml**: `--dart-define=UID_SCOPED_QUERIES=true` — מזיין את ה-scoped-listen (`where participantUids arrayContains uid`) כך ש-threads-לפי-uid נקראים חי תחת ה-rules.
+- index: composite כבר קיים; ה-listen לא ממיין server-side ⇒ לא נדרש חדש.
+- **3ב/3ג (הבא):** מסך-אנשים (directory) + קישור-לקוחות; שניהם ידרשו את אותה תוספת-uid ב-`_visibleToAudience` (הרשימה ה-on-screen, לא `threadsFor`) כדי שה-thread ירונדר.
+gate: `flutter analyze` 0 · `chat_dm_thread_test` (6) + 51 chat tests עוברים.

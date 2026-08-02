@@ -229,6 +229,29 @@ class ChatThread {
 bool chatThreadVisibleToUid(List<String> participantUids, String uid) =>
     participantUids.isEmpty || participantUids.contains(uid);
 
+// ─── per-user (uid) DM thread key (#8 · phase 3a) ─────────────────────────────
+
+/// #8/3a (per-user chat) — the DE-DUPLICATED, sorted-ascending uid set a
+/// per-user DM thread is keyed on: the raw [participantUids] with the empties
+/// dropped, made distinct, sorted ascending. Pure → the id it feeds
+/// ([dmThreadId]) is identical on every device and unit-testable directly.
+List<String> dmThreadUids(List<String> participantUids) {
+  final set = <String>{
+    for (final u in participantUids)
+      if (u.isNotEmpty) u,
+  };
+  return set.toList()..sort();
+}
+
+/// #8/3a (per-user chat) — the DETERMINISTIC per-user DM thread id: `dm-` +
+/// the [dmThreadUids] joined by `__`. The SAME set of people therefore always
+/// maps to ONE id (natural dedup — every device computes the same thread id
+/// with no server round-trip). Shared by the engine (local path) and the
+/// Firestore repo ([ChatRepository.createOrGetThread]) so they can never
+/// disagree on the id.
+String dmThreadId(List<String> participantUids) =>
+    'dm-${dmThreadUids(participantUids).join('__')}';
+
 // ─── engine ───────────────────────────────────────────────────────────────────
 
 /// SharedPreferences key for the persisted cross-persona chat messages.
@@ -590,6 +613,57 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
     ];
   }
 
+  /// #8/3a (per-user chat) — CREATE-OR-GET the per-user DM thread for
+  /// [participantUids] (the directory / manager-customers link — phase 3b/3c —
+  /// is the caller; this phase only lands the primitive). The thread id is the
+  /// DETERMINISTIC [dmThreadId] (the sorted, de-duped uids joined by `__`), so
+  /// the same set of people always maps to ONE thread on every device — dedup
+  /// with no lookup. The uid set becomes the thread's
+  /// [ChatThread.participantUids] (the auth-truth the rules scope on); its role
+  /// [ChatThread.participants] is EMPTY (a uid-thread is keyed on uids, not
+  /// roles) — [threadsFor] surfaces it via the current uid instead.
+  ///
+  /// At least TWO distinct uids are required to actually create the thread; the
+  /// id is returned REGARDLESS (so a caller always has the deterministic handle).
+  ///
+  /// GATED exactly like [send]: bound to Firestore this delegates to the repo's
+  /// create-or-get (optimistic head upsert + a background create write, mirrored
+  /// back through the cache in the same synchronous call); on the local /
+  /// Firebase-free path (tests/demo) it creates the thread in engine state
+  /// directly and persists via the existing path, so the method still works
+  /// there. An existing thread is a NO-OP (returns its id) on both paths.
+  String createOrGetThread(List<String> participantUids,
+      {String name = '', String avatar = '💬'}) {
+    final uids = dmThreadUids(participantUids);
+    final id = dmThreadId(participantUids);
+    // Bound to Firestore: the repo owns create-or-get + the head write; its
+    // optimistic upsert notifies back synchronously → the mirror already carries
+    // the new thread by the time this returns (same-frame, exactly like send).
+    final r = _remote;
+    if (r != null) {
+      return r.createOrGetThread(participantUids, name: name, avatar: avatar);
+    }
+    // Local path: need ≥2 distinct uids to create; return the id regardless.
+    if (uids.length < 2) return id;
+    if (state.any((t) => t.id == id)) return id; // create-or-GET → existing no-op
+    // F-35: register the new thread so a late [_load] merges the disk overlay
+    // AROUND it (the same guard send/resetToSeed use) rather than short-circuiting
+    // the load and dropping every OTHER thread's persisted messages.
+    _dirtyThreadIds.add(id);
+    state = [
+      ...state,
+      ChatThread(
+        id: id,
+        participants: const [],
+        participantUids: uids,
+        name: name,
+        avatar: avatar,
+        messages: const [],
+      ),
+    ];
+    return id;
+  }
+
   /// A14 (launch uid-migration) — POPULATE a thread's [ChatThread.participantUids]
   /// for real (the chat last-mile). When [uidScoped] is ON, a [lookup]
   /// exists, and the thread's uids are still EMPTY, this resolves the UNION over
@@ -692,8 +766,22 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// 🔒 ISOLATION primitive — the threads [role] participates in (SPEC §2.5).
   /// The store never sees a contractor↔manager thread. Order is preserved from
   /// the seed (newest-activity ordering is the UI's job, not the engine's).
-  List<ChatThread> threadsFor(BsRole role) =>
-      state.where((t) => t.participants.contains(role)).toList();
+  ///
+  /// #8/3a (per-user chat) — ALSO includes a uid-thread (empty role
+  /// [ChatThread.participants], keyed on [ChatThread.participantUids]) when the
+  /// CURRENT user's uid is among its members. The uid is read from the engine's
+  /// own [currentUid] getter — the `currentUidProvider` value the provider wired
+  /// in, the SAME source [send] stamps `fromUid` from — so no call-site change is
+  /// needed. A null uid (signed-out / Firebase-free / the whole test suite) makes
+  /// the clause inert, so role-thread filtering stays byte-identical to today.
+  List<ChatThread> threadsFor(BsRole role) {
+    final uid = currentUid?.call();
+    return state
+        .where((t) =>
+            t.participants.contains(role) ||
+            (uid != null && uid.isNotEmpty && t.participantUids.contains(uid)))
+        .toList();
+  }
 
   /// markRead — no unread-count store yet (the legacy `unread` lived on the
   /// static seed only). Kept as a typed no-op so callers/CH-4 can wire it

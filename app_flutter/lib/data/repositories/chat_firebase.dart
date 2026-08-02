@@ -175,8 +175,10 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
   /// `id`; `participants` role-name strings resolve to [BsRole] — an entry that
   /// resolves to NO role (e.g. a real uid once S1 starts writing them) is
   /// skipped rather than fatal, so mixed pre/post-S1 docs keep decoding; a doc
-  /// where NOTHING resolves THROWS (structurally bad for the pre-S1 world) and
-  /// the base skips it per-doc. `lastMsg`/`ts` are display denormalisations —
+  /// with NO resolvable role AND no `participantUids` THROWS (structurally bad
+  /// for the pre-S1 world) and the base skips it per-doc — but a uid-thread
+  /// (#8/3a: empty roles, non-empty `participantUids`) is a VALID decode, not a
+  /// throw. `lastMsg`/`ts` are display denormalisations —
   /// tolerated when missing (messages stream from their own collection anyway).
   @override
   _ChatThreadHead fromDoc(RemoteDoc doc) {
@@ -187,9 +189,6 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
       for (final e in raw)
         ...BsRole.values.where((r) => r.name == e), // unknown entry → skipped
     ];
-    if (participants.isEmpty) {
-      throw const FormatException('chatThreads: no resolvable participants');
-    }
     // A9 — uid members: a string list post-migration, absent on every legacy/
     // seed doc → [] (zero regression). Tolerant of non-string entries.
     final uidsRaw = j['participantUids'];
@@ -198,6 +197,15 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
         for (final e in uidsRaw)
           if (e is String) e,
     ];
+    // #8/3a (per-user chat) — a uid-thread (per-user DM) carries EMPTY role
+    // participants but a NON-EMPTY participantUids; TOLERATE it so it survives
+    // the round-trip and shows live (else fromDoc would throw and the base would
+    // silently drop every uid-thread). Only a doc with NEITHER a resolvable role
+    // NOR any uid is structurally bad (the pre-uid world) → THROW; the base then
+    // skips it per-doc (never blanks the chat).
+    if (participants.isEmpty && participantUids.isEmpty) {
+      throw const FormatException('chatThreads: no resolvable participants');
+    }
     return _ChatThreadHead(
       id: doc.id,
       participants: participants,
@@ -461,6 +469,41 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
         );
       },
     );
+  }
+
+  /// #8/3a (per-user chat) — CREATE-OR-GET the per-user DM thread for
+  /// [participantUids]. Deterministic id ([dmThreadId]) → the same people always
+  /// map to ONE thread (dedup with no lookup). If a head with that id is already
+  /// cached this is a NO-OP that returns the id (create-or-GET — an existing
+  /// thread is never overwritten). Otherwise a fresh head — empty role
+  /// [_ChatThreadHead.participants], the sorted uid set as
+  /// [_ChatThreadHead.participantUids], name/avatar, ts=now — is upserted: the
+  /// optimistic cache upsert notifies the engine back synchronously (mirrored in
+  /// the same call, like [send]'s head denorm) and fires a guarded background
+  /// create write (`toDoc` persists participantUids when non-empty, so the rules
+  /// can scope on it). At least TWO distinct uids are required to create; the
+  /// (always-computed) id is returned regardless.
+  @override
+  String createOrGetThread(List<String> participantUids,
+      {String name = '', String avatar = '💬'}) {
+    final uids = dmThreadUids(participantUids);
+    final id = dmThreadId(participantUids);
+    if (uids.length < 2) return id;
+    final heads = _threads.cached();
+    if (heads.any((h) => h.id == id)) return id; // create-or-GET → never overwrite
+    _threads.upsert(
+      _ChatThreadHead(
+        id: id,
+        participants: const [],
+        participantUids: uids,
+        name: name,
+        avatar: avatar,
+        isBot: false,
+        lastMsg: '',
+        lastTs: DateTime.now(),
+      ),
+    );
+    return id;
   }
 
   /// Reset both collections to the verbatim seed — whole-cache optimistic

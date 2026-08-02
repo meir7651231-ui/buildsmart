@@ -53,6 +53,18 @@ abstract class ChatRepository implements Listenable {
   void send(String threadId, BsRole fromRole, String text,
       {String fromUid = ''});
 
+  /// #8/3a (per-user chat) — CREATE-OR-GET the per-user DM thread for
+  /// [participantUids]. The thread id is the DETERMINISTIC `dm-<sorted, de-duped
+  /// uids joined by __>` ([dmThreadId], sys_chat.dart), so the same set of people
+  /// always maps to ONE thread on every device (natural dedup, no lookup).
+  /// Creates the `chatThreads/{id}` head — real `participantUids`, name, avatar,
+  /// ts — if absent, and NEVER overwrites an existing thread (create-or-get);
+  /// an optimistic local cache upsert mirrors it back like [send]. At least TWO
+  /// distinct uids are required to create; the (always-computed) id is returned
+  /// regardless.
+  String createOrGetThread(List<String> participantUids,
+      {String name = '', String avatar = '💬'});
+
   /// Reset both collections to the verbatim `kChatThreads` seed (tests / a
   /// future "demo reset"). Mirrors `ChatEngineNotifier.resetToSeed`.
   void resetToSeed();
