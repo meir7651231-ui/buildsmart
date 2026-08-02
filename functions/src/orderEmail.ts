@@ -54,6 +54,12 @@ function fmtDate(iso: unknown): string {
   return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
+/** True when the string looks like an email — used to label the contact row
+ *  ("אימייל" vs "טלפון") so an email address is never mislabeled as a phone. */
+function looksLikeEmail(s: string): boolean {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s.trim());
+}
+
 type Line = { name?: unknown; emoji?: unknown; qty?: unknown; price?: unknown };
 
 /** The pretty RTL confirmation email. Pure (testable). */
@@ -64,8 +70,10 @@ export function buildOrderEmailHtml(args: {
   lines: Line[];
   sum: number;
   customerPhone: string;
+  customerEmail: string;
 }): string {
-  const { orderId, customerName, dateStr, lines, sum, customerPhone } = args;
+  const { orderId, customerName, dateStr, lines, sum, customerPhone, customerEmail } =
+    args;
   const rows = lines
     .map((l) => {
       const name = `${esc(l.emoji ?? "")} ${esc(l.name ?? "")}`.trim();
@@ -78,6 +86,20 @@ export function buildOrderEmailHtml(args: {
       </tr>`;
     })
     .join("");
+
+  // Contact rows: label by TYPE, never "טלפון" on an email. A phone row only for
+  // a real phone value; an email row for either a dedicated customerEmail or a
+  // contact that is itself an email.
+  const phoneVal = (customerPhone ?? "").trim();
+  const emailVal = (customerEmail ?? "").trim();
+  const emailToShow = emailVal || (looksLikeEmail(phoneVal) ? phoneVal : "");
+  const contactRows =
+    (phoneVal && !looksLikeEmail(phoneVal)
+      ? `<tr><td style="padding:4px 0;color:#888">טלפון</td><td style="padding:4px 0;text-align:left">${esc(phoneVal)}</td></tr>`
+      : "") +
+    (emailToShow
+      ? `<tr><td style="padding:4px 0;color:#888">אימייל</td><td style="padding:4px 0;text-align:left">${esc(emailToShow)}</td></tr>`
+      : "");
 
   return `<!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8">
@@ -96,7 +118,7 @@ export function buildOrderEmailHtml(args: {
       <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px">
         <tr><td style="padding:4px 0;color:#888">מס' הזמנה</td><td style="padding:4px 0;text-align:left;font-weight:700">${esc(orderId)}</td></tr>
         <tr><td style="padding:4px 0;color:#888">תאריך</td><td style="padding:4px 0;text-align:left">${esc(dateStr)}</td></tr>
-        ${customerPhone ? `<tr><td style="padding:4px 0;color:#888">טלפון</td><td style="padding:4px 0;text-align:left">${esc(customerPhone)}</td></tr>` : ""}
+        ${contactRows}
       </table>
 
       <table style="width:100%;border-collapse:collapse;font-size:14px;border:1px solid #eee;border-radius:10px;overflow:hidden">
@@ -156,6 +178,7 @@ export const onOrderCreatedEmail = onDocumentCreated(
       sum: Number(o.sum ?? 0),
       customerPhone:
         typeof o.customerPhone === "string" ? o.customerPhone : "",
+      customerEmail,
     });
 
     try {
