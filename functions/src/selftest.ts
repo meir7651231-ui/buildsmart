@@ -25,6 +25,11 @@ import {
   roleMayStep,
 } from "./orderFlow";
 import { mayReviewRoleRequest } from "./reviewRoleRequest";
+import {
+  APPROVE_USERS_CAP,
+  cleanApproveUids,
+  mayApproveUsers,
+} from "./approveUsers";
 
 let passed = 0;
 let failed = 0;
@@ -137,6 +142,30 @@ check(
   mayReviewRoleRequest(["contractor"], "manager") === false,
   "manager is not a requestable/reviewable role"
 );
+
+// ── reg · approveUsers authz + input validation (registration approval) ──────
+// manager/admin activate accounts; contractor/store/courier/worker cannot.
+check(mayApproveUsers(["manager"]), "manager may approve users");
+check(mayApproveUsers(["admin"]), "admin may approve users");
+check(mayApproveUsers(["manager", "store"]), "multi-role incl. manager may approve");
+check(mayApproveUsers(["admin", "worker"]), "multi-role incl. admin may approve");
+check(mayApproveUsers(["contractor"]) === false, "contractor may NOT approve users");
+check(mayApproveUsers(["store"]) === false, "store may NOT approve users");
+check(mayApproveUsers(["courier", "worker"]) === false, "courier/worker may NOT approve");
+check(mayApproveUsers([]) === false, "a role-less caller may NOT approve");
+// input validation.
+check(cleanApproveUids(["a", "b"]).error === null, "clean uids: valid list passes");
+check(cleanApproveUids(["a", "b"]).uids.length === 2, "clean uids: keeps both");
+check(cleanApproveUids(["a", "a", "b"]).uids.length === 2, "clean uids: de-dupes repeats");
+check(cleanApproveUids([]).error !== null, "clean uids: empty list rejected");
+check(cleanApproveUids("x").error !== null, "clean uids: non-array rejected");
+check(cleanApproveUids(undefined).error !== null, "clean uids: undefined rejected");
+check(cleanApproveUids(["a", ""]).error !== null, "clean uids: empty-string uid rejected");
+check(cleanApproveUids(["a", 7]).error !== null, "clean uids: non-string uid rejected");
+const _capOver = Array.from({ length: APPROVE_USERS_CAP + 1 }, (_v, i) => `u${i}`);
+check(cleanApproveUids(_capOver).error !== null, "clean uids: over-cap rejected");
+const _capExact = Array.from({ length: APPROVE_USERS_CAP }, (_v, i) => `u${i}`);
+check(cleanApproveUids(_capExact).error === null, "clean uids: exactly cap passes");
 
 // ── P5.68 · deploy-ordering CI-assertion (R2-10) ─────────────────────────────
 // The Studio publish/catalog path ships server artifacts in a HARD order:

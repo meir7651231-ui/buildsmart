@@ -73,11 +73,19 @@ import 'package:buildsmart/state/customer_score_source.dart'
     show customerScoreProvider;
 import 'package:buildsmart/state/customers_store.dart'
     show SavedCustomer, savedCustomerForProvider, savedCustomersProvider;
+import 'package:buildsmart/state/directory.dart'
+    show
+        DirectoryEntry,
+        directoryProvider,
+        kDirectoryStatusActive,
+        kDirectoryStatusPending,
+        pendingDirectoryEntries,
+        resolveApproveTargets;
 import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/org_gates.dart'
     show elementVisible, featEnabled, orgTerm;
 import 'package:buildsmart/state/role_requests.dart'
-    show pendingRoleRequestsProvider;
+    show pendingRoleRequestsProvider, userApproverProvider;
 import 'package:buildsmart/state/screen_sections.dart'
     show screenSectionsProvider;
 import 'package:buildsmart/state/manager_dashboard_state.dart';
@@ -2095,11 +2103,25 @@ class _CustomerView {
     required this.customer,
     required this.pct,
     required this.sites,
+    this.uid = '',
+    this.accountStatus = '',
   });
 
   final ManagerCustomer customer;
   final int pct;
   final int sites;
+
+  /// #reg-approval — the directory uid this row maps to. '' for an order-derived-
+  /// only row (a seed buyer, or ANY row when the backend is OFF — the directory is
+  /// empty then, so these default to the byte-identical values). Lets the chat
+  /// affordance reach a registered user who never ordered (no phone), by uid.
+  final String uid;
+
+  /// #reg-approval — the account-lifecycle status from the directory
+  /// ([kDirectoryStatusPending]/[kDirectoryStatusActive]), '' when order-derived-
+  /// only / backend OFF. Drives the ממתין/מאושר row badge; NEVER a permission
+  /// decision (the `approveUsers` callable authorizes server-side).
+  final String accountStatus;
 
   /// @legacy index.html:16562 — `pct>=90?'low':pct>0?'live':'off'`.
   String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
@@ -2117,6 +2139,13 @@ class _CustomerView {
 final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
   final customers = ref.watch(managerCustomersProvider);
   final orders = ref.watch(ordersEngineProvider);
+  // #reg-approval — ALL registered users (the people directory), so a user who
+  // registered but NEVER ordered still appears. EMPTY when the backend is OFF
+  // (the whole test suite + demo), so the union below collapses to today's
+  // order-derived list ⇒ BYTE-IDENTICAL when off. valueOrNull → [] while the
+  // stream is loading (no throw into the sync provider).
+  final directory =
+      ref.watch(directoryProvider).valueOrNull ?? const <DirectoryEntry>[];
 
   // Distinct build sites per buyer (legacy `byName[nm].sites` set @16554) —
   // a non-empty `o.site` is added to that buyer's set; its size is `c.sites`.
@@ -2126,18 +2155,56 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
     (sitesByBuyer[o.who] ??= <String>{}).add(o.site);
   }
 
-  return [
-    for (final c in customers)
-      _CustomerView(
-        customer: c,
-        // @legacy index.html:16559 — `min(100, round(spent/credit*100))`.
-        pct:
-            c.creditLimit == 0
-                ? 0
-                : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100),
-        sites: sitesByBuyer[c.name]?.length ?? 0,
-      ),
-  ];
+  // @legacy index.html:16559 — `min(100, round(spent/credit*100))`.
+  int pctOf(ManagerCustomer c) => c.creditLimit == 0
+      ? 0
+      : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100);
+
+  // The order-derived stats keyed by (trimmed) buyer name, for the by-name merge
+  // (spend/orders flow onto a matching registered user; unmatched registered
+  // users show with zero stats).
+  final statsByName = <String, ManagerCustomer>{
+    for (final c in customers) c.name.trim(): c,
+  };
+
+  final views = <_CustomerView>[];
+  final takenNames = <String>{};
+
+  // 1) Every REGISTERED user (directory) — appears even with zero orders. Merge
+  //    the order-derived stats (spend/orders) by name when the buyer placed any.
+  for (final e in directory) {
+    final key = e.displayName.trim();
+    final stats = statsByName[key];
+    final base = stats ??
+        ManagerCustomer(
+          name: e.displayName,
+          orderCount: 0,
+          totalSpend: 0,
+          creditLimit: 0,
+        );
+    views.add(_CustomerView(
+      customer: base,
+      pct: pctOf(base),
+      sites: sitesByBuyer[base.name]?.length ?? 0,
+      uid: e.uid,
+      accountStatus: e.status,
+    ));
+    if (stats != null) takenNames.add(key);
+  }
+
+  // 2) Order-derived buyers with NO directory row — the seed customers, and the
+  //    ENTIRE list when the backend is OFF (directory empty). Preserves today's
+  //    order + content exactly in that case (byte-identical when off).
+  for (final c in customers) {
+    if (takenNames.contains(c.name.trim())) continue;
+    views.add(_CustomerView(
+      customer: c,
+      pct: pctOf(c),
+      sites: sitesByBuyer[c.name]?.length ?? 0,
+    ));
+  }
+
+  return views;
 });
 
 /// A13 (launch server-connect) — the server-canonical credit AGGREGATE for one
@@ -2271,6 +2338,15 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
         BsTokens.space5,
       ),
       children: [
+        // #reg-approval — the owner's registration-approval panel at the TOP.
+        // GATED on the LIVE backend + the manager persona (the same
+        // BoardRole.manager gate the whole screen is built under, line ~142) so it
+        // is NEVER shown to a non-manager and is ABSENT from the tree when the
+        // backend is OFF ⇒ the tab is byte-identical off (the whole Firebase-free
+        // test suite + demo). The panel self-hides when nobody is pending.
+        if (useFirebaseBackend &&
+            ref.watch(boardAuthProvider)?.role == BoardRole.manager)
+          const _PendingApprovalPanel(),
         _CustomerSummary(
           contractors: views.length,
           totalUsed: totalUsed,
@@ -2638,6 +2714,17 @@ class _CustomerCard extends ConsumerWidget {
                                 fontSize: 13,
                               ),
                             ),
+                            // #reg-approval — the account-lifecycle badge
+                            // (⏳ ממתין / ✓ מאושר). LIVE-ONLY: only a directory-
+                            // sourced row carries a status, and the directory is
+                            // empty when the backend is OFF, so this is absent off
+                            // ⇒ the card is byte-identical (the seed cards show no
+                            // badge, as today).
+                            if (useFirebaseBackend &&
+                                view.accountStatus.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              _ApprovalBadge(status: view.accountStatus),
+                            ],
                           ],
                         ),
                       ),
@@ -2870,7 +2957,7 @@ class _CustomerDetailSheet extends ConsumerWidget {
             // the real DM thread, falling back to 📞/💬 or an honest toast.
             if (useFirebaseBackend) ...[
               const SizedBox(height: BsTokens.space3),
-              _CustomerChatButton(customer: c),
+              _CustomerChatButton(customer: c, directUid: view.uid),
             ],
             // GIANT Phase-2 — the SAVED customer entity (phone/notes/tags) rides
             // the opt-in gate `manager.customers`; default-OFF ⇒ this sheet is
@@ -3002,9 +3089,16 @@ class _CustomerDetailSheet extends ConsumerWidget {
 /// the button (a spinner) during the async lookup so a double-tap can never kick
 /// a second resolve.
 class _CustomerChatButton extends ConsumerStatefulWidget {
-  const _CustomerChatButton({required this.customer});
+  const _CustomerChatButton({required this.customer, this.directUid = ''});
 
   final ManagerCustomer customer;
+
+  /// #reg-approval — the customer's directory uid when this row came from the
+  /// people directory (ALL registered users). When present, chat opens on it
+  /// DIRECTLY — no phone→uid lookup — so a registered user who never ordered (no
+  /// phone on the aggregate) is still reachable. '' for an order-derived-only row,
+  /// where the phone→uid resolve stays the path (byte-identical to #8/3c).
+  final String directUid;
 
   @override
   ConsumerState<_CustomerChatButton> createState() =>
@@ -3023,6 +3117,20 @@ class _CustomerChatButtonState extends ConsumerState<_CustomerChatButton> {
       // No signed-in manager (should not happen on the live board) — honest bail,
       // never a create-or-get with a missing half.
       showToast(context, "יש להתחבר כדי לפתוח צ'אט");
+      return;
+    }
+
+    // #reg-approval — a directory-sourced row carries the uid directly; open the
+    // DM on it without a phone lookup (this is what makes a registered user who
+    // never ordered — hence no phone — reachable from the customers list).
+    final direct = widget.directUid;
+    if (direct.isNotEmpty) {
+      final threadId = ref.read(chatEngineProvider.notifier).createOrGetThread(
+        [managerUid, direct],
+        name: widget.customer.name,
+      );
+      if (!context.mounted) return;
+      openChatThread(context, ref, threadId, persona: BsRole.manager);
       return;
     }
 
@@ -3100,6 +3208,289 @@ class _CustomerChatButtonState extends ConsumerState<_CustomerChatButton> {
           ContactActions(phone: phone),
         ],
       ],
+    );
+  }
+}
+
+// ── #reg-approval — the registration-approval panel (owner-driven) ───────────
+
+/// The Hebrew label per directory role, for the pending checklist rows. Display-
+/// only (never a permission decision); an absent/unknown role reads as ''.
+const Map<BsRole, String> _kBsRoleLabel = {
+  BsRole.contractor: 'קבלן',
+  BsRole.manager: 'מנהל',
+  BsRole.store: 'חנות',
+  BsRole.courier: 'שליח',
+  BsRole.worker: 'עובד',
+  BsRole.bot: '',
+};
+
+/// #reg-approval — the account-lifecycle badge shown on a customer row and echoed
+/// in the pending checklist: ⏳ ממתין (amber) for a `pending` account, ✓ מאושר
+/// (green) for an `active` one. LIGHT tokens; only mounted on the LIVE path
+/// (directory-sourced status), so the card is byte-identical when the backend is
+/// off.
+class _ApprovalBadge extends StatelessWidget {
+  const _ApprovalBadge({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = status == kDirectoryStatusPending;
+    final active = status == kDirectoryStatusActive;
+    final label = pending
+        ? '⏳ ממתין'
+        : active
+            ? '✓ מאושר'
+            : status;
+    final color = pending
+        ? const Color(0xFFB07400)
+        : active
+            ? const Color(0xFF1F8A4C)
+            : BsTokens.mutedLight;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space2,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: BsTokens.typeLabel,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// #reg-approval — the OWNER's registration-approval panel, at the TOP of the
+/// 👥 לקוחות tab. New users are born `pending` (checkout-blocked) and appear here
+/// as a default-CHECKED checklist; the owner approves them in bulk. Three
+/// affordances, all one server call (`approveUsers` via [userApproverProvider]):
+///   • "אשר הכל"      — approve EVERY pending user (ignores the tick-state);
+///   • "אשר מסומנים"  — approve only the ticked (the "manual" path AND the
+///                       "approve all-except-X": untick X, then press this).
+/// On success the directory stream flips the approved rows active, so they drop
+/// out of the pending list here with no reload. Hidden entirely when nobody is
+/// pending. Only ever mounted behind `useFirebaseBackend` + the manager persona
+/// (see the tab's gate), so it is absent off ⇒ byte-identical.
+class _PendingApprovalPanel extends ConsumerStatefulWidget {
+  const _PendingApprovalPanel();
+
+  @override
+  ConsumerState<_PendingApprovalPanel> createState() =>
+      _PendingApprovalPanelState();
+}
+
+class _PendingApprovalPanelState extends ConsumerState<_PendingApprovalPanel> {
+  /// uids the owner explicitly UNCHECKED (excluded). Empty ⇒ every pending row is
+  /// checked by default (the task's default-checked). Tracking EXCLUSIONS (not
+  /// inclusions) means a newly-arrived pending user is auto-checked, and an
+  /// approved user simply drops out of the pending stream — no reconciliation.
+  final Set<String> _unchecked = {};
+
+  /// True while an approve batch is in flight (checkboxes + buttons disabled).
+  bool _busy = false;
+
+  Future<void> _approve(List<String> uids) async {
+    final approver = ref.read(userApproverProvider);
+    if (approver == null || uids.isEmpty || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final n = await approver(uids, approve: true);
+      if (mounted) {
+        showToast(context, n > 0 ? '✓ אושרו $n משתמשים' : 'לא בוצע אישור');
+        // Drop stale exclusions for the acted uids (they leave `pending` anyway).
+        setState(() => _unchecked.removeAll(uids));
+      }
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'האישור נכשל — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final directory =
+        ref.watch(directoryProvider).valueOrNull ?? const <DirectoryEntry>[];
+    final pending = pendingDirectoryEntries(directory);
+    // Nobody waiting → the panel disappears entirely (no empty strip).
+    if (pending.isEmpty) return const SizedBox.shrink();
+
+    final pendingUids = [for (final e in pending) e.uid];
+    final checked = {
+      for (final u in pendingUids)
+        if (!_unchecked.contains(u)) u,
+    };
+    final selected = resolveApproveTargets(
+      all: false,
+      pendingUids: pendingUids,
+      checked: checked,
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: BsTokens.space4),
+      padding: const EdgeInsets.all(BsTokens.space4),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        // Amber outline — this card asks for an action (accounts are waiting).
+        border: Border.all(color: const Color(0xFFF2A516)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('🔔', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: BsTokens.space2),
+              Expanded(
+                child: Text(
+                  'אישור משתמשים חדשים (${pending.length})',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'משתמשים חדשים נולדים כ״ממתינים״ ואינם יכולים לקנות עד לאישור. '
+            'בחר את מי לאשר (ברירת-מחדל: הכל).',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+          const SizedBox(height: BsTokens.space3),
+          for (final e in pending)
+            _PendingRow(
+              entry: e,
+              checked: checked.contains(e.uid),
+              enabled: !_busy,
+              onChanged: (v) => setState(() {
+                if (v) {
+                  _unchecked.remove(e.uid);
+                } else {
+                  _unchecked.add(e.uid);
+                }
+              }),
+            ),
+          const SizedBox(height: BsTokens.space3),
+          if (_busy)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(6),
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2.4),
+                ),
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => _approve(pendingUids),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: BsTokens.brand,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    icon: const Icon(Icons.done_all, size: 18),
+                    label: Text('אשר הכל (${pendingUids.length})'),
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space3),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    // Disabled when nothing is ticked (approving nobody is a no-op).
+                    onPressed:
+                        selected.isEmpty ? null : () => _approve(selected),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: BsTokens.brandDark,
+                      side: const BorderSide(color: BsTokens.brand),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: Text('אשר מסומנים (${selected.length})'),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One pending-user row in the approval checklist — a tappable checkbox + the
+/// person's name (and role, when known) + the ⏳ ממתין tag. LIGHT tokens.
+class _PendingRow extends StatelessWidget {
+  const _PendingRow({
+    required this.entry,
+    required this.checked,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final DirectoryEntry entry;
+  final bool checked;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final roleLabel = _kBsRoleLabel[entry.role] ?? '';
+    return InkWell(
+      onTap: enabled ? () => onChanged(!checked) : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            Checkbox(
+              value: checked,
+              onChanged: enabled ? (v) => onChanged(v ?? false) : null,
+              activeColor: BsTokens.brand,
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Expanded(
+              child: Text(
+                roleLabel.isEmpty
+                    ? entry.displayName
+                    : '${entry.displayName} · $roleLabel',
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            const Text(
+              '⏳ ממתין',
+              style: TextStyle(
+                color: Color(0xFFB07400),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

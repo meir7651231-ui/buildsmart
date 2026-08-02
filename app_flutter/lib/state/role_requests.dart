@@ -141,6 +141,37 @@ final roleReviewerProvider = Provider<RoleReviewer?>((ref) {
       );
 });
 
+// ── registration approval (owner-driven account activation) ──────────────────
+
+/// Seam over the `approveUsers` callable (registration approval) — a function so
+/// tests inject a fake (the real impl needs FirebaseFunctions, which a
+/// Firebase-free test can't construct). Bulk-activates the given uids:
+/// `approve: true` flips `users.status` pending→active (unblocks checkout),
+/// `false` reverts to pending. Returns the server's acted `count`.
+typedef UserApprover = Future<int> Function(
+  List<String> uids, {
+  required bool approve,
+});
+
+/// The user-approver — null Firebase-free / demo (byte-identical when off, like
+/// every seam here), so the approval panel is inert without the live backend.
+/// Region must match the function (kAuthFunctionsRegion = me-west1), exactly like
+/// [roleReviewerProvider] above. The SERVER enforces the manager/admin auth
+/// (callerRoles); this only forwards the batch and reads back `count`.
+final userApproverProvider = Provider<UserApprover?>((ref) {
+  if (!useFirebaseBackend) return null;
+  final functions = FirebaseFunctions.instanceFor(region: kAuthFunctionsRegion);
+  return (List<String> uids, {required bool approve}) async {
+    final res = await functions.httpsCallable('approveUsers').call<dynamic>(
+      <String, dynamic>{'uids': uids, 'approve': approve},
+    );
+    final data = res.data;
+    if (data is Map && data['count'] is int) return data['count'] as int;
+    // The call resolved but returned no count — fall back to the requested size.
+    return uids.length;
+  };
+});
+
 /// Set true by the registration flow (`WelcomeScreen._finishAfterAuth`) the
 /// moment a NEW user finishes registering, so the shell opens the role-request
 /// sheet ONCE — "בקשת תפקיד במסך אחד אחרי הרשמה". The shell resets it after
