@@ -210,6 +210,11 @@ export {
   onUserCreatedQueueApproval,
   reviewRoleRequest,
 } from "./reviewRoleRequest";
+//   reg   approveUsers                 — gen2 callable; manager/admin bulk
+//                                        account-activation (users.status
+//                                        pending⇄active via the Admin SDK), the
+//                                        server side of the owner's approval panel
+export { approveUsers } from "./approveUsers";
 export { publishConfig, revertIllegalConfigWrite } from "./studio";
 // P5.66 rollup schedulers. Deploying these `onSchedule` functions requires the
 // Cloud Scheduler API enabled AND the CI service account granted

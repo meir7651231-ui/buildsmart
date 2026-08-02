@@ -48,6 +48,15 @@ const String kDirectoryDisplayNameField = 'displayName';
 const String kDirectoryRoleField = 'role';
 const String kDirectoryStatusField = 'status';
 
+/// The two account-lifecycle status values the approval flow keys on — kept
+/// verbatim with the server, which writes these exact strings into `users.status`
+/// / `directory.status` (functions/src/reviewRoleRequest.ts + approveUsers.ts).
+/// A user is born [kDirectoryStatusPending] (checkout-blocked) and the owner's
+/// approval panel flips them to [kDirectoryStatusActive] via the `approveUsers`
+/// callable. Same drift-guard discipline as the field-name constants above.
+const String kDirectoryStatusPending = 'pending';
+const String kDirectoryStatusActive = 'active';
+
 /// Parse a stored `role` string into a [BsRole], or null when it is
 /// absent/unknown. [BsRole.bot] is deliberately NOT matchable — the bot is the
 /// system, never a `directory` row — so a stray `'bot'` value resolves to null
@@ -149,3 +158,40 @@ final directoryProvider = StreamProvider<List<DirectoryEntry>>((ref) {
     return out;
   });
 });
+
+// ── registration approval (owner-driven) — the PURE checklist logic ───────────
+// The Manager Customers approval panel (manager_dashboard_screen.dart) drives its
+// checklist + the three approve affordances through these two pure functions, so
+// the select/all/all-except logic is unit-tested widget-free (the callable itself
+// is `userApproverProvider` in role_requests.dart; the server authorizes).
+
+/// PURE — the PENDING directory rows ([DirectoryEntry.status] ==
+/// [kDirectoryStatusPending]) in input order: the approval panel's checklist
+/// source (every registered user still waiting to be approved to buy). Selftested
+/// widget-free.
+List<DirectoryEntry> pendingDirectoryEntries(List<DirectoryEntry> entries) => [
+      for (final e in entries)
+        if (e.status == kDirectoryStatusPending) e,
+    ];
+
+/// PURE — resolve which pending uids an approve action targets. [all] (the
+/// "אשר הכל" button) approves EVERY pending uid regardless of the tick-state;
+/// otherwise ("אשר מסומנים") only the [checked] ones. Order follows [pendingUids]
+/// (deterministic), and a [checked] uid no longer in [pendingUids] is ignored
+/// (stale-exclusion safety across a live stream re-emit). This ONE mapping is
+/// behind all three panel affordances:
+///   • "approve all"          → all: true
+///   • "approve selected"     → all: false, checked = the ticked rows
+///   • "approve all-except-X" → untick X, then all: false (X ∉ checked)
+/// Selftested widget-free.
+List<String> resolveApproveTargets({
+  required bool all,
+  required List<String> pendingUids,
+  required Set<String> checked,
+}) =>
+    all
+        ? List<String>.of(pendingUids)
+        : [
+            for (final u in pendingUids)
+              if (checked.contains(u)) u,
+          ];

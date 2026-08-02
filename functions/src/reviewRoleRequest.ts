@@ -175,51 +175,32 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
   return { ok: true, uid, requestedRole, decision };
 });
 
-/** Put EVERY new account into the approval queue — the trigger that makes the
- * inbox tell the truth.
+/** DOCUMENTED NO-OP — new accounts stay `pending` until an owner approves them
+ * (owner decision 2026-08-02, REVERTING the earlier auto-activate).
  *
- * Registration is all-by-approval, and the reviewer works from `roleRequests`.
- * But that document was written by exactly one screen: the welcome-screen
- * registration button. Anyone who arrived through the login sheet — phone code,
- * or the Google button — got a `users/{uid}` record held at `pending` and NO
- * request, so they were blocked and simultaneously invisible: waiting forever in
- * a queue nobody could see them in.
+ * New users are born `status: pending` (the client born-status write) and the
+ * pending-gate (rbac checkoutBlock + the `isActive()` orders rule) blocks them at
+ * checkout until approval. Approval is now OWNER-DRIVEN: the manager/owner
+ * activates accounts in bulk from the Manager Customers approval panel
+ * (app_flutter/lib/screens/manager_dashboard_screen.dart), which calls the
+ * `approveUsers` callable (functions/src/approveUsers.ts). The owner does NOT
+ * want silent auto-approve, so this trigger no longer flips pending→active, and
+ * it no longer auto-files a nameless `contractor` roleRequest (that flooded the
+ * inbox). ELEVATED operational roles (worker/courier/store/manager) still go
+ * through explicit approval via `submitRoleRequest` → `reviewRoleRequest` above.
  *
- * Doing it here, rather than in the app, is deliberate on three counts:
- *   • `users/{uid}` is created exactly once (`ensureUser` is create-if-absent),
- *     so this fires once per person — no "is this their first time?" guessing
- *     against a cache that may not have loaded yet;
- *   • the client helper `submitRoleRequest` DELETES and recreates, which on a
- *     returning user would wipe a decision that was already made;
- *   • it covers doors that do not exist yet. A future sign-in method is enrolled
- *     the moment it writes a user record.
- *
- * Never overwrites: an existing request (pending, approved or denied) is left
- * exactly as it is.
+ * There is nothing left for a user-create trigger to do: the directory row every
+ * approval panel reads is created for each new user by `onUserDocWritten`
+ * (directory.ts) on the SAME `users` write, so a fresh pending user already
+ * surfaces in the panel with no action here. The export name + its
+ * `onDocumentCreated` wiring are KEPT as a no-op for DEPLOY-STABILITY — renaming
+ * or deleting it would delete+recreate the Cloud Function. If a per-user
+ * post-create hook is ever needed, this is its home.
  */
 export const onUserCreatedQueueApproval = onDocumentCreated(
   { region: REGION, document: "users/{uid}" },
-  async (event) => {
-    const snap = event.data;
-    if (!snap) return;
-    const uid = event.params.uid;
-
-    // Already active (an admin-seeded or migrated record) — nothing to approve.
-    if (asString(snap.get("status")) !== "pending") return;
-
-    const ref = db().collection("roleRequests").doc(uid);
-    if ((await ref.get()).exists) return; // a decision already exists — leave it
-
-    await ref.set({
-      requestedRole: "contractor",
-      status: "pending",
-      displayName: asString(snap.get("displayName")) ?? "",
-      phone: asString(snap.get("phone")) ?? "",
-      requestedAt: FieldValue.serverTimestamp(),
-      // Marks the ones that arrived by signing in rather than by filling the
-      // registration form, so the queue can be read honestly.
-      source: "signIn",
-    });
-    logger.info("queued for approval", { uid });
+  async () => {
+    // Intentionally empty: registration approval is owner-driven (approveUsers).
+    // Users are born `pending`; the directory is synced by onUserDocWritten.
   }
 );
