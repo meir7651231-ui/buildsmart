@@ -224,8 +224,21 @@ Future<void> main() async {
   if (useServerCatalog && Firebase.apps.isNotEmpty) {
     try {
       final auth = fb.FirebaseAuth.instance;
+      // #7 fix — WAIT for the persisted session to restore before deciding to
+      // sign in anonymously. Right after init, currentUser is null even for a
+      // returning REAL user (web restores from indexedDB asynchronously), so the
+      // old synchronous `currentUser != null` read minted an anonymous session
+      // that SHADOWED the real account — every visit looked like a new account,
+      // and OnboardingGate never routed a returning customer straight to
+      // HomeShell (#3). authStateChanges().first emits the restored user (or
+      // null once persistence has loaded); bound it so a stalled SDK never
+      // blocks the first frame (fall back to currentUser, then anon).
+      final restored = await auth.authStateChanges().first.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => auth.currentUser,
+          );
       await ensureAnonAuthForServerCatalog(
-        hasUser: auth.currentUser != null,
+        hasUser: restored != null,
         signInAnon: auth.signInAnonymously,
       );
     } on Object catch (_) {
