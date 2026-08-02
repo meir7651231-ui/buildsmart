@@ -311,6 +311,7 @@ class ManagerCustomer {
     required this.totalSpend,
     required this.creditLimit,
     this.ownerId = '',
+    this.phone = '',
   });
 
   final String name;
@@ -330,4 +331,35 @@ class ManagerCustomer {
   /// doc only when non-empty, so the seed + every legacy doc round-trip
   /// byte-identical (zero regression — the A3 `contractorUid` guard).
   final String ownerId;
+
+  /// #8/3c (per-customer chat link) — the customer's (contractor's) free-text
+  /// phone, carried onto the aggregate so the manager's chat affordance can
+  /// resolve it to a chat uid (`UsersLookup.uidByPhone`) or fall back to 📞/💬
+  /// (`ContactActions`). It is DERIVED, not stored on the `customers` doc:
+  /// `managerCustomersProvider` (state/orders_engine.dart) stamps it from the
+  /// buyer's MOST-RECENT non-empty `Order.customerPhone` (orders are newest-first,
+  /// so the first non-empty phone per buyer wins) — the same field the order rows
+  /// already reach with `ContactActions`. Additive + display-neutral: '' when
+  /// unknown (the seed + every phone-less order), it is never mapped into `toDoc`/
+  /// `fromDoc` (so Firestore docs round-trip byte-identical), and nothing renders
+  /// it unless the LIVE chat affordance is shown (gated on `useFirebaseBackend`)
+  /// — so the customers tab is byte-identical when the backend is off.
+  final String phone;
+
+  ManagerCustomer copyWith({
+    String? name,
+    int? orderCount,
+    int? totalSpend,
+    int? creditLimit,
+    String? ownerId,
+    String? phone,
+  }) =>
+      ManagerCustomer(
+        name: name ?? this.name,
+        orderCount: orderCount ?? this.orderCount,
+        totalSpend: totalSpend ?? this.totalSpend,
+        creditLimit: creditLimit ?? this.creditLimit,
+        ownerId: ownerId ?? this.ownerId,
+        phone: phone ?? this.phone,
+      );
 }

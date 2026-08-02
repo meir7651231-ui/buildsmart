@@ -4,7 +4,7 @@ import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/repositories/backend.dart'
-    show kIntelLive, kStudioCoEditor;
+    show kIntelLive, kStudioCoEditor, useFirebaseBackend;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 // A13 — the server-canonical credit seam: the repository provider + the
@@ -13,6 +13,10 @@ import 'package:buildsmart/data/repositories/customers_local.dart'
     show customersRepositoryProvider;
 import 'package:buildsmart/data/repositories/order_functions.dart'
     show CreditResult;
+// #8/3c — the counterparty→uid directory (phone→chat uid), gated on the live
+// backend (null off the launch path) so the manager's chat link resolves.
+import 'package:buildsmart/data/repositories/users_lookup.dart'
+    show usersLookupProvider;
 import 'package:buildsmart/logic/attention_engine.dart'
     show AttentionItem, AttentionSev;
 import 'package:buildsmart/logic/customer_score.dart' show CustomerScore;
@@ -51,6 +55,8 @@ import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/services/doc_print.dart' show printDocument;
+// #8/3c — the signed-in manager's uid, one half of the DM thread's participants.
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart' show kVatRate;
 import 'package:buildsmart/state/connection_status.dart'
@@ -2856,6 +2862,16 @@ class _CustomerDetailSheet extends ConsumerWidget {
             row('נוצל', '₪${_grouped(liveTotalSpend)}'),
             row('יתרה זמינה', creditLimit <= 0 ? '—' : '₪${_grouped(balance)}'),
             row('אתרי בנייה', '$liveSites'),
+            // #8/3c (per-customer chat link) — the manager's in-app chat
+            // affordance. LIVE-ONLY: gated on `useFirebaseBackend` (the demo has
+            // no directory/uid to resolve against), so with the backend OFF this
+            // whole block is absent from the tree and the sheet is byte-identical
+            // to today. When ON it resolves customer→uid (`uidByPhone`) and opens
+            // the real DM thread, falling back to 📞/💬 or an honest toast.
+            if (useFirebaseBackend) ...[
+              const SizedBox(height: BsTokens.space3),
+              _CustomerChatButton(customer: c),
+            ],
             // GIANT Phase-2 — the SAVED customer entity (phone/notes/tags) rides
             // the opt-in gate `manager.customers`; default-OFF ⇒ this sheet is
             // byte-identical (the block is compiled in but the gate is false).
@@ -2960,6 +2976,130 @@ class _CustomerDetailSheet extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// #8/3c (per-customer chat link) — the manager's in-app chat affordance on the
+/// customer-detail sheet. LIVE-ONLY: only mounted inside the sheet's
+/// `if (useFirebaseBackend)` branch (the demo has no directory/uid to resolve
+/// against), so with the backend OFF it never enters the tree and the sheet is
+/// byte-identical to today.
+///
+/// The customer→uid resolve is best-effort and NEVER crashes:
+///   • manager uid = [currentUidProvider]; customer uid =
+///     `usersLookupProvider.uidByPhone(phone)` — an ASYNC one-shot over the
+///     EXISTING directory seam (no new listen — stage-2 rule #4);
+///   • BOTH present → [ChatEngineNotifier.createOrGetThread] mints/gets the
+///     deterministic DM thread, then [openChatThread] opens it as the manager;
+///   • the customer has no chat account (uid null) / a lookup error → an honest
+///     toast, with the 📞/💬 [ContactActions] rendered beside as the visible
+///     fallback whenever a phone exists (the same widget the order rows use).
+///
+/// The effective phone is the order-derived [ManagerCustomer.phone], falling
+/// back to the saved-CRM record's phone ([savedCustomerForProvider]) — the
+/// order/saved-customer sources #8/3c calls for. A stateful busy flag disables
+/// the button (a spinner) during the async lookup so a double-tap can never kick
+/// a second resolve.
+class _CustomerChatButton extends ConsumerStatefulWidget {
+  const _CustomerChatButton({required this.customer});
+
+  final ManagerCustomer customer;
+
+  @override
+  ConsumerState<_CustomerChatButton> createState() =>
+      _CustomerChatButtonState();
+}
+
+class _CustomerChatButtonState extends ConsumerState<_CustomerChatButton> {
+  /// In-flight guard: true while [UsersLookup.uidByPhone] resolves. Disables the
+  /// button (shows a spinner) so a rapid double-tap can never kick a 2nd resolve.
+  bool _busy = false;
+
+  Future<void> _open(String phone) async {
+    if (_busy) return; // double-tap guard (belt-and-suspenders with onPressed)
+    final managerUid = ref.read(currentUidProvider);
+    if (managerUid == null || managerUid.isEmpty) {
+      // No signed-in manager (should not happen on the live board) — honest bail,
+      // never a create-or-get with a missing half.
+      showToast(context, "יש להתחבר כדי לפתוח צ'אט");
+      return;
+    }
+
+    setState(() => _busy = true);
+    String? customerUid;
+    try {
+      // ASYNC one-shot resolve through the existing directory seam (null off the
+      // live path). A null answer / any error degrades to the fallback below —
+      // it must NEVER throw into the tap handler (the users_lookup contract).
+      customerUid = await ref.read(usersLookupProvider)?.uidByPhone(phone);
+    } on Object catch (_) {
+      customerUid = null;
+    }
+    if (!mounted) return; // the sheet was dismissed mid-resolve
+    setState(() => _busy = false);
+
+    if (customerUid != null && customerUid.isNotEmpty) {
+      // BOTH present → create-or-get the deterministic DM thread (gated exactly
+      // like send), then open the real engine-backed thread as the manager.
+      final threadId = ref.read(chatEngineProvider.notifier).createOrGetThread(
+        [managerUid, customerUid],
+        name: widget.customer.name,
+      );
+      if (!context.mounted) return;
+      openChatThread(context, ref, threadId, persona: BsRole.manager);
+      return;
+    }
+    // No registered chat account → honest toast. The 📞/💬 fallback (built below)
+    // is already on screen whenever a phone exists, so the manager is one tap
+    // from a call/WhatsApp.
+    if (context.mounted) {
+      showToast(context, "ללקוח אין עדיין חשבון בצ'אט");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // The effective phone: the order-derived aggregate phone, else the saved-CRM
+    // record's phone (the order/saved-customer sources #8/3c resolves on).
+    final saved = ref.watch(savedCustomerForProvider(widget.customer.name));
+    final phone = widget.customer.phone.isNotEmpty
+        ? widget.customer.phone
+        : (saved?.phone ?? '');
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            // Disabled while busy — the visual + functional double-tap guard.
+            onPressed: _busy ? null : () => _open(phone),
+            icon: _busy
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('💬'),
+            label: const Text("צ'אט עם הלקוח"),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BsTokens.brandDark,
+              side: const BorderSide(color: BsTokens.brand),
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle:
+                  const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            ),
+          ),
+        ),
+        // The 📞/💬 fallback — the SAME ContactActions the order rows use — shown
+        // whenever a phone exists (its own empty-guard collapses it otherwise).
+        if (phone.isNotEmpty) ...[
+          const SizedBox(width: BsTokens.space2),
+          ContactActions(phone: phone),
+        ],
+      ],
     );
   }
 }

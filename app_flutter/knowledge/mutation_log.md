@@ -1961,3 +1961,8 @@
 - **הנכס:** `dmThreadId` (id דטרמיניסטי/דדופ) + `createOrGetThread` (create-or-get) + `threadsFor` uid-aware, ב-`chat_dm_thread_test`.
 - **תקלות מוזרקות (mutation-sensitivity):** (1) `dmThreadId` בלי sort → סדר שונה של אותם uids נותן id שונה → 'order-independent' נכשלת ⇒ הדדופ load-bearing. (2) `createOrGetThread` בלי בדיקת-קיום → קריאה שנייה מייצרת thread כפול → 'creates ONCE then GETs' נכשלת. (3) ה-uid-clause ב-`threadsFor` בלי `uid != null` → thread-uid דולף ללא-חבר/anon → 'INERT for non-member' נכשלת ⇒ מוכיח זהה-בייטים-כבוי.
 - **אימות:** `chat_dm_thread_test` 6/6 · `flutter analyze` 0.
+
+## #8/3ג — ManagerCustomer.phone enrichment (2026-08-02)
+- **הנכס:** `ManagerCustomer.phone` + `copyWith` (manager_customer_phone_test) + enrichment ב-`managerCustomersProvider`.
+- **תקלות מוזרקות (mutation-sensitivity):** (1) `copyWith` בלי `phone ?? this.phone` → copyWith עוקב מאפס את הטלפון → 'preserves existing phone' נכשלת. (2) enrichment בלי guard `if(phoneByName.isEmpty) return base` → מצב-דמו (בלי טלפונים) מקבל רשימה חדשה (זהות-אובייקט אחרת) → סיכון-רגרסיה; ה-guard מוכיח זהה-בייטים-כבוי.
+- **אימות:** `manager_customer_phone_test` 3/3 · `flutter analyze` 0.

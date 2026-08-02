@@ -3662,3 +3662,9 @@ gate: `flutter analyze` 0 · `chat_dm_thread_test` (6) + 51 chat tests עובר�
 - **chats_screen.dart**: `_visibleToAudience(...,{uid})` — clause uid additive (thread-uid נראה לחבר), inert כש-uid ריק; מוזן ב-2 האתרים (`_ThreadList` + `visibleThreadsProvider`). `openChatThread` חדש — פותח thread אמיתי engine-backed, no-op אם חסר.
 gate: `flutter analyze` 0 · `directory_3b_test` + 128 chat/related tests עוברים.
 3ג (הבא): קישור-צ'אט במסך-לקוחות (customer→uid + createOrGetThread).
+
+### #8/3ג — קישור-צ'אט במסך-לקוחות של המנהל (2026-08-02)
+- **manager_dashboard.dart** (logic): `ManagerCustomer.phone` (default '') + `copyWith` — הטלפון נישא על האגרגט (המפתח ל-resolve לקוח→uid). DERIVED, לא ב-toDoc/fromDoc → Firestore זהה-בייטים.
+- **orders_engine.dart**: `managerCustomersProvider` מעשיר כל אגרגט בטלפון מה-live-orders שכבר נצפים (`Order.customerPhone`, newest-first → ה-non-empty הראשון מנצח) — **בלי listen חדש** (stage-2 rule 4). אין טלפונים ⇒ מחזיר את הבסיס ללא שינוי (זהה-בייטים).
+- **manager_dashboard_screen.dart**: `_CustomerChatButton` (גדור `useFirebaseBackend`) ב-`_CustomerDetailSheet` — `uidByPhone(phone)` → `createOrGetThread([managerUid, customerUid])` → `openChatThread(persona: manager)`; נפילה: toast "ללקוח אין עדיין חשבון בצ'אט" + `ContactActions` (📞/💬); double-tap guard + mounted-checks.
+gate: `flutter analyze` 0 · `manager_customer_phone_test` + `stage2_scale` (conformance) + 107 manager tests עוברים.

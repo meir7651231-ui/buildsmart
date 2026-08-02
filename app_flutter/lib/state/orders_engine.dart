@@ -764,5 +764,29 @@ final managerCustomersProvider = Provider<List<ManagerCustomer>>((ref) {
   // Delegate the group-by-buyer fold to the repository. The local impl exposes
   // `aggregate(orders)` so the watched live list drives it directly; any other
   // impl folds the engine's current orders via `all()` — identical result.
-  return repo is LocalCustomersRepository ? repo.aggregate(orders) : repo.all();
+  final base =
+      repo is LocalCustomersRepository ? repo.aggregate(orders) : repo.all();
+
+  // #8/3c (per-customer chat link) — carry each buyer's phone onto the aggregate
+  // so the manager's chat affordance can resolve customer→uid (uidByPhone) or
+  // fall back to 📞/💬. The phone is DERIVED from the SAME live orders this
+  // provider already watches — `Order.customerPhone` is carried on BOTH the
+  // local and Firebase order paths (orders_firebase.dart maps it), so this one
+  // enrichment covers the derived-aggregate path AND the Firestore `customers`
+  // path uniformly, without a new listen (stage-2 rule #4) and without touching
+  // the customers `toDoc`/`fromDoc`. MOST-RECENT non-empty wins: orders are
+  // newest-first (placeOrder prepends), so `putIfAbsent` keeps the first — i.e.
+  // most recent — non-empty phone seen per buyer.
+  final phoneByName = <String, String>{};
+  for (final o in orders) {
+    if (o.customerPhone.isEmpty) continue;
+    phoneByName.putIfAbsent(o.who, () => o.customerPhone);
+  }
+  // No phones anywhere (the seed + every phone-less order — the demo/test state)
+  // ⇒ return the aggregate UNTOUCHED, so the list is byte-identical to before.
+  if (phoneByName.isEmpty) return base;
+  return [
+    for (final c in base)
+      if (phoneByName[c.name] case final p?) c.copyWith(phone: p) else c,
+  ];
 });
