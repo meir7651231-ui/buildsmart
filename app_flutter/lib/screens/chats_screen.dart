@@ -112,7 +112,20 @@ List<_AudienceChip>? _audienceChipsFor(String audience) => switch (audience) {
 /// without the bridge each side's send was write-only for the other. The
 /// participants check keeps every other audience-crossing thread invisible
 /// (verified against the seed: these are the only store+courier threads).
-bool _visibleToAudience(ChatThread t, BsRole persona, String audience) {
+bool _visibleToAudience(ChatThread t, BsRole persona, String audience,
+    {String? uid}) {
+  // #8/3b (per-user chat) — ADDITIVE uid clause, the SAME predicate
+  // `ChatEngineNotifier.threadsFor` uses (sys_chat.dart): a per-user DM thread
+  // (empty role [ChatThread.participants], keyed on [ChatThread.participantUids])
+  // is visible when the CURRENT user's uid ∈ its members — in ADDITION to the
+  // role-audience logic below. INERT when [uid] is null/empty (signed-out /
+  // Firebase-free / the whole test suite), so role-thread visibility stays
+  // byte-identical to today (the on/off invariant). Placed first so a uid-thread
+  // surfaces in EVERY board the signed-in user views, exactly like `threadsFor`
+  // (a DM belongs to its members regardless of the board's role audience).
+  if (uid != null && uid.isNotEmpty && t.participantUids.contains(uid)) {
+    return true;
+  }
   if (audience == 'contractor') {
     return t.participants.contains(persona) &&
         (t.audience == 'contractor' || t.audience == 'worker');
@@ -249,12 +262,16 @@ final visibleThreadsProvider = Provider<List<ThreadLite>>((ref) {
           ? null
           : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
 
+  // #8/3b — the current signed-in uid, so a per-user DM thread surfaces in this
+  // keyboard-chip projection too (kept in lock-step with the on-screen list's
+  // [_ThreadList] filter). Null Firebase-free/signed-out ⇒ the clause is inert.
+  final uid = ref.watch(currentUidProvider);
   final views = [
     for (final t in ref
         .watch(chatEngineProvider)
         .where(
           (t) =>
-              _visibleToAudience(t, persona, audience) &&
+              _visibleToAudience(t, persona, audience, uid: uid) &&
               (audienceChip == null || audienceChip.matches(t)),
         ))
       _viewOf(t, persona, lastRead),
@@ -1098,12 +1115,17 @@ class _ThreadList extends ConsumerWidget {
         audienceChips == null
             ? null
             : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
+    // #8/3b — the current signed-in uid so a per-user DM thread (created from the
+    // people-picker) is rendered in this on-screen list, via the SAME additive
+    // clause `threadsFor` uses. Null Firebase-free/signed-out ⇒ inert ⇒
+    // role-thread visibility byte-identical to today.
+    final uid = ref.watch(currentUidProvider);
     final views = [
       for (final t in ref
           .watch(chatEngineProvider)
           .where(
             (t) =>
-                _visibleToAudience(t, persona, audience) &&
+                _visibleToAudience(t, persona, audience, uid: uid) &&
                 (audienceChip == null || audienceChip.matches(t)),
           ))
         _viewOf(t, persona, lastRead),
@@ -1427,6 +1449,41 @@ void openNewChatWith(
       builder:
           (_) => _ChatPage(
             view: (thread: thread, threadId: null, persona: BsRole.contractor),
+          ),
+    ),
+  );
+}
+
+/// #8/3b (per-user chat) — open the ENGINE thread [threadId] as its real,
+/// engine-backed `_ChatPage` (messages persist to the shared store — the
+/// opposite of [openNewChatWith]'s detached page), resolving the thread through
+/// the SAME persona-relative [_viewOf] the on-screen list + `_openChatById` use.
+///
+/// The people-picker (home_shell `_NewChatSheet`) calls this right after
+/// [ChatEngineNotifier.createOrGetThread] returns the deterministic id: that
+/// create is mirrored into [chatEngineProvider] synchronously (same-frame,
+/// exactly like `send`), so the thread is present here on both the local and the
+/// Firestore-bound paths. A NO-OP that stays on the caller when the thread is not
+/// (yet) in the engine — it never crashes on a missing thread (edge safety
+/// mirroring `_openChatById`).
+void openChatThread(
+  BuildContext context,
+  WidgetRef ref,
+  String threadId, {
+  BsRole persona = BsRole.contractor,
+}) {
+  final match = ref.read(chatEngineProvider).where((t) => t.id == threadId);
+  if (match.isEmpty) return;
+  final view = _viewOf(match.first, persona, ref.read(chatLastReadProvider));
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder:
+          (_) => _ChatPage(
+            view: (
+              thread: view.thread,
+              threadId: view.threadId,
+              persona: view.persona,
+            ),
           ),
     ),
   );

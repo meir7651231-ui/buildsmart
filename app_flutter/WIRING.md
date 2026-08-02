@@ -3655,3 +3655,10 @@ gate: `flutter analyze` 0 errors · `flutter test` ירוק. אימות פתיח
 - index: composite כבר קיים; ה-listen לא ממיין server-side ⇒ לא נדרש חדש.
 - **3ב/3ג (הבא):** מסך-אנשים (directory) + קישור-לקוחות; שניהם ידרשו את אותה תוספת-uid ב-`_visibleToAudience` (הרשימה ה-on-screen, לא `threadsFor`) כדי שה-thread ירונדר.
 gate: `flutter analyze` 0 · `chat_dm_thread_test` (6) + 51 chat tests עוברים.
+
+### #8/3ב — מסך-אנשים (directory) + הצגת שיחות-uid (2026-08-02)
+- **directory.dart** (חדש): `DirectoryEntry` + `parseBsRole` + `directorySourceProvider`/`directoryProvider` — קורא `directory/{uid}` (שרת: directory.ts), מסנן self + שם-ריק, ריק כשה-backend כבוי (זהה-בייטים). רשומות = uid+שם+תפקיד בלבד (בלי PII).
+- **home_shell.dart** `_NewChatSheet` → ConsumerWidget: כבוי → 5 הקבועים הישנים (זהה-בייטים); דלוק → רשימת-אנשים חיה מ-`directoryProvider` (loading/empty/error כנים), הקשה → `createOrGetThread([myUid, uid])` → `openChatThread`.
+- **chats_screen.dart**: `_visibleToAudience(...,{uid})` — clause uid additive (thread-uid נראה לחבר), inert כש-uid ריק; מוזן ב-2 האתרים (`_ThreadList` + `visibleThreadsProvider`). `openChatThread` חדש — פותח thread אמיתי engine-backed, no-op אם חסר.
+gate: `flutter analyze` 0 · `directory_3b_test` + 128 chat/related tests עוברים.
+3ג (הבא): קישור-צ'אט במסך-לקוחות (customer→uid + createOrGetThread).

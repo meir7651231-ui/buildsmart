@@ -1,5 +1,5 @@
 import 'package:buildsmart/data/repositories/backend.dart'
-    show kIntelLive, kUserSystem;
+    show kIntelLive, kUserSystem, useFirebaseBackend;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
@@ -22,9 +22,11 @@ import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/screens/updates_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
-import 'package:buildsmart/state/auth_state.dart' show authStateProvider;
+import 'package:buildsmart/state/auth_state.dart'
+    show authStateProvider, currentUidProvider;
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/directory.dart';
 import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/intel/screen_view.dart';
 import 'package:buildsmart/state/keyboard_overlay.dart';
@@ -32,6 +34,7 @@ import 'package:buildsmart/state/org_gates.dart';
 import 'package:buildsmart/state/role_requests.dart'
     show RoleChipState, promptRoleRequestProvider, roleChipStateProvider;
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/sys_chat.dart' show BsRole, chatEngineProvider;
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -1340,9 +1343,34 @@ class _MenuRow extends StatelessWidget {
 
 // ─── new chat sheet ──────────────────────────────────────────────────────────────────────
 
-class _NewChatSheet extends StatelessWidget {
+/// #8/3b — the emoji + Hebrew label a directory row shows for a [BsRole], reusing
+/// the persona emojis the app + the legacy [_NewChatSheet] contact types use. A
+/// null/unknown role (or the bot, never a directory row) falls back to the
+/// neutral 💬 with no label.
+({String emoji, String label}) _roleBadge(BsRole? role) {
+  switch (role) {
+    case BsRole.contractor:
+      return (emoji: '👷', label: 'קבלן');
+    case BsRole.store:
+      return (emoji: '🏪', label: 'ספק');
+    case BsRole.courier:
+      return (emoji: '🛵', label: 'שליח');
+    case BsRole.worker:
+      return (emoji: '🦺', label: 'עובד');
+    case BsRole.manager:
+      return (emoji: '👔', label: 'מנהל');
+    case BsRole.bot:
+    case null:
+      return (emoji: '💬', label: '');
+  }
+}
+
+class _NewChatSheet extends ConsumerWidget {
   const _NewChatSheet();
 
+  /// The legacy hardcoded contact TYPES — the byte-identical fallback shown on
+  /// the OFF/demo build (no live `directory`). Each opens a DETACHED chat via
+  /// [openNewChatWith], exactly as before.
   static const _contacts = [
     (emoji: '👷', label: 'קבלן'),
     (emoji: '🏪', label: 'ספק'),
@@ -1352,7 +1380,7 @@ class _NewChatSheet extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       child: Column(
@@ -1393,25 +1421,117 @@ class _NewChatSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Divider(color: Color(0xFFF5F5F5), height: 1),
-          ..._contacts.map(
-            (c) => ListTile(
-              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
-              title: Text(
-                c.label,
-                style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+          // #8/3b — the LIVE people-picker when the backend is on; the legacy
+          // hardcoded contact TYPES when off (byte-identical demo behaviour, the
+          // `else` branch is never reached with Firebase uninitialised).
+          if (!useFirebaseBackend)
+            ..._contacts.map(
+              (c) => ListTile(
+                leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+                title: Text(
+                  c.label,
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: Color(0xFF888888),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  openNewChatWith(context, emoji: c.emoji, name: c.label);
+                },
               ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: Color(0xFF888888),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                openNewChatWith(context, emoji: c.emoji, name: c.label);
-              },
-            ),
-          ),
+            )
+          else
+            _liveDirectory(context, ref),
         ],
       ),
+    );
+  }
+
+  /// The live people list from [directoryProvider]. Honest about every state:
+  /// a spinner while the first snapshot loads, an "אין עדיין משתמשים" hint on
+  /// empty OR error (never crash the sheet — HARD RULE #3), else a bounded,
+  /// scrollable list of rows.
+  Widget _liveDirectory(BuildContext context, WidgetRef ref) {
+    final dir = ref.watch(directoryProvider);
+    final myUid = ref.watch(currentUidProvider);
+    return dir.when(
+      loading:
+          () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+      error: (_, __) => _emptyHint(),
+      data: (entries) {
+        if (entries.isEmpty) return _emptyHint();
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.5,
+          ),
+          child: ListView(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            children: [
+              for (final e in entries) _directoryRow(context, ref, e, myUid),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _emptyHint() => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 28),
+    child: Center(
+      child: CfgText(
+        'home.newchat.empty',
+        'אין עדיין משתמשים',
+        style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+      ),
+    ),
+  );
+
+  Widget _directoryRow(
+    BuildContext context,
+    WidgetRef ref,
+    DirectoryEntry e,
+    String? myUid,
+  ) {
+    final badge = _roleBadge(e.role);
+    return ListTile(
+      leading: Text(badge.emoji, style: const TextStyle(fontSize: 24)),
+      title: Text(
+        e.displayName,
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+      ),
+      subtitle:
+          badge.label.isEmpty
+              ? null
+              : Text(
+                badge.label,
+                style: const TextStyle(color: Color(0xFF888888), fontSize: 12),
+              ),
+      trailing: const Icon(Icons.chevron_left, color: Color(0xFF888888)),
+      // No identity (races to signed-out) ⇒ disabled row rather than a crash on
+      // a null uid; the directory read requires a signed-in user, so this is a
+      // defensive belt only.
+      onTap:
+          myUid == null || myUid.isEmpty
+              ? null
+              : () {
+                // CREATE-OR-GET the deterministic dm-<sorted uids> thread, then
+                // open the real engine-backed thread — its messages persist to
+                // the shared store (unlike the detached [openNewChatWith]). The
+                // optimistic create is mirrored into [chatEngineProvider]
+                // synchronously (local AND Firestore paths), so [openChatThread]
+                // finds it. Pop first, mirroring the legacy onTap's push idiom.
+                final threadId = ref
+                    .read(chatEngineProvider.notifier)
+                    .createOrGetThread([myUid, e.uid], name: e.displayName);
+                Navigator.pop(context);
+                openChatThread(context, ref, threadId);
+              },
     );
   }
 }

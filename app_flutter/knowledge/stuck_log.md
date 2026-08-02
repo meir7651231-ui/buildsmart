@@ -1798,3 +1798,8 @@ RULE: כל פקד חייב לבצע את פעולתו המוצהרת או להי
 ### ג — כלל המניעה
 ANTIPATTERN: הוספת פרמטר ל-method רב-שכבתי (placeOrder) בשכבה אחת בלבד כשהוא מוגדר ב-engine+abstract+impls
 RULE: פרמטר חדש ב-method רב-שכבתי משורשר בכל השכבות באותו commit — engine + abstract interface + כל ה-impls + המודל וה-serialization — ומאומת ב-analyze לפני commit
+
+## #8/3ב — remote-listen לא-חסום חסם את שער-הסקייל (2026-08-02)
+בעיה: ה-provider החדש של ה-directory יצר remote-listen (מקור-אוסף) ללא cap, ובדיקת-הקונפורמנס stage2_scale ("כל מקור-אוסף חסום או פטור") נכשלה → שער 32 חסם את commit 3ב. הבדיקה מפרידה בין regression אמיתי (ה-listen החדש) לבין רעש-flaky-on-retry קיים (net-עובר בריצה המלאה). פתרון: cap של 500 שורות ל-listen (picker, לא feed; בלי מיון → בלי index).
+ANTIPATTERN: remote-listen חדש שנוצר ללא cap/bound ובלי רישום ברשימת-הפטורים של בדיקת-הקונפורמנס
+RULE: כל remote-listen חדש ב-lib נושא cap (limit) או נרשם ברשימת-הפטורים של stage2_scale עם נימוק — אחרת בדיקת-הקונפורמנס חוסמת את ה-commit

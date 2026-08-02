@@ -2333,5 +2333,26 @@ void main() {
       expect(matches, isEmpty,
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
+
+    test("antipattern #114 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp('remote-listen חדש שנוצר ללא cap/bound ובלי רישום ברשימת-הפטורים של בדיקת-הקונפורמנס');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
   });
 }
