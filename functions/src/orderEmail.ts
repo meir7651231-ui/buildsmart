@@ -24,12 +24,14 @@ const resendKey = defineSecret("RESEND_API_KEY");
 /** Master flag. Default "" ⇒ OFF ⇒ the trigger no-ops (byte-identical). */
 const orderEmailFlag = defineString("ORDER_EMAIL", { default: "" });
 
-/** From-address. Resend's shared sender works out of the box on the free tier;
- *  swap to a verified domain sender once the owner has one (edit this constant).
- *  Deliberately a plain const, NOT a defineString param: under
- *  `firebase deploy --non-interactive` a *defaulted* string param is still
- *  reported as "no value" and aborts the deploy, so the sender lives in code. */
-const fromAddress = "בנייה חכמה <onboarding@resend.dev>";
+/** From-address. Uses the owner's VERIFIED Resend domain (buildsmart-il.com —
+ *  DKIM + SPF confirmed), so the confirmation delivers to ANY customer, not just
+ *  the Resend-account owner (the free-tier shared-sender restriction is lifted
+ *  once a domain is verified). Deliberately a plain const, NOT a defineString
+ *  param: under `firebase deploy --non-interactive` a *defaulted* string param
+ *  is still reported as "no value" and aborts the deploy, so the sender lives in
+ *  code. */
+const fromAddress = "בנייה חכמה <noreply@buildsmart-il.com>";
 
 /** Live brand icon (the deployed PWA icon) — used as the email logo. */
 const kLogoUrl = "https://buildsmart-il.com/icons/Icon-192.png";
