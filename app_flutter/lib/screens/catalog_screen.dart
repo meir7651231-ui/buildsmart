@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
+import 'package:buildsmart/atoms/atom_flag.dart';
+import 'package:buildsmart/atoms/atom_home_screen.dart';
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_source.dart'
     show companyCatalogActive, lipskeyScanPool, resolvedCatalogProducts;
@@ -1713,7 +1715,14 @@ class _CatalogBody extends ConsumerWidget {
     // Giant-system V2 — `search` module off ⇒ skip the finder branch, so 'מאתר'
     // falls through to the section-absent tail below (header + 📋 empty state),
     // never a crash (absent=on ⇒ the all-on default keeps this byte-identical).
-    if (active == 'מאתר' && modOn(ref, 'search')) return const FinderScreen();
+    if (active == 'מאתר' && modOn(ref, 'search')) {
+      // The finder ('מאתר') is the contractor-home atom-engine target. Behind
+      // kAtomEngine (default off → FinderScreen renders, no code change) it is
+      // assembled by the atom engine from atom-engine/manifests/
+      // contractor-home.json; AtomHomeScreen is pixel-identical to FinderScreen
+      // (atom_home_parity_test). See atom-engine/ENGINE-SPEC.md.
+      return kAtomEngine ? const AtomHomeScreen() : const FinderScreen();
+    }
     // OWNER-REVIEW · kWordFinder seam — routes the flag-gated 'מאתר חכם' pill to
     // the two-mode word-finder host. Unreachable when kWordFinderFlag is off
     // (the pill that sets this active section never renders), so this branch is

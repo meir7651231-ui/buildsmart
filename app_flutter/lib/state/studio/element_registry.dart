@@ -381,6 +381,15 @@ const List<ElementDescriptor> kElementRegistry = [
     wired: true,
   ),
   ElementDescriptor(
+    id: 'home.newchat.empty',
+    screen: 'home',
+    area: 'newchat',
+    labelHe: 'הודעת "אין עדיין משתמשים"',
+    kind: ElementKind.text,
+    editableProps: {EditAxis.text, EditAxis.style, EditAxis.hidden},
+    wired: true,
+  ),
+  ElementDescriptor(
     id: 'home.profilecard.editCta',
     screen: 'home',
     area: 'profile',

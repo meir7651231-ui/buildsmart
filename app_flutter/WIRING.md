@@ -1,5 +1,12 @@
 # WIRING CONTRACT — app_flutter
 
+## #atom-engine-slice1 — 🧬 מנוע-אטומים: מסך-המאתר נטען מ-manifest (kAtomEngine, default-off, tree-shaken)
+**SSOT:** `atom-engine/ENGINE-SPEC.md` + `atom-engine/manifests/contractor-home.json`. פרוסה-1 של מנוע-הרכבת-המסכים: מסך-המאתר (`FinderScreen`, ה-section `'מאתר'`) הופך ל-**9 אטומים ניידים** + terminal results, שהמנוע מרכיב מ-manifest.
+- **חיווט** (`catalog_screen.dart`): הענף `if (active == 'מאתר' && modOn(ref,'search'))` מפצל `kAtomEngine ? const AtomHomeScreen() : const FinderScreen()`. מסך-הבית (`'בית'`→`SmartHomeBody`) **לא נגעים בו**.
+- **`kAtomEngine`** = `bool.fromEnvironment('ATOM_ENGINE')`, default `false` ⇒ כל graph של `lib/atoms/` tree-shaken (off-build לא גדל מהאטומים) · `finder_screen.dart` **לא נגעים בו** — הוא ה-live/fallback. On ⇒ `--dart-define=ATOM_ENGINE=true`.
+- **9 אטומים** (`lib/atoms/home_atoms.dart`): type_grid · breadcrumb · subtype/narrow/angle/letter/**wall**/result_count/chip_tip + results. הלוגיקה הטהורה: `lib/atoms/finder_model.dart` (group/sub/letter/wall + system-counts) מעל `features/word_finder/narrow_axis.dart` (narrowAxis/productHasChip — reused, לא משוכפל).
+- **אימות:** `test/atom_home_parity_test.dart` — `AtomHomeScreen` **פיקסל-זהה** ל-`FinderScreen` הנוכחי (landing PNG bytes + landing/drilled structural fingerprint) + manifest≡SSOT. central-verify ירוק · toggle-matrix (off/on) בונה.
+
 ## #screen-mgmt-s11 — ✏️ טריגר-עריכה: long-press-מקלדת → ✎ מעל-הסל (בלי באנר · un-freeze של s0) — 2026-07-28
 **SSOT:** `knowledge/DIRECTIVE-edit-trigger-keyboard-longpress.md` (ענף nice-volta) · **אושר ע"י הבעלים מול ההדמיה.** מדליק חזרה את העריכה-על-המסך שהוקפאה ב-`screen-mgmt-s0` — עם טריגר טוב ואוניברסלי.
 - **הטריגר** (`main.dart` · `_GlobalKeyboardOverlay`): **long-press על ה-FAB-מקלדת הגלובלי** (`kKbGlobal`, על כל מסך) → `editModeProvider.notifier.toggleEdit()`. **לחיצה-רגילה = מקלדת כרגיל.** ה-FAB חולץ למשתנה `fab` ונעטף `kStudioFlag ? GestureDetector(onLongPress: canEdit ? toggle : null, child: fab) : fab`.
