@@ -98,6 +98,7 @@ class _SpyOrders implements OrdersRepository {
     String notes = '',
     String contractorUid = '',
     String customerPhone = '',
+    String customerEmail = '',
   }) =>
       throw UnimplementedError();
   @override

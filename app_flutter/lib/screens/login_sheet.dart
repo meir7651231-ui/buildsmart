@@ -51,6 +51,9 @@ String hebrewAuthError(String code) => switch (code) {
       'invalid-credential' =>
         'אימייל או סיסמה שגויים',
       'email-already-in-use' => 'האימייל כבר רשום — התחברו במקום',
+      'credential-already-in-use' ||
+      'account-exists-with-different-credential' =>
+        'הפרטים כבר משויכים לחשבון אחר — התחברו איתם',
       'weak-password' => 'סיסמה חלשה (6+ תווים)',
       'invalid-email' => 'כתובת האימייל אינה תקינה',
       'user-disabled' => 'החשבון הושבת — פנה לתמיכה',

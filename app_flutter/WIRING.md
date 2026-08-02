@@ -3635,3 +3635,10 @@ SSOT: DIRECTIVE-order-confirmation-email. מייל-HTML יפה בסיום-הזמ
 - **Dart**: `kOrderEmail` (feature_flags, `fromEnvironment('ORDER_EMAIL')`, default-false) גודר כתיבת `customerEmail` על ההזמנה ב-store_screen placeOrder (מ-`authStateProvider.user.email`). `customerEmail` שורשר במודל `Order` (orders_engine: ctor/field/copyWith/toJson/fromJson) + 3 שכבות-repo (firebase/local/abstract) + toDoc (orders_firebase). כבוי ⇒ '' ⇒ זהה-בייטים.
 - אין מייל-לקוח → עותק-בעלים בלבד (edge). הבעלים מספק API-key בקונסול.
 gate: `flutter analyze` 0 · `order_customer_email_test` 3/3 · functions `tsc` 0.
+
+### #identity — פאזה 2: זהות אחת מקושרת (2026-08-02)
+- **main.dart** (#7+#3): המתנה לשחזור-הסשן (`auth.authStateChanges().first`, bounded 5s) לפני חיבור-אנונימי — קודם נקרא `currentUser` סינכרונית לפני השחזור האסינכרוני, אז אנונימי דרס משתמש-אמיתי חוזר ("חדש כל פעם"). עכשיו נזכר, ו-OnboardingGate מכניס אותו ישר ל-HomeShell. גדור `useServerCatalog` → זהה-בייטים כבוי.
+- **auth_state.dart** (#6): `_linkOrSignIn` / `_linkOrSignInWithPopup` / `_linkOrCreateEmail` — קישור credential (טלפון/Google/מייל) לסשן הקיים (אורח/משתמש) עם אותו UID במקום חשבון חדש; fallback בטוח ל-sign-in על כל שגיאה → לעולם לא שובר התחברות.
+- **login_sheet.dart**: `hebrewAuthError` + `credential-already-in-use` / `account-exists-with-different-credential`.
+- **תיקון gate-escape קדום (178fe858)**: 2 fakes של OrdersRepository (site_firebase_repo_test / offline_order_queue_test) חסרו `customerEmail` → invalid_override → נכשלו בקומפילציה; הושלמו.
+gate: `flutter analyze` 0 errors · `flutter test` ירוק. אימות auth-linking בפועל — על האתר החי (אין unit-test ל-Firebase Auth).

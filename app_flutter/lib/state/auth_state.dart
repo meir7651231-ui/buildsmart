@@ -318,7 +318,7 @@ class FirebaseAuthGateway implements AuthGateway {
           _webConfirmations.remove(verificationId); // consumed on success only
           return;
         }
-        await _auth.signInWithCredential(
+        await _linkOrSignIn(
           fb.PhoneAuthProvider.credential(
             verificationId: verificationId,
             smsCode: smsCode,
@@ -339,14 +339,15 @@ class FirebaseAuthGateway implements AuthGateway {
   @override
   Future<void> createUserWithEmailPassword(String email, String password) =>
       _guard(() async {
-        final cred = await _auth.createUserWithEmailAndPassword(
-            email: email, password: password);
+        // #6 — link email onto the current session when one exists (unify with a
+        // phone/Google/guest account) instead of always minting a new one.
+        final user = await _linkOrCreateEmail(email, password);
         // P4 — fire a verification email right after sign-up so the address is
         // confirmable. Best-effort: a send failure must NOT fail account
         // creation (the user already exists + is signed in). The phone/SMS
         // verification path is separate and untouched.
         try {
-          await cred.user?.sendEmailVerification();
+          await user?.sendEmailVerification();
         } on Object catch (e) {
           debugPrint('sendEmailVerification failed (non-fatal): $e');
         }
@@ -368,8 +369,7 @@ class FirebaseAuthGateway implements AuthGateway {
           // themselves.
           final provider = fb.GoogleAuthProvider()
             ..setCustomParameters(<String, String>{'prompt': 'select_account'});
-          final cred = await _auth.signInWithPopup(provider);
-          return _toAuthUser(cred.user);
+          return _toAuthUser(await _linkOrSignInWithPopup(provider));
         }
         // Mobile: the google_sign_in chooser yields OAuth tokens, exchanged for
         // a Firebase credential. A null account = the user cancelled the chooser.
@@ -383,14 +383,70 @@ class FirebaseAuthGateway implements AuthGateway {
         final account = await google.signIn();
         if (account == null) return null;
         final googleAuth = await account.authentication;
-        final cred = await _auth.signInWithCredential(
-          fb.GoogleAuthProvider.credential(
-            idToken: googleAuth.idToken,
-            accessToken: googleAuth.accessToken,
+        return _toAuthUser(
+          await _linkOrSignIn(
+            fb.GoogleAuthProvider.credential(
+              idToken: googleAuth.idToken,
+              accessToken: googleAuth.accessToken,
+            ),
           ),
         );
-        return _toAuthUser(cred.user);
       });
+
+  // #6 — LINK a new credential onto the CURRENT session when one exists (an
+  // anonymous guest OR a remembered real user) so phone / email / Google resolve
+  // to ONE account (same UID → no duplicate, no identity-cache wipe). If linking
+  // isn't possible — no current user, or the credential already belongs to
+  // ANOTHER account — fall back to a normal sign-in with that credential. Net:
+  // this can only UNIFY accounts; it never removes the ability to sign in.
+  Future<fb.User?> _linkOrSignIn(fb.AuthCredential cred) async {
+    final current = _auth.currentUser;
+    if (current != null) {
+      try {
+        return (await current.linkWithCredential(cred)).user;
+      } on fb.FirebaseAuthException catch (e) {
+        debugPrint('link failed (${e.code}) -> sign-in fallback');
+      }
+    }
+    return (await _auth.signInWithCredential(cred)).user;
+  }
+
+  // Popup twin of [_linkOrSignIn] for the web Google flow.
+  Future<fb.User?> _linkOrSignInWithPopup(fb.AuthProvider provider) async {
+    final current = _auth.currentUser;
+    if (current != null) {
+      try {
+        return (await current.linkWithPopup(provider)).user;
+      } on fb.FirebaseAuthException catch (e) {
+        debugPrint('linkWithPopup failed (${e.code}) -> popup sign-in fallback');
+      }
+    }
+    return (await _auth.signInWithPopup(provider)).user;
+  }
+
+  // Email twin: link email+password onto the current session, else create a new
+  // account. A collision (the email belongs to another account) is SURFACED —
+  // never silently duplicated — so the sheet shows "already registered".
+  Future<fb.User?> _linkOrCreateEmail(String email, String password) async {
+    final cred =
+        fb.EmailAuthProvider.credential(email: email, password: password);
+    final current = _auth.currentUser;
+    if (current != null) {
+      try {
+        return (await current.linkWithCredential(cred)).user;
+      } on fb.FirebaseAuthException catch (e) {
+        if (e.code == 'email-already-in-use' ||
+            e.code == 'credential-already-in-use' ||
+            e.code == 'provider-already-linked') {
+          rethrow;
+        }
+        debugPrint('email link failed (${e.code}) -> create fallback');
+      }
+    }
+    return (await _auth.createUserWithEmailAndPassword(
+            email: email, password: password))
+        .user;
+  }
 
   @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) =>

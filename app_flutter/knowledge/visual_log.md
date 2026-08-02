@@ -2434,3 +2434,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #launch-order-email — 📧 מייל-אישור-הזמנה יפה (RTL) — 2026-08-02
 מייל-HTML נשלח בסיום-הזמנה (מגודר `kOrderEmail`/`ORDER_EMAIL`, default-off). **visual-verify: רינדרתי את התבנית ב-Chromium** (email-preview.png) — header כתום-מדורג + לוגו + "בנייה חכמה / אישור הזמנה" · ברכה · טבלת-מוצרים (מוצר/כמות/מחיר) · **סה"כ ₪ בכתום** · פרטי-קשר · footer · RTL תקין. יפה+מקצועי — עומד ב-DoD "מייל יפה". הלוגו נטען מ-`buildsmart-il.com/icons/Icon-192.png` אצל הלקוח האמיתי (headless לא הגיע ל-CDN דרך הפרוקסי — placeholder בתצוגה בלבד).
+
+## #identity פאזה 2 — auth (2026-08-02)
+אין שינוי ויזואלי: `login_sheet.dart` רק מחרוזות-שגיאה (`hebrewAuthError`); `auth_state.dart`/`main.dart` לוגיקת-auth בלבד (שחזור-סשן + קישור-חשבונות) — אין רכיב-UI חדש/משתנה. `flutter analyze` 0 errors · `flutter test` ירוק. אימות התנהגות (נזכר/קישור) — על האתר החי, כי אין unit-test ל-Firebase Auth בסביבה.
