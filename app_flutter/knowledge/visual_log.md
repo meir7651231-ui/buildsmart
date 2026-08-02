@@ -2422,3 +2422,12 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **[MED]** תגמול-משלוח (`courier_delivery_detail`+`persona_pod`) → נוסף awardCoins+פעמון (מראה כרטיס-הלוח) · vacation double-notify → `if(!fired)return` (`manager_dashboard`) · "שמור קופון" (`rewards_hub`) → מוסתר תחת kHideUnderConstruction (אין ארנק — לא toast-מזויף) · 6 צ'יפי-"שירותים" (`keyboard_store_deriver`) → `_comingSoon('פתיחת שירות')` במקום no-op שקט · CSV cross-trade (`product_authoring`) → בדיקת-כפילות גלובלית (לא דורס מסחר אחר) · cart qty (`lipskey_products` list-row) → sync מ-smartCartProvider (לא דורס 5→1) · notif toggle (`notif_settings`) → תווית 'התראות תקציב' (תואם האפקט האמיתי) + מראה ב-`search_index`.
 - **[LOW]** vacation reason מושחל לפעמון/צ'אט (`contractor_hr`) · busy-guard חי (`customer_import`) · isActive מת הוסר (`role_picker`) · sortDefault דירוג/מרחק מוסתרים (`store_settings`) · טיר 'קריטיות' כפול הוסר (`notif_settings`) · worker-attendance send-guard (`worker_attendance`) · ai-finder תוצאות-ליטרל מוצגות גם ב-AI-off (`ai_finder`).
 **אימות:** `flutter analyze` **0 errors** · `keyboard_store_deriver_test` (updated) + `legal_texts_test` ירוקים · כל fixer אימת שאין test שנשבר. visual-verify: שינויי-התנהגות/תווית/הסתרה — נבדקו דרך traces של ה-auditors + analyze + tests; ה-runtime smoke (Chromium) בשלב הבא מאשר חזותית.
+
+## #launch-real-photos — 🖼️ אמוג'י → תמונות-מוצר אמיתיות (קטלוג + סל) — 2026-08-02
+לבקשת הבעלים (2 צילומי-מסך: כרטיסי-קטלוג + סל עם אמוג'י). כרטיסי-קטגוריה/עץ-חכם ו-thumbnails של שורות-הסל הציגו אמוג'י כשלא היה imageAsset — כעת תמונות-אמת:
+- קטגוריות → `assets/lipskey/categories/*.png` (11 תמונות-מוצר מעוצבות) לפי keyword resolver.
+- שורות-סל → תמונת-ה-CDN של המוצר לפי SKU (אותו נתיב imageAsset שדף-המוצר כבר מציג).
+**visual-verify:** צפיתי ב-`faucets.png` = תמונת-ברז-כרום אמיתית ✓; הרזולבר ממפה נכון את 6 הכרטיסים בצילומים (faucets/shower_bath/pipes/drainage); תמונות-הסל בנתיב-ה-CDN המוכח של דף-המוצר; fallback לאמוג'י לכל פריט חסר-תמונה. `analyze` 0 errors.
+
+## #launch-kbd-stable — ⌨️ כפתור-המקלדת במיקום-קבוע (לא קופץ בניווט) — 2026-08-02
+`main.dart` `_GlobalKeyboardOverlay`: `navOffset` היה `routePushed ? 0 : _kHomeNavHeight` → קפץ בגובה-הסרגל בין הבית (יש nav) למסך-פתוח (אין nav). תוקן ל-`navOffset = _kHomeNavHeight` **קבוע** → מיקום זהה בכל מסך; בבית מנקה את הסרגל, במסך-פתוח צף באותו מקום (רווח קטן מתחת, לא זז). owner-gate (long-press kStudioFlag) לא-נגע. analyze 0.

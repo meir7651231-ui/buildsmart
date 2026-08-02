@@ -1,7 +1,9 @@
 import 'dart:async' show unawaited;
 
 import 'package:buildsmart/config/app_brand.dart';
+import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/data/repositories/backend.dart' show kUserSystem;
+import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
@@ -56,6 +58,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Store section tabs.
 enum StoreSection { all, cart, orders, services }
+
+/// Real product photo for a cart line whose productKey is 'lip:<sku>' — resolved
+/// via the sanctioned data-layer `productBySku` accessor (its own imageAsset,
+/// correct .jpg/.jpeg + brand dir), or null when the key isn't a catalog SKU
+/// (caller keeps the emoji). Uses the data-layer accessor rather than reading
+/// the catalog list directly from the UI (gate 114 / lesson #69).
+String? cartLineImageAsset(String productKey) {
+  if (!productKey.startsWith('lip:')) return null;
+  return productBySku(productKey.substring(4))?.imageAsset;
+}
+
+/// A cart-line thumbnail: the real product photo when available, else the emoji.
+/// A missing/failed CDN image falls back to the emoji (honest, never blank).
+Widget cartLineThumb(String productKey, String emoji, double emojiSize) {
+  final img = cartLineImageAsset(productKey);
+  if (img == null) return Text(emoji, style: TextStyle(fontSize: emojiSize));
+  return Padding(
+    padding: const EdgeInsets.all(4),
+    child: Image(
+      image: resolveProductImage(img),
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) =>
+          Text(emoji, style: TextStyle(fontSize: emojiSize)),
+    ),
+  );
+}
 
 final storeSectionProvider = StateProvider<StoreSection>(
   (_) => StoreSection.all,
@@ -1937,10 +1965,7 @@ class _SmartCartRow extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  line.productEmoji,
-                  style: const TextStyle(fontSize: 22),
-                ),
+                child: cartLineThumb(line.productKey, line.productEmoji, 22),
               ),
               const SizedBox(width: 10),
               Expanded(

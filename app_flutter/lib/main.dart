@@ -710,14 +710,14 @@ class _GlobalKeyboardOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // OWNER FIX (nav-clearance, REACTIVE): lift by the HomeShell nav height ONLY
-    // when NO route is pushed above HomeShell — a pushed full-screen route (e.g.
-    // משימות) has no bottom nav, so lifting there would leave a gap that shows the
-    // screen content BELOW the keyboard. Watch the screen-tools stack so this
-    // rebuilds on route push/pop; read canPop() fresh for the current depth.
+    // OWNER FIX (stable position): lift the global keyboard FAB by the HomeShell
+    // nav height on EVERY screen — a CONSTANT offset so it never jumps between
+    // home (bottom nav present) and a pushed full-screen route (no nav). On home
+    // it clears the bottom nav; on a pushed route it floats at the identical spot
+    // (small harmless gap below). No route-dependent offset ⇒ no jump on nav.
+    // The screen-tools watch stays for the OPEN-keyboard rebuild below.
     ref.watch(keyboardScreenToolsProvider);
-    final routePushed = bsNavigatorKey.currentState?.canPop() ?? false;
-    final navOffset = routePushed ? 0.0 : _kHomeNavHeight;
+    final navOffset = _kHomeNavHeight;
 
     // Closed -> a global open-FAB (mirrors the home FAB but above the Navigator,
     // so it is reachable on EVERY route). Open -> the floating keyboard itself.

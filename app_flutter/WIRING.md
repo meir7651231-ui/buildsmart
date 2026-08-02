@@ -3622,3 +3622,9 @@ staged flag-flip → אישור-בעלים פר-שלב) · מה **לא** נכל�
 נחיל 12-auditors סרק כל ~1369 הפקדים (~171 מסכים) על מחווט/מציג/נרשם → 17 באגים אמיתיים תוקנו, כולם הפיכים/כנים:
 - **catalog** ⓘ אביזר null-price → 'לפי ספק' (לא קורס) · **courier** תגמול-משלוח ב-3 המסלולים (detail+POD+card) · **vacation** double-notify guard (manager) + reason מושחל (contractor) · **rewards** "שמור קופון" מוסתר (אין ארנק) · **keyboard** services chips → "בקרוב" · **studio** CSV cross-trade dup גלובלי · **lipskey** cart qty sync (לא דורס 5→1) · **notif** 'התראות תקציב' + search-index mirror · **role-picker** isActive-מת הוסר · **store-settings** sortDefault inert מוסתר · **notif** importance-tier כפול הוסר · **customer-import** busy-guard חי · **worker-attendance** send-guard · **ai-finder** literal results גם ב-AI-off.
 verify: `flutter analyze` 0 errors · keyboard_store_deriver_test(updated)+legal_texts_test ירוקים.
+
+### #launch-real-photos — 🖼️ תמונות-אמת במקום אמוג'י (כרטיסי-קטלוג + סל) — 2026-08-02
+לבקשת הבעלים — החלפת אמוג'י בתמונות-מוצר אמיתיות בשני משטחים:
+- **catalog_screen**: `catPhotoAsset(label)` + `catAvatar(label,emoji,size)` — כרטיסי-קטגוריה/עץ-חכם (ראשי מקלחת · ברז למטבח…) מציגים את תמונות-הקטגוריה המצורפות (`assets/lipskey/categories/*.png`: faucets/shower_bath/pipes/drainage…) לפי keyword, fallback לאמוג'י. אתרים: `_CatalogRow`(24) · כרטיס עץ-חכם(44) · node avatar(24).
+- **store_screen**: `cartLineImageAsset(productKey)` + `cartLineThumb(...)` — thumbnail של שורת-סל `lip:<sku>` נגזר ל-`imageAsset` של המוצר מהקטלוג (סיומת+brand-dir נכונים) → תמונת-CDN אמיתית, fallback לאמוג'י. אתר: cart line thumbnail 42×42.
+imageAsset של מוצר-אמת גובר (סיפון וכו' שומרים תמונתם). `flutter analyze` 0 errors.

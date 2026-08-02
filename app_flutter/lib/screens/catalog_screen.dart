@@ -1911,6 +1911,65 @@ class _EmptySection extends StatelessWidget {
 /// the browse list. Reversible data filter (mirrors wave-1's `where(...)`) —
 /// no `kCatalogCats`/`kCatalogTree` data is deleted; re-add a tree node and the
 /// category reappears automatically.
+/// Real bundled product-photo (`assets/lipskey/categories/*.png`) for a catalog
+/// category / smart-tree node, resolved by keyword — replaces the emoji on the
+/// card avatars with a real image. Returns null when no keyword matches (the
+/// caller then keeps the emoji). Uses the same designer image-set as the finder.
+String? catPhotoAsset(String label) {
+  String? f;
+  if (label.contains('ברז')) {
+    f = 'faucets';
+  } else if (label.contains('אסל')) {
+    f = 'toilets';
+  } else if (label.contains('סיפון') ||
+      label.contains('ניקוז') ||
+      label.contains('דלוחין') ||
+      label.contains('מחסום')) {
+    f = 'drainage';
+  } else if (label.contains('SmartLock') || label.contains('חוליות')) {
+    f = 'smartlock';
+  } else if (label.contains('PPR')) {
+    f = 'ppr';
+  } else if (label.contains('מקלחת') ||
+      label.contains('אמבט') ||
+      label.contains('מזלף') ||
+      label.contains('זרוע') ||
+      label.contains('שטיפה') ||
+      label.contains('ראשי')) {
+    f = 'shower_bath';
+  } else if (label.contains('צינור') || label.contains('צנרת')) {
+    f = 'pipes';
+  } else if (label.contains('מחבר') ||
+      label.contains('חיבור') ||
+      label.contains('רקורד') ||
+      label.contains('מעבר')) {
+    f = 'connectors';
+  } else if (label.contains('חבק') || label.contains('תלי')) {
+    f = 'clamps';
+  } else if (label.contains('גינ') || label.contains('השקי')) {
+    f = 'garden';
+  }
+  return f == null ? null : 'assets/lipskey/categories/$f.png';
+}
+
+/// Card-avatar content: the real category photo when [label] maps to one, else
+/// the [emoji] at [emojiSize]. A missing/failed image falls back to the emoji.
+Widget catAvatar(String label, String emoji, double emojiSize) {
+  final asset = catPhotoAsset(label);
+  if (asset == null) {
+    return Text(emoji, style: TextStyle(fontSize: emojiSize));
+  }
+  return Padding(
+    padding: const EdgeInsets.all(6),
+    child: Image.asset(
+      asset,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) =>
+          Text(emoji, style: TextStyle(fontSize: emojiSize)),
+    ),
+  );
+}
+
 bool categoryHasContent(String title) {
   final node = _findCatalogTreeNodeByTitle(title);
   return node != null && node.children.isNotEmpty;
@@ -2100,7 +2159,7 @@ class _CatalogRow extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(cat.emoji, style: const TextStyle(fontSize: 24)),
+              child: catAvatar(cat.title, cat.emoji, 24),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -2699,7 +2758,7 @@ class _TreeComingSoon extends StatelessWidget {
                 border: Border.all(color: BsTokens.brand, width: 1.5),
               ),
               alignment: Alignment.center,
-              child: Text(node.emoji, style: const TextStyle(fontSize: 44)),
+              child: catAvatar(node.title, node.emoji, 44),
             ),
             const SizedBox(height: 20),
             Text(
@@ -3000,7 +3059,7 @@ class _TreeCatRow extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Text(node.emoji, style: const TextStyle(fontSize: 24)),
+                  child: catAvatar(node.title, node.emoji, 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
