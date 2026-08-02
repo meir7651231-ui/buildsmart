@@ -1966,3 +1966,9 @@
 - **הנכס:** `ManagerCustomer.phone` + `copyWith` (manager_customer_phone_test) + enrichment ב-`managerCustomersProvider`.
 - **תקלות מוזרקות (mutation-sensitivity):** (1) `copyWith` בלי `phone ?? this.phone` → copyWith עוקב מאפס את הטלפון → 'preserves existing phone' נכשלת. (2) enrichment בלי guard `if(phoneByName.isEmpty) return base` → מצב-דמו (בלי טלפונים) מקבל רשימה חדשה (זהות-אובייקט אחרת) → סיכון-רגרסיה; ה-guard מוכיח זהה-בייטים-כבוי.
 - **אימות:** `manager_customer_phone_test` 3/3 · `flutter analyze` 0.
+
+## #8 תיקון-צ'אט-חי — listen פר-thread להודעות (2026-08-02)
+- **הנכס:** `_PerThreadChatMessagesSource` (chat_firebase) + factory `messagesSourceFor` (chat_repository) — listen `where(threadId==X)` פר-thread, ממוזג. בדיקות ב-`chat_firebase_repo_test`.
+- **תקלות מוזרקות (mutation-sensitivity):** (1) listen על כל-האוסף (בלי scope threadId) → ה-rule הפר-מסמך דוחה את כל ה-query → 0 הודעות → 'server snapshot → delivered' נכשלת. (2) listen ל-thread ללא participantUids → 'opens only for uid-threads' נכשלת. (3) merge לקוי → 'two threads merge' נכשלת.
+- **בטיחות:** כבוי (useFirebaseBackend/UID_SCOPED) ⇒ מקור כל-האוסף כמו קודם (זהה-בייטים).
+- **אימות:** `chat_firebase_repo_test` (4 חדשות) + 88 chat tests + full suite ירוקים · analyze 0.

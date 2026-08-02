@@ -3675,3 +3675,9 @@ gate: `flutter analyze` 0 · `directory_3b_test` + 128 chat/related tests עוב
 - **orders_engine.dart**: `managerCustomersProvider` מעשיר כל אגרגט בטלפון מה-live-orders שכבר נצפים (`Order.customerPhone`, newest-first → ה-non-empty הראשון מנצח) — **בלי listen חדש** (stage-2 rule 4). אין טלפונים ⇒ מחזיר את הבסיס ללא שינוי (זהה-בייטים).
 - **manager_dashboard_screen.dart**: `_CustomerChatButton` (גדור `useFirebaseBackend`) ב-`_CustomerDetailSheet` — `uidByPhone(phone)` → `createOrGetThread([managerUid, customerUid])` → `openChatThread(persona: manager)`; נפילה: toast "ללקוח אין עדיין חשבון בצ'אט" + `ContactActions` (📞/💬); double-tap guard + mounted-checks.
 gate: `flutter analyze` 0 · `manager_customer_phone_test` + `stage2_scale` (conformance) + 107 manager tests עוברים.
+
+### #8 תיקון-צ'אט-חי — listen פר-thread להודעות (2026-08-02)
+- **באג:** listen של `chatMessages` היה על כל-האוסף; ה-rule פר-מסמך (`uid ∈ threadParticipants`) → "rules אינן filters" → ה-listen נדחה כמכלול, השגיאה נבלעה → אף הודעה לא הגיעה (ההודעות אפילו נכתבו). תגובת-קוד שקרית טענה per-thread.
+- **תיקון:** `chat_repository` מעביר factory `messagesSourceFor(threadId)` (scoped `where threadId==id`, bound `orderBy ts limit 500`) כשה-uid-scoped דלוק; `chat_firebase._PerThreadChatMessagesSource` פותח listen פר-thread-משתתף וממזג. כבוי ⇒ מקור כל-האוסף (זהה-בייטים). index קיים (`chatMessages (threadId, ts)` #6, ACTIVE).
+- **נלווה:** ניקוי-חוב-בדיקות — `app_profile_flags` (סיווג ORDER_EMAIL ל-arming), `consent_flow` (יושר ל-§5 החדש/GA4), `worker_attendance` (pumpAndSettle) — כולם צד-בדיקה, ללא החלשת assertion.
+gate: `flutter analyze` 0 · chat_firebase_repo_test + 88 chat + full suite ירוקים.

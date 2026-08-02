@@ -418,6 +418,127 @@ void main() {
     });
   });
 
+  group('#chat-live-messages — per-thread messages listen (rule-compliant)', () {
+    // Drives the PRODUCTION path (`messagesSourceFor` factory), NOT the
+    // single-source fake the other groups use. This is the fix for the live
+    // break: the `chatMessages` READ rule is per-doc
+    // (`auth.uid in threadParticipants(resource.data.threadId)`), so a
+    // whole-collection listen is DENIED as a whole ("rules are not filters") and
+    // silently blanks live messages. A threadId-PINNED listen per participating
+    // thread is the only query the rule can prove.
+    late _FakeSource threads;
+    late Map<String, _FakeSource> perThread;
+    late _FakeSource writer;
+    late FirebaseChatRepository repo;
+
+    setUp(() {
+      threads = _FakeSource();
+      perThread = {};
+      writer = _FakeSource();
+      repo = FirebaseChatRepository(
+        threadsSource: threads,
+        messagesSourceFor: (id) => perThread[id] ??= _FakeSource(),
+        messagesWriter: writer,
+      );
+      addTearDown(() async {
+        repo.dispose();
+        await threads.close();
+        await writer.close();
+        for (final s in perThread.values) {
+          await s.close();
+        }
+      });
+      repo.attach();
+    });
+
+    RemoteDoc uidHead(String id, List<String> uids, String name) =>
+        RemoteDoc(id, {
+          'participants': const <String>[],
+          'participantUids': uids,
+          'names': name,
+        });
+
+    RemoteDoc msg(String id, String threadId, String text, String ts) =>
+        RemoteDoc(id, {
+          'threadId': threadId,
+          'fromRole': 'manager',
+          'text': text,
+          'ts': ts,
+        });
+
+    test(
+        'opens a threadId-pinned listen for each PARTICIPATING (uid) thread — '
+        'seed/role threads (empty participantUids) get NONE', () async {
+      threads.emit([
+        uidHead('dm-a__b', ['a', 'b'], 'צוות'),
+        const RemoteDoc('th-role', {
+          'participants': ['contractor', 'store'],
+          'names': 'תפקידי',
+        }),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      // Only the uid-thread got a per-thread message listen — the rule can't be
+      // proven for a role thread's messages (empty participantUids) → skipped.
+      expect(perThread.keys, contains('dm-a__b'));
+      expect(perThread.keys, isNot(contains('th-role')));
+    });
+
+    test('a per-thread message snapshot flows into that thread, delivered ✓✓',
+        () async {
+      threads.emit([uidHead('dm-a__b', ['a', 'b'], 'צוות')]);
+      await Future<void>.delayed(Duration.zero);
+
+      perThread['dm-a__b']!.emit([
+        msg('m1', 'dm-a__b', 'שלום', '2026-06-10T09:00:00.000'),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      final t = repo.threads().firstWhere((t) => t.id == 'dm-a__b');
+      expect(t.messages.map((m) => m.text).toList(), ['שלום']);
+      // Arrived via a server-snapshot decode → delivered (the honest invariant).
+      expect(t.messages.single.status, MsgStatus.delivered);
+    });
+
+    test('messages from TWO uid-threads MERGE into their own threads', () async {
+      threads.emit([
+        uidHead('dm-a__b', ['a', 'b'], 'צוות 1'),
+        uidHead('dm-a__c', ['a', 'c'], 'צוות 2'),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      perThread['dm-a__b']!
+          .emit([msg('m1', 'dm-a__b', 'ראשון', '2026-06-10T09:00:00.000')]);
+      perThread['dm-a__c']!
+          .emit([msg('m2', 'dm-a__c', 'שני', '2026-06-10T09:01:00.000')]);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        repo.threads().firstWhere((t) => t.id == 'dm-a__b').messages.single.text,
+        'ראשון',
+      );
+      expect(
+        repo.threads().firstWhere((t) => t.id == 'dm-a__c').messages.single.text,
+        'שני',
+      );
+    });
+
+    test('send writes the message by doc-id through the UNSCOPED writer',
+        () async {
+      threads.emit([uidHead('dm-a__b', ['a', 'b'], 'צוות')]);
+      await Future<void>.delayed(Duration.zero);
+
+      repo.send('dm-a__b', BsRole.manager, 'נשלח', fromUid: 'a');
+      await Future<void>.delayed(Duration.zero);
+
+      final write = writer.sets.firstWhere((e) => e.value['text'] == 'נשלח');
+      expect(write.value['threadId'], 'dm-a__b');
+      expect(write.value['fromUid'], 'a');
+      // Writes are by doc-id (unscoped) — the per-thread READ fake gets none.
+      expect(perThread['dm-a__b']!.sets, isEmpty);
+    });
+  });
+
   group('resetToSeed', () {
     test('restores BOTH collections to the verbatim seed + re-writes them',
         () async {

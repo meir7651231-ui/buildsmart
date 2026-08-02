@@ -143,7 +143,13 @@ void main() {
       // states the detailed transfer is off/gated at this stage. (The earlier
       // 541184e9 phrasing this asserted no longer matches the honest policy.)
       final excerpt = consentPolicyExcerpt();
+      // §5 was rewritten (launch-v2, policy version 2) to the ACCURATE
+      // disclosure: GA4/Crashlytics ARE active when connected, while the
+      // detailed usage/presence/intel analytics stay OFF. The excerpt is pulled
+      // verbatim from that §5, so the no-drift assertions track the CURRENT
+      // honest wording (policy = source of truth): the collector that IS named…
       expect(excerpt, contains('Google Analytics (GA4)'));
+      // …and the honest "the expanded analytics are off at this stage" claim.
       expect(excerpt, contains('כבויות בשלב זה'));
     });
   });
