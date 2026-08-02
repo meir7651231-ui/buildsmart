@@ -293,8 +293,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // auth stream hasn't propagated yet (the direct email-create path, where
     // createUser set FirebaseAuth.currentUser synchronously but the snapshot
     // stream event is still queued).
-    final uid = ref.read(authStateProvider).user?.uid ??
+    final authUser = ref.read(authStateProvider).user;
+    final uid = authUser?.uid ??
         ref.read(authGatewayProvider)?.currentUser?.uid;
+    // F5 (#5) — a Google sign-in carries a display name the person never typed;
+    // phone-OTP / existing-login carry none. When the local profile has no name,
+    // adopt the auth display name so users/{uid}.displayName (and the role request
+    // the server copies FROM it) isn't blank — the "no names in the inbox" bug.
+    if (ref.read(userProfileProvider).name.trim().isEmpty &&
+        (authUser?.displayName ?? '').trim().isNotEmpty) {
+      ref.read(userProfileProvider.notifier).register(
+            name: authUser!.displayName!.trim(),
+            contact: ref.read(userProfileProvider).contact,
+          );
+    }
     final writer = ref.read(usersProfileWriterProvider);
     // U0.3 (user-system) — DORMANT behind [kUserSystem]: on a REGISTERED login,
     // ensure the unified users/{uid} record exists (born status=pending,

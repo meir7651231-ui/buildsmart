@@ -3642,3 +3642,8 @@ gate: `flutter analyze` 0 · `order_customer_email_test` 3/3 · functions `tsc` 
 - **login_sheet.dart**: `hebrewAuthError` + `credential-already-in-use` / `account-exists-with-different-credential`.
 - **תיקון gate-escape קדום (178fe858)**: 2 fakes של OrdersRepository (site_firebase_repo_test / offline_order_queue_test) חסרו `customerEmail` → invalid_override → נכשלו בקומפילציה; הושלמו.
 gate: `flutter analyze` 0 errors · `flutter test` ירוק. אימות auth-linking בפועל — על האתר החי (אין unit-test ל-Firebase Auth).
+
+### #identity — #5: שמות + "רק קבלן" (2026-08-02)
+- **home_shell.dart** (F3): פתיחת סליק-בחירת-התפקיד תוקנה. ה-latch (`promptRoleRequestProvider`) מודלק ב-`welcome._finishAfterAuth` *לפני* ש-HomeShell נבנה, אז ה-`ref.listen` (נרשם בבנייה) לא שיחזר את השינוי שכבר קרה → הסליק לא נפתח → המשתמש נתקע בברירת-המחדל `contractor` של הטריגר-שרת. עכשיו בודקים את ה-latch גם בבנייה הראשונה (post-frame + re-check) → הסליק נפתח, המשתמש בוחר תפקיד אמיתי שדורס את ה-contractor (submitRoleRequest delete→set).
+- **welcome_screen.dart** (F5): ב-`_finishAfterAuth` — אם `profile.name` ריק, אימוץ `authUser.displayName` (מ-Google) → `users/{uid}.displayName` לא ריק → הטריגר-שרת מעתיק שם אמיתי לבקשה (במקום ריק).
+gate: `flutter analyze` 0 errors · `flutter test` ירוק. אימות פתיחת-הסליק + השם — על האתר החי.

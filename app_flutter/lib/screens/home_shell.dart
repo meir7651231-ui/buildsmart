@@ -111,6 +111,22 @@ class HomeShell extends ConsumerWidget {
           });
         }
       });
+      // FIX (#5) — the latch is set in WelcomeScreen._finishAfterAuth BEFORE
+      // HomeShell first builds, so the ref.listen above (registered on mount)
+      // never replays that already-past change → the sheet never opened and the
+      // user was stuck on the server's default "contractor" request. Catch a
+      // latch that is ALREADY true on first build; schedule in a post-frame
+      // (never mutate a provider during build) and re-check so only one frame
+      // opens the sheet.
+      if (ref.read(promptRoleRequestProvider)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          if (ref.read(promptRoleRequestProvider)) {
+            ref.read(promptRoleRequestProvider.notifier).state = false;
+            showRoleRequestSheet(context);
+          }
+        });
+      }
     }
 
     // Step 92 — automatic `screen_view` on every tab switch. ONE read-only

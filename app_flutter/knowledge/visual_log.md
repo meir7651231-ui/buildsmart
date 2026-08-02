@@ -2437,3 +2437,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #identity פאזה 2 — auth (2026-08-02)
 אין שינוי ויזואלי: `login_sheet.dart` רק מחרוזות-שגיאה (`hebrewAuthError`); `auth_state.dart`/`main.dart` לוגיקת-auth בלבד (שחזור-סשן + קישור-חשבונות) — אין רכיב-UI חדש/משתנה. `flutter analyze` 0 errors · `flutter test` ירוק. אימות התנהגות (נזכר/קישור) — על האתר החי, כי אין unit-test ל-Firebase Auth בסביבה.
+
+## #identity #5 — סליק-תפקיד + שם (2026-08-02)
+`home_shell.dart`: תיקון-תזמון לפתיחת סליק-בחירת-התפקיד (נפתח עכשיו אחרי הרשמה במקום להישאר סגור). `welcome_screen.dart`: אימוץ שם-Google ל-`displayName`. שינוי התנהגותי (מתי נפתח סליק קיים + מה נשמר), לא עיצוב רכיב חדש. `flutter analyze` 0 errors · `flutter test` ירוק. אימות פתיחת-הסליק + השם בפועל — על האתר החי.
