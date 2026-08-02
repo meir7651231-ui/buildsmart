@@ -57,6 +57,9 @@ const Set<String> kArmingLayer = {
   // giant-system Phase 1: arms the runtime OrgConfig layer (owner-staged,
   // per-flag rollback = drop the define — the STUDIO/USER_SYSTEM shape).
   'ORG_CONFIG',
+  // order-confirmation email (178fe858): server send gated by ORDER_EMAIL +
+  // the RESEND_API_KEY secret — owner-staged, default-off, no profile owns it.
+  'ORDER_EMAIL',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must
@@ -65,6 +68,9 @@ const Set<String> kPassthrough = {
   'ENABLE_CARD_KEYBOARD',
   'KB_BUTTONS_V2',
   'FINDER_FRONT',
+  // atom-engine slice-1: a default-off dev dial that renders the finder ('מאתר')
+  // from the atom assembly engine. No profile owns it (arms via --dart-define).
+  'ATOM_ENGINE',
   'EMAIL_PASSWORD_AUTH',
   'CATALOG_SOURCE',
   'SERVER_CATALOG_ROLLOUT',

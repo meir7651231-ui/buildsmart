@@ -101,6 +101,8 @@ const Set<String> kRawShellGateConsumers = {
   // completion final wave: AI-hub price/plan/analytics tiles + store svc-5
   'lib/screens/ai_hub_screen.dart',
   'lib/screens/store_screen.dart',
+  // wizard-studio-s0 (206a4ff5): the WYSIWYG edit-live arm hides chrome too.
+  'lib/state/studio/edit_mode.dart',
 };
 
 void main() {

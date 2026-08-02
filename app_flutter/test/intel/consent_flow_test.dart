@@ -138,9 +138,13 @@ void main() {
 
   group('consent copy is sourced from the policy (no drift)', () {
     test('the excerpt is the honest §5 analytics paragraph', () {
+      // Sourced live from §5 of the current policy (73e14ed5 — "match the live
+      // backend"): it names the GA4 usage a server-connected build performs and
+      // states the detailed transfer is off/gated at this stage. (The earlier
+      // 541184e9 phrasing this asserted no longer matches the honest policy.)
       final excerpt = consentPolicyExcerpt();
-      expect(excerpt, contains('אנליטיקת השימוש מגודרת'));
-      expect(excerpt, contains('ברירת-המחדל כבויה'));
+      expect(excerpt, contains('Google Analytics (GA4)'));
+      expect(excerpt, contains('כבויות בשלב זה'));
     });
   });
 }
