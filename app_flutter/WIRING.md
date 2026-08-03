@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pB4 — 🔗 מנוע-קטלוג-3D · פאזה B (27+29): קצוות-מדויקים + מתאם בין-חומרי — 2026-08-03
+`lib/features/fittings/plan/deep_ends.dart` (מגודר · לא-נוגע ב-`polyrollSpecFor` החי): `weldEndsFor(family, dn)` (משפחות-ריתוך → N שקעי-`hdpeCompression`) · `ppRThreadAdapterEnds`/`ppRThreadAdapterSpec` (אדפטר = שקע-ריתוך PP-R **+** קצה-BSP · `_canonBsp` מבטיח סימן-אינץ'). **🔑 שלב 29:** אדפטר-PP-R מתחבר ל**פליז/מתכת** דרך מפרק ה-`bspMale↔bspFemale` הבלתי-תלוי-חומר (מוכח: PP-R male 1/2" ↔ פליז female 1/2"), ולצד-השקע ל-PP-R (חומר-מונע=PPR). **🛡️ M2 — ביקורת-יריב (עדשת reliability+safety, זו שתפסה את באג-M2 בפאזה-A): אפס over-match ניתן-לבנייה** — `_materialsCompatible('PPR', X)` נכון **רק** ל-PPR; PVC/PP/HDPE·ניקוז/ceramic/rubber/press/drain באותו DN → כולם FALSE (מאומת אמפירית + guards ב-`deep_ends_test`). ה-BSP raw-string ⇒ הגרוע = false-negative (בטוח). fittings 206/206.
+
 ## #fittings-engine-pB3 — 🛡️ מנוע-קטלוג-3D · פאזה B (31): פרמטרי-ריתוך DVS (M5) — 2026-08-03
 `lib/features/fittings/plan/weld_table.dart` (מגודר) — **ערכי-ייחוס בלבד**, verbatim מהמקור-המאומת `gen3d.html` (`WELD` @ `:362` + הערת-האזהרה @ `:417`). `WeldParams{od, heatSec, joinSec, coolMin, headTempC=260, caveat}` + `weldParamsFor(od)`. **🛡️ M5 חרוט-מבנית:** (1) `caveat` הוא שדה-**required** — אין `WeldParams` בלי אזהרת-יצרן; (2) OD לא-בטבלה → `null`, לעולם לא ערך-ריתוך משוער; (3) `kWeldCaveat` verbatim ("DVS 2207-11 · לאמת מול דף-יצרן · מתקין מוסמך בלבד"). `weld_table_test`: golden-מול-WELD · אכיפת-caveat פר-קריאה · null-ללא-מקור · mutation-L3. fittings 195/195.
 
