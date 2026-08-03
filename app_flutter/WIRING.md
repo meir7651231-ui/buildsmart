@@ -1,5 +1,11 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-p0 — 🔌 מנוע-קטלוג-3D · פאזה 0: פורט-מנוע + golden 1:1 (שער #124, default-OFF) — 2026-08-03
+**SSOT:** `knowledge/CATALOG-3D-100-STEPS.md` + `knowledge/catalog-3d/` (מקור-הגולדן: `pure_engine.py` · חוזה: `INTEGRATION-SPEC.md` · יחסים: `construction_ratios.json`). פרוסה-1 של מנוע-האביזרים הפרמטרי.
+- **מנוע טהור** (`lib/features/fittings/engine/fitting_dims.dart`): `generate(family, od, {od2})` — פורט 1:1 מ-`pure_engine.py`. הבסיס האוניברסלי (`base`: OD/wall/ID/B/C/F מ-SDR+DIN 8077) + 10 משפחות (מצמד · ברך 90°/45° · טי · מתאם-תבריג · ברז-כדורי · פקק · רוכב · צווארון · מצרה) + ברך-מחותכת (≥160). Dart טהור — אפס תלויות/async/I/O. `r1()` = `round(x,1)` half-to-even זהה-Python (toStringAsFixed(18) — לא `x*10`, שיוצר תיקו-שקרי).
+- **🔑 golden 1:1** (`test/fittings/fitting_engine_golden_test.dart`): 140 שורות (11 משפחות × כל OD) מול fixture שנוצר ישירות מ-`pure_engine.py` — כל אות byte-זהה. 141/141 ✅.
+- **דגלים** (`lib/features/fittings/fitting_flags.dart`): `kFittingEngine`/`_3d`/`_intel` — `bool.fromEnvironment`, **default-OFF** ⇒ כל `features/fittings/` tree-shaken. **שער #124** (`test/fittings/gate_124_ga_safety_test.dart` + `GATE_REGISTRY.md`) — keystone R2: אינסטלציה byte-identical, אפס נגיעה בחי.
+
 ## #product-journey-overflow-fix — 🧾 גיליון-מוצר: overflow עמודת-הצד (CI 3.29.3) — 2026-08-03
 תיקון RenderFlex overflow אמיתי (~9-17px) שהכשיל 10× `product_journey` על ה-CI (Flutter 3.29.3) — קדם-קיים, לא מ-slice-1 (היה ירוק ב-`b8bc66b2`, רגרס מאז). `lipskey_products_screen.dart · _side()` (עמודה קבועה 100px): ה-`_unitToggle` (בודד/ארגז/משטח) וה-`_stepper` נעטפו ב-`FittedBox(fit: BoxFit.scaleDown)` — ללא-שינוי כשיש מקום, מתכווץ מעט במקום לגלוש כשמטריקות-הלייבל רחבות. בנוסף `product_journey_test.dart` טוען את פונט Heebo האמיתי (ברירת-המחדל של האפליקציה) כדי שהטסט ה-headless ימדוד רוחב-אמת במקום ריבועי-Ahem. אומת: הסוויטה המלאה על 3.29.3 = 0 כשלים.
 

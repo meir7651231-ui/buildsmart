@@ -63,6 +63,13 @@ const Set<String> kArmingLayer = {
   // so BOTH must be armed and per-flag rollback = drop the define (the
   // CLOUD_PHOTOS / APP_CHECK_PROD backend-coordinated shape, never a profile).
   'ORDER_EMAIL',
+  // catalog-3D fittings engine (CATALOG-3D-100-STEPS · שער #124): three arming
+  // flags for a built-but-dormant feature — default-OFF, per-flag rollback =
+  // drop the define, never profile-owned (the STUDIO/INTEL_LIVE shape). The
+  // `features/fittings/` graph is tree-shaken until armed.
+  'FITTING_ENGINE',
+  'FITTING_ENGINE_3D',
+  'FITTING_ENGINE_INTEL',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

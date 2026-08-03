@@ -8,7 +8,9 @@
 
 ---
 
-## הבא הפנוי: **124**
+## הבא הפנוי: **125**
+
+> **מנוע-הקטלוג-3D (פאזה 0 · `catalog-3d/CATALOG-3D-100-STEPS.md`):** 124=fittings-GA-safe-by-default **✅ מיושם (`test/fittings/gate_124_ga_safety_test.dart`)** — 3 דגלי `kFittingEngine*` (`FITTING_ENGINE`/`_3D`/`_INTEL`) נטענים ל-OFF בבנייה ללא `--dart-define` ⇒ כל graph של `features/fittings/` tree-shaken (keystone R2: אינסטלציה byte-identical) + סריקת closed-set שמפילה כל דגל-fittings חדש שאינו מכוסה. **#125 = אינטליגנציה (פאזה D) · #126 = authoring/טריידים (E) · #127 = שוק/פרטיות (F) — שמורים-מראש בתוכנית.**
 
 > **שמור-מראש ל-Studio (Red-Team R1):** 118=config ids⊆registry (ע1) **✅ מיושם (studio-s22, `test/studio/gate_118_test.dart`)** · 119=AI-grounded-config (ע4) **✅ מיושם (pillar4-s85, `test/studio/gate_119_test.dart`)** · 120=analytics-PII (ע3) **✅ מיושם (pillar3-s99, `test/studio/gate_120_test.dart`)**. מיושמים בזמן-הבנייה; שמורים כאן כדי שלא יתנגשו (ראה `studio-plan/RED-TEAM-R1.md`). **#119/#120 שמורים-מראש → לא bump בזמנו (121/122 נלקחו ב-Pillar-5 s68).**
 >
@@ -122,6 +124,7 @@ _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 | 121 | deploy-ordering (R2-10): `firebase-deploy.yml` — bootstrap-pointer לפני rules-lock · indexes=GATE (`id: indexes`, ללא continue-on-error) · functions `if: steps.indexes.outcome=='success'` · READY-poll לפני functions. נאכף ב-`functions/src/selftest.ts` (`npm run selftest`, 11 checks offline) | Pillar-5 s68 2026-07-07 |
 | 122 | flags-OFF parity: כל דגל Pillar-5 (`STUDIO_LIVE`/`CATALOG_SERVER_SEARCH`/`CATALOG_BASE_URL`) default OFF/'' — נאכף ב-`test/backend_flag_test.dart` (shipped-default byte-identical) | Pillar-5 s68 2026-07-07 |
 | 123 | **Studio GA — safe-by-default** (capstone): כל דגלי ה-Pillar (STUDIO/STUDIO_LIVE/CATALOG_SERVER_SEARCH/CATALOG_BASE_URL/STUDIO_CO_EDITOR/INTEL_LIVE) נטענים לברירת-מחדל בטוחה ללא `--dart-define`, + `useCatalogServerSearch` guard=false ללא backend חי, + closed-set scan שמפיל דגל-Pillar לא-מכוסה. נאכף ב-`test/studio/gate_123_ga_safety_test.dart` | Studio s100 2026-07-08 |
+| 124 | **Fittings-3D — safe-by-default** (מנוע-קטלוג-3D פאזה 0): 3 דגלי `kFittingEngine*` (FITTING_ENGINE/_3D/_INTEL) נטענים ל-OFF ללא `--dart-define` ⇒ `features/fittings/` tree-shaken (keystone R2), + closed-set scan שמפיל דגל-fittings לא-מכוסה. נאכף ב-`test/fittings/gate_124_ga_safety_test.dart` | catalog-3d פ׳0 2026-08-03 |
 
 ---
 
