@@ -42,7 +42,7 @@ void main() {
           continue;
         }
         expect(s.ends, isNotEmpty, reason: '${p.sku}: empty ends');
-        expect(s.material, 'HDPE');
+        expect(s.material, 'HDPE·ניקוז'); // distinct — avoids M2 vs HDPE-supply
         expect(s.endSystems, contains(WaterSystem.drainage),
             reason: '${p.sku}: not classified drainage',);
       }

@@ -1,5 +1,12 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pA2 — 🛡️ מנוע-קטלוג-3D · פאזה A (20+22): no-leak · R5(v2) · תיקון-M2 — 2026-08-03
+המשך פאזה-A — **הוכחת-בטיחות + answer-equivalent** (הכל דורמנטי, אפס-שינוי-חי):
+- **🛑 תיקון-M2 (זיווג-שווא):** `compatibleWith` מתאים לפי (end-type+DN+חומר) ומתעלם מ-supply/drainage. חומר `'HDPE'` על חוליות-ניקוז היה מזווג-שקרית **199** אביזרי-ניקוז ל-HDPE-אספקה קיים באותו DN (32/40/50/63). התיקון: `family_specs.dart` נותן חומר ייחודי **`'HDPE·ניקוז'`** (לא ב-supplyMaterials ולא בקבוצת-drainage-interop) ⇒ אביזר-Huliot מתחבר **רק** ל-Huliot אחר באותו DN. **זיווגי-שווא: 199→0**, חיבור-Huliot↔Huliot נשמר.
+- **no-leak (`huliot_connectivity_test`, שלב 22):** גם אחרי `registerFamilySpecs`, כל תוצאת-`compatibleProductsFor` ⊆ `resolvedCatalogProducts` — ב-v1 (ברירת-מחדל) ה-789 מחוץ ל-`_skuIndex` ⇒ אינרטי לחלוטין, byte-identical.
+- **R5(v2)/שלב 20:** החלק-Huliot ב-`kCatalogProductsV2` מכוסה ≥90% ע"י `familySpecFor` (שער 114 — הרשימה-האוניברסלית, לא רשימה-גולמית).
+- **M2-בטיחות מפורש:** Huliot-DN110 ↔ Huliot-DN110 = מתחבר; Huliot-ניקוז ↔ HDPE-אספקה/PPR באותו DN = **לא** מתחבר. נתיב-הפעלה = `CATALOG_SOURCE=v2 + kFittingEngine`.
+
 ## #fittings-engine-pA — 🔑 מנוע-קטלוג-3D · פאזה A: familySpecFor → חוליות מחברת (מגודר, byte-identical) — 2026-08-03
 `lib/data/family_specs.dart` — מכליל את `polyrollSpecFor` המוכח: `familySpecFor(product)→VerifiedSpec?` = `polyrollSpecFor(p) ?? _huliotSpecFor(p)` (**⊇** — פולירול מקבל spec זהה). Huliot-789 (`kHuliotProducts`, מערכת-ניקוז HDPE) → קצוות `hdpeCompression`×ספירת-קטגוריה + חומר HDPE + `systemOverride: drainage` (interoperable-לפי-DN, תואם-פיזיקה). אטם/חבק או נטול-מידה → `null` (fallback M1). `registerFamilySpecs()` מזריע ל-`kVerifiedSpecs` דרך **`putIfAbsent` בלבד** (keystone R2), מחווט ב-`main.dart:277` **אחרי** `registerPolyrollSpecs` ומאחורי `kFittingEngine` (OFF ⇒ מנוע-החיבוריות החי byte-identical). **🔑 כיסוי חוליות: 728/763 = 95.4%** מהאביזרים-המחברים (הפער = אביזרי-נוי נטולי-מידה · טלמטריית-gaps). `familySpecFor`/`registerFamilySpecs` ב-`_kRequiredHelpers` (R4).
 

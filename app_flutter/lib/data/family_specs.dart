@@ -54,7 +54,12 @@ VerifiedSpec? _huliotSpecFor(LipskeyCatalogProduct p) {
       ports,
       (_) => ConnectorEnd(EndType.hdpeCompression, dn),
     ),
-    material: 'HDPE',
+    // חומר ייחודי 'HDPE·ניקוז' — **לא** 'HDPE' — כדי למנוע M2: `compatibleWith`
+    // מתאים לפי (end-type + DN + חומר) ומתעלם מ-supply/drainage, אז 'HDPE' סתם
+    // היה מזווג-שקרית אביזר-ניקוז לאביזר-HDPE-אספקה באותו DN (199 זיווגי-שווא
+    // אומתו). התווית הזו אינה ב-supplyMaterials ולא בקבוצת-הניקוז-interop, לכן
+    // אביזר-Huliot מתחבר **רק** לאביזר-Huliot אחר באותו DN (שמרני · נכון · M1).
+    material: 'HDPE·ניקוז',
     systemOverride: WaterSystem.drainage, // מערכת-ניקוז (soil & waste)
   );
 }
