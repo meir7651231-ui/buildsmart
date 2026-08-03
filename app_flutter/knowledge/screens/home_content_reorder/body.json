@@ -61,6 +61,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "ReorderableListView = shared component → separate atom"

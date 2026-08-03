@@ -23,6 +23,7 @@
   "floor": [],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "done",
       "inReview",

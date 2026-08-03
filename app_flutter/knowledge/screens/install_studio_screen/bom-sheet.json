@@ -271,6 +271,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": false,
     "props": [
       "plan",
       "anchorSkus",

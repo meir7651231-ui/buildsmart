@@ -75,6 +75,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onSmartCart(…) callback instead of direct smartCartProvider write"

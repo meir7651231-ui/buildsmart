@@ -59,6 +59,7 @@
   "floor": [],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "profession"
     ],

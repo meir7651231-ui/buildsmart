@@ -117,6 +117,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "ChatsScreen = shared component → separate atom",

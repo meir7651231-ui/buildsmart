@@ -71,6 +71,7 @@
   "floor": [],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "composing",
       "itemsCtrl",

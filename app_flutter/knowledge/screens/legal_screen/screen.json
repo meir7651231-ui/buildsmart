@@ -30,6 +30,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [
           "initialTab"
         ],
@@ -61,6 +62,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -85,6 +87,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "value",
           "onChanged"

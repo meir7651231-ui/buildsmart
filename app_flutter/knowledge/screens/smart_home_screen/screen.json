@@ -39,6 +39,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [
           "scrollCtrl"
         ],
@@ -108,6 +109,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write",
@@ -192,6 +194,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onSmartCart(…) callback instead of direct smartCartProvider write"
@@ -257,6 +260,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -327,6 +331,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -378,6 +383,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -412,6 +418,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "CatalogWheelScreen = shared component → separate atom"
@@ -487,6 +494,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onCatalogSection(…) callback instead of direct catalogSectionProvider write",
@@ -556,6 +564,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -605,6 +614,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }

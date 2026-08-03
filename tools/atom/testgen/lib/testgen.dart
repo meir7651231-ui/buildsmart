@@ -1,0 +1,264 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+
+/// Generate a flutter_test file from a screen's atom-decomposition graph
+/// (`app_flutter/knowledge/screens/<screen>/screen.json`). The RULE: every
+/// testable edge + flow-step maps to one test —
+///   writes → state-set · action → nav/sheet · registry-ID → wired ·
+///   cfgVisible → hide · rule(shrink) → gated · formula → input/output ·
+///   verb → effect.
+///
+/// Trivial `reads` are skipped (priority: verbs, formulas, registry-wiring,
+/// gates, writes, actions). Output lands in the OPT-IN `app_flutter/test/
+/// generated/` dir so a failing generated test never blocks the main suite.
+
+/// One generated screen test file + its test count.
+class GenResult {
+  GenResult(this.screen, this.source, this.contents, this.testCount, this.edgeStepCount);
+  final String screen;
+  final String source; // the screen .dart basename
+  final String contents;
+  final int testCount;
+  final int edgeStepCount; // count(edges + flow-steps) for the count==count check
+}
+
+/// Read a screen graph dir and emit a test file. Returns null when the screen
+/// has no composer atom (nothing to pump) or no testable mappings.
+GenResult? generateForScreen(String screenDir, {String? importPackage}) {
+  final screenJson = File(p.join(screenDir, 'screen.json'));
+  if (!screenJson.existsSync()) return null;
+  final d = jsonDecode(screenJson.readAsStringSync()) as Map<String, dynamic>;
+  final screen = d['screen'] as String;
+  final source = d['source'] as String; // e.g. smart_home_screen.dart
+  final atoms = (d['atoms'] as List).cast<Map<String, dynamic>>();
+  if (atoms.isEmpty) return null;
+
+  final composer = atoms.first;
+  final composerName = composer['name'] as String;
+  // Only a PUBLIC composer can be imported + pumped; a private one (rare) can't.
+  if (composerName.startsWith('_')) return null;
+  // Skip composers that need REQUIRED constructor args — `const X()` won't
+  // compile (a detail/sheet screen that takes data). Regenerable once a pump
+  // harness supplies fixtures; for now they'd break compilation.
+  final contract = composer['contract'] as Map<String, dynamic>?;
+  if (contract != null && contract['constructible'] == false) return null;
+
+  final lib = importPackage ?? 'buildsmart';
+  final importPath = 'package:$lib/screens/${p.basenameWithoutExtension(source)}.dart';
+  // A "…Screen" is self-contained (own Scaffold); a "…Body" needs wrapping.
+  final selfContained = composerName.endsWith('Screen');
+
+  final b = StringBuffer();
+  var testCount = 0;
+  var edgeStep = 0;
+  final seen = <String>{};
+
+  void wiredTest(Map<String, dynamic> node, String atom) {
+    final text = (node['text'] as String?) ?? '';
+    final id = node['registryId'] as String?;
+    if (text.isEmpty) return;
+    final key = 'wired|$text';
+    if (!seen.add(key)) return;
+    testCount++;
+    b.writeln("""
+    testWidgets('wired · $atom · "${_esc(text)}"${id != null ? ' [$id]' : ''}', (t) async {
+      await pumpScreen(t, const $composerName(), selfContained: $selfContained);
+      expect(find.text('${_esc(text)}'), findsWidgets,
+          reason: 'the ${id ?? 'text'} element renders on $screen');
+    });""");
+  }
+
+  void hideTest(Map<String, dynamic> node, String atom) {
+    final id = node['registryId'] as String?;
+    final text = (node['text'] as String?) ?? '';
+    if (id == null || text.isEmpty) return;
+    final key = 'hide|$id|$text';
+    if (!seen.add(key)) return;
+    testCount++;
+    b.writeln("""
+    testWidgets('hide · $atom · $id → gone when hidden', (t) async {
+      await pumpScreen(t, const $composerName(), selfContained: $selfContained,
+          hidden: const {'$id'});
+      expect(find.text('${_esc(text)}'), findsNothing,
+          reason: 'hiding $id removes it for end-users');
+    });""");
+  }
+
+  void toastTest(String atom, String label, String toast) {
+    final key = 'toast|$label|$toast';
+    if (!seen.add(key)) return;
+    testCount++;
+    b.writeln("""
+    testWidgets('verb · $atom · tap "${_esc(label)}" → toast "${_esc(toast)}"', (t) async {
+      await pumpScreen(t, const $composerName(), selfContained: $selfContained);
+      final btn = find.text('${_esc(label)}');
+      expect(btn, findsWidgets, reason: 'the "${_esc(label)}" trigger is present');
+      await t.tap(btn.first);
+      await t.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.textContaining('${_esc(toast)}'), findsWidgets,
+          reason: 'tapping "${_esc(label)}" fires the toast (verb effect)');
+    });""");
+  }
+
+  for (final atom in atoms) {
+    final name = atom['name'] as String;
+    // Preview variants are NOT in the live tree; const-gated atoms don't render
+    // with their gate off — neither can pass a "renders" test, so skip them.
+    final variant = atom['variant'] as String?;
+    final gate = atom['gate'] as String?;
+    final renderable = variant != 'preview' && gate == null;
+    final nodes = ((atom['object'] as Map)['nodes'] as List).cast<Map<String, dynamic>>();
+    final edges = ((atom['connections'] as Map)['edges'] as List).cast<Map<String, dynamic>>();
+    final flows = ((atom['behaviour'] as Map)['flows'] as List).cast<Map<String, dynamic>>();
+    edgeStep += edges.length + flows.length;
+    if (!renderable) continue;
+
+    // registry-wiring + hide — ONLY registry-backed nodes ("registry-ID→wired").
+    // Plain text (unregistered = gaps) is not a wiring target.
+    for (final node in nodes) {
+      if (node['registryId'] == null) continue;
+      final kind = node['kind'] as String;
+      if (kind == 'cfgText') wiredTest(node, name);
+      if (kind == 'cfgVisible' || kind == 'cfgText') hideTest(node, name);
+    }
+
+    // verb effect — a labelled element (cfgText) with a toast flow → tap it and
+    // assert the toast (validates the onPressed verb without importing state).
+    final label = nodes.firstWhere(
+      (n) => n['kind'] == 'cfgText' && (n['text'] as String).isNotEmpty,
+      orElse: () => const <String, dynamic>{},
+    )['text'] as String?;
+    if (label != null && label.isNotEmpty) {
+      for (final f in flows) {
+        if (f['effect'] == 'toast') {
+          final toast = _toastLiteral(f['detail'] as String? ?? '');
+          if (toast.isNotEmpty) toastTest(name, label, toast);
+        }
+      }
+    }
+  }
+
+  if (testCount == 0) return null;
+
+  final header = StringBuffer()
+    ..writeln('// GENERATED by tools/atom/testgen — DO NOT EDIT.')
+    ..writeln('// Source graph: knowledge/screens/$screen/ · screen: $source')
+    ..writeln('// Opt-in suite (app_flutter/test/generated/) — NOT run by the main')
+    ..writeln('// swarm CI. A failure here is a triage signal (real bug OR generator')
+    ..writeln('// gap), never a blocker. Regenerate: dart run atom_testgen … .')
+    ..writeln("import '$importPath' show $composerName;")
+    ..writeln("import '_harness.dart';")
+    ..writeln("import 'package:flutter_test/flutter_test.dart';")
+    ..writeln()
+    ..writeln('void main() {')
+    ..writeln('  // OPT-IN: the main swarm suite runs all of test/, so self-skip unless')
+    ..writeln('  // the separate atom-tools CI job opts in (--dart-define=atomgen=true).')
+    ..writeln('  // A failing generated test therefore never blocks the main CI.')
+    ..writeln("  if (!const bool.fromEnvironment('atomgen')) return;")
+    ..writeln("  group('$screen · generated ($testCount tests)', () {");
+
+  final footer = '  });\n}\n';
+  return GenResult(screen, source, '$header${b.toString()}\n$footer', testCount, edgeStep);
+}
+
+String _esc(String s) => s
+    .replaceAll(r'\', r'\\')
+    .replaceAll("'", r"\'")
+    .replaceAll(r'$', r'\$')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\t', r'\t');
+
+/// Extract the STATIC part of a `showToast(context, '${x} נוסף לסל')` literal —
+/// strip the `${…}` interpolations and the quotes, keep the constant text.
+String _toastLiteral(String detail) {
+  final m = RegExp(r"showToast\([^,]*,\s*'(.*?)'").firstMatch(detail);
+  if (m == null) return '';
+  return m.group(1)!.replaceAll(RegExp(r'\$\{[^}]*\}'), '').trim();
+}
+
+/// The shared test harness — pumps a composer with fonts + RTL + a hidden-node
+/// override, in the proven full-suite-safe pattern (favorite_tile_opens_sheet).
+const String kHarness = r'''
+// GENERATED by tools/atom/testgen — DO NOT EDIT.
+// Shared pump harness for the generated screen tests.
+import 'package:buildsmart/state/studio/config_node.dart' show CfgNode;
+import 'package:buildsmart/state/studio/config_store.dart' show resolvedNodeProvider;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show FontLoader, rootBundle;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+bool _fontsLoaded = false;
+Future<void> _loadFonts() async {
+  if (_fontsLoaded) return;
+  final f = FontLoader('Heebo')
+    ..addFont(rootBundle.load('assets/fonts/Heebo-Regular.ttf'))
+    ..addFont(rootBundle.load('assets/fonts/Heebo-Bold.ttf'));
+  await f.load();
+  _fontsLoaded = true;
+}
+
+/// Pump [composer] in a tall RTL surface with fonts + mock prefs. When [hidden]
+/// is non-empty, override resolvedNodeProvider for those ids to hidden so the
+/// CfgVisible/CfgText wrappers shrink for end-users.
+Future<void> pumpScreen(
+  WidgetTester t,
+  Widget composer, {
+  bool selfContained = false,
+  Set<String> hidden = const {},
+}) async {
+  await _loadFonts();
+  SharedPreferences.setMockInitialValues({});
+  t.view.physicalSize = const Size(1200, 6000);
+  t.view.devicePixelRatio = 1.0;
+  addTearDown(t.view.resetPhysicalSize);
+  addTearDown(t.view.resetDevicePixelRatio);
+
+  final overrides = <Override>[
+    for (final id in hidden)
+      resolvedNodeProvider(id).overrideWith(
+        (ref) => const CfgNode(hidden: true),
+      ),
+  ];
+  final body = selfContained
+      ? composer
+      : Directionality(textDirection: TextDirection.rtl, child: Scaffold(body: composer));
+  await t.pumpWidget(
+    ProviderScope(
+      overrides: overrides,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(fontFamily: 'Heebo', useMaterial3: true),
+        home: body,
+      ),
+    ),
+  );
+  await t.pump(const Duration(milliseconds: 300));
+}
+''';
+
+/// Batch-generate for every screen dir under [screensKnowledgeDir], writing to
+/// [outDir]. Returns per-screen results.
+List<GenResult> generateBatch(String screensKnowledgeDir, String outDir,
+    {String? importPackage}) {
+  final dirs = Directory(screensKnowledgeDir)
+      .listSync()
+      .whereType<Directory>()
+      .toList()
+    ..sort((a, b) => a.path.compareTo(b.path));
+  Directory(outDir).createSync(recursive: true);
+  File(p.join(outDir, '_harness.dart')).writeAsStringSync(kHarness);
+  final results = <GenResult>[];
+  for (final dir in dirs) {
+    final r = generateForScreen(dir.path, importPackage: importPackage);
+    if (r == null) continue;
+    File(p.join(outDir, '${r.screen}_generated_test.dart'))
+        .writeAsStringSync(r.contents);
+    results.add(r);
+  }
+  return results;
+}

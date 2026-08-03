@@ -36,6 +36,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom",
@@ -74,6 +75,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -125,6 +127,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onAppSettings(…) callback instead of direct appSettingsProvider write"
@@ -176,6 +179,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write"
@@ -234,6 +238,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }

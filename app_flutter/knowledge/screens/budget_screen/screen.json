@@ -194,6 +194,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -216,6 +217,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "child",
           "onTap"
@@ -241,6 +243,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "value",
           "label",
@@ -268,6 +271,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "cat",
           "share",
@@ -294,6 +298,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "name",
           "value"
@@ -319,6 +324,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "label",
           "controller",

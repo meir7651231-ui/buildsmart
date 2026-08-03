@@ -284,6 +284,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "product",
           "categoryProducts",
@@ -316,6 +317,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "qty",
           "onChanged"
@@ -344,6 +346,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "unit",
           "hasPack",
@@ -373,6 +376,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "product",
           "onTap"
@@ -434,6 +438,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "product",
           "screenH"
@@ -459,6 +464,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "stage",
           "index",
@@ -486,6 +492,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "emoji",
           "title",
@@ -512,6 +519,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -686,6 +694,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "product",
           "onPickProduct"
@@ -741,6 +750,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "product",
           "openPickerKey",

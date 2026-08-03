@@ -95,6 +95,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onWorkerNotifs(…) callback instead of direct workerNotifsProvider write"

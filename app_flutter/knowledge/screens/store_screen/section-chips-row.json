@@ -54,6 +54,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "SingleChildScrollView = shared component → separate atom"

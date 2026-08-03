@@ -78,6 +78,7 @@
   "floor": [],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": false,
     "props": [
       "onAgree",
       "onDismiss"

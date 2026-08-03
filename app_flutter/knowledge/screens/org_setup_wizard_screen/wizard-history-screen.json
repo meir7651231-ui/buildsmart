@@ -23,6 +23,7 @@
   "floor": [],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "HistoryPane = shared component → separate atom"

@@ -54,6 +54,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "onAsk",
       "onBrief"

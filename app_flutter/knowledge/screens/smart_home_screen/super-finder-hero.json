@@ -67,6 +67,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onCatalogSection(…) callback instead of direct catalogSectionProvider write",

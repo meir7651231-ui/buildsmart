@@ -119,6 +119,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onSmartProject(…) callback instead of direct smartProjectProvider write"
@@ -145,6 +146,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "title",
           "done",
@@ -181,6 +183,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -214,6 +217,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "index",
           "stage",

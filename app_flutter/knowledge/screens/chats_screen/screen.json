@@ -58,6 +58,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [
           "persona",
           "audience",
@@ -105,6 +106,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onUpdatesChatSearch(…) callback instead of direct updatesChatSearchProvider write"
@@ -160,6 +162,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [
           "audience"
         ],
@@ -281,6 +284,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "persona",
           "audience"
@@ -448,6 +452,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "view"
         ],

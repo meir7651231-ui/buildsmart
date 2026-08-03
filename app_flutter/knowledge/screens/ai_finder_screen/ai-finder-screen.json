@@ -92,6 +92,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [
       "initialQuery"
     ],

@@ -114,6 +114,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onSmartProject(…) callback instead of direct smartProjectProvider write"

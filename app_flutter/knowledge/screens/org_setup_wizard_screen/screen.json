@@ -178,6 +178,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onOrgConfig(…) callback instead of direct orgConfigProvider write"
@@ -241,6 +242,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "descriptor"
         ],
@@ -313,6 +315,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "FindReplacePane = shared component → separate atom"
@@ -344,6 +347,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "HistoryPane = shared component → separate atom"
@@ -440,6 +444,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "ReorderableListView = shared component → separate atom"

@@ -58,6 +58,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "certs",
       "onAdd",

@@ -162,6 +162,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "WelcomeScreen = shared component → separate atom"

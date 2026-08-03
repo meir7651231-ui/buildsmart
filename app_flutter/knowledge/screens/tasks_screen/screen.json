@@ -98,6 +98,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom",
@@ -123,6 +124,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "text"
         ],
@@ -162,6 +164,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "onTap"
         ],
@@ -202,6 +205,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "onTap"
         ],
@@ -242,6 +246,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "name",
           "workerLabel",
@@ -285,6 +290,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "id",
           "name",
@@ -315,6 +321,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "text"
         ],
@@ -355,6 +362,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "header",
           "tasks",
@@ -504,6 +512,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "task",
           "role"
@@ -548,6 +557,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -622,6 +632,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [
           "edit",
           "initialWorker"

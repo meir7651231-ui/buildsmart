@@ -99,6 +99,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom",
@@ -130,6 +131,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -174,6 +176,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": false,
         "props": [
           "active"
         ],
@@ -356,6 +359,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onManagerTab(…) callback instead of direct managerTabProvider write"
@@ -487,6 +491,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -731,6 +736,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "SingleChildScrollView = shared component → separate atom"
@@ -948,6 +954,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }

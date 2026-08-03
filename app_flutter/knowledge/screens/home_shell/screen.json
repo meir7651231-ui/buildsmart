@@ -144,6 +144,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "CatalogScreen = shared component → separate atom",
@@ -191,6 +192,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "GlobalSearchResultsView = shared component → separate atom"
@@ -248,6 +250,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onHelpMode(…) callback instead of direct helpModeProvider write"
@@ -314,6 +317,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [
           "popFirst"
         ],
@@ -606,6 +610,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onHelpMode(…) callback instead of direct helpModeProvider write",
@@ -642,6 +647,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "currentIndex",
           "onTap"

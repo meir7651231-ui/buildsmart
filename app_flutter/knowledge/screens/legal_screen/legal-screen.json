@@ -25,6 +25,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": true,
     "props": [
       "initialTab"
     ],

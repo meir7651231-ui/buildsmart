@@ -98,6 +98,7 @@ class AtomFlow {
 class AtomContract {
   const AtomContract({
     required this.extractable,
+    this.constructible = true,
     List<String>? props,
     List<String>? untangle,
   })  : props = props ?? const <String>[],
@@ -108,6 +109,10 @@ class AtomContract {
   /// widget that is its own atom).
   final String extractable;
 
+  /// True when the atom has a zero-arg (`const X()`) constructor — no REQUIRED
+  /// params. The test-generator only pumps constructible composers.
+  final bool constructible;
+
   /// The atom's declared constructor params (its current inputs).
   final List<String> props;
 
@@ -117,6 +122,7 @@ class AtomContract {
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'extractable': extractable,
+        'constructible': constructible,
         'props': props,
         'untangle': untangle,
       };

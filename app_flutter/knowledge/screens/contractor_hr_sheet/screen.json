@@ -152,6 +152,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -174,6 +175,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "request",
           "onApprove",
@@ -200,6 +202,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "label",
           "color",
@@ -228,6 +231,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "training",
           "onApprove",
@@ -254,6 +258,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "cert"
         ],

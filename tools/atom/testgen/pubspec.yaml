@@ -1,0 +1,14 @@
+name: atom_testgen
+description: >-
+  Generate flutter_test files from the atom-decomposition graphs
+  (app_flutter/knowledge/screens/<screen>/*.json). Every edge + flow-step → a
+  test. Output lands in an OPT-IN dir (app_flutter/test/generated/) so a failing
+  generated test never blocks the main CI suite.
+publish_to: none
+version: 0.1.0
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  path: ^1.9.0
+dev_dependencies:
+  test: ^1.25.0

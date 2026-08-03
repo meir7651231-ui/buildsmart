@@ -98,6 +98,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom"
@@ -124,6 +125,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "label",
           "on",
@@ -150,6 +152,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "name",
           "info",
@@ -177,6 +180,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "tab"
         ],

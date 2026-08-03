@@ -27,6 +27,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "index",
       "stage",

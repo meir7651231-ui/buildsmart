@@ -80,6 +80,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -163,6 +164,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -229,6 +231,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -306,6 +309,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -391,6 +395,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -516,6 +521,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -601,6 +607,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -686,6 +693,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -759,6 +767,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -836,6 +845,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"
@@ -904,6 +914,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onChatSettings(…) callback instead of direct chatSettingsProvider write"

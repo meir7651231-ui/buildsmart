@@ -74,6 +74,7 @@
   "floor": [],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onKeyboardDiveQuery(…) callback instead of direct keyboardDiveQueryProvider write"

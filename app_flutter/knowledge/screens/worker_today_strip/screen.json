@@ -58,6 +58,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": false,
         "props": [
           "worker"
         ],
@@ -97,6 +98,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "stage",
           "tag",

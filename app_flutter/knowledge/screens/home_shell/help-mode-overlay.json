@@ -49,6 +49,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onHelpMode(…) callback instead of direct helpModeProvider write"

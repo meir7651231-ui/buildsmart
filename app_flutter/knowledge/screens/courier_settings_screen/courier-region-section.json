@@ -43,6 +43,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onAppSettings(…) callback instead of direct appSettingsProvider write"

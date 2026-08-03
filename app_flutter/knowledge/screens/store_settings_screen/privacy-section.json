@@ -82,6 +82,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onStoreSearchQuery(…) callback instead of direct storeSearchQueryProvider write",

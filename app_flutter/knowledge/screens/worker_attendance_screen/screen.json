@@ -76,6 +76,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "WelcomeScreen = shared component → separate atom"
@@ -117,6 +118,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "today",
           "onClockIn",
@@ -191,6 +193,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "month",
           "byKey",
@@ -269,6 +272,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "day",
           "work"
@@ -296,6 +300,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "enabled",
           "label",

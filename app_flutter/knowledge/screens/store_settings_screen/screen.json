@@ -82,6 +82,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom"
@@ -156,6 +157,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -241,6 +243,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -309,6 +312,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -369,6 +373,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -435,6 +440,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -526,6 +532,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -594,6 +601,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -679,6 +687,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
@@ -769,6 +778,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSearchQuery(…) callback instead of direct storeSearchQueryProvider write",

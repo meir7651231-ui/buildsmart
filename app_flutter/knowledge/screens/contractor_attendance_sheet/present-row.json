@@ -44,6 +44,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "day"
     ],

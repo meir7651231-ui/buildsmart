@@ -16,6 +16,7 @@
   "floor": [],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "value",
       "label"
