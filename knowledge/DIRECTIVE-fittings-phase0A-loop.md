@@ -1,6 +1,20 @@
 # 🔁 הנחיה — מנוע-הקטלוג-3D: פאזה 0+A + **מצב-לולאה-רציף**
 
-> **הקשר:** slice-1 נחת ואומת ירוק (Protocol Enforcement run 783 + כל הצינורות). עכשיו בונים את מנוע-הקטלוג-3D לפי `knowledge/CATALOG-3D-100-STEPS.md` (ענף `nice-volta`), **החל מפאזה 0+A**, ב**לולאה רציפה** — לא עוצרים לאישור אחרי כל פרוסה.
+> **הקשר:** slice-1 נחת ואומת ירוק (Protocol Enforcement run 783 + כל הצינורות). עכשיו בונים את מנוע-הקטלוג-3D לפי `knowledge/CATALOG-3D-100-STEPS.md` (ה**מפרט** — על `nice-volta`), **החל מפאזה 0+A**, ב**לולאה רציפה** — לא עוצרים לאישור אחרי כל פרוסה.
+
+---
+
+## 📍 ענף-בנייה + מקור-הגולדן (קרא ראשון — זה מה שחסר קודם)
+
+**איפה בונים:** על **`claude/whats-happening-LyY9G`** — שם הקוד החי (`polyroll_specs.dart`, `catalog_source.dart`, `main.dart`, האנקרים). ה**מפרט** (`CATALOG-3D-100-STEPS.md` + ההנחיה הזו) יושב על `nice-volta` — קורא משם, **בונה על whats-happening**. אל תבנה על nice-volta (הוא ענף-ידע, מפגר, אין בו קוד).
+
+**מקור-הגולדן (החובה לפאזה 0):** קיים בריפו על ענף **`claude/what-do-you-see-bcxttj`** ב-`app_flutter/knowledge/catalog-3d/`:
+- `pure_engine.py` — מימוש-הייחוס (ה-Dart port חייב 1:1 מולו).
+- `INTEGRATION-SPEC.md` — החוזה (נוסחאות + חוקי-משפחה + מודל-נתונים).
+- `construction_ratios.json` + `master_ratios.py` — 627-מוצרים לוולידציית-golden.
+- `GEOMETRIC-CONSTRUCTION.md` — הוכחות · `prototypes/gen3d.html` — הרפרנס ל-3D (פאזה C).
+
+**שלב-0 צעד-1:** `git fetch origin claude/what-do-you-see-bcxttj` → העתק את `app_flutter/knowledge/catalog-3d/` לתוך עץ-הבנייה של whats-happening. **אל תמציא פיזיקה** — היא ב-`pure_engine.py`. **אל תמציא תוכן-בטיחות/ריתוך משפטי** — caveat-יצרן בלבד, אין ערך-מחייב בלי מקור (M5). *(אופציית "גזור בלי golden-Python" = לא. המקור קיים.)*
 
 ---
 
@@ -70,7 +84,11 @@
 ## ✂️ בלוק להעתקה לנחיל
 
 ━━━━━━━━━━━━━━━━━━
-משימה: בנה את מנוע-הקטלוג-3D לפי `knowledge/CATALOG-3D-100-STEPS.md` (ענף nice-volta), החל מפאזה 0, ב-**מצב-לולאה-רציף**.
+משימה: בנה את מנוע-הקטלוג-3D לפי המפרט `knowledge/CATALOG-3D-100-STEPS.md` (על nice-volta), החל מפאזה 0, ב-**מצב-לולאה-רציף**.
+
+**ענף-בנייה:** `whats-happening-LyY9G` (שם הקוד). המפרט על nice-volta — קרא משם, בנה על whats-happening. אל תבנה על nice-volta.
+
+**מקור-הגולדן (שלב-0 צעד-1):** על ענף `what-do-you-see-bcxttj` ב-`app_flutter/knowledge/catalog-3d/` — `pure_engine.py` (מימוש-ייחוס ל-golden 1:1) + `INTEGRATION-SPEC.md` (חוזה) + `construction_ratios.json` (627 מוצרים) + `gen3d.html` (3D, פאזה C). `git fetch origin claude/what-do-you-see-bcxttj` → העתק את התיקייה פנימה. **אל תמציא פיזיקה/תוכן-בטיחות — הכל שם.**
 
 הלולאה: קח פרוסה → בנה (מגודר `kFittingEngine*` OFF · keystone אינסטלציה byte-identical · `putIfAbsent` בלבד · golden 1:1 מול `pure_engine.py`) → כל השערים + CI ירוק (Protocol Enforcement + deploys) → **ירוק? עבור מיד לפרוסה הבאה בלי לחכות לאישור** → חזור.
 
