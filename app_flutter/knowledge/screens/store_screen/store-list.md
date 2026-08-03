@@ -119,8 +119,9 @@
 - **reads** · `read` → `cartProjectProvider`
 - **reads** · `read` → `telemetryProvider`
 
-## התנהגות · behaviour (30)
+## התנהגות · behaviour (31)
 
+- **build** → _formula_ `ordersPreview = storeOrders.isEmpty ? … : …` → text: 'אין הזמנות פעילות' | 'הזמנה ${storeOrders.first.id} · ${storeOrders.first.stageLabel}'
 - **onTap** → _verb_ `showToast(context, '${r.label} — בבנייה')` → toast
 - **onTap** → _verb_ `showToast(context, '${item.title} — בבנייה')` → toast
 - **onPressed** → _verb_ `ref.read(storeSettingsProvider.notifier).update((s) => s.copyWith(purchaseHis…` → write → storeSettingsProvider

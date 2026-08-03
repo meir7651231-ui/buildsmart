@@ -16,9 +16,10 @@
 
 _(no edges)_
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (2)
 
-_(no flows)_
+- **build** → _formula_ `tempTag = tempC >= 60 ? … : …` → text: '🔥 חם' | '❄ קר'
+- **build** → _formula_ `loopTag = loop ? … : …` → text: ' (ריזרקולציה)' | ''
 
 ## floor · external functions (6)
 

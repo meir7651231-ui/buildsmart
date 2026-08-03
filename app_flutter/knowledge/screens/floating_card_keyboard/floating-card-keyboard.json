@@ -165,7 +165,14 @@
     ]
   },
   "behaviour": {
-    "flows": []
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "sep = existing.isEmpty || existing.endsWith(' ') ? … : …",
+        "effect": "text: '' | ' '"
+      }
+    ]
   },
   "floor": [
     "add",

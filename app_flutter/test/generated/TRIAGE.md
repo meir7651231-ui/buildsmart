@@ -24,24 +24,27 @@ Regenerate: `dart run tools/atom/testgen/bin/testgen.dart --graphs app_flutter/k
 - `registry-ID` → **wired** (the element renders) · **hide** (gone when its
   `resolvedNodeProvider` is overridden hidden).
 - `verb` with a toast effect → **verb** (tap the labelled trigger → toast fires).
+- `formula` (a named money-ternary) → **formula** (reconstructed pure test:
+  null → constant · 1234 → ₪1,234).
 - Skipped by design: preview variants + const-gated atoms (not in the live tree
   by default), composers with required ctor args (`const X()` won't compile),
-  trivial `reads`, and — for now — `formula` (needs formula-capture in the
-  decomposer · next slice).
+  trivial `reads`.
 
-## Latest triage (this commit)
+## Latest triage
 
-- **Screens:** 62 (constructible public composers) · **Tests:** 1000
-- **Anchor:** `contractor-home` (smart_home_screen) — **13/13 green**, pinned in
-  `tools/atom/decompose/test/golden` + `tools/atom/testgen/test/golden`.
-- **Batch:** **479 pass · 521 fail · 0 compile-fail.**
-  - fail by type: 376 `wired` · 107 `hide` · 36 `verb`.
+- **Screens:** 62 (constructible public composers) · **Tests:** 1001
+- **Anchor:** `contractor-home` (smart_home_screen) — **14/14 green**, pinned in
+  `tools/atom/decompose/test/golden` + `tools/atom/testgen/test/golden`. Covers
+  all **5 smartTree ST-3 mappings**: verb (add-to-cart→toast) · hide (CfgVisible)
+  · formula (priceLabel null→"מחיר לפי ספק" · 1234→"₪1,234").
+- **Batch:** ~**480 pass · 521 fail · 0 compile-fail** (376 `wired` · 107 `hide`
+  · 36 `verb`; +1 vs slice-1 is the new formula test, passing).
 
-**Reading the failures (pass = verified · fail = report):** the dominant `wired`
-failures are screens whose element only renders after **provider seeding**, or
-behind a **gate/scroll** the naive pump doesn't satisfy — a HARNESS gap, not
-necessarily a code bug. Each remaining slice tightens the harness (seed the
-providers a screen needs, honor its gates) and/or the decomposer (capture
-formulas) and re-triages. A `verb`/`hide` failure on a screen that IS wired is a
-stronger signal — inspect those first (possible real wiring bug or generator
-gap).
+### Slice log
+
+- **slice-1:** wired · hide · verb-toast. contractor-home 13/13.
+- **slice-2:** + `formula` — the decomposer captures named money-ternaries
+  (`v == null ? 'LABEL' : 'PFX${groupThousands(v)}'`); testgen reconstructs them
+  as a pure null/1234 test. contractor-home 14/14 (ST-3 complete).
+- **next:** tighten the harness (seed each screen's providers · honor gates) to
+  convert the `wired` failures (pass = verified · fail = report, never swallowed).

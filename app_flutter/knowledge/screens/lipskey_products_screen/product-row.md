@@ -27,9 +27,10 @@
 - **action** · `showQtyWheel` → `showQtyWheel`
 - **gated-by** · `guard` → `shown.isEmpty`
 
-## התנהגות · behaviour (4)
+## התנהגות · behaviour (5)
 
 - **onTap** → _verb_ `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: CfgText('lipskey…` → open → showSnackBar
+- **build** → _formula_ `label = s == '+' ? … : …` → text: 'הוסף כמות' | 'הפחת כמות'
 - **onTap** → _verb_ `showQtyWheel(context, _qty, _setQty)` → open → showQtyWheel
 - **build** → _rule_ `if (shown.isEmpty)` → hidden (SizedBox.shrink)
 - **onTap** → _verb_ `LipskeyProductsScreen.openWordSearch(context, w)` → open → openWordSearch

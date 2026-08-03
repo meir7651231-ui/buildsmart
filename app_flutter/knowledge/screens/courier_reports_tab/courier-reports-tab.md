@@ -40,9 +40,10 @@
 - **reads** · `read` → `chatEngineProvider`
 - **reads** · `read` → `workerNotifsProvider`
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (2)
 
-_(no flows)_
+- **build** → _formula_ `streakLabel = activityDays.isEmpty ? … : …` → text: '—' | '${streak} ימים'
+- **build** → _formula_ `firstAttemptLabel = measuredDelivered.isEmpty ? … : …` → text: '—' | '${(firstAttempt * 100 / measuredDelivered.length).round()}%'
 
 ## floor · external functions (5)
 

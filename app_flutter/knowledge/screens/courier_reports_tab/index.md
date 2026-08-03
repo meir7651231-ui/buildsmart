@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `CourierReportsTab` | composer | — | — | 14·15·0 | clean | 2 |
+| 1 | `CourierReportsTab` | composer | — | — | 14·15·2 | clean | 2 |
 | 2 | `_DeliveredCard` | section | — | — | 3·1·1 | clean | 1 |
 | 3 | `_RStat` | section | — | — | 0·0·0 | clean | 0 |
 | 4 | `_RCard` | section | — | — | 0·0·0 | clean | 0 |

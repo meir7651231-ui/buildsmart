@@ -38,6 +38,9 @@ void main() {
       expect(c, contains('hide · _SmartTreeRow · smart_home_screen.add_to_cart → gone when hidden'));
       // verb → effect (add-to-cart write + toast, observed via the toast)
       expect(c, contains('tap "הוסף לסל" → toast "נוסף לסל"'));
+      // formula → input/output (priceLabel: null → constant · 1234 → ₪1,234)
+      expect(c, contains("expect(f(null), 'מחיר לפי ספק');"));
+      expect(c, contains("expect(f(1234), '₪1,234');"));
       // all 6 registry ids are wired
       for (final id in const [
         'smart_home_screen.add_to_cart',
@@ -51,8 +54,8 @@ void main() {
       }
     });
 
-    test('13 tests · preview/const-gated atoms skipped (not renderable)', () {
-      expect(r.testCount, 13);
+    test('14 tests · preview/const-gated atoms skipped (not renderable)', () {
+      expect(r.testCount, 14);
       // The preview + gated super-finder atoms produce NO wired test.
       expect(r.contents, isNot(contains('_SuperFinderHero')));
       expect(r.contents, isNot(contains('_SuperFinderOpen')));

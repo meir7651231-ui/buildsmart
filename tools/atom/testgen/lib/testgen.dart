@@ -53,7 +53,32 @@ GenResult? generateForScreen(String screenDir, {String? importPackage}) {
   final b = StringBuffer();
   var testCount = 0;
   var edgeStep = 0;
+  var needsMoney = false;
   final seen = <String>{};
+
+  // formula → input/output. For the recurring `v == null ? 'LABEL' : 'PFX${
+  // groupThousands(v)}'` money-formula, reconstruct it as a pure test asserting
+  // both branches (null → LABEL · 1234 → PFX1,234). Other formulas are skipped
+  // (their free variables can't be reconstructed generically).
+  void formulaTest(String atom, String detail, String effect) {
+    final branches = _formulaBranches(effect); // ['מחיר לפי ספק', '₪${groupThousands(rec.price!)}']
+    if (branches.length != 2) return;
+    final lit = branches.firstWhere((x) => !x.contains(r'${'), orElse: () => '');
+    final money = branches.firstWhere((x) => x.contains('groupThousands('), orElse: () => '');
+    if (lit.isEmpty || money.isEmpty) return;
+    final pfx = money.replaceAll(RegExp(r'\$\{groupThousands\([^}]*\)\}'), '');
+    final key = 'formula|$lit|$pfx';
+    if (!seen.add(key)) return;
+    needsMoney = true;
+    testCount++;
+    final varName = detail.split('=').first.trim();
+    b.writeln("""
+    test('formula · $atom · $varName (null→"${_esc(lit)}" · 1234→"${_esc(pfx)}1,234")', () {
+      String f(int? v) => v == null ? '${_esc(lit)}' : '${_esc(pfx)}\${groupThousands(v)}';
+      expect(f(null), '${_esc(lit)}');
+      expect(f(1234), '${_esc(pfx)}1,234');
+    });""");
+  }
 
   void wiredTest(Map<String, dynamic> node, String atom) {
     final text = (node['text'] as String?) ?? '';
@@ -138,6 +163,13 @@ GenResult? generateForScreen(String screenDir, {String? importPackage}) {
         }
       }
     }
+
+    // formula → input/output (reconstructed money-formula).
+    for (final f in flows) {
+      if (f['mechanism'] == 'formula') {
+        formulaTest(name, f['detail'] as String? ?? '', f['effect'] as String? ?? '');
+      }
+    }
   }
 
   if (testCount == 0) return null;
@@ -151,6 +183,9 @@ GenResult? generateForScreen(String screenDir, {String? importPackage}) {
     ..writeln("import '$importPath' show $composerName;")
     ..writeln("import '_harness.dart';")
     ..writeln("import 'package:flutter_test/flutter_test.dart';")
+    ..write(needsMoney
+        ? "import 'package:$lib/logic/money_format.dart' show groupThousands;\n"
+        : '')
     ..writeln()
     ..writeln('void main() {')
     ..writeln('  // OPT-IN: the main swarm suite runs all of test/, so self-skip unless')
@@ -170,6 +205,19 @@ String _esc(String s) => s
     .replaceAll('\n', r'\n')
     .replaceAll('\r', r'\r')
     .replaceAll('\t', r'\t');
+
+/// Split a formula effect `text: 'A' | 'B'` into its two branch strings.
+List<String> _formulaBranches(String effect) {
+  var s = effect;
+  if (s.startsWith('text:')) s = s.substring('text:'.length).trim();
+  return s.split(' | ').map((x) {
+    var t = x.trim();
+    if (t.length >= 2 && t.startsWith("'") && t.endsWith("'")) {
+      t = t.substring(1, t.length - 1);
+    }
+    return t;
+  }).toList();
+}
 
 /// Extract the STATIC part of a `showToast(context, '${x} נוסף לסל')` literal —
 /// strip the `${…}` interpolations and the quotes, keep the constant text.

@@ -176,7 +176,20 @@
         ]
       },
       "behaviour": {
-        "flows": []
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "streakLabel = activityDays.isEmpty ? … : …",
+            "effect": "text: '—' | '${streak} ימים'"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "firstAttemptLabel = measuredDelivered.isEmpty ? … : …",
+            "effect": "text: '—' | '${(firstAttempt * 100 / measuredDelivered.length).round()}%'"
+          }
+        ]
       },
       "floor": [
         "bsOnAccent",

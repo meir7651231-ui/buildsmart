@@ -40,8 +40,10 @@
 - **action** · `showToast` → `showToast`
 - **action** · `push` → `DailyReportScreen`
 
-## התנהגות · behaviour (7)
+## התנהגות · behaviour (9)
 
+- **build** → _formula_ `streakLabel = activityDays.isEmpty ? … : …` → text: '—' | '${streak} ימים'
+- **build** → _formula_ `firstPassLabel = submitted.isEmpty ? … : …` → text: '—' | '${(firstPass * 100 / submitted.length).round()}%'
 - **onTap** → _verb_ `showFirstPassDrilldown(context, ref, worker: worker)` → open → showFirstPassDrilldown
 - **onTap** → _verb_ `showCoinsDrilldown(context, ref)` → open → showCoinsDrilldown
 - **onTap** → _verb_ `showStreakDrilldown(context, ref, worker: worker)` → open → showStreakDrilldown

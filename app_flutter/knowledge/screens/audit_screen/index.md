@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `AuditScreen` | composer | — | — | 4·0·0 | clean | 1 |
+| 1 | `AuditScreen` | composer | — | — | 4·0·2 | clean | 1 |
 
 ## Registry reconciliation (3/3)
 

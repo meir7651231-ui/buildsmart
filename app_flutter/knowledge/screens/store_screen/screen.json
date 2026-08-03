@@ -856,6 +856,12 @@
       "behaviour": {
         "flows": [
           {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "ordersPreview = storeOrders.isEmpty ? … : …",
+            "effect": "text: 'אין הזמנות פעילות' | 'הזמנה ${storeOrders.first.id} · ${storeOrders.first.stageLabel}'"
+          },
+          {
             "trigger": "onTap",
             "mechanism": "verb",
             "detail": "showToast(context, '${r.label} — בבנייה')",

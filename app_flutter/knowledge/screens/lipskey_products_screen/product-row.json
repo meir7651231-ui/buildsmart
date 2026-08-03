@@ -105,6 +105,12 @@
         "effect": "open → showSnackBar"
       },
       {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "label = s == '+' ? … : …",
+        "effect": "text: 'הוסף כמות' | 'הפחת כמות'"
+      },
+      {
         "trigger": "onTap",
         "mechanism": "verb",
         "detail": "showQtyWheel(context, _qty, _setQty)",

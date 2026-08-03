@@ -6,13 +6,14 @@
 import 'package:buildsmart/screens/smart_home_screen.dart' show SmartHomeBody;
 import '_harness.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:buildsmart/logic/money_format.dart' show groupThousands;
 
 void main() {
   // OPT-IN: the main swarm suite runs all of test/, so self-skip unless
   // the separate atom-tools CI job opts in (--dart-define=atomgen=true).
   // A failing generated test therefore never blocks the main CI.
   if (!const bool.fromEnvironment('atomgen')) return;
-  group('smart_home_screen · generated (13 tests)', () {
+  group('smart_home_screen · generated (14 tests)', () {
     testWidgets('wired · _SmartTreeRow · "הוסף לסל" [smart_home_screen.add_to_cart]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
       expect(find.text('הוסף לסל'), findsWidgets,
@@ -32,6 +33,11 @@ void main() {
       await t.pumpAndSettle(const Duration(seconds: 1));
       expect(find.textContaining('נוסף לסל'), findsWidgets,
           reason: 'tapping "הוסף לסל" fires the toast (verb effect)');
+    });
+    test('formula · _SmartTreeRow · priceLabel (null→"מחיר לפי ספק" · 1234→"₪1,234")', () {
+      String f(int? v) => v == null ? 'מחיר לפי ספק' : '₪${groupThousands(v)}';
+      expect(f(null), 'מחיר לפי ספק');
+      expect(f(1234), '₪1,234');
     });
     testWidgets('wired · _WorkPath · "🛁 חדש — מאפס עד גמר" [smart_home_screen.workpath_badge]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);

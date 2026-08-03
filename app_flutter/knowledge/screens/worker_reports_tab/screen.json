@@ -176,6 +176,18 @@
       "behaviour": {
         "flows": [
           {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "streakLabel = activityDays.isEmpty ? … : …",
+            "effect": "text: '—' | '${streak} ימים'"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "firstPassLabel = submitted.isEmpty ? … : …",
+            "effect": "text: '—' | '${(firstPass * 100 / submitted.length).round()}%'"
+          },
+          {
             "trigger": "onTap",
             "mechanism": "verb",
             "detail": "showFirstPassDrilldown(context, ref, worker: worker)",

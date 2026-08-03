@@ -11,7 +11,7 @@
 |---|------|------|---------|---------|-------|-------------|------|
 | 1 | `SmartHomeBody` | composer | — | — | 0·3·0 | clean | 0 |
 | 2 | `_Departments` | section | categories | — | 1·3·3 | needs-untangle | 1 |
-| 3 | `_SmartTreeRow` | section | products | — | 3·3·3 | needs-untangle | 1 |
+| 3 | `_SmartTreeRow` | section | products | — | 3·3·4 | needs-untangle | 1 |
 | 4 | `_WorkPath` | section | workPath | — | 4·1·1 | clean | 1 |
 | 5 | `_QuickTools` | section | promise | — | 1·6·1 | clean | 1 |
 | 6 | `_InstallStudioHero` | section | installHero | — | 2·1·1 | clean | 0 |

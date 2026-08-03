@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `AiAssistantScreen` | composer | — | — | 6·4·0 | clean | 1 |
+| 1 | `AiAssistantScreen` | composer | — | — | 6·4·1 | clean | 1 |
 
 ## Registry reconciliation (5/5)
 

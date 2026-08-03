@@ -24,7 +24,14 @@
     "edges": []
   },
   "behaviour": {
-    "flows": []
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "splitTag = fulfillment.splitInto > 1 ? … : …",
+        "effect": "text: ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות' | ''"
+      }
+    ]
   },
   "floor": [
     "cfgRadius",

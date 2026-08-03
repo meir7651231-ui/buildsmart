@@ -118,6 +118,12 @@
       "behaviour": {
         "flows": [
           {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "reasonSuffix = (!approve && why != null && why.isNotEmpty) ? … : …",
+            "effect": "text: ' · סיבה: ${why}' | ''"
+          },
+          {
             "trigger": "onPressed",
             "mechanism": "verb",
             "detail": "ref.read(requiredDocsPolicyProvider.notifier).removeRequirement(kDemoContract…",

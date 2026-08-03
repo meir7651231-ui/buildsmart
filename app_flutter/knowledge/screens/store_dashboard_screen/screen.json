@@ -532,7 +532,14 @@
         "edges": []
       },
       "behaviour": {
-        "flows": []
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "splitTag = fulfillment.splitInto > 1 ? … : …",
+            "effect": "text: ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות' | ''"
+          }
+        ]
       },
       "floor": [
         "cfgRadius",
@@ -628,7 +635,14 @@
         "edges": []
       },
       "behaviour": {
-        "flows": []
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "idLine = item.sku != null ? … : …",
+            "effect": "text: '🏷️ מק\"ט ${item.sku}${item.category != null ? ' · ${item.category}' : ''}' | 'ללא מק\"ט בקטלוג'"
+          }
+        ]
       },
       "floor": [
         "cfgRadius",
