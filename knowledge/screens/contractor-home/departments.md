@@ -1,37 +1,35 @@
-# atom · departments · מחלקות   [🔵 צריך-ניתוק]
-`_Departments` (:271) · ConsumerWidget · section
+# _Departments
 
-## 1 · עצם (node)
-| טקסט | registry-ID | kind | סטטי/דינמי |
-|---|---|---|---|
-| מחלקות (:294) | — לא רשום | text | static |
-| עוד (:321) | — לא רשום | text | static |
-| (אריחי-מחלקות) | — | tile | **דינמי** (`DepartmentsScreen.departments.where(live)`) |
-| בקרוב (:310) | — | text | static (**מת** — pre-filter live) |
+- **screen:** `contractor-home`
+- **role:** section · section `categories`
 
-→ **registry 0 · mapped 0 · לא-רשום 2** · **state:** Stateless
+## עצם · object (1)
 
-## 2 · חיבורים (edges)
-```
-departments —קרא→   catalogSettings (metrics) · DepartmentsScreen.departments
-departments —כתוב→  homeDepartment = d.name   (D-2)
-departments —כתוב→  mainTab = 1               (D-2, D-3) → מחליף לשונית-מחלקות
-departments —משתמש→ _Pad · _SectionTitle · _MiniTile · _Metrics
-departments —מגודר→ kProfileRawShell
-```
+> registry 0 · mapped 0/0 · **unregistered 1**
 
-## 3 · התנהגות (flows)
-**D-1 · build:**
-`rule` `if kProfileRawShell → shrink` · `verb filter+take` `depts = departments.where(d.live).take(3)` · `formula` `tileH = m.tileH`
-*(הערה: `dim:!d.live` ו-`note:'בקרוב'` — ענפים **מתים**, כי depts כבר-מסונן ל-live)*
+- **text** "מחלקות" · — לא-רשום
 
-**D-2 · onTap אריח:**
-`verb write` `homeDepartment = d.name` → `verb write` `mainTab = 1` → **effect:** מחלקה-נבחרת + מעבר-לשונית
-*primitives:* `ref.read · .notifier · .state=`
+## חיבורים · connections (3)
 
-**D-3 · onTap "עוד":**
-`verb write` `mainTab = 1` → **effect:** מעבר-לשונית-מחלקות
+- **gated-by** · `const-flag` → `kProfileRawShell`
+- **writes** · `state=` → `homeDepartmentProvider`
+- **writes** · `state=` → `mainTabProvider`
 
-## חוזה-רכיב + gaps
-`extractable: needs-untangle` · props:`[departments, onSelect]` · **untangle:** departments כ-prop · `onSelect(name)` במקום כתיבה-ישירה ל-homeDepartment/mainTab
-**gaps:** 'מחלקות'/'עוד' לא-רשומים · 'בקרוב' קוד-מת
+## התנהגות · behaviour (3)
+
+- **build** → _rule_ `if (kProfileRawShell)` → hidden (SizedBox.shrink)
+- **onTap** → _verb_ `ref.read(homeDepartmentProvider.notifier).state = d.name` → write → homeDepartmentProvider
+- **onTap** → _verb_ `ref.read(mainTabProvider.notifier).state = 1` → write → mainTabProvider
+
+## floor · external functions (1)
+
+- `cfgRadius`
+
+## חוזה-רכיב · contract + gaps
+
+- **extractable:** `needs-untangle`
+- **props:** —
+- **untangle:**
+  - onHomeDepartment(…) callback instead of direct homeDepartmentProvider write
+  - onMainTab(…) callback instead of direct mainTabProvider write
+- **gaps:** 1 unregistered — "מחלקות"

@@ -1,0 +1,807 @@
+{
+  "name": "_StoreList",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🛒"
+      },
+      {
+        "kind": "cfgText",
+        "text": "הסל ריק",
+        "registryId": "shop.emptycart.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוסיפו מוצרים מהקטלוג",
+        "registryId": "shop.emptycart.hint",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.service_under_construction",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🚧 בבנייה",
+        "registryId": "store_screen.service_under_construction",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🔍"
+      },
+      {
+        "kind": "text",
+        "text": "🔒"
+      },
+      {
+        "kind": "cfgText",
+        "text": "היסטוריית הרכישות מוסתרת",
+        "registryId": "shop.orders.hidden",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הפעלת \"היסטוריית רכישות\" בהגדרות תציג שוב את ההזמנות.",
+        "registryId": "store_screen.orders_hidden_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.orders_hidden_show",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הצג היסטוריה",
+        "registryId": "store_screen.orders_hidden_show",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📦"
+      },
+      {
+        "kind": "cfgText",
+        "text": "🏗️ שיוך לפרויקט",
+        "registryId": "store_screen.proj_assign_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.proj_add_chip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "+ הוסף",
+        "registryId": "store_screen.proj_add_chip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוספת פרויקט",
+        "registryId": "store_screen.proj_add_dialog_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.proj_add_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "store_screen.proj_add_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.proj_add_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוסף",
+        "registryId": "store_screen.proj_add_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אספקה: יום-יומיים",
+        "registryId": "store_screen.supplier_lead_time",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🚚 אפשרויות משלוח",
+        "registryId": "shop.delivery.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📝 הערות לשליח",
+        "registryId": "shop.notes.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💳 אמצעי תשלום",
+        "registryId": "shop.payment.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "cart.cta",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "cart.cta",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אישור הזמנה גדולה",
+        "registryId": "store_screen.large_order_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.large_order_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "store_screen.large_order_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.large_order_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אשר והמשך",
+        "registryId": "store_screen.large_order_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שמור סל כרשימה",
+        "registryId": "store_screen.save_list_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.save_list_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "store_screen.save_list_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.save_list_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שמור",
+        "registryId": "store_screen.save_list_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔖 רשימות שמורות",
+        "registryId": "store_screen.saved_lists_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין רשימות שמורות עדיין",
+        "registryId": "store_screen.saved_lists_empty",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.actions_lists",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "רשימות",
+        "registryId": "store_screen.actions_lists",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.actions_save",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שמור",
+        "registryId": "store_screen.actions_save",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.actions_share",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שתף",
+        "registryId": "store_screen.actions_share",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_screen.actions_clear",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נקה",
+        "registryId": "store_screen.actions_clear",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סיכום הזמנה",
+        "registryId": "shop.checkout.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "פרויקט",
+        "registryId": "store_screen.checkout_project_label",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📦 משלוח",
+        "registryId": "store_screen.checkout_delivery_label",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💳 תשלום",
+        "registryId": "store_screen.checkout_payment_label",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סה\"כ לתשלום",
+        "registryId": "store_screen.checkout_total_label",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "shop.checkout.confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אישור הזמנה",
+        "registryId": "shop.checkout.confirm",
+        "registryOk": true
+      }
+    ],
+    "registered": 49,
+    "unregistered": [
+      "🛒",
+      "🔍",
+      "🔒",
+      "📦"
+    ],
+    "summary": "registry 49 · mapped 49/49 · unregistered 4"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSectionProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "featOn",
+        "target": "orders.services"
+      },
+      {
+        "kind": "action",
+        "via": "openPriceCompareSheet",
+        "target": "openPriceCompareSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSearchQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "storeSectionProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeFavoritesProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cartQtysProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.displayMode)"
+      },
+      {
+        "kind": "writes",
+        "via": "toggle",
+        "target": "storeFavoritesProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.purchaseHistory)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.sortDefault)"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cartNotesProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "cartNotesProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "intelBusProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cartQtysProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cartDeliveryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cartProjectProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cartPaymentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.vatInclusive)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.saveCartToProject)"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "projectsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "cartProjectProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "projectsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "cartQtysProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "cartDeliveryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.supplierCreditEnabled)"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "cartPaymentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cartListsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cartListsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider.select((s) => s.shareCartWithTeam)"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "shareTextProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "shipToProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "clear",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "activeProjectProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "authStateProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "pendingApprovalProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showLoginSheet",
+        "target": "showLoginSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showRoleRequestSheet",
+        "target": "showRoleRequestSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "shipToProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "userProfileProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "currentUidProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "currentOrgIdProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cartProjectProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "telemetryProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '${r.label} — בבנייה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '${item.title} — בבנייה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(storeSettingsProvider.notifier).update((s) => s.copyWith(purchaseHis…",
+        "effect": "write → storeSettingsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showModalBottomSheet<void>(context: context, isScrollControlled: true, backgr…",
+        "effect": "open → showModalBottomSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(cartProjectProvider.notifier).state = p",
+        "effect": "write → cartProjectProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(projectsProvider.notifier).addProject(name: name)",
+        "effect": "write → projectsProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartProjectProvider.notifier).state = name",
+        "effect": "write → cartProjectProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(smartCartProvider.notifier).remove(index)",
+        "effect": "write → smartCartProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(cartDeliveryProvider.notifier).state = _kDeliveryOptions[i].method",
+        "effect": "write → cartDeliveryProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(cartPaymentProvider.notifier).state = options[i].method",
+        "effect": "write → cartPaymentProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'שם הרשימה לא יכול להיות ריק')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הסל ריק')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartListsProvider.notifier).saveCart(controller.text.trim(), items)",
+        "effect": "write → cartListsProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הרשימה נשמרה בהצלחה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartListsProvider.notifier).deleteList(list.id)",
+        "effect": "write → cartListsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הרשימה \"${list.name}\" נטענה לסל')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(smartCartProvider.notifier).clear()",
+        "effect": "write → smartCartProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הסל נוקה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartQtysProvider.notifier).state = const {}",
+        "effect": "write → cartQtysProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartNotesProvider.notifier).state = ''",
+        "effect": "write → cartNotesProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(shipToProvider.notifier).state = ''",
+        "effect": "write → shipToProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartDeliveryProvider.notifier).state = cartDeliveryFor(ref.read(stor…",
+        "effect": "write → cartDeliveryProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartPaymentProvider.notifier).state = cartPaymentFor(ref.read(storeS…",
+        "effect": "write → cartPaymentProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(cartProjectProvider.notifier).state = ref.read(activeProjectProvider…",
+        "effect": "write → cartProjectProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'יש להירשם כדי לבצע הזמנה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showLoginSheet(context)",
+        "effect": "open → showLoginSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'החשבון ממתין לאישור — אפשר לשלוח בקשת תפקיד')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showRoleRequestSheet(context)",
+        "effect": "open → showRoleRequestSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(ordersEngineProvider.notifier).placeOrder(who: contractor.isEmpty ? …",
+        "effect": "write → ordersEngineProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הזמנה ${placed.id} אושרה! 🎉')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "btn",
+    "checkoutBlock",
+    "confirmDestructive",
+    "onFavToggle",
+    "parsePrice",
+    "setQty",
+    "setState",
+    "unawaited"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}
