@@ -74,6 +74,12 @@ const _kRequiredHelpers = <String>[
   'projectTemplates',
   'projectItemsAfterAdd',
   'buildSafetyAccessories',
+
+  // Fittings engine (catalog-3D · CATALOG-3D-100-STEPS step 9, R4 Helper-First)
+  'generate', // family + OD → dims (the pure engine contract)
+  'familyOf', // catalog product → engine family
+  'odOf', // catalog product → OD
+  'engineCanRender', // renderable-guard (M1 fallback)
 ];
 
 void main() {
@@ -91,7 +97,7 @@ void main() {
       scanned++;
     }
     expect(scanned, greaterThan(20),
-        reason: 'sanity — should find many test files');
+        reason: 'sanity — should find many test files',);
     final corpus = buf.toString();
     final missing = <String>[
       for (final name in _kRequiredHelpers)
@@ -99,7 +105,7 @@ void main() {
     ];
     expect(missing, isEmpty,
         reason:
-            'these helpers have no test reference:\n  ${missing.join("\n  ")}');
+            'these helpers have no test reference:\n  ${missing.join("\n  ")}',);
   });
 
   test('curated list itself has no duplicates', () {
