@@ -14,122 +14,122 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('store_profile_screen · generated (22 tests)', () {
     testWidgets('wired · StoreProfileBody · "הגדרות ספק" [store_profile_screen.settings_row]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('הגדרות ספק'), findsWidgets,
           reason: 'the store_profile_screen.settings_row element renders on store_profile_screen');
     });
     testWidgets('hide · StoreProfileBody · store_profile_screen.settings_row → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.settings_row'});
       expect(find.text('הגדרות ספק'), findsNothing,
           reason: 'hiding store_profile_screen.settings_row removes it for end-users');
     });
     testWidgets('wired · StoreProfileBody · "יציאה מהחשבון" [store_profile_screen.logout_row]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('יציאה מהחשבון'), findsWidgets,
           reason: 'the store_profile_screen.logout_row element renders on store_profile_screen');
     });
     testWidgets('hide · StoreProfileBody · store_profile_screen.logout_row → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.logout_row'});
       expect(find.text('יציאה מהחשבון'), findsNothing,
           reason: 'hiding store_profile_screen.logout_row removes it for end-users');
     });
     testWidgets('wired · _StoreIdentityCard · "דמו" [store_profile_screen.demo_chip]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('דמו'), findsWidgets,
           reason: 'the store_profile_screen.demo_chip element renders on store_profile_screen');
     });
     testWidgets('hide · _StoreIdentityCard · store_profile_screen.demo_chip → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.demo_chip'});
       expect(find.text('דמו'), findsNothing,
           reason: 'hiding store_profile_screen.demo_chip removes it for end-users');
     });
     testWidgets('wired · _StoreStatsCard · "📊 סטטיסטיקת חנות" [store_profile_screen.stats_title]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('📊 סטטיסטיקת חנות'), findsWidgets,
           reason: 'the store_profile_screen.stats_title element renders on store_profile_screen');
     });
     testWidgets('hide · _StoreStatsCard · store_profile_screen.stats_title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.stats_title'});
       expect(find.text('📊 סטטיסטיקת חנות'), findsNothing,
           reason: 'hiding store_profile_screen.stats_title removes it for end-users');
     });
     testWidgets('wired · _StoreStatsCard · "נתונים חיים ממנוע ההזמנות — כלל ההזמנות של החנות." [store_profile_screen.stats_note]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('נתונים חיים ממנוע ההזמנות — כלל ההזמנות של החנות.'), findsWidgets,
           reason: 'the store_profile_screen.stats_note element renders on store_profile_screen');
     });
     testWidgets('hide · _StoreStatsCard · store_profile_screen.stats_note → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.stats_note'});
       expect(find.text('נתונים חיים ממנוע ההזמנות — כלל ההזמנות של החנות.'), findsNothing,
           reason: 'hiding store_profile_screen.stats_note removes it for end-users');
     });
     testWidgets('wired · _StorePersonalAreaCard · "פרופיל עסק" [store_profile_screen.profile_row]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('פרופיל עסק'), findsWidgets,
           reason: 'the store_profile_screen.profile_row element renders on store_profile_screen');
     });
     testWidgets('hide · _StorePersonalAreaCard · store_profile_screen.profile_row → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.profile_row'});
       expect(find.text('פרופיל עסק'), findsNothing,
           reason: 'hiding store_profile_screen.profile_row removes it for end-users');
     });
     testWidgets('wired · _StorePersonalAreaCard · "שם, טלפון, כתובת, ח.פ. ולוגו" [store_profile_screen.profile_row_sub]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('שם, טלפון, כתובת, ח.פ. ולוגו'), findsWidgets,
           reason: 'the store_profile_screen.profile_row_sub element renders on store_profile_screen');
     });
     testWidgets('hide · _StorePersonalAreaCard · store_profile_screen.profile_row_sub → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.profile_row_sub'});
       expect(find.text('שם, טלפון, כתובת, ח.פ. ולוגו'), findsNothing,
           reason: 'hiding store_profile_screen.profile_row_sub removes it for end-users');
     });
     testWidgets('wired · _StorePersonalAreaCard · "תעודות עסק" [store_profile_screen.certs_row]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('תעודות עסק'), findsWidgets,
           reason: 'the store_profile_screen.certs_row element renders on store_profile_screen');
     });
     testWidgets('hide · _StorePersonalAreaCard · store_profile_screen.certs_row → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.certs_row'});
       expect(find.text('תעודות עסק'), findsNothing,
           reason: 'hiding store_profile_screen.certs_row removes it for end-users');
     });
     testWidgets('wired · _StorePersonalAreaCard · "רישיון עסק · ביטוח עסק" [store_profile_screen.certs_row_sub]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('רישיון עסק · ביטוח עסק'), findsWidgets,
           reason: 'the store_profile_screen.certs_row_sub element renders on store_profile_screen');
     });
     testWidgets('hide · _StorePersonalAreaCard · store_profile_screen.certs_row_sub → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.certs_row_sub'});
       expect(find.text('רישיון עסק · ביטוח עסק'), findsNothing,
           reason: 'hiding store_profile_screen.certs_row_sub removes it for end-users');
     });
     testWidgets('wired · _StorePersonalAreaCard · "מסמכים" [store_profile_screen.docs_row]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('מסמכים'), findsWidgets,
           reason: 'the store_profile_screen.docs_row element renders on store_profile_screen');
     });
     testWidgets('hide · _StorePersonalAreaCard · store_profile_screen.docs_row → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.docs_row'});
       expect(find.text('מסמכים'), findsNothing,
           reason: 'hiding store_profile_screen.docs_row removes it for end-users');
     });
     testWidgets('wired · _StorePersonalAreaCard · "יחובר עם חיבור השרת" [store_profile_screen.docs_row_sub]', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false);
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store');
       expect(find.text('יחובר עם חיבור השרת'), findsWidgets,
           reason: 'the store_profile_screen.docs_row_sub element renders on store_profile_screen');
     });
     testWidgets('hide · _StorePersonalAreaCard · store_profile_screen.docs_row_sub → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreProfileBody(), selfContained: false,
+      await pumpScreen(t, const StoreProfileBody(), selfContained: false, role: 'store',
           hidden: const {'store_profile_screen.docs_row_sub'});
       expect(find.text('יחובר עם חיבור השרת'), findsNothing,
           reason: 'hiding store_profile_screen.docs_row_sub removes it for end-users');

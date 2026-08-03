@@ -123,7 +123,8 @@ void main() {
       final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
       expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('לא צולמה תמונה'), findsWidgets,
           reason: 'tapping "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." fires the toast (verb effect)');
     });
@@ -132,7 +133,8 @@ void main() {
       final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
       expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('📷 תמונת ההוכחה צורפה'), findsWidgets,
           reason: 'tapping "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." fires the toast (verb effect)');
     });
@@ -141,7 +143,8 @@ void main() {
       final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
       expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('נשלח לאישור המנהל ✓'), findsWidgets,
           reason: 'tapping "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." fires the toast (verb effect)');
     });
@@ -150,7 +153,8 @@ void main() {
       final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
       expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('המשימה הוחזרה לעובד לתיקון'), findsWidgets,
           reason: 'tapping "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." fires the toast (verb effect)');
     });
@@ -159,7 +163,8 @@ void main() {
       final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
       expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('המשימה אושרה ✓'), findsWidgets,
           reason: 'tapping "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." fires the toast (verb effect)');
     });

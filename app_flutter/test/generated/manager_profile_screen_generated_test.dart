@@ -14,67 +14,67 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('manager_profile_screen · generated (12 tests)', () {
     testWidgets('wired · ManagerProfileScreen · "אזור אישי — מנהל המערכת" [manager_profile_screen.t01]', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
       expect(find.text('אזור אישי — מנהל המערכת'), findsWidgets,
           reason: 'the manager_profile_screen.t01 element renders on manager_profile_screen');
     });
     testWidgets('hide · ManagerProfileScreen · manager_profile_screen.t01 → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_profile_screen.t01'});
       expect(find.text('אזור אישי — מנהל המערכת'), findsNothing,
           reason: 'hiding manager_profile_screen.t01 removes it for end-users');
     });
     testWidgets('wired · _ManagerProfileBody · "מצב הדגמה" [manager_profile_screen.t02]', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
       expect(find.text('מצב הדגמה'), findsWidgets,
           reason: 'the manager_profile_screen.t02 element renders on manager_profile_screen');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t02 → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_profile_screen.t02'});
       expect(find.text('מצב הדגמה'), findsNothing,
           reason: 'hiding manager_profile_screen.t02 removes it for end-users');
     });
     testWidgets('wired · _ManagerProfileBody · "הזמנות — סטטיסטיקה" [manager_profile_screen.t03]', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
       expect(find.text('הזמנות — סטטיסטיקה'), findsWidgets,
           reason: 'the manager_profile_screen.t03 element renders on manager_profile_screen');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t03 → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_profile_screen.t03'});
       expect(find.text('הזמנות — סטטיסטיקה'), findsNothing,
           reason: 'hiding manager_profile_screen.t03 removes it for end-users');
     });
     testWidgets('wired · _ManagerProfileBody · "הגדרות" [manager_profile_screen.t04]', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
       expect(find.text('הגדרות'), findsWidgets,
           reason: 'the manager_profile_screen.t04 element renders on manager_profile_screen');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t04 → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_profile_screen.t04'});
       expect(find.text('הגדרות'), findsNothing,
           reason: 'hiding manager_profile_screen.t04 removes it for end-users');
     });
     testWidgets('wired · _ManagerProfileBody · "מעבר בין מסכים" [manager_profile_screen.t05]', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
       expect(find.text('מעבר בין מסכים'), findsWidgets,
           reason: 'the manager_profile_screen.t05 element renders on manager_profile_screen');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t05 → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_profile_screen.t05'});
       expect(find.text('מעבר בין מסכים'), findsNothing,
           reason: 'hiding manager_profile_screen.t05 removes it for end-users');
     });
     testWidgets('wired · _ManagerProfileBody · "צפייה בכל לוח — מצב מנהל" [manager_profile_screen.t06]', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
       expect(find.text('צפייה בכל לוח — מצב מנהל'), findsWidgets,
           reason: 'the manager_profile_screen.t06 element renders on manager_profile_screen');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t06 → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_profile_screen.t06'});
       expect(find.text('צפייה בכל לוח — מצב מנהל'), findsNothing,
           reason: 'hiding manager_profile_screen.t06 removes it for end-users');

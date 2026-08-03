@@ -156,7 +156,8 @@ void main() {
       final btn = find.text('תקציב הפרויקט');
       expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('יש להזין מספרים תקינים'), findsWidgets,
           reason: 'tapping "תקציב הפרויקט" fires the toast (verb effect)');
     });
@@ -165,7 +166,8 @@ void main() {
       final btn = find.text('תקציב הפרויקט');
       expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('התקציב עודכן'), findsWidgets,
           reason: 'tapping "תקציב הפרויקט" fires the toast (verb effect)');
     });
@@ -174,7 +176,8 @@ void main() {
       final btn = find.text('תקציב הפרויקט');
       expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('יש להזין שם קטגוריה'), findsWidgets,
           reason: 'tapping "תקציב הפרויקט" fires the toast (verb effect)');
     });
@@ -183,7 +186,8 @@ void main() {
       final btn = find.text('תקציב הפרויקט');
       expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('יש להזין סכום תקין'), findsWidgets,
           reason: 'tapping "תקציב הפרויקט" fires the toast (verb effect)');
     });
@@ -192,7 +196,8 @@ void main() {
       final btn = find.text('תקציב הפרויקט');
       expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הקטגוריה נשמרה'), findsWidgets,
           reason: 'tapping "תקציב הפרויקט" fires the toast (verb effect)');
     });
@@ -201,7 +206,8 @@ void main() {
       final btn = find.text('תקציב הפרויקט');
       expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הקטגוריה נמחקה'), findsWidgets,
           reason: 'tapping "תקציב הפרויקט" fires the toast (verb effect)');
     });

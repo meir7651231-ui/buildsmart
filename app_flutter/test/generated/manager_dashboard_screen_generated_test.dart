@@ -14,241 +14,242 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('manager_dashboard_screen · generated (43 tests)', () {
     testWidgets('wired · ManagerDashboardScreen · "מרכז השליטה" [manager.dash.title]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('מרכז השליטה'), findsWidgets,
           reason: 'the manager.dash.title element renders on manager_dashboard_screen');
     });
     testWidgets('hide · ManagerDashboardScreen · manager.dash.title → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.dash.title'});
       expect(find.text('מרכז השליטה'), findsNothing,
           reason: 'hiding manager.dash.title removes it for end-users');
     });
     testWidgets('wired · ManagerDashboardScreen · "מנהל המערכת" [manager.dash.subtitle]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('מנהל המערכת'), findsWidgets,
           reason: 'the manager.dash.subtitle element renders on manager_dashboard_screen');
     });
     testWidgets('hide · ManagerDashboardScreen · manager.dash.subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.dash.subtitle'});
       expect(find.text('מנהל המערכת'), findsNothing,
           reason: 'hiding manager.dash.subtitle removes it for end-users');
     });
     testWidgets('wired · ManagerDashboardScreen · "‹ יציאה" [manager.dash.exit]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('‹ יציאה'), findsWidgets,
           reason: 'the manager.dash.exit element renders on manager_dashboard_screen');
     });
     testWidgets('hide · ManagerDashboardScreen · manager.dash.exit → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.dash.exit'});
       expect(find.text('‹ יציאה'), findsNothing,
           reason: 'hiding manager.dash.exit removes it for end-users');
     });
     testWidgets('wired · _DashboardTab · "שאל את העסק שלך" [manager.cockpit.copilot.title]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('שאל את העסק שלך'), findsWidgets,
           reason: 'the manager.cockpit.copilot.title element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _DashboardTab · manager.cockpit.copilot.title → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.cockpit.copilot.title'});
       expect(find.text('שאל את העסק שלך'), findsNothing,
           reason: 'hiding manager.cockpit.copilot.title removes it for end-users');
     });
     testWidgets('wired · _DashboardTab · "סטודיו — ערוך את האפליקציה" [manager_dashboard_screen.studio_hero_title]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('סטודיו — ערוך את האפליקציה'), findsWidgets,
           reason: 'the manager_dashboard_screen.studio_hero_title element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _DashboardTab · manager_dashboard_screen.studio_hero_title → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.studio_hero_title'});
       expect(find.text('סטודיו — ערוך את האפליקציה'), findsNothing,
           reason: 'hiding manager_dashboard_screen.studio_hero_title removes it for end-users');
     });
     testWidgets('wired · _DashboardTab · "ניסיוני" [manager_dashboard_screen.studio_experimental_badge]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('ניסיוני'), findsWidgets,
           reason: 'the manager_dashboard_screen.studio_experimental_badge element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _DashboardTab · manager_dashboard_screen.studio_experimental_badge → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.studio_experimental_badge'});
       expect(find.text('ניסיוני'), findsNothing,
           reason: 'hiding manager_dashboard_screen.studio_experimental_badge removes it for end-users');
     });
     testWidgets('wired · _DashboardTab · "צינור ההזמנות" [manager.dash.pipeline.title]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('צינור ההזמנות'), findsWidgets,
           reason: 'the manager.dash.pipeline.title element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _DashboardTab · manager.dash.pipeline.title → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.dash.pipeline.title'});
       expect(find.text('צינור ההזמנות'), findsNothing,
           reason: 'hiding manager.dash.pipeline.title removes it for end-users');
     });
     testWidgets('wired · _OrdersTab · "לא נמצאו הזמנות תואמות." [manager.orders.empty]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('לא נמצאו הזמנות תואמות.'), findsWidgets,
           reason: 'the manager.orders.empty element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _OrdersTab · manager.orders.empty → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.orders.empty'});
       expect(find.text('לא נמצאו הזמנות תואמות.'), findsNothing,
           reason: 'hiding manager.orders.empty removes it for end-users');
     });
     testWidgets('wired · _OrdersTab · "✓ הושלם" [manager_dashboard_screen.order_completed_badge]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('✓ הושלם'), findsWidgets,
           reason: 'the manager_dashboard_screen.order_completed_badge element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _OrdersTab · manager_dashboard_screen.order_completed_badge → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.order_completed_badge'});
       expect(find.text('✓ הושלם'), findsNothing,
           reason: 'hiding manager_dashboard_screen.order_completed_badge removes it for end-users');
     });
     testWidgets('wired · _OrdersTab · "✓ ההזמנה הושלמה ונמסרה" [manager_dashboard_screen.order_completed_delivered]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('✓ ההזמנה הושלמה ונמסרה'), findsWidgets,
           reason: 'the manager_dashboard_screen.order_completed_delivered element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _OrdersTab · manager_dashboard_screen.order_completed_delivered → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.order_completed_delivered'});
       expect(find.text('✓ ההזמנה הושלמה ונמסרה'), findsNothing,
           reason: 'hiding manager_dashboard_screen.order_completed_delivered removes it for end-users');
     });
     testWidgets('wired · _OrdersTab · "קדם שלב ›" [manager.orders.advance]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('קדם שלב ›'), findsWidgets,
           reason: 'the manager.orders.advance element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _OrdersTab · manager.orders.advance → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.orders.advance'});
       expect(find.text('קדם שלב ›'), findsNothing,
           reason: 'hiding manager.orders.advance removes it for end-users');
     });
     testWidgets('verb · _OrdersTab · tap "לא נמצאו הזמנות תואמות." → toast "הדפסה זמינה בדפדפן"', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       final btn = find.text('לא נמצאו הזמנות תואמות.');
       expect(btn, findsWidgets, reason: 'the "לא נמצאו הזמנות תואמות." trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הדפסה זמינה בדפדפן'), findsWidgets,
           reason: 'tapping "לא נמצאו הזמנות תואמות." fires the toast (verb effect)');
     });
     testWidgets('wired · _CustomersTab · "לא נמצאו קבלנים תואמים." [manager.customers.empty]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('לא נמצאו קבלנים תואמים.'), findsWidgets,
           reason: 'the manager.customers.empty element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _CustomersTab · manager.customers.empty → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.customers.empty'});
       expect(find.text('לא נמצאו קבלנים תואמים.'), findsNothing,
           reason: 'hiding manager.customers.empty removes it for end-users');
     });
     testWidgets('wired · _CustomersTab · "הסבר אשראי" [manager_dashboard_screen.credit_explain_btn]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('הסבר אשראי'), findsWidgets,
           reason: 'the manager_dashboard_screen.credit_explain_btn element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _CustomersTab · manager_dashboard_screen.credit_explain_btn → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.credit_explain_btn'});
       expect(find.text('הסבר אשראי'), findsNothing,
           reason: 'hiding manager_dashboard_screen.credit_explain_btn removes it for end-users');
     });
     testWidgets('wired · _CustomersTab · "🧭 מסע הלקוח" [manager_dashboard_screen.journey_title]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('🧭 מסע הלקוח'), findsWidgets,
           reason: 'the manager_dashboard_screen.journey_title element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _CustomersTab · manager_dashboard_screen.journey_title → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.journey_title'});
       expect(find.text('🧭 מסע הלקוח'), findsNothing,
           reason: 'hiding manager_dashboard_screen.journey_title removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית." [manager.manage.intro]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.'), findsWidgets,
           reason: 'the manager.manage.intro element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager.manage.intro → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.manage.intro'});
       expect(find.text('🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.'), findsNothing,
           reason: 'hiding manager.manage.intro removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "🎉 אין משימות הממתינות לאישור." [manager_dashboard_screen.approvals_empty]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('🎉 אין משימות הממתינות לאישור.'), findsWidgets,
           reason: 'the manager_dashboard_screen.approvals_empty element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager_dashboard_screen.approvals_empty → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.approvals_empty'});
       expect(find.text('🎉 אין משימות הממתינות לאישור.'), findsNothing,
           reason: 'hiding manager_dashboard_screen.approvals_empty removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "אין בקשות חופשה." [manager_dashboard_screen.vacations_empty]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('אין בקשות חופשה.'), findsWidgets,
           reason: 'the manager_dashboard_screen.vacations_empty element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager_dashboard_screen.vacations_empty → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.vacations_empty'});
       expect(find.text('אין בקשות חופשה.'), findsNothing,
           reason: 'hiding manager_dashboard_screen.vacations_empty removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו." [manager_dashboard_screen.producttree_intro]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.'), findsWidgets,
           reason: 'the manager_dashboard_screen.producttree_intro element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager_dashboard_screen.producttree_intro → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager_dashboard_screen.producttree_intro'});
       expect(find.text('עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.'), findsNothing,
           reason: 'hiding manager_dashboard_screen.producttree_intro removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "🔬 פתח מרכז בדיקות רגרסיה" [manager.manage.regression.open]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('🔬 פתח מרכז בדיקות רגרסיה'), findsWidgets,
           reason: 'the manager.manage.regression.open element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager.manage.regression.open → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.manage.regression.open'});
       expect(find.text('🔬 פתח מרכז בדיקות רגרסיה'), findsNothing,
           reason: 'hiding manager.manage.regression.open removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "🔑 פתח שיוך תפקידים" [manager.manage.roles.open]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('🔑 פתח שיוך תפקידים'), findsWidgets,
           reason: 'the manager.manage.roles.open element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager.manage.roles.open → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.manage.roles.open'});
       expect(find.text('🔑 פתח שיוך תפקידים'), findsNothing,
           reason: 'hiding manager.manage.roles.open removes it for end-users');
     });
     testWidgets('wired · _ManageTab · "📋 פתח בקשות אישור" [manager.manage.approvals.open]', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
       expect(find.text('📋 פתח בקשות אישור'), findsWidgets,
           reason: 'the manager.manage.approvals.open element renders on manager_dashboard_screen');
     });
     testWidgets('hide · _ManageTab · manager.manage.approvals.open → gone when hidden', (t) async {
-      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
           hidden: const {'manager.manage.approvals.open'});
       expect(find.text('📋 פתח בקשות אישור'), findsNothing,
           reason: 'hiding manager.manage.approvals.open removes it for end-users');

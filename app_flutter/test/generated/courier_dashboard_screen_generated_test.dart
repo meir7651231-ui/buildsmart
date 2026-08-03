@@ -14,73 +14,73 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('courier_dashboard_screen · generated (13 tests)', () {
     testWidgets('wired · CourierDashboardScreen · "🛵 שליח" [courier.dash.appbar_title]', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier');
       expect(find.text('🛵 שליח'), findsWidgets,
           reason: 'the courier.dash.appbar_title element renders on courier_dashboard_screen');
     });
     testWidgets('hide · CourierDashboardScreen · courier.dash.appbar_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.dash.appbar_title'});
       expect(find.text('🛵 שליח'), findsNothing,
           reason: 'hiding courier.dash.appbar_title removes it for end-users');
     });
     testWidgets('wired · CourierDashboardScreen · "‹ יציאה" [courier.dash.exit]', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier');
       expect(find.text('‹ יציאה'), findsWidgets,
           reason: 'the courier.dash.exit element renders on courier_dashboard_screen');
     });
     testWidgets('hide · CourierDashboardScreen · courier.dash.exit → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.dash.exit'});
       expect(find.text('‹ יציאה'), findsNothing,
           reason: 'hiding courier.dash.exit removes it for end-users');
     });
     testWidgets('wired · CourierDashboardScreen · "הרכב שלי היום" [courier.gate.vehicle_title]', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier');
       expect(find.text('הרכב שלי היום'), findsWidgets,
           reason: 'the courier.gate.vehicle_title element renders on courier_dashboard_screen');
     });
     testWidgets('hide · CourierDashboardScreen · courier.gate.vehicle_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.gate.vehicle_title'});
       expect(find.text('הרכב שלי היום'), findsNothing,
           reason: 'hiding courier.gate.vehicle_title removes it for end-users');
     });
     testWidgets('wired · CourierDashboardScreen · "בחר רכב כדי להתחיל את המשמרת — רשימת המשלוחים תסונן לפי הקיבולת" [courier.gate.vehicle_sub]', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier');
       expect(find.text('בחר רכב כדי להתחיל את המשמרת — רשימת המשלוחים תסונן לפי הקיבולת'), findsWidgets,
           reason: 'the courier.gate.vehicle_sub element renders on courier_dashboard_screen');
     });
     testWidgets('hide · CourierDashboardScreen · courier.gate.vehicle_sub → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.gate.vehicle_sub'});
       expect(find.text('בחר רכב כדי להתחיל את המשמרת — רשימת המשלוחים תסונן לפי הקיבולת'), findsNothing,
           reason: 'hiding courier.gate.vehicle_sub removes it for end-users');
     });
     testWidgets('wired · CourierDashboardScreen · "המשלוחים שלך להיום" [courier.dash.subtitle]', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier');
       expect(find.text('המשלוחים שלך להיום'), findsWidgets,
           reason: 'the courier.dash.subtitle element renders on courier_dashboard_screen');
     });
     testWidgets('hide · CourierDashboardScreen · courier.dash.subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.dash.subtitle'});
       expect(find.text('המשלוחים שלך להיום'), findsNothing,
           reason: 'hiding courier.dash.subtitle removes it for end-users');
     });
     testWidgets('hide · CourierDashboardScreen · courier.dash.vehicle_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.dash.vehicle_title'});
       expect(find.text('הרכב שלי היום'), findsNothing,
           reason: 'hiding courier.dash.vehicle_title removes it for end-users');
     });
     testWidgets('wired · _VehicleButton · "★ מועדף" [courier.vehicle.preferred]', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true);
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier');
       expect(find.text('★ מועדף'), findsWidgets,
           reason: 'the courier.vehicle.preferred element renders on courier_dashboard_screen');
     });
     testWidgets('hide · _VehicleButton · courier.vehicle.preferred → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true,
+      await pumpScreen(t, const CourierDashboardScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.vehicle.preferred'});
       expect(find.text('★ מועדף'), findsNothing,
           reason: 'hiding courier.vehicle.preferred removes it for end-users');

@@ -14,12 +14,12 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('suppliers_screen · generated (2 tests)', () {
     testWidgets('wired · SuppliersScreen · "ספקים ומותגים" [suppliers_screen.title]', (t) async {
-      await pumpScreen(t, const SuppliersScreen(), selfContained: true);
+      await pumpScreen(t, const SuppliersScreen(), selfContained: true, role: 'store');
       expect(find.text('ספקים ומותגים'), findsWidgets,
           reason: 'the suppliers_screen.title element renders on suppliers_screen');
     });
     testWidgets('hide · SuppliersScreen · suppliers_screen.title → gone when hidden', (t) async {
-      await pumpScreen(t, const SuppliersScreen(), selfContained: true,
+      await pumpScreen(t, const SuppliersScreen(), selfContained: true, role: 'store',
           hidden: const {'suppliers_screen.title'});
       expect(find.text('ספקים ומותגים'), findsNothing,
           reason: 'hiding suppliers_screen.title removes it for end-users');

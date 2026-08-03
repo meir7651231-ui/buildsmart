@@ -14,45 +14,45 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('worker_notifs_sheet · generated (8 tests)', () {
     testWidgets('wired · _WorkerNotifsSheet · "🔔 התראות" [worker_notifs_sheet.t01]', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false);
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
       expect(find.text('🔔 התראות'), findsWidgets,
           reason: 'the worker_notifs_sheet.t01 element renders on worker_notifs_sheet');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t01 → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false,
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
           hidden: const {'worker_notifs_sheet.t01'});
       expect(find.text('🔔 התראות'), findsNothing,
           reason: 'hiding worker_notifs_sheet.t01 removes it for end-users');
     });
     testWidgets('wired · _WorkerNotifsSheet · "אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן." [worker_notifs_sheet.t02]', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false);
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
       expect(find.text('אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.'), findsWidgets,
           reason: 'the worker_notifs_sheet.t02 element renders on worker_notifs_sheet');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t02 → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false,
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
           hidden: const {'worker_notifs_sheet.t02'});
       expect(find.text('אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.'), findsNothing,
           reason: 'hiding worker_notifs_sheet.t02 removes it for end-users');
     });
     testWidgets('wired · _WorkerNotifsSheet · "סמן הכל כנקרא" [worker_notifs_sheet.t03]', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false);
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
       expect(find.text('סמן הכל כנקרא'), findsWidgets,
           reason: 'the worker_notifs_sheet.t03 element renders on worker_notifs_sheet');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t03 → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false,
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
           hidden: const {'worker_notifs_sheet.t03'});
       expect(find.text('סמן הכל כנקרא'), findsNothing,
           reason: 'hiding worker_notifs_sheet.t03 removes it for end-users');
     });
     testWidgets('wired · _WorkerNotifsSheet · "נקה הכל" [worker_notifs_sheet.t04]', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false);
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
       expect(find.text('נקה הכל'), findsWidgets,
           reason: 'the worker_notifs_sheet.t04 element renders on worker_notifs_sheet');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t04 → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false,
+      await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
           hidden: const {'worker_notifs_sheet.t04'});
       expect(find.text('נקה הכל'), findsNothing,
           reason: 'hiding worker_notifs_sheet.t04 removes it for end-users');

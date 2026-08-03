@@ -14,45 +14,45 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('courier_settings_screen · generated (8 tests)', () {
     testWidgets('wired · CourierSettingsScreen · "הגדרות שליח" [courier.settings.title]', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier');
       expect(find.text('הגדרות שליח'), findsWidgets,
           reason: 'the courier.settings.title element renders on courier_settings_screen');
     });
     testWidgets('hide · CourierSettingsScreen · courier.settings.title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.settings.title'});
       expect(find.text('הגדרות שליח'), findsNothing,
           reason: 'hiding courier.settings.title removes it for end-users');
     });
     testWidgets('wired · _CourierRegionSection · "בקרוב" [courier_settings_screen.soon]', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier');
       expect(find.text('בקרוב'), findsWidgets,
           reason: 'the courier_settings_screen.soon element renders on courier_settings_screen');
     });
     testWidgets('hide · _CourierRegionSection · courier_settings_screen.soon → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier_settings_screen.soon'});
       expect(find.text('בקרוב'), findsNothing,
           reason: 'hiding courier_settings_screen.soon removes it for end-users');
     });
     testWidgets('wired · _CourierInfoSection · "תנאי שימוש" [courier.info.terms]', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier');
       expect(find.text('תנאי שימוש'), findsWidgets,
           reason: 'the courier.info.terms element renders on courier_settings_screen');
     });
     testWidgets('hide · _CourierInfoSection · courier.info.terms → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.info.terms'});
       expect(find.text('תנאי שימוש'), findsNothing,
           reason: 'hiding courier.info.terms removes it for end-users');
     });
     testWidgets('wired · _CourierInfoSection · "מדיניות פרטיות" [courier.info.privacy]', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier');
       expect(find.text('מדיניות פרטיות'), findsWidgets,
           reason: 'the courier.info.privacy element renders on courier_settings_screen');
     });
     testWidgets('hide · _CourierInfoSection · courier.info.privacy → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierSettingsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.info.privacy'});
       expect(find.text('מדיניות פרטיות'), findsNothing,
           reason: 'hiding courier.info.privacy removes it for end-users');
