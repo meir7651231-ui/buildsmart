@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-p0b — 🔌 מנוע-קטלוג-3D · פאזה 0 (5–6): גשר קטלוג→מנוע `familyOf`/`odOf` — 2026-08-03
+פרוסה-2 של פאזה-0. `lib/features/fittings/engine/catalog_map.dart` (טהור, מיובא-קטלוג — נפרד מ-`fitting_dims.dart` הטהור-מקטלוג): `familyOf(product)→String?` (קטגוריה/שם→שם-משפחת-מנוע · מרחיב `_portCountFor`; מכריע ברך 90/45 ומצמד/מצרה מהשם) + `odOf(product)→int?` / `od2Of` (מרחיב `_parsePprDn`; דו-קוטרי לפני DN-נגרר) + `engineCanRender` (M1: `null`→fallback, לעולם לא 3D-שגוי). **🔑 דוח-כיסוי** (`test/fittings/catalog_map_test.dart`): **614/620 = 99.0%** ממוצרי-ה-PPR-fitting ב-`kPolyrollCatalog` נפתרים ל-{משפחה,OD} (>95% נדרש). אפס נגיעה בחי · דגלים עדיין OFF.
+
 ## #fittings-engine-p0 — 🔌 מנוע-קטלוג-3D · פאזה 0: פורט-מנוע + golden 1:1 (שער #124, default-OFF) — 2026-08-03
 **SSOT:** `knowledge/CATALOG-3D-100-STEPS.md` + `knowledge/catalog-3d/` (מקור-הגולדן: `pure_engine.py` · חוזה: `INTEGRATION-SPEC.md` · יחסים: `construction_ratios.json`). פרוסה-1 של מנוע-האביזרים הפרמטרי.
 - **מנוע טהור** (`lib/features/fittings/engine/fitting_dims.dart`): `generate(family, od, {od2})` — פורט 1:1 מ-`pure_engine.py`. הבסיס האוניברסלי (`base`: OD/wall/ID/B/C/F מ-SDR+DIN 8077) + 10 משפחות (מצמד · ברך 90°/45° · טי · מתאם-תבריג · ברז-כדורי · פקק · רוכב · צווארון · מצרה) + ברך-מחותכת (≥160). Dart טהור — אפס תלויות/async/I/O. `r1()` = `round(x,1)` half-to-even זהה-Python (toStringAsFixed(18) — לא `x*10`, שיוצר תיקו-שקרי).
