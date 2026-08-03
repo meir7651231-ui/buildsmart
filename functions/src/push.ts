@@ -40,8 +40,9 @@ const ROLE_TITLE_HE: Record<string, string> = {
 
 /** Resolve users/{uid}.fcmToken for each uid and send one notification per
  * token (sendEach). Unknown uids / missing tokens are skipped; dead tokens
- * are pruned from the user doc. */
-async function sendToUsers(
+ * are pruned from the user doc. Exported so the registration-approval alert
+ * (onUserCreatedQueueApproval, reviewRoleRequest.ts) reuses this ONE send path. */
+export async function sendToUsers(
   uids: ReadonlyArray<string>,
   title: string,
   body: string,
