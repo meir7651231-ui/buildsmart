@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pC1 — 🐢 מנוע-קטלוג-3D · פאזה C (41): turtle — דלתות-פריסה (מגודר) — 2026-08-03
+פאזה-C פרוסה-1 (3D-על-הכרטיס, web-first · `kFittingEngine3d` default-OFF). `lib/features/fittings/layout/turtle.dart`: `LayoutDelta{ex, ey, turn, terminal}` + `layoutDeltaFor(family, od, {od2})` — היטלי-הפריסה פר-אביזר (התקדמות-קדימה · על-הפנייה · זווית · קצה), נגזרים מאותיות-`generate` ומקבילים 1:1 ל-`elemMeshes` ב-`gen3d.html:280-319`. ברך: `ex=l+l·cosθ · ey=l·sinθ · turn=θ` (90°→ex=l,ey=l · 45°→θ=π/4) · מצמד=A · טי=E · מצרה=F1+4+F2 · פקק=F+cap(terminal) · רוכב=0.9·d1 · צווארון=A+max(4,0.18od). משפחה-לא-מוכרת → `null` (M1 · fallback-לתמונה). `turtle_test`: golden-letters · mutation-L3 · null. ה-turtle-הווקטורי-המלא (מסגרות+Gram-Schmidt) = פרוסה נפרדת. אפס גזירת-פיזיקה חדשה · הכרטיס-החי לא-נגוע. fittings 227/227.
+
 ## #fittings-engine-pB6 — 🏁 מנוע-קטלוג-3D · פאזה B · אבן-דרך 40: מנוע buildable מלא — 2026-08-03
 `lib/features/fittings/plan/buildable_spec.dart` (מגודר) — `buildableSpecFor(family, od, {od2, tempC, threadInch, threadMale})` מרכיב את **המפרט-הבַּניָה המלא** של אביזר: מידות (`generate`) + `envelope` + קצוות-מדויקים + **תווית-חיבור פר-קצה** (שלב 30: "ריתוך-שקע 260°C" / "תבריג BSP") + **פרמטרי-ריתוך DVS** (שלב 31, ערכי-ייחוס+caveat) + **בטיחות-קו-חם** (שלב 32) + **תקנים** (שלב 34, verbatim מ-`gen3d.html`). **🏁 אבן-דרך 40 מוכחת** (`buildable_spec_test`, capstone שלב 39): (1) אדפטר-PP-R עם קצה-BSP `directMatesWith` פליז — **מתחבר בין-חומרית**; (2) קו-חם גוזר בטיחות-אוטומטית (כל פריט עם caveat), קו-קר לא; (3) כל 11 המשפחות מרכיבות spec **שלם**. fittings 220/220 · הכל מגודר/byte-identical.
 
