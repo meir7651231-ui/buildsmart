@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pC3 — 🧱 מנוע-קטלוג-3D · פאזה C (42): פרימיטיבים→רשתות (מגודר) — 2026-08-03
+`lib/features/fittings/geometry/primitives.dart` (מגודר · טהור) — `Mesh{positions, normals, indices}` + `revolve(profile, seg)` / `tube(x0,x1,ro,ri)` / `hexRod(sides,r,len,cx)` / `sphere(r,la,lo)`. פורט 1:1 מ-`gen3d.html:153-172`. סקאלת-התצוגה `S` נשארת ב-render (הגיאומטריה טהורה במ״מ). **🔑 golden** (`primitives_test`): ספירות פר-gen3d (revolve N·seg·4 · **tube=768** · hexRod-6=24 · sphere (la+1)(lo+1)) + אינווריאנטים גיאומטריים (נורמלים unit · אינדקסים בתחום · קודקודי-כדור על-הרדיוס). **זו הפרוסה-הטהורה האחרונה** לפני שער-הבעלים (צעד 43 · הטמעה-חיה). fittings 240/240 · הכרטיס-החי לא-נגוע.
+
 ## #fittings-engine-pC2 — 🐢 מנוע-קטלוג-3D · פאזה C (41): turtle-3D וקטורי מלא (מגודר) — 2026-08-03
 `lib/features/fittings/layout/route_layout.dart` (מגודר) — `Vec3` (מתמטיקה-וקטורית טהורה) + `Placement{family, od, position, forward, up}` + `layoutRoute(List<RunElement>)` — פורס רצף-אביזרים למרחב-3D. פורט 1:1 מ-`gen3d.buildPlan()`: מצב-הצב P/F/U · לכל אביזר `P += F·ex + bendAxis·ey` · בברך מסובב F/U בזווית עם **Gram-Schmidt** (`U ⟂ F`). `dirVec`: up→U · down→−U · right→side · left→−side. `terminal` (פקק) סוגר · משפחה-לא-פריסה מדולגת (M1). **🔑 golden אבולוציית-המסגרת** (`route_layout_test`): ברך-90°-up מסובב `F` מ-`[1,0,0]` ל-`[0,1,0]` · 45°→(cos45,sin45,0) · **כל מסגרת אורתונורמלית** (|F|=|U|=1, F⟂U). אפס גזירת-פיזיקה · הכרטיס-החי לא-נגוע. fittings 235/235.
 
