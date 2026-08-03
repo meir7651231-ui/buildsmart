@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pB6 — 🏁 מנוע-קטלוג-3D · פאזה B · אבן-דרך 40: מנוע buildable מלא — 2026-08-03
+`lib/features/fittings/plan/buildable_spec.dart` (מגודר) — `buildableSpecFor(family, od, {od2, tempC, threadInch, threadMale})` מרכיב את **המפרט-הבַּניָה המלא** של אביזר: מידות (`generate`) + `envelope` + קצוות-מדויקים + **תווית-חיבור פר-קצה** (שלב 30: "ריתוך-שקע 260°C" / "תבריג BSP") + **פרמטרי-ריתוך DVS** (שלב 31, ערכי-ייחוס+caveat) + **בטיחות-קו-חם** (שלב 32) + **תקנים** (שלב 34, verbatim מ-`gen3d.html`). **🏁 אבן-דרך 40 מוכחת** (`buildable_spec_test`, capstone שלב 39): (1) אדפטר-PP-R עם קצה-BSP `directMatesWith` פליז — **מתחבר בין-חומרית**; (2) קו-חם גוזר בטיחות-אוטומטית (כל פריט עם caveat), קו-קר לא; (3) כל 11 המשפחות מרכיבות spec **שלם**. fittings 220/220 · הכל מגודר/byte-identical.
+
 ## #fittings-engine-pB5 — 🛡️ מנוע-קטלוג-3D · פאזה B (32): בטיחות-קו-חם (M5, ביקורת-יריב) — 2026-08-03
 `lib/features/fittings/plan/safety.dart` (מגודר): `hotLineSafetyFor(material, tempC)` → **המלצות-בטיחות עקרוניות** לקו-PP-R חם (≥60°C): PRV · **מיכל-התפשטות** · פיצוי-התפשטות-הצינור · אנטי-כוויה (TMV) · בידוד-תרמי. **🛡️ M5 חרוט-מבנית:** `SafetyAdvisory.caveat` = שדה-required (אין המלצה בלי אזהרת-"לא-מחייב · מתקין-מוסמך · קוד-מקומי") · **אפס ערך-מספרי-מחייב** (רק "≥60°C" תיאורי) · קו-קר/לא-PP-R → ריק (אין דרישת-שווא). **ביקורת-יריב-בטיחות תפסה under-warning קריטי:** `== 'PPR'` השמיט תוויות-faser/PP-RCT (`'PPR · faser'`/`'PPRCT'`/`'PP-RCT'`) — בדיוק צינורות-הקו-החם ⇒ קו-חם-אמיתי החזיר אפס-בטיחות. **תוקן:** `replaceAll('-','').startsWith('PPR')` + guard-רגרסיה. (Finding-2 מיכל + Finding-3 בידוד נוספו מהביקורת.) fittings 214/214.
 
