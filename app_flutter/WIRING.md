@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pB1 — 🧊 מנוע-קטלוג-3D · פאזה B (28): envelope גיאומטרי (מגודר) — 2026-08-03
+פאזה-B פרוסה-1 — עומק-spec, **הכל ב-`lib/features/fittings/plan/` ⇒ tree-shaken כשהדגל כבוי (keystone byte-identical, הקוד-החי לא-נגוע).** `envelope.dart`: `Envelope{axialLength, radialDiameter, secondaryExtent?}` + `envelopeFor(family, od, {od2})` — תיבת-חוסם פר-משפחה, כל שדה = היטל של אות-מנוע קיימת (A/B/D/E/l/hex/h/D1/d1) ⇒ **זהה-golden טרנזיטיבית ל-`pure_engine.py`**. משפחה-לא-מוכרת/מחוץ-לתחום → `null` (M1). `test/fittings/envelope_test.dart`: golden-אותיות · mutation-L3 (OD-sensitive · secondary null↔set) · out-of-domain null. היסוד ל-layout/3D (פאזה C). מקור-בטיחות ל-31 (DVS 2207-11 + caveat-יצרן) אומת קיים ב-`gen3d.html`.
+
 ## #fittings-engine-pA-CLOSED — ✅ מנוע-קטלוג-3D · פאזה A סגורה רשמית (invariant-23) — 2026-08-03
 **פאזה A ✅ — ההישג המהותי הושג ומאומת ב-CI (793/795):** חוליות מחברת (95.4%) · מותג-כללי (3 מסלולים: polyroll/familySpec/company) · תיקון-M2 (199→0) · keystone byte-identical.
 - **🔒 invariant-23 (keystone byte-compat):** דגל כבוי ⇒ **`main.dart.js` זהה** לפני-פאזה-A. מובטח בשלוש שכבות: (1) **שער #124** — 3 דגלי `kFittingEngine*` = `bool.fromEnvironment` default-OFF ⇒ כל `features/fittings/` **tree-shaken** מה-build; (2) `registerFamilySpecs()` מגודר `if (kFittingEngine)` ב-`main.dart` ⇒ ב-OFF לא-נקרא; (3) גם אם נקרא (v1 ברירת-מחדל), ה-789 מחוץ ל-`_skuIndex` ⇒ **אינרטי** (`huliot_connectivity_test` · no-leak). `family_specs.dart` הוא lib/data טהור — נכנס ל-build רק כשמחווט-דרך-דגל. **נתיב-הפעלה: `CATALOG_SOURCE=v2 + kFittingEngine`.**
