@@ -27,27 +27,16 @@
 # הוסרו מה-baseline → known-failing 2→0 (הרשימה ריקה כעת). [ראה גם: stock_local קיבל
 # פטור מתועד ב-stage2_scale — offender דטרמיניסטי שנבלע בתקציב עד לאודיט 2026-07-27.]
 
-# ── 2026-08-02 (atom-engine slice-1 re-integration onto v7.01) ──────────────
-# 11 ENVIRONMENTAL failures in THIS headless container (Flutter 3.44.8, no
-# system-font metrics). ALL green in CI (system fonts). NONE caused by
-# atom-engine slice-1 (it adds 0 net failures). Reversible: drop these lines +
-# reset known-failing:0 once the container ships fonts / on the CI runner.
-# The 8 REAL pre-existing branch failures were FIXED (not baselined) in the
-# same session — see the branch-repair commit. Zero-tolerance preserved for
-# real failures.
-#
-# 10× product_journey_test — RenderFlex overflow (font width) rendering all 935
-# product sheets at large-text/narrow-phone; deterministic here, green in CI.
-product_journey_test.dart :: journey · 116209 — מחבר כפול תבריג 32/32
-product_journey_test.dart :: journey · 118220 — מסעף 45° DN110 עם תבריג · כולל 3 אומים ו-3 אטמים
-product_journey_test.dart :: journey · 217861 — מחסום (סיפון) אמריקאי 1.25" לכיור רחצה
-product_journey_test.dart :: journey · 610918 — מכסה עגול עליון קבוע לבן
-product_journey_test.dart :: journey · 77001191 — מחבר טלסקופי כפול 1/2"
-product_journey_test.dart :: journey · 77110166 — דיור מערכת שטיפה דולפין פלוס ניקל
-product_journey_test.dart :: journey · 77405428 — זווית פנימית NTM 20×3/4"
-product_journey_test.dart :: journey · 77777482 — מצוף נחושת 3/4"
-product_journey_test.dart :: journey · 77Z3080A — מכסה נחושת עגול 4"
-product_journey_test.dart :: journey · 9102501231 — זווית HDPE הברגה חיצונית 25×1/2"
-# 1× worker_attendance_geo_test — flaky ONLY under full-suite concurrency=4;
-# passes in isolation (11/11). Load-flake, not a logic regression.
-worker_attendance_geo_test.dart :: P-15 send-report — after sending the button shows "הדוח נשלח ✓" and a second tap does NOT post a duplicate report
+# ── 2026-08-03 (atom-engine slice-1) — CORRECTION + REAL FIX ────────────────
+# The 2026-08-02 entry mislabeled 10 product_journey failures as "environmental
+# / green in CI". That was WRONG: they FAILED on the CI runner too (Flutter
+# 3.29.3) — a REAL ~9-17px RenderFlex overflow in the product-sheet side column
+# (fixed 100px), not a font-only artifact. FIXED, not baselined:
+#   • product_journey_test loads the real Heebo font (the app's default family)
+#     so the headless test measures true glyph widths, not Ahem's 1em squares;
+#   • lipskey_products_screen `_side()` wraps the unit-toggle + stepper in
+#     FittedBox(scaleDown) — unchanged when they fit, shrinks a hair instead of
+#     overflowing when the label metrics run a few px wide.
+# worker_attendance_geo P-15 was a concurrency flake; passes in the verified
+# full run. Full suite on Flutter 3.29.3 (the CI toolchain): 5332 ✅ / 0 ✗ /
+# 12 skip. known-failing → 0 (list empty below). Zero-tolerance restored.

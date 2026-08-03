@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #product-journey-overflow-fix — 🧾 גיליון-מוצר: overflow עמודת-הצד (CI 3.29.3) — 2026-08-03
+תיקון RenderFlex overflow אמיתי (~9-17px) שהכשיל 10× `product_journey` על ה-CI (Flutter 3.29.3) — קדם-קיים, לא מ-slice-1 (היה ירוק ב-`b8bc66b2`, רגרס מאז). `lipskey_products_screen.dart · _side()` (עמודה קבועה 100px): ה-`_unitToggle` (בודד/ארגז/משטח) וה-`_stepper` נעטפו ב-`FittedBox(fit: BoxFit.scaleDown)` — ללא-שינוי כשיש מקום, מתכווץ מעט במקום לגלוש כשמטריקות-הלייבל רחבות. בנוסף `product_journey_test.dart` טוען את פונט Heebo האמיתי (ברירת-המחדל של האפליקציה) כדי שהטסט ה-headless ימדוד רוחב-אמת במקום ריבועי-Ahem. אומת: הסוויטה המלאה על 3.29.3 = 0 כשלים.
+
 ## #org-setup-3293-fix — 🔌 אשף הקמת חברה: תאימות Flutter 3.29.3 (CI) — 2026-08-03
 תיקון version-skew שחסם את ה-CI (Flutter 3.29.3): `org_setup_wizard_screen.dart` — ה-`DropdownButtonFormField` של `_tokenDropdown` השתמש ב-`initialValue:` (API מ-3.32+ בלבד) → כשל-קומפילציה על ה-runner. הוחלף ל-`value:` (קיים ב-3.29.3 וב-3.44.8). בנוסף `org_setup_wizard_test.dart` מקבל `pageTransitionsTheme` עם Fade (במקום ZoomPageTransition שממפה את המסך-הגבוה 21000px ל-bitmap שחורג ממגבלת-ה-texture ב-headless). התנהגות-מוצר לא משתנה.
 

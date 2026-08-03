@@ -1460,10 +1460,17 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           SizedBox(
             height: 34,
             child: Center(
-                child: (_open || _inCart) ? _unitToggle() : const SizedBox()),
+                child: (_open || _inCart)
+                    // scaleDown-only: unchanged when the 3 unit chips fit the
+                    // 100px side column, shrinks a hair (never grows) rather
+                    // than overflow when the label metrics run a few px wide.
+                    ? FittedBox(fit: BoxFit.scaleDown, child: _unitToggle())
+                    : const SizedBox()),
           ),
           // middle zone
-          (_open || _inCart) ? _stepper() : _plusBtn(),
+          (_open || _inCart)
+              ? FittedBox(fit: BoxFit.scaleDown, child: _stepper())
+              : _plusBtn(),
           // bottom zone — details (opens sheet)
           GestureDetector(
             onTap: _openSheet,

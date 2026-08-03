@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle, FontLoader;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,6 +17,27 @@ import 'package:flutter_test/flutter_test.dart';
 /// confirmation — asserting both the UI and the underlying providers at every
 /// stage. If any button in the chain breaks for a product, its case goes red.
 void main() {
+  // Load the real Heebo font (the app's default family, app_theme.dart:44).
+  // Without it, `flutter test` renders every glyph in Ahem — a fixed 1em SQUARE
+  // per character — so Hebrew product labels come out ~2× their true width and
+  // the unit-selector / stepper Rows overflow by a few px. Production (and any
+  // font-equipped run) uses Heebo and never overflows; loading it here makes the
+  // headless test measure real widths. Scoped to this file so the one golden
+  // test (kb_golden) keeps its Ahem reference untouched.
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final loader = FontLoader('Heebo');
+    for (final path in const [
+      'assets/fonts/Heebo-Regular.ttf',
+      'assets/fonts/Heebo-SemiBold.ttf',
+      'assets/fonts/Heebo-Bold.ttf',
+      'assets/fonts/Heebo-ExtraBold.ttf',
+    ]) {
+      loader.addFont(rootBundle.load(path));
+    }
+    await loader.load();
+  });
+
   // 10 diverse SKUs spanning trap / cover / branch / thread / flush / brass /
   // HDPE / NTM / float categories.
   const cases = <(String sku, String name)>[
