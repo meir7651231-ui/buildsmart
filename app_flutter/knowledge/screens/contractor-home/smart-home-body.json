@@ -1,0 +1,32 @@
+{
+  "name": "SmartHomeBody",
+  "role": "composer",
+  "object": {
+    "nodes": []
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "compat"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "childrenFor"
+  ]
+}

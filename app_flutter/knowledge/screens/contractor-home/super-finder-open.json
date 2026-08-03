@@ -1,0 +1,21 @@
+{
+  "name": "_SuperFinderOpen",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🕸️ מאתר-על"
+      }
+    ]
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius"
+  ]
+}

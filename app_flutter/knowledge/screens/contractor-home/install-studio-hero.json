@@ -1,0 +1,43 @@
+{
+  "name": "_InstallStudioHero",
+  "role": "section",
+  "section": "installHero",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "תכנון חיבור",
+        "registryId": "smart_home_screen.install_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור",
+        "registryId": "smart_home_screen.install_sub",
+        "registryOk": true
+      }
+    ]
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "InstallStudioScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Inst…",
+        "effect": "navigate → InstallStudioScreen"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ]
+}
