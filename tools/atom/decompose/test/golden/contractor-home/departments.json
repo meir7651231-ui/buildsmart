@@ -8,7 +8,12 @@
         "kind": "text",
         "text": "מחלקות"
       }
-    ]
+    ],
+    "registered": 0,
+    "unregistered": [
+      "מחלקות"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
   },
   "connections": {
     "edges": [
@@ -53,5 +58,13 @@
   },
   "floor": [
     "cfgRadius"
-  ]
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write",
+      "onMainTab(…) callback instead of direct mainTabProvider write"
+    ]
+  }
 }

@@ -40,19 +40,35 @@ ScreenDecomposition decomposeScreen(
     featureSet: FeatureSet.latestLanguageVersion(),
   ).unit;
 
-  // 1 · index every widget class + top-level function in the file.
+  // 1 · index every widget class, its State class (stateful widgets build in the
+  //     State, not the widget), and top-level functions.
   final widgetClasses = <String, ClassDeclaration>{};
+  final stateOf = <String, ClassDeclaration>{}; // widget name → its State class
   final topFns = <String, FunctionDeclaration>{};
   for (final d in unit.declarations) {
     if (d is ClassDeclaration) {
-      final base = d.extendsClause?.superclass.name.lexeme;
+      final sc = d.extendsClause?.superclass;
+      final base = sc?.name.lexeme;
       if (base != null && _kWidgetBases.contains(base)) {
         widgetClasses[d.name.lexeme] = d;
+      } else if (base == 'State' || base == 'ConsumerState') {
+        // State<W> / ConsumerState<W> — attribute the State's build to W.
+        final targs = sc?.typeArguments?.arguments;
+        if (targs != null && targs.isNotEmpty && targs.first is NamedType) {
+          stateOf[(targs.first as NamedType).name.lexeme] = d;
+        }
       }
     } else if (d is FunctionDeclaration) {
       topFns[d.name.lexeme] = d;
     }
   }
+
+  final allWidgetNames = widgetClasses.keys.toSet();
+  // The build-bearing decls for a widget: itself + its State class (if any).
+  List<ClassDeclaration> scanDecls(String w) => <ClassDeclaration>[
+        if (widgetClasses[w] != null) widgetClasses[w]!,
+        if (stateOf[w] != null) stateOf[w]!,
+      ];
 
   // 2 · the composer = the public (non-`_`) widget class. Ties → the one whose
   //     build instantiates the most sibling widgets.
@@ -61,29 +77,28 @@ ScreenDecomposition decomposeScreen(
   String composerName;
   if (publicWidgets.length == 1) {
     composerName = publicWidgets.first;
+  } else if (publicWidgets.isEmpty) {
+    composerName = widgetClasses.keys.first;
   } else {
-    publicWidgets.sort((a, b) => _instantiatedWidgets(
-          widgetClasses[b]!,
-          widgetClasses.keys.toSet(),
-        ).length.compareTo(_instantiatedWidgets(
-          widgetClasses[a]!,
-          widgetClasses.keys.toSet(),
-        ).length));
-    composerName =
-        publicWidgets.isNotEmpty ? publicWidgets.first : widgetClasses.keys.first;
+    publicWidgets.sort((a, b) =>
+        _instantiatedWidgetsIn(scanDecls(b), allWidgetNames)
+            .length
+            .compareTo(_instantiatedWidgetsIn(scanDecls(a), allWidgetNames).length));
+    composerName = publicWidgets.first;
   }
-  final composer = widgetClasses[composerName]!;
 
-  // 3 · sections = widgets the composer instantiates directly, PLUS widgets
-  //     reached through an in-file dispatch function it calls (…SectionFor).
-  final allWidgetNames = widgetClasses.keys.toSet();
+  // 3 · sections = widgets the composer instantiates directly (in its widget OR
+  //     State build), PLUS widgets reached through an in-file dispatch function
+  //     it calls (…SectionFor).
   final sectionNames = <String>{};
-  sectionNames.addAll(_instantiatedWidgets(composer, allWidgetNames));
+  sectionNames.addAll(_instantiatedWidgetsIn(scanDecls(composerName), allWidgetNames));
   final sectionEnum = <String, String>{}; // widget → HomeSection member
-  for (final fnName in _calledTopFns(composer, topFns.keys.toSet())) {
-    final fn = topFns[fnName]!;
-    sectionNames.addAll(_instantiatedWidgets(fn, allWidgetNames));
-    sectionEnum.addAll(_switchEnumMap(fn, allWidgetNames));
+  for (final decl in scanDecls(composerName)) {
+    for (final fnName in _calledTopFns(decl, topFns.keys.toSet())) {
+      final fn = topFns[fnName]!;
+      sectionNames.addAll(_instantiatedWidgets(fn, allWidgetNames));
+      sectionEnum.addAll(_switchEnumMap(fn, allWidgetNames));
+    }
   }
   sectionNames.remove(composerName);
 
@@ -92,6 +107,15 @@ ScreenDecomposition decomposeScreen(
       .where(sectionNames.contains)
       .toList();
   final atomOrder = <String>[composerName, ...orderedSections];
+
+  // 4b · composer variants — widgets the composer renders behind a const-flag
+  //      (`kAxisDive ? [_SuperFinderOpen()] : …`) are the LIVE variant; a
+  //      dispatch widget for the SAME section is then the PREVIEW.
+  final liveGate = <String, String>{}; // widget → const-flag
+  final liveSection = <String, String>{}; // widget → HomeSection member
+  for (final decl in scanDecls(composerName)) {
+    _composerVariants(decl, allWidgetNames, liveGate, liveSection);
+  }
 
   // 5 · decompose each atom. A section's SUPPORT helpers (in-file widgets it
   //     composes that are NOT themselves atoms — cards, tiles, pads) roll UP into
@@ -103,7 +127,7 @@ ScreenDecomposition decomposeScreen(
   final registryRefs = <RegistryRef>[];
   for (final name in atomOrder) {
     final decl = widgetClasses[name]!;
-    final closure = _supportClosure(decl, widgetClasses, atomSet);
+    final closure = _supportClosure(name, widgetClasses, stateOf, atomSet);
     final ex = _AtomExtractor(
       className: name,
       inFileFns: inFileFnNames,
@@ -113,14 +137,18 @@ ScreenDecomposition decomposeScreen(
     for (final d in closure) {
       d.accept(ex);
     }
+    final gate = liveGate[name];
     atoms.add(Atom(
       name: name,
       role: name == composerName ? 'composer' : 'section',
-      section: sectionEnum[name],
+      section: sectionEnum[name] ?? liveSection[name],
+      variant: gate != null ? 'live' : null,
+      gate: gate,
       nodes: ex.nodes,
       edges: ex.edges,
       flows: ex.flows,
       floor: ex.floor.toList()..sort(),
+      contract: _contractFor(decl, ex),
     ));
     for (final n in ex.nodes) {
       if (n.registryId != null) {
@@ -130,6 +158,29 @@ ScreenDecomposition decomposeScreen(
           atom: name,
         ));
       }
+    }
+  }
+
+  // 5b · mark PREVIEW: a section that also has a live gated variant → the OTHER
+  //      (dispatch) atom for that section is the preview token.
+  final liveSections = liveSection.values.toSet();
+  for (var i = 0; i < atoms.length; i++) {
+    final a = atoms[i];
+    if (a.variant == null &&
+        a.section != null &&
+        liveSections.contains(a.section)) {
+      atoms[i] = Atom(
+        name: a.name,
+        role: a.role,
+        section: a.section,
+        variant: 'preview',
+        gate: a.gate,
+        nodes: a.nodes,
+        edges: a.edges,
+        flows: a.flows,
+        floor: a.floor,
+        contract: a.contract,
+      );
     }
   }
 
@@ -156,6 +207,18 @@ Set<String> _instantiatedWidgets(AstNode node, Set<String> widgetNames) {
   return v.found;
 }
 
+/// As [_instantiatedWidgets], over several decls (a widget + its State class).
+Set<String> _instantiatedWidgetsIn(
+  Iterable<AstNode> nodes,
+  Set<String> widgetNames,
+) {
+  final v = _InstanceCollector(widgetNames);
+  for (final n in nodes) {
+    n.accept(v);
+  }
+  return v.found;
+}
+
 /// In-file top-level function names called inside [node].
 Set<String> _calledTopFns(AstNode node, Set<String> fnNames) {
   final v = _CallCollector(fnNames);
@@ -170,6 +233,143 @@ Map<String, String> _switchEnumMap(FunctionDeclaration fn, Set<String> widgets) 
   final v = _SwitchEnumCollector(widgets, out);
   fn.accept(v);
   return out;
+}
+
+final _constFlagRe = RegExp(r'^k[A-Z]');
+bool _isConstFlag(String name) => _constFlagRe.hasMatch(name);
+
+/// The atom's constructor field-formal params — its declared inputs (props).
+List<String> _constructorProps(ClassDeclaration decl) {
+  final out = <String>[];
+  for (final m in decl.members) {
+    if (m is ConstructorDeclaration) {
+      for (final param in m.parameters.parameters) {
+        final n = param.name?.lexeme;
+        if (n != null && n != 'key') out.add(n);
+      }
+    }
+  }
+  return out;
+}
+
+String _capCallback(String provider) {
+  var t = provider;
+  if (t.endsWith('Provider')) t = t.substring(0, t.length - 'Provider'.length);
+  return t.isEmpty ? t : 'on${t[0].toUpperCase()}${t.substring(1)}';
+}
+
+/// Build the extraction contract (the "untangle" analysis) from the atom decl +
+/// its extracted edges/embeds.
+AtomContract _contractFor(ClassDeclaration decl, _AtomExtractor ex) {
+  final props = _constructorProps(decl);
+  final pushTargets = ex.edges
+      .where((e) => e.kind == 'action' && e.via == 'push')
+      .map((e) => e.target)
+      .toSet();
+  final embeds = ex.externalWidgets.where((w) => !pushTargets.contains(w)).toList()
+    ..sort();
+  final writes = <String>{
+    for (final e in ex.edges)
+      if (e.kind == 'writes') e.target,
+  }.toList()
+    ..sort();
+
+  final untangle = <String>[];
+  String extractable;
+  if (embeds.isNotEmpty) {
+    extractable = 'embeds-shared';
+    for (final w in embeds) {
+      untangle.add('$w = shared component → separate atom');
+    }
+  } else if (writes.isNotEmpty) {
+    extractable = 'needs-untangle';
+    for (final w in writes) {
+      untangle.add('${_capCallback(w)}(…) callback instead of direct $w write');
+    }
+  } else {
+    extractable = 'clean';
+  }
+  return AtomContract(
+    extractable: extractable,
+    props: props,
+    untangle: untangle,
+  );
+}
+
+/// Find the widgets the composer renders behind a const-flag (the LIVE variant)
+/// and the HomeSection member of the enclosing switch case.
+void _composerVariants(
+  ClassDeclaration composer,
+  Set<String> widgetNames,
+  Map<String, String> liveGate,
+  Map<String, String> liveSection,
+) {
+  composer.accept(
+    _ComposerVariantCollector(widgetNames, liveGate, liveSection),
+  );
+}
+
+class _ComposerVariantCollector extends RecursiveAstVisitor<void> {
+  _ComposerVariantCollector(this.widgetNames, this.liveGate, this.liveSection);
+  final Set<String> widgetNames;
+  final Map<String, String> liveGate;
+  final Map<String, String> liveSection;
+  String? _curSection;
+
+  @override
+  void visitSwitchExpressionCase(SwitchExpressionCase node) {
+    final prev = _curSection;
+    final pat = node.guardedPattern.pattern.toSource();
+    _curSection = pat.contains('.') ? pat.split('.').last.trim() : prev;
+    super.visitSwitchExpressionCase(node);
+    _curSection = prev;
+  }
+
+  void _markThen(AstNode then, String flag) {
+    for (final w in _instantiatedWidgets(then, widgetNames)) {
+      liveGate[w] = flag;
+      if (_curSection != null) liveSection[w] = _curSection!;
+    }
+  }
+
+  @override
+  void visitConditionalExpression(ConditionalExpression node) {
+    final flag = _flagIn(node.condition);
+    if (flag != null) _markThen(node.thenExpression, flag);
+    super.visitConditionalExpression(node);
+  }
+
+  @override
+  void visitIfStatement(IfStatement node) {
+    final flag = _flagIn(node.expression);
+    if (flag != null) _markThen(node.thenStatement, flag);
+    super.visitIfStatement(node);
+  }
+
+  @override
+  void visitIfElement(IfElement node) {
+    final flag = _flagIn(node.expression);
+    if (flag != null) _markThen(node.thenElement, flag);
+    super.visitIfElement(node);
+  }
+
+  String? _flagIn(Expression cond) {
+    String? found;
+    cond.accept(_IdentGrabber((n) {
+      if (found == null && _isConstFlag(n)) found = n;
+    }));
+    return found;
+  }
+}
+
+class _IdentGrabber extends RecursiveAstVisitor<void> {
+  _IdentGrabber(this.onId);
+  final void Function(String) onId;
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    onId(node.name);
+    super.visitSimpleIdentifier(node);
+  }
 }
 
 class _InstanceCollector extends RecursiveAstVisitor<void> {
@@ -241,27 +441,31 @@ class _InstanceNameGrabber extends RecursiveAstVisitor<void> {
   }
 }
 
-/// The atom's class + the transitive in-file SUPPORT widgets it composes
-/// (widgets that are not themselves atoms). Content in those helpers is the
-/// atom's content, so it rolls up. Other atoms are boundaries — never entered.
+/// The atom's build-bearing decls (its widget + State class) + the transitive
+/// in-file SUPPORT widgets it composes (widgets that are not themselves atoms,
+/// each WITH its State class). Content in those helpers is the atom's content,
+/// so it rolls up. Other atoms are boundaries — never entered.
 List<ClassDeclaration> _supportClosure(
-  ClassDeclaration atom,
+  String atomName,
   Map<String, ClassDeclaration> widgetClasses,
+  Map<String, ClassDeclaration> stateOf,
   Set<String> atomSet,
 ) {
-  final out = <ClassDeclaration>[atom];
-  final seen = <String>{atom.name.lexeme};
-  final queue = <ClassDeclaration>[atom];
+  final names = widgetClasses.keys.toSet();
+  List<ClassDeclaration> declsFor(String w) => <ClassDeclaration>[
+        if (widgetClasses[w] != null) widgetClasses[w]!,
+        if (stateOf[w] != null) stateOf[w]!,
+      ];
+  final out = <ClassDeclaration>[...declsFor(atomName)];
+  final seen = <String>{atomName};
+  final queue = <String>[atomName];
   while (queue.isNotEmpty) {
     final cur = queue.removeAt(0);
-    for (final w in _instantiatedWidgets(cur, widgetClasses.keys.toSet())) {
+    for (final w in _instantiatedWidgetsIn(declsFor(cur), names)) {
       if (seen.contains(w) || atomSet.contains(w)) continue; // stop at atoms
       seen.add(w);
-      final decl = widgetClasses[w];
-      if (decl != null) {
-        out.add(decl);
-        queue.add(decl);
-      }
+      out.addAll(declsFor(w));
+      queue.add(w);
     }
   }
   return out;
@@ -288,6 +492,19 @@ class _AtomExtractor extends RecursiveAstVisitor<void> {
   final List<AtomFlow> flows = <AtomFlow>[];
   final Set<String> floor = <String>{};
 
+  /// External (out-of-file) heavyweight widgets the atom INSTANTIATES — a shared
+  /// screen/wheel/pane it embeds. Used by the extraction contract to flag
+  /// `embeds-shared`. Push targets are filtered out later (a pushed screen is a
+  /// navigation, not an embed).
+  final Set<String> externalWidgets = <String>{};
+
+  static final _widgetSuffix = RegExp(r'(Screen|Wheel|View|Pane|Board)$');
+  void _maybeExternalWidget(String name) {
+    if (name.isEmpty || name[0] != name[0].toUpperCase()) return;
+    if (inFileWidgets.contains(name) || _kFrameworkNames.contains(name)) return;
+    if (_widgetSuffix.hasMatch(name)) externalWidgets.add(name);
+  }
+
   final Set<String> _edgeKeys = <String>{};
   final Set<String> _nodeKeys = <String>{};
   final Set<String> _flowKeys = <String>{};
@@ -311,7 +528,9 @@ class _AtomExtractor extends RecursiveAstVisitor<void> {
   // ── Layer 1 · nodes (object) ───────────────────────────────────────────────
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    _creationNode(node.constructorName.type.name.lexeme, node.argumentList);
+    final type = node.constructorName.type.name.lexeme;
+    _creationNode(type, node.argumentList);
+    _maybeExternalWidget(type);
     super.visitInstanceCreationExpression(node);
   }
 
@@ -378,6 +597,7 @@ class _AtomExtractor extends RecursiveAstVisitor<void> {
             inFileWidgets.contains(method))) {
       _creationNode(method, node.argumentList);
     }
+    if (node.target == null) _maybeExternalWidget(method);
 
     // gated-by: modOn(ref,'module') / featOn(ref,'module','feature').
     if (_isGate(node)) {

@@ -93,20 +93,53 @@ class AtomFlow {
       };
 }
 
+/// The extraction contract for an atom — how cleanly it can be lifted into a
+/// standalone, reusable widget (the "untangle" analysis from the hand golden).
+class AtomContract {
+  const AtomContract({
+    required this.extractable,
+    List<String>? props,
+    List<String>? untangle,
+  })  : props = props ?? const <String>[],
+        untangle = untangle ?? const <String>[];
+
+  /// 'clean' (pure — only props) · 'needs-untangle' (writes global state
+  /// directly → lift to callbacks) · 'embeds-shared' (embeds a big shared
+  /// widget that is its own atom).
+  final String extractable;
+
+  /// The atom's declared constructor params (its current inputs).
+  final List<String> props;
+
+  /// What to parameterise to make it extractable — reads that should become
+  /// props, writes that should become callbacks, embeds to split out.
+  final List<String> untangle;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'extractable': extractable,
+        'props': props,
+        'untangle': untangle,
+      };
+}
+
 /// One decomposed atom — the composer or a section widget.
 class Atom {
   Atom({
     required this.name,
     required this.role,
     this.section,
+    this.variant,
+    this.gate,
     List<AtomNode>? nodes,
     List<AtomEdge>? edges,
     List<AtomFlow>? flows,
     List<String>? floor,
+    AtomContract? contract,
   })  : nodes = nodes ?? <AtomNode>[],
         edges = edges ?? <AtomEdge>[],
         flows = flows ?? <AtomFlow>[],
-        floor = floor ?? <String>[];
+        floor = floor ?? <String>[],
+        contract = contract ?? const AtomContract(extractable: 'clean');
 
   /// The class name (e.g. `SmartHomeBody`, `_Departments`).
   final String name;
@@ -118,6 +151,15 @@ class Atom {
   /// it through a `…SectionFor` switch (else null).
   final String? section;
 
+  /// 'live' (the variant the composer actually renders, often behind a
+  /// const-flag) · 'preview' (a dispatch/reorder-only token superseded by a
+  /// live variant for the same section) · null (the ordinary single variant).
+  final String? variant;
+
+  /// The const-flag (`kAxisDive`, …) that compile-gates this atom in the
+  /// composer, when it is a live gated variant; else null.
+  final String? gate;
+
   final List<AtomNode> nodes;
   final List<AtomEdge> edges;
   final List<AtomFlow> flows;
@@ -125,12 +167,33 @@ class Atom {
   /// External (out-of-file) functions the atom calls — the "floor" it stands on.
   final List<String> floor;
 
+  /// The extraction contract (untangle analysis).
+  final AtomContract contract;
+
+  /// The gaps — visible text the atom paints that is NOT in element_registry
+  /// (a plain `Text` where a `CfgText` id would let the owner edit it live).
+  List<String> get unregistered => [
+        for (final n in nodes)
+          if (n.registryId == null && n.text.isNotEmpty) n.text,
+      ];
+
+  /// Registry-backed nodes (cfgText/cfgVisible), all cross-checked.
+  int get registeredCount =>
+      nodes.where((n) => n.registryId != null).length;
+
   Map<String, dynamic> toJson() => <String, dynamic>{
         'name': name,
         'role': role,
         if (section != null) 'section': section,
+        if (variant != null) 'variant': variant,
+        if (gate != null) 'gate': gate,
         'object': <String, dynamic>{
           'nodes': nodes.map((n) => n.toJson()).toList(),
+          'registered': registeredCount,
+          'unregistered': unregistered,
+          'summary':
+              'registry $registeredCount · mapped ${nodes.where((n) => n.registryOk).length}'
+                  '/$registeredCount · unregistered ${unregistered.length}',
         },
         'connections': <String, dynamic>{
           'edges': edges.map((e) => e.toJson()).toList(),
@@ -139,6 +202,7 @@ class Atom {
           'flows': flows.map((f) => f.toJson()).toList(),
         },
         'floor': floor,
+        'contract': contract.toJson(),
       };
 }
 

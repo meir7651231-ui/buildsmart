@@ -26,7 +26,12 @@
         "registryId": "smart_home_screen.workpath_sub",
         "registryOk": true
       }
-    ]
+    ],
+    "registered": 3,
+    "unregistered": [
+      "מסלול עבודה חכם"
+    ],
+    "summary": "registry 3 · mapped 3/3 · unregistered 1"
   },
   "connections": {
     "edges": [
@@ -49,5 +54,10 @@
   },
   "floor": [
     "cfgRadius"
-  ]
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
 }

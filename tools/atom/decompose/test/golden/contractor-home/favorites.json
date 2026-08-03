@@ -12,7 +12,13 @@
         "kind": "text",
         "text": "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
       }
-    ]
+    ],
+    "registered": 0,
+    "unregistered": [
+      "מועדפים",
+      "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
   },
   "connections": {
     "edges": [
@@ -50,5 +56,10 @@
   },
   "floor": [
     "cfgRadius"
-  ]
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
 }

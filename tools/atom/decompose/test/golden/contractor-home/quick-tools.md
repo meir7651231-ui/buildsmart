@@ -5,7 +5,9 @@
 
 ## עצם · object (1)
 
-- **text** "כלים מהירים"
+> registry 0 · mapped 0/0 · **unregistered 1**
+
+- **text** "כלים מהירים" · — לא-רשום
 
 ## חיבורים · connections (6)
 
@@ -23,3 +25,9 @@
 ## floor · external functions (1)
 
 - `cfgRadius`
+
+## חוזה-רכיב · contract + gaps
+
+- **extractable:** `clean`
+- **props:** —
+- **gaps:** 1 unregistered — "כלים מהירים"
