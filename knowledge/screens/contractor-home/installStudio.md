@@ -1,20 +1,29 @@
 # atom · installStudio · תכנון חיבור   [🟡 כמעט-נקי]
-**class:** `_InstallStudioHero` (:621) · `ConsumerWidget` · **kind:** hero
+`_InstallStudioHero` (:621) · ConsumerWidget · hero
 
-## אלמנטים
+## 1 · עצם (node)
 | טקסט | registry-ID | kind | סטטי/דינמי |
 |---|---|---|---|
 | תכנון חיבור (:648) | `smart_home_screen.install_title` ✓ | text | static |
 | בחר מה לחבר — נכין רשימת קנייה… (:655) | `smart_home_screen.install_sub` ✓ | text | static |
 
-→ **registry: 2 · mapped: 2/2 ✓ · לא-רשום: 0** ✅ **האטום היחיד עם כיסוי מלא**
+→ **registry 2 · mapped 2/2 ✓ · לא-רשום 0** ✅ **כיסוי מלא** · **state:** Stateless
 
-- **state:** Stateless
-- **reads:** `_pal` בלבד (אין provider)
-- **cross-effects:** אין
-- **actions:** `Navigator.push(InstallStudioScreen())` (:630)
-- **gate:** אין בפנים — **המרכיב** מגדר על `compatOn` (:141)
-- **layout:** `_Pad→InkWell→Container(#1AFF7A18, border)→Row[ Icon(account_tree), Expanded(Column[CfgText title, CfgText sub]), chevron ]`
-- **primitives:** _Pad
-- **חוזה-רכיב:** props:`[onOpen:cb]` · **untangle:** אין (נקי — רק callback-ניווט)
-- **gaps:** אין ✅ — **התבנית לשאוף אליה** (2 טקסטים, שניהם רשומים, gate ברור, ניקוי מלא)
+## 2 · חיבורים (edges)
+```
+installStudio —קרא→   _pal
+installStudio —פעולה→ Navigator.push(InstallStudioScreen)   (IS-2)
+installStudio —משתמש→ _Pad · CfgText
+installStudio —מגודר→ compatOn  ← ב-SmartHomeBody (:141), לא בפנים
+```
+
+## 3 · התנהגות (flows)
+**IS-1 · build:** רנדר-סטטי (CfgText title/sub). הנראות מוכרעת ב-**המרכיב** (compat gate), לא כאן.
+
+**IS-2 · onTap hero:**
+`verb navigate` `Navigator.push(MaterialPageRoute → InstallStudioScreen())` → **effect:** ניווט למנוע-החיבור
+*primitives:* `Navigator.push · MaterialPageRoute · InstallStudioScreen`
+
+## חוזה-רכיב + gaps
+`extractable: clean` · props:`[onOpen]` · **untangle:** אין (רק callback-ניווט)
+**gaps:** אין ✅ — **התבנית לשאוף אליה** (2 טקסטים רשומים, gate ברור במרכיב, ניקוי מלא)

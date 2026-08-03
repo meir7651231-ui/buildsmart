@@ -1,22 +1,37 @@
 # atom · departments · מחלקות   [🔵 צריך-ניתוק]
-**class:** `_Departments` (:271) · `ConsumerWidget` · **kind:** section
+`_Departments` (:271) · ConsumerWidget · section
 
-## אלמנטים
+## 1 · עצם (node)
 | טקסט | registry-ID | kind | סטטי/דינמי |
 |---|---|---|---|
 | מחלקות (:294) | — לא רשום | text | static |
 | עוד (:321) | — לא רשום | text | static |
 | (אריחי-מחלקות) | — | tile | **דינמי** (`DepartmentsScreen.departments.where(live)`) |
-| בקרוב (:310) | — | text | static (**מת** — רק live עוברות ה-filter) |
+| בקרוב (:310) | — | text | static (**מת** — pre-filter live) |
 
-→ **registry: 0 · mapped: 0 · לא-רשום: 2** ⚠️
+→ **registry 0 · mapped 0 · לא-רשום 2** · **state:** Stateless
 
-- **state:** Stateless (אין controllers)
-- **reads:** `catalogSettingsProvider` (_metrics) · `DepartmentsScreen.departments`
-- **cross-effects (writes):** `homeDepartmentProvider.state = d.name` (:313) · `mainTabProvider.state = 1` (:314,322) → מעביר ללשונית-מחלקות
-- **actions:** אין Navigator (החלפת-לשונית בלבד)
-- **gate:** `kProfileRawShell` → shrink (:281)
-- **layout:** `_Pad→Column[ _SectionTitle('מחלקות'), GridView(cross:2, extent:m.tileH)[ _MiniTile ×depts, _MiniTile('עוד') ] ]`
-- **primitives:** _Pad · _SectionTitle · _MiniTile · _Metrics
-- **חוזה-רכיב:** props:`[departments:list, onSelect:cb]` · **untangle:** חשוף `departments` כ-prop · `onSelect(name)` במקום כתיבה-ישירה ל-homeDepartment/mainTab
-- **gaps:** 'מחלקות'/'עוד' לא-רשומים · 'בקרוב' קוד-מת
+## 2 · חיבורים (edges)
+```
+departments —קרא→   catalogSettings (metrics) · DepartmentsScreen.departments
+departments —כתוב→  homeDepartment = d.name   (D-2)
+departments —כתוב→  mainTab = 1               (D-2, D-3) → מחליף לשונית-מחלקות
+departments —משתמש→ _Pad · _SectionTitle · _MiniTile · _Metrics
+departments —מגודר→ kProfileRawShell
+```
+
+## 3 · התנהגות (flows)
+**D-1 · build:**
+`rule` `if kProfileRawShell → shrink` · `verb filter+take` `depts = departments.where(d.live).take(3)` · `formula` `tileH = m.tileH`
+*(הערה: `dim:!d.live` ו-`note:'בקרוב'` — ענפים **מתים**, כי depts כבר-מסונן ל-live)*
+
+**D-2 · onTap אריח:**
+`verb write` `homeDepartment = d.name` → `verb write` `mainTab = 1` → **effect:** מחלקה-נבחרת + מעבר-לשונית
+*primitives:* `ref.read · .notifier · .state=`
+
+**D-3 · onTap "עוד":**
+`verb write` `mainTab = 1` → **effect:** מעבר-לשונית-מחלקות
+
+## חוזה-רכיב + gaps
+`extractable: needs-untangle` · props:`[departments, onSelect]` · **untangle:** departments כ-prop · `onSelect(name)` במקום כתיבה-ישירה ל-homeDepartment/mainTab
+**gaps:** 'מחלקות'/'עוד' לא-רשומים · 'בקרוב' קוד-מת
