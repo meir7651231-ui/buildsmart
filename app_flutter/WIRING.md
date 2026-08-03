@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pC2 — 🐢 מנוע-קטלוג-3D · פאזה C (41): turtle-3D וקטורי מלא (מגודר) — 2026-08-03
+`lib/features/fittings/layout/route_layout.dart` (מגודר) — `Vec3` (מתמטיקה-וקטורית טהורה) + `Placement{family, od, position, forward, up}` + `layoutRoute(List<RunElement>)` — פורס רצף-אביזרים למרחב-3D. פורט 1:1 מ-`gen3d.buildPlan()`: מצב-הצב P/F/U · לכל אביזר `P += F·ex + bendAxis·ey` · בברך מסובב F/U בזווית עם **Gram-Schmidt** (`U ⟂ F`). `dirVec`: up→U · down→−U · right→side · left→−side. `terminal` (פקק) סוגר · משפחה-לא-פריסה מדולגת (M1). **🔑 golden אבולוציית-המסגרת** (`route_layout_test`): ברך-90°-up מסובב `F` מ-`[1,0,0]` ל-`[0,1,0]` · 45°→(cos45,sin45,0) · **כל מסגרת אורתונורמלית** (|F|=|U|=1, F⟂U). אפס גזירת-פיזיקה · הכרטיס-החי לא-נגוע. fittings 235/235.
+
 ## #fittings-engine-pC1 — 🐢 מנוע-קטלוג-3D · פאזה C (41): turtle — דלתות-פריסה (מגודר) — 2026-08-03
 פאזה-C פרוסה-1 (3D-על-הכרטיס, web-first · `kFittingEngine3d` default-OFF). `lib/features/fittings/layout/turtle.dart`: `LayoutDelta{ex, ey, turn, terminal}` + `layoutDeltaFor(family, od, {od2})` — היטלי-הפריסה פר-אביזר (התקדמות-קדימה · על-הפנייה · זווית · קצה), נגזרים מאותיות-`generate` ומקבילים 1:1 ל-`elemMeshes` ב-`gen3d.html:280-319`. ברך: `ex=l+l·cosθ · ey=l·sinθ · turn=θ` (90°→ex=l,ey=l · 45°→θ=π/4) · מצמד=A · טי=E · מצרה=F1+4+F2 · פקק=F+cap(terminal) · רוכב=0.9·d1 · צווארון=A+max(4,0.18od). משפחה-לא-מוכרת → `null` (M1 · fallback-לתמונה). `turtle_test`: golden-letters · mutation-L3 · null. ה-turtle-הווקטורי-המלא (מסגרות+Gram-Schmidt) = פרוסה נפרדת. אפס גזירת-פיזיקה חדשה · הכרטיס-החי לא-נגוע. fittings 227/227.
 
