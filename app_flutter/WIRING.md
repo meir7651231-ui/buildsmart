@@ -1,5 +1,11 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pA-CLOSED — ✅ מנוע-קטלוג-3D · פאזה A סגורה רשמית (invariant-23) — 2026-08-03
+**פאזה A ✅ — ההישג המהותי הושג ומאומת ב-CI (793/795):** חוליות מחברת (95.4%) · מותג-כללי (3 מסלולים: polyroll/familySpec/company) · תיקון-M2 (199→0) · keystone byte-identical.
+- **🔒 invariant-23 (keystone byte-compat):** דגל כבוי ⇒ **`main.dart.js` זהה** לפני-פאזה-A. מובטח בשלוש שכבות: (1) **שער #124** — 3 דגלי `kFittingEngine*` = `bool.fromEnvironment` default-OFF ⇒ כל `features/fittings/` **tree-shaken** מה-build; (2) `registerFamilySpecs()` מגודר `if (kFittingEngine)` ב-`main.dart` ⇒ ב-OFF לא-נקרא; (3) גם אם נקרא (v1 ברירת-מחדל), ה-789 מחוץ ל-`_skuIndex` ⇒ **אינרטי** (`huliot_connectivity_test` · no-leak). `family_specs.dart` הוא lib/data טהור — נכנס ל-build רק כשמחווט-דרך-דגל. **נתיב-הפעלה: `CATALOG_SOURCE=v2 + kFittingEngine`.**
+- **שלב 23 = מכוסה** (השכבות למעלה). **שלב 24 (הבלעת polyroll) = צעד-review-בעלים מכוון בהמשך** (refactor נתיב-רישום-חי · מקור-אמת-אחד · לא-דחוף). **שלב 26 (רוֹל-אַפ) = מושג.**
+- **הבא (פאזה B עומק-spec / C 3D-על-הכרטיס) = החלטת-בעלים אסטרטגית** — לא נכנסים אליה בלולאה.
+
 ## #fittings-engine-pA3 — 🔌 מנוע-קטלוג-3D · פאזה A (19+21): מותג-כללי + seam-העלאה (מוכח, לא כפול) — 2026-08-03
 **ממצא:** שלבים 19+21 כבר ממומשים בבטחה ע"י תשתית קיימת — `company_spec_bridge.dart` (`companySpecFor`/`registerCompanySpecs`) גוזר `VerifiedSpec` מ**עמודות-ה-spec המוצהרות** של קטלוג-שהועלה (`קצה 1/2/3`·`חומר`·`טמפ`·`לחץ`), **קורא-נתונים ולא מנחש** (null = honest-absent), וכבר מחווט ב-`hydrateCompanyCatalog` (seam-ה-`setCompanyCatalog`). לא שוכפלה גזירה-מסוכנת למותג-לא-מוכר. **"כל מותג מתחבר" = שלושה מסלולים משלימים** שכולם מזריעים `kVerifiedSpecs` דרך `putIfAbsent`: `registerPolyrollSpecs` (PPR built-in) · `registerFamilySpecs` (Huliot built-in · אינפרנס-קטגוריה) · `registerCompanySpecs` (העלאה · עמודות-מוצהרות). `test/fittings/brand_general_test.dart` מוכיח: seam-העלאה ברand-general (מותג-בדוי מתחבר) · honest-absent (push-fit בלי-חומר → null, אפס-M2) · הרכבה ללא-דריסה, בלתי-תלוית-סדר.
 
