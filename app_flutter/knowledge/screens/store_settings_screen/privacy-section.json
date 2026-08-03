@@ -1,0 +1,91 @@
+{
+  "name": "_PrivacySection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+        "registryId": "store_settings_screen.section_wip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "store_settings_screen.switch_wip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה — עדיין לא משפיע",
+        "registryId": "store_settings_screen.number_wip",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "storeSearchQueryProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'החיפוש נוקה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(storeSearchQueryProvider.notifier).state = ''",
+        "effect": "write → storeSearchQueryProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onStoreSearchQuery(…) callback instead of direct storeSearchQueryProvider write",
+      "onStoreSettings(…) callback instead of direct storeSettingsProvider write"
+    ]
+  }
+}

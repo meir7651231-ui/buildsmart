@@ -1,0 +1,279 @@
+{
+  "screen": "worker_employer_stock_sheet",
+  "source": "worker_employer_stock_sheet.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "_EmployerStockSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📦 מלאי הקבלן",
+            "registryId": "worker_employer_stock_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הקבלן טרם שיתף מלאי",
+            "registryId": "worker_employer_stock_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "רשימת המלאי תוצג כאן כשתחובר עם השרת.",
+            "registryId": "worker_employer_stock_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הבקשות שלי",
+            "registryId": "worker_employer_stock_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_employer_stock_sheet.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "סגור",
+            "registryId": "worker_employer_stock_sheet.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [],
+        "summary": "registry 6 · mapped 6/6 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "employerStockProvider(session?.employerId ?? '')"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "requestsForWorker(session?.username ?? '')"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "materialRequestsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "employerStockProvider",
+        "requestsForWorker",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_StockRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "item"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RequestComposer",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_employer_stock_sheet.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🧱"
+          },
+          {
+            "kind": "cfgText",
+            "text": "בקש חומרים",
+            "registryId": "worker_employer_stock_sheet.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🧱 בקשת חומרים מהקבלן",
+            "registryId": "worker_employer_stock_sheet.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כתוב פריט אחד בכל שורה. הבקשה נשלחת לקבלן המעסיק — לא משנה את המלאי.",
+            "registryId": "worker_employer_stock_sheet.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_employer_stock_sheet.t09",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שלח בקשה",
+            "registryId": "worker_employer_stock_sheet.t09",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_employer_stock_sheet.t10",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בטל",
+            "registryId": "worker_employer_stock_sheet.t10",
+            "registryOk": true
+          }
+        ],
+        "registered": 8,
+        "unregistered": [
+          "🧱"
+        ],
+        "summary": "registry 8 · mapped 8/8 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "composing",
+          "itemsCtrl",
+          "noteCtrl",
+          "onToggle",
+          "onSend"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_MyRequestRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "request"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 10,
+    "total": 10,
+    "summary": "10/10",
+    "entries": [
+      {
+        "id": "worker_employer_stock_sheet.t01",
+        "ok": true,
+        "atom": "_EmployerStockSheet"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t02",
+        "ok": true,
+        "atom": "_EmployerStockSheet"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t03",
+        "ok": true,
+        "atom": "_EmployerStockSheet"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t04",
+        "ok": true,
+        "atom": "_EmployerStockSheet"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t05",
+        "ok": true,
+        "atom": "_EmployerStockSheet"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t06",
+        "ok": true,
+        "atom": "_RequestComposer"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t07",
+        "ok": true,
+        "atom": "_RequestComposer"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t08",
+        "ok": true,
+        "atom": "_RequestComposer"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t09",
+        "ok": true,
+        "atom": "_RequestComposer"
+      },
+      {
+        "id": "worker_employer_stock_sheet.t10",
+        "ok": true,
+        "atom": "_RequestComposer"
+      }
+    ]
+  }
+}

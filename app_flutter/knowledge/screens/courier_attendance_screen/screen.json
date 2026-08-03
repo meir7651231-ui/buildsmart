@@ -1,0 +1,242 @@
+{
+  "screen": "courier_attendance_screen",
+  "source": "courier_attendance_screen.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "CourierAttendanceScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🕐 נוכחות",
+            "registryId": "courier.attend.title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierAttendanceProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "courierAttendanceProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerNotifsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "attendanceDateKey",
+        "attendanceMonth",
+        "attendanceTotal",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ClockCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "היום",
+            "registryId": "courier.attend.today",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "today",
+          "onClockIn",
+          "onClockOut"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_MonthCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier.attend.prev",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ הקודם",
+            "registryId": "courier.attend.prev",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier.attend.next",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הבא ›",
+            "registryId": "courier.attend.next",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין רישומי נוכחות בחודש זה",
+            "registryId": "courier.attend.empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "סה\"כ חודשי",
+            "registryId": "courier.attend.month_total",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [],
+        "summary": "registry 6 · mapped 6/6 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cell"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "month",
+          "days",
+          "total",
+          "canGoNext",
+          "onPrev",
+          "onNext"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SendReportButton",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "enabled",
+          "label",
+          "onPressed"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "courier.attend.title",
+        "ok": true,
+        "atom": "CourierAttendanceScreen"
+      },
+      {
+        "id": "courier.attend.today",
+        "ok": true,
+        "atom": "_ClockCard"
+      },
+      {
+        "id": "courier.attend.prev",
+        "ok": true,
+        "atom": "_MonthCard"
+      },
+      {
+        "id": "courier.attend.next",
+        "ok": true,
+        "atom": "_MonthCard"
+      },
+      {
+        "id": "courier.attend.empty",
+        "ok": true,
+        "atom": "_MonthCard"
+      },
+      {
+        "id": "courier.attend.month_total",
+        "ok": true,
+        "atom": "_MonthCard"
+      }
+    ]
+  }
+}

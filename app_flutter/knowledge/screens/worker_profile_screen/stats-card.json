@@ -1,0 +1,34 @@
+{
+  "name": "_StatsCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "המשימות שלי",
+        "registryId": "worker.profile.tasks_title",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "done",
+      "inReview",
+      "rejected",
+      "total"
+    ],
+    "untangle": []
+  }
+}

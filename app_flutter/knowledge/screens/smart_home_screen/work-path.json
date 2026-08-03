@@ -1,0 +1,63 @@
+{
+  "name": "_WorkPath",
+  "role": "section",
+  "section": "workPath",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "מסלול עבודה חכם"
+      },
+      {
+        "kind": "cfgText",
+        "text": "🛁 חדש — מאפס עד גמר",
+        "registryId": "smart_home_screen.workpath_badge",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "גמר אמבטיה — מלווה אותך שלב-שלב",
+        "registryId": "smart_home_screen.workpath_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון \"סדר הרכבה\".",
+        "registryId": "smart_home_screen.workpath_sub",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [
+      "מסלול עבודה חכם"
+    ],
+    "summary": "registry 3 · mapped 3/3 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kProfileRawShell"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kProfileRawShell)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

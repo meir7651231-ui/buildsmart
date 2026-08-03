@@ -1,0 +1,144 @@
+{
+  "screen": "rewards_hub_screen",
+  "source": "rewards_hub_screen.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "RewardsHubScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "rewardsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "_RewardsFeatureScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(_RewardsFeatureScreen.route(t.id))",
+            "effect": "navigate → _RewardsFeatureScreen"
+          }
+        ]
+      },
+      "floor": [
+        "orgTerm"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_MdHead",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "ic",
+          "title",
+          "sub"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CoinBanner",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🪙"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🪙"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "coins",
+          "sub"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_FinTile",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "ic",
+          "title",
+          "sub",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

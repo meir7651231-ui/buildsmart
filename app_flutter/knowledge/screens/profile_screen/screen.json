@@ -1,0 +1,398 @@
+{
+  "screen": "profile_screen",
+  "source": "profile_screen.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "name": "ProfileScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מחיקת חשבון",
+            "registryId": "profile_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל.",
+            "registryId": "profile_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "profile_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "profile_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "profile_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מחק לצמיתות",
+            "registryId": "profile_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הפרופיל שלי",
+            "registryId": "profile_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "פרטים אישיים"
+          },
+          {
+            "kind": "text",
+            "text": "תחום מקצועי"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "profile_screen.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שמור",
+            "registryId": "profile_screen.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "עוד"
+          },
+          {
+            "kind": "text",
+            "text": "חשבון"
+          }
+        ],
+        "registered": 9,
+        "unregistered": [
+          "פרטים אישיים",
+          "תחום מקצועי",
+          "עוד",
+          "חשבון"
+        ],
+        "summary": "registry 9 · mapped 9/9 · unregistered 4"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "userProfileProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "userProfileProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "authStateProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "userProfileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "activePersonaProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "authStateProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "authGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "roleSwitchLockedProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "modOn",
+            "target": "rewards"
+          },
+          {
+            "kind": "action",
+            "via": "showRolePicker",
+            "target": "showRolePicker"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "RewardsHubScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showLoginSheet",
+            "target": "showLoginSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showRoleRequestSheet",
+            "target": "showRoleRequestSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "RoleRequestsInboxScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showRolePicker(context)",
+            "effect": "open → showRolePicker"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(RewardsHubScreen.route())",
+            "effect": "navigate → RewardsHubScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showLoginSheet(context)",
+            "effect": "open → showLoginSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showRoleRequestSheet(context)",
+            "effect": "open → showRoleRequestSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(RoleRequestsInboxScreen.route())",
+            "effect": "navigate → RoleRequestsInboxScreen"
+          }
+        ]
+      },
+      "floor": [
+        "approvableRolesForClaims",
+        "bsOnAccent",
+        "cfgRadius",
+        "hebrewAuthError",
+        "kbProfileNodes",
+        "orgTerm",
+        "setState",
+        "validBusinessId",
+        "validEmail",
+        "validIsraeliMobile"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_HeaderCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "profile"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SectionLabel",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "text"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_FieldLabel",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "text"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Field",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "controller",
+          "hint",
+          "textDirection",
+          "errorText"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_LinkRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "profile_screen.t01",
+        "ok": true,
+        "atom": "ProfileScreen"
+      },
+      {
+        "id": "profile_screen.t02",
+        "ok": true,
+        "atom": "ProfileScreen"
+      },
+      {
+        "id": "profile_screen.t03",
+        "ok": true,
+        "atom": "ProfileScreen"
+      },
+      {
+        "id": "profile_screen.t04",
+        "ok": true,
+        "atom": "ProfileScreen"
+      },
+      {
+        "id": "profile_screen.t05",
+        "ok": true,
+        "atom": "ProfileScreen"
+      },
+      {
+        "id": "profile_screen.t06",
+        "ok": true,
+        "atom": "ProfileScreen"
+      }
+    ]
+  }
+}

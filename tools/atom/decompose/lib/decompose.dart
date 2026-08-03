@@ -50,6 +50,60 @@ void writeOut(ScreenDecomposition d, String outDir) {
   });
 }
 
+/// One screen's batch result.
+class BatchResult {
+  BatchResult(this.file, this.screen, this.atoms, this.matched, this.total,
+      {this.error});
+  final String file;
+  final String screen;
+  final int atoms;
+  final int matched;
+  final int total;
+  final String? error;
+
+  /// A "full" save = a real decomposition (a composer + at least one section).
+  bool get full => error == null && atoms > 1;
+  bool get skipped => error == null && atoms <= 1;
+}
+
+/// Decompose every `*.dart` under [screensDir] (non-recursively), writing each to
+/// `<outDir>/<basename>/`, cross-checking against [registryPath] parsed ONCE.
+/// Returns a per-file result list. Files with no widget class (or a parse error)
+/// are recorded, never fatal.
+List<BatchResult> decomposeBatch(
+  String screensDir,
+  String registryPath,
+  String outDir,
+) {
+  final registry = RegistryIndex.fromFile(registryPath);
+  final files = Directory(screensDir)
+      .listSync()
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .map((f) => f.path)
+      .toList()
+    ..sort();
+  final results = <BatchResult>[];
+  for (final file in files) {
+    final screen = p.basenameWithoutExtension(file);
+    try {
+      final d = decomposeScreen(file, registry, screenName: screen);
+      if (d.atoms.isNotEmpty) writeOut(d, outDir);
+      results.add(BatchResult(
+        p.basename(file),
+        screen,
+        d.atoms.length,
+        d.registry.matched,
+        d.registry.total,
+      ));
+    } on Object catch (e) {
+      results.add(BatchResult(p.basename(file), screen, 0, 0, 0,
+          error: e.toString().split('\n').first));
+    }
+  }
+  return results;
+}
+
 String _slug(String className) {
   var s = className.startsWith('_') ? className.substring(1) : className;
   // CamelCase → kebab: SmartHomeBody → smart-home-body

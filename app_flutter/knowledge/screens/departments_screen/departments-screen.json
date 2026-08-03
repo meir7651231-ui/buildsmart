@@ -1,0 +1,61 @@
+{
+  "name": "DepartmentsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מחלקות",
+        "registryId": "departments_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🗂️"
+      },
+      {
+        "kind": "text",
+        "text": "אין מחלקות עדיין — יופיעו עם טעינת קטלוג החברה"
+      }
+    ],
+    "registered": 1,
+    "unregistered": [
+      "🗂️",
+      "אין מחלקות עדיין — יופיעו עם טעינת קטלוג החברה"
+    ],
+    "summary": "registry 1 · mapped 1/1 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "homeDepartmentProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "deptFlatProductsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogTreePathProvider.select((p) => p.isNotEmpty)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "companyDepartments",
+    "isCatalogDept"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "CatalogScreen = shared component → separate atom"
+    ]
+  }
+}

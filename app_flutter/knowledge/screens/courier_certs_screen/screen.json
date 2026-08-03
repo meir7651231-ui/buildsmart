@@ -1,0 +1,265 @@
+{
+  "screen": "courier_certs_screen",
+  "source": "courier_certs_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "CourierCertsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🪪 תעודות נהג",
+            "registryId": "courier.certs.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🪪 הוספת תעודה",
+            "registryId": "courier.certs.sheet_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מילוי מהיר — ממלא את שם התעודה בלבד:",
+            "registryId": "courier_certs_screen.quick_fill_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📅"
+          },
+          {
+            "kind": "cfgText",
+            "text": "📷 צרף צילום תעודה (לא חובה)",
+            "registryId": "courier_certs_screen.attach_photo",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📷 צילום צורף ✓",
+            "registryId": "courier_certs_screen.photo_attached",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier.certs.save_button",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💾 שמור תעודה",
+            "registryId": "courier.certs.save_button",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [
+          "📅"
+        ],
+        "summary": "registry 7 · mapped 7/7 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierCertsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "remove",
+            "target": "courierCertsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showDatePicker",
+            "target": "showDatePicker"
+          },
+          {
+            "kind": "writes",
+            "via": "add",
+            "target": "courierCertsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "confirmDestructive",
+        "pickTaskPhoto",
+        "setSheetState",
+        "sort"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_PresetChip",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "selected",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CertsCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "אין תעודות בארנק עדיין — הוסף את הראשונה.",
+            "registryId": "courier.certs.empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier.certs.add_button",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "➕ הוסף תעודה",
+            "registryId": "courier.certs.add_button",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📷"
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "📷"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showFullPhotoRefDialog",
+            "target": "showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFullPhotoRefDialog(context, cert.photo, label: cert.name)",
+            "effect": "open → showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "imageProviderForRef",
+        "onRemove"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "certs",
+          "onAdd",
+          "onRemove"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 8,
+    "total": 8,
+    "summary": "8/8",
+    "entries": [
+      {
+        "id": "courier.certs.title",
+        "ok": true,
+        "atom": "CourierCertsScreen"
+      },
+      {
+        "id": "courier.certs.sheet_title",
+        "ok": true,
+        "atom": "CourierCertsScreen"
+      },
+      {
+        "id": "courier_certs_screen.quick_fill_hint",
+        "ok": true,
+        "atom": "CourierCertsScreen"
+      },
+      {
+        "id": "courier_certs_screen.attach_photo",
+        "ok": true,
+        "atom": "CourierCertsScreen"
+      },
+      {
+        "id": "courier_certs_screen.photo_attached",
+        "ok": true,
+        "atom": "CourierCertsScreen"
+      },
+      {
+        "id": "courier.certs.save_button",
+        "ok": true,
+        "atom": "CourierCertsScreen"
+      },
+      {
+        "id": "courier.certs.empty",
+        "ok": true,
+        "atom": "_CertsCard"
+      },
+      {
+        "id": "courier.certs.add_button",
+        "ok": true,
+        "atom": "_CertsCard"
+      }
+    ]
+  }
+}

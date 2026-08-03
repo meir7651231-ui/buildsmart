@@ -1,0 +1,81 @@
+{
+  "name": "_ProductPicker",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "מה אתה מחפש?"
+      },
+      {
+        "kind": "text",
+        "text": "או חפש ישירות בשדה החיפוש למעלה"
+      },
+      {
+        "kind": "text",
+        "text": "לא נמצאו מוצרים"
+      },
+      {
+        "kind": "text",
+        "text": "✓ כבר נוסף"
+      },
+      {
+        "kind": "text",
+        "text": "הוסף"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "מה אתה מחפש?",
+      "או חפש ישירות בשדה החיפוש למעלה",
+      "לא נמצאו מוצרים",
+      "✓ כבר נוסף",
+      "הוסף"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 5"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "chainProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "chainProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(chainProvider.notifier).state = [...chain, p]",
+        "effect": "write → chainProvider"
+      }
+    ]
+  },
+  "floor": [
+    "productImage",
+    "productSuitableForTemp",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [
+      "lineTemp",
+      "initialCat"
+    ],
+    "untangle": [
+      "onChain(…) callback instead of direct chainProvider write"
+    ]
+  }
+}

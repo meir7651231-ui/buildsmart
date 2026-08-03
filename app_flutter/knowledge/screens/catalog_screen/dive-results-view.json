@@ -1,0 +1,82 @@
+{
+  "name": "_DiveResultsView",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "אין תוצאות תואמות",
+        "registryId": "catalog_screen.t14",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין מוצרים תואמים",
+        "registryId": "catalog_screen.t15",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kGlobalSearch"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "diveResultsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "keyboardDiveQueryProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "keyboardDiveQueryProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "LegalScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kGlobalSearch)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: entry.title == 'תנאי…",
+        "effect": "navigate → LegalScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(keyboardDiveQueryProvider.notifier).state = entry.title",
+        "effect": "write → keyboardDiveQueryProvider"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onKeyboardDiveQuery(…) callback instead of direct keyboardDiveQueryProvider write"
+    ]
+  }
+}

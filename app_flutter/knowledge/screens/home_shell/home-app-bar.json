@@ -1,0 +1,290 @@
+{
+  "name": "_HomeAppBar",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "home.topbar.brand",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "home.status.smarttree",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✏️ שיחה חדשה",
+        "registryId": "home.newchat.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בחר סוג איש קשר",
+        "registryId": "home.newchat.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין עדיין משתמשים",
+        "registryId": "home.newchat.empty",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [],
+    "summary": "registry 5 · mapped 5/5 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "mainTabProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "chat"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "userProfileProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showRolePicker",
+        "target": "showRolePicker"
+      },
+      {
+        "kind": "action",
+        "via": "showProfileCard",
+        "target": "showProfileCard"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSectionProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tabHeaderHiddenProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "search"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "tabHeaderHiddenProvider"
+      },
+      {
+        "kind": "action",
+        "via": "openCameraSheet",
+        "target": "openCameraSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "updatesSubTabProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "helpModeProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showIntroTour",
+        "target": "showIntroTour"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "helpModeProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "!kUserSystem"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "roleChipStateProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "authStateProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WelcomeScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showRoleRequestSheet",
+        "target": "showRoleRequestSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "ai"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "AIHubScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "CatalogSettingsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "ChatsArchiveScreen"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "NotifSettingsScreen"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "storeSectionProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "StoreSettingsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "openNewChatWith",
+        "target": "openNewChatWith"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "directoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "currentUidProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "openChatThread",
+        "target": "openChatThread"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showRolePicker(context)",
+        "effect": "open → showRolePicker"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showProfileCard(context)",
+        "effect": "open → showProfileCard"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(tabHeaderHiddenProvider.notifier).state = false",
+        "effect": "write → tabHeaderHiddenProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "openCameraSheet(context)",
+        "effect": "open → openCameraSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(helpModeProvider.notifier).update((on) => !on)",
+        "effect": "write → helpModeProvider"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (!kUserSystem)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "openNewChatWith(context, emoji: c.emoji, name: c.label)",
+        "effect": "open → openNewChatWith"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(chatEngineProvider.notifier).createOrGetThread([myUid, e.uid], name:…",
+        "effect": "write → chatEngineProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "openChatThread(context, ref, threadId)",
+        "effect": "open → openChatThread"
+      }
+    ]
+  },
+  "floor": [
+    "allChatsMuted",
+    "bsSuccess",
+    "confirmDestructive",
+    "dismissAllNotifs",
+    "markAllNotifsRead",
+    "toggleMuteAllChats"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onHelpMode(…) callback instead of direct helpModeProvider write",
+      "onStoreSection(…) callback instead of direct storeSectionProvider write",
+      "onTabHeaderHidden(…) callback instead of direct tabHeaderHiddenProvider write"
+    ]
+  }
+}

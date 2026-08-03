@@ -1,0 +1,420 @@
+{
+  "screen": "courier_reports_tab",
+  "source": "courier_reports_tab.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "name": "CourierReportsTab",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📊 דוחות",
+            "registryId": "courier.reports.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נתונים חיים ממנוע ההזמנות המשותף — ללא המצאות",
+            "registryId": "courier.reports.subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מסירות ישנות ללא ייחוס אינן נספרות",
+            "registryId": "courier_reports_tab.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע אישור האיסוף ועד המסירה ללקוח.",
+            "registryId": "courier_reports_tab.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "היסטוריית מסירות",
+            "registryId": "courier.reports.history_title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📭"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין עדיין מסירות שהושלמו",
+            "registryId": "courier.reports.empty_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "משלוח שיסומן \"נמסר ללקוח\" יופיע כאן",
+            "registryId": "courier_reports_tab.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier.reports.send_report",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🏪 שלח דוח-יומי לחנות",
+            "registryId": "courier.reports.send_report",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_reports_tab.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "✨"
+          },
+          {
+            "kind": "cfgText",
+            "text": "נסח דוח עם AI",
+            "registryId": "courier_reports_tab.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הדוח נשלח כהודעה אמיתית לשיחת \"חנות ליפסקי\" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.",
+            "registryId": "courier_reports_tab.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 12,
+        "unregistered": [
+          "📭",
+          "✨"
+        ],
+        "summary": "registry 12 · mapped 12/12 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "courierClockProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "podPhotosProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "rewardsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "courierClockProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "DailyReportScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerNotifsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "daysBetweenDst",
+        "fMoney",
+        "orgTerm",
+        "startOfWeekSunday"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_DeliveredCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📷"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "courier_reports_tab.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נמסר ✓",
+            "registryId": "courier_reports_tab.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "📷"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showFullPhotoRefDialog",
+            "target": "showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFullPhotoRefDialog(context, widget.podPhoto, label: '📦 ${order.id} — איש…",
+            "effect": "open → showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "floor": [
+        "fMoney",
+        "identical",
+        "imageProviderForRef"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "order",
+          "podCaptured",
+          "podPhoto",
+          "deliveredAt"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RStat",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "value",
+          "label"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "title",
+          "children"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_KvRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "value"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_WeekBars",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "counts",
+          "todayIndex"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 11,
+    "total": 11,
+    "summary": "11/11",
+    "entries": [
+      {
+        "id": "courier.reports.title",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier.reports.subtitle",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier_reports_tab.t01",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier_reports_tab.t02",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier.reports.history_title",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier.reports.empty_title",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier_reports_tab.t03",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier.reports.send_report",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier_reports_tab.t04",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier_reports_tab.t05",
+        "ok": true,
+        "atom": "CourierReportsTab"
+      },
+      {
+        "id": "courier_reports_tab.t06",
+        "ok": true,
+        "atom": "_DeliveredCard"
+      }
+    ]
+  }
+}

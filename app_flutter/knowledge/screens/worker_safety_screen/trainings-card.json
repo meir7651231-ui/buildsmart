@@ -1,0 +1,64 @@
+{
+  "name": "_TrainingsCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "אין הדרכות רשומות עדיין — הוסף את הראשונה.",
+        "registryId": "worker_safety_screen.no_trainings",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נתוני דמו — רישום הדרכות אמיתי יחובר עם חיבור השרת.",
+        "registryId": "worker_safety_screen.demo_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_safety_screen.add_training_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ הוסף הדרכה",
+        "registryId": "worker_safety_screen.add_training_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "✅"
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "✅"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "onRemove",
+    "onSend",
+    "onView"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "trainings",
+      "onAdd",
+      "onSend",
+      "onView",
+      "onRemove"
+    ],
+    "untangle": []
+  }
+}

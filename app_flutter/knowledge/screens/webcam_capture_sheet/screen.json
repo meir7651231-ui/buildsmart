@@ -1,0 +1,59 @@
+{
+  "screen": "webcam_capture_sheet",
+  "source": "webcam_capture_sheet.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "WebcamCaptureScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📸 צלם",
+            "registryId": "webcam_capture_sheet.shoot",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "availableCameras",
+        "base64Encode",
+        "downscaleToJpegDataUrl",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "webcam_capture_sheet.shoot",
+        "ok": true,
+        "atom": "WebcamCaptureScreen"
+      }
+    ]
+  }
+}

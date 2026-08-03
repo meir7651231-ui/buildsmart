@@ -1,0 +1,50 @@
+{
+  "name": "LipskeyBrandScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "ליפסקי ברקן",
+        "registryId": "lipskey_brand_screen.appbar_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אינסטלציה · סניטציה",
+        "registryId": "lipskey_brand_screen.appbar_sub",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "context"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.push(context, LipskeySectionScreen.route(section: section))",
+        "effect": "navigate → context"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "CustomScrollView = shared component → separate atom"
+    ]
+  }
+}

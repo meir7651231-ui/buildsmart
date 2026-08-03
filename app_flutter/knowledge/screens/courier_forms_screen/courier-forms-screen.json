@@ -1,0 +1,121 @@
+{
+  "name": "CourierFormsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📄 טפסים",
+        "registryId": "courier.forms.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "",
+        "registryId": "courier.forms.form101_note",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הבקשות שלי",
+        "registryId": "courier.forms.my_requests",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "צלם את אישור המחלה — הצילום נשמר ברשימה כאן.",
+        "registryId": "courier.forms.sicknote_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין אישורים שהועלו עדיין",
+        "registryId": "courier_forms_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📷"
+      }
+    ],
+    "registered": 5,
+    "unregistered": [
+      "📷"
+    ],
+    "summary": "registry 5 · mapped 5/5 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierFormsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "vacationRequestsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "courierFormsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDatePicker",
+        "target": "showDatePicker"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "vacationRequestsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showFullPhotoRefDialog",
+        "target": "showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showFullPhotoRefDialog(context, n.photo, label: 'אישור מחלה · ${_fmtDate(n.ts…",
+        "effect": "open → showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive",
+    "imageProviderForRef",
+    "pickTaskPhoto",
+    "setState",
+    "sort",
+    "validIsraeliMobile"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

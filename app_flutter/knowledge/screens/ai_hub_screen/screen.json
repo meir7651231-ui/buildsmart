@@ -1,0 +1,191 @@
+{
+  "screen": "ai_hub_screen",
+  "source": "ai_hub_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "AIHubScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הדפדפן לא תומך בחיפוש קולי",
+            "registryId": "ai_hub_screen.t01",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "openBarcodeScanner",
+            "target": "openBarcodeScanner"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "searchQueryProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "mainTabProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "DescribeToCartScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "AiAssistantScreen"
+          },
+          {
+            "kind": "action",
+            "via": "openCheaperAlternativesSheet",
+            "target": "openCheaperAlternativesSheet"
+          },
+          {
+            "kind": "action",
+            "via": "openScanPlanSheet",
+            "target": "openScanPlanSheet"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "_AIFeatureScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartCartProvider.select((lines) => lines.isNotEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(DescribeToCartScreen.route())",
+            "effect": "navigate → DescribeToCartScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(AiAssistantScreen.route())",
+            "effect": "navigate → AiAssistantScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "openCheaperAlternativesSheet(context)",
+            "effect": "open → openCheaperAlternativesSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "openScanPlanSheet(context)",
+            "effect": "open → openScanPlanSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(_AIFeatureScreen.route(t.id))",
+            "effect": "navigate → _AIFeatureScreen"
+          }
+        ]
+      },
+      "floor": [
+        "catalogProductForSku",
+        "catalogSiblingsFor",
+        "unawaited"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "AiMdHead",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "ic",
+          "title",
+          "sub"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "AiFinTile",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "ic",
+          "title",
+          "sub",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "ai_hub_screen.t01",
+        "ok": true,
+        "atom": "AIHubScreen"
+      }
+    ]
+  }
+}

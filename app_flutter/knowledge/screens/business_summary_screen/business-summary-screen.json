@@ -1,0 +1,56 @@
+{
+  "name": "BusinessSummaryScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "✨ סיכום עסקי",
+        "registryId": "business_summary_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "התובנות שחושבו:",
+        "registryId": "business_summary_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח אותם לסיכום.",
+        "registryId": "business_summary_screen.t03",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "insightLines"
+    ],
+    "untangle": []
+  }
+}

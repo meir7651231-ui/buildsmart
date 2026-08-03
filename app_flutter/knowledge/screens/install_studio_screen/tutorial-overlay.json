@@ -1,0 +1,48 @@
+{
+  "name": "_TutorialOverlay",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "ברוכים הבאים לתכנון חיבור"
+      },
+      {
+        "kind": "text",
+        "text": "3 צעדים לרשימת קנייה מוכנה"
+      },
+      {
+        "kind": "text",
+        "text": "הבנתי — בוא נתחיל!"
+      },
+      {
+        "kind": "text",
+        "text": "דלג"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "ברוכים הבאים לתכנון חיבור",
+      "3 צעדים לרשימת קנייה מוכנה",
+      "הבנתי — בוא נתחיל!",
+      "דלג"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 4"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "onDismiss"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

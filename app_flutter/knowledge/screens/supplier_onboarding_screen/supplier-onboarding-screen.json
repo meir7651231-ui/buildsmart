@@ -1,0 +1,48 @@
+{
+  "name": "SupplierOnboardingScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "העלאת מוצר"
+      },
+      {
+        "kind": "text",
+        "text": "מאפיינים מזוהים אוטומטית"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "העלאת מוצר",
+      "מאפיינים מזוהים אוטומטית"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "supplierSubmitProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState",
+    "suggestFacets",
+    "validateDraft"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "storeId"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

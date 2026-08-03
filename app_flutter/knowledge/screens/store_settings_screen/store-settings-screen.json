@@ -1,0 +1,85 @@
+{
+  "name": "StoreSettingsScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "הגדרות חנות",
+        "registryId": "store_settings_screen.screen_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "איפוס הגדרות?",
+        "registryId": "store_settings_screen.reset_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כל הגדרות החנות יוחזרו לברירת המחדל.",
+        "registryId": "store_settings_screen.reset_body",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_settings_screen.cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "store_settings_screen.cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_settings_screen.reset_ok",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אפס",
+        "registryId": "store_settings_screen.reset_ok",
+        "registryOk": true
+      }
+    ],
+    "registered": 7,
+    "unregistered": [],
+    "summary": "registry 7 · mapped 7/7 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "storeSettingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "kbStoreSettingsNodes"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom"
+    ]
+  }
+}

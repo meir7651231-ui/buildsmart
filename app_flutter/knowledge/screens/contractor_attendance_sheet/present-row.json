@@ -1,0 +1,52 @@
+{
+  "name": "_PresentRow",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "contractor_attendance_sheet.location",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מיקום הכניסה — פתח ניווט",
+        "registryId": "contractor_attendance_sheet.location",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "openNavSheet",
+        "target": "openNavSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "openNavSheet(context, label: '${day.username} — מיקום כניסה', lat: day.inLat,…",
+        "effect": "open → openNavSheet"
+      }
+    ]
+  },
+  "floor": [
+    "mapsQueryForDay"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "day"
+    ],
+    "untangle": []
+  }
+}

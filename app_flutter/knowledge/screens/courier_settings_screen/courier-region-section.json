@@ -1,0 +1,51 @@
+{
+  "name": "_CourierRegionSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier_settings_screen.soon",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "courier_settings_screen.soon",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "appSettingsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onAppSettings(…) callback instead of direct appSettingsProvider write"
+    ]
+  }
+}

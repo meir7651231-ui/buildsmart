@@ -1,0 +1,99 @@
+{
+  "name": "_DeptScopeBar",
+  "role": "section",
+  "variant": "live",
+  "gate": "kProfileRawShell",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "כל המחלקות",
+        "registryId": "departments_screen.t03",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "deptFlatProductsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "deptFlatProductsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "homeDepartmentProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogSystemFilterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreePathProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(deptFlatProductsProvider.notifier).state = !flat",
+        "effect": "write → deptFlatProductsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(deptFlatProductsProvider.notifier).state = false",
+        "effect": "write → deptFlatProductsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(homeDepartmentProvider.notifier).state = null",
+        "effect": "write → homeDepartmentProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogSystemFilterProvider.notifier).state = null",
+        "effect": "write → catalogSystemFilterProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreePathProvider.notifier).state = const []",
+        "effect": "write → catalogTreePathProvider"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [
+      "name",
+      "system",
+      "showFlatToggle"
+    ],
+    "untangle": [
+      "onCatalogSystemFilter(…) callback instead of direct catalogSystemFilterProvider write",
+      "onCatalogTreePath(…) callback instead of direct catalogTreePathProvider write",
+      "onDeptFlatProducts(…) callback instead of direct deptFlatProductsProvider write",
+      "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write"
+    ]
+  }
+}

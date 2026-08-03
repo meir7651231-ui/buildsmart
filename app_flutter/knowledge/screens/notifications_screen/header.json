@@ -1,0 +1,84 @@
+{
+  "name": "_Header",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "התראות",
+        "registryId": "notifications_screen.screen_title",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "notifReadIdsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "notifDismissedIdsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "notifUnreadCountProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "set",
+        "target": "notifReadIdsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "set",
+        "target": "notifDismissedIdsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "notifDismissedIdsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "notifReadIdsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(notifReadIdsProvider.notifier).set(_activeNotifs.map((n) => n.id).to…",
+        "effect": "write → notifReadIdsProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(notifDismissedIdsProvider.notifier).set(Set<String>.from(ref.read(no…",
+        "effect": "write → notifDismissedIdsProvider"
+      }
+    ]
+  },
+  "floor": [
+    "addAll",
+    "confirmDestructive"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onNotifDismissedIds(…) callback instead of direct notifDismissedIdsProvider write",
+      "onNotifReadIds(…) callback instead of direct notifReadIdsProvider write"
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "name": "_RequestComposer",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_employer_stock_sheet.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🧱"
+      },
+      {
+        "kind": "cfgText",
+        "text": "בקש חומרים",
+        "registryId": "worker_employer_stock_sheet.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🧱 בקשת חומרים מהקבלן",
+        "registryId": "worker_employer_stock_sheet.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כתוב פריט אחד בכל שורה. הבקשה נשלחת לקבלן המעסיק — לא משנה את המלאי.",
+        "registryId": "worker_employer_stock_sheet.t08",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_employer_stock_sheet.t09",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שלח בקשה",
+        "registryId": "worker_employer_stock_sheet.t09",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_employer_stock_sheet.t10",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בטל",
+        "registryId": "worker_employer_stock_sheet.t10",
+        "registryOk": true
+      }
+    ],
+    "registered": 8,
+    "unregistered": [
+      "🧱"
+    ],
+    "summary": "registry 8 · mapped 8/8 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "composing",
+      "itemsCtrl",
+      "noteCtrl",
+      "onToggle",
+      "onSend"
+    ],
+    "untangle": []
+  }
+}

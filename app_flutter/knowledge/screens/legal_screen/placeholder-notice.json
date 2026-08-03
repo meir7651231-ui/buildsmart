@@ -1,0 +1,29 @@
+{
+  "name": "_PlaceholderNotice",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "ℹ️"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "ℹ️"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

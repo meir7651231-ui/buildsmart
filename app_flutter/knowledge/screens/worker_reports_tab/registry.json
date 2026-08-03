@@ -1,0 +1,52 @@
+{
+  "matched": 9,
+  "total": 9,
+  "summary": "9/9",
+  "entries": [
+    {
+      "id": "worker.reports.title",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.time_empty",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.area_note",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.history_empty",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.rejections_empty",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.send_daily_button",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.ai_button",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker.reports.send_note",
+      "ok": true,
+      "atom": "WorkerReportsTab"
+    },
+    {
+      "id": "worker_reports_tab.photo_error",
+      "ok": true,
+      "atom": "_HistoryRow"
+    }
+  ]
+}

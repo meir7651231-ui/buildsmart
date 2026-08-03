@@ -1,0 +1,74 @@
+{
+  "name": "_ManagerScreensSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מעבר בין מסכים",
+        "registryId": "manager_screens_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "צפייה בכל לוח של המערכת — חזרה לניהול בכל רגע.",
+        "registryId": "manager_screens_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🏪"
+      },
+      {
+        "kind": "text",
+        "text": "העלאת מוצר (ספק)"
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🏪",
+      "העלאת מוצר (ספק)"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "MaterialPageRoute<void>(builder: (_) …"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "featureFlagsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "SupplierOnboardingScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(SupplierOnboardingScreen.route('ahim_cohen'))",
+        "effect": "navigate → SupplierOnboardingScreen"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

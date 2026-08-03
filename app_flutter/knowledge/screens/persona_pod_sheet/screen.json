@@ -1,0 +1,214 @@
+{
+  "screen": "persona_pod_sheet",
+  "source": "persona_pod_sheet.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "PersonaPodSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📦"
+          },
+          {
+            "kind": "cfgText",
+            "text": "ההזמנה לא נמצאה",
+            "registryId": "persona_pod_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ייתכן שההזמנה הוסרה או שהמשלוח כבר נסגר — חזרו לרשימת המשלוחים",
+            "registryId": "persona_pod_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📸 אישור מסירה",
+            "registryId": "persona_pod_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "POD + צילום",
+            "registryId": "persona_pod_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📷"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין צילום עדיין",
+            "registryId": "persona_pod_sheet.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✅ נמסר ללקוח",
+            "registryId": "persona_pod_sheet.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [
+          "📦",
+          "📷"
+        ],
+        "summary": "registry 6 · mapped 6/6 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "openSignaturePad",
+            "target": "openSignaturePad"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "rewardsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "workerNotifsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, ok ? 'צילום המסירה נשמר 📸 — מוצג לחנות ולמנהל' : 'התמונה …",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "openSignaturePad(context)",
+            "effect": "open → openSignaturePad"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, ok ? 'החתימה נשמרה ✍️' : 'החתימה לא נשמרה — נסה שוב')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(sysOrdersProvider.notifier).courierAdvance(order.id)",
+            "effect": "write → sysOrdersProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins)",
+            "effect": "write → rewardsProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(workerNotifsProvider.notifier).addNotification(username: s.username,…",
+            "effect": "write → workerNotifsProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'המשלוח ${order.id} עודכן — מסונכרן עם החנות והמנהל ✓')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "confirmDestructive",
+        "pickTaskPhoto",
+        "stampCourierClock",
+        "taskPhotoWidget",
+        "unawaited"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [
+          "orderId"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "persona_pod_sheet.t01",
+        "ok": true,
+        "atom": "PersonaPodSheet"
+      },
+      {
+        "id": "persona_pod_sheet.t02",
+        "ok": true,
+        "atom": "PersonaPodSheet"
+      },
+      {
+        "id": "persona_pod_sheet.t03",
+        "ok": true,
+        "atom": "PersonaPodSheet"
+      },
+      {
+        "id": "persona_pod_sheet.t04",
+        "ok": true,
+        "atom": "PersonaPodSheet"
+      },
+      {
+        "id": "persona_pod_sheet.t05",
+        "ok": true,
+        "atom": "PersonaPodSheet"
+      },
+      {
+        "id": "persona_pod_sheet.t06",
+        "ok": true,
+        "atom": "PersonaPodSheet"
+      }
+    ]
+  }
+}

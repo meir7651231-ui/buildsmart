@@ -1,0 +1,206 @@
+{
+  "screen": "worker_equipment_checklist_sheet",
+  "source": "worker_equipment_checklist_sheet.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "_EquipmentChecklistSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🧰 ציוד נדרש להיום",
+            "registryId": "worker_equipment_checklist_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "רשימת הציוד נגזרת ממיפוי דמו של מוצרים למשימה — תחובר עם השרת",
+            "registryId": "worker_equipment_checklist_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "צ׳קליסט ציוד"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין רשימת ציוד למשימות הנוכחיות",
+            "registryId": "worker_equipment_checklist_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "משימות ללא רשימת ציוד"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_equipment_checklist_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "סגור",
+            "registryId": "worker_equipment_checklist_sheet.t04",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [
+          "צ׳קליסט ציוד",
+          "משימות ללא רשימת ציוד"
+        ],
+        "summary": "registry 5 · mapped 5/5 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "employerStockProvider(employerId)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "availabilityFor",
+        "employerStockProvider",
+        "productsForTask",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "tasks"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_EquipmentRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "item",
+          "checked",
+          "availability",
+          "onChanged"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SecH",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "text"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PrimaryBtn",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "worker_equipment_checklist_sheet.t01",
+        "ok": true,
+        "atom": "_EquipmentChecklistSheet"
+      },
+      {
+        "id": "worker_equipment_checklist_sheet.t02",
+        "ok": true,
+        "atom": "_EquipmentChecklistSheet"
+      },
+      {
+        "id": "worker_equipment_checklist_sheet.t03",
+        "ok": true,
+        "atom": "_EquipmentChecklistSheet"
+      },
+      {
+        "id": "worker_equipment_checklist_sheet.t04",
+        "ok": true,
+        "atom": "_EquipmentChecklistSheet"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1006 @@
+{
+  "screen": "chat_settings_screen",
+  "source": "chat_settings_screen.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "name": "ChatSettingsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הגדרות שיחות",
+            "registryId": "chat_settings_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "איפוס הגדרות?",
+            "registryId": "chat_settings_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כל הגדרות השיחות יוחזרו לברירת המחדל.",
+            "registryId": "chat_settings_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chat_settings_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "chat_settings_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chat_settings_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אפס",
+            "registryId": "chat_settings_screen.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [],
+        "summary": "registry 7 · mapped 7/7 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_QuickReplyBanner",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "תשובות מהירות",
+            "registryId": "chat_settings_screen.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chat_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הבנתי",
+            "registryId": "chat_settings_screen.t07",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "⚡"
+          },
+          {
+            "kind": "cfgText",
+            "text": "תשובות מהירות",
+            "registryId": "chat_settings_screen.t08",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chat_settings_screen.t09",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ערוך",
+            "registryId": "chat_settings_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [
+          "⚡"
+        ],
+        "summary": "registry 6 · mapped 6/6 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'התבנית הועתקה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PresenceSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t16",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ChatNotifSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "chat_settings_screen.t17",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_MediaSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t16",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "chat_settings_screen.t17",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ChatPrivacySection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מחיקת היסטוריית שיחות",
+            "registryId": "chat_settings_screen.t10",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.",
+            "registryId": "chat_settings_screen.t11",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chat_settings_screen.t12",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "chat_settings_screen.t12",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "chat_settings_screen.t13",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מחק",
+            "registryId": "chat_settings_screen.t13",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t16",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "chat_settings_screen.t17",
+            "registryOk": true
+          }
+        ],
+        "registered": 9,
+        "unregistered": [],
+        "summary": "registry 9 · mapped 9/9 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatHistoryClearedProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_BackupSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t16",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "chat_settings_screen.t17",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_LangSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t16",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "chat_settings_screen.t17",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_BusinessSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showTimePicker",
+            "target": "showTimePicker"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showTimePicker(context: context, initialTime: time, builder: (ctx, child) => …",
+            "effect": "open → showTimePicker"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_BotSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה",
+            "registryId": "chat_settings_screen.t17",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, '$label — בבנייה')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ArchiveSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות",
+            "registryId": "chat_settings_screen.t14",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t15",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בבנייה — עדיין לא משפיע",
+            "registryId": "chat_settings_screen.t16",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "chatSettingsProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kHideUnderConstruction && (underConstruction || _visibleChildren.isEmpty))",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "onChanged"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onChatSettings(…) callback instead of direct chatSettingsProvider write"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 17,
+    "total": 17,
+    "summary": "17/17",
+    "entries": [
+      {
+        "id": "chat_settings_screen.t01",
+        "ok": true,
+        "atom": "ChatSettingsScreen"
+      },
+      {
+        "id": "chat_settings_screen.t02",
+        "ok": true,
+        "atom": "ChatSettingsScreen"
+      },
+      {
+        "id": "chat_settings_screen.t03",
+        "ok": true,
+        "atom": "ChatSettingsScreen"
+      },
+      {
+        "id": "chat_settings_screen.t04",
+        "ok": true,
+        "atom": "ChatSettingsScreen"
+      },
+      {
+        "id": "chat_settings_screen.t05",
+        "ok": true,
+        "atom": "ChatSettingsScreen"
+      },
+      {
+        "id": "chat_settings_screen.t06",
+        "ok": true,
+        "atom": "_QuickReplyBanner"
+      },
+      {
+        "id": "chat_settings_screen.t07",
+        "ok": true,
+        "atom": "_QuickReplyBanner"
+      },
+      {
+        "id": "chat_settings_screen.t08",
+        "ok": true,
+        "atom": "_QuickReplyBanner"
+      },
+      {
+        "id": "chat_settings_screen.t09",
+        "ok": true,
+        "atom": "_QuickReplyBanner"
+      },
+      {
+        "id": "chat_settings_screen.t14",
+        "ok": true,
+        "atom": "_PresenceSection"
+      },
+      {
+        "id": "chat_settings_screen.t15",
+        "ok": true,
+        "atom": "_PresenceSection"
+      },
+      {
+        "id": "chat_settings_screen.t16",
+        "ok": true,
+        "atom": "_PresenceSection"
+      },
+      {
+        "id": "chat_settings_screen.t17",
+        "ok": true,
+        "atom": "_ChatNotifSection"
+      },
+      {
+        "id": "chat_settings_screen.t10",
+        "ok": true,
+        "atom": "_ChatPrivacySection"
+      },
+      {
+        "id": "chat_settings_screen.t11",
+        "ok": true,
+        "atom": "_ChatPrivacySection"
+      },
+      {
+        "id": "chat_settings_screen.t12",
+        "ok": true,
+        "atom": "_ChatPrivacySection"
+      },
+      {
+        "id": "chat_settings_screen.t13",
+        "ok": true,
+        "atom": "_ChatPrivacySection"
+      }
+    ]
+  }
+}

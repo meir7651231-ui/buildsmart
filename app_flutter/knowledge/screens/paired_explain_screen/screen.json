@@ -1,0 +1,86 @@
+{
+  "screen": "paired_explain_screen",
+  "source": "paired_explain_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "PairedExplainScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🧩 מה עוד צריך?",
+            "registryId": "paired_explain_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מותקן לרוב יחד עם:",
+            "registryId": "paired_explain_screen.paired_with",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "⚙️ הרשימה מנתוני-הקטלוג; ה-AI רק מסביר למה כל אביזר נחוץ.",
+            "registryId": "paired_explain_screen.footer",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "product",
+          "types"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 3,
+    "total": 3,
+    "summary": "3/3",
+    "entries": [
+      {
+        "id": "paired_explain_screen.title",
+        "ok": true,
+        "atom": "PairedExplainScreen"
+      },
+      {
+        "id": "paired_explain_screen.paired_with",
+        "ok": true,
+        "atom": "PairedExplainScreen"
+      },
+      {
+        "id": "paired_explain_screen.footer",
+        "ok": true,
+        "atom": "PairedExplainScreen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "RewardsHubScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "rewardsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "_RewardsFeatureScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(_RewardsFeatureScreen.route(t.id))",
+        "effect": "navigate → _RewardsFeatureScreen"
+      }
+    ]
+  },
+  "floor": [
+    "orgTerm"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "_RoleSwitchCodeDialog",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "החלפת תפקיד",
+        "registryId": "courier_profile_screen.role_switch_dialog_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:",
+        "registryId": "courier_profile_screen.role_switch_dialog_body",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier_profile_screen.dialog_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ביטול",
+        "registryId": "courier_profile_screen.dialog_cancel",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier_profile_screen.dialog_confirm",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אישור",
+        "registryId": "courier_profile_screen.dialog_confirm",
+        "registryOk": true
+      }
+    ],
+    "registered": 6,
+    "unregistered": [],
+    "summary": "registry 6 · mapped 6/6 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

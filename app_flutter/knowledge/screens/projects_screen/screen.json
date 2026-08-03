@@ -1,0 +1,406 @@
+{
+  "screen": "projects_screen",
+  "source": "projects_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "ProjectsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🏗️ הפרויקטים שלי",
+            "registryId": "projects_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "projects_screen.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ יציאה",
+            "registryId": "projects_screen.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "projects_screen.new_project",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "פרויקט חדש",
+            "registryId": "projects_screen.new_project",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🏗️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין פרויקטים עדיין",
+            "registryId": "projects_screen.empty_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר",
+            "registryId": "projects_screen.empty_sub",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "projects_screen.empty_cta",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "פרויקט חדש",
+            "registryId": "projects_screen.empty_cta",
+            "registryOk": true
+          }
+        ],
+        "registered": 9,
+        "unregistered": [
+          "🏗️"
+        ],
+        "summary": "registry 9 · mapped 9/9 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "projectsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "BudgetScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "TasksScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "SmartProjectScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "projectsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(BudgetScreen.route())",
+            "effect": "navigate → BudgetScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(TasksScreen.route())",
+            "effect": "navigate → TasksScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(SmartProjectScreen.route())",
+            "effect": "navigate → SmartProjectScreen"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "kbProjectsNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_SiteCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "projects_screen.status_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📊 הקש לסטטוס האתר המלא",
+            "registryId": "projects_screen.status_hint",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "project",
+          "isActive",
+          "onSwitch",
+          "onStatus",
+          "onCart"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_LinkBtn",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_StatusSheet",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "✏️ הקש לעריכת הפרטים",
+            "registryId": "projects_screen.edit_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "projects_screen.edit_site",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✏️ עריכת פרטי האתר",
+            "registryId": "projects_screen.edit_site",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "projectsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "projectsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(projectsProvider.notifier).switchProject(p.id, outgoingCart: outgoing)",
+            "effect": "write → projectsProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(smartCartProvider.notifier).loadSnapshot(incoming)",
+            "effect": "write → smartCartProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'עברת לפרויקט: ${p.name}')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showModalBottomSheet<void>(context: context, backgroundColor: Colors.transpar…",
+            "effect": "open → showModalBottomSheet"
+          }
+        ]
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "projectId"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_EditSheet",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "projectsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "projectId"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 9,
+    "total": 9,
+    "summary": "9/9",
+    "entries": [
+      {
+        "id": "projects_screen.title",
+        "ok": true,
+        "atom": "ProjectsScreen"
+      },
+      {
+        "id": "projects_screen.exit",
+        "ok": true,
+        "atom": "ProjectsScreen"
+      },
+      {
+        "id": "projects_screen.new_project",
+        "ok": true,
+        "atom": "ProjectsScreen"
+      },
+      {
+        "id": "projects_screen.empty_title",
+        "ok": true,
+        "atom": "ProjectsScreen"
+      },
+      {
+        "id": "projects_screen.empty_sub",
+        "ok": true,
+        "atom": "ProjectsScreen"
+      },
+      {
+        "id": "projects_screen.empty_cta",
+        "ok": true,
+        "atom": "ProjectsScreen"
+      },
+      {
+        "id": "projects_screen.status_hint",
+        "ok": true,
+        "atom": "_SiteCard"
+      },
+      {
+        "id": "projects_screen.edit_hint",
+        "ok": true,
+        "atom": "_StatusSheet"
+      },
+      {
+        "id": "projects_screen.edit_site",
+        "ok": true,
+        "atom": "_StatusSheet"
+      }
+    ]
+  }
+}

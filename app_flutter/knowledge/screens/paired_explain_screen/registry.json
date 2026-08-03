@@ -1,0 +1,22 @@
+{
+  "matched": 3,
+  "total": 3,
+  "summary": "3/3",
+  "entries": [
+    {
+      "id": "paired_explain_screen.title",
+      "ok": true,
+      "atom": "PairedExplainScreen"
+    },
+    {
+      "id": "paired_explain_screen.paired_with",
+      "ok": true,
+      "atom": "PairedExplainScreen"
+    },
+    {
+      "id": "paired_explain_screen.footer",
+      "ok": true,
+      "atom": "PairedExplainScreen"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "matched": 1,
+  "total": 1,
+  "summary": "1/1",
+  "entries": [
+    {
+      "id": "lens_selector_row.sort_by",
+      "ok": true,
+      "atom": "LensSelectorRow"
+    }
+  ]
+}

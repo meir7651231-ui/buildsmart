@@ -1,0 +1,57 @@
+{
+  "name": "_HelpModeOverlay",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה",
+        "registryId": "home.helpmode.banner",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "helpModeProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showSnackBar",
+        "target": "showSnackBar"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(helpModeProvider.notifier).state = false",
+        "effect": "write → helpModeProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "..showSnackBar(const SnackBar(duration: Duration(seconds: 2), content: Text('…",
+        "effect": "open → showSnackBar"
+      }
+    ]
+  },
+  "floor": [
+    "hideCurrentSnackBar"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onHelpMode(…) callback instead of direct helpModeProvider write"
+    ]
+  }
+}

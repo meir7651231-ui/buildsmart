@@ -1,0 +1,42 @@
+{
+  "matched": 7,
+  "total": 7,
+  "summary": "7/7",
+  "entries": [
+    {
+      "id": "courier.dash.appbar_title",
+      "ok": true,
+      "atom": "CourierDashboardScreen"
+    },
+    {
+      "id": "courier.dash.exit",
+      "ok": true,
+      "atom": "CourierDashboardScreen"
+    },
+    {
+      "id": "courier.gate.vehicle_title",
+      "ok": true,
+      "atom": "CourierDashboardScreen"
+    },
+    {
+      "id": "courier.gate.vehicle_sub",
+      "ok": true,
+      "atom": "CourierDashboardScreen"
+    },
+    {
+      "id": "courier.dash.subtitle",
+      "ok": true,
+      "atom": "CourierDashboardScreen"
+    },
+    {
+      "id": "courier.dash.vehicle_title",
+      "ok": true,
+      "atom": "CourierDashboardScreen"
+    },
+    {
+      "id": "courier.vehicle.preferred",
+      "ok": true,
+      "atom": "_VehicleButton"
+    }
+  ]
+}

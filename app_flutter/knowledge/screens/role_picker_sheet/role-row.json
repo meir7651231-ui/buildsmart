@@ -1,0 +1,43 @@
+{
+  "name": "_RoleRow",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "activePersonaProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(activePersonaProvider.notifier).state = null",
+        "effect": "write → activePersonaProvider"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "persona"
+    ],
+    "untangle": [
+      "CourierDashboardScreen = shared component → separate atom",
+      "ManagerDashboardScreen = shared component → separate atom",
+      "StoreDashboardScreen = shared component → separate atom",
+      "WorkerAppScreen = shared component → separate atom",
+      "_pushBoard = shared component → separate atom"
+    ]
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "name": "_ContractorHrSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "👷 חופשות עובדים",
+        "registryId": "contractor_hr_sheet.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🌴 אין בקשות חופשה מהעובדים שלך כרגע",
+        "registryId": "contractor_hr_sheet.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🎓 הדרכות עובדים",
+        "registryId": "contractor_hr_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🎓 אין הדרכות מהעובדים שלך כרגע",
+        "registryId": "contractor_hr_sheet.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📜 תעודות עובדים",
+        "registryId": "contractor_hr_sheet.t05",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "התעודות המקצועיות של העובדים שלך (לצפייה בלבד)",
+        "registryId": "contractor_hr_sheet.t06",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📜 אין תעודות מהעובדים שלך כרגע",
+        "registryId": "contractor_hr_sheet.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📋 מסמכים נדרשים מהעובדים",
+        "registryId": "contractor_hr_sheet.t08",
+        "registryOk": true
+      }
+    ],
+    "registered": 8,
+    "unregistered": [],
+    "summary": "registry 8 · mapped 8/8 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "vacationRequestsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerTrainingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "requestsForEmployer(kDemoContractorId)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "trainingsForEmployer(kDemoContractorId)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "certsForEmployer(kDemoContractorId)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "requiredDocsForEmployer(kDemoContractorId)"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "requiredDocsPolicyProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(requiredDocsPolicyProvider.notifier).removeRequirement(kDemoContract…",
+        "effect": "write → requiredDocsPolicyProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, '❌ הוסר מסמך נדרש: $name')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(requiredDocsPolicyProvider.notifier).addRequirement(kDemoContractorI…",
+        "effect": "write → requiredDocsPolicyProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '📋 נוסף מסמך נדרש: $s')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "certsForEmployer",
+    "promptRejectReason",
+    "requestsForEmployer",
+    "requiredDocsForEmployer",
+    "trainingsForEmployer"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "screen": "role_request_sheet",
+  "source": "role_request_sheet.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "_RoleRequestSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🪪 בקשת תפקיד",
+            "registryId": "role_request_sheet.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בחר תפקיד — הבקשה תישלח לאישור הגורם המתאים",
+            "registryId": "role_request_sheet.subtitle",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState",
+        "submitRoleRequest"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RequestingAs",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מבקש/ת בשם"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מבקש/ת בשם"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "authStateProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "user == null"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "name.isEmpty && contact.isEmpty"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (user == null)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (name.isEmpty && contact.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RoleRequestRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "role",
+          "busy",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "role_request_sheet.title",
+        "ok": true,
+        "atom": "_RoleRequestSheet"
+      },
+      {
+        "id": "role_request_sheet.subtitle",
+        "ok": true,
+        "atom": "_RoleRequestSheet"
+      }
+    ]
+  }
+}

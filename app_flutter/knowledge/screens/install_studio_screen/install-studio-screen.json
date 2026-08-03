@@ -1,0 +1,253 @@
+{
+  "name": "InstallStudioScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "תכנון חיבור"
+      },
+      {
+        "kind": "text",
+        "text": "בחר מה לחבר · נכין רשימת קנייה"
+      },
+      {
+        "kind": "text",
+        "text": "סוג הקו — מה טמפרטורת המים?"
+      },
+      {
+        "kind": "text",
+        "text": "הטמפרטורה קובעת אילו פריטי בטיחות נדרשים"
+      },
+      {
+        "kind": "text",
+        "text": "מה אתה רוצה לחבר?"
+      },
+      {
+        "kind": "text",
+        "text": "בחר מה אתה מתקין:"
+      },
+      {
+        "kind": "text",
+        "text": "— או כתוב במילים —"
+      },
+      {
+        "kind": "text",
+        "text": "בנה"
+      },
+      {
+        "kind": "text",
+        "text": "חיבור צינור צריך 2 נקודות — כניסה + יציאה.\nהוסף את הנקודה השנייה (ברז, אסלה, דוד…)"
+      },
+      {
+        "kind": "text",
+        "text": "מחזור מים חמים"
+      },
+      {
+        "kind": "text",
+        "text": "מים חמים מיד, בלי להמתין שיתחממו"
+      },
+      {
+        "kind": "text",
+        "text": "הפריטים הבאים חסרים וחשובים לבטיחות:"
+      },
+      {
+        "kind": "text",
+        "text": "🔴"
+      },
+      {
+        "kind": "text",
+        "text": "חזור לתכנון"
+      },
+      {
+        "kind": "text",
+        "text": "הצג רשימה בכל זאת"
+      },
+      {
+        "kind": "text",
+        "text": "שמור פרויקט"
+      },
+      {
+        "kind": "text",
+        "text": "ביטול"
+      },
+      {
+        "kind": "text",
+        "text": "שמור"
+      },
+      {
+        "kind": "text",
+        "text": "הפרויקטים שלי"
+      },
+      {
+        "kind": "text",
+        "text": "אין עדיין פרויקטים שמורים.\nבנה קו ולחץ \"💾 שמור פרויקט\"."
+      },
+      {
+        "kind": "text",
+        "text": "שנה שם"
+      },
+      {
+        "kind": "text",
+        "text": "מחק"
+      },
+      {
+        "kind": "text",
+        "text": "שנה שם לפרויקט"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "תכנון חיבור",
+      "בחר מה לחבר · נכין רשימת קנייה",
+      "סוג הקו — מה טמפרטורת המים?",
+      "הטמפרטורה קובעת אילו פריטי בטיחות נדרשים",
+      "מה אתה רוצה לחבר?",
+      "בחר מה אתה מתקין:",
+      "— או כתוב במילים —",
+      "בנה",
+      "חיבור צינור צריך 2 נקודות — כניסה + יציאה.\nהוסף את הנקודה השנייה (ברז, אסלה, דוד…)",
+      "מחזור מים חמים",
+      "מים חמים מיד, בלי להמתין שיתחממו",
+      "הפריטים הבאים חסרים וחשובים לבטיחות:",
+      "🔴",
+      "חזור לתכנון",
+      "הצג רשימה בכל זאת",
+      "שמור פרויקט",
+      "ביטול",
+      "שמור",
+      "הפרויקטים שלי",
+      "אין עדיין פרויקטים שמורים.\nבנה קו ולחץ \"💾 שמור פרויקט\".",
+      "שנה שם",
+      "מחק",
+      "שנה שם לפרויקט"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 23"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "installStudioActionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chainProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "lineMaxTempProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "chainProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "chainProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "lineMaxTempProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "lineMaxTempProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "AuditScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "lineAccessoriesProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "lineAccessoriesProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "savedProjectsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "savedProjectsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "savedProjectsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(lineMaxTempProvider.notifier).state = val",
+        "effect": "write → lineMaxTempProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Audi…",
+        "effect": "navigate → AuditScreen"
+      }
+    ]
+  },
+  "floor": [
+    "add",
+    "autoFlowFix",
+    "buildInstallation",
+    "buildTreeInstallation",
+    "canConnect",
+    "confirmDestructive",
+    "connectionMethodLabel",
+    "manifoldOutlets",
+    "productSuitableForTemp",
+    "removeAt",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom",
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

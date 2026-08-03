@@ -1,0 +1,700 @@
+{
+  "screen": "tasks_screen",
+  "source": "tasks_screen.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "name": "TasksScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📋 משימות",
+            "registryId": "tasks_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ יציאה",
+            "registryId": "tasks_screen.exit",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "אתה רואה את כל משימות הצוות. אשר עבודות שהוגשו ועקוב אחרי ההתקדמות."
+          },
+          {
+            "kind": "text",
+            "text": "אין משימות לצוות עדיין — משימות חדשות יופיעו כאן"
+          },
+          {
+            "kind": "cfgText",
+            "text": "עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.",
+            "registryId": "tasks_screen.proposal_intro",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "אתה רואה את כל משימות הצוות. אשר עבודות שהוגשו ועקוב אחרי ההתקדמות.",
+          "אין משימות לצוות עדיין — משימות חדשות יופיעו כאן"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 2"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "pendingApprovalTasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "pendingProposalsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "confirmDestructive",
+        "promptRejectReason",
+        "statusBranch",
+        "taskLeaf"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "_managerView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_Intro",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "text"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_LogButton",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.log_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📅 יומן עבודה — מה בוצע בכל יום",
+            "registryId": "tasks_screen.log_btn",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_NewTaskButton",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.new_task",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "＋ משימה חדשה",
+            "registryId": "tasks_screen.new_task",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ApprovalCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.approval_reject",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "↩️ החזר לתיקון",
+            "registryId": "tasks_screen.approval_reject",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "name",
+          "workerLabel",
+          "onApprove",
+          "onReject"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ProposalCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.proposal_reject",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "❌ דחה",
+            "registryId": "tasks_screen.proposal_reject",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "id",
+          "name",
+          "detail",
+          "workerLabel",
+          "days",
+          "onApprove",
+          "onReject"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_DoneAll",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "text"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Group",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.edit",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✏️ ערוך",
+            "registryId": "tasks_screen.edit",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius",
+        "onTap"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "header",
+          "tasks",
+          "onTap",
+          "onEdit"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_TaskSheet",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "תיאור המשימה"
+          },
+          {
+            "kind": "text",
+            "text": "שלבי ביצוע"
+          },
+          {
+            "kind": "text",
+            "text": "תמונת ביצוע"
+          },
+          {
+            "kind": "text",
+            "text": "הערת העובד"
+          },
+          {
+            "kind": "text",
+            "text": "דווח על הביצוע"
+          },
+          {
+            "kind": "cfgText",
+            "text": "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.",
+            "registryId": "tasks_screen.decide_intro",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "tasks_screen.sheet_reject",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "↩️ החזר לתיקון",
+            "registryId": "tasks_screen.sheet_reject",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "תיאור המשימה",
+          "שלבי ביצוע",
+          "תמונת ביצוע",
+          "הערת העובד",
+          "דווח על הביצוע"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 5"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'לא צולמה תמונה')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(tasksProvider.notifier).attachPhoto(t.id, dataUrl)",
+            "effect": "write → tasksProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, '📷 תמונת ההוכחה צורפה')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(tasksProvider.notifier).submitForReview(t.id, note: _note.text)",
+            "effect": "write → tasksProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'נשלח לאישור המנהל ✓')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "ref.read(tasksProvider.notifier).reject(t.id, reason: why)",
+            "effect": "write → tasksProvider"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'המשימה הוחזרה לעובד לתיקון')",
+            "effect": "toast"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(tasksProvider.notifier).approve(t.id)",
+            "effect": "write → tasksProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'המשימה אושרה ✓')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "confirmDestructive",
+        "pickTaskPhoto",
+        "promptRejectReason",
+        "taskPhotoWidget"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "task",
+          "role"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_WorkLogSheet",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "יומן עבודה",
+            "registryId": "tasks_screen.worklog_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "סיכום יומי — מה בוצע בפרויקט",
+            "registryId": "tasks_screen.worklog_sub",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workLogProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_TaskAuthorSheet",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "שם המשימה"
+          },
+          {
+            "kind": "text",
+            "text": "תיאור"
+          },
+          {
+            "kind": "text",
+            "text": "שלבי ביצוע — שלב בכל שורה"
+          },
+          {
+            "kind": "text",
+            "text": "משך משוער (ימים)"
+          },
+          {
+            "kind": "text",
+            "text": "📅 תאריך התחלה (לגאנט)"
+          },
+          {
+            "kind": "text",
+            "text": "שיוך לעובד"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "שם המשימה",
+          "תיאור",
+          "שלבי ביצוע — שלב בכל שורה",
+          "משך משוער (ימים)",
+          "📅 תאריך התחלה (לגאנט)",
+          "שיוך לעובד"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 6"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDatePicker",
+            "target": "showDatePicker"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "onSelect",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "edit",
+          "initialWorker"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 12,
+    "total": 12,
+    "summary": "12/12",
+    "entries": [
+      {
+        "id": "tasks_screen.title",
+        "ok": true,
+        "atom": "TasksScreen"
+      },
+      {
+        "id": "tasks_screen.exit",
+        "ok": true,
+        "atom": "TasksScreen"
+      },
+      {
+        "id": "tasks_screen.proposal_intro",
+        "ok": true,
+        "atom": "TasksScreen"
+      },
+      {
+        "id": "tasks_screen.log_btn",
+        "ok": true,
+        "atom": "_LogButton"
+      },
+      {
+        "id": "tasks_screen.new_task",
+        "ok": true,
+        "atom": "_NewTaskButton"
+      },
+      {
+        "id": "tasks_screen.approval_reject",
+        "ok": true,
+        "atom": "_ApprovalCard"
+      },
+      {
+        "id": "tasks_screen.proposal_reject",
+        "ok": true,
+        "atom": "_ProposalCard"
+      },
+      {
+        "id": "tasks_screen.edit",
+        "ok": true,
+        "atom": "_Group"
+      },
+      {
+        "id": "tasks_screen.decide_intro",
+        "ok": true,
+        "atom": "_TaskSheet"
+      },
+      {
+        "id": "tasks_screen.sheet_reject",
+        "ok": true,
+        "atom": "_TaskSheet"
+      },
+      {
+        "id": "tasks_screen.worklog_title",
+        "ok": true,
+        "atom": "_WorkLogSheet"
+      },
+      {
+        "id": "tasks_screen.worklog_sub",
+        "ok": true,
+        "atom": "_WorkLogSheet"
+      }
+    ]
+  }
+}

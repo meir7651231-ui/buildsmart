@@ -1,0 +1,147 @@
+{
+  "screen": "ai_finder_screen",
+  "source": "ai_finder_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "AiFinderScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🗣️ חיפוש חכם",
+            "registryId": "ai_finder_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💡 החיפוש החכם דורש חיבור לשרת.",
+            "registryId": "ai_finder_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "תאר במילים שלך מה אתה מחפש:",
+            "registryId": "ai_finder_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "ai_finder_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🔎"
+          },
+          {
+            "kind": "cfgText",
+            "text": "מצא לי",
+            "registryId": "ai_finder_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "משהו השתבש — נסה שוב.",
+            "registryId": "ai_finder_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "לא נמצאו תוצאות — נסה מילים אחרות.",
+            "registryId": "ai_finder_screen.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [
+          "🔎"
+        ],
+        "summary": "registry 7 · mapped 7/7 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showLipskeyProductSheet(context, p, _products)",
+            "effect": "open → showLipskeyProductSheet"
+          }
+        ]
+      },
+      "floor": [
+        "fuzzySearchProducts",
+        "kbAiFinderNodes",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [
+          "initialQuery"
+        ],
+        "untangle": [
+          "CustomScrollView = shared component → separate atom",
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "ai_finder_screen.t01",
+        "ok": true,
+        "atom": "AiFinderScreen"
+      },
+      {
+        "id": "ai_finder_screen.t02",
+        "ok": true,
+        "atom": "AiFinderScreen"
+      },
+      {
+        "id": "ai_finder_screen.t03",
+        "ok": true,
+        "atom": "AiFinderScreen"
+      },
+      {
+        "id": "ai_finder_screen.t04",
+        "ok": true,
+        "atom": "AiFinderScreen"
+      },
+      {
+        "id": "ai_finder_screen.t05",
+        "ok": true,
+        "atom": "AiFinderScreen"
+      },
+      {
+        "id": "ai_finder_screen.t06",
+        "ok": true,
+        "atom": "AiFinderScreen"
+      }
+    ]
+  }
+}

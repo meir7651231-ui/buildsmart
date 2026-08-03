@@ -1,0 +1,62 @@
+{
+  "matched": 11,
+  "total": 11,
+  "summary": "11/11",
+  "entries": [
+    {
+      "id": "chats_screen.appbar_title",
+      "ok": true,
+      "atom": "ChatsScreen"
+    },
+    {
+      "id": "chats_screen.empty_title",
+      "ok": true,
+      "atom": "_ThreadList"
+    },
+    {
+      "id": "chats_screen.empty_hint",
+      "ok": true,
+      "atom": "_ThreadList"
+    },
+    {
+      "id": "chats_screen.archived_snack",
+      "ok": true,
+      "atom": "_ThreadList"
+    },
+    {
+      "id": "chats_screen.menu_archive",
+      "ok": true,
+      "atom": "_ChatPage"
+    },
+    {
+      "id": "chats_screen.menu_search",
+      "ok": true,
+      "atom": "_ChatPage"
+    },
+    {
+      "id": "chats_screen.menu_block",
+      "ok": true,
+      "atom": "_ChatPage"
+    },
+    {
+      "id": "chats_screen.online_now",
+      "ok": true,
+      "atom": "_ChatPage"
+    },
+    {
+      "id": "chats_screen.privacy_notice",
+      "ok": true,
+      "atom": "_ChatPage"
+    },
+    {
+      "id": "chats_screen.typing",
+      "ok": true,
+      "atom": "_ChatPage"
+    },
+    {
+      "id": "chats_screen.retry",
+      "ok": true,
+      "atom": "_ChatPage"
+    }
+  ]
+}

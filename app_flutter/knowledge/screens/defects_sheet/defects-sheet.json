@@ -1,0 +1,65 @@
+{
+  "name": "_DefectsSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🔧 ליקויים",
+        "registryId": "defects_sheet.header",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "רשימת ליקויים",
+        "registryId": "defects_sheet.list_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין ליקויים",
+        "registryId": "defects_sheet.empty",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "defectsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState",
+    "workerIndexForSession"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

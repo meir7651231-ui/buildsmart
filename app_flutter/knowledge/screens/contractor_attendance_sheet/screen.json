@@ -1,0 +1,183 @@
+{
+  "screen": "contractor_attendance_sheet",
+  "source": "contractor_attendance_sheet.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "_ContractorAttendanceSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🕒 נוכחות עובדים",
+            "registryId": "contractor_attendance_sheet.header",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מי מהעובדים שלך מחותם כרגע ומי נכח היום (לצפייה בלבד)",
+            "registryId": "contractor_attendance_sheet.subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין עובדים מחותמים כרגע",
+            "registryId": "contractor_attendance_sheet.empty_present",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "היום",
+            "registryId": "contractor_attendance_sheet.today",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין נוכחות רשומה היום",
+            "registryId": "contractor_attendance_sheet.empty_today",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [],
+        "summary": "registry 5 · mapped 5/5 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "attendanceForEmployer(kDemoContractorId)"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "attendanceDateKey",
+        "attendanceForEmployer",
+        "clockedInNow"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PresentRow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "contractor_attendance_sheet.location",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מיקום הכניסה — פתח ניווט",
+            "registryId": "contractor_attendance_sheet.location",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "openNavSheet",
+            "target": "openNavSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "openNavSheet(context, label: '${day.username} — מיקום כניסה', lat: day.inLat,…",
+            "effect": "open → openNavSheet"
+          }
+        ]
+      },
+      "floor": [
+        "mapsQueryForDay"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "day"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_TodayRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "day"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "contractor_attendance_sheet.header",
+        "ok": true,
+        "atom": "_ContractorAttendanceSheet"
+      },
+      {
+        "id": "contractor_attendance_sheet.subtitle",
+        "ok": true,
+        "atom": "_ContractorAttendanceSheet"
+      },
+      {
+        "id": "contractor_attendance_sheet.empty_present",
+        "ok": true,
+        "atom": "_ContractorAttendanceSheet"
+      },
+      {
+        "id": "contractor_attendance_sheet.today",
+        "ok": true,
+        "atom": "_ContractorAttendanceSheet"
+      },
+      {
+        "id": "contractor_attendance_sheet.empty_today",
+        "ok": true,
+        "atom": "_ContractorAttendanceSheet"
+      },
+      {
+        "id": "contractor_attendance_sheet.location",
+        "ok": true,
+        "atom": "_PresentRow"
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "_RoleRequestSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🪪 בקשת תפקיד",
+        "registryId": "role_request_sheet.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בחר תפקיד — הבקשה תישלח לאישור הגורם המתאים",
+        "registryId": "role_request_sheet.subtitle",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState",
+    "submitRoleRequest"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

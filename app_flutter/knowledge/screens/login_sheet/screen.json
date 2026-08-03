@@ -1,0 +1,176 @@
+{
+  "screen": "login_sheet",
+  "source": "login_sheet.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "LoginSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🔐 התחברות לחשבון",
+            "registryId": "login_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "המשך עם Google"
+          },
+          {
+            "kind": "cfgText",
+            "text": "או בקוד ל-SMS",
+            "registryId": "login_sheet.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "login_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כניסה עם אימייל וסיסמה",
+            "registryId": "login_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "login_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שליחת קוד חדש",
+            "registryId": "login_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "login_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "החלפת מספר",
+            "registryId": "login_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "login_sheet.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שכחתי סיסמה",
+            "registryId": "login_sheet.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "login_sheet.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חזרה לכניסה עם טלפון",
+            "registryId": "login_sheet.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 12,
+        "unregistered": [
+          "המשך עם Google"
+        ],
+        "summary": "registry 12 · mapped 12/12 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "authStateProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "userProfileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "authGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onSubmitted",
+        "setState",
+        "unawaited",
+        "validEmail"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom",
+          "_codePane = shared component → separate atom",
+          "_emailPane = shared component → separate atom",
+          "_phonePane = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "login_sheet.t01",
+        "ok": true,
+        "atom": "LoginSheet"
+      },
+      {
+        "id": "login_sheet.t06",
+        "ok": true,
+        "atom": "LoginSheet"
+      },
+      {
+        "id": "login_sheet.t02",
+        "ok": true,
+        "atom": "LoginSheet"
+      },
+      {
+        "id": "login_sheet.t03",
+        "ok": true,
+        "atom": "LoginSheet"
+      },
+      {
+        "id": "login_sheet.t04",
+        "ok": true,
+        "atom": "LoginSheet"
+      },
+      {
+        "id": "login_sheet.t05",
+        "ok": true,
+        "atom": "LoginSheet"
+      }
+    ]
+  }
+}

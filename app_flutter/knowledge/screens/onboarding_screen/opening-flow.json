@@ -1,0 +1,62 @@
+{
+  "name": "_OpeningFlow",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "דלג",
+        "registryId": "onboarding_screen.skip",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "startupStepProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "startupStepProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "welcomeSeenProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "helpModeProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "persistWelcomeSeen",
+    "setState",
+    "unawaited"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "ProfessionScreen = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

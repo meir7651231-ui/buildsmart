@@ -1,0 +1,17 @@
+{
+  "matched": 2,
+  "total": 2,
+  "summary": "2/2",
+  "entries": [
+    {
+      "id": "worker_payslips_sheet.t01",
+      "ok": true,
+      "atom": "_PayslipsSheetBody"
+    },
+    {
+      "id": "worker_payslips_sheet.t02",
+      "ok": true,
+      "atom": "_MonthRow"
+    }
+  ]
+}

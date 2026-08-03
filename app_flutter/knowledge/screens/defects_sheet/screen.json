@@ -1,0 +1,166 @@
+{
+  "screen": "defects_sheet",
+  "source": "defects_sheet.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "_DefectsSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🔧 ליקויים",
+            "registryId": "defects_sheet.header",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "רשימת ליקויים",
+            "registryId": "defects_sheet.list_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין ליקויים",
+            "registryId": "defects_sheet.empty",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "defectsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState",
+        "workerIndexForSession"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_DefectRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "defect"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_AddDefectForm",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "חומרה",
+            "registryId": "defects_sheet.severity",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onSeverity"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "title",
+          "nameKey",
+          "locationKey",
+          "severityKey",
+          "saveKey",
+          "saveLabel",
+          "name",
+          "location",
+          "severity",
+          "onSeverity",
+          "onSave"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "defects_sheet.header",
+        "ok": true,
+        "atom": "_DefectsSheet"
+      },
+      {
+        "id": "defects_sheet.list_title",
+        "ok": true,
+        "atom": "_DefectsSheet"
+      },
+      {
+        "id": "defects_sheet.empty",
+        "ok": true,
+        "atom": "_DefectsSheet"
+      },
+      {
+        "id": "defects_sheet.severity",
+        "ok": true,
+        "atom": "_AddDefectForm"
+      }
+    ]
+  }
+}

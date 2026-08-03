@@ -1,0 +1,89 @@
+{
+  "screen": "site_hub_screen",
+  "source": "site_hub_screen.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "_SiteScaffold",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "site_hub_screen.back",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ חזרה",
+            "registryId": "site_hub_screen.back",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [
+          "appTitle",
+          "icon",
+          "title",
+          "sub",
+          "children",
+          "kbTools"
+        ],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_MdHead",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "icon",
+          "title",
+          "sub"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "site_hub_screen.back",
+        "ok": true,
+        "atom": "_SiteScaffold"
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "matched": 11,
+  "total": 11,
+  "summary": "11/11",
+  "entries": [
+    {
+      "id": "worker_attendance_screen.title",
+      "ok": true,
+      "atom": "WorkerAttendanceScreen"
+    },
+    {
+      "id": "worker_attendance_screen.today",
+      "ok": true,
+      "atom": "_ClockCard"
+    },
+    {
+      "id": "worker_attendance_screen.loc_recorded",
+      "ok": true,
+      "atom": "_ClockCard"
+    },
+    {
+      "id": "worker_attendance_screen.prev",
+      "ok": true,
+      "atom": "_CalendarCard"
+    },
+    {
+      "id": "worker_attendance_screen.next",
+      "ok": true,
+      "atom": "_CalendarCard"
+    },
+    {
+      "id": "worker_attendance_screen.no_records",
+      "ok": true,
+      "atom": "_CalendarCard"
+    },
+    {
+      "id": "worker_attendance_screen.month_total",
+      "ok": true,
+      "atom": "_CalendarCard"
+    },
+    {
+      "id": "worker_attendance_screen.no_loc_day",
+      "ok": true,
+      "atom": "_DayDetailSheet"
+    },
+    {
+      "id": "worker_attendance_screen.work_summary",
+      "ok": true,
+      "atom": "_DayDetailSheet"
+    },
+    {
+      "id": "worker_attendance_screen.no_work_day",
+      "ok": true,
+      "atom": "_DayDetailSheet"
+    },
+    {
+      "id": "worker_attendance_screen.open_nav",
+      "ok": true,
+      "atom": "_DayDetailSheet"
+    }
+  ]
+}

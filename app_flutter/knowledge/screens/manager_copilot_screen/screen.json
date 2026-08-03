@@ -1,0 +1,247 @@
+{
+  "screen": "manager_copilot_screen",
+  "source": "manager_copilot_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "ManagerCopilotScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🤖 קו-פיילוט",
+            "registryId": "manager_copilot_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "שאל את העסק שלך",
+            "registryId": "manager_copilot_screen.subtitle",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "ordersEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "managerAnalyticsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "managerCustomersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "buildManagerContext",
+        "managerCopilotPrompt",
+        "managerMorningBriefPrompt",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Welcome",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🤖"
+          },
+          {
+            "kind": "cfgText",
+            "text": "שאל אותי כל דבר על העסק שלך.",
+            "registryId": "manager_copilot_screen.welcome_headline",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.",
+            "registryId": "manager_copilot_screen.welcome_sub",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "☀️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "תדריך-בוקר",
+            "registryId": "manager_copilot_screen.morning_brief",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "או שאל:",
+            "registryId": "manager_copilot_screen.or_ask",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "🤖",
+          "☀️"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 2"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onAsk"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "onAsk",
+          "onBrief"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Bubble",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "turn"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Typing",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_InputBar",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onSend"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "controller",
+          "enabled",
+          "onSend"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "manager_copilot_screen.title",
+        "ok": true,
+        "atom": "ManagerCopilotScreen"
+      },
+      {
+        "id": "manager_copilot_screen.subtitle",
+        "ok": true,
+        "atom": "ManagerCopilotScreen"
+      },
+      {
+        "id": "manager_copilot_screen.welcome_headline",
+        "ok": true,
+        "atom": "_Welcome"
+      },
+      {
+        "id": "manager_copilot_screen.welcome_sub",
+        "ok": true,
+        "atom": "_Welcome"
+      },
+      {
+        "id": "manager_copilot_screen.morning_brief",
+        "ok": true,
+        "atom": "_Welcome"
+      },
+      {
+        "id": "manager_copilot_screen.or_ask",
+        "ok": true,
+        "atom": "_Welcome"
+      }
+    ]
+  }
+}
