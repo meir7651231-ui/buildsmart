@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pB5 — 🛡️ מנוע-קטלוג-3D · פאזה B (32): בטיחות-קו-חם (M5, ביקורת-יריב) — 2026-08-03
+`lib/features/fittings/plan/safety.dart` (מגודר): `hotLineSafetyFor(material, tempC)` → **המלצות-בטיחות עקרוניות** לקו-PP-R חם (≥60°C): PRV · **מיכל-התפשטות** · פיצוי-התפשטות-הצינור · אנטי-כוויה (TMV) · בידוד-תרמי. **🛡️ M5 חרוט-מבנית:** `SafetyAdvisory.caveat` = שדה-required (אין המלצה בלי אזהרת-"לא-מחייב · מתקין-מוסמך · קוד-מקומי") · **אפס ערך-מספרי-מחייב** (רק "≥60°C" תיאורי) · קו-קר/לא-PP-R → ריק (אין דרישת-שווא). **ביקורת-יריב-בטיחות תפסה under-warning קריטי:** `== 'PPR'` השמיט תוויות-faser/PP-RCT (`'PPR · faser'`/`'PPRCT'`/`'PP-RCT'`) — בדיוק צינורות-הקו-החם ⇒ קו-חם-אמיתי החזיר אפס-בטיחות. **תוקן:** `replaceAll('-','').startsWith('PPR')` + guard-רגרסיה. (Finding-2 מיכל + Finding-3 בידוד נוספו מהביקורת.) fittings 214/214.
+
 ## #fittings-engine-pB4 — 🔗 מנוע-קטלוג-3D · פאזה B (27+29): קצוות-מדויקים + מתאם בין-חומרי — 2026-08-03
 `lib/features/fittings/plan/deep_ends.dart` (מגודר · לא-נוגע ב-`polyrollSpecFor` החי): `weldEndsFor(family, dn)` (משפחות-ריתוך → N שקעי-`hdpeCompression`) · `ppRThreadAdapterEnds`/`ppRThreadAdapterSpec` (אדפטר = שקע-ריתוך PP-R **+** קצה-BSP · `_canonBsp` מבטיח סימן-אינץ'). **🔑 שלב 29:** אדפטר-PP-R מתחבר ל**פליז/מתכת** דרך מפרק ה-`bspMale↔bspFemale` הבלתי-תלוי-חומר (מוכח: PP-R male 1/2" ↔ פליז female 1/2"), ולצד-השקע ל-PP-R (חומר-מונע=PPR). **🛡️ M2 — ביקורת-יריב (עדשת reliability+safety, זו שתפסה את באג-M2 בפאזה-A): אפס over-match ניתן-לבנייה** — `_materialsCompatible('PPR', X)` נכון **רק** ל-PPR; PVC/PP/HDPE·ניקוז/ceramic/rubber/press/drain באותו DN → כולם FALSE (מאומת אמפירית + guards ב-`deep_ends_test`). ה-BSP raw-string ⇒ הגרוע = false-negative (בטוח). fittings 206/206.
 
