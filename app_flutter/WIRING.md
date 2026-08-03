@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pB2 — ✂️ מנוע-קטלוג-3D · פאזה B (33): ניכוי-חיתוך Z (מגודר) — 2026-08-03
+`lib/features/fittings/plan/cut_list.dart` (מגודר): `cutDeductionFor(family, od, {socket})` = הניכוי פר-קצה (`מרכז→תחתית-שקע = פתח−F`) + `pipeCutLength(c2c, z1, z2) = c2c − z1 − z2`. פר-משפחה מ-אותיות-golden: ברך `Z=z` · מצמד `A/2−F` · טי רַץ `B/2` / הסתעפות `A−F`. משפחות א-סימטריות/קצה → `null` (M1, פרוסה נפרדת · מתועד). `cut_list_test`: golden-גיאומטריה · pipeCutLength · mutation-L3. היסוד לכתב-כמויות (פאזה C). fittings 190/190.
+
 ## #fittings-engine-pB1 — 🧊 מנוע-קטלוג-3D · פאזה B (28): envelope גיאומטרי (מגודר) — 2026-08-03
 פאזה-B פרוסה-1 — עומק-spec, **הכל ב-`lib/features/fittings/plan/` ⇒ tree-shaken כשהדגל כבוי (keystone byte-identical, הקוד-החי לא-נגוע).** `envelope.dart`: `Envelope{axialLength, radialDiameter, secondaryExtent?}` + `envelopeFor(family, od, {od2})` — תיבת-חוסם פר-משפחה, כל שדה = היטל של אות-מנוע קיימת (A/B/D/E/l/hex/h/D1/d1) ⇒ **זהה-golden טרנזיטיבית ל-`pure_engine.py`**. משפחה-לא-מוכרת/מחוץ-לתחום → `null` (M1). `test/fittings/envelope_test.dart`: golden-אותיות · mutation-L3 (OD-sensitive · secondary null↔set) · out-of-domain null. היסוד ל-layout/3D (פאזה C). מקור-בטיחות ל-31 (DVS 2207-11 + caveat-יצרן) אומת קיים ב-`gen3d.html`.
 
