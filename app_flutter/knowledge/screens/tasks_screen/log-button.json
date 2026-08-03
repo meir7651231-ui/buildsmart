@@ -1,0 +1,39 @@
+{
+  "name": "_LogButton",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.log_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📅 יומן עבודה — מה בוצע בכל יום",
+        "registryId": "tasks_screen.log_btn",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "onTap"
+    ],
+    "untangle": []
+  }
+}

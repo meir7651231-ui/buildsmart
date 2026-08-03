@@ -1,0 +1,63 @@
+{
+  "name": "_ContractorAttendanceSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🕒 נוכחות עובדים",
+        "registryId": "contractor_attendance_sheet.header",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מי מהעובדים שלך מחותם כרגע ומי נכח היום (לצפייה בלבד)",
+        "registryId": "contractor_attendance_sheet.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין עובדים מחותמים כרגע",
+        "registryId": "contractor_attendance_sheet.empty_present",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "היום",
+        "registryId": "contractor_attendance_sheet.today",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין נוכחות רשומה היום",
+        "registryId": "contractor_attendance_sheet.empty_today",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [],
+    "summary": "registry 5 · mapped 5/5 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "attendanceForEmployer(kDemoContractorId)"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "attendanceDateKey",
+    "attendanceForEmployer",
+    "clockedInNow"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

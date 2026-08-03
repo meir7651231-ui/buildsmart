@@ -1,0 +1,43 @@
+{
+  "name": "_ApprovalCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.approval_reject",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "↩️ החזר לתיקון",
+        "registryId": "tasks_screen.approval_reject",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "name",
+      "workerLabel",
+      "onApprove",
+      "onReject"
+    ],
+    "untangle": []
+  }
+}

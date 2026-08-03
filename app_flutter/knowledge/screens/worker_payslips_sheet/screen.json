@@ -1,0 +1,90 @@
+{
+  "screen": "worker_payslips_sheet",
+  "source": "worker_payslips_sheet.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "_PayslipsSheetBody",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "💰 תלושי שכר",
+            "registryId": "worker_payslips_sheet.t01",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_MonthRow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_payslips_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "יחובר עם חיבור השרת",
+            "registryId": "worker_payslips_sheet.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "month"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "worker_payslips_sheet.t01",
+        "ok": true,
+        "atom": "_PayslipsSheetBody"
+      },
+      {
+        "id": "worker_payslips_sheet.t02",
+        "ok": true,
+        "atom": "_MonthRow"
+      }
+    ]
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "name": "_SuppliersSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "catalog_settings_screen.t11",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בבנייה",
+        "registryId": "catalog_settings_screen.t12",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

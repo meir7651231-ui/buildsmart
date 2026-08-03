@@ -1,0 +1,258 @@
+{
+  "name": "StoreDashboardScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store.action.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "store.action.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_dashboard_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✓ אין הזמנות שממתינות לאישור",
+        "registryId": "store_dashboard_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_dashboard_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ סימולציית הזמנה נכנסת (כלי הדגמה)",
+        "registryId": "store_dashboard_screen.t02",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שלום 👋",
+        "registryId": "store.home.greeting",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📥 הזמנות",
+        "registryId": "store.section.orders",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין הזמנות בקטגוריה זו ✓",
+        "registryId": "store_dashboard_screen.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store.action.newProduct",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ הוסף מוצר חדש",
+        "registryId": "store.action.newProduct",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לא נמצאו מוצרים תואמים.",
+        "registryId": "store_dashboard_screen.t04",
+        "registryOk": true
+      }
+    ],
+    "registered": 12,
+    "unregistered": [],
+    "summary": "registry 12 · mapped 12/12 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "visibleOrderIdsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeProductsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeProfileProvider.select((m) => (m[session.username]?.businessName ?? '').trim())"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "chat"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "StoreProfileScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "SupplierSettingsScreen"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeOosProvider.select((oos) => oos.length)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "fulfillmentProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showPickingSheet",
+        "target": "showPickingSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showPortalSheet",
+        "target": "showPortalSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "sysOrdersProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "screenSectionsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeOosProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "storeOosProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "storeProductsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(StoreProfileScreen.route())",
+        "effect": "navigate → StoreProfileScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(SupplierSettingsScreen.route())",
+        "effect": "navigate → SupplierSettingsScreen"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showPickingSheet(context, held.first.id)",
+        "effect": "open → showPickingSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showPortalSheet(context, kStorePortalTiles.firstWhere((t) => t.kind == Portal…",
+        "effect": "open → showPortalSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(sysOrdersProvider.notifier).simulateIncomingOrder()",
+        "effect": "write → sysOrdersProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showPickingSheet(context, o.id)",
+        "effect": "open → showPickingSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showPortalSheet(context, t)",
+        "effect": "open → showPortalSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "confirmDestructive",
+    "fMoney",
+    "kbStoreDashboardNodes",
+    "sectionChildren",
+    "setState",
+    "sort"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "ChatsScreen = shared component → separate atom",
+      "KbScreen = shared component → separate atom",
+      "SingleChildScrollView = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

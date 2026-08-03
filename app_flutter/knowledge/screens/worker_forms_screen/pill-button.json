@@ -1,0 +1,28 @@
+{
+  "name": "_PillButton",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "label",
+      "onPressed",
+      "filled"
+    ],
+    "untangle": []
+  }
+}

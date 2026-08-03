@@ -1,0 +1,50 @@
+{
+  "screen": "barcode_scanner",
+  "source": "barcode_scanner.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "BarcodeScanner",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "סריקת ברקוד",
+            "registryId": "barcode_scanner.scan_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cameraPermissionErrorView"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "barcode_scanner.scan_title",
+        "ok": true,
+        "atom": "BarcodeScanner"
+      }
+    ]
+  }
+}

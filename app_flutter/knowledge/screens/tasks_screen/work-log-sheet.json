@@ -1,0 +1,41 @@
+{
+  "name": "_WorkLogSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "יומן עבודה",
+        "registryId": "tasks_screen.worklog_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "סיכום יומי — מה בוצע בפרויקט",
+        "registryId": "tasks_screen.worklog_sub",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workLogProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

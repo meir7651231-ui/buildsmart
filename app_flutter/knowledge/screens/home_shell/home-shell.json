@@ -1,0 +1,150 @@
+{
+  "name": "HomeShell",
+  "role": "composer",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "mainTabProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "helpModeProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "shipToPromptedProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "shipToPromptedProvider"
+      },
+      {
+        "kind": "action",
+        "via": "openShipToSheet",
+        "target": "openShipToSheet"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "promptRoleRequestProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showRoleRequestSheet",
+        "target": "showRoleRequestSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "promptRoleRequestProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "search"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "keyboardOverlayOpenProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "keyboardOverlayOpenProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "homeDepartmentProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogSystemFilterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreePathProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogSectionProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "mainTabProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(keyboardOverlayOpenProvider.notifier).state = true",
+        "effect": "write → keyboardOverlayOpenProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(homeDepartmentProvider.notifier).state = null",
+        "effect": "write → homeDepartmentProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogSystemFilterProvider.notifier).state = null",
+        "effect": "write → catalogSystemFilterProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreePathProvider.notifier).state = const []",
+        "effect": "write → catalogTreePathProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogSectionProvider.notifier).state = 'בית'",
+        "effect": "write → catalogSectionProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(mainTabProvider.notifier).state = i",
+        "effect": "write → mainTabProvider"
+      }
+    ]
+  },
+  "floor": [
+    "listenTabScreenView",
+    "maybeShowConsentModal",
+    "resetAllDials",
+    "saveShipToPrompted"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "CatalogScreen = shared component → separate atom",
+      "DepartmentsScreen = shared component → separate atom",
+      "StoreScreen = shared component → separate atom",
+      "UpdatesScreen = shared component → separate atom"
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "screen": "ai_assistant_screen",
+  "source": "ai_assistant_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "AiAssistantScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🤖 העוזר החכם",
+            "registryId": "ai_assistant_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💡 העוזר החכם דורש חיבור לשרת.",
+            "registryId": "ai_assistant_screen.offline",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🤖"
+          },
+          {
+            "kind": "cfgText",
+            "text": "שאל אותי כל דבר על אינסטלציה, רכש או עבודה.",
+            "registryId": "ai_assistant_screen.empty_prompt",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "ai_assistant_screen.empty_examples",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✓ נוסף לסל",
+            "registryId": "ai_assistant_screen.added",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [
+          "🤖"
+        ],
+        "summary": "registry 5 · mapped 5/5 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "ordersEngineProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "assistantIntentPrompt",
+        "computeAnalyticsInsights",
+        "fuzzySearchProducts",
+        "matchRecipe",
+        "parseAssistantIntent",
+        "productsInCategory",
+        "resolvedKitProducts",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 5,
+    "total": 5,
+    "summary": "5/5",
+    "entries": [
+      {
+        "id": "ai_assistant_screen.title",
+        "ok": true,
+        "atom": "AiAssistantScreen"
+      },
+      {
+        "id": "ai_assistant_screen.offline",
+        "ok": true,
+        "atom": "AiAssistantScreen"
+      },
+      {
+        "id": "ai_assistant_screen.empty_prompt",
+        "ok": true,
+        "atom": "AiAssistantScreen"
+      },
+      {
+        "id": "ai_assistant_screen.empty_examples",
+        "ok": true,
+        "atom": "AiAssistantScreen"
+      },
+      {
+        "id": "ai_assistant_screen.added",
+        "ok": true,
+        "atom": "AiAssistantScreen"
+      }
+    ]
+  }
+}

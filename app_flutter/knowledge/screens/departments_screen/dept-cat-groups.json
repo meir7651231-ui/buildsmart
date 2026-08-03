@@ -1,0 +1,63 @@
+{
+  "name": "_DeptCatGroups",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🗂️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין קטגוריות במחלקה זו",
+        "registryId": "departments_screen.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה",
+        "registryId": "departments_screen.t05",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🗂️"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreePathProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreePathProvider.notifier).state = [node]",
+        "effect": "write → catalogTreePathProvider"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "catNodeProductCount",
+    "cfgRadius",
+    "resolveCatTitle"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [
+      "deptName"
+    ],
+    "untangle": [
+      "onCatalogTreePath(…) callback instead of direct catalogTreePathProvider write"
+    ]
+  }
+}

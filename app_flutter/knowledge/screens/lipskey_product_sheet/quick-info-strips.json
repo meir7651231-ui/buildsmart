@@ -1,0 +1,177 @@
+{
+  "name": "_QuickInfoStrips",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "אין קבוצה"
+      },
+      {
+        "kind": "text",
+        "text": "אין מוצרים אחרים בקבוצה"
+      },
+      {
+        "kind": "text",
+        "text": "אין מפרט תואם"
+      },
+      {
+        "kind": "text",
+        "text": "לא נמצאו מוצרים שמשלימים את הקצוות"
+      },
+      {
+        "kind": "text",
+        "text": "אין מוצרים משלימים"
+      },
+      {
+        "kind": "text",
+        "text": "אין רשימת ערכת התקנה"
+      },
+      {
+        "kind": "cfgText",
+        "text": "חובה (עץ חכם)",
+        "registryId": "lipskey_product_sheet.must_smart_tree",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אופציונלי (עץ חכם)",
+        "registryId": "lipskey_product_sheet.optional_smart_tree",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "כלים ואיטומים (אוטומטי)",
+        "registryId": "lipskey_product_sheet.tools_auto",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "חובה",
+        "registryId": "lipskey_product_sheet.must_badge",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "אין וריאנטים נוספים"
+      },
+      {
+        "kind": "text",
+        "text": "אין דרישות תקינות מיוחדות"
+      },
+      {
+        "kind": "cfgText",
+        "text": "חובה",
+        "registryId": "lipskey_product_sheet.must_badge_compliance",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "אין מפרט הנדסי מאומת"
+      },
+      {
+        "kind": "cfgText",
+        "text": "צנרת PPR לאספקת מים חמים וקרים",
+        "registryId": "lipskey_product_sheet.ppr_caption",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "SMART LOCK — מערכת דלוחין, צנרת ואביזרים מפוליפרופילן בקטרים 32-63 מ\"מ בצבע שחור",
+        "registryId": "lipskey_product_sheet.smartlock_caption",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "אין הערכת מחיר לקטגוריה זו"
+      },
+      {
+        "kind": "cfgText",
+        "text": "ליחידה",
+        "registryId": "lipskey_product_sheet.per_unit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הערכה",
+        "registryId": "lipskey_product_sheet.estimate_badge",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.",
+        "registryId": "lipskey_product_sheet.price_note",
+        "registryOk": true
+      }
+    ],
+    "registered": 10,
+    "unregistered": [
+      "אין קבוצה",
+      "אין מוצרים אחרים בקבוצה",
+      "אין מפרט תואם",
+      "לא נמצאו מוצרים שמשלימים את הקצוות",
+      "אין מוצרים משלימים",
+      "אין רשימת ערכת התקנה",
+      "אין וריאנטים נוספים",
+      "אין דרישות תקינות מיוחדות",
+      "אין מפרט הנדסי מאומת",
+      "אין הערכת מחיר לקטגוריה זו"
+    ],
+    "summary": "registry 10 · mapped 10/10 · unregistered 10"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "rows.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (rows.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "bsSuccess",
+    "companyComplementsFor",
+    "compatibleProductsCount",
+    "compatibleProductsFor",
+    "complianceTriggersFor",
+    "connectionExplainHe",
+    "currencySymbol",
+    "engineeringSpecFor",
+    "finderGroupFor",
+    "formatCatalogPrice",
+    "installKitFor",
+    "onPickProduct",
+    "priceFor",
+    "priceWithVat",
+    "productImage",
+    "recommendedKitForProduct",
+    "row",
+    "setState",
+    "smartProductForSku",
+    "variantSiblingsCountFor",
+    "variantSiblingsOf"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "product",
+      "onPickProduct"
+    ],
+    "untangle": []
+  }
+}

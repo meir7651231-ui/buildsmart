@@ -1,0 +1,86 @@
+{
+  "name": "LipskeyProductGridCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "✓"
+      },
+      {
+        "kind": "cfgText",
+        "text": "מחיר לפי ספק",
+        "registryId": "lipskey_products_screen.price_by_supplier_grid",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לסל",
+        "registryId": "lipskey_products_screen.to_cart",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "✓"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartCartProvider.select((lines) => lines.where((l) => l.productKey == _key).fold<int>(0, (s, l) => s + l.productQty))"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showLipskeyProductSheet",
+        "target": "showLipskeyProductSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showQtyWheel",
+        "target": "showQtyWheel"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showLipskeyProductSheet(context, product, products)",
+        "effect": "open → showLipskeyProductSheet"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showQtyWheel(context, qty, (n) => cart.setQtyForKey(_line(n)))",
+        "effect": "open → showQtyWheel"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "productImage"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "product",
+      "products"
+    ],
+    "untangle": []
+  }
+}

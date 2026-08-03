@@ -1,0 +1,298 @@
+{
+  "screen": "persona_picking_sheet",
+  "source": "persona_picking_sheet.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "PersonaPickingSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "אין הזמנות בקטגוריה זו ✓",
+            "registryId": "persona_picking_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "persona_picking_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📄 הצג תעודת משלוח",
+            "registryId": "persona_picking_sheet.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "persona_picking_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "🛵 ההזמנה מוכנה — ממתינה לאיסוף השליח",
+            "registryId": "persona_picking_sheet.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "סמן כל פריט כ\"לוקט\" או \"חסר\" כדי לסיים את ההכנה",
+            "registryId": "persona_picking_sheet.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "תעודת משלוח",
+            "registryId": "persona_picking_sheet.t05",
+            "registryOk": true
+          }
+        ],
+        "registered": 7,
+        "unregistered": [],
+        "summary": "registry 7 · mapped 7/7 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "fulfillmentProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "sysOrdersProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "fMoney",
+        "haulInfo"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [
+          "orderId"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_PickLine",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "persona_picking_sheet.t10",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מוצר חלופי",
+            "registryId": "persona_picking_sheet.t10",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "✓"
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "persona_picking_sheet.t11",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "חסר",
+            "registryId": "persona_picking_sheet.t11",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "✓"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "line",
+          "status",
+          "onPick",
+          "onMiss"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_SplitControl",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🚚 פיצול משלוחים",
+            "registryId": "persona_picking_sheet.t12",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "onSelect"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "splitInto",
+          "onSelect"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Banner",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "text",
+          "bg",
+          "fg"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Grip",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 8,
+    "total": 8,
+    "summary": "8/8",
+    "entries": [
+      {
+        "id": "persona_picking_sheet.t01",
+        "ok": true,
+        "atom": "PersonaPickingSheet"
+      },
+      {
+        "id": "persona_picking_sheet.t02",
+        "ok": true,
+        "atom": "PersonaPickingSheet"
+      },
+      {
+        "id": "persona_picking_sheet.t03",
+        "ok": true,
+        "atom": "PersonaPickingSheet"
+      },
+      {
+        "id": "persona_picking_sheet.t04",
+        "ok": true,
+        "atom": "PersonaPickingSheet"
+      },
+      {
+        "id": "persona_picking_sheet.t05",
+        "ok": true,
+        "atom": "PersonaPickingSheet"
+      },
+      {
+        "id": "persona_picking_sheet.t10",
+        "ok": true,
+        "atom": "_PickLine"
+      },
+      {
+        "id": "persona_picking_sheet.t11",
+        "ok": true,
+        "atom": "_PickLine"
+      },
+      {
+        "id": "persona_picking_sheet.t12",
+        "ok": true,
+        "atom": "_SplitControl"
+      }
+    ]
+  }
+}

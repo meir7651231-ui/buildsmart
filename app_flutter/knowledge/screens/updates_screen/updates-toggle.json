@@ -1,0 +1,41 @@
+{
+  "name": "_UpdatesToggle",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "updatesSubTabProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(updatesSubTabProvider.notifier).state = i",
+        "effect": "write → updatesSubTabProvider"
+      }
+    ]
+  },
+  "floor": [
+    "seg"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [
+      "active"
+    ],
+    "untangle": [
+      "onUpdatesSubTab(…) callback instead of direct updatesSubTabProvider write"
+    ]
+  }
+}

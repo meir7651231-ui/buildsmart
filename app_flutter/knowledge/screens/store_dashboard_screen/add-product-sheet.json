@@ -1,0 +1,68 @@
+{
+  "name": "_AddProductSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "➕ הוסף מוצר חדש",
+        "registryId": "store.addProduct.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "קטגוריה",
+        "registryId": "store.addProduct.category",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store.action.addProduct",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ הוסף מוצר",
+        "registryId": "store.action.addProduct",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [],
+    "summary": "registry 4 · mapped 4/4 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "storeProductsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "storeProductsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

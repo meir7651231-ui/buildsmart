@@ -1,0 +1,103 @@
+{
+  "screen": "daily_report_screen",
+  "source": "daily_report_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "DailyReportScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הדוח הועתק",
+            "registryId": "daily_report_screen.copied",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✨ ניסוח חכם",
+            "registryId": "daily_report_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📋"
+          },
+          {
+            "kind": "cfgText",
+            "text": "העתק לשליחה",
+            "registryId": "daily_report_screen.copy_send",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "⚙️ המספרים נרשמו במערכת; ה-AI רק מנסח אותם לדוח.",
+            "registryId": "daily_report_screen.footer_note",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "📋"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "title",
+          "reportLines"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "daily_report_screen.copied",
+        "ok": true,
+        "atom": "DailyReportScreen"
+      },
+      {
+        "id": "daily_report_screen.title",
+        "ok": true,
+        "atom": "DailyReportScreen"
+      },
+      {
+        "id": "daily_report_screen.copy_send",
+        "ok": true,
+        "atom": "DailyReportScreen"
+      },
+      {
+        "id": "daily_report_screen.footer_note",
+        "ok": true,
+        "atom": "DailyReportScreen"
+      }
+    ]
+  }
+}

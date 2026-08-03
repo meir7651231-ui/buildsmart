@@ -1,0 +1,62 @@
+{
+  "name": "CatalogScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "tabHeaderHiddenProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogTreePathProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSectionProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "smartTreeCatProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "intelBusProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "diveResultsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "keyboardDiveQueryProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onTabHeaderHidden(…) callback instead of direct tabHeaderHiddenProvider write"
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "name": "WorkerAppScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🦺 עובד",
+        "registryId": "worker.section.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker.action.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "worker.action.exit",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "docsGateOverrideProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerDocsReadyProvider(session.username)"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "taskRejectionLogProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "taskRejectionLogProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "chat"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WorkerTaskBoardScreen"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "WorkerSettingsScreen"
+      },
+      {
+        "kind": "action",
+        "via": "openBarcodeScanner",
+        "target": "openBarcodeScanner"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "action",
+        "via": "showLipskeyProductSheet",
+        "target": "showLipskeyProductSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(WorkerTaskBoardScreen.route())",
+        "effect": "navigate → WorkerTaskBoardScreen"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(WorkerSettingsScreen.route())",
+        "effect": "navigate → WorkerSettingsScreen"
+      }
+    ]
+  },
+  "floor": [
+    "catalogSiblingsFor",
+    "kbWorkerAppNodes",
+    "productBySku",
+    "setState",
+    "submitWithProofPhoto",
+    "workerDocsReadyProvider",
+    "workerIndexForSession"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "ChatsScreen = shared component → separate atom",
+      "KbScreen = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom",
+      "WorkerProfileScreen = shared component → separate atom"
+    ]
+  }
+}

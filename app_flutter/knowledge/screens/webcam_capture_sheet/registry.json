@@ -1,0 +1,12 @@
+{
+  "matched": 1,
+  "total": 1,
+  "summary": "1/1",
+  "entries": [
+    {
+      "id": "webcam_capture_sheet.shoot",
+      "ok": true,
+      "atom": "WebcamCaptureScreen"
+    }
+  ]
+}

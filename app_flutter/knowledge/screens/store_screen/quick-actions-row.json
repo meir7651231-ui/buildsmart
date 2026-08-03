@@ -1,0 +1,92 @@
+{
+  "name": "_QuickActionsRow",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeFavoritesProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "finance"
+      },
+      {
+        "kind": "action",
+        "via": "openFinanceHub",
+        "target": "openFinanceHub"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "storeSectionProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'אין פריטים מועדפים')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "openFinanceHub(context)",
+        "effect": "open → openFinanceHub"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(storeSectionProvider.notifier).state = StoreSection.cart",
+        "effect": "write → storeSectionProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(storeSectionProvider.notifier).state = StoreSection.orders",
+        "effect": "write → storeSectionProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'שיחה עם ${c.name} — בבנייה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onStoreSection(…) callback instead of direct storeSectionProvider write"
+    ]
+  }
+}

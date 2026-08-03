@@ -28,6 +28,20 @@ dart run tools/atom/decompose/bin/decompose.dart <screen.dart> --print
 Flags: `--registry <path>` (default `app_flutter/lib/state/studio/element_registry.dart`),
 `--out <dir>` (default `app_flutter/knowledge/screens`), `--name <key>`, `--print`.
 
+**Batch** — decompose every screen in a directory in one pass (registry parsed
+once), writing each to `<out>/<basename>/`, printing a coverage summary:
+
+```bash
+dart run tools/atom/decompose/bin/decompose.dart --batch app_flutter/lib/screens \
+  --out app_flutter/knowledge/screens
+# → 76 full · 41 thin · 0 errored · 117 total
+```
+
+These decompositions are **code-derived knowledge**: they live next to the code
+at `app_flutter/knowledge/screens/<screen>/` and are regenerated from the batch,
+never hand-edited. (Hand-authored specs live on the `nice-volta` knowledge
+branch.) A file with no widget class is skipped, not fatal.
+
 ## What an atom is
 
 - **composer** — the public widget class that arranges the screen's sections

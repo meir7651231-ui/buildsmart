@@ -1,0 +1,42 @@
+{
+  "name": "_StageCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "שלבי ביצוע",
+        "registryId": "smart_project_screen.t09",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius",
+    "isStepDone",
+    "onToggleStep"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "index",
+      "stage",
+      "isDone",
+      "expanded",
+      "isStepDone",
+      "onToggleExpand",
+      "onToggleDone",
+      "onToggleStep"
+    ],
+    "untangle": []
+  }
+}

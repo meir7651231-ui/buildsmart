@@ -1,0 +1,57 @@
+{
+  "name": "_FilterChipsRow",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "_audienceChipIndexProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "_audienceChipIndexProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "_chatFilterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "_chatFilterProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(_audienceChipIndexProvider.notifier).state = i",
+        "effect": "write → _audienceChipIndexProvider"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "select"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "audience"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "WorkerNotifsBell",
+  "role": "composer",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "notifSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "currentWorkerUnreadCountProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showWorkerNotifsSheet",
+        "target": "showWorkerNotifsSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showWorkerNotifsSheet(context)",
+        "effect": "open → showWorkerNotifsSheet"
+      }
+    ]
+  },
+  "floor": [
+    "playInAppNotifFeedback"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "screen": "quote_polish_screen",
+  "source": "quote_polish_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "QuotePolishScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "ההצעה המנוסחת הועתקה",
+            "registryId": "quote_polish_screen.copied_toast",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✨ הצעה מקצועית",
+            "registryId": "quote_polish_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📋"
+          },
+          {
+            "kind": "cfgText",
+            "text": "העתק לשליחה",
+            "registryId": "quote_polish_screen.copy_btn",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח — לא משנה מחירים.",
+            "registryId": "quote_polish_screen.footer_note",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [
+          "📋"
+        ],
+        "summary": "registry 4 · mapped 4/4 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "rawQuote",
+          "productName"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "quote_polish_screen.copied_toast",
+        "ok": true,
+        "atom": "QuotePolishScreen"
+      },
+      {
+        "id": "quote_polish_screen.title",
+        "ok": true,
+        "atom": "QuotePolishScreen"
+      },
+      {
+        "id": "quote_polish_screen.copy_btn",
+        "ok": true,
+        "atom": "QuotePolishScreen"
+      },
+      {
+        "id": "quote_polish_screen.footer_note",
+        "ok": true,
+        "atom": "QuotePolishScreen"
+      }
+    ]
+  }
+}

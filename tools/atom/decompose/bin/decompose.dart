@@ -29,9 +29,35 @@ void main(List<String> argv) {
       'app_flutter/lib/state/studio/element_registry.dart';
   final outDir = optOf('--out') ?? 'app_flutter/knowledge/screens';
   final name = optOf('--name'); // logical screen key (default = file basename)
+  final batchDir = optOf('--batch'); // decompose every *.dart in this dir
+
+  // ── batch mode ──────────────────────────────────────────────────────────────
+  if (batchDir != null) {
+    if (!Directory(batchDir).existsSync()) {
+      stderr.writeln('decompose: --batch dir not found: $batchDir');
+      exit(66);
+    }
+    final results = decomposeBatch(batchDir, registry, outDir);
+    final full = results.where((r) => r.full).toList();
+    final skipped = results.where((r) => r.skipped).toList();
+    final errored = results.where((r) => r.error != null).toList();
+    for (final r in full) {
+      stdout.writeln('  ✅ ${r.screen} — ${r.atoms} atoms · registry ${r.matched}/${r.total}');
+    }
+    for (final r in skipped) {
+      stdout.writeln('  ·  ${r.screen} — thin (${r.atoms} atom) · not a composed screen');
+    }
+    for (final r in errored) {
+      stdout.writeln('  ⚠️  ${r.screen} — ${r.error}');
+    }
+    stdout.writeln('\nbatch: ${full.length} full · ${skipped.length} thin · '
+        '${errored.length} errored · ${results.length} total → $outDir/');
+    return;
+  }
 
   if (args.isEmpty) {
     stderr.writeln('usage: decompose <screen.dart> [--registry P] [--out D] [--print]');
+    stderr.writeln('       decompose --batch <screensDir> [--registry P] [--out D]');
     exit(64);
   }
   final source = args.first;

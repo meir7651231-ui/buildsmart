@@ -1,0 +1,66 @@
+{
+  "name": "LipskeyProductsList",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "📦"
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין מוצרים להצגה",
+        "registryId": "lipskey_products_screen.empty_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נסו לבחור קטגוריה אחרת בקטלוג",
+        "registryId": "lipskey_products_screen.empty_hint",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "📦"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogRepositoryProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogLensProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "availableLensesForSet",
+    "groupByLens",
+    "resolveActiveLens",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "products"
+    ],
+    "untangle": [
+      "CustomScrollView = shared component → separate atom"
+    ]
+  }
+}

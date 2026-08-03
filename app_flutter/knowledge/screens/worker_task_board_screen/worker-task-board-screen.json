@@ -1,0 +1,46 @@
+{
+  "name": "WorkerTaskBoardScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🗂️ לוח משימות מלא",
+        "registryId": "worker_task_board_screen.board_title",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "groupByStatus",
+    "sort",
+    "workerIndexForSession"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

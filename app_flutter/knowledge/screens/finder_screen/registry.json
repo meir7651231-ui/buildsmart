@@ -1,0 +1,17 @@
+{
+  "matched": 2,
+  "total": 2,
+  "summary": "2/2",
+  "entries": [
+    {
+      "id": "finder_screen.no_results",
+      "ok": true,
+      "atom": "FinderScreen"
+    },
+    {
+      "id": "finder_screen.chip_tip",
+      "ok": true,
+      "atom": "FinderScreen"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "matched": 3,
+  "total": 3,
+  "summary": "3/3",
+  "entries": [
+    {
+      "id": "stock_screen.t01",
+      "ok": true,
+      "atom": "StockScreen"
+    },
+    {
+      "id": "stock_screen.t02",
+      "ok": true,
+      "atom": "StockScreen"
+    },
+    {
+      "id": "stock_screen.t03",
+      "ok": true,
+      "atom": "StockScreen"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "_HeroImage",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "חזרה למוצר",
+        "registryId": "lipskey_product_sheet.back_to_product",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "PPR-CT",
+        "registryId": "lipskey_product_sheet.ppr_ct_badge",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "פרטים / מפרט",
+        "registryId": "lipskey_product_sheet.details_spec",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הגדלה",
+        "registryId": "lipskey_product_sheet.zoom",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [],
+    "summary": "registry 4 · mapped 4/4 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "productImage",
+    "rotateY",
+    "setEntry",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "product",
+      "screenH"
+    ],
+    "untangle": []
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "screen": "credit_explain_screen",
+  "source": "credit_explain_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "CreditExplainScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "💳 הסבר אשראי",
+            "registryId": "credit_explain_screen.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "⚙️ המספרים מנתוני-המערכת; ה-AI רק מסביר אותם.",
+            "registryId": "credit_explain_screen.note",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "name",
+          "creditLimit",
+          "used",
+          "balance",
+          "pct"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 2,
+    "total": 2,
+    "summary": "2/2",
+    "entries": [
+      {
+        "id": "credit_explain_screen.title",
+        "ok": true,
+        "atom": "CreditExplainScreen"
+      },
+      {
+        "id": "credit_explain_screen.note",
+        "ok": true,
+        "atom": "CreditExplainScreen"
+      }
+    ]
+  }
+}

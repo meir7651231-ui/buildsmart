@@ -63,6 +63,18 @@ ScreenDecomposition decomposeScreen(
     }
   }
 
+  // A file with no widget class is not a decomposable screen (a utility / data
+  // file). Return an empty decomposition rather than throwing, so batch runs
+  // classify it as "skipped" and carry on.
+  if (widgetClasses.isEmpty) {
+    return ScreenDecomposition(
+      screen: screenName ?? p.basenameWithoutExtension(sourcePath),
+      sourcePath: p.basename(sourcePath),
+      atoms: const <Atom>[],
+      registry: RegistryReconciliation(entries: const <RegistryRef>[]),
+    );
+  }
+
   final allWidgetNames = widgetClasses.keys.toSet();
   // The build-bearing decls for a widget: itself + its State class (if any).
   List<ClassDeclaration> scanDecls(String w) => <ClassDeclaration>[

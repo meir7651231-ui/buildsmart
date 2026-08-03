@@ -1,0 +1,43 @@
+{
+  "name": "_Group",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.edit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "✏️ ערוך",
+        "registryId": "tasks_screen.edit",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius",
+    "onTap"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "header",
+      "tasks",
+      "onTap",
+      "onEdit"
+    ],
+    "untangle": []
+  }
+}

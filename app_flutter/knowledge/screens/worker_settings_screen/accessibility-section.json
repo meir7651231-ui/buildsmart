@@ -1,0 +1,56 @@
+{
+  "name": "_AccessibilitySection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "גודל טקסט (כל האפליקציה)",
+        "registryId": "worker_settings_screen.text_size",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "ניגודיות גבוהה (כל האפליקציה)",
+        "registryId": "worker_settings_screen.high_contrast",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הנפשות מופחתות (כל האפליקציה)",
+        "registryId": "worker_settings_screen.reduced_motion",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "catalogSettingsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write"
+    ]
+  }
+}

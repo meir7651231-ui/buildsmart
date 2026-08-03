@@ -1,0 +1,215 @@
+{
+  "screen": "camera_sheet",
+  "source": "camera_sheet.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "name": "CameraScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showLipskeyProductSheet",
+            "target": "showLipskeyProductSheet"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "taskPhotoPickerProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(ctx, 'אין פלאש במכשיר')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "cameraPermissionErrorView",
+        "catalogProductForSku",
+        "catalogSiblingsFor",
+        "picker",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_ShutterButton",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "📸"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "📸"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "busy",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_GalleryThumb",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "bg",
+          "icon",
+          "label",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_GalleryAllBtn",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "כל\nהגלריה",
+            "registryId": "camera_sheet.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_BarcodeReticle",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ModeFrame",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "emoji",
+          "hint"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 1,
+    "total": 1,
+    "summary": "1/1",
+    "entries": [
+      {
+        "id": "camera_sheet.t06",
+        "ok": true,
+        "atom": "_GalleryAllBtn"
+      }
+    ]
+  }
+}

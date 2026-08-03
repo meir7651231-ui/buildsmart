@@ -1,0 +1,454 @@
+{
+  "screen": "worker_reports_tab",
+  "source": "worker_reports_tab.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "name": "WorkerReportsTab",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📊 דוחות",
+            "registryId": "worker.reports.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע תחילת משימה ועד אישורה.",
+            "registryId": "worker.reports.time_empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "האזור נגזר משם המשימה (אין שדה אתר במנוע המשימות). שיוך לאתרי פרויקט אמיתיים יחובר עם חיבור השרת.",
+            "registryId": "worker.reports.area_note",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "עוד לא הגשת משימות לאישור — ההגשות שלך יופיעו כאן.",
+            "registryId": "worker.reports.history_empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין משימות שנדחו לתיקון.",
+            "registryId": "worker.reports.rejections_empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.reports.send_daily_button",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💬 שלח דוח יומי לקבלן",
+            "registryId": "worker.reports.send_daily_button",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker.reports.ai_button",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "✨"
+          },
+          {
+            "kind": "cfgText",
+            "text": "נסח דוח עם AI",
+            "registryId": "worker.reports.ai_button",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הדוח נשלח כהודעה אמיתית לשיחת הקבלן (טאב שיחות) — סיכום הסטטוסים הנוכחי, בלי המצאות.",
+            "registryId": "worker.reports.send_note",
+            "registryOk": true
+          }
+        ],
+        "registered": 10,
+        "unregistered": [
+          "✨"
+        ],
+        "summary": "registry 10 · mapped 10/10 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "taskClockProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "taskRejectNotesProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "taskRejectionLogProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "rewardsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showFirstPassDrilldown",
+            "target": "showFirstPassDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showCoinsDrilldown",
+            "target": "showCoinsDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showStreakDrilldown",
+            "target": "showStreakDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showWeekDayDrilldown",
+            "target": "showWeekDayDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showTaskTimeDrilldown",
+            "target": "showTaskTimeDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showAreaDrilldown",
+            "target": "showAreaDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showSubmissionDrilldown",
+            "target": "showSubmissionDrilldown"
+          },
+          {
+            "kind": "action",
+            "via": "showRejectionDrilldown",
+            "target": "showRejectionDrilldown"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chatEngineProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "DailyReportScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFirstPassDrilldown(context, ref, worker: worker)",
+            "effect": "open → showFirstPassDrilldown"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showCoinsDrilldown(context, ref)",
+            "effect": "open → showCoinsDrilldown"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showStreakDrilldown(context, ref, worker: worker)",
+            "effect": "open → showStreakDrilldown"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showTaskTimeDrilldown(context, ref, task: t)",
+            "effect": "open → showTaskTimeDrilldown"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showAreaDrilldown(context, ref, worker: worker, area: e.key)",
+            "effect": "open → showAreaDrilldown"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showSubmissionDrilldown(context, task: t, duration: clock[t.id]?.duration)",
+            "effect": "open → showSubmissionDrilldown"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showRejectionDrilldown(context, ref, task: t)",
+            "effect": "open → showRejectionDrilldown"
+          }
+        ]
+      },
+      "floor": [
+        "bsOnAccent",
+        "count",
+        "daysBetweenDst",
+        "orgTerm",
+        "startOfWeekSunday",
+        "workerShortName"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "worker"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_KpiBox",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "value",
+          "label",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Card",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "title",
+          "children",
+          "titleId"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_KvRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "value",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_WeekBars",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "counts",
+          "todayIndex",
+          "onTapDay"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_HistoryRow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📷 לא ניתן להציג את התמונה",
+            "registryId": "worker_reports_tab.photo_error",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "action",
+            "via": "showFullPhotoRefDialog",
+            "target": "showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showDialog<void>(context: context, builder: (_) => Dialog(backgroundColor: Co…",
+            "effect": "open → showDialog"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showFullPhotoRefDialog(context, p)",
+            "effect": "open → showFullPhotoRefDialog"
+          }
+        ]
+      },
+      "floor": [
+        "imageProviderForRef"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "task",
+          "duration",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 9,
+    "total": 9,
+    "summary": "9/9",
+    "entries": [
+      {
+        "id": "worker.reports.title",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.time_empty",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.area_note",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.history_empty",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.rejections_empty",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.send_daily_button",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.ai_button",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker.reports.send_note",
+        "ok": true,
+        "atom": "WorkerReportsTab"
+      },
+      {
+        "id": "worker_reports_tab.photo_error",
+        "ok": true,
+        "atom": "_HistoryRow"
+      }
+    ]
+  }
+}

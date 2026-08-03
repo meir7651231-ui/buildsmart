@@ -1,0 +1,733 @@
+{
+  "screen": "install_studio_screen",
+  "source": "install_studio_screen.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "name": "InstallStudioScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "תכנון חיבור"
+          },
+          {
+            "kind": "text",
+            "text": "בחר מה לחבר · נכין רשימת קנייה"
+          },
+          {
+            "kind": "text",
+            "text": "סוג הקו — מה טמפרטורת המים?"
+          },
+          {
+            "kind": "text",
+            "text": "הטמפרטורה קובעת אילו פריטי בטיחות נדרשים"
+          },
+          {
+            "kind": "text",
+            "text": "מה אתה רוצה לחבר?"
+          },
+          {
+            "kind": "text",
+            "text": "בחר מה אתה מתקין:"
+          },
+          {
+            "kind": "text",
+            "text": "— או כתוב במילים —"
+          },
+          {
+            "kind": "text",
+            "text": "בנה"
+          },
+          {
+            "kind": "text",
+            "text": "חיבור צינור צריך 2 נקודות — כניסה + יציאה.\nהוסף את הנקודה השנייה (ברז, אסלה, דוד…)"
+          },
+          {
+            "kind": "text",
+            "text": "מחזור מים חמים"
+          },
+          {
+            "kind": "text",
+            "text": "מים חמים מיד, בלי להמתין שיתחממו"
+          },
+          {
+            "kind": "text",
+            "text": "הפריטים הבאים חסרים וחשובים לבטיחות:"
+          },
+          {
+            "kind": "text",
+            "text": "🔴"
+          },
+          {
+            "kind": "text",
+            "text": "חזור לתכנון"
+          },
+          {
+            "kind": "text",
+            "text": "הצג רשימה בכל זאת"
+          },
+          {
+            "kind": "text",
+            "text": "שמור פרויקט"
+          },
+          {
+            "kind": "text",
+            "text": "ביטול"
+          },
+          {
+            "kind": "text",
+            "text": "שמור"
+          },
+          {
+            "kind": "text",
+            "text": "הפרויקטים שלי"
+          },
+          {
+            "kind": "text",
+            "text": "אין עדיין פרויקטים שמורים.\nבנה קו ולחץ \"💾 שמור פרויקט\"."
+          },
+          {
+            "kind": "text",
+            "text": "שנה שם"
+          },
+          {
+            "kind": "text",
+            "text": "מחק"
+          },
+          {
+            "kind": "text",
+            "text": "שנה שם לפרויקט"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "תכנון חיבור",
+          "בחר מה לחבר · נכין רשימת קנייה",
+          "סוג הקו — מה טמפרטורת המים?",
+          "הטמפרטורה קובעת אילו פריטי בטיחות נדרשים",
+          "מה אתה רוצה לחבר?",
+          "בחר מה אתה מתקין:",
+          "— או כתוב במילים —",
+          "בנה",
+          "חיבור צינור צריך 2 נקודות — כניסה + יציאה.\nהוסף את הנקודה השנייה (ברז, אסלה, דוד…)",
+          "מחזור מים חמים",
+          "מים חמים מיד, בלי להמתין שיתחממו",
+          "הפריטים הבאים חסרים וחשובים לבטיחות:",
+          "🔴",
+          "חזור לתכנון",
+          "הצג רשימה בכל זאת",
+          "שמור פרויקט",
+          "ביטול",
+          "שמור",
+          "הפרויקטים שלי",
+          "אין עדיין פרויקטים שמורים.\nבנה קו ולחץ \"💾 שמור פרויקט\".",
+          "שנה שם",
+          "מחק",
+          "שנה שם לפרויקט"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 23"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "installStudioActionsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chainProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "lineMaxTempProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "chainProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chainProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "lineMaxTempProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "lineMaxTempProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "AuditScreen"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "lineAccessoriesProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "lineAccessoriesProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "savedProjectsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "savedProjectsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "remove",
+            "target": "savedProjectsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(lineMaxTempProvider.notifier).state = val",
+            "effect": "write → lineMaxTempProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Audi…",
+            "effect": "navigate → AuditScreen"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "autoFlowFix",
+        "buildInstallation",
+        "buildTreeInstallation",
+        "canConnect",
+        "confirmDestructive",
+        "connectionMethodLabel",
+        "manifoldOutlets",
+        "productSuitableForTemp",
+        "removeAt",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_SheetClose",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_NodeRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "product",
+          "index",
+          "isLast",
+          "flow",
+          "nextColor",
+          "connectsToNext",
+          "onRemove",
+          "systemColorOverride"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_BomSheet",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "שנה שם לאזור"
+          },
+          {
+            "kind": "text",
+            "text": "ביטול"
+          },
+          {
+            "kind": "text",
+            "text": "שמור"
+          },
+          {
+            "kind": "text",
+            "text": "המערכת תיקנה אוטומטית:"
+          },
+          {
+            "kind": "text",
+            "text": "✅"
+          },
+          {
+            "kind": "text",
+            "text": "עלייה אנכית:"
+          },
+          {
+            "kind": "text",
+            "text": "החלף לחומר עמיד-חום: PEX / נחושת / פליז."
+          },
+          {
+            "kind": "text",
+            "text": "מינ׳ 2% · ת\"י 1205"
+          },
+          {
+            "kind": "text",
+            "text": "אורך אופקי:"
+          },
+          {
+            "kind": "text",
+            "text": "מפל אנכי:"
+          },
+          {
+            "kind": "text",
+            "text": "🛡️"
+          },
+          {
+            "kind": "text",
+            "text": "אחריות: הסל משלים את העבודה — אין נסיעה שנייה"
+          },
+          {
+            "kind": "text",
+            "text": "⚠️ חסרים חיבורים — הקו לא שלם"
+          },
+          {
+            "kind": "text",
+            "text": "בטיחות ותקינות"
+          },
+          {
+            "kind": "text",
+            "text": "💡"
+          },
+          {
+            "kind": "text",
+            "text": "מה הצעד הבא?"
+          },
+          {
+            "kind": "text",
+            "text": "לחץ \"📋 שלח לאינסטלטור\" כדי להעתיק ולשלוח ב-WhatsApp,\nאו \"הוסף לסל\" להזמנה ישירה."
+          },
+          {
+            "kind": "text",
+            "text": "📋 שלח לאינסטלטור"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "שנה שם לאזור",
+          "ביטול",
+          "שמור",
+          "המערכת תיקנה אוטומטית:",
+          "✅",
+          "עלייה אנכית:",
+          "החלף לחומר עמיד-חום: PEX / נחושת / פליז.",
+          "מינ׳ 2% · ת\"י 1205",
+          "אורך אופקי:",
+          "מפל אנכי:",
+          "🛡️",
+          "אחריות: הסל משלים את העבודה — אין נסיעה שנייה",
+          "⚠️ חסרים חיבורים — הקו לא שלם",
+          "בטיחות ותקינות",
+          "💡",
+          "מה הצעד הבא?",
+          "לחץ \"📋 שלח לאינסטלטור\" כדי להעתיק ולשלוח ב-WhatsApp,\nאו \"הוסף לסל\" להזמנה ישירה.",
+          "📋 שלח לאינסטלטור"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 18"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "chainProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "chainProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "lineMaxTempProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "lineAccessoriesProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "anchorSkus.length != 2 || branches > 0"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "anchors.length != 2"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "alts.length < 2"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "autoAdded == 0"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "s49bTempCfg != null"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "unfit.isEmpty"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "s49bCfg != null && s49bCfg.physics?.minSlopePercent == null"
+          },
+          {
+            "kind": "gated-by",
+            "via": "const-flag",
+            "target": "kit.isEmpty"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "rules.isEmpty"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "smartCartProvider"
+          },
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "count == 0"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (anchorSkus.length != 2 || branches > 0)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (anchors.length != 2)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (alts.length < 2)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (autoAdded == 0)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (s49bTempCfg != null)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (unfit.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (s49bCfg != null && s49bCfg.physics?.minSlopePercent == null)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (kit.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (rules.isEmpty)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (count == 0)",
+            "effect": "hidden (SizedBox.shrink)"
+          }
+        ]
+      },
+      "floor": [
+        "buildInstallation",
+        "checkDrainageSlope",
+        "estimatePressureDrop",
+        "estimatePrice",
+        "findAlternativePaths",
+        "isPipe",
+        "lineComplianceChecklist",
+        "lineIsSupply",
+        "lineStructureText",
+        "materializeChain",
+        "productMaxTempC",
+        "productSuitableForTemp",
+        "recommendedKitFor",
+        "setState",
+        "widerSiblingOf"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [
+          "plan",
+          "anchorSkus",
+          "branches",
+          "outlets",
+          "autoFixes"
+        ],
+        "untangle": [
+          "onChain(…) callback instead of direct chainProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_ProductPicker",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "מה אתה מחפש?"
+          },
+          {
+            "kind": "text",
+            "text": "או חפש ישירות בשדה החיפוש למעלה"
+          },
+          {
+            "kind": "text",
+            "text": "לא נמצאו מוצרים"
+          },
+          {
+            "kind": "text",
+            "text": "✓ כבר נוסף"
+          },
+          {
+            "kind": "text",
+            "text": "הוסף"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מה אתה מחפש?",
+          "או חפש ישירות בשדה החיפוש למעלה",
+          "לא נמצאו מוצרים",
+          "✓ כבר נוסף",
+          "הוסף"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 5"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "catalogRepositoryProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "chainProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "chainProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(chainProvider.notifier).state = [...chain, p]",
+            "effect": "write → chainProvider"
+          }
+        ]
+      },
+      "floor": [
+        "productImage",
+        "productSuitableForTemp",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [
+          "lineTemp",
+          "initialCat"
+        ],
+        "untangle": [
+          "onChain(…) callback instead of direct chainProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_TutorialOverlay",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "ברוכים הבאים לתכנון חיבור"
+          },
+          {
+            "kind": "text",
+            "text": "3 צעדים לרשימת קנייה מוכנה"
+          },
+          {
+            "kind": "text",
+            "text": "הבנתי — בוא נתחיל!"
+          },
+          {
+            "kind": "text",
+            "text": "דלג"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "ברוכים הבאים לתכנון חיבור",
+          "3 צעדים לרשימת קנייה מוכנה",
+          "הבנתי — בוא נתחיל!",
+          "דלג"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 4"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [
+          "onDismiss"
+        ],
+        "untangle": [
+          "SingleChildScrollView = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

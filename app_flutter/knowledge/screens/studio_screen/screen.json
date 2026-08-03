@@ -1,0 +1,194 @@
+{
+  "screen": "studio_screen",
+  "source": "studio_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "StudioScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🎬 סטודיו",
+            "registryId": "studio_screen_old.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ערוך את האפליקציה — עורך ניסיוני",
+            "registryId": "studio_screen_old.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "studioCoEditorProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "StudioRulesScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_StudioTabs",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "onSelect",
+        "seg"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "active",
+          "onSelect"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_CoEditorPane",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🤖 תאר בעברית מה לשנות. אכין תצוגה מקדימה — שום דבר לא ישתנה עד שתאשר.",
+            "registryId": "studio_screen_old.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "נסח שינוי לתצוגה מקדימה",
+            "registryId": "studio_screen_old.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אשר והחל בטיוטה ✓",
+            "registryId": "studio_screen_old.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "👁️ תצוגה מקדימה (לפני החלה)",
+            "registryId": "studio_screen_old.t06",
+            "registryOk": true
+          }
+        ],
+        "registered": 4,
+        "unregistered": [],
+        "summary": "registry 4 · mapped 4/4 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "configStoreProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent",
+        "classifyScope",
+        "parseConfigEdit",
+        "scopeHe",
+        "setState",
+        "studioEditPrompt",
+        "studioScopePrompt",
+        "summarizeDiff",
+        "validateSafe"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "ai"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 6,
+    "total": 6,
+    "summary": "6/6",
+    "entries": [
+      {
+        "id": "studio_screen_old.t01",
+        "ok": true,
+        "atom": "StudioScreen"
+      },
+      {
+        "id": "studio_screen_old.t02",
+        "ok": true,
+        "atom": "StudioScreen"
+      },
+      {
+        "id": "studio_screen_old.t03",
+        "ok": true,
+        "atom": "_CoEditorPane"
+      },
+      {
+        "id": "studio_screen_old.t04",
+        "ok": true,
+        "atom": "_CoEditorPane"
+      },
+      {
+        "id": "studio_screen_old.t05",
+        "ok": true,
+        "atom": "_CoEditorPane"
+      },
+      {
+        "id": "studio_screen_old.t06",
+        "ok": true,
+        "atom": "_CoEditorPane"
+      }
+    ]
+  }
+}

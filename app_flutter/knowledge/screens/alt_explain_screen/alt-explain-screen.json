@@ -1,0 +1,54 @@
+{
+  "name": "AltExplainScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "💡 למה החלופה שווה?",
+        "registryId": "alt_explain_screen.t01",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "⚙️ המחירים מתוך נתוני-הקטלוג; ה-AI רק מנסח את ההשוואה.",
+        "registryId": "alt_explain_screen.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "product",
+      "recName",
+      "recPrice",
+      "altName",
+      "altPrice"
+    ],
+    "untangle": []
+  }
+}

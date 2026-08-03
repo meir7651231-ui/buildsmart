@@ -1,0 +1,298 @@
+{
+  "screen": "worker_settings_screen",
+  "source": "worker_settings_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "WorkerSettingsScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "הגדרות",
+            "registryId": "worker_settings_screen.settings_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "kbWorkerSettingsNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_NotifRow",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "🔔"
+          },
+          {
+            "kind": "cfgText",
+            "text": "התראות",
+            "registryId": "worker_settings_screen.notifications",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [
+          "🔔"
+        ],
+        "summary": "registry 1 · mapped 1/1 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "NotifSettingsScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(NotifSettingsScreen.route())",
+            "effect": "navigate → NotifSettingsScreen"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RegionSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקרוב",
+            "registryId": "worker_settings_screen.coming_soon",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "appSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "appSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onAppSettings(…) callback instead of direct appSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_AccessibilitySection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "גודל טקסט (כל האפליקציה)",
+            "registryId": "worker_settings_screen.text_size",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ניגודיות גבוהה (כל האפליקציה)",
+            "registryId": "worker_settings_screen.high_contrast",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "הנפשות מופחתות (כל האפליקציה)",
+            "registryId": "worker_settings_screen.reduced_motion",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "catalogSettingsProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "update",
+            "target": "catalogSettingsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_InfoSection",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "תנאי שימוש",
+            "registryId": "worker_settings_screen.terms",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מדיניות פרטיות",
+            "registryId": "worker_settings_screen.privacy",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "LegalScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.terms))",
+            "effect": "navigate → LegalScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(LegalScreen.route(initialTab: LegalTab.privacy))",
+            "effect": "navigate → LegalScreen"
+          }
+        ]
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 8,
+    "total": 8,
+    "summary": "8/8",
+    "entries": [
+      {
+        "id": "worker_settings_screen.settings_title",
+        "ok": true,
+        "atom": "WorkerSettingsScreen"
+      },
+      {
+        "id": "worker_settings_screen.notifications",
+        "ok": true,
+        "atom": "_NotifRow"
+      },
+      {
+        "id": "worker_settings_screen.coming_soon",
+        "ok": true,
+        "atom": "_RegionSection"
+      },
+      {
+        "id": "worker_settings_screen.text_size",
+        "ok": true,
+        "atom": "_AccessibilitySection"
+      },
+      {
+        "id": "worker_settings_screen.high_contrast",
+        "ok": true,
+        "atom": "_AccessibilitySection"
+      },
+      {
+        "id": "worker_settings_screen.reduced_motion",
+        "ok": true,
+        "atom": "_AccessibilitySection"
+      },
+      {
+        "id": "worker_settings_screen.terms",
+        "ok": true,
+        "atom": "_InfoSection"
+      },
+      {
+        "id": "worker_settings_screen.privacy",
+        "ok": true,
+        "atom": "_InfoSection"
+      }
+    ]
+  }
+}

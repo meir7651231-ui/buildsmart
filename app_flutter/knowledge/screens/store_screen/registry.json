@@ -1,0 +1,207 @@
+{
+  "matched": 40,
+  "total": 40,
+  "summary": "40/40",
+  "entries": [
+    {
+      "id": "shop.emptycart.title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.emptycart.hint",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.service_under_construction",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.orders.hidden",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.orders_hidden_hint",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.orders_hidden_show",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.proj_assign_title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.proj_add_chip",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.proj_add_dialog_title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.proj_add_cancel",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.proj_add_confirm",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.supplier_lead_time",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.delivery.title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.notes.title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.payment.title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "cart.cta",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.large_order_title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.large_order_cancel",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.large_order_confirm",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.save_list_title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.save_list_cancel",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.save_list_confirm",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.saved_lists_title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.saved_lists_empty",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.actions_lists",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.actions_save",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.actions_share",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.actions_clear",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.checkout.title",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.checkout_project_label",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.checkout_delivery_label",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.checkout_payment_label",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.checkout_total_label",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "shop.checkout.confirm",
+      "ok": true,
+      "atom": "_StoreList"
+    },
+    {
+      "id": "store_screen.order_no_items",
+      "ok": true,
+      "atom": "_OrderSheet"
+    },
+    {
+      "id": "store_screen.order_subtotal",
+      "ok": true,
+      "atom": "_OrderSheet"
+    },
+    {
+      "id": "store_screen.order_vat_delivery",
+      "ok": true,
+      "atom": "_OrderSheet"
+    },
+    {
+      "id": "store_screen.order_total",
+      "ok": true,
+      "atom": "_OrderSheet"
+    },
+    {
+      "id": "shop.tracking.title",
+      "ok": true,
+      "atom": "_OrderSheet"
+    },
+    {
+      "id": "store_screen.order_scan_delivery",
+      "ok": true,
+      "atom": "_OrderSheet"
+    }
+  ]
+}

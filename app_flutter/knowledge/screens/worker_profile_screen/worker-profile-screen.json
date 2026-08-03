@@ -1,0 +1,57 @@
+{
+  "name": "WorkerProfileScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "פרופיל עובד",
+        "registryId": "worker_profile_screen.appbar_title",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerProfileProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerFormsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "kbWorkerProfileNodes"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "embedded"
+    ],
+    "untangle": [
+      "KbScreen = shared component → separate atom",
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

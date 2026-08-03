@@ -1,0 +1,43 @@
+{
+  "name": "_AddDefectForm",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "חומרה",
+        "registryId": "defects_sheet.severity",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "onSeverity"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "title",
+      "nameKey",
+      "locationKey",
+      "severityKey",
+      "saveKey",
+      "saveLabel",
+      "name",
+      "location",
+      "severity",
+      "onSeverity",
+      "onSave"
+    ],
+    "untangle": []
+  }
+}

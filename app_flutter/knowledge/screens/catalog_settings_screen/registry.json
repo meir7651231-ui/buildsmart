@@ -1,0 +1,67 @@
+{
+  "matched": 12,
+  "total": 12,
+  "summary": "12/12",
+  "entries": [
+    {
+      "id": "catalog_settings_screen.t01",
+      "ok": true,
+      "atom": "CatalogSettingsScreen"
+    },
+    {
+      "id": "catalog_settings_screen.t02",
+      "ok": true,
+      "atom": "CatalogSettingsScreen"
+    },
+    {
+      "id": "catalog_settings_screen.t03",
+      "ok": true,
+      "atom": "CatalogSettingsScreen"
+    },
+    {
+      "id": "catalog_settings_screen.t04",
+      "ok": true,
+      "atom": "CatalogSettingsScreen"
+    },
+    {
+      "id": "catalog_settings_screen.t05",
+      "ok": true,
+      "atom": "CatalogSettingsScreen"
+    },
+    {
+      "id": "catalog_settings_screen.t06",
+      "ok": true,
+      "atom": "_ProfileRow"
+    },
+    {
+      "id": "catalog_settings_screen.t07",
+      "ok": true,
+      "atom": "_ThemeSection"
+    },
+    {
+      "id": "catalog_settings_screen.t08",
+      "ok": true,
+      "atom": "_ThemeSection"
+    },
+    {
+      "id": "catalog_settings_screen.t11",
+      "ok": true,
+      "atom": "_ThemeSection"
+    },
+    {
+      "id": "catalog_settings_screen.t12",
+      "ok": true,
+      "atom": "_SearchSection"
+    },
+    {
+      "id": "catalog_settings_screen.t09",
+      "ok": true,
+      "atom": "_InfoSection"
+    },
+    {
+      "id": "catalog_settings_screen.t10",
+      "ok": true,
+      "atom": "_InfoSection"
+    }
+  ]
+}

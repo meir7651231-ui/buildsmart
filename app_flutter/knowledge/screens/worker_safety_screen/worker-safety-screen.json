@@ -1,0 +1,170 @@
+{
+  "name": "WorkerSafetyScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🛡️ תיק בטיחות",
+        "registryId": "worker_safety_screen.appbar_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🎓 הוספת הדרכה",
+        "registryId": "worker_safety_screen.add_training_title",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📅"
+      },
+      {
+        "kind": "cfgText",
+        "text": "📄 צרף מסמך הדרכה (לא חובה)",
+        "registryId": "worker_safety_screen.attach_doc",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📄 מסמך צורף ✓",
+        "registryId": "worker_safety_screen.doc_attached",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_safety_screen.save_training",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💾 שמור הדרכה",
+        "registryId": "worker_safety_screen.save_training",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🪪 הוספת תעודה",
+        "registryId": "worker_safety_screen.add_cert_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📷 צרף צילום תעודה (לא חובה)",
+        "registryId": "worker_safety_screen.attach_photo",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📷 צילום צורף ✓",
+        "registryId": "worker_safety_screen.photo_attached",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_safety_screen.save_cert",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💾 שמור תעודה",
+        "registryId": "worker_safety_screen.save_cert",
+        "registryOk": true
+      }
+    ],
+    "registered": 11,
+    "unregistered": [
+      "📅"
+    ],
+    "summary": "registry 11 · mapped 11/11 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerTrainingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "workerCertsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerTrainingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showFullPhotoDialog",
+        "target": "showFullPhotoDialog"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "workerCertsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "writes",
+        "via": "remove",
+        "target": "workerTrainingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "action",
+        "via": "showDatePicker",
+        "target": "showDatePicker"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "workerTrainingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "workerCertsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "bsOnAccent",
+    "confirmDestructive",
+    "decodeDataUrlPhoto",
+    "pickTaskPhoto",
+    "setSheetState",
+    "sort"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

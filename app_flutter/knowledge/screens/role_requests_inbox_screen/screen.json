@@ -1,0 +1,214 @@
+{
+  "screen": "role_requests_inbox_screen",
+  "source": "role_requests_inbox_screen.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "RoleRequestsInboxScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "בקשות תפקיד",
+            "registryId": "role_requests_inbox_screen.t01",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "roleReviewerProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "pendingRoleRequestsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "authStateProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "clearAllRoleRequests",
+        "confirmDestructive",
+        "isOwnerEmail",
+        "reviewer",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RequestCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "role_requests_inbox_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אישור",
+            "registryId": "role_requests_inbox_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "role_requests_inbox_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דחייה",
+            "registryId": "role_requests_inbox_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "role_requests_inbox_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "✨"
+          },
+          {
+            "kind": "cfgText",
+            "text": "נסח סיבת-דחייה",
+            "registryId": "role_requests_inbox_screen.t04",
+            "registryOk": true
+          }
+        ],
+        "registered": 6,
+        "unregistered": [
+          "✨"
+        ],
+        "summary": "registry 6 · mapped 6/6 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "gated-by",
+            "via": "guard",
+            "target": "ref.watch(claudeGatewayProvider) == null"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "RejectReasonScreen"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "rule",
+            "detail": "if (ref.watch(claudeGatewayProvider) == null)",
+            "effect": "hidden (SizedBox.shrink)"
+          },
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(RejectReasonScreen.route(role: role, name: name ??…",
+            "effect": "navigate → RejectReasonScreen"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "doc",
+          "busy",
+          "onApprove",
+          "onDeny"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Empty",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "icon",
+          "text"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "role_requests_inbox_screen.t01",
+        "ok": true,
+        "atom": "RoleRequestsInboxScreen"
+      },
+      {
+        "id": "role_requests_inbox_screen.t02",
+        "ok": true,
+        "atom": "_RequestCard"
+      },
+      {
+        "id": "role_requests_inbox_screen.t03",
+        "ok": true,
+        "atom": "_RequestCard"
+      },
+      {
+        "id": "role_requests_inbox_screen.t04",
+        "ok": true,
+        "atom": "_RequestCard"
+      }
+    ]
+  }
+}

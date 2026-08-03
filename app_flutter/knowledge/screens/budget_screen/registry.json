@@ -1,0 +1,72 @@
+{
+  "matched": 13,
+  "total": 13,
+  "summary": "13/13",
+  "entries": [
+    {
+      "id": "budget_screen.title",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.cat_header",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.add",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.no_cats",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.site_header",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.no_sites",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.edit_budget_btn",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.editor_title",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.save",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.remove_expense",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.add_expense",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.save_cat",
+      "ok": true,
+      "atom": "BudgetScreen"
+    },
+    {
+      "id": "budget_screen.delete_cat",
+      "ok": true,
+      "atom": "BudgetScreen"
+    }
+  ]
+}

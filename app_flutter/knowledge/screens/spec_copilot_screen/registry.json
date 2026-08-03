@@ -1,0 +1,32 @@
+{
+  "matched": 5,
+  "total": 5,
+  "summary": "5/5",
+  "entries": [
+    {
+      "id": "spec_copilot_screen.t01",
+      "ok": true,
+      "atom": "SpecCopilotScreen"
+    },
+    {
+      "id": "spec_copilot_screen.t02",
+      "ok": true,
+      "atom": "SpecCopilotScreen"
+    },
+    {
+      "id": "spec_copilot_screen.t03",
+      "ok": true,
+      "atom": "SpecCopilotScreen"
+    },
+    {
+      "id": "spec_copilot_screen.t04",
+      "ok": true,
+      "atom": "SpecCopilotScreen"
+    },
+    {
+      "id": "spec_copilot_screen.t05",
+      "ok": true,
+      "atom": "SpecCopilotScreen"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "name": "_DeptTile",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "departments_screen.t02",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogSystemFilterProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogTreePathProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "deptFlatProductsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "homeDepartmentProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'בקרוב')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogSystemFilterProvider.notifier).state = null",
+        "effect": "write → catalogSystemFilterProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreePathProvider.notifier).state = _toolDeptPath(dept.name, t…",
+        "effect": "write → catalogTreePathProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogTreePathProvider.notifier).state = const []",
+        "effect": "write → catalogTreePathProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(deptFlatProductsProvider.notifier).state = false",
+        "effect": "write → deptFlatProductsProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(homeDepartmentProvider.notifier).state = dept.name",
+        "effect": "write → homeDepartmentProvider"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [
+      "dept"
+    ],
+    "untangle": [
+      "onCatalogSystemFilter(…) callback instead of direct catalogSystemFilterProvider write",
+      "onCatalogTreePath(…) callback instead of direct catalogTreePathProvider write",
+      "onDeptFlatProducts(…) callback instead of direct deptFlatProductsProvider write",
+      "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write"
+    ]
+  }
+}

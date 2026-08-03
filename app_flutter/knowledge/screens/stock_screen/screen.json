@@ -1,0 +1,209 @@
+{
+  "screen": "stock_screen",
+  "source": "stock_screen.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "StockScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "המלאי שלי",
+            "registryId": "stock_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "📥"
+          },
+          {
+            "kind": "cfgText",
+            "text": "📦 המלאי שלי",
+            "registryId": "stock_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💡 כשתסמן פריט כ\"במחסן\" או \"באתר\" בעץ המוצרים — הוא יופיע כאן.",
+            "registryId": "stock_screen.t03",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [
+          "📥"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "stockTabProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "stockProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showContractorMaterialRequestsSheet",
+            "target": "showContractorMaterialRequestsSheet"
+          },
+          {
+            "kind": "writes",
+            "via": "state=",
+            "target": "stockTabProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "stockProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showContractorMaterialRequestsSheet(context)",
+            "effect": "open → showContractorMaterialRequestsSheet"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(stockTabProvider.notifier).state = 'warehouse'",
+            "effect": "write → stockTabProvider"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "ref.read(stockTabProvider.notifier).state = 'site'",
+            "effect": "write → stockTabProvider"
+          }
+        ]
+      },
+      "floor": [
+        "kbStockNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "KbScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_StockTab",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "bsOnAccent"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "label",
+          "on",
+          "onTap"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_StockRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "name",
+          "info",
+          "warehouse",
+          "onMove"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Empty",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "tab"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 3,
+    "total": 3,
+    "summary": "3/3",
+    "entries": [
+      {
+        "id": "stock_screen.t01",
+        "ok": true,
+        "atom": "StockScreen"
+      },
+      {
+        "id": "stock_screen.t02",
+        "ok": true,
+        "atom": "StockScreen"
+      },
+      {
+        "id": "stock_screen.t03",
+        "ok": true,
+        "atom": "StockScreen"
+      }
+    ]
+  }
+}

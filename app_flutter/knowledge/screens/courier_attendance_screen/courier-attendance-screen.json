@@ -1,0 +1,67 @@
+{
+  "name": "CourierAttendanceScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🕐 נוכחות",
+        "registryId": "courier.attend.title",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "courierAttendanceProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "courierAttendanceProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "workerNotifsProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "attendanceDateKey",
+    "attendanceMonth",
+    "attendanceTotal",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "WelcomeScreen = shared component → separate atom"
+    ]
+  }
+}

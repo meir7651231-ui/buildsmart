@@ -1,0 +1,46 @@
+{
+  "name": "_RecheckButton",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "docs_readiness_gate.t04",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔄 בדוק שוב",
+        "registryId": "docs_readiness_gate.t04",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "boardAuthProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "courierDocsReadyProvider",
+    "workerDocsReadyProvider"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "role"
+    ],
+    "untangle": []
+  }
+}

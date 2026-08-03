@@ -1,0 +1,292 @@
+{
+  "name": "LipskeyProductSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "נוסף לסל ✓",
+        "registryId": "lipskey_product_sheet.added_to_cart",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔗 קשור",
+        "registryId": "lipskey_product_sheet.related_rail_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "🔌 מה מתחבר לזה",
+        "registryId": "lipskey_product_sheet.connects_rail_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוסף לקו",
+        "registryId": "lipskey_product_sheet.add_to_line",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נוסף לקו ✓",
+        "registryId": "lipskey_product_sheet.added_to_line",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📋 רשימת חומרים — קו",
+        "registryId": "lipskey_product_sheet.line_bom_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לא נמצאו פריטים לפתרון — בחר מוצרים אחרים לקו",
+        "registryId": "lipskey_product_sheet.line_bom_empty",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מק\"ט הועתק",
+        "registryId": "lipskey_product_sheet.sku_copied",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "חזרה למוצר הקודם",
+        "registryId": "lipskey_product_sheet.hop_back",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "💡 צ׳יפ כתום ▾ — הקש להחלפת גודל/צבע/דגם",
+        "registryId": "lipskey_product_sheet.chip_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🧩"
+      },
+      {
+        "kind": "cfgText",
+        "text": "ערכת התקנה מומלצת",
+        "registryId": "lipskey_product_sheet.recommended_kit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "+ ערכה",
+        "registryId": "lipskey_product_sheet.add_kit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אביזרים נבחרים:",
+        "registryId": "lipskey_product_sheet.selected_accessories",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוסף לסל",
+        "registryId": "lipskey_product_sheet.add_to_cart_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🌡️"
+      },
+      {
+        "kind": "cfgText",
+        "text": "מתאים לתנאים שלי?",
+        "registryId": "lipskey_product_sheet.spec_copilot_cta",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "מה עוד צריך להתקנה?",
+        "registryId": "lipskey_product_sheet.paired_explain_cta",
+        "registryOk": true
+      }
+    ],
+    "registered": 16,
+    "unregistered": [
+      "🧩",
+      "🌡️"
+    ],
+    "summary": "registry 16 · mapped 16/16 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "featureFlagsProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "neighbours.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "connects.isEmpty"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "cardPicksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "cardPicksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      },
+      {
+        "kind": "writes",
+        "via": "clear",
+        "target": "cardPicksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "seed"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "q"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showLipskeyProductSheet",
+        "target": "showLipskeyProductSheet"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "SpecCopilotScreen"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "pairedTypes.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "ref.watch(claudeGatewayProvider) == null"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "PairedExplainScreen"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (neighbours.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (connects.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: CfgText('l…",
+        "effect": "open → showSnackBar"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showLipskeyProductSheet(context, g.parts[i], _scanPool.where((x) => x.categor…",
+        "effect": "open → showLipskeyProductSheet"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(SpecCopilotScreen.route(p))",
+        "effect": "navigate → SpecCopilotScreen"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (pairedTypes.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (ref.watch(claudeGatewayProvider) == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(PairedExplainScreen.route(product: p.nameHe, types…",
+        "effect": "navigate → PairedExplainScreen"
+      }
+    ]
+  },
+  "floor": [
+    "addParts",
+    "cardReadinessScore",
+    "chip",
+    "dataCompletenessScore",
+    "formatDimValue",
+    "frequentlyPairedTypesFor",
+    "genderRank",
+    "lipskeyAccFor",
+    "lipskeyStagesFor",
+    "max",
+    "methodRank",
+    "planLineFromPicks",
+    "scoreBandColors",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [
+      "product",
+      "categoryProducts",
+      "forceLive",
+      "hopSeedForTest"
+    ],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

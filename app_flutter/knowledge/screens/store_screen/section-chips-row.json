@@ -1,0 +1,62 @@
+{
+  "name": "_SectionChipsRow",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🔔"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🔔"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "storeSectionProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "storeSectionProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "featOn",
+        "target": "orders.services"
+      },
+      {
+        "kind": "action",
+        "via": "showOrderNotifSheet",
+        "target": "showOrderNotifSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showOrderNotifSheet(context)",
+        "effect": "open → showOrderNotifSheet"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "select"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "SingleChildScrollView = shared component → separate atom"
+    ]
+  }
+}

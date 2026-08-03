@@ -1,0 +1,32 @@
+{
+  "matched": 5,
+  "total": 5,
+  "summary": "5/5",
+  "entries": [
+    {
+      "id": "courier.forms.title",
+      "ok": true,
+      "atom": "CourierFormsScreen"
+    },
+    {
+      "id": "courier.forms.form101_note",
+      "ok": true,
+      "atom": "CourierFormsScreen"
+    },
+    {
+      "id": "courier.forms.my_requests",
+      "ok": true,
+      "atom": "CourierFormsScreen"
+    },
+    {
+      "id": "courier.forms.sicknote_hint",
+      "ok": true,
+      "atom": "CourierFormsScreen"
+    },
+    {
+      "id": "courier_forms_screen.t01",
+      "ok": true,
+      "atom": "CourierFormsScreen"
+    }
+  ]
+}

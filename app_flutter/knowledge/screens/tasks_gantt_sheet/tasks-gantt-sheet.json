@@ -1,0 +1,67 @@
+{
+  "name": "_TasksGanttSheet",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📊 גאנט משימות",
+        "registryId": "tasks_gantt_sheet.header",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "לוח-הזמנים של המשימות לפי תאריך-התחלה מתוזמן (לצפייה בלבד)",
+        "registryId": "tasks_gantt_sheet.subtitle",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "אין משימות",
+        "registryId": "tasks_gantt_sheet.empty",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📊 לוח-זמנים (גאנט)",
+        "registryId": "tasks_gantt_sheet.timeline",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "משימות אלו לא ממוקמות על הציר — הקבלן יכול לשבץ להן תאריך התחלה.",
+        "registryId": "tasks_gantt_sheet.unscheduled_note",
+        "registryOk": true
+      }
+    ],
+    "registered": 5,
+    "unregistered": [],
+    "summary": "registry 5 · mapped 5/5 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "boardAuthProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "buildTasksGantt",
+    "workerIndexForSession"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

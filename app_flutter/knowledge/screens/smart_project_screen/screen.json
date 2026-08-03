@@ -1,0 +1,283 @@
+{
+  "screen": "smart_project_screen",
+  "source": "smart_project_screen.dart",
+  "atomCount": 4,
+  "atoms": [
+    {
+      "name": "SmartProjectScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🏗️ פרויקט חכם",
+            "registryId": "smart_project_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "smart_project_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📅 בחר יום",
+            "registryId": "smart_project_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "smart_project_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ יציאה",
+            "registryId": "smart_project_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🗓️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין ימי עבודה בתוכנית",
+            "registryId": "smart_project_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן",
+            "registryId": "smart_project_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "בחר יום",
+            "registryId": "smart_project_screen.t06",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✓ הושלם",
+            "registryId": "smart_project_screen.t07",
+            "registryOk": true
+          }
+        ],
+        "registered": 9,
+        "unregistered": [
+          "🗓️"
+        ],
+        "summary": "registry 9 · mapped 9/9 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartProjectProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartProjectProgressProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "activeProjectProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "toggle",
+            "target": "smartProjectProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "action",
+            "via": "showModalBottomSheet",
+            "target": "showModalBottomSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "addAll",
+        "buildDayStages",
+        "cfgRadius",
+        "clear",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onSmartProject(…) callback instead of direct smartProjectProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_Hero",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "title",
+          "done",
+          "total",
+          "pct"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ProjectDone",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!",
+            "registryId": "smart_project_screen.t08",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_StageCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "שלבי ביצוע",
+            "registryId": "smart_project_screen.t09",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "cfgRadius",
+        "isStepDone",
+        "onToggleStep"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "index",
+          "stage",
+          "isDone",
+          "expanded",
+          "isStepDone",
+          "onToggleExpand",
+          "onToggleDone",
+          "onToggleStep"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 9,
+    "total": 9,
+    "summary": "9/9",
+    "entries": [
+      {
+        "id": "smart_project_screen.t01",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t02",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t03",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t04",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t05",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t06",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t07",
+        "ok": true,
+        "atom": "SmartProjectScreen"
+      },
+      {
+        "id": "smart_project_screen.t08",
+        "ok": true,
+        "atom": "_ProjectDone"
+      },
+      {
+        "id": "smart_project_screen.t09",
+        "ok": true,
+        "atom": "_StageCard"
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "name": "_ThemeSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "סידור מסך הבית",
+        "registryId": "catalog_settings_screen.t07",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "גרור לשנות את סדר המקטעים בבית",
+        "registryId": "catalog_settings_screen.t08",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "בקרוב",
+        "registryId": "catalog_settings_screen.t11",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [],
+    "summary": "registry 3 · mapped 3/3 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "appSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogProductSortProvider"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "HomeContentReorder"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "Navigator.of(context).push(HomeContentReorder.route())",
+        "effect": "navigate → HomeContentReorder"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "onChanged"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onAppSettings(…) callback instead of direct appSettingsProvider write",
+      "onCatalogProductSort(…) callback instead of direct catalogProductSortProvider write"
+    ]
+  }
+}

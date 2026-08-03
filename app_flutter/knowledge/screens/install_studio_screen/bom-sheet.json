@@ -1,0 +1,285 @@
+{
+  "name": "_BomSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "שנה שם לאזור"
+      },
+      {
+        "kind": "text",
+        "text": "ביטול"
+      },
+      {
+        "kind": "text",
+        "text": "שמור"
+      },
+      {
+        "kind": "text",
+        "text": "המערכת תיקנה אוטומטית:"
+      },
+      {
+        "kind": "text",
+        "text": "✅"
+      },
+      {
+        "kind": "text",
+        "text": "עלייה אנכית:"
+      },
+      {
+        "kind": "text",
+        "text": "החלף לחומר עמיד-חום: PEX / נחושת / פליז."
+      },
+      {
+        "kind": "text",
+        "text": "מינ׳ 2% · ת\"י 1205"
+      },
+      {
+        "kind": "text",
+        "text": "אורך אופקי:"
+      },
+      {
+        "kind": "text",
+        "text": "מפל אנכי:"
+      },
+      {
+        "kind": "text",
+        "text": "🛡️"
+      },
+      {
+        "kind": "text",
+        "text": "אחריות: הסל משלים את העבודה — אין נסיעה שנייה"
+      },
+      {
+        "kind": "text",
+        "text": "⚠️ חסרים חיבורים — הקו לא שלם"
+      },
+      {
+        "kind": "text",
+        "text": "בטיחות ותקינות"
+      },
+      {
+        "kind": "text",
+        "text": "💡"
+      },
+      {
+        "kind": "text",
+        "text": "מה הצעד הבא?"
+      },
+      {
+        "kind": "text",
+        "text": "לחץ \"📋 שלח לאינסטלטור\" כדי להעתיק ולשלוח ב-WhatsApp,\nאו \"הוסף לסל\" להזמנה ישירה."
+      },
+      {
+        "kind": "text",
+        "text": "📋 שלח לאינסטלטור"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "שנה שם לאזור",
+      "ביטול",
+      "שמור",
+      "המערכת תיקנה אוטומטית:",
+      "✅",
+      "עלייה אנכית:",
+      "החלף לחומר עמיד-חום: PEX / נחושת / פליז.",
+      "מינ׳ 2% · ת\"י 1205",
+      "אורך אופקי:",
+      "מפל אנכי:",
+      "🛡️",
+      "אחריות: הסל משלים את העבודה — אין נסיעה שנייה",
+      "⚠️ חסרים חיבורים — הקו לא שלם",
+      "בטיחות ותקינות",
+      "💡",
+      "מה הצעד הבא?",
+      "לחץ \"📋 שלח לאינסטלטור\" כדי להעתיק ולשלוח ב-WhatsApp,\nאו \"הוסף לסל\" להזמנה ישירה.",
+      "📋 שלח לאינסטלטור"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 18"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chainProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "chainProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "lineMaxTempProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "lineAccessoriesProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "anchorSkus.length != 2 || branches > 0"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "anchors.length != 2"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "alts.length < 2"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "autoAdded == 0"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "s49bTempCfg != null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "unfit.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "s49bCfg != null && s49bCfg.physics?.minSlopePercent == null"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kit.isEmpty"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "rules.isEmpty"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "count == 0"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (anchorSkus.length != 2 || branches > 0)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (anchors.length != 2)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (alts.length < 2)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (autoAdded == 0)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (s49bTempCfg != null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (unfit.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (s49bCfg != null && s49bCfg.physics?.minSlopePercent == null)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kit.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (rules.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (count == 0)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "buildInstallation",
+    "checkDrainageSlope",
+    "estimatePressureDrop",
+    "estimatePrice",
+    "findAlternativePaths",
+    "isPipe",
+    "lineComplianceChecklist",
+    "lineIsSupply",
+    "lineStructureText",
+    "materializeChain",
+    "productMaxTempC",
+    "productSuitableForTemp",
+    "recommendedKitFor",
+    "setState",
+    "widerSiblingOf"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [
+      "plan",
+      "anchorSkus",
+      "branches",
+      "outlets",
+      "autoFixes"
+    ],
+    "untangle": [
+      "onChain(…) callback instead of direct chainProvider write"
+    ]
+  }
+}

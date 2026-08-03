@@ -1,0 +1,102 @@
+{
+  "name": "TasksScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📋 משימות",
+        "registryId": "tasks_screen.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "‹ יציאה",
+        "registryId": "tasks_screen.exit",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "אתה רואה את כל משימות הצוות. אשר עבודות שהוגשו ועקוב אחרי ההתקדמות."
+      },
+      {
+        "kind": "text",
+        "text": "אין משימות לצוות עדיין — משימות חדשות יופיעו כאן"
+      },
+      {
+        "kind": "cfgText",
+        "text": "עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.",
+        "registryId": "tasks_screen.proposal_intro",
+        "registryOk": true
+      }
+    ],
+    "registered": 4,
+    "unregistered": [
+      "אתה רואה את כל משימות הצוות. אשר עבודות שהוגשו ועקוב אחרי ההתקדמות.",
+      "אין משימות לצוות עדיין — משימות חדשות יופיעו כאן"
+    ],
+    "summary": "registry 4 · mapped 4/4 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "pendingApprovalTasksProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "pendingProposalsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "chatEngineProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showModalBottomSheet",
+        "target": "showModalBottomSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "confirmDestructive",
+    "promptRejectReason",
+    "statusBranch",
+    "taskLeaf"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "KbScreen = shared component → separate atom",
+      "_managerView = shared component → separate atom"
+    ]
+  }
+}

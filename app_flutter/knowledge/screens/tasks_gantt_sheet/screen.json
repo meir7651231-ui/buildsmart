@@ -1,0 +1,156 @@
+{
+  "screen": "tasks_gantt_sheet",
+  "source": "tasks_gantt_sheet.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "name": "_TasksGanttSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📊 גאנט משימות",
+            "registryId": "tasks_gantt_sheet.header",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "לוח-הזמנים של המשימות לפי תאריך-התחלה מתוזמן (לצפייה בלבד)",
+            "registryId": "tasks_gantt_sheet.subtitle",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין משימות",
+            "registryId": "tasks_gantt_sheet.empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "📊 לוח-זמנים (גאנט)",
+            "registryId": "tasks_gantt_sheet.timeline",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "משימות אלו לא ממוקמות על הציר — הקבלן יכול לשבץ להן תאריך התחלה.",
+            "registryId": "tasks_gantt_sheet.unscheduled_note",
+            "registryOk": true
+          }
+        ],
+        "registered": 5,
+        "unregistered": [],
+        "summary": "registry 5 · mapped 5/5 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "buildTasksGantt",
+        "workerIndexForSession"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_GanttBarRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "bar",
+          "spanDays",
+          "start"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_UnscheduledRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "task"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 5,
+    "total": 5,
+    "summary": "5/5",
+    "entries": [
+      {
+        "id": "tasks_gantt_sheet.header",
+        "ok": true,
+        "atom": "_TasksGanttSheet"
+      },
+      {
+        "id": "tasks_gantt_sheet.subtitle",
+        "ok": true,
+        "atom": "_TasksGanttSheet"
+      },
+      {
+        "id": "tasks_gantt_sheet.empty",
+        "ok": true,
+        "atom": "_TasksGanttSheet"
+      },
+      {
+        "id": "tasks_gantt_sheet.timeline",
+        "ok": true,
+        "atom": "_TasksGanttSheet"
+      },
+      {
+        "id": "tasks_gantt_sheet.unscheduled_note",
+        "ok": true,
+        "atom": "_TasksGanttSheet"
+      }
+    ]
+  }
+}

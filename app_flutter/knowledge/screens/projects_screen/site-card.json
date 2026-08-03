@@ -1,0 +1,43 @@
+{
+  "name": "_SiteCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "projects_screen.status_hint",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "📊 הקש לסטטוס האתר המלא",
+        "registryId": "projects_screen.status_hint",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "project",
+      "isActive",
+      "onSwitch",
+      "onStatus",
+      "onCart"
+    ],
+    "untangle": []
+  }
+}

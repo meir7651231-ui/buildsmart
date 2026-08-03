@@ -1,0 +1,59 @@
+{
+  "name": "_HistoryRow",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📷 לא ניתן להציג את התמונה",
+        "registryId": "worker_reports_tab.photo_error",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showDialog",
+        "target": "showDialog"
+      },
+      {
+        "kind": "action",
+        "via": "showFullPhotoRefDialog",
+        "target": "showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showDialog<void>(context: context, builder: (_) => Dialog(backgroundColor: Co…",
+        "effect": "open → showDialog"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showFullPhotoRefDialog(context, p)",
+        "effect": "open → showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "floor": [
+    "imageProviderForRef"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "task",
+      "duration",
+      "onTap"
+    ],
+    "untangle": []
+  }
+}

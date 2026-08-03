@@ -1,0 +1,12 @@
+{
+  "matched": 1,
+  "total": 1,
+  "summary": "1/1",
+  "entries": [
+    {
+      "id": "barcode_scanner.scan_title",
+      "ok": true,
+      "atom": "BarcodeScanner"
+    }
+  ]
+}

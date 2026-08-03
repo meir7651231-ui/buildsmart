@@ -1,0 +1,146 @@
+{
+  "screen": "home_content_reorder",
+  "source": "home_content_reorder.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "HomeContentReorder",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🏠 תוכן הבית",
+            "registryId": "home_content_reorder.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "home_content_reorder.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "‹ חזרה",
+            "registryId": "home_content_reorder.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "showAppBar"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_Body",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "מסך הבית שלי",
+            "registryId": "home_content_reorder.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "home_content_reorder.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "איפוס",
+            "registryId": "home_content_reorder.t04",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "screenSectionsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showToast(context, 'הסדר וההסתרות אופסו לברירת מחדל')",
+            "effect": "toast"
+          }
+        ]
+      },
+      "floor": [
+        "setState",
+        "smartHomeSectionFor"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "ReorderableListView = shared component → separate atom"
+        ]
+      }
+    }
+  ],
+  "registry": {
+    "matched": 4,
+    "total": 4,
+    "summary": "4/4",
+    "entries": [
+      {
+        "id": "home_content_reorder.t01",
+        "ok": true,
+        "atom": "HomeContentReorder"
+      },
+      {
+        "id": "home_content_reorder.t02",
+        "ok": true,
+        "atom": "HomeContentReorder"
+      },
+      {
+        "id": "home_content_reorder.t03",
+        "ok": true,
+        "atom": "_Body"
+      },
+      {
+        "id": "home_content_reorder.t04",
+        "ok": true,
+        "atom": "_Body"
+      }
+    ]
+  }
+}

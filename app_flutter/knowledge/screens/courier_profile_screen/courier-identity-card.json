@@ -1,0 +1,61 @@
+{
+  "name": "_CourierIdentityCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "courier_profile_screen.demo_chip",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "דמו",
+        "registryId": "courier_profile_screen.demo_chip",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "🛵"
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🛵"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showCourierProfileEditSheet",
+        "target": "showCourierProfileEditSheet"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showCourierProfileEditSheet(context, session: session)",
+        "effect": "open → showCourierProfileEditSheet"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "haulInfo",
+    "imageProviderForRef"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "session",
+      "profile"
+    ],
+    "untangle": []
+  }
+}

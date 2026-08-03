@@ -1,0 +1,85 @@
+{
+  "name": "_SearchSection",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "בבנייה",
+        "registryId": "catalog_settings_screen.t12",
+        "registryOk": true
+      }
+    ],
+    "registered": 1,
+    "unregistered": [],
+    "summary": "registry 1 · mapped 1/1 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "update",
+        "target": "catalogSettingsProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "clear",
+        "target": "recentSearchesProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kHideUnderConstruction && _visibleChildren.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(recentSearchesProvider.notifier).clear()",
+        "effect": "write → recentSearchesProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'ההיסטוריה נוקתה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kHideUnderConstruction && _visibleChildren.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, '$label — בבנייה')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "confirmDestructive"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onCatalogSettings(…) callback instead of direct catalogSettingsProvider write",
+      "onRecentSearches(…) callback instead of direct recentSearchesProvider write"
+    ]
+  }
+}

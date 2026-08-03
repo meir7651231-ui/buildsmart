@@ -1,0 +1,89 @@
+{
+  "screen": "customer_import_sheet",
+  "source": "customer_import_sheet.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "_CustomerImportSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "👥 ייבוא לקוחות"
+          },
+          {
+            "kind": "text",
+            "text": "טענו רשימת לקוחות מקובץ CSV — שם חובה, טלפון ואימייל נבדקים, כפילויות מסוננות אוטומטית."
+          },
+          {
+            "kind": "text",
+            "text": "סגור"
+          },
+          {
+            "kind": "text",
+            "text": "⬇️ הורד תבנית לדוגמה"
+          },
+          {
+            "kind": "text",
+            "text": "⬆️ העלה נתונים"
+          }
+        ],
+        "registered": 0,
+        "unregistered": [
+          "👥 ייבוא לקוחות",
+          "טענו רשימת לקוחות מקובץ CSV — שם חובה, טלפון ואימייל נבדקים, כפילויות מסוננות אוטומטית.",
+          "סגור",
+          "⬇️ הורד תבנית לדוגמה",
+          "⬆️ העלה נתונים"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 5"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "downloadTextFileProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "pickTextFileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "savedCustomersProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "auditRows",
+        "bsOnAccent",
+        "customerCatalogTemplateCsv",
+        "parseCustomerCsv",
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 0,
+    "total": 0,
+    "summary": "0/0",
+    "entries": []
+  }
+}

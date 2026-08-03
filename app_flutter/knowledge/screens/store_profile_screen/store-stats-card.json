@@ -1,0 +1,44 @@
+{
+  "name": "_StoreStatsCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "📊 סטטיסטיקת חנות",
+        "registryId": "store_profile_screen.stats_title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "נתונים חיים ממנוע ההזמנות — כלל ההזמנות של החנות.",
+        "registryId": "store_profile_screen.stats_note",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius",
+    "fMoney"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

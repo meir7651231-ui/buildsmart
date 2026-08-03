@@ -1,0 +1,57 @@
+{
+  "matched": 10,
+  "total": 10,
+  "summary": "10/10",
+  "entries": [
+    {
+      "id": "worker_employer_stock_sheet.t01",
+      "ok": true,
+      "atom": "_EmployerStockSheet"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t02",
+      "ok": true,
+      "atom": "_EmployerStockSheet"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t03",
+      "ok": true,
+      "atom": "_EmployerStockSheet"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t04",
+      "ok": true,
+      "atom": "_EmployerStockSheet"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t05",
+      "ok": true,
+      "atom": "_EmployerStockSheet"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t06",
+      "ok": true,
+      "atom": "_RequestComposer"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t07",
+      "ok": true,
+      "atom": "_RequestComposer"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t08",
+      "ok": true,
+      "atom": "_RequestComposer"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t09",
+      "ok": true,
+      "atom": "_RequestComposer"
+    },
+    {
+      "id": "worker_employer_stock_sheet.t10",
+      "ok": true,
+      "atom": "_RequestComposer"
+    }
+  ]
+}

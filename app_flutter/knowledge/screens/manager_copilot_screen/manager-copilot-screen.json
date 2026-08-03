@@ -1,0 +1,66 @@
+{
+  "name": "ManagerCopilotScreen",
+  "role": "composer",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "🤖 קו-פיילוט",
+        "registryId": "manager_copilot_screen.title",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "שאל את העסק שלך",
+        "registryId": "manager_copilot_screen.subtitle",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "ordersEngineProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "managerAnalyticsProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "managerCustomersProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "claudeGatewayProvider"
+      },
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "claudeGatewayProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "buildManagerContext",
+    "managerCopilotPrompt",
+    "managerMorningBriefPrompt",
+    "setState"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
+}

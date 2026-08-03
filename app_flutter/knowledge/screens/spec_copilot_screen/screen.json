@@ -1,0 +1,113 @@
+{
+  "screen": "spec_copilot_screen",
+  "source": "spec_copilot_screen.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "name": "SpecCopilotScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "🌡️ מתאים לתנאים שלי?",
+            "registryId": "spec_copilot_screen.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "טמפרטורת הקו:",
+            "registryId": "spec_copilot_screen.t02",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין מפרט מאומת למוצר זה — לא ניתן לקבוע.",
+            "registryId": "spec_copilot_screen.t03",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "💡 הסבר-AI דורש חיבור לשרת.",
+            "registryId": "spec_copilot_screen.t04",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מנסח הסבר…",
+            "registryId": "spec_copilot_screen.t05",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🤖"
+          }
+        ],
+        "registered": 5,
+        "unregistered": [
+          "🤖"
+        ],
+        "summary": "registry 5 · mapped 5/5 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "claudeGatewayProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "claudeGatewayProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "setState"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "product"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 5,
+    "total": 5,
+    "summary": "5/5",
+    "entries": [
+      {
+        "id": "spec_copilot_screen.t01",
+        "ok": true,
+        "atom": "SpecCopilotScreen"
+      },
+      {
+        "id": "spec_copilot_screen.t02",
+        "ok": true,
+        "atom": "SpecCopilotScreen"
+      },
+      {
+        "id": "spec_copilot_screen.t03",
+        "ok": true,
+        "atom": "SpecCopilotScreen"
+      },
+      {
+        "id": "spec_copilot_screen.t04",
+        "ok": true,
+        "atom": "SpecCopilotScreen"
+      },
+      {
+        "id": "spec_copilot_screen.t05",
+        "ok": true,
+        "atom": "SpecCopilotScreen"
+      }
+    ]
+  }
+}

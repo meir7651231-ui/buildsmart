@@ -1,0 +1,147 @@
+{
+  "name": "_TaskSheet",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "תיאור המשימה"
+      },
+      {
+        "kind": "text",
+        "text": "שלבי ביצוע"
+      },
+      {
+        "kind": "text",
+        "text": "תמונת ביצוע"
+      },
+      {
+        "kind": "text",
+        "text": "הערת העובד"
+      },
+      {
+        "kind": "text",
+        "text": "דווח על הביצוע"
+      },
+      {
+        "kind": "cfgText",
+        "text": "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.",
+        "registryId": "tasks_screen.decide_intro",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "tasks_screen.sheet_reject",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "↩️ החזר לתיקון",
+        "registryId": "tasks_screen.sheet_reject",
+        "registryOk": true
+      }
+    ],
+    "registered": 3,
+    "unregistered": [
+      "תיאור המשימה",
+      "שלבי ביצוע",
+      "תמונת ביצוע",
+      "הערת העובד",
+      "דווח על הביצוע"
+    ],
+    "summary": "registry 3 · mapped 3/3 · unregistered 5"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "tasksProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      },
+      {
+        "kind": "reads",
+        "via": "read",
+        "target": "tasksProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'לא צולמה תמונה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(tasksProvider.notifier).attachPhoto(t.id, dataUrl)",
+        "effect": "write → tasksProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, '📷 תמונת ההוכחה צורפה')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(tasksProvider.notifier).submitForReview(t.id, note: _note.text)",
+        "effect": "write → tasksProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'נשלח לאישור המנהל ✓')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(tasksProvider.notifier).reject(t.id, reason: why)",
+        "effect": "write → tasksProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'המשימה הוחזרה לעובד לתיקון')",
+        "effect": "toast"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(tasksProvider.notifier).approve(t.id)",
+        "effect": "write → tasksProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showToast(context, 'המשימה אושרה ✓')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "confirmDestructive",
+    "pickTaskPhoto",
+    "promptRejectReason",
+    "taskPhotoWidget"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "task",
+      "role"
+    ],
+    "untangle": []
+  }
+}

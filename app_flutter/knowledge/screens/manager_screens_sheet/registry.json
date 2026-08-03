@@ -1,0 +1,22 @@
+{
+  "matched": 3,
+  "total": 3,
+  "summary": "3/3",
+  "entries": [
+    {
+      "id": "manager_screens_sheet.t01",
+      "ok": true,
+      "atom": "_ManagerScreensSheet"
+    },
+    {
+      "id": "manager_screens_sheet.t02",
+      "ok": true,
+      "atom": "_ManagerScreensSheet"
+    },
+    {
+      "id": "manager_screens_sheet.t03",
+      "ok": true,
+      "atom": "_ImpersonationFrame"
+    }
+  ]
+}

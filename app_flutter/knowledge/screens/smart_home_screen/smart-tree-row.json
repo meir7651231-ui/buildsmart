@@ -1,0 +1,83 @@
+{
+  "name": "_SmartTreeRow",
+  "role": "section",
+  "section": "products",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🌳 עץ חכם — אינסטלציה"
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "smart_home_screen.add_to_cart",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "הוסף לסל",
+        "registryId": "smart_home_screen.add_to_cart",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🌳 עץ חכם — אינסטלציה"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kSmartProducts.isEmpty"
+      },
+      {
+        "kind": "writes",
+        "via": "add",
+        "target": "smartCartProvider"
+      },
+      {
+        "kind": "action",
+        "via": "showToast",
+        "target": "showToast"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kSmartProducts.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: rec.sku ??…",
+        "effect": "write → smartCartProvider"
+      },
+      {
+        "trigger": "onPressed",
+        "mechanism": "verb",
+        "detail": "showToast(context, '${p.name} נוסף לסל')",
+        "effect": "toast"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius",
+    "groupThousands",
+    "productImage"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onSmartCart(…) callback instead of direct smartCartProvider write"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "_Tappable",
+  "role": "section",
+  "object": {
+    "nodes": [],
+    "registered": 0,
+    "unregistered": [],
+    "summary": "registry 0 · mapped 0/0 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "child",
+      "onTap"
+    ],
+    "untangle": []
+  }
+}

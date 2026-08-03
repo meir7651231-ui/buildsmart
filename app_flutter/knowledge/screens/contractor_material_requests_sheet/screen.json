@@ -1,0 +1,117 @@
+{
+  "screen": "contractor_material_requests_sheet",
+  "source": "contractor_material_requests_sheet.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "_ContractorMaterialRequestsSheet",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📥 בקשות חומר",
+            "registryId": "contractor_material_requests_sheet.t01",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "",
+            "registryId": "contractor_material_requests_sheet.t02",
+            "registryOk": true
+          }
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "requestsForEmployer(kDemoContractorId)"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "materialRequestsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "requestsForEmployer"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_RequestCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "👷"
+          },
+          {
+            "kind": "cfgText",
+            "text": "ללא פריטים",
+            "registryId": "contractor_material_requests_sheet.t03",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [
+          "👷"
+        ],
+        "summary": "registry 1 · mapped 1/1 · unregistered 1"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "onSetStatus"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "request",
+          "onSetStatus"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 3,
+    "total": 3,
+    "summary": "3/3",
+    "entries": [
+      {
+        "id": "contractor_material_requests_sheet.t01",
+        "ok": true,
+        "atom": "_ContractorMaterialRequestsSheet"
+      },
+      {
+        "id": "contractor_material_requests_sheet.t02",
+        "ok": true,
+        "atom": "_ContractorMaterialRequestsSheet"
+      },
+      {
+        "id": "contractor_material_requests_sheet.t03",
+        "ok": true,
+        "atom": "_RequestCard"
+      }
+    ]
+  }
+}

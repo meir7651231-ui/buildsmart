@@ -1,0 +1,17 @@
+{
+  "matched": 2,
+  "total": 2,
+  "summary": "2/2",
+  "entries": [
+    {
+      "id": "worker_task_board_screen.board_title",
+      "ok": true,
+      "atom": "WorkerTaskBoardScreen"
+    },
+    {
+      "id": "worker_task_board_screen.empty_group",
+      "ok": true,
+      "atom": "_StatusGroup"
+    }
+  ]
+}

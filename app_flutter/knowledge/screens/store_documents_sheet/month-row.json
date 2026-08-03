@@ -1,0 +1,37 @@
+{
+  "name": "_MonthRow",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "store_documents_sheet.t03",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "יחובר עם חיבור השרת",
+        "registryId": "store_documents_sheet.t03",
+        "registryOk": true
+      }
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "month"
+    ],
+    "untangle": []
+  }
+}

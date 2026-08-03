@@ -1,0 +1,132 @@
+{
+  "screen": "worker_today_strip",
+  "source": "worker_today_strip.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "name": "WorkerTodayStrip",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "📅 היום שלי",
+            "registryId": "worker.today.title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אין שלבי-יום מתוכננים עבורך בפרויקט",
+            "registryId": "worker.today.empty",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "✅ כל שלבי-היום שלך בפרויקט הושלמו",
+            "registryId": "worker.today.alldone",
+            "registryOk": true
+          }
+        ],
+        "registered": 3,
+        "unregistered": [],
+        "summary": "registry 3 · mapped 3/3 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "smartProjectProvider"
+          },
+          {
+            "kind": "writes",
+            "via": "toggle",
+            "target": "smartProjectProvider"
+          },
+          {
+            "kind": "action",
+            "via": "showToast",
+            "target": "showToast"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "buildDayStages"
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [
+          "worker"
+        ],
+        "untangle": [
+          "onSmartProject(…) callback instead of direct smartProjectProvider write"
+        ]
+      }
+    },
+    {
+      "name": "_StageRow",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showWorkerTaskDetailSheet",
+            "target": "showWorkerTaskDetailSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showWorkerTaskDetailSheet(context, taskId: stage.taskId)",
+            "effect": "open → showWorkerTaskDetailSheet"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "stage",
+          "tag",
+          "emphasized",
+          "onMarkDone"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 3,
+    "total": 3,
+    "summary": "3/3",
+    "entries": [
+      {
+        "id": "worker.today.title",
+        "ok": true,
+        "atom": "WorkerTodayStrip"
+      },
+      {
+        "id": "worker.today.empty",
+        "ok": true,
+        "atom": "WorkerTodayStrip"
+      },
+      {
+        "id": "worker.today.alldone",
+        "ok": true,
+        "atom": "WorkerTodayStrip"
+      }
+    ]
+  }
+}

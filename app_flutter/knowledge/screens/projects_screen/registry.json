@@ -1,0 +1,52 @@
+{
+  "matched": 9,
+  "total": 9,
+  "summary": "9/9",
+  "entries": [
+    {
+      "id": "projects_screen.title",
+      "ok": true,
+      "atom": "ProjectsScreen"
+    },
+    {
+      "id": "projects_screen.exit",
+      "ok": true,
+      "atom": "ProjectsScreen"
+    },
+    {
+      "id": "projects_screen.new_project",
+      "ok": true,
+      "atom": "ProjectsScreen"
+    },
+    {
+      "id": "projects_screen.empty_title",
+      "ok": true,
+      "atom": "ProjectsScreen"
+    },
+    {
+      "id": "projects_screen.empty_sub",
+      "ok": true,
+      "atom": "ProjectsScreen"
+    },
+    {
+      "id": "projects_screen.empty_cta",
+      "ok": true,
+      "atom": "ProjectsScreen"
+    },
+    {
+      "id": "projects_screen.status_hint",
+      "ok": true,
+      "atom": "_SiteCard"
+    },
+    {
+      "id": "projects_screen.edit_hint",
+      "ok": true,
+      "atom": "_StatusSheet"
+    },
+    {
+      "id": "projects_screen.edit_site",
+      "ok": true,
+      "atom": "_StatusSheet"
+    }
+  ]
+}

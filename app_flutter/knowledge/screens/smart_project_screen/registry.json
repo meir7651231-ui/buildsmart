@@ -1,0 +1,52 @@
+{
+  "matched": 9,
+  "total": 9,
+  "summary": "9/9",
+  "entries": [
+    {
+      "id": "smart_project_screen.t01",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t02",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t03",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t04",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t05",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t06",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t07",
+      "ok": true,
+      "atom": "SmartProjectScreen"
+    },
+    {
+      "id": "smart_project_screen.t08",
+      "ok": true,
+      "atom": "_ProjectDone"
+    },
+    {
+      "id": "smart_project_screen.t09",
+      "ok": true,
+      "atom": "_StageCard"
+    }
+  ]
+}

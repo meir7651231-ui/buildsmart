@@ -1,0 +1,77 @@
+{
+  "name": "_SuperFinderHero",
+  "role": "section",
+  "section": "superFinder",
+  "variant": "preview",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🕸️ מאתר-על"
+      },
+      {
+        "kind": "text",
+        "text": "גלגל-חיפוש-על — בחר מאיזה ציר להתחיל"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🕸️ מאתר-על",
+      "גלגל-חיפוש-על — בחר מאיזה ציר להתחיל"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 2"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "mainTabProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "catalogSectionProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "keyboardDiveQueryProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(mainTabProvider.notifier).state = 0",
+        "effect": "write → mainTabProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(catalogSectionProvider.notifier).state = 'מאתר-על'",
+        "effect": "write → catalogSectionProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(keyboardDiveQueryProvider.notifier).state = ''",
+        "effect": "write → keyboardDiveQueryProvider"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onCatalogSection(…) callback instead of direct catalogSectionProvider write",
+      "onKeyboardDiveQuery(…) callback instead of direct keyboardDiveQueryProvider write",
+      "onMainTab(…) callback instead of direct mainTabProvider write"
+    ]
+  }
+}

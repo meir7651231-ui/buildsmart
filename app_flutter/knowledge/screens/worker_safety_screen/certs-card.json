@@ -1,0 +1,68 @@
+{
+  "name": "_CertsCard",
+  "role": "section",
+  "object": {
+    "nodes": [
+      {
+        "kind": "cfgText",
+        "text": "אין תעודות בארנק עדיין — הוסף את הראשונה.",
+        "registryId": "worker_safety_screen.no_certs",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgVisible",
+        "text": "",
+        "registryId": "worker_safety_screen.add_cert_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "cfgText",
+        "text": "➕ הוסף תעודה",
+        "registryId": "worker_safety_screen.add_cert_btn",
+        "registryOk": true
+      },
+      {
+        "kind": "text",
+        "text": "📷"
+      }
+    ],
+    "registered": 3,
+    "unregistered": [
+      "📷"
+    ],
+    "summary": "registry 3 · mapped 3/3 · unregistered 1"
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "action",
+        "via": "showFullPhotoRefDialog",
+        "target": "showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "showFullPhotoRefDialog(context, cert.photo, label: cert.name)",
+        "effect": "open → showFullPhotoRefDialog"
+      }
+    ]
+  },
+  "floor": [
+    "bsOnAccent",
+    "imageProviderForRef",
+    "onRemove"
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [
+      "certs",
+      "onAdd",
+      "onRemove"
+    ],
+    "untangle": []
+  }
+}

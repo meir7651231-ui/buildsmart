@@ -1,0 +1,445 @@
+{
+  "screen": "worker_profile_screen",
+  "source": "worker_profile_screen.dart",
+  "atomCount": 5,
+  "atoms": [
+    {
+      "name": "WorkerProfileScreen",
+      "role": "composer",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "פרופיל עובד",
+            "registryId": "worker_profile_screen.appbar_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "boardAuthProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "tasksProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerProfileProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerFormsProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [
+        "kbWorkerProfileNodes"
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [
+          "embedded"
+        ],
+        "untangle": [
+          "KbScreen = shared component → separate atom",
+          "WelcomeScreen = shared component → separate atom"
+        ]
+      }
+    },
+    {
+      "name": "_IdentityCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_profile_screen.demo",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "דמו",
+            "registryId": "worker_profile_screen.demo",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🦺"
+          }
+        ],
+        "registered": 2,
+        "unregistered": [
+          "🦺"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "showWorkerProfileEditSheet",
+            "target": "showWorkerProfileEditSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onPressed",
+            "mechanism": "verb",
+            "detail": "showWorkerProfileEditSheet(context, session: session)",
+            "effect": "open → showWorkerProfileEditSheet"
+          }
+        ]
+      },
+      "floor": [
+        "imageProviderForRef"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "session",
+          "profile",
+          "specialty"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_StatsCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "cfgText",
+            "text": "המשימות שלי",
+            "registryId": "worker.profile.tasks_title",
+            "registryOk": true
+          }
+        ],
+        "registered": 1,
+        "unregistered": [],
+        "summary": "registry 1 · mapped 1/1 · unregistered 0"
+      },
+      "connections": {
+        "edges": []
+      },
+      "behaviour": {
+        "flows": []
+      },
+      "floor": [],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "done",
+          "inReview",
+          "rejected",
+          "total"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_PersonalAreaCard",
+      "role": "section",
+      "object": {
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerAttendanceProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerFormsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "vacationRequestsProvider"
+          },
+          {
+            "kind": "reads",
+            "via": "watch",
+            "target": "workerCertsProvider"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerAttendanceScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerFormsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerSafetyScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showWorkerPayslipsSheet",
+            "target": "showWorkerPayslipsSheet"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(WorkerAttendanceScreen.route())",
+            "effect": "navigate → WorkerAttendanceScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(WorkerFormsScreen.route())",
+            "effect": "navigate → WorkerFormsScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(WorkerSafetyScreen.route())",
+            "effect": "navigate → WorkerSafetyScreen"
+          },
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "showWorkerPayslipsSheet(context)",
+            "effect": "open → showWorkerPayslipsSheet"
+          }
+        ]
+      },
+      "floor": [
+        "attendanceDateKey"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "session"
+        ],
+        "untangle": []
+      }
+    },
+    {
+      "name": "_ActionsCard",
+      "role": "section",
+      "object": {
+        "nodes": [
+          {
+            "kind": "text",
+            "text": "⚙️"
+          },
+          {
+            "kind": "cfgText",
+            "text": "הגדרות עובד",
+            "registryId": "worker.profile.settings_title",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🔄"
+          },
+          {
+            "kind": "cfgText",
+            "text": "החלפת תפקיד",
+            "registryId": "worker.profile.role_switch_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מוגן בקוד",
+            "registryId": "worker.profile.role_switch_hint",
+            "registryOk": true
+          },
+          {
+            "kind": "text",
+            "text": "🚪"
+          },
+          {
+            "kind": "cfgText",
+            "text": "יציאה",
+            "registryId": "worker.profile.logout_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "החלפת תפקיד",
+            "registryId": "worker_profile_screen.role_switch_dialog_title",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:",
+            "registryId": "worker_profile_screen.role_switch_dialog_body",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_profile_screen.cancel",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "ביטול",
+            "registryId": "worker_profile_screen.cancel",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgVisible",
+            "text": "",
+            "registryId": "worker_profile_screen.confirm",
+            "registryOk": true
+          },
+          {
+            "kind": "cfgText",
+            "text": "אישור",
+            "registryId": "worker_profile_screen.confirm",
+            "registryOk": true
+          }
+        ],
+        "registered": 10,
+        "unregistered": [
+          "⚙️",
+          "🔄",
+          "🚪"
+        ],
+        "summary": "registry 10 · mapped 10/10 · unregistered 3"
+      },
+      "connections": {
+        "edges": [
+          {
+            "kind": "action",
+            "via": "push",
+            "target": "WorkerSettingsScreen"
+          },
+          {
+            "kind": "action",
+            "via": "showDialog",
+            "target": "showDialog"
+          },
+          {
+            "kind": "action",
+            "via": "showRolePicker",
+            "target": "showRolePicker"
+          },
+          {
+            "kind": "reads",
+            "via": "read",
+            "target": "boardAuthProvider"
+          }
+        ]
+      },
+      "behaviour": {
+        "flows": [
+          {
+            "trigger": "onTap",
+            "mechanism": "verb",
+            "detail": "Navigator.of(context).push(WorkerSettingsScreen.route())",
+            "effect": "navigate → WorkerSettingsScreen"
+          }
+        ]
+      },
+      "floor": [
+        "confirmDestructive",
+        "setState",
+        "submit"
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "session"
+        ],
+        "untangle": []
+      }
+    }
+  ],
+  "registry": {
+    "matched": 11,
+    "total": 11,
+    "summary": "11/11",
+    "entries": [
+      {
+        "id": "worker_profile_screen.appbar_title",
+        "ok": true,
+        "atom": "WorkerProfileScreen"
+      },
+      {
+        "id": "worker_profile_screen.demo",
+        "ok": true,
+        "atom": "_IdentityCard"
+      },
+      {
+        "id": "worker.profile.tasks_title",
+        "ok": true,
+        "atom": "_StatsCard"
+      },
+      {
+        "id": "worker.profile.settings_title",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker.profile.role_switch_title",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker.profile.role_switch_hint",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker.profile.logout_title",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker_profile_screen.role_switch_dialog_title",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker_profile_screen.role_switch_dialog_body",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker_profile_screen.cancel",
+        "ok": true,
+        "atom": "_ActionsCard"
+      },
+      {
+        "id": "worker_profile_screen.confirm",
+        "ok": true,
+        "atom": "_ActionsCard"
+      }
+    ]
+  }
+}
