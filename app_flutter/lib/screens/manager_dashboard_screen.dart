@@ -2197,6 +2197,16 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
   //    order + content exactly in that case (byte-identical when off).
   for (final c in customers) {
     if (takenNames.contains(c.name.trim())) continue;
+    // #reg-approval launch-clean — on the LIVE backend, DROP an order-derived
+    // buyer with NO contact (empty phone). These are the bundled demo-seed
+    // customers (משה אברהם … — kOrdersEngineSeed) surfacing through the born-seed
+    // when the real `orders` collection is empty (firestore_cached_repo
+    // `_onSnapshot` keeps the seed on an UNSCOPED empty first snapshot) — they are
+    // NOT real accounts, and deleting from the DB can't remove them. A REAL buyer
+    // carries `customerPhone`; a REGISTERED user is in the directory (kept in step
+    // 1 above, regardless of phone). GATED on [useFirebaseBackend] so the OFF/demo
+    // build is byte-identical — the seed IS the demo content there, never filtered.
+    if (useFirebaseBackend && c.phone.isEmpty) continue;
     views.add(_CustomerView(
       customer: c,
       pct: pctOf(c),

@@ -27,7 +27,8 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { writeAudit } from "./audit";
 import { syncDirectoryEntry } from "./directory";
-import { asString, callerRoles, db, REGION } from "./common";
+import { asString, callerRoles, db, OWNER_EMAIL, REGION } from "./common";
+import { sendToUsers } from "./push";
 
 /// The role a CALLER must hold to approve a request for the keyed role. Only
 /// these four operational roles are ever requestable/grantable through #6.
@@ -175,32 +176,69 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
   return { ok: true, uid, requestedRole, decision };
 });
 
-/** DOCUMENTED NO-OP — new accounts stay `pending` until an owner approves them
- * (owner decision 2026-08-02, REVERTING the earlier auto-activate).
+/** On a new PENDING registration, ALERT the owner + managers by push so they
+ * approve in real time (owner request 2026-08-03) — the "know the moment someone
+ * signs up" companion to the owner-driven approval panel.
  *
  * New users are born `status: pending` (the client born-status write) and the
  * pending-gate (rbac checkoutBlock + the `isActive()` orders rule) blocks them at
- * checkout until approval. Approval is now OWNER-DRIVEN: the manager/owner
- * activates accounts in bulk from the Manager Customers approval panel
- * (app_flutter/lib/screens/manager_dashboard_screen.dart), which calls the
- * `approveUsers` callable (functions/src/approveUsers.ts). The owner does NOT
- * want silent auto-approve, so this trigger no longer flips pending→active, and
- * it no longer auto-files a nameless `contractor` roleRequest (that flooded the
- * inbox). ELEVATED operational roles (worker/courier/store/manager) still go
- * through explicit approval via `submitRoleRequest` → `reviewRoleRequest` above.
+ * checkout until approval. Approval is OWNER-DRIVEN from the Manager Customers
+ * panel (app_flutter/lib/screens/manager_dashboard_screen.dart → `approveUsers`).
+ * This trigger does NOT change the account (still no auto-activate, still no
+ * auto-filed roleRequest): it ONLY fires an FCM push so the approver sees a fresh
+ * signup without watching the screen. ELEVATED operational roles still go through
+ * `submitRoleRequest` → `reviewRoleRequest` above.
  *
- * There is nothing left for a user-create trigger to do: the directory row every
- * approval panel reads is created for each new user by `onUserDocWritten`
- * (directory.ts) on the SAME `users` write, so a fresh pending user already
- * surfaces in the panel with no action here. The export name + its
- * `onDocumentCreated` wiring are KEPT as a no-op for DEPLOY-STABILITY — renaming
- * or deleting it would delete+recreate the Cloud Function. If a per-user
- * post-create hook is ever needed, this is its home.
+ * SAFE + additive: it fires AFTER the user doc exists, so a throw here can never
+ * fail a registration; every lookup is best-effort (a miss just means no push);
+ * and `sendToUsers` no-ops when a recipient has no `fcmToken` (push not yet
+ * granted). Recipients = the owner (OWNER_EMAIL→uid) ∪ every `manager` in the
+ * readable directory, minus the registrant. The export name + `onDocumentCreated`
+ * wiring are unchanged (renaming would delete+recreate the Cloud Function).
  */
 export const onUserCreatedQueueApproval = onDocumentCreated(
   { region: REGION, document: "users/{uid}" },
-  async () => {
-    // Intentionally empty: registration approval is owner-driven (approveUsers).
-    // Users are born `pending`; the directory is synced by onUserDocWritten.
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    const newUid = event.params.uid;
+    // Only a genuinely PENDING signup warrants an approval alert — an admin-
+    // seeded/migrated ACTIVE record (or the owner's self-active doc) needs none.
+    if (asString(snap.get("status")) !== "pending") return;
+
+    // WHO to alert: the owner (OWNER_EMAIL→uid) ∪ every `manager` in the readable
+    // directory, deduped, minus the registrant. Each lookup is best-effort — a
+    // miss (owner not signed up yet, directory hiccup) must NEVER throw out of the
+    // trigger, so a failed notify can never masquerade as a failed registration.
+    const targets = new Set<string>();
+    try {
+      const owner = await getAuth().getUserByEmail(OWNER_EMAIL);
+      targets.add(owner.uid);
+    } catch (e) {
+      logger.info("notify-pending: owner not resolvable yet", { e: String(e) });
+    }
+    try {
+      const mgrs = await db()
+        .collection("directory")
+        .where("role", "==", "manager")
+        .get();
+      for (const d of mgrs.docs) targets.add(d.id);
+    } catch (e) {
+      logger.warn("notify-pending: manager lookup failed", { e: String(e) });
+    }
+    targets.delete(newUid); // never alert the new user about their own signup
+    if (targets.size === 0) return;
+
+    const name = asString(snap.get("displayName"))?.trim();
+    await sendToUsers(
+      [...targets],
+      "משתמש חדש ממתין לאישור",
+      `${name && name.length > 0 ? name : "משתמש חדש"} נרשם/ה — אשר/י כדי לאפשר קנייה.`,
+      { kind: "user_pending_approval", uid: newUid }
+    );
+    logger.info("notify-pending: alerted approvers of a new signup", {
+      newUid,
+      recipients: targets.size,
+    });
   }
 );
