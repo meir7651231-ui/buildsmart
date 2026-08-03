@@ -313,6 +313,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "worker",
       "username",

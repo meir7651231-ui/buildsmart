@@ -95,6 +95,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "role",
           "readiness"
@@ -122,6 +123,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "title",
           "lines",
@@ -151,6 +153,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "label",
           "onPressed"
@@ -198,6 +201,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "role"
         ],

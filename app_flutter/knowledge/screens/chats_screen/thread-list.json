@@ -111,6 +111,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "persona",
       "audience"

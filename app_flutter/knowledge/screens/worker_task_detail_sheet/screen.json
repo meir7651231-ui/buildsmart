@@ -147,6 +147,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": false,
         "props": [
           "taskId"
         ],
@@ -173,6 +174,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "text"
         ],
@@ -199,6 +201,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "label",
           "onTap"
@@ -224,6 +227,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "item"
         ],

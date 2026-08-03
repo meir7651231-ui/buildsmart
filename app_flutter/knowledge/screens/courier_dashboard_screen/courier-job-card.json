@@ -22,6 +22,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "order",
       "podCaptured",

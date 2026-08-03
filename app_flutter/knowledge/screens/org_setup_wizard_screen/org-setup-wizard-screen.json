@@ -173,6 +173,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onOrgConfig(…) callback instead of direct orgConfigProvider write"

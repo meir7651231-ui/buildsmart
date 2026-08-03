@@ -249,6 +249,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom",
@@ -274,6 +275,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -296,6 +298,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "product",
           "index",
@@ -582,6 +585,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": false,
         "props": [
           "plan",
           "anchorSkus",
@@ -666,6 +670,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": false,
         "props": [
           "lineTemp",
           "initialCat"
@@ -715,6 +720,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "onDismiss"
         ],

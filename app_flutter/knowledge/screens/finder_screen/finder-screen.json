@@ -70,6 +70,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onFinderChipTipDismissed(…) callback instead of direct finderChipTipDismissedProvider write"

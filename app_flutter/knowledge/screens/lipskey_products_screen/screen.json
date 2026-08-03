@@ -61,6 +61,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "products"
         ],
@@ -94,6 +95,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "title",
           "count",
@@ -181,6 +183,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "product",
           "products"
@@ -336,6 +339,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "product",
           "categoryProducts",

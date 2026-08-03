@@ -44,6 +44,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreOrderOpen(…) callback instead of direct storeOrderOpenProvider write",
@@ -85,6 +86,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "SingleChildScrollView = shared component → separate atom"
@@ -147,6 +149,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "SingleChildScrollView = shared component → separate atom"
@@ -239,6 +242,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStoreSection(…) callback instead of direct storeSectionProvider write"
@@ -1046,6 +1050,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "SingleChildScrollView = shared component → separate atom"
@@ -1149,6 +1154,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "order"
         ],

@@ -122,6 +122,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "ChatsScreen = shared component → separate atom",
@@ -446,6 +447,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "worker",
           "username",
@@ -475,6 +477,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "currentIndex",
           "onTap",

@@ -53,6 +53,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "CatalogScreen = shared component → separate atom"

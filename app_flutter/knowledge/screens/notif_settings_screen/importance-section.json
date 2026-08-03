@@ -65,6 +65,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onNotifSettings(…) callback instead of direct notifSettingsProvider write"

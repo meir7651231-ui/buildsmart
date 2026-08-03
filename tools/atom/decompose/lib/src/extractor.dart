@@ -264,6 +264,20 @@ List<String> _constructorProps(ClassDeclaration decl) {
   return out;
 }
 
+/// True when the atom can be built as `const X()` — no REQUIRED param on its
+/// (first) constructor. `key` and optional/defaulted params don't block it.
+bool _isConstructible(ClassDeclaration decl) {
+  for (final m in decl.members) {
+    if (m is ConstructorDeclaration) {
+      for (final param in m.parameters.parameters) {
+        if (param.isRequired) return false; // required-positional or `required`
+      }
+      return true; // found a constructor with no required params
+    }
+  }
+  return true; // no explicit constructor → implicit zero-arg
+}
+
 String _capCallback(String provider) {
   var t = provider;
   if (t.endsWith('Provider')) t = t.substring(0, t.length - 'Provider'.length);
@@ -303,6 +317,7 @@ AtomContract _contractFor(ClassDeclaration decl, _AtomExtractor ex) {
   }
   return AtomContract(
     extractable: extractable,
+    constructible: _isConstructible(decl),
     props: props,
     untangle: untangle,
   );

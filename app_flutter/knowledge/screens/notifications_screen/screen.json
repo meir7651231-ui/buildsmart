@@ -29,6 +29,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onTabHeaderHidden(…) callback instead of direct tabHeaderHiddenProvider write"
@@ -112,6 +113,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifDismissedIds(…) callback instead of direct notifDismissedIdsProvider write",
@@ -322,6 +324,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "SingleChildScrollView = shared component → separate atom"

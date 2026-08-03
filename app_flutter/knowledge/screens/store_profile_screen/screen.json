@@ -87,6 +87,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [
           "standalone"
         ],
@@ -146,6 +147,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "session",
           "profile"
@@ -193,6 +195,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -305,6 +308,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "session"
         ],

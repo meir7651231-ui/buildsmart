@@ -38,6 +38,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "title",
       "tasks"

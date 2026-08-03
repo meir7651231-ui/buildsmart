@@ -84,6 +84,7 @@
   "floor": [],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onStoreSection(…) callback instead of direct storeSectionProvider write"

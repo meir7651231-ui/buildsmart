@@ -72,6 +72,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onStartupStep(…) callback instead of direct startupStepProvider write"

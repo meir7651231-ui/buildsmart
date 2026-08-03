@@ -160,6 +160,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": false,
     "props": [
       "orderId"
     ],

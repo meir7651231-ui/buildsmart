@@ -19,6 +19,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "color",
       "badge",

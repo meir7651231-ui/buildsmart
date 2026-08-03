@@ -53,6 +53,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "ProfessionScreen = shared component → separate atom",

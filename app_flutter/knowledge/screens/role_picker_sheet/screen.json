@@ -55,6 +55,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -90,6 +91,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": false,
         "props": [
           "persona"
         ],

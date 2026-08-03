@@ -142,6 +142,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": false,
     "props": [
       "taskId"
     ],

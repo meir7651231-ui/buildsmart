@@ -82,6 +82,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "KbScreen = shared component → separate atom"
@@ -147,6 +148,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }
@@ -211,6 +213,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -277,6 +280,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -356,6 +360,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -439,6 +444,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -512,6 +518,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -578,6 +585,7 @@
       "floor": [],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -657,6 +665,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -725,6 +734,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onNotifSettings(…) callback instead of direct notifSettingsProvider write"
@@ -786,6 +796,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": true,
         "props": [],
         "untangle": []
       }

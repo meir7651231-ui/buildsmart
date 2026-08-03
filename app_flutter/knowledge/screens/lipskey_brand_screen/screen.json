@@ -47,6 +47,7 @@
       "floor": [],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "CustomScrollView = shared component → separate atom"
@@ -84,6 +85,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "totalProducts",
           "totalCats"
@@ -109,6 +111,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "section",
           "prodCount",

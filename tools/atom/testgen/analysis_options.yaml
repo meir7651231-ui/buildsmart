@@ -1,0 +1,5 @@
+# The frozen golden fixture is a FLUTTER test (uses flutter_test); this is a
+# dart-only tool package, so exclude it from analysis.
+analyzer:
+  exclude:
+    - test/golden/**

@@ -109,6 +109,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": true,
     "props": [],
     "untangle": [
       "KbScreen = shared component → separate atom"

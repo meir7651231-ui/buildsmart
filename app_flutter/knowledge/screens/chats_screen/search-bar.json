@@ -34,6 +34,7 @@
   "floor": [],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onUpdatesChatSearch(…) callback instead of direct updatesChatSearchProvider write"

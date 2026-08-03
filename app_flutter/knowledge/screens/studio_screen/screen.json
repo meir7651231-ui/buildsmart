@@ -47,6 +47,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "StudioRulesScreen = shared component → separate atom",
@@ -76,6 +77,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "active",
           "onSelect"
@@ -147,6 +149,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "ai"
         ],

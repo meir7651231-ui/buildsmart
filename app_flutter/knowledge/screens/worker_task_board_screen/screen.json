@@ -43,6 +43,7 @@
       ],
       "contract": {
         "extractable": "embeds-shared",
+        "constructible": true,
         "props": [],
         "untangle": [
           "WelcomeScreen = shared component → separate atom"
@@ -89,6 +90,7 @@
       ],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "title",
           "tasks"

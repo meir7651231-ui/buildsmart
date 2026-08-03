@@ -84,6 +84,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": false,
     "props": [
       "name",
       "system",

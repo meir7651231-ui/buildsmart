@@ -55,6 +55,7 @@
   ],
   "contract": {
     "extractable": "embeds-shared",
+    "constructible": false,
     "props": [
       "descriptor"
     ],

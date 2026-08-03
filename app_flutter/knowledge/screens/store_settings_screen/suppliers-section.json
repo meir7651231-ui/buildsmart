@@ -83,6 +83,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onStoreSettings(…) callback instead of direct storeSettingsProvider write"

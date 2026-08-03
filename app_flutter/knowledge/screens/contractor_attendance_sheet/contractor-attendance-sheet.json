@@ -57,6 +57,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": true,
     "props": [],
     "untangle": []
   }

@@ -77,6 +77,7 @@
       ],
       "contract": {
         "extractable": "needs-untangle",
+        "constructible": true,
         "props": [],
         "untangle": [
           "onStartupStep(…) callback instead of direct startupStepProvider write"
@@ -101,6 +102,7 @@
       "floor": [],
       "contract": {
         "extractable": "clean",
+        "constructible": false,
         "props": [
           "trade",
           "onTap"

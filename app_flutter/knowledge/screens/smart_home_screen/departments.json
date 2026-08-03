@@ -61,6 +61,7 @@
   ],
   "contract": {
     "extractable": "needs-untangle",
+    "constructible": true,
     "props": [],
     "untangle": [
       "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write",

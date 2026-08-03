@@ -47,6 +47,7 @@
   "floor": [],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "line",
       "status",

@@ -64,6 +64,7 @@
   ],
   "contract": {
     "extractable": "clean",
+    "constructible": false,
     "props": [
       "month",
       "byKey",
