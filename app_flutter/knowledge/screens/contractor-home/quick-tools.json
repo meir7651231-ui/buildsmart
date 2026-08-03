@@ -1,0 +1,60 @@
+{
+  "name": "_QuickTools",
+  "role": "section",
+  "section": "promise",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "כלים מהירים"
+      }
+    ]
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "modOn",
+        "target": "site"
+      },
+      {
+        "kind": "gated-by",
+        "via": "featOn",
+        "target": "site.stock"
+      },
+      {
+        "kind": "action",
+        "via": "openScanPlanSheet",
+        "target": "openScanPlanSheet"
+      },
+      {
+        "kind": "action",
+        "via": "push",
+        "target": "StockScreen"
+      },
+      {
+        "kind": "action",
+        "via": "openSiteHub",
+        "target": "openSiteHub"
+      },
+      {
+        "kind": "gated-by",
+        "via": "guard",
+        "target": "rows.isEmpty"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (rows.isEmpty)",
+        "effect": "hidden (SizedBox.shrink)"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ]
+}

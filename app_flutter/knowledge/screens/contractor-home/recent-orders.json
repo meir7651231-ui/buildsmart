@@ -1,0 +1,37 @@
+{
+  "name": "_RecentOrders",
+  "role": "section",
+  "section": "reorderHistory",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "הזמנות אחרונות לאתר"
+      },
+      {
+        "kind": "text",
+        "text": "עדיין אין הזמנות — לאחר הראשונה היא תופיע כאן."
+      },
+      {
+        "kind": "text",
+        "text": "📦"
+      }
+    ]
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "reads",
+        "via": "watch",
+        "target": "sysOrdersProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius",
+    "groupThousands"
+  ]
+}

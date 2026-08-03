@@ -1,0 +1,57 @@
+{
+  "name": "_Departments",
+  "role": "section",
+  "section": "categories",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "מחלקות"
+      }
+    ]
+  },
+  "connections": {
+    "edges": [
+      {
+        "kind": "gated-by",
+        "via": "const-flag",
+        "target": "kProfileRawShell"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "homeDepartmentProvider"
+      },
+      {
+        "kind": "writes",
+        "via": "state=",
+        "target": "mainTabProvider"
+      }
+    ]
+  },
+  "behaviour": {
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "rule",
+        "detail": "if (kProfileRawShell)",
+        "effect": "hidden (SizedBox.shrink)"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(homeDepartmentProvider.notifier).state = d.name",
+        "effect": "write → homeDepartmentProvider"
+      },
+      {
+        "trigger": "onTap",
+        "mechanism": "verb",
+        "detail": "ref.read(mainTabProvider.notifier).state = 1",
+        "effect": "write → mainTabProvider"
+      }
+    ]
+  },
+  "floor": [
+    "cfgRadius"
+  ]
+}

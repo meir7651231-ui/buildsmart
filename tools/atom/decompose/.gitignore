@@ -1,0 +1,4 @@
+# Dart tool package artifacts — never committed.
+.dart_tool/
+.packages
+build/
