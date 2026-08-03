@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-p0c — 🔑 מנוע-קטלוג-3D · פאזה 0 (8,12): value-objects + מוכיח-ליבה — 2026-08-03
+פרוסה-3 (סוגרת את ליבת פאזה-0). `lib/features/fittings/engine/models.dart` (§2, טהור/immutable): `Family` (enum · 11 משפחות · נושא את שם-מנוע ב-`label`, גישור enum↔`generate`) · `Dir` · `Dims` · `RunElement(family,od,{dir,od2})` עם `.dims()` הנגזר-מהמנוע · `Route`. **🔑 מוכיח-ליבה** (`test/fittings/core_proof_test.dart`): על **413 מוצרים אמיתיים** מ-`kPolyrollCatalog` — מוצר → `familyOf`/`odOf` → `RunElement` → `dims()` = זהה-למנוע · לא-ריק · עם קדח-זרימה+עומק-שקע ("קצוות"). מוכיח `מוצר → משפחה+OD → dims+קצוות` מקצה-לקצה. אפס נגיעה בחי · דגלים OFF.
+
 ## #fittings-engine-p0b — 🔌 מנוע-קטלוג-3D · פאזה 0 (5–6): גשר קטלוג→מנוע `familyOf`/`odOf` — 2026-08-03
 פרוסה-2 של פאזה-0. `lib/features/fittings/engine/catalog_map.dart` (טהור, מיובא-קטלוג — נפרד מ-`fitting_dims.dart` הטהור-מקטלוג): `familyOf(product)→String?` (קטגוריה/שם→שם-משפחת-מנוע · מרחיב `_portCountFor`; מכריע ברך 90/45 ומצמד/מצרה מהשם) + `odOf(product)→int?` / `od2Of` (מרחיב `_parsePprDn`; דו-קוטרי לפני DN-נגרר) + `engineCanRender` (M1: `null`→fallback, לעולם לא 3D-שגוי). **🔑 דוח-כיסוי** (`test/fittings/catalog_map_test.dart`): **614/620 = 99.0%** ממוצרי-ה-PPR-fitting ב-`kPolyrollCatalog` נפתרים ל-{משפחה,OD} (>95% נדרש). אפס נגיעה בחי · דגלים עדיין OFF.
 
