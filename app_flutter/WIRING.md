@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pA3 — 🔌 מנוע-קטלוג-3D · פאזה A (19+21): מותג-כללי + seam-העלאה (מוכח, לא כפול) — 2026-08-03
+**ממצא:** שלבים 19+21 כבר ממומשים בבטחה ע"י תשתית קיימת — `company_spec_bridge.dart` (`companySpecFor`/`registerCompanySpecs`) גוזר `VerifiedSpec` מ**עמודות-ה-spec המוצהרות** של קטלוג-שהועלה (`קצה 1/2/3`·`חומר`·`טמפ`·`לחץ`), **קורא-נתונים ולא מנחש** (null = honest-absent), וכבר מחווט ב-`hydrateCompanyCatalog` (seam-ה-`setCompanyCatalog`). לא שוכפלה גזירה-מסוכנת למותג-לא-מוכר. **"כל מותג מתחבר" = שלושה מסלולים משלימים** שכולם מזריעים `kVerifiedSpecs` דרך `putIfAbsent`: `registerPolyrollSpecs` (PPR built-in) · `registerFamilySpecs` (Huliot built-in · אינפרנס-קטגוריה) · `registerCompanySpecs` (העלאה · עמודות-מוצהרות). `test/fittings/brand_general_test.dart` מוכיח: seam-העלאה ברand-general (מותג-בדוי מתחבר) · honest-absent (push-fit בלי-חומר → null, אפס-M2) · הרכבה ללא-דריסה, בלתי-תלוית-סדר.
+
 ## #fittings-engine-pA2 — 🛡️ מנוע-קטלוג-3D · פאזה A (20+22): no-leak · R5(v2) · תיקון-M2 — 2026-08-03
 המשך פאזה-A — **הוכחת-בטיחות + answer-equivalent** (הכל דורמנטי, אפס-שינוי-חי):
 - **🛑 תיקון-M2 (זיווג-שווא):** `compatibleWith` מתאים לפי (end-type+DN+חומר) ומתעלם מ-supply/drainage. חומר `'HDPE'` על חוליות-ניקוז היה מזווג-שקרית **199** אביזרי-ניקוז ל-HDPE-אספקה קיים באותו DN (32/40/50/63). התיקון: `family_specs.dart` נותן חומר ייחודי **`'HDPE·ניקוז'`** (לא ב-supplyMaterials ולא בקבוצת-drainage-interop) ⇒ אביזר-Huliot מתחבר **רק** ל-Huliot אחר באותו DN. **זיווגי-שווא: 199→0**, חיבור-Huliot↔Huliot נשמר.
