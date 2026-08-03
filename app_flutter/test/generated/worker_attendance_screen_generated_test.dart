@@ -14,122 +14,122 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('worker_attendance_screen · generated (22 tests)', () {
     testWidgets('wired · WorkerAttendanceScreen · "🕐 נוכחות" [worker_attendance_screen.title]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('🕐 נוכחות'), findsWidgets,
           reason: 'the worker_attendance_screen.title element renders on worker_attendance_screen');
     });
     testWidgets('hide · WorkerAttendanceScreen · worker_attendance_screen.title → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.title'});
       expect(find.text('🕐 נוכחות'), findsNothing,
           reason: 'hiding worker_attendance_screen.title removes it for end-users');
     });
     testWidgets('wired · _ClockCard · "היום" [worker_attendance_screen.today]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('היום'), findsWidgets,
           reason: 'the worker_attendance_screen.today element renders on worker_attendance_screen');
     });
     testWidgets('hide · _ClockCard · worker_attendance_screen.today → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.today'});
       expect(find.text('היום'), findsNothing,
           reason: 'hiding worker_attendance_screen.today removes it for end-users');
     });
     testWidgets('wired · _ClockCard · "📍 מיקום נרשם" [worker_attendance_screen.loc_recorded]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('📍 מיקום נרשם'), findsWidgets,
           reason: 'the worker_attendance_screen.loc_recorded element renders on worker_attendance_screen');
     });
     testWidgets('hide · _ClockCard · worker_attendance_screen.loc_recorded → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.loc_recorded'});
       expect(find.text('📍 מיקום נרשם'), findsNothing,
           reason: 'hiding worker_attendance_screen.loc_recorded removes it for end-users');
     });
     testWidgets('wired · _CalendarCard · "‹ הקודם" [worker_attendance_screen.prev]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('‹ הקודם'), findsWidgets,
           reason: 'the worker_attendance_screen.prev element renders on worker_attendance_screen');
     });
     testWidgets('hide · _CalendarCard · worker_attendance_screen.prev → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.prev'});
       expect(find.text('‹ הקודם'), findsNothing,
           reason: 'hiding worker_attendance_screen.prev removes it for end-users');
     });
     testWidgets('wired · _CalendarCard · "הבא ›" [worker_attendance_screen.next]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('הבא ›'), findsWidgets,
           reason: 'the worker_attendance_screen.next element renders on worker_attendance_screen');
     });
     testWidgets('hide · _CalendarCard · worker_attendance_screen.next → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.next'});
       expect(find.text('הבא ›'), findsNothing,
           reason: 'hiding worker_attendance_screen.next removes it for end-users');
     });
     testWidgets('wired · _CalendarCard · "אין רישומי נוכחות בחודש זה" [worker_attendance_screen.no_records]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('אין רישומי נוכחות בחודש זה'), findsWidgets,
           reason: 'the worker_attendance_screen.no_records element renders on worker_attendance_screen');
     });
     testWidgets('hide · _CalendarCard · worker_attendance_screen.no_records → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.no_records'});
       expect(find.text('אין רישומי נוכחות בחודש זה'), findsNothing,
           reason: 'hiding worker_attendance_screen.no_records removes it for end-users');
     });
     testWidgets('wired · _CalendarCard · "סה"כ חודשי" [worker_attendance_screen.month_total]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('סה"כ חודשי'), findsWidgets,
           reason: 'the worker_attendance_screen.month_total element renders on worker_attendance_screen');
     });
     testWidgets('hide · _CalendarCard · worker_attendance_screen.month_total → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.month_total'});
       expect(find.text('סה"כ חודשי'), findsNothing,
           reason: 'hiding worker_attendance_screen.month_total removes it for end-users');
     });
     testWidgets('wired · _DayDetailSheet · "📍 לא נרשם מיקום ביום זה" [worker_attendance_screen.no_loc_day]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('📍 לא נרשם מיקום ביום זה'), findsWidgets,
           reason: 'the worker_attendance_screen.no_loc_day element renders on worker_attendance_screen');
     });
     testWidgets('hide · _DayDetailSheet · worker_attendance_screen.no_loc_day → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.no_loc_day'});
       expect(find.text('📍 לא נרשם מיקום ביום זה'), findsNothing,
           reason: 'hiding worker_attendance_screen.no_loc_day removes it for end-users');
     });
     testWidgets('wired · _DayDetailSheet · "סיכום עבודה יומי" [worker_attendance_screen.work_summary]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('סיכום עבודה יומי'), findsWidgets,
           reason: 'the worker_attendance_screen.work_summary element renders on worker_attendance_screen');
     });
     testWidgets('hide · _DayDetailSheet · worker_attendance_screen.work_summary → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.work_summary'});
       expect(find.text('סיכום עבודה יומי'), findsNothing,
           reason: 'hiding worker_attendance_screen.work_summary removes it for end-users');
     });
     testWidgets('wired · _DayDetailSheet · "אין פירוט-עבודה משויך ליום זה" [worker_attendance_screen.no_work_day]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('אין פירוט-עבודה משויך ליום זה'), findsWidgets,
           reason: 'the worker_attendance_screen.no_work_day element renders on worker_attendance_screen');
     });
     testWidgets('hide · _DayDetailSheet · worker_attendance_screen.no_work_day → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.no_work_day'});
       expect(find.text('אין פירוט-עבודה משויך ליום זה'), findsNothing,
           reason: 'hiding worker_attendance_screen.no_work_day removes it for end-users');
     });
     testWidgets('wired · _DayDetailSheet · "מיקום הכניסה — פתח ניווט" [worker_attendance_screen.open_nav]', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker');
       expect(find.text('מיקום הכניסה — פתח ניווט'), findsWidgets,
           reason: 'the worker_attendance_screen.open_nav element renders on worker_attendance_screen');
     });
     testWidgets('hide · _DayDetailSheet · worker_attendance_screen.open_nav → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerAttendanceScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_attendance_screen.open_nav'});
       expect(find.text('מיקום הכניסה — פתח ניווט'), findsNothing,
           reason: 'hiding worker_attendance_screen.open_nav removes it for end-users');

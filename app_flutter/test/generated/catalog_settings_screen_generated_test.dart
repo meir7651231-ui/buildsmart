@@ -128,7 +128,8 @@ void main() {
       final btn = find.text('בבנייה');
       expect(btn, findsWidgets, reason: 'the "בבנייה" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('ההיסטוריה נוקתה'), findsWidgets,
           reason: 'tapping "בבנייה" fires the toast (verb effect)');
     });
@@ -137,7 +138,8 @@ void main() {
       final btn = find.text('בבנייה');
       expect(btn, findsWidgets, reason: 'the "בבנייה" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
           reason: 'tapping "בבנייה" fires the toast (verb effect)');
     });
@@ -146,7 +148,8 @@ void main() {
       final btn = find.text('בקרוב');
       expect(btn, findsWidgets, reason: 'the "בקרוב" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
           reason: 'tapping "בקרוב" fires the toast (verb effect)');
     });

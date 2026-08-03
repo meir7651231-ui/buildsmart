@@ -14,67 +14,67 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('courier_attendance_screen · generated (12 tests)', () {
     testWidgets('wired · CourierAttendanceScreen · "🕐 נוכחות" [courier.attend.title]', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
       expect(find.text('🕐 נוכחות'), findsWidgets,
           reason: 'the courier.attend.title element renders on courier_attendance_screen');
     });
     testWidgets('hide · CourierAttendanceScreen · courier.attend.title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.attend.title'});
       expect(find.text('🕐 נוכחות'), findsNothing,
           reason: 'hiding courier.attend.title removes it for end-users');
     });
     testWidgets('wired · _ClockCard · "היום" [courier.attend.today]', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
       expect(find.text('היום'), findsWidgets,
           reason: 'the courier.attend.today element renders on courier_attendance_screen');
     });
     testWidgets('hide · _ClockCard · courier.attend.today → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.attend.today'});
       expect(find.text('היום'), findsNothing,
           reason: 'hiding courier.attend.today removes it for end-users');
     });
     testWidgets('wired · _MonthCard · "‹ הקודם" [courier.attend.prev]', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
       expect(find.text('‹ הקודם'), findsWidgets,
           reason: 'the courier.attend.prev element renders on courier_attendance_screen');
     });
     testWidgets('hide · _MonthCard · courier.attend.prev → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.attend.prev'});
       expect(find.text('‹ הקודם'), findsNothing,
           reason: 'hiding courier.attend.prev removes it for end-users');
     });
     testWidgets('wired · _MonthCard · "הבא ›" [courier.attend.next]', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
       expect(find.text('הבא ›'), findsWidgets,
           reason: 'the courier.attend.next element renders on courier_attendance_screen');
     });
     testWidgets('hide · _MonthCard · courier.attend.next → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.attend.next'});
       expect(find.text('הבא ›'), findsNothing,
           reason: 'hiding courier.attend.next removes it for end-users');
     });
     testWidgets('wired · _MonthCard · "אין רישומי נוכחות בחודש זה" [courier.attend.empty]', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
       expect(find.text('אין רישומי נוכחות בחודש זה'), findsWidgets,
           reason: 'the courier.attend.empty element renders on courier_attendance_screen');
     });
     testWidgets('hide · _MonthCard · courier.attend.empty → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.attend.empty'});
       expect(find.text('אין רישומי נוכחות בחודש זה'), findsNothing,
           reason: 'hiding courier.attend.empty removes it for end-users');
     });
     testWidgets('wired · _MonthCard · "סה"כ חודשי" [courier.attend.month_total]', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true);
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
       expect(find.text('סה"כ חודשי'), findsWidgets,
           reason: 'the courier.attend.month_total element renders on courier_attendance_screen');
     });
     testWidgets('hide · _MonthCard · courier.attend.month_total → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true,
+      await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.attend.month_total'});
       expect(find.text('סה"כ חודשי'), findsNothing,
           reason: 'hiding courier.attend.month_total removes it for end-users');

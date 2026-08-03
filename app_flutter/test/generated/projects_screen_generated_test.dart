@@ -112,7 +112,8 @@ void main() {
       final btn = find.text('✏️ הקש לעריכת הפרטים');
       expect(btn, findsWidgets, reason: 'the "✏️ הקש לעריכת הפרטים" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('עברת לפרויקט:'), findsWidgets,
           reason: 'tapping "✏️ הקש לעריכת הפרטים" fires the toast (verb effect)');
     });

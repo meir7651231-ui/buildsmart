@@ -84,7 +84,8 @@ void main() {
       final btn = find.text('🔇 השתק התראות');
       expect(btn, findsWidgets, reason: 'the "🔇 השתק התראות" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('השתקה בוטלה'), findsWidgets,
           reason: 'tapping "🔇 השתק התראות" fires the toast (verb effect)');
     });
@@ -137,7 +138,8 @@ void main() {
       final btn = find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות');
       expect(btn, findsWidgets, reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
           reason: 'tapping "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" fires the toast (verb effect)');
     });

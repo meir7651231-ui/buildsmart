@@ -14,45 +14,45 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('courier_forms_screen · generated (8 tests)', () {
     testWidgets('wired · CourierFormsScreen · "📄 טפסים" [courier.forms.title]', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier');
       expect(find.text('📄 טפסים'), findsWidgets,
           reason: 'the courier.forms.title element renders on courier_forms_screen');
     });
     testWidgets('hide · CourierFormsScreen · courier.forms.title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.forms.title'});
       expect(find.text('📄 טפסים'), findsNothing,
           reason: 'hiding courier.forms.title removes it for end-users');
     });
     testWidgets('wired · CourierFormsScreen · "הבקשות שלי" [courier.forms.my_requests]', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier');
       expect(find.text('הבקשות שלי'), findsWidgets,
           reason: 'the courier.forms.my_requests element renders on courier_forms_screen');
     });
     testWidgets('hide · CourierFormsScreen · courier.forms.my_requests → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.forms.my_requests'});
       expect(find.text('הבקשות שלי'), findsNothing,
           reason: 'hiding courier.forms.my_requests removes it for end-users');
     });
     testWidgets('wired · CourierFormsScreen · "צלם את אישור המחלה — הצילום נשמר ברשימה כאן." [courier.forms.sicknote_hint]', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier');
       expect(find.text('צלם את אישור המחלה — הצילום נשמר ברשימה כאן.'), findsWidgets,
           reason: 'the courier.forms.sicknote_hint element renders on courier_forms_screen');
     });
     testWidgets('hide · CourierFormsScreen · courier.forms.sicknote_hint → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier.forms.sicknote_hint'});
       expect(find.text('צלם את אישור המחלה — הצילום נשמר ברשימה כאן.'), findsNothing,
           reason: 'hiding courier.forms.sicknote_hint removes it for end-users');
     });
     testWidgets('wired · CourierFormsScreen · "אין אישורים שהועלו עדיין" [courier_forms_screen.t01]', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true);
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier');
       expect(find.text('אין אישורים שהועלו עדיין'), findsWidgets,
           reason: 'the courier_forms_screen.t01 element renders on courier_forms_screen');
     });
     testWidgets('hide · CourierFormsScreen · courier_forms_screen.t01 → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierFormsScreen(), selfContained: true,
+      await pumpScreen(t, const CourierFormsScreen(), selfContained: true, role: 'courier',
           hidden: const {'courier_forms_screen.t01'});
       expect(find.text('אין אישורים שהועלו עדיין'), findsNothing,
           reason: 'hiding courier_forms_screen.t01 removes it for end-users');

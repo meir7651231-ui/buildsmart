@@ -14,67 +14,67 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('worker_forms_screen · generated (12 tests)', () {
     testWidgets('wired · WorkerFormsScreen · "📄 טפסים" [worker_forms_screen.forms_title]', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker');
       expect(find.text('📄 טפסים'), findsWidgets,
           reason: 'the worker_forms_screen.forms_title element renders on worker_forms_screen');
     });
     testWidgets('hide · WorkerFormsScreen · worker_forms_screen.forms_title → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_forms_screen.forms_title'});
       expect(find.text('📄 טפסים'), findsNothing,
           reason: 'hiding worker_forms_screen.forms_title removes it for end-users');
     });
     testWidgets('wired · WorkerFormsScreen · "פרטי המעסיק" [worker_forms_screen.employer_details]', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker');
       expect(find.text('פרטי המעסיק'), findsWidgets,
           reason: 'the worker_forms_screen.employer_details element renders on worker_forms_screen');
     });
     testWidgets('hide · WorkerFormsScreen · worker_forms_screen.employer_details → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_forms_screen.employer_details'});
       expect(find.text('פרטי המעסיק'), findsNothing,
           reason: 'hiding worker_forms_screen.employer_details removes it for end-users');
     });
     testWidgets('wired · WorkerFormsScreen · "הבקשות שלי" [worker_forms_screen.my_requests]', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker');
       expect(find.text('הבקשות שלי'), findsWidgets,
           reason: 'the worker_forms_screen.my_requests element renders on worker_forms_screen');
     });
     testWidgets('hide · WorkerFormsScreen · worker_forms_screen.my_requests → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_forms_screen.my_requests'});
       expect(find.text('הבקשות שלי'), findsNothing,
           reason: 'hiding worker_forms_screen.my_requests removes it for end-users');
     });
     testWidgets('wired · WorkerFormsScreen · "צלם את אישור המחלה — הצילום נשמר ברשימה כאן." [worker_forms_screen.sick_hint]', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker');
       expect(find.text('צלם את אישור המחלה — הצילום נשמר ברשימה כאן.'), findsWidgets,
           reason: 'the worker_forms_screen.sick_hint element renders on worker_forms_screen');
     });
     testWidgets('hide · WorkerFormsScreen · worker_forms_screen.sick_hint → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_forms_screen.sick_hint'});
       expect(find.text('צלם את אישור המחלה — הצילום נשמר ברשימה כאן.'), findsNothing,
           reason: 'hiding worker_forms_screen.sick_hint removes it for end-users');
     });
     testWidgets('wired · WorkerFormsScreen · "אין אישורים שהועלו עדיין" [worker_forms_screen.no_uploads]', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker');
       expect(find.text('אין אישורים שהועלו עדיין'), findsWidgets,
           reason: 'the worker_forms_screen.no_uploads element renders on worker_forms_screen');
     });
     testWidgets('hide · WorkerFormsScreen · worker_forms_screen.no_uploads → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_forms_screen.no_uploads'});
       expect(find.text('אין אישורים שהועלו עדיין'), findsNothing,
           reason: 'hiding worker_forms_screen.no_uploads removes it for end-users');
     });
     testWidgets('wired · WorkerFormsScreen · "חתום ✓" [worker_forms_screen.signed]', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true);
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker');
       expect(find.text('חתום ✓'), findsWidgets,
           reason: 'the worker_forms_screen.signed element renders on worker_forms_screen');
     });
     testWidgets('hide · WorkerFormsScreen · worker_forms_screen.signed → gone when hidden', (t) async {
-      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true,
+      await pumpScreen(t, const WorkerFormsScreen(), selfContained: true, role: 'worker',
           hidden: const {'worker_forms_screen.signed'});
       expect(find.text('חתום ✓'), findsNothing,
           reason: 'hiding worker_forms_screen.signed removes it for end-users');

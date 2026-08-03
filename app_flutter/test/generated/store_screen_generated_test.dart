@@ -14,506 +14,516 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('store_screen · generated (85 tests)', () {
     testWidgets('wired · _StoreList · "הסל ריק" [shop.emptycart.title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('הסל ריק'), findsWidgets,
           reason: 'the shop.emptycart.title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.emptycart.title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.emptycart.title'});
       expect(find.text('הסל ריק'), findsNothing,
           reason: 'hiding shop.emptycart.title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "הוסיפו מוצרים מהקטלוג" [shop.emptycart.hint]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('הוסיפו מוצרים מהקטלוג'), findsWidgets,
           reason: 'the shop.emptycart.hint element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.emptycart.hint → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.emptycart.hint'});
       expect(find.text('הוסיפו מוצרים מהקטלוג'), findsNothing,
           reason: 'hiding shop.emptycart.hint removes it for end-users');
     });
     testWidgets('wired · _StoreList · "🚧 בבנייה" [store_screen.service_under_construction]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('🚧 בבנייה'), findsWidgets,
           reason: 'the store_screen.service_under_construction element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.service_under_construction → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.service_under_construction'});
       expect(find.text('🚧 בבנייה'), findsNothing,
           reason: 'hiding store_screen.service_under_construction removes it for end-users');
     });
     testWidgets('wired · _StoreList · "היסטוריית הרכישות מוסתרת" [shop.orders.hidden]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('היסטוריית הרכישות מוסתרת'), findsWidgets,
           reason: 'the shop.orders.hidden element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.orders.hidden → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.orders.hidden'});
       expect(find.text('היסטוריית הרכישות מוסתרת'), findsNothing,
           reason: 'hiding shop.orders.hidden removes it for end-users');
     });
     testWidgets('wired · _StoreList · "הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות." [store_screen.orders_hidden_hint]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות.'), findsWidgets,
           reason: 'the store_screen.orders_hidden_hint element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.orders_hidden_hint → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.orders_hidden_hint'});
       expect(find.text('הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות.'), findsNothing,
           reason: 'hiding store_screen.orders_hidden_hint removes it for end-users');
     });
     testWidgets('wired · _StoreList · "הצג היסטוריה" [store_screen.orders_hidden_show]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('הצג היסטוריה'), findsWidgets,
           reason: 'the store_screen.orders_hidden_show element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.orders_hidden_show → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.orders_hidden_show'});
       expect(find.text('הצג היסטוריה'), findsNothing,
           reason: 'hiding store_screen.orders_hidden_show removes it for end-users');
     });
     testWidgets('wired · _StoreList · "🏗️ שיוך לפרויקט" [store_screen.proj_assign_title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('🏗️ שיוך לפרויקט'), findsWidgets,
           reason: 'the store_screen.proj_assign_title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.proj_assign_title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.proj_assign_title'});
       expect(find.text('🏗️ שיוך לפרויקט'), findsNothing,
           reason: 'hiding store_screen.proj_assign_title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "+ הוסף" [store_screen.proj_add_chip]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('+ הוסף'), findsWidgets,
           reason: 'the store_screen.proj_add_chip element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.proj_add_chip → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.proj_add_chip'});
       expect(find.text('+ הוסף'), findsNothing,
           reason: 'hiding store_screen.proj_add_chip removes it for end-users');
     });
     testWidgets('wired · _StoreList · "הוספת פרויקט" [store_screen.proj_add_dialog_title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('הוספת פרויקט'), findsWidgets,
           reason: 'the store_screen.proj_add_dialog_title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.proj_add_dialog_title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.proj_add_dialog_title'});
       expect(find.text('הוספת פרויקט'), findsNothing,
           reason: 'hiding store_screen.proj_add_dialog_title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "ביטול" [store_screen.proj_add_cancel]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('ביטול'), findsWidgets,
           reason: 'the store_screen.proj_add_cancel element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.proj_add_cancel → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.proj_add_cancel'});
       expect(find.text('ביטול'), findsNothing,
           reason: 'hiding store_screen.proj_add_cancel removes it for end-users');
     });
     testWidgets('wired · _StoreList · "הוסף" [store_screen.proj_add_confirm]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('הוסף'), findsWidgets,
           reason: 'the store_screen.proj_add_confirm element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.proj_add_confirm → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.proj_add_confirm'});
       expect(find.text('הוסף'), findsNothing,
           reason: 'hiding store_screen.proj_add_confirm removes it for end-users');
     });
     testWidgets('wired · _StoreList · "אספקה: יום-יומיים" [store_screen.supplier_lead_time]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('אספקה: יום-יומיים'), findsWidgets,
           reason: 'the store_screen.supplier_lead_time element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.supplier_lead_time → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.supplier_lead_time'});
       expect(find.text('אספקה: יום-יומיים'), findsNothing,
           reason: 'hiding store_screen.supplier_lead_time removes it for end-users');
     });
     testWidgets('wired · _StoreList · "🚚 אפשרויות משלוח" [shop.delivery.title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('🚚 אפשרויות משלוח'), findsWidgets,
           reason: 'the shop.delivery.title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.delivery.title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.delivery.title'});
       expect(find.text('🚚 אפשרויות משלוח'), findsNothing,
           reason: 'hiding shop.delivery.title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "📝 הערות לשליח" [shop.notes.title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('📝 הערות לשליח'), findsWidgets,
           reason: 'the shop.notes.title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.notes.title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.notes.title'});
       expect(find.text('📝 הערות לשליח'), findsNothing,
           reason: 'hiding shop.notes.title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "💳 אמצעי תשלום" [shop.payment.title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('💳 אמצעי תשלום'), findsWidgets,
           reason: 'the shop.payment.title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.payment.title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.payment.title'});
       expect(find.text('💳 אמצעי תשלום'), findsNothing,
           reason: 'hiding shop.payment.title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "אישור הזמנה גדולה" [store_screen.large_order_title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('אישור הזמנה גדולה'), findsWidgets,
           reason: 'the store_screen.large_order_title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.large_order_title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.large_order_title'});
       expect(find.text('אישור הזמנה גדולה'), findsNothing,
           reason: 'hiding store_screen.large_order_title removes it for end-users');
     });
     testWidgets('hide · _StoreList · store_screen.large_order_cancel → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.large_order_cancel'});
       expect(find.text('ביטול'), findsNothing,
           reason: 'hiding store_screen.large_order_cancel removes it for end-users');
     });
     testWidgets('wired · _StoreList · "אשר והמשך" [store_screen.large_order_confirm]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('אשר והמשך'), findsWidgets,
           reason: 'the store_screen.large_order_confirm element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.large_order_confirm → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.large_order_confirm'});
       expect(find.text('אשר והמשך'), findsNothing,
           reason: 'hiding store_screen.large_order_confirm removes it for end-users');
     });
     testWidgets('wired · _StoreList · "שמור סל כרשימה" [store_screen.save_list_title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('שמור סל כרשימה'), findsWidgets,
           reason: 'the store_screen.save_list_title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.save_list_title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.save_list_title'});
       expect(find.text('שמור סל כרשימה'), findsNothing,
           reason: 'hiding store_screen.save_list_title removes it for end-users');
     });
     testWidgets('hide · _StoreList · store_screen.save_list_cancel → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.save_list_cancel'});
       expect(find.text('ביטול'), findsNothing,
           reason: 'hiding store_screen.save_list_cancel removes it for end-users');
     });
     testWidgets('wired · _StoreList · "שמור" [store_screen.save_list_confirm]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('שמור'), findsWidgets,
           reason: 'the store_screen.save_list_confirm element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.save_list_confirm → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.save_list_confirm'});
       expect(find.text('שמור'), findsNothing,
           reason: 'hiding store_screen.save_list_confirm removes it for end-users');
     });
     testWidgets('wired · _StoreList · "🔖 רשימות שמורות" [store_screen.saved_lists_title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('🔖 רשימות שמורות'), findsWidgets,
           reason: 'the store_screen.saved_lists_title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.saved_lists_title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.saved_lists_title'});
       expect(find.text('🔖 רשימות שמורות'), findsNothing,
           reason: 'hiding store_screen.saved_lists_title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "אין רשימות שמורות עדיין" [store_screen.saved_lists_empty]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('אין רשימות שמורות עדיין'), findsWidgets,
           reason: 'the store_screen.saved_lists_empty element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.saved_lists_empty → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.saved_lists_empty'});
       expect(find.text('אין רשימות שמורות עדיין'), findsNothing,
           reason: 'hiding store_screen.saved_lists_empty removes it for end-users');
     });
     testWidgets('wired · _StoreList · "רשימות" [store_screen.actions_lists]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('רשימות'), findsWidgets,
           reason: 'the store_screen.actions_lists element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.actions_lists → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.actions_lists'});
       expect(find.text('רשימות'), findsNothing,
           reason: 'hiding store_screen.actions_lists removes it for end-users');
     });
     testWidgets('hide · _StoreList · store_screen.actions_save → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.actions_save'});
       expect(find.text('שמור'), findsNothing,
           reason: 'hiding store_screen.actions_save removes it for end-users');
     });
     testWidgets('wired · _StoreList · "שתף" [store_screen.actions_share]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('שתף'), findsWidgets,
           reason: 'the store_screen.actions_share element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.actions_share → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.actions_share'});
       expect(find.text('שתף'), findsNothing,
           reason: 'hiding store_screen.actions_share removes it for end-users');
     });
     testWidgets('wired · _StoreList · "נקה" [store_screen.actions_clear]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('נקה'), findsWidgets,
           reason: 'the store_screen.actions_clear element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.actions_clear → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.actions_clear'});
       expect(find.text('נקה'), findsNothing,
           reason: 'hiding store_screen.actions_clear removes it for end-users');
     });
     testWidgets('wired · _StoreList · "סיכום הזמנה" [shop.checkout.title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('סיכום הזמנה'), findsWidgets,
           reason: 'the shop.checkout.title element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.checkout.title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.checkout.title'});
       expect(find.text('סיכום הזמנה'), findsNothing,
           reason: 'hiding shop.checkout.title removes it for end-users');
     });
     testWidgets('wired · _StoreList · "פרויקט" [store_screen.checkout_project_label]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('פרויקט'), findsWidgets,
           reason: 'the store_screen.checkout_project_label element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.checkout_project_label → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.checkout_project_label'});
       expect(find.text('פרויקט'), findsNothing,
           reason: 'hiding store_screen.checkout_project_label removes it for end-users');
     });
     testWidgets('wired · _StoreList · "📦 משלוח" [store_screen.checkout_delivery_label]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('📦 משלוח'), findsWidgets,
           reason: 'the store_screen.checkout_delivery_label element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.checkout_delivery_label → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.checkout_delivery_label'});
       expect(find.text('📦 משלוח'), findsNothing,
           reason: 'hiding store_screen.checkout_delivery_label removes it for end-users');
     });
     testWidgets('wired · _StoreList · "💳 תשלום" [store_screen.checkout_payment_label]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('💳 תשלום'), findsWidgets,
           reason: 'the store_screen.checkout_payment_label element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.checkout_payment_label → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.checkout_payment_label'});
       expect(find.text('💳 תשלום'), findsNothing,
           reason: 'hiding store_screen.checkout_payment_label removes it for end-users');
     });
     testWidgets('wired · _StoreList · "סה"כ לתשלום" [store_screen.checkout_total_label]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('סה"כ לתשלום'), findsWidgets,
           reason: 'the store_screen.checkout_total_label element renders on store_screen');
     });
     testWidgets('hide · _StoreList · store_screen.checkout_total_label → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.checkout_total_label'});
       expect(find.text('סה"כ לתשלום'), findsNothing,
           reason: 'hiding store_screen.checkout_total_label removes it for end-users');
     });
     testWidgets('wired · _StoreList · "אישור הזמנה" [shop.checkout.confirm]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('אישור הזמנה'), findsWidgets,
           reason: 'the shop.checkout.confirm element renders on store_screen');
     });
     testWidgets('hide · _StoreList · shop.checkout.confirm → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.checkout.confirm'});
       expect(find.text('אישור הזמנה'), findsNothing,
           reason: 'hiding shop.checkout.confirm removes it for end-users');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "— בבנייה"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('— בבנייה'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "שם הרשימה לא יכול להיות ריק"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('שם הרשימה לא יכול להיות ריק'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "הסל ריק"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הסל ריק'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "הרשימה נשמרה בהצלחה"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הרשימה נשמרה בהצלחה'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "הרשימה "" נטענה לסל"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הרשימה "" נטענה לסל'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "הסל נוקה"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הסל נוקה'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "יש להירשם כדי לבצע הזמנה"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('יש להירשם כדי לבצע הזמנה'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "החשבון ממתין לאישור — אפשר לשלוח בקשת תפקיד"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('החשבון ממתין לאישור — אפשר לשלוח בקשת תפקיד'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('verb · _StoreList · tap "הסל ריק" → toast "הזמנה  אושרה! 🎉"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('הסל ריק');
       expect(btn, findsWidgets, reason: 'the "הסל ריק" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('הזמנה  אושרה! 🎉'), findsWidgets,
           reason: 'tapping "הסל ריק" fires the toast (verb effect)');
     });
     testWidgets('wired · _OrderSheet · "פרטי הפריטים אינם זמינים" [store_screen.order_no_items]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('פרטי הפריטים אינם זמינים'), findsWidgets,
           reason: 'the store_screen.order_no_items element renders on store_screen');
     });
     testWidgets('hide · _OrderSheet · store_screen.order_no_items → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.order_no_items'});
       expect(find.text('פרטי הפריטים אינם זמינים'), findsNothing,
           reason: 'hiding store_screen.order_no_items removes it for end-users');
     });
     testWidgets('wired · _OrderSheet · "סכום ביניים" [store_screen.order_subtotal]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('סכום ביניים'), findsWidgets,
           reason: 'the store_screen.order_subtotal element renders on store_screen');
     });
     testWidgets('hide · _OrderSheet · store_screen.order_subtotal → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.order_subtotal'});
       expect(find.text('סכום ביניים'), findsNothing,
           reason: 'hiding store_screen.order_subtotal removes it for end-users');
     });
     testWidgets('wired · _OrderSheet · "מע"מ + משלוח" [store_screen.order_vat_delivery]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('מע"מ + משלוח'), findsWidgets,
           reason: 'the store_screen.order_vat_delivery element renders on store_screen');
     });
     testWidgets('hide · _OrderSheet · store_screen.order_vat_delivery → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.order_vat_delivery'});
       expect(find.text('מע"מ + משלוח'), findsNothing,
           reason: 'hiding store_screen.order_vat_delivery removes it for end-users');
     });
     testWidgets('wired · _OrderSheet · "סה"כ" [store_screen.order_total]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('סה"כ'), findsWidgets,
           reason: 'the store_screen.order_total element renders on store_screen');
     });
     testWidgets('hide · _OrderSheet · store_screen.order_total → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.order_total'});
       expect(find.text('סה"כ'), findsNothing,
           reason: 'hiding store_screen.order_total removes it for end-users');
     });
     testWidgets('wired · _OrderSheet · "🚛 מעקב הזמנה" [shop.tracking.title]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('🚛 מעקב הזמנה'), findsWidgets,
           reason: 'the shop.tracking.title element renders on store_screen');
     });
     testWidgets('hide · _OrderSheet · shop.tracking.title → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'shop.tracking.title'});
       expect(find.text('🚛 מעקב הזמנה'), findsNothing,
           reason: 'hiding shop.tracking.title removes it for end-users');
     });
     testWidgets('wired · _OrderSheet · "סרוק תעודת-משלוח" [store_screen.order_scan_delivery]', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       expect(find.text('סרוק תעודת-משלוח'), findsWidgets,
           reason: 'the store_screen.order_scan_delivery element renders on store_screen');
     });
     testWidgets('hide · _OrderSheet · store_screen.order_scan_delivery → gone when hidden', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true,
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store',
           hidden: const {'store_screen.order_scan_delivery'});
       expect(find.text('סרוק תעודת-משלוח'), findsNothing,
           reason: 'hiding store_screen.order_scan_delivery removes it for end-users');
     });
     testWidgets('verb · _OrderSheet · tap "פרטי הפריטים אינם זמינים" → toast "סריקת תעודת-משלוח (OCR) — בקרוב"', (t) async {
-      await pumpScreen(t, const StoreScreen(), selfContained: true);
+      await pumpScreen(t, const StoreScreen(), selfContained: true, role: 'store');
       final btn = find.text('פרטי הפריטים אינם זמינים');
       expect(btn, findsWidgets, reason: 'the "פרטי הפריטים אינם זמינים" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('סריקת תעודת-משלוח (OCR) — בקרוב'), findsWidgets,
           reason: 'tapping "פרטי הפריטים אינם זמינים" fires the toast (verb effect)');
     });

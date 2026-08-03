@@ -30,7 +30,8 @@ void main() {
       final btn = find.text('הוסף לסל');
       expect(btn, findsWidgets, reason: 'the "הוסף לסל" trigger is present');
       await t.tap(btn.first);
-      await t.pumpAndSettle(const Duration(seconds: 1));
+      await t.pump(const Duration(milliseconds: 600));
+      drainOverflow(t);
       expect(find.textContaining('נוסף לסל'), findsWidgets,
           reason: 'tapping "הוסף לסל" fires the toast (verb effect)');
     });
