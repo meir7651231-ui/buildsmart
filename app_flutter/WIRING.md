@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #org-setup-3293-fix — 🔌 אשף הקמת חברה: תאימות Flutter 3.29.3 (CI) — 2026-08-03
+תיקון version-skew שחסם את ה-CI (Flutter 3.29.3): `org_setup_wizard_screen.dart` — ה-`DropdownButtonFormField` של `_tokenDropdown` השתמש ב-`initialValue:` (API מ-3.32+ בלבד) → כשל-קומפילציה על ה-runner. הוחלף ל-`value:` (קיים ב-3.29.3 וב-3.44.8). בנוסף `org_setup_wizard_test.dart` מקבל `pageTransitionsTheme` עם Fade (במקום ZoomPageTransition שממפה את המסך-הגבוה 21000px ל-bitmap שחורג ממגבלת-ה-texture ב-headless). התנהגות-מוצר לא משתנה.
+
 ## #atom-engine-slice1 — 🧬 מנוע-אטומים: מסך-המאתר נטען מ-manifest (kAtomEngine, default-off, tree-shaken)
 **SSOT:** `atom-engine/ENGINE-SPEC.md` + `atom-engine/manifests/contractor-home.json`. פרוסה-1 של מנוע-הרכבת-המסכים: מסך-המאתר (`FinderScreen`, ה-section `'מאתר'`) הופך ל-**9 אטומים ניידים** + terminal results, שהמנוע מרכיב מ-manifest.
 - **חיווט** (`catalog_screen.dart`): הענף `if (active == 'מאתר' && modOn(ref,'search'))` מפצל `kAtomEngine ? const AtomHomeScreen() : const FinderScreen()`. מסך-הבית (`'בית'`→`SmartHomeBody`) **לא נגעים בו**.

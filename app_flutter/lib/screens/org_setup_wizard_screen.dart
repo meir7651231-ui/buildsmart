@@ -1149,7 +1149,11 @@ class _ElementInspectorSheetState
       Padding(
         padding: const EdgeInsets.only(top: BsTokens.space3),
         child: DropdownButtonFormField<String?>(
-          initialValue: value,
+          // `value:` (not `initialValue:`) — the former is the param that exists
+          // on the CI-pinned Flutter 3.29.3; `initialValue` was only added in
+          // 3.32+, so it fails to compile on the runner (blast-radius: every
+          // test transitively importing this screen). Works on both toolchains.
+          value: value,
           isExpanded: true,
           decoration: _dec(label),
           items: [

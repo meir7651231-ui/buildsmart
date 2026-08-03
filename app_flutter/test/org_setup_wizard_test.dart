@@ -42,9 +42,26 @@ Future<ProviderContainer> _pump(WidgetTester t,
     ProviderScope(
       key: UniqueKey(),
       overrides: [orgConfigProvider.overrideWith((ref) => boot)],
-      child: const MaterialApp(
-        locale: Locale('he'),
-        home: OrgSetupWizardScreen(),
+      child: MaterialApp(
+        locale: const Locale('he'),
+        // The level-2 editors push routes; on the CI-pinned Flutter 3.29.3 the
+        // default ZoomPageTransition SNAPSHOTS the (deliberately 7000px-tall,
+        // ×3 DPR = 21000px) page to a bitmap that exceeds the headless
+        // renderer's texture limit → PictureRasterizationException. Use the
+        // non-snapshotting Fade transition in tests (a test-env config only;
+        // production scrolls lazily and never rasterizes the full page).
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        home: const OrgSetupWizardScreen(),
       ),
     ),
   );
