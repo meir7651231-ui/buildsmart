@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pA — 🔑 מנוע-קטלוג-3D · פאזה A: familySpecFor → חוליות מחברת (מגודר, byte-identical) — 2026-08-03
+`lib/data/family_specs.dart` — מכליל את `polyrollSpecFor` המוכח: `familySpecFor(product)→VerifiedSpec?` = `polyrollSpecFor(p) ?? _huliotSpecFor(p)` (**⊇** — פולירול מקבל spec זהה). Huliot-789 (`kHuliotProducts`, מערכת-ניקוז HDPE) → קצוות `hdpeCompression`×ספירת-קטגוריה + חומר HDPE + `systemOverride: drainage` (interoperable-לפי-DN, תואם-פיזיקה). אטם/חבק או נטול-מידה → `null` (fallback M1). `registerFamilySpecs()` מזריע ל-`kVerifiedSpecs` דרך **`putIfAbsent` בלבד** (keystone R2), מחווט ב-`main.dart:277` **אחרי** `registerPolyrollSpecs` ומאחורי `kFittingEngine` (OFF ⇒ מנוע-החיבוריות החי byte-identical). **🔑 כיסוי חוליות: 728/763 = 95.4%** מהאביזרים-המחברים (הפער = אביזרי-נוי נטולי-מידה · טלמטריית-gaps). `familySpecFor`/`registerFamilySpecs` ב-`_kRequiredHelpers` (R4).
+
 ## #fittings-engine-p0c — 🔑 מנוע-קטלוג-3D · פאזה 0 (8,12): value-objects + מוכיח-ליבה — 2026-08-03
 פרוסה-3 (סוגרת את ליבת פאזה-0). `lib/features/fittings/engine/models.dart` (§2, טהור/immutable): `Family` (enum · 11 משפחות · נושא את שם-מנוע ב-`label`, גישור enum↔`generate`) · `Dir` · `Dims` · `RunElement(family,od,{dir,od2})` עם `.dims()` הנגזר-מהמנוע · `Route`. **🔑 מוכיח-ליבה** (`test/fittings/core_proof_test.dart`): על **413 מוצרים אמיתיים** מ-`kPolyrollCatalog` — מוצר → `familyOf`/`odOf` → `RunElement` → `dims()` = זהה-למנוע · לא-ריק · עם קדח-זרימה+עומק-שקע ("קצוות"). מוכיח `מוצר → משפחה+OD → dims+קצוות` מקצה-לקצה. אפס נגיעה בחי · דגלים OFF.
 

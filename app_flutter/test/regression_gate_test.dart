@@ -80,6 +80,8 @@ const _kRequiredHelpers = <String>[
   'familyOf', // catalog product → engine family
   'odOf', // catalog product → OD
   'engineCanRender', // renderable-guard (M1 fallback)
+  'familySpecFor', // Phase A — product → VerifiedSpec (⊇ polyrollSpecFor)
+  'registerFamilySpecs', // Phase A — putIfAbsent seed into kVerifiedSpecs
 ];
 
 void main() {

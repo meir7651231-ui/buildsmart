@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
 import 'package:buildsmart/config/org_config.dart' show kOrgCompanyJson;
+import 'package:buildsmart/data/family_specs.dart';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/catalog_paged.dart'
     show useServerCatalog;
+import 'package:buildsmart/features/fittings/fitting_flags.dart';
 import 'package:buildsmart/firebase_options.dart';
 import 'package:buildsmart/screens/floating_card_keyboard.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
@@ -271,6 +273,11 @@ Future<void> main() async {
   // the card's compat / pair-warning / install-engine helpers cover the
   // 757-strong PPR catalog the same way they cover Lipskey.
   registerPolyrollSpecs();
+  // Catalog-3D · Phase A: extend the same bridge to Huliot (789 HDPE drainage
+  // fittings) via familySpecFor → putIfAbsent (never overwrites a hand/polyroll
+  // spec). Gated OFF by default (kFittingEngine) ⇒ the live compat engine is
+  // byte-identical until armed; ON ⇒ Huliot products gain their connectivity.
+  if (kFittingEngine) registerFamilySpecs();
   // First-run gate: seed the welcome flag from prefs before the first frame.
   final welcomeSeen = await loadWelcomeSeen();
   // …and the guest-browsing CHOICE, or a visitor who already picked "browse
