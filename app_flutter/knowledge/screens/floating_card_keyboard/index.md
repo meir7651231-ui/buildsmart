@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `FloatingCardKeyboard` | composer | — | — | 2·28·0 | needs-untangle | 1 |
+| 1 | `FloatingCardKeyboard` | composer | — | — | 2·28·1 | needs-untangle | 1 |
 
 ## Registry reconciliation (1/1)
 

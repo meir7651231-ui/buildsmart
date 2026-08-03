@@ -14,9 +14,9 @@
 
 _(no edges)_
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (1)
 
-_(no flows)_
+- **build** → _formula_ `splitTag = fulfillment.splitInto > 1 ? … : …` → text: ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות' | ''
 
 ## floor · external functions (4)
 

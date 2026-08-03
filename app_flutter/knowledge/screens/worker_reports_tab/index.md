@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `WorkerReportsTab` | composer | — | — | 11·18·7 | clean | 1 |
+| 1 | `WorkerReportsTab` | composer | — | — | 11·18·9 | clean | 1 |
 | 2 | `_KpiBox` | section | — | — | 0·0·0 | clean | 0 |
 | 3 | `_Card` | section | — | — | 0·0·0 | clean | 0 |
 | 4 | `_KvRow` | section | — | — | 0·0·0 | clean | 0 |

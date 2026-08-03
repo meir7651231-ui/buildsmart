@@ -13,7 +13,7 @@
 | 2 | `_SummaryRow` | section | — | — | 0·3·0 | embeds-shared | 0 |
 | 3 | `_SectionChipsRow` | section | — | — | 1·4·1 | embeds-shared | 1 |
 | 4 | `_QuickActionsRow` | section | — | — | 0·6·6 | needs-untangle | 0 |
-| 5 | `_StoreList` | section | — | — | 53·55·30 | embeds-shared | 4 |
+| 5 | `_StoreList` | section | — | — | 53·55·31 | embeds-shared | 4 |
 | 6 | `_OrderSheet` | section | — | — | 10·2·1 | embeds-shared | 3 |
 
 ## Registry reconciliation (40/40)

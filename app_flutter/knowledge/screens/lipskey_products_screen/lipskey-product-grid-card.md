@@ -19,10 +19,11 @@
 - **action** · `showLipskeyProductSheet` → `showLipskeyProductSheet`
 - **action** · `showQtyWheel` → `showQtyWheel`
 
-## התנהגות · behaviour (2)
+## התנהגות · behaviour (3)
 
 - **onTap** → _verb_ `showLipskeyProductSheet(context, product, products)` → open → showLipskeyProductSheet
 - **onTap** → _verb_ `showQtyWheel(context, qty, (n) => cart.setQtyForKey(_line(n)))` → open → showQtyWheel
+- **build** → _formula_ `label = icon == Icons.add ? … : …` → text: 'הוסף כמות' | 'הפחת כמות'
 
 ## floor · external functions (2)
 

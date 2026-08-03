@@ -29,8 +29,9 @@
 - **reads** · `watch` → `requiredDocsForEmployer(kDemoContractorId)`
 - **reads** · `read` → `requiredDocsPolicyProvider`
 
-## התנהגות · behaviour (4)
+## התנהגות · behaviour (5)
 
+- **build** → _formula_ `reasonSuffix = (!approve && why != null && why.isNotEmpty) ? … : …` → text: ' · סיבה: ${why}' | ''
 - **onPressed** → _verb_ `ref.read(requiredDocsPolicyProvider.notifier).removeRequirement(kDemoContract…` → write → requiredDocsPolicyProvider
 - **onPressed** → _verb_ `showToast(context, '❌ הוסר מסמך נדרש: $name')` → toast
 - **onTap** → _verb_ `ref.read(requiredDocsPolicyProvider.notifier).addRequirement(kDemoContractorI…` → write → requiredDocsPolicyProvider

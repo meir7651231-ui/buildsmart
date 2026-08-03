@@ -74,7 +74,14 @@
         ]
       },
       "behaviour": {
-        "flows": []
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "label = fromLiteral ? … : …",
+            "effect": "text: '🔎 \"${userText}\"' | '📂 ${intent.key}'"
+          }
+        ]
       },
       "floor": [
         "assistantIntentPrompt",

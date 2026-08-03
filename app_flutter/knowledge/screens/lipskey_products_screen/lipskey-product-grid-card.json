@@ -68,6 +68,12 @@
         "mechanism": "verb",
         "detail": "showQtyWheel(context, qty, (n) => cart.setQtyForKey(_line(n)))",
         "effect": "open → showQtyWheel"
+      },
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "label = icon == Icons.add ? … : …",
+        "effect": "text: 'הוסף כמות' | 'הפחת כמות'"
       }
     ]
   },

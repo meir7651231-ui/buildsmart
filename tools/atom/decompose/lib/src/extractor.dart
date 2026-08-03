@@ -742,6 +742,49 @@ class _AtomExtractor extends RecursiveAstVisitor<void> {
     super.visitIfStatement(node);
   }
 
+  // ── Layer 3 · formula flows (named text ternaries) ─────────────────────────
+  // `final label = cond ? 'A' : '₪${x}'` — a text-selection formula. Captured
+  // only when it names a local (a VariableDeclaration), to keep the noise down.
+  @override
+  void visitConditionalExpression(ConditionalExpression node) {
+    if (node.parent is VariableDeclaration) {
+      final a = _stringOutput(node.thenExpression);
+      final b = _stringOutput(node.elseExpression);
+      if (a != null && b != null) {
+        final name = (node.parent as VariableDeclaration).name.lexeme;
+        _addFlow(AtomFlow(
+          trigger: 'build',
+          mechanism: 'formula',
+          detail: '$name = ${_short(node.condition.toSource())} ? … : …',
+          effect: 'text: $a | $b',
+        ));
+      }
+    }
+    super.visitConditionalExpression(node);
+  }
+
+  /// The static text of a string branch — a literal verbatim, or an
+  /// interpolation with its `${…}` expressions kept (so the floor primitive
+  /// inside, e.g. groupThousands, stays visible to the test-generator).
+  String? _stringOutput(Expression e) {
+    if (e is SimpleStringLiteral) return "'${e.value}'";
+    if (e is StringInterpolation) {
+      final sb = StringBuffer("'");
+      for (final el in e.elements) {
+        if (el is InterpolationString) {
+          sb.write(el.value);
+        } else if (el is InterpolationExpression) {
+          sb.write('\${${el.expression.toSource()}}');
+        }
+      }
+      sb.write("'");
+      return sb.toString();
+    }
+    return null;
+  }
+
+  String _short(String s) => s.length > 60 ? '${s.substring(0, 57)}…' : s;
+
   // ── Layer 3 · verb flows (callbacks) ───────────────────────────────────────
   @override
   void visitNamedExpression(NamedExpression node) {

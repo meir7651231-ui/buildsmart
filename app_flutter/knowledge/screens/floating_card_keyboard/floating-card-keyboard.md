@@ -41,9 +41,9 @@
 - **reads** · `watch` → `keyboardJobSkusProvider`
 - **reads** · `watch` → `keyboardScreenToolsProvider`
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (1)
 
-_(no flows)_
+- **build** → _formula_ `sep = existing.isEmpty || existing.endsWith(' ') ? … : …` → text: '' | ' '
 
 ## floor · external functions (31)
 

@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `_ContractorHrSheet` | composer | — | — | 8·10·4 | clean | 0 |
+| 1 | `_ContractorHrSheet` | composer | — | — | 8·10·5 | clean | 0 |
 | 2 | `_VacationRow` | section | — | — | 0·0·0 | clean | 0 |
 | 3 | `_DecideButton` | section | — | — | 0·0·0 | clean | 0 |
 | 4 | `_TrainingRow` | section | — | — | 0·0·0 | clean | 0 |

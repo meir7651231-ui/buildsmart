@@ -10,7 +10,7 @@
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
 | 1 | `OrgSetupWizardScreen` | composer | — | — | 18·9·1 | needs-untangle | 18 |
-| 2 | `_ElementInspectorSheet` | section | — | — | 2·4·0 | embeds-shared | 2 |
+| 2 | `_ElementInspectorSheet` | section | — | — | 2·4·1 | embeds-shared | 2 |
 | 3 | `_WizardFindReplaceScreen` | section | — | — | 3·3·2 | embeds-shared | 3 |
 | 4 | `_WizardHistoryScreen` | section | — | — | 1·0·0 | embeds-shared | 1 |
 | 5 | `_ScreenManagerScreen` | section | — | — | 8·4·1 | embeds-shared | 8 |

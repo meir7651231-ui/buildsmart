@@ -13,9 +13,9 @@ _(no text nodes)_
 
 _(no edges)_
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (1)
 
-_(no flows)_
+- **build** → _formula_ `idLine = item.sku != null ? … : …` → text: '🏷️ מק"ט ${item.sku}${item.category != null ? ' · ${item.category}' : ''}' | 'ללא מק"ט בקטלוג'
 
 ## floor · external functions (2)
 

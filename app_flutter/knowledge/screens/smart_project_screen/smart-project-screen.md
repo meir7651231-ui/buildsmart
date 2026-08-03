@@ -27,9 +27,9 @@
 - **action** · `showToast` → `showToast`
 - **action** · `showModalBottomSheet` → `showModalBottomSheet`
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (1)
 
-_(no flows)_
+- **build** → _formula_ `title = active.name.isEmpty ? … : …` → text: 'הפרויקט שלי — מאפס עד מסירה' | '${active.name} — מאפס עד מסירה'
 
 ## floor · external functions (5)
 

@@ -41,7 +41,20 @@
         "edges": []
       },
       "behaviour": {
-        "flows": []
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "tempTag = tempC >= 60 ? … : …",
+            "effect": "text: '🔥 חם' | '❄ קר'"
+          },
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "loopTag = loop ? … : …",
+            "effect": "text: ' (ריזרקולציה)' | ''"
+          }
+        ]
       },
       "floor": [
         "buildInstallation",

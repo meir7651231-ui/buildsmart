@@ -17,9 +17,10 @@
 - **writes** · `add` → `smartCartProvider`
 - **action** · `showToast` → `showToast`
 
-## התנהגות · behaviour (3)
+## התנהגות · behaviour (4)
 
 - **build** → _rule_ `if (kSmartProducts.isEmpty)` → hidden (SizedBox.shrink)
+- **build** → _formula_ `priceLabel = rec.price == null ? … : …` → text: 'מחיר לפי ספק' | '₪${groupThousands(rec.price!)}'
 - **onPressed** → _verb_ `ref.read(smartCartProvider.notifier).add(SmartCartLine(productKey: rec.sku ??…` → write → smartCartProvider
 - **onPressed** → _verb_ `showToast(context, '${p.name} נוסף לסל')` → toast
 

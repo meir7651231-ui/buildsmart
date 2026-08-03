@@ -108,7 +108,14 @@
         ]
       },
       "behaviour": {
-        "flows": []
+        "flows": [
+          {
+            "trigger": "build",
+            "mechanism": "formula",
+            "detail": "title = active.name.isEmpty ? … : …",
+            "effect": "text: 'הפרויקט שלי — מאפס עד מסירה' | '${active.name} — מאפס עד מסירה'"
+          }
+        ]
       },
       "floor": [
         "addAll",

@@ -21,9 +21,9 @@
 - **reads** · `read` → `smartCartProvider`
 - **reads** · `watch` → `claudeGatewayProvider`
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (1)
 
-_(no flows)_
+- **build** → _formula_ `label = fromLiteral ? … : …` → text: '🔎 "${userText}"' | '📂 ${intent.key}'
 
 ## floor · external functions (8)
 

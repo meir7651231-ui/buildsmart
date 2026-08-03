@@ -17,9 +17,9 @@
 - **reads** · `read` → `studioOwnerEmailProvider`
 - **reads** · `read` → `criticalIdsProvider`
 
-## התנהגות · behaviour (0)
+## התנהגות · behaviour (1)
 
-_(no flows)_
+- **build** → _formula_ `previewEmoji = _hasEmoji && _emoji.text.isNotEmpty ? … : …` → text: '${_emoji.text} ' | ''
 
 ## floor · external functions (5)
 

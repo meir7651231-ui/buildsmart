@@ -11,8 +11,8 @@
 |---|------|------|---------|---------|-------|-------------|------|
 | 1 | `LipskeyProductsList` | composer | — | — | 3·3·0 | embeds-shared | 1 |
 | 2 | `_LensGroupHeader` | section | — | — | 1·0·0 | clean | 1 |
-| 3 | `LipskeyProductGridCard` | section | — | — | 3·5·2 | clean | 1 |
-| 4 | `_ProductRow` | section | — | — | 6·10·4 | embeds-shared | 3 |
+| 3 | `LipskeyProductGridCard` | section | — | — | 3·5·3 | clean | 1 |
+| 4 | `_ProductRow` | section | — | — | 6·10·5 | embeds-shared | 3 |
 
 ## Registry reconciliation (7/7)
 

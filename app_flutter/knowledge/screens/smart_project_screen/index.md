@@ -9,7 +9,7 @@
 
 | # | atom | role | section | variant | n·e·f | extractable | gaps |
 |---|------|------|---------|---------|-------|-------------|------|
-| 1 | `SmartProjectScreen` | composer | — | — | 10·6·0 | needs-untangle | 1 |
+| 1 | `SmartProjectScreen` | composer | — | — | 10·6·1 | needs-untangle | 1 |
 | 2 | `_Hero` | section | — | — | 0·0·0 | clean | 0 |
 | 3 | `_ProjectDone` | section | — | — | 1·0·0 | clean | 0 |
 | 4 | `_StageCard` | section | — | — | 1·0·0 | clean | 0 |

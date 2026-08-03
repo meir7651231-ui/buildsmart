@@ -44,7 +44,14 @@
     ]
   },
   "behaviour": {
-    "flows": []
+    "flows": [
+      {
+        "trigger": "build",
+        "mechanism": "formula",
+        "detail": "previewEmoji = _hasEmoji && _emoji.text.isNotEmpty ? … : …",
+        "effect": "text: '${_emoji.text} ' | ''"
+      }
+    ]
   },
   "floor": [
     "applyCfgTextStyle",

@@ -17,9 +17,9 @@
 | 6 | `_Stat` | section | — | — | 0·0·0 | clean | 0 |
 | 7 | `_BigButton` | section | — | — | 0·0·0 | clean | 0 |
 | 8 | `_Chip` | section | — | — | 0·0·0 | clean | 0 |
-| 9 | `_StoreOrderCard` | section | — | — | 2·0·0 | clean | 0 |
+| 9 | `_StoreOrderCard` | section | — | — | 2·0·1 | clean | 0 |
 | 10 | `_DeliveredCard` | section | — | — | 3·1·1 | clean | 1 |
-| 11 | `_StockRow` | section | — | — | 0·0·0 | clean | 0 |
+| 11 | `_StockRow` | section | — | — | 0·0·1 | clean | 0 |
 
 ## Registry reconciliation (14/14)
 
