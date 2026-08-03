@@ -5,14 +5,14 @@
 > **triage signal**, never a CI blocker. The main swarm gate stays green.
 > Regenerate: `dart run atom_testgen` (tools/atom/testgen).
 
-## Frozen numbers (tab-walk run · `triage5`)
+## Frozen numbers (Material-lever run · `triage6`)
 
 | | |
 |---|---:|
 | screens | 62 |
 | generated tests | 1001 |
-| **verified PASS** | **509** |
-| **reported FAIL** | **492** |
+| **verified PASS** | **596** |
+| **reported FAIL** | **405** |
 | compile-fail | 0 |
 | **force-pass** | **0** |
 
@@ -20,101 +20,93 @@
 
 ### Levers applied (generic, one mechanism each — not per-screen seeds)
 
-| lever | net conversions | note |
+| lever | net | note |
 |---|---:|---|
 | tall RTL surface + overflow drain | (baseline) | overflow is layout-noise, drained; content is asserted |
-| board-role seed (`_SeededBoard`) | **+29** | role screens gate their whole body on `boardAuthProvider.role` |
-| **tab-walk (`findAcrossTabs`)** | **0** | honest: the app uses **custom tab rows**, not Material `Tab`, so `find.byType(Tab)` matches nothing. Kept as future-proof infra for any Material-tab screen; it changed no result vs the pre-tab-walk run (0 regressed / 0 improved). |
+| board-role seed (`_SeededBoard`) | +29 | role screens gate their whole body on `boardAuthProvider.role` |
+| tab-walk (`findAcrossTabs`) | 0 | honest: the app uses **custom tab rows**, not Material `Tab`, so `find.byType(Tab)` matches nothing. Kept as future-proof infra. |
+| **Material-ancestor wrap (body-only screens)** | **+87** | detect the screen's **real** `Scaffold` from source; a body-only screen (0 real Material `Scaffold`) is pumped inside a `Scaffold` so its `InkWell`s have a Material ancestor — as they do in the real app's shell. |
 
-**The number is now frozen.** Per decision, we stop chasing it here and split the
-492 into the two lists below rather than descending into per-screen data-seeds
-(diminishing returns + gaming risk).
+Total: **509 → 596 verified pass**. The Material lever also **reclassified ~89**
+former *crash* failures into honest *not-present-in-default* (they now render
+without throwing; the specific element just isn't in the default view). Net: the
+264-strong Material-ancestor cascade collapsed to **87 genuine remainders**.
 
----
-
-## The 492, split by *what threw*
-
-Each failing test is attributed to the exception that actually failed it
-(`… was thrown running a test`):
-
-| class | count | meaning |
-|---|---:|---|
-| **A** — widget threw at build/layout | **264** | the screen itself raised a runtime exception → **real discovery** |
-| **B** — our `expect(…, isTrue)` | **228** | element simply not present in the default pump → **uncovered** (needs interaction/data/nav) |
+**The number is now frozen.** We stop chasing it and split the remaining 405
+into the two lists below — no per-screen data-seeds.
 
 ---
 
-## LIST A — real discoveries (worklist for the code team)
+## Discriminator — real `Scaffold` vs. custom (why store_screen moved)
 
-Tool-surfaced runtime exceptions, sorted by blast radius. These are **not**
-force-passable; each is a genuine signal that a composer raised during
-build/layout when pumped in isolation.
+The lever wraps a screen **only** when its source has **no real Material
+`Scaffold`** (regex `\bScaffold\s*\(`; the name-heuristic is the fallback when the
+source can't be located, which keeps the goldens byte-stable).
 
-**Dominant root-cause: Material-ancestor / `InkResponse` (240 of 264).**
-The failure is a cascade of *"No Material widget found — InkWell/InkResponse
-require a Material ancestor"* (surfaced as `Multiple exceptions … running a
-test`, plus 24 raw `No Material widget found`). It splits two ways:
-
-- **Body-only screens with no `Scaffold` of their own** (e.g. `catalog_screen` —
-  0 Scaffold, 22 Ink surfaces): they assume an ancestor `Scaffold` supplied by
-  their shell. Latent structural coupling — verify each is *always* mounted under
-  a shell that provides one, else it will throw the same way in a real nav state.
-- **Scaffold-bearing screens** (e.g. `store_screen` — 5 Scaffold, still 85 fails):
-  the failing Ink surfaces live **outside** the screen's own Material subtree
-  (sheets/dialogs/pre-mount sub-widgets). Smaller but real.
-
-| screen | count | pattern |
-|---|---:|---|
-| store_screen | 85 | Ink outside own Scaffold subtree |
-| catalog_screen | 77 | body-only, no Scaffold (22 Ink) |
-| courier_profile_screen | 35 | Ink/Material-ancestor |
-| chats_screen | 22 | Ink/Material-ancestor |
-| worker_profile_screen | 21 | Ink/Material-ancestor |
-| notifications_screen | 18 | raw `No Material widget found` |
-| finder_screen | 4 | raw `No Material widget found` |
-| studio_rules_screen | 2 | raw `No Material widget found` |
-
-**Candidate generic lever (NOT applied — awaiting approval):** wrap the
-`selfContained` composer body in a bare `Material` in `pumpScreen`. Estimated to
-convert most of the 264 to real passes in one harness line — the same shape as
-the role-seed lever. Held back deliberately: it is a *new* generic lever beyond
-the agreed tab-walk stopping point, and for the Scaffold-bearing cases (store_screen)
-it could mask a real "Ink escapes Scaffold" signal. Flagging it for a decision
-rather than silently applying it.
+- **Correction on an earlier report:** `store_screen` was previously called
+  "Scaffold-bearing (5)". That count came from a naive `grep "Scaffold("` — all 5
+  were **`_SheetScaffold`**, a *custom* widget (it returns a `Padding`, no
+  Material). `store_screen` has **zero** real Material `Scaffold` → it is
+  body-only, exactly like `catalog_screen`, and is now correctly wrapped. This
+  implements the agreed principle faithfully (real Scaffold ⇒ keep flagged; none
+  ⇒ wrap), the naive grep did not.
+- Screens with a **real** Material `Scaffold` are **not** wrapped, so a genuine
+  "Ink escapes the screen's own Scaffold" crash stays visible as a signal (List A).
 
 ---
 
-## LIST B — intentionally uncovered (228, self-skipped, never force-passed)
+## LIST A — real discoveries (worklist for the code team) · 87 on 4 screens
 
-Clean `element-not-present-in-default-state` failures — the composer built fine,
-but the asserted text/registry element only appears after per-screen setup the
-generic harness deliberately does **not** perform (a specific tab tap on a custom
-tab row, a data seed, a scroll, a prior interaction, or a feature flag). Low
-value / high setup cost per screen. These stay **self-skipped** (the `atomgen`
-guard) and are **never** forced green.
+These four screens **do** build their own Material `Scaffold`, yet still throw a
+Material-ancestor / `InkResponse` cascade when pumped — i.e. tappable Ink surfaces
+that live **outside** the screen's own Material subtree (sheets/dialogs/pre-mount
+sub-widgets), or a crash before the Scaffold mounts. **Not** wrapped (that would
+mask the signal), **not** force-passable.
 
-Spread across 41 screens (top slice):
+| screen | count | real Material Scaffold | pattern |
+|---|---:|:---:|---|
+| courier_profile_screen | 35 | yes (1) | Ink outside own Scaffold subtree |
+| chats_screen | 22 | yes (3) | Ink outside own Scaffold subtree |
+| worker_profile_screen | 21 | yes (1) | Ink outside own Scaffold subtree |
+| home_content_reorder | 9 | yes (1) | Ink outside own Scaffold subtree |
+
+Action for the code team: verify each Ink surface in these screens is mounted
+under the screen's `Scaffold`/`Material`, not in a detached subtree.
+
+---
+
+## LIST B — intentionally uncovered (317, self-skipped, never force-passed)
+
+Clean `element-not-present-in-default-state` failures — the composer built fine
+(no crash), but the asserted text/registry element only appears after per-screen
+setup the generic harness deliberately does **not** perform (a tab tap on a custom
+tab row, a data seed, a scroll, a prior interaction, or a feature flag). Low value
+/ high setup cost per screen. These stay **self-skipped** (the `atomgen` guard)
+and are **never** forced green.
+
+Spread across 44 screens (top slice — note store/catalog are now here, as clean
+not-founds rather than crashes):
 
 | screen | count |
 |---|---:|
+| store_screen | 46 |
+| catalog_screen | 38 |
 | manager_dashboard_screen | 17 |
 | worker_app_screen | 15 |
 | chat_settings_screen | 15 |
 | catalog_settings_screen | 13 |
 | budget_screen | 13 |
-| tasks_screen | 11 |
 | notif_settings_screen | 11 |
+| tasks_screen | 10 |
 | store_dashboard_screen | 10 |
 | worker_safety_screen | 9 |
 | store_settings_screen | 9 |
-| welcome_screen | 8 |
-| … 30 more screens | ≤6 each |
+| … 32 more screens | ≤8 each |
 
 **Notable flag-gated discovery (correct behaviour, not a bug):**
-`manager_profile_screen.t02` — the element is absent because it sits behind
-`kHideUnderConstruction`. The generated test correctly detects the flag is
-hiding it. This is the tool working (a gated element reads as "not present"),
-not an app defect. Left in List B, not List A.
+`manager_profile_screen.t02` — absent because it sits behind
+`kHideUnderConstruction`. The generated test correctly detects the flag is hiding
+it. Tool working as intended; left in List B, not List A.
 
 ---
 
@@ -123,4 +115,7 @@ not an app defect. Left in List B, not List A.
 - generated-suite stays **NON-blocking** (62/62 files carry the `atomgen` return-guard)
 - main swarm gate **green** (generated tests self-skip in the default run)
 - **zero force-pass** — every green is a real assertion against real widget output
-- numbers reported are the raw run tally (`+509 -492`), not massaged
+- goldens **byte-stable** — the Material-lever falls back to the name heuristic when
+  a screen source can't be located (the decompose golden dir), so `dart test` in
+  tools/atom stays 4/4 + 8/8
+- numbers reported are the raw run tally (`+596 -405`), not massaged

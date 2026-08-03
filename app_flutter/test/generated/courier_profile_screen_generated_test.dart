@@ -14,194 +14,194 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('courier_profile_screen · generated (35 tests)', () {
     testWidgets('wired · CourierProfileBody · "מסירות — סטטיסטיקה" [courier_profile_screen.stats_heading]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('מסירות — סטטיסטיקה')), isTrue,
           reason: 'the courier_profile_screen.stats_heading element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · CourierProfileBody · courier_profile_screen.stats_heading → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.stats_heading'});
       expect(find.text('מסירות — סטטיסטיקה'), findsNothing,
           reason: 'hiding courier_profile_screen.stats_heading removes it for end-users');
     });
     testWidgets('wired · CourierProfileBody · "הגדרות שליח" [courier.profile.settings_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('הגדרות שליח')), isTrue,
           reason: 'the courier.profile.settings_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · CourierProfileBody · courier.profile.settings_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.profile.settings_title'});
       expect(find.text('הגדרות שליח'), findsNothing,
           reason: 'hiding courier.profile.settings_title removes it for end-users');
     });
     testWidgets('wired · CourierProfileBody · "החלפת תפקיד" [courier.profile.role_switch_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('החלפת תפקיד')), isTrue,
           reason: 'the courier.profile.role_switch_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · CourierProfileBody · courier.profile.role_switch_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.profile.role_switch_title'});
       expect(find.text('החלפת תפקיד'), findsNothing,
           reason: 'hiding courier.profile.role_switch_title removes it for end-users');
     });
     testWidgets('wired · CourierProfileBody · "מוגן בקוד" [courier_profile_screen.role_switch_subtitle]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('מוגן בקוד')), isTrue,
           reason: 'the courier_profile_screen.role_switch_subtitle element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · CourierProfileBody · courier_profile_screen.role_switch_subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.role_switch_subtitle'});
       expect(find.text('מוגן בקוד'), findsNothing,
           reason: 'hiding courier_profile_screen.role_switch_subtitle removes it for end-users');
     });
     testWidgets('wired · CourierProfileBody · "יציאה מהחשבון" [courier.profile.logout_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('יציאה מהחשבון')), isTrue,
           reason: 'the courier.profile.logout_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · CourierProfileBody · courier.profile.logout_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.profile.logout_title'});
       expect(find.text('יציאה מהחשבון'), findsNothing,
           reason: 'hiding courier.profile.logout_title removes it for end-users');
     });
     testWidgets('wired · _CourierIdentityCard · "דמו" [courier_profile_screen.demo_chip]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('דמו')), isTrue,
           reason: 'the courier_profile_screen.demo_chip element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierIdentityCard · courier_profile_screen.demo_chip → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.demo_chip'});
       expect(find.text('דמו'), findsNothing,
           reason: 'hiding courier_profile_screen.demo_chip removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "נוכחות" [courier.personal.attendance_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('נוכחות')), isTrue,
           reason: 'the courier.personal.attendance_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier.personal.attendance_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.personal.attendance_title'});
       expect(find.text('נוכחות'), findsNothing,
           reason: 'hiding courier.personal.attendance_title removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "כניסה/יציאה ודוח חודשי" [courier_profile_screen.attendance_subtitle]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('כניסה/יציאה ודוח חודשי')), isTrue,
           reason: 'the courier_profile_screen.attendance_subtitle element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier_profile_screen.attendance_subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.attendance_subtitle'});
       expect(find.text('כניסה/יציאה ודוח חודשי'), findsNothing,
           reason: 'hiding courier_profile_screen.attendance_subtitle removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "טפסים" [courier.personal.forms_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('טפסים')), isTrue,
           reason: 'the courier.personal.forms_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier.personal.forms_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.personal.forms_title'});
       expect(find.text('טפסים'), findsNothing,
           reason: 'hiding courier.personal.forms_title removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "טופס 101 · בקשת חופשה · אישור מחלה" [courier_profile_screen.forms_subtitle]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('טופס 101 · בקשת חופשה · אישור מחלה')), isTrue,
           reason: 'the courier_profile_screen.forms_subtitle element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier_profile_screen.forms_subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.forms_subtitle'});
       expect(find.text('טופס 101 · בקשת חופשה · אישור מחלה'), findsNothing,
           reason: 'hiding courier_profile_screen.forms_subtitle removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "תעודות נהג" [courier.personal.certs_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('תעודות נהג')), isTrue,
           reason: 'the courier.personal.certs_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier.personal.certs_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.personal.certs_title'});
       expect(find.text('תעודות נהג'), findsNothing,
           reason: 'hiding courier.personal.certs_title removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "רישיון נהיגה · ביטוח רכב · רישיון רכב" [courier_profile_screen.certs_subtitle]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('רישיון נהיגה · ביטוח רכב · רישיון רכב')), isTrue,
           reason: 'the courier_profile_screen.certs_subtitle element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier_profile_screen.certs_subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.certs_subtitle'});
       expect(find.text('רישיון נהיגה · ביטוח רכב · רישיון רכב'), findsNothing,
           reason: 'hiding courier_profile_screen.certs_subtitle removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "תלושי שכר" [courier.personal.payslips_title]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('תלושי שכר')), isTrue,
           reason: 'the courier.personal.payslips_title element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier.personal.payslips_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier.personal.payslips_title'});
       expect(find.text('תלושי שכר'), findsNothing,
           reason: 'hiding courier.personal.payslips_title removes it for end-users');
     });
     testWidgets('wired · _CourierPersonalAreaCard · "יחובר עם חיבור השרת" [courier_profile_screen.payslips_subtitle]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('יחובר עם חיבור השרת')), isTrue,
           reason: 'the courier_profile_screen.payslips_subtitle element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _CourierPersonalAreaCard · courier_profile_screen.payslips_subtitle → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.payslips_subtitle'});
       expect(find.text('יחובר עם חיבור השרת'), findsNothing,
           reason: 'hiding courier_profile_screen.payslips_subtitle removes it for end-users');
     });
     testWidgets('hide · _RoleSwitchCodeDialog · courier_profile_screen.role_switch_dialog_title → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.role_switch_dialog_title'});
       expect(find.text('החלפת תפקיד'), findsNothing,
           reason: 'hiding courier_profile_screen.role_switch_dialog_title removes it for end-users');
     });
     testWidgets('wired · _RoleSwitchCodeDialog · "מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:" [courier_profile_screen.role_switch_dialog_body]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:')), isTrue,
           reason: 'the courier_profile_screen.role_switch_dialog_body element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _RoleSwitchCodeDialog · courier_profile_screen.role_switch_dialog_body → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.role_switch_dialog_body'});
       expect(find.text('מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:'), findsNothing,
           reason: 'hiding courier_profile_screen.role_switch_dialog_body removes it for end-users');
     });
     testWidgets('wired · _RoleSwitchCodeDialog · "ביטול" [courier_profile_screen.dialog_cancel]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
           reason: 'the courier_profile_screen.dialog_cancel element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _RoleSwitchCodeDialog · courier_profile_screen.dialog_cancel → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.dialog_cancel'});
       expect(find.text('ביטול'), findsNothing,
           reason: 'hiding courier_profile_screen.dialog_cancel removes it for end-users');
     });
     testWidgets('wired · _RoleSwitchCodeDialog · "אישור" [courier_profile_screen.dialog_confirm]', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier');
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier');
       expect(await findAcrossTabs(t, find.text('אישור')), isTrue,
           reason: 'the courier_profile_screen.dialog_confirm element renders on courier_profile_screen (any tab)');
     });
     testWidgets('hide · _RoleSwitchCodeDialog · courier_profile_screen.dialog_confirm → gone when hidden', (t) async {
-      await pumpScreen(t, const CourierProfileBody(), selfContained: false, role: 'courier',
+      await pumpScreen(t, const CourierProfileBody(), selfContained: true, role: 'courier',
           hidden: const {'courier_profile_screen.dialog_confirm'});
       expect(find.text('אישור'), findsNothing,
           reason: 'hiding courier_profile_screen.dialog_confirm removes it for end-users');

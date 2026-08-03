@@ -14,12 +14,12 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('onboarding_screen · generated (2 tests)', () {
     testWidgets('wired · _OpeningFlow · "דלג" [onboarding_screen.skip]', (t) async {
-      await pumpScreen(t, const OnboardingGate(), selfContained: false);
+      await pumpScreen(t, const OnboardingGate(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('דלג')), isTrue,
           reason: 'the onboarding_screen.skip element renders on onboarding_screen (any tab)');
     });
     testWidgets('hide · _OpeningFlow · onboarding_screen.skip → gone when hidden', (t) async {
-      await pumpScreen(t, const OnboardingGate(), selfContained: false,
+      await pumpScreen(t, const OnboardingGate(), selfContained: true,
           hidden: const {'onboarding_screen.skip'});
       expect(find.text('דלג'), findsNothing,
           reason: 'hiding onboarding_screen.skip removes it for end-users');

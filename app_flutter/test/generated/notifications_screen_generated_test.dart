@@ -14,100 +14,100 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('notifications_screen · generated (18 tests)', () {
     testWidgets('wired · _Header · "התראות" [notifications_screen.screen_title]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('התראות')), isTrue,
           reason: 'the notifications_screen.screen_title element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _Header · notifications_screen.screen_title → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.screen_title'});
       expect(find.text('התראות'), findsNothing,
           reason: 'hiding notifications_screen.screen_title removes it for end-users');
     });
     testWidgets('wired · _NotifList · "התראות מושתקות" [notifications_screen.snooze_title]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('התראות מושתקות')), isTrue,
           reason: 'the notifications_screen.snooze_title element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.snooze_title → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.snooze_title'});
       expect(find.text('התראות מושתקות'), findsNothing,
           reason: 'hiding notifications_screen.snooze_title removes it for end-users');
     });
     testWidgets('wired · _NotifList · "שעות שקט פעילות" [notifications_screen.quiet_title]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('שעות שקט פעילות')), isTrue,
           reason: 'the notifications_screen.quiet_title element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.quiet_title → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.quiet_title'});
       expect(find.text('שעות שקט פעילות'), findsNothing,
           reason: 'hiding notifications_screen.quiet_title removes it for end-users');
     });
     testWidgets('wired · _NotifList · "מושתק בשעות השקט" [notifications_screen.quiet_sub]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מושתק בשעות השקט')), isTrue,
           reason: 'the notifications_screen.quiet_sub element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.quiet_sub → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.quiet_sub'});
       expect(find.text('מושתק בשעות השקט'), findsNothing,
           reason: 'hiding notifications_screen.quiet_sub removes it for end-users');
     });
     testWidgets('wired · _NotifList · "אין התראות" [notifications_screen.empty_title]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין התראות')), isTrue,
           reason: 'the notifications_screen.empty_title element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.empty_title → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.empty_title'});
       expect(find.text('אין התראות'), findsNothing,
           reason: 'hiding notifications_screen.empty_title removes it for end-users');
     });
     testWidgets('wired · _NotifList · "כשיהיו עדכונים — הם יופיעו כאן" [notifications_screen.empty_sub]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('כשיהיו עדכונים — הם יופיעו כאן')), isTrue,
           reason: 'the notifications_screen.empty_sub element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.empty_sub → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.empty_sub'});
       expect(find.text('כשיהיו עדכונים — הם יופיעו כאן'), findsNothing,
           reason: 'hiding notifications_screen.empty_sub removes it for end-users');
     });
     testWidgets('wired · _NotifList · "התראה נמחקה" [notifications_screen.deleted_toast]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('התראה נמחקה')), isTrue,
           reason: 'the notifications_screen.deleted_toast element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.deleted_toast → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.deleted_toast'});
       expect(find.text('התראה נמחקה'), findsNothing,
           reason: 'hiding notifications_screen.deleted_toast removes it for end-users');
     });
     testWidgets('wired · _NotifList · "סמן כנקרא" [notifications_screen.mark_read]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('סמן כנקרא')), isTrue,
           reason: 'the notifications_screen.mark_read element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.mark_read → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.mark_read'});
       expect(find.text('סמן כנקרא'), findsNothing,
           reason: 'hiding notifications_screen.mark_read removes it for end-users');
     });
     testWidgets('wired · _NotifList · "מחק" [notifications_screen.menu_delete]', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true);
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מחק')), isTrue,
           reason: 'the notifications_screen.menu_delete element renders on notifications_screen (any tab)');
     });
     testWidgets('hide · _NotifList · notifications_screen.menu_delete → gone when hidden', (t) async {
-      await pumpScreen(t, const NotificationsScreen(), selfContained: true,
+      await pumpScreen(t, const NotificationsScreen(), selfContained: false,
           hidden: const {'notifications_screen.menu_delete'});
       expect(find.text('מחק'), findsNothing,
           reason: 'hiding notifications_screen.menu_delete removes it for end-users');

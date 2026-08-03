@@ -14,12 +14,12 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('barcode_scanner · generated (2 tests)', () {
     testWidgets('wired · BarcodeScanner · "סריקת ברקוד" [barcode_scanner.scan_title]', (t) async {
-      await pumpScreen(t, const BarcodeScanner(), selfContained: false);
+      await pumpScreen(t, const BarcodeScanner(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('סריקת ברקוד')), isTrue,
           reason: 'the barcode_scanner.scan_title element renders on barcode_scanner (any tab)');
     });
     testWidgets('hide · BarcodeScanner · barcode_scanner.scan_title → gone when hidden', (t) async {
-      await pumpScreen(t, const BarcodeScanner(), selfContained: false,
+      await pumpScreen(t, const BarcodeScanner(), selfContained: true,
           hidden: const {'barcode_scanner.scan_title'});
       expect(find.text('סריקת ברקוד'), findsNothing,
           reason: 'hiding barcode_scanner.scan_title removes it for end-users');

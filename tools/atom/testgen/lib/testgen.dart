@@ -47,8 +47,15 @@ GenResult? generateForScreen(String screenDir, {String? importPackage}) {
 
   final lib = importPackage ?? 'buildsmart';
   final importPath = 'package:$lib/screens/${p.basenameWithoutExtension(source)}.dart';
-  // A "…Screen" is self-contained (own Scaffold); a "…Body" needs wrapping.
-  final selfContained = composerName.endsWith('Screen');
+  // Self-contained = the screen builds its OWN Scaffold, so we pump it bare. A
+  // body-only screen (0 Scaffold) is meant to sit inside a shell's Scaffold; pump
+  // it bare and its InkWells have no Material ancestor → they throw. So we detect
+  // the real Scaffold presence from source and wrap the body-only ones
+  // (selfContained: false → the harness gives them a Scaffold). When the source
+  // can't be located (e.g. the decompose golden dir has no lib/), fall back to the
+  // "…Screen" name heuristic — which keeps the golden output byte-stable.
+  final selfContained =
+      _hasOwnScaffold(screenDir, source) ?? composerName.endsWith('Screen');
   // Role screens gate their body on the board session — seed it by screen name.
   final roleArg = _screenRole(screen);
   final roleSuffix = roleArg.isEmpty ? '' : ", role: '$roleArg'";
@@ -210,6 +217,42 @@ String _esc(String s) => s
     .replaceAll('\r', r'\r')
     .replaceAll('\t', r'\t');
 
+
+/// Whether the screen defines its OWN `Scaffold`. A body-only screen (0 Scaffold)
+/// is meant to be a Scaffold body; pumped bare, its `InkWell`/`ListTile` surfaces
+/// have no Material ancestor and throw. Detecting this lets the generator wrap
+/// only those screens (selfContained: false). Returns null when the screen source
+/// can't be located from [screenDir] (e.g. the decompose golden dir has no lib/
+/// with this screen) — callers fall back to the name heuristic, so goldens that
+/// run without the app tree stay byte-stable.
+bool? _hasOwnScaffold(String screenDir, String source) {
+  var dir = Directory(screenDir);
+  for (var i = 0; i < 6; i++) {
+    final lib = Directory(p.join(dir.path, 'lib'));
+    if (lib.existsSync()) {
+      final f = _libIndex(lib)[source];
+      if (f == null) return null; // wrong tree (e.g. a tool's own lib) → fallback
+      return RegExp(r'\bScaffold\s*\(').hasMatch(f.readAsStringSync());
+    }
+    final parent = dir.parent;
+    if (parent.path == dir.path) break;
+    dir = parent;
+  }
+  return null;
+}
+
+final _libIndexCache = <String, Map<String, File>>{};
+
+/// basename → File index of every `.dart` under [lib], cached per root so the
+/// batch (62 screens) walks each lib tree once, not per screen.
+Map<String, File> _libIndex(Directory lib) =>
+    _libIndexCache.putIfAbsent(lib.path, () {
+      final m = <String, File>{};
+      for (final e in lib.listSync(recursive: true, followLinks: false)) {
+        if (e is File && e.path.endsWith('.dart')) m[p.basename(e.path)] = e;
+      }
+      return m;
+    });
 
 /// Infer a board role from the screen key (manager_* → manager, …) so the
 /// harness can seed the session that gates role screens. Empty = no session.

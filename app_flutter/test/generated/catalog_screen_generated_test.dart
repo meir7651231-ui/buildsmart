@@ -14,425 +14,425 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('catalog_screen · generated (77 tests)', () {
     testWidgets('wired · _DiveResultsView · "אין תוצאות תואמות" [catalog_screen.t14]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין תוצאות תואמות')), isTrue,
           reason: 'the catalog_screen.t14 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _DiveResultsView · catalog_screen.t14 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t14'});
       expect(find.text('אין תוצאות תואמות'), findsNothing,
           reason: 'hiding catalog_screen.t14 removes it for end-users');
     });
     testWidgets('wired · _DiveResultsView · "אין מוצרים תואמים" [catalog_screen.t15]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין מוצרים תואמים')), isTrue,
           reason: 'the catalog_screen.t15 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _DiveResultsView · catalog_screen.t15 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t15'});
       expect(find.text('אין מוצרים תואמים'), findsNothing,
           reason: 'hiding catalog_screen.t15 removes it for end-users');
     });
     testWidgets('wired · _CatalogBody · "נקה הכל" [catalog.search.clearAll]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('נקה הכל')), isTrue,
           reason: 'the catalog.search.clearAll element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _CatalogBody · catalog.search.clearAll → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.search.clearAll'});
       expect(find.text('נקה הכל'), findsNothing,
           reason: 'hiding catalog.search.clearAll removes it for end-users');
     });
     testWidgets('wired · _CatalogBody · "אין משפחות וריאנטים" [catalog_screen.t40]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין משפחות וריאנטים')), isTrue,
           reason: 'the catalog_screen.t40 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _CatalogBody · catalog_screen.t40 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t40'});
       expect(find.text('אין משפחות וריאנטים'), findsNothing,
           reason: 'hiding catalog_screen.t40 removes it for end-users');
     });
     testWidgets('wired · _CatalogBody · "אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים." [catalog_screen.t18]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים.')), isTrue,
           reason: 'the catalog_screen.t18 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _CatalogBody · catalog_screen.t18 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t18'});
       expect(find.text('אין פריטים להצגה.\nפתחו את ניהול הרשימות והקישו ✏️ כדי לבחור פריטים.'), findsNothing,
           reason: 'hiding catalog_screen.t18 removes it for end-users');
     });
     testWidgets('wired · _CatalogBody · "מיון לפי:" [catalog_screen.t41]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מיון לפי:')), isTrue,
           reason: 'the catalog_screen.t41 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _CatalogBody · catalog_screen.t41 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t41'});
       expect(find.text('מיון לפי:'), findsNothing,
           reason: 'hiding catalog_screen.t41 removes it for end-users');
     });
     testWidgets('wired · _TreeDrill · "בקרוב" [catalog_screen.t21]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
           reason: 'the catalog_screen.t21 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _TreeDrill · catalog_screen.t21 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t21'});
       expect(find.text('בקרוב'), findsNothing,
           reason: 'hiding catalog_screen.t21 removes it for end-users');
     });
     testWidgets('wired · _TreeDrill · "הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב." [catalog_screen.t22]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.')), isTrue,
           reason: 'the catalog_screen.t22 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _TreeDrill · catalog_screen.t22 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t22'});
       expect(find.text('הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.'), findsNothing,
           reason: 'hiding catalog_screen.t22 removes it for end-users');
     });
     testWidgets('wired · _TreeDrill · "מוצרים" [catalog_screen.t19]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מוצרים')), isTrue,
           reason: 'the catalog_screen.t19 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _TreeDrill · catalog_screen.t19 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t19'});
       expect(find.text('מוצרים'), findsNothing,
           reason: 'hiding catalog_screen.t19 removes it for end-users');
     });
     testWidgets('wired · _TreeDrill · "מיון לפי" [catalog_screen.t20]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מיון לפי')), isTrue,
           reason: 'the catalog_screen.t20 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _TreeDrill · catalog_screen.t20 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t20'});
       expect(find.text('מיון לפי'), findsNothing,
           reason: 'hiding catalog_screen.t20 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "מומלץ" [catalog_screen.t23]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מומלץ')), isTrue,
           reason: 'the catalog_screen.t23 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t23 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t23'});
       expect(find.text('מומלץ'), findsNothing,
           reason: 'hiding catalog_screen.t23 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "סגור" [catalog_screen.t24]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('סגור')), isTrue,
           reason: 'the catalog_screen.t24 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t24 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t24'});
       expect(find.text('סגור'), findsNothing,
           reason: 'hiding catalog_screen.t24 removes it for end-users');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t25 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t25'});
       expect(find.text('סגור'), findsNothing,
           reason: 'hiding catalog_screen.t25 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "אין מותג תואם לסינון שנבחר" [catalog_screen.t26]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין מותג תואם לסינון שנבחר')), isTrue,
           reason: 'the catalog_screen.t26 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t26 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t26'});
       expect(find.text('אין מותג תואם לסינון שנבחר'), findsNothing,
           reason: 'hiding catalog_screen.t26 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "📦 נתוני קטלוג" [catalog.detail.dataHeader]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('📦 נתוני קטלוג')), isTrue,
           reason: 'the catalog.detail.dataHeader element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.dataHeader → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.dataHeader'});
       expect(find.text('📦 נתוני קטלוג'), findsNothing,
           reason: 'hiding catalog.detail.dataHeader removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "הצעת המחיר הועתקה" [catalog_screen.t27]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('הצעת המחיר הועתקה')), isTrue,
           reason: 'the catalog_screen.t27 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t27 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t27'});
       expect(find.text('הצעת המחיר הועתקה'), findsNothing,
           reason: 'hiding catalog_screen.t27 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "📋 הצעה" [catalog.action.proposal]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('📋 הצעה')), isTrue,
           reason: 'the catalog.action.proposal element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.action.proposal → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.action.proposal'});
       expect(find.text('📋 הצעה'), findsNothing,
           reason: 'hiding catalog.action.proposal removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "✨ נסח" [catalog.action.draft]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('✨ נסח')), isTrue,
           reason: 'the catalog.action.draft element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.action.draft → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.action.draft'});
       expect(find.text('✨ נסח'), findsNothing,
           reason: 'hiding catalog.action.draft removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "🔌 איך לגשר?" [catalog.action.howToBridge]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('🔌 איך לגשר?')), isTrue,
           reason: 'the catalog.action.howToBridge element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.action.howToBridge → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.action.howToBridge'});
       expect(find.text('🔌 איך לגשר?'), findsNothing,
           reason: 'hiding catalog.action.howToBridge removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "🔧 בנה לי קו (BOM)" [catalog.action.buildBom]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('🔧 בנה לי קו (BOM)')), isTrue,
           reason: 'the catalog.action.buildBom element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.action.buildBom → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.action.buildBom'});
       expect(find.text('🔧 בנה לי קו (BOM)'), findsNothing,
           reason: 'hiding catalog.action.buildBom removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "🛒 + בטיחות לסל" [catalog_screen.t28]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('🛒 + בטיחות לסל')), isTrue,
           reason: 'the catalog_screen.t28 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t28 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t28'});
       expect(find.text('🛒 + בטיחות לסל'), findsNothing,
           reason: 'hiding catalog_screen.t28 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "➕ הוסף לפרויקט" [catalog.action.addToProject]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('➕ הוסף לפרויקט')), isTrue,
           reason: 'the catalog.action.addToProject element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.action.addToProject → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.action.addToProject'});
       expect(find.text('➕ הוסף לפרויקט'), findsNothing,
           reason: 'hiding catalog.action.addToProject removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "נוסף ל-3 חדרים" [catalog_screen.t29]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('נוסף ל-3 חדרים')), isTrue,
           reason: 'the catalog_screen.t29 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t29 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t29'});
       expect(find.text('נוסף ל-3 חדרים'), findsNothing,
           reason: 'hiding catalog_screen.t29 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "×3 חדרים" [catalog_screen.t30]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('×3 חדרים')), isTrue,
           reason: 'the catalog_screen.t30 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t30 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t30'});
       expect(find.text('×3 חדרים'), findsNothing,
           reason: 'hiding catalog_screen.t30 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "תבניות:" [catalog.templates.label]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('תבניות:')), isTrue,
           reason: 'the catalog.templates.label element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.templates.label → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.templates.label'});
       expect(find.text('תבניות:'), findsNothing,
           reason: 'hiding catalog.templates.label removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "📋 BOM פרויקט מלא" [catalog_screen.t31]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('📋 BOM פרויקט מלא')), isTrue,
           reason: 'the catalog_screen.t31 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t31 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t31'});
       expect(find.text('📋 BOM פרויקט מלא'), findsNothing,
           reason: 'hiding catalog_screen.t31 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "הצעת מחיר לפרויקט הועתקה" [catalog_screen.t32]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('הצעת מחיר לפרויקט הועתקה')), isTrue,
           reason: 'the catalog_screen.t32 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t32 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t32'});
       expect(find.text('הצעת מחיר לפרויקט הועתקה'), findsNothing,
           reason: 'hiding catalog_screen.t32 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "📋 הצעת מחיר לפרויקט" [catalog_screen.t33]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('📋 הצעת מחיר לפרויקט')), isTrue,
           reason: 'the catalog_screen.t33 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t33 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t33'});
       expect(find.text('📋 הצעת מחיר לפרויקט'), findsNothing,
           reason: 'hiding catalog_screen.t33 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "תקינות נדרשת" [catalog.detail.requiredStandards]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('תקינות נדרשת')), isTrue,
           reason: 'the catalog.detail.requiredStandards element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.requiredStandards → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.requiredStandards'});
       expect(find.text('תקינות נדרשת'), findsNothing,
           reason: 'hiding catalog.detail.requiredStandards removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "מה הקו צריך לחיבור" [catalog.detail.connectionNeeds]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מה הקו צריך לחיבור')), isTrue,
           reason: 'the catalog.detail.connectionNeeds element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.connectionNeeds → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.connectionNeeds'});
       expect(find.text('מה הקו צריך לחיבור'), findsNothing,
           reason: 'hiding catalog.detail.connectionNeeds removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "בדיקת קבלה (סיום התקנה)" [catalog.detail.acceptanceCheck]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('בדיקת קבלה (סיום התקנה)')), isTrue,
           reason: 'the catalog.detail.acceptanceCheck element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.acceptanceCheck → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.acceptanceCheck'});
       expect(find.text('בדיקת קבלה (סיום התקנה)'), findsNothing,
           reason: 'hiding catalog.detail.acceptanceCheck removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "תקן ישראלי רלוונטי" [catalog.detail.israeliStandard]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('תקן ישראלי רלוונטי')), isTrue,
           reason: 'the catalog.detail.israeliStandard element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.israeliStandard → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.israeliStandard'});
       expect(find.text('תקן ישראלי רלוונטי'), findsNothing,
           reason: 'hiding catalog.detail.israeliStandard removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "טעויות נפוצות וטיפים" [catalog.detail.commonMistakes]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('טעויות נפוצות וטיפים')), isTrue,
           reason: 'the catalog.detail.commonMistakes element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.commonMistakes → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.commonMistakes'});
       expect(find.text('טעויות נפוצות וטיפים'), findsNothing,
           reason: 'hiding catalog.detail.commonMistakes removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "💾 שמור גרסה" [catalog.action.saveVersion]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('💾 שמור גרסה')), isTrue,
           reason: 'the catalog.action.saveVersion element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.action.saveVersion → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.action.saveVersion'});
       expect(find.text('💾 שמור גרסה'), findsNothing,
           reason: 'hiding catalog.action.saveVersion removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "מתי לבחור איזה מותג" [catalog.detail.brandGuide]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מתי לבחור איזה מותג')), isTrue,
           reason: 'the catalog.detail.brandGuide element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.brandGuide → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.brandGuide'});
       expect(find.text('מתי לבחור איזה מותג'), findsNothing,
           reason: 'hiding catalog.detail.brandGuide removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "נצפו לאחרונה" [catalog.detail.recentlyViewed]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('נצפו לאחרונה')), isTrue,
           reason: 'the catalog.detail.recentlyViewed element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog.detail.recentlyViewed → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog.detail.recentlyViewed'});
       expect(find.text('נצפו לאחרונה'), findsNothing,
           reason: 'hiding catalog.detail.recentlyViewed removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "⚡ פריטי חובה" [catalog_screen.t34]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('⚡ פריטי חובה')), isTrue,
           reason: 'the catalog_screen.t34 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t34 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t34'});
       expect(find.text('⚡ פריטי חובה'), findsNothing,
           reason: 'hiding catalog_screen.t34 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "💡 פריטים אופציונליים" [catalog_screen.t35]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('💡 פריטים אופציונליים')), isTrue,
           reason: 'the catalog_screen.t35 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t35 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t35'});
       expect(find.text('💡 פריטים אופציונליים'), findsNothing,
           reason: 'hiding catalog_screen.t35 removes it for end-users');
     });
     testWidgets('wired · _SmartTreeProductList · "💡 הקש על שלב כדי להדגיש את האביזרים שלו" [catalog_screen.t36]', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true);
+      await pumpScreen(t, const CatalogScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('💡 הקש על שלב כדי להדגיש את האביזרים שלו')), isTrue,
           reason: 'the catalog_screen.t36 element renders on catalog_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeProductList · catalog_screen.t36 → gone when hidden', (t) async {
-      await pumpScreen(t, const CatalogScreen(), selfContained: true,
+      await pumpScreen(t, const CatalogScreen(), selfContained: false,
           hidden: const {'catalog_screen.t36'});
       expect(find.text('💡 הקש על שלב כדי להדגיש את האביזרים שלו'), findsNothing,
           reason: 'hiding catalog_screen.t36 removes it for end-users');

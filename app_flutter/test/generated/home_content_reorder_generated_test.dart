@@ -14,51 +14,51 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('home_content_reorder · generated (9 tests)', () {
     testWidgets('wired · HomeContentReorder · "🏠 תוכן הבית" [home_content_reorder.t01]', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false);
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('🏠 תוכן הבית')), isTrue,
           reason: 'the home_content_reorder.t01 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · HomeContentReorder · home_content_reorder.t01 → gone when hidden', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false,
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true,
           hidden: const {'home_content_reorder.t01'});
       expect(find.text('🏠 תוכן הבית'), findsNothing,
           reason: 'hiding home_content_reorder.t01 removes it for end-users');
     });
     testWidgets('wired · HomeContentReorder · "‹ חזרה" [home_content_reorder.t02]', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false);
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('‹ חזרה')), isTrue,
           reason: 'the home_content_reorder.t02 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · HomeContentReorder · home_content_reorder.t02 → gone when hidden', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false,
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true,
           hidden: const {'home_content_reorder.t02'});
       expect(find.text('‹ חזרה'), findsNothing,
           reason: 'hiding home_content_reorder.t02 removes it for end-users');
     });
     testWidgets('wired · _Body · "מסך הבית שלי" [home_content_reorder.t03]', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false);
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('מסך הבית שלי')), isTrue,
           reason: 'the home_content_reorder.t03 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · _Body · home_content_reorder.t03 → gone when hidden', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false,
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true,
           hidden: const {'home_content_reorder.t03'});
       expect(find.text('מסך הבית שלי'), findsNothing,
           reason: 'hiding home_content_reorder.t03 removes it for end-users');
     });
     testWidgets('wired · _Body · "איפוס" [home_content_reorder.t04]', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false);
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('איפוס')), isTrue,
           reason: 'the home_content_reorder.t04 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · _Body · home_content_reorder.t04 → gone when hidden', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false,
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true,
           hidden: const {'home_content_reorder.t04'});
       expect(find.text('איפוס'), findsNothing,
           reason: 'hiding home_content_reorder.t04 removes it for end-users');
     });
     testWidgets('verb · _Body · tap "מסך הבית שלי" → toast "הסדר וההסתרות אופסו לברירת מחדל"', (t) async {
-      await pumpScreen(t, const HomeContentReorder(), selfContained: false);
+      await pumpScreen(t, const HomeContentReorder(), selfContained: true);
       expect(await findAcrossTabs(t, find.text('מסך הבית שלי')), isTrue,
           reason: 'the "מסך הבית שלי" trigger is present (any tab)');
       await t.tap(find.text('מסך הבית שלי').first);

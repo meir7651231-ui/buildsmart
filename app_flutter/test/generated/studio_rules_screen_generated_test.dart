@@ -14,12 +14,12 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('studio_rules_screen · generated (2 tests)', () {
     testWidgets('wired · StudioRulesScreen · "הוסף כלל" [studio_rules_screen.t02]', (t) async {
-      await pumpScreen(t, const StudioRulesScreen(), selfContained: true);
+      await pumpScreen(t, const StudioRulesScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('הוסף כלל')), isTrue,
           reason: 'the studio_rules_screen.t02 element renders on studio_rules_screen (any tab)');
     });
     testWidgets('hide · StudioRulesScreen · studio_rules_screen.t02 → gone when hidden', (t) async {
-      await pumpScreen(t, const StudioRulesScreen(), selfContained: true,
+      await pumpScreen(t, const StudioRulesScreen(), selfContained: false,
           hidden: const {'studio_rules_screen.t02'});
       expect(find.text('הוסף כלל'), findsNothing,
           reason: 'hiding studio_rules_screen.t02 removes it for end-users');

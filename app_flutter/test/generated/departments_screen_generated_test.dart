@@ -14,29 +14,29 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('departments_screen · generated (9 tests)', () {
     testWidgets('wired · DepartmentsScreen · "מחלקות" [departments_screen.t01]', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('מחלקות')), isTrue,
           reason: 'the departments_screen.t01 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · DepartmentsScreen · departments_screen.t01 → gone when hidden', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false,
           hidden: const {'departments_screen.t01'});
       expect(find.text('מחלקות'), findsNothing,
           reason: 'hiding departments_screen.t01 removes it for end-users');
     });
     testWidgets('wired · _DeptTile · "בקרוב" [departments_screen.t02]', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
           reason: 'the departments_screen.t02 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · _DeptTile · departments_screen.t02 → gone when hidden', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false,
           hidden: const {'departments_screen.t02'});
       expect(find.text('בקרוב'), findsNothing,
           reason: 'hiding departments_screen.t02 removes it for end-users');
     });
     testWidgets('verb · _DeptTile · tap "בקרוב" → toast "בקרוב"', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
           reason: 'the "בקרוב" trigger is present (any tab)');
       await t.tap(find.text('בקרוב').first);
@@ -46,23 +46,23 @@ void main() {
           reason: 'tapping "בקרוב" fires the toast (verb effect)');
     });
     testWidgets('wired · _DeptCatGroups · "אין קטגוריות במחלקה זו" [departments_screen.t04]', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('אין קטגוריות במחלקה זו')), isTrue,
           reason: 'the departments_screen.t04 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · _DeptCatGroups · departments_screen.t04 → gone when hidden', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false,
           hidden: const {'departments_screen.t04'});
       expect(find.text('אין קטגוריות במחלקה זו'), findsNothing,
           reason: 'hiding departments_screen.t04 removes it for end-users');
     });
     testWidgets('wired · _DeptCatGroups · "הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה" [departments_screen.t05]', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה')), isTrue,
           reason: 'the departments_screen.t05 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · _DeptCatGroups · departments_screen.t05 → gone when hidden', (t) async {
-      await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
+      await pumpScreen(t, const DepartmentsScreen(), selfContained: false,
           hidden: const {'departments_screen.t05'});
       expect(find.text('הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה'), findsNothing,
           reason: 'hiding departments_screen.t05 removes it for end-users');

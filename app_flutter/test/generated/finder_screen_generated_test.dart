@@ -14,23 +14,23 @@ void main() {
   if (!const bool.fromEnvironment('atomgen')) return;
   group('finder_screen · generated (4 tests)', () {
     testWidgets('wired · FinderScreen · "לא נמצאו מוצרים" [finder_screen.no_results]', (t) async {
-      await pumpScreen(t, const FinderScreen(), selfContained: true);
+      await pumpScreen(t, const FinderScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('לא נמצאו מוצרים')), isTrue,
           reason: 'the finder_screen.no_results element renders on finder_screen (any tab)');
     });
     testWidgets('hide · FinderScreen · finder_screen.no_results → gone when hidden', (t) async {
-      await pumpScreen(t, const FinderScreen(), selfContained: true,
+      await pumpScreen(t, const FinderScreen(), selfContained: false,
           hidden: const {'finder_screen.no_results'});
       expect(find.text('לא נמצאו מוצרים'), findsNothing,
           reason: 'hiding finder_screen.no_results removes it for end-users');
     });
     testWidgets('wired · FinderScreen · "צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע" [finder_screen.chip_tip]', (t) async {
-      await pumpScreen(t, const FinderScreen(), selfContained: true);
+      await pumpScreen(t, const FinderScreen(), selfContained: false);
       expect(await findAcrossTabs(t, find.text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע')), isTrue,
           reason: 'the finder_screen.chip_tip element renders on finder_screen (any tab)');
     });
     testWidgets('hide · FinderScreen · finder_screen.chip_tip → gone when hidden', (t) async {
-      await pumpScreen(t, const FinderScreen(), selfContained: true,
+      await pumpScreen(t, const FinderScreen(), selfContained: false,
           hidden: const {'finder_screen.chip_tip'});
       expect(find.text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע'), findsNothing,
           reason: 'hiding finder_screen.chip_tip removes it for end-users');
