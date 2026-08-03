@@ -15,8 +15,8 @@ void main() {
   group('store_dashboard_screen · generated (28 tests)', () {
     testWidgets('wired · StoreDashboardScreen · "‹ יציאה" [store.action.exit]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('‹ יציאה'), findsWidgets,
-          reason: 'the store.action.exit element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the store.action.exit element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store.action.exit → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "✓ אין הזמנות שממתינות לאישור" [store_dashboard_screen.t01]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('✓ אין הזמנות שממתינות לאישור'), findsWidgets,
-          reason: 'the store_dashboard_screen.t01 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('✓ אין הזמנות שממתינות לאישור')), isTrue,
+          reason: 'the store_dashboard_screen.t01 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store_dashboard_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "➕ סימולציית הזמנה נכנסת (כלי הדגמה)" [store_dashboard_screen.t02]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('➕ סימולציית הזמנה נכנסת (כלי הדגמה)'), findsWidgets,
-          reason: 'the store_dashboard_screen.t02 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('➕ סימולציית הזמנה נכנסת (כלי הדגמה)')), isTrue,
+          reason: 'the store_dashboard_screen.t02 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store_dashboard_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "שלום 👋" [store.home.greeting]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('שלום 👋'), findsWidgets,
-          reason: 'the store.home.greeting element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('שלום 👋')), isTrue,
+          reason: 'the store.home.greeting element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store.home.greeting → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "📥 הזמנות" [store.section.orders]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('📥 הזמנות'), findsWidgets,
-          reason: 'the store.section.orders element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('📥 הזמנות')), isTrue,
+          reason: 'the store.section.orders element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store.section.orders → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "אין הזמנות בקטגוריה זו ✓" [store_dashboard_screen.t03]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('אין הזמנות בקטגוריה זו ✓'), findsWidgets,
-          reason: 'the store_dashboard_screen.t03 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('אין הזמנות בקטגוריה זו ✓')), isTrue,
+          reason: 'the store_dashboard_screen.t03 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store_dashboard_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "➕ הוסף מוצר חדש" [store.action.newProduct]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('➕ הוסף מוצר חדש'), findsWidgets,
-          reason: 'the store.action.newProduct element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('➕ הוסף מוצר חדש')), isTrue,
+          reason: 'the store.action.newProduct element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store.action.newProduct → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · StoreDashboardScreen · "לא נמצאו מוצרים תואמים." [store_dashboard_screen.t04]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('לא נמצאו מוצרים תואמים.'), findsWidgets,
-          reason: 'the store_dashboard_screen.t04 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('לא נמצאו מוצרים תואמים.')), isTrue,
+          reason: 'the store_dashboard_screen.t04 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · StoreDashboardScreen · store_dashboard_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -103,9 +103,9 @@ void main() {
     });
     testWidgets('verb · StoreDashboardScreen · tap "‹ יציאה" → toast "הזמנת הדגמה \$id נוצרה — נכנסה לתור ✓"', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      final btn = find.text('‹ יציאה');
-      expect(btn, findsWidgets, reason: 'the "‹ יציאה" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the "‹ יציאה" trigger is present (any tab)');
+      await t.tap(find.text('‹ יציאה').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('הזמנת הדגמה \$id נוצרה — נכנסה לתור ✓'), findsWidgets,
@@ -119,8 +119,8 @@ void main() {
     });
     testWidgets('wired · _AddProductSheet · "קטגוריה" [store.addProduct.category]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('קטגוריה'), findsWidgets,
-          reason: 'the store.addProduct.category element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('קטגוריה')), isTrue,
+          reason: 'the store.addProduct.category element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · _AddProductSheet · store.addProduct.category → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -130,8 +130,8 @@ void main() {
     });
     testWidgets('wired · _AddProductSheet · "➕ הוסף מוצר" [store.action.addProduct]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('➕ הוסף מוצר'), findsWidgets,
-          reason: 'the store.action.addProduct element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('➕ הוסף מוצר')), isTrue,
+          reason: 'the store.action.addProduct element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · _AddProductSheet · store.action.addProduct → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -141,8 +141,8 @@ void main() {
     });
     testWidgets('wired · _StoreOrderCard · "🕒 נדרש: בתיאום" [store_dashboard_screen.t11]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('🕒 נדרש: בתיאום'), findsWidgets,
-          reason: 'the store_dashboard_screen.t11 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('🕒 נדרש: בתיאום')), isTrue,
+          reason: 'the store_dashboard_screen.t11 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · _StoreOrderCard · store_dashboard_screen.t11 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -152,8 +152,8 @@ void main() {
     });
     testWidgets('wired · _StoreOrderCard · "✓ תיקון בוצע — בדוק שינויים" [store_dashboard_screen.t12]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('✓ תיקון בוצע — בדוק שינויים'), findsWidgets,
-          reason: 'the store_dashboard_screen.t12 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('✓ תיקון בוצע — בדוק שינויים')), isTrue,
+          reason: 'the store_dashboard_screen.t12 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · _StoreOrderCard · store_dashboard_screen.t12 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',
@@ -163,8 +163,8 @@ void main() {
     });
     testWidgets('wired · _DeliveredCard · "נמסר ✓" [store_dashboard_screen.t13]', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store');
-      expect(find.text('נמסר ✓'), findsWidgets,
-          reason: 'the store_dashboard_screen.t13 element renders on store_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('נמסר ✓')), isTrue,
+          reason: 'the store_dashboard_screen.t13 element renders on store_dashboard_screen (any tab)');
     });
     testWidgets('hide · _DeliveredCard · store_dashboard_screen.t13 → gone when hidden', (t) async {
       await pumpScreen(t, const StoreDashboardScreen(), selfContained: true, role: 'store',

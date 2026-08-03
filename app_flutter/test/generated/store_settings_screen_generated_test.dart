@@ -15,8 +15,8 @@ void main() {
   group('store_settings_screen · generated (21 tests)', () {
     testWidgets('wired · StoreSettingsScreen · "הגדרות חנות" [store_settings_screen.screen_title]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('הגדרות חנות'), findsWidgets,
-          reason: 'the store_settings_screen.screen_title element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות חנות')), isTrue,
+          reason: 'the store_settings_screen.screen_title element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · StoreSettingsScreen · store_settings_screen.screen_title → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · StoreSettingsScreen · "איפוס הגדרות?" [store_settings_screen.reset_title]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('איפוס הגדרות?'), findsWidgets,
-          reason: 'the store_settings_screen.reset_title element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('איפוס הגדרות?')), isTrue,
+          reason: 'the store_settings_screen.reset_title element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · StoreSettingsScreen · store_settings_screen.reset_title → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · StoreSettingsScreen · "כל הגדרות החנות יוחזרו לברירת המחדל." [store_settings_screen.reset_body]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('כל הגדרות החנות יוחזרו לברירת המחדל.'), findsWidgets,
-          reason: 'the store_settings_screen.reset_body element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('כל הגדרות החנות יוחזרו לברירת המחדל.')), isTrue,
+          reason: 'the store_settings_screen.reset_body element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · StoreSettingsScreen · store_settings_screen.reset_body → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · StoreSettingsScreen · "ביטול" [store_settings_screen.cancel]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('ביטול'), findsWidgets,
-          reason: 'the store_settings_screen.cancel element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
+          reason: 'the store_settings_screen.cancel element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · StoreSettingsScreen · store_settings_screen.cancel → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · StoreSettingsScreen · "אפס" [store_settings_screen.reset_ok]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('אפס'), findsWidgets,
-          reason: 'the store_settings_screen.reset_ok element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('אפס')), isTrue,
+          reason: 'the store_settings_screen.reset_ok element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · StoreSettingsScreen · store_settings_screen.reset_ok → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _ShippingSection · "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" [store_settings_screen.section_wip]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות'), findsWidgets,
-          reason: 'the store_settings_screen.section_wip element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the store_settings_screen.section_wip element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · _ShippingSection · store_settings_screen.section_wip → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _ShippingSection · "בבנייה — עדיין לא משפיע" [store_settings_screen.inline_wip]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('בבנייה — עדיין לא משפיע'), findsWidgets,
-          reason: 'the store_settings_screen.inline_wip element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה — עדיין לא משפיע')), isTrue,
+          reason: 'the store_settings_screen.inline_wip element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · _ShippingSection · store_settings_screen.inline_wip → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -104,8 +104,8 @@ void main() {
     });
     testWidgets('wired · _PaymentSection · "בבנייה" [store_settings_screen.placeholder_wip]', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      expect(find.text('בבנייה'), findsWidgets,
-          reason: 'the store_settings_screen.placeholder_wip element renders on store_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה')), isTrue,
+          reason: 'the store_settings_screen.placeholder_wip element renders on store_settings_screen (any tab)');
     });
     testWidgets('hide · _PaymentSection · store_settings_screen.placeholder_wip → gone when hidden', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store',
@@ -115,9 +115,9 @@ void main() {
     });
     testWidgets('verb · _PaymentSection · tap "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" → toast "\$label — בבנייה"', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      final btn = find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות');
-      expect(btn, findsWidgets, reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present (any tab)');
+      await t.tap(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
@@ -131,9 +131,9 @@ void main() {
     });
     testWidgets('verb · _PrivacySection · tap "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" → toast "החיפוש נוקה"', (t) async {
       await pumpScreen(t, const StoreSettingsScreen(), selfContained: true, role: 'store');
-      final btn = find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות');
-      expect(btn, findsWidgets, reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present (any tab)');
+      await t.tap(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('החיפוש נוקה'), findsWidgets,

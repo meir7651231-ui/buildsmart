@@ -15,8 +15,8 @@ void main() {
   group('legal_screen · generated (2 tests)', () {
     testWidgets('wired · LegalScreen · "תנאי שימוש ופרטיות" [legal_screen.t01]', (t) async {
       await pumpScreen(t, const LegalScreen(), selfContained: true);
-      expect(find.text('תנאי שימוש ופרטיות'), findsWidgets,
-          reason: 'the legal_screen.t01 element renders on legal_screen');
+      expect(await findAcrossTabs(t, find.text('תנאי שימוש ופרטיות')), isTrue,
+          reason: 'the legal_screen.t01 element renders on legal_screen (any tab)');
     });
     testWidgets('hide · LegalScreen · legal_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const LegalScreen(), selfContained: true,

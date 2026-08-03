@@ -15,8 +15,8 @@ void main() {
   group('smart_project_screen · generated (18 tests)', () {
     testWidgets('wired · SmartProjectScreen · "🏗️ פרויקט חכם" [smart_project_screen.t01]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('🏗️ פרויקט חכם'), findsWidgets,
-          reason: 'the smart_project_screen.t01 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('🏗️ פרויקט חכם')), isTrue,
+          reason: 'the smart_project_screen.t01 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · SmartProjectScreen · "📅 בחר יום" [smart_project_screen.t02]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('📅 בחר יום'), findsWidgets,
-          reason: 'the smart_project_screen.t02 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('📅 בחר יום')), isTrue,
+          reason: 'the smart_project_screen.t02 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · SmartProjectScreen · "‹ יציאה" [smart_project_screen.t03]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('‹ יציאה'), findsWidgets,
-          reason: 'the smart_project_screen.t03 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the smart_project_screen.t03 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · SmartProjectScreen · "אין ימי עבודה בתוכנית" [smart_project_screen.t04]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('אין ימי עבודה בתוכנית'), findsWidgets,
-          reason: 'the smart_project_screen.t04 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('אין ימי עבודה בתוכנית')), isTrue,
+          reason: 'the smart_project_screen.t04 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · SmartProjectScreen · "כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן" [smart_project_screen.t05]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן'), findsWidgets,
-          reason: 'the smart_project_screen.t05 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן')), isTrue,
+          reason: 'the smart_project_screen.t05 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · SmartProjectScreen · "בחר יום" [smart_project_screen.t06]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('בחר יום'), findsWidgets,
-          reason: 'the smart_project_screen.t06 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('בחר יום')), isTrue,
+          reason: 'the smart_project_screen.t06 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · SmartProjectScreen · "✓ הושלם" [smart_project_screen.t07]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('✓ הושלם'), findsWidgets,
-          reason: 'the smart_project_screen.t07 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('✓ הושלם')), isTrue,
+          reason: 'the smart_project_screen.t07 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · SmartProjectScreen · smart_project_screen.t07 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _ProjectDone · "🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!" [smart_project_screen.t08]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!'), findsWidgets,
-          reason: 'the smart_project_screen.t08 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('🎉 כל ימי העבודה בוצעו — הפרויקט הושלם!')), isTrue,
+          reason: 'the smart_project_screen.t08 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · _ProjectDone · smart_project_screen.t08 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · _StageCard · "שלבי ביצוע" [smart_project_screen.t09]', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true);
-      expect(find.text('שלבי ביצוע'), findsWidgets,
-          reason: 'the smart_project_screen.t09 element renders on smart_project_screen');
+      expect(await findAcrossTabs(t, find.text('שלבי ביצוע')), isTrue,
+          reason: 'the smart_project_screen.t09 element renders on smart_project_screen (any tab)');
     });
     testWidgets('hide · _StageCard · smart_project_screen.t09 → gone when hidden', (t) async {
       await pumpScreen(t, const SmartProjectScreen(), selfContained: true,

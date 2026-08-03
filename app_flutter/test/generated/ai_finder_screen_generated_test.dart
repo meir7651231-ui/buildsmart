@@ -15,8 +15,8 @@ void main() {
   group('ai_finder_screen · generated (12 tests)', () {
     testWidgets('wired · AiFinderScreen · "🗣️ חיפוש חכם" [ai_finder_screen.t01]', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true);
-      expect(find.text('🗣️ חיפוש חכם'), findsWidgets,
-          reason: 'the ai_finder_screen.t01 element renders on ai_finder_screen');
+      expect(await findAcrossTabs(t, find.text('🗣️ חיפוש חכם')), isTrue,
+          reason: 'the ai_finder_screen.t01 element renders on ai_finder_screen (any tab)');
     });
     testWidgets('hide · AiFinderScreen · ai_finder_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · AiFinderScreen · "💡 החיפוש החכם דורש חיבור לשרת." [ai_finder_screen.t02]', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true);
-      expect(find.text('💡 החיפוש החכם דורש חיבור לשרת.'), findsWidgets,
-          reason: 'the ai_finder_screen.t02 element renders on ai_finder_screen');
+      expect(await findAcrossTabs(t, find.text('💡 החיפוש החכם דורש חיבור לשרת.')), isTrue,
+          reason: 'the ai_finder_screen.t02 element renders on ai_finder_screen (any tab)');
     });
     testWidgets('hide · AiFinderScreen · ai_finder_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · AiFinderScreen · "תאר במילים שלך מה אתה מחפש:" [ai_finder_screen.t03]', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true);
-      expect(find.text('תאר במילים שלך מה אתה מחפש:'), findsWidgets,
-          reason: 'the ai_finder_screen.t03 element renders on ai_finder_screen');
+      expect(await findAcrossTabs(t, find.text('תאר במילים שלך מה אתה מחפש:')), isTrue,
+          reason: 'the ai_finder_screen.t03 element renders on ai_finder_screen (any tab)');
     });
     testWidgets('hide · AiFinderScreen · ai_finder_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · AiFinderScreen · "מצא לי" [ai_finder_screen.t04]', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true);
-      expect(find.text('מצא לי'), findsWidgets,
-          reason: 'the ai_finder_screen.t04 element renders on ai_finder_screen');
+      expect(await findAcrossTabs(t, find.text('מצא לי')), isTrue,
+          reason: 'the ai_finder_screen.t04 element renders on ai_finder_screen (any tab)');
     });
     testWidgets('hide · AiFinderScreen · ai_finder_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · AiFinderScreen · "משהו השתבש — נסה שוב." [ai_finder_screen.t05]', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true);
-      expect(find.text('משהו השתבש — נסה שוב.'), findsWidgets,
-          reason: 'the ai_finder_screen.t05 element renders on ai_finder_screen');
+      expect(await findAcrossTabs(t, find.text('משהו השתבש — נסה שוב.')), isTrue,
+          reason: 'the ai_finder_screen.t05 element renders on ai_finder_screen (any tab)');
     });
     testWidgets('hide · AiFinderScreen · ai_finder_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · AiFinderScreen · "לא נמצאו תוצאות — נסה מילים אחרות." [ai_finder_screen.t06]', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true);
-      expect(find.text('לא נמצאו תוצאות — נסה מילים אחרות.'), findsWidgets,
-          reason: 'the ai_finder_screen.t06 element renders on ai_finder_screen');
+      expect(await findAcrossTabs(t, find.text('לא נמצאו תוצאות — נסה מילים אחרות.')), isTrue,
+          reason: 'the ai_finder_screen.t06 element renders on ai_finder_screen (any tab)');
     });
     testWidgets('hide · AiFinderScreen · ai_finder_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const AiFinderScreen(), selfContained: true,

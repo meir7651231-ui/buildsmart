@@ -15,8 +15,8 @@ void main() {
   group('camera_sheet · generated (2 tests)', () {
     testWidgets('wired · _GalleryAllBtn · "כל\nהגלריה" [camera_sheet.t06]', (t) async {
       await pumpScreen(t, const CameraScreen(), selfContained: true);
-      expect(find.text('כל\nהגלריה'), findsWidgets,
-          reason: 'the camera_sheet.t06 element renders on camera_sheet');
+      expect(await findAcrossTabs(t, find.text('כל\nהגלריה')), isTrue,
+          reason: 'the camera_sheet.t06 element renders on camera_sheet (any tab)');
     });
     testWidgets('hide · _GalleryAllBtn · camera_sheet.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const CameraScreen(), selfContained: true,

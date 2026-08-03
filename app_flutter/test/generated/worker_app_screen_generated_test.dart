@@ -15,8 +15,8 @@ void main() {
   group('worker_app_screen · generated (30 tests)', () {
     testWidgets('wired · WorkerAppScreen · "🦺 עובד" [worker.section.title]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('🦺 עובד'), findsWidgets,
-          reason: 'the worker.section.title element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('🦺 עובד')), isTrue,
+          reason: 'the worker.section.title element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · WorkerAppScreen · worker.section.title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · WorkerAppScreen · "‹ יציאה" [worker.action.exit]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('‹ יציאה'), findsWidgets,
-          reason: 'the worker.action.exit element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the worker.action.exit element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · WorkerAppScreen · worker.action.exit → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "📅 היומן שלי" [worker.section.journal]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('📅 היומן שלי'), findsWidgets,
-          reason: 'the worker.section.journal element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('📅 היומן שלי')), isTrue,
+          reason: 'the worker.section.journal element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.section.journal → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "חודש מלא ›" [worker.action.fullMonth]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('חודש מלא ›'), findsWidgets,
-          reason: 'the worker.action.fullMonth element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('חודש מלא ›')), isTrue,
+          reason: 'the worker.action.fullMonth element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.fullMonth → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "✓ נרשמה נוכחות להיום" [worker_app_screen.t01]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('✓ נרשמה נוכחות להיום'), findsWidgets,
-          reason: 'the worker_app_screen.t01 element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('✓ נרשמה נוכחות להיום')), isTrue,
+          reason: 'the worker_app_screen.t01 element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker_app_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "לא נרשמה נוכחות ביום זה" [worker_app_screen.t02]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('לא נרשמה נוכחות ביום זה'), findsWidgets,
-          reason: 'the worker_app_screen.t02 element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('לא נרשמה נוכחות ביום זה')), isTrue,
+          reason: 'the worker_app_screen.t02 element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker_app_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "דמו" [worker_app_screen.t03]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('דמו'), findsWidgets,
-          reason: 'the worker_app_screen.t03 element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('דמו')), isTrue,
+          reason: 'the worker_app_screen.t03 element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker_app_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "בדוק ציוד נדרש" [worker.action.checkEquipment]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('בדוק ציוד נדרש'), findsWidgets,
-          reason: 'the worker.action.checkEquipment element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('בדוק ציוד נדרש')), isTrue,
+          reason: 'the worker.action.checkEquipment element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.checkEquipment → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "מלאי הקבלן" [worker.action.employerStock]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('מלאי הקבלן'), findsWidgets,
-          reason: 'the worker.action.employerStock element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('מלאי הקבלן')), isTrue,
+          reason: 'the worker.action.employerStock element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.employerStock → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -114,8 +114,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "הוסף משימה" [worker.action.addTask]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('הוסף משימה'), findsWidgets,
-          reason: 'the worker.action.addTask element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('הוסף משימה')), isTrue,
+          reason: 'the worker.action.addTask element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.addTask → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -125,8 +125,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "גאנט משימות" [worker.action.gantt]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('גאנט משימות'), findsWidgets,
-          reason: 'the worker.action.gantt element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('גאנט משימות')), isTrue,
+          reason: 'the worker.action.gantt element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.gantt → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -136,8 +136,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "ליקויים" [worker.action.defects]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('ליקויים'), findsWidgets,
-          reason: 'the worker.action.defects element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('ליקויים')), isTrue,
+          reason: 'the worker.action.defects element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.defects → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -147,8 +147,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "➕ הצעת משימה לקבלן" [worker.section.proposeTitle]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('➕ הצעת משימה לקבלן'), findsWidgets,
-          reason: 'the worker.section.proposeTitle element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('➕ הצעת משימה לקבלן')), isTrue,
+          reason: 'the worker.section.proposeTitle element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.section.proposeTitle → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -158,8 +158,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "המשימה תישלח לקבלן לאישור" [worker.propose.subtitle]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('המשימה תישלח לקבלן לאישור'), findsWidgets,
-          reason: 'the worker.propose.subtitle element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('המשימה תישלח לקבלן לאישור')), isTrue,
+          reason: 'the worker.propose.subtitle element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.propose.subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',
@@ -169,8 +169,8 @@ void main() {
     });
     testWidgets('wired · _TasksTab · "📸 שלח לאישור" [worker.action.submit]', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker');
-      expect(find.text('📸 שלח לאישור'), findsWidgets,
-          reason: 'the worker.action.submit element renders on worker_app_screen');
+      expect(await findAcrossTabs(t, find.text('📸 שלח לאישור')), isTrue,
+          reason: 'the worker.action.submit element renders on worker_app_screen (any tab)');
     });
     testWidgets('hide · _TasksTab · worker.action.submit → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerAppScreen(), selfContained: true, role: 'worker',

@@ -15,8 +15,8 @@ void main() {
   group('courier_attendance_screen · generated (12 tests)', () {
     testWidgets('wired · CourierAttendanceScreen · "🕐 נוכחות" [courier.attend.title]', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
-      expect(find.text('🕐 נוכחות'), findsWidgets,
-          reason: 'the courier.attend.title element renders on courier_attendance_screen');
+      expect(await findAcrossTabs(t, find.text('🕐 נוכחות')), isTrue,
+          reason: 'the courier.attend.title element renders on courier_attendance_screen (any tab)');
     });
     testWidgets('hide · CourierAttendanceScreen · courier.attend.title → gone when hidden', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _ClockCard · "היום" [courier.attend.today]', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
-      expect(find.text('היום'), findsWidgets,
-          reason: 'the courier.attend.today element renders on courier_attendance_screen');
+      expect(await findAcrossTabs(t, find.text('היום')), isTrue,
+          reason: 'the courier.attend.today element renders on courier_attendance_screen (any tab)');
     });
     testWidgets('hide · _ClockCard · courier.attend.today → gone when hidden', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _MonthCard · "‹ הקודם" [courier.attend.prev]', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
-      expect(find.text('‹ הקודם'), findsWidgets,
-          reason: 'the courier.attend.prev element renders on courier_attendance_screen');
+      expect(await findAcrossTabs(t, find.text('‹ הקודם')), isTrue,
+          reason: 'the courier.attend.prev element renders on courier_attendance_screen (any tab)');
     });
     testWidgets('hide · _MonthCard · courier.attend.prev → gone when hidden', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _MonthCard · "הבא ›" [courier.attend.next]', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
-      expect(find.text('הבא ›'), findsWidgets,
-          reason: 'the courier.attend.next element renders on courier_attendance_screen');
+      expect(await findAcrossTabs(t, find.text('הבא ›')), isTrue,
+          reason: 'the courier.attend.next element renders on courier_attendance_screen (any tab)');
     });
     testWidgets('hide · _MonthCard · courier.attend.next → gone when hidden', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _MonthCard · "אין רישומי נוכחות בחודש זה" [courier.attend.empty]', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
-      expect(find.text('אין רישומי נוכחות בחודש זה'), findsWidgets,
-          reason: 'the courier.attend.empty element renders on courier_attendance_screen');
+      expect(await findAcrossTabs(t, find.text('אין רישומי נוכחות בחודש זה')), isTrue,
+          reason: 'the courier.attend.empty element renders on courier_attendance_screen (any tab)');
     });
     testWidgets('hide · _MonthCard · courier.attend.empty → gone when hidden', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _MonthCard · "סה"כ חודשי" [courier.attend.month_total]', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier');
-      expect(find.text('סה"כ חודשי'), findsWidgets,
-          reason: 'the courier.attend.month_total element renders on courier_attendance_screen');
+      expect(await findAcrossTabs(t, find.text('סה"כ חודשי')), isTrue,
+          reason: 'the courier.attend.month_total element renders on courier_attendance_screen (any tab)');
     });
     testWidgets('hide · _MonthCard · courier.attend.month_total → gone when hidden', (t) async {
       await pumpScreen(t, const CourierAttendanceScreen(), selfContained: true, role: 'courier',

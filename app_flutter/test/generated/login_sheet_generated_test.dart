@@ -15,8 +15,8 @@ void main() {
   group('login_sheet · generated (14 tests)', () {
     testWidgets('wired · LoginSheet · "🔐 התחברות לחשבון" [login_sheet.t01]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('🔐 התחברות לחשבון'), findsWidgets,
-          reason: 'the login_sheet.t01 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('🔐 התחברות לחשבון')), isTrue,
+          reason: 'the login_sheet.t01 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · LoginSheet · "או בקוד ל-SMS" [login_sheet.t06]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('או בקוד ל-SMS'), findsWidgets,
-          reason: 'the login_sheet.t06 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('או בקוד ל-SMS')), isTrue,
+          reason: 'the login_sheet.t06 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · LoginSheet · "כניסה עם אימייל וסיסמה" [login_sheet.t02]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('כניסה עם אימייל וסיסמה'), findsWidgets,
-          reason: 'the login_sheet.t02 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('כניסה עם אימייל וסיסמה')), isTrue,
+          reason: 'the login_sheet.t02 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · LoginSheet · "שליחת קוד חדש" [login_sheet.t03]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('שליחת קוד חדש'), findsWidgets,
-          reason: 'the login_sheet.t03 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('שליחת קוד חדש')), isTrue,
+          reason: 'the login_sheet.t03 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · LoginSheet · "החלפת מספר" [login_sheet.t04]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('החלפת מספר'), findsWidgets,
-          reason: 'the login_sheet.t04 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('החלפת מספר')), isTrue,
+          reason: 'the login_sheet.t04 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · LoginSheet · "שכחתי סיסמה" [login_sheet.t05]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('שכחתי סיסמה'), findsWidgets,
-          reason: 'the login_sheet.t05 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('שכחתי סיסמה')), isTrue,
+          reason: 'the login_sheet.t05 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · LoginSheet · "חזרה לכניסה עם טלפון" [login_sheet.t06]', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false);
-      expect(find.text('חזרה לכניסה עם טלפון'), findsWidgets,
-          reason: 'the login_sheet.t06 element renders on login_sheet');
+      expect(await findAcrossTabs(t, find.text('חזרה לכניסה עם טלפון')), isTrue,
+          reason: 'the login_sheet.t06 element renders on login_sheet (any tab)');
     });
     testWidgets('hide · LoginSheet · login_sheet.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const LoginSheet(), selfContained: false,

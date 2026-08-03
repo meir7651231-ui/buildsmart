@@ -15,8 +15,8 @@ void main() {
   group('profile_screen · generated (12 tests)', () {
     testWidgets('wired · ProfileScreen · "מחיקת חשבון" [profile_screen.t01]', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true);
-      expect(find.text('מחיקת חשבון'), findsWidgets,
-          reason: 'the profile_screen.t01 element renders on profile_screen');
+      expect(await findAcrossTabs(t, find.text('מחיקת חשבון')), isTrue,
+          reason: 'the profile_screen.t01 element renders on profile_screen (any tab)');
     });
     testWidgets('hide · ProfileScreen · profile_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ProfileScreen · "החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל." [profile_screen.t02]', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true);
-      expect(find.text('החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל.'), findsWidgets,
-          reason: 'the profile_screen.t02 element renders on profile_screen');
+      expect(await findAcrossTabs(t, find.text('החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל.')), isTrue,
+          reason: 'the profile_screen.t02 element renders on profile_screen (any tab)');
     });
     testWidgets('hide · ProfileScreen · profile_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · ProfileScreen · "ביטול" [profile_screen.t03]', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true);
-      expect(find.text('ביטול'), findsWidgets,
-          reason: 'the profile_screen.t03 element renders on profile_screen');
+      expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
+          reason: 'the profile_screen.t03 element renders on profile_screen (any tab)');
     });
     testWidgets('hide · ProfileScreen · profile_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · ProfileScreen · "מחק לצמיתות" [profile_screen.t04]', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true);
-      expect(find.text('מחק לצמיתות'), findsWidgets,
-          reason: 'the profile_screen.t04 element renders on profile_screen');
+      expect(await findAcrossTabs(t, find.text('מחק לצמיתות')), isTrue,
+          reason: 'the profile_screen.t04 element renders on profile_screen (any tab)');
     });
     testWidgets('hide · ProfileScreen · profile_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · ProfileScreen · "הפרופיל שלי" [profile_screen.t05]', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true);
-      expect(find.text('הפרופיל שלי'), findsWidgets,
-          reason: 'the profile_screen.t05 element renders on profile_screen');
+      expect(await findAcrossTabs(t, find.text('הפרופיל שלי')), isTrue,
+          reason: 'the profile_screen.t05 element renders on profile_screen (any tab)');
     });
     testWidgets('hide · ProfileScreen · profile_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · ProfileScreen · "שמור" [profile_screen.t06]', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true);
-      expect(find.text('שמור'), findsWidgets,
-          reason: 'the profile_screen.t06 element renders on profile_screen');
+      expect(await findAcrossTabs(t, find.text('שמור')), isTrue,
+          reason: 'the profile_screen.t06 element renders on profile_screen (any tab)');
     });
     testWidgets('hide · ProfileScreen · profile_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfileScreen(), selfContained: true,

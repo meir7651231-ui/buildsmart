@@ -15,8 +15,8 @@ void main() {
   group('tasks_screen · generated (28 tests)', () {
     testWidgets('wired · TasksScreen · "📋 משימות" [tasks_screen.title]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('📋 משימות'), findsWidgets,
-          reason: 'the tasks_screen.title element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('📋 משימות')), isTrue,
+          reason: 'the tasks_screen.title element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · TasksScreen · tasks_screen.title → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · TasksScreen · "‹ יציאה" [tasks_screen.exit]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('‹ יציאה'), findsWidgets,
-          reason: 'the tasks_screen.exit element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the tasks_screen.exit element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · TasksScreen · tasks_screen.exit → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · TasksScreen · "עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה." [tasks_screen.proposal_intro]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.'), findsWidgets,
-          reason: 'the tasks_screen.proposal_intro element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.')), isTrue,
+          reason: 'the tasks_screen.proposal_intro element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · TasksScreen · tasks_screen.proposal_intro → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _LogButton · "📅 יומן עבודה — מה בוצע בכל יום" [tasks_screen.log_btn]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('📅 יומן עבודה — מה בוצע בכל יום'), findsWidgets,
-          reason: 'the tasks_screen.log_btn element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('📅 יומן עבודה — מה בוצע בכל יום')), isTrue,
+          reason: 'the tasks_screen.log_btn element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _LogButton · tasks_screen.log_btn → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _NewTaskButton · "＋ משימה חדשה" [tasks_screen.new_task]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('＋ משימה חדשה'), findsWidgets,
-          reason: 'the tasks_screen.new_task element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('＋ משימה חדשה')), isTrue,
+          reason: 'the tasks_screen.new_task element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _NewTaskButton · tasks_screen.new_task → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _ApprovalCard · "↩️ החזר לתיקון" [tasks_screen.approval_reject]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('↩️ החזר לתיקון'), findsWidgets,
-          reason: 'the tasks_screen.approval_reject element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('↩️ החזר לתיקון')), isTrue,
+          reason: 'the tasks_screen.approval_reject element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _ApprovalCard · tasks_screen.approval_reject → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _ProposalCard · "❌ דחה" [tasks_screen.proposal_reject]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('❌ דחה'), findsWidgets,
-          reason: 'the tasks_screen.proposal_reject element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('❌ דחה')), isTrue,
+          reason: 'the tasks_screen.proposal_reject element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _ProposalCard · tasks_screen.proposal_reject → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _Group · "✏️ ערוך" [tasks_screen.edit]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('✏️ ערוך'), findsWidgets,
-          reason: 'the tasks_screen.edit element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('✏️ ערוך')), isTrue,
+          reason: 'the tasks_screen.edit element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _Group · tasks_screen.edit → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · _TaskSheet · "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." [tasks_screen.decide_intro]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.'), findsWidgets,
-          reason: 'the tasks_screen.decide_intro element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.')), isTrue,
+          reason: 'the tasks_screen.decide_intro element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _TaskSheet · tasks_screen.decide_intro → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -120,9 +120,9 @@ void main() {
     });
     testWidgets('verb · _TaskSheet · tap "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." → toast "לא צולמה תמונה"', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
-      expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.')), isTrue,
+          reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present (any tab)');
+      await t.tap(find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('לא צולמה תמונה'), findsWidgets,
@@ -130,9 +130,9 @@ void main() {
     });
     testWidgets('verb · _TaskSheet · tap "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." → toast "📷 תמונת ההוכחה צורפה"', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
-      expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.')), isTrue,
+          reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present (any tab)');
+      await t.tap(find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('📷 תמונת ההוכחה צורפה'), findsWidgets,
@@ -140,9 +140,9 @@ void main() {
     });
     testWidgets('verb · _TaskSheet · tap "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." → toast "נשלח לאישור המנהל ✓"', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
-      expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.')), isTrue,
+          reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present (any tab)');
+      await t.tap(find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('נשלח לאישור המנהל ✓'), findsWidgets,
@@ -150,9 +150,9 @@ void main() {
     });
     testWidgets('verb · _TaskSheet · tap "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." → toast "המשימה הוחזרה לעובד לתיקון"', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
-      expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.')), isTrue,
+          reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present (any tab)');
+      await t.tap(find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('המשימה הוחזרה לעובד לתיקון'), findsWidgets,
@@ -160,9 +160,9 @@ void main() {
     });
     testWidgets('verb · _TaskSheet · tap "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." → toast "המשימה אושרה ✓"', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      final btn = find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.');
-      expect(btn, findsWidgets, reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.')), isTrue,
+          reason: 'the "העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון." trigger is present (any tab)');
+      await t.tap(find.text('העובד הגיש את המשימה. אשר אם בוצעה כראוי, או החזר לתיקון.').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('המשימה אושרה ✓'), findsWidgets,
@@ -170,8 +170,8 @@ void main() {
     });
     testWidgets('wired · _WorkLogSheet · "יומן עבודה" [tasks_screen.worklog_title]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('יומן עבודה'), findsWidgets,
-          reason: 'the tasks_screen.worklog_title element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('יומן עבודה')), isTrue,
+          reason: 'the tasks_screen.worklog_title element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _WorkLogSheet · tasks_screen.worklog_title → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,
@@ -181,8 +181,8 @@ void main() {
     });
     testWidgets('wired · _WorkLogSheet · "סיכום יומי — מה בוצע בפרויקט" [tasks_screen.worklog_sub]', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true);
-      expect(find.text('סיכום יומי — מה בוצע בפרויקט'), findsWidgets,
-          reason: 'the tasks_screen.worklog_sub element renders on tasks_screen');
+      expect(await findAcrossTabs(t, find.text('סיכום יומי — מה בוצע בפרויקט')), isTrue,
+          reason: 'the tasks_screen.worklog_sub element renders on tasks_screen (any tab)');
     });
     testWidgets('hide · _WorkLogSheet · tasks_screen.worklog_sub → gone when hidden', (t) async {
       await pumpScreen(t, const TasksScreen(), selfContained: true,

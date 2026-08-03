@@ -15,8 +15,8 @@ void main() {
   group('ai_assistant_screen · generated (8 tests)', () {
     testWidgets('wired · AiAssistantScreen · "🤖 העוזר החכם" [ai_assistant_screen.title]', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true);
-      expect(find.text('🤖 העוזר החכם'), findsWidgets,
-          reason: 'the ai_assistant_screen.title element renders on ai_assistant_screen');
+      expect(await findAcrossTabs(t, find.text('🤖 העוזר החכם')), isTrue,
+          reason: 'the ai_assistant_screen.title element renders on ai_assistant_screen (any tab)');
     });
     testWidgets('hide · AiAssistantScreen · ai_assistant_screen.title → gone when hidden', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · AiAssistantScreen · "💡 העוזר החכם דורש חיבור לשרת." [ai_assistant_screen.offline]', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true);
-      expect(find.text('💡 העוזר החכם דורש חיבור לשרת.'), findsWidgets,
-          reason: 'the ai_assistant_screen.offline element renders on ai_assistant_screen');
+      expect(await findAcrossTabs(t, find.text('💡 העוזר החכם דורש חיבור לשרת.')), isTrue,
+          reason: 'the ai_assistant_screen.offline element renders on ai_assistant_screen (any tab)');
     });
     testWidgets('hide · AiAssistantScreen · ai_assistant_screen.offline → gone when hidden', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · AiAssistantScreen · "שאל אותי כל דבר על אינסטלציה, רכש או עבודה." [ai_assistant_screen.empty_prompt]', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true);
-      expect(find.text('שאל אותי כל דבר על אינסטלציה, רכש או עבודה.'), findsWidgets,
-          reason: 'the ai_assistant_screen.empty_prompt element renders on ai_assistant_screen');
+      expect(await findAcrossTabs(t, find.text('שאל אותי כל דבר על אינסטלציה, רכש או עבודה.')), isTrue,
+          reason: 'the ai_assistant_screen.empty_prompt element renders on ai_assistant_screen (any tab)');
     });
     testWidgets('hide · AiAssistantScreen · ai_assistant_screen.empty_prompt → gone when hidden', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · AiAssistantScreen · "✓ נוסף לסל" [ai_assistant_screen.added]', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true);
-      expect(find.text('✓ נוסף לסל'), findsWidgets,
-          reason: 'the ai_assistant_screen.added element renders on ai_assistant_screen');
+      expect(await findAcrossTabs(t, find.text('✓ נוסף לסל')), isTrue,
+          reason: 'the ai_assistant_screen.added element renders on ai_assistant_screen (any tab)');
     });
     testWidgets('hide · AiAssistantScreen · ai_assistant_screen.added → gone when hidden', (t) async {
       await pumpScreen(t, const AiAssistantScreen(), selfContained: true,

@@ -15,8 +15,8 @@ void main() {
   group('webcam_capture_sheet · generated (2 tests)', () {
     testWidgets('wired · WebcamCaptureScreen · "📸 צלם" [webcam_capture_sheet.shoot]', (t) async {
       await pumpScreen(t, const WebcamCaptureScreen(), selfContained: true);
-      expect(find.text('📸 צלם'), findsWidgets,
-          reason: 'the webcam_capture_sheet.shoot element renders on webcam_capture_sheet');
+      expect(await findAcrossTabs(t, find.text('📸 צלם')), isTrue,
+          reason: 'the webcam_capture_sheet.shoot element renders on webcam_capture_sheet (any tab)');
     });
     testWidgets('hide · WebcamCaptureScreen · webcam_capture_sheet.shoot → gone when hidden', (t) async {
       await pumpScreen(t, const WebcamCaptureScreen(), selfContained: true,

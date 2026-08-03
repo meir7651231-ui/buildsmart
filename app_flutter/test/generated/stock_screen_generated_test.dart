@@ -15,8 +15,8 @@ void main() {
   group('stock_screen · generated (6 tests)', () {
     testWidgets('wired · StockScreen · "המלאי שלי" [stock_screen.t01]', (t) async {
       await pumpScreen(t, const StockScreen(), selfContained: true);
-      expect(find.text('המלאי שלי'), findsWidgets,
-          reason: 'the stock_screen.t01 element renders on stock_screen');
+      expect(await findAcrossTabs(t, find.text('המלאי שלי')), isTrue,
+          reason: 'the stock_screen.t01 element renders on stock_screen (any tab)');
     });
     testWidgets('hide · StockScreen · stock_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const StockScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · StockScreen · "📦 המלאי שלי" [stock_screen.t02]', (t) async {
       await pumpScreen(t, const StockScreen(), selfContained: true);
-      expect(find.text('📦 המלאי שלי'), findsWidgets,
-          reason: 'the stock_screen.t02 element renders on stock_screen');
+      expect(await findAcrossTabs(t, find.text('📦 המלאי שלי')), isTrue,
+          reason: 'the stock_screen.t02 element renders on stock_screen (any tab)');
     });
     testWidgets('hide · StockScreen · stock_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const StockScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · StockScreen · "💡 כשתסמן פריט כ"במחסן" או "באתר" בעץ המוצרים — הוא יופיע כאן." [stock_screen.t03]', (t) async {
       await pumpScreen(t, const StockScreen(), selfContained: true);
-      expect(find.text('💡 כשתסמן פריט כ"במחסן" או "באתר" בעץ המוצרים — הוא יופיע כאן.'), findsWidgets,
-          reason: 'the stock_screen.t03 element renders on stock_screen');
+      expect(await findAcrossTabs(t, find.text('💡 כשתסמן פריט כ"במחסן" או "באתר" בעץ המוצרים — הוא יופיע כאן.')), isTrue,
+          reason: 'the stock_screen.t03 element renders on stock_screen (any tab)');
     });
     testWidgets('hide · StockScreen · stock_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const StockScreen(), selfContained: true,

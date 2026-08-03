@@ -15,8 +15,8 @@ void main() {
   group('floating_card_keyboard · generated (2 tests)', () {
     testWidgets('wired · FloatingCardKeyboard · "קולי — בקרוב" [floating_card_keyboard.voice_soon]', (t) async {
       await pumpScreen(t, const FloatingCardKeyboard(), selfContained: false);
-      expect(find.text('קולי — בקרוב'), findsWidgets,
-          reason: 'the floating_card_keyboard.voice_soon element renders on floating_card_keyboard');
+      expect(await findAcrossTabs(t, find.text('קולי — בקרוב')), isTrue,
+          reason: 'the floating_card_keyboard.voice_soon element renders on floating_card_keyboard (any tab)');
     });
     testWidgets('hide · FloatingCardKeyboard · floating_card_keyboard.voice_soon → gone when hidden', (t) async {
       await pumpScreen(t, const FloatingCardKeyboard(), selfContained: false,

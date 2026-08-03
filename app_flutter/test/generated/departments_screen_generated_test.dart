@@ -15,8 +15,8 @@ void main() {
   group('departments_screen · generated (9 tests)', () {
     testWidgets('wired · DepartmentsScreen · "מחלקות" [departments_screen.t01]', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
-      expect(find.text('מחלקות'), findsWidgets,
-          reason: 'the departments_screen.t01 element renders on departments_screen');
+      expect(await findAcrossTabs(t, find.text('מחלקות')), isTrue,
+          reason: 'the departments_screen.t01 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · DepartmentsScreen · departments_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _DeptTile · "בקרוב" [departments_screen.t02]', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
-      expect(find.text('בקרוב'), findsWidgets,
-          reason: 'the departments_screen.t02 element renders on departments_screen');
+      expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
+          reason: 'the departments_screen.t02 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · _DeptTile · departments_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
@@ -37,9 +37,9 @@ void main() {
     });
     testWidgets('verb · _DeptTile · tap "בקרוב" → toast "בקרוב"', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
-      final btn = find.text('בקרוב');
-      expect(btn, findsWidgets, reason: 'the "בקרוב" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
+          reason: 'the "בקרוב" trigger is present (any tab)');
+      await t.tap(find.text('בקרוב').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('בקרוב'), findsWidgets,
@@ -47,8 +47,8 @@ void main() {
     });
     testWidgets('wired · _DeptCatGroups · "אין קטגוריות במחלקה זו" [departments_screen.t04]', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
-      expect(find.text('אין קטגוריות במחלקה זו'), findsWidgets,
-          reason: 'the departments_screen.t04 element renders on departments_screen');
+      expect(await findAcrossTabs(t, find.text('אין קטגוריות במחלקה זו')), isTrue,
+          reason: 'the departments_screen.t04 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · _DeptCatGroups · departments_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true,
@@ -58,8 +58,8 @@ void main() {
     });
     testWidgets('wired · _DeptCatGroups · "הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה" [departments_screen.t05]', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true);
-      expect(find.text('הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה'), findsWidgets,
-          reason: 'the departments_screen.t05 element renders on departments_screen');
+      expect(await findAcrossTabs(t, find.text('הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה')), isTrue,
+          reason: 'the departments_screen.t05 element renders on departments_screen (any tab)');
     });
     testWidgets('hide · _DeptCatGroups · departments_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const DepartmentsScreen(), selfContained: true,

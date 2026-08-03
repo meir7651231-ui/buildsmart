@@ -93,8 +93,8 @@ GenResult? generateForScreen(String screenDir, {String? importPackage}) {
     b.writeln("""
     testWidgets('wired · $atom · "${_esc(text)}"${id != null ? ' [$id]' : ''}', (t) async {
       await pumpScreen(t, const $composerName(), selfContained: $selfContained$roleSuffix);
-      expect(find.text('${_esc(text)}'), findsWidgets,
-          reason: 'the ${id ?? 'text'} element renders on $screen');
+      expect(await findAcrossTabs(t, find.text('${_esc(text)}')), isTrue,
+          reason: 'the ${id ?? 'text'} element renders on $screen (any tab)');
     });""");
   }
 
@@ -121,9 +121,9 @@ GenResult? generateForScreen(String screenDir, {String? importPackage}) {
     b.writeln("""
     testWidgets('verb · $atom · tap "${_esc(label)}" → toast "${_esc(toast)}"', (t) async {
       await pumpScreen(t, const $composerName(), selfContained: $selfContained$roleSuffix);
-      final btn = find.text('${_esc(label)}');
-      expect(btn, findsWidgets, reason: 'the "${_esc(label)}" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('${_esc(label)}')), isTrue,
+          reason: 'the "${_esc(label)}" trigger is present (any tab)');
+      await t.tap(find.text('${_esc(label)}').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('${_esc(toast)}'), findsWidgets,
@@ -335,6 +335,25 @@ Future<void> pumpScreen(
   );
   await t.pump(const Duration(milliseconds: 300));
   drainOverflow(t);
+}
+
+/// Tab-walk — a registry element often lives on a NON-default tab, so it is not
+/// rendered until that tab is selected. Check [target] on the current view; if
+/// absent, tap each Material `Tab` in turn (pumping between) and re-check.
+/// Returns true as soon as it is found on any tab. One generic mechanism for
+/// every tabbed screen (the big bucket after role-seed).
+Future<bool> findAcrossTabs(WidgetTester t, Finder target) async {
+  if (target.evaluate().isNotEmpty) return true;
+  final count = find.byType(Tab).evaluate().length;
+  for (var i = 0; i < count; i++) {
+    final tab = find.byType(Tab).at(i);
+    if (tab.evaluate().isEmpty) break;
+    await t.tap(tab, warnIfMissed: false);
+    await t.pump(const Duration(milliseconds: 350));
+    drainOverflow(t);
+    if (target.evaluate().isNotEmpty) return true;
+  }
+  return target.evaluate().isNotEmpty;
 }
 
 /// Swallow RenderFlex overflow exceptions (a layout concern, orthogonal to what

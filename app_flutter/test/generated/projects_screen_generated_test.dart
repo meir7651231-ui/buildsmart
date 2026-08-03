@@ -15,8 +15,8 @@ void main() {
   group('projects_screen · generated (18 tests)', () {
     testWidgets('wired · ProjectsScreen · "🏗️ הפרויקטים שלי" [projects_screen.title]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('🏗️ הפרויקטים שלי'), findsWidgets,
-          reason: 'the projects_screen.title element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('🏗️ הפרויקטים שלי')), isTrue,
+          reason: 'the projects_screen.title element renders on projects_screen (any tab)');
     });
     testWidgets('hide · ProjectsScreen · projects_screen.title → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ProjectsScreen · "‹ יציאה" [projects_screen.exit]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('‹ יציאה'), findsWidgets,
-          reason: 'the projects_screen.exit element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the projects_screen.exit element renders on projects_screen (any tab)');
     });
     testWidgets('hide · ProjectsScreen · projects_screen.exit → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · ProjectsScreen · "פרויקט חדש" [projects_screen.new_project]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('פרויקט חדש'), findsWidgets,
-          reason: 'the projects_screen.new_project element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('פרויקט חדש')), isTrue,
+          reason: 'the projects_screen.new_project element renders on projects_screen (any tab)');
     });
     testWidgets('hide · ProjectsScreen · projects_screen.new_project → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · ProjectsScreen · "אין פרויקטים עדיין" [projects_screen.empty_title]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('אין פרויקטים עדיין'), findsWidgets,
-          reason: 'the projects_screen.empty_title element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('אין פרויקטים עדיין')), isTrue,
+          reason: 'the projects_screen.empty_title element renders on projects_screen (any tab)');
     });
     testWidgets('hide · ProjectsScreen · projects_screen.empty_title → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · ProjectsScreen · "צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר" [projects_screen.empty_sub]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר'), findsWidgets,
-          reason: 'the projects_screen.empty_sub element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר')), isTrue,
+          reason: 'the projects_screen.empty_sub element renders on projects_screen (any tab)');
     });
     testWidgets('hide · ProjectsScreen · projects_screen.empty_sub → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -76,8 +76,8 @@ void main() {
     });
     testWidgets('wired · _SiteCard · "📊 הקש לסטטוס האתר המלא" [projects_screen.status_hint]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('📊 הקש לסטטוס האתר המלא'), findsWidgets,
-          reason: 'the projects_screen.status_hint element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('📊 הקש לסטטוס האתר המלא')), isTrue,
+          reason: 'the projects_screen.status_hint element renders on projects_screen (any tab)');
     });
     testWidgets('hide · _SiteCard · projects_screen.status_hint → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -87,8 +87,8 @@ void main() {
     });
     testWidgets('wired · _StatusSheet · "✏️ הקש לעריכת הפרטים" [projects_screen.edit_hint]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('✏️ הקש לעריכת הפרטים'), findsWidgets,
-          reason: 'the projects_screen.edit_hint element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('✏️ הקש לעריכת הפרטים')), isTrue,
+          reason: 'the projects_screen.edit_hint element renders on projects_screen (any tab)');
     });
     testWidgets('hide · _StatusSheet · projects_screen.edit_hint → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -98,8 +98,8 @@ void main() {
     });
     testWidgets('wired · _StatusSheet · "✏️ עריכת פרטי האתר" [projects_screen.edit_site]', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      expect(find.text('✏️ עריכת פרטי האתר'), findsWidgets,
-          reason: 'the projects_screen.edit_site element renders on projects_screen');
+      expect(await findAcrossTabs(t, find.text('✏️ עריכת פרטי האתר')), isTrue,
+          reason: 'the projects_screen.edit_site element renders on projects_screen (any tab)');
     });
     testWidgets('hide · _StatusSheet · projects_screen.edit_site → gone when hidden', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true,
@@ -109,9 +109,9 @@ void main() {
     });
     testWidgets('verb · _StatusSheet · tap "✏️ הקש לעריכת הפרטים" → toast "עברת לפרויקט:"', (t) async {
       await pumpScreen(t, const ProjectsScreen(), selfContained: true);
-      final btn = find.text('✏️ הקש לעריכת הפרטים');
-      expect(btn, findsWidgets, reason: 'the "✏️ הקש לעריכת הפרטים" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('✏️ הקש לעריכת הפרטים')), isTrue,
+          reason: 'the "✏️ הקש לעריכת הפרטים" trigger is present (any tab)');
+      await t.tap(find.text('✏️ הקש לעריכת הפרטים').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('עברת לפרויקט:'), findsWidgets,

@@ -15,8 +15,8 @@ void main() {
   group('order_notif_sheet · generated (12 tests)', () {
     testWidgets('wired · OrderNotifSheet · "🔔 התראות הזמנות ומשלוחים" [order_notif_sheet.t01]', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false);
-      expect(find.text('🔔 התראות הזמנות ומשלוחים'), findsWidgets,
-          reason: 'the order_notif_sheet.t01 element renders on order_notif_sheet');
+      expect(await findAcrossTabs(t, find.text('🔔 התראות הזמנות ומשלוחים')), isTrue,
+          reason: 'the order_notif_sheet.t01 element renders on order_notif_sheet (any tab)');
     });
     testWidgets('hide · OrderNotifSheet · order_notif_sheet.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · OrderNotifSheet · "שאר ההתראות נשארו בהגדרות › התראות" [order_notif_sheet.t02]', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false);
-      expect(find.text('שאר ההתראות נשארו בהגדרות › התראות'), findsWidgets,
-          reason: 'the order_notif_sheet.t02 element renders on order_notif_sheet');
+      expect(await findAcrossTabs(t, find.text('שאר ההתראות נשארו בהגדרות › התראות')), isTrue,
+          reason: 'the order_notif_sheet.t02 element renders on order_notif_sheet (any tab)');
     });
     testWidgets('hide · OrderNotifSheet · order_notif_sheet.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · OrderNotifSheet · "עדכוני הזמנות" [order_notif_sheet.t03]', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false);
-      expect(find.text('עדכוני הזמנות'), findsWidgets,
-          reason: 'the order_notif_sheet.t03 element renders on order_notif_sheet');
+      expect(await findAcrossTabs(t, find.text('עדכוני הזמנות')), isTrue,
+          reason: 'the order_notif_sheet.t03 element renders on order_notif_sheet (any tab)');
     });
     testWidgets('hide · OrderNotifSheet · order_notif_sheet.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · OrderNotifSheet · "אישור · בהכנה · מוכן · שינוי סטטוס" [order_notif_sheet.t04]', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false);
-      expect(find.text('אישור · בהכנה · מוכן · שינוי סטטוס'), findsWidgets,
-          reason: 'the order_notif_sheet.t04 element renders on order_notif_sheet');
+      expect(await findAcrossTabs(t, find.text('אישור · בהכנה · מוכן · שינוי סטטוס')), isTrue,
+          reason: 'the order_notif_sheet.t04 element renders on order_notif_sheet (any tab)');
     });
     testWidgets('hide · OrderNotifSheet · order_notif_sheet.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · OrderNotifSheet · "עדכוני משלוחים" [order_notif_sheet.t05]', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false);
-      expect(find.text('עדכוני משלוחים'), findsWidgets,
-          reason: 'the order_notif_sheet.t05 element renders on order_notif_sheet');
+      expect(await findAcrossTabs(t, find.text('עדכוני משלוחים')), isTrue,
+          reason: 'the order_notif_sheet.t05 element renders on order_notif_sheet (any tab)');
     });
     testWidgets('hide · OrderNotifSheet · order_notif_sheet.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · OrderNotifSheet · "יצא לדרך · בדרך אליך · נמסר" [order_notif_sheet.t06]', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false);
-      expect(find.text('יצא לדרך · בדרך אליך · נמסר'), findsWidgets,
-          reason: 'the order_notif_sheet.t06 element renders on order_notif_sheet');
+      expect(await findAcrossTabs(t, find.text('יצא לדרך · בדרך אליך · נמסר')), isTrue,
+          reason: 'the order_notif_sheet.t06 element renders on order_notif_sheet (any tab)');
     });
     testWidgets('hide · OrderNotifSheet · order_notif_sheet.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const OrderNotifSheet(), selfContained: false,

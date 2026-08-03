@@ -15,8 +15,8 @@ void main() {
   group('regression_panel_screen · generated (4 tests)', () {
     testWidgets('wired · RegressionPanelScreen · "🔬 מרכז בדיקות רגרסיה" [regression_panel_screen.t01]', (t) async {
       await pumpScreen(t, const RegressionPanelScreen(), selfContained: true);
-      expect(find.text('🔬 מרכז בדיקות רגרסיה'), findsWidgets,
-          reason: 'the regression_panel_screen.t01 element renders on regression_panel_screen');
+      expect(await findAcrossTabs(t, find.text('🔬 מרכז בדיקות רגרסיה')), isTrue,
+          reason: 'the regression_panel_screen.t01 element renders on regression_panel_screen (any tab)');
     });
     testWidgets('hide · RegressionPanelScreen · regression_panel_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const RegressionPanelScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · RegressionPanelScreen · "בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring" [regression_panel_screen.t02]', (t) async {
       await pumpScreen(t, const RegressionPanelScreen(), selfContained: true);
-      expect(find.text('בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring'), findsWidgets,
-          reason: 'the regression_panel_screen.t02 element renders on regression_panel_screen');
+      expect(await findAcrossTabs(t, find.text('בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring')), isTrue,
+          reason: 'the regression_panel_screen.t02 element renders on regression_panel_screen (any tab)');
     });
     testWidgets('hide · RegressionPanelScreen · regression_panel_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const RegressionPanelScreen(), selfContained: true,

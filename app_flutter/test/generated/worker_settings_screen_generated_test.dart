@@ -15,8 +15,8 @@ void main() {
   group('worker_settings_screen · generated (16 tests)', () {
     testWidgets('wired · WorkerSettingsScreen · "הגדרות" [worker_settings_screen.settings_title]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('הגדרות'), findsWidgets,
-          reason: 'the worker_settings_screen.settings_title element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות')), isTrue,
+          reason: 'the worker_settings_screen.settings_title element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · WorkerSettingsScreen · worker_settings_screen.settings_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _NotifRow · "התראות" [worker_settings_screen.notifications]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('התראות'), findsWidgets,
-          reason: 'the worker_settings_screen.notifications element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('התראות')), isTrue,
+          reason: 'the worker_settings_screen.notifications element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _NotifRow · worker_settings_screen.notifications → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _RegionSection · "בקרוב" [worker_settings_screen.coming_soon]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('בקרוב'), findsWidgets,
-          reason: 'the worker_settings_screen.coming_soon element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
+          reason: 'the worker_settings_screen.coming_soon element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _RegionSection · worker_settings_screen.coming_soon → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _AccessibilitySection · "גודל טקסט (כל האפליקציה)" [worker_settings_screen.text_size]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('גודל טקסט (כל האפליקציה)'), findsWidgets,
-          reason: 'the worker_settings_screen.text_size element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('גודל טקסט (כל האפליקציה)')), isTrue,
+          reason: 'the worker_settings_screen.text_size element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _AccessibilitySection · worker_settings_screen.text_size → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _AccessibilitySection · "ניגודיות גבוהה (כל האפליקציה)" [worker_settings_screen.high_contrast]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('ניגודיות גבוהה (כל האפליקציה)'), findsWidgets,
-          reason: 'the worker_settings_screen.high_contrast element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('ניגודיות גבוהה (כל האפליקציה)')), isTrue,
+          reason: 'the worker_settings_screen.high_contrast element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _AccessibilitySection · worker_settings_screen.high_contrast → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _AccessibilitySection · "הנפשות מופחתות (כל האפליקציה)" [worker_settings_screen.reduced_motion]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('הנפשות מופחתות (כל האפליקציה)'), findsWidgets,
-          reason: 'the worker_settings_screen.reduced_motion element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הנפשות מופחתות (כל האפליקציה)')), isTrue,
+          reason: 'the worker_settings_screen.reduced_motion element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _AccessibilitySection · worker_settings_screen.reduced_motion → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _InfoSection · "תנאי שימוש" [worker_settings_screen.terms]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('תנאי שימוש'), findsWidgets,
-          reason: 'the worker_settings_screen.terms element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('תנאי שימוש')), isTrue,
+          reason: 'the worker_settings_screen.terms element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _InfoSection · worker_settings_screen.terms → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _InfoSection · "מדיניות פרטיות" [worker_settings_screen.privacy]', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker');
-      expect(find.text('מדיניות פרטיות'), findsWidgets,
-          reason: 'the worker_settings_screen.privacy element renders on worker_settings_screen');
+      expect(await findAcrossTabs(t, find.text('מדיניות פרטיות')), isTrue,
+          reason: 'the worker_settings_screen.privacy element renders on worker_settings_screen (any tab)');
     });
     testWidgets('hide · _InfoSection · worker_settings_screen.privacy → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSettingsScreen(), selfContained: true, role: 'worker',

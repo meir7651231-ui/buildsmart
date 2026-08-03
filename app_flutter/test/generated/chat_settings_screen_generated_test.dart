@@ -15,8 +15,8 @@ void main() {
   group('chat_settings_screen · generated (34 tests)', () {
     testWidgets('wired · ChatSettingsScreen · "הגדרות שיחות" [chat_settings_screen.t01]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('הגדרות שיחות'), findsWidgets,
-          reason: 'the chat_settings_screen.t01 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות שיחות')), isTrue,
+          reason: 'the chat_settings_screen.t01 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · ChatSettingsScreen · chat_settings_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ChatSettingsScreen · "איפוס הגדרות?" [chat_settings_screen.t02]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('איפוס הגדרות?'), findsWidgets,
-          reason: 'the chat_settings_screen.t02 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('איפוס הגדרות?')), isTrue,
+          reason: 'the chat_settings_screen.t02 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · ChatSettingsScreen · chat_settings_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · ChatSettingsScreen · "כל הגדרות השיחות יוחזרו לברירת המחדל." [chat_settings_screen.t03]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('כל הגדרות השיחות יוחזרו לברירת המחדל.'), findsWidgets,
-          reason: 'the chat_settings_screen.t03 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('כל הגדרות השיחות יוחזרו לברירת המחדל.')), isTrue,
+          reason: 'the chat_settings_screen.t03 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · ChatSettingsScreen · chat_settings_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · ChatSettingsScreen · "ביטול" [chat_settings_screen.t04]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('ביטול'), findsWidgets,
-          reason: 'the chat_settings_screen.t04 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
+          reason: 'the chat_settings_screen.t04 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · ChatSettingsScreen · chat_settings_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · ChatSettingsScreen · "אפס" [chat_settings_screen.t05]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('אפס'), findsWidgets,
-          reason: 'the chat_settings_screen.t05 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('אפס')), isTrue,
+          reason: 'the chat_settings_screen.t05 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · ChatSettingsScreen · chat_settings_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _QuickReplyBanner · "תשובות מהירות" [chat_settings_screen.t06]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('תשובות מהירות'), findsWidgets,
-          reason: 'the chat_settings_screen.t06 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('תשובות מהירות')), isTrue,
+          reason: 'the chat_settings_screen.t06 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _QuickReplyBanner · chat_settings_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _QuickReplyBanner · "הבנתי" [chat_settings_screen.t07]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('הבנתי'), findsWidgets,
-          reason: 'the chat_settings_screen.t07 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הבנתי')), isTrue,
+          reason: 'the chat_settings_screen.t07 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _QuickReplyBanner · chat_settings_screen.t07 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -98,8 +98,8 @@ void main() {
     });
     testWidgets('wired · _QuickReplyBanner · "ערוך" [chat_settings_screen.t09]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('ערוך'), findsWidgets,
-          reason: 'the chat_settings_screen.t09 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('ערוך')), isTrue,
+          reason: 'the chat_settings_screen.t09 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _QuickReplyBanner · chat_settings_screen.t09 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -109,9 +109,9 @@ void main() {
     });
     testWidgets('verb · _QuickReplyBanner · tap "תשובות מהירות" → toast "התבנית הועתקה"', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      final btn = find.text('תשובות מהירות');
-      expect(btn, findsWidgets, reason: 'the "תשובות מהירות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תשובות מהירות')), isTrue,
+          reason: 'the "תשובות מהירות" trigger is present (any tab)');
+      await t.tap(find.text('תשובות מהירות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('התבנית הועתקה'), findsWidgets,
@@ -119,8 +119,8 @@ void main() {
     });
     testWidgets('wired · _PresenceSection · "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" [chat_settings_screen.t14]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות'), findsWidgets,
-          reason: 'the chat_settings_screen.t14 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the chat_settings_screen.t14 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _PresenceSection · chat_settings_screen.t14 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -130,8 +130,8 @@ void main() {
     });
     testWidgets('wired · _PresenceSection · "בבנייה — עדיין לא משפיע" [chat_settings_screen.t15]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה — עדיין לא משפיע'), findsWidgets,
-          reason: 'the chat_settings_screen.t15 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה — עדיין לא משפיע')), isTrue,
+          reason: 'the chat_settings_screen.t15 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _PresenceSection · chat_settings_screen.t15 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -147,8 +147,8 @@ void main() {
     });
     testWidgets('wired · _ChatNotifSection · "בבנייה" [chat_settings_screen.t17]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה'), findsWidgets,
-          reason: 'the chat_settings_screen.t17 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה')), isTrue,
+          reason: 'the chat_settings_screen.t17 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _ChatNotifSection · chat_settings_screen.t17 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -158,9 +158,9 @@ void main() {
     });
     testWidgets('verb · _ChatNotifSection · tap "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" → toast "\$label — בבנייה"', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      final btn = find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות');
-      expect(btn, findsWidgets, reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present (any tab)');
+      await t.tap(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
@@ -168,8 +168,8 @@ void main() {
     });
     testWidgets('wired · _ChatPrivacySection · "מחיקת היסטוריית שיחות" [chat_settings_screen.t10]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('מחיקת היסטוריית שיחות'), findsWidgets,
-          reason: 'the chat_settings_screen.t10 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('מחיקת היסטוריית שיחות')), isTrue,
+          reason: 'the chat_settings_screen.t10 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _ChatPrivacySection · chat_settings_screen.t10 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -179,8 +179,8 @@ void main() {
     });
     testWidgets('wired · _ChatPrivacySection · "היסטוריית השיחות תימחק והשיחות ייפתחו ריקות." [chat_settings_screen.t11]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.'), findsWidgets,
-          reason: 'the chat_settings_screen.t11 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.')), isTrue,
+          reason: 'the chat_settings_screen.t11 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _ChatPrivacySection · chat_settings_screen.t11 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -196,8 +196,8 @@ void main() {
     });
     testWidgets('wired · _ChatPrivacySection · "מחק" [chat_settings_screen.t13]', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      expect(find.text('מחק'), findsWidgets,
-          reason: 'the chat_settings_screen.t13 element renders on chat_settings_screen');
+      expect(await findAcrossTabs(t, find.text('מחק')), isTrue,
+          reason: 'the chat_settings_screen.t13 element renders on chat_settings_screen (any tab)');
     });
     testWidgets('hide · _ChatPrivacySection · chat_settings_screen.t13 → gone when hidden', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true,
@@ -207,9 +207,9 @@ void main() {
     });
     testWidgets('verb · _ChatPrivacySection · tap "מחיקת היסטוריית שיחות" → toast "\$label — בבנייה"', (t) async {
       await pumpScreen(t, const ChatSettingsScreen(), selfContained: true);
-      final btn = find.text('מחיקת היסטוריית שיחות');
-      expect(btn, findsWidgets, reason: 'the "מחיקת היסטוריית שיחות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('מחיקת היסטוריית שיחות')), isTrue,
+          reason: 'the "מחיקת היסטוריית שיחות" trigger is present (any tab)');
+      await t.tap(find.text('מחיקת היסטוריית שיחות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,

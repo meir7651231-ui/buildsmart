@@ -15,8 +15,8 @@ void main() {
   group('worker_safety_screen · generated (28 tests)', () {
     testWidgets('wired · WorkerSafetyScreen · "🛡️ תיק בטיחות" [worker_safety_screen.appbar_title]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('🛡️ תיק בטיחות'), findsWidgets,
-          reason: 'the worker_safety_screen.appbar_title element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('🛡️ תיק בטיחות')), isTrue,
+          reason: 'the worker_safety_screen.appbar_title element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.appbar_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "🎓 הוספת הדרכה" [worker_safety_screen.add_training_title]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('🎓 הוספת הדרכה'), findsWidgets,
-          reason: 'the worker_safety_screen.add_training_title element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('🎓 הוספת הדרכה')), isTrue,
+          reason: 'the worker_safety_screen.add_training_title element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.add_training_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "📄 צרף מסמך הדרכה (לא חובה)" [worker_safety_screen.attach_doc]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('📄 צרף מסמך הדרכה (לא חובה)'), findsWidgets,
-          reason: 'the worker_safety_screen.attach_doc element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('📄 צרף מסמך הדרכה (לא חובה)')), isTrue,
+          reason: 'the worker_safety_screen.attach_doc element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.attach_doc → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "📄 מסמך צורף ✓" [worker_safety_screen.doc_attached]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('📄 מסמך צורף ✓'), findsWidgets,
-          reason: 'the worker_safety_screen.doc_attached element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('📄 מסמך צורף ✓')), isTrue,
+          reason: 'the worker_safety_screen.doc_attached element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.doc_attached → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "💾 שמור הדרכה" [worker_safety_screen.save_training]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('💾 שמור הדרכה'), findsWidgets,
-          reason: 'the worker_safety_screen.save_training element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('💾 שמור הדרכה')), isTrue,
+          reason: 'the worker_safety_screen.save_training element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.save_training → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "🪪 הוספת תעודה" [worker_safety_screen.add_cert_title]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('🪪 הוספת תעודה'), findsWidgets,
-          reason: 'the worker_safety_screen.add_cert_title element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('🪪 הוספת תעודה')), isTrue,
+          reason: 'the worker_safety_screen.add_cert_title element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.add_cert_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "📷 צרף צילום תעודה (לא חובה)" [worker_safety_screen.attach_photo]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('📷 צרף צילום תעודה (לא חובה)'), findsWidgets,
-          reason: 'the worker_safety_screen.attach_photo element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('📷 צרף צילום תעודה (לא חובה)')), isTrue,
+          reason: 'the worker_safety_screen.attach_photo element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.attach_photo → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "📷 צילום צורף ✓" [worker_safety_screen.photo_attached]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('📷 צילום צורף ✓'), findsWidgets,
-          reason: 'the worker_safety_screen.photo_attached element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('📷 צילום צורף ✓')), isTrue,
+          reason: 'the worker_safety_screen.photo_attached element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.photo_attached → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · WorkerSafetyScreen · "💾 שמור תעודה" [worker_safety_screen.save_cert]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('💾 שמור תעודה'), findsWidgets,
-          reason: 'the worker_safety_screen.save_cert element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('💾 שמור תעודה')), isTrue,
+          reason: 'the worker_safety_screen.save_cert element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · WorkerSafetyScreen · worker_safety_screen.save_cert → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -114,8 +114,8 @@ void main() {
     });
     testWidgets('wired · _TrainingsCard · "אין הדרכות רשומות עדיין — הוסף את הראשונה." [worker_safety_screen.no_trainings]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('אין הדרכות רשומות עדיין — הוסף את הראשונה.'), findsWidgets,
-          reason: 'the worker_safety_screen.no_trainings element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('אין הדרכות רשומות עדיין — הוסף את הראשונה.')), isTrue,
+          reason: 'the worker_safety_screen.no_trainings element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · _TrainingsCard · worker_safety_screen.no_trainings → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -125,8 +125,8 @@ void main() {
     });
     testWidgets('wired · _TrainingsCard · "נתוני דמו — רישום הדרכות אמיתי יחובר עם חיבור השרת." [worker_safety_screen.demo_hint]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('נתוני דמו — רישום הדרכות אמיתי יחובר עם חיבור השרת.'), findsWidgets,
-          reason: 'the worker_safety_screen.demo_hint element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('נתוני דמו — רישום הדרכות אמיתי יחובר עם חיבור השרת.')), isTrue,
+          reason: 'the worker_safety_screen.demo_hint element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · _TrainingsCard · worker_safety_screen.demo_hint → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -136,8 +136,8 @@ void main() {
     });
     testWidgets('wired · _TrainingsCard · "➕ הוסף הדרכה" [worker_safety_screen.add_training_btn]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('➕ הוסף הדרכה'), findsWidgets,
-          reason: 'the worker_safety_screen.add_training_btn element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('➕ הוסף הדרכה')), isTrue,
+          reason: 'the worker_safety_screen.add_training_btn element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · _TrainingsCard · worker_safety_screen.add_training_btn → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -147,8 +147,8 @@ void main() {
     });
     testWidgets('wired · _CertsCard · "אין תעודות בארנק עדיין — הוסף את הראשונה." [worker_safety_screen.no_certs]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('אין תעודות בארנק עדיין — הוסף את הראשונה.'), findsWidgets,
-          reason: 'the worker_safety_screen.no_certs element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('אין תעודות בארנק עדיין — הוסף את הראשונה.')), isTrue,
+          reason: 'the worker_safety_screen.no_certs element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · _CertsCard · worker_safety_screen.no_certs → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',
@@ -158,8 +158,8 @@ void main() {
     });
     testWidgets('wired · _CertsCard · "➕ הוסף תעודה" [worker_safety_screen.add_cert_btn]', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker');
-      expect(find.text('➕ הוסף תעודה'), findsWidgets,
-          reason: 'the worker_safety_screen.add_cert_btn element renders on worker_safety_screen');
+      expect(await findAcrossTabs(t, find.text('➕ הוסף תעודה')), isTrue,
+          reason: 'the worker_safety_screen.add_cert_btn element renders on worker_safety_screen (any tab)');
     });
     testWidgets('hide · _CertsCard · worker_safety_screen.add_cert_btn → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerSafetyScreen(), selfContained: true, role: 'worker',

@@ -15,8 +15,8 @@ void main() {
   group('studio_screen · generated (12 tests)', () {
     testWidgets('wired · StudioScreen · "🎬 סטודיו" [studio_screen_old.t01]', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true);
-      expect(find.text('🎬 סטודיו'), findsWidgets,
-          reason: 'the studio_screen_old.t01 element renders on studio_screen');
+      expect(await findAcrossTabs(t, find.text('🎬 סטודיו')), isTrue,
+          reason: 'the studio_screen_old.t01 element renders on studio_screen (any tab)');
     });
     testWidgets('hide · StudioScreen · studio_screen_old.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · StudioScreen · "ערוך את האפליקציה — עורך ניסיוני" [studio_screen_old.t02]', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true);
-      expect(find.text('ערוך את האפליקציה — עורך ניסיוני'), findsWidgets,
-          reason: 'the studio_screen_old.t02 element renders on studio_screen');
+      expect(await findAcrossTabs(t, find.text('ערוך את האפליקציה — עורך ניסיוני')), isTrue,
+          reason: 'the studio_screen_old.t02 element renders on studio_screen (any tab)');
     });
     testWidgets('hide · StudioScreen · studio_screen_old.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _CoEditorPane · "🤖 תאר בעברית מה לשנות. אכין תצוגה מקדימה — שום דבר לא ישתנה עד שתאשר." [studio_screen_old.t03]', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true);
-      expect(find.text('🤖 תאר בעברית מה לשנות. אכין תצוגה מקדימה — שום דבר לא ישתנה עד שתאשר.'), findsWidgets,
-          reason: 'the studio_screen_old.t03 element renders on studio_screen');
+      expect(await findAcrossTabs(t, find.text('🤖 תאר בעברית מה לשנות. אכין תצוגה מקדימה — שום דבר לא ישתנה עד שתאשר.')), isTrue,
+          reason: 'the studio_screen_old.t03 element renders on studio_screen (any tab)');
     });
     testWidgets('hide · _CoEditorPane · studio_screen_old.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _CoEditorPane · "נסח שינוי לתצוגה מקדימה" [studio_screen_old.t04]', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true);
-      expect(find.text('נסח שינוי לתצוגה מקדימה'), findsWidgets,
-          reason: 'the studio_screen_old.t04 element renders on studio_screen');
+      expect(await findAcrossTabs(t, find.text('נסח שינוי לתצוגה מקדימה')), isTrue,
+          reason: 'the studio_screen_old.t04 element renders on studio_screen (any tab)');
     });
     testWidgets('hide · _CoEditorPane · studio_screen_old.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _CoEditorPane · "אשר והחל בטיוטה ✓" [studio_screen_old.t05]', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true);
-      expect(find.text('אשר והחל בטיוטה ✓'), findsWidgets,
-          reason: 'the studio_screen_old.t05 element renders on studio_screen');
+      expect(await findAcrossTabs(t, find.text('אשר והחל בטיוטה ✓')), isTrue,
+          reason: 'the studio_screen_old.t05 element renders on studio_screen (any tab)');
     });
     testWidgets('hide · _CoEditorPane · studio_screen_old.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _CoEditorPane · "👁️ תצוגה מקדימה (לפני החלה)" [studio_screen_old.t06]', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true);
-      expect(find.text('👁️ תצוגה מקדימה (לפני החלה)'), findsWidgets,
-          reason: 'the studio_screen_old.t06 element renders on studio_screen');
+      expect(await findAcrossTabs(t, find.text('👁️ תצוגה מקדימה (לפני החלה)')), isTrue,
+          reason: 'the studio_screen_old.t06 element renders on studio_screen (any tab)');
     });
     testWidgets('hide · _CoEditorPane · studio_screen_old.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioScreen(), selfContained: true,

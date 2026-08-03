@@ -15,8 +15,8 @@ void main() {
   group('manager_dashboard_screen · generated (43 tests)', () {
     testWidgets('wired · ManagerDashboardScreen · "מרכז השליטה" [manager.dash.title]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('מרכז השליטה'), findsWidgets,
-          reason: 'the manager.dash.title element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('מרכז השליטה')), isTrue,
+          reason: 'the manager.dash.title element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · ManagerDashboardScreen · manager.dash.title → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ManagerDashboardScreen · "מנהל המערכת" [manager.dash.subtitle]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('מנהל המערכת'), findsWidgets,
-          reason: 'the manager.dash.subtitle element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('מנהל המערכת')), isTrue,
+          reason: 'the manager.dash.subtitle element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · ManagerDashboardScreen · manager.dash.subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · ManagerDashboardScreen · "‹ יציאה" [manager.dash.exit]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('‹ יציאה'), findsWidgets,
-          reason: 'the manager.dash.exit element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('‹ יציאה')), isTrue,
+          reason: 'the manager.dash.exit element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · ManagerDashboardScreen · manager.dash.exit → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _DashboardTab · "שאל את העסק שלך" [manager.cockpit.copilot.title]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('שאל את העסק שלך'), findsWidgets,
-          reason: 'the manager.cockpit.copilot.title element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('שאל את העסק שלך')), isTrue,
+          reason: 'the manager.cockpit.copilot.title element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _DashboardTab · manager.cockpit.copilot.title → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _DashboardTab · "סטודיו — ערוך את האפליקציה" [manager_dashboard_screen.studio_hero_title]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('סטודיו — ערוך את האפליקציה'), findsWidgets,
-          reason: 'the manager_dashboard_screen.studio_hero_title element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('סטודיו — ערוך את האפליקציה')), isTrue,
+          reason: 'the manager_dashboard_screen.studio_hero_title element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _DashboardTab · manager_dashboard_screen.studio_hero_title → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _DashboardTab · "ניסיוני" [manager_dashboard_screen.studio_experimental_badge]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('ניסיוני'), findsWidgets,
-          reason: 'the manager_dashboard_screen.studio_experimental_badge element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('ניסיוני')), isTrue,
+          reason: 'the manager_dashboard_screen.studio_experimental_badge element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _DashboardTab · manager_dashboard_screen.studio_experimental_badge → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _DashboardTab · "צינור ההזמנות" [manager.dash.pipeline.title]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('צינור ההזמנות'), findsWidgets,
-          reason: 'the manager.dash.pipeline.title element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('צינור ההזמנות')), isTrue,
+          reason: 'the manager.dash.pipeline.title element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _DashboardTab · manager.dash.pipeline.title → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _OrdersTab · "לא נמצאו הזמנות תואמות." [manager.orders.empty]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('לא נמצאו הזמנות תואמות.'), findsWidgets,
-          reason: 'the manager.orders.empty element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('לא נמצאו הזמנות תואמות.')), isTrue,
+          reason: 'the manager.orders.empty element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _OrdersTab · manager.orders.empty → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · _OrdersTab · "✓ הושלם" [manager_dashboard_screen.order_completed_badge]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('✓ הושלם'), findsWidgets,
-          reason: 'the manager_dashboard_screen.order_completed_badge element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('✓ הושלם')), isTrue,
+          reason: 'the manager_dashboard_screen.order_completed_badge element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _OrdersTab · manager_dashboard_screen.order_completed_badge → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -114,8 +114,8 @@ void main() {
     });
     testWidgets('wired · _OrdersTab · "✓ ההזמנה הושלמה ונמסרה" [manager_dashboard_screen.order_completed_delivered]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('✓ ההזמנה הושלמה ונמסרה'), findsWidgets,
-          reason: 'the manager_dashboard_screen.order_completed_delivered element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('✓ ההזמנה הושלמה ונמסרה')), isTrue,
+          reason: 'the manager_dashboard_screen.order_completed_delivered element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _OrdersTab · manager_dashboard_screen.order_completed_delivered → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -125,8 +125,8 @@ void main() {
     });
     testWidgets('wired · _OrdersTab · "קדם שלב ›" [manager.orders.advance]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('קדם שלב ›'), findsWidgets,
-          reason: 'the manager.orders.advance element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('קדם שלב ›')), isTrue,
+          reason: 'the manager.orders.advance element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _OrdersTab · manager.orders.advance → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -136,9 +136,9 @@ void main() {
     });
     testWidgets('verb · _OrdersTab · tap "לא נמצאו הזמנות תואמות." → toast "הדפסה זמינה בדפדפן"', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      final btn = find.text('לא נמצאו הזמנות תואמות.');
-      expect(btn, findsWidgets, reason: 'the "לא נמצאו הזמנות תואמות." trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('לא נמצאו הזמנות תואמות.')), isTrue,
+          reason: 'the "לא נמצאו הזמנות תואמות." trigger is present (any tab)');
+      await t.tap(find.text('לא נמצאו הזמנות תואמות.').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('הדפסה זמינה בדפדפן'), findsWidgets,
@@ -146,8 +146,8 @@ void main() {
     });
     testWidgets('wired · _CustomersTab · "לא נמצאו קבלנים תואמים." [manager.customers.empty]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('לא נמצאו קבלנים תואמים.'), findsWidgets,
-          reason: 'the manager.customers.empty element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('לא נמצאו קבלנים תואמים.')), isTrue,
+          reason: 'the manager.customers.empty element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _CustomersTab · manager.customers.empty → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -157,8 +157,8 @@ void main() {
     });
     testWidgets('wired · _CustomersTab · "הסבר אשראי" [manager_dashboard_screen.credit_explain_btn]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('הסבר אשראי'), findsWidgets,
-          reason: 'the manager_dashboard_screen.credit_explain_btn element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('הסבר אשראי')), isTrue,
+          reason: 'the manager_dashboard_screen.credit_explain_btn element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _CustomersTab · manager_dashboard_screen.credit_explain_btn → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -168,8 +168,8 @@ void main() {
     });
     testWidgets('wired · _CustomersTab · "🧭 מסע הלקוח" [manager_dashboard_screen.journey_title]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('🧭 מסע הלקוח'), findsWidgets,
-          reason: 'the manager_dashboard_screen.journey_title element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('🧭 מסע הלקוח')), isTrue,
+          reason: 'the manager_dashboard_screen.journey_title element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _CustomersTab · manager_dashboard_screen.journey_title → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -179,8 +179,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית." [manager.manage.intro]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.'), findsWidgets,
-          reason: 'the manager.manage.intro element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.')), isTrue,
+          reason: 'the manager.manage.intro element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager.manage.intro → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -190,8 +190,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "🎉 אין משימות הממתינות לאישור." [manager_dashboard_screen.approvals_empty]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('🎉 אין משימות הממתינות לאישור.'), findsWidgets,
-          reason: 'the manager_dashboard_screen.approvals_empty element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('🎉 אין משימות הממתינות לאישור.')), isTrue,
+          reason: 'the manager_dashboard_screen.approvals_empty element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager_dashboard_screen.approvals_empty → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -201,8 +201,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "אין בקשות חופשה." [manager_dashboard_screen.vacations_empty]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('אין בקשות חופשה.'), findsWidgets,
-          reason: 'the manager_dashboard_screen.vacations_empty element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('אין בקשות חופשה.')), isTrue,
+          reason: 'the manager_dashboard_screen.vacations_empty element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager_dashboard_screen.vacations_empty → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -212,8 +212,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו." [manager_dashboard_screen.producttree_intro]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.'), findsWidgets,
-          reason: 'the manager_dashboard_screen.producttree_intro element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.')), isTrue,
+          reason: 'the manager_dashboard_screen.producttree_intro element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager_dashboard_screen.producttree_intro → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -223,8 +223,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "🔬 פתח מרכז בדיקות רגרסיה" [manager.manage.regression.open]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('🔬 פתח מרכז בדיקות רגרסיה'), findsWidgets,
-          reason: 'the manager.manage.regression.open element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('🔬 פתח מרכז בדיקות רגרסיה')), isTrue,
+          reason: 'the manager.manage.regression.open element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager.manage.regression.open → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -234,8 +234,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "🔑 פתח שיוך תפקידים" [manager.manage.roles.open]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('🔑 פתח שיוך תפקידים'), findsWidgets,
-          reason: 'the manager.manage.roles.open element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('🔑 פתח שיוך תפקידים')), isTrue,
+          reason: 'the manager.manage.roles.open element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager.manage.roles.open → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',
@@ -245,8 +245,8 @@ void main() {
     });
     testWidgets('wired · _ManageTab · "📋 פתח בקשות אישור" [manager.manage.approvals.open]', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager');
-      expect(find.text('📋 פתח בקשות אישור'), findsWidgets,
-          reason: 'the manager.manage.approvals.open element renders on manager_dashboard_screen');
+      expect(await findAcrossTabs(t, find.text('📋 פתח בקשות אישור')), isTrue,
+          reason: 'the manager.manage.approvals.open element renders on manager_dashboard_screen (any tab)');
     });
     testWidgets('hide · _ManageTab · manager.manage.approvals.open → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerDashboardScreen(), selfContained: true, role: 'manager',

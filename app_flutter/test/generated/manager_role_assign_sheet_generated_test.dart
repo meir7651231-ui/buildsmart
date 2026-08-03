@@ -15,8 +15,8 @@ void main() {
   group('manager_role_assign_sheet · generated (8 tests)', () {
     testWidgets('wired · ManagerRoleAssignSheet · "שיוך תפקיד למשתמש" [manager_role_assign_sheet.t01]', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager');
-      expect(find.text('שיוך תפקיד למשתמש'), findsWidgets,
-          reason: 'the manager_role_assign_sheet.t01 element renders on manager_role_assign_sheet');
+      expect(await findAcrossTabs(t, find.text('שיוך תפקיד למשתמש')), isTrue,
+          reason: 'the manager_role_assign_sheet.t01 element renders on manager_role_assign_sheet (any tab)');
     });
     testWidgets('hide · ManagerRoleAssignSheet · manager_role_assign_sheet.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ManagerRoleAssignSheet · "אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה." [manager_role_assign_sheet.t02]', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager');
-      expect(find.text('אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.'), findsWidgets,
-          reason: 'the manager_role_assign_sheet.t02 element renders on manager_role_assign_sheet');
+      expect(await findAcrossTabs(t, find.text('אתר משתמש לפי טלפון (או הדבק מזהה uid) ובחר תפקיד להקצאה.')), isTrue,
+          reason: 'the manager_role_assign_sheet.t02 element renders on manager_role_assign_sheet (any tab)');
     });
     testWidgets('hide · ManagerRoleAssignSheet · manager_role_assign_sheet.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · ManagerRoleAssignSheet · "תפקיד" [manager_role_assign_sheet.t03]', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager');
-      expect(find.text('תפקיד'), findsWidgets,
-          reason: 'the manager_role_assign_sheet.t03 element renders on manager_role_assign_sheet');
+      expect(await findAcrossTabs(t, find.text('תפקיד')), isTrue,
+          reason: 'the manager_role_assign_sheet.t03 element renders on manager_role_assign_sheet (any tab)');
     });
     testWidgets('hide · ManagerRoleAssignSheet · manager_role_assign_sheet.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _AssignButton · "שייך תפקיד" [manager_role_assign_sheet.t04]', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager');
-      expect(find.text('שייך תפקיד'), findsWidgets,
-          reason: 'the manager_role_assign_sheet.t04 element renders on manager_role_assign_sheet');
+      expect(await findAcrossTabs(t, find.text('שייך תפקיד')), isTrue,
+          reason: 'the manager_role_assign_sheet.t04 element renders on manager_role_assign_sheet (any tab)');
     });
     testWidgets('hide · _AssignButton · manager_role_assign_sheet.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerRoleAssignSheet(), selfContained: false, role: 'manager',

@@ -15,8 +15,8 @@ void main() {
   group('home_shell · generated (8 tests)', () {
     testWidgets('wired · _HelpModeOverlay · "מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה" [home.helpmode.banner]', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false);
-      expect(find.text('מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה'), findsWidgets,
-          reason: 'the home.helpmode.banner element renders on home_shell');
+      expect(await findAcrossTabs(t, find.text('מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה')), isTrue,
+          reason: 'the home.helpmode.banner element renders on home_shell (any tab)');
     });
     testWidgets('hide · _HelpModeOverlay · home.helpmode.banner → gone when hidden', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _HomeAppBar · "✏️ שיחה חדשה" [home.newchat.title]', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false);
-      expect(find.text('✏️ שיחה חדשה'), findsWidgets,
-          reason: 'the home.newchat.title element renders on home_shell');
+      expect(await findAcrossTabs(t, find.text('✏️ שיחה חדשה')), isTrue,
+          reason: 'the home.newchat.title element renders on home_shell (any tab)');
     });
     testWidgets('hide · _HomeAppBar · home.newchat.title → gone when hidden', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _HomeAppBar · "בחר סוג איש קשר" [home.newchat.subtitle]', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false);
-      expect(find.text('בחר סוג איש קשר'), findsWidgets,
-          reason: 'the home.newchat.subtitle element renders on home_shell');
+      expect(await findAcrossTabs(t, find.text('בחר סוג איש קשר')), isTrue,
+          reason: 'the home.newchat.subtitle element renders on home_shell (any tab)');
     });
     testWidgets('hide · _HomeAppBar · home.newchat.subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _HomeAppBar · "אין עדיין משתמשים" [home.newchat.empty]', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false);
-      expect(find.text('אין עדיין משתמשים'), findsWidgets,
-          reason: 'the home.newchat.empty element renders on home_shell');
+      expect(await findAcrossTabs(t, find.text('אין עדיין משתמשים')), isTrue,
+          reason: 'the home.newchat.empty element renders on home_shell (any tab)');
     });
     testWidgets('hide · _HomeAppBar · home.newchat.empty → gone when hidden', (t) async {
       await pumpScreen(t, const HomeShell(), selfContained: false,

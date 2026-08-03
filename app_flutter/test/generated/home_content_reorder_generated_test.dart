@@ -15,8 +15,8 @@ void main() {
   group('home_content_reorder · generated (9 tests)', () {
     testWidgets('wired · HomeContentReorder · "🏠 תוכן הבית" [home_content_reorder.t01]', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false);
-      expect(find.text('🏠 תוכן הבית'), findsWidgets,
-          reason: 'the home_content_reorder.t01 element renders on home_content_reorder');
+      expect(await findAcrossTabs(t, find.text('🏠 תוכן הבית')), isTrue,
+          reason: 'the home_content_reorder.t01 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · HomeContentReorder · home_content_reorder.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · HomeContentReorder · "‹ חזרה" [home_content_reorder.t02]', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false);
-      expect(find.text('‹ חזרה'), findsWidgets,
-          reason: 'the home_content_reorder.t02 element renders on home_content_reorder');
+      expect(await findAcrossTabs(t, find.text('‹ חזרה')), isTrue,
+          reason: 'the home_content_reorder.t02 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · HomeContentReorder · home_content_reorder.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _Body · "מסך הבית שלי" [home_content_reorder.t03]', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false);
-      expect(find.text('מסך הבית שלי'), findsWidgets,
-          reason: 'the home_content_reorder.t03 element renders on home_content_reorder');
+      expect(await findAcrossTabs(t, find.text('מסך הבית שלי')), isTrue,
+          reason: 'the home_content_reorder.t03 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · _Body · home_content_reorder.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _Body · "איפוס" [home_content_reorder.t04]', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false);
-      expect(find.text('איפוס'), findsWidgets,
-          reason: 'the home_content_reorder.t04 element renders on home_content_reorder');
+      expect(await findAcrossTabs(t, find.text('איפוס')), isTrue,
+          reason: 'the home_content_reorder.t04 element renders on home_content_reorder (any tab)');
     });
     testWidgets('hide · _Body · home_content_reorder.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false,
@@ -59,9 +59,9 @@ void main() {
     });
     testWidgets('verb · _Body · tap "מסך הבית שלי" → toast "הסדר וההסתרות אופסו לברירת מחדל"', (t) async {
       await pumpScreen(t, const HomeContentReorder(), selfContained: false);
-      final btn = find.text('מסך הבית שלי');
-      expect(btn, findsWidgets, reason: 'the "מסך הבית שלי" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('מסך הבית שלי')), isTrue,
+          reason: 'the "מסך הבית שלי" trigger is present (any tab)');
+      await t.tap(find.text('מסך הבית שלי').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('הסדר וההסתרות אופסו לברירת מחדל'), findsWidgets,

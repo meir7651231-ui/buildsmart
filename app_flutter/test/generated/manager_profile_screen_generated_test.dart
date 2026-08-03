@@ -15,8 +15,8 @@ void main() {
   group('manager_profile_screen · generated (12 tests)', () {
     testWidgets('wired · ManagerProfileScreen · "אזור אישי — מנהל המערכת" [manager_profile_screen.t01]', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
-      expect(find.text('אזור אישי — מנהל המערכת'), findsWidgets,
-          reason: 'the manager_profile_screen.t01 element renders on manager_profile_screen');
+      expect(await findAcrossTabs(t, find.text('אזור אישי — מנהל המערכת')), isTrue,
+          reason: 'the manager_profile_screen.t01 element renders on manager_profile_screen (any tab)');
     });
     testWidgets('hide · ManagerProfileScreen · manager_profile_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _ManagerProfileBody · "מצב הדגמה" [manager_profile_screen.t02]', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
-      expect(find.text('מצב הדגמה'), findsWidgets,
-          reason: 'the manager_profile_screen.t02 element renders on manager_profile_screen');
+      expect(await findAcrossTabs(t, find.text('מצב הדגמה')), isTrue,
+          reason: 'the manager_profile_screen.t02 element renders on manager_profile_screen (any tab)');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _ManagerProfileBody · "הזמנות — סטטיסטיקה" [manager_profile_screen.t03]', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
-      expect(find.text('הזמנות — סטטיסטיקה'), findsWidgets,
-          reason: 'the manager_profile_screen.t03 element renders on manager_profile_screen');
+      expect(await findAcrossTabs(t, find.text('הזמנות — סטטיסטיקה')), isTrue,
+          reason: 'the manager_profile_screen.t03 element renders on manager_profile_screen (any tab)');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _ManagerProfileBody · "הגדרות" [manager_profile_screen.t04]', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
-      expect(find.text('הגדרות'), findsWidgets,
-          reason: 'the manager_profile_screen.t04 element renders on manager_profile_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות')), isTrue,
+          reason: 'the manager_profile_screen.t04 element renders on manager_profile_screen (any tab)');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _ManagerProfileBody · "מעבר בין מסכים" [manager_profile_screen.t05]', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
-      expect(find.text('מעבר בין מסכים'), findsWidgets,
-          reason: 'the manager_profile_screen.t05 element renders on manager_profile_screen');
+      expect(await findAcrossTabs(t, find.text('מעבר בין מסכים')), isTrue,
+          reason: 'the manager_profile_screen.t05 element renders on manager_profile_screen (any tab)');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _ManagerProfileBody · "צפייה בכל לוח — מצב מנהל" [manager_profile_screen.t06]', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager');
-      expect(find.text('צפייה בכל לוח — מצב מנהל'), findsWidgets,
-          reason: 'the manager_profile_screen.t06 element renders on manager_profile_screen');
+      expect(await findAcrossTabs(t, find.text('צפייה בכל לוח — מצב מנהל')), isTrue,
+          reason: 'the manager_profile_screen.t06 element renders on manager_profile_screen (any tab)');
     });
     testWidgets('hide · _ManagerProfileBody · manager_profile_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerProfileScreen(), selfContained: true, role: 'manager',

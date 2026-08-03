@@ -15,8 +15,8 @@ void main() {
   group('courier_reports_tab · generated (22 tests)', () {
     testWidgets('wired · CourierReportsTab · "📊 דוחות" [courier.reports.title]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('📊 דוחות'), findsWidgets,
-          reason: 'the courier.reports.title element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('📊 דוחות')), isTrue,
+          reason: 'the courier.reports.title element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier.reports.title → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "נתונים חיים ממנוע ההזמנות המשותף — ללא המצאות" [courier.reports.subtitle]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('נתונים חיים ממנוע ההזמנות המשותף — ללא המצאות'), findsWidgets,
-          reason: 'the courier.reports.subtitle element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('נתונים חיים ממנוע ההזמנות המשותף — ללא המצאות')), isTrue,
+          reason: 'the courier.reports.subtitle element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier.reports.subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "מסירות ישנות ללא ייחוס אינן נספרות" [courier_reports_tab.t01]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('מסירות ישנות ללא ייחוס אינן נספרות'), findsWidgets,
-          reason: 'the courier_reports_tab.t01 element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('מסירות ישנות ללא ייחוס אינן נספרות')), isTrue,
+          reason: 'the courier_reports_tab.t01 element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier_reports_tab.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע אישור האיסוף ועד המסירה ללקוח." [courier_reports_tab.t02]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע אישור האיסוף ועד המסירה ללקוח.'), findsWidgets,
-          reason: 'the courier_reports_tab.t02 element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('אין עדיין מדידות זמן — הזמן נמדד אוטומטית מרגע אישור האיסוף ועד המסירה ללקוח.')), isTrue,
+          reason: 'the courier_reports_tab.t02 element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier_reports_tab.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "היסטוריית מסירות" [courier.reports.history_title]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('היסטוריית מסירות'), findsWidgets,
-          reason: 'the courier.reports.history_title element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('היסטוריית מסירות')), isTrue,
+          reason: 'the courier.reports.history_title element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier.reports.history_title → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "אין עדיין מסירות שהושלמו" [courier.reports.empty_title]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('אין עדיין מסירות שהושלמו'), findsWidgets,
-          reason: 'the courier.reports.empty_title element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('אין עדיין מסירות שהושלמו')), isTrue,
+          reason: 'the courier.reports.empty_title element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier.reports.empty_title → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "משלוח שיסומן "נמסר ללקוח" יופיע כאן" [courier_reports_tab.t03]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('משלוח שיסומן "נמסר ללקוח" יופיע כאן'), findsWidgets,
-          reason: 'the courier_reports_tab.t03 element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('משלוח שיסומן "נמסר ללקוח" יופיע כאן')), isTrue,
+          reason: 'the courier_reports_tab.t03 element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier_reports_tab.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "🏪 שלח דוח-יומי לחנות" [courier.reports.send_report]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('🏪 שלח דוח-יומי לחנות'), findsWidgets,
-          reason: 'the courier.reports.send_report element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('🏪 שלח דוח-יומי לחנות')), isTrue,
+          reason: 'the courier.reports.send_report element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier.reports.send_report → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "נסח דוח עם AI" [courier_reports_tab.t04]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('נסח דוח עם AI'), findsWidgets,
-          reason: 'the courier_reports_tab.t04 element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('נסח דוח עם AI')), isTrue,
+          reason: 'the courier_reports_tab.t04 element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier_reports_tab.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -114,8 +114,8 @@ void main() {
     });
     testWidgets('wired · CourierReportsTab · "הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות." [courier_reports_tab.t05]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.'), findsWidgets,
-          reason: 'the courier_reports_tab.t05 element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.')), isTrue,
+          reason: 'the courier_reports_tab.t05 element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · CourierReportsTab · courier_reports_tab.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
@@ -125,8 +125,8 @@ void main() {
     });
     testWidgets('wired · _DeliveredCard · "נמסר ✓" [courier_reports_tab.t06]', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier');
-      expect(find.text('נמסר ✓'), findsWidgets,
-          reason: 'the courier_reports_tab.t06 element renders on courier_reports_tab');
+      expect(await findAcrossTabs(t, find.text('נמסר ✓')), isTrue,
+          reason: 'the courier_reports_tab.t06 element renders on courier_reports_tab (any tab)');
     });
     testWidgets('hide · _DeliveredCard · courier_reports_tab.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierReportsTab(), selfContained: false, role: 'courier',
