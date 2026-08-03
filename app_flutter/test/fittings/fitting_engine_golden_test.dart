@@ -25,6 +25,22 @@ void main() {
     expect(rows.length, greaterThanOrEqualTo(140));
   });
 
+  // The diagram-selector (`elbow_auto`) — a helper NOT wired into the ENGINE
+  // dispatch, so the golden rows never touch its threshold. Cover it directly so
+  // a `>=`/`>` or branch regression can't hide (per port-review, 2026-08-03).
+  group('elbowAuto selector — mitered ≥160, plain elbow <160', () {
+    test('<160 → plain elbow (byte-identical to elbow())', () {
+      for (final d in [50, 90, 125]) {
+        expect(elbowAuto(d), elbow(d), reason: 'elbowAuto($d)');
+      }
+    });
+    test('≥160 → mitered (byte-identical to miteredElbow())', () {
+      for (final d in [160, 200, 400]) {
+        expect(elbowAuto(d), miteredElbow(d), reason: 'elbowAuto($d)');
+      }
+    });
+  });
+
   group('generate() ≡ pure_engine.py (byte-identical, every letter)', () {
     for (final row in rows) {
       final family = row['family'] as String;

@@ -185,10 +185,13 @@ Map<String, double> generate(String family, int od, {int? od2}) {
   switch (family) {
     case 'מצמד':
       return coupler(od);
+    // 1:1 עם `pure_engine.ENGINE`: 90°/45° = `elbow(d, angle)` תמיד (תקף ל-OD
+    // שב-DEPTH, ≤125). ברך-גדולה ≥160 היא משפחה נפרדת ('ברך מחותכת') — לא מיתוג
+    // אוטומטי כאן. `elbowAuto` (הבורר) נשאר helper מיוצא ל-פאזה-C, עם כיסוי-ישיר.
     case 'ברך 90°':
-      return elbowAuto(od);
+      return elbow(od); // angle=90 (ברירת-מחדל)
     case 'ברך 45°':
-      return elbowAuto(od, angle: 45);
+      return elbow(od, angle: 45);
     case 'ברך מחותכת':
       return miteredElbow(od);
     case 'מסעף (טי)':
