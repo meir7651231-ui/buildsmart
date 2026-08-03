@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pB3 — 🛡️ מנוע-קטלוג-3D · פאזה B (31): פרמטרי-ריתוך DVS (M5) — 2026-08-03
+`lib/features/fittings/plan/weld_table.dart` (מגודר) — **ערכי-ייחוס בלבד**, verbatim מהמקור-המאומת `gen3d.html` (`WELD` @ `:362` + הערת-האזהרה @ `:417`). `WeldParams{od, heatSec, joinSec, coolMin, headTempC=260, caveat}` + `weldParamsFor(od)`. **🛡️ M5 חרוט-מבנית:** (1) `caveat` הוא שדה-**required** — אין `WeldParams` בלי אזהרת-יצרן; (2) OD לא-בטבלה → `null`, לעולם לא ערך-ריתוך משוער; (3) `kWeldCaveat` verbatim ("DVS 2207-11 · לאמת מול דף-יצרן · מתקין מוסמך בלבד"). `weld_table_test`: golden-מול-WELD · אכיפת-caveat פר-קריאה · null-ללא-מקור · mutation-L3. fittings 195/195.
+
 ## #fittings-engine-pB2 — ✂️ מנוע-קטלוג-3D · פאזה B (33): ניכוי-חיתוך Z (מגודר) — 2026-08-03
 `lib/features/fittings/plan/cut_list.dart` (מגודר): `cutDeductionFor(family, od, {socket})` = הניכוי פר-קצה (`מרכז→תחתית-שקע = פתח−F`) + `pipeCutLength(c2c, z1, z2) = c2c − z1 − z2`. פר-משפחה מ-אותיות-golden: ברך `Z=z` · מצמד `A/2−F` · טי רַץ `B/2` / הסתעפות `A−F`. משפחות א-סימטריות/קצה → `null` (M1, פרוסה נפרדת · מתועד). `cut_list_test`: golden-גיאומטריה · pipeCutLength · mutation-L3. היסוד לכתב-כמויות (פאזה C). fittings 190/190.
 
