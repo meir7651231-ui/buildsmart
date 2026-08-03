@@ -15,8 +15,8 @@ void main() {
   group('suppliers_screen · generated (2 tests)', () {
     testWidgets('wired · SuppliersScreen · "ספקים ומותגים" [suppliers_screen.title]', (t) async {
       await pumpScreen(t, const SuppliersScreen(), selfContained: true, role: 'store');
-      expect(find.text('ספקים ומותגים'), findsWidgets,
-          reason: 'the suppliers_screen.title element renders on suppliers_screen');
+      expect(await findAcrossTabs(t, find.text('ספקים ומותגים')), isTrue,
+          reason: 'the suppliers_screen.title element renders on suppliers_screen (any tab)');
     });
     testWidgets('hide · SuppliersScreen · suppliers_screen.title → gone when hidden', (t) async {
       await pumpScreen(t, const SuppliersScreen(), selfContained: true, role: 'store',

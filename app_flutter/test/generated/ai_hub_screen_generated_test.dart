@@ -15,8 +15,8 @@ void main() {
   group('ai_hub_screen · generated (2 tests)', () {
     testWidgets('wired · AIHubScreen · "הדפדפן לא תומך בחיפוש קולי" [ai_hub_screen.t01]', (t) async {
       await pumpScreen(t, const AIHubScreen(), selfContained: true);
-      expect(find.text('הדפדפן לא תומך בחיפוש קולי'), findsWidgets,
-          reason: 'the ai_hub_screen.t01 element renders on ai_hub_screen');
+      expect(await findAcrossTabs(t, find.text('הדפדפן לא תומך בחיפוש קולי')), isTrue,
+          reason: 'the ai_hub_screen.t01 element renders on ai_hub_screen (any tab)');
     });
     testWidgets('hide · AIHubScreen · ai_hub_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const AIHubScreen(), selfContained: true,

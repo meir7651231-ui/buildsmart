@@ -15,8 +15,8 @@ void main() {
   group('courier_portal_tab · generated (6 tests)', () {
     testWidgets('wired · CourierPortalTab · "🧰 פורטל השליח" [courier_portal_tab.t01]', (t) async {
       await pumpScreen(t, const CourierPortalTab(), selfContained: false, role: 'courier');
-      expect(find.text('🧰 פורטל השליח'), findsWidgets,
-          reason: 'the courier_portal_tab.t01 element renders on courier_portal_tab');
+      expect(await findAcrossTabs(t, find.text('🧰 פורטל השליח')), isTrue,
+          reason: 'the courier_portal_tab.t01 element renders on courier_portal_tab (any tab)');
     });
     testWidgets('hide · CourierPortalTab · courier_portal_tab.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierPortalTab(), selfContained: false, role: 'courier',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · CourierPortalTab · "ניווט, צי רכב, צ׳אט ומעקב SLA" [courier_portal_tab.t02]', (t) async {
       await pumpScreen(t, const CourierPortalTab(), selfContained: false, role: 'courier');
-      expect(find.text('ניווט, צי רכב, צ׳אט ומעקב SLA'), findsWidgets,
-          reason: 'the courier_portal_tab.t02 element renders on courier_portal_tab');
+      expect(await findAcrossTabs(t, find.text('ניווט, צי רכב, צ׳אט ומעקב SLA')), isTrue,
+          reason: 'the courier_portal_tab.t02 element renders on courier_portal_tab (any tab)');
     });
     testWidgets('hide · CourierPortalTab · courier_portal_tab.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierPortalTab(), selfContained: false, role: 'courier',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _DestinationCard · "🧭 פתח ניווט — יחובר עם חיבור השרת" [courier_portal_tab.t03]', (t) async {
       await pumpScreen(t, const CourierPortalTab(), selfContained: false, role: 'courier');
-      expect(find.text('🧭 פתח ניווט — יחובר עם חיבור השרת'), findsWidgets,
-          reason: 'the courier_portal_tab.t03 element renders on courier_portal_tab');
+      expect(await findAcrossTabs(t, find.text('🧭 פתח ניווט — יחובר עם חיבור השרת')), isTrue,
+          reason: 'the courier_portal_tab.t03 element renders on courier_portal_tab (any tab)');
     });
     testWidgets('hide · _DestinationCard · courier_portal_tab.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const CourierPortalTab(), selfContained: false, role: 'courier',

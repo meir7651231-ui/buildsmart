@@ -15,8 +15,8 @@ void main() {
   group('notif_settings_screen · generated (22 tests)', () {
     testWidgets('wired · NotifSettingsScreen · "הגדרות התראות" [notif_settings_screen.t01]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('הגדרות התראות'), findsWidgets,
-          reason: 'the notif_settings_screen.t01 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות התראות')), isTrue,
+          reason: 'the notif_settings_screen.t01 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · NotifSettingsScreen · notif_settings_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · NotifSettingsScreen · "איפוס הגדרות?" [notif_settings_screen.t02]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('איפוס הגדרות?'), findsWidgets,
-          reason: 'the notif_settings_screen.t02 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('איפוס הגדרות?')), isTrue,
+          reason: 'the notif_settings_screen.t02 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · NotifSettingsScreen · notif_settings_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · NotifSettingsScreen · "כל הגדרות ההתראות יוחזרו לברירת המחדל." [notif_settings_screen.t03]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('כל הגדרות ההתראות יוחזרו לברירת המחדל.'), findsWidgets,
-          reason: 'the notif_settings_screen.t03 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('כל הגדרות ההתראות יוחזרו לברירת המחדל.')), isTrue,
+          reason: 'the notif_settings_screen.t03 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · NotifSettingsScreen · notif_settings_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · NotifSettingsScreen · "ביטול" [notif_settings_screen.t04]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('ביטול'), findsWidgets,
-          reason: 'the notif_settings_screen.t04 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
+          reason: 'the notif_settings_screen.t04 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · NotifSettingsScreen · notif_settings_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · NotifSettingsScreen · "אפס" [notif_settings_screen.t05]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('אפס'), findsWidgets,
-          reason: 'the notif_settings_screen.t05 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('אפס')), isTrue,
+          reason: 'the notif_settings_screen.t05 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · NotifSettingsScreen · notif_settings_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _SnoozeBanner · "🔇 השתק התראות" [notif_settings_screen.t06]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('🔇 השתק התראות'), findsWidgets,
-          reason: 'the notif_settings_screen.t06 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('🔇 השתק התראות')), isTrue,
+          reason: 'the notif_settings_screen.t06 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · _SnoozeBanner · notif_settings_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -81,9 +81,9 @@ void main() {
     });
     testWidgets('verb · _SnoozeBanner · tap "🔇 השתק התראות" → toast "השתקה בוטלה"', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      final btn = find.text('🔇 השתק התראות');
-      expect(btn, findsWidgets, reason: 'the "🔇 השתק התראות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('🔇 השתק התראות')), isTrue,
+          reason: 'the "🔇 השתק התראות" trigger is present (any tab)');
+      await t.tap(find.text('🔇 השתק התראות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('השתקה בוטלה'), findsWidgets,
@@ -91,8 +91,8 @@ void main() {
     });
     testWidgets('wired · _ChannelsSection · "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" [notif_settings_screen.t07]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות'), findsWidgets,
-          reason: 'the notif_settings_screen.t07 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the notif_settings_screen.t07 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · _ChannelsSection · notif_settings_screen.t07 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -102,8 +102,8 @@ void main() {
     });
     testWidgets('wired · _ChannelsSection · "דורש חיבור שרת — לא זמין בגרסה זו" [notif_settings_screen.t08]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('דורש חיבור שרת — לא זמין בגרסה זו'), findsWidgets,
-          reason: 'the notif_settings_screen.t08 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('דורש חיבור שרת — לא זמין בגרסה זו')), isTrue,
+          reason: 'the notif_settings_screen.t08 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · _ChannelsSection · notif_settings_screen.t08 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -113,8 +113,8 @@ void main() {
     });
     testWidgets('wired · _ChannelsSection · "בבנייה — עדיין לא משפיע" [notif_settings_screen.t09]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה — עדיין לא משפיע'), findsWidgets,
-          reason: 'the notif_settings_screen.t09 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה — עדיין לא משפיע')), isTrue,
+          reason: 'the notif_settings_screen.t09 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · _ChannelsSection · notif_settings_screen.t09 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -124,8 +124,8 @@ void main() {
     });
     testWidgets('wired · _SoundSection · "בבנייה" [notif_settings_screen.t10]', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה'), findsWidgets,
-          reason: 'the notif_settings_screen.t10 element renders on notif_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה')), isTrue,
+          reason: 'the notif_settings_screen.t10 element renders on notif_settings_screen (any tab)');
     });
     testWidgets('hide · _SoundSection · notif_settings_screen.t10 → gone when hidden', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true,
@@ -135,9 +135,9 @@ void main() {
     });
     testWidgets('verb · _SoundSection · tap "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" → toast "\$label — בבנייה"', (t) async {
       await pumpScreen(t, const NotifSettingsScreen(), selfContained: true);
-      final btn = find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות');
-      expect(btn, findsWidgets, reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות')), isTrue,
+          reason: 'the "בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות" trigger is present (any tab)');
+      await t.tap(find.text('בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,

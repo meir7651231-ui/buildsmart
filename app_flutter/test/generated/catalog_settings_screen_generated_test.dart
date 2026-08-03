@@ -15,8 +15,8 @@ void main() {
   group('catalog_settings_screen · generated (27 tests)', () {
     testWidgets('wired · CatalogSettingsScreen · "הגדרות" [catalog_settings_screen.t01]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('הגדרות'), findsWidgets,
-          reason: 'the catalog_settings_screen.t01 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות')), isTrue,
+          reason: 'the catalog_settings_screen.t01 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · CatalogSettingsScreen · catalog_settings_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · CatalogSettingsScreen · "איפוס הגדרות?" [catalog_settings_screen.t02]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('איפוס הגדרות?'), findsWidgets,
-          reason: 'the catalog_settings_screen.t02 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('איפוס הגדרות?')), isTrue,
+          reason: 'the catalog_settings_screen.t02 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · CatalogSettingsScreen · catalog_settings_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · CatalogSettingsScreen · "כל ההגדרות יוחזרו לברירת המחדל." [catalog_settings_screen.t03]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('כל ההגדרות יוחזרו לברירת המחדל.'), findsWidgets,
-          reason: 'the catalog_settings_screen.t03 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('כל ההגדרות יוחזרו לברירת המחדל.')), isTrue,
+          reason: 'the catalog_settings_screen.t03 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · CatalogSettingsScreen · catalog_settings_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · CatalogSettingsScreen · "ביטול" [catalog_settings_screen.t04]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('ביטול'), findsWidgets,
-          reason: 'the catalog_settings_screen.t04 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
+          reason: 'the catalog_settings_screen.t04 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · CatalogSettingsScreen · catalog_settings_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · CatalogSettingsScreen · "אפס" [catalog_settings_screen.t05]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('אפס'), findsWidgets,
-          reason: 'the catalog_settings_screen.t05 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('אפס')), isTrue,
+          reason: 'the catalog_settings_screen.t05 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · CatalogSettingsScreen · catalog_settings_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _ProfileRow · "הפרופיל שלי" [catalog_settings_screen.t06]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('הפרופיל שלי'), findsWidgets,
-          reason: 'the catalog_settings_screen.t06 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('הפרופיל שלי')), isTrue,
+          reason: 'the catalog_settings_screen.t06 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _ProfileRow · catalog_settings_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _ThemeSection · "סידור מסך הבית" [catalog_settings_screen.t07]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('סידור מסך הבית'), findsWidgets,
-          reason: 'the catalog_settings_screen.t07 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('סידור מסך הבית')), isTrue,
+          reason: 'the catalog_settings_screen.t07 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _ThemeSection · catalog_settings_screen.t07 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _ThemeSection · "גרור לשנות את סדר המקטעים בבית" [catalog_settings_screen.t08]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('גרור לשנות את סדר המקטעים בבית'), findsWidgets,
-          reason: 'the catalog_settings_screen.t08 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('גרור לשנות את סדר המקטעים בבית')), isTrue,
+          reason: 'the catalog_settings_screen.t08 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _ThemeSection · catalog_settings_screen.t08 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · _ThemeSection · "בקרוב" [catalog_settings_screen.t11]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('בקרוב'), findsWidgets,
-          reason: 'the catalog_settings_screen.t11 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
+          reason: 'the catalog_settings_screen.t11 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _ThemeSection · catalog_settings_screen.t11 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -114,8 +114,8 @@ void main() {
     });
     testWidgets('wired · _SearchSection · "בבנייה" [catalog_settings_screen.t12]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('בבנייה'), findsWidgets,
-          reason: 'the catalog_settings_screen.t12 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('בבנייה')), isTrue,
+          reason: 'the catalog_settings_screen.t12 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _SearchSection · catalog_settings_screen.t12 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -125,9 +125,9 @@ void main() {
     });
     testWidgets('verb · _SearchSection · tap "בבנייה" → toast "ההיסטוריה נוקתה"', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      final btn = find.text('בבנייה');
-      expect(btn, findsWidgets, reason: 'the "בבנייה" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בבנייה')), isTrue,
+          reason: 'the "בבנייה" trigger is present (any tab)');
+      await t.tap(find.text('בבנייה').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('ההיסטוריה נוקתה'), findsWidgets,
@@ -135,9 +135,9 @@ void main() {
     });
     testWidgets('verb · _SearchSection · tap "בבנייה" → toast "\$label — בבנייה"', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      final btn = find.text('בבנייה');
-      expect(btn, findsWidgets, reason: 'the "בבנייה" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בבנייה')), isTrue,
+          reason: 'the "בבנייה" trigger is present (any tab)');
+      await t.tap(find.text('בבנייה').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
@@ -145,9 +145,9 @@ void main() {
     });
     testWidgets('verb · _PricesSection · tap "בקרוב" → toast "\$label — בבנייה"', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      final btn = find.text('בקרוב');
-      expect(btn, findsWidgets, reason: 'the "בקרוב" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('בקרוב')), isTrue,
+          reason: 'the "בקרוב" trigger is present (any tab)');
+      await t.tap(find.text('בקרוב').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('\$label — בבנייה'), findsWidgets,
@@ -155,8 +155,8 @@ void main() {
     });
     testWidgets('wired · _InfoSection · "תנאי שימוש" [catalog_settings_screen.t09]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('תנאי שימוש'), findsWidgets,
-          reason: 'the catalog_settings_screen.t09 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('תנאי שימוש')), isTrue,
+          reason: 'the catalog_settings_screen.t09 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _InfoSection · catalog_settings_screen.t09 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,
@@ -166,8 +166,8 @@ void main() {
     });
     testWidgets('wired · _InfoSection · "מדיניות פרטיות" [catalog_settings_screen.t10]', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true);
-      expect(find.text('מדיניות פרטיות'), findsWidgets,
-          reason: 'the catalog_settings_screen.t10 element renders on catalog_settings_screen');
+      expect(await findAcrossTabs(t, find.text('מדיניות פרטיות')), isTrue,
+          reason: 'the catalog_settings_screen.t10 element renders on catalog_settings_screen (any tab)');
     });
     testWidgets('hide · _InfoSection · catalog_settings_screen.t10 → gone when hidden', (t) async {
       await pumpScreen(t, const CatalogSettingsScreen(), selfContained: true,

@@ -15,8 +15,8 @@ void main() {
   group('role_requests_inbox_screen · generated (8 tests)', () {
     testWidgets('wired · RoleRequestsInboxScreen · "בקשות תפקיד" [role_requests_inbox_screen.t01]', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true);
-      expect(find.text('בקשות תפקיד'), findsWidgets,
-          reason: 'the role_requests_inbox_screen.t01 element renders on role_requests_inbox_screen');
+      expect(await findAcrossTabs(t, find.text('בקשות תפקיד')), isTrue,
+          reason: 'the role_requests_inbox_screen.t01 element renders on role_requests_inbox_screen (any tab)');
     });
     testWidgets('hide · RoleRequestsInboxScreen · role_requests_inbox_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _RequestCard · "אישור" [role_requests_inbox_screen.t02]', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true);
-      expect(find.text('אישור'), findsWidgets,
-          reason: 'the role_requests_inbox_screen.t02 element renders on role_requests_inbox_screen');
+      expect(await findAcrossTabs(t, find.text('אישור')), isTrue,
+          reason: 'the role_requests_inbox_screen.t02 element renders on role_requests_inbox_screen (any tab)');
     });
     testWidgets('hide · _RequestCard · role_requests_inbox_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _RequestCard · "דחייה" [role_requests_inbox_screen.t03]', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true);
-      expect(find.text('דחייה'), findsWidgets,
-          reason: 'the role_requests_inbox_screen.t03 element renders on role_requests_inbox_screen');
+      expect(await findAcrossTabs(t, find.text('דחייה')), isTrue,
+          reason: 'the role_requests_inbox_screen.t03 element renders on role_requests_inbox_screen (any tab)');
     });
     testWidgets('hide · _RequestCard · role_requests_inbox_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _RequestCard · "נסח סיבת-דחייה" [role_requests_inbox_screen.t04]', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true);
-      expect(find.text('נסח סיבת-דחייה'), findsWidgets,
-          reason: 'the role_requests_inbox_screen.t04 element renders on role_requests_inbox_screen');
+      expect(await findAcrossTabs(t, find.text('נסח סיבת-דחייה')), isTrue,
+          reason: 'the role_requests_inbox_screen.t04 element renders on role_requests_inbox_screen (any tab)');
     });
     testWidgets('hide · _RequestCard · role_requests_inbox_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const RoleRequestsInboxScreen(), selfContained: true,

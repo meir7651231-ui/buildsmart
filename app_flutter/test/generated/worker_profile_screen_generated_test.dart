@@ -15,8 +15,8 @@ void main() {
   group('worker_profile_screen · generated (21 tests)', () {
     testWidgets('wired · WorkerProfileScreen · "פרופיל עובד" [worker_profile_screen.appbar_title]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('פרופיל עובד'), findsWidgets,
-          reason: 'the worker_profile_screen.appbar_title element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('פרופיל עובד')), isTrue,
+          reason: 'the worker_profile_screen.appbar_title element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · WorkerProfileScreen · worker_profile_screen.appbar_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _IdentityCard · "דמו" [worker_profile_screen.demo]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('דמו'), findsWidgets,
-          reason: 'the worker_profile_screen.demo element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('דמו')), isTrue,
+          reason: 'the worker_profile_screen.demo element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _IdentityCard · worker_profile_screen.demo → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _StatsCard · "המשימות שלי" [worker.profile.tasks_title]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('המשימות שלי'), findsWidgets,
-          reason: 'the worker.profile.tasks_title element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('המשימות שלי')), isTrue,
+          reason: 'the worker.profile.tasks_title element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _StatsCard · worker.profile.tasks_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "הגדרות עובד" [worker.profile.settings_title]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('הגדרות עובד'), findsWidgets,
-          reason: 'the worker.profile.settings_title element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('הגדרות עובד')), isTrue,
+          reason: 'the worker.profile.settings_title element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker.profile.settings_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "החלפת תפקיד" [worker.profile.role_switch_title]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('החלפת תפקיד'), findsWidgets,
-          reason: 'the worker.profile.role_switch_title element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('החלפת תפקיד')), isTrue,
+          reason: 'the worker.profile.role_switch_title element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker.profile.role_switch_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "מוגן בקוד" [worker.profile.role_switch_hint]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('מוגן בקוד'), findsWidgets,
-          reason: 'the worker.profile.role_switch_hint element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('מוגן בקוד')), isTrue,
+          reason: 'the worker.profile.role_switch_hint element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker.profile.role_switch_hint → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "יציאה" [worker.profile.logout_title]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('יציאה'), findsWidgets,
-          reason: 'the worker.profile.logout_title element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('יציאה')), isTrue,
+          reason: 'the worker.profile.logout_title element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker.profile.logout_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -98,8 +98,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:" [worker_profile_screen.role_switch_dialog_body]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:'), findsWidgets,
-          reason: 'the worker_profile_screen.role_switch_dialog_body element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('מעבר בין לוחות מוגן בקוד. הזן את קוד החלפת התפקיד:')), isTrue,
+          reason: 'the worker_profile_screen.role_switch_dialog_body element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker_profile_screen.role_switch_dialog_body → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -109,8 +109,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "ביטול" [worker_profile_screen.cancel]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('ביטול'), findsWidgets,
-          reason: 'the worker_profile_screen.cancel element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('ביטול')), isTrue,
+          reason: 'the worker_profile_screen.cancel element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker_profile_screen.cancel → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',
@@ -120,8 +120,8 @@ void main() {
     });
     testWidgets('wired · _ActionsCard · "אישור" [worker_profile_screen.confirm]', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker');
-      expect(find.text('אישור'), findsWidgets,
-          reason: 'the worker_profile_screen.confirm element renders on worker_profile_screen');
+      expect(await findAcrossTabs(t, find.text('אישור')), isTrue,
+          reason: 'the worker_profile_screen.confirm element renders on worker_profile_screen (any tab)');
     });
     testWidgets('hide · _ActionsCard · worker_profile_screen.confirm → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerProfileScreen(), selfContained: true, role: 'worker',

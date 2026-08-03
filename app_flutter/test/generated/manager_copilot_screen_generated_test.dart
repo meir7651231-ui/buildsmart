@@ -15,8 +15,8 @@ void main() {
   group('manager_copilot_screen · generated (12 tests)', () {
     testWidgets('wired · ManagerCopilotScreen · "🤖 קו-פיילוט" [manager_copilot_screen.title]', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager');
-      expect(find.text('🤖 קו-פיילוט'), findsWidgets,
-          reason: 'the manager_copilot_screen.title element renders on manager_copilot_screen');
+      expect(await findAcrossTabs(t, find.text('🤖 קו-פיילוט')), isTrue,
+          reason: 'the manager_copilot_screen.title element renders on manager_copilot_screen (any tab)');
     });
     testWidgets('hide · ManagerCopilotScreen · manager_copilot_screen.title → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ManagerCopilotScreen · "שאל את העסק שלך" [manager_copilot_screen.subtitle]', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager');
-      expect(find.text('שאל את העסק שלך'), findsWidgets,
-          reason: 'the manager_copilot_screen.subtitle element renders on manager_copilot_screen');
+      expect(await findAcrossTabs(t, find.text('שאל את העסק שלך')), isTrue,
+          reason: 'the manager_copilot_screen.subtitle element renders on manager_copilot_screen (any tab)');
     });
     testWidgets('hide · ManagerCopilotScreen · manager_copilot_screen.subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _Welcome · "שאל אותי כל דבר על העסק שלך." [manager_copilot_screen.welcome_headline]', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager');
-      expect(find.text('שאל אותי כל דבר על העסק שלך.'), findsWidgets,
-          reason: 'the manager_copilot_screen.welcome_headline element renders on manager_copilot_screen');
+      expect(await findAcrossTabs(t, find.text('שאל אותי כל דבר על העסק שלך.')), isTrue,
+          reason: 'the manager_copilot_screen.welcome_headline element renders on manager_copilot_screen (any tab)');
     });
     testWidgets('hide · _Welcome · manager_copilot_screen.welcome_headline → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _Welcome · "אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים." [manager_copilot_screen.welcome_sub]', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager');
-      expect(find.text('אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.'), findsWidgets,
-          reason: 'the manager_copilot_screen.welcome_sub element renders on manager_copilot_screen');
+      expect(await findAcrossTabs(t, find.text('אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.')), isTrue,
+          reason: 'the manager_copilot_screen.welcome_sub element renders on manager_copilot_screen (any tab)');
     });
     testWidgets('hide · _Welcome · manager_copilot_screen.welcome_sub → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · _Welcome · "תדריך-בוקר" [manager_copilot_screen.morning_brief]', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager');
-      expect(find.text('תדריך-בוקר'), findsWidgets,
-          reason: 'the manager_copilot_screen.morning_brief element renders on manager_copilot_screen');
+      expect(await findAcrossTabs(t, find.text('תדריך-בוקר')), isTrue,
+          reason: 'the manager_copilot_screen.morning_brief element renders on manager_copilot_screen (any tab)');
     });
     testWidgets('hide · _Welcome · manager_copilot_screen.morning_brief → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · _Welcome · "או שאל:" [manager_copilot_screen.or_ask]', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager');
-      expect(find.text('או שאל:'), findsWidgets,
-          reason: 'the manager_copilot_screen.or_ask element renders on manager_copilot_screen');
+      expect(await findAcrossTabs(t, find.text('או שאל:')), isTrue,
+          reason: 'the manager_copilot_screen.or_ask element renders on manager_copilot_screen (any tab)');
     });
     testWidgets('hide · _Welcome · manager_copilot_screen.or_ask → gone when hidden', (t) async {
       await pumpScreen(t, const ManagerCopilotScreen(), selfContained: true, role: 'manager',

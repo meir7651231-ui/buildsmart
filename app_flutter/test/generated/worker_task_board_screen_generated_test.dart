@@ -15,8 +15,8 @@ void main() {
   group('worker_task_board_screen · generated (4 tests)', () {
     testWidgets('wired · WorkerTaskBoardScreen · "🗂️ לוח משימות מלא" [worker_task_board_screen.board_title]', (t) async {
       await pumpScreen(t, const WorkerTaskBoardScreen(), selfContained: true, role: 'worker');
-      expect(find.text('🗂️ לוח משימות מלא'), findsWidgets,
-          reason: 'the worker_task_board_screen.board_title element renders on worker_task_board_screen');
+      expect(await findAcrossTabs(t, find.text('🗂️ לוח משימות מלא')), isTrue,
+          reason: 'the worker_task_board_screen.board_title element renders on worker_task_board_screen (any tab)');
     });
     testWidgets('hide · WorkerTaskBoardScreen · worker_task_board_screen.board_title → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerTaskBoardScreen(), selfContained: true, role: 'worker',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _StatusGroup · "אין משימות במצב זה" [worker_task_board_screen.empty_group]', (t) async {
       await pumpScreen(t, const WorkerTaskBoardScreen(), selfContained: true, role: 'worker');
-      expect(find.text('אין משימות במצב זה'), findsWidgets,
-          reason: 'the worker_task_board_screen.empty_group element renders on worker_task_board_screen');
+      expect(await findAcrossTabs(t, find.text('אין משימות במצב זה')), isTrue,
+          reason: 'the worker_task_board_screen.empty_group element renders on worker_task_board_screen (any tab)');
     });
     testWidgets('hide · _StatusGroup · worker_task_board_screen.empty_group → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerTaskBoardScreen(), selfContained: true, role: 'worker',

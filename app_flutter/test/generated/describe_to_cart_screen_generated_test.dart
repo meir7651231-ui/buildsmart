@@ -15,8 +15,8 @@ void main() {
   group('describe_to_cart_screen · generated (14 tests)', () {
     testWidgets('wired · DescribeToCartScreen · "🗣️ תאר עבודה → סל" [describe_to_cart_screen.t01]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('🗣️ תאר עבודה → סל'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t01 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('🗣️ תאר עבודה → סל')), isTrue,
+          reason: 'the describe_to_cart_screen.t01 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · DescribeToCartScreen · "💡 הפיצ\'ר דורש חיבור לשרת." [describe_to_cart_screen.t02]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('💡 הפיצ\'ר דורש חיבור לשרת.'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t02 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('💡 הפיצ\'ר דורש חיבור לשרת.')), isTrue,
+          reason: 'the describe_to_cart_screen.t02 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · DescribeToCartScreen · "ספר במילים שלך מה אתה צריך:" [describe_to_cart_screen.t03]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('ספר במילים שלך מה אתה צריך:'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t03 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('ספר במילים שלך מה אתה צריך:')), isTrue,
+          reason: 'the describe_to_cart_screen.t03 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · DescribeToCartScreen · "מצא לי את הסל" [describe_to_cart_screen.t04]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('מצא לי את הסל'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t04 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('מצא לי את הסל')), isTrue,
+          reason: 'the describe_to_cart_screen.t04 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · DescribeToCartScreen · "משהו השתבש — נסה שוב." [describe_to_cart_screen.t05]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('משהו השתבש — נסה שוב.'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t05 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('משהו השתבש — נסה שוב.')), isTrue,
+          reason: 'the describe_to_cart_screen.t05 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t05 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · DescribeToCartScreen · "זוהתה העבודה, אך לחלקיה עדיין אין מק"ט מקושר." [describe_to_cart_screen.t06]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('זוהתה העבודה, אך לחלקיה עדיין אין מק"ט מקושר.'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t06 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('זוהתה העבודה, אך לחלקיה עדיין אין מק"ט מקושר.')), isTrue,
+          reason: 'the describe_to_cart_screen.t06 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t06 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · DescribeToCartScreen · "לא זוהתה עבודה מתאימה — נסה לתאר אחרת." [describe_to_cart_screen.t07]', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true);
-      expect(find.text('לא זוהתה עבודה מתאימה — נסה לתאר אחרת.'), findsWidgets,
-          reason: 'the describe_to_cart_screen.t07 element renders on describe_to_cart_screen');
+      expect(await findAcrossTabs(t, find.text('לא זוהתה עבודה מתאימה — נסה לתאר אחרת.')), isTrue,
+          reason: 'the describe_to_cart_screen.t07 element renders on describe_to_cart_screen (any tab)');
     });
     testWidgets('hide · DescribeToCartScreen · describe_to_cart_screen.t07 → gone when hidden', (t) async {
       await pumpScreen(t, const DescribeToCartScreen(), selfContained: true,

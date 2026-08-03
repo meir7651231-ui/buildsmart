@@ -15,8 +15,8 @@ void main() {
   group('welcome_screen · generated (31 tests)', () {
     testWidgets('wired · WelcomeScreen · "כניסת מנהל המערכת" [welcome_screen.mgr_login_title]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('כניסת מנהל המערכת'), findsWidgets,
-          reason: 'the welcome_screen.mgr_login_title element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('כניסת מנהל המערכת')), isTrue,
+          reason: 'the welcome_screen.mgr_login_title element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.mgr_login_title → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "חשבון הבעלים — כניסה מאובטחת עם חשבון Google." [welcome_screen.mgr_login_subtitle]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('חשבון הבעלים — כניסה מאובטחת עם חשבון Google.'), findsWidgets,
-          reason: 'the welcome_screen.mgr_login_subtitle element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('חשבון הבעלים — כניסה מאובטחת עם חשבון Google.')), isTrue,
+          reason: 'the welcome_screen.mgr_login_subtitle element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.mgr_login_subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "המשך עם Google" [welcome_screen.mgr_continue_google]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('המשך עם Google'), findsWidgets,
-          reason: 'the welcome_screen.mgr_continue_google element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('המשך עם Google')), isTrue,
+          reason: 'the welcome_screen.mgr_continue_google element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.mgr_continue_google → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור." [welcome_screen.mgr_needs_connection]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.'), findsWidgets,
-          reason: 'the welcome_screen.mgr_needs_connection element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.')), isTrue,
+          reason: 'the welcome_screen.mgr_needs_connection element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.mgr_needs_connection → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "או כניסה עם קוד (demo)" [welcome_screen.mgr_or_code_login]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('או כניסה עם קוד (demo)'), findsWidgets,
-          reason: 'the welcome_screen.mgr_or_code_login element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('או כניסה עם קוד (demo)')), isTrue,
+          reason: 'the welcome_screen.mgr_or_code_login element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.mgr_or_code_login → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "כניסה ללקוח קיים" [welcome_screen.board_existing_login_btn]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('כניסה ללקוח קיים'), findsWidgets,
-          reason: 'the welcome_screen.board_existing_login_btn element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('כניסה ללקוח קיים')), isTrue,
+          reason: 'the welcome_screen.board_existing_login_btn element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.board_existing_login_btn → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "מצב דמו" [welcome_screen.board_demo_mode]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('מצב דמו'), findsWidgets,
-          reason: 'the welcome_screen.board_demo_mode element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('מצב דמו')), isTrue,
+          reason: 'the welcome_screen.board_demo_mode element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.board_demo_mode → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "כניסה עם Google (בעלים)" [welcome_screen.owner_google_login]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('כניסה עם Google (בעלים)'), findsWidgets,
-          reason: 'the welcome_screen.owner_google_login element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('כניסה עם Google (בעלים)')), isTrue,
+          reason: 'the welcome_screen.owner_google_login element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.owner_google_login → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -109,8 +109,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "או הירשם" [welcome.signup.divider]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('או הירשם'), findsWidgets,
-          reason: 'the welcome.signup.divider element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('או הירשם')), isTrue,
+          reason: 'the welcome.signup.divider element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome.signup.divider → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -120,8 +120,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "רישום ראשוני" [welcome.signup.heading]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('רישום ראשוני'), findsWidgets,
-          reason: 'the welcome.signup.heading element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('רישום ראשוני')), isTrue,
+          reason: 'the welcome.signup.heading element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome.signup.heading → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -131,8 +131,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "מלא את הפרטים — סימן ✓ יופיע כשהשדות תקינים" [welcome.signup.subtitle]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('מלא את הפרטים — סימן ✓ יופיע כשהשדות תקינים'), findsWidgets,
-          reason: 'the welcome.signup.subtitle element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('מלא את הפרטים — סימן ✓ יופיע כשהשדות תקינים')), isTrue,
+          reason: 'the welcome.signup.subtitle element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome.signup.subtitle → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -142,8 +142,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "בהרשמה אתה מאשר את " [welcome_screen.terms_prefix]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('בהרשמה אתה מאשר את '), findsWidgets,
-          reason: 'the welcome_screen.terms_prefix element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('בהרשמה אתה מאשר את ')), isTrue,
+          reason: 'the welcome_screen.terms_prefix element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.terms_prefix → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -153,8 +153,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "תנאי השימוש" [welcome_screen.terms_of_use]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('תנאי השימוש'), findsWidgets,
-          reason: 'the welcome_screen.terms_of_use element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('תנאי השימוש')), isTrue,
+          reason: 'the welcome_screen.terms_of_use element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.terms_of_use → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -164,8 +164,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · " ואת " [welcome_screen.terms_and]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text(' ואת '), findsWidgets,
-          reason: 'the welcome_screen.terms_and element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text(' ואת ')), isTrue,
+          reason: 'the welcome_screen.terms_and element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.terms_and → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,
@@ -175,8 +175,8 @@ void main() {
     });
     testWidgets('wired · WelcomeScreen · "מדיניות הפרטיות" [welcome_screen.privacy_policy]', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true);
-      expect(find.text('מדיניות הפרטיות'), findsWidgets,
-          reason: 'the welcome_screen.privacy_policy element renders on welcome_screen');
+      expect(await findAcrossTabs(t, find.text('מדיניות הפרטיות')), isTrue,
+          reason: 'the welcome_screen.privacy_policy element renders on welcome_screen (any tab)');
     });
     testWidgets('hide · WelcomeScreen · welcome_screen.privacy_policy → gone when hidden', (t) async {
       await pumpScreen(t, const WelcomeScreen(), selfContained: true,

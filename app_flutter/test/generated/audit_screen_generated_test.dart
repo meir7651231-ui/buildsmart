@@ -15,8 +15,8 @@ void main() {
   group('audit_screen · generated (6 tests)', () {
     testWidgets('wired · AuditScreen · "אודיט תרחישים" [audit_screen.t01]', (t) async {
       await pumpScreen(t, const AuditScreen(), selfContained: true);
-      expect(find.text('אודיט תרחישים'), findsWidgets,
-          reason: 'the audit_screen.t01 element renders on audit_screen');
+      expect(await findAcrossTabs(t, find.text('אודיט תרחישים')), isTrue,
+          reason: 'the audit_screen.t01 element renders on audit_screen (any tab)');
     });
     testWidgets('hide · AuditScreen · audit_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const AuditScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · AuditScreen · "עדיין לא הורצו בדיקות" [audit_screen.t02]', (t) async {
       await pumpScreen(t, const AuditScreen(), selfContained: true);
-      expect(find.text('עדיין לא הורצו בדיקות'), findsWidgets,
-          reason: 'the audit_screen.t02 element renders on audit_screen');
+      expect(await findAcrossTabs(t, find.text('עדיין לא הורצו בדיקות')), isTrue,
+          reason: 'the audit_screen.t02 element renders on audit_screen (any tab)');
     });
     testWidgets('hide · AuditScreen · audit_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const AuditScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · AuditScreen · "הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל" [audit_screen.t03]', (t) async {
       await pumpScreen(t, const AuditScreen(), selfContained: true);
-      expect(find.text('הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל'), findsWidgets,
-          reason: 'the audit_screen.t03 element renders on audit_screen');
+      expect(await findAcrossTabs(t, find.text('הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל')), isTrue,
+          reason: 'the audit_screen.t03 element renders on audit_screen (any tab)');
     });
     testWidgets('hide · AuditScreen · audit_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const AuditScreen(), selfContained: true,

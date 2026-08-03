@@ -16,8 +16,8 @@ void main() {
   group('smart_home_screen · generated (14 tests)', () {
     testWidgets('wired · _SmartTreeRow · "הוסף לסל" [smart_home_screen.add_to_cart]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      expect(find.text('הוסף לסל'), findsWidgets,
-          reason: 'the smart_home_screen.add_to_cart element renders on smart_home_screen');
+      expect(await findAcrossTabs(t, find.text('הוסף לסל')), isTrue,
+          reason: 'the smart_home_screen.add_to_cart element renders on smart_home_screen (any tab)');
     });
     testWidgets('hide · _SmartTreeRow · smart_home_screen.add_to_cart → gone when hidden', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false,
@@ -27,9 +27,9 @@ void main() {
     });
     testWidgets('verb · _SmartTreeRow · tap "הוסף לסל" → toast "נוסף לסל"', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      final btn = find.text('הוסף לסל');
-      expect(btn, findsWidgets, reason: 'the "הוסף לסל" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('הוסף לסל')), isTrue,
+          reason: 'the "הוסף לסל" trigger is present (any tab)');
+      await t.tap(find.text('הוסף לסל').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('נוסף לסל'), findsWidgets,
@@ -42,8 +42,8 @@ void main() {
     });
     testWidgets('wired · _WorkPath · "🛁 חדש — מאפס עד גמר" [smart_home_screen.workpath_badge]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      expect(find.text('🛁 חדש — מאפס עד גמר'), findsWidgets,
-          reason: 'the smart_home_screen.workpath_badge element renders on smart_home_screen');
+      expect(await findAcrossTabs(t, find.text('🛁 חדש — מאפס עד גמר')), isTrue,
+          reason: 'the smart_home_screen.workpath_badge element renders on smart_home_screen (any tab)');
     });
     testWidgets('hide · _WorkPath · smart_home_screen.workpath_badge → gone when hidden', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false,
@@ -53,8 +53,8 @@ void main() {
     });
     testWidgets('wired · _WorkPath · "גמר אמבטיה — מלווה אותך שלב-שלב" [smart_home_screen.workpath_title]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      expect(find.text('גמר אמבטיה — מלווה אותך שלב-שלב'), findsWidgets,
-          reason: 'the smart_home_screen.workpath_title element renders on smart_home_screen');
+      expect(await findAcrossTabs(t, find.text('גמר אמבטיה — מלווה אותך שלב-שלב')), isTrue,
+          reason: 'the smart_home_screen.workpath_title element renders on smart_home_screen (any tab)');
     });
     testWidgets('hide · _WorkPath · smart_home_screen.workpath_title → gone when hidden', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false,
@@ -64,8 +64,8 @@ void main() {
     });
     testWidgets('wired · _WorkPath · "4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון "סדר הרכבה"." [smart_home_screen.workpath_sub]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      expect(find.text('4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון "סדר הרכבה".'), findsWidgets,
-          reason: 'the smart_home_screen.workpath_sub element renders on smart_home_screen');
+      expect(await findAcrossTabs(t, find.text('4 שלבים בסדר הנכון. כל שלב: עץ מוצרים + חלון "סדר הרכבה".')), isTrue,
+          reason: 'the smart_home_screen.workpath_sub element renders on smart_home_screen (any tab)');
     });
     testWidgets('hide · _WorkPath · smart_home_screen.workpath_sub → gone when hidden', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false,
@@ -75,8 +75,8 @@ void main() {
     });
     testWidgets('wired · _InstallStudioHero · "תכנון חיבור" [smart_home_screen.install_title]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      expect(find.text('תכנון חיבור'), findsWidgets,
-          reason: 'the smart_home_screen.install_title element renders on smart_home_screen');
+      expect(await findAcrossTabs(t, find.text('תכנון חיבור')), isTrue,
+          reason: 'the smart_home_screen.install_title element renders on smart_home_screen (any tab)');
     });
     testWidgets('hide · _InstallStudioHero · smart_home_screen.install_title → gone when hidden', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false,
@@ -86,8 +86,8 @@ void main() {
     });
     testWidgets('wired · _InstallStudioHero · "בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור" [smart_home_screen.install_sub]', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false);
-      expect(find.text('בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור'), findsWidgets,
-          reason: 'the smart_home_screen.install_sub element renders on smart_home_screen');
+      expect(await findAcrossTabs(t, find.text('בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור')), isTrue,
+          reason: 'the smart_home_screen.install_sub element renders on smart_home_screen (any tab)');
     });
     testWidgets('hide · _InstallStudioHero · smart_home_screen.install_sub → gone when hidden', (t) async {
       await pumpScreen(t, const SmartHomeBody(), selfContained: false,

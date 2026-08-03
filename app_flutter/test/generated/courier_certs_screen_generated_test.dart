@@ -15,8 +15,8 @@ void main() {
   group('courier_certs_screen · generated (16 tests)', () {
     testWidgets('wired · CourierCertsScreen · "🪪 תעודות נהג" [courier.certs.title]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('🪪 תעודות נהג'), findsWidgets,
-          reason: 'the courier.certs.title element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('🪪 תעודות נהג')), isTrue,
+          reason: 'the courier.certs.title element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · CourierCertsScreen · courier.certs.title → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · CourierCertsScreen · "🪪 הוספת תעודה" [courier.certs.sheet_title]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('🪪 הוספת תעודה'), findsWidgets,
-          reason: 'the courier.certs.sheet_title element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('🪪 הוספת תעודה')), isTrue,
+          reason: 'the courier.certs.sheet_title element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · CourierCertsScreen · courier.certs.sheet_title → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · CourierCertsScreen · "מילוי מהיר — ממלא את שם התעודה בלבד:" [courier_certs_screen.quick_fill_hint]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('מילוי מהיר — ממלא את שם התעודה בלבד:'), findsWidgets,
-          reason: 'the courier_certs_screen.quick_fill_hint element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('מילוי מהיר — ממלא את שם התעודה בלבד:')), isTrue,
+          reason: 'the courier_certs_screen.quick_fill_hint element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · CourierCertsScreen · courier_certs_screen.quick_fill_hint → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · CourierCertsScreen · "📷 צרף צילום תעודה (לא חובה)" [courier_certs_screen.attach_photo]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('📷 צרף צילום תעודה (לא חובה)'), findsWidgets,
-          reason: 'the courier_certs_screen.attach_photo element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('📷 צרף צילום תעודה (לא חובה)')), isTrue,
+          reason: 'the courier_certs_screen.attach_photo element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · CourierCertsScreen · courier_certs_screen.attach_photo → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · CourierCertsScreen · "📷 צילום צורף ✓" [courier_certs_screen.photo_attached]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('📷 צילום צורף ✓'), findsWidgets,
-          reason: 'the courier_certs_screen.photo_attached element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('📷 צילום צורף ✓')), isTrue,
+          reason: 'the courier_certs_screen.photo_attached element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · CourierCertsScreen · courier_certs_screen.photo_attached → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · CourierCertsScreen · "💾 שמור תעודה" [courier.certs.save_button]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('💾 שמור תעודה'), findsWidgets,
-          reason: 'the courier.certs.save_button element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('💾 שמור תעודה')), isTrue,
+          reason: 'the courier.certs.save_button element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · CourierCertsScreen · courier.certs.save_button → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · _CertsCard · "אין תעודות בארנק עדיין — הוסף את הראשונה." [courier.certs.empty]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('אין תעודות בארנק עדיין — הוסף את הראשונה.'), findsWidgets,
-          reason: 'the courier.certs.empty element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('אין תעודות בארנק עדיין — הוסף את הראשונה.')), isTrue,
+          reason: 'the courier.certs.empty element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · _CertsCard · courier.certs.empty → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · _CertsCard · "➕ הוסף תעודה" [courier.certs.add_button]', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier');
-      expect(find.text('➕ הוסף תעודה'), findsWidgets,
-          reason: 'the courier.certs.add_button element renders on courier_certs_screen');
+      expect(await findAcrossTabs(t, find.text('➕ הוסף תעודה')), isTrue,
+          reason: 'the courier.certs.add_button element renders on courier_certs_screen (any tab)');
     });
     testWidgets('hide · _CertsCard · courier.certs.add_button → gone when hidden', (t) async {
       await pumpScreen(t, const CourierCertsScreen(), selfContained: true, role: 'courier',

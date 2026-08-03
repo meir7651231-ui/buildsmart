@@ -15,8 +15,8 @@ void main() {
   group('profession_screen · generated (8 tests)', () {
     testWidgets('wired · ProfessionScreen · "חזור" [profession_screen.t01]', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true);
-      expect(find.text('חזור'), findsWidgets,
-          reason: 'the profession_screen.t01 element renders on profession_screen');
+      expect(await findAcrossTabs(t, find.text('חזור')), isTrue,
+          reason: 'the profession_screen.t01 element renders on profession_screen (any tab)');
     });
     testWidgets('hide · ProfessionScreen · profession_screen.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · ProfessionScreen · "מה התחום שלך?" [profession_screen.t02]', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true);
-      expect(find.text('מה התחום שלך?'), findsWidgets,
-          reason: 'the profession_screen.t02 element renders on profession_screen');
+      expect(await findAcrossTabs(t, find.text('מה התחום שלך?')), isTrue,
+          reason: 'the profession_screen.t02 element renders on profession_screen (any tab)');
     });
     testWidgets('hide · ProfessionScreen · profession_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · ProfessionScreen · "נתאים לך את האפליקציה — קטלוג, כלים והמלצות לפי המקצוע" [profession_screen.t03]', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true);
-      expect(find.text('נתאים לך את האפליקציה — קטלוג, כלים והמלצות לפי המקצוע'), findsWidgets,
-          reason: 'the profession_screen.t03 element renders on profession_screen');
+      expect(await findAcrossTabs(t, find.text('נתאים לך את האפליקציה — קטלוג, כלים והמלצות לפי המקצוע')), isTrue,
+          reason: 'the profession_screen.t03 element renders on profession_screen (any tab)');
     });
     testWidgets('hide · ProfessionScreen · profession_screen.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · ProfessionScreen · "תוכל לשנות את הבחירה בכל עת מההגדרות" [profession_screen.t04]', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true);
-      expect(find.text('תוכל לשנות את הבחירה בכל עת מההגדרות'), findsWidgets,
-          reason: 'the profession_screen.t04 element renders on profession_screen');
+      expect(await findAcrossTabs(t, find.text('תוכל לשנות את הבחירה בכל עת מההגדרות')), isTrue,
+          reason: 'the profession_screen.t04 element renders on profession_screen (any tab)');
     });
     testWidgets('hide · ProfessionScreen · profession_screen.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const ProfessionScreen(), selfContained: true,

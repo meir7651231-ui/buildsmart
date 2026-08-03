@@ -15,8 +15,8 @@ void main() {
   group('lipskey_brand_screen · generated (5 tests)', () {
     testWidgets('wired · LipskeyBrandScreen · "ליפסקי ברקן" [lipskey_brand_screen.appbar_title]', (t) async {
       await pumpScreen(t, const LipskeyBrandScreen(), selfContained: true);
-      expect(find.text('ליפסקי ברקן'), findsWidgets,
-          reason: 'the lipskey_brand_screen.appbar_title element renders on lipskey_brand_screen');
+      expect(await findAcrossTabs(t, find.text('ליפסקי ברקן')), isTrue,
+          reason: 'the lipskey_brand_screen.appbar_title element renders on lipskey_brand_screen (any tab)');
     });
     testWidgets('hide · LipskeyBrandScreen · lipskey_brand_screen.appbar_title → gone when hidden', (t) async {
       await pumpScreen(t, const LipskeyBrandScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · LipskeyBrandScreen · "אינסטלציה · סניטציה" [lipskey_brand_screen.appbar_sub]', (t) async {
       await pumpScreen(t, const LipskeyBrandScreen(), selfContained: true);
-      expect(find.text('אינסטלציה · סניטציה'), findsWidgets,
-          reason: 'the lipskey_brand_screen.appbar_sub element renders on lipskey_brand_screen');
+      expect(await findAcrossTabs(t, find.text('אינסטלציה · סניטציה')), isTrue,
+          reason: 'the lipskey_brand_screen.appbar_sub element renders on lipskey_brand_screen (any tab)');
     });
     testWidgets('hide · LipskeyBrandScreen · lipskey_brand_screen.appbar_sub → gone when hidden', (t) async {
       await pumpScreen(t, const LipskeyBrandScreen(), selfContained: true,

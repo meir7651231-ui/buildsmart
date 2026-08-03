@@ -15,8 +15,8 @@ void main() {
   group('budget_screen · generated (31 tests)', () {
     testWidgets('wired · BudgetScreen · "תקציב הפרויקט" [budget_screen.title]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('תקציב הפרויקט'), findsWidgets,
-          reason: 'the budget_screen.title element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the budget_screen.title element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.title → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "פירוט הוצאות לפי קטגוריה" [budget_screen.cat_header]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('פירוט הוצאות לפי קטגוריה'), findsWidgets,
-          reason: 'the budget_screen.cat_header element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('פירוט הוצאות לפי קטגוריה')), isTrue,
+          reason: 'the budget_screen.cat_header element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.cat_header → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "＋ הוסף" [budget_screen.add]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('＋ הוסף'), findsWidgets,
-          reason: 'the budget_screen.add element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('＋ הוסף')), isTrue,
+          reason: 'the budget_screen.add element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.add → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "אין קטגוריות עדיין — הקש "＋ הוסף" כדי להוסיף קטגוריה" [budget_screen.no_cats]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('אין קטגוריות עדיין — הקש "＋ הוסף" כדי להוסיף קטגוריה'), findsWidgets,
-          reason: 'the budget_screen.no_cats element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('אין קטגוריות עדיין — הקש "＋ הוסף" כדי להוסיף קטגוריה')), isTrue,
+          reason: 'the budget_screen.no_cats element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.no_cats → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -59,8 +59,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "הוצאות לפי אתר" [budget_screen.site_header]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('הוצאות לפי אתר'), findsWidgets,
-          reason: 'the budget_screen.site_header element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('הוצאות לפי אתר')), isTrue,
+          reason: 'the budget_screen.site_header element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.site_header → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -70,8 +70,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "אין אתרים פעילים — הוסיפו פרויקט במסך הפרויקטים" [budget_screen.no_sites]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('אין אתרים פעילים — הוסיפו פרויקט במסך הפרויקטים'), findsWidgets,
-          reason: 'the budget_screen.no_sites element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('אין אתרים פעילים — הוסיפו פרויקט במסך הפרויקטים')), isTrue,
+          reason: 'the budget_screen.no_sites element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.no_sites → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -81,8 +81,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "✏️ עריכת התקציב" [budget_screen.edit_budget_btn]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('✏️ עריכת התקציב'), findsWidgets,
-          reason: 'the budget_screen.edit_budget_btn element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('✏️ עריכת התקציב')), isTrue,
+          reason: 'the budget_screen.edit_budget_btn element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.edit_budget_btn → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -92,8 +92,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "עריכת תקציב" [budget_screen.editor_title]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('עריכת תקציב'), findsWidgets,
-          reason: 'the budget_screen.editor_title element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('עריכת תקציב')), isTrue,
+          reason: 'the budget_screen.editor_title element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.editor_title → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -103,8 +103,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "שמירה" [budget_screen.save]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('שמירה'), findsWidgets,
-          reason: 'the budget_screen.save element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('שמירה')), isTrue,
+          reason: 'the budget_screen.save element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.save → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -114,8 +114,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "− הסר הוצאה" [budget_screen.remove_expense]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('− הסר הוצאה'), findsWidgets,
-          reason: 'the budget_screen.remove_expense element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('− הסר הוצאה')), isTrue,
+          reason: 'the budget_screen.remove_expense element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.remove_expense → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -125,8 +125,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "＋ הוסף הוצאה" [budget_screen.add_expense]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('＋ הוסף הוצאה'), findsWidgets,
-          reason: 'the budget_screen.add_expense element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('＋ הוסף הוצאה')), isTrue,
+          reason: 'the budget_screen.add_expense element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.add_expense → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -142,8 +142,8 @@ void main() {
     });
     testWidgets('wired · BudgetScreen · "🗑️ מחיקת קטגוריה" [budget_screen.delete_cat]', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      expect(find.text('🗑️ מחיקת קטגוריה'), findsWidgets,
-          reason: 'the budget_screen.delete_cat element renders on budget_screen');
+      expect(await findAcrossTabs(t, find.text('🗑️ מחיקת קטגוריה')), isTrue,
+          reason: 'the budget_screen.delete_cat element renders on budget_screen (any tab)');
     });
     testWidgets('hide · BudgetScreen · budget_screen.delete_cat → gone when hidden', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true,
@@ -153,9 +153,9 @@ void main() {
     });
     testWidgets('verb · BudgetScreen · tap "תקציב הפרויקט" → toast "יש להזין מספרים תקינים"', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      final btn = find.text('תקציב הפרויקט');
-      expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the "תקציב הפרויקט" trigger is present (any tab)');
+      await t.tap(find.text('תקציב הפרויקט').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('יש להזין מספרים תקינים'), findsWidgets,
@@ -163,9 +163,9 @@ void main() {
     });
     testWidgets('verb · BudgetScreen · tap "תקציב הפרויקט" → toast "התקציב עודכן"', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      final btn = find.text('תקציב הפרויקט');
-      expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the "תקציב הפרויקט" trigger is present (any tab)');
+      await t.tap(find.text('תקציב הפרויקט').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('התקציב עודכן'), findsWidgets,
@@ -173,9 +173,9 @@ void main() {
     });
     testWidgets('verb · BudgetScreen · tap "תקציב הפרויקט" → toast "יש להזין שם קטגוריה"', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      final btn = find.text('תקציב הפרויקט');
-      expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the "תקציב הפרויקט" trigger is present (any tab)');
+      await t.tap(find.text('תקציב הפרויקט').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('יש להזין שם קטגוריה'), findsWidgets,
@@ -183,9 +183,9 @@ void main() {
     });
     testWidgets('verb · BudgetScreen · tap "תקציב הפרויקט" → toast "יש להזין סכום תקין"', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      final btn = find.text('תקציב הפרויקט');
-      expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the "תקציב הפרויקט" trigger is present (any tab)');
+      await t.tap(find.text('תקציב הפרויקט').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('יש להזין סכום תקין'), findsWidgets,
@@ -193,9 +193,9 @@ void main() {
     });
     testWidgets('verb · BudgetScreen · tap "תקציב הפרויקט" → toast "הקטגוריה נשמרה"', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      final btn = find.text('תקציב הפרויקט');
-      expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the "תקציב הפרויקט" trigger is present (any tab)');
+      await t.tap(find.text('תקציב הפרויקט').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('הקטגוריה נשמרה'), findsWidgets,
@@ -203,9 +203,9 @@ void main() {
     });
     testWidgets('verb · BudgetScreen · tap "תקציב הפרויקט" → toast "הקטגוריה נמחקה"', (t) async {
       await pumpScreen(t, const BudgetScreen(), selfContained: true);
-      final btn = find.text('תקציב הפרויקט');
-      expect(btn, findsWidgets, reason: 'the "תקציב הפרויקט" trigger is present');
-      await t.tap(btn.first);
+      expect(await findAcrossTabs(t, find.text('תקציב הפרויקט')), isTrue,
+          reason: 'the "תקציב הפרויקט" trigger is present (any tab)');
+      await t.tap(find.text('תקציב הפרויקט').first);
       await t.pump(const Duration(milliseconds: 600));
       drainOverflow(t);
       expect(find.textContaining('הקטגוריה נמחקה'), findsWidgets,

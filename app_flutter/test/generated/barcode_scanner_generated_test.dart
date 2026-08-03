@@ -15,8 +15,8 @@ void main() {
   group('barcode_scanner · generated (2 tests)', () {
     testWidgets('wired · BarcodeScanner · "סריקת ברקוד" [barcode_scanner.scan_title]', (t) async {
       await pumpScreen(t, const BarcodeScanner(), selfContained: false);
-      expect(find.text('סריקת ברקוד'), findsWidgets,
-          reason: 'the barcode_scanner.scan_title element renders on barcode_scanner');
+      expect(await findAcrossTabs(t, find.text('סריקת ברקוד')), isTrue,
+          reason: 'the barcode_scanner.scan_title element renders on barcode_scanner (any tab)');
     });
     testWidgets('hide · BarcodeScanner · barcode_scanner.scan_title → gone when hidden', (t) async {
       await pumpScreen(t, const BarcodeScanner(), selfContained: false,

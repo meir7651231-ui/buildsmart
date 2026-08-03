@@ -15,8 +15,8 @@ void main() {
   group('studio_rules_screen · generated (2 tests)', () {
     testWidgets('wired · StudioRulesScreen · "הוסף כלל" [studio_rules_screen.t02]', (t) async {
       await pumpScreen(t, const StudioRulesScreen(), selfContained: true);
-      expect(find.text('הוסף כלל'), findsWidgets,
-          reason: 'the studio_rules_screen.t02 element renders on studio_rules_screen');
+      expect(await findAcrossTabs(t, find.text('הוסף כלל')), isTrue,
+          reason: 'the studio_rules_screen.t02 element renders on studio_rules_screen (any tab)');
     });
     testWidgets('hide · StudioRulesScreen · studio_rules_screen.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const StudioRulesScreen(), selfContained: true,

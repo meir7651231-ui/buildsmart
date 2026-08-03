@@ -15,8 +15,8 @@ void main() {
   group('worker_notifs_sheet · generated (8 tests)', () {
     testWidgets('wired · _WorkerNotifsSheet · "🔔 התראות" [worker_notifs_sheet.t01]', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
-      expect(find.text('🔔 התראות'), findsWidgets,
-          reason: 'the worker_notifs_sheet.t01 element renders on worker_notifs_sheet');
+      expect(await findAcrossTabs(t, find.text('🔔 התראות')), isTrue,
+          reason: 'the worker_notifs_sheet.t01 element renders on worker_notifs_sheet (any tab)');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t01 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
@@ -26,8 +26,8 @@ void main() {
     });
     testWidgets('wired · _WorkerNotifsSheet · "אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן." [worker_notifs_sheet.t02]', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
-      expect(find.text('אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.'), findsWidgets,
-          reason: 'the worker_notifs_sheet.t02 element renders on worker_notifs_sheet');
+      expect(await findAcrossTabs(t, find.text('אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.')), isTrue,
+          reason: 'the worker_notifs_sheet.t02 element renders on worker_notifs_sheet (any tab)');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t02 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
@@ -37,8 +37,8 @@ void main() {
     });
     testWidgets('wired · _WorkerNotifsSheet · "סמן הכל כנקרא" [worker_notifs_sheet.t03]', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
-      expect(find.text('סמן הכל כנקרא'), findsWidgets,
-          reason: 'the worker_notifs_sheet.t03 element renders on worker_notifs_sheet');
+      expect(await findAcrossTabs(t, find.text('סמן הכל כנקרא')), isTrue,
+          reason: 'the worker_notifs_sheet.t03 element renders on worker_notifs_sheet (any tab)');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t03 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',
@@ -48,8 +48,8 @@ void main() {
     });
     testWidgets('wired · _WorkerNotifsSheet · "נקה הכל" [worker_notifs_sheet.t04]', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker');
-      expect(find.text('נקה הכל'), findsWidgets,
-          reason: 'the worker_notifs_sheet.t04 element renders on worker_notifs_sheet');
+      expect(await findAcrossTabs(t, find.text('נקה הכל')), isTrue,
+          reason: 'the worker_notifs_sheet.t04 element renders on worker_notifs_sheet (any tab)');
     });
     testWidgets('hide · _WorkerNotifsSheet · worker_notifs_sheet.t04 → gone when hidden', (t) async {
       await pumpScreen(t, const WorkerNotifsBell(), selfContained: false, role: 'worker',

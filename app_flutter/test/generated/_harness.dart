@@ -90,6 +90,25 @@ Future<void> pumpScreen(
   drainOverflow(t);
 }
 
+/// Tab-walk — a registry element often lives on a NON-default tab, so it is not
+/// rendered until that tab is selected. Check [target] on the current view; if
+/// absent, tap each Material `Tab` in turn (pumping between) and re-check.
+/// Returns true as soon as it is found on any tab. One generic mechanism for
+/// every tabbed screen (the big bucket after role-seed).
+Future<bool> findAcrossTabs(WidgetTester t, Finder target) async {
+  if (target.evaluate().isNotEmpty) return true;
+  final count = find.byType(Tab).evaluate().length;
+  for (var i = 0; i < count; i++) {
+    final tab = find.byType(Tab).at(i);
+    if (tab.evaluate().isEmpty) break;
+    await t.tap(tab, warnIfMissed: false);
+    await t.pump(const Duration(milliseconds: 350));
+    drainOverflow(t);
+    if (target.evaluate().isNotEmpty) return true;
+  }
+  return target.evaluate().isNotEmpty;
+}
+
 /// Swallow RenderFlex overflow exceptions (a layout concern, orthogonal to what
 /// the generated tests assert). A genuine (non-overflow) exception is re-thrown
 /// immediately so it still fails the test — a real triage signal, never
