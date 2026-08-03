@@ -51,8 +51,32 @@ Extracted from the AST, per atom:
 | 3 · behaviour | התנהגות | `flows` | `trigger → mechanism → effect`, where mechanism is **verb** (a call), **rule** (`if` / `?:`) or **formula** (a pure expression). |
 | — | floor | `floor` | external (out-of-file) functions the atom leans on (`groupThousands`, `productImage`, `cfgRadius`, …). |
 
+Plus, per atom:
+
+- **gaps** (`object.unregistered`) — visible text the atom paints that is **not**
+  in `element_registry` (a plain `Text` where a `CfgText` id would let the owner
+  edit it live). The object summary reads `registry N · mapped M/N · unregistered K`.
+- **contract** (`contract`) — the *untangle* analysis: `extractable`
+  (`clean` · `needs-untangle` — writes global state, lift to callbacks ·
+  `embeds-shared` — embeds a big shared widget that is its own atom), the atom's
+  declared `props`, and `untangle` notes (which writes → callbacks, which embeds
+  → split out).
+- **variant / gate** — when the composer renders one widget behind a const-flag
+  for a section (`kAxisDive ? [_SuperFinderOpen()] : …`), that widget is the
+  **live** variant (`variant: live`, `gate: kAxisDive`) and the section's
+  dispatch widget is the **preview** (`variant: preview`).
+
 Plus a screen-level **registry reconciliation** — every id the screen uses and
 whether `element_registry` carries it (`matched/total`).
+
+## Screen shapes it handles
+
+- **Stateless composer + dispatch switch** (`smart_home_screen` — `SmartHomeBody`,
+  `…SectionFor(s) => switch (s) {…}`): sections + `HomeSection` mapping + live/preview.
+- **Stateful composer** (`store_screen`, `manager_dashboard_screen`): the build
+  lives in the `State` class (`_XState extends ConsumerState<X>`); the tool
+  attributes the State's build to the widget, so its tabs/rows are found as
+  sections. Support helpers (with their own State classes) roll up.
 
 ## Output files (per screen dir)
 
@@ -61,16 +85,39 @@ whether `element_registry` carries it (`matched/total`).
 - `registry.json` — the reconciliation.
 - `screen.json` — the whole decomposition (machine-readable).
 
+## Sources & branches (per `knowledge/AGENT-SOURCES.md`)
+
+- **Code + this tool** live on `claude/whats-happening-LyY9G` (the live tree).
+  All golden **inputs** (the screen `.dart`, `element_registry.dart`) are read
+  from there.
+- **Published knowledge** — the human-readable decompositions — live on
+  `claude/nice-volta-BSbVm` at `knowledge/screens/<screen>/`. That is the SSOT
+  for the golden MD; the output is **not** committed to the code branch.
+
+Publish (from a `nice-volta` checkout, pointing `--registry` at the live tree):
+
+```bash
+dart run <path-to-tool>/bin/decompose.dart <live>/app_flutter/lib/screens/smart_home_screen.dart \
+  --name contractor-home --out knowledge/screens \
+  --registry <live>/app_flutter/lib/state/studio/element_registry.dart
+```
+
 ## Golden
 
-`test/golden_test.dart` runs the decomposer on `smart_home_screen.dart` and
-asserts the output **equals** the committed golden at
-`app_flutter/knowledge/screens/contractor-home/` byte-for-byte, plus the spec
-anchors: **8 atoms · one composer · registry 6/6 · section mapping recovered**.
+`test/golden_test.dart` runs the decomposer on the live `smart_home_screen.dart`
+and asserts the output equals the **self-contained fixture** at
+`test/golden/contractor-home/` byte-for-byte, plus the anchors: **one composer ·
+registry 6/6 · section mapping recovered · super-finder live/preview · untangle
+contract · gaps surfaced**. (Atom count tracks the live screen — 10 today.)
 
 ```bash
 cd tools/atom/decompose && dart test
 ```
 
-If a screen legitimately changes, regenerate the golden with the `dart run …`
-command above and re-commit the `contractor-home/` dir.
+If the live screen legitimately changes, regenerate the fixture:
+
+```bash
+dart run bin/decompose.dart ../../../app_flutter/lib/screens/smart_home_screen.dart \
+  --name contractor-home --out test/golden \
+  --registry ../../../app_flutter/lib/state/studio/element_registry.dart
+```

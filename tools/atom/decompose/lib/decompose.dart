@@ -71,13 +71,18 @@ String _indexMd(ScreenDecomposition d) {
     ..writeln()
     ..writeln('- **Atoms:** ${d.atoms.length}')
     ..writeln('- **Registry:** ${d.registry.matched}/${d.registry.total} ids matched against `element_registry`')
+    ..writeln('- **Gaps:** ${d.atoms.fold<int>(0, (s, a) => s + a.unregistered.length)} unregistered text nodes across the screen')
     ..writeln()
-    ..writeln('| # | atom | role | section | nodes | edges | flows |')
-    ..writeln('|---|------|------|---------|-------|-------|-------|');
+    ..writeln('| # | atom | role | section | variant | n·e·f | extractable | gaps |')
+    ..writeln('|---|------|------|---------|---------|-------|-------------|------|');
   for (var i = 0; i < d.atoms.length; i++) {
     final a = d.atoms[i];
+    final variant = a.variant == null
+        ? '—'
+        : '${a.variant}${a.gate != null ? '·${a.gate}' : ''}';
     b.writeln('| ${i + 1} | `${a.name}` | ${a.role} | ${a.section ?? '—'} '
-        '| ${a.nodes.length} | ${a.edges.length} | ${a.flows.length} |');
+        '| $variant | ${a.nodes.length}·${a.edges.length}·${a.flows.length} '
+        '| ${a.contract.extractable} | ${a.unregistered.length} |');
   }
   b
     ..writeln()
@@ -90,20 +95,25 @@ String _indexMd(ScreenDecomposition d) {
 }
 
 String _atomMd(String screen, Atom a) {
+  final variantTag = a.variant == null
+      ? ''
+      : ' · ${a.variant}${a.gate != null ? ' (gated `${a.gate}`)' : ''}';
   final b = StringBuffer()
     ..writeln('# ${a.name}')
     ..writeln()
     ..writeln('- **screen:** `$screen`')
-    ..writeln('- **role:** ${a.role}${a.section != null ? ' · section `${a.section}`' : ''}')
+    ..writeln('- **role:** ${a.role}${a.section != null ? ' · section `${a.section}`' : ''}$variantTag')
     ..writeln()
     ..writeln('## עצם · object (${a.nodes.length})')
+    ..writeln()
+    ..writeln('> registry ${a.registeredCount} · mapped ${a.nodes.where((n) => n.registryOk).length}/${a.registeredCount} · **unregistered ${a.unregistered.length}**')
     ..writeln();
   if (a.nodes.isEmpty) {
     b.writeln('_(no text nodes)_');
   } else {
     for (final n in a.nodes) {
       final reg = n.registryId == null
-          ? ''
+          ? ' · — לא-רשום'
           : ' · `${n.registryId}` ${n.registryOk ? '✅' : '❌'}';
       final txt = n.text.isEmpty ? '' : ' "${n.text}"';
       b.writeln('- **${n.kind}**$txt$reg');
@@ -142,5 +152,18 @@ String _atomMd(String screen, Atom a) {
       b.writeln('- `$fn`');
     }
   }
+  b
+    ..writeln()
+    ..writeln('## חוזה-רכיב · contract + gaps')
+    ..writeln()
+    ..writeln('- **extractable:** `${a.contract.extractable}`')
+    ..writeln('- **props:** ${a.contract.props.isEmpty ? '—' : a.contract.props.map((p) => '`$p`').join(' · ')}');
+  if (a.contract.untangle.isNotEmpty) {
+    b.writeln('- **untangle:**');
+    for (final u in a.contract.untangle) {
+      b.writeln('  - $u');
+    }
+  }
+  b.writeln('- **gaps:** ${a.unregistered.isEmpty ? 'none (all registry-backed)' : '${a.unregistered.length} unregistered — ${a.unregistered.map((t) => '"$t"').join(' · ')}'}');
   return b.toString();
 }

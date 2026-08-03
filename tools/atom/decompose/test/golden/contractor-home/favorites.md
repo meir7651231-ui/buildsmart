@@ -5,8 +5,10 @@
 
 ## עצם · object (2)
 
-- **text** "מועדפים"
-- **text** "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+> registry 0 · mapped 0/0 · **unregistered 2**
+
+- **text** "מועדפים" · — לא-רשום
+- **text** "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן." · — לא-רשום
 
 ## חיבורים · connections (4)
 
@@ -22,3 +24,9 @@
 ## floor · external functions (1)
 
 - `cfgRadius`
+
+## חוזה-רכיב · contract + gaps
+
+- **extractable:** `clean`
+- **props:** —
+- **gaps:** 2 unregistered — "מועדפים" · "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."

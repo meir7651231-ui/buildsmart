@@ -20,7 +20,12 @@
         "registryId": "smart_home_screen.add_to_cart",
         "registryOk": true
       }
-    ]
+    ],
+    "registered": 2,
+    "unregistered": [
+      "🌳 עץ חכם — אינסטלציה"
+    ],
+    "summary": "registry 2 · mapped 2/2 · unregistered 1"
   },
   "connections": {
     "edges": [
@@ -67,5 +72,12 @@
     "cfgRadius",
     "groupThousands",
     "productImage"
-  ]
+  ],
+  "contract": {
+    "extractable": "needs-untangle",
+    "props": [],
+    "untangle": [
+      "onSmartCart(…) callback instead of direct smartCartProvider write"
+    ]
+  }
 }

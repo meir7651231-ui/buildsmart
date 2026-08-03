@@ -5,7 +5,9 @@
 
 ## עצם · object (1)
 
-- **text** "מחלקות"
+> registry 0 · mapped 0/0 · **unregistered 1**
+
+- **text** "מחלקות" · — לא-רשום
 
 ## חיבורים · connections (3)
 
@@ -22,3 +24,12 @@
 ## floor · external functions (1)
 
 - `cfgRadius`
+
+## חוזה-רכיב · contract + gaps
+
+- **extractable:** `needs-untangle`
+- **props:** —
+- **untangle:**
+  - onHomeDepartment(…) callback instead of direct homeDepartmentProvider write
+  - onMainTab(…) callback instead of direct mainTabProvider write
+- **gaps:** 1 unregistered — "מחלקות"

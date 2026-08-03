@@ -16,7 +16,14 @@
         "kind": "text",
         "text": "📦"
       }
-    ]
+    ],
+    "registered": 0,
+    "unregistered": [
+      "הזמנות אחרונות לאתר",
+      "עדיין אין הזמנות — לאחר הראשונה היא תופיע כאן.",
+      "📦"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 3"
   },
   "connections": {
     "edges": [
@@ -33,5 +40,10 @@
   "floor": [
     "cfgRadius",
     "groupThousands"
-  ]
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
 }

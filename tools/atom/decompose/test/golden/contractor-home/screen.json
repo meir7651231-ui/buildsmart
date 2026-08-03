@@ -7,7 +7,10 @@
       "name": "SmartHomeBody",
       "role": "composer",
       "object": {
-        "nodes": []
+        "nodes": [],
+        "registered": 0,
+        "unregistered": [],
+        "summary": "registry 0 · mapped 0/0 · unregistered 0"
       },
       "connections": {
         "edges": [
@@ -33,7 +36,14 @@
       },
       "floor": [
         "childrenFor"
-      ]
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [
+          "scrollCtrl"
+        ],
+        "untangle": []
+      }
     },
     {
       "name": "_Departments",
@@ -45,7 +55,12 @@
             "kind": "text",
             "text": "מחלקות"
           }
-        ]
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מחלקות"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
       },
       "connections": {
         "edges": [
@@ -90,7 +105,15 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onHomeDepartment(…) callback instead of direct homeDepartmentProvider write",
+          "onMainTab(…) callback instead of direct mainTabProvider write"
+        ]
+      }
     },
     {
       "name": "_SmartTreeRow",
@@ -114,7 +137,12 @@
             "registryId": "smart_home_screen.add_to_cart",
             "registryOk": true
           }
-        ]
+        ],
+        "registered": 2,
+        "unregistered": [
+          "🌳 עץ חכם — אינסטלציה"
+        ],
+        "summary": "registry 2 · mapped 2/2 · unregistered 1"
       },
       "connections": {
         "edges": [
@@ -161,7 +189,14 @@
         "cfgRadius",
         "groupThousands",
         "productImage"
-      ]
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onSmartCart(…) callback instead of direct smartCartProvider write"
+        ]
+      }
     },
     {
       "name": "_WorkPath",
@@ -191,7 +226,12 @@
             "registryId": "smart_home_screen.workpath_sub",
             "registryOk": true
           }
-        ]
+        ],
+        "registered": 3,
+        "unregistered": [
+          "מסלול עבודה חכם"
+        ],
+        "summary": "registry 3 · mapped 3/3 · unregistered 1"
       },
       "connections": {
         "edges": [
@@ -214,7 +254,12 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
     },
     {
       "name": "_QuickTools",
@@ -226,7 +271,12 @@
             "kind": "text",
             "text": "כלים מהירים"
           }
-        ]
+        ],
+        "registered": 0,
+        "unregistered": [
+          "כלים מהירים"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
       },
       "connections": {
         "edges": [
@@ -274,7 +324,12 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
     },
     {
       "name": "_InstallStudioHero",
@@ -294,7 +349,10 @@
             "registryId": "smart_home_screen.install_sub",
             "registryOk": true
           }
-        ]
+        ],
+        "registered": 2,
+        "unregistered": [],
+        "summary": "registry 2 · mapped 2/2 · unregistered 0"
       },
       "connections": {
         "edges": [
@@ -317,18 +375,31 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
     },
     {
       "name": "_SuperFinderOpen",
       "role": "section",
+      "section": "superFinder",
+      "variant": "live",
+      "gate": "kAxisDive",
       "object": {
         "nodes": [
           {
             "kind": "text",
             "text": "🕸️ מאתר-על"
           }
-        ]
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🕸️ מאתר-על"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 1"
       },
       "connections": {
         "edges": []
@@ -338,12 +409,20 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "embeds-shared",
+        "props": [],
+        "untangle": [
+          "CatalogWheelScreen = shared component → separate atom"
+        ]
+      }
     },
     {
       "name": "_SuperFinderHero",
       "role": "section",
       "section": "superFinder",
+      "variant": "preview",
       "object": {
         "nodes": [
           {
@@ -354,7 +433,13 @@
             "kind": "text",
             "text": "גלגל-חיפוש-על — בחר מאיזה ציר להתחיל"
           }
-        ]
+        ],
+        "registered": 0,
+        "unregistered": [
+          "🕸️ מאתר-על",
+          "גלגל-חיפוש-על — בחר מאיזה ציר להתחיל"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
       },
       "connections": {
         "edges": [
@@ -399,7 +484,16 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "needs-untangle",
+        "props": [],
+        "untangle": [
+          "onCatalogSection(…) callback instead of direct catalogSectionProvider write",
+          "onKeyboardDiveQuery(…) callback instead of direct keyboardDiveQueryProvider write",
+          "onMainTab(…) callback instead of direct mainTabProvider write"
+        ]
+      }
     },
     {
       "name": "_Favorites",
@@ -415,7 +509,13 @@
             "kind": "text",
             "text": "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
           }
-        ]
+        ],
+        "registered": 0,
+        "unregistered": [
+          "מועדפים",
+          "עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן."
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 2"
       },
       "connections": {
         "edges": [
@@ -453,7 +553,12 @@
       },
       "floor": [
         "cfgRadius"
-      ]
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
     },
     {
       "name": "_RecentOrders",
@@ -473,7 +578,14 @@
             "kind": "text",
             "text": "📦"
           }
-        ]
+        ],
+        "registered": 0,
+        "unregistered": [
+          "הזמנות אחרונות לאתר",
+          "עדיין אין הזמנות — לאחר הראשונה היא תופיע כאן.",
+          "📦"
+        ],
+        "summary": "registry 0 · mapped 0/0 · unregistered 3"
       },
       "connections": {
         "edges": [
@@ -490,7 +602,12 @@
       "floor": [
         "cfgRadius",
         "groupThousands"
-      ]
+      ],
+      "contract": {
+        "extractable": "clean",
+        "props": [],
+        "untangle": []
+      }
     }
   ],
   "registry": {

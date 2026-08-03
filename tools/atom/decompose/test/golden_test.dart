@@ -15,14 +15,16 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 /// Repo-relative paths from the package root, made ABSOLUTE (the analyzer's
-/// parseFile requires an absolute path).
+/// parseFile requires an absolute path). Code inputs come from the live
+/// whats-happening tree (per knowledge/AGENT-SOURCES.md); the golden fixture is
+/// self-contained in this package (the published knowledge lives on nice-volta).
 final _rel = p.canonicalize(p.join(Directory.current.path, '../../..'));
+final _pkg = Directory.current.path;
 final _source =
     p.join(_rel, 'app_flutter/lib/screens/smart_home_screen.dart');
 final _registry =
     p.join(_rel, 'app_flutter/lib/state/studio/element_registry.dart');
-final _goldenDir =
-    p.join(_rel, 'app_flutter/knowledge/screens/contractor-home');
+final _goldenDir = p.join(_pkg, 'test/golden/contractor-home');
 
 void main() {
   final present = File(_source).existsSync() && File(_registry).existsSync();
@@ -73,6 +75,35 @@ void main() {
         row.edges.any((e) => e.kind == 'writes' && e.target == 'smartCartProvider'),
         isTrue,
       );
+    });
+
+    test('super-finder LIVE vs PREVIEW is distinguished (kAxisDive)', () {
+      final open = d.atoms.firstWhere((a) => a.name == '_SuperFinderOpen');
+      final hero = d.atoms.firstWhere((a) => a.name == '_SuperFinderHero');
+      expect(open.variant, 'live');
+      expect(open.gate, 'kAxisDive');
+      expect(open.section, 'superFinder');
+      expect(hero.variant, 'preview');
+      expect(hero.section, 'superFinder');
+    });
+
+    test('untangle contract — writes → callbacks, embeds → split', () {
+      final row = d.atoms.firstWhere((a) => a.name == '_SmartTreeRow');
+      expect(row.contract.extractable, 'needs-untangle');
+      expect(row.contract.untangle.any((u) => u.contains('smartCartProvider')),
+          isTrue);
+      final open = d.atoms.firstWhere((a) => a.name == '_SuperFinderOpen');
+      expect(open.contract.extractable, 'embeds-shared');
+      expect(open.contract.untangle.any((u) => u.contains('CatalogWheelScreen')),
+          isTrue);
+    });
+
+    test('gaps — unregistered visible text is surfaced per atom', () {
+      final row = d.atoms.firstWhere((a) => a.name == '_SmartTreeRow');
+      // The section title has no CfgText id → it is a gap.
+      expect(row.unregistered, contains('🌳 עץ חכם — אינסטלציה'));
+      // The add-to-cart button IS registered → not a gap.
+      expect(row.unregistered, isNot(contains('הוסף לסל')));
     });
 
     test('rendered files match the committed golden byte-for-byte', () {

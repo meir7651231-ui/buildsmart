@@ -16,7 +16,10 @@
         "registryId": "smart_home_screen.install_sub",
         "registryOk": true
       }
-    ]
+    ],
+    "registered": 2,
+    "unregistered": [],
+    "summary": "registry 2 · mapped 2/2 · unregistered 0"
   },
   "connections": {
     "edges": [
@@ -39,5 +42,10 @@
   },
   "floor": [
     "cfgRadius"
-  ]
+  ],
+  "contract": {
+    "extractable": "clean",
+    "props": [],
+    "untangle": []
+  }
 }

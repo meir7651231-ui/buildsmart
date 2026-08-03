@@ -1,0 +1,36 @@
+{
+  "name": "_SuperFinderOpen",
+  "role": "section",
+  "section": "superFinder",
+  "variant": "live",
+  "gate": "kAxisDive",
+  "object": {
+    "nodes": [
+      {
+        "kind": "text",
+        "text": "🕸️ מאתר-על"
+      }
+    ],
+    "registered": 0,
+    "unregistered": [
+      "🕸️ מאתר-על"
+    ],
+    "summary": "registry 0 · mapped 0/0 · unregistered 1"
+  },
+  "connections": {
+    "edges": []
+  },
+  "behaviour": {
+    "flows": []
+  },
+  "floor": [
+    "cfgRadius"
+  ],
+  "contract": {
+    "extractable": "embeds-shared",
+    "props": [],
+    "untangle": [
+      "CatalogWheelScreen = shared component → separate atom"
+    ]
+  }
+}
