@@ -29,16 +29,26 @@ void main() {
 
     final angle = s.attributes[0];
     expect(angle.kind, AttributeKind.choice);
-    final angleCanon = angle.values.map((v) => v.canonical).toSet();
-    expect(angleCanon.containsAll({'45', '90'}), isTrue);
+    // assert via the ° LABELS (canonical stays °-less) so a bare 45/90 never
+    // appears — stuck_log RULE: angles always carry ° (else parsed as a size).
+    final angleLabels = angle.values.map((v) => v.labelHe).toSet();
+    expect(angleLabels.containsAll({'45°', '90°'}), isTrue);
 
     final diameter = s.attributes[1];
     expect(diameter.kind, AttributeKind.dimension);
     expect(diameter.unitHe, 'מ"מ');
-    // 🔑 engine-derived: the diameter wheel is exactly the sorted kDepth ODs.
-    final ods = kDepth.keys.toList()..sort();
-    expect(diameter.values.map((v) => v.canonical).toList(),
-        ods.map((o) => '$o').toList(),);
+    // 🔑 phase-F fold (real-vs-template): the diameter wheel is now the REAL
+    // AGGREGATED DN ladder of the elbow family (distinct `odOf` across the live
+    // 'ברך 90°' siblings), NOT the bare template `kDepth` set. Assert the shape
+    // that holds for real-aggregated values — non-empty, distinct, sorted
+    // ascending — and that it is NOT merely the template ladder.
+    final canon = [for (final v in diameter.values) v.canonical!];
+    expect(canon, isNotEmpty);
+    final nums = [for (final c in canon) int.parse(c)];
+    expect(nums, orderedEquals([...nums]..sort())); // sorted ascending
+    expect(nums.toSet().length, nums.length); // distinct
+    final template = kDepth.keys.toList()..sort();
+    expect(nums, isNot(orderedEquals(template))); // real ⇒ diverges from template
 
     final length = s.attributes[2];
     expect(length.values, hasLength(3));
@@ -69,7 +79,7 @@ void main() {
     expect(_ids(s), ['diameter', 'thread']);
   });
 
-  test('🔑 manifold (מחלק) with a color → [ports · color · diameter]', () {
+  test('🔑 manifold (מחלק) with a color → [ports · color · diameter], REAL-aggregated', () {
     const p = LipskeyCatalogProduct(
       sku: 'M-1',
       nameHe: 'מחלק PPR 3 דרך 25',
@@ -79,16 +89,36 @@ void main() {
       categoryEmoji: '🔀',
       page: 34,
       color: 'כחול',
+      dims: {'יציאות': '3'},
     );
-    final s = configSchemaFor(p);
+    // A CONTROLLED manifold universe → ports {2,3}, colors {כחול,אדום}: the fold
+    // aggregates the REAL values from the siblings, NOT the template 1-4 / a
+    // single degenerate color (the owner's "real values, not generic").
+    const universe = [
+      p,
+      LipskeyCatalogProduct(
+        sku: 'M-2',
+        nameHe: 'מחלק PPR 2 דרך 25',
+        nameEn: '',
+        categoryHe: kPprCollars,
+        categoryEn: '',
+        categoryEmoji: '🔀',
+        page: 34,
+        color: 'אדום',
+        dims: {'יציאות': '2'},
+      ),
+    ];
+    final s = configSchemaFor(p, universe: universe);
     expect(s.familyId, 'מחלק');
     expect(_ids(s), ['ports', 'color', 'diameter']);
     final ports = s.attributes[0];
     expect(ports.kind, AttributeKind.number);
-    expect(ports.values.map((v) => v.canonical).toList(), ['1', '2', '3', '4']);
+    // REAL, aggregated from dims['יציאות'] = {2,3} — NOT the template [1,2,3,4].
+    expect(ports.values.map((v) => v.canonical).toList(), ['2', '3']);
     final color = s.attributes[1];
     expect(color.kind, AttributeKind.color);
-    expect(color.values.single.labelHe, 'כחול'); // grounded in p.color, not invented
+    // REAL color CHOICE (כחול/אדום), not a single degenerate value.
+    expect(color.values.map((v) => v.labelHe).toList(), ['כחול', 'אדום']);
   });
 
   test('🔑 manifold without color → [ports · diameter] (no invented swatches)', () {

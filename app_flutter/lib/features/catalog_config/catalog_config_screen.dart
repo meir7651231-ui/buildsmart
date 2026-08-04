@@ -1,0 +1,353 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CATALOG-CONFIG · Phase A/B — the GATED dive SCREEN. Renders a catalog section
+// as the design's open-rail dive: section title → families פתוחות (header) → a
+// visible rail of product TILES. BuildSmart-dressed (RTL · orange · round ·
+// emoji). Phase B: tapping a tile TOGGLES a generic config CARD that opens INLINE
+// (accordion) under its rail while the rest of the rail stays visible (plan B.2);
+// the card's schema is the ENGINE-derived [configSchemaFor] of the tile's real
+// catalog product. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§המסך, phase A/B).
+//
+// GATING (plan G · byte-identical-off): the ONLY entry is [route], which returns
+// null when `kCatalogConfig` is OFF (const-false in every normal build) — so no
+// live navigation path to this screen can exist. Nothing in the app imports this
+// file except behind `if (kCatalogConfig)`, so the whole surface tree-shakes away
+// ⇒ the shipped build is byte-identical to today. The pilot section is
+// `אביזרי קצה וחיבורים` ([pilotSectionNode]).
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
+import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/features/catalog_config/browse_model.dart';
+import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart';
+import 'package:buildsmart/features/catalog_config/config_card.dart';
+import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
+import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/toast.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Tile hairline — the brand orange at ~20% (const ARGB, no runtime opacity).
+const Color _kTileBorder = Color(0x33FF7A18);
+
+/// The pilot section title, used only if [pilotSectionNode] is ever null.
+const String _kFallbackTitle = 'אביזרי קצה וחיבורים';
+
+/// The rounded (radiusCard=20) white tile card shape — const so it never rebuilds.
+const RoundedRectangleBorder _kTileShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(BsTokens.radiusCard)),
+  side: BorderSide(color: _kTileBorder),
+);
+
+/// The same shape with a solid brand edge — the EXPANDED (open-card) tile.
+const RoundedRectangleBorder _kTileShapeOpen = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(BsTokens.radiusCard)),
+  side: BorderSide(color: BsTokens.brand, width: 2),
+);
+
+/// The live catalog product whose sku is [sku], or null (a fake/test tile or a
+/// sku missing from the active universe → the caller skips the card). A firstWhere
+/// over `resolvedCatalogProducts` with a null guard (no orElse throw).
+LipskeyCatalogProduct? _product(String sku) {
+  for (final product in resolvedCatalogProducts) {
+    if (product.sku == sku) {
+      return product;
+    }
+  }
+  return null;
+}
+
+/// The gated catalog-config dive screen (browse + inline card). STATEFUL only to
+/// hold the accordion's [_CatalogConfigScreenState._expandedSku]; its browse data
+/// stays the pure [browseSection] projection of the pilot section over the live
+/// catalog. [onTapTile] is an OPTIONAL extra hook, fired alongside the toggle.
+class CatalogConfigScreen extends ConsumerStatefulWidget {
+  const CatalogConfigScreen({super.key, this.onTapTile});
+
+  /// Optional extra tap hook, fired (in addition to toggling the inline card)
+  /// when a tile is tapped. Null ⇒ only the accordion toggles.
+  final void Function(ConfigTile tile)? onTapTile;
+
+  /// The ONLY route factory — GATED. Returns null when the flag is OFF, so there
+  /// is no live navigation path to this screen in a default (OFF) build.
+  static Route<void>? route({void Function(ConfigTile tile)? onTapTile}) {
+    if (!kCatalogConfig) {
+      return null;
+    }
+    return MaterialPageRoute<void>(
+      builder: (_) => CatalogConfigScreen(onTapTile: onTapTile),
+    );
+  }
+
+  @override
+  ConsumerState<CatalogConfigScreen> createState() =>
+      _CatalogConfigScreenState();
+}
+
+class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
+  /// The sku of the tile whose config card is open (accordion), or null. Only one
+  /// card is open at a time; the rest of the rail stays visible (plan B.2).
+  String? _expandedSku;
+
+  void _toggleTile(ConfigTile tile) {
+    widget.onTapTile?.call(tile);
+    setState(() {
+      _expandedSku = _expandedSku == tile.sku ? null : tile.sku;
+    });
+  }
+
+  /// PLAN E.1 · הוסף-לסל — add a [SmartCartLine] that CARRIES the chosen
+  /// [selection] (the configurator's picks) through the existing `smartCart.add`.
+  /// The catalog has NO price field, so the price is the owner-decided stub
+  /// ('לפי ספק' → 0); a variant is priced by the supplier downstream.
+  void _onAddToCart(
+    ProductConfigSchema schema,
+    Map<String, String> selection,
+    int qty,
+  ) {
+    final line = SmartCartLine(
+      productKey: 'lip:${schema.sku}',
+      productName: schema.nameHe,
+      productEmoji: schema.emoji,
+      brandName: '',
+      brandPrice: 0,
+      productQty: qty,
+      accessories: const [],
+      selection: selection,
+    );
+    ref.read(smartCartProvider.notifier).add(line);
+    showToast(context, 'נוסף לסל');
+  }
+
+  /// PLAN E.2 · בנה-קו — deferred (the connection-graph endgame is gated
+  /// separately); the button toasts "בקרוב" until that phase lands.
+  void _onBuildLine(
+    ProductConfigSchema schema,
+    Map<String, String> selection,
+    int qty,
+  ) {
+    showToast(context, 'בקרוב');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final section = pilotSectionNode();
+    final browse = section == null
+        ? const ConfigBrowse(titleHe: _kFallbackTitle, families: <ConfigFamily>[])
+        : browseSection(section, resolvedCatalogProducts);
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: BsTokens.bgLight,
+        appBar: AppBar(
+          backgroundColor: BsTokens.bgLight,
+          elevation: 0,
+          scrolledUnderElevation: 2,
+          title: Text(
+            browse.titleHe,
+            style: const TextStyle(
+              color: BsTokens.brand,
+              fontWeight: FontWeight.w900,
+              fontSize: BsTokens.typeTitleMd,
+            ),
+          ),
+        ),
+        body: browse.families.isEmpty
+            ? const _EmptyState()
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+                itemCount: browse.families.length,
+                itemBuilder: (context, i) => _FamilySection(
+                  family: browse.families[i],
+                  expandedSku: _expandedSku,
+                  onToggle: _toggleTile,
+                  onAddToCart: _onAddToCart,
+                  onBuildLine: _onBuildLine,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+/// One family: a brand-accent header (emoji + title) above its OPEN, visible
+/// horizontal rail of product tiles (design: "משפחות פתוחות"). When one of its
+/// tiles is [expandedSku], that tile's generic config card opens INLINE below the
+/// rail (accordion) — the rail itself stays visible (plan B.2). A tile whose sku
+/// resolves to no catalog product (a stale/foreign sku) simply skips the card.
+class _FamilySection extends StatelessWidget {
+  const _FamilySection({
+    required this.family,
+    required this.expandedSku,
+    required this.onToggle,
+    required this.onAddToCart,
+    required this.onBuildLine,
+  });
+
+  final ConfigFamily family;
+  final String? expandedSku;
+  final void Function(ConfigTile tile) onToggle;
+
+  /// Phase-E card actions, forwarded to the inline [ConfigCard] (הוסף-לסל /
+  /// בנה-קו) — the screen owns them so it can reach the cart provider + toast.
+  final ConfigCardAction onAddToCart;
+  final ConfigCardAction onBuildLine;
+
+  @override
+  Widget build(BuildContext context) {
+    // The one open tile in THIS family (if any) → its inline card below the rail.
+    Widget? inlineCard;
+    for (final tile in family.tiles) {
+      if (tile.sku == expandedSku) {
+        final product = _product(tile.sku);
+        if (product != null) {
+          inlineCard = Padding(
+            padding: const EdgeInsets.fromLTRB(
+              BsTokens.space4,
+              BsTokens.space2,
+              BsTokens.space4,
+              0,
+            ),
+            child: ConfigCard(
+              key: ValueKey<String>(tile.sku),
+              schema: configSchemaFor(product),
+              imageAsset: tile.imageAsset,
+              onAddToCart: onAddToCart,
+              onBuildLine: onBuildLine,
+            ),
+          );
+        }
+        break;
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            BsTokens.space4,
+            BsTokens.space4,
+            BsTokens.space4,
+            BsTokens.space2,
+          ),
+          child: Row(
+            children: [
+              Text(family.emoji, style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: BsTokens.space2),
+              Expanded(
+                child: Text(
+                  family.titleHe,
+                  style: const TextStyle(
+                    color: BsTokens.brand,
+                    fontSize: BsTokens.typeSubhead,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 116,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
+            itemCount: family.tiles.length,
+            separatorBuilder: (_, __) =>
+                const SizedBox(width: BsTokens.space3),
+            itemBuilder: (context, i) {
+              final tile = family.tiles[i];
+              return _Tile(
+                tile: tile,
+                selected: tile.sku == expandedSku,
+                onTap: () => onToggle(tile),
+              );
+            },
+          ),
+        ),
+        if (inlineCard != null) inlineCard,
+        const SizedBox(height: BsTokens.space3),
+      ],
+    );
+  }
+}
+
+/// A single product tile — a rounded white card (emoji + name), tappable. The tap
+/// toggles the inline card; [selected] (its card is open) draws a solid brand edge.
+class _Tile extends StatelessWidget {
+  const _Tile({
+    required this.tile,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final ConfigTile tile;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 128,
+      child: Material(
+        color: BsTokens.cardLight,
+        clipBehavior: Clip.antiAlias,
+        shape: selected ? _kTileShapeOpen : _kTileShape,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(tile.emoji, style: const TextStyle(fontSize: 30)),
+                const SizedBox(height: BsTokens.space2),
+                Text(
+                  tile.nameHe,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: BsTokens.typeLabel,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown when the pilot section resolves to no families (no products / missing
+/// section) — the plan's "אין פריטים" null-fallback state.
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('📦', style: TextStyle(fontSize: 48)),
+          SizedBox(height: BsTokens.space3),
+          Text(
+            'אין פריטים',
+            style: TextStyle(
+              color: BsTokens.inkLight,
+              fontSize: BsTokens.typeTitleSm,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -38,6 +38,7 @@ class SmartCartLine {
     required this.brandPrice,
     required this.productQty,
     required this.accessories,
+    this.selection = const {},
   });
   final String productKey;
   final String productName;
@@ -46,6 +47,12 @@ class SmartCartLine {
   final int brandPrice;
   final int productQty;
   final List<SmartCartAcc> accessories;
+
+  /// The configurator selection this line carries (plan E.1 — "הקונפיג נשמר
+  /// בשורה"), keyed by attribute (e.g. `{'angle': '45°'}`). EMPTY for every
+  /// ordinary (non-configured) line — so its JSON stays byte-identical: the key
+  /// is serialized only when non-empty and decoded tolerantly (old lines → {}).
+  final Map<String, String> selection;
 
   int get total {
     var t = brandPrice * productQty;
@@ -63,6 +70,9 @@ class SmartCartLine {
         'brandPrice': brandPrice,
         'productQty': productQty,
         'accessories': accessories.map((a) => a.toJson()).toList(),
+        // Emitted ONLY when non-empty ⇒ every legacy (unconfigured) line encodes
+        // byte-for-byte as before (no new key in the payload).
+        if (selection.isNotEmpty) 'selection': selection,
       };
 
   factory SmartCartLine.fromJson(Map<String, dynamic> j) => SmartCartLine(
@@ -75,6 +85,11 @@ class SmartCartLine {
         accessories: (j['accessories'] as List<dynamic>)
             .map((e) => SmartCartAcc.fromJson(e as Map<String, dynamic>))
             .toList(),
+        // TOLERANT: an old line with no `selection` key → the empty map.
+        selection: (j['selection'] as Map?)?.map(
+              (k, v) => MapEntry('$k', '$v'),
+            ) ??
+            const {},
       );
 }
 
@@ -158,6 +173,7 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
             brandPrice: l.brandPrice,
             productQty: qty,
             accessories: l.accessories,
+            selection: l.selection, // a qty change must not drop the config
           )
         else
           state[i],
