@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-intel-pD6 — 📋 מנוע-אביזרים · פאזה D slice 6: capstone "תוכנית-בנייה" (מגודר) — 2026-08-04
+`lib/features/fittings/intel/build_plan_screen.dart` (מגודר · off-live) — **ה-capstone** של פאזה D: `BuildPlanScreen(route)` מאחד למסך-אחד **תצוגת-3D** (C6 · `FittingPreview3d`) + **כתב-חיתוך** (D5 · `cutListUniform` · אורכי-צינור פר-מרווח). זהו הכפתור שמציג את ה-cut-list בפועל. מרחק-מרכזים נומינלי לתצוגה (קלט-תכן-אמיתי = בהמשך). **🔒 keystone:** אף מסך-חי לא מייבא `intel/` ⇒ tree-shaken ⇒ byte-identical. widget-smoke (`build_plan_screen_test`): דמו בונה 3D+כתב-חיתוך · רצף-בודד→"אין מרווחי-צינור" בלי-קריסה. **פאזה D (יכולות-מאחורי-כפתור) — שש פרוסות:** בנה-קו (D1/D2) · הצג-בתלת-ממד+מפרט (D3) · כתב-כמויות (D4) · כתב-חיתוך (D5) · תוכנית-בנייה (D6). fittings 318/318.
+
 ## #fittings-intel-pD5 — ✂️ מנוע-אביזרים · פאזה D slice 5: כתב-חיתוך (cut-list) — יכולת-מנוע (מגודר) — 2026-08-04
 `lib/features/fittings/intel/line_cuts.dart` (טהור · מגודר · off-live) — לכל קטע-צינור בין שני אביזרים סמוכים: **אורך-חיתוך = מרחק-מרכזים − ניכוי-שקע-A − ניכוי-שקע-B**. `cutList(route, centerToCenters)` → `List<CutSegment{fromFamily, toFamily, od, centerToCenter, cutLength}>` · `cutListUniform(route, spacing)`. **מקורקע ב-`cut_list.dart` (פאזה B):** `cutDeductionFor` (ניכוי פר-שקע · null→0 · M1) + `pipeCutLength(c2c, z1, z2)=c2c−z1−z2`. זו **גיאומטריה** (אורכי-צינור) — אין ערכי-בטיחות-מחייבים ⇒ אין צורך בביקורת-M5. **🔒 keystone:** אף מסך לא מייבא `intel/` ⇒ tree-shaken ⇒ byte-identical. **🔑 golden** (`line_cuts_test`): מצמד↔מצמד cut≡pipeCutLength(c2c,ded,ded) · אביזר-בלי-ניכוי→0 · רב-מרווח · רצף-קצר/מרווחים-חסרים בלי-קריסה · uniform. **הכפתור:** יוצג ב-capstone "תוכנית-בנייה" (מאחד spec+BOM+cut-list). fittings 316/316.
 
