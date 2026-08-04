@@ -41,6 +41,62 @@ void main(List<String> argv) {
   final journeyDir = optOf('--journeys-batch'); // merge a dir into one graph
   final asyncSrc = optOf('--async'); // one module (providers/consumers/exc)
   final asyncDir = optOf('--async-batch'); // merge a dir into one overview
+  final backendSrc = optOf('--backend'); // one functions/src/*.ts module
+  final backendDir = optOf('--backend-batch'); // merge functions/src → overview
+
+  // ── backend mode (DECOMP-DEPTH phase B) ───────────────────────────────────
+  if (backendDir != null) {
+    if (!Directory(backendDir).existsSync()) {
+      stderr.writeln('decompose: --backend-batch dir not found: $backendDir');
+      exit(66);
+    }
+    final bOut = outOpt ?? 'app_flutter/knowledge/backend';
+    final files = Directory(backendDir)
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.ts') && !f.path.endsWith('.d.ts'))
+        .map((f) => f.path)
+        .toList()
+      ..sort();
+    final ov = decomposeBackendOverview(files);
+    stdout.writeln('decompose(backend): ${files.length} files → '
+        '${ov.functions.length} functions '
+        '(${ov.callables} onCall · ${ov.triggers} trigger · ${ov.scheduled} sched)');
+    if (printOnly) {
+      renderBackendOverview(ov).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    Directory(bOut).createSync(recursive: true);
+    renderBackendOverview(ov).forEach((n, c) {
+      File('$bOut/$n').writeAsStringSync(c);
+    });
+    stdout.writeln('decompose(backend): wrote $bOut/overview.backend.json + OVERVIEW.md');
+    return;
+  }
+  if (backendSrc != null) {
+    if (!File(backendSrc).existsSync()) {
+      stderr.writeln('decompose: --backend source not found: $backendSrc');
+      exit(66);
+    }
+    final bOut = outOpt ?? 'app_flutter/knowledge/backend';
+    final m = decomposeBackend(backendSrc, moduleName: name);
+    stdout.writeln('decompose(backend): ${m.module} → ${m.functions.length} functions');
+    if (printOnly) {
+      renderBackendFiles(m).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    writeBackendOut(m, bOut);
+    stdout.writeln('decompose(backend): wrote $bOut/${m.module}/');
+    return;
+  }
 
   // ── async mode (DECOMP-DEPTH phase async) ─────────────────────────────────
   if (asyncDir != null) {

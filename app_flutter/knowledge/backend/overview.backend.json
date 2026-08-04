@@ -1,0 +1,340 @@
+{
+  "functionCount": 20,
+  "callables": 10,
+  "documentTriggers": 8,
+  "scheduled": 2,
+  "errorCodes": [
+    "failed-precondition",
+    "internal",
+    "invalid-argument",
+    "not-found",
+    "permission-denied",
+    "unauthenticated"
+  ],
+  "functions": [
+    {
+      "name": "rollupAnalyticsDaily",
+      "trigger": "onSchedule",
+      "region": "REGION",
+      "line": 251,
+      "authGated": false,
+      "reads": [
+        "analyticsCounters",
+        "shards",
+        "analyticsDaily"
+      ],
+      "writes": [
+        "analyticsCounters",
+        "shards",
+        "analyticsDaily"
+      ],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "rollupPresenceSummary",
+      "trigger": "onSchedule",
+      "region": "REGION",
+      "line": 288,
+      "authGated": false,
+      "reads": [
+        "presence",
+        "presenceSummary"
+      ],
+      "writes": [
+        "presence",
+        "presenceSummary"
+      ],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "approveUsers",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 100,
+      "authGated": true,
+      "reads": [],
+      "writes": [
+        "users"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "invalid-argument",
+        "permission-denied",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "askClaude",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 112,
+      "authGated": true,
+      "reads": [],
+      "writes": [],
+      "calls": [
+        "claude"
+      ],
+      "errorCodes": [
+        "internal",
+        "invalid-argument",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "computeCredit",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 42,
+      "authGated": true,
+      "reads": [
+        "users",
+        "customers",
+        "orders"
+      ],
+      "writes": [],
+      "calls": [],
+      "errorCodes": [
+        "invalid-argument",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "deleteAccount",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 270,
+      "authGated": true,
+      "reads": [
+        "users",
+        "diag"
+      ],
+      "writes": [
+        "users",
+        "diag"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "onUserDocWritten",
+      "trigger": "onDocumentWritten",
+      "region": "REGION",
+      "line": 119,
+      "authGated": false,
+      "reads": [],
+      "writes": [
+        "directory"
+      ],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "setRole",
+      "trigger": "onCall",
+      "region": "me-west1",
+      "line": 45,
+      "authGated": true,
+      "reads": [
+        "stores"
+      ],
+      "writes": [],
+      "calls": [],
+      "errorCodes": [
+        "invalid-argument",
+        "not-found",
+        "permission-denied",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "onOrderCreatedEmail",
+      "trigger": "onDocumentCreated",
+      "region": "REGION",
+      "line": 146,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "advanceOrderStage",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 50,
+      "authGated": true,
+      "reads": [
+        "orders"
+      ],
+      "writes": [
+        "orders"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "failed-precondition",
+        "invalid-argument",
+        "not-found",
+        "permission-denied",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "revertIllegalOrderStageWrite",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 145,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "onOrderStageChanged",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 98,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "onChatMessageCreated",
+      "trigger": "onDocumentCreated",
+      "region": "REGION",
+      "line": 143,
+      "authGated": false,
+      "reads": [
+        "chatThreads",
+        "users"
+      ],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "onUserActivated",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 198,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "getUploadUrl",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 94,
+      "authGated": true,
+      "reads": [],
+      "writes": [],
+      "calls": [
+        "r2"
+      ],
+      "errorCodes": [
+        "failed-precondition",
+        "invalid-argument",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "reviewRoleRequest",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 60,
+      "authGated": true,
+      "reads": [
+        "roleRequests",
+        "users"
+      ],
+      "writes": [
+        "roleRequests",
+        "users"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "failed-precondition",
+        "invalid-argument",
+        "not-found",
+        "permission-denied",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "onUserCreatedQueueApproval",
+      "trigger": "onDocumentCreated",
+      "region": "REGION",
+      "line": 199,
+      "authGated": false,
+      "reads": [
+        "directory"
+      ],
+      "writes": [
+        "directory"
+      ],
+      "calls": [],
+      "errorCodes": []
+    },
+    {
+      "name": "setOrg",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 41,
+      "authGated": true,
+      "reads": [],
+      "writes": [
+        "users"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "invalid-argument",
+        "not-found",
+        "permission-denied",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "publishConfig",
+      "trigger": "onCall",
+      "region": "REGION",
+      "line": 209,
+      "authGated": true,
+      "reads": [
+        "studioConfig",
+        "studioConfigApprovals",
+        "studioConfigSnapshots"
+      ],
+      "writes": [
+        "studioConfig",
+        "studioConfigApprovals",
+        "studioConfigSnapshots"
+      ],
+      "calls": [],
+      "errorCodes": [
+        "failed-precondition",
+        "invalid-argument",
+        "unauthenticated"
+      ]
+    },
+    {
+      "name": "revertIllegalConfigWrite",
+      "trigger": "onDocumentUpdated",
+      "region": "REGION",
+      "line": 471,
+      "authGated": false,
+      "reads": [],
+      "writes": [],
+      "calls": [],
+      "errorCodes": []
+    }
+  ]
+}
