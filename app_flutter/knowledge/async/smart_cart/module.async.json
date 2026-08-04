@@ -1,0 +1,17 @@
+{
+  "module": "smart_cart",
+  "source": "../../../app_flutter/lib/state/smart_cart.dart",
+  "providerCount": 1,
+  "consumerCount": 0,
+  "providers": [
+    {
+      "name": "smartCartProvider",
+      "kind": "StateNotifierProvider",
+      "async": false,
+      "backing": "local",
+      "line": 205
+    }
+  ],
+  "consumers": [],
+  "exceptions": []
+}

@@ -39,6 +39,64 @@ void main(List<String> argv) {
   final onlyPrim = optOf('--fn-only'); // one primitive within --primitives
   final journeySrc = optOf('--journeys'); // one screen module (nodes+edges)
   final journeyDir = optOf('--journeys-batch'); // merge a dir into one graph
+  final asyncSrc = optOf('--async'); // one module (providers/consumers/exc)
+  final asyncDir = optOf('--async-batch'); // merge a dir into one overview
+
+  // ── async mode (DECOMP-DEPTH phase async) ─────────────────────────────────
+  if (asyncDir != null) {
+    if (!Directory(asyncDir).existsSync()) {
+      stderr.writeln('decompose: --async-batch dir not found: $asyncDir');
+      exit(66);
+    }
+    final aOut = outOpt ?? 'app_flutter/knowledge/async';
+    final files = Directory(asyncDir)
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .map((f) => f.path)
+        .toList()
+      ..sort();
+    final ov = decomposeAsyncOverview(files);
+    stdout.writeln('decompose(async): ${files.length} files → '
+        '${ov.providers.length} providers (${ov.asyncProviders} async) · '
+        '${ov.consumers.length} .when · ${ov.exceptions.length} exc');
+    if (printOnly) {
+      renderAsyncOverview(ov).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    Directory(aOut).createSync(recursive: true);
+    renderAsyncOverview(ov).forEach((n, c) {
+      File('$aOut/$n').writeAsStringSync(c);
+    });
+    stdout.writeln('decompose(async): wrote $aOut/overview.async.json + OVERVIEW.md');
+    return;
+  }
+  if (asyncSrc != null) {
+    if (!File(asyncSrc).existsSync()) {
+      stderr.writeln('decompose: --async source not found: $asyncSrc');
+      exit(66);
+    }
+    final aOut = outOpt ?? 'app_flutter/knowledge/async';
+    final m = decomposeAsync(asyncSrc, moduleName: name);
+    stdout.writeln('decompose(async): ${m.module} → '
+        '${m.providers.length} providers · ${m.consumers.length} .when · '
+        '${m.exceptions.length} exc');
+    if (printOnly) {
+      renderAsyncFiles(m).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    writeAsyncOut(m, aOut);
+    stdout.writeln('decompose(async): wrote $aOut/${m.module}/');
+    return;
+  }
 
   // ── journey mode (DECOMP-DEPTH phase N) ───────────────────────────────────
   if (journeyDir != null) {
