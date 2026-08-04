@@ -4,6 +4,13 @@
 
 ---
 
+## #worker-profile-card-material — 🦺 עטיפת Material שקוף לשורות-כרטיס (ink/lint) — 2026-08-04
+**שינוי-UI:** `_PersonalAreaRow.build` + `Column` של `_ActionsCard` נעטפו ב-`Material(type: MaterialType.transparency)` כדי לתת ל-`ListTile`ים משטח-ink מעל רקע-הכרטיס (תיקון debug-assertion "ListTile ink may be invisible" · release: ink-ripple בלתי-נראה). **הציפייה: אפס שינוי-סטטי** — `MaterialType.transparency` לא צובע כלום; רקע-הכרטיס עדיין מגיע מה-`Container`. הדלתא-הוויזואלית היחידה = ה-tap-ripple שכעת *נראה* (התיקון עצמו).
+**אימות (screenshot אמיתי · pump WorkerProfileScreen · worker-seed=רן · Heebo · 390 logical · toImage):** צולם והוצג בעין. כל הכרטיסים נרנדרו נקי — כרטיס-זהות (רן · דמו · @ran), כרטיס-סטטיסטיקה (המשימות שלי 0/3 · נדחו/ממתינות/הושלמו), אזור-אישי (נוכחות/טפסים/תיק בטיחות/תלושי שכר עם פילי-סטטוס "לא נרשם היום"/"אין תעודות"/"מוכן לשרת"), וכרטיס-פעולות (הגדרות עובד · החלפת תפקיד · יציאה-אדום). רקעים לבנים · צללים · dividers · פילי-הסטטוס (ה-`Material`+`InkWell` הקיים בשורה 714) — כולם ללא רגרסיה. העטיפה השקופה בלתי-נראית כצפוי. (ה-□ = חוסר-גליף-emoji בפונט-הטסט, לא רגרסיה.)
+**מקור:** `tools/atom/testgen` (List A) · הטסטים הגנרטיביים מאמתים render (find.text עבר) · main-suite 5572/12/0 · analyze 0 חדשים · `git diff -w` = שני העיטופים בלבד.
+
+---
+
 ## #launch-g3 — 🙈 הסתרת 3 placeholders פומביים (hide-only · fallbacks קיימים) — 2026-08-01
 **קבוצה 3 מתוך SSOT סגירת-האתר-להשקה — leak-hunt.** נחיל 4-auditors אימת נגישות; 3 placeholders "בבנייה"/"בקרוב" הגיעו למשתמש-לא-בעלים ב-web החי וגודרו. **שינויי הסתרה בלבד — אפס UI חדש**, ולכן ה-visual-verify הוא אישור *היעדר* ה-placeholder + שה-fallback הוא משטח-קיים-מאומת:
 - **store services** (מקלדת → יעד "שירותים" עקף את השער) → כעת `_AllList` (רשימת-הכל הקיימת) במקום גריד-"🚧 בבנייה".

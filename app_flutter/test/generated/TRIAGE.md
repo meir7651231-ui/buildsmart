@@ -5,18 +5,22 @@
 > **triage signal**, never a CI blocker. The main swarm gate stays green.
 > Regenerate: `dart run atom_testgen` (tools/atom/testgen).
 
-## Frozen numbers (Material-lever run · `triage6`)
+## Frozen numbers (after worker_profile pilot fix · `triage7`)
 
-| | |
-|---|---:|
-| screens | 62 |
-| generated tests | 1001 |
-| **verified PASS** | **596** |
-| **reported FAIL** | **405** |
-| compile-fail | 0 |
-| **force-pass** | **0** |
+| | `triage6` | after pilot (`triage7`) |
+|---|---:|---:|
+| screens | 62 | 62 |
+| generated tests | 1001 | 1001 |
+| **verified PASS** | 596 | **612** |
+| **reported FAIL** | 405 | **389** |
+| compile-fail | 0 | 0 |
+| **force-pass** | 0 | **0** |
 
-`pass = verified · fail = reported`. Nothing here is forced green.
+`pass = verified · fail = reported`. Nothing here is forced green. The pilot fix
+(worker_profile app code) converted 16 crash-failures to verified passes; the
+remaining 5 on that screen are honest not-founds (dialog content). Global
+`+612 -389` is the raw `triage7` tally (verified, not arithmetic); `ink-hidden`
+is now 0 globally. Main app suite stays green (5572 pass / 12 skip / 0 fail).
 
 ### Levers applied (generic, one mechanism each — not per-screen seeds)
 
@@ -55,23 +59,41 @@ source can't be located, which keeps the goldens byte-stable).
 
 ---
 
-## LIST A — real discoveries (worklist for the code team) · 87 on 4 screens
+## LIST A — real discoveries (worklist for the code team)
 
-These four screens **do** build their own Material `Scaffold`, yet still throw a
-Material-ancestor / `InkResponse` cascade when pumped — i.e. tappable Ink surfaces
-that live **outside** the screen's own Material subtree (sheets/dialogs/pre-mount
-sub-widgets), or a crash before the Scaffold mounts. **Not** wrapped (that would
-mask the signal), **not** force-passable.
+Per-finding investigation (real-render-path repros: the real Screen widget; a
+realistic 390×844 viewport in a normal route) proved these are **real**, not
+pump-isolation artifacts. **One shared Flutter anti-pattern:** a tappable
+(`ListTile`/`InkWell`) inside a **decorated card** (`Container`/`DecoratedBox`
+with a bg colour) **without its own `Material`** → in debug the framework asserts
+("ListTile ink may be invisible" / "No Material widget found"); in release the
+assert is stripped and the tap ripple is hidden by the card (cosmetic — or, for
+the true "No Material" cases, `Material.of` is null). Fix = give the card content
+its own transparent `Material` (or lift a `Material` above the decoration).
 
-| screen | count | real Material Scaffold | pattern |
-|---|---:|:---:|---|
-| courier_profile_screen | 35 | yes (1) | Ink outside own Scaffold subtree |
-| chats_screen | 22 | yes (3) | Ink outside own Scaffold subtree |
-| worker_profile_screen | 21 | yes (1) | Ink outside own Scaffold subtree |
-| home_content_reorder | 9 | yes (1) | Ink outside own Scaffold subtree |
+### ✅ FIXED — worker_profile_screen (pilot)
 
-Action for the code team: verify each Ink surface in these screens is mounted
-under the screen's `Scaffold`/`Material`, not in a detached subtree.
+Surgical, no refactor: wrapped `_PersonalAreaRow`'s `ListTile` and `_ActionsCard`'s
+tile `Column` in `Material(type: MaterialType.transparency)` — the card bg still
+shows (from the `Container`), the tiles now have an ink surface above it. Matches
+the file's existing correct pattern (the status-pill `Material`).
+
+Result (verified, `--dart-define=atomgen=true`): **21 crashes → 16 verified pass
++ 5 honest not-found** (the 5 are `_RoleSwitchCodeDialog` content that only
+renders when the dialog is opened — bucket B, self-skipped, never force-passed).
+0 `No Material` / 0 ink-hidden / 0 `InkResponse` remain.
+
+### Remaining — 66 on 3 screens (same anti-pattern, not yet fixed)
+
+**Not** force-passable. Recommended fix order (per plan): the true `No Material`
+cases first (chats, reorder — potentially worse than cosmetic in release), then
+the cosmetic ink-hidden case (courier_profile).
+
+| screen | count | real-render-path assertion |
+|---|---:|---|
+| courier_profile_screen | 35 | real `CourierProfileScreen` → "ListTile ink hidden" (the bare-`Body` "No Material" masks it) |
+| chats_screen | 22 | "No Material" — persists at 390×844 in a normal route |
+| home_content_reorder | 9 | `InkResponse` "No Material" — `ReorderableListView` items, persists at normal size |
 
 ---
 

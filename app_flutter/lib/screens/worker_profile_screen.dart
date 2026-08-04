@@ -254,26 +254,26 @@ class _IdentityCard extends StatelessWidget {
                             // כל צ'יפ ה'דמו' נעלם עם הסתרת האלמנט (לא שלד ריק).
                             'worker_profile_screen.demo',
                             child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF2F3F5),
-                              borderRadius: BorderRadius.circular(
-                                BsTokens.radiusPill,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF2F3F5),
+                                borderRadius: BorderRadius.circular(
+                                  BsTokens.radiusPill,
+                                ),
+                              ),
+                              child: const CfgText(
+                                'worker_profile_screen.demo',
+                                'דמו',
+                                style: TextStyle(
+                                  color: BsTokens.mutedLight,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                            child: const CfgText(
-                              'worker_profile_screen.demo',
-                              'דמו',
-                              style: TextStyle(
-                                color: BsTokens.mutedLight,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
                           ),
                         ],
                       ],
@@ -692,58 +692,65 @@ class _PersonalAreaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Text(emoji, style: const TextStyle(fontSize: 20)),
-      title: Text(
-        title,
-        style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // The status is a tappable shortcut to the latest update (same
-          // destination as the row). ≥48dp tap target via the pill padding.
-          Semantics(
-            button: true,
-            label: '${status.label} — פתח $title',
-            excludeSemantics: true,
-            child: Material(
-              color:
-                  status.muted
-                      ? const Color(0xFFF2F3F5)
-                      : status.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              child: InkWell(
+    // The row lives inside a decorated card (Container bg). Its own Material —
+    // transparent, so the card colour still shows — gives the ListTile an ink
+    // surface ABOVE that bg, otherwise the tap ripple paints on the far Scaffold
+    // Material and is hidden by the card. Matches the status-pill Material below.
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        leading: Text(emoji, style: const TextStyle(fontSize: 20)),
+        title: Text(
+          title,
+          style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // The status is a tappable shortcut to the latest update (same
+            // destination as the row). ≥48dp tap target via the pill padding.
+            Semantics(
+              button: true,
+              label: '${status.label} — פתח $title',
+              excludeSemantics: true,
+              child: Material(
+                color:
+                    status.muted
+                        ? const Color(0xFFF2F3F5)
+                        : status.color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                onTap: onTap,
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 32),
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  child: Text(
-                    status.label,
-                    style: TextStyle(
-                      color: status.color,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  onTap: onTap,
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 32),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    child: Text(
+                      status.label,
+                      style: TextStyle(
+                        color: status.color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
-        ],
+            const SizedBox(width: 4),
+            const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          ],
+        ),
+        onTap: onTap,
       ),
-      onTap: onTap,
     );
   }
 }
@@ -770,72 +777,78 @@ class _ActionsCard extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          HelpTarget(
-            title: 'הגדרות עובד',
-            body:
-                'פותח את הגדרות הלוח המותאמות לעובד — התראות, אזור ושפה, '
-                'ממשק ונגישות ומידע משפטי.',
-            child: ListTile(
-              leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'worker.profile.settings_title',
-                'הגדרות עובד',
-                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+      // Transparent Material inside the decorated card so the ListTiles' ink
+      // ripples paint above the card bg instead of being hidden by it.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          children: [
+            HelpTarget(
+              title: 'הגדרות עובד',
+              body:
+                  'פותח את הגדרות הלוח המותאמות לעובד — התראות, אזור ושפה, '
+                  'ממשק ונגישות ומידע משפטי.',
+              child: ListTile(
+                leading: const Text('⚙️', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'worker.profile.settings_title',
+                  'הגדרות עובד',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                ),
+                onTap:
+                    () => Navigator.of(
+                      context,
+                    ).push(WorkerSettingsScreen.route()),
               ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: BsTokens.mutedLight,
-              ),
-              onTap:
-                  () =>
-                      Navigator.of(context).push(WorkerSettingsScreen.route()),
             ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          HelpTarget(
-            title: 'החלפת תפקיד',
-            body:
-                'מעבר ללוח אחר (קבלן/מנהל/חנות/שליח) — מוגן בקוד. '
-                'ללא הקוד הנכון המעבר אינו מתאפשר.',
-            child: ListTile(
-              leading: const Text('🔄', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'worker.profile.role_switch_title',
-                'החלפת תפקיד',
-                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            const Divider(height: 1, color: Color(0xFFF2F3F5)),
+            HelpTarget(
+              title: 'החלפת תפקיד',
+              body:
+                  'מעבר ללוח אחר (קבלן/מנהל/חנות/שליח) — מוגן בקוד. '
+                  'ללא הקוד הנכון המעבר אינו מתאפשר.',
+              child: ListTile(
+                leading: const Text('🔄', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'worker.profile.role_switch_title',
+                  'החלפת תפקיד',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                subtitle: const CfgText(
+                  'worker.profile.role_switch_hint',
+                  'מוגן בקוד',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                ),
+                onTap: () => _askRoleSwitchCode(context),
               ),
-              subtitle: const CfgText(
-                'worker.profile.role_switch_hint',
-                'מוגן בקוד',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: BsTokens.mutedLight,
-              ),
-              onTap: () => _askRoleSwitchCode(context),
             ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          HelpTarget(
-            title: 'יציאה',
-            body:
-                'מנתק אותך מלוח העובד ומחזיר למסך ההרשמה. '
-                'תתבקש לאשר לפני הניתוק.',
-            child: ListTile(
-              leading: const Text('🚪', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'worker.profile.logout_title',
-                'יציאה',
-                // AA: redAccent על לבן נכשל — token חוזה 9.
-                style: TextStyle(color: BsTokens.dangerDark, fontSize: 15),
+            const Divider(height: 1, color: Color(0xFFF2F3F5)),
+            HelpTarget(
+              title: 'יציאה',
+              body:
+                  'מנתק אותך מלוח העובד ומחזיר למסך ההרשמה. '
+                  'תתבקש לאשר לפני הניתוק.',
+              child: ListTile(
+                leading: const Text('🚪', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'worker.profile.logout_title',
+                  'יציאה',
+                  // AA: redAccent על לבן נכשל — token חוזה 9.
+                  style: TextStyle(color: BsTokens.dangerDark, fontSize: 15),
+                ),
+                onTap: () => _logout(context, ref),
               ),
-              onTap: () => _logout(context, ref),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1347,29 +1360,29 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     // כל כרטיס-הכפתור נעלם עם הסתרת האלמנט (לא שלד ריק).
                     'worker.profile.save_button',
                     child: Material(
-                    color: BsTokens.brand,
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                    child: InkWell(
+                      color: BsTokens.brand,
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                      onTap: _saving ? null : _save,
-                      child: Opacity(
-                        opacity: _saving ? 0.6 : 1,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          child: CfgText(
-                            'worker.profile.save_button',
-                            '✓ שמור פרופיל',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: bsOnAccent(context),
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w800,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                        onTap: _saving ? null : _save,
+                        child: Opacity(
+                          opacity: _saving ? 0.6 : 1,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            child: CfgText(
+                              'worker.profile.save_button',
+                              '✓ שמור פרופיל',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: bsOnAccent(context),
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                   ),
                 ],
               ),

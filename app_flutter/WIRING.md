@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #worker-profile-card-material — 🦺 שורות-כרטיס עוטפות Material (ink/lint) — 2026-08-04
+`lib/screens/worker_profile_screen.dart` — תיקון כירורגי (ללא refactor): `_PersonalAreaRow.build` וה-`Column` של `_ActionsCard` עוטפים כעת ב-`Material(type: MaterialType.transparency)`. הסיבה: `ListTile`/`InkWell` בתוך כרטיס-מעוצב (`Container` עם רקע) בלי `Material` ביניים — אדוות-ההקשה נצבעת על ה-Scaffold-Material הרחוק ומוסתרת ע"י רקע-הכרטיס (debug: assertion "ListTile ink may be invisible" / "No Material widget found" · release: ink בלתי-נראה). ה-Material השקוף נותן משטח-ink מעל רקע-הכרטיס (הרקע עדיין נצבע מה-`Container`) — תואם את דפוס-הפיל-הסטטוס הקיים בקובץ. **מקור-הממצא:** כלי `tools/atom/testgen` (List A). מאומת (`--dart-define=atomgen=true`): 21 כשלי-crash → 16 pass-מאומת + 5 not-found-כן (תוכן-דיאלוג `_RoleSwitchCodeDialog`, bucket B). 0 No-Material/ink-hidden נותרו. אפס force-pass · main-suite ירוק (5572/12/0) · `git diff -w` = שני העיטופים בלבד.
+
 ## #fittings-engine-pC6 — 🖼️ מנוע-קטלוג-3D · פאזה C (renderer 3): צייר + מסך-preview מגודר off-live — 2026-08-04
 פרוסת-ה-renderer השלישית והאחרונה (option א) — **ה-build-preview המגודר שהתבקש לפני צעד 43.** שני קבצים תחת `lib/features/fittings/render/`:
 - `mesh_projector.dart` (**טהור · golden**): `projectMeshes(meshes, proj, view, eye, size)` → `List<RenderTriangle>` **ממוינים רחוק→קרוב** (painter's algorithm) עם **הצללת-Lambert דו-צדדית** (`uLight=[0.5,0.9,0.55]` verbatim gen3d:435 · היפוך-נורמל-לעין gen3d:252); משולש-מאחורי-המצלמה מדולג. `+ meshBounds(meshes)` (מרכז+רדיוס למסגור, gen3d:268; ריק→origin/1, בלי חלוקה-באפס). **🔑 golden** (`mesh_projector_test`): מיון-עומק · shade∈[ambient,1] · culling-מאחור · מסגור · רצף-אמיתי.
