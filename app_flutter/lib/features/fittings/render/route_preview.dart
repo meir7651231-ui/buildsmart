@@ -31,6 +31,13 @@ Color colorForMaterial(PartMaterial mat) => switch (mat) {
       PartMaterial.brass => kBrassColor,
     };
 
+/// צבע-ההיילייט (ברק) פר-חומר: דיאלקטרי → לבן · פליז → לבן-חמים (השתקפות מתכתית).
+Color _highlightForMaterial(PartMaterial mat) => switch (mat) {
+      PartMaterial.ppr => const Color(0xFFFFFFFF),
+      PartMaterial.pipe => const Color(0xFFFFFFFF),
+      PartMaterial.brass => const Color(0xFFFFF4D8),
+    };
+
 /// צייר-דק: מקבל חלקים-מוכנים (world-space, בעלי-חומר) + פרמטרי-מצלמה, מקרין ומצייר.
 /// כל הלוגיקה-הכבדה ב-`projectParts` הטהור (הנבדק-golden); כאן רק רקע + מילוי-משולשים.
 class RoutePainter extends CustomPainter {
@@ -61,12 +68,17 @@ class RoutePainter extends CustomPainter {
     final paint = Paint()..style = PaintingStyle.fill;
     for (final t in tris) {
       final base = colorForMaterial(t.mat);
+      final hl = _highlightForMaterial(t.mat);
       final s = t.shade.clamp(0.0, 1.0);
+      final spec = t.specular.clamp(0.0, 1.0);
+      // צבע-סופי = בסיס·הצללה + היילייט·ספקולרי (מוגבל ל-255).
+      int ch(double baseC, double hlC) =>
+          (baseC * 255.0 * s + hlC * 255.0 * spec).clamp(0.0, 255.0).round();
       paint.color = Color.fromARGB(
         255,
-        (base.r * 255.0 * s).round(),
-        (base.g * 255.0 * s).round(),
-        (base.b * 255.0 * s).round(),
+        ch(base.r, hl.r),
+        ch(base.g, hl.g),
+        ch(base.b, hl.b),
       );
       canvas.drawPath(
         Path()

@@ -5,7 +5,11 @@
 import 'dart:ui' show Size;
 
 import 'package:buildsmart/features/fittings/engine/models.dart';
+import 'package:buildsmart/features/fittings/geometry/element_meshes.dart'
+    show PartMaterial;
 import 'package:buildsmart/features/fittings/geometry/primitives.dart';
+import 'package:buildsmart/features/fittings/geometry/route_assembly.dart'
+    show WorldPart;
 import 'package:buildsmart/features/fittings/geometry/route_meshes.dart';
 import 'package:buildsmart/features/fittings/layout/route_layout.dart' show Vec3;
 import 'package:buildsmart/features/fittings/render/camera.dart';
@@ -22,10 +26,44 @@ const _size = Size(400, 300);
   return (proj: proj, view: view, eye: eye);
 }
 
+double _maxSpecular(List<RenderTriangle> tris) =>
+    tris.fold(0, (m, t) => t.specular > m ? t.specular : m);
+
 void main() {
   test('empty meshes → no triangles', () {
     final cam = _camera(const Vec3(0, 0, 0), 100);
     expect(projectMeshes(const [], cam.proj, cam.view, cam.eye, _size), isEmpty);
+  });
+
+  group('🔑 specular highlights (P4 — gen3d-lite Blinn-Phong + Fresnel)', () {
+    final tubeMesh = tube(-20, 20, 16, 10);
+    final cam = _camera(const Vec3(0, 0, 0), 120);
+
+    List<RenderTriangle> asMat(PartMaterial mat) => projectParts(
+          [WorldPart(tubeMesh, mat)], cam.proj, cam.view, cam.eye, _size,);
+
+    test('every specular ∈ [0,1]; a lit tube shows at least one highlight', () {
+      final tris = asMat(PartMaterial.ppr);
+      expect(tris, isNotEmpty);
+      for (final t in tris) {
+        expect(t.specular, inInclusiveRange(0, 1));
+      }
+      expect(_maxSpecular(tris), greaterThan(0.0)); // a highlight exists
+    });
+
+    test('brass (glossy metal) peaks brighter than PP-R (rough dielectric)', () {
+      // Same geometry & camera — only the material changes. Brass has lower
+      // roughness (sharper, taller peak) + higher F0 ⇒ a stronger highlight.
+      expect(_maxSpecular(asMat(PartMaterial.brass)),
+          greaterThan(_maxSpecular(asMat(PartMaterial.ppr))),);
+    });
+
+    test('projectMeshes (no material) still yields finite specular in range', () {
+      final tris = projectMeshes([tubeMesh], cam.proj, cam.view, cam.eye, _size);
+      for (final t in tris) {
+        expect(t.specular, inInclusiveRange(0, 1));
+      }
+    });
   });
 
   group('meshBounds — camera framing', () {

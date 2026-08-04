@@ -5,6 +5,7 @@
 // הצללה: `N·L` עם `uLight=[0.5,0.9,0.55]` (gen3d:435) + היפוך-נורמל-לעבר-העין
 // (`if dot(N,V)<0: N=-N`, gen3d:252) — דו-צדדי כמו המקור. PBR-מלא = שיפור מאוחר.
 
+import 'dart:math' as math;
 import 'dart:ui' show Offset, Size;
 
 import 'package:buildsmart/features/fittings/geometry/element_meshes.dart'
@@ -22,17 +23,27 @@ const Vec3 kLightDir = Vec3(0.5, 0.9, 0.55);
 /// עוצמת-האמביינט (רצפת-ההצללה) — כדי שפאה בצל לא תושחר לגמרי.
 const double kAmbient = 0.35;
 
-/// משולש מוכן-לציור: שלוש נקודות-מסך, עומק-מיון (far→near), הצללה ב-[0,1], וחומר.
+/// פרמטרי-הצללה פר-חומר (`metal`/`rough`) — מזינים את Blinn-Phong+Fresnel פר-פאה,
+/// פורט-lite מ-`gen3d.html:250-254`. PP-R = דיאלקטרי חצי-מבריק · פליז = מתכתי-מלוטש.
+({double metal, double rough}) _shadeParams(PartMaterial m) => switch (m) {
+      PartMaterial.ppr => (metal: 0, rough: 0.55),
+      PartMaterial.pipe => (metal: 0.5, rough: 0.4),
+      PartMaterial.brass => (metal: 1, rough: 0.25),
+    };
+
+/// משולש מוכן-לציור: שלוש נקודות-מסך, עומק-מיון (far→near), הצללת-Lambert, ברק-
+/// ספקולרי (highlight), וחומר.
 @immutable
 class RenderTriangle {
   const RenderTriangle(this.a, this.b, this.c, this.depth, this.shade,
-      {this.mat = PartMaterial.ppr,});
+      {this.mat = PartMaterial.ppr, this.specular = 0,});
   final Offset a;
   final Offset b;
   final Offset c;
   final double depth; // ממוצע-NDC-z: גדול-יותר = רחוק-יותר
   final double shade; // 0..1 (מוכפל בצבע-הבסיס אצל הצייר)
   final PartMaterial mat; // הצייר בוחר צבע-בסיס לפי החומר
+  final double specular; // 0..1 — עוצמת-ההיילייט (מוסף כלבן/מתכתי אצל הצייר)
 }
 
 /// מקרין רשימת-רשתות (world-space) למשולשי-מסך **ממוינים רחוק→קרוב** עם הצללת-Lambert.
@@ -105,6 +116,21 @@ void _emit(
     final ndotl = normal.dot(light);
     final lit = ndotl < 0 ? 0.0 : ndotl;
     final shade = kAmbient + (1 - kAmbient) * lit; // ∈ [ambient, 1]
+
+    // Blinn-Phong + Fresnel ספקולרי פר-פאה (gen3d:253-254, lite): H=norm(L+V),
+    // חדות `sh=mix(14,120,1-rough)`, `spec=NdotH^sh·(sh+8)/25`, Fresnel-Schlick.
+    final p = _shadeParams(mat);
+    final h = (light + viewDir).norm();
+    final ndoth = normal.dot(h);
+    final ndotv = normal.dot(viewDir);
+    final sh = 14 + (120 - 14) * (1 - p.rough);
+    final specTerm =
+        (ndoth <= 0 ? 0.0 : math.pow(ndoth, sh).toDouble()) * (sh + 8) / 25;
+    final f0 = 0.04 + (1 - 0.04) * p.metal;
+    final nv = ndotv < 1e-3 ? 1e-3 : ndotv;
+    final fresnel = f0 + (1 - f0) * math.pow(1 - nv, 5).toDouble();
+    final specular = (fresnel * specTerm * 1.1).clamp(0.0, 1.0);
+
     final depth = (s0.depth + s1.depth + s2.depth) / 3;
     out.add(RenderTriangle(
       Offset(s0.x, s0.y),
@@ -113,6 +139,7 @@ void _emit(
       depth,
       shade,
       mat: mat,
+      specular: specular,
     ),);
   }
 }
