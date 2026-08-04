@@ -115,4 +115,59 @@ void main() {
       expect(module.caches, contains('_skuCache'));
     });
   });
+
+  group('logic decomposer · install_engine module map (phase L)', () {
+    test('the module is reachable', () {
+      expect(present, isTrue);
+    }, skip: present ? false : 'not found');
+    if (!present) return;
+
+    final module = decomposeModule(_engine);
+    LogicAtom fn(String n) =>
+        module.atoms.firstWhere((a) => a.fn == n,
+            orElse: () => throw StateError('no fn $n'));
+
+    test('map — the whole god-module decomposes (all 3 caches)', () {
+      expect(module.atoms.length, greaterThanOrEqualTo(35),
+          reason: '~30+ engine functions');
+      expect(module.caches, containsAll(['_skuCache', '_compatCache', '_syntheticPipeCache']),
+          reason: 'all three mutable caches surfaced (even the `final` ones)');
+    });
+
+    test('hard-case · runtime registry mutation — _syntheticPipe writes kVerifiedSpecs', () {
+      final sp = fn('_syntheticPipe');
+      final w = sp.writes.map((x) => '${x.kind}:${x.name}').toList();
+      expect(w, contains('state:kVerifiedSpecs'),
+          reason: '_syntheticPipe.putIfAbsent mutates the imported "const" spec '
+              'registry at runtime — hidden state, documented not fixed');
+      expect(w, contains('cache:_syntheticPipeCache'));
+      expect(sp.contract.purity, 'side-effecting');
+    });
+
+    test('hard-case · order-sensitive in-place safety — _autoAddCompliance mutates its args', () {
+      final ac = fn('_autoAddCompliance');
+      final w = ac.writes.map((x) => x.name).toList();
+      expect(w.any((n) => n.startsWith('items.')), isTrue,
+          reason: 'injects PRV/vessel/TMTV in place into the passed items list');
+      expect(ac.contract.purity, 'side-effecting');
+    });
+
+    test('memoised predicate — compatibleWith writes only its cache', () {
+      final cw = fn('compatibleWith');
+      expect(cw.writes.map((x) => '${x.kind}:${x.name}'), ['cache:_compatCache']);
+      expect(cw.contract.purity, 'deterministic-side-effecting');
+    });
+
+    test('classifiers are pure string-category readers (hard-case #1 — data welded to flow)', () {
+      // productSystems / flowRole classify by categoryHe STRING sets — pure, but
+      // the tables belong in schema (marked for phase D). The decomposer proves
+      // they are pure (no writes) and read the const category tables.
+      for (final n in ['productSystems', 'flowRole']) {
+        final a = fn(n);
+        expect(a.contract.purity, 'pure');
+        expect(a.writes, isEmpty);
+        expect(a.reads.any((r) => r.kind == 'const'), isTrue);
+      }
+    });
+  });
 }

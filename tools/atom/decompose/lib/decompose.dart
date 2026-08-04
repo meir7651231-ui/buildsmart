@@ -234,7 +234,7 @@ Map<String, String> renderLogicFiles(ModuleDecomposition module) {
   final files = <String, String>{};
   files['module.logic.json'] = '${_json.convert(module.toJson())}\n';
   for (final a in module.atoms) {
-    files['${_slug(a.fn)}.logic.md'] = _logicMd(module, a);
+    files['${_logicSlug(a.fn)}.logic.md'] = _logicMd(module, a);
   }
   return files;
 }
@@ -246,6 +246,14 @@ void writeLogicOut(ModuleDecomposition module, String outDir) {
   renderLogicFiles(module).forEach((name, contents) {
     File(p.join(dir.path, name)).writeAsStringSync(contents);
   });
+}
+
+/// Kebab slug that KEEPS the private-underscore so `isPipe` and `_isPipe` don't
+/// collide (a leading `_` becomes a `p_` prefix — filesystem-safe, still readable).
+String _logicSlug(String fn) {
+  final private = fn.startsWith('_');
+  final s = _slug(fn); // strips the leading `_` and kebabs
+  return private ? 'p_$s' : s;
 }
 
 String _logicMd(ModuleDecomposition m, LogicAtom a) {

@@ -44,22 +44,26 @@ ModuleDecomposition decomposeModule(
     if (d is FunctionDeclaration) {
       topFns[d.name.lexeme] = d;
     } else if (d is TopLevelVariableDeclaration) {
-      final isConst = d.variables.isConst || d.variables.isFinal;
+      final mutableColl = _isMutableCollectionDecl(d.variables);
       for (final v in d.variables.variables) {
         final n = v.name.lexeme;
         if (d.variables.isConst) {
           constNames.add(n);
-        } else if (isConst) {
-          globalNames.add(n); // `final` global (e.g. a lazily-built index)
         } else {
           globalNames.add(n);
-          caches.add(n); // plain `var` at top level = mutable hidden state
+          // A top-level `final`/`var`/`late` whose CONTENTS are mutable (a Map/
+          // List/Set — even when the reference is `final`) is hidden runtime
+          // state: the god-module's caches (`_compatCache`, `_syntheticPipeCache`,
+          // `_skuCache`). Surface it as debt, never refactor it.
+          if (!d.variables.isFinal ||
+              mutableColl ||
+              RegExp(r'cache|index', caseSensitive: false).hasMatch(n)) {
+            caches.add(n);
+          }
         }
       }
     }
   }
-  // `late`/nullable caches declared as `Type? _x;` are TopLevelVariableDeclaration
-  // too; the loop above already captured them.
 
   final paramSets = <String, Set<String>>{}; // fn → its param names
   for (final e in topFns.entries) {
@@ -120,6 +124,22 @@ class _Facts {
   final constants = <String>[];
   final throwsAt = <String>[];
   bool nondeterministic = false;
+}
+
+/// True when the declaration's contents are a mutable collection (a Map/List/Set
+/// type, or a `{…}`/`[…]`/`<…>{}` initializer) — mutable even behind `final`.
+bool _isMutableCollectionDecl(VariableDeclarationList vars) {
+  final t = vars.type?.toSource() ?? '';
+  if (RegExp(r'^(Map|List|Set|HashMap|SplayTreeMap|LinkedHashMap)\b').hasMatch(t)) {
+    return true;
+  }
+  for (final v in vars.variables) {
+    final init = v.initializer;
+    if (init is SetOrMapLiteral || init is ListLiteral) return true;
+    final s = init?.toSource() ?? '';
+    if (RegExp(r'^(<[^>]*>)?[\[{]').hasMatch(s)) return true;
+  }
+  return false;
 }
 
 Set<String> _paramNames(FunctionDeclaration d) {
@@ -357,16 +377,31 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
       final base = _receiverBase(node.target!);
       if (base == null) return;
       if (bodyLocals.contains(base)) return; // private accumulator — no effect
-      if (globalNames.contains(base) || _looksCache(base)) {
-        _addWrite(_looksCache(base) ? 'cache' : 'state', base);
+      if (_looksCache(base)) {
+        _addWrite('cache', base);
+      } else if (globalNames.contains(base)) {
+        _addWrite('state', base);
       } else if (params.contains(base)) {
         _addWrite('mutation', '$base.$name');
+      } else if (_isExternalName(base)) {
+        // Mutating an IMPORTED table at runtime — e.g. `kVerifiedSpecs.putIfAbsent`
+        // in _syntheticPipe, which writes a synthetic spec into the "const"
+        // registry. Hidden runtime state; surfaced as a state write, not fixed.
+        _addWrite('state', base);
       }
     }
   }
 
   bool _looksCache(String base) =>
       base.startsWith('_') && base.toLowerCase().contains('cache');
+
+  /// An imported top-level name (const table / global) — not local, not a module
+  /// function, value-shaped (lowerCamel or `kXxx`, never a PascalCase Type).
+  bool _isExternalName(String base) =>
+      !locals.contains(base) &&
+      !moduleFns.contains(base) &&
+      !_kFloorNames.contains(base) &&
+      RegExp(r'^_?[a-z]|^k[A-Z0-9]').hasMatch(base);
 
   /// The root identifier of a receiver chain (`a.b.c(...)` → `a`, `xs[i]` → `xs`).
   String? _receiverBase(Expression e) {
