@@ -10,17 +10,48 @@ the widget graph only named. For each function: **object** (signature + constant
 `↝` markers) · **behaviour** (the algorithm as steps) · **floor** · **contract**
 (input→output · precond · null-when · purity).
 
-## Modules
+## Coverage
 
-| module | atoms | note |
+The **whole `logic/` layer is open** — 38 modules (~316 atoms), plus
+`domain/connection_resolver` and `state/smart_cart`. Two modules are pure
+provider/data wiring (0 logic atoms — `co_editor_gate`, `config_op`) and carry no
+dir. The `logic/ sweep coverage` golden asserts every module decomposes.
+
+### Golden-anchored engines (the core)
+
+| module | atoms | golden — what it shows |
 |---|---:|---|
-| [`install_engine`](install_engine/) | 44 | the plumbing god-module — compatibility · least-cost routing (Dijkstra/Yen) · BOM assembly · safety compliance. Golden: `findShortestPath`. See its [HARD-CASES.md](install_engine/HARD-CASES.md). |
-| [`smart_cart`](smart_cart/) | 13 | the cart `StateNotifier`. Golden: `SmartCartNotifier.add` — a one-line `state = […]` whose real behaviour (the `_loaded` race-guard + async `_persist()` IO) lives in the overridden `set state` it triggers (hard-case #6, surfaced transitively). |
-| [`pressure_drop`](pressure_drop/) | 14 | pipe-flow physics. Golden: `estimatePressureDrop` — pure Darcy-Weisbach (ΣK → v → Re → ƒ → ΔP), reads the verified specs, no side effects. |
-| [`fuzzy_match`](fuzzy_match/) | 6 | search primitives. Golden: `damerauLevenshtein` — pure edit-distance DP (`int` out, nested loops). |
-| [`workflow_engine`](workflow_engine/) | 18 | the 5-stage job state-machine. Golden: `planWfAdvance` — a pure transition that returns a patch (`WfAdvancePlan?`), the caller applies it. |
-| [`price_estimate`](price_estimate/) | 1 | rough pricing. Golden: `estimatePrice` — pure category→ILS lookup (`_categoryPriceILS` table; price is data-welded-to-logic → phase D). |
-| [`connection_resolver`](connection_resolver/) | 13 | the trade-agnostic rule evaluator (dormant). Golden: `ConnectionResolver.canConnect` — a memoised (`_memo`) predicate, deterministic behind its cache. |
+| [`install_engine`](install_engine/) | 44 | the plumbing god-module — routing (Dijkstra/Yen) · BOM · safety. Golden `findShortestPath`. See [HARD-CASES.md](install_engine/HARD-CASES.md). |
+| [`smart_cart`](smart_cart/) | 13 | cart `StateNotifier`. Golden `SmartCartNotifier.add` — one-line `state=…` whose real behaviour (the `_loaded` race-guard + async `_persist()` IO) is in the `set state` it triggers (hard-case #6). |
+| [`pressure_drop`](pressure_drop/) | 14 | `estimatePressureDrop` — pure Darcy-Weisbach (ΣK → v → Re → ƒ → ΔP). |
+| [`fuzzy_match`](fuzzy_match/) | 6 | `damerauLevenshtein` — pure edit-distance DP. |
+| [`workflow_engine`](workflow_engine/) | 18 | `planWfAdvance` — pure state-machine transition (returns a patch). |
+| [`price_estimate`](price_estimate/) | 1 | `estimatePrice` — pure category→ILS lookup (data welded to logic → phase D). |
+| [`connection_resolver`](connection_resolver/) | 13 | `ConnectionResolver.canConnect` — memoised (`_memo`) predicate, deterministic behind its cache. |
+
+### studio/ — the AI co-editor safety engines (depth · hard-case)
+
+These govern **what the AI is allowed to do to the live app**. The decomposer
+proves the safety-critical properties:
+
+| module | golden — the safety property proven |
+|---|---|
+| [`studio/edit_safety`](edit_safety/) | `validateSafe` — **pure** verdict that reads EVERY ceiling (`kStudioMaxBatch` · `kStudioMaxRegistryFraction` · `kStudioMinContrast` · `kStudioSessionBudget`) and delegates to `_reasonToBlock` (nav/auth immutable · role floor). |
+| [`studio/edit_intent`](edit_intent/) | `parseConfigEdit` — pure and **NEVER throws**: a hallucinated / truncated edit degrades to a `ConfigEditResult`, never crashes the co-editor. |
+| [`studio/action_catalog`](action_catalog/) | `actionCatalogIds` — the **closed** `Set<String>` of effects the AI may emit (incl. `cart.add`). |
+
+### the rest of the sweep
+
+Docs (`invoice` · `delivery_note` · `printable_docs` · `finance_report_pdf`) ·
+analytics (`intel/funnels` · `intel/segments` · `intel/intel_config` ·
+`attention_engine` · `customer_score` · `data_quality`) · assistant
+(`assistant_intent` · `manager_copilot` · `ai_hub_logic`) · scheduling
+(`tasks_gantt` · `calendar_days`) · classification (`category_division` ·
+`system_division` · `equipment_stock_join`) · primitives (`money_format` ·
+`text_normalize` · `input_validators` · `prompt_sanitize`) · queue
+(`offline_order_queue`) · the rest of `studio/` (`diff_preview` ·
+`component_palette` · `registry_view` · `rules_model` · `edit_prompt`). Each is
+decomposed to its own dir; the sweep-coverage golden gates the whole set.
 
 Each module dir holds `module.logic.json` (the machine model), one
 `<fn>.logic.md` per function (private fns prefixed `p_`), and — where the

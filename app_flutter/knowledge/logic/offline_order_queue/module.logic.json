@@ -1,0 +1,598 @@
+{
+  "module": "offline_order_queue",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/offline_order_queue.dart",
+  "atomCount": 11,
+  "atoms": [
+    {
+      "fn": "OfflineOrderIntent.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "items"
+          },
+          {
+            "kind": "field",
+            "name": "lines"
+          },
+          {
+            "kind": "field",
+            "name": "notes"
+          },
+          {
+            "kind": "field",
+            "name": "queuedAt"
+          },
+          {
+            "kind": "field",
+            "name": "shipTo"
+          },
+          {
+            "kind": "field",
+            "name": "site"
+          },
+          {
+            "kind": "field",
+            "name": "sum"
+          },
+          {
+            "kind": "field",
+            "name": "who"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'who' : who, 'site' : site, 'items' : items, 'sum' : sum, 'queuedAt' : queuedAt.toIso860…"
+          }
+        ]
+      },
+      "floor": [
+        "map",
+        "toIso8601String",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue._serialized",
+      "kind": "method",
+      "object": {
+        "signature": "(Future<T> Function() op) -> Future<T>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "OfflineOrderQueue.drainQueue",
+          "OfflineOrderQueue.enqueue",
+          "OfflineOrderQueue.pending"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "run = _chain.then((_) => op())"
+          },
+          {
+            "kind": "effect",
+            "detail": "_chain = run.then((_) {}).catchError((Object _) {})"
+          },
+          {
+            "kind": "return",
+            "detail": "run"
+          }
+        ]
+      },
+      "floor": [
+        "catchError",
+        "op",
+        "then"
+      ],
+      "contract": {
+        "input": "(Future<T> Function() op)",
+        "output": "Future<T>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue.offlineSuspect",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "connectivityProbeProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "!_ref.read(connectivityProbeProvider)()"
+          }
+        ]
+      },
+      "floor": [
+        "read"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue.maybeEnqueue",
+      "kind": "method",
+      "object": {
+        "signature": "({required String who, required String site, required int items, required int sum, List<OrderLineItem> lines = const [], String shipTo = '', String notes = ''}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "enqueue",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !offlineSuspect → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "unawaited(enqueue(OfflineOrderIntent(who: who, site: site, items: items, sum: sum, queued…"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "OfflineOrderIntent",
+        "now",
+        "unawaited"
+      ],
+      "contract": {
+        "input": "({required String who, required String site, required int items, required int sum, List<OrderLineItem> lines = const [], String shipTo = '', String notes = ''})",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if !offlineSuspect → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue.enqueue",
+      "kind": "method",
+      "object": {
+        "signature": "(OfflineOrderIntent intent) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOfflineOrdersKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain",
+            "transitive": true
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_serialized",
+            "module": true
+          },
+          {
+            "name": "_enqueueNow",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "OfflineOrderQueue.maybeEnqueue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_serialized(() => _enqueueNow(intent))"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(OfflineOrderIntent intent)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue._enqueueNow",
+      "kind": "method",
+      "object": {
+        "signature": "(OfflineOrderIntent intent) -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOfflineOrdersKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_decode",
+            "module": true
+          },
+          {
+            "name": "_encode",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "OfflineOrderQueue.enqueue"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "add",
+        "debugPrint",
+        "getInstance",
+        "getString",
+        "setString"
+      ],
+      "contract": {
+        "input": "(OfflineOrderIntent intent)",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue.pending",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<List<OfflineOrderIntent>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOfflineOrdersKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_serialized",
+            "module": true
+          },
+          {
+            "name": "_decode",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_serialized(() async {try {final prefs = await SharedPreferences.getInstance(); return _d…"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "getInstance",
+        "getString"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<List<OfflineOrderIntent>>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue.drainQueue",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_chain",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_serialized",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_serialized(_drainNow)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Future<int>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue._drainNow",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Future<int>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kOfflineOrdersKey"
+          },
+          {
+            "kind": "field",
+            "name": "_ref"
+          },
+          {
+            "kind": "global",
+            "name": "ordersRepositoryProvider"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_decode",
+            "module": true
+          },
+          {
+            "name": "_encode",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "replayed = 0"
+          }
+        ]
+      },
+      "floor": [
+        "debugPrint",
+        "getInstance",
+        "getString",
+        "placeOrder",
+        "read",
+        "setString",
+        "sublist"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<int>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue._encode",
+      "kind": "method",
+      "object": {
+        "signature": "(List<OfflineOrderIntent> intents) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "OfflineOrderQueue._drainNow",
+          "OfflineOrderQueue._enqueueNow"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "jsonEncode(intents.map((i) => i.toJson()).toList())"
+          }
+        ]
+      },
+      "floor": [
+        "jsonEncode",
+        "map",
+        "toJson",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<OfflineOrderIntent> intents)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "OfflineOrderQueue._decode",
+      "kind": "method",
+      "object": {
+        "signature": "(String? raw) -> List<OfflineOrderIntent>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "OfflineOrderQueue._drainNow",
+          "OfflineOrderQueue._enqueueNow",
+          "OfflineOrderQueue.pending"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw == null || raw.isEmpty → return <OfflineOrderIntent>[]"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "debugPrint",
+        "fromJson",
+        "jsonDecode"
+      ],
+      "contract": {
+        "input": "(String? raw)",
+        "output": "List<OfflineOrderIntent>",
+        "purity": "pure",
+        "precond": [
+          "if raw == null || raw.isEmpty → return <OfflineOrderIntent>[]"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

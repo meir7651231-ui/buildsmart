@@ -267,4 +267,78 @@ void main() {
       expect(a.contract.purity, 'deterministic-side-effecting');
     });
   });
+
+  // ── DEPTH: the studio AI co-editor safety engines ────────────────────────────
+  // These govern what the AI is ALLOWED to do to the live app. The decomposer
+  // proves the safety-critical properties: pure (deterministic verdicts) and
+  // never-throw (a hallucinated edit degrades to a result, never crashes).
+  group('logic decomposer · studio AI-safety engines (hard-case · depth)', () {
+    LogicAtom anchor(String rel, String name) {
+      final path = _lib(rel);
+      if (!File(path).existsSync()) throw StateError('missing $path');
+      final m = decomposeModule(path);
+      return m.atoms.firstWhere((a) => a.fn == name || a.fn.endsWith('.$name'),
+          orElse: () => throw StateError('no $name in $rel'));
+    }
+
+    test('edit_safety.validateSafe — pure verdict reading ALL the ceilings', () {
+      final a = anchor('logic/studio/edit_safety.dart', 'validateSafe');
+      expect(a.contract.purity, 'pure',
+          reason: 'a deterministic verdict — same edit, same ruling');
+      expect(a.contract.output, 'SafetyVerdict');
+      // it reads every studio safety ceiling — the caps the AI cannot exceed.
+      final reads = a.reads.map((r) => r.name).toSet();
+      expect(reads, containsAll([
+        'kStudioMaxBatch',
+        'kStudioMaxRegistryFraction',
+        'kStudioMinContrast',
+        'kStudioSessionBudget',
+      ]), reason: 'the verdict is bounded by the declared ceilings');
+      // and delegates to the block-reason check (nav/auth immutable · role floor).
+      expect(a.calls.map((c) => c.name), contains('_reasonToBlock'));
+    });
+
+    test('edit_intent.parseConfigEdit — anti-hallucination parser NEVER throws', () {
+      final a = anchor('logic/studio/edit_intent.dart', 'parseConfigEdit');
+      expect(a.contract.purity, 'pure');
+      expect(a.contract.output, 'ConfigEditResult');
+      expect(a.contract.throws, isEmpty,
+          reason: 'HARD RULE: a hallucinated / truncated edit degrades to a '
+              'result, it never crashes the co-editor');
+      expect(a.calls.map((c) => c.name), contains('_validateOp'));
+    });
+
+    test('action_catalog.actionCatalogIds — the CLOSED set of allowed effects', () {
+      final a = anchor('logic/studio/action_catalog.dart', 'actionCatalogIds');
+      expect(a.contract.purity, 'pure');
+      expect(a.contract.output, 'Set<String>',
+          reason: 'a closed vocabulary — the AI can only emit these action ids');
+    });
+  });
+
+  // ── BREADTH: the whole logic/ layer decomposes (the sweep-complete gate) ─────
+  group('logic decomposer · logic/ sweep coverage', () {
+    final dir = Directory(p.join(_repo, 'app_flutter/lib/logic'));
+    test('every logic/ module decomposes without error', () {
+      if (!dir.existsSync()) {
+        markTestSkipped('logic/ not found');
+        return;
+      }
+      final files = dir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .toList();
+      expect(files.length, greaterThanOrEqualTo(30),
+          reason: 'the logic/ layer is ~35 modules');
+      var totalAtoms = 0;
+      for (final f in files) {
+        final m = decomposeModule(f.path); // must not throw on any real module
+        totalAtoms += m.atoms.length;
+      }
+      // the layer as a whole yields a substantial decomposed graph.
+      expect(totalAtoms, greaterThan(150),
+          reason: 'the opened logic/ layer is hundreds of atoms deep');
+    });
+  });
 }

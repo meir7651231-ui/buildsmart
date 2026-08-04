@@ -1,0 +1,466 @@
+{
+  "module": "assistant_intent",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/assistant_intent.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "assistantCategories",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "resolvedCatalogProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "assistantIntentPrompt",
+          "matchAssistantCategory"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "set = <String>{for (final p in resolvedCatalogProducts) p.categoryHe}"
+          },
+          {
+            "kind": "return",
+            "detail": "set.toList()..sort()"
+          }
+        ]
+      },
+      "floor": [
+        "sort",
+        "toList"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchAssistantCategory",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "resolvedCatalogProducts",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "assistantCategories",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "parseAssistantIntent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = reply.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "cats = assistantCategories()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in cats"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r == c → return c"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in cats"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r.contains(c) && (best == null || c.length > best.length)"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if r.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "r.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchAssistantRecipeKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "parseAssistantIntent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = reply.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r.isEmpty → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kSmartProducts"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r == p.key → return p.key"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in kSmartProducts"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r.contains(p.key) && (best == null || p.key.length > best.length)"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if r.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "r.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_actionFromString",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> AssistantAction?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "parseAssistantIntent"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch s"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String s)",
+        "output": "AssistantAction?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "assistantIntentPrompt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<IntentTurn> history, String userText) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kIntentHistoryWindow"
+          },
+          {
+            "kind": "const",
+            "name": "kSmartProducts"
+          },
+          {
+            "kind": "global",
+            "name": "resolvedCatalogProducts",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "assistantCategories",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "recent = history.length > kIntentHistoryWindow ? history.sublist(history.length - kIntentHistoryWi…"
+          },
+          {
+            "kind": "compute",
+            "detail": "cats = assistantCategories().join('\\n')"
+          },
+          {
+            "kind": "init",
+            "detail": "recipes = [for (final r in kSmartProducts) '${r.key}=${r.name}'].join('\\n')"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = StringBuffer()"
+          },
+          {
+            "kind": "branch",
+            "detail": "if recent.isNotEmpty"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('המשתמש כתב: \"${promptSafeText(userText, maxLen: 600)}\".')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('בחר פעולה אחת מהרשימה הסגורה והחזר שורת-JSON אחת בלבד:')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('- \"answer\": ענה ישירות. שים את התשובה ב-say, key=\"\".')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('- \"findProduct\": המשתמש מחפש מוצר. key = קטגוריה אחת מרשימת ' 'הקטגוריות למטה …"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('- \"summarizeOrders\": המשתמש שואל על ההזמנות/הרכש שלו.')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('- \"checkBudget\": המשתמש שואל על התקציב / כמה נשאר.')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('- \"addToCart\": המשתמש מבקש להוסיף ערכה לסל. key = מפתח-ערכה אחד ' 'מרשימת הערכ…"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('קטגוריות זמינות ל-findProduct:')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln(cats)"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('ערכות זמינות ל-addToCart (מפתח=שם):')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln(recipes)"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln()"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('החזר אך ורק שורת-JSON אחת בפורמט: ' '{\"action\":\"...\",\"key\":\"...\",\"say\":\"...\"}')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.writeln('אם אף קטגוריה/ערכה לא מתאימה — השתמש ב-answer.')"
+          },
+          {
+            "kind": "return",
+            "detail": "b.toString()"
+          }
+        ]
+      },
+      "floor": [
+        "StringBuffer",
+        "join",
+        "promptSafeText",
+        "sublist",
+        "toString",
+        "writeln"
+      ],
+      "contract": {
+        "input": "(List<IntentTurn> history, String userText)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "parseAssistantIntent",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> AssistantIntent",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kSmartProducts",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_actionFromString",
+            "module": true
+          },
+          {
+            "name": "matchAssistantCategory",
+            "module": true
+          },
+          {
+            "name": "matchAssistantRecipeKey",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "text = raw.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "start = text.indexOf('{')"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = text.lastIndexOf('}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if start < 0 || end <= start → return AssistantIntent.answer(text)"
+          }
+        ]
+      },
+      "floor": [
+        "AssistantIntent",
+        "answer",
+        "indexOf",
+        "jsonDecode",
+        "lastIndexOf",
+        "substring",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "AssistantIntent",
+        "purity": "pure",
+        "precond": [
+          "if start < 0 || end <= start → return AssistantIntent.answer(text)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,1242 @@
+{
+  "module": "edit_intent",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/edit_intent.dart",
+  "atomCount": 21,
+  "atoms": [
+    {
+      "fn": "parseConfigEdit",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw, RegistryView registry, {String? finishReason}) -> ConfigEditResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kCleanFinishReasons"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_firstOpen",
+            "module": true
+          },
+          {
+            "name": "_lastClose",
+            "module": true
+          },
+          {
+            "name": "_looksTruncated",
+            "module": true
+          },
+          {
+            "name": "_rawOps",
+            "module": true
+          },
+          {
+            "name": "_validateOp",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildScopeEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "text = raw.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if finishReason != null && !_kCleanFinishReasons.contains(finishReason) → return const ConfigEditResult.truncated()"
+          },
+          {
+            "kind": "compute",
+            "detail": "start = _firstOpen(text)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if start < 0 → return const ConfigEditResult.empty()"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = _lastClose(text)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if end <= start → return const ConfigEditResult.truncated()"
+          },
+          {
+            "kind": "compute",
+            "detail": "candidate = text.substring(start, end + 1)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if _looksTruncated(candidate) → return const ConfigEditResult.truncated()"
+          }
+        ]
+      },
+      "floor": [
+        "ConfigEditResult",
+        "add",
+        "contains",
+        "empty",
+        "jsonDecode",
+        "substring",
+        "trim",
+        "truncated"
+      ],
+      "contract": {
+        "input": "(String raw, RegistryView registry, {String? finishReason})",
+        "output": "ConfigEditResult",
+        "purity": "pure",
+        "precond": [
+          "if finishReason != null && !_kCleanFinishReasons.contains(finishReason) → return const ConfigEditResult.truncated()",
+          "if start < 0 → return const ConfigEditResult.empty()",
+          "if end <= start → return const ConfigEditResult.truncated()",
+          "if _looksTruncated(candidate) → return const ConfigEditResult.truncated()"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_validateOp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? entry, RegistryView reg) -> ConfigOp?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_axisOf",
+            "module": true
+          },
+          {
+            "name": "_freeValueOk",
+            "module": true
+          },
+          {
+            "name": "_resolveStyle",
+            "module": true
+          },
+          {
+            "name": "_actionIdOf",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "parseConfigEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if entry is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "m = entry.map((k, v) => MapEntry(k.toString(), v))"
+          },
+          {
+            "kind": "compute",
+            "detail": "shape = configOpFromJson(m)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if shape == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "target = matchElementId(reg, shape.id)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if target == null → return null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if matchPropKey(reg, target, _axisOf(shape)) == null → return null"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch shape"
+          }
+        ]
+      },
+      "floor": [
+        "CfgAction",
+        "MapEntry",
+        "SetAction",
+        "SetEmoji",
+        "SetHidden",
+        "SetOrder",
+        "SetStyle",
+        "SetText",
+        "configOpFromJson",
+        "map",
+        "matchActionId",
+        "matchCatalogActionId",
+        "matchElementId",
+        "matchPropKey",
+        "toString"
+      ],
+      "contract": {
+        "input": "(Object? entry, RegistryView reg)",
+        "output": "ConfigOp?",
+        "purity": "pure",
+        "precond": [
+          "if entry is! Map → return null",
+          "if shape == null → return null",
+          "if target == null → return null",
+          "if matchPropKey(reg, target, _axisOf(shape)) == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "entry is! Map · shape == null · target == null · matchPropKey(reg, target, _axisOf(shape)) == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_axisOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp op) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_validateOp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (op) {SetText() => 'text', SetEmoji() => 'emoji', SetHidden() => 'hidden', SetOrde…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConfigOp op)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_freeValueOk",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String target, String prop, String? value) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_validateOp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if value == null → return true"
+          },
+          {
+            "kind": "precond",
+            "detail": "if reg.allowedValues(target, prop).isEmpty → return true"
+          },
+          {
+            "kind": "return",
+            "detail": "matchValue(reg, target, prop, value) != null"
+          }
+        ]
+      },
+      "floor": [
+        "allowedValues",
+        "matchValue"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String target, String prop, String? value)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if value == null → return true",
+          "if reg.allowedValues(target, prop).isEmpty → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_resolveStyle",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String target, CfgStyle? style) -> ({bool ok, CfgStyle? style})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_resolveToken",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_validateOp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if style == null → return (ok: true, style: null)"
+          },
+          {
+            "kind": "compute",
+            "detail": "color = _resolveToken(reg, target, 'color', style.colorToken)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !color.ok → return (ok: false, style: null)"
+          },
+          {
+            "kind": "compute",
+            "detail": "bg = _resolveToken(reg, target, 'bg', style.bgToken)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !bg.ok → return (ok: false, style: null)"
+          },
+          {
+            "kind": "compute",
+            "detail": "weight = _resolveToken(reg, target, 'weight', style.weightToken)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !weight.ok → return (ok: false, style: null)"
+          },
+          {
+            "kind": "compute",
+            "detail": "size = _resolveToken(reg, target, 'size', style.sizeToken)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !size.ok → return (ok: false, style: null)"
+          },
+          {
+            "kind": "return",
+            "detail": "(ok: true, style: CfgStyle(colorToken: color.value, bgToken: bg.value, weightToken: weigh…"
+          }
+        ]
+      },
+      "floor": [
+        "CfgStyle"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String target, CfgStyle? style)",
+        "output": "({bool ok, CfgStyle? style})",
+        "purity": "pure",
+        "precond": [
+          "if style == null → return (ok: true, style: null)",
+          "if !color.ok → return (ok: false, style: null)",
+          "if !bg.ok → return (ok: false, style: null)",
+          "if !weight.ok → return (ok: false, style: null)",
+          "if !size.ok → return (ok: false, style: null)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_resolveToken",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RegistryView reg, String target, String prop, String? token) -> ({bool ok, String? value})",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_resolveStyle"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if token == null → return (ok: true, value: null)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if reg.allowedValues(target, prop).isEmpty → return (ok: true, value: token)"
+          },
+          {
+            "kind": "compute",
+            "detail": "resolved = matchValue(reg, target, prop, token)"
+          },
+          {
+            "kind": "return",
+            "detail": "resolved == null ? (ok: false, value: null) : (ok: true, value: resolved)"
+          }
+        ]
+      },
+      "floor": [
+        "allowedValues",
+        "matchValue"
+      ],
+      "contract": {
+        "input": "(RegistryView reg, String target, String prop, String? token)",
+        "output": "({bool ok, String? value})",
+        "purity": "pure",
+        "precond": [
+          "if token == null → return (ok: true, value: null)",
+          "if reg.allowedValues(target, prop).isEmpty → return (ok: true, value: token)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_actionIdOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Map<String, dynamic> m) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_validateOp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "a = m['action']"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a is String"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a is Map"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(Map<String, dynamic> m)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_rawOps",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? decoded) -> List<Object?>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "parseConfigEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if decoded is List → return decoded"
+          },
+          {
+            "kind": "branch",
+            "detail": "if decoded is Map"
+          },
+          {
+            "kind": "return",
+            "detail": "const <Object?>[]"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object? decoded)",
+        "output": "List<Object?>",
+        "purity": "pure",
+        "precond": [
+          "if decoded is List → return decoded"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_firstOpen",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "parseConfigEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "brace = s.indexOf('{')"
+          },
+          {
+            "kind": "compute",
+            "detail": "bracket = s.indexOf('[')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if brace < 0 → return bracket"
+          },
+          {
+            "kind": "precond",
+            "detail": "if bracket < 0 → return brace"
+          },
+          {
+            "kind": "return",
+            "detail": "brace < bracket ? brace : bracket"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [
+          "if brace < 0 → return bracket",
+          "if bracket < 0 → return brace"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_lastClose",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "parseConfigEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "brace = s.lastIndexOf('}')"
+          },
+          {
+            "kind": "compute",
+            "detail": "bracket = s.lastIndexOf(']')"
+          },
+          {
+            "kind": "return",
+            "detail": "brace > bracket ? brace : bracket"
+          }
+        ]
+      },
+      "floor": [
+        "lastIndexOf"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_looksTruncated",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String candidate) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "parseConfigEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "depth = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "inString = false"
+          },
+          {
+            "kind": "compute",
+            "detail": "escaped = false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rune in candidate.runes"
+          },
+          {
+            "kind": "branch",
+            "detail": "if inString"
+          },
+          {
+            "kind": "branch",
+            "detail": "if rune == 0x22"
+          },
+          {
+            "kind": "return",
+            "detail": "inString || depth > 0"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String candidate)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "expandScope",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token, RegistryView registry) -> List<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeActionable"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeAll"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeEveryPrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "dryCountScope"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ids = registry.elementIds()"
+          },
+          {
+            "kind": "compute",
+            "detail": "matched = "
+          },
+          {
+            "kind": "branch",
+            "detail": "if token == kScopeActionable"
+          },
+          {
+            "kind": "compute",
+            "detail": "out = matched.where(ids.contains).toSet().toList()..sort()"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "actionIdsFor",
+        "elementIds",
+        "matchElementId",
+        "scopeElementIds",
+        "sort",
+        "startsWith",
+        "substring",
+        "toList",
+        "toSet",
+        "trim",
+        "where"
+      ],
+      "contract": {
+        "input": "(String token, RegistryView registry)",
+        "output": "List<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_batchRejectHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int count) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kStudioMaxBatch"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "dryCountScope"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'השינוי נרחב מדי — $count יעדים (מעל התקרה $kStudioMaxBatch). צמצם את הטווח.'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int count)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "dryCountScope",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token, RegistryView registry) -> ScopeCount",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeActionable",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeAll",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeEveryPrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxBatch"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "expandScope",
+            "module": true
+          },
+          {
+            "name": "_batchRejectHe",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "buildScopeEdit"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "expanded = expandScope(token, registry)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if expanded.length > kStudioMaxBatch → return ScopeCount._(const <String>[], expanded.length, _batchRejectHe(expanded.length))"
+          },
+          {
+            "kind": "return",
+            "detail": "ScopeCount._(expanded, expanded.length, null)"
+          }
+        ]
+      },
+      "floor": [
+        "_"
+      ],
+      "contract": {
+        "input": "(String token, RegistryView registry)",
+        "output": "ScopeCount",
+        "purity": "pure",
+        "precond": [
+          "if expanded.length > kStudioMaxBatch → return ScopeCount._(const <String>[], expanded.length, _batchRejectHe(expanded.length))"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildScopeEdit",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token, Map<String, Object?> editTemplate, RegistryView registry) -> ScopeEditResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kCleanFinishReasons",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kStudioMaxBatch",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "dryCountScope",
+            "module": true
+          },
+          {
+            "name": "parseConfigEdit",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "counted = dryCountScope(token, registry)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if counted.rejected → return ScopeEditResult(token: token, requested: counted.requested, result: const ConfigEditResul…"
+          },
+          {
+            "kind": "init",
+            "detail": "opsJson = <Map<String, Object?>>[for (final id in counted.ids) {...editTemplate, 'id' : id}]"
+          },
+          {
+            "kind": "return",
+            "detail": "ScopeEditResult(token: token, requested: counted.requested, result: parseConfigEdit(jsonE…"
+          }
+        ]
+      },
+      "floor": [
+        "ScopeEditResult",
+        "empty",
+        "jsonEncode"
+      ],
+      "contract": {
+        "input": "(String token, Map<String, Object?> editTemplate, RegistryView registry)",
+        "output": "ScopeEditResult",
+        "purity": "pure",
+        "precond": [
+          "if counted.rejected → return ScopeEditResult(token: token, requested: counted.requested, result: const ConfigEditResul…"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "scopeHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kScopeActionable"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeAll"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeEveryPrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeScreenPrefix"
+          },
+          {
+            "kind": "const",
+            "name": "kScopeSinglePrefix"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if token == kScopeAll → return 'כל האלמנטים'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if token == kScopeActionable → return 'כל הכפתורים'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if token.startsWith(kScopeEveryPrefix) → return 'כל «${token.substring(kScopeEveryPrefix.length)}»'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if token.startsWith(kScopeScreenPrefix) → return 'מסך «${token.substring(kScopeScreenPrefix.length)}»'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if token.startsWith(kScopeSinglePrefix) → return 'האלמנט «${token.substring(kScopeSinglePrefix.length)}»'"
+          },
+          {
+            "kind": "return",
+            "detail": "'(טווח לא מזוהה)'"
+          }
+        ]
+      },
+      "floor": [
+        "startsWith",
+        "substring"
+      ],
+      "contract": {
+        "input": "(String token)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if token == kScopeAll → return 'כל האלמנטים'",
+          "if token == kScopeActionable → return 'כל הכפתורים'",
+          "if token.startsWith(kScopeEveryPrefix) → return 'כל «${token.substring(kScopeEveryPrefix.length)}»'",
+          "if token.startsWith(kScopeScreenPrefix) → return 'מסך «${token.substring(kScopeScreenPrefix.length)}»'",
+          "if token.startsWith(kScopeSinglePrefix) → return 'האלמנט «${token.substring(kScopeSinglePrefix.length)}»'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScopeCount.ok",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "rejectedReasonHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "rejectedReasonHe == null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScopeCount.rejected",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "rejectedReasonHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "rejectedReasonHe != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScopeCount.count",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "ids"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ids.length"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScopeEditResult.rejected",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "rejectedReasonHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "rejectedReasonHe != null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ScopeEditResult.ops",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> List<ConfigOp>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "result"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "result.ops"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "List<ConfigOp>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

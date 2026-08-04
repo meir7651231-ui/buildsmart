@@ -1,0 +1,441 @@
+{
+  "module": "system_division",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/system_division.dart",
+  "atomCount": 7,
+  "caches": [
+    "_catSystemTally",
+    "_nodeHasSystemCache"
+  ],
+  "atoms": [
+    {
+      "fn": "productDivisionSystems",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> Set<WaterSystem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_catSystemTallyIndex",
+          "filterBySystem",
+          "smartProductSystems"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ends = kVerifiedSpecs[p.sku]?.endSystems"
+          },
+          {
+            "kind": "precond",
+            "detail": "if ends != null && ends.isNotEmpty → return ends"
+          },
+          {
+            "kind": "precond",
+            "detail": "if p.brand == 'פולירול' → return const {WaterSystem.supply}"
+          },
+          {
+            "kind": "return",
+            "detail": "const {WaterSystem.drainage}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "Set<WaterSystem>",
+        "purity": "pure",
+        "precond": [
+          "if ends != null && ends.isNotEmpty → return ends",
+          "if p.brand == 'פולירול' → return const {WaterSystem.supply}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "filterBySystem",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> list, WaterSystem? system) -> List<LipskeyCatalogProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "productDivisionSystems",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if system == null → return list"
+          },
+          {
+            "kind": "return",
+            "detail": "list.where((p) => productDivisionSystems(p).contains(system)).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> list, WaterSystem? system)",
+        "output": "List<LipskeyCatalogProduct>",
+        "purity": "pure",
+        "precond": [
+          "if system == null → return list"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_catSystemTallyIndex",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Map<String, ({int sup, int dr})>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_catSystemTally"
+          }
+        ],
+        "calls": [
+          {
+            "name": "productDivisionSystems",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _catSystemTally != null → return _catSystemTally!"
+          },
+          {
+            "kind": "init",
+            "detail": "m = <String, ({int sup, int dr})>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in catalogRepo().allProducts()"
+          },
+          {
+            "kind": "compute",
+            "detail": "s = productDivisionSystems(p)"
+          },
+          {
+            "kind": "compute",
+            "detail": "prev = m[p.categoryHe] ?? (sup: 0, dr: 0)"
+          },
+          {
+            "kind": "effect",
+            "detail": "m[p.categoryHe] = (sup: prev.sup + (s.contains(WaterSystem.supply) ? 1 : 0), dr: prev.dr …"
+          },
+          {
+            "kind": "return",
+            "detail": "_catSystemTally = m"
+          }
+        ]
+      },
+      "floor": [
+        "allProducts",
+        "catalogRepo",
+        "contains"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, ({int sup, int dr})>",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if _catSystemTally != null → return _catSystemTally!"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "nodeHasSystem",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(CatalogNode node, WaterSystem system) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_fixtureTitles"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_nodeHasSystemCache"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if _fixtureTitles.contains(node.title) → return true"
+          },
+          {
+            "kind": "compute",
+            "detail": "cacheKey = '${node.id}|${system.name}'"
+          },
+          {
+            "kind": "compute",
+            "detail": "cached = _nodeHasSystemCache[cacheKey]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if cached != null → return cached"
+          },
+          {
+            "kind": "compute",
+            "detail": "sup = 0"
+          },
+          {
+            "kind": "effect",
+            "detail": "walk(node)"
+          },
+          {
+            "kind": "compute",
+            "detail": "result = (sup != 0 || dr != 0) && (sup >= dr ? WaterSystem.supply : WaterSystem.drainage) == system"
+          },
+          {
+            "kind": "return",
+            "detail": "_nodeHasSystemCache[cacheKey] = result"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "walk"
+      ],
+      "contract": {
+        "input": "(CatalogNode node, WaterSystem system)",
+        "output": "bool",
+        "purity": "deterministic-side-effecting",
+        "precond": [
+          "if _fixtureTitles.contains(node.title) → return true",
+          "if cached != null → return cached"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "smartProductSystems",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(SmartProduct sp) -> Set<WaterSystem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "productDivisionSystems",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "smartProductInSystem"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "out = <WaterSystem>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final b in sp.brands"
+          },
+          {
+            "kind": "compute",
+            "detail": "sku = b.sku"
+          },
+          {
+            "kind": "branch",
+            "detail": "if sku == null → continue"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in catalogRepo().allProducts()"
+          },
+          {
+            "kind": "return",
+            "detail": "out"
+          }
+        ]
+      },
+      "floor": [
+        "addAll",
+        "allProducts",
+        "catalogRepo"
+      ],
+      "contract": {
+        "input": "(SmartProduct sp)",
+        "output": "Set<WaterSystem>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "smartProductInSystem",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(SmartProduct sp, WaterSystem? system) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "smartProductSystems",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "filterSmartBySystem"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if system == null → return true"
+          },
+          {
+            "kind": "compute",
+            "detail": "sys = smartProductSystems(sp)"
+          },
+          {
+            "kind": "return",
+            "detail": "sys.isEmpty || sys.contains(system)"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(SmartProduct sp, WaterSystem? system)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if system == null → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "filterSmartBySystem",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<SmartProduct> list, WaterSystem? system) -> List<SmartProduct>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "smartProductInSystem",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "system == null ? list : list.where((p) => smartProductInSystem(p, system)).toList()"
+          }
+        ]
+      },
+      "floor": [
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<SmartProduct> list, WaterSystem? system)",
+        "output": "List<SmartProduct>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

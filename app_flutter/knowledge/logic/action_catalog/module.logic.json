@@ -1,0 +1,267 @@
+{
+  "module": "action_catalog",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/action_catalog.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "actionCatalogIds",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "() -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kActionCatalog"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{for (final a in kActionCatalog) a.id}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "actionDescriptor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> ActionDescriptor?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kActionCatalog"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "actionHe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final a in kActionCatalog"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a.id == id → return a"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "ActionDescriptor?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "actionHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kActionCatalog",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "actionDescriptor",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "actionDescriptor(id)?.he"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchScreenId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_navScreenView"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "matchElementId(_navScreenView, reply)"
+          }
+        ]
+      },
+      "floor": [
+        "matchElementId"
+      ],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchCatalogActionId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "_catalogActionView"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "matchElementId(_catalogActionView, reply)"
+          }
+        ]
+      },
+      "floor": [
+        "matchElementId"
+      ],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "catalogActionIdsFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String elementId, {required bool readOnly}) -> Set<String>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kActionCatalog"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if elementId.trim().isEmpty → return const <String>{}"
+          },
+          {
+            "kind": "return",
+            "detail": "{for (final a in kActionCatalog) if (!(readOnly && a.mutates)) a.id}"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(String elementId, {required bool readOnly})",
+        "output": "Set<String>",
+        "purity": "pure",
+        "precond": [
+          "if elementId.trim().isEmpty → return const <String>{}"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

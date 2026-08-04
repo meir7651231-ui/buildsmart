@@ -1,0 +1,239 @@
+{
+  "module": "install_kit",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/install_kit.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "recommendedKitForProduct",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(LipskeyCatalogProduct p) -> List<KitItem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "spec = kVerifiedSpecs[p.sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if p.brand == 'פולירול' || (spec?.material.startsWith('PPR') ?? false)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if p.brand == 'חוליות'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if spec == null → return const []"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, KitItem>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in spec.ends"
+          },
+          {
+            "kind": "branch",
+            "detail": "if e.type == EndType.bspMale || e.type == EndType.bspFemale"
+          },
+          {
+            "kind": "return",
+            "detail": "out.values.toList()"
+          }
+        ]
+      },
+      "floor": [
+        "KitItem",
+        "add",
+        "contains",
+        "putIfAbsent",
+        "startsWith",
+        "toList",
+        "toString",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(LipskeyCatalogProduct p)",
+        "output": "List<KitItem>",
+        "purity": "pure",
+        "precond": [
+          "if spec == null → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "recommendedKitFor",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> chain) -> List<KitItem>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kVerifiedSpecs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if chain.length < 2 → return const []"
+          },
+          {
+            "kind": "init",
+            "detail": "out = <String, KitItem>{}"
+          },
+          {
+            "kind": "loop",
+            "detail": "for var i = 0; i < chain.length - 1; i++"
+          },
+          {
+            "kind": "compute",
+            "detail": "a = chain[i]"
+          },
+          {
+            "kind": "compute",
+            "detail": "sa = kVerifiedSpecs[a.sku]"
+          },
+          {
+            "kind": "compute",
+            "detail": "sb = kVerifiedSpecs[b.sku]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if sa == null || sb == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "jointA = "
+          },
+          {
+            "kind": "compute",
+            "detail": "isDirect = false"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final eA in sa.ends"
+          },
+          {
+            "kind": "branch",
+            "detail": "if jointA == null → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if jointA.type == EndType.bspMale || jointA.type == EndType.bspFemale"
+          },
+          {
+            "kind": "branch",
+            "detail": "if sa.material.startsWith('PPR') && sb.material.startsWith('PPR')"
+          },
+          {
+            "kind": "branch",
+            "detail": "if jointA.type == EndType.pexPress"
+          },
+          {
+            "kind": "branch",
+            "detail": "if jointA.type == EndType.copperPress"
+          },
+          {
+            "kind": "compute",
+            "detail": "ma = sa.material"
+          },
+          {
+            "kind": "branch",
+            "detail": "if ma != mb"
+          },
+          {
+            "kind": "return",
+            "detail": "out.values.toList()"
+          }
+        ]
+      },
+      "floor": [
+        "KitItem",
+        "addItem",
+        "contains",
+        "directMatesWith",
+        "pipeSharedWith",
+        "putIfAbsent",
+        "startsWith",
+        "toList"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> chain)",
+        "output": "List<KitItem>",
+        "purity": "pure",
+        "precond": [
+          "if chain.length < 2 → return const []"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "KitItem.severityHe",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "severity"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (severity) {Severity.required => 'חובה', Severity.recommended => 'מומלץ', Severity…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

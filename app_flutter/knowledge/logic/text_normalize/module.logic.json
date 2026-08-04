@@ -1,0 +1,127 @@
+{
+  "module": "text_normalize",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/text_normalize.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "fn": "normSearch",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String t) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHebrewFinalFold"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "normName"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "s = t.toLowerCase()"
+          },
+          {
+            "kind": "effect",
+            "detail": "s = s.replaceAll(RegExp('[֑-ׇ]'), '')"
+          },
+          {
+            "kind": "compute",
+            "detail": "b = StringBuffer()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final ch in s.split('')"
+          },
+          {
+            "kind": "effect",
+            "detail": "b.write(kHebrewFinalFold[ch] ?? ch)"
+          },
+          {
+            "kind": "effect",
+            "detail": "s = b.toString().replaceAll(RegExp('[\\'\"׳״\\\\-–._]'), '')"
+          },
+          {
+            "kind": "return",
+            "detail": "s.trim()"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "StringBuffer",
+        "replaceAll",
+        "split",
+        "toLowerCase",
+        "toString",
+        "trim",
+        "write"
+      ],
+      "contract": {
+        "input": "(String t)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "normName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kHebrewFinalFold",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "normSearch",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "normSearch(s).replaceAll(RegExp(r'\\s'), '')"
+          }
+        ]
+      },
+      "floor": [
+        "RegExp",
+        "replaceAll"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

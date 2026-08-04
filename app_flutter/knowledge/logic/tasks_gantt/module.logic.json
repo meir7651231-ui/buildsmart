@@ -1,0 +1,193 @@
+{
+  "module": "tasks_gantt",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/tasks_gantt.dart",
+  "atomCount": 3,
+  "atoms": [
+    {
+      "fn": "_dateOnly",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime d) -> DateTime",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildTasksGantt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "DateTime(d.year, d.month, d.day)"
+          }
+        ]
+      },
+      "floor": [
+        "DateTime"
+      ],
+      "contract": {
+        "input": "(DateTime d)",
+        "output": "DateTime",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_donePercent",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(TaskItem t) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "buildTasksGantt"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "if t.steps.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch t.status"
+          }
+        ]
+      },
+      "floor": [
+        "round"
+      ],
+      "contract": {
+        "input": "(TaskItem t)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "buildTasksGantt",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<TaskItem> tasks) -> TasksGanttLayout",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_dateOnly",
+            "module": true
+          },
+          {
+            "name": "_donePercent",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "scheduled = <TaskItem>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "unscheduled = <TaskItem>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in tasks"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.scheduledStart != null"
+          },
+          {
+            "kind": "precond",
+            "detail": "if scheduled.isEmpty → return TasksGanttLayout(bars: const [], spanDays: 0, unscheduled: unscheduled)"
+          },
+          {
+            "kind": "compute",
+            "detail": "earliest = _dateOnly(scheduled.first.scheduledStart!)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final t in scheduled"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = _dateOnly(t.scheduledStart!)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d.isBefore(earliest)"
+          },
+          {
+            "kind": "init",
+            "detail": "bars = <GanttBar>[for (final t in scheduled) GanttBar(taskId: t.id, name: t.name, startDay: () {…"
+          },
+          {
+            "kind": "compute",
+            "detail": "spanDays = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final b in bars"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = b.startDay + b.lenDays"
+          },
+          {
+            "kind": "branch",
+            "detail": "if end > spanDays"
+          },
+          {
+            "kind": "return",
+            "detail": "TasksGanttLayout(bars: bars, spanDays: spanDays, unscheduled: unscheduled)"
+          }
+        ]
+      },
+      "floor": [
+        "GanttBar",
+        "TasksGanttLayout",
+        "add",
+        "compareTo",
+        "daysBetweenDst",
+        "isBefore",
+        "sort"
+      ],
+      "contract": {
+        "input": "(List<TaskItem> tasks)",
+        "output": "TasksGanttLayout",
+        "purity": "pure",
+        "precond": [
+          "if scheduled.isEmpty → return TasksGanttLayout(bars: const [], spanDays: 0, unscheduled: unscheduled)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,401 @@
+{
+  "module": "diff_preview",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/diff_preview.dart",
+  "atomCount": 8,
+  "atoms": [
+    {
+      "fn": "summarizeDiff",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<ConfigOp> ops, RegistryView registry, {SafetyVerdict? verdict}) -> List<DiffLine>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kDiffBroadcastThreshold"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_broadcastRow",
+            "module": true
+          },
+          {
+            "name": "_heForOp",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "rows = <DiffLine>[]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if ops.length >= kDiffBroadcastThreshold"
+          },
+          {
+            "kind": "compute",
+            "detail": "blocked = verdict?.blocked.length ?? 0"
+          },
+          {
+            "kind": "branch",
+            "detail": "if blocked > 0"
+          },
+          {
+            "kind": "return",
+            "detail": "rows"
+          }
+        ]
+      },
+      "floor": [
+        "DiffLine",
+        "add"
+      ],
+      "contract": {
+        "input": "(List<ConfigOp> ops, RegistryView registry, {SafetyVerdict? verdict})",
+        "output": "List<DiffLine>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_broadcastRow",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<ConfigOp> ops) -> DiffLine",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_kindEmoji",
+            "module": true
+          },
+          {
+            "name": "_kindPlural",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "summarizeDiff"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "counts = <ConfigOpKind, int>{}"
+          },
+          {
+            "kind": "compute",
+            "detail": "styleAllColor = true"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final op in ops"
+          },
+          {
+            "kind": "compute",
+            "detail": "kind = op.kind"
+          },
+          {
+            "kind": "effect",
+            "detail": "counts[kind] = (counts[kind] ?? 0) + 1"
+          },
+          {
+            "kind": "branch",
+            "detail": "if kind == ConfigOpKind.setStyle && !(op is SetStyle && op.style?.colorToken != null)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if counts.length == 1 → return DiffLine('${ops.length} שינויים')"
+          },
+          {
+            "kind": "init",
+            "detail": "frags = <String>[for (final kind in ConfigOpKind.values) if (counts[kind] != null) '${_kindEmoji(…"
+          },
+          {
+            "kind": "return",
+            "detail": "DiffLine(frags.join(' · '))"
+          }
+        ]
+      },
+      "floor": [
+        "DiffLine",
+        "join"
+      ],
+      "contract": {
+        "input": "(List<ConfigOp> ops)",
+        "output": "DiffLine",
+        "purity": "pure",
+        "precond": [
+          "if counts.length == 1 → return DiffLine('${ops.length} שינויים')"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_kindEmoji",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOpKind kind) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_broadcastRow"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (kind) {ConfigOpKind.setText => '✏️', ConfigOpKind.setEmoji => '🙂', ConfigOpKind.…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConfigOpKind kind)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_kindPlural",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOpKind kind, bool styleAllColor) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_broadcastRow"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (kind) {ConfigOpKind.setText => 'טקסטים', ConfigOpKind.setEmoji => 'אמוג׳ים', Conf…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ConfigOpKind kind, bool styleAllColor)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_heForOp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(ConfigOp op, RegistryView registry) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_styleHe",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "summarizeDiff"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (op) {SetText() => 'שינוי טקסט: ${op.id}', SetEmoji() => 'שינוי אמוג׳י: ${op.id}',…"
+          }
+        ]
+      },
+      "floor": [
+        "actionHe"
+      ],
+      "contract": {
+        "input": "(ConfigOp op, RegistryView registry)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_styleHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id, CfgStyle? style, RegistryView registry) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_colorHe",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_heForOp"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "token = style?.colorToken"
+          },
+          {
+            "kind": "precond",
+            "detail": "if token == null → return 'שינוי עיצוב: $id'"
+          },
+          {
+            "kind": "precond",
+            "detail": "if registry.allowedValues(id, 'color').contains(token) → return 'שינוי צבע: $id ← ${_colorHe(token)}'"
+          },
+          {
+            "kind": "return",
+            "detail": "'שינוי צבע: $id'"
+          }
+        ]
+      },
+      "floor": [
+        "allowedValues",
+        "contains"
+      ],
+      "contract": {
+        "input": "(String id, CfgStyle? style, RegistryView registry)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [
+          "if token == null → return 'שינוי עיצוב: $id'",
+          "if registry.allowedValues(id, 'color').contains(token) → return 'שינוי צבע: $id ← ${_colorHe(token)}'"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_colorHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String token) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_styleHe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (token) {'success' => 'ירוק', 'danger' => 'אדום', 'warn' => 'כתום', 'muted' => 'אפ…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String token)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "DiffLine.toString",
+      "kind": "method",
+      "object": {
+        "signature": "() -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "he"
+          },
+          {
+            "kind": "field",
+            "name": "op"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'DiffLine($he${op == null ? '' : ' · ${op!.id}'})'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,1356 @@
+{
+  "module": "rules_model",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/studio/rules_model.dart",
+  "atomCount": 24,
+  "caches": [
+    "kRuleActionIds",
+    "kRuleConditionFields",
+    "kRuleOps",
+    "kRuleTriggerIds"
+  ],
+  "atoms": [
+    {
+      "fn": "ruleActionIsMutating",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String actionId) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRuleActions"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "Rule.isMutating"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final a in kRuleActions"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a.id == actionId → return a.mutating"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String actionId)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_matchClosed",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Set<String> closed, String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "matchConditionField",
+          "matchRuleActionId",
+          "matchRuleOp",
+          "matchTriggerId"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "r = reply.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if r.isEmpty → return null"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final k in closed"
+          },
+          {
+            "kind": "branch",
+            "detail": "if r == k → return k"
+          },
+          {
+            "kind": "compute",
+            "detail": "best = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final k in closed"
+          },
+          {
+            "kind": "branch",
+            "detail": "if k.isNotEmpty && r.contains(k) && (best == null || k.length > best.length)"
+          },
+          {
+            "kind": "return",
+            "detail": "best"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "trim"
+      ],
+      "contract": {
+        "input": "(Set<String> closed, String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if r.isEmpty → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "r.isEmpty · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchTriggerId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kRuleTriggerIds"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "parseRule"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(kRuleTriggerIds, reply)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchConditionField",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kRuleConditionFields"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_validateCondition"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(kRuleConditionFields, reply)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchRuleOp",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kRuleOps"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "_validateCondition"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(kRuleOps, reply)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "matchRuleActionId",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String reply) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kRuleActionIds"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_matchClosed",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "parseRule"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "_matchClosed(kRuleActionIds, reply)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String reply)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "parseRule",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String raw) -> Rule?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kRuleActionIds",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "kRuleTriggerIds",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "num",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "matchTriggerId",
+            "module": true
+          },
+          {
+            "name": "matchRuleActionId",
+            "module": true
+          },
+          {
+            "name": "_validateCondition",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "text = raw.trim()"
+          },
+          {
+            "kind": "compute",
+            "detail": "start = text.indexOf('{')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if start < 0 → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "end = text.lastIndexOf('}')"
+          },
+          {
+            "kind": "precond",
+            "detail": "if end <= start → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "candidate = text.substring(start, end + 1)"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "Rule",
+        "indexOf",
+        "jsonDecode",
+        "lastIndexOf",
+        "map",
+        "substring",
+        "toString",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String raw)",
+        "output": "Rule?",
+        "purity": "pure",
+        "precond": [
+          "if start < 0 → return null",
+          "if end <= start → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "start < 0 · end <= start · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "_validateCondition",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Object? raw) -> RuleCondition?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "kRuleConditionFields",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "kRuleOps",
+            "transitive": true
+          },
+          {
+            "kind": "global",
+            "name": "num"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "matchConditionField",
+            "module": true
+          },
+          {
+            "name": "matchRuleOp",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "parseRule"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "c = raw.map((k, v) => MapEntry(k.toString(), v))"
+          },
+          {
+            "kind": "compute",
+            "detail": "field = matchConditionField((c['field'] ?? '').toString())"
+          },
+          {
+            "kind": "precond",
+            "detail": "if field == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "op = matchRuleOp((c['op'] ?? '').toString())"
+          },
+          {
+            "kind": "precond",
+            "detail": "if op == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "rawValue = c['value']"
+          },
+          {
+            "kind": "compute",
+            "detail": "value = rawValue is num ? rawValue : num.tryParse((rawValue ?? '').toString())"
+          },
+          {
+            "kind": "precond",
+            "detail": "if value == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "RuleCondition(field: field, op: op, value: value)"
+          }
+        ]
+      },
+      "floor": [
+        "MapEntry",
+        "RuleCondition",
+        "map",
+        "toString",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "RuleCondition?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if field == null → return null",
+          "if op == null → return null",
+          "if value == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · field == null · op == null · value == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "evalRuleAdvisory",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Rule rule, {required List<Order> orders, ManagerAnalytics? analytics, DateTime? now}) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTriggerOrderDelivered",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTriggerOrderNew",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTriggerOrderOpen",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kTriggerOrderStuck",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_triggerMatches",
+            "module": true
+          },
+          {
+            "name": "_conditionMatches",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "ref = now ?? DateTime.now()"
+          },
+          {
+            "kind": "compute",
+            "detail": "count = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final o in orders"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _triggerMatches(rule.trigger, o) && _conditionMatches(rule.condition, o, ref)"
+          },
+          {
+            "kind": "return",
+            "detail": "count"
+          }
+        ]
+      },
+      "floor": [
+        "now"
+      ],
+      "contract": {
+        "input": "(Rule rule, {required List<Order> orders, ManagerAnalytics? analytics, DateTime? now})",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_triggerMatches",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String trigger, Order order) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kTriggerOrderDelivered"
+          },
+          {
+            "kind": "const",
+            "name": "kTriggerOrderNew"
+          },
+          {
+            "kind": "const",
+            "name": "kTriggerOrderOpen"
+          },
+          {
+            "kind": "const",
+            "name": "kTriggerOrderStuck"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "evalRuleAdvisory"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch trigger"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String trigger, Order order)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_conditionMatches",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(RuleCondition c, Order order, DateTime now) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFieldAgeDays",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kFieldItems",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kFieldSum",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_fieldValue",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "evalRuleAdvisory"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "v = _fieldValue(c.field, order, now)"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch c.op"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(RuleCondition c, Order order, DateTime now)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "_fieldValue",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String field, Order order, DateTime now) -> num",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kFieldAgeDays"
+          },
+          {
+            "kind": "const",
+            "name": "kFieldItems"
+          },
+          {
+            "kind": "const",
+            "name": "kFieldSum"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "_conditionMatches"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch field"
+          },
+          {
+            "kind": "return",
+            "detail": "0"
+          }
+        ]
+      },
+      "floor": [
+        "difference"
+      ],
+      "contract": {
+        "input": "(String field, Order order, DateTime now)",
+        "output": "num",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "triggerLabelHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRuleTriggers"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ruleSummaryHe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final t in kRuleTriggers"
+          },
+          {
+            "kind": "branch",
+            "detail": "if t.id == id → return t.labelHe"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "fieldLabelHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRuleFields"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ruleSummaryHe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final f in kRuleFields"
+          },
+          {
+            "kind": "branch",
+            "detail": "if f.id == id → return f.labelHe"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "actionLabelHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String id) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRuleActions"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ruleSummaryHe"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "loop",
+            "detail": "for final a in kRuleActions"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a.id == id → return a.labelHe"
+          },
+          {
+            "kind": "return",
+            "detail": "id"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String id)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ruleSummaryHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(Rule r) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRuleActions",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kRuleFields",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "kRuleOpLabelsHe"
+          },
+          {
+            "kind": "const",
+            "name": "kRuleTriggers",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "triggerLabelHe",
+            "module": true
+          },
+          {
+            "name": "fieldLabelHe",
+            "module": true
+          },
+          {
+            "name": "actionLabelHe",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "op = kRuleOpLabelsHe[r.condition.op] ?? r.condition.op"
+          },
+          {
+            "kind": "return",
+            "detail": "'${triggerLabelHe(r.trigger)} · ' '${fieldLabelHe(r.condition.field)} $op ${r.condition.v…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Rule r)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "advisoryHe",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(int matches) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'כרגע $matches הזמנות תואמות'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int matches)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RuleCondition.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "field"
+          },
+          {
+            "kind": "field",
+            "name": "op"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<String, dynamic>{'field' : field, 'op' : op, 'value' : value}"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RuleCondition.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "field"
+          },
+          {
+            "kind": "field",
+            "name": "op"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is RuleCondition && other.field == field && other.op == o…"
+          }
+        ]
+      },
+      "floor": [
+        "identical"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "RuleCondition.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "field"
+          },
+          {
+            "kind": "field",
+            "name": "op"
+          },
+          {
+            "kind": "field",
+            "name": "value"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(field, op, value)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Rule.isMutating",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kRuleActions",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "action"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "ruleActionIsMutating",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "ruleActionIsMutating(action)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Rule.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "condition"
+          },
+          {
+            "kind": "field",
+            "name": "trigger"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "<String, dynamic>{'trigger' : trigger, 'condition' : condition.toJson(), 'action' : actio…"
+          }
+        ]
+      },
+      "floor": [
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Rule.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "condition"
+          },
+          {
+            "kind": "field",
+            "name": "trigger"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "identical(this, other) || other is Rule && other.trigger == trigger && other.condition ==…"
+          }
+        ]
+      },
+      "floor": [
+        "identical"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "Rule.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "action"
+          },
+          {
+            "kind": "field",
+            "name": "condition"
+          },
+          {
+            "kind": "field",
+            "name": "trigger"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(trigger, condition, action)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}
