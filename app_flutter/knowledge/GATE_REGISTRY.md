@@ -8,9 +8,11 @@
 
 ---
 
-## הבא הפנוי: **125**
+## הבא הפנוי: **129**
 
 > **מנוע-הקטלוג-3D (פאזה 0 · `catalog-3d/CATALOG-3D-100-STEPS.md`):** 124=fittings-GA-safe-by-default **✅ מיושם (`test/fittings/gate_124_ga_safety_test.dart`)** — 3 דגלי `kFittingEngine*` (`FITTING_ENGINE`/`_3D`/`_INTEL`) נטענים ל-OFF בבנייה ללא `--dart-define` ⇒ כל graph של `features/fittings/` tree-shaken (keystone R2: אינסטלציה byte-identical) + סריקת closed-set שמפילה כל דגל-fittings חדש שאינו מכוסה. **#125 = אינטליגנציה (פאזה D) · #126 = authoring/טריידים (E) · #127 = שוק/פרטיות (F) — שמורים-מראש בתוכנית.**
+>
+> **CATALOG-CONFIG (הקטלוג-המגדיר · `CATALOG-CONFIG-PLAN.md`):** 128=catalog-config-GA-safe-by-default **✅ מיושם (`test/catalog_config/gate_128_ga_safety_test.dart`)** — `kCatalogConfig` (`CATALOG_CONFIG`) נטען ל-OFF בבנייה ללא `--dart-define` ⇒ כל graph של `features/catalog_config/` tree-shaken (הקטלוג-החי byte-identical) + סריקת closed-set. הדלקה-חיה על הקטלוג = החלטת-בעלים מפורשת.
 
 > **שמור-מראש ל-Studio (Red-Team R1):** 118=config ids⊆registry (ע1) **✅ מיושם (studio-s22, `test/studio/gate_118_test.dart`)** · 119=AI-grounded-config (ע4) **✅ מיושם (pillar4-s85, `test/studio/gate_119_test.dart`)** · 120=analytics-PII (ע3) **✅ מיושם (pillar3-s99, `test/studio/gate_120_test.dart`)**. מיושמים בזמן-הבנייה; שמורים כאן כדי שלא יתנגשו (ראה `studio-plan/RED-TEAM-R1.md`). **#119/#120 שמורים-מראש → לא bump בזמנו (121/122 נלקחו ב-Pillar-5 s68).**
 >

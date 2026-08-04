@@ -1,5 +1,11 @@
 # WIRING CONTRACT — app_flutter
 
+## #catalog-config-p0s1 — 🫀 CATALOG-CONFIG · פאזה 0 (slice 1): ProductConfigSchema נגזר-מהמנוע (מגודר) — 2026-08-04
+כיוון חדש (`CATALOG-CONFIG-PLAN.md` · nice-volta): כרטיס-הגדרה **גנרי דאטה-מונחה** (תמונה + גלגלים פר-מוצר · **בלי 3D**), המנוע מזין ערכי-גלגלים. פרוסה 1 = **הלב** (0.1+0.2):
+- `lib/features/catalog_config/catalog_config_flags.dart`: `kCatalogConfig = bool.fromEnvironment('CATALOG_CONFIG')` (default-OFF · **שער #128**).
+- `lib/features/catalog_config/product_config_schema.dart` (טהור · מגודר): `ProductConfigSchema{sku, nameHe, familyId, emoji, attributes}` **בונה על** `AttributeDef`/`AttributeValue`/`AttributeKind` הקיימים (`domain/trade_schema.dart` · reuse, לא-מאפס). `configSchemaFor(p)` **גוזר אוטומטית מהמנוע** (`familyOf`/`odOf`/`kDepth`): ברך→[זווית{45,90} · קוטר · אורך] · מצמד/טי/ברז/פקק/רוכב/צווארון→[קוטר] · מתאם→[קוטר · תבריג] · מצרה→[קוטר-גדול · קוטר-קטן]. **ערכי-הקוטר = מפתחות-`kDepth` ממוינים** (20…125). null-fallback: משפחה-לא-מוכרת → כרטיס-בסיס (קוטר-בלבד אם יש OD, אחרת ריק) — לעולם לא קורס.
+**🔑 golden** (`product_config_schema_test`): ברך=[angle·diameter·length] · קוטר≡kDepth · מצרה=2-קטרים · מתאם=קוטר+תבריג · null-fallback · **שומר: אין תכונה בלי ערכים לאף משפחה**. **🔒 keystone:** אף מסך-חי לא מייבא `catalog_config/` (מאומת: NONE outside) ⇒ tree-shaken ⇒ הקטלוג-החי byte-identical. gate-128 (`gate_128_ga_safety_test`): `kCatalogConfig` OFF + closed-set. **הבא:** מחלק (golden קטלוג-נגזר · 0.3). **🛑 הדלקה-חיה = GO-בעלים.**
+
 ## #fittings-engine-pC9 — 🔤 מנוע-קטלוג-3D · renderer-polish 3: כותרת-עברית + במה כהה (מגודר) — 2026-08-04
 ליטוש 3 (סוגר את רשימת-הפערים של הבעלים). `render/route_preview.dart` — `FittingPreviewScreen`: כותרת ב-**פונט Heebo** (מוצהר במפורש · `assets/fonts/Heebo-*.ttf` המצורף) ⇒ עברית תקינה (לא tofu) גם מחוץ ל-theme-האפליקציה · AppBar כהה (`0xFF151F2A`) · רקע-Scaffold = `kStageBackground`. הטקסט: "תצוגה תלת-ממדית · preview (off-live)" (עברית רציפה, בלי bidi-glitch). **visual-verify נטיב סופי אושר** (`--dart-define=FITTING_ENGINE_3D=true`, Heebo נטען דרך `FontLoader` ב-`runAsync`): רצף-צנרת רציף · טי-הסתעפות · ידית-ברז פליז · מדרגת-קוטר · **כותרת-עברית קריאה**. **🔒 keystone נשמר** — הכרטיס-החי byte-identical (dormant). **🛑 צעד 43 = GO-בעלים.** רשימת-הפערים של הליטוש (גוף-אמת · ריתוך · פונט-עברית) הושלמה. fittings 290/290.
 
