@@ -127,6 +127,52 @@ AttributeDef _thread() => const AttributeDef(
       ],
     );
 
+/// יציאות-המחלק (תבנית-קטלוג · 1–4). תכונת-משפחה מוצהרת (לא שדה-דאטה-חדש).
+AttributeDef _ports() => const AttributeDef(
+      id: 'ports',
+      tradeId: kCatalogConfigTradeId,
+      nameHe: 'יציאות',
+      emoji: '🔀',
+      kind: AttributeKind.number,
+      required: true,
+      values: [
+        AttributeValue(id: 'p1', labelHe: '1', canonical: '1'),
+        AttributeValue(id: 'p2', labelHe: '2', canonical: '2', sortIndex: 1),
+        AttributeValue(id: 'p3', labelHe: '3', canonical: '3', sortIndex: 2),
+        AttributeValue(id: 'p4', labelHe: '4', canonical: '4', sortIndex: 3),
+      ],
+    );
+
+/// גלגל-צבע — **נגזר מהדאטה בלבד** (`p.color`). אין צבע מוצהר → הגלגל מושמט (שומר:
+/// אין תכונה בלי ערכים · אפס-המצאת-swatches). אגירת-וריאנטי-צבע מהקטלוג = פאזה מאוחרת.
+AttributeDef? _colorAttr(LipskeyCatalogProduct p) {
+  final c = p.color;
+  if (c == null || c.isEmpty) return null;
+  return AttributeDef(
+    id: 'color',
+    tradeId: kCatalogConfigTradeId,
+    nameHe: 'צבע',
+    emoji: '🎨',
+    kind: AttributeKind.color,
+    values: [AttributeValue(id: 'c-$c', labelHe: c, canonical: c)],
+  );
+}
+
+/// זיהוי מחלק (סעפת/מחלק) — לפי השם. מחלקים חיים תחת קטגוריית-צווארונים אך נבדלים
+/// בשם; לכן מיירטים אותם **לפני** נתיב-משפחת-המנוע (אחרת יקבלו סכמת-צווארון).
+bool _isManifold(LipskeyCatalogProduct p) =>
+    p.nameHe.contains('מחלק') || p.nameHe.contains('סעפת');
+
+/// סכמת-המחלק (0.3, קטלוג-נגזר): [יציאות · צבע(אם קיים) · קוטר]. הצבע נגזר-מדאטה.
+List<AttributeDef> _manifoldAttributes(LipskeyCatalogProduct p) {
+  final color = _colorAttr(p);
+  return [
+    _ports(),
+    if (color != null) color,
+    _diameter(),
+  ];
+}
+
 /// תבנית-התכונות פר-משפחת-מנוע (0.2). `null` = משפחה לא-מוכרת (→ כרטיס-בסיס).
 List<AttributeDef>? _attributesForFamily(String family) {
   switch (family) {
@@ -156,6 +202,16 @@ List<AttributeDef>? _attributesForFamily(String family) {
 /// גלגלים מלאה; אחרת → כרטיס-בסיס (קוטר-בלבד אם ניתן לקרוא OD, אחרת ריק). לעולם
 /// לא `null` ולא תכונה-בלי-ערכים — כרטיס תמיד ניתן-לרינדור (guard · M1).
 ProductConfigSchema configSchemaFor(LipskeyCatalogProduct p) {
+  // מחלק (קטלוג-נגזר) מיורט לפני משפחת-המנוע (אחרת יזוהה כצווארון).
+  if (_isManifold(p)) {
+    return ProductConfigSchema(
+      sku: p.sku,
+      nameHe: p.nameHe,
+      familyId: 'מחלק',
+      emoji: p.categoryEmoji,
+      attributes: _manifoldAttributes(p),
+    );
+  }
   final family = familyOf(p);
   final attrs = family == null ? null : _attributesForFamily(family);
   if (family != null && attrs != null) {

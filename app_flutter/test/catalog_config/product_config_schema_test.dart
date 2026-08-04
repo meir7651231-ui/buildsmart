@@ -69,6 +69,43 @@ void main() {
     expect(_ids(s), ['diameter', 'thread']);
   });
 
+  test('🔑 manifold (מחלק) with a color → [ports · color · diameter]', () {
+    const p = LipskeyCatalogProduct(
+      sku: 'M-1',
+      nameHe: 'מחלק PPR 3 דרך 25',
+      nameEn: '',
+      categoryHe: kPprCollars, // manifolds live under collars, keyed by name
+      categoryEn: '',
+      categoryEmoji: '🔀',
+      page: 34,
+      color: 'כחול',
+    );
+    final s = configSchemaFor(p);
+    expect(s.familyId, 'מחלק');
+    expect(_ids(s), ['ports', 'color', 'diameter']);
+    final ports = s.attributes[0];
+    expect(ports.kind, AttributeKind.number);
+    expect(ports.values.map((v) => v.canonical).toList(), ['1', '2', '3', '4']);
+    final color = s.attributes[1];
+    expect(color.kind, AttributeKind.color);
+    expect(color.values.single.labelHe, 'כחול'); // grounded in p.color, not invented
+  });
+
+  test('🔑 manifold without color → [ports · diameter] (no invented swatches)', () {
+    final s = configSchemaFor(_p('סעפת למונים PPR 4', kPprCollars));
+    expect(s.familyId, 'מחלק');
+    expect(_ids(s), ['ports', 'diameter']); // color omitted — data-grounded
+    for (final a in s.attributes) {
+      expect(a.values, isNotEmpty);
+    }
+  });
+
+  test('a plain collar (not a manifold) still derives as צווארון → [diameter]', () {
+    final s = configSchemaFor(_p('צווארון PPR 40', kPprCollars));
+    expect(s.familyId, 'צווארון');
+    expect(_ids(s), ['diameter']);
+  });
+
   test('🔑 null-fallback: no engine family & no OD → base card, no crash', () {
     final s = configSchemaFor(_p('צינור PPR', 'צינורות PPR'));
     expect(s.hasWheels, isFalse);

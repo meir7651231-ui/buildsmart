@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #catalog-config-p0s2 — 🔀 CATALOG-CONFIG · פאזה 0 (slice 2): מחלק — סכמה קטלוג-נגזרת (מגודר) — 2026-08-04
+משלים את זוג-הגולדנים של פאזה 0 (ברך=מנוע-נגזר + מחלק=קטלוג-נגזר · 0.3). `product_config_schema.dart` — `configSchemaFor` מיירט **מחלק** (`_isManifold`: שם מכיל 'מחלק'/'סעפת') **לפני** נתיב-משפחת-המנוע (אחרת יזוהה כצווארון) ומחזיר `familyId='מחלק'` עם [**יציאות**{1–4, תבנית-משפחה מוצהרת} · **צבע**(אם קיים) · **קוטר**{kDepth}]. **🛡️ צבע נגזר-מדאטה בלבד** (`p.color`) — אין צבע → הגלגל מושמט (**אפס-המצאת-swatches**, שומר "אין תכונה בלי ערכים"); אגירת-וריאנטי-צבע מהקטלוג = פאזה מאוחרת. **🔑 golden** (`product_config_schema_test`): מחלק-עם-צבע → [ports·color·diameter] (color.labelHe מ-`p.color`) · מחלק-בלי-צבע → [ports·diameter] · **צווארון-רגיל (לא-מחלק) עדיין → [diameter]** (נתיב-המנוע לא-נפגע). keystone נשמר (dormant · הקטלוג byte-identical). **פאזה 0 (הלב) שלמה** — הבא: פאזה A (שכבת-הצלילה) / B (כרטיס-גנרי) לפי `CATALOG-CONFIG-PLAN.md`. **🛑 הדלקה-חיה = GO-בעלים.**
+
 ## #catalog-config-p0s1 — 🫀 CATALOG-CONFIG · פאזה 0 (slice 1): ProductConfigSchema נגזר-מהמנוע (מגודר) — 2026-08-04
 כיוון חדש (`CATALOG-CONFIG-PLAN.md` · nice-volta): כרטיס-הגדרה **גנרי דאטה-מונחה** (תמונה + גלגלים פר-מוצר · **בלי 3D**), המנוע מזין ערכי-גלגלים. פרוסה 1 = **הלב** (0.1+0.2):
 - `lib/features/catalog_config/catalog_config_flags.dart`: `kCatalogConfig = bool.fromEnvironment('CATALOG_CONFIG')` (default-OFF · **שער #128**).
