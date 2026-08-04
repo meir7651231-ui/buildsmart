@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-intel-pD7 — 💥 מנוע-אביזרים · פאזה D slice 7: מבט-פירוק (exploded-view) — יכולת (מגודר) — 2026-08-04
+יכולת "מבט-פירוק" — מרחיקה את אביזרי-הקו להצגת-פירוק/הרכבה. `geometry/route_assembly.dart`: `assembleRoute(route, {explode=0})` + `kExplodeGap=36` (פורט מ-gen3d `GAP`/💥) — **`explode=0` (ברירת-מחדל) = זהה-בית לאסמבלר-המקורי** (קוראים קיימים לא-מושפעים). `render/route_preview.dart`: `FittingPreview3d(explode:)` (additive · rebuild-on-change). `intel/exploded_view_screen.dart` (מגודר · off-live): `ExplodedViewScreen` = 3D + סליידר-💥 (0→3). **🔒 keystone:** explode-0 default שומר byte-identical · אף מסך-חי לא מייבא `intel/` ⇒ tree-shaken. **🔑 golden** (`exploded_view_test`): explode משמר ספירת-חלקים (רק מזיז) · explode>0 מרחיב את הטווח לאורך-X · מונוטוני · מסך בונה סליידר+3D בלי-קריסה. **פאזה D — 7 יכולות:** בנה-קו · הצג-בתלת-ממד+מפרט · BOM · כתב-חיתוך · תוכנית-בנייה · מבט-פירוק. fittings 332/332.
+
 ## #fittings-intel-pD6 — 📋 מנוע-אביזרים · פאזה D slice 6: capstone "תוכנית-בנייה" (מגודר) — 2026-08-04
 `lib/features/fittings/intel/build_plan_screen.dart` (מגודר · off-live) — **ה-capstone** של פאזה D: `BuildPlanScreen(route)` מאחד למסך-אחד **תצוגת-3D** (C6 · `FittingPreview3d`) + **כתב-חיתוך** (D5 · `cutListUniform` · אורכי-צינור פר-מרווח). זהו הכפתור שמציג את ה-cut-list בפועל. מרחק-מרכזים נומינלי לתצוגה (קלט-תכן-אמיתי = בהמשך). **🔒 keystone:** אף מסך-חי לא מייבא `intel/` ⇒ tree-shaken ⇒ byte-identical. widget-smoke (`build_plan_screen_test`): דמו בונה 3D+כתב-חיתוך · רצף-בודד→"אין מרווחי-צינור" בלי-קריסה. **פאזה D (יכולות-מאחורי-כפתור) — שש פרוסות:** בנה-קו (D1/D2) · הצג-בתלת-ממד+מפרט (D3) · כתב-כמויות (D4) · כתב-חיתוך (D5) · תוכנית-בנייה (D6). fittings 318/318.
 

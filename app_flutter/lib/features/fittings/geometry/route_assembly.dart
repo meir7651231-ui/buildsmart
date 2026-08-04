@@ -54,9 +54,14 @@ Mesh _place(Mesh local, Vec3 p, Vec3 f, Vec3 axis) {
   return Mesh(wp, wn, local.indices);
 }
 
+/// מרווח-הפיצוץ (💥) פר-יחידת-explode — פורט מ-`GAP` ב-gen3d (`:331`).
+const double kExplodeGap = 36;
+
 /// מרכיב `route` לרשימת-חלקים במרחב-עולם, כולל צנרת-המעבר בין האביזרים (ריתוך).
 /// אביזר לא-פריס (משפחה בלי `elementMeshesFor`) מדולג (M1). פורט 1:1 מ-`buildPlan`.
-List<WorldPart> assembleRoute(List<RunElement> route) {
+/// [explode] (💥 · 0=מורכב · פורט מ-gen3d) מרחיק את האביזרים לאורך-הרַץ להצגת-פירוק;
+/// **`0` (ברירת-מחדל) = זהה-בית לאסמבלר-המקורי** (הקוראים הקיימים לא-מושפעים).
+List<WorldPart> assembleRoute(List<RunElement> route, {double explode = 0}) {
   final out = <WorldPart>[];
   // רק אביזרים שיש להם גוף (משמיטים ברך-מחותכת/לא-מוכר — כמו ה-turtle).
   final steps = <({RunElement el, ElementMeshes em})>[];
@@ -87,6 +92,7 @@ List<WorldPart> assembleRoute(List<RunElement> route) {
     final el = steps[i].el;
     final em = steps[i].em;
     if (i > 0) emitPipe(kPipeLen, prev, el.od); // צנרת-המעבר (ריתוך)
+    if (explode > 0) p = p + f.scale(explode * kExplodeGap); // 💥 מרווח-פירוק
 
     final b = _dirVec(el.dir, f, u);
     for (final part in em.parts) {

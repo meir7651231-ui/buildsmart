@@ -103,9 +103,12 @@ class RoutePainter extends CustomPainter {
 /// תצוגת-3D אינטראקטיבית של רצף-אביזרים: מסגור-אוטומטי מ-bbox + גרירה-לסיבוב +
 /// צביטה-לזום. **מגודר · off-live** — נבנה רק ב-build-preview.
 class FittingPreview3d extends StatefulWidget {
-  const FittingPreview3d({required this.route, super.key});
+  const FittingPreview3d({required this.route, this.explode = 0, super.key});
 
   final List<RunElement> route;
+
+  /// 💥 מרווח-פירוק (0=מורכב) — מרחיק את האביזרים להצגת-פירוק (יכולת exploded-view).
+  final double explode;
 
   @override
   State<FittingPreview3d> createState() => _FittingPreview3dState();
@@ -128,11 +131,13 @@ class _FittingPreview3dState extends State<FittingPreview3d> {
   @override
   void didUpdateWidget(FittingPreview3d old) {
     super.didUpdateWidget(old);
-    if (!identical(old.route, widget.route)) _rebuild();
+    if (!identical(old.route, widget.route) || old.explode != widget.explode) {
+      _rebuild();
+    }
   }
 
   void _rebuild() {
-    _parts = assembleRoute(widget.route);
+    _parts = assembleRoute(widget.route, explode: widget.explode);
     final b = meshBounds(_parts.map((p) => p.mesh).toList());
     _target = b.center;
     _dist = b.radius * kFrameDistRatio * 2; // מרווח-נשימה סביב הרצף
