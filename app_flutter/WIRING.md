@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-engine-pC9 — 🔤 מנוע-קטלוג-3D · renderer-polish 3: כותרת-עברית + במה כהה (מגודר) — 2026-08-04
+ליטוש 3 (סוגר את רשימת-הפערים של הבעלים). `render/route_preview.dart` — `FittingPreviewScreen`: כותרת ב-**פונט Heebo** (מוצהר במפורש · `assets/fonts/Heebo-*.ttf` המצורף) ⇒ עברית תקינה (לא tofu) גם מחוץ ל-theme-האפליקציה · AppBar כהה (`0xFF151F2A`) · רקע-Scaffold = `kStageBackground`. הטקסט: "תצוגה תלת-ממדית · preview (off-live)" (עברית רציפה, בלי bidi-glitch). **visual-verify נטיב סופי אושר** (`--dart-define=FITTING_ENGINE_3D=true`, Heebo נטען דרך `FontLoader` ב-`runAsync`): רצף-צנרת רציף · טי-הסתעפות · ידית-ברז פליז · מדרגת-קוטר · **כותרת-עברית קריאה**. **🔒 keystone נשמר** — הכרטיס-החי byte-identical (dormant). **🛑 צעד 43 = GO-בעלים.** רשימת-הפערים של הליטוש (גוף-אמת · ריתוך · פונט-עברית) הושלמה. fittings 290/290.
+
 ## #fittings-engine-pC8 — 🔧 מנוע-קטלוג-3D · renderer-polish 2: assembler-רצף (ריתוך) + חומרים (מגודר) — 2026-08-04
 ליטוש 2 (דורמנטי · `kFittingEngine3d` OFF · off-live). **סוגר את מרווח-הקטעים-הצפים** בהחלפת ה-envelope-tube ברצף-צנרת רציף ונאמן, עם חומרים.
 - `lib/features/fittings/geometry/route_assembly.dart` (טהור · **פורט 1:1 מ-`gen3d.buildPlan` `:324-352`, S מוסר**): `assembleRoute(route)` → `List<WorldPart{mesh, mat}>` — גוף-אמת פר-אביזר (`elementMeshesFor`) + **צנרת-מעבר בין אביזרים** (`straightPipe`/`taperGeom`, STUB-הובלה + PIPELEN-מעבר + STUB-סיום = ה"ריתוך") + turtle (F/U/Gram-Schmidt) + ציר פר-חלק (הסתעפות=B). מצרה → צינור-מעבר בקוטר-המוקטן.

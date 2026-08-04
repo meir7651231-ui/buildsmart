@@ -173,7 +173,17 @@ class FittingPreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('תצוגת-3D · preview (off-live)')),
+      backgroundColor: kStageBackground,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF151F2A),
+        foregroundColor: Colors.white,
+        title: const Text(
+          'תצוגה תלת-ממדית · preview (off-live)',
+          // Heebo is bundled by the app (pubspec fonts); set it explicitly so the
+          // Hebrew title renders correctly even outside the app's ambient theme.
+          style: TextStyle(fontFamily: 'Heebo', fontWeight: FontWeight.w700),
+        ),
+      ),
       body: FittingPreview3d(route: route),
     );
   }
