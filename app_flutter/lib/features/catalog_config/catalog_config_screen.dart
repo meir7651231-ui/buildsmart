@@ -17,6 +17,7 @@
 
 import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';
 import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart';
 import 'package:buildsmart/features/catalog_config/config_card.dart';
@@ -62,11 +63,20 @@ LipskeyCatalogProduct? _product(String sku) {
 /// stays the pure [browseSection] projection of the pilot section over the live
 /// catalog. [onTapTile] is an OPTIONAL extra hook, fired alongside the toggle.
 class CatalogConfigScreen extends ConsumerStatefulWidget {
-  const CatalogConfigScreen({super.key, this.onTapTile});
+  const CatalogConfigScreen({
+    super.key,
+    this.onTapTile,
+    this.initialExpandedSku,
+  });
 
   /// Optional extra tap hook, fired (in addition to toggling the inline card)
   /// when a tile is tapped. Null ⇒ only the accordion toggles.
   final void Function(ConfigTile tile)? onTapTile;
+
+  /// The sku whose inline config card starts OPEN (else all collapsed) — the
+  /// visual-verify entry uses it to render the accordion open in a static shot;
+  /// null in every production route.
+  final String? initialExpandedSku;
 
   /// The ONLY route factory — GATED. Returns null when the flag is OFF, so there
   /// is no live navigation path to this screen in a default (OFF) build.
@@ -88,6 +98,12 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
   /// The sku of the tile whose config card is open (accordion), or null. Only one
   /// card is open at a time; the rest of the rail stays visible (plan B.2).
   String? _expandedSku;
+
+  @override
+  void initState() {
+    super.initState();
+    _expandedSku = widget.initialExpandedSku;
+  }
 
   void _toggleTile(ConfigTile tile) {
     widget.onTapTile?.call(tile);
@@ -234,8 +250,17 @@ class _FamilySection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Text(family.emoji, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: BsTokens.space2),
+              // Layer 2 sub-header: the family's DERIVED representative image
+              // (first pictured product) + title + product count.
+              _ProductThumb(
+                imageAsset: family.representativeImage,
+                emoji: family.emoji,
+                width: 38,
+                height: 38,
+                emojiSize: 20,
+                radius: 9,
+              ),
+              const SizedBox(width: BsTokens.space3),
               Expanded(
                 child: Text(
                   family.titleHe,
@@ -246,6 +271,8 @@ class _FamilySection extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: BsTokens.space2),
+              _CountBadge(count: family.count),
             ],
           ),
         ),
@@ -298,11 +325,20 @@ class _Tile extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(BsTokens.space3),
+            padding: const EdgeInsets.all(BsTokens.space2),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(tile.emoji, style: const TextStyle(fontSize: 30)),
+                // Layer 3 tile: the REAL product image (emoji fallback · never
+                // an empty box).
+                _ProductThumb(
+                  imageAsset: tile.imageAsset,
+                  emoji: tile.emoji,
+                  height: 54,
+                  emojiSize: 30,
+                  radius: 10,
+                ),
                 const SizedBox(height: BsTokens.space2),
                 Text(
                   tile.nameHe,
@@ -319,6 +355,81 @@ class _Tile extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A product image resolved through the catalog resolver ([resolveProductImage]),
+/// with an EMOJI fallback (plan D.2 · never an empty box): a null asset OR a failed
+/// load (offline / CDN error) shows [emoji] on the light image pad. Fills the
+/// available width when [width] is null (a rail tile), else a fixed square (the
+/// family sub-header thumb).
+class _ProductThumb extends StatelessWidget {
+  const _ProductThumb({
+    required this.imageAsset,
+    required this.emoji,
+    required this.height,
+    required this.emojiSize,
+    this.width,
+    this.radius = 12,
+  });
+
+  final String? imageAsset;
+  final String emoji;
+  final double height;
+  final double emojiSize;
+  final double? width;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final asset = imageAsset;
+    final fallback = Text(emoji, style: TextStyle(fontSize: emojiSize));
+    return Container(
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: BsTokens.bgLightAlt,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      child: asset == null
+          ? fallback
+          : Image(
+              image: resolveProductImage(asset),
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => fallback,
+            ),
+    );
+  }
+}
+
+/// The family sub-header product-count pill (mockup `.cnt` — brand fill, white).
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space2,
+        vertical: 2,
+      ),
+      decoration: const BoxDecoration(
+        color: BsTokens.brand,
+        borderRadius: BorderRadius.all(Radius.circular(BsTokens.radiusPill)),
+      ),
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: BsTokens.typeCaption,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

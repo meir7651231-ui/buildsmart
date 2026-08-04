@@ -107,6 +107,24 @@ class ConfigFamily {
   /// The product tiles in this family, in catalog-list order. Non-empty.
   final List<ConfigTile> tiles;
 
+  /// The family's REPRESENTATIVE image (plan D · DERIVED, never hardcoded): the
+  /// first tile that carries a [ConfigTile.imageAsset]. So the family sub-header
+  /// shows a real product photo pulled from the live catalog — it SURVIVES a
+  /// catalog delete-and-reupload (there is NO family→image map, the north star).
+  /// null ⇒ no pictured product in the family (→ the header falls back to [emoji]).
+  String? get representativeImage {
+    for (final tile in tiles) {
+      final asset = tile.imageAsset;
+      if (asset != null) {
+        return asset;
+      }
+    }
+    return null;
+  }
+
+  /// The family's product count — the rail's tile count (the sub-header badge).
+  int get count => tiles.length;
+
   @override
   bool operator ==(Object other) =>
       other is ConfigFamily &&

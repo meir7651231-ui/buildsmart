@@ -144,6 +144,28 @@ void main() {
     });
   });
 
+  group('#catalog-config browse — family representative image (derived · plan D)', () {
+    test('representativeImage = the FIRST tile that carries an image', () {
+      // A1 has no image, A2 does → the family header derives A2's image (never a
+      // hardcoded family→image map — survives a catalog delete-and-reupload).
+      final family = browseSection(kFakeSection, [
+        prod('A1', 'catA'),
+        prod('A2', 'catA', imageFile: 'a2.jpeg'),
+      ]).families.single;
+      expect(family.representativeImage, 'assets/lipskey/products/a2.jpeg');
+      expect(family.count, 2);
+    });
+
+    test('no pictured product in the family → null (header falls back to emoji)', () {
+      final family = browseSection(kFakeSection, [
+        prod('A1', 'catA'),
+        prod('A2', 'catA'),
+      ]).families.single;
+      expect(family.representativeImage, isNull);
+      expect(family.count, 2);
+    });
+  });
+
   group('#catalog-config browse — null-fallback (never throws)', () {
     test('no products → an empty ConfigBrowse with the section title', () {
       final browse = browseSection(kFakeSection, const []);
