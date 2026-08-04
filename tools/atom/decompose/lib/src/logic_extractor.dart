@@ -57,7 +57,7 @@ ModuleDecomposition decomposeModule(
           // `_skuCache`). Surface it as debt, never refactor it.
           if (!d.variables.isFinal ||
               mutableColl ||
-              RegExp(r'cache|index', caseSensitive: false).hasMatch(n)) {
+              RegExp(r'cache|memo|index', caseSensitive: false).hasMatch(n)) {
             caches.add(n);
           }
         }
@@ -520,7 +520,8 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool _looksCache(String base) =>
-      base.startsWith('_') && base.toLowerCase().contains('cache');
+      base.startsWith('_') &&
+      RegExp(r'cache|memo').hasMatch(base.toLowerCase());
 
   /// An imported top-level name (const table / global) — not local, not a module
   /// function, value-shaped (lowerCamel or `kXxx`, never a PascalCase Type).

@@ -1,0 +1,77 @@
+{
+  "module": "price_estimate",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/price_estimate.dart",
+  "atomCount": 1,
+  "atoms": [
+    {
+      "fn": "estimatePrice",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<LipskeyCatalogProduct> items) -> PriceEstimate",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_categoryPriceILS"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if items.isEmpty → return const PriceEstimate(totalILS: 0, itemCount: 0, lowConfidence: true)"
+          },
+          {
+            "kind": "compute",
+            "detail": "total = 0"
+          },
+          {
+            "kind": "compute",
+            "detail": "matched = 0"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final p in items"
+          },
+          {
+            "kind": "compute",
+            "detail": "v = _categoryPriceILS[p.categoryHe]"
+          },
+          {
+            "kind": "branch",
+            "detail": "if v != null"
+          },
+          {
+            "kind": "compute",
+            "detail": "lowConf = matched < items.length / 2"
+          },
+          {
+            "kind": "return",
+            "detail": "PriceEstimate(totalILS: total, itemCount: items.length, lowConfidence: lowConf)"
+          }
+        ]
+      },
+      "floor": [
+        "PriceEstimate"
+      ],
+      "contract": {
+        "input": "(List<LipskeyCatalogProduct> items)",
+        "output": "PriceEstimate",
+        "purity": "pure",
+        "precond": [
+          "if items.isEmpty → return const PriceEstimate(totalILS: 0, itemCount: 0, lowConfidence: true)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

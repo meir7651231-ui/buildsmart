@@ -17,6 +17,7 @@ import 'package:test/test.dart';
 final _repo = p.canonicalize(p.join(Directory.current.path, '../../..'));
 final _engine = p.join(_repo, 'app_flutter/lib/logic/install_engine.dart');
 final _cart = p.join(_repo, 'app_flutter/lib/state/smart_cart.dart');
+String _lib(String rel) => p.join(_repo, 'app_flutter/lib/$rel');
 
 void main() {
   final present = File(_engine).existsSync();
@@ -213,6 +214,57 @@ void main() {
       expect(w, contains('field:_loaded'), reason: 'the race-guard, set directly');
       expect(w, contains('state:state'), reason: 'super.state = value');
       expect(setter.calls.map((c) => c.name), contains('_persist'));
+    });
+  });
+
+  // ── the pure-engines slice: one anchor per module ────────────────────────────
+  group('logic decomposer · pure engines (phase L slice)', () {
+    LogicAtom anchor(String rel, String name) {
+      final path = _lib(rel);
+      if (!File(path).existsSync()) throw StateError('missing $path');
+      final m = decomposeModule(path);
+      return m.atoms.firstWhere((a) => a.fn == name || a.fn.endsWith('.$name'),
+          orElse: () => throw StateError('no $name in $rel'));
+    }
+
+    test('pressure_drop.estimatePressureDrop — pure Darcy-Weisbach physics', () {
+      final a = anchor('logic/pressure_drop.dart', 'estimatePressureDrop');
+      expect(a.contract.purity, 'pure', reason: 'total physics, no side effects');
+      expect(a.writes, isEmpty);
+      // calls the friction-factor + bore + K-table helpers; reads the verified specs.
+      expect(a.calls.map((c) => c.name), containsAll(['_frictionFactor', '_minBoreOf']));
+      expect(a.reads.any((r) => r.name == 'kVerifiedSpecs'), isTrue);
+      expect(a.steps.length, greaterThan(10), reason: 'the ΣK→v→Re→ƒ→ΔP pipeline');
+    });
+
+    test('fuzzy_match.damerauLevenshtein — pure DP primitive', () {
+      final a = anchor('logic/fuzzy_match.dart', 'damerauLevenshtein');
+      expect(a.contract.purity, 'pure');
+      expect(a.contract.output, 'int');
+      expect(a.steps.where((s) => s.kind == 'loop').length, greaterThanOrEqualTo(2),
+          reason: 'the nested edit-distance loops');
+    });
+
+    test('workflow_engine.planWfAdvance — pure state-machine transition', () {
+      final a = anchor('logic/workflow_engine.dart', 'planWfAdvance');
+      expect(a.contract.purity, 'pure');
+      expect(a.contract.output, 'WfAdvancePlan?', reason: 'a plan, or null when no advance');
+      expect(a.writes, isEmpty, reason: 'a pure patch — the caller applies it');
+    });
+
+    test('price_estimate.estimatePrice — pure category→ILS lookup', () {
+      final a = anchor('logic/price_estimate.dart', 'estimatePrice');
+      expect(a.contract.purity, 'pure');
+      expect(a.reads.any((r) => r.kind == 'const' && r.name == '_categoryPriceILS'), isTrue,
+          reason: 'reads the category price table (data welded to logic — phase D)');
+    });
+
+    test('connection_resolver.canConnect — memoised rule evaluator (method)', () {
+      final a = anchor('domain/connection_resolver.dart', 'canConnect');
+      expect(a.kind, 'method');
+      expect(a.writes.map((w) => '${w.kind}:${w.name}'), ['cache:_memo'],
+          reason: 'the end-pair memo — a transparent cache, so deterministic');
+      expect(a.contract.purity, 'deterministic-side-effecting');
     });
   });
 }

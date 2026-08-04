@@ -1,0 +1,717 @@
+{
+  "module": "connection_resolver",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/connection_resolver.dart",
+  "atomCount": 13,
+  "atoms": [
+    {
+      "fn": "normalizeSize",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "ConnectionResolver._sizeOk"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "s.replaceAll('\"', '').trim()"
+          }
+        ]
+      },
+      "floor": [
+        "replaceAll",
+        "trim"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectResult.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "mates"
+          },
+          {
+            "kind": "field",
+            "name": "methodLabelHe"
+          },
+          {
+            "kind": "field",
+            "name": "rule"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is ConnectResult && other.mates == mates && other.methodLabelHe == methodLabelHe &&…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectResult.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "mates"
+          },
+          {
+            "kind": "field",
+            "name": "methodLabelHe"
+          },
+          {
+            "kind": "field",
+            "name": "rule"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(mates, methodLabelHe, severity, rule)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CompletionIssue.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "offendingSkus"
+          },
+          {
+            "kind": "field",
+            "name": "rule"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          },
+          {
+            "kind": "field",
+            "name": "whyHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is CompletionIssue && other.rule == rule && other.whyHe == whyHe && other.severity …"
+          }
+        ]
+      },
+      "floor": [
+        "listEquals"
+      ],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "CompletionIssue.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "offendingSkus"
+          },
+          {
+            "kind": "field",
+            "name": "rule"
+          },
+          {
+            "kind": "field",
+            "name": "severity"
+          },
+          {
+            "kind": "field",
+            "name": "whyHe"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(rule, whyHe, severity, Object.hashAll(offendingSkus))"
+          }
+        ]
+      },
+      "floor": [
+        "hash",
+        "hashAll"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SystemCoherence.==",
+      "kind": "method",
+      "object": {
+        "signature": "(Object other) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "coherent"
+          },
+          {
+            "kind": "field",
+            "name": "offendingSku"
+          },
+          {
+            "kind": "field",
+            "name": "offendingSystem"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "other is SystemCoherence && other.coherent == coherent && other.offendingSystem == offend…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(Object other)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "SystemCoherence.hashCode",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "coherent"
+          },
+          {
+            "kind": "field",
+            "name": "offendingSku"
+          },
+          {
+            "kind": "field",
+            "name": "offendingSystem"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "Object.hash(coherent, offendingSystem, offendingSku)"
+          }
+        ]
+      },
+      "floor": [
+        "hash"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionResolver.canConnect",
+      "kind": "method",
+      "object": {
+        "signature": "(ProductConnectorSpec a, ProductConnectorSpec b) -> ConnectResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_noRule"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_memo",
+            "transitive": true
+          }
+        ],
+        "calls": [
+          {
+            "name": "_endPairMemoized",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "firstMiss = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final endA in a.ends"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final endB in b.ends"
+          },
+          {
+            "kind": "return",
+            "detail": "firstMiss ?? _noRule"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(ProductConnectorSpec a, ProductConnectorSpec b)",
+        "output": "ConnectResult",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionResolver._endPairMemoized",
+      "kind": "method",
+      "object": {
+        "signature": "(ProductEnd endA, ProductEnd endB) -> ConnectResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_noRule",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "rules",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "cache",
+            "name": "_memo"
+          }
+        ],
+        "calls": [
+          {
+            "name": "_endPair",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ConnectionResolver.canConnect"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = '${endA.connectorTypeId}|${endA.sizeValue}' '|${endB.connectorTypeId}|${endB.sizeValue}'"
+          },
+          {
+            "kind": "return",
+            "detail": "_memo.putIfAbsent(key, () => _endPair(endA, endB))"
+          }
+        ]
+      },
+      "floor": [
+        "putIfAbsent"
+      ],
+      "contract": {
+        "input": "(ProductEnd endA, ProductEnd endB)",
+        "output": "ConnectResult",
+        "purity": "deterministic-side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionResolver._endPair",
+      "kind": "method",
+      "object": {
+        "signature": "(ProductEnd endA, ProductEnd endB) -> ConnectResult",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_noRule"
+          },
+          {
+            "kind": "field",
+            "name": "rules"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_sizeOk",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ConnectionResolver._endPairMemoized"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "firstSizeMiss = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rule in rules"
+          },
+          {
+            "kind": "compute",
+            "detail": "forward = rule.aTypeId == endA.connectorTypeId && rule.bTypeId == endB.connectorTypeId"
+          },
+          {
+            "kind": "compute",
+            "detail": "reverse = !forward && rule.aTypeId == endB.connectorTypeId && rule.bTypeId == endA.connectorTypeId"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !forward && !reverse → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "if _sizeOk(rule, endA, endB, forward: forward) → return ConnectResult(mates: true, methodLabelHe: rule.methodLabelHe, rule: rule)"
+          },
+          {
+            "kind": "effect",
+            "detail": "firstSizeMiss ??= rule"
+          },
+          {
+            "kind": "precond",
+            "detail": "if firstSizeMiss != null → return ConnectResult(mates: false, methodLabelHe: '', severity: firstSizeMiss.onMismatch, rule: …"
+          },
+          {
+            "kind": "return",
+            "detail": "_noRule"
+          }
+        ]
+      },
+      "floor": [
+        "ConnectResult"
+      ],
+      "contract": {
+        "input": "(ProductEnd endA, ProductEnd endB)",
+        "output": "ConnectResult",
+        "purity": "pure",
+        "precond": [
+          "if firstSizeMiss != null → return ConnectResult(mates: false, methodLabelHe: '', severity: firstSizeMiss.onMismatch, rule: …"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionResolver._sizeOk",
+      "kind": "method",
+      "object": {
+        "signature": "(CompatibilityRule rule, ProductEnd endA, ProductEnd endB, {required bool forward}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "normalizeSize",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "ConnectionResolver._endPair"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch rule.sizeMatch"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(CompatibilityRule rule, ProductEnd endA, ProductEnd endB, {required bool forward})",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionResolver.completion",
+      "kind": "method",
+      "object": {
+        "signature": "(List<ProductConnectorSpec> line) -> List<CompletionIssue>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "completionRules"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "presentGroups = <String>{for (final spec in line) if (spec.materialGroupId != null) spec.materialGroupId!}"
+          },
+          {
+            "kind": "init",
+            "detail": "issues = <CompletionIssue>[]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final rule in completionRules"
+          },
+          {
+            "kind": "compute",
+            "detail": "groups = rule.incompatibleMaterialGroups"
+          },
+          {
+            "kind": "branch",
+            "detail": "if groups != null && groups.isNotEmpty"
+          },
+          {
+            "kind": "branch",
+            "detail": "if rule.whenInLineHasTypeId.isNotEmpty"
+          },
+          {
+            "kind": "return",
+            "detail": "issues"
+          }
+        ]
+      },
+      "floor": [
+        "CompletionIssue",
+        "add",
+        "any",
+        "contains"
+      ],
+      "contract": {
+        "input": "(List<ProductConnectorSpec> line)",
+        "output": "List<CompletionIssue>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "ConnectionResolver.systemCoherence",
+      "kind": "method",
+      "object": {
+        "signature": "(List<ProductConnectorSpec> line) -> SystemCoherence",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_systemById"
+          },
+          {
+            "kind": "field",
+            "name": "_systemIdByTypeId"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "firstSystemId = "
+          },
+          {
+            "kind": "loop",
+            "detail": "for final spec in line"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final end in spec.ends"
+          },
+          {
+            "kind": "return",
+            "detail": "const SystemCoherence(coherent: true)"
+          }
+        ]
+      },
+      "floor": [
+        "SystemCoherence"
+      ],
+      "contract": {
+        "input": "(List<ProductConnectorSpec> line)",
+        "output": "SystemCoherence",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

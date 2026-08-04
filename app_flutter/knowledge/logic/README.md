@@ -16,6 +16,11 @@ the widget graph only named. For each function: **object** (signature + constant
 |---|---:|---|
 | [`install_engine`](install_engine/) | 44 | the plumbing god-module — compatibility · least-cost routing (Dijkstra/Yen) · BOM assembly · safety compliance. Golden: `findShortestPath`. See its [HARD-CASES.md](install_engine/HARD-CASES.md). |
 | [`smart_cart`](smart_cart/) | 13 | the cart `StateNotifier`. Golden: `SmartCartNotifier.add` — a one-line `state = […]` whose real behaviour (the `_loaded` race-guard + async `_persist()` IO) lives in the overridden `set state` it triggers (hard-case #6, surfaced transitively). |
+| [`pressure_drop`](pressure_drop/) | 14 | pipe-flow physics. Golden: `estimatePressureDrop` — pure Darcy-Weisbach (ΣK → v → Re → ƒ → ΔP), reads the verified specs, no side effects. |
+| [`fuzzy_match`](fuzzy_match/) | 6 | search primitives. Golden: `damerauLevenshtein` — pure edit-distance DP (`int` out, nested loops). |
+| [`workflow_engine`](workflow_engine/) | 18 | the 5-stage job state-machine. Golden: `planWfAdvance` — a pure transition that returns a patch (`WfAdvancePlan?`), the caller applies it. |
+| [`price_estimate`](price_estimate/) | 1 | rough pricing. Golden: `estimatePrice` — pure category→ILS lookup (`_categoryPriceILS` table; price is data-welded-to-logic → phase D). |
+| [`connection_resolver`](connection_resolver/) | 13 | the trade-agnostic rule evaluator (dormant). Golden: `ConnectionResolver.canConnect` — a memoised (`_memo`) predicate, deterministic behind its cache. |
 
 Each module dir holds `module.logic.json` (the machine model), one
 `<fn>.logic.md` per function (private fns prefixed `p_`), and — where the

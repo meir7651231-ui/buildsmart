@@ -1,0 +1,875 @@
+{
+  "module": "workflow_engine",
+  "source": "/home/user/buildsmart/app_flutter/lib/logic/workflow_engine.dart",
+  "atomCount": 18,
+  "atoms": [
+    {
+      "fn": "wfStageKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfStage s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "wfStageLabel"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (s) {WfStage.intake => 'intake', WfStage.prep => 'prep', WfStage.ready => 'ready',…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(WfStage s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfStageFromKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String k) -> WfStage?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "switch (k) {'intake' => WfStage.intake, 'prep' => WfStage.prep, 'ready' => WfStage.ready,…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String k)",
+        "output": "WfStage?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfStageLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg, WfStage s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStageFallback"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfStageKey",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "planWfAdvance",
+          "wfAdvanceLabel",
+          "wfDailyRows"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "termOf(cfg, 'workflow.stage.${wfStageKey(s)}', _kStageFallback[s]!)"
+          }
+        ]
+      },
+      "floor": [
+        "termOf"
+      ],
+      "contract": {
+        "input": "(OrgConfig cfg, WfStage s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfFeatureLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "planWfAdvance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "termOf(cfg, 'nav.workflow', 'מעקב טיפול')"
+          }
+        ]
+      },
+      "floor": [
+        "termOf"
+      ],
+      "contract": {
+        "input": "(OrgConfig cfg)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfItemLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "planWfAdvance",
+          "wfDailyRows"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "termOf(cfg, 'entity.wfItem', 'פריט')"
+          }
+        ]
+      },
+      "floor": [
+        "termOf"
+      ],
+      "contract": {
+        "input": "(OrgConfig cfg)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfUnitLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "planWfAdvance",
+          "wfDailyRows"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "termOf(cfg, 'entity.wfUnit', 'כמות')"
+          }
+        ]
+      },
+      "floor": [
+        "termOf"
+      ],
+      "contract": {
+        "input": "(OrgConfig cfg)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfStageIndex",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfStage s) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWfStages"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "wfNextStage",
+          "wfRevertPatch"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "kWfStages.indexOf(s)"
+          }
+        ]
+      },
+      "floor": [
+        "indexOf"
+      ],
+      "contract": {
+        "input": "(WfStage s)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfNextStage",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfStage s) -> WfStage?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWfStages"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfStageIndex",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = wfStageIndex(s)"
+          },
+          {
+            "kind": "return",
+            "detail": "i < kWfStages.length - 1 ? kWfStages[i + 1] : null"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(WfStage s)",
+        "output": "WfStage?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfUnitsTotal",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfCase a) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "planWfAdvance",
+          "wfDailyRows"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "a.names.fold(0, (t, x) => t + (x.units ?? 0))"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "(WfCase a)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfActive",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfCase? a) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if a == null → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "a.stage != WfStage.intake || a.names.isNotEmpty || a.lastTouch.isNotEmpty || a.log.isNotE…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(WfCase? a)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if a == null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfActionVisible",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfCase a) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "planWfAdvance"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch a.stage"
+          }
+        ]
+      },
+      "floor": [
+        "any"
+      ],
+      "contract": {
+        "input": "(WfCase a)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfAdvanceLabel",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg, WfCase a) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStageFallback",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfStageLabel",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch a.stage"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(OrgConfig cfg, WfCase a)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "planWfAdvance",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg, String name, WfCase a) -> WfAdvancePlan?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStageFallback",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfActionVisible",
+            "module": true
+          },
+          {
+            "name": "wfFeatureLabel",
+            "module": true
+          },
+          {
+            "name": "wfItemLabel",
+            "module": true
+          },
+          {
+            "name": "wfUnitLabel",
+            "module": true
+          },
+          {
+            "name": "wfStageLabel",
+            "module": true
+          },
+          {
+            "name": "wfUnitsTotal",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !wfActionVisible(a) → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "feat = wfFeatureLabel(cfg)"
+          },
+          {
+            "kind": "compute",
+            "detail": "item = wfItemLabel(cfg)"
+          },
+          {
+            "kind": "compute",
+            "detail": "unit = wfUnitLabel(cfg)"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch a.stage"
+          }
+        ]
+      },
+      "floor": [
+        "WfAdvancePlan",
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(OrgConfig cfg, String name, WfCase a)",
+        "output": "WfAdvancePlan?",
+        "purity": "pure",
+        "precond": [
+          "if !wfActionVisible(a) → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "!wfActionVisible(a) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfRevertPatch",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfCase a, WfStage to) -> WfCase",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kWfStages",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfStageIndex",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "a.copyWith(stage: to, dispatchPushed: wfStageIndex(to) >= wfStageIndex(WfStage.dispatch) …"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith"
+      ],
+      "contract": {
+        "input": "(WfCase a, WfStage to)",
+        "output": "WfCase",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfNormName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String s) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "planAddName"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "normName(s)"
+          }
+        ]
+      },
+      "floor": [
+        "normName"
+      ],
+      "contract": {
+        "input": "(String s)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "planAddName",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WfCase a, String rawName, int? units, String id, {required String todayIso}) -> ({List<WfName> names, List<WfLog>? log})?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfNormName",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "nm = rawName.trim()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if nm.isEmpty → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = wfNormName(nm)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if a.names.any((x) => wfNormName(x.name) == key) → return null"
+          },
+          {
+            "kind": "init",
+            "detail": "names = [...a.names, WfName(id: id, name: nm, units: units)]"
+          },
+          {
+            "kind": "precond",
+            "detail": "if units != null → return (names: names, log: [WfLog(date: todayIso, units: units, name: nm), ...a.log])"
+          },
+          {
+            "kind": "return",
+            "detail": "(names: names, log: null)"
+          }
+        ]
+      },
+      "floor": [
+        "WfLog",
+        "WfName",
+        "any",
+        "trim"
+      ],
+      "contract": {
+        "input": "(WfCase a, String rawName, int? units, String id, {required String todayIso})",
+        "output": "({List<WfName> names, List<WfLog>? log})?",
+        "purity": "pure",
+        "precond": [
+          "if nm.isEmpty → return null",
+          "if a.names.any((x) => wfNormName(x.name) == key) → return null",
+          "if units != null → return (names: names, log: [WfLog(date: todayIso, units: units, name: nm), ...a.log])"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "nm.isEmpty · a.names.any((x) => wfNormName(x.name) == key) · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "wfDailyRows",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(OrgConfig cfg, List<({String name, String phone, WfCase? wf})> entities, String todayIso) -> List<List<Object>>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kStageFallback",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "wfUnitLabel",
+            "module": true
+          },
+          {
+            "name": "wfItemLabel",
+            "module": true
+          },
+          {
+            "name": "wfUnitsTotal",
+            "module": true
+          },
+          {
+            "name": "wfStageLabel",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "unit = wfUnitLabel(cfg)"
+          },
+          {
+            "kind": "compute",
+            "detail": "item = wfItemLabel(cfg)"
+          },
+          {
+            "kind": "init",
+            "detail": "rows = <List<Object>>[['שם', 'טלפון', '$unit היום', 'שלב', item, 'מתי לדבר שוב', 'הערה']]"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final e in entities"
+          },
+          {
+            "kind": "compute",
+            "detail": "a = e.wf"
+          },
+          {
+            "kind": "branch",
+            "detail": "if a == null → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "touched = a.lastTouch == todayIso || a.log.any((l) => l.date == todayIso)"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !touched → continue"
+          },
+          {
+            "kind": "compute",
+            "detail": "logToday = a.log.where((l) => l.date == todayIso).toList()"
+          },
+          {
+            "kind": "compute",
+            "detail": "unitsToday = logToday.isNotEmpty ? logToday.fold<int>(0, (t, l) => t + l.units) : (wfUnitsTotal(a) == …"
+          },
+          {
+            "kind": "compute",
+            "detail": "namesLine = a.names.map((n) => n.name + (n.units != null ? ' ·${n.units}' : '') + (n.done ? ' ✓' : ''…"
+          },
+          {
+            "kind": "effect",
+            "detail": "rows.add([e.name, e.phone, unitsToday, wfStageLabel(cfg, a.stage), namesLine, a.nextTouch…"
+          },
+          {
+            "kind": "return",
+            "detail": "rows"
+          }
+        ]
+      },
+      "floor": [
+        "add",
+        "any",
+        "fold",
+        "join",
+        "map",
+        "toList",
+        "where"
+      ],
+      "contract": {
+        "input": "(OrgConfig cfg, List<({String name, String phone, WfCase? wf})> entities, String todayIso)",
+        "output": "List<List<Object>>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WfCase.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({WfStage? stage, String? note, bool? dispatchPushed, String? nextTouch, String? nextTouchTime, String? lastTouch, List<WfName>? names, List<WfLog>? log}) -> WfCase",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "WfCase(stage: stage ?? this.stage, note: note ?? this.note, dispatchPushed: dispatchPushe…"
+          }
+        ]
+      },
+      "floor": [
+        "WfCase"
+      ],
+      "contract": {
+        "input": "({WfStage? stage, String? note, bool? dispatchPushed, String? nextTouch, String? nextTouchTime, String? lastTouch, List<WfName>? names, List<WfLog>? log})",
+        "output": "WfCase",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}
