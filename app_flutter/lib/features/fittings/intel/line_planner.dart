@@ -24,6 +24,11 @@ class FittingLinePlan {
     required this.complete,
   });
 
+  /// תוכנית ישירות מרצף-`RunElement` (בלי מעבר-גרף) — למסך-preview/דמו של היכולת.
+  /// `products` ריק (אין מקור-קטלוג), `complete` = הרצף לא-ריק.
+  FittingLinePlan.fromRoute(List<RunElement> route)
+      : this(products: const [], route: route, complete: route.isNotEmpty);
+
   /// המוצרים בנתיב (כולל צינורות/קבועים), בסדר-החיבור.
   final List<LipskeyCatalogProduct> products;
 
