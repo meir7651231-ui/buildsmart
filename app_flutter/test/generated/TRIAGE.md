@@ -5,20 +5,22 @@
 > **triage signal**, never a CI blocker. The main swarm gate stays green.
 > Regenerate: `dart run atom_testgen` (tools/atom/testgen).
 
-## Frozen numbers (after isolation-wrap harness fix · `triage8`)
+## Frozen numbers (List A closed · `triage9`)
 
-| | `triage6` | `triage7` (worker fix) | `triage8` (isolation-wrap) |
-|---|---:|---:|---:|
-| screens | 62 | 62 | 62 |
-| generated tests | 1001 | 1001 | 1001 |
-| **verified PASS** | 596 | 612 | **628** |
-| **reported FAIL** | 405 | 389 | **373** |
-| compile-fail | 0 | 0 | 0 |
-| **force-pass** | 0 | 0 | **0** |
+| | `triage6` | `triage7` (worker) | `triage8` (isolation-wrap) | `triage9` (courier) |
+|---|---:|---:|---:|---:|
+| screens | 62 | 62 | 62 | 62 |
+| generated tests | 1001 | 1001 | 1001 | 1001 |
+| **verified PASS** | 596 | 612 | 628 | **658** |
+| **reported FAIL** | 405 | 389 | 373 | **343** |
+| compile-fail | 0 | 0 | 0 | 0 |
+| **force-pass** | 0 | 0 | 0 | **0** |
 
-`pass = verified · fail = reported`. Nothing here is forced green. `triage8` is the
-raw verified tally. **No-Material is now 0 globally.** Main app suite green
-(5572 pass / 12 skip / 0 fail).
+`pass = verified · fail = reported`. Nothing here is forced green. `triage9` is the
+raw verified tally. **No-Material AND ink-hidden are now 0 globally — List A
+(real exception-throwing findings) is CLOSED.** All 343 remaining failures are
+bucket-B honest not-founds (element needs interaction/data/nav; self-skipped,
+never force-passed). Main app suite green (5601 pass / 12 skip / 0 fail).
 
 ### Honest correction — chats + home_content_reorder were ISOLATION, not real bugs
 
@@ -97,22 +99,24 @@ Result (verified, `--dart-define=atomgen=true`): **21 crashes → 16 verified pa
 renders when the dialog is opened — bucket B, self-skipped, never force-passed).
 0 `No Material` / 0 ink-hidden / 0 `InkResponse` remain.
 
-### Remaining — 35 on 1 screen (the one genuine real finding)
+### ✅ List A CLOSED — every real finding fixed or reclassified
 
-**Not** force-passable. After the isolation-wrap, the ONLY real exception-throwing
-remainder is `courier_profile_screen`: its bare-body `No-Material` (isolation) is
-now cleared, revealing the **real** `ListTile`-in-`DecoratedBox` ink-hidden
-assertion underneath (same anti-pattern as the fixed worker_profile). It needs
-the same surgical app fix (wrap the card tiles in a transparent `Material`) —
-deferred as the last pilot per plan (cosmetic in release).
+| screen | was | fix | now |
+|---|---|---|---:|
+| worker_profile_screen | +0 −21 (ink-hidden) | surgical app fix — transparent `Material` on card tiles | +16 −5 |
+| courier_profile_screen | +0 −35 (No-Material → ink-hidden) | surgical app fix — transparent `Material` on `_CourierPersonalAreaCard` | **+30 −5** |
+| chats_screen | +0 −22 (No-Material) | **isolation** → harness always-wrap (no app change) | +11 −11 |
+| home_content_reorder | +0 −9 (No-Material) | **isolation** → harness always-wrap (no app change) | +5 −4 |
 
-| screen | count | real-render-path assertion |
-|---|---:|---|
-| courier_profile_screen | 35 | `ListTile` ink hidden by the card `DecoratedBox` (real; surgical app fix pending) |
+Two were **real** app findings (`ListTile`-in-`DecoratedBox` ink-hidden — debug
+assertion / release invisible-ink) → surgical transparent-`Material` app fixes,
+each visual-verified. Two were **isolation** artifacts (bare-body composers the
+app always mounts under a Scaffold) → one generic harness lever, zero app change.
 
-chats (now +11 −11) and home_content_reorder (now +5 −4) moved OUT of List A —
-their failures were isolation `No-Material`, cleared by the harness; the residual
-`−11` / `−4` are honest not-founds (bucket B, element needs interaction/data).
+**No exception-throwing failures remain.** The residual 343 are all bucket-B
+honest not-founds — elements that render only after interaction/data/nav the
+generic harness deliberately doesn't perform. Self-skipped, documented, never
+force-passed.
 
 ---
 

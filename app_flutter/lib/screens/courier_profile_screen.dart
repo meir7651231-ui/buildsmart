@@ -429,26 +429,26 @@ class _CourierIdentityCard extends StatelessWidget {
                         // כל צ'יפ ה'דמו' נעלם עם הסתרת האלמנט (לא שלד ריק).
                         'courier_profile_screen.demo_chip',
                         child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF2F3F5),
-                          borderRadius: BorderRadius.circular(
-                            BsTokens.radiusPill,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2F3F5),
+                            borderRadius: BorderRadius.circular(
+                              BsTokens.radiusPill,
+                            ),
+                          ),
+                          child: const CfgText(
+                            'courier_profile_screen.demo_chip',
+                            'דמו',
+                            style: TextStyle(
+                              color: BsTokens.mutedLight,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        child: const CfgText(
-                          'courier_profile_screen.demo_chip',
-                          'דמו',
-                          style: TextStyle(
-                            color: BsTokens.mutedLight,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
                       ),
                     ],
                   ],
@@ -564,112 +564,119 @@ class _CourierPersonalAreaCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          HelpTarget(
-            title: 'נוכחות',
-            body:
-                'פותח את מסך הנוכחות — רישום כניסה/יציאה, טבלה חודשית '
-                'ושליחת דוח-נוכחות לחנות.',
-            child: ListTile(
-              leading: const Text('🕐', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'courier.personal.attendance_title',
-                'נוכחות',
-                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+      // Transparent Material inside the decorated card so the ListTiles' ink
+      // ripples paint above the card bg instead of being hidden by it.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          children: [
+            HelpTarget(
+              title: 'נוכחות',
+              body:
+                  'פותח את מסך הנוכחות — רישום כניסה/יציאה, טבלה חודשית '
+                  'ושליחת דוח-נוכחות לחנות.',
+              child: ListTile(
+                leading: const Text('🕐', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'courier.personal.attendance_title',
+                  'נוכחות',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                subtitle: const CfgText(
+                  'courier_profile_screen.attendance_subtitle',
+                  'כניסה/יציאה ודוח חודשי',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                ),
+                onTap:
+                    () => Navigator.of(
+                      context,
+                    ).push(CourierAttendanceScreen.route()),
               ),
-              subtitle: const CfgText(
-                'courier_profile_screen.attendance_subtitle',
-                'כניסה/יציאה ודוח חודשי',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: BsTokens.mutedLight,
-              ),
-              onTap:
-                  () => Navigator.of(
-                    context,
-                  ).push(CourierAttendanceScreen.route()),
             ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          HelpTarget(
-            title: 'טפסים',
-            body: 'פותח את מרכז הטפסים — טופס 101, בקשת חופשה ואישור מחלה.',
-            child: ListTile(
-              leading: const Text('📄', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'courier.personal.forms_title',
-                'טפסים',
-                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            const Divider(height: 1, color: Color(0xFFF2F3F5)),
+            HelpTarget(
+              title: 'טפסים',
+              body: 'פותח את מרכז הטפסים — טופס 101, בקשת חופשה ואישור מחלה.',
+              child: ListTile(
+                leading: const Text('📄', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'courier.personal.forms_title',
+                  'טפסים',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                subtitle: const CfgText(
+                  'courier_profile_screen.forms_subtitle',
+                  'טופס 101 · בקשת חופשה · אישור מחלה',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                ),
+                onTap:
+                    () =>
+                        Navigator.of(context).push(CourierFormsScreen.route()),
               ),
-              subtitle: const CfgText(
-                'courier_profile_screen.forms_subtitle',
-                'טופס 101 · בקשת חופשה · אישור מחלה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: BsTokens.mutedLight,
-              ),
-              onTap:
-                  () => Navigator.of(context).push(CourierFormsScreen.route()),
             ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          HelpTarget(
-            title: 'תעודות נהג',
-            body:
-                'פותח את ארנק תעודות-הנהג — רישיון נהיגה, ביטוח רכב '
-                'ורישיון רכב עם תאריכי תוקף.',
-            child: ListTile(
-              leading: const Text('🪪', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'courier.personal.certs_title',
-                'תעודות נהג',
-                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            const Divider(height: 1, color: Color(0xFFF2F3F5)),
+            HelpTarget(
+              title: 'תעודות נהג',
+              body:
+                  'פותח את ארנק תעודות-הנהג — רישיון נהיגה, ביטוח רכב '
+                  'ורישיון רכב עם תאריכי תוקף.',
+              child: ListTile(
+                leading: const Text('🪪', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'courier.personal.certs_title',
+                  'תעודות נהג',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                subtitle: const CfgText(
+                  'courier_profile_screen.certs_subtitle',
+                  'רישיון נהיגה · ביטוח רכב · רישיון רכב',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                ),
+                onTap:
+                    () =>
+                        Navigator.of(context).push(CourierCertsScreen.route()),
               ),
-              subtitle: const CfgText(
-                'courier_profile_screen.certs_subtitle',
-                'רישיון נהיגה · ביטוח רכב · רישיון רכב',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: BsTokens.mutedLight,
-              ),
-              onTap:
-                  () => Navigator.of(context).push(CourierCertsScreen.route()),
             ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          HelpTarget(
-            title: 'תלושי שכר',
-            body:
-                'פותח את גיליון תלושי-השכר — מוכן לשרת; התלושים יחוברו '
-                'עם חיבור השרת.',
-            child: ListTile(
-              leading: const Text('💰', style: TextStyle(fontSize: 20)),
-              title: const CfgText(
-                'courier.personal.payslips_title',
-                'תלושי שכר',
-                style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            const Divider(height: 1, color: Color(0xFFF2F3F5)),
+            HelpTarget(
+              title: 'תלושי שכר',
+              body:
+                  'פותח את גיליון תלושי-השכר — מוכן לשרת; התלושים יחוברו '
+                  'עם חיבור השרת.',
+              child: ListTile(
+                leading: const Text('💰', style: TextStyle(fontSize: 20)),
+                title: const CfgText(
+                  'courier.personal.payslips_title',
+                  'תלושי שכר',
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                ),
+                subtitle: const CfgText(
+                  'courier_profile_screen.payslips_subtitle',
+                  'יחובר עם חיבור השרת',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                ),
+                // reuse כמו-שהוא — ה-sheet role-agnostic ומוכן-לשרת (#86.5).
+                onTap: () => showWorkerPayslipsSheet(context),
               ),
-              subtitle: const CfgText(
-                'courier_profile_screen.payslips_subtitle',
-                'יחובר עם חיבור השרת',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: BsTokens.mutedLight,
-              ),
-              // reuse כמו-שהוא — ה-sheet role-agnostic ומוכן-לשרת (#86.5).
-              onTap: () => showWorkerPayslipsSheet(context),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -966,29 +973,29 @@ class _EditCourierProfileSheetState
                     // כל כרטיס-הכפתור נעלם עם הסתרת האלמנט (לא שלד ריק).
                     'courier.profile.save_action',
                     child: Material(
-                    color: BsTokens.brand,
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                    child: InkWell(
+                      color: BsTokens.brand,
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                      onTap: _saving ? null : _save,
-                      child: Opacity(
-                        opacity: _saving ? 0.6 : 1,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          child: CfgText(
-                            'courier.profile.save_action',
-                            '✓ שמור פרופיל',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: bsOnAccent(context),
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w800,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                        onTap: _saving ? null : _save,
+                        child: Opacity(
+                          opacity: _saving ? 0.6 : 1,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            child: CfgText(
+                              'courier.profile.save_action',
+                              '✓ שמור פרופיל',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: bsOnAccent(context),
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                   ),
                 ],
               ),

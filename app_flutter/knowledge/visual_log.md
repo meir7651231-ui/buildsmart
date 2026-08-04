@@ -4,6 +4,13 @@
 
 ---
 
+## #courier-profile-card-material — 🛵 עטיפת Material שקוף ל-_CourierPersonalAreaCard (ink/lint) — 2026-08-04
+**שינוי-UI:** ה-`Column` של `_CourierPersonalAreaCard` נעטף ב-`Material(type: MaterialType.transparency)` (אותו תיקון כמו worker_profile). **ציפייה: אפס שינוי-סטטי** — Material שקוף לא צובע; רקע-הכרטיס עדיין מה-`Container`. הדלתא היחידה = tap-ripple שכעת נראה.
+**אימות (screenshot אמיתי · `CourierProfileBody(standalone:true)` בתוך Scaffold · courier-seed=דמו · Heebo · 390 logical · toImage):** צולם והוצג בעין. כל הכרטיסים נקי — כרטיס-זהות (דמו · @demo · שליח), סטטיסטיקת-מסירות (0 נמסרו · 1 בדרך · 0 POD · סה"כ 0₪), כרטיס אזור-אישי המתוקן (נוכחות · טפסים · תעודות נהג · תלושי שכר — רקעים/dividers תקינים), וכרטיס-הפעולות (הגדרות שליח · החלפת תפקיד · יציאה מהחשבון-אדום). העטיפה השקופה בלתי-נראית. (□ = חוסר-גליף-emoji בפונט-הטסט.)
+**מקור:** `tools/atom/testgen` (List A · פיילוט אחרון). מאומת: 35 crash → 30 pass + 5 not-found · main-suite 5601/12/0 · analyze 0 חדשים · `git diff -w` = עטיפה אחת. **List A סגורה.**
+
+---
+
 ## #worker-profile-card-material — 🦺 עטיפת Material שקוף לשורות-כרטיס (ink/lint) — 2026-08-04
 **שינוי-UI:** `_PersonalAreaRow.build` + `Column` של `_ActionsCard` נעטפו ב-`Material(type: MaterialType.transparency)` כדי לתת ל-`ListTile`ים משטח-ink מעל רקע-הכרטיס (תיקון debug-assertion "ListTile ink may be invisible" · release: ink-ripple בלתי-נראה). **הציפייה: אפס שינוי-סטטי** — `MaterialType.transparency` לא צובע כלום; רקע-הכרטיס עדיין מגיע מה-`Container`. הדלתא-הוויזואלית היחידה = ה-tap-ripple שכעת *נראה* (התיקון עצמו).
 **אימות (screenshot אמיתי · pump WorkerProfileScreen · worker-seed=רן · Heebo · 390 logical · toImage):** צולם והוצג בעין. כל הכרטיסים נרנדרו נקי — כרטיס-זהות (רן · דמו · @ran), כרטיס-סטטיסטיקה (המשימות שלי 0/3 · נדחו/ממתינות/הושלמו), אזור-אישי (נוכחות/טפסים/תיק בטיחות/תלושי שכר עם פילי-סטטוס "לא נרשם היום"/"אין תעודות"/"מוכן לשרת"), וכרטיס-פעולות (הגדרות עובד · החלפת תפקיד · יציאה-אדום). רקעים לבנים · צללים · dividers · פילי-הסטטוס (ה-`Material`+`InkWell` הקיים בשורה 714) — כולם ללא רגרסיה. העטיפה השקופה בלתי-נראית כצפוי. (ה-□ = חוסר-גליף-emoji בפונט-הטסט, לא רגרסיה.)
