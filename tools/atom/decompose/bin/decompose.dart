@@ -27,9 +27,35 @@ void main(List<String> argv) {
   final printOnly = args.remove('--print');
   final registry = optOf('--registry') ??
       'app_flutter/lib/state/studio/element_registry.dart';
-  final outDir = optOf('--out') ?? 'app_flutter/knowledge/screens';
+  final outOpt = optOf('--out'); // read ONCE (consumed from args)
+  final outDir = outOpt ?? 'app_flutter/knowledge/screens';
   final name = optOf('--name'); // logical screen key (default = file basename)
   final batchDir = optOf('--batch'); // decompose every *.dart in this dir
+  final logicSrc = optOf('--logic'); // decompose a logic module (functions)
+  final onlyFn = optOf('--fn'); // one function within --logic
+
+  // ── logic mode (DECOMP-DEPTH phase 0) ─────────────────────────────────────
+  if (logicSrc != null) {
+    if (!File(logicSrc).existsSync()) {
+      stderr.writeln('decompose: --logic source not found: $logicSrc');
+      exit(66);
+    }
+    final logicOut = outOpt ?? 'app_flutter/knowledge/logic';
+    final m = decomposeModule(logicSrc, only: onlyFn, moduleName: name);
+    stdout.writeln('decompose(logic): ${m.module} → ${m.atoms.length} atoms'
+        '${m.caches.isNotEmpty ? ' · caches ${m.caches.join(', ')}' : ''}');
+    if (printOnly) {
+      renderLogicFiles(m).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    writeLogicOut(m, logicOut);
+    stdout.writeln('decompose(logic): wrote $logicOut/${m.module}/');
+    return;
+  }
 
   // ── batch mode ──────────────────────────────────────────────────────────────
   if (batchDir != null) {
