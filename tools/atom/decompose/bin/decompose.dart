@@ -33,6 +33,30 @@ void main(List<String> argv) {
   final batchDir = optOf('--batch'); // decompose every *.dart in this dir
   final logicSrc = optOf('--logic'); // decompose a logic module (functions)
   final onlyFn = optOf('--fn'); // one function within --logic
+  final dataSrc = optOf('--data'); // decompose a data module (entities)
+  final onlyEntity = optOf('--entity'); // one entity within --data
+
+  // ── data mode (DECOMP-DEPTH phase D) ──────────────────────────────────────
+  if (dataSrc != null) {
+    if (!File(dataSrc).existsSync()) {
+      stderr.writeln('decompose: --data source not found: $dataSrc');
+      exit(66);
+    }
+    final dataOut = outOpt ?? 'app_flutter/knowledge/data';
+    final m = decomposeData(dataSrc, only: onlyEntity, moduleName: name);
+    stdout.writeln('decompose(data): ${m.module} → ${m.entities.length} entities');
+    if (printOnly) {
+      renderDataFiles(m).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    writeDataOut(m, dataOut);
+    stdout.writeln('decompose(data): wrote $dataOut/${m.module}/');
+    return;
+  }
 
   // ── logic mode (DECOMP-DEPTH phase 0) ─────────────────────────────────────
   if (logicSrc != null) {

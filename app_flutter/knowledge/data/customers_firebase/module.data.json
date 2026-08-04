@@ -1,0 +1,80 @@
+{
+  "module": "customers_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/customers_firebase.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "FirebaseCustomersRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_serverCallables",
+            "type": "bool?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_functions",
+            "type": "OrderFunctionsGateway?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_ownerUid",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "_orgId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "seed",
+            "type": "List<ManagerCustomer>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_functions",
+            "ref": "OrderFunctionsGateway",
+            "kind": "embed"
+          },
+          {
+            "field": "_orgId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "idOf",
+          "toDoc",
+          "fromDoc",
+          "sortBy",
+          "onFirstSnapshotEmpty",
+          "all",
+          "byName",
+          "creditLimit",
+          "computeCredit"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_ownerUid",
+          "_orgId"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

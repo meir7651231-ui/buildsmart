@@ -1,0 +1,63 @@
+{
+  "module": "score_band",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/score_band.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "ScoreBandColors",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "bg",
+            "type": "Color",
+            "required": true
+          },
+          {
+            "name": "border",
+            "type": "Color",
+            "required": true
+          },
+          {
+            "name": "fg",
+            "type": "Color",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "bg",
+            "ref": "Color",
+            "kind": "embed"
+          },
+          {
+            "field": "border",
+            "ref": "Color",
+            "kind": "embed"
+          },
+          {
+            "field": "fg",
+            "ref": "Color",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "bg",
+          "border",
+          "fg"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

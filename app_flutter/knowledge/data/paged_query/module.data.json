@@ -1,0 +1,225 @@
+{
+  "module": "paged_query",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/paged_query.dart",
+  "entityCount": 4,
+  "entities": [
+    {
+      "entity": "Cursor",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "lastDocId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sortValue",
+            "type": "Object?",
+            "required": true,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "lastDocId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "lastDocId",
+          "sortValue"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "PagedResult",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "items",
+            "type": "List<T>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "cursor",
+            "type": "Cursor?",
+            "required": true,
+            "nullable": true
+          },
+          {
+            "name": "hasMore",
+            "type": "bool",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "items",
+            "ref": "T",
+            "kind": "embed",
+            "collection": true
+          },
+          {
+            "field": "cursor",
+            "ref": "Cursor",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "items",
+          "cursor",
+          "hasMore"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "LocalPagedSource",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_docs",
+            "type": "List<RemoteDoc>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "isSinglePage",
+            "type": "bool",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_docs",
+            "ref": "RemoteDoc",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "page"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_docs"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "PagedQuery",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_source",
+            "type": "PagedSource",
+            "required": true
+          },
+          {
+            "name": "_fromDoc",
+            "type": "T Function(RemoteDoc doc)",
+            "required": true
+          },
+          {
+            "name": "_sortValueOf",
+            "type": "Object? Function(RemoteDoc doc)",
+            "required": true
+          },
+          {
+            "name": "_limit",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_source",
+            "ref": "PagedSource",
+            "kind": "embed"
+          },
+          {
+            "field": "_fromDoc",
+            "ref": "T Function(RemoteDoc doc)",
+            "kind": "embed"
+          },
+          {
+            "field": "_sortValueOf",
+            "ref": "Object Function(RemoteDoc doc)",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_clamp",
+          "_defaultSortValue",
+          "page",
+          "_toResult"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_source",
+          "_fromDoc",
+          "_sortValueOf",
+          "_limit"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "module": "store_inventory",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/store_inventory.dart",
+  "entityCount": 3,
+  "entities": [
+    {
+      "entity": "Store",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "area",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "logo",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "contact",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "ownerUid",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "toDoc"
+        ]
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "area"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "InventoryItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "storeId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "sku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "num",
+            "required": true
+          },
+          {
+            "name": "stock",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "docId",
+            "type": "String",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "storeId",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "toDoc"
+        ]
+      },
+      "contract": {
+        "required": [
+          "storeId",
+          "sku",
+          "price",
+          "stock",
+          "updatedAt"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "StoreComparison",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "sku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "offers",
+            "type": "List<InventoryItem>",
+            "required": true,
+            "collection": true
+          },
+          {
+            "name": "inStock",
+            "type": "List<InventoryItem>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "availableCount",
+            "type": "int",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "cheapest",
+            "type": "InventoryItem?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "headline",
+            "type": "String",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "sheetLine",
+            "type": "String",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "offers",
+            "ref": "InventoryItem",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_fmtPrice"
+        ]
+      },
+      "contract": {
+        "required": [
+          "sku",
+          "offers"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

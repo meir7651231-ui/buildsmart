@@ -1,0 +1,46 @@
+{
+  "module": "trade_physics_config",
+  "source": "/home/user/buildsmart/app_flutter/lib/domain/trade_physics_config.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "TradePhysicsConfig",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "minSlopePercent",
+            "type": "double?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "pressureDropBarThreshold",
+            "type": "double?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "hashCode",
+            "type": "int",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

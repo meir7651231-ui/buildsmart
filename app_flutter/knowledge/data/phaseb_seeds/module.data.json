@@ -1,0 +1,623 @@
+{
+  "module": "phaseb_seeds",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/phaseb_seeds.dart",
+  "entityCount": 13,
+  "entities": [
+    {
+      "entity": "BuildIndex",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "base",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "current",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "label",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "base",
+          "current",
+          "label"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "PaymentTerm",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "days",
+            "type": "int?",
+            "required": true,
+            "nullable": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "days"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "Subcontractor",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "ic",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "allocated",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "spent",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "ic",
+          "allocated",
+          "spent"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ApprovalItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "what",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "amount",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "by",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "what",
+          "amount",
+          "by",
+          "status"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "GanttTask",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "start",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "len",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "done",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "start",
+          "len",
+          "done"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SnagItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "what",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "loc",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "severity",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "what",
+          "loc",
+          "severity",
+          "status"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "Inspection",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "what",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "due",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "what",
+          "due",
+          "status"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SiteApartment",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "n",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rooms",
+            "type": "List<String>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "n",
+          "rooms"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "SiteFloor",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "floor",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "apts",
+            "type": "List<SiteApartment>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "apts",
+            "ref": "SiteApartment",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "floor",
+          "apts"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ArchivedProject",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "year",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "units",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "year",
+          "units",
+          "status"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "WorkLogItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "worker",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "task",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "worker",
+          "task",
+          "status"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "WorkLogDay",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "date",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<WorkLogItem>",
+            "required": true,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "items",
+            "ref": "WorkLogItem",
+            "kind": "embed",
+            "collection": true
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "date",
+          "items"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "ReorderHistoryItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "icon",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "cat",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "ago",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "name",
+          "price",
+          "icon",
+          "cat",
+          "ago"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "module": "finance_local",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/finance_local.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "LocalFinanceRepository",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "_ref",
+            "type": "Ref?",
+            "required": true,
+            "nullable": true
+          },
+          {
+            "name": "budgetListenable",
+            "type": "Listenable?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "approvalsListenable",
+            "type": "Listenable?",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_ref",
+            "ref": "Ref",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "budgetTotal",
+          "budgetSpent",
+          "budgetCategories",
+          "budgetPct",
+          "budgetLevel",
+          "setBudget",
+          "financeHub",
+          "activeRevenue",
+          "approvals",
+          "decide"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_ref"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

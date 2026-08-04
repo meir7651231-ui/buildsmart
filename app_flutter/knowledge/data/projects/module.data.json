@@ -1,0 +1,59 @@
+{
+  "module": "projects",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/projects.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "Project",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "addr",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "manager",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": []
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "addr",
+          "manager"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

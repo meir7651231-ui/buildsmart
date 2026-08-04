@@ -1,0 +1,236 @@
+{
+  "module": "lipskey_catalog",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/lipskey_catalog.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "LipskeyCatalogProduct",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "sku",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "nameEn",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "color",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "qtyPack",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "qtyPallet",
+            "type": "int?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "categoryHe",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "categoryEn",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "categoryEmoji",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "dims",
+            "type": "Map<String, dynamic>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "imageFile",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "imageFiles",
+            "type": "List<String>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "specImageFile",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "specImageFiles",
+            "type": "List<String>?",
+            "required": false,
+            "nullable": true,
+            "collection": true
+          },
+          {
+            "name": "brand",
+            "type": "String",
+            "required": false,
+            "default": "'ליפסקי'"
+          },
+          {
+            "name": "imageAssetOverride",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "imageAsset",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "imageAssets",
+            "type": "List<String>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "specImageAsset",
+            "type": "String",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "specImageAssets",
+            "type": "List<String>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "connectionSizes",
+            "type": "List<String>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "connectionGender",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "connectionMethod",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "brandModel",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "colorVariant",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "productType",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "productSubtype",
+            "type": "String?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "parsedName",
+            "type": "({String? type, String? subtype, String? brand, String? variant})",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "saleUnits",
+            "type": "Map<String, int>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "uid",
+            "type": "String",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "typeEmoji",
+            "type": "String",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "sku",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "_brandDir",
+          "_isUrl",
+          "_imgPath"
+        ]
+      },
+      "contract": {
+        "required": [
+          "sku",
+          "nameHe",
+          "nameEn",
+          "categoryHe",
+          "categoryEn",
+          "categoryEmoji",
+          "page"
+        ],
+        "defaults": {
+          "brand": "'ליפסקי'"
+        },
+        "invariants": []
+      }
+    }
+  ]
+}

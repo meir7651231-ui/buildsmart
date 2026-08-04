@@ -1,0 +1,132 @@
+{
+  "module": "stock_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/stock_firebase.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "StockItem",
+      "kind": "const-value",
+      "object": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "location",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "qty",
+            "type": "int",
+            "required": false,
+            "default": "1"
+          },
+          {
+            "name": "projectId",
+            "type": "String",
+            "required": false,
+            "default": "''"
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "id",
+            "ref": "catalog",
+            "kind": "fk"
+          },
+          {
+            "field": "projectId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "withLocation"
+        ]
+      },
+      "contract": {
+        "required": [
+          "id",
+          "name",
+          "location"
+        ],
+        "defaults": {
+          "qty": "1",
+          "projectId": "''"
+        },
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirebaseStockRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_orgId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "seed",
+            "type": "List<StockItem>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_orgId",
+            "ref": "catalog",
+            "kind": "fk"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "idOf",
+          "toDoc",
+          "fromDoc",
+          "sortBy",
+          "onFirstSnapshotEmpty",
+          "stockDemo",
+          "move",
+          "totalProducts",
+          "catalogCount",
+          "accessoryCount",
+          "availableCount",
+          "categoryCounts",
+          "stores",
+          "activeStores",
+          "supplierStores",
+          "haulTypes"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_orgId"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

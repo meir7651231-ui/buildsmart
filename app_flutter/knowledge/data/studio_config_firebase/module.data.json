@@ -1,0 +1,140 @@
+{
+  "module": "studio_config_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/studio_config_firebase.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "FirebaseStudioConfigRepository",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "_draftSource",
+            "type": "RemoteCollectionSource",
+            "required": true
+          },
+          {
+            "name": "_snapshotSource",
+            "type": "ConfigSnapshotSource",
+            "required": true
+          },
+          {
+            "name": "_live",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "_versionChanges",
+            "type": "ValueNotifier<int>",
+            "required": false
+          },
+          {
+            "name": "_needsAppUpdate",
+            "type": "ValueNotifier<bool>",
+            "required": false
+          },
+          {
+            "name": "_diffWired",
+            "type": "bool",
+            "required": false
+          },
+          {
+            "name": "_lastGoodTree",
+            "type": "ConfigLayer",
+            "required": false
+          },
+          {
+            "name": "seed",
+            "type": "List<StudioConfigPointer>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "changes",
+            "type": "Listenable?",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "versionChanges",
+            "type": "ValueListenable<int>",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "lastSeenVersion",
+            "type": "int",
+            "required": false,
+            "derived": true
+          },
+          {
+            "name": "needsAppUpdate",
+            "type": "ValueListenable<bool>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_draftSource",
+            "ref": "RemoteCollectionSource",
+            "kind": "embed"
+          },
+          {
+            "field": "_snapshotSource",
+            "ref": "ConfigSnapshotSource",
+            "kind": "embed"
+          },
+          {
+            "field": "_versionChanges",
+            "ref": "ValueNotifier<int>",
+            "kind": "embed"
+          },
+          {
+            "field": "_needsAppUpdate",
+            "ref": "ValueNotifier<bool>",
+            "kind": "embed"
+          },
+          {
+            "field": "_lastGoodTree",
+            "ref": "ConfigLayer",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "idOf",
+          "toDoc",
+          "fromDoc",
+          "published",
+          "publishedTree",
+          "saveDraft",
+          "attach",
+          "_diffVersion",
+          "_pullShards",
+          "_fetchVerifyAssemble",
+          "_assemble",
+          "_mergeLayerJson",
+          "_ordered",
+          "checksumOf",
+          "_fnv1a64Hex",
+          "dispose"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_draftSource",
+          "_snapshotSource",
+          "_live"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

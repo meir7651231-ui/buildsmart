@@ -1,0 +1,108 @@
+{
+  "module": "users_repository",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/users_repository.dart",
+  "entityCount": 2,
+  "entities": [
+    {
+      "entity": "LocalUsersRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_currentUid",
+            "type": "String?",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "name": "_byUid",
+            "type": "Map<String, BsUser>",
+            "required": false,
+            "collection": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_byUid",
+            "ref": "BsUser",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "byUid",
+          "currentUser",
+          "upsertUser",
+          "ensureUser",
+          "touchLastSeen"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    },
+    {
+      "entity": "FirestoreUsersRepository",
+      "kind": "value",
+      "object": {
+        "fields": [
+          {
+            "name": "_source",
+            "type": "RemoteCollectionSource",
+            "required": true
+          },
+          {
+            "name": "currentUid",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "seed",
+            "type": "List<BsUser>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": [
+          {
+            "field": "_source",
+            "ref": "RemoteCollectionSource",
+            "kind": "embed"
+          }
+        ]
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "idOf",
+          "fromDoc",
+          "toDoc",
+          "byUid",
+          "currentUser",
+          "upsertUser",
+          "ensureUser",
+          "touchLastSeen",
+          "_createDoc"
+        ]
+      },
+      "contract": {
+        "required": [
+          "_source",
+          "currentUid"
+        ],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}

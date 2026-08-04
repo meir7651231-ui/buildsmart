@@ -1,0 +1,48 @@
+{
+  "module": "material_requests_firebase",
+  "source": "/home/user/buildsmart/app_flutter/lib/data/repositories/material_requests_firebase.dart",
+  "entityCount": 1,
+  "entities": [
+    {
+      "entity": "FirebaseMaterialRequestsRepository",
+      "kind": "mutable",
+      "object": {
+        "fields": [
+          {
+            "name": "_seq",
+            "type": "int",
+            "required": false
+          },
+          {
+            "name": "seed",
+            "type": "List<MaterialRequest>",
+            "required": false,
+            "derived": true
+          }
+        ]
+      },
+      "connections": {
+        "relations": []
+      },
+      "behaviour": {
+        "decoders": [],
+        "tolerantDecoder": false,
+        "methods": [
+          "idOf",
+          "toDoc",
+          "fromDoc",
+          "sortBy",
+          "onFirstSnapshotEmpty",
+          "all",
+          "submit",
+          "setStatus"
+        ]
+      },
+      "contract": {
+        "required": [],
+        "defaults": {},
+        "invariants": []
+      }
+    }
+  ]
+}
