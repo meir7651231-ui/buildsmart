@@ -35,6 +35,31 @@ void main(List<String> argv) {
   final onlyFn = optOf('--fn'); // one function within --logic
   final dataSrc = optOf('--data'); // decompose a data module (entities)
   final onlyEntity = optOf('--entity'); // one entity within --data
+  final primSrc = optOf('--primitives'); // decompose a primitive module (fns)
+  final onlyPrim = optOf('--fn-only'); // one primitive within --primitives
+
+  // ── primitive mode (DECOMP-DEPTH phase P) ─────────────────────────────────
+  if (primSrc != null) {
+    if (!File(primSrc).existsSync()) {
+      stderr.writeln('decompose: --primitives source not found: $primSrc');
+      exit(66);
+    }
+    final primOut = outOpt ?? 'app_flutter/knowledge/primitives';
+    final m = decomposePrimitives(primSrc, only: onlyPrim, moduleName: name);
+    stdout.writeln(
+        'decompose(prim): ${m.module} → ${m.primitives.length} primitives');
+    if (printOnly) {
+      renderPrimitiveFiles(m).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    writePrimitiveOut(m, primOut);
+    stdout.writeln('decompose(prim): wrote $primOut/${m.module}/');
+    return;
+  }
 
   // ── data mode (DECOMP-DEPTH phase D) ──────────────────────────────────────
   if (dataSrc != null) {

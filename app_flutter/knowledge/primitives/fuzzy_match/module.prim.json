@@ -1,0 +1,79 @@
+{
+  "module": "fuzzy_match",
+  "source": "../../../app_flutter/lib/logic/fuzzy_match.dart",
+  "primitiveCount": 6,
+  "primitives": [
+    {
+      "name": "damerauLevenshtein",
+      "line": 16,
+      "signature": "(String a, String b) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "a==b → 0",
+          "note": "identical inputs → 0 (the trivial short-circuit)"
+        },
+        {
+          "signal": "isEmpty → other.length",
+          "note": "one side empty → the other length (edit distance to \"\")"
+        }
+      ]
+    },
+    {
+      "name": "fuzzyTolerance",
+      "line": 54,
+      "signature": "(int len) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "~/ (floor-div)",
+          "note": "integer floor division (tolerance = len ~/ 3 + 1)"
+        }
+      ]
+    },
+    {
+      "name": "fuzzyMatch",
+      "line": 58,
+      "signature": "(String query, String candidate) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "isEmpty → false",
+          "note": "empty input → false / no-match (short-circuits before the work)"
+        }
+      ]
+    },
+    {
+      "name": "fuzzyNameMatch",
+      "line": 68,
+      "signature": "(String query, String candidate) → bool",
+      "returns": "bool",
+      "pure": true,
+      "edges": []
+    },
+    {
+      "name": "fuzzyScore",
+      "line": 78,
+      "signature": "(String query, String candidate) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": [
+        {
+          "signal": "return -1",
+          "note": "no match → -1 (sentinel, distinct from a real score of 0)"
+        }
+      ]
+    },
+    {
+      "name": "_min3",
+      "line": 87,
+      "signature": "(int a, int b, int c) → int",
+      "returns": "int",
+      "pure": true,
+      "edges": []
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "module": "toast",
+  "source": "../../../app_flutter/lib/widgets/toast.dart",
+  "primitiveCount": 3,
+  "primitives": [
+    {
+      "name": "showToast",
+      "line": 19,
+      "signature": "(BuildContext context, String message, {Duration duration = BsTokens.toastDuration}) → void",
+      "returns": "void",
+      "pure": false,
+      "sideEffect": "shows a SnackBar (UI side effect)",
+      "edges": [
+        {
+          "signal": "null → no-op",
+          "note": "target not mounted → silent no-op (never a throw)"
+        }
+      ]
+    },
+    {
+      "name": "showGlobalToast",
+      "line": 34,
+      "signature": "(String message, {Duration duration = BsTokens.toastDuration}) → void",
+      "returns": "void",
+      "pure": false,
+      "sideEffect": "shows a SnackBar (UI side effect)",
+      "edges": [
+        {
+          "signal": "null → no-op",
+          "note": "target not mounted → silent no-op (never a throw)"
+        }
+      ]
+    },
+    {
+      "name": "_toastBar",
+      "line": 46,
+      "signature": "(String message, Duration duration) → SnackBar",
+      "returns": "SnackBar",
+      "pure": true,
+      "edges": []
+    }
+  ]
+}
