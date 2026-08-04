@@ -83,11 +83,10 @@ void main() {
         ),
       );
 
-      // Raise qty to 3 so a non-default value flows through the callback too.
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.tap(find.byIcon(Icons.add));
+      // Raise qty to 3 (tap the qty wheel value) so a non-default flows through.
+      await tester.tap(find.text('3'));
       await tester.pump();
-      await tester.tap(find.text('הוסף לסל'));
+      await tester.tap(find.byKey(const Key('configAddToCart')));
       await tester.pump();
 
       expect(seenSchema, same(schema));

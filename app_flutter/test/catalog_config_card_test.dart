@@ -1,15 +1,19 @@
-// CATALOG-CONFIG · Phase B card test — the GENERIC [ConfigCard] builds ANY
-// engine [ProductConfigSchema]: one [WheelPicker] per [AttributeDef] (label +
-// values), a colour wheel shows its Hebrew names, the center resolves the passed
-// `imageAsset` (else the emoji fallback), a wheel SPIN changes the live selection
-// (surfaced through onAddToCart), the qty stepper floors at 1, and בנה-קו fires
-// with the SAME schema instance. The card holds NO per-product code — a new
-// product is a data row. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§B).
+// CATALOG-CONFIG · dive-bs2b card test — the GENERIC [ConfigCard] renders ANY
+// engine [ProductConfigSchema] as the APPROVED dive-bs2b: the product IMAGE is the
+// centre HERO (key 'configImageCenter'), never empty (emoji fallback); the first
+// two non-diameter attributes are the ↕ / ↔ axes SCROLLED ON THE IMAGE (four edge
+// labels · a ↕/↔ drag cycles them); the diameter attribute(s) ride a TAPPABLE
+// side wheel on the RIGHT and qty a tappable wheel on the LEFT. There is NO
+// spinner ([ListWheelScrollView]) and NO centre band (the two abandoned dive-bs4
+// sins). Tapping a wheel value / dragging an axis changes the live selection
+// (surfaced through onAddToCart) and RE-RESOLVES the centre image (pure
+// re-resolution is pinned in catalog_config_variant_image_test). The card holds NO
+// per-product code — a new product is a data row. Assertions check STRUCTURE +
+// CONTRACT, never pixels. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§B/§dive-bs2b).
 
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/features/catalog_config/config_card.dart';
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
-import 'package:buildsmart/features/catalog_config/wheel_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -36,24 +40,28 @@ AttributeDef _attr(
       ],
     );
 
+// dive-bs2b positional order: attr[0]=angle (↕) · attr[1]=length (↔) ·
+// attr[2]=diameter (RIGHT side wheel). A BOGUS familyId keeps the centre
+// deterministic (no live-catalog variant matches → the emoji fallback shows).
 ProductConfigSchema _elbow() => ProductConfigSchema(
       sku: 'E-1',
       nameHe: 'ברך',
-      familyId: 'ברך 90°',
+      familyId: 'בדיקה',
       emoji: '🦵',
       attributes: [
         _attr('angle', 'זווית', AttributeKind.choice, const ['45°', '90°']),
-        _attr('diameter', 'קוטר', AttributeKind.dimension,
-            const ['20', '25', '32', '40', '50']),
         _attr('length', 'אורך', AttributeKind.choice,
             const ['קצר', 'בינוני', 'ארוך']),
+        _attr('diameter', 'קוטר', AttributeKind.dimension,
+            const ['20', '25', '32', '40', '50']),
       ],
     );
 
+// Manifold shape: attr[0]=ports (↕) · attr[1]=color (↔) · attr[2]=diameter (side).
 ProductConfigSchema _manifold() => ProductConfigSchema(
       sku: 'M-1',
       nameHe: 'מחלק',
-      familyId: 'מחלק',
+      familyId: 'בדיקה',
       emoji: '🔀',
       attributes: [
         _attr('ports', 'יציאות', AttributeKind.number, const ['1', '2', '3', '4']),
@@ -66,7 +74,7 @@ ProductConfigSchema _manifold() => ProductConfigSchema(
 ProductConfigSchema _bare() => const ProductConfigSchema(
       sku: 'X-0',
       nameHe: 'ריק',
-      familyId: '',
+      familyId: 'בדיקה',
       emoji: '🔧',
       attributes: [],
     );
@@ -75,34 +83,69 @@ Widget _host(Widget card) => MaterialApp(
       home: Scaffold(body: SingleChildScrollView(child: card)),
     );
 
+/// A non-scrolling host — so a ↕/↔ drag on the image is not stolen by an ancestor
+/// [Scrollable] (used by the axis-drag tests; determinism, no arena contest).
+Widget _staticHost(Widget card) => MaterialApp(
+      home: Scaffold(
+        body: Center(child: SizedBox(width: 380, child: card)),
+      ),
+    );
+
+Finder _key(String k) => find.byKey(Key(k));
+
 void main() {
-  group('#catalog-config ConfigCard — generic build (any AttributeDef schema)', () {
-    testWidgets('elbow schema → 3 wheel labels + emoji fallback + default value',
+  group('#catalog-config ConfigCard — dive-bs2b build (image hero · 4 edges)', () {
+    testWidgets(
+        'elbow (3 attrs) → image CENTRE hero · ↕/↔ edge labels · קוטר+כמות wheels',
         (tester) async {
       await tester.pumpWidget(_host(ConfigCard(schema: _elbow())));
 
-      // one label per DECLARED wheel — the card hardcodes none of these.
-      expect(find.text('זווית'), findsOneWidget);
-      expect(find.text('קוטר'), findsOneWidget);
-      expect(find.text('אורך'), findsOneWidget);
-      // no imageAsset ⇒ the center shows the emoji (D.2 fallback).
+      // the image is the CENTRE hero, inside the stage — never a boxed/top image.
+      expect(_key('configStage'), findsOneWidget);
+      expect(_key('configImageCenter'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: _key('configStage'),
+          matching: _key('configImageCenter'),
+        ),
+        findsOneWidget,
+      );
+
+      // the FOUR edge labels of the two image axes (data-driven — hardcoded none).
+      expect(find.text('▲ זווית'), findsOneWidget); // ↕ name (top)
+      expect(find.text('45°·90° ▼'), findsOneWidget); // ↕ values (bottom)
+      expect(find.text('◀ אורך'), findsOneWidget); // ↔ name (right)
+      expect(find.text('קצר ▶'), findsOneWidget); // ↔ first value (left)
+
+      // the side wheels: קוטר (right) + כמות (left) as TAPPABLE stacks.
+      expect(find.text('קוטר'), findsOneWidget); // diameter wheel header
+      expect(find.text('כמות'), findsOneWidget); // qty wheel header
+      expect(find.text('40'), findsOneWidget); // an unselected diameter value
+
+      // the two actions.
+      expect(_key('configAddToCart'), findsOneWidget);
+      expect(_key('configBuildLine'), findsOneWidget);
+
+      // no imageAsset + no catalog variant ⇒ the centre shows the big emoji (D.2).
       expect(find.text('🦵'), findsOneWidget);
-      // the default (sortIndex==0) value is centred on its wheel.
-      expect(find.text('45°'), findsOneWidget); // angle default
-      expect(find.text('הוסף לסל'), findsOneWidget);
-      expect(find.text('בנה קו'), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+
+      // the two abandoned dive-bs4 sins are ABSENT: no spinner, no axis band.
+      expect(find.byType(ListWheelScrollView), findsNothing);
+      expect(_key('configAxisPrimary'), findsNothing);
     });
 
-    testWidgets('manifold schema → different shape, SAME card (generic)',
+    testWidgets('manifold schema → axes SWAP (יציאות/צבע), SAME card (generic)',
         (tester) async {
       await tester.pumpWidget(_host(ConfigCard(schema: _manifold())));
 
-      expect(find.text('יציאות'), findsOneWidget);
-      expect(find.text('צבע'), findsOneWidget);
-      expect(find.text('קוטר'), findsOneWidget);
-      // a colour wheel renders its rows with the Hebrew colour name.
-      expect(find.text('כחול'), findsOneWidget);
-      expect(find.text('אדום'), findsOneWidget);
+      expect(_key('configStage'), findsOneWidget);
+      expect(find.text('▲ יציאות'), findsOneWidget); // ↕ ports
+      expect(find.text('◀ צבע'), findsOneWidget); // ↔ color
+      expect(find.text('כחול ▶'), findsOneWidget); // ↔ first color
+      expect(find.text('קוטר'), findsOneWidget); // same diameter side wheel
+      expect(find.text('כמות'), findsOneWidget);
+      expect(find.text('🔀'), findsOneWidget);
     });
 
     testWidgets('a schema with NO attributes still renders (image + qty + cart)',
@@ -117,29 +160,37 @@ void main() {
         ),
       );
 
-      expect(find.byType(WheelPicker), findsNothing); // no wheels
-      expect(find.text('🔧'), findsOneWidget); // emoji center still shown
-      await tester.tap(find.byIcon(Icons.add)); // qty stepper still usable
+      expect(_key('configImageCenter'), findsOneWidget); // centre still present
+      expect(find.text('🔧'), findsOneWidget); // emoji centre (never empty)
+      expect(find.textContaining('▲'), findsNothing); // no axis labels
+      expect(find.text('כמות'), findsOneWidget); // qty wheel still usable
+      await tester.tap(find.text('2')); // pick qty 2
       await tester.pump();
-      await tester.tap(find.text('הוסף לסל'));
+      await tester.tap(_key('configAddToCart'));
       await tester.pump();
       expect(added, isTrue);
     });
   });
 
-  group('#catalog-config ConfigCard — center image (plan D)', () {
-    testWidgets('a card WITH an imageAsset renders an Image (resolved)',
+  group('#catalog-config ConfigCard — centre image (plan D · variant/tile/emoji)', () {
+    testWidgets('a card WITH an imageAsset renders an Image in the centre',
         (tester) async {
       await tester.pumpWidget(
         _host(ConfigCard(schema: _elbow(), imageAsset: 'gold.jpeg')),
       );
 
-      // STRUCTURAL assertion only — the image is built through the catalog
-      // resolver, but a single pump never drives the async image frame, so
-      // NOTHING is fetched: we assert the Image widget exists, and that the emoji
-      // fallback is NOT shown in its place.
+      // STRUCTURAL: the variant resolves to null (bogus family) so the tile image
+      // is the centre — an Image (built through the catalog resolver), NOT the
+      // emoji. A single pump never drives the async frame, so nothing is fetched.
       expect(find.byType(Image), findsOneWidget);
       expect(find.text('🦵'), findsNothing);
+      expect(
+        find.descendant(
+          of: _key('configImageCenter'),
+          matching: find.byType(Image),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a null-image card shows the emoji, no Image (D.2 fallback)',
@@ -151,8 +202,8 @@ void main() {
     });
   });
 
-  group('#catalog-config ConfigCard — wheel spin + qty stepper', () {
-    testWidgets('a wheel spin changes the live selection (via onAddToCart)',
+  group('#catalog-config ConfigCard — tap wheels · drag axes · actions', () {
+    testWidgets('tapping a קוטר value changes the live selection',
         (tester) async {
       Map<String, String>? captured;
       int? capturedQty;
@@ -168,26 +219,19 @@ void main() {
         ),
       );
 
-      // Spin the diameter wheel (2nd; seeds on its default '20' at index 0, so an
-      // UPWARD drag lands on a later value — deterministic, no pixel math).
-      await tester.drag(
-        find.descendant(
-          of: find.byType(WheelPicker).at(1),
-          matching: find.byType(ListWheelScrollView),
-        ),
-        const Offset(0, -72),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('הוסף לסל'));
+      await tester.tap(find.text('40')); // pick a non-default diameter
+      await tester.pump();
+      await tester.tap(_key('configAddToCart'));
       await tester.pump();
 
       expect(captured, isNotNull);
-      expect(captured!['diameter'], isNot('20')); // the spin replaced the default
-      expect(captured!['angle'], '45°'); // an untouched default carried through
+      expect(captured!['diameter'], '40'); // the tap replaced the default '20'
+      expect(captured!['angle'], '45°'); // untouched default (° · compliant)
+      expect(captured!['length'], 'קצר'); // ditto
       expect(capturedQty, 1);
     });
 
-    testWidgets('qty stepper: + raises, − floors at 1', (tester) async {
+    testWidgets('tapping the qty wheel sets qty; min option is 1', (tester) async {
       int? qty;
       await tester.pumpWidget(
         _host(
@@ -198,20 +242,61 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.text('4'));
       await tester.pump();
-      await tester.tap(find.text('הוסף לסל'));
+      await tester.tap(_key('configAddToCart'));
       await tester.pump();
-      expect(qty, 2);
+      expect(qty, 4);
 
-      // three decrements from 2 must not fall below the min of 1.
-      await tester.tap(find.byIcon(Icons.remove));
-      await tester.tap(find.byIcon(Icons.remove));
-      await tester.tap(find.byIcon(Icons.remove));
+      await tester.tap(find.text('1')); // the floor value is always reachable
       await tester.pump();
-      await tester.tap(find.text('הוסף לסל'));
+      await tester.tap(_key('configAddToCart'));
       await tester.pump();
       expect(qty, 1);
+    });
+
+    testWidgets('a ↕ drag on the image cycles the FIRST axis (angle)',
+        (tester) async {
+      Map<String, String>? captured;
+      await tester.pumpWidget(
+        _staticHost(
+          ConfigCard(
+            schema: _elbow(),
+            onAddToCart: (schema, selection, qty) => captured = selection,
+          ),
+        ),
+      );
+
+      // an upward drag advances the angle wheel off its default '45°' → '90°'
+      // (2 values, clamped end), proving the scroll is ON THE IMAGE (↕=angle).
+      await tester.drag(_key('configStage'), const Offset(0, -120));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('configAddToCart'));
+      await tester.pump();
+
+      expect(captured!['angle'], '90°');
+      expect(captured!['length'], 'קצר'); // the ↔ axis stayed on its default
+    });
+
+    testWidgets('a ↔ drag on the image cycles the SECOND axis (length)',
+        (tester) async {
+      Map<String, String>? captured;
+      await tester.pumpWidget(
+        _staticHost(
+          ConfigCard(
+            schema: _elbow(),
+            onAddToCart: (schema, selection, qty) => captured = selection,
+          ),
+        ),
+      );
+
+      await tester.drag(_key('configStage'), const Offset(-120, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('configAddToCart'));
+      await tester.pump();
+
+      expect(captured!['length'], 'ארוך'); // advanced to the clamped far end
+      expect(captured!['angle'], '45°'); // the ↕ axis stayed on its default
     });
 
     testWidgets('בנה קו fires with the SAME schema instance', (tester) async {
@@ -225,7 +310,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('בנה קו'));
+      await tester.tap(_key('configBuildLine'));
       await tester.pump();
       expect(seen, same(schema));
     });

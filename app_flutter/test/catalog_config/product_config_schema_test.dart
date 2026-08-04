@@ -22,10 +22,11 @@ LipskeyCatalogProduct _p(String nameHe, String categoryHe) => LipskeyCatalogProd
 List<String> _ids(ProductConfigSchema s) => s.attributes.map((a) => a.id).toList();
 
 void main() {
-  test('🔑 elbow 90° → [angle · diameter · length], diameters = engine kDepth ODs', () {
+  test('🔑 elbow 90° → [angle · length · diameter], diameters = engine kDepth ODs', () {
     final s = configSchemaFor(_p('ברך PPR 90° 32', kPprElbows));
     expect(s.familyId, 'ברך 90°');
-    expect(_ids(s), ['angle', 'diameter', 'length']);
+    // dive-bs2b order: attr[0]=angle (↕) · attr[1]=length (↔) · attr[2]=diameter.
+    expect(_ids(s), ['angle', 'length', 'diameter']);
 
     final angle = s.attributes[0];
     expect(angle.kind, AttributeKind.choice);
@@ -34,7 +35,7 @@ void main() {
     final angleLabels = angle.values.map((v) => v.labelHe).toSet();
     expect(angleLabels.containsAll({'45°', '90°'}), isTrue);
 
-    final diameter = s.attributes[1];
+    final diameter = s.attributes.last;
     expect(diameter.kind, AttributeKind.dimension);
     expect(diameter.unitHe, 'מ"מ');
     // 🔑 phase-F fold (real-vs-template): the diameter wheel is now the REAL
@@ -50,14 +51,14 @@ void main() {
     final template = kDepth.keys.toList()..sort();
     expect(nums, isNot(orderedEquals(template))); // real ⇒ diverges from template
 
-    final length = s.attributes[2];
+    final length = s.attributes[1];
     expect(length.values, hasLength(3));
   });
 
   test('elbow 45° (name carries 45) → family ברך 45°, same wheel shape', () {
     final s = configSchemaFor(_p('ברך PPR 45° פ.פ 25', kPprElbows));
     expect(s.familyId, 'ברך 45°');
-    expect(_ids(s), ['angle', 'diameter', 'length']);
+    expect(_ids(s), ['angle', 'length', 'diameter']);
   });
 
   test('coupler → single diameter wheel', () {

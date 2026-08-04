@@ -56,9 +56,10 @@ void main() {
     test('elbow diameter = the exact-family DN ladder (NOT all kDepth)', () {
       final s = configSchemaFor(_e9020, universe: _universe);
       expect(s.familyId, 'ברך 90°');
-      expect(s.attributes.map((a) => a.id), ['angle', 'diameter', 'length']);
+      // dive-bs2b order: attr[0]=angle (↕) · attr[1]=length (↔) · attr[2]=diameter.
+      expect(s.attributes.map((a) => a.id), ['angle', 'length', 'diameter']);
       // diameter aggregates the 90° siblings' odOf only → [20, 25], not kDepth.
-      final diameter = s.attributes[1];
+      final diameter = s.attributes.last;
       expect(_canon(diameter), ['20', '25']);
       expect(diameter.kind, AttributeKind.dimension);
       expect(diameter.values.length, isNot(kDepth.length)); // real, not template
@@ -95,7 +96,7 @@ void main() {
   group('#catalog-config fold — template fallback when a family has no siblings', () {
     test('an empty universe → the template kDepth ladder (M1: never empty)', () {
       final s = configSchemaFor(_e9020, universe: const []);
-      final diameter = s.attributes[1];
+      final diameter = s.attributes.last;
       // no siblings ⇒ diameter falls back to the sorted kDepth ODs (template).
       expect(diameter.values.length, kDepth.length);
       expect(_canon(diameter), diameterValues().map((v) => v.canonical).toList());

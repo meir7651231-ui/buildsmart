@@ -5,7 +5,9 @@
 //      [AttributeKind.color] wheel, guards empty values with '—', and fires
 //      [WheelPicker.onSelected] with a NEW index when spun (and re-centres when an
 //      outside index change arrives via didUpdateWidget).
-//   2. the [ConfigCard] renders REAL wheels (one [WheelPicker] per [AttributeDef]).
+//   2. the [ConfigCard] renders the dive-bs2b card (image hero · edge labels ·
+//      flat tappable side wheels) — the WheelPicker spinner stays a standalone,
+//      tested widget; the full card contract lives in catalog_config_card_test.
 //
 // DETERMINISM (no flaky pixel math): the card seeds each wheel on its DEFAULT
 // (sortIndex==0) value, i.e. index 0, so a single over-two-extent UPWARD
@@ -49,11 +51,12 @@ AttributeDef _attr(
       ],
     );
 
-/// A 3-wheel elbow schema (זווית · קוטר · אורך) — the canonical 3-wheel shape.
+/// An elbow schema (angle · diameter · length). A BOGUS familyId keeps the centre
+/// image deterministic (no live-catalog variant matches → the emoji fallback).
 ProductConfigSchema _elbow() => ProductConfigSchema(
       sku: 'E-1',
       nameHe: 'ברך',
-      familyId: 'ברך 90°',
+      familyId: 'בדיקה',
       emoji: '🦵',
       attributes: [
         _attr('angle', 'זווית', AttributeKind.choice, const ['45°', '90°']),
@@ -202,23 +205,28 @@ void main() {
     });
   });
 
-  group('#catalog-config ConfigCard — renders one WheelPicker per attribute', () {
-    testWidgets('elbow schema → 3 WheelPickers, 3 labels, emoji, buttons',
+  group('#catalog-config ConfigCard — dive-bs2b (image hero · edge labels · tap wheels)',
+      () {
+    testWidgets('elbow schema → image hero · ↕/↔ edge labels · קוטר+כמות wheels',
         (tester) async {
       await tester.pumpWidget(_cardHost(ConfigCard(schema: _elbow())));
 
-      // one WheelPicker per DECLARED attribute — the card hardcodes none of these.
-      expect(find.byType(WheelPicker), findsNWidgets(3));
-      expect(find.text('זווית'), findsOneWidget);
-      expect(find.text('קוטר'), findsOneWidget);
-      expect(find.text('אורך'), findsOneWidget);
+      // the dive-bs2b card is the image HERO + edge labels + flat tappable side
+      // wheels — NOT the abandoned per-attribute spinner row.
+      expect(find.byType(WheelPicker), findsNothing);
+      expect(find.byKey(const Key('configStage')), findsOneWidget);
+      expect(find.byKey(const Key('configImageCenter')), findsOneWidget);
+      expect(find.text('▲ זווית'), findsOneWidget); // ↕ axis (top edge)
+      expect(find.text('◀ אורך'), findsOneWidget); // ↔ axis (right edge)
+      expect(find.text('קוטר'), findsOneWidget); // diameter side-wheel header
+      expect(find.text('כמות'), findsOneWidget); // qty side-wheel header
       // no imageAsset ⇒ the center shows the emoji (D.2 fallback).
       expect(find.text('🦵'), findsOneWidget);
-      expect(find.text('הוסף לסל'), findsOneWidget);
-      expect(find.text('בנה קו'), findsOneWidget);
+      expect(find.byKey(const Key('configAddToCart')), findsOneWidget);
+      expect(find.byKey(const Key('configBuildLine')), findsOneWidget);
     });
 
-    testWidgets('spinning a wheel surfaces the changed selection via onAddToCart',
+    testWidgets('tapping the קוטר wheel surfaces the changed selection via onAddToCart',
         (tester) async {
       Map<String, String>? captured;
       int? capturedQty;
@@ -234,21 +242,16 @@ void main() {
         ),
       );
 
-      // The diameter wheel is the 2nd (זווית · קוטר · אורך). It seeds on its
-      // default '20' (index 0), so an UPWARD drag MUST advance to a later value.
-      final diameterWheel = find.descendant(
-        of: find.byType(WheelPicker).at(1),
-        matching: find.byType(ListWheelScrollView),
-      );
-      await tester.drag(diameterWheel, const Offset(0, -72));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('הוסף לסל'));
+      // the diameter wheel seeds on its default '20'; tapping a shown value ('40')
+      // replaces the live pick — deterministic, no spinner drag.
+      await tester.tap(find.text('40'));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('configAddToCart')));
       await tester.pump();
 
       expect(captured, isNotNull);
-      expect(captured!['diameter'], isNot('20')); // the spin changed the live pick
-      expect(captured!['angle'], '45°'); // an untouched wheel keeps its default
+      expect(captured!['diameter'], '40'); // the tap changed the live pick
+      expect(captured!['angle'], '45°'); // an untouched axis keeps its default
       expect(captured!['length'], 'קצר'); // ditto
       expect(capturedQty, 1);
     });

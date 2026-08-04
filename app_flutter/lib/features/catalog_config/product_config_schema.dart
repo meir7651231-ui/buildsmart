@@ -341,7 +341,9 @@ List<AttributeDef>? _attributesForFamily(
       return [_diameter(values: diameter)];
     case 'ברך 90°':
     case 'ברך 45°':
-      return [_angle(_angleValues(universe)), _diameter(values: diameter), _length()];
+      // dive-bs2b positional axis-map: attr[0]=angle (↕) · attr[1]=length (↔) ·
+      // attr[2]=diameter (side wheel). Aggregation unchanged — only the ORDER.
+      return [_angle(_angleValues(universe)), _length(), _diameter(values: diameter)];
     case 'מתאם תבריג':
       return [_diameter(values: diameter), _thread()];
     case 'מצרה':
