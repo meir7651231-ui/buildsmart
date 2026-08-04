@@ -70,6 +70,11 @@ const Set<String> kArmingLayer = {
   'FITTING_ENGINE',
   'FITTING_ENGINE_3D',
   'FITTING_ENGINE_INTEL',
+  // CATALOG-CONFIG (הקטלוג-המגדיר · CATALOG-CONFIG-PLAN · שער #128): one arming
+  // flag for a built-but-dormant feature — default-OFF, rollback = drop the
+  // define, never profile-owned. `features/catalog_config/` is tree-shaken until
+  // armed (the catalog stays byte-identical).
+  'CATALOG_CONFIG',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must
