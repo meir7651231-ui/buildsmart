@@ -37,6 +37,62 @@ void main(List<String> argv) {
   final onlyEntity = optOf('--entity'); // one entity within --data
   final primSrc = optOf('--primitives'); // decompose a primitive module (fns)
   final onlyPrim = optOf('--fn-only'); // one primitive within --primitives
+  final journeySrc = optOf('--journeys'); // one screen module (nodes+edges)
+  final journeyDir = optOf('--journeys-batch'); // merge a dir into one graph
+
+  // ── journey mode (DECOMP-DEPTH phase N) ───────────────────────────────────
+  if (journeyDir != null) {
+    if (!Directory(journeyDir).existsSync()) {
+      stderr.writeln('decompose: --journeys-batch dir not found: $journeyDir');
+      exit(66);
+    }
+    final jOut = outOpt ?? 'app_flutter/knowledge/journeys';
+    final files = Directory(journeyDir)
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .map((f) => f.path)
+        .toList()
+      ..sort();
+    final graph = decomposeJourneyGraph(files);
+    stdout.writeln('decompose(journeys): ${files.length} files → '
+        '${graph.nodes.length} nodes · ${graph.edges.length} edges');
+    if (printOnly) {
+      renderJourneyGraph(graph).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    Directory(jOut).createSync(recursive: true);
+    renderJourneyGraph(graph).forEach((n, c) {
+      File('$jOut/$n').writeAsStringSync(c);
+    });
+    stdout.writeln('decompose(journeys): wrote $jOut/graph.journey.json + GRAPH.md');
+    return;
+  }
+  if (journeySrc != null) {
+    if (!File(journeySrc).existsSync()) {
+      stderr.writeln('decompose: --journeys source not found: $journeySrc');
+      exit(66);
+    }
+    final jOut = outOpt ?? 'app_flutter/knowledge/journeys';
+    final m = decomposeJourneys(journeySrc, moduleName: name);
+    stdout.writeln('decompose(journeys): ${m.module} → '
+        '${m.nodes.length} nodes · ${m.edges.length} edges');
+    if (printOnly) {
+      renderJourneyFiles(m).forEach((n, c) {
+        stdout
+          ..writeln('──────── $n ────────')
+          ..writeln(c);
+      });
+      return;
+    }
+    writeJourneyOut(m, jOut);
+    stdout.writeln('decompose(journeys): wrote $jOut/${m.module}/');
+    return;
+  }
 
   // ── primitive mode (DECOMP-DEPTH phase P) ─────────────────────────────────
   if (primSrc != null) {

@@ -1,0 +1,182 @@
+{
+  "module": "home_shell",
+  "source": "../../../app_flutter/lib/screens/home_shell.dart",
+  "nodeCount": 18,
+  "edgeCount": 13,
+  "nodes": [
+    {
+      "screen": "HomeShell",
+      "line": 80,
+      "bypassSurface": "tabs"
+    },
+    {
+      "screen": "_GlobalSearchOverlay",
+      "line": 271
+    },
+    {
+      "screen": "_HelpModeOverlay",
+      "line": 289
+    },
+    {
+      "screen": "CartFab",
+      "line": 374,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_CartChatBubble",
+      "line": 484
+    },
+    {
+      "screen": "_HomeAppBar",
+      "line": 650
+    },
+    {
+      "screen": "_BottomNav",
+      "line": 895
+    },
+    {
+      "screen": "_BadgedIcon",
+      "line": 958
+    },
+    {
+      "screen": "_CatalogMenuButton",
+      "line": 1001
+    },
+    {
+      "screen": "_ChatsMenuButton",
+      "line": 1061
+    },
+    {
+      "screen": "_NotificationsMenuButton",
+      "line": 1170
+    },
+    {
+      "screen": "_StoreMenuButton",
+      "line": 1239,
+      "bypassSurface": "store-section"
+    },
+    {
+      "screen": "_MenuRow",
+      "line": 1301
+    },
+    {
+      "screen": "_NewChatSheet",
+      "line": 1368
+    },
+    {
+      "screen": "_ProfileCard",
+      "line": 1561
+    },
+    {
+      "screen": "_RoleStatusChip",
+      "line": 1720
+    },
+    {
+      "screen": "_PulsingStatus",
+      "line": 1819
+    },
+    {
+      "screen": "_PulsingStatusState",
+      "line": 1827
+    }
+  ],
+  "edges": [
+    {
+      "from": "_CatalogMenuButton",
+      "to": "AIHubScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1052
+    },
+    {
+      "from": "_CatalogMenuButton",
+      "to": "CatalogSettingsScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1054
+    },
+    {
+      "from": "_ChatsMenuButton",
+      "to": "ChatsArchiveScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1134
+    },
+    {
+      "from": "_NotificationsMenuButton",
+      "to": "NotifSettingsScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1232
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "StoreSettingsScreen",
+      "trigger": "_onSelected",
+      "kind": "push",
+      "line": 1294
+    },
+    {
+      "from": "_ProfileCard",
+      "to": "ProfileScreen",
+      "trigger": "build",
+      "kind": "push",
+      "line": 1680
+    },
+    {
+      "from": "_RoleStatusChip",
+      "to": "WelcomeScreen",
+      "trigger": "_onTap",
+      "kind": "raw-push",
+      "line": 1802
+    },
+    {
+      "from": "HomeShell",
+      "to": "HomeShell#tabi",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 243,
+      "params": "i"
+    },
+    {
+      "from": "CartFab",
+      "to": "Store/cart",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 409,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "CartFab",
+      "to": "HomeShell#tab3",
+      "trigger": "build",
+      "kind": "provider-swap",
+      "line": 410,
+      "params": "3"
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "Store/cart",
+      "trigger": "_onSelected",
+      "kind": "provider-swap",
+      "line": 1288,
+      "params": "StoreSection.cart"
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "Store/orders",
+      "trigger": "_onSelected",
+      "kind": "provider-swap",
+      "line": 1290,
+      "params": "StoreSection.orders"
+    },
+    {
+      "from": "_StoreMenuButton",
+      "to": "Store/services",
+      "trigger": "_onSelected",
+      "kind": "provider-swap",
+      "line": 1292,
+      "params": "StoreSection.services"
+    }
+  ]
+}
