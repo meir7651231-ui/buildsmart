@@ -16,6 +16,7 @@ import 'package:test/test.dart';
 
 final _repo = p.canonicalize(p.join(Directory.current.path, '../../..'));
 final _engine = p.join(_repo, 'app_flutter/lib/logic/install_engine.dart');
+final _cart = p.join(_repo, 'app_flutter/lib/state/smart_cart.dart');
 
 void main() {
   final present = File(_engine).existsSync();
@@ -168,6 +169,50 @@ void main() {
         expect(a.writes, isEmpty);
         expect(a.reads.any((r) => r.kind == 'const'), isTrue);
       }
+    });
+  });
+
+  // ── the method slice: class methods, fields, and setter-triggered behaviour ──
+  group('logic decomposer · SmartCartNotifier.add golden (method slice)', () {
+    final present = File(_cart).existsSync();
+    test('smart_cart reachable', () => expect(present, isTrue),
+        skip: present ? false : 'smart_cart.dart not found');
+    if (!present) return;
+
+    final module = decomposeModule(_cart);
+    LogicAtom fn(String q) => module.atoms.firstWhere((a) => a.fn == q,
+        orElse: () => throw StateError('no atom $q'));
+
+    test('the tool now opens CLASS METHODS, not just top-level functions', () {
+      expect(module.atoms.any((a) => a.fn.contains('.')), isTrue);
+      final add = fn('SmartCartNotifier.add');
+      expect(add.kind, 'notifier-method');
+      expect(add.signature, '(SmartCartLine line) -> void');
+    });
+
+    test('hard-case #6 — the one-line add carries the SETTER\'s hidden invariant', () {
+      // `add` is literally `state = [...state, line]`, but the real behaviour is
+      // in the overridden `set state`: the `_loaded` race-guard + the async
+      // `_persist()` IO. The tool must surface BOTH, transitively.
+      final add = fn('SmartCartNotifier.add');
+      final w = {for (final x in add.writes) x.name: x};
+      expect(w['state']?.kind, 'state', reason: 'the direct state write');
+      expect(w['_loaded']?.kind, 'field');
+      expect(w['_loaded']?.transitive, isTrue,
+          reason: 'the setter\'s race-guard reached THROUGH the state setter');
+      expect(w.keys.where((k) => k.contains('prefs')), isNotEmpty,
+          reason: 'the async _persist IO, two hops through the setter');
+      expect(add.writes.firstWhere((x) => x.name.contains('prefs')).transitive, isTrue);
+      expect(add.contract.purity, 'side-effecting');
+    });
+
+    test('the overridden setter is its own atom with the raw invariant', () {
+      final setter = fn('SmartCartNotifier.state=');
+      expect(setter.kind, 'setter');
+      final w = setter.writes.map((x) => '${x.kind}:${x.name}').toList();
+      expect(w, contains('field:_loaded'), reason: 'the race-guard, set directly');
+      expect(w, contains('state:state'), reason: 'super.state = value');
+      expect(setter.calls.map((c) => c.name), contains('_persist'));
     });
   });
 }

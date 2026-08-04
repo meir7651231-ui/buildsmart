@@ -1,7 +1,7 @@
 {
   "module": "install_engine",
   "source": "/home/user/buildsmart/app_flutter/lib/logic/install_engine.dart",
-  "atomCount": 39,
+  "atomCount": 44,
   "caches": [
     "_compatCache",
     "_skuCache",
@@ -501,7 +501,9 @@
             "module": true
           }
         ],
-        "calledBy": [],
+        "calledBy": [
+          "InstallationPlan.compliance"
+        ],
         "gatedBy": []
       },
       "behaviour": {
@@ -3442,6 +3444,223 @@
         "input": "(List<LipskeyCatalogProduct> trunk, List<LipskeyCatalogProduct> branchTargets, {int maxDepthPerSegment = 6, int tempC = 20, Set<String> accessories = const {}, bool autoCompliance = false})",
         "output": "InstallationPlan",
         "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.isComplete",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "gaps"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "gaps.isEmpty"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "()",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.totalPieces",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quantities"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "quantities.values.fold(0, (sum, q) => sum + q)"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.qtyOf",
+      "kind": "method",
+      "object": {
+        "signature": "(String sku) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "quantities"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "quantities[sku] ?? 1"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(String sku)",
+        "output": "int",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.compliance",
+      "kind": "method",
+      "object": {
+        "signature": "(int tempC, [Set<String> accessories = const {}]) -> List<LineCheck>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "_kHotThresholdC",
+            "transitive": true
+          },
+          {
+            "kind": "const",
+            "name": "_kIsolationValveSkus",
+            "transitive": true
+          },
+          {
+            "kind": "field",
+            "name": "items"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "lineComplianceChecklist",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "InstallationPlan.criticalOpen"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "lineComplianceChecklist(items, tempC, accessories)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(int tempC, [Set<String> accessories = const {}])",
+        "output": "List<LineCheck>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "InstallationPlan.criticalOpen",
+      "kind": "method",
+      "object": {
+        "signature": "(int tempC, [Set<String> accessories = const {}]) -> int",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "items",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "compliance",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "compliance(tempC, accessories).where((c) => !c.satisfied && c.severity == CheckSeverity.c…"
+          }
+        ]
+      },
+      "floor": [
+        "where"
+      ],
+      "contract": {
+        "input": "(int tempC, [Set<String> accessories = const {}])",
+        "output": "int",
+        "purity": "pure",
         "precond": [],
         "postcond": [],
         "invariants": [],

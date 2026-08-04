@@ -12,7 +12,7 @@
 - **reads:** `_kHotThresholdC` · `_kIsolationValveSkus` · `kVerifiedSpecs↝`
 - **writes:** _none_
 - **calls:** `_galvanicallyDissimilar` · `lineIsSupply` · `_isDirectionalDevice` · `_directionalContext`
-- **called-by:** _none_
+- **called-by:** `InstallationPlan.compliance`
 - **gated-by:** _none_
   <br/>(`↝` = reached transitively, through a call)
 

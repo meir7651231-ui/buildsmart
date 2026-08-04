@@ -14,7 +14,8 @@ the widget graph only named. For each function: **object** (signature + constant
 
 | module | atoms | note |
 |---|---:|---|
-| [`install_engine`](install_engine/) | 39 | the plumbing god-module — compatibility · least-cost routing (Dijkstra/Yen) · BOM assembly · safety compliance. Golden: `findShortestPath`. See its [HARD-CASES.md](install_engine/HARD-CASES.md). |
+| [`install_engine`](install_engine/) | 44 | the plumbing god-module — compatibility · least-cost routing (Dijkstra/Yen) · BOM assembly · safety compliance. Golden: `findShortestPath`. See its [HARD-CASES.md](install_engine/HARD-CASES.md). |
+| [`smart_cart`](smart_cart/) | 13 | the cart `StateNotifier`. Golden: `SmartCartNotifier.add` — a one-line `state = […]` whose real behaviour (the `_loaded` race-guard + async `_persist()` IO) lives in the overridden `set state` it triggers (hard-case #6, surfaced transitively). |
 
 Each module dir holds `module.logic.json` (the machine model), one
 `<fn>.logic.md` per function (private fns prefixed `p_`), and — where the

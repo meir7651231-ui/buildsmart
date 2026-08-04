@@ -65,52 +65,173 @@ ModuleDecomposition decomposeModule(
     }
   }
 
-  final paramSets = <String, Set<String>>{}; // fn → its param names
-  for (final e in topFns.entries) {
-    paramSets[e.key] = _paramNames(e.value);
+  // ── index classes: fields + methods (DECOMP-DEPTH phase L, method slice) ────
+  final classes = <String, ClassDeclaration>{};
+  for (final d in unit.declarations) {
+    if (d is ClassDeclaration) classes[d.name.lexeme] = d;
   }
 
-  // ── per-function DIRECT facts (needed before transitive propagation) ───────
+  // Every callable in the module — top-level functions AND class methods — under
+  // one model so a single code path decomposes both.
+  final callables = <String, _Callable>{}; // qname → callable
+  final classOf = <String, String?>{}; // qname → owning class (null for top-level)
+  final classFields = <String, Set<String>>{}; // class → field names
+  final classMethods = <String, Set<String>>{}; // class → method simple-names
+  final notifierClasses = <String>{}; // classes that own a `state` (StateNotifier)
+
+  for (final f in topFns.values) {
+    final c = _Callable.fromFunction(f);
+    callables[c.qname] = c;
+    classOf[c.qname] = null;
+  }
+  for (final cls in classes.values) {
+    final owner = cls.name.lexeme;
+    final fields = <String>{};
+    final methods = <String>{};
+    final base = cls.extendsClause?.superclass.name.lexeme ?? '';
+    final isNotifier =
+        RegExp(r'(StateNotifier|ChangeNotifier|Notifier|AsyncNotifier)').hasMatch(base);
+    if (isNotifier) notifierClasses.add(owner);
+    for (final m in cls.members) {
+      if (m is FieldDeclaration) {
+        for (final v in m.fields.variables) {
+          fields.add(v.name.lexeme);
+        }
+      } else if (m is MethodDeclaration && m.body is! EmptyFunctionBody) {
+        methods.add(m.name.lexeme);
+        final c = _Callable.fromMethod(m, owner, isNotifier);
+        callables[c.qname] = c;
+        classOf[c.qname] = owner;
+      }
+    }
+    classFields[owner] = fields;
+    classMethods[owner] = methods;
+  }
+
+  // ── per-callable DIRECT facts ──────────────────────────────────────────────
   final direct = <String, _Facts>{};
-  for (final e in topFns.entries) {
+  for (final e in callables.entries) {
+    final owner = classOf[e.key];
     direct[e.key] = _collectFacts(
       e.value,
-      moduleFns: topFns.keys.toSet(),
+      // sibling methods + all top-level fns are the module-call universe.
+      moduleFns: {...topFns.keys, if (owner != null) ...classMethods[owner]!},
       constNames: constNames,
       globalNames: globalNames,
-      params: paramSets[e.key]!,
+      params: e.value.paramNames,
+      fields: owner != null ? classFields[owner]! : const <String>{},
+      isNotifier: owner != null && notifierClasses.contains(owner),
     );
   }
 
-  // ── reverse call-graph (called-by) ────────────────────────────────────────
-  final calledBy = <String, Set<String>>{for (final n in topFns.keys) n: <String>{}};
+  // ── reverse call-graph (called-by), resolved within class then top-level ───
+  final calledBy = <String, Set<String>>{for (final k in callables.keys) k: <String>{}};
   for (final e in direct.entries) {
+    final owner = classOf[e.key];
     for (final c in e.value.moduleCalls) {
-      if (calledBy.containsKey(c)) calledBy[c]!.add(e.key);
+      final calleeQ = _resolveCallee(c, owner, callables);
+      if (calleeQ != null) calledBy[calleeQ]!.add(e.key);
     }
   }
 
   final targets = only != null
-      ? {if (topFns.containsKey(only)) only: topFns[only]!}
-      : topFns;
+      ? {
+          for (final e in callables.entries)
+            if (e.key == only || e.value.name == only) e.key: e.value,
+        }
+      : callables;
 
   final atoms = <LogicAtom>[];
   for (final e in targets.entries) {
+    final owner = classOf[e.key];
     atoms.add(_buildAtom(
-      name: e.key,
-      decl: e.value,
+      call: e.value,
       facts: direct[e.key]!,
       direct: direct,
-      calledBy: (calledBy[e.key]!.toList()..sort()),
+      owner: owner,
+      classFields: owner != null ? classFields[owner]! : const <String>{},
+      isNotifier: owner != null && notifierClasses.contains(owner),
+      callables: callables,
+      calledBy: (calledBy[e.key]!.map((q) => callables[q]!.label).toList()..sort()),
     ));
   }
-
+  // stable order: top-level first (file order via topFns), then methods.
   return ModuleDecomposition(
     module: moduleName ?? p.basenameWithoutExtension(sourcePath),
     sourcePath: sourcePath,
     atoms: atoms,
     caches: caches..sort(),
   );
+}
+
+/// Resolve a simple call name from a callable in [owner] to a callable qname:
+/// a sibling method (`Owner.name`) wins over a top-level function (`name`).
+String? _resolveCallee(String simple, String? owner, Map<String, _Callable> all) {
+  if (owner != null && all.containsKey('$owner.$simple')) return '$owner.$simple';
+  if (all.containsKey(simple)) return simple;
+  return null;
+}
+
+/// A unit of logic — a top-level function OR a class method/getter/setter.
+class _Callable {
+  _Callable({
+    required this.name,
+    required this.kind,
+    required this.body,
+    required this.parameters,
+    required this.returnType,
+    this.owner,
+    this.isSetter = false,
+  });
+
+  factory _Callable.fromFunction(FunctionDeclaration d) => _Callable(
+        name: d.name.lexeme,
+        kind: 'top-level-function',
+        body: d.functionExpression.body,
+        parameters: d.functionExpression.parameters,
+        returnType: d.returnType,
+      );
+
+  factory _Callable.fromMethod(MethodDeclaration m, String owner, bool isNotifier) {
+    final kind = m.isGetter
+        ? 'getter'
+        : m.isSetter
+            ? 'setter'
+            : isNotifier
+                ? 'notifier-method'
+                : 'method';
+    return _Callable(
+      name: m.name.lexeme,
+      kind: kind,
+      body: m.body,
+      parameters: m.parameters,
+      returnType: m.returnType,
+      owner: owner,
+      isSetter: m.isSetter,
+    );
+  }
+
+  final String name;
+  final String kind;
+  final FunctionBody body;
+  final FormalParameterList? parameters;
+  final TypeAnnotation? returnType;
+  final String? owner;
+  final bool isSetter;
+
+  // A setter `set x` is `Owner.x=` so it never collides with a getter/method `x`.
+  String get qname =>
+      owner == null ? name : '$owner.$name${isSetter ? '=' : ''}';
+  String get label => owner == null ? name : '$owner.$name${isSetter ? '=' : ''}';
+
+  Set<String> get paramNames {
+    final out = <String>{};
+    for (final p in parameters?.parameters ?? const <FormalParameter>[]) {
+      final n = p.name?.lexeme;
+      if (n != null) out.add(n);
+    }
+    return out;
+  }
 }
 
 // ─── direct-fact collection ───────────────────────────────────────────────────
@@ -142,25 +263,17 @@ bool _isMutableCollectionDecl(VariableDeclarationList vars) {
   return false;
 }
 
-Set<String> _paramNames(FunctionDeclaration d) {
-  final out = <String>{};
-  final params = d.functionExpression.parameters?.parameters ?? const [];
-  for (final param in params) {
-    final n = param.name?.lexeme;
-    if (n != null) out.add(n);
-  }
-  return out;
-}
-
 _Facts _collectFacts(
-  FunctionDeclaration decl, {
+  _Callable call, {
   required Set<String> moduleFns,
   required Set<String> constNames,
   required Set<String> globalNames,
   required Set<String> params,
+  Set<String> fields = const <String>{},
+  bool isNotifier = false,
 }) {
   final f = _Facts();
-  final body = decl.functionExpression.body;
+  final body = call.body;
   // Body-bound names (var-decls, closure params, patterns, for/catch vars) —
   // mutating one of these is NOT a side effect (a private accumulator). Mutating
   // a formal PARAM, by contrast, is observable by the caller (an in-place write).
@@ -176,6 +289,8 @@ _Facts _collectFacts(
     locals: locals,
     params: params,
     bodyLocals: bodyLocals,
+    fields: fields,
+    isNotifier: isNotifier,
   ));
   return f;
 }
@@ -243,6 +358,8 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
     required this.locals,
     required this.params,
     required this.bodyLocals,
+    this.fields = const <String>{},
+    this.isNotifier = false,
   });
 
   final _Facts f;
@@ -252,6 +369,12 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
   final Set<String> locals;
   final Set<String> params;
   final Set<String> bodyLocals;
+
+  /// This method's owning-class instance fields (for a class method).
+  final Set<String> fields;
+
+  /// The owning class is a StateNotifier/ChangeNotifier — `state` is its value.
+  final bool isNotifier;
 
   void _addRead(String kind, String name) {
     final r = LogicRead(kind: kind, name: name);
@@ -268,6 +391,10 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
     final n = node.name;
     if (constNames.contains(n)) {
       _addRead('const', n);
+    } else if (isNotifier && n == 'state' && !locals.contains(n)) {
+      _addRead('field', 'state'); // the notifier's own value
+    } else if (fields.contains(n) && !locals.contains(n)) {
+      _addRead('field', n); // an instance field of the owning class
     } else if (globalNames.contains(n) && !locals.contains(n)) {
       _addRead('global', n);
     } else if (_isExternalValueRef(node)) {
@@ -428,13 +555,22 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitAssignmentExpression(AssignmentExpression node) {
-    // Writes to a cache / global (index or member assignment on a non-local).
     final lhs = node.leftHandSide;
+    // `super.state = …` / `state = …` in a StateNotifier is the state write.
+    final superState = lhs is PropertyAccess &&
+        lhs.target is SuperExpression &&
+        lhs.propertyName.name == 'state';
     final base = _baseName(lhs);
     if (base != null && !locals.contains(base)) {
-      if (globalNames.contains(base) || constNames.contains(base)) {
+      if (isNotifier && (base == 'state' || superState)) {
+        _addWrite('state', 'state'); // the notifier's own value
+      } else if (fields.contains(base)) {
+        _addWrite('field', base); // an instance field (e.g. _loaded race-guard)
+      } else if (globalNames.contains(base) || constNames.contains(base)) {
         _addWrite('cache', base);
       }
+    } else if (superState) {
+      _addWrite('state', 'state');
     }
     super.visitAssignmentExpression(node);
   }
@@ -482,10 +618,13 @@ class _FactVisitor extends RecursiveAstVisitor<void> {
 // ─── atom assembly (steps · contract · transitive rollup) ─────────────────────
 
 LogicAtom _buildAtom({
-  required String name,
-  required FunctionDeclaration decl,
+  required _Callable call,
   required _Facts facts,
   required Map<String, _Facts> direct,
+  required String? owner,
+  required Set<String> classFields,
+  required bool isNotifier,
+  required Map<String, _Callable> callables,
   required List<String> calledBy,
 }) {
   // 1-hop transitive rollup: fold each module callee's DIRECT reads/writes in,
@@ -497,8 +636,32 @@ LogicAtom _buildAtom({
   final writes = <String, LogicWrite>{
     for (final w in facts.writes.values) w.key: w,
   };
-  for (final callee in facts.moduleCalls) {
-    final cf = direct[callee];
+
+  // Callees to roll up: the explicit module calls, PLUS — when this method writes
+  // `state` on a StateNotifier that OVERRIDES `set state` — the setter itself.
+  // That is hard-case #6: `SmartCartNotifier.add` is one line (`state = […]`),
+  // but the real behaviour (the `_loaded` race-guard + the async `_persist()`
+  // IO) lives in the setter it triggers.
+  final rollup = <String>[
+    for (final c in facts.moduleCalls) _resolveCallee(c, owner, callables) ?? c,
+  ];
+  if (owner != null &&
+      facts.writes.values.any((w) => w.kind == 'state' && w.name == 'state') &&
+      callables.containsKey('$owner.state=')) {
+    final setterQ = '$owner.state=';
+    rollup.add(setterQ);
+    // Reach ONE hop past the setter too, so `add` surfaces the async `_persist()`
+    // IO the setter triggers — the full hard-case #6 (`_loaded` guard + IO).
+    final sf = direct[setterQ];
+    if (sf != null) {
+      for (final sc in sf.moduleCalls) {
+        final q = _resolveCallee(sc, owner, callables);
+        if (q != null) rollup.add(q);
+      }
+    }
+  }
+  for (final calleeQ in rollup) {
+    final cf = direct[calleeQ];
     if (cf == null) continue;
     for (final r in cf.reads.values) {
       reads.putIfAbsent(
@@ -510,9 +673,9 @@ LogicAtom _buildAtom({
     }
   }
 
-  final steps = _algorithmSteps(decl);
+  final steps = _algorithmSteps(call);
   final contract = _inferContract(
-    decl: decl,
+    call: call,
     facts: facts,
     writes: writes.values.toList(),
     steps: steps,
@@ -531,9 +694,9 @@ LogicAtom _buildAtom({
   final gates = facts.gatedBy..sort();
 
   return LogicAtom(
-    fn: name,
-    kind: 'top-level-function',
-    signature: _signature(decl),
+    fn: call.label,
+    kind: call.kind,
+    signature: _signature(call),
     constants: facts.constants,
     reads: readList,
     writes: writeList,
@@ -546,18 +709,19 @@ LogicAtom _buildAtom({
   );
 }
 
-String _signature(FunctionDeclaration d) {
-  final params = d.functionExpression.parameters?.toSource() ?? '()';
-  final ret = d.returnType?.toSource() ?? 'dynamic';
-  return '$params -> $ret';
+String _signature(_Callable c) {
+  final params = c.parameters?.toSource() ?? (c.isSetter ? '' : '()');
+  final ret = c.returnType?.toSource() ?? (c.isSetter ? 'void' : 'dynamic');
+  final kw = c.kind == 'getter' ? 'get ' : c.isSetter ? 'set ' : '';
+  return '$kw$params -> $ret';
 }
 
 /// Walk the body's top-level statements into ordered algorithm steps. An
 /// early-return `if` is a precond; a `while`/`for` is a loop (its body is walked
 /// one level deeper for branch/effect steps); a var-decl is compute/init; a bare
 /// return is the terminal.
-List<LogicStep> _algorithmSteps(FunctionDeclaration d) {
-  final body = d.functionExpression.body;
+List<LogicStep> _algorithmSteps(_Callable c) {
+  final body = c.body;
   final steps = <LogicStep>[];
   if (body is! BlockFunctionBody) {
     // Expression-bodied function: one formula step.
@@ -652,13 +816,13 @@ bool _isAccumulator(Expression? e) {
 }
 
 LogicContract _inferContract({
-  required FunctionDeclaration decl,
+  required _Callable call,
   required _Facts facts,
   required List<LogicWrite> writes,
   required List<LogicStep> steps,
 }) {
-  final params = decl.functionExpression.parameters?.toSource() ?? '()';
-  final ret = decl.returnType?.toSource() ?? 'dynamic';
+  final params = call.parameters?.toSource() ?? (call.isSetter ? '' : '()');
+  final ret = call.returnType?.toSource() ?? (call.isSetter ? 'void' : 'dynamic');
   final nullable = ret.trimRight().endsWith('?');
 
   // Purity from writes.
