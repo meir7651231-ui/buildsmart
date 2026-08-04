@@ -1,0 +1,174 @@
+{
+  "module": "docs_readiness",
+  "source": "../../../app_flutter/lib/state/docs_readiness.dart",
+  "atomCount": 2,
+  "atoms": [
+    {
+      "fn": "workerDocsReadiness",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required String username, required WorkerFormsState forms, required List<WorkerCert> certs, required DateTime now, List<String> requiredCertNames = const []}) -> DocsReadiness",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "init",
+            "detail": "missing = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "expiring = <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "form = forms.form101For(username, now.year)"
+          },
+          {
+            "kind": "compute",
+            "detail": "hasSigned101 = form != null && form.signature.isNotEmpty && form.declared"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !hasSigned101"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in certs"
+          },
+          {
+            "kind": "branch",
+            "detail": "if c.username != username → continue"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch c.statusAt(now)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final req in requiredCertNames"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = normalizeDocName(req)"
+          },
+          {
+            "kind": "compute",
+            "detail": "satisfied = certs.any((c) => c.username == username && normalizeDocName(c.name) == key && c.statusAt(…"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !satisfied"
+          },
+          {
+            "kind": "return",
+            "detail": "DocsReadiness(ready: missing.isEmpty, missing: missing, expiring: expiring)"
+          }
+        ]
+      },
+      "floor": [
+        "DocsReadiness",
+        "add",
+        "any",
+        "form101For",
+        "normalizeDocName",
+        "statusAt"
+      ],
+      "contract": {
+        "input": "({required String username, required WorkerFormsState forms, required List<WorkerCert> certs, required DateTime now, List<String> requiredCertNames = const []})",
+        "output": "DocsReadiness",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "courierDocsReadiness",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required String username, required List<WorkerCert> certs, required DateTime now}) -> DocsReadiness",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "kCourierCertPresets"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "mine = certs.where((c) => c.username == username).toList()"
+          },
+          {
+            "kind": "init",
+            "detail": "missing = <String>[]"
+          },
+          {
+            "kind": "init",
+            "detail": "expiring = <String>[]"
+          },
+          {
+            "kind": "compute",
+            "detail": "presentNames = mine.map((c) => c.name).toSet()"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final required in kCourierCertPresets"
+          },
+          {
+            "kind": "branch",
+            "detail": "if !presentNames.contains(required)"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final c in mine"
+          },
+          {
+            "kind": "branch",
+            "detail": "switch c.statusAt(now)"
+          },
+          {
+            "kind": "return",
+            "detail": "DocsReadiness(ready: missing.isEmpty, missing: missing, expiring: expiring)"
+          }
+        ]
+      },
+      "floor": [
+        "DocsReadiness",
+        "add",
+        "contains",
+        "map",
+        "statusAt",
+        "toList",
+        "toSet",
+        "where"
+      ],
+      "contract": {
+        "input": "({required String username, required List<WorkerCert> certs, required DateTime now})",
+        "output": "DocsReadiness",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

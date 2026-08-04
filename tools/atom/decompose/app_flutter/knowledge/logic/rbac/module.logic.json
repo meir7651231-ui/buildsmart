@@ -1,0 +1,358 @@
+{
+  "module": "rbac",
+  "source": "../../../app_flutter/lib/state/rbac.dart",
+  "atomCount": 7,
+  "atoms": [
+    {
+      "fn": "roleFromClaim",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(String? claim) -> BsRole",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "bsRoleFrom"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch claim?.trim()"
+          }
+        ]
+      },
+      "floor": [
+        "trim"
+      ],
+      "contract": {
+        "input": "(String? claim)",
+        "output": "BsRole",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "claimOf",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BsRole role) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "requirePermission"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "branch",
+            "detail": "switch role"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(BsRole role)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "hasPermission",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(BsRole role, Permission perm) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "roleToPermissions"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "permitAction"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "roleToPermissions[role]?.contains(perm) ?? false"
+          }
+        ]
+      },
+      "floor": [
+        "contains"
+      ],
+      "contract": {
+        "input": "(BsRole role, Permission perm)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "permitAction",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required BsRole role, required Permission perm, required UserStatus? status}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "const",
+            "name": "roleToPermissions",
+            "transitive": true
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "hasPermission",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "requirePermission"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if perm != Permission.viewCatalog && (status == UserStatus.pending || status == UserStatus.s… → return false"
+          },
+          {
+            "kind": "return",
+            "detail": "hasPermission(role, perm)"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required BsRole role, required Permission perm, required UserStatus? status})",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if perm != Permission.viewCatalog && (status == UserStatus.pending || status == UserStatus.s… → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "bsRoleFrom",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required bool signedIn, required String? email, required List<String> serverRoles}) -> BsRole",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [
+          {
+            "name": "roleFromClaim",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !signedIn → return BsRole.contractor"
+          },
+          {
+            "kind": "precond",
+            "detail": "if isOwnerEmail(email) → return BsRole.admin"
+          },
+          {
+            "kind": "precond",
+            "detail": "if serverRoles.length == 1 → return roleFromClaim(serverRoles.first)"
+          },
+          {
+            "kind": "return",
+            "detail": "BsRole.contractor"
+          }
+        ]
+      },
+      "floor": [
+        "isOwnerEmail"
+      ],
+      "contract": {
+        "input": "({required bool signedIn, required String? email, required List<String> serverRoles})",
+        "output": "BsRole",
+        "purity": "pure",
+        "precond": [
+          "if !signedIn → return BsRole.contractor",
+          "if isOwnerEmail(email) → return BsRole.admin",
+          "if serverRoles.length == 1 → return roleFromClaim(serverRoles.first)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "requirePermission",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, Permission perm, String label) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "auditTrailProvider"
+          },
+          {
+            "kind": "global",
+            "name": "bsRoleProvider"
+          },
+          {
+            "kind": "global",
+            "name": "currentUserProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "permitAction",
+            "module": true
+          },
+          {
+            "name": "claimOf",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "role = ref.read(bsRoleProvider)"
+          },
+          {
+            "kind": "compute",
+            "detail": "status = ref.read(currentUserProvider)?.status"
+          },
+          {
+            "kind": "precond",
+            "detail": "if permitAction(role: role, perm: perm, status: status) → return true"
+          },
+          {
+            "kind": "compute",
+            "detail": "blockedPending = perm != Permission.viewCatalog && (status == UserStatus.pending || status == UserStatus.s…"
+          },
+          {
+            "kind": "effect",
+            "detail": "ref.read(auditTrailProvider.notifier).log(blockedPending ? 'הרשאה נדחתה (ממתין לאישור)' :…"
+          },
+          {
+            "kind": "return",
+            "detail": "false"
+          }
+        ]
+      },
+      "floor": [
+        "log",
+        "read"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, Permission perm, String label)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if permitAction(role: role, perm: perm, status: status) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "checkoutBlock",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "({required bool userSystemOn, required bool isRealUser, required bool isPending}) -> CheckoutBlock",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if !userSystemOn → return CheckoutBlock.none"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !isRealUser → return CheckoutBlock.notRegistered"
+          },
+          {
+            "kind": "precond",
+            "detail": "if isPending → return CheckoutBlock.pendingApproval"
+          },
+          {
+            "kind": "return",
+            "detail": "CheckoutBlock.none"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "({required bool userSystemOn, required bool isRealUser, required bool isPending})",
+        "output": "CheckoutBlock",
+        "purity": "pure",
+        "precond": [
+          "if !userSystemOn → return CheckoutBlock.none",
+          "if !isRealUser → return CheckoutBlock.notRegistered",
+          "if isPending → return CheckoutBlock.pendingApproval"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

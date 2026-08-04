@@ -1,0 +1,890 @@
+{
+  "module": "worker_attendance",
+  "source": "../../../app_flutter/lib/state/worker_attendance.dart",
+  "atomCount": 15,
+  "atoms": [
+    {
+      "fn": "attendanceDateKey",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(DateTime d) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "WorkerAttendanceNotifier.clockIn",
+          "WorkerAttendanceNotifier.todayFor"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "'${d.year.toString().padLeft(4, '0')}-' '${d.month.toString().padLeft(2, '0')}-' '${d.day…"
+          }
+        ]
+      },
+      "floor": [
+        "padLeft",
+        "toString"
+      ],
+      "contract": {
+        "input": "(DateTime d)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "attendanceMonth",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<AttendanceDay> all, String username, int year, int month) -> List<AttendanceDay>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefix = '${year.toString().padLeft(4, '0')}-' '${month.toString().padLeft(2, '0')}-'"
+          },
+          {
+            "kind": "return",
+            "detail": "all.where((d) => d.username == username && d.date.startsWith(prefix)).toList()..sort((a, …"
+          }
+        ]
+      },
+      "floor": [
+        "compareTo",
+        "padLeft",
+        "sort",
+        "startsWith",
+        "toList",
+        "toString",
+        "where"
+      ],
+      "contract": {
+        "input": "(List<AttendanceDay> all, String username, int year, int month)",
+        "output": "List<AttendanceDay>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "attendanceTotal",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<AttendanceDay> days) -> Duration",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "days.fold(Duration.zero, (sum, d) => sum + (d.worked ?? Duration.zero))"
+          }
+        ]
+      },
+      "floor": [
+        "fold"
+      ],
+      "contract": {
+        "input": "(List<AttendanceDay> days)",
+        "output": "Duration",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "mapsQueryForDay",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(AttendanceDay d) -> String?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "lat = d.inLat"
+          },
+          {
+            "kind": "compute",
+            "detail": "lng = d.inLng"
+          },
+          {
+            "kind": "precond",
+            "detail": "if lat == null || lng == null → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "'$lat,$lng'"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(AttendanceDay d)",
+        "output": "String?",
+        "purity": "pure",
+        "precond": [
+          "if lat == null || lng == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "lat == null || lng == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "clockedInNow",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(List<AttendanceDay> employerDays, String todayKey) -> List<AttendanceDay>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "[for (final d in employerDays) if (d.date == todayKey && d.inTs != null && d.outTs == nul…"
+          }
+        ]
+      },
+      "floor": [],
+      "contract": {
+        "input": "(List<AttendanceDay> employerDays, String todayKey)",
+        "output": "List<AttendanceDay>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AttendanceDay.worked",
+      "kind": "getter",
+      "object": {
+        "signature": "get () -> Duration?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "inTs"
+          },
+          {
+            "kind": "field",
+            "name": "outTs"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "i = inTs"
+          },
+          {
+            "kind": "compute",
+            "detail": "o = outTs"
+          },
+          {
+            "kind": "precond",
+            "detail": "if i == null || o == null → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "d = o.difference(i)"
+          },
+          {
+            "kind": "return",
+            "detail": "d.isNegative ? Duration.zero : d"
+          }
+        ]
+      },
+      "floor": [
+        "difference"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Duration?",
+        "purity": "pure",
+        "precond": [
+          "if i == null || o == null → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "i == null || o == null · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "AttendanceDay.copyWith",
+      "kind": "method",
+      "object": {
+        "signature": "({DateTime? inTs, DateTime? outTs, double? inLat, double? inLng, double? outLat, double? outLng, String? employerId}) -> AttendanceDay",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "date"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "AttendanceDay(username: username, date: date, inTs: inTs ?? this.inTs, outTs: outTs ?? th…"
+          }
+        ]
+      },
+      "floor": [
+        "AttendanceDay"
+      ],
+      "contract": {
+        "input": "({DateTime? inTs, DateTime? outTs, double? inLat, double? inLng, double? outLat, double? outLng, String? employerId})",
+        "output": "AttendanceDay",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AttendanceDay.toJson",
+      "kind": "method",
+      "object": {
+        "signature": "() -> Map<String, dynamic>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "date"
+          },
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "inLat"
+          },
+          {
+            "kind": "field",
+            "name": "inLng"
+          },
+          {
+            "kind": "field",
+            "name": "inTs"
+          },
+          {
+            "kind": "field",
+            "name": "outLat"
+          },
+          {
+            "kind": "field",
+            "name": "outLng"
+          },
+          {
+            "kind": "field",
+            "name": "outTs"
+          },
+          {
+            "kind": "field",
+            "name": "username"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "{'username' : username, 'date' : date, 'inTs' : inTs?.toIso8601String(), 'outTs' : outTs?…"
+          }
+        ]
+      },
+      "floor": [
+        "toIso8601String"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Map<String, dynamic>",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "AttendanceDay.tryFromJson",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? raw) -> AttendanceDay?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "employerId"
+          },
+          {
+            "kind": "field",
+            "name": "inLat"
+          },
+          {
+            "kind": "field",
+            "name": "inLng"
+          },
+          {
+            "kind": "field",
+            "name": "inTs"
+          },
+          {
+            "kind": "field",
+            "name": "outLat"
+          },
+          {
+            "kind": "field",
+            "name": "outLng"
+          },
+          {
+            "kind": "field",
+            "name": "outTs"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "_tryDouble",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if raw is! Map → return null"
+          },
+          {
+            "kind": "compute",
+            "detail": "username = raw['username']"
+          },
+          {
+            "kind": "compute",
+            "detail": "date = raw['date']"
+          },
+          {
+            "kind": "precond",
+            "detail": "if username is! String || date is! String → return null"
+          },
+          {
+            "kind": "return",
+            "detail": "AttendanceDay(username: username, date: date, inTs: DateTime.tryParse('${raw['inTs']}'), …"
+          }
+        ]
+      },
+      "floor": [
+        "AttendanceDay",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? raw)",
+        "output": "AttendanceDay?",
+        "purity": "pure",
+        "precond": [
+          "if raw is! Map → return null",
+          "if username is! String || date is! String → return null"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "raw is! Map · username is! String || date is! String · or search exhausted",
+        "throws": []
+      }
+    },
+    {
+      "fn": "AttendanceDay._tryDouble",
+      "kind": "method",
+      "object": {
+        "signature": "(Object? v) -> double?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [],
+        "writes": [],
+        "calls": [],
+        "calledBy": [
+          "AttendanceDay.tryFromJson"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if v is num → return v.toDouble()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if v is String → return double.tryParse(v)"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "toDouble",
+        "tryParse"
+      ],
+      "contract": {
+        "input": "(Object? v)",
+        "output": "double?",
+        "purity": "pure",
+        "precond": [
+          "if v is num → return v.toDouble()",
+          "if v is String → return double.tryParse(v)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerAttendanceNotifier._load",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          },
+          {
+            "kind": "global",
+            "name": "mounted"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "prefs = await SharedPreferences.getInstance()"
+          },
+          {
+            "kind": "precond",
+            "detail": "if !mounted → return (void)"
+          },
+          {
+            "kind": "compute",
+            "detail": "raw = prefs.getString(storageKey)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if raw == null || _userTouched → return (void)"
+          }
+        ]
+      },
+      "floor": [
+        "getInstance",
+        "getString",
+        "jsonDecode",
+        "tryFromJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [
+          "if !mounted → return (void)",
+          "if raw == null || _userTouched → return (void)"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerAttendanceNotifier._persist",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "() -> Future<void>",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          },
+          {
+            "kind": "field",
+            "name": "storageKey"
+          }
+        ],
+        "writes": [
+          {
+            "kind": "io",
+            "name": "prefs.setString"
+          }
+        ],
+        "calls": [],
+        "calledBy": [
+          "WorkerAttendanceNotifier.clockIn",
+          "WorkerAttendanceNotifier.clockOut"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": []
+      },
+      "floor": [
+        "getInstance",
+        "jsonEncode",
+        "setString",
+        "toJson"
+      ],
+      "contract": {
+        "input": "()",
+        "output": "Future<void>",
+        "purity": "side-effecting",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerAttendanceNotifier.todayFor",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username) -> AttendanceDay?",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "state"
+          }
+        ],
+        "writes": [],
+        "calls": [
+          {
+            "name": "attendanceDateKey",
+            "module": true
+          }
+        ],
+        "calledBy": [
+          "WorkerAttendanceNotifier.clockIn",
+          "WorkerAttendanceNotifier.clockOut"
+        ],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "key = attendanceDateKey(DateTime.now())"
+          },
+          {
+            "kind": "loop",
+            "detail": "for final d in state"
+          },
+          {
+            "kind": "branch",
+            "detail": "if d.username == username && d.date == key → return d"
+          },
+          {
+            "kind": "return",
+            "detail": "null"
+          }
+        ]
+      },
+      "floor": [
+        "now"
+      ],
+      "contract": {
+        "input": "(String username)",
+        "output": "AttendanceDay?",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "nullReturn": "no result",
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerAttendanceNotifier.clockIn",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, {double? lat, double? lng, String employerId = ''}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "todayFor",
+            "module": true
+          },
+          {
+            "name": "attendanceDateKey",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "today = todayFor(username)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if today != null && today.inTs != null → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "compute",
+            "detail": "key = attendanceDateKey(DateTime.now())"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final d in state) if (!(d.username == username && d.date == key)) d, Attend…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "AttendanceDay",
+        "now"
+      ],
+      "contract": {
+        "input": "(String username, {double? lat, double? lng, String employerId = ''})",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if today != null && today.inTs != null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "WorkerAttendanceNotifier.clockOut",
+      "kind": "notifier-method",
+      "object": {
+        "signature": "(String username, {double? lat, double? lng}) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "field",
+            "name": "storageKey",
+            "transitive": true
+          }
+        ],
+        "writes": [
+          {
+            "kind": "field",
+            "name": "_userTouched"
+          },
+          {
+            "kind": "io",
+            "name": "prefs.setString",
+            "transitive": true
+          },
+          {
+            "kind": "state",
+            "name": "state"
+          }
+        ],
+        "calls": [
+          {
+            "name": "todayFor",
+            "module": true
+          },
+          {
+            "name": "_persist",
+            "module": true
+          }
+        ],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "compute",
+            "detail": "today = todayFor(username)"
+          },
+          {
+            "kind": "precond",
+            "detail": "if today == null || today.inTs == null || today.outTs != null → return false"
+          },
+          {
+            "kind": "effect",
+            "detail": "_userTouched = true"
+          },
+          {
+            "kind": "effect",
+            "detail": "state = [for (final d in state) if (d.username == username && d.date == today.date) d.cop…"
+          },
+          {
+            "kind": "effect",
+            "detail": "_persist()"
+          },
+          {
+            "kind": "return",
+            "detail": "true"
+          }
+        ]
+      },
+      "floor": [
+        "copyWith",
+        "now"
+      ],
+      "contract": {
+        "input": "(String username, {double? lat, double? lng})",
+        "output": "bool",
+        "purity": "side-effecting",
+        "precond": [
+          "if today == null || today.inTs == null || today.outTs != null → return false"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}

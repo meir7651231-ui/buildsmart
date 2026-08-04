@@ -1,0 +1,264 @@
+{
+  "module": "org_gates",
+  "source": "../../../app_flutter/lib/state/org_gates.dart",
+  "atomCount": 6,
+  "atoms": [
+    {
+      "fn": "modOn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String module) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "moduleOn(ref.watch(orgConfigProvider), module)"
+          }
+        ]
+      },
+      "floor": [
+        "moduleOn",
+        "watch"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String module)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "featOn",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String module, String feature) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "featureOn(ref.watch(orgConfigProvider), module, feature)"
+          }
+        ]
+      },
+      "floor": [
+        "featureOn",
+        "watch"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String module, String feature)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "featEnabled",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String module, String feature) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "featureEnabled(ref.watch(orgConfigProvider), module, feature)"
+          }
+        ]
+      },
+      "floor": [
+        "featureEnabled",
+        "watch"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String module, String feature)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "elementVisible",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String id) -> bool",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "criticalIdsProvider"
+          },
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "precond",
+            "detail": "if ref.watch(criticalIdsProvider).contains(id) → return true"
+          },
+          {
+            "kind": "return",
+            "detail": "elementShown(ref.watch(orgConfigProvider), id)"
+          }
+        ]
+      },
+      "floor": [
+        "contains",
+        "elementShown",
+        "watch"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String id)",
+        "output": "bool",
+        "purity": "pure",
+        "precond": [
+          "if ref.watch(criticalIdsProvider).contains(id) → return true"
+        ],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "orgTerm",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String key, String fallback) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "termOf(ref.watch(orgConfigProvider), key, fallback)"
+          }
+        ]
+      },
+      "floor": [
+        "termOf",
+        "watch"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String key, String fallback)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    },
+    {
+      "fn": "orgTermNow",
+      "kind": "top-level-function",
+      "object": {
+        "signature": "(WidgetRef ref, String key, String fallback) -> String",
+        "constants": []
+      },
+      "connections": {
+        "reads": [
+          {
+            "kind": "global",
+            "name": "orgConfigProvider"
+          }
+        ],
+        "writes": [],
+        "calls": [],
+        "calledBy": [],
+        "gatedBy": []
+      },
+      "behaviour": {
+        "steps": [
+          {
+            "kind": "formula",
+            "detail": "termOf(ref.read(orgConfigProvider), key, fallback)"
+          }
+        ]
+      },
+      "floor": [
+        "read",
+        "termOf"
+      ],
+      "contract": {
+        "input": "(WidgetRef ref, String key, String fallback)",
+        "output": "String",
+        "purity": "pure",
+        "precond": [],
+        "postcond": [],
+        "invariants": [],
+        "throws": []
+      }
+    }
+  ]
+}
