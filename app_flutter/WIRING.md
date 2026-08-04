@@ -1,5 +1,8 @@
 # WIRING CONTRACT — app_flutter
 
+## #fittings-intel-pD4 — 🧾 מנוע-אביזרים · פאזה D slice 4: כתב-כמויות (BOM) — יכולת-מאחורי-כפתור (מגודר) — 2026-08-04
+`lib/features/fittings/intel/line_bom.dart` + `line_bom_screen.dart` (מגודר · off-live) — **הכפתור-השלישי**: עוגני-קו → כתב-כמויות (shopping-list). `lineBom(anchors,{tempC})` **מקורקע ב-`buildInstallation`** (המנוע החי): `bomRows(plan)` = מוצר×כמות (`qtyOf` פר-מק״ט · connector-חוזר נספר פעמיים) · `totalPieces` · `complete` (אין gaps) · `criticalOpen` (בטיחות-קריטית חסרה). `LineBomScreen` מציג טבלת-קנייה + פס-סטטוס (✓/אזהרה · סה״כ · פערים · בטיחות-חסרה). **🔒 keystone:** `install_engine` כבר-חי ⇒ ייבוא לא-מוסיף-קוד · אף מסך לא מייבא `intel/` (מאומת NONE) ⇒ tree-shaken ⇒ byte-identical. **🔑 golden** (`line_bom_test`): פריט→שורה+כמות · qtyOf-ברירת-מחדל 1 · תוכנית-ריקה→BOM-ריק · מסך: דמו/פערים-אזהרה/ריק בלי-קריסה. **היכולות עד כה (D):** בנה-קו · הצג-בתלת-ממד · כתב-כמויות. fittings 311/311.
+
 ## #fittings-intel-pD3 — 🔎 מנוע-אביזרים · פאזה D slice 3: יכולת "הצג-בתלת-ממד" + מפרט-מנוע (מגודר) — 2026-08-04
 `lib/features/fittings/intel/product_3d_screen.dart` (מגודר · off-live) — **הכפתור-השני** של החזון: מוצר-קטלוג בודד → `Product3dScreen` מציג **תצוגת-3D** (`FittingPreview3d` על אביזר-בודד) **+ לוח-מפרט-המנוע המלא** (`buildableSpecFor`, פאזה B): משפחה+קוטר · שיטות-חיבור פר-קצה · ריתוך (ערכי-ייחוס + **caveat-יצרן**) · **בטיחות קו-חם** (tempC · קר→"לא-נדרשת") · תקנים. אביזר לא-פריס-במנוע → הודעת-fallback בלי 3D (M1 · לא קורס). מרכיב D1 (גשר) + פאזה B (spec) + C6 (3D). **🔒 keystone:** אף route חי לא מייבא `intel/` ⇒ tree-shaken ⇒ byte-identical. widget-smoke (`product_3d_screen_test`): אביזר→3D+מפרט · קו-חם מציף בטיחות · לא-אביזר→fallback בלי קריסה. **הבא:** capability הבאה (authoring / AR). fittings 305/305.
 
