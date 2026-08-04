@@ -1,64 +1,81 @@
-// 🔌 מנוע-קטלוג-3D · פאזה C (renderer, שלב 3b) — הצייר + מסך-ה-preview **המגודר**.
-// `RoutePainter` (CustomPainter דק) מצייר את משולשי-`projectMeshes` · `FittingPreview3d`
-// מוסיף מסגור-אוטומטי + סיבוב/זום (gestures) · `FittingPreviewScreen` = מסך-בדיקה.
+// 🔌 מנוע-קטלוג-3D · renderer-polish 2 (הצייר) — הצייר + מסך-ה-preview **המגודר**.
+// `RoutePainter` (CustomPainter דק) מצייר את משולשי-`projectParts` (חלקים-בעלי-חומר
+// מ-`assembleRoute`), צבע פר-חומר (PP-R ירוק · צינור אפור · פליז). `FittingPreview3d`
+// מוסיף מסגור-אוטומטי + סיבוב/זום · `FittingPreviewScreen` = מסך-בדיקה.
 //
 // 🔒 **off-live · מגודר `kFittingEngine3d` (default-OFF).** אף route חי אינו מייבא את
-// הקובץ הזה ⇒ tree-shaken מ-build-הפרודקשן. נגיש רק ב-build-preview
-// (`--dart-define=FITTING_ENGINE_3D=true`). **צעד 43 (הכרטיס-החי) = GO-בעלים מפורש.**
+// הקובץ הזה ⇒ tree-shaken. נגיש רק ב-`--dart-define=FITTING_ENGINE_3D=true`.
+// **צעד 43 (הכרטיס-החי) = GO-בעלים מפורש.**
 
 import 'package:buildsmart/features/fittings/engine/models.dart';
-import 'package:buildsmart/features/fittings/geometry/primitives.dart';
-import 'package:buildsmart/features/fittings/geometry/route_meshes.dart';
+import 'package:buildsmart/features/fittings/geometry/element_meshes.dart'
+    show PartMaterial;
+import 'package:buildsmart/features/fittings/geometry/route_assembly.dart';
 import 'package:buildsmart/features/fittings/layout/route_layout.dart' show Vec3;
 import 'package:buildsmart/features/fittings/render/camera.dart';
 import 'package:buildsmart/features/fittings/render/mesh_projector.dart';
 import 'package:flutter/material.dart';
 
-/// צבע-הבסיס של האביזר (מוכפל בגורם-ההצללה פר-משולש) — ירוק-PP-R.
-const Color kFittingBaseColor = Color(0xFF3F8F46);
+/// צבע-בסיס פר-חומר (מוכפל בגורם-ההצללה פר-משולש). PP-R ירוק · צינור אפור · פליז.
+const Color kPprColor = Color(0xFF3F8F46);
+const Color kPipeColor = Color(0xFFAAB4BD);
+const Color kBrassColor = Color(0xFFC9A24B);
 
-/// צייר-דק: מקבל רשתות-מוכנות (world-space) + פרמטרי-מצלמה, מקרין ומצייר.
-/// כל הלוגיקה-הכבדה ב-`projectMeshes` הטהור (הנבדק-golden); כאן רק מילוי-משולשים.
+/// רקע-הבמה (כהה) — כדי שהצנרת הירוקה/פליז תבלוט.
+const Color kStageBackground = Color(0xFF0E141C);
+
+/// צבע-הבסיס של חומר-חלק.
+Color colorForMaterial(PartMaterial mat) => switch (mat) {
+      PartMaterial.ppr => kPprColor,
+      PartMaterial.pipe => kPipeColor,
+      PartMaterial.brass => kBrassColor,
+    };
+
+/// צייר-דק: מקבל חלקים-מוכנים (world-space, בעלי-חומר) + פרמטרי-מצלמה, מקרין ומצייר.
+/// כל הלוגיקה-הכבדה ב-`projectParts` הטהור (הנבדק-golden); כאן רק רקע + מילוי-משולשים.
 class RoutePainter extends CustomPainter {
   RoutePainter({
-    required this.meshes,
+    required this.parts,
     required this.yaw,
     required this.pitch,
     required this.dist,
     required this.target,
-    this.baseColor = kFittingBaseColor,
+    this.background = kStageBackground,
   });
 
-  final List<Mesh> meshes;
+  final List<WorldPart> parts;
   final double yaw;
   final double pitch;
   final double dist;
   final Vec3 target;
-  final Color baseColor;
+  final Color background;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
+    canvas.drawRect(Offset.zero & size, Paint()..color = background);
     final proj = perspective(kDefaultFov, size.width / size.height, 0.1, 100000);
     final eye = orbitEye(target, dist, yaw, pitch);
     final view = lookAt(eye, target, const Vec3(0, 1, 0));
-    final tris = projectMeshes(meshes, proj, view, eye, size);
+    final tris = projectParts(parts, proj, view, eye, size);
     final paint = Paint()..style = PaintingStyle.fill;
     for (final t in tris) {
-      final path = Path()
-        ..moveTo(t.a.dx, t.a.dy)
-        ..lineTo(t.b.dx, t.b.dy)
-        ..lineTo(t.c.dx, t.c.dy)
-        ..close();
-      // צבע-הבסיס מעומעם בגורם-ההצללה (Lambert דו-צדדי).
+      final base = colorForMaterial(t.mat);
       final s = t.shade.clamp(0.0, 1.0);
       paint.color = Color.fromARGB(
         255,
-        (baseColor.r * 255.0 * s).round(),
-        (baseColor.g * 255.0 * s).round(),
-        (baseColor.b * 255.0 * s).round(),
+        (base.r * 255.0 * s).round(),
+        (base.g * 255.0 * s).round(),
+        (base.b * 255.0 * s).round(),
       );
-      canvas.drawPath(path, paint);
+      canvas.drawPath(
+        Path()
+          ..moveTo(t.a.dx, t.a.dy)
+          ..lineTo(t.b.dx, t.b.dy)
+          ..lineTo(t.c.dx, t.c.dy)
+          ..close(),
+        paint,
+      );
     }
   }
 
@@ -67,8 +84,8 @@ class RoutePainter extends CustomPainter {
       old.yaw != yaw ||
       old.pitch != pitch ||
       old.dist != dist ||
-      !identical(old.meshes, meshes) ||
-      old.baseColor != baseColor;
+      !identical(old.parts, parts) ||
+      old.background != background;
 }
 
 /// תצוגת-3D אינטראקטיבית של רצף-אביזרים: מסגור-אוטומטי מ-bbox + גרירה-לסיבוב +
@@ -83,7 +100,7 @@ class FittingPreview3d extends StatefulWidget {
 }
 
 class _FittingPreview3dState extends State<FittingPreview3d> {
-  late List<Mesh> _meshes;
+  late List<WorldPart> _parts;
   late Vec3 _target;
   late double _dist;
   double _yaw = kDefaultYaw;
@@ -103,10 +120,10 @@ class _FittingPreview3dState extends State<FittingPreview3d> {
   }
 
   void _rebuild() {
-    _meshes = buildRoutePreviewMeshes(widget.route);
-    final b = meshBounds(_meshes);
+    _parts = assembleRoute(widget.route);
+    final b = meshBounds(_parts.map((p) => p.mesh).toList());
     _target = b.center;
-    _dist = b.radius * kFrameDistRatio * 2; // מרווח-נשימה סביב האביזר
+    _dist = b.radius * kFrameDistRatio * 2; // מרווח-נשימה סביב הרצף
   }
 
   @override
@@ -124,7 +141,7 @@ class _FittingPreview3dState extends State<FittingPreview3d> {
       },
       child: CustomPaint(
         painter: RoutePainter(
-          meshes: _meshes,
+          parts: _parts,
           yaw: _yaw,
           pitch: _pitch,
           dist: _dist,
