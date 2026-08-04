@@ -1,0 +1,11 @@
+monster-finder/MONSTER-PLAN-v3.md
+DIRECTIVE-wizard-is-the-studio.md
+17-security-service-boot.md
+SPEC-server-connect.md
+20-infra-build-tooling-protocol.md
+DIRECTIVE-catalog-replace.md
+04-data-catalog-variants-tools.md
+LAUNCH-CHECKLIST.md
+LAUNCH-PLAN.md
+DIRECTIVE-arm-wizard-preview.md
+DIRECTIVE-close-web-for-launch.md

@@ -1,0 +1,17 @@
+PLAN-contractor-completion.md
+monster-finder/MONSTER-100-STEP-BUILD-PLAN.md
+KEYBOARD-MASTER-PLAN.md
+00-START-HERE.md
+TASKS-to-full.md
+12-persona-manager-store.md
+22-protocols-agents-process-specialized.md
+DIRECTIVE-fittings-phase0A-loop.md
+PLAN-giant-system-master.md
+MICRO-TASKS.md
+V2-ROADMAP-visual-ai.md
+DIRECTIVE-fittings-phaseB-depth.md
+11-manager-dashboard-selftest.md
+NORTH-STAR-data-contract.md
+DIRECTIVE-huliot-images.md
+10-engine-pricing-stores-sysorders.md
+START-HERE-buildsmart-clean.md

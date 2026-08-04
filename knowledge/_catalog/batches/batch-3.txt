@@ -1,0 +1,13 @@
+monster-finder/MONSTER-PLAN-v2.md
+DIRECTIVE-fake-data-sweep.md
+LAUNCH-deploy.md
+monster-finder/MONSTER-PLAN-TEARDOWN.md
+PLAN-manager-completion.md
+SPEC-ring-dive-handoff.md
+DIRECTIVE-manager-console-live.md
+SPEC-ai-assistant.md
+COORDINATION-SPEC.md
+13-scenarios-courier-registration.md
+16-portal-ai-rewards.md
+GO-LIVE.md
+GUIDE-F1-firebase-register.md
