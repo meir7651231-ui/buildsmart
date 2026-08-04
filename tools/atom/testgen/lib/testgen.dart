@@ -363,9 +363,19 @@ Future<void> pumpScreen(
         (ref) => const CfgNode(hidden: true),
       ),
   ];
-  final body = selfContained
-      ? composer
-      : Directionality(textDirection: TextDirection.rtl, child: Scaffold(body: composer));
+  // Always give the composer a Scaffold ancestor (⇒ a Material for its ink
+  // surfaces). A composer that builds its OWN Scaffold just nests harmlessly; a
+  // bare-body composer — one whose default construction returns a body meant to
+  // sit inside a shell's Scaffold at runtime (a home-shell / board tab like
+  // ChatsScreen, or a `showAppBar:false` body like HomeContentReorder) — gets
+  // the Material it assumes. This is the isolation `No Material` case: the app
+  // ALWAYS mounts these under a Scaffold, so pumping them bare was the false
+  // signal, not an app bug. A real `ListTile`-in-`DecoratedBox` finding needs a
+  // Material PRESENT and so still surfaces through this wrap (not masked).
+  // `selfContained` is kept for call-site compatibility; it no longer gates the
+  // wrap.
+  final body = Directionality(
+      textDirection: TextDirection.rtl, child: Scaffold(body: composer));
   await t.pumpWidget(
     ProviderScope(
       overrides: overrides,

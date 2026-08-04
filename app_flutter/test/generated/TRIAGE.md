@@ -5,22 +5,35 @@
 > **triage signal**, never a CI blocker. The main swarm gate stays green.
 > Regenerate: `dart run atom_testgen` (tools/atom/testgen).
 
-## Frozen numbers (after worker_profile pilot fix · `triage7`)
+## Frozen numbers (after isolation-wrap harness fix · `triage8`)
 
-| | `triage6` | after pilot (`triage7`) |
-|---|---:|---:|
-| screens | 62 | 62 |
-| generated tests | 1001 | 1001 |
-| **verified PASS** | 596 | **612** |
-| **reported FAIL** | 405 | **389** |
-| compile-fail | 0 | 0 |
-| **force-pass** | 0 | **0** |
+| | `triage6` | `triage7` (worker fix) | `triage8` (isolation-wrap) |
+|---|---:|---:|---:|
+| screens | 62 | 62 | 62 |
+| generated tests | 1001 | 1001 | 1001 |
+| **verified PASS** | 596 | 612 | **628** |
+| **reported FAIL** | 405 | 389 | **373** |
+| compile-fail | 0 | 0 | 0 |
+| **force-pass** | 0 | 0 | **0** |
 
-`pass = verified · fail = reported`. Nothing here is forced green. The pilot fix
-(worker_profile app code) converted 16 crash-failures to verified passes; the
-remaining 5 on that screen are honest not-founds (dialog content). Global
-`+612 -389` is the raw `triage7` tally (verified, not arithmetic); `ink-hidden`
-is now 0 globally. Main app suite stays green (5572 pass / 12 skip / 0 fail).
+`pass = verified · fail = reported`. Nothing here is forced green. `triage8` is the
+raw verified tally. **No-Material is now 0 globally.** Main app suite green
+(5572 pass / 12 skip / 0 fail).
+
+### Honest correction — chats + home_content_reorder were ISOLATION, not real bugs
+
+An earlier pass listed `chats` and `home_content_reorder` in List A as real
+`No-Material` findings. **That was wrong** — those probes pumped the composer
+*without* the `Scaffold` the app always provides:
+- `const ChatsScreen()` → `persona=contractor` → returns the **bare body** by
+  design (home_shell's Scaffold wraps it at runtime — chats lives under
+  `UpdatesScreen`).
+- `const HomeContentReorder()` → `showAppBar:false` → bare `_Body()`; every real
+  mount uses `.route()` (`showAppBar:true` → its own Scaffold).
+
+Verified: pumping either **inside a `Scaffold`** (as the app does) → **CLEAN**.
+So they are pump-isolation artifacts → **harness fix, not app code** (per the
+isolation→harness rule). Fixed by the lever below; **no app change.**
 
 ### Levers applied (generic, one mechanism each — not per-screen seeds)
 
@@ -30,6 +43,7 @@ is now 0 globally. Main app suite stays green (5572 pass / 12 skip / 0 fail).
 | board-role seed (`_SeededBoard`) | +29 | role screens gate their whole body on `boardAuthProvider.role` |
 | tab-walk (`findAcrossTabs`) | 0 | honest: the app uses **custom tab rows**, not Material `Tab`, so `find.byType(Tab)` matches nothing. Kept as future-proof infra. |
 | **Material-ancestor wrap (body-only screens)** | **+87** | detect the screen's **real** `Scaffold` from source; a body-only screen (0 real Material `Scaffold`) is pumped inside a `Scaffold` so its `InkWell`s have a Material ancestor — as they do in the real app's shell. |
+| **always-wrap in `Scaffold` (isolation-wrap)** | **+16** | superseded the detect-then-wrap heuristic: ALWAYS pump the composer inside a `Scaffold`. A composer with its own Scaffold nests harmlessly; a bare-body composer (a shell/board tab whose default construction returns a body — `ChatsScreen`, `HomeContentReorder`) gets the Material the app gives it. Clears the last isolation `No-Material` (chats +11, reorder +5) WITHOUT masking real `ListTile`-in-`DecoratedBox` findings (those need a Material present, so they still surface — see courier below). |
 
 Total: **509 → 596 verified pass**. The Material lever also **reclassified ~89**
 former *crash* failures into honest *not-present-in-default* (they now render
@@ -83,17 +97,22 @@ Result (verified, `--dart-define=atomgen=true`): **21 crashes → 16 verified pa
 renders when the dialog is opened — bucket B, self-skipped, never force-passed).
 0 `No Material` / 0 ink-hidden / 0 `InkResponse` remain.
 
-### Remaining — 66 on 3 screens (same anti-pattern, not yet fixed)
+### Remaining — 35 on 1 screen (the one genuine real finding)
 
-**Not** force-passable. Recommended fix order (per plan): the true `No Material`
-cases first (chats, reorder — potentially worse than cosmetic in release), then
-the cosmetic ink-hidden case (courier_profile).
+**Not** force-passable. After the isolation-wrap, the ONLY real exception-throwing
+remainder is `courier_profile_screen`: its bare-body `No-Material` (isolation) is
+now cleared, revealing the **real** `ListTile`-in-`DecoratedBox` ink-hidden
+assertion underneath (same anti-pattern as the fixed worker_profile). It needs
+the same surgical app fix (wrap the card tiles in a transparent `Material`) —
+deferred as the last pilot per plan (cosmetic in release).
 
 | screen | count | real-render-path assertion |
 |---|---:|---|
-| courier_profile_screen | 35 | real `CourierProfileScreen` → "ListTile ink hidden" (the bare-`Body` "No Material" masks it) |
-| chats_screen | 22 | "No Material" — persists at 390×844 in a normal route |
-| home_content_reorder | 9 | `InkResponse` "No Material" — `ReorderableListView` items, persists at normal size |
+| courier_profile_screen | 35 | `ListTile` ink hidden by the card `DecoratedBox` (real; surgical app fix pending) |
+
+chats (now +11 −11) and home_content_reorder (now +5 −4) moved OUT of List A —
+their failures were isolation `No-Material`, cleared by the harness; the residual
+`−11` / `−4` are honest not-founds (bucket B, element needs interaction/data).
 
 ---
 
