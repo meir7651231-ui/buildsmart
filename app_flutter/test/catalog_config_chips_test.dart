@@ -102,6 +102,14 @@ void main() {
       expect(_ids(p, universe: [p]), ['diameter']);
     });
 
+    test('§4: NAME-color variants (pipes) yield a צבע wheel', () {
+      // catAxesOf reads color from the p.color field; the fallback feeds the name
+      // color, so a pipe family varying שחור/אפור gets a color wheel.
+      final a = _p('צינור שחור DN40', 'צינורות ניקוז');
+      final b = _p('צינור אפור DN40', 'צינורות ניקוז');
+      expect(_ids(a, universe: [a, b]), contains('color'));
+    });
+
     test('§4 keeps the engine goldens intact (union, engine wins a shared id)', () {
       // The axis engine must not disturb a PPR golden — the elbow still resolves to
       // exactly [diameter · angle · length].

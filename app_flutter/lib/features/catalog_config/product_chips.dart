@@ -24,7 +24,8 @@
 
 import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/variant_families.dart' show productCanonicalKey;
+import 'package:buildsmart/data/variant_families.dart'
+    show AttrKind, productCanonicalKey, variantValue;
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
 import 'package:buildsmart/features/fittings/engine/catalog_map.dart' show odOf;
@@ -184,6 +185,11 @@ List<AttributeDef> axisChips(
       final od = odOf(m);
       if (od != null) add('diameter', '$od');
     }
+    // Color fallback: [catAxesOf] reads color from the p.color FIELD, so a NAME
+    // color ("צינור שחור") is missed. Feed the variant engine's name-color in — a
+    // pipe family that varies שחור/אפור then gets a real צבע wheel.
+    final nameColor = variantValue(m, AttrKind.color);
+    if (nameColor.isNotEmpty) add('color', nameColor);
   }
   return [
     for (final e in agg.entries)
