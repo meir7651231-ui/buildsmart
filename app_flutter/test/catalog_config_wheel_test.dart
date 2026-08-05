@@ -5,7 +5,7 @@
 //      [AttributeKind.color] wheel, guards empty values with '—', and fires
 //      [WheelPicker.onSelected] with a NEW index when spun (and re-centres when an
 //      outside index change arrives via didUpdateWidget).
-//   2. the [ConfigCard] renders the dive-bs2b card (image hero · edge labels ·
+//   2. the [ConfigCard] renders the clean card (full name · square image hero ·
 //      flat tappable side wheels) — the WheelPicker spinner stays a standalone,
 //      tested widget; the full card contract lives in catalog_config_card_test.
 //
@@ -205,19 +205,20 @@ void main() {
     });
   });
 
-  group('#catalog-config ConfigCard — dive-bs2b (image hero · edge labels · tap wheels)',
+  group('#catalog-config ConfigCard — clean card (name · square image · tap wheels)',
       () {
-    testWidgets('elbow schema → image hero · ↕/↔ edge labels · קוטר+כמות wheels',
+    testWidgets('elbow schema → full name · square hero · קוטר+כמות wheels',
         (tester) async {
       await tester.pumpWidget(_cardHost(ConfigCard(schema: _elbow())));
 
-      // the dive-bs2b card is the image HERO + edge labels + flat tappable side
-      // wheels — NOT the abandoned per-attribute spinner row.
+      // the clean card: full name above a square image hero + flat tappable side
+      // wheels — NOT the abandoned spinner, and NO edge arrows/labels.
       expect(find.byType(WheelPicker), findsNothing);
+      expect(find.byKey(const Key('configFullName')), findsOneWidget); // name above
       expect(find.byKey(const Key('configStage')), findsOneWidget);
       expect(find.byKey(const Key('configImageCenter')), findsOneWidget);
-      expect(find.text('▲ זווית'), findsOneWidget); // ↕ axis (top edge)
-      expect(find.text('◀ אורך'), findsOneWidget); // ↔ axis (right edge)
+      expect(find.textContaining('▲'), findsNothing); // no edge arrows/labels
+      expect(find.textContaining('◀'), findsNothing);
       expect(find.text('קוטר'), findsOneWidget); // diameter side-wheel header
       expect(find.text('כמות'), findsOneWidget); // qty side-wheel header
       // no imageAsset ⇒ the center shows the emoji (D.2 fallback).

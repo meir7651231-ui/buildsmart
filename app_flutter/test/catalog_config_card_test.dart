@@ -1,15 +1,14 @@
 // CATALOG-CONFIG · dive-bs2b card test — the GENERIC [ConfigCard] renders ANY
-// engine [ProductConfigSchema] as the APPROVED dive-bs2b: the product IMAGE is the
-// centre HERO (key 'configImageCenter'), never empty (emoji fallback); the first
-// two non-diameter attributes are the ↕ / ↔ axes SCROLLED ON THE IMAGE (four edge
-// labels · a ↕/↔ drag cycles them); the diameter attribute(s) ride a TAPPABLE
-// side wheel on the RIGHT and qty a tappable wheel on the LEFT. There is NO
-// spinner ([ListWheelScrollView]) and NO centre band (the two abandoned dive-bs4
-// sins). Tapping a wheel value / dragging an axis changes the live selection
-// (surfaced through onAddToCart) and RE-RESOLVES the centre image (pure
-// re-resolution is pinned in catalog_config_variant_image_test). The card holds NO
-// per-product code — a new product is a data row. Assertions check STRUCTURE +
-// CONTRACT, never pixels. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§B/§dive-bs2b).
+// engine [ProductConfigSchema] as the CLEAN card (owner): the FULL product name
+// clean ABOVE a SQUARE centre image (key 'configImageCenter', never empty — emoji
+// fallback); the current values ride a CLEAN pill EMBEDDED on the image (no arrows,
+// no edge labels · a ↕/↔ drag scrolls the two axes + swaps the photo); the diameter
+// attribute(s) ride a TAPPABLE side wheel on the RIGHT and qty a tappable wheel on
+// the LEFT (the wheels STAY). NO spinner ([ListWheelScrollView]), NO centre band, NO
+// "הגלגלים של…" hint. Tapping a wheel / dragging an axis changes the live selection
+// (surfaced through onAddToCart) and updates the pill + RE-RESOLVES the centre image.
+// The card holds NO per-product code — a new product is a data row. Assertions check
+// STRUCTURE + CONTRACT, never pixels. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§B).
 
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/features/catalog_config/config_card.dart';
@@ -42,7 +41,8 @@ AttributeDef _attr(
 
 // PRIORITY (taxonomy) order — the card is positional: attr[0]=diameter (🔩 right)
 // · attr[1]=angle (↕) · attr[2]=length (↔). A BOGUS familyId keeps the centre
-// deterministic (no live-catalog variant matches → the emoji fallback shows).
+// deterministic (no live-catalog variant matches → the emoji fallback shows, and
+// the full name stays the schema name).
 ProductConfigSchema _elbow() => ProductConfigSchema(
       sku: 'E-1',
       nameHe: 'ברך',
@@ -94,13 +94,17 @@ Widget _staticHost(Widget card) => MaterialApp(
 Finder _key(String k) => find.byKey(Key(k));
 
 void main() {
-  group('#catalog-config ConfigCard — dive-bs2b build (image hero · 4 edges)', () {
+  group('#catalog-config ConfigCard — clean build (name · square image · value pill)', () {
     testWidgets(
-        'elbow (3 attrs) → image CENTRE hero · ↕/↔ edge labels · קוטר+כמות wheels',
+        'elbow → full name above · square hero · value pill · קוטר+כמות wheels',
         (tester) async {
       await tester.pumpWidget(_host(ConfigCard(schema: _elbow())));
 
-      // the image is the CENTRE hero, inside the stage — never a boxed/top image.
+      // the FULL product name, clean, above the image.
+      expect(_key('configFullName'), findsOneWidget);
+      expect(find.text('ברך'), findsOneWidget);
+
+      // the image is the CENTRE hero, inside the (square) stage.
       expect(_key('configStage'), findsOneWidget);
       expect(_key('configImageCenter'), findsOneWidget);
       expect(
@@ -111,16 +115,17 @@ void main() {
         findsOneWidget,
       );
 
-      // the FOUR edge labels: axis NAME + the single CURRENT value (SCROLL, not a
-      // text-wheel — never the whole value list · owner). Defaults = the sortIndex-0
-      // value of each axis (angle 45°, length קצר).
-      expect(find.text('▲ זווית'), findsOneWidget); // ↕ name (top)
-      expect(find.text('45° ▼'), findsOneWidget); // ↕ CURRENT value (bottom)
-      expect(find.text('◀ אורך'), findsOneWidget); // ↔ name (right)
-      expect(find.text('קצר ▶'), findsOneWidget); // ↔ CURRENT value (left)
-      expect(find.text('45°·90° ▼'), findsNothing); // NOT the joined value list
+      // the current values are a CLEAN pill embedded on the image — the defaults
+      // (sortIndex-0 of each axis), no arrows, no axis names.
+      expect(find.text('20 · 45° · קצר'), findsOneWidget);
+      // …and NONE of the old edge arrows/labels survive.
+      expect(find.textContaining('▲'), findsNothing);
+      expect(find.textContaining('▼'), findsNothing);
+      expect(find.textContaining('◀'), findsNothing);
+      expect(find.textContaining('▶'), findsNothing);
+      expect(find.textContaining('הגלגלים של'), findsNothing); // no hint
 
-      // the side wheels: קוטר (right) + כמות (left) as TAPPABLE stacks.
+      // the side wheels STAY: קוטר (right) + כמות (left) as TAPPABLE stacks.
       expect(find.text('קוטר'), findsOneWidget); // diameter wheel header
       expect(find.text('כמות'), findsOneWidget); // qty wheel header
       expect(find.text('40'), findsOneWidget); // an unselected diameter value
@@ -133,19 +138,18 @@ void main() {
       expect(find.text('🦵'), findsOneWidget);
       expect(find.byType(Image), findsNothing);
 
-      // the two abandoned dive-bs4 sins are ABSENT: no spinner, no axis band.
+      // the abandoned dive-bs4 sins are ABSENT: no spinner.
       expect(find.byType(ListWheelScrollView), findsNothing);
-      expect(_key('configAxisPrimary'), findsNothing);
     });
 
-    testWidgets('manifold schema → axes SWAP (יציאות/צבע), SAME card (generic)',
+    testWidgets('manifold → axes swap in the pill (יציאות/צבע), SAME card (generic)',
         (tester) async {
       await tester.pumpWidget(_host(ConfigCard(schema: _manifold())));
 
       expect(_key('configStage'), findsOneWidget);
-      expect(find.text('▲ יציאות'), findsOneWidget); // ↕ ports
-      expect(find.text('◀ צבע'), findsOneWidget); // ↔ color
-      expect(find.text('כחול ▶'), findsOneWidget); // ↔ first color
+      expect(find.text('מחלק'), findsOneWidget); // full name above
+      // the pill carries the manifold defaults (diameter · ports · color).
+      expect(find.text('20 · 1 · כחול'), findsOneWidget);
       expect(find.text('קוטר'), findsOneWidget); // same diameter side wheel
       expect(find.text('כמות'), findsOneWidget);
       expect(find.text('🔀'), findsOneWidget);
@@ -164,6 +168,7 @@ void main() {
       );
 
       expect(_key('configImageCenter'), findsOneWidget); // centre still present
+      expect(find.text('ריק'), findsOneWidget); // the full name
       expect(find.text('🔧'), findsOneWidget); // emoji centre (never empty)
       expect(find.textContaining('▲'), findsNothing); // no axis labels
       expect(find.text('כמות'), findsOneWidget); // qty wheel still usable
@@ -258,7 +263,7 @@ void main() {
       expect(qty, 1);
     });
 
-    testWidgets('a ↕ drag on the image cycles the FIRST axis (angle)',
+    testWidgets('a ↕ drag on the image cycles the FIRST axis; the pill tracks it',
         (tester) async {
       Map<String, String>? captured;
       await tester.pumpWidget(
@@ -270,14 +275,14 @@ void main() {
         ),
       );
 
-      // an upward drag advances the angle wheel off its default '45°' → '90°'
-      // (2 values, clamped end), proving the scroll is ON THE IMAGE (↕=angle).
+      // an upward drag advances the angle off its default '45°' → '90°' (2 values,
+      // clamped end), proving the scroll is ON THE IMAGE (↕=angle).
       await tester.drag(_key('configStage'), const Offset(0, -120));
       await tester.pumpAndSettle();
 
-      // the ↕ edge label tracks the CURRENT value (scroll, not a static list).
-      expect(find.text('90° ▼'), findsOneWidget); // now the new current value
-      expect(find.text('45° ▼'), findsNothing); // the old value is gone
+      // the embedded pill tracks the CURRENT values (scroll, not a static list).
+      expect(find.text('20 · 90° · קצר'), findsOneWidget);
+      expect(find.text('20 · 45° · קצר'), findsNothing);
 
       await tester.tap(_key('configAddToCart'));
       await tester.pump();

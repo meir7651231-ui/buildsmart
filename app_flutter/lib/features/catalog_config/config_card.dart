@@ -1,22 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// CATALOG-CONFIG · dive-bs2b — the GENERIC config CARD, rebuilt 1:1 to the APPROVED
-// dive-bs2b mockup (NOT the abandoned dive-bs4 image-top / wheel-row). ONE
-// StatefulWidget that renders ANY [ProductConfigSchema] as three columns in a row
-// (RTL): a קוטר wheel on the RIGHT · a LARGE image STAGE in the centre (flex:1,
-// min-height 150) · a כמות wheel on the LEFT. The IMAGE is the hero — dead-centre,
-// never a grey box (no file → the big product EMOJI). There is NO band / slider /
-// bar in the middle (the two forbidden sins).
+// CATALOG-CONFIG · dive-bs2b — the GENERIC config CARD (owner's CLEAN layout). ONE
+// StatefulWidget that renders ANY [ProductConfigSchema]: the FULL product name clean
+// ABOVE, then a row (RTL) of a קוטר wheel on the RIGHT · a SQUARE image in the CENTRE
+// · a כמות wheel on the LEFT. The IMAGE is the hero — dead-centre, never a grey box
+// (no file → the big product EMOJI). NO band / slider / bar (the forbidden sins).
 //
-//   • The centre stage carries FOUR edge labels — top `▲ name` + bottom
-//     `current ▼` for the FIRST axis (elbow → זווית), right `◀ name` + left
-//     `current ▶` for the SECOND (elbow → אורך): the axis NAME + its single CURRENT
-//     value, never the whole value list. The two axes SCROLL ON THE IMAGE itself: a
-//     ↕ drag cycles attribute[0], a ↔ drag cycles attribute[1], swapping the photo.
+//   • The centre image is a SQUARE (~20% under the available width); the side
+//     wheels are vertically CENTRED on it. Its ONLY overlay is a CLEAN value PILL
+//     embedded at the bottom — the current values (e.g. `DN50 · 16×1/2 · 15°`) in
+//     the brand accent, NO arrows and NO edge labels. The two axes SCROLL ON THE
+//     IMAGE: a ↕ drag cycles attribute[1], a ↔ drag attribute[2], swapping the photo
+//     and updating the pill (the image itself is the control).
 //   • The side wheels are TAPPABLE value stacks (mockup `.wheel`): the diameter
 //     attribute(s) on the RIGHT, qty on the LEFT — the centred value is
 //     highlighted brand-orange (bigger + bold), the rest dimmed.
-//   • Below: a value line (`90° · 32 מ״מ`), a hint (`הגלגלים של ברך: …`) and the
-//     two actions — הוסף-לסל (solid) + בנה-קו (outline).
+//   • Below: the two actions — הוסף-לסל (solid) + בנה-קו (outline). NO value line,
+//     NO "הגלגלים של…" hint (owner: clean).
 //
 // PER-PRODUCT, DATA-DRIVEN (plan 🫀): the SAME frame draws whatever the schema
 // declares — a manifold swaps the axes to ↕יציאות ↔צבע with the same קוטר+כמות
@@ -54,7 +53,6 @@ const Color _cInk = Color(0xFF232A33); // --ink
 const Color _cDim = Color(0xFF7A828D); // --dim
 const Color _cLine = Color(0xFFECEEF2); // --line (secondary btn border)
 const Color _cAccent = Color(0xFFEE6A2A); // --accent
-const Color _cAccentD = Color(0xFFCF551B); // --accent-d (header)
 const Color _cImgBg = Color(0xFFF5F7FA); // --imgbg (stage)
 const Color _cWheelOff = Color(0xFFB7BDC6); // dimmed wheel value
 
@@ -66,10 +64,8 @@ const List<BoxShadow> _kCardShadow = [
 // ── geometry (mockup values) ──────────────────────────────────────────────────
 const double _kWheelCol = 50; // .wheelcol flex:0 0 50px
 const double _kColGap = 9; // .cols gap
-const double _kStageMin = 150; // .stage min-height (the hero floor)
 const double _kStageRadius = 15; // .stage radius
 const double _kCardRadius = 18; // .cfg radius
-const double _kHeroSize = 118; // the centred product image box
 const double _kEmojiSize = 76; // .pic — the big fallback emoji
 const double _kActionRadius = 13; // .primary/.secondary radius
 const double _kDragStep = 24; // px of drag that advances one axis step
@@ -247,18 +243,14 @@ class _ConfigCardState extends State<ConfigCard> {
   List<AttributeDef> get _rightWheels =>
       _sideA == null ? const <AttributeDef>[] : <AttributeDef>[_sideA!];
 
-  /// The short family name for the header/hint ('ברך 90°' → 'ברך', 'מחלק' → 'מחלק').
-  String get _familyShort => widget.schema.familyId.split(' ').first;
-
   @override
   Widget build(BuildContext context) {
-    // RTL is intrinsic to the card (the dive screen is RTL; forcing it here keeps
-    // the right=קוטר / left=כמות geometry correct even hosted LTR — e.g. a test).
+    // RTL is intrinsic to the card (the dive screen is RTL).
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12),
-        padding: const EdgeInsets.fromLTRB(10, 12, 10, 13),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
         decoration: BoxDecoration(
           color: _cCard,
           borderRadius: BorderRadius.circular(_kCardRadius),
@@ -268,14 +260,13 @@ class _ConfigCardState extends State<ConfigCard> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _header(),
-            const SizedBox(height: 9),
+            // CLEAN layout (owner): full product name above; the side wheels
+            // (קוטר · כמות) STAY; a BIG centre image carrying only a clean
+            // current-value pill — no edge arrows/labels, no "הגלגלים של…" hint.
+            _fullName(),
+            const SizedBox(height: 10),
             _cols(),
-            const SizedBox(height: 3),
-            _valueLine(),
-            const SizedBox(height: 9),
-            _hint(),
-            const SizedBox(height: 9),
+            const SizedBox(height: 12),
             _actions(),
           ],
         ),
@@ -283,140 +274,136 @@ class _ConfigCardState extends State<ConfigCard> {
     );
   }
 
-  /// `.cfghd` — the summary + a decorative ✕, in accent-dark.
-  Widget _header() {
-    final parts = <String>[
-      _familyShort,
-      for (final a in _usable) _selectedLabel(a),
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Text(
-              parts.join(' · '),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: _cAccentD,
-              ),
-            ),
-          ),
-          const Text(
-            '✕',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: _cAccentD,
-            ),
-          ),
-        ],
+  /// The FULL product name, clean, above the image (owner). Reflects the live
+  /// selection's variant when one resolves, else the schema's base name.
+  Widget _fullName() {
+    final variant = variantForSelection(widget.schema, _selection, _family);
+    return Text(
+      variant?.nameHe ?? widget.schema.nameHe,
+      key: const Key('configFullName'),
+      textAlign: TextAlign.center,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w900,
+        color: _cInk,
+        height: 1.15,
       ),
     );
   }
 
-  /// `.cols` — RIGHT diameter wheel · CENTRE image stage (flex:1) · LEFT qty wheel.
-  /// [IntrinsicHeight] lets the side wheels stretch to the stage's height (the
-  /// stage's min-height 150 drives the row — the hero floor).
+  /// The current selected values, CLEAN — no arrows, no axis names (owner: only the
+  /// present values, embedded on the image). The top few (by taxonomy priority) so
+  /// it stays a tight pill, e.g. `DN50 · 1/2×16 · 15°`.
+  String _currentValues() =>
+      [for (final a in _usable.take(3)) _selectedLabel(a)].join(' · ');
+
+  /// The clean current-values pill embedded on the image (no arrows · owner).
+  Widget _valuesPill() {
+    // MATCH the brand palette (owner) — the same accent-orange as the selected wheel
+    // values + the הוסף-לסל CTA, white text; not the old dark-ink pill.
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+      decoration: BoxDecoration(
+        color: _cAccent,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        _currentValues(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  /// `.cols` — RIGHT קוטר wheel · a SQUARE centre image · LEFT כמות wheel, the wheels
+  /// vertically centred on the square (owner).
   Widget _cols() {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _sideWheels(_rightWheels),
-          const SizedBox(width: _kColGap),
-          Expanded(child: _stage()),
-          const SizedBox(width: _kColGap),
-          _qtyWheel(),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, c) {
+        // A SQUARE centre image (owner: "מרובע באמצע"), ~20% smaller than the full
+        // available width; the side wheels are vertically CENTRED on it (owner:
+        // "מרכז את אמצע הגלגלים ביחס אליו") — IntrinsicHeight + center aligns the
+        // wheel columns' middle with the square's middle.
+        final avail = c.maxWidth - 2 * _kWheelCol - 2 * _kColGap;
+        final square = avail.clamp(150.0, 184.0);
+        return IntrinsicHeight(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _sideWheels(_rightWheels),
+              SizedBox(
+                key: const Key('configStage'),
+                width: square,
+                height: square,
+                child: _stage(),
+              ),
+              _qtyWheel(),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  /// The centre STAGE — the light image pad with the hero image dead-centre and
-  /// four axis labels on the four edges; a ↕/↔ drag on it cycles the two axes.
-  /// NO band / slider (the forbidden sin) — the image IS the focus.
+  /// The centre STAGE — a SQUARE image pad: the hero photo FILLS it (padding leaves
+  /// room for the clean current-value pill at the bottom). NO edge arrows/labels
+  /// (owner); a ↕/↔ drag scrolls the two axes + swaps the photo.
   Widget _stage() {
     final primary = _primary;
     final secondary = _secondary;
-    return ConstrainedBox(
-      key: const Key('configStage'),
-      constraints: const BoxConstraints(minHeight: _kStageMin),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _cImgBg,
-          borderRadius: BorderRadius.circular(_kStageRadius),
-        ),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onVerticalDragUpdate: primary == null
-              ? null
-              : (d) => _onVerticalDrag(d, primary),
-          onVerticalDragEnd: (_) => _accV = 0,
-          onHorizontalDragUpdate: secondary == null
-              ? null
-              : (d) => _onHorizontalDrag(d, secondary),
-          onHorizontalDragEnd: (_) => _accH = 0,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Center(
-                  child: KeyedSubtree(
-                    key: const Key('configImageCenter'),
-                    child: _hero(),
-                  ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _cImgBg,
+        borderRadius: BorderRadius.circular(_kStageRadius),
+      ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragUpdate:
+            primary == null ? null : (d) => _onVerticalDrag(d, primary),
+        onVerticalDragEnd: (_) => _accV = 0,
+        onHorizontalDragUpdate:
+            secondary == null ? null : (d) => _onHorizontalDrag(d, secondary),
+        onHorizontalDragEnd: (_) => _accH = 0,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 46),
+                child: KeyedSubtree(
+                  key: const Key('configImageCenter'),
+                  child: _hero(),
                 ),
               ),
-              // The ↕/↔ axes are SCROLL, not text-wheels (owner): each edge shows
-              // the axis NAME on one side and the single CURRENT value on the
-              // opposite side — a drag cycles the value + swaps the image. NEVER the
-              // whole value list (that was the "3·1×25·3/4×25…" gibberish).
-              if (primary != null) ...[
-                _edge(top: 6, child: _axisLabel('▲ ${primary.nameHe}')),
-                _edge(
-                  bottom: 18,
-                  child: _axisLabel('${_selectedLabel(primary)} ▼'),
-                ),
-              ],
-              if (secondary != null) ...[
-                _edge(right: 7, child: _axisLabel('◀ ${secondary.nameHe}')),
-                _edge(
-                  left: 7,
-                  child: _axisLabel('${_selectedLabel(secondary)} ▶'),
-                ),
-              ],
-              _edge(
-                bottom: 6,
-                child: const Text(
-                  'תמונת-מוצר · מתחלפת לפי הבחירה',
-                  style: TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w800,
-                    color: _cDim,
-                  ),
-                ),
+            ),
+            if (_usable.isNotEmpty)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 10,
+                child: Center(child: _valuesPill()),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  /// The hero — the REAL per-selection image (swaps on every pick), falling back
-  /// to the big product emoji (never a grey box · D.2).
+  /// The hero — the REAL per-selection image (swaps on every pick) FILLING the
+  /// square pad (BoxFit.contain), falling back to the big product emoji (never a
+  /// grey box · D.2).
   Widget _hero() {
     final asset = _resolvedImageAsset();
     if (asset == null) {
-      return _emoji();
+      return Center(child: _emoji());
     }
-    return SizedBox(
-      width: _kHeroSize,
-      height: _kHeroSize,
+    return Center(
       child: Image(
         image: resolveProductImage(asset),
         fit: BoxFit.contain,
@@ -430,37 +417,6 @@ class _ConfigCardState extends State<ConfigCard> {
         style: const TextStyle(fontSize: _kEmojiSize, height: 1),
       );
 
-  /// A single edge label positioned against the stage box. Top/bottom labels span
-  /// the full width and centre horizontally; side labels (left/right) span the
-  /// full height and centre vertically — so all four sit on the stage's edges.
-  Widget _edge({
-    required Widget child,
-    double? top,
-    double? bottom,
-    double? left,
-    double? right,
-  }) {
-    final side = left != null || right != null;
-    return Positioned(
-      top: side ? 0 : top,
-      bottom: side ? 0 : bottom,
-      left: side ? left : 0,
-      right: side ? right : 0,
-      child: Center(child: child),
-    );
-  }
-
-  /// An orange axis label (`▲ זווית`, `◀ אורך`, …).
-  Widget _axisLabel(String text) => Text(
-        text,
-        maxLines: 1,
-        style: const TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          color: _cAccent,
-        ),
-      );
-
   /// The RIGHT side wheel column — the diameter attribute(s) as COMPACT tappable
   /// value stacks (mockup `.wheel`). Empty ⇒ a fixed-width spacer so the image
   /// stays centred between the two edges.
@@ -471,6 +427,7 @@ class _ConfigCardState extends State<ConfigCard> {
     return SizedBox(
       width: _kWheelCol,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (var w = 0; w < attrs.length; w++) ...[
@@ -520,6 +477,7 @@ class _ConfigCardState extends State<ConfigCard> {
     return SizedBox(
       width: _kWheelCol,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _colHeader('כמות'),
@@ -580,50 +538,6 @@ class _ConfigCardState extends State<ConfigCard> {
             fontWeight: on ? FontWeight.w800 : FontWeight.w500,
           ),
         ),
-      ),
-    );
-  }
-
-  /// `.vn` — the current headline (`90° · 32 מ״מ`): the first axis value + the
-  /// diameter value with its unit. Falls back to the product name when the schema
-  /// declares no wheels.
-  Widget _valueLine() {
-    final primary = _primary;
-    final side = _sideA;
-    final parts = <String>[
-      if (primary != null) _selectedLabel(primary),
-      if (side != null)
-        side.unitHe == null
-            ? _selectedLabel(side)
-            : '${_selectedLabel(side)} ${side.unitHe}',
-    ];
-    return Center(
-      child: Text(
-        parts.isEmpty ? widget.schema.nameHe : parts.join(' · '),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
-          color: _cInk,
-        ),
-      ),
-    );
-  }
-
-  /// `.hint` — the per-product wheel roster (`הגלגלים של ברך: זווית · אורך · קוטר · כמות`).
-  Widget _hint() {
-    final names = <String>[
-      for (final a in _usable.take(3)) a.nameHe,
-      'כמות',
-    ];
-    return Text(
-      'הגלגלים של $_familyShort: ${names.join(' · ')}',
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 10.5,
-        fontWeight: FontWeight.w800,
-        color: _cAccent,
       ),
     );
   }
