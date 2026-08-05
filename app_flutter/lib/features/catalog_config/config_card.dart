@@ -8,9 +8,10 @@
 // bar in the middle (the two forbidden sins).
 //
 //   • The centre stage carries FOUR edge labels — top `▲ name` + bottom
-//     `values ▼` for the FIRST axis attribute (elbow → זווית), right `◀ name` +
-//     left `first ▶` for the SECOND (elbow → אורך). The two axes SCROLL ON THE
-//     IMAGE itself: a ↕ drag cycles attribute[0], a ↔ drag cycles attribute[1].
+//     `current ▼` for the FIRST axis (elbow → זווית), right `◀ name` + left
+//     `current ▶` for the SECOND (elbow → אורך): the axis NAME + its single CURRENT
+//     value, never the whole value list. The two axes SCROLL ON THE IMAGE itself: a
+//     ↕ drag cycles attribute[0], a ↔ drag cycles attribute[1], swapping the photo.
 //   • The side wheels are TAPPABLE value stacks (mockup `.wheel`): the diameter
 //     attribute(s) on the RIGHT, qty on the LEFT — the centred value is
 //     highlighted brand-orange (bigger + bold), the rest dimmed.
@@ -370,20 +371,22 @@ class _ConfigCardState extends State<ConfigCard> {
                   ),
                 ),
               ),
+              // The ↕/↔ axes are SCROLL, not text-wheels (owner): each edge shows
+              // the axis NAME on one side and the single CURRENT value on the
+              // opposite side — a drag cycles the value + swaps the image. NEVER the
+              // whole value list (that was the "3·1×25·3/4×25…" gibberish).
               if (primary != null) ...[
                 _edge(top: 6, child: _axisLabel('▲ ${primary.nameHe}')),
                 _edge(
                   bottom: 18,
-                  child: _axisLabel(
-                    '${[for (final v in primary.values) v.labelHe].join('·')} ▼',
-                  ),
+                  child: _axisLabel('${_selectedLabel(primary)} ▼'),
                 ),
               ],
               if (secondary != null) ...[
                 _edge(right: 7, child: _axisLabel('◀ ${secondary.nameHe}')),
                 _edge(
                   left: 7,
-                  child: _axisLabel('${secondary.values.first.labelHe} ▶'),
+                  child: _axisLabel('${_selectedLabel(secondary)} ▶'),
                 ),
               ],
               _edge(

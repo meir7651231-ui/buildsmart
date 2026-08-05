@@ -25,7 +25,32 @@ import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart';
+import 'package:buildsmart/features/catalog_config/image_quality.dart';
 import 'package:flutter/foundation.dart';
+
+/// The representative product of [group] — the one with the BRIGHTEST image
+/// ([imageBrightness] · owner: the clearest, most-central photo, never a black
+/// tile). Relative, not an absolute cutoff: a type is represented by its best
+/// available photo. Never empty (falls back to [group].first when none is pictured).
+LipskeyCatalogProduct _pickRep(List<LipskeyCatalogProduct> group) {
+  LipskeyCatalogProduct? best;
+  var bestB = -2;
+  for (final p in group) {
+    if (p.imageAsset == null) continue;
+    final b = imageBrightness(p.imageAsset);
+    if (b > bestB) {
+      bestB = b;
+      best = p;
+    }
+  }
+  return best ?? group.first;
+}
+
+/// The representative IMAGE of [rep] — its photo unless that is genuinely black
+/// ([isBrightImage] false, below the dark floor), in which case null ⇒ the caller
+/// shows the emoji, so a tile/header is NEVER black (owner).
+String? _repImage(LipskeyCatalogProduct rep) =>
+    isBrightImage(rep.imageAsset) ? rep.imageAsset : null;
 
 /// One product tile in an open family rail — the leaf-level unit the user taps
 /// to open the (phase-B) config card. Identity + display only (pure data).
@@ -117,15 +142,20 @@ class ConfigFamily {
   final int productCount;
 
   /// The family's REPRESENTATIVE image (plan D · DERIVED, never hardcoded): the
-  /// first tile that carries a [ConfigTile.imageAsset]. So the family sub-header
-  /// shows a real product photo pulled from the live catalog — it SURVIVES a
-  /// catalog delete-and-reupload (there is NO family→image map, the north star).
-  /// null ⇒ no pictured product in the family (→ the header falls back to [emoji]).
+  /// first tile that carries a BRIGHT [ConfigTile.imageAsset] ([isBrightImage] ·
+  /// owner: never a black header), else the first with any image. So the family
+  /// sub-header shows a real, CLEAR product photo pulled from the live catalog — it
+  /// SURVIVES a catalog delete-and-reupload (there is NO family→image map, the north
+  /// star). null ⇒ no pictured product (→ the header falls back to [emoji]).
   String? get representativeImage {
     for (final tile in tiles) {
-      final asset = tile.imageAsset;
-      if (asset != null) {
-        return asset;
+      if (isBrightImage(tile.imageAsset)) {
+        return tile.imageAsset;
+      }
+    }
+    for (final tile in tiles) {
+      if (tile.imageAsset != null) {
+        return tile.imageAsset;
       }
     }
     return null;
@@ -206,18 +236,16 @@ ConfigTile _tileForGroup(
   List<LipskeyCatalogProduct> group,
   String fallbackEmoji,
 ) {
-  final rep = group.firstWhere(
-    (p) => p.imageAsset != null,
-    orElse: () => group.first,
-  );
+  final rep = _pickRep(group);
   final frame = productFrame(rep);
-  final emoji =
-      rep.categoryEmoji.isNotEmpty ? rep.categoryEmoji : fallbackEmoji;
+  final emoji = tileEmoji(
+    rep.categoryEmoji.isNotEmpty ? rep.categoryEmoji : fallbackEmoji,
+  );
   return ConfigTile(
     sku: rep.sku,
     nameHe: frame.length >= 3 ? frame : rep.nameHe,
     emoji: emoji,
-    imageAsset: rep.imageAsset,
+    imageAsset: _repImage(rep),
   );
 }
 
@@ -302,7 +330,7 @@ ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
         ConfigFamily(
           id: family,
           titleHe: family,
-          emoji: familyEmoji[family]!.isNotEmpty ? familyEmoji[family]! : '📦',
+          emoji: tileEmoji(familyEmoji[family]!),
           productCount: familyTypes[family]!
               .fold(0, (sum, tk) => sum + byType[tk]!.length),
           tiles: [
@@ -313,18 +341,16 @@ ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
   );
 }
 
-/// One tile per TYPE group — label = the [typeWordOf]; sku + image from the first
-/// pictured member (else the first, plan D).
+/// One tile per TYPE group — label = the [typeWordOf]; sku from the BRIGHTEST member
+/// ([_pickRep]); image = that photo unless it is genuinely black ([_repImage] → null
+/// ⇒ the emoji), so a tile never leads with a black photo (owner).
 ConfigTile _typeTile(List<LipskeyCatalogProduct> group) {
-  final rep = group.firstWhere(
-    (p) => p.imageAsset != null,
-    orElse: () => group.first,
-  );
+  final rep = _pickRep(group);
   return ConfigTile(
     sku: rep.sku,
     nameHe: typeWordOf(rep),
-    emoji: rep.categoryEmoji.isNotEmpty ? rep.categoryEmoji : '📦',
-    imageAsset: rep.imageAsset,
+    emoji: tileEmoji(rep.categoryEmoji),
+    imageAsset: _repImage(rep),
   );
 }
 

@@ -111,11 +111,14 @@ void main() {
         findsOneWidget,
       );
 
-      // the FOUR edge labels of the two image axes (data-driven — hardcoded none).
+      // the FOUR edge labels: axis NAME + the single CURRENT value (SCROLL, not a
+      // text-wheel — never the whole value list · owner). Defaults = the sortIndex-0
+      // value of each axis (angle 45°, length קצר).
       expect(find.text('▲ זווית'), findsOneWidget); // ↕ name (top)
-      expect(find.text('45°·90° ▼'), findsOneWidget); // ↕ values (bottom)
+      expect(find.text('45° ▼'), findsOneWidget); // ↕ CURRENT value (bottom)
       expect(find.text('◀ אורך'), findsOneWidget); // ↔ name (right)
-      expect(find.text('קצר ▶'), findsOneWidget); // ↔ first value (left)
+      expect(find.text('קצר ▶'), findsOneWidget); // ↔ CURRENT value (left)
+      expect(find.text('45°·90° ▼'), findsNothing); // NOT the joined value list
 
       // the side wheels: קוטר (right) + כמות (left) as TAPPABLE stacks.
       expect(find.text('קוטר'), findsOneWidget); // diameter wheel header
@@ -271,6 +274,11 @@ void main() {
       // (2 values, clamped end), proving the scroll is ON THE IMAGE (↕=angle).
       await tester.drag(_key('configStage'), const Offset(0, -120));
       await tester.pumpAndSettle();
+
+      // the ↕ edge label tracks the CURRENT value (scroll, not a static list).
+      expect(find.text('90° ▼'), findsOneWidget); // now the new current value
+      expect(find.text('45° ▼'), findsNothing); // the old value is gone
+
       await tester.tap(_key('configAddToCart'));
       await tester.pump();
 

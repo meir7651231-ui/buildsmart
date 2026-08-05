@@ -9,6 +9,7 @@ import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProduct
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';
+import 'package:buildsmart/features/catalog_config/image_quality.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A minimal fake product — only the fields [browseSection] reads matter
@@ -327,6 +328,52 @@ void main() {
       final b = browseAll(resolvedCatalogProducts);
       expect(b.families.length, 12);
       expect(productCount(b), resolvedCatalogProducts.length);
+    });
+
+    // ── owner: never a black tile/header — the representative picks the BRIGHTEST
+    //    image of a type ([imageBrightness]) and floors genuinely-black ones to emoji.
+    //    '4502A.jpg' measures luma 13 (near-black); '213072.jpeg' is a normal photo.
+    test('isBrightImage: null / a genuinely-black crop → false; a normal crop → true', () {
+      expect(isBrightImage(null), isFalse);
+      expect(isBrightImage('assets/lipskey/products/4502A.jpg'), isFalse);
+      expect(isBrightImage('assets/lipskey/products/213072.jpeg'), isTrue);
+    });
+
+    test('a type tile leads with the BRIGHTEST sibling, skipping the black crop', () {
+      // D1 comes first but its crop is near-black; the tile must represent the type
+      // with the brighter sibling B1 instead (owner: never a black tile).
+      final b = browseAll([
+        named('D1', 'מצמד 1/2"', 'מצמדים', imageFile: '4502A.jpg'),
+        named('B1', 'מצמד 3/4"', 'מצמדים', imageFile: '213072.jpeg'),
+      ]);
+      final tile = b.families.expand((f) => f.tiles).single;
+      expect(tile.sku, 'B1');
+      expect(tile.imageAsset, 'assets/lipskey/products/213072.jpeg');
+    });
+
+    test('the family header image skips a black first tile for a bright one', () {
+      final fam = browseAll([
+        named('D1', 'מצמד 1/2"', 'מצמדים', imageFile: '4502A.jpg'),
+        named('B1', 'מסעף 1/2"', 'מצמדים', imageFile: '213072.jpeg'),
+      ]).families.single;
+      expect(fam.representativeImage, 'assets/lipskey/products/213072.jpeg');
+    });
+
+    test('tileEmoji: a BLACK category emoji (⚫) → neutral 📦; a normal emoji kept', () {
+      // even the emoji fallback is never black (owner: no black tile/header).
+      expect(tileEmoji('⚫'), '📦');
+      expect(tileEmoji(''), '📦');
+      expect(tileEmoji('🔩'), '🔩');
+    });
+
+    test('an all-black group shows the EMOJI, never a black photo (owner)', () {
+      // the only image is genuinely black ⇒ the tile drops it (imageAsset null) so
+      // the emoji shows — a tile is NEVER black.
+      final b = browseAll([
+        named('D1', 'מצמד 1/2"', 'מצמדים', imageFile: '4502A.jpg'),
+      ]);
+      final tile = b.families.expand((f) => f.tiles).single;
+      expect(tile.imageAsset, isNull);
     });
   });
 }
