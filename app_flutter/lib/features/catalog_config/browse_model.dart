@@ -24,6 +24,7 @@
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart';
 import 'package:flutter/foundation.dart';
 
 /// One product tile in an open family rail — the leaf-level unit the user taps
@@ -264,6 +265,67 @@ ConfigBrowse browseSection(
 
   walk(section);
   return ConfigBrowse(titleHe: section.title, families: families);
+}
+
+/// The WHOLE-catalog browse (owner §1·§2) — grouped by the clean FAMILY
+/// ([familyGroupOf], the ~12 owner category groups) → TYPE tiles ([typeWordOf], the
+/// canonical word within the family). Each type collapses ALL its variants (any
+/// size/angle/material) into ONE tile; the card's wheels carry the variations. This
+/// REPLACES the per-leaf tree walk against fragmentation (93 leaves → ~12 families).
+/// Family + type keep first-appearance (catalog) order.
+ConfigBrowse browseAll(List<LipskeyCatalogProduct> products) {
+  final familyTypes = <String, List<String>>{}; // family -> type keys, in order
+  final byType = <String, List<LipskeyCatalogProduct>>{}; // type key -> products
+  final familyOrder = <String>[];
+  final familyEmoji = <String, String>{};
+  for (final product in products) {
+    final family = familyGroupOf(product);
+    final typeKey = typeKeyOf(product);
+    if (!familyTypes.containsKey(family)) {
+      familyOrder.add(family);
+      familyTypes[family] = <String>[];
+      familyEmoji[family] = product.categoryEmoji;
+    }
+    final types = familyTypes[family]!;
+    final list = byType[typeKey];
+    if (list == null) {
+      byType[typeKey] = [product];
+      types.add(typeKey);
+    } else {
+      list.add(product);
+    }
+  }
+  return ConfigBrowse(
+    titleHe: 'כל הקטלוג',
+    families: [
+      for (final family in familyOrder)
+        ConfigFamily(
+          id: family,
+          titleHe: family,
+          emoji: familyEmoji[family]!.isNotEmpty ? familyEmoji[family]! : '📦',
+          productCount: familyTypes[family]!
+              .fold(0, (sum, tk) => sum + byType[tk]!.length),
+          tiles: [
+            for (final typeKey in familyTypes[family]!) _typeTile(byType[typeKey]!),
+          ],
+        ),
+    ],
+  );
+}
+
+/// One tile per TYPE group — label = the [typeWordOf]; sku + image from the first
+/// pictured member (else the first, plan D).
+ConfigTile _typeTile(List<LipskeyCatalogProduct> group) {
+  final rep = group.firstWhere(
+    (p) => p.imageAsset != null,
+    orElse: () => group.first,
+  );
+  return ConfigTile(
+    sku: rep.sku,
+    nameHe: typeWordOf(rep),
+    emoji: rep.categoryEmoji.isNotEmpty ? rep.categoryEmoji : '📦',
+    imageAsset: rep.imageAsset,
+  );
 }
 
 /// The pilot section (plan phase F.1 · G): `אביזרי קצה וחיבורים` — the top-level

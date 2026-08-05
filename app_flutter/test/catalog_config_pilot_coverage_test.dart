@@ -8,7 +8,9 @@
 // define-less (kCatalogConfig OFF).
 // ignore_for_file: avoid_print
 import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';
+import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart';
 import 'package:buildsmart/features/catalog_config/product_chips.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,40 +53,47 @@ void main() {
     );
   });
 
-  test('WHOLE catalog — collapse + wheel-count distribution (owner §2 · §10)', () {
-    final browse = browseSection(kCatalogRootNode, resolvedCatalogProducts);
-    expect(browse.families, isNotEmpty);
-    final bySku = {for (final p in resolvedCatalogProducts) p.sku: p};
+  test('WHOLE catalog via browseAll — 12 clean families + wheel distribution (owner §1·§2·§10)', () {
+    // ── (1) FAMILIES — the fragmented 93 leaves fold into the 12 CLEAN owner groups
+    //    ([familyGroupOf]); every product lands in exactly one, and the rail collapses
+    //    the SKUs into TYPE tiles ([typeWordOf], the canonical word).
+    final browse = browseAll(resolvedCatalogProducts);
+    expect(browse.titleHe, 'כל הקטלוג');
+    expect(browse.families.length, 12); // owner §1 — from 93 fragmented leaves
+    expect(browse.families.every((f) => f.tiles.isNotEmpty), isTrue);
+    final famProducts = browse.families.fold(0, (s, f) => s + f.productCount);
+    expect(famProducts, resolvedCatalogProducts.length); // every product placed once
+    final tiles = browse.families.fold(0, (s, f) => s + f.tiles.length);
+    expect(tiles, lessThan(resolvedCatalogProducts.length)); // rail COLLAPSES
 
-    var products = 0;
-    var tiles = 0;
-    var familiesWithImage = 0;
-    final wheelHist = <int, int>{0: 0, 1: 0, 2: 0, 3: 0}; // wheels (capped 3) -> tiles
-    for (final f in browse.families) {
-      products += f.productCount;
-      tiles += f.tiles.length;
-      if (f.representativeImage != null) {
-        familiesWithImage++;
-      }
-      for (final t in f.tiles) {
-        final p = bySku[t.sku];
-        final raw = p == null ? 0 : prioritizedSchema(p).attributes.length;
-        final wheels = raw > 3 ? 3 : raw; // the card shows the top 3 (+ qty)
-        wheelHist[wheels] = (wheelHist[wheels] ?? 0) + 1;
-      }
+    // ── (2) WHEEL DISTRIBUTION — the card shows min(roster, 3) wheels (+ qty). Weight
+    //    by the PRODUCTS a browser actually reaches: a type stands for its peer count.
+    final repByType = <String, LipskeyCatalogProduct>{};
+    final peers = <String, int>{};
+    for (final p in resolvedCatalogProducts) {
+      repByType.putIfAbsent(typeKeyOf(p), () => p);
+      peers[typeKeyOf(p)] = (peers[typeKeyOf(p)] ?? 0) + 1;
     }
-    print('WHOLE-CATALOG: ${browse.families.length} families · '
-        '$products SKUs -> $tiles type tiles');
-    print('FAMILY-IMG: $familiesWithImage/${browse.families.length} '
-        'families with a real representative image');
-    print('WHEELS/tile (capped 3, + qty always): '
-        '${[for (var k = 0; k <= 3; k++) '$k→${wheelHist[k]}'].join(' · ')}');
+    final cardByProduct = <int, int>{0: 0, 1: 0, 2: 0, 3: 0}; // card wheels -> products
+    for (final e in repByType.entries) {
+      final roster = chipRoster(e.value).length;
+      final card = roster > 3 ? 3 : roster;
+      cardByProduct[card] = cardByProduct[card]! + peers[e.key]!;
+    }
+    final total = resolvedCatalogProducts.length;
+    final mid = cardByProduct[2]! + cardByProduct[3]!;
 
-    // the whole-catalog dive is real (many families) and the rail COLLAPSES.
-    expect(browse.families.length, greaterThan(10));
-    expect(tiles, lessThan(products));
-    // not every tile is wheel-less — many carry a real wheel (graduated card).
-    final wheelless = wheelHist[0] ?? 0;
-    expect(wheelless, lessThan(tiles));
+    print('FAMILIES: ${browse.families.length} (from 93 fragmented leaves) · '
+        '$total products -> $tiles type tiles');
+    for (final f in browse.families) {
+      print('  ${f.titleHe}: ${f.tiles.length} types · ${f.productCount} products');
+    }
+    print('CARD WHEELS by product exposure: '
+        '${[for (var k = 0; k <= 3; k++) '$k→${cardByProduct[k]}'].join(' · ')}');
+    print('2-3 wheels: ${(100 * mid / total).round()}% of products '
+        '(owner §10: most 2-3, not 0-1)');
+
+    // owner §10 — MOST products (by browsing exposure) land on a 2-3 wheel card.
+    expect(mid, greaterThan(total * 0.6));
   });
 }

@@ -58,8 +58,8 @@ LipskeyCatalogProduct? _product(String sku) {
 
 /// The gated catalog-config dive screen (browse + inline card). STATEFUL only to
 /// hold the accordion's [_CatalogConfigScreenState._expandedSku]; its browse data
-/// stays the pure [browseSection] projection of the pilot section over the live
-/// catalog. [onTapTile] is an OPTIONAL extra hook, fired alongside the toggle.
+/// stays the pure [browseAll] projection of the whole catalog into clean families →
+/// type tiles. [onTapTile] is an OPTIONAL extra hook, fired alongside the toggle.
 class CatalogConfigScreen extends ConsumerStatefulWidget {
   const CatalogConfigScreen({
     super.key,
@@ -145,9 +145,11 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // WHOLE catalog (owner §2) — every pictured leaf-category across kCatalogTree,
-    // not just the pilot section. The rail collapses each to type tiles.
-    final browse = browseSection(kCatalogRootNode, resolvedCatalogProducts);
+    // WHOLE catalog (owner §1·§2) — the 12 CLEAN families ([familyGroupOf], the
+    // human-curated category groups) each holding its TYPE tiles ([typeWordOf], the
+    // canonical word), against the 93-leaf fragmentation. The card's wheels carry the
+    // variations (size/angle/color/…) of the tapped type.
+    final browse = browseAll(resolvedCatalogProducts);
 
     return Directionality(
       textDirection: TextDirection.rtl,

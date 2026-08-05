@@ -5,6 +5,7 @@
 // no Firebase, no widgets — exercised define-less (kCatalogConfig OFF).
 // Template: test/config_schema_test.dart. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (phase A).
 
+import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';
@@ -258,6 +259,74 @@ void main() {
 
       walk(node);
       expect(cats, contains('אביזרי תבריג'));
+    });
+  });
+
+  group('#catalog-config browse — browseAll (whole catalog · clean families · owner §1·§2)', () {
+    LipskeyCatalogProduct named(String sku, String nameHe, String cat,
+            {String? imageFile}) =>
+        LipskeyCatalogProduct(
+          sku: sku,
+          nameHe: nameHe,
+          nameEn: '',
+          categoryHe: cat,
+          categoryEn: cat,
+          categoryEmoji: '🔩',
+          page: 1,
+          imageFile: imageFile,
+        );
+
+    int tileCount(ConfigBrowse b) =>
+        b.families.fold(0, (s, f) => s + f.tiles.length);
+    int productCount(ConfigBrowse b) =>
+        b.families.fold(0, (s, f) => s + f.productCount);
+
+    test('title = "כל הקטלוג"', () {
+      expect(browseAll([named('M1', 'מצמד 1/2"', 'מצמדים')]).titleHe, 'כל הקטלוג');
+    });
+
+    test('same TYPE (מצמד) collapses to ONE tile; product count preserved', () {
+      final b = browseAll([
+        named('M1', 'מצמד 1/2"', 'מצמדים', imageFile: 'm1.jpeg'),
+        named('M2', 'מצמד 3/4"', 'מצמדים'),
+        named('M3', 'מצמד 1"', 'מצמדים'),
+      ]);
+      expect(tileCount(b), 1); // 3 SKUs, one type → one tile
+      expect(productCount(b), 3); // the badge counts PRODUCTS, not tiles
+    });
+
+    test('different TYPES (מצמד vs מסעף) split into two tiles', () {
+      final b = browseAll([
+        named('M1', 'מצמד 1/2"', 'מצמדים'),
+        named('M2', 'מצמד 3/4"', 'מצמדים'),
+        named('T1', 'מסעף 1/2"', 'מצמדים'),
+      ]);
+      expect(tileCount(b), 2);
+    });
+
+    test('synonym normalization: זווית folds into the ברך tile (owner map)', () {
+      // an elbow named ברך and one named זווית are the SAME type (kWordSynonyms
+      // זווית→ברך) — against fragmentation ⇒ ONE tile.
+      final b = browseAll([
+        named('E1', 'ברך 1/2"', 'ברכיים'),
+        named('E2', 'זווית 3/4"', 'ברכיים'),
+      ]);
+      expect(tileCount(b), 1);
+    });
+
+    test('the tile image derives from the first pictured member', () {
+      final b = browseAll([
+        named('M1', 'מצמד 1/2"', 'מצמדים'),
+        named('M2', 'מצמד 3/4"', 'מצמדים', imageFile: 'm2.jpeg'),
+      ]);
+      final tile = b.families.expand((f) => f.tiles).single;
+      expect(tile.imageAsset, 'assets/lipskey/products/m2.jpeg');
+    });
+
+    test('whole real catalog → the 12 clean families, every product placed once', () {
+      final b = browseAll(resolvedCatalogProducts);
+      expect(b.families.length, 12);
+      expect(productCount(b), resolvedCatalogProducts.length);
     });
   });
 }

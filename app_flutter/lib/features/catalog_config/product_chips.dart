@@ -10,9 +10,11 @@
 // brass/threaded, which the PPR engine ([configSchemaFor]) types for ≈0 of them. So
 // the chips come from the EXISTING 17-axis projector [catAxesOf] (features/ring_dive/
 // catalog_axes.dart) — סוג/חומר/מותג/קוטר-אינץ'/DN/מ"מ/מעבר/אורך/צבע/זווית/שיטה/מין/
-// חדר/תכולה — run over a type-tile's VARIANT FAMILY (the frame siblings,
-// [productCanonicalKey]). The axes whose value VARIES across the siblings (>1 value)
-// are the wheels; each maps to the taxonomy priority; [prioritizedSchema] feeds them,
+// חדר/תכולה — run over a type-tile's TYPE GROUP (the clean-family peers that share a
+// [typeKeyOf] · owner §1–§3, against fragmentation). The axes whose value VARIES
+// across the peers (>1 value) are the wheels; each maps to the taxonomy priority; so
+// grouping by the TYPE (ברך, צינור) — not the fragmented frame — makes those axes
+// genuinely vary. [prioritizedSchema] feeds them,
 // UNIONed over [configSchemaFor]'s real engine aggregation (kept for a mapped engine
 // family — e.g. the manifolds' יציאות, which the axis engine has no wheel for).
 //
@@ -24,12 +26,16 @@
 
 import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/variant_families.dart'
-    show AttrKind, productCanonicalKey, variantValue;
 import 'package:buildsmart/domain/trade_schema.dart';
+import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
+    show typeKeyOf;
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
 import 'package:buildsmart/features/fittings/engine/catalog_map.dart' show odOf;
 import 'package:buildsmart/features/ring_dive/catalog_axes.dart' show catAxesOf;
+import 'package:buildsmart/features/word_finder/color_truth.dart'
+    show isTrueColor;
+import 'package:buildsmart/features/word_finder/material_taxonomy.dart'
+    show canonicalMaterial;
 
 /// Synthetic tradeId for engine/catalog-derived attributes (not a user Trade).
 const String _kTradeId = 'catalog';
@@ -135,40 +141,53 @@ List<AttributeValue> _values(Iterable<String> raw) {
   ];
 }
 
-/// The frame-group siblings of [p] within [universe] — the VARIANT family (same
-/// [productCanonicalKey]); wheels aggregate over it. Never empty (falls back to [p]).
-List<LipskeyCatalogProduct> _frameGroup(
+/// The TYPE-group peers of [p] within [universe] — the products that share [p]'s
+/// clean [typeKeyOf] (family + canonical type word: every ברך/מרפק/זווית, any size or
+/// angle, is ONE type · owner §1–§3). This is the SAME set the rail collapses to a
+/// tile, so rail = types and card = that type's variations agree. The wheels
+/// aggregate over it. Never empty (falls back to [p] when the type is a singleton).
+List<LipskeyCatalogProduct> _typeGroup(
   LipskeyCatalogProduct p,
   List<LipskeyCatalogProduct> universe,
 ) {
-  final key = productCanonicalKey(p);
+  final key = typeKeyOf(p);
   final group = [
     for (final m in universe)
-      if (productCanonicalKey(m) == key) m,
+      if (typeKeyOf(m) == key) m,
   ];
   return group.isEmpty ? [p] : group;
 }
 
-/// DEFINING chips — shown even single-value: the SIZE (owner: "1/2\" is a diameter")
-/// and the COLOR (owner: "בצינורות יש לך צבעים" — a fitting's colour is a defining
-/// attribute, black HDPE vs gray PVC). Every OTHER axis is a wheel only when it
-/// VARIES across the family.
-const Set<String> _kSizeChips = {'diameter', 'diameter-small', 'color'};
+/// DEFINING chips — shown even single-value: the SIZE (owner: "1/2\" is a diameter").
+/// Diameter is THE primary config axis, so a type shows its קוטר even when the tile
+/// holds one size. Every OTHER axis — color/type/material/… — is a wheel only when it
+/// VARIES across the type group; grouping by the clean TYPE (owner §1–§3) is what
+/// makes them vary (e.g. the 140-product צינור type spans שחור/אפור, so צבע surfaces
+/// on its own — no need to force it, unlike the old fragmented frame grouping).
+const Set<String> _kSizeChips = {'diameter', 'diameter-small'};
 
-/// §4 — the wheels from [catAxesOf] over [p]'s variant family: the axes mapped to
+/// §4 — the wheels from [catAxesOf] over [p]'s type group: the axes mapped to
 /// taxonomy chips. The SIZE chip ([_kSizeChips]) always shows (the defining
 /// property); a DESCRIPTIVE axis (color/type/material/…) shows only when it VARIES
-/// across the siblings (>1 value — otherwise it is context, not a wheel · §7).
+/// across the peers (>1 value — otherwise it is context, not a wheel · §7).
 List<AttributeDef> axisChips(
   LipskeyCatalogProduct p,
   List<LipskeyCatalogProduct> universe,
 ) {
-  final group = _frameGroup(p, universe);
+  final group = _typeGroup(p, universe);
   // chip id → ordered distinct values across the family.
   final agg = <String, List<String>>{};
   void add(String chipId, String value) {
+    // §4 — one material space: fold brass→copper, PE→HDPE etc. (canonicalMaterial)
+    // so a type that spells one material two ways yields ONE חומר value, not a
+    // spurious wheel. Idempotent for the axis engine's already-canonical keys.
+    final v = chipId == 'material' ? canonicalMaterial(value) : value;
+    // §4 — color_truth: the catalog miscodes metal FINISHES (נחושת/כרום/ניקל) into
+    // the color field; [isTrueColor] keeps only real colours off the צבע wheel, so a
+    // finish never poses as a colour (it belongs on the חומר axis).
+    if (chipId == 'color' && !isTrueColor(v)) return;
     final list = agg.putIfAbsent(chipId, () => <String>[]);
-    if (!list.contains(value)) list.add(value);
+    if (!list.contains(v)) list.add(v);
   }
 
   for (final m in group) {
@@ -187,11 +206,6 @@ List<AttributeDef> axisChips(
       final od = odOf(m);
       if (od != null) add('diameter', '$od');
     }
-    // Color fallback: [catAxesOf] reads color from the p.color FIELD, so a NAME
-    // color ("צינור שחור") is missed. Feed the variant engine's name-color in — a
-    // pipe family that varies שחור/אפור then gets a real צבע wheel.
-    final nameColor = variantValue(m, AttrKind.color);
-    if (nameColor.isNotEmpty) add('color', nameColor);
   }
   return [
     for (final e in agg.entries)
