@@ -23,6 +23,7 @@
 
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/variant_families.dart';
 import 'package:flutter/foundation.dart';
 
 /// One product tile in an open family rail — the leaf-level unit the user taps
@@ -93,6 +94,7 @@ class ConfigFamily {
     required this.titleHe,
     required this.emoji,
     required this.tiles,
+    required this.productCount,
   });
 
   /// The source leaf's id (stable) — e.g. `endparts.threading.fittings`.
@@ -104,8 +106,14 @@ class ConfigFamily {
   /// The family header icon — the leaf's emoji.
   final String emoji;
 
-  /// The product tiles in this family, in catalog-list order. Non-empty.
+  /// The TYPE tiles in this family, in catalog-list order — ONE per variant
+  /// family ([productCanonicalKey]); the per-SKU variations are collapsed into
+  /// the card's wheels. Non-empty.
   final List<ConfigTile> tiles;
+
+  /// The total PRODUCT count in this family (all variations, before collapse) —
+  /// the sub-header badge (the mockup's "· 143"), NOT the tile/type count.
+  final int productCount;
 
   /// The family's REPRESENTATIVE image (plan D · DERIVED, never hardcoded): the
   /// first tile that carries a [ConfigTile.imageAsset]. So the family sub-header
@@ -122,8 +130,8 @@ class ConfigFamily {
     return null;
   }
 
-  /// The family's product count — the rail's tile count (the sub-header badge).
-  int get count => tiles.length;
+  /// The sub-header badge — the total product count (all variations).
+  int get count => productCount;
 
   @override
   bool operator ==(Object other) =>
@@ -131,10 +139,12 @@ class ConfigFamily {
       other.id == id &&
       other.titleHe == titleHe &&
       other.emoji == emoji &&
+      other.productCount == productCount &&
       listEquals(other.tiles, tiles);
 
   @override
-  int get hashCode => Object.hash(id, titleHe, emoji, Object.hashAll(tiles));
+  int get hashCode =>
+      Object.hash(id, titleHe, emoji, productCount, Object.hashAll(tiles));
 }
 
 /// A browse SECTION — the dive screen's whole payload: a section title plus its
@@ -158,6 +168,56 @@ class ConfigBrowse {
 
   @override
   int get hashCode => Object.hash(titleHe, Object.hashAll(families));
+}
+
+/// Collapse a family's products into ONE [ConfigTile] per variant family (the
+/// existing [productCanonicalKey] — every size/color/model/subtype variant of the
+/// same product shares one key), so the rail shows TYPES and the config card's
+/// wheels carry the variations (owner: "הרַיל = סוגים, הכרטיס = וריאציות"). Reuses
+/// the built variant engine — no new grouping, no name-heuristic. Groups keep
+/// first-appearance (catalog) order.
+List<ConfigTile> _collapseTiles(
+  List<LipskeyCatalogProduct> products,
+  String fallbackEmoji,
+) {
+  final groups = <String, List<LipskeyCatalogProduct>>{};
+  final order = <String>[];
+  for (final product in products) {
+    final key = productCanonicalKey(product);
+    final list = groups[key];
+    if (list == null) {
+      groups[key] = [product];
+      order.add(key);
+    } else {
+      list.add(product);
+    }
+  }
+  return [
+    for (final key in order) _tileForGroup(groups[key]!, fallbackEmoji),
+  ];
+}
+
+/// One tile for a collapsed variant group — sku + image from the first pictured
+/// member (else the first, plan D); label = the [productFrame] (falls back to the
+/// full name for a too-short frame); emoji = the member's categoryEmoji else
+/// [fallbackEmoji].
+ConfigTile _tileForGroup(
+  List<LipskeyCatalogProduct> group,
+  String fallbackEmoji,
+) {
+  final rep = group.firstWhere(
+    (p) => p.imageAsset != null,
+    orElse: () => group.first,
+  );
+  final frame = productFrame(rep);
+  final emoji =
+      rep.categoryEmoji.isNotEmpty ? rep.categoryEmoji : fallbackEmoji;
+  return ConfigTile(
+    sku: rep.sku,
+    nameHe: frame.length >= 3 ? frame : rep.nameHe,
+    emoji: emoji,
+    imageAsset: rep.imageAsset,
+  );
 }
 
 /// PURE + deterministic — walk [section]'s subtree, collect every leaf that
@@ -191,10 +251,8 @@ ConfigBrowse browseSection(
             id: node.id,
             titleHe: node.title,
             emoji: node.emoji,
-            tiles: [
-              for (final product in matches)
-                ConfigTile.fromProduct(product, fallbackEmoji: node.emoji),
-            ],
+            productCount: matches.length,
+            tiles: _collapseTiles(matches, node.emoji),
           ),
         );
       }

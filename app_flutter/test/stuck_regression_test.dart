@@ -2354,5 +2354,26 @@ void main() {
       expect(matches, isEmpty,
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
+
+    test("antipattern #115 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp('בניית שורות-UI פר-SKU לרשימת-מוצרים כשקיים כבר מנוע-וריאנטים שמקבץ אותם — שכבת-הכיווץ מנותקת ממפתח-האֲחים של הסכמה ולכן מתנגשת');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
   });
 }

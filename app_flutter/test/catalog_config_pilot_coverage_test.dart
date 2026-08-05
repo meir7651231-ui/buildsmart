@@ -20,27 +20,28 @@ void main() {
     expect(browse.families, isNotEmpty);
 
     var withImage = 0;
-    var tilesTotal = 0;
-    var tilesWithImage = 0;
+    var productTotal = 0; // SKUs (variations, pre-collapse)
+    var typeTotal = 0; // tiles (types, post-collapse)
     for (final f in browse.families) {
       final rep = f.representativeImage;
       if (rep != null) {
         withImage++;
       }
-      final ti = f.tiles.where((t) => t.imageAsset != null).length;
-      tilesTotal += f.tiles.length;
-      tilesWithImage += ti;
+      productTotal += f.productCount;
+      typeTotal += f.tiles.length;
       print(
-        '  ${f.titleHe} | count=${f.count} | '
-        'rep=${rep ?? 'EMOJI(${f.emoji})'} | tiles=$ti/${f.tiles.length}',
+        '  ${f.titleHe} | products=${f.productCount} -> types=${f.tiles.length}'
+        ' | rep=${rep ?? 'EMOJI(${f.emoji})'}',
       );
     }
     print('PILOT "${browse.titleHe}" · families=${browse.families.length}');
+    print('RAIL-COLLAPSE: $productTotal SKUs -> $typeTotal type tiles');
     print('FAMILY-COVERAGE: $withImage/${browse.families.length} real-image');
-    print('TILE-COVERAGE: $tilesWithImage/$tilesTotal real-image');
 
     // every open family is non-empty (browseSection drops 0-tile leaves)…
     expect(browse.families.every((f) => f.tiles.isNotEmpty), isTrue);
+    // …the rail COLLAPSES variations: fewer type-tiles than raw SKUs…
+    expect(typeTotal, lessThan(productTotal));
     // …and the vast majority derive a REAL image (emoji is the rare edge).
     expect(
       withImage,

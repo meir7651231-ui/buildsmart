@@ -209,6 +209,15 @@ List<String> sizeDiameterAtoms(String size) {
   return out.toList();
 }
 
+/// The product's FRAME — its name with every variant token (size / color /
+/// brand-model / subtype · [kindOf]) removed. Every variant of the same product
+/// shares one frame; it is the human label of the collapsed family row (the
+/// name-half of [productCanonicalKey], mirrored here so that key stays untouched).
+String productFrame(LipskeyCatalogProduct p) => p.nameHe
+    .split(RegExp(r'\s+'))
+    .where((w) => w.isNotEmpty && kindOf(w) == null)
+    .join(' ');
+
 /// Canonical key identifying a product's "family" — every variant (size,
 /// color, brand-model, subtype) of the same product yields the same key. Two
 /// products with equal canonical keys belong to the same family and should

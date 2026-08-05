@@ -166,6 +166,60 @@ void main() {
     });
   });
 
+  group('#catalog-config browse — rail collapses variants to type tiles', () {
+    // A leaf whose category holds size-variants of TWO base products.
+    const collapseSection = CatalogNode(
+      id: 'sec',
+      title: 'מקטע',
+      emoji: '🔧',
+      children: [
+        CatalogNode(
+          id: 'sec.fit',
+          title: 'אביזרים',
+          emoji: '🔩',
+          lipskeyCategory: 'מצמדים',
+        ),
+      ],
+    );
+    LipskeyCatalogProduct named(String sku, String nameHe, {String? imageFile}) =>
+        LipskeyCatalogProduct(
+          sku: sku,
+          nameHe: nameHe,
+          nameEn: '',
+          categoryHe: 'מצמדים',
+          categoryEn: 'מצמדים',
+          categoryEmoji: '🔩',
+          page: 1,
+          imageFile: imageFile,
+        );
+
+    test('3 size-variants of "מצמד" collapse to ONE tile labelled by the frame', () {
+      final family = browseSection(collapseSection, [
+        named('M1', 'מצמד 1/2"', imageFile: 'm1.jpeg'),
+        named('M2', 'מצמד 3/4"'),
+        named('M3', 'מצמד 1"'),
+      ]).families.single;
+
+      expect(family.tiles.length, 1); // 3 SKUs → 1 TYPE tile
+      expect(family.tiles.single.nameHe, 'מצמד'); // the frame (size stripped)
+      expect(family.tiles.single.sku, 'M1'); // the first PICTURED member
+      expect(family.tiles.single.imageAsset, 'assets/lipskey/products/m1.jpeg');
+      expect(family.productCount, 3); // badge = the PRODUCT count (not tiles)
+      expect(family.count, 3);
+    });
+
+    test('two DIFFERENT base products → two tiles (frames differ)', () {
+      final family = browseSection(collapseSection, [
+        named('M1', 'מצמד 1/2"'),
+        named('M2', 'מצמד 3/4"'),
+        named('T1', 'מסעף 1/2"'),
+      ]).families.single;
+
+      expect(family.tiles.map((t) => t.nameHe), ['מצמד', 'מסעף']);
+      expect(family.productCount, 3); // still 3 products, now across 2 types
+    });
+  });
+
   group('#catalog-config browse — null-fallback (never throws)', () {
     test('no products → an empty ConfigBrowse with the section title', () {
       final browse = browseSection(kFakeSection, const []);

@@ -1972,3 +1972,9 @@
 - **תקלות מוזרקות (mutation-sensitivity):** (1) listen על כל-האוסף (בלי scope threadId) → ה-rule הפר-מסמך דוחה את כל ה-query → 0 הודעות → 'server snapshot → delivered' נכשלת. (2) listen ל-thread ללא participantUids → 'opens only for uid-threads' נכשלת. (3) merge לקוי → 'two threads merge' נכשלת.
 - **בטיחות:** כבוי (useFirebaseBackend/UID_SCOPED) ⇒ מקור כל-האוסף כמו קודם (זהה-בייטים).
 - **אימות:** `chat_firebase_repo_test` (4 חדשות) + 88 chat tests + full suite ירוקים · analyze 0.
+
+## #catalog-config-rail-collapse — אריח-פר-סוג דרך מנוע-הוריאנטים הקיים (2026-08-05)
+- **הנכס:** `browseSection` (browse_model) מכווץ את מוצרי-המשפחה ל-`ConfigTile` אחד פר-`productCanonicalKey` (מנוע-הוריאנטים הקיים · `data/variant_families.dart`); `productFrame` = תווית-הטיפוס; `ConfigFamily.productCount` = מונה-המוצרים לבאדג'.
+- **תקלות מוזרקות (mutation-sensitivity):** (1) קיבוץ פר-SKU במקום `productCanonicalKey` (אריח-פר-וריאציה) → הבדיקה `3 size-variants of "מצמד" collapse to ONE tile` נכשלת (3 אריחים במקום 1) ⇒ הכיווץ load-bearing. (2) `count => tiles.length` במקום `productCount` → הבאדג' מציג טיפוסים (1) במקום מוצרים (3) → הבדיקה `badge = the PRODUCT count` נכשלת ⇒ המונה מודד מוצרים לא-טיפוסים. (3) כיווץ שאינו מכווץ (types==SKUs) → `expect(typeTotal, lessThan(productTotal))` בפיילוט נכשלת.
+- **בטיחות:** מגודר `kCatalogConfig` OFF ⇒ tree-shaken; `productCanonicalKey` נשאר **byte-identical** (`productFrame` additive · מקטע-"וריאנטים" החי ללא-שינוי).
+- **אימות:** `flutter analyze` 0 (הקבצים שלי) · catalog_config 64/64 · הפיילוט "אביזרי קצה וחיבורים" 143 SKUs → 62 אריחי-טיפוס.
