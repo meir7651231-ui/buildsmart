@@ -78,4 +78,33 @@ void main() {
       expect(priorities, orderedEquals([...priorities]..sort()));
     });
   });
+
+  group('#catalog-config chips — §4 wheels FROM THE NAME (brass/threaded · non-PPR)', () {
+    test('a threaded elbow gets זווית + תבריג from its NAME, not the PPR engine', () {
+      // 'אביזרי תבריג' is NOT a PPR engine category ⇒ configSchemaFor makes a base
+      // card; the name parser supplies the wheels (45° → angle, 1/2" → thread).
+      final p = _p('ברך 45° תבריג צד אחד 1/2"', 'אביזרי תבריג');
+      final roster = _ids(p, universe: [p]);
+      expect(roster, contains('angle'));
+      expect(roster, contains('thread'));
+      expect(roster.first, isIn(['angle', 'thread'])); // priority-1 = highest present
+    });
+
+    test('§4: size-variants of the family supply a MULTI-value wheel', () {
+      // Same frame ("מצמד", size stripped) ⇒ one variant family; the thread wheel
+      // spans both inch sizes (aggregated over the siblings).
+      final a = _p('מצמד 1/2"', 'אביזרי תבריג');
+      final b = _p('מצמד 3/4"', 'אביזרי תבריג');
+      final s = prioritizedSchema(a, universe: [a, b]);
+      final thread = s.attributes.firstWhere((x) => x.id == 'thread');
+      expect(thread.values.map((v) => v.labelHe), containsAll(['1/2"', '3/4"']));
+    });
+
+    test('§4 keeps the engine goldens intact (union, engine wins a shared id)', () {
+      // The name parser must not disturb a PPR golden — the elbow still resolves to
+      // exactly [diameter · angle · length].
+      expect(_ids(_p('ברך PPR 90° 32', kPprElbows)),
+          ['diameter', 'angle', 'length']);
+    });
+  });
 }
