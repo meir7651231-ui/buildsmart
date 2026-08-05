@@ -1,789 +1,789 @@
 [
-  {
-    "path": "02-shell-and-screens.md",
-    "one_line": "לכידה verbatim של המעטפת וכל המסכים והתיבות מאב-הטיפוס (index.html 4021–5419) + דלתאות Preact ו-Flutter.",
-    "status": "reference",
-    "vision": "מקור-אמת יחיד — לתעד כל מסך/overlay/handler של אב-הטיפוס verbatim לצורך port.",
-    "mission": "לתעד מבנה stage>phone>notch>screen, מסכי-onboarding, מעטפת-קבועה, views-קבלן ו-overlays — כל מחרוזת+handler+מיקום.",
-    "capabilities": [
-      "מסכי onboarding: splash/welcome/login/profession/prep + 4 דשבורדי-פרסונה",
-      "מעטפת: statusbar · appbar (פעמון+עגלה+notifPanel) · tabbar 5-טאבים",
-      "views-קבלן: home/catalog/catnav/project/scan/orders/cart/sites/profile/stock/tasks",
-      "overlays/sheets: בוררי אתר/זמן/יום · תקציב · הגדרות · hubs A–J · עץ-מוצרים · brand/variant/order",
-      "Preact: dial pattern — מסכים→dials · tabbar→MenuSpeedDial · appbar→FloatingHeader · routing לפי-פרסונה",
-      "Flutter: מעטפת 4-טאבים (מחלקות·שיחות·התראות·חנות) + CatalogScreen 7,660ש׳ + InstallStudioScreen 3,185ש׳"
-    ],
-    "instructions": [
-      "כל מחרוזת verbatim, מיקום=index.html:NNNN",
-      "הקוד (ה-label) קובע מול comment/spec",
-      "אל תממש shared-admin ב-Flutter — הפרסונות מסכים מבודדים"
-    ],
-    "faults": [
-      "אי-התאמה תווית↔יעד: טאב רכש→cart · טאב הגדרות→profile",
-      "drift: README של app_flutter מתאר Phase-0/5-FAB מיושן; הקוד = 4-tab בוגר",
-      "שורש-בלבול קטלוג/מחלקות: comment בקוד כתוב קטלוג אבל label המוצג = מחלקות"
-    ],
-    "workarounds": [
-      "standalone — fallback-בזיכרון לכל נתיב-נתונים (אין data-layer חיצוני; apiService.js שבר viewers מבודדים)",
-      "ה-menu-dial הוסר (b9737cf) → כלי-הקבלן עברו לגישה-נייטיב",
-      "dial-overlays (menu-leaves + פרסונות store/courier/worker/manager) = leaves שמציגים toast (בבנייה)"
-    ],
-    "owner_decisions": [],
-    "contract": "לכידה מלאה verbatim של index.html:4021–5419 — אפס פערים.",
-    "dependencies": [
-      "index.html:4021–5419",
-      "app/src/app.tsx",
-      "app_flutter/lib/screens/home_shell.dart"
-    ],
-    "gating": [
-      "openDialProvider + scrim",
-      "cart-FAB מוסתר בטאב-חנות"
-    ],
-    "verification": [
-      "אומת שורה-שורה home_shell.dart:508–527 (labels)",
-      "אומת b4e2198 (1,539+ בדיקות)",
-      "cutover b9737cf (menu-dial הוסר 07-06)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "index.html:4021–5419",
-      "app/src/app.tsx",
-      "home_shell.dart (1033ש׳)",
-      "catalog_screen.dart",
-      "install_studio_screen.dart + install_engine (1391ש׳)"
-    ]
-  },
-  {
-    "path": "01-design-system.md",
-    "one_line": "לכידה מלאה של מערכת-העיצוב (CSS) מאב-הטיפוס (index.html 14–4019) — 8 חלקים א׳–ח׳, Categories A–J, + דלתאות Preact/Flutter.",
-    "status": "reference",
-    "vision": "לתעד את שפת-העיצוב המלאה (טוקנים·רכיבים·פרסונות) כמקור לתרגום port.",
-    "mission": "ללכוד טיפוגרפיה, פלטת-צבעים, רכיבי-תוכן, כרטיס-מוצר, עץ-מוצרים ו-Categories A–J verbatim לפי שורה.",
-    "capabilities": [
-      "טוקנים: Heebo/Rubik · פלטה teal #1f6f6b + amber #f2a516 + dark-theme + reduce-motion",
-      "שפת-רכיבים: header/appbar · notif-panel · sheets (overlay/sheet/grip) · budget-box · tree",
-      "Categories A–J (prefix-CSS): שרשרת-אספקה·פיננסים·ניהול-אתר·UX·פורטל·AI·gamification·אבטחה·שירות (אין D)",
-      "4 פרסונות חולקות מעטפת admin: manager(md/mm/mo/mc) · store(sh/so) · courier(ch) · worker(ww)",
-      "Preact: tokens זהים + סקאלות + מערכת-dial/fab/float נטו-חדשה + screen__bg (bathroom-bg)",
-      "Flutter: BsTokens (dial-dims/animation) + מותג כתום #FF7A18 + Material3 + RTL + i18n"
-    ],
-    "instructions": [
-      "קוראים כל שורה verbatim, מיקום index.html:NNNN",
-      "2 צבעי-מותג בלבד: teal (מבנה) + amber (CTA); ירוק=הצלחה, אדום=סכנה, אפור=ניטרלי",
-      "מצבי-סטטוס בצבע אחיד לאורך כל האפליקציה (כתום=בתהליך·teal=פעיל·ירוק=הושלם·אדום=בעיה·אפור=ממתין)",
-      "Heebo-900 לכותרות/מספרים · Rubik לגוף"
-    ],
-    "faults": [
-      "פער-מותג מתועד: אב-טיפוס teal #1f6f6b; Flutter עבר ל-orange #FF7A18",
-      "Flutter חסר tokens amber/ok/danger/line · חסר font Rubik · חסר glass-aesthetic (frosted-over-photo)",
-      "אין Category D (דילוג במקור)"
-    ],
-    "workarounds": [
-      "text-size כ-zoom (small .92 / large 1.1)"
-    ],
-    "owner_decisions": [
-      "screen__bg (רקע-אמבטיה חד + כרטיסי frosted-glass) = net-new owner-specified (spec.json FEAT-bathroom-bg)"
-    ],
-    "contract": "מערכת-העיצוב נלכדה במלואה head + 14–4019 — אפס פערים.",
-    "dependencies": [
-      "index.html:14–4019",
-      "app/src/styles/tokens.css (59ש׳) + global.css (2125ש׳)",
-      "app_flutter/lib/theme/ (tokens.dart + app_theme.dart)"
-    ],
-    "gating": [
-      "root[data-theme=dark]",
-      "data-reduce-motion=1",
-      "html[data-contrast=high]"
-    ],
-    "verification": [
-      "INSP-0005/0006/0007 (verbatim units/currency/contrast)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "index.html:14–4019",
-      "tokens.css",
-      "global.css",
-      "tokens.dart (BsTokens)",
-      "app_theme.dart (AppTheme.light/dark)"
-    ]
-  },
-  {
-    "path": "README.md",
-    "one_line": "אינדקס מאגר-הידע של אב-הטיפוס — שיטה, מבנה 3-שכבות, מעקב-כיסוי, ו-3 מקורות (פרוטוטייפ/Preact/Flutter).",
-    "status": "current",
-    "vision": "מקור-אמת יחיד = אב-הטיפוס index.html (1.4MB, 22,416 שורות); לכידה verbatim מלאה מהקוד.",
-    "mission": "לאנדקס 23 דוחות-תחום + מפת-ניווט JS + דלתאות Preact/Flutter + מעקב-כיסוי מלא.",
-    "capabilities": [
-      "אינדקס דוחות 01–23 + טווחי-מקור פר-דוח",
-      "מפת-ניווט JS (5440–22414): שמות-מבני-נתונים + שורות (lookup מהיר)",
-      "3 מקורות מאומתים: אב-טיפוס (100% נלכד) · Preact (55/15,841) · Flutter (~172 קבצים, קוד=SSOT)"
-    ],
-    "instructions": [
-      "קוראים כל שורה/תיבה — לא grep, לא מנחשים, לא מדלגים",
-      "verbatim עם מיקום index.html:NNNN",
-      "כל ידע חדש → לקובץ מיד (אין זיכרון בין sessions); לא נוגעים בקוד",
-      "הקוד = SSOT; אם אב-הטיפוס משתנה — השווה SHA ועדכן דוח רלוונטי"
-    ],
-    "faults": [
-      "doc-vs-code drift: KB אמר tab0=קטלוג/מותג-teal; הקוד = tab0=מחלקות/כתום #FF7A18",
-      "טעות קודמת: 1,337/Lipskey-255 → תוקן שורה-שורה ל-1,877 (935+772+170)",
-      "divergences: UI_ARCH profile-mockup · SYSTEM_MANAGER מספרים/REST-API · ROLE_DRAWER worker-names — מומצאים מול המקור"
-    ],
-    "workarounds": [],
-    "owner_decisions": [],
-    "contract": "100% קבצי .md נקראו + פרוטוטייפ 22,416 + קוד-מקור 24K + config + native-manifests — אפס פערים.",
-    "dependencies": [
-      "index.html",
-      "app/src",
-      "app_flutter/lib + app_flutter/knowledge (~88 מסמכים)",
-      "app/knowledge (62 מסמכים) + RULES.md",
-      "KNOWLEDGE_AUDIT.md"
-    ],
-    "gating": [],
-    "verification": [
-      "CI 9/9 · smoke 21/21 · runRegression 236/236",
-      "אומת b4e2198 (1,539+ בדיקות)",
-      "1,877 מוצרים אומת שורה-שורה (deploy.yml פורס Preact→/buildsmart/ + Flutter→/buildsmart/flutter/)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "index.html (22,416 שורות)",
-      "app/knowledge (43/43 INSP · 3 ADR · 4 dashboards)",
-      "deploy.yml · manifest.json · service-worker.js · capacitor.config.ts"
-    ]
-  },
-  {
-    "path": "SPEC-user-system-MICRO.md",
-    "one_line": "תוכנית-בנייה מיקרו למערך-משתמשים (U0–U5): מודל·RBAC·בעלות-חנות·הרשמה·ניהול-אדמין·מחזור-חיים.",
-    "status": "current",
-    "vision": "להשלים את השכבה-המסחרית ולפתוח go-live — חנות מנהלת מלאי לבד דרך משתמש-בעל-חנות.",
-    "mission": "לפרק ל-units (DoD-בודד) 6 שלבים: U0 יסודות · U1 RBAC · U3 חנות↔בעלים (⭐) · U2 הרשמה · U4 ניהול-אדמין · U5 מחזור-חיים.",
-    "capabilities": [
-      "U0: class BsUser + FirestoreUsersRepository + currentUserProvider + Security-Rules users",
-      "U1: enums BsRole/Permission + roleToPermissions + hasPermission/requirePerm (role מ-custom-claims)",
-      "U3: setRole+storeUid · stores.ownerUid · myStoreProvider · isolation פר-חנות",
-      "U2: הרשמה per-persona + שדרוג-אנונימי (linkWithCredential) + onboarding-חנות",
-      "U4: users-admin (רשימה/חיפוש) · הקצאת-תפקיד · השעיה · תור-אישור (roleRequests)",
-      "U5: עריכת-פרופיל · מחיקת-חשבון · logout · השעיה בזמן-אמת · GDPR-export"
-    ],
-    "instructions": [
-      "additive — לא לשבור login/guest קיים; חדש מגודר kUserSystem (OFF=זהה-בייטים)",
-      "שימוש-חוזר (לא לבנות מאפס): authStateProvider·login_sheet·roleProvider·setRole/reviewRoleRequest/deleteAccount קיימים",
-      "Rules additive — deny-by-default נשמר",
-      "אומתו = flutter test מלא ירוק"
-    ],
-    "faults": [
-      "שכבת-החנויות חצי: ההשוואה קוראת מלאי-שזרע-האדמין אבל חנות לא יכולה לנהל את המלאי שלה",
-      "מחיקת-חשבון (U5.2) = חוסם-iOS של Apple"
-    ],
-    "workarounds": [],
-    "owner_decisions": [
-      "הוכרע 14.7: הרשמה = הכל באישור-admin — כל משתמש חדש status=pending → admin→active (מוסיף U1.5+U2.4)",
-      "הוכרע 14.7: אורח רואה קטלוג · הזמנה+פרופיל דורשים הרשמה (מוסיף U2.5)",
-      "הוכרע 14.7: בעלות-חנות = בעל-יחיד לכל חנות (storeUid אחד, בלי מודל-צוות)"
-    ],
-    "contract": "כל unit = DoD-בודד; אומתו=flutter test מלא; דגל-OFF=golden זהה-בייטים; חוסמי-השקה U3+U5.2.",
-    "dependencies": [
-      "סדר-בנייה U0→U1→U3→U2→U4→U5; מסלול-מהיר U0→U1→U3",
-      "U3 משלים את C5.3 (Rules לפי-חנות)"
-    ],
-    "gating": [
-      "kUserSystem (env, OFF default) + דגלי-תת-שלב",
-      "kRoleSwitchCode (role-switch לרב-תפקיד)"
-    ],
-    "verification": [
-      "golden דגל-OFF (הכניסה זהה-בייטים)",
-      "rules-test: חנות-א׳ לא כותבת מלאי של חנות-ב׳ (403)",
-      "round-trip test (fromJson/toDoc) + full-suite ירוקה"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "authStateProvider · login_sheet.dart · roleProvider + currentUidProvider",
-      "setRole/reviewRoleRequest/deleteAccount (callables קיימים) · roleRequests collection · kOwnerEmails",
-      "UserProfile/UserProfileNotifier · FirestoreCachedRepo<T> · main.dart:329 (logout)"
-    ]
-  },
-  {
-    "path": "APP-SPEC-full.md",
-    "one_line": "אפיון-מוצר מלא (PRD) — 5 פרסונות, קטלוג+הזמנת-רץ, מרכז-כספים, ניהול-אתר, מנוע-הזמנות חוצה-תפקידים.",
-    "status": "superseded",
-    "vision": "פלטפורמה שמחברת את כל שרשרת-האספקה (קבלן·חנות·שליח·עובד·מנהל) באפליקציה אחת iOS/Android/Web, RTL, בסגנון-וואטסאפ.",
-    "mission": "לתעד מקצה-לקצה כל מודול: עקרונות→mockup→תרחיש→דרישות→נתונים→MVP/סטטוס.",
-    "capabilities": [
-      "קטלוג 1,877 מוצרים (Lipskey 935·Polyroll 772·Huliot 170)+HW-133 + הזמנת-רץ stay-on-screen",
-      "מרכז-כספים 10 כלים: מדד·תנאי-תשלום·קבלני-משנה·אישורי-רכש·חריגה·ROI·פיצול-חשבונית·קנסות·דוחות·מט״ח",
-      "ניהול-אתר 10 כלים: גאנט·ליקויים·קומה-דירה-חדר·נוכחות-GPS·יומן·בטיחות·תלויות·צילום·ביקורות·ארכיון",
-      "מנוע-הזמנות חוצה-תפקידים: new→preparing→ready→pickup→transit→delivered (storeAdvance/courierAdvance)",
-      "5 פרסונות: קבלן(ראשי)·חנות·שליח·עובד·מנהל (2,682ש׳ v6.12)"
-    ],
-    "instructions": [
-      "verbatim (בלי המצאה) · RTL-first · Heebo · כתום מותג #FF7A18",
-      "server-ready דרך שכבת-Repository (חיבור-שרת = drop-in)",
-      "בלי כפתורים-מזויפים — פקד שלא עובד = honest-stub (לא toast-מתחזה)",
-      "נגישות-שטח: כפתור ≥52px · קולי · מצב-בניין ניגודיות-גבוהה · רטט+צליל"
-    ],
-    "faults": [
-      "SUPERSEDED 07-06: מתאר ניווט pre-dial (תפריט-נסתר); הדיאל הוסר → ניווט נייטיב (00-START-HERE §4.6). שאר התוכן (מודולים/מנוע/פרסונות) תקף",
-      "בעיה: הקבלן היום עובד בטלפונים/וואטסאפ/אקסל — אין מקור-אמת אחד לקנייה/משלוח/תקציב"
-    ],
-    "workarounds": [],
-    "owner_decisions": [],
-    "contract": "DoD פר-מודול לפי מקרא ✅בנוי/◑חלקי/🔲לבנות; MVP מוגדר פר-מודול.",
-    "dependencies": [
-      "Track T1 (finance) · T2 (site) · T3 (tasks/project/budget/stock/AI/club) · T4 (notif) · T5 (personas) · T6 (repo/server)"
-    ],
-    "gating": [],
-    "verification": [
-      "אומת מהקוד v6.16",
-      "מנוע-הזמנות ✅ (sys_orders) · מנהל 2,682 שורות (מאוחד v6.12)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "app_flutter/",
-      "OrderLineItem{sku,nameHe,brand,qty,unitPrice,lineTotal}",
-      "Order{stage} · Project{cart} · Task{status} · Customer{credit} · contractorCredit (30k–120k)"
-    ]
-  },
-  {
-    "path": "SPEC-catalog-to-server-MICRO.md",
-    "one_line": "פירוק-מיקרו (C0–C5) להעברת הקטלוג הדינמי + שכבת-חנויות חדשה (מחיר/מלאי) לשרת — בלי לשכתב מנוע.",
-    "status": "current",
-    "vision": "drop-in דרך Repository (bundled→server) + cache-pattern → UI ומנועים ללא-שינוי · אופליין נשמר · עלות-DB נמוכה.",
-    "mission": "לפרק ל-units: C0 תשתית · C1 פרוסה-דקה (20 SKU, שער-הוכחה) · C2 מיגרציה-מלאה · C3 חנויות-אמיתיות · C4 טופס-ספק · C5 הפעלה.",
-    "capabilities": [
-      "5 collections: products·verified_specs·recipes·stores·inventory",
-      "cache-pattern: הורדה-פעם-אחת → מקומי · sync-reads · re-sync רק ב-updatedAt",
-      "שכבת-חנויות אמיתית: Store{id,name,area,logo,contact} + Inventory{storeId,sku,price,stock} + מנוע השוואת-חנויות",
-      "טופס-העלאה-ספק (16 שדות + מפרט-חיבורים + מחיר/מלאי) + ייבוא-המוני CSV/Excel",
-      "barcode→sku (אופציונלי)"
-    ],
-    "instructions": [
-      "drop-in דרך Repository — אף unit לא נוגע במנוע (מתחלף רק המקור bundled→server)",
-      "שער-בטיחות קבוע: דגל-OFF = byte-identical בכל שלב (C0.5)",
-      "להסיר מחיר-הניחוש (estimatePrice/priceFor) → מחיר-אמת מ-inventory",
-      "אומתו = flutter test מלא (לא רק טסט-הפיצ׳ר; 2 נפילות-Play קודמות היו על זה)"
-    ],
-    "faults": [
-      "מסחרי מזויף: אין מחיר-אמת (מנוחש מ-categoryHe ב-price_estimate.dart/priceFor) · אין מלאי · חנויות-דמו",
-      "שדה barcode לא קיים (_runBarcode מחפש לפי sku)"
-    ],
-    "workarounds": [
-      "הרבה מ-C0/C1/C4 = הדלקה/חיווט של בנוי-רדום (הסכמה · catalog_paged server-mode · authored_products_firebase · kTradeImport)"
-    ],
-    "owner_decisions": [
-      "פתוח לפני C1: אילו 20 SKUs לפרוסה",
-      "פתוח: יעד-זמן ל-perf (C2.5) — מה נחשב מהיר-מספיק",
-      "פתוח: מודל-חנות (C3) — חנויות ידנית-על-ידי-הבעלים או onboarding-עצמי לכל חנות"
-    ],
-    "contract": "C1.7–C1.10 עוברים → הארכיטקטורה מוכחת; אחרת עוצרים לפני C2. DoD-בודד פר-unit; דגל-OFF=byte-identical.",
-    "dependencies": [
-      "מהפך של SPEC-server-connect S3.K; base FirestoreCachedRepo מ-S2.2"
-    ],
-    "gating": [
-      "useServerCatalog (kCatalogBaseUrl + useFirebaseBackend) · kSeedFreshBackend · kTradeImport — כולם OFF default"
-    ],
-    "verification": [
-      "golden/regression דגל-OFF · test-זהות 0 diffs · perf-benchmark",
-      "אופליין (טיסה-מטוס PASS) · kill-server → cache→bundled fallback PASS",
-      "כל המנועים עוברים על דאטת-שרת (finder/dive/compat/standards/tools/global-search)"
-    ],
-    "open_questions": [
-      "20 ה-SKUs לפרוסה?",
-      "יעד-זמן perf לפתיחת-קטלוג?",
-      "מודל הזנת-חנות (ידני מול onboarding-עצמי)?"
-    ],
-    "source_anchor": [
-      "lipskey_catalog.dart:4 (16 שדות) · polyroll_catalog.dart:1513 (kCatalogProducts)",
-      "trade_schema.dart · authored_products_firebase.dart (toDoc, catalogProducts) · catalog_paged.dart",
-      "contractor_tools_sheets.dart:388 (storePriceComparison) · price_estimate.dart · related_info.dart:779"
-    ]
-  },
-  {
-    "path": "06-logic-settings-projects.md",
-    "one_line": "לכידת לוגיקת הגדרות·פרופיל·פרויקטים·תקציב·פרויקט-חכם·סטטוס (index.html 6560–7700) + דלתאות Preact/Flutter.",
-    "status": "reference",
-    "vision": "לתעד תפקיד+זרימה+חיווט של פונקציות-הלוגיקה (לא העתק-קוד), עם שמות+שורות מדויקים.",
-    "mission": "ללכוד SETTINGS_LABELS, renderSettings (8 קבוצות+reset), פרופיל, היסטוריה, בוררי אתר/זמן, תקציב, פרויקט-חכם, אתרים, סטטוס-הזמנה.",
-    "capabilities": [
-      "renderSettings: 8 קבוצות+reset (חשבון·התראות·תצוגה·נגישות·אבטחה·שירות·משלוח·אזור·מידע·איפוס)",
-      "toggleSetting/cycleSetting (haptic+ARIA+toast) · applySettings→DOM · applyEntryMode",
-      "תקציב: renderBudget · openBudgetEditor/Detail · adjustBudget(±) · category-editor",
-      "פרויקט-חכם: renderSmartProject (פירוק שלבים→ימי-עבודה) · toggleSmartDay/Step",
-      "Preact: SETTINGS_ROWS 9 קבוצות + SETTINGS_SUB עץ-dial + LEAF_BINDINGS 72 עלים + inline-edit + PROFILE_TREE",
-      "Flutter: 4 מסכי-הגדרות native (~140 שדות, persist bs.{catalog/chat/notif/store}-settings.v1)"
-    ],
-    "instructions": [
-      "שיטת-לכידה: תפקיד+זרימה+חיווט (לא העתק-קוד), שמות+שורות מדויקים",
-      "verbatim (units/currency INSP-0007 · contrast/express INSP-0006 · כותרות-קבוצות INSP-0005)"
-    ],
-    "faults": [
-      "הגדרות-פרופיל = label שחיבר הבעלים (לא-verbatim; חריג מתועד INSP-0019)",
-      "drift: data/settings_tree.dart הוסר 07-06 — ההגדרות נייטיב בלבד"
-    ],
-    "workarounds": [
-      "ה-menu-dial הוסר (b9737cf) — ההגדרות נגישות נייטיב בלבד ב-4 מסכי-settings"
-    ],
-    "owner_decisions": [],
-    "contract": "לכידת index.html:6560–7700 עם שמות-פונקציות+שורות מדויקים.",
-    "dependencies": [
-      "index.html:6560–7700",
-      "app/src/components/menu/submenu-settings.tsx (1461ש׳) + app-store.ts",
-      "app/src/store/app-settings.ts · data/settings_tree.dart (הוסר 07-06)"
-    ],
-    "gating": [],
-    "verification": [
-      "INSP-0005/0006/0007/0010/0017/0019 · smoke 21/21 · runRegression 236/236",
-      "Playwright התנהגותי (currency→attr→stored→reset); AppSettings 6 מפתחות; LEAF_BINDINGS=72"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "index.html:6750(SETTINGS_LABELS)/6806(renderSettings)/7455(renderProjects)/7632(ORDER_STATUS)/7641(resolveStatus)",
-      "submenu-settings.tsx · app-settings.ts"
-    ]
-  },
-  {
-    "path": "MASTER-giant-system-order.md",
-    "one_line": "מסמך-אב מאחד ל-המערכת-הענקית — מנוע-אחד superset · כל חברה=פרוסת-קונפיג · הסדר המדויק 0→5.",
-    "status": "current",
-    "vision": "מנוע-אחד ענק (superset מקסימלי) · חברה=גולמי-נקי+קונפיג+דאטה · קוד-אחד→אינסוף חברות (30 אפליקציות · white-label).",
-    "mission": "להגדיר את הסדר-המדויק: 0 registry · 0.5 גולמי-נקי · 1 חבר-הכל+ירוק · 2 אשף=סטודיו-מלא · 2.5 איחוד-סטודיו · 3 מרכז-שליטה · 4 ורטיקל+חברה-2 · 5 שמירה.",
-    "capabilities": [
-      "registry קיים (~863 של ה-Studio, element_registry.dart) כמקור-הטוגלים",
-      "שלד-הענק (giant-v1..v6.1): OrgConfig · org_gates (featOn/termOf) · vertical_packs (6) · org_setup_wizard",
-      "Phase-2: attention_engine · workflow_engine · CRM (RFM · תיקון-באג-ח״פ · normalizePhone) · data-quality · קבלות",
-      "מרכז-שליטה: דשבורד-מנהל 5-טאבים + Trade-Builder (עורכים-אמיתיים חבויים) + 2 Studioים (~863 registry)"
-    ],
-    "instructions": [
-      "לא-שובר-קיים: additive · מאחורי-דגל · default=זהה-בייטים · לא-נוגעים-במנועים",
-      "אמת-בבייטים-לא-פרוזה (תפקיד-הידען)",
-      "לא-לבנות-מה-שקיים — לאחד, לא לשכפל",
-      "מחזרים element_registry.dart כמקור-הטוגלים (לא בונים חדש); חבר-קודם→פרק-לאט"
-    ],
-    "faults": [
-      "🔴 stubs קריאה-בלבד בטאב-ניהול: קטגוריות:4329 · הגדרות:4360 · עץ-מוצרים:4399 · מותגים+מחירים:4437 — אפס-עריכה",
-      "כפילויות: קטגוריות×2 · מוצרים×3 · מותגים×2 · מחירים×4 · הגדרות×3 · Studio×2 · תפקידים×3",
-      "פירוק שטחי: רק 13 מודולים גסים (kOrgModules) + ~8 טוגלים אד-הוק · אין registry קנוני; מודול-קבלן חסר מ-org_modules"
-    ],
-    "workarounds": [
-      "עורכים-אמיתיים חבויים ב-Trade-Builder (kTradeBuilderFlag-off) + CatalogSettings",
-      "degrade-graceful (תלוי שורד כבוי) · toggle-matrix מגבה כל צירוף"
-    ],
-    "owner_decisions": [
-      "תיקוני-בעלים: גולמי-נקי כבסיס · שני ה-Studioים · האשף=הסטודיו (מורחב 27/7, אושר צא-לדרך מול הדמייה חיה wizard-mockup.html)",
-      "מחוץ-לתוכנית (בעלים/נפרד): Android-Play (כשל קיים-מראש) · סיבוב-R2 · keystore · iOS-pipeline · הדלקות-launch"
-    ],
-    "contract": "default-ON=זהה-בייטים · ליבה-נעולה (kImmutable/kRoleFloor) · toggle-matrix ירוק · שער ירוק.",
-    "dependencies": [
-      "PLAN-giant-system-master · PLAN-verticals-and-toggles · DIRECTIVE-deepen-toggles · MAOR-REUSE-MAP",
-      "DIRECTIVE-buildsmart-clean · DIRECTIVE-fake-data-sweep · LAUNCH-MICRO-BREAKDOWN (הטראקר)"
-    ],
-    "gating": [
-      "kOrgConfigFlag · kTradeBuilderFlag · kStudioFlag · kStudioCoEditor · kImmutable/kRoleFloor (edit-safety)"
-    ],
-    "verification": [
-      "toggle-matrix (תופס שבירת-טוגל ב-CI לא בפרוד) · degrade-graceful",
-      "מודל-מאור: MaorClean↔MaorHachesed 396/400 שורות זהות"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "config/org_config.dart · state/org_gates.dart · config/vertical_packs.dart · org_setup_wizard_screen.dart",
-      "state/studio/element_registry.dart (~863) · logic/attention_engine.dart · logic/workflow_engine.dart",
-      "input_validators.dart:29 (checksum ח״פ) · studio_screen"
-    ]
-  },
-  {
-    "path": "PLAN-buildsmart-clean-master.md",
-    "one_line": "תוכנית-אב להפוך את BuildSmart למנוע-Clean בלתי-שביר (קוד-אחד→אינסוף אפליקציות), 6 שלבים.",
-    "status": "current",
-    "vision": "ה-Clean=בסיס גנרי-מלא-בלתי-שביר; כל חברה=בסיס+דאטה+שם+פיצ׳רים-נבחרים · קוד-אחד→הרבה אפליקציות חיות בו-זמנית.",
-    "mission": "מפת-שלבים: 1 מנוע-אמת · 2 חוסן · 3 הפרדת-מנוע↔דאטה · 4 פרופיל-Clean+לינק · 5 הוכחת-שכפול · 6 מודולריזציה.",
-    "capabilities": [
-      "שלב 1 מנוע-אמת (מיגור פייק): מנהל·חנות·פיננסים·שליח+פורטל-ספק·בית/תגמולים/אתר · פקדים-מתים",
-      "שלב 2 חוסן: סבילות-דאטה (ריק/חסר/מעוות/ענק) · בידוד-דייר · server→cache→bundled · קנה-מידה",
-      "שלב 3 הפרדה: קטלוג-מקור-מתחלף · מיתוג-config · orgId per-tenant · איחוד-דגלים→APP_PROFILE",
-      "שלב 4 פרופיל clean (קטלוג-ריק·מיתוג-נייטרלי·כל-היכולות-דלוקות) + דיפלוי-לינק",
-      "שלב 5 חברה #2 (החלפת קטלוג+שם) → שני לינקים חיים"
-    ],
-    "instructions": [
-      "בנוי-לא-להישבר (בסיס-למיליונים) · לא-דורסים-במקום · מאחורי-דגל · הקיים זהה-בייטים · שילוח רק-על-ירוק",
-      "רב-פעמי (multi-pass) — פרוסה-אחר-פרוסה · שער-ירוק · הידען מחזיק את המפה בין הפרוסות"
-    ],
-    "faults": [
-      "בעיית-מידע-מזויף: ~24 אתרי מזויף-כאמת ממופים (file:line) מסריקת-6-עדשות בלוח-המנהל"
-    ],
-    "workarounds": [],
-    "owner_decisions": [],
-    "contract": "DoD פר-שלב; היעד: 2 לינקים חיים (נוכחי+חברה-2) מקוד-אחד · additive·הפיך·מאומת · אפס-סיכון לחי.",
-    "dependencies": [
-      "DIRECTIVE-fake-data-sweep · DIRECTIVE-buildsmart-clean · DIRECTIVE-manager-console-live",
-      "LAUNCH-MICRO-BREAKDOWN.md (SSOT/טראקר)"
-    ],
-    "gating": [
-      "APP_PROFILE (demo/buildsmart/clean/company2) · דגל פר-פרוסה"
-    ],
-    "verification": [
-      "CI 9/9 ירוק (head 03506f3c)",
-      "טסט בידוד-דייר A-לא-רואה-B (stage2_tenant_isolation) · זהה-בייטים מוכח · mutation-verify"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "lipskey_catalog.dart:120 (data-driven) · orgId/kOrgScopedQueries · Studio",
-      "2-לינקים-מוכחים (clean + BuildMax)"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-LOOP-launch.md",
-    "one_line": "הנחיית-לולאה self-driving למסלול-ההשקה U3→U2→U4→U5.2; הצי בונה+מאמת כל שלב לבד, דחיפה-במילה.",
-    "status": "current",
-    "vision": "הצי מריץ את שאר מסלול-ההשקה בלולאה לבד — שלב-אחרי-שלב — בלי שהבעלים ישכפל הנחיה לכל צעד.",
-    "mission": "רצף תלותי: U2 הרשמה+באנר-ממתין → U4 תור-אישור-אדמין (שער-אוניברסלי, יוצר בעלי-חנות) → U3.3 מסך-בעל-חנות (מייבא-קוד-בינה) → U5.2 מחיקת-חשבון.",
-    "capabilities": [
-      "U3.3 מסך-בעל-חנות = מייבא-קוד-בינה: העלאת-Excel/CSV + מסך-מיפוי-עמודות-גמיש → כתיבה ל-inventory תחת storeId + חותמת עודכן-לאחרונה",
-      "reuse: parseCsvToDrafts (C4.5) · kTradeImportFlag · claim storeId (U3.1.1)"
-    ],
-    "instructions": [
-      "מצב-הפעלה ברירת-מחדל: בנייה-אוטומטית · דחיפה-במילה; עוצר לפני כל דחיפה-חיה ומבקש תדחוף",
-      "גראונד מול הקוד החי (שמות-סימבולים+מוקשים); אל תבנה מה שקיים",
-      "additive מגודר kUserSystem (OFF=זהה-בייטים); שינויי rules/functions additive-בטוח",
-      "אמת מקומית: analyze=0 · סוויטה-מלאה · emulator rules-test (--test-concurrency=1) · mutation-verify"
-    ],
-    "faults": [
-      "הספק חי ב-קוד-בינה (מיניסופט) — דסקטופ בלי API ציבורי → ייצוא-קובץ בלבד",
-      "מחיקת-חשבון (U5.2) = חוסם-iOS של Apple (עצמאי — ניתן להקדים)"
-    ],
-    "workarounds": [
-      "U3.3 = ייבוא (לא הקלדה-ידנית) → פותר את ה-cross-cut של supplierSubmitProvider",
-      "מיפוי-גמיש חסין-לפורמט (נשמר per-store, כל ייצוא עתידי נכנס אוטומטית)",
-      "עצירה-קשיחה אם ייצוא לא-CSV/Excel (מבנה-אחיד בינארי) → ייתכן פרסר נפרד"
-    ],
-    "owner_decisions": [
-      "🔒 החלטות-נעולות: הכל-באישור-admin · אורח=גלישה-בלבד · בעל-יחיד-לחנות (claim storeId==store.id, לא storeUid)",
-      "🛑 עצירה-קשיחה: supplierSubmitProvider (U3.3.1) דורש הכרעה לפני מימוש · כל secret/keystore/service-account"
-    ],
-    "contract": "שער-קבלה: analyze 0 · סוויטה-מלאה · emulator rules-test · mutation-verify · protocol-enforce; דחיפה רק על תדחוף וכשהכל ירוק.",
-    "dependencies": [
-      "SSOT: SPEC-user-system-MICRO §U2/U4/U3.3/U5.2 (ענף nice-volta)",
-      "U3-core חי-מאומת (b8808b5e, 10/10 CI)"
-    ],
-    "gating": [
-      "kUserSystem · kTradeImportFlag · claim storeId"
-    ],
-    "verification": [
-      "emulator rules-test · mutation-verify (הזרק באג→RED→שחזר→GREEN)",
-      "המתן לאימות-CI (ירוק—מאומת) לפני התקדמות לשלב הבא"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "parseCsvToDrafts (supplier_onboarding.dart:170) · deleteAccount · myStoreProvider · setRole · main.dart:329"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-atom-tooling.md",
-    "one_line": "הנחיה לבניית 2 כלי-אטומיזציה: מפרק-אוטומטי (קוד→גרף, AST) + מחולל-טסטים (גרף→בדיקות).",
-    "status": "current",
-    "vision": "pipeline קוד→גרף→טסטים, מקורקע במסך-1 כגולדן — אפס drift מהמקור-האחד.",
-    "mission": "כלי A decompose (tools/atom/decompose, Dart+analyzer) + כלי B testgen (tools/atom/testgen) — כל edge+flow-step=טסט.",
-    "capabilities": [
-      "מפרק: אטומים (composer+section-widgets) · node (Text/CfgText literals + registry-ID מוצלב מול element_registry) · edges (reads/writes/actions/uses/gated-by) · flows (trigger→verb/rule/formula→effect) · floor",
-      "מחולל: reads→watched · writes→state-set · action→nav/sheet · registry-ID→wired · gated→shrink · rule→cond-אמת/שקר · formula→I/O · verb→אפקט",
-      "אינטרפול: גרף = JSON (מכונה) + Markdown (אדם, פורמט מסך-1)"
-    ],
-    "instructions": [
-      "מ-AST — לא regex-ניחוש",
-      "dev-tooling ב-tools/atom/ — לא app-lib · לא bundle · job-CI נפרד (לא Protocol Enforcement של האפליקציה)",
-      "בונים במקביל — אפשר לזרע graph.json ידני למסך-1 כדי ש-B יתחיל לפני ש-A גמור"
-    ],
-    "faults": [],
-    "workarounds": [],
-    "owner_decisions": [],
-    "contract": "גולדן-מפרק: פלט≡מסך-1-הידני (nodes/edges/flows/registry 6/6). גולדן-מחולל: 5 טסטי smartTree ST-3 + count(edges+steps)==count(tests) + הטסטים עוברים מול הקוד.",
-    "dependencies": [
-      "מסך-1 (knowledge/screens/contractor-home/) = golden-fixture",
-      "element_registry.dart"
-    ],
-    "gating": [
-      "מגודר-CI כ-job נפרד (לא Protocol Enforcement של האפליקציה)"
-    ],
-    "verification": [
-      "golden-test מול הקבצים-הידניים · zero-miss (registry-count · count(edges+steps)==count(tests)) · הטסטים עוברים מול הקוד האמיתי"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "smart_home_screen.dart · element_registry.dart · knowledge/screens/contractor-home/ · tools/atom/{decompose,testgen}"
-    ]
-  },
-  {
-    "path": "VERIFIED-OPEN-WORK-2026-07-29.md",
-    "one_line": "מקור-אמת לעבודה-הפתוחה (אומת מהקוד v7.01 ע״י 5 סוכני-אימות) — מפריד פתוח-באמת ממסמך-מיושן.",
-    "status": "current",
-    "vision": "לפני סימון פריט פתוח — אמת בקוד (git show), אל תסמוך על המסמך לבדו.",
-    "mission": "להפריד נטען-פתוח-במסמכים מ-מאומת-בקוד ולמפות את העבודה-הפתוחה-האמיתית לפי-עדיפות.",
-    "capabilities": [],
-    "instructions": [
-      "לפני סימון פריט פתוח — אמת בקוד: git show origin/claude/whats-happening-LyY9G:<path>",
-      "אל תסמוך על המסמך לבדו"
-    ],
-    "faults": [
-      "שילוב-מאור השארית ~40%: workflow_engine מיובא רק בטסט (אפס צרכן ב-lib) · JourneyTimeline כבוי (kIntelLive const-false, _resolveCustomerKey→null) · מספור-מסמכים-רץ חסר (receiptSeq) · credit חסר cred.log+tiers",
-      "#8/#9/#11/#14 (לוח-משאבים/מכסה/חזרתיות/דוח-הרחבה) — אין בקוד; הקשחות C3/C4/C5 חסרות",
-      "שער אנטי-כפילות מערכתי (דרישת-בעלים) — הגייט-האוטומטי לא מומש (dedup_test catalog-only בלבד)",
-      "מסמכים-מיושנים: CONTINUITY · TASKS-to-full (T6) · session_plan · TODO-worktree-hooks · huliot comment"
-    ],
-    "workarounds": [
-      "store_screen.dart:1093-1094 pull-to-refresh = Future.delayed(800ms) no-op (גבולי; storeOrdersProvider כבר ריאקטיבי)"
-    ],
-    "owner_decisions": [
-      "שער אנטי-כפילות = דרישת-בעל-המוצר (06-07: חייב טיפול)",
-      "Ops/השקה (לא-קוד): Backend go-live (USE_FIREBASE_BACKEND) · Blaze · App Check · חנויות Apple $99/Google $25 · דומיין עברי · פוליש P-1/P-5"
-    ],
-    "contract": "פסק-דין פר-תחום (סגור/פתוח/כמעט-סגור); העבודה-הפתוחה-האמיתית = שילוב-מאור ~40% + שער-אנטי-כפילות.",
-    "dependencies": [
-      "DIRECTIVE-maor-full-integration · MAOR-REUSE-MAP · TODO-dedup-gate"
-    ],
-    "gating": [
-      "kIntelLive (const-false, tree-shaken)",
-      "_resolveCustomerKey→null (JourneyTimeline)"
-    ],
-    "verification": [
-      "5 דוחות-אימות עם evidence file:line (Backend S0–S9 · wizard/studio s0–s11 · TASKS B0–T7 · fake-data-sweep 24 אתרים · מאור 19 פריטים)",
-      "אימות-חוזר: git show origin/claude/whats-happening-LyY9G:<path>"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "logic/workflow_engine.dart · manager_dashboard_screen.dart:3003 · screens/intel/journey_labels.dart",
-      "invoice.dart:46 · delivery_note.dart:41 · store_screen.dart:1093 · input_validators.dart:29",
-      "ai_hub_dedup_test.dart · dedup_test/no_duplicate_specs_test"
-    ]
-  },
-  {
-    "path": "SERVER-KICKOFF.md",
-    "one_line": "חבילת-משימות-כניסה להפעלת הצי על פרויקט-השרת (Firebase) — S0–S9, cache-pattern drop-in.",
-    "status": "aging",
-    "vision": "לחבר את האפליקציה ל-Firebase החי דרך drop-in (_local→_firebase) ב-cache-pattern — ה-interface (sync) וה-UI לא משתנים, הנתונים אמיתיים.",
-    "mission": "להפעיל את הצי על S0–S9: שלב A SDK · B Auth · C שכבת-נתונים (S2 base→S3×6→S4) · D Rules · E push/images/functions/offline.",
-    "capabilities": [
-      "base FirestoreCachedRepo<T> (cache-pattern, all() נשאר sync) + pilot=orders",
-      "S3 ×6 repos מקבילי: orders·customers·catalog·site·stock·finance",
-      "S4 real-time (chat threads/messages · orders snapshots) · S5 Security Rules + emulator-tests · S6 FCM · S7 R2 · S8 Functions · S9 offline"
-    ],
-    "instructions": [
-      "לא להפוך interface ל-async — cache-pattern שומר sync (drop-in)",
-      "לא לגעת ב-UI — רק data/providers",
-      "catalog (1,877) לא ב-Firestore — bundle/R2 (אפס עלות-DB)",
-      "🔴 anti-loss: דחוף אחרי כל משימה (S2 וכל repo בנפרד, לא בבאצ׳ים); grep-verify מול ה-spec — אפס המצאה"
-    ],
-    "faults": [
-      "❌ S2 אבד (לא נדחף) — היה code-complete אך נפל עם סביבה שנגמרו-לה-הטוקנים → בנה מחדש מ-S2 (⚠️ RESUME POINT 06-09; לפי VERIFIED-OPEN-WORK כל S0–S9 בנוי+פרוס)"
-    ],
-    "workarounds": [
-      "ה-_local הוא ה-fallback — כל push בטוח (UI לא משתנה)"
-    ],
-    "owner_decisions": [
-      "דברי-console לבעלים: Blaze billing (מכסת-SMS, כעת 10/יום) · App Check register (S0.5) · Deploy Security Rules (אחרי S5)"
-    ],
-    "contract": "גייט per-task: central-verify (analyze=0·test·build·conformance) + grep-verify; interface נשאר sync; UI ללא-שינוי; catalog לא ב-Firestore.",
-    "dependencies": [
-      "SSOT: SPEC-server-connect-MICRO (~48 מיקרו, S0–S9) + SPEC-server-connect",
-      "שלב A (S0) חוסם-הכל; D (S5 Rules) לפני כל deploy פומבי"
-    ],
-    "gating": [
-      "USE_FIREBASE_BACKEND · App Check"
-    ],
-    "verification": [
-      "1,772 טסטים ירוקים (שלב A · S0 · commit 61912d9)",
-      "emulator-tests: חנות לא-קוראת-של-אחר · chat מבודד · credit חסום"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "firebase_options.dart · main.dart (initializeApp) · FirestoreCachedRepo<T>",
-      "buildsmart-b0b78 (Spark) · me-west1 (Tel Aviv) · firebase-hosting.yml · firebase.json"
-    ]
-  },
-  {
-    "path": "09-logic-cart-notif-onboarding.md",
-    "one_line": "לכידת לוגיקת סל-render·checkout-submit·התראות·onboarding/roles (index.html 11000–11907) + דלתאות Preact/Flutter.",
-    "status": "reference",
-    "vision": "לתעד את ליבת-הסל, זרימת-checkout, מנוע-ההתראות ו-onboarding verbatim.",
-    "mission": "ללכוד renderCart/syncOrderToSystem/checkout · seedNotifications/pushNotification/notifyOrderStatus · ONBOARD_SCREENS/showScreen/enterRole.",
-    "capabilities": [
-      "סל: renderCart (store-group לפי ספק + computeCheckout + ship-plan) · syncOrderToSystem (דוחף ל-SYS_ORDERS) · checkout",
-      "התראות: seedNotifications (3 seed) · pushNotification · toggleNotifications · notifyOrderStatus · toast · tick",
-      "onboarding: ONBOARD_SCREENS (10 מסכים) · showScreen · buildPrep · enterApp · enterRole (5 פרסונות)",
-      "Flutter: notifications_screen (1,081ש׳, קיבוץ-חכם run≥3) · chats_screen (1,437ש׳, auto-reply 900ms) · onboarding ממוקד-קבלן"
-    ],
-    "instructions": [
-      "⚠️ shared-admin = פרוטוטייפ בלבד; ב-Flutter הפרסונות = מסכים נפרדים ומבודדים → אל תממש shared-admin"
-    ],
-    "faults": [],
-    "workarounds": [
-      "Preact: onboarding הוסר לחלוטין (כניסה לפי-פרסונה ישירה); התראות = רק notificationCount signal; checkout-submit המלא לא הומר"
-    ],
-    "owner_decisions": [],
-    "contract": "לכידת index.html:11000–11907 עם שמות-פונקציות+שורות.",
-    "dependencies": [
-      "index.html:11000–11907",
-      "app/src/ (app-store.ts)",
-      "notifications_screen.dart · chats_screen.dart · onboarding_screen.dart"
-    ],
-    "gating": [
-      "botEnabled (auto-reply)",
-      "welcomeSeenProvider (bs.welcome-seen.v1)"
-    ],
-    "verification": [],
-    "open_questions": [],
-    "source_anchor": [
-      "index.html:11044(renderCart)/11212(syncOrderToSystem)/11312(checkout)/11482(seedNotifications)/11555(pushNotification)/11634(ONBOARD_SCREENS)/11806(enterRole)/11890(admTab)",
-      "notifications_screen.dart · chats_screen.dart"
-    ]
-  },
-  {
-    "path": "15-finance-site-hubs.md",
-    "one_line": "לכידת מרכז-פיננסים (Category B) + ניהול-אתר (Category C) (index.html 19452–20800) + דלתאות Preact/Flutter.",
-    "status": "reference",
-    "vision": "לתעד את 2 ה-hubs שמעמיקים את אפליקציית-הקבלן מעבר-לרכש: פיננסים + ניהול-אתר.",
-    "mission": "ללכוד נתונים+פונקציות של finFeature (10 כלים) ו-siteFeature (10 כלים) verbatim.",
-    "capabilities": [
-      "פיננסים (fin-*): BUILD_INDEX{121.3→128.7} · PAYMENT_TERMS · subcontractors(3) · approvalQueue(2) · penaltyLedger · FX_RATES; finIndex/finROI/finApprovals/finReports/finFX",
-      "ניהול-אתר (site*): GANTT_TASKS · SAFETY_TIPS · SITE_TREE(קומה→דירה→חדר) · ARCHIVED_PROJECTS; siteGantt/siteSnagging/siteAttendance/siteDiary/siteSafety",
-      "10 כלי-site-hub verbatim (INSP-0037): גאנט·ליקויים·קומה-דירה-חדר·נוכחות-GPS·יומן·בטיחות·תלויות·צילום·ביקורות-מפקח·ארכיון"
-    ],
-    "instructions": [],
-    "faults": [],
-    "workarounds": [
-      "Preact: פיננסים(B) ו-site-hub(C) = subtrees של 10 dial-leaves כ״א verbatim, אך ה-flows (מדד/ROI/גאנט) = drill/toast, לא רצים"
-    ],
-    "owner_decisions": [],
-    "contract": "לכידת index.html:19452–20800 (hub-overlay→feature-overlay פר-כלי).",
-    "dependencies": [
-      "index.html:19452–20800",
-      "כפתור מרכז-פיננסים ב-view-project · כפתור ניהול-אתר ב-view-tasks",
-      "finance_hub_sheets.dart · site_hub_screen.dart"
-    ],
-    "gating": [],
-    "verification": [
-      "INSP-0037 (10 site-hub verbatim) · INSP-0039",
-      "אומת-קוד 07-06: openFinanceHub (גריד-10, נגיש מטאב-חנות) + openSiteHub (10 כלים, נגיש מתפריט-בית) נבנו"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "index.html:19459(BUILD_INDEX)/19461(PAYMENT_TERMS)/19815(GANTT_TASKS)/19841(SITE_TREE)",
-      "finance_hub_sheets.dart · site_hub_screen.dart · b9737cf (menu-dial הוסר)"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-studio-registry-to-wizard-toggles.md",
-    "one_line": "הנחיה להמיר את registry-ה-Studio (~863 אלמנטים) לטוגלי הצג/הסתר יפים באשף (קיבוץ עברי + אקורדיון + חיפוש).",
-    "status": "current",
-    "vision": "אותה שליטה פר-אלמנט של ה-Studio, באותה כמות (~863) — כטוגלי הצג/הסתר מוצגים יפה כאשף, לא כרשימה-הגולמית.",
-    "mission": "למחזר element_registry.dart כמקור-הטוגלים; כל רשומה→טוגל ב-OrgConfig; קיבוץ מסך→סעיף + labelHe + אקורדיון + חיפוש.",
-    "capabilities": [
-      "מחזור element_registry (~863) → טוגלי הצג/הסתר ב-OrgConfig",
-      "תצוגה: קיבוץ מסך→סעיף (אקורדיון) · שם-עברי labelHe (לא מזהה-טכני) · שורת-חיפוש",
-      "כל משטח בודק את הטוגל שלו ב-build() דרך org_gates (degrade-graceful)"
-    ],
-    "instructions": [
-      "מחזור (לא בנייה-מחדש/כפילות) — ה-Studio ממשיך לעבוד; רק נחשף ציר-ה-on/off",
-      "default-ON (גלוי) = הקיים זהה-בייטים",
-      "edit-safety: אלמנטי-ליבה נעולים (kWizardLockedModules-style) — הסתרת ניווט/מסך-חובה אסורה",
-      "ביצוע: הצי, רב-פעמי · דחיפה רק על תדחוף"
-    ],
-    "faults": [],
-    "workarounds": [],
-    "owner_decisions": [
-      "מה הבעלים רוצה: אותה כמות/שליטה כמו ה-Studio, מוצג יפה כאשף בעברית",
-      "מקום בסדר: צעדים 0→2 של MASTER-giant-system-order"
-    ],
-    "contract": "DoD: ~863 טוגלים מקובצים-יפה בעברית (אקורדיון+חיפוש) · כל טוגל מציג/מסתיר באמת בכל האפליקציה · default-ON=זהה-בייטים · ליבה-נעולה · toggle-matrix ירוק · Studio לא-נשבר · שער ירוק.",
-    "dependencies": [
-      "MASTER-giant-system-order (צעדים 0→2)",
-      "clean empty-shell (בסיס — טוגלים על אפס-דמו)"
-    ],
-    "gating": [
-      "OrgConfig טוגל-פר-אלמנט · org_gates · ליבה-נעולה (kWizardLockedModules-style)"
-    ],
-    "verification": [
-      "toggle-matrix מתרחב (מכבה טוגלים→מריץ-זרימות→אפס-שגיאות; תופס ב-CI לא בפרוד)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "state/studio/element_registry.dart (~863, labelHe+מיקום) · org_gates · OrgConfig"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-clean-finish.md",
-    "one_line": "הנחיה לסגור את Clean — לתקן פיננסים-4 (מזויף-כאמת) + שלב-5 הוכחת שני-לינקים · קוד-אחד.",
-    "status": "current",
-    "vision": "הבעלים פותח 2 לינקים חיים מאותו קוד (MaorClean→MaorHachesed) — סגירת צד-הצי של תוכנית-Clean.",
-    "mission": "משימה-1 תיקון-פיננסים-4 · משימה-2 להפוך Clean לחי (לינק) + חברת-דמו-#2 (לינק שני) + תיעוד.",
-    "capabilities": [
-      "דיפלוי APP_PROFILE=clean לערוץ-Firebase-Hosting נפרד (hosting:channel:deploy) → לינק חי",
-      "חברת-דמו #2: AppBrand שם+מיתוג-שונה + קטלוג-מוחלף (seam 3.1c) → לינק שני"
-    ],
-    "instructions": [
-      "תקן פיננסים-4: חווט ל-financeRepositoryProvider, או תן תווית-(דמו) בסגנון קיים (_ServerNote כמו FX:1622)",
-      "additive · מאחורי-דגל/פרופיל · האתר-הראשי-החי לא-נגע לרגע · בייטים-לא-פרוזה",
-      "אל-תדלג-שוב (פיננסים-4 דולג 4 פעמים)"
-    ],
-    "faults": [
-      "🔴 פיננסים-4 מזויף-כאמת ב-finance_hub_sheets.dart: ROI :1095 (total*1.42 → תמיד 42%) · קבלני-משנה :632/:669 (kSubcontractors const) · מדד-בנייה :488/:490 (kBuildIndex const) · חשבונית (kInvoiceTotal)"
-    ],
-    "workarounds": [
-      "Clean-v1 יכול לשאת קטלוג-גנרי אם 3.1c לא-בשל — אבל חברה-#2 חייבת קטלוג+מיתוג שונים גלויים (אחרת לא הוכחנו כלום)"
-    ],
-    "owner_decisions": [],
-    "contract": "DoD: פיננסים-4 סגור (אפס-מתחזה) · 2 לינקים חיים מאותו commit עם הבדל-נראה-לעין (שם+קטלוג) · מתועד ב-LAUNCH_READINESS · הקיים זהה-בייטים · שער ירוק.",
-    "dependencies": [
-      "תוכנית-Clean (PLAN-buildsmart-clean-master) · seam 3.1c (החלפת-קטלוג) · LAUNCH_READINESS"
-    ],
-    "gating": [
-      "APP_PROFILE=clean / company2 · דגל/פרופיל"
-    ],
-    "verification": [
-      "mutation-verify לכל טסט-חדש · שער-ירוק · הישן ל-rollback"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "app_flutter/lib/screens/finance_hub_sheets.dart (:1095 ROI · :632/:669 subs · :488/:490 index · :1622 FX-note)"
-    ]
-  },
-  {
-    "path": "MILESTONE-LOG.md",
-    "one_line": "יומן אבני-דרך מאומתות-ב-CI (ע״י הקטלגן, verify-before-✅) — חדש-למעלה; אחרונה 08-03 מנוע-קטלוג-3D + אטומיזציה-מלאה.",
-    "status": "current",
-    "vision": "אבני-דרך שאומתו ב-CI בפועל (Protocol Enforcement) — לא על-דיווח.",
-    "mission": "לתעד אבני-דרך CI-ירוקות, משלים ל-LAUNCH-MICRO-BREAKDOWN.",
-    "capabilities": [
-      "פאזה-0 (fittings): פורט-מנוע PP-R + golden 1:1 + familyOf/odOf 99% כיסוי; Protocol Enforcement 788",
-      "פאזה-A: familySpecFor⊇polyroll → חוליות 789 SKU 0→95.4% (728/763); Protocol Enforcement 793",
-      "אטומיזציה-מלאה: מפרק-אטומים אוטומטי (tools/atom/decompose, AST) → 108 מסכים · registry 676/676=100% (zero-miss) · 3 שכבות פר-אטום; Protocol Enforcement 794"
-    ],
-    "instructions": [],
-    "faults": [
-      "פער 4.6% בחוליות = אביזרי-נוי נטולי-מידה (gaps)"
-    ],
-    "workarounds": [
-      "registerFamilySpecs אחרי registerPolyrollSpecs (putIfAbsent) → אינרטי כברירת-מחדל (v1+דגל-כבוי), byte-identical"
-    ],
-    "owner_decisions": [],
-    "contract": "כל אבן-דרך = CI-ירוק אומת ע״י הקטלגן (Protocol Enforcement בפועל); byte-identical · דגל default-OFF.",
-    "dependencies": [
-      "משלים LAUNCH-MICRO-BREAKDOWN.md",
-      "AGENT-SOURCES: קוד+גרפים=whats-happening · מפרטים/ידע-אסטרטגי=nice-volta"
-    ],
-    "gating": [
-      "kFittingEngine (default-OFF)"
-    ],
-    "verification": [
-      "Protocol Enforcement 788/793/794 ירוק · golden 1:1 · golden-עוגן contractor-home 8/8",
-      "commits 47240cfa · 0c828268 · 0bfe9726 · 7142f3cc"
-    ],
-    "open_questions": [
-      "ממתין: לולאת-אביזרים שלבים 20-26 (מותג-כללי · v2 end-to-end · answer-equivalent)",
-      "ממתין: כלי-B מחולל-טסטים (על 108 הגרפים)"
-    ],
-    "source_anchor": [
-      "tools/atom/decompose · main.dart:280 (if kFittingEngine registerFamilySpecs) · app_flutter/knowledge/screens/",
-      "commits 47240cfa/0c828268/0bfe9726/7142f3cc"
-    ]
-  }
+ {
+  "path": "02-shell-and-screens.md",
+  "one_line": "לכידה verbatim של המעטפת וכל המסכים והתיבות מאב-הטיפוס (index.html 4021–5419) + דלתאות Preact ו-Flutter.",
+  "status": "reference",
+  "vision": "מקור-אמת יחיד — לתעד כל מסך/overlay/handler של אב-הטיפוס verbatim לצורך port.",
+  "mission": "לתעד מבנה stage>phone>notch>screen, מסכי-onboarding, מעטפת-קבועה, views-קבלן ו-overlays — כל מחרוזת+handler+מיקום.",
+  "capabilities": [
+   "מסכי onboarding: splash/welcome/login/profession/prep + 4 דשבורדי-פרסונה",
+   "מעטפת: statusbar · appbar (פעמון+עגלה+notifPanel) · tabbar 5-טאבים",
+   "views-קבלן: home/catalog/catnav/project/scan/orders/cart/sites/profile/stock/tasks",
+   "overlays/sheets: בוררי אתר/זמן/יום · תקציב · הגדרות · hubs A–J · עץ-מוצרים · brand/variant/order",
+   "Preact: dial pattern — מסכים→dials · tabbar→MenuSpeedDial · appbar→FloatingHeader · routing לפי-פרסונה",
+   "Flutter: מעטפת 4-טאבים (מחלקות·שיחות·התראות·חנות) + CatalogScreen 7,660ש׳ + InstallStudioScreen 3,185ש׳"
+  ],
+  "instructions": [
+   "כל מחרוזת verbatim, מיקום=index.html:NNNN",
+   "הקוד (ה-label) קובע מול comment/spec",
+   "אל תממש shared-admin ב-Flutter — הפרסונות מסכים מבודדים"
+  ],
+  "faults": [
+   "אי-התאמה תווית↔יעד: טאב רכש→cart · טאב הגדרות→profile",
+   "drift: README של app_flutter מתאר Phase-0/5-FAB מיושן; הקוד = 4-tab בוגר",
+   "שורש-בלבול קטלוג/מחלקות: comment בקוד כתוב קטלוג אבל label המוצג = מחלקות"
+  ],
+  "workarounds": [
+   "standalone — fallback-בזיכרון לכל נתיב-נתונים (אין data-layer חיצוני; apiService.js שבר viewers מבודדים)",
+   "ה-menu-dial הוסר (b9737cf) → כלי-הקבלן עברו לגישה-נייטיב",
+   "dial-overlays (menu-leaves + פרסונות store/courier/worker/manager) = leaves שמציגים toast (בבנייה)"
+  ],
+  "owner_decisions": [],
+  "contract": "לכידה מלאה verbatim של index.html:4021–5419 — אפס פערים.",
+  "dependencies": [
+   "index.html:4021–5419",
+   "app/src/app.tsx",
+   "app_flutter/lib/screens/home_shell.dart"
+  ],
+  "gating": [
+   "openDialProvider + scrim",
+   "cart-FAB מוסתר בטאב-חנות"
+  ],
+  "verification": [
+   "אומת שורה-שורה home_shell.dart:508–527 (labels)",
+   "אומת b4e2198 (1,539+ בדיקות)",
+   "cutover b9737cf (menu-dial הוסר 07-06)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "index.html:4021–5419",
+   "app/src/app.tsx",
+   "home_shell.dart (1033ש׳)",
+   "catalog_screen.dart",
+   "install_studio_screen.dart + install_engine (1391ש׳)"
+  ]
+ },
+ {
+  "path": "01-design-system.md",
+  "one_line": "לכידה מלאה של מערכת-העיצוב (CSS) מאב-הטיפוס (index.html 14–4019) — 8 חלקים א׳–ח׳, Categories A–J, + דלתאות Preact/Flutter.",
+  "status": "reference",
+  "vision": "לתעד את שפת-העיצוב המלאה (טוקנים·רכיבים·פרסונות) כמקור לתרגום port.",
+  "mission": "ללכוד טיפוגרפיה, פלטת-צבעים, רכיבי-תוכן, כרטיס-מוצר, עץ-מוצרים ו-Categories A–J verbatim לפי שורה.",
+  "capabilities": [
+   "טוקנים: Heebo/Rubik · פלטה teal #1f6f6b + amber #f2a516 + dark-theme + reduce-motion",
+   "שפת-רכיבים: header/appbar · notif-panel · sheets (overlay/sheet/grip) · budget-box · tree",
+   "Categories A–J (prefix-CSS): שרשרת-אספקה·פיננסים·ניהול-אתר·UX·פורטל·AI·gamification·אבטחה·שירות (אין D)",
+   "4 פרסונות חולקות מעטפת admin: manager(md/mm/mo/mc) · store(sh/so) · courier(ch) · worker(ww)",
+   "Preact: tokens זהים + סקאלות + מערכת-dial/fab/float נטו-חדשה + screen__bg (bathroom-bg)",
+   "Flutter: BsTokens (dial-dims/animation) + מותג כתום #FF7A18 + Material3 + RTL + i18n"
+  ],
+  "instructions": [
+   "קוראים כל שורה verbatim, מיקום index.html:NNNN",
+   "2 צבעי-מותג בלבד: teal (מבנה) + amber (CTA); ירוק=הצלחה, אדום=סכנה, אפור=ניטרלי",
+   "מצבי-סטטוס בצבע אחיד לאורך כל האפליקציה (כתום=בתהליך·teal=פעיל·ירוק=הושלם·אדום=בעיה·אפור=ממתין)",
+   "Heebo-900 לכותרות/מספרים · Rubik לגוף"
+  ],
+  "faults": [
+   "פער-מותג מתועד: אב-טיפוס teal #1f6f6b; Flutter עבר ל-orange #FF7A18",
+   "Flutter חסר tokens amber/ok/danger/line · חסר font Rubik · חסר glass-aesthetic (frosted-over-photo)",
+   "אין Category D (דילוג במקור)"
+  ],
+  "workarounds": [
+   "text-size כ-zoom (small .92 / large 1.1)"
+  ],
+  "owner_decisions": [
+   "screen__bg (רקע-אמבטיה חד + כרטיסי frosted-glass) = net-new owner-specified (spec.json FEAT-bathroom-bg)"
+  ],
+  "contract": "מערכת-העיצוב נלכדה במלואה head + 14–4019 — אפס פערים.",
+  "dependencies": [
+   "index.html:14–4019",
+   "app/src/styles/tokens.css (59ש׳) + global.css (2125ש׳)",
+   "app_flutter/lib/theme/ (tokens.dart + app_theme.dart)"
+  ],
+  "gating": [
+   "root[data-theme=dark]",
+   "data-reduce-motion=1",
+   "html[data-contrast=high]"
+  ],
+  "verification": [
+   "INSP-0005/0006/0007 (verbatim units/currency/contrast)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "index.html:14–4019",
+   "tokens.css",
+   "global.css",
+   "tokens.dart (BsTokens)",
+   "app_theme.dart (AppTheme.light/dark)"
+  ]
+ },
+ {
+  "path": "README.md",
+  "one_line": "אינדקס מאגר-הידע של אב-הטיפוס — שיטה, מבנה 3-שכבות, מעקב-כיסוי, ו-3 מקורות (פרוטוטייפ/Preact/Flutter).",
+  "status": "current",
+  "vision": "מקור-אמת יחיד = אב-הטיפוס index.html (1.4MB, 22,416 שורות); לכידה verbatim מלאה מהקוד.",
+  "mission": "לאנדקס 23 דוחות-תחום + מפת-ניווט JS + דלתאות Preact/Flutter + מעקב-כיסוי מלא.",
+  "capabilities": [
+   "אינדקס דוחות 01–23 + טווחי-מקור פר-דוח",
+   "מפת-ניווט JS (5440–22414): שמות-מבני-נתונים + שורות (lookup מהיר)",
+   "3 מקורות מאומתים: אב-טיפוס (100% נלכד) · Preact (55/15,841) · Flutter (~172 קבצים, קוד=SSOT)"
+  ],
+  "instructions": [
+   "קוראים כל שורה/תיבה — לא grep, לא מנחשים, לא מדלגים",
+   "verbatim עם מיקום index.html:NNNN",
+   "כל ידע חדש → לקובץ מיד (אין זיכרון בין sessions); לא נוגעים בקוד",
+   "הקוד = SSOT; אם אב-הטיפוס משתנה — השווה SHA ועדכן דוח רלוונטי"
+  ],
+  "faults": [
+   "doc-vs-code drift: KB אמר tab0=קטלוג/מותג-teal; הקוד = tab0=מחלקות/כתום #FF7A18",
+   "טעות קודמת: 1,337/Lipskey-255 → תוקן שורה-שורה ל-1,877 (935+772+170)",
+   "divergences: UI_ARCH profile-mockup · SYSTEM_MANAGER מספרים/REST-API · ROLE_DRAWER worker-names — מומצאים מול המקור"
+  ],
+  "workarounds": [],
+  "owner_decisions": [],
+  "contract": "100% קבצי .md נקראו + פרוטוטייפ 22,416 + קוד-מקור 24K + config + native-manifests — אפס פערים.",
+  "dependencies": [
+   "index.html",
+   "app/src",
+   "app_flutter/lib + app_flutter/knowledge (~88 מסמכים)",
+   "app/knowledge (62 מסמכים) + RULES.md",
+   "KNOWLEDGE_AUDIT.md"
+  ],
+  "gating": [],
+  "verification": [
+   "CI 9/9 · smoke 21/21 · runRegression 236/236",
+   "אומת b4e2198 (1,539+ בדיקות)",
+   "1,877 מוצרים אומת שורה-שורה (deploy.yml פורס Preact→/buildsmart/ + Flutter→/buildsmart/flutter/)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "index.html (22,416 שורות)",
+   "app/knowledge (43/43 INSP · 3 ADR · 4 dashboards)",
+   "deploy.yml · manifest.json · service-worker.js · capacitor.config.ts"
+  ]
+ },
+ {
+  "path": "SPEC-user-system-MICRO.md",
+  "one_line": "תוכנית-בנייה מיקרו למערך-משתמשים (U0–U5): מודל·RBAC·בעלות-חנות·הרשמה·ניהול-אדמין·מחזור-חיים.",
+  "status": "current",
+  "vision": "להשלים את השכבה-המסחרית ולפתוח go-live — חנות מנהלת מלאי לבד דרך משתמש-בעל-חנות.",
+  "mission": "לפרק ל-units (DoD-בודד) 6 שלבים: U0 יסודות · U1 RBAC · U3 חנות↔בעלים (⭐) · U2 הרשמה · U4 ניהול-אדמין · U5 מחזור-חיים.",
+  "capabilities": [
+   "U0: class BsUser + FirestoreUsersRepository + currentUserProvider + Security-Rules users",
+   "U1: enums BsRole/Permission + roleToPermissions + hasPermission/requirePerm (role מ-custom-claims)",
+   "U3: setRole+storeUid · stores.ownerUid · myStoreProvider · isolation פר-חנות",
+   "U2: הרשמה per-persona + שדרוג-אנונימי (linkWithCredential) + onboarding-חנות",
+   "U4: users-admin (רשימה/חיפוש) · הקצאת-תפקיד · השעיה · תור-אישור (roleRequests)",
+   "U5: עריכת-פרופיל · מחיקת-חשבון · logout · השעיה בזמן-אמת · GDPR-export"
+  ],
+  "instructions": [
+   "additive — לא לשבור login/guest קיים; חדש מגודר kUserSystem (OFF=זהה-בייטים)",
+   "שימוש-חוזר (לא לבנות מאפס): authStateProvider·login_sheet·roleProvider·setRole/reviewRoleRequest/deleteAccount קיימים",
+   "Rules additive — deny-by-default נשמר",
+   "אומתו = flutter test מלא ירוק"
+  ],
+  "faults": [
+   "שכבת-החנויות חצי: ההשוואה קוראת מלאי-שזרע-האדמין אבל חנות לא יכולה לנהל את המלאי שלה",
+   "מחיקת-חשבון (U5.2) = חוסם-iOS של Apple"
+  ],
+  "workarounds": [],
+  "owner_decisions": [
+   "הוכרע 14.7: הרשמה = הכל באישור-admin — כל משתמש חדש status=pending → admin→active (מוסיף U1.5+U2.4)",
+   "הוכרע 14.7: אורח רואה קטלוג · הזמנה+פרופיל דורשים הרשמה (מוסיף U2.5)",
+   "הוכרע 14.7: בעלות-חנות = בעל-יחיד לכל חנות (storeUid אחד, בלי מודל-צוות)"
+  ],
+  "contract": "כל unit = DoD-בודד; אומתו=flutter test מלא; דגל-OFF=golden זהה-בייטים; חוסמי-השקה U3+U5.2.",
+  "dependencies": [
+   "סדר-בנייה U0→U1→U3→U2→U4→U5; מסלול-מהיר U0→U1→U3",
+   "U3 משלים את C5.3 (Rules לפי-חנות)"
+  ],
+  "gating": [
+   "kUserSystem (env, OFF default) + דגלי-תת-שלב",
+   "kRoleSwitchCode (role-switch לרב-תפקיד)"
+  ],
+  "verification": [
+   "golden דגל-OFF (הכניסה זהה-בייטים)",
+   "rules-test: חנות-א׳ לא כותבת מלאי של חנות-ב׳ (403)",
+   "round-trip test (fromJson/toDoc) + full-suite ירוקה"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "authStateProvider · login_sheet.dart · roleProvider + currentUidProvider",
+   "setRole/reviewRoleRequest/deleteAccount (callables קיימים) · roleRequests collection · kOwnerEmails",
+   "UserProfile/UserProfileNotifier · FirestoreCachedRepo<T> · main.dart:329 (logout)"
+  ]
+ },
+ {
+  "path": "archive/APP-SPEC-full.md",
+  "one_line": "אפיון-מוצר מלא (PRD) — 5 פרסונות, קטלוג+הזמנת-רץ, מרכז-כספים, ניהול-אתר, מנוע-הזמנות חוצה-תפקידים.",
+  "status": "superseded",
+  "vision": "פלטפורמה שמחברת את כל שרשרת-האספקה (קבלן·חנות·שליח·עובד·מנהל) באפליקציה אחת iOS/Android/Web, RTL, בסגנון-וואטסאפ.",
+  "mission": "לתעד מקצה-לקצה כל מודול: עקרונות→mockup→תרחיש→דרישות→נתונים→MVP/סטטוס.",
+  "capabilities": [
+   "קטלוג 1,877 מוצרים (Lipskey 935·Polyroll 772·Huliot 170)+HW-133 + הזמנת-רץ stay-on-screen",
+   "מרכז-כספים 10 כלים: מדד·תנאי-תשלום·קבלני-משנה·אישורי-רכש·חריגה·ROI·פיצול-חשבונית·קנסות·דוחות·מט״ח",
+   "ניהול-אתר 10 כלים: גאנט·ליקויים·קומה-דירה-חדר·נוכחות-GPS·יומן·בטיחות·תלויות·צילום·ביקורות·ארכיון",
+   "מנוע-הזמנות חוצה-תפקידים: new→preparing→ready→pickup→transit→delivered (storeAdvance/courierAdvance)",
+   "5 פרסונות: קבלן(ראשי)·חנות·שליח·עובד·מנהל (2,682ש׳ v6.12)"
+  ],
+  "instructions": [
+   "verbatim (בלי המצאה) · RTL-first · Heebo · כתום מותג #FF7A18",
+   "server-ready דרך שכבת-Repository (חיבור-שרת = drop-in)",
+   "בלי כפתורים-מזויפים — פקד שלא עובד = honest-stub (לא toast-מתחזה)",
+   "נגישות-שטח: כפתור ≥52px · קולי · מצב-בניין ניגודיות-גבוהה · רטט+צליל"
+  ],
+  "faults": [
+   "SUPERSEDED 07-06: מתאר ניווט pre-dial (תפריט-נסתר); הדיאל הוסר → ניווט נייטיב (00-START-HERE §4.6). שאר התוכן (מודולים/מנוע/פרסונות) תקף",
+   "בעיה: הקבלן היום עובד בטלפונים/וואטסאפ/אקסל — אין מקור-אמת אחד לקנייה/משלוח/תקציב"
+  ],
+  "workarounds": [],
+  "owner_decisions": [],
+  "contract": "DoD פר-מודול לפי מקרא ✅בנוי/◑חלקי/🔲לבנות; MVP מוגדר פר-מודול.",
+  "dependencies": [
+   "Track T1 (finance) · T2 (site) · T3 (tasks/project/budget/stock/AI/club) · T4 (notif) · T5 (personas) · T6 (repo/server)"
+  ],
+  "gating": [],
+  "verification": [
+   "אומת מהקוד v6.16",
+   "מנוע-הזמנות ✅ (sys_orders) · מנהל 2,682 שורות (מאוחד v6.12)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "app_flutter/",
+   "OrderLineItem{sku,nameHe,brand,qty,unitPrice,lineTotal}",
+   "Order{stage} · Project{cart} · Task{status} · Customer{credit} · contractorCredit (30k–120k)"
+  ]
+ },
+ {
+  "path": "SPEC-catalog-to-server-MICRO.md",
+  "one_line": "פירוק-מיקרו (C0–C5) להעברת הקטלוג הדינמי + שכבת-חנויות חדשה (מחיר/מלאי) לשרת — בלי לשכתב מנוע.",
+  "status": "current",
+  "vision": "drop-in דרך Repository (bundled→server) + cache-pattern → UI ומנועים ללא-שינוי · אופליין נשמר · עלות-DB נמוכה.",
+  "mission": "לפרק ל-units: C0 תשתית · C1 פרוסה-דקה (20 SKU, שער-הוכחה) · C2 מיגרציה-מלאה · C3 חנויות-אמיתיות · C4 טופס-ספק · C5 הפעלה.",
+  "capabilities": [
+   "5 collections: products·verified_specs·recipes·stores·inventory",
+   "cache-pattern: הורדה-פעם-אחת → מקומי · sync-reads · re-sync רק ב-updatedAt",
+   "שכבת-חנויות אמיתית: Store{id,name,area,logo,contact} + Inventory{storeId,sku,price,stock} + מנוע השוואת-חנויות",
+   "טופס-העלאה-ספק (16 שדות + מפרט-חיבורים + מחיר/מלאי) + ייבוא-המוני CSV/Excel",
+   "barcode→sku (אופציונלי)"
+  ],
+  "instructions": [
+   "drop-in דרך Repository — אף unit לא נוגע במנוע (מתחלף רק המקור bundled→server)",
+   "שער-בטיחות קבוע: דגל-OFF = byte-identical בכל שלב (C0.5)",
+   "להסיר מחיר-הניחוש (estimatePrice/priceFor) → מחיר-אמת מ-inventory",
+   "אומתו = flutter test מלא (לא רק טסט-הפיצ׳ר; 2 נפילות-Play קודמות היו על זה)"
+  ],
+  "faults": [
+   "מסחרי מזויף: אין מחיר-אמת (מנוחש מ-categoryHe ב-price_estimate.dart/priceFor) · אין מלאי · חנויות-דמו",
+   "שדה barcode לא קיים (_runBarcode מחפש לפי sku)"
+  ],
+  "workarounds": [
+   "הרבה מ-C0/C1/C4 = הדלקה/חיווט של בנוי-רדום (הסכמה · catalog_paged server-mode · authored_products_firebase · kTradeImport)"
+  ],
+  "owner_decisions": [
+   "פתוח לפני C1: אילו 20 SKUs לפרוסה",
+   "פתוח: יעד-זמן ל-perf (C2.5) — מה נחשב מהיר-מספיק",
+   "פתוח: מודל-חנות (C3) — חנויות ידנית-על-ידי-הבעלים או onboarding-עצמי לכל חנות"
+  ],
+  "contract": "C1.7–C1.10 עוברים → הארכיטקטורה מוכחת; אחרת עוצרים לפני C2. DoD-בודד פר-unit; דגל-OFF=byte-identical.",
+  "dependencies": [
+   "מהפך של SPEC-server-connect S3.K; base FirestoreCachedRepo מ-S2.2"
+  ],
+  "gating": [
+   "useServerCatalog (kCatalogBaseUrl + useFirebaseBackend) · kSeedFreshBackend · kTradeImport — כולם OFF default"
+  ],
+  "verification": [
+   "golden/regression דגל-OFF · test-זהות 0 diffs · perf-benchmark",
+   "אופליין (טיסה-מטוס PASS) · kill-server → cache→bundled fallback PASS",
+   "כל המנועים עוברים על דאטת-שרת (finder/dive/compat/standards/tools/global-search)"
+  ],
+  "open_questions": [
+   "20 ה-SKUs לפרוסה?",
+   "יעד-זמן perf לפתיחת-קטלוג?",
+   "מודל הזנת-חנות (ידני מול onboarding-עצמי)?"
+  ],
+  "source_anchor": [
+   "lipskey_catalog.dart:4 (16 שדות) · polyroll_catalog.dart:1513 (kCatalogProducts)",
+   "trade_schema.dart · authored_products_firebase.dart (toDoc, catalogProducts) · catalog_paged.dart",
+   "contractor_tools_sheets.dart:388 (storePriceComparison) · price_estimate.dart · related_info.dart:779"
+  ]
+ },
+ {
+  "path": "06-logic-settings-projects.md",
+  "one_line": "לכידת לוגיקת הגדרות·פרופיל·פרויקטים·תקציב·פרויקט-חכם·סטטוס (index.html 6560–7700) + דלתאות Preact/Flutter.",
+  "status": "reference",
+  "vision": "לתעד תפקיד+זרימה+חיווט של פונקציות-הלוגיקה (לא העתק-קוד), עם שמות+שורות מדויקים.",
+  "mission": "ללכוד SETTINGS_LABELS, renderSettings (8 קבוצות+reset), פרופיל, היסטוריה, בוררי אתר/זמן, תקציב, פרויקט-חכם, אתרים, סטטוס-הזמנה.",
+  "capabilities": [
+   "renderSettings: 8 קבוצות+reset (חשבון·התראות·תצוגה·נגישות·אבטחה·שירות·משלוח·אזור·מידע·איפוס)",
+   "toggleSetting/cycleSetting (haptic+ARIA+toast) · applySettings→DOM · applyEntryMode",
+   "תקציב: renderBudget · openBudgetEditor/Detail · adjustBudget(±) · category-editor",
+   "פרויקט-חכם: renderSmartProject (פירוק שלבים→ימי-עבודה) · toggleSmartDay/Step",
+   "Preact: SETTINGS_ROWS 9 קבוצות + SETTINGS_SUB עץ-dial + LEAF_BINDINGS 72 עלים + inline-edit + PROFILE_TREE",
+   "Flutter: 4 מסכי-הגדרות native (~140 שדות, persist bs.{catalog/chat/notif/store}-settings.v1)"
+  ],
+  "instructions": [
+   "שיטת-לכידה: תפקיד+זרימה+חיווט (לא העתק-קוד), שמות+שורות מדויקים",
+   "verbatim (units/currency INSP-0007 · contrast/express INSP-0006 · כותרות-קבוצות INSP-0005)"
+  ],
+  "faults": [
+   "הגדרות-פרופיל = label שחיבר הבעלים (לא-verbatim; חריג מתועד INSP-0019)",
+   "drift: data/settings_tree.dart הוסר 07-06 — ההגדרות נייטיב בלבד"
+  ],
+  "workarounds": [
+   "ה-menu-dial הוסר (b9737cf) — ההגדרות נגישות נייטיב בלבד ב-4 מסכי-settings"
+  ],
+  "owner_decisions": [],
+  "contract": "לכידת index.html:6560–7700 עם שמות-פונקציות+שורות מדויקים.",
+  "dependencies": [
+   "index.html:6560–7700",
+   "app/src/components/menu/submenu-settings.tsx (1461ש׳) + app-store.ts",
+   "app/src/store/app-settings.ts · data/settings_tree.dart (הוסר 07-06)"
+  ],
+  "gating": [],
+  "verification": [
+   "INSP-0005/0006/0007/0010/0017/0019 · smoke 21/21 · runRegression 236/236",
+   "Playwright התנהגותי (currency→attr→stored→reset); AppSettings 6 מפתחות; LEAF_BINDINGS=72"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "index.html:6750(SETTINGS_LABELS)/6806(renderSettings)/7455(renderProjects)/7632(ORDER_STATUS)/7641(resolveStatus)",
+   "submenu-settings.tsx · app-settings.ts"
+  ]
+ },
+ {
+  "path": "MASTER-giant-system-order.md",
+  "one_line": "מסמך-אב מאחד ל-המערכת-הענקית — מנוע-אחד superset · כל חברה=פרוסת-קונפיג · הסדר המדויק 0→5.",
+  "status": "current",
+  "vision": "מנוע-אחד ענק (superset מקסימלי) · חברה=גולמי-נקי+קונפיג+דאטה · קוד-אחד→אינסוף חברות (30 אפליקציות · white-label).",
+  "mission": "להגדיר את הסדר-המדויק: 0 registry · 0.5 גולמי-נקי · 1 חבר-הכל+ירוק · 2 אשף=סטודיו-מלא · 2.5 איחוד-סטודיו · 3 מרכז-שליטה · 4 ורטיקל+חברה-2 · 5 שמירה.",
+  "capabilities": [
+   "registry קיים (~863 של ה-Studio, element_registry.dart) כמקור-הטוגלים",
+   "שלד-הענק (giant-v1..v6.1): OrgConfig · org_gates (featOn/termOf) · vertical_packs (6) · org_setup_wizard",
+   "Phase-2: attention_engine · workflow_engine · CRM (RFM · תיקון-באג-ח״פ · normalizePhone) · data-quality · קבלות",
+   "מרכז-שליטה: דשבורד-מנהל 5-טאבים + Trade-Builder (עורכים-אמיתיים חבויים) + 2 Studioים (~863 registry)"
+  ],
+  "instructions": [
+   "לא-שובר-קיים: additive · מאחורי-דגל · default=זהה-בייטים · לא-נוגעים-במנועים",
+   "אמת-בבייטים-לא-פרוזה (תפקיד-הידען)",
+   "לא-לבנות-מה-שקיים — לאחד, לא לשכפל",
+   "מחזרים element_registry.dart כמקור-הטוגלים (לא בונים חדש); חבר-קודם→פרק-לאט"
+  ],
+  "faults": [
+   "🔴 stubs קריאה-בלבד בטאב-ניהול: קטגוריות:4329 · הגדרות:4360 · עץ-מוצרים:4399 · מותגים+מחירים:4437 — אפס-עריכה",
+   "כפילויות: קטגוריות×2 · מוצרים×3 · מותגים×2 · מחירים×4 · הגדרות×3 · Studio×2 · תפקידים×3",
+   "פירוק שטחי: רק 13 מודולים גסים (kOrgModules) + ~8 טוגלים אד-הוק · אין registry קנוני; מודול-קבלן חסר מ-org_modules"
+  ],
+  "workarounds": [
+   "עורכים-אמיתיים חבויים ב-Trade-Builder (kTradeBuilderFlag-off) + CatalogSettings",
+   "degrade-graceful (תלוי שורד כבוי) · toggle-matrix מגבה כל צירוף"
+  ],
+  "owner_decisions": [
+   "תיקוני-בעלים: גולמי-נקי כבסיס · שני ה-Studioים · האשף=הסטודיו (מורחב 27/7, אושר צא-לדרך מול הדמייה חיה wizard-mockup.html)",
+   "מחוץ-לתוכנית (בעלים/נפרד): Android-Play (כשל קיים-מראש) · סיבוב-R2 · keystore · iOS-pipeline · הדלקות-launch"
+  ],
+  "contract": "default-ON=זהה-בייטים · ליבה-נעולה (kImmutable/kRoleFloor) · toggle-matrix ירוק · שער ירוק.",
+  "dependencies": [
+   "PLAN-giant-system-master · PLAN-verticals-and-toggles · DIRECTIVE-deepen-toggles · MAOR-REUSE-MAP",
+   "DIRECTIVE-buildsmart-clean · DIRECTIVE-fake-data-sweep · LAUNCH-MICRO-BREAKDOWN (הטראקר)"
+  ],
+  "gating": [
+   "kOrgConfigFlag · kTradeBuilderFlag · kStudioFlag · kStudioCoEditor · kImmutable/kRoleFloor (edit-safety)"
+  ],
+  "verification": [
+   "toggle-matrix (תופס שבירת-טוגל ב-CI לא בפרוד) · degrade-graceful",
+   "מודל-מאור: MaorClean↔MaorHachesed 396/400 שורות זהות"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "config/org_config.dart · state/org_gates.dart · config/vertical_packs.dart · org_setup_wizard_screen.dart",
+   "state/studio/element_registry.dart (~863) · logic/attention_engine.dart · logic/workflow_engine.dart",
+   "input_validators.dart:29 (checksum ח״פ) · studio_screen"
+  ]
+ },
+ {
+  "path": "PLAN-buildsmart-clean-master.md",
+  "one_line": "תוכנית-אב להפוך את BuildSmart למנוע-Clean בלתי-שביר (קוד-אחד→אינסוף אפליקציות), 6 שלבים.",
+  "status": "current",
+  "vision": "ה-Clean=בסיס גנרי-מלא-בלתי-שביר; כל חברה=בסיס+דאטה+שם+פיצ׳רים-נבחרים · קוד-אחד→הרבה אפליקציות חיות בו-זמנית.",
+  "mission": "מפת-שלבים: 1 מנוע-אמת · 2 חוסן · 3 הפרדת-מנוע↔דאטה · 4 פרופיל-Clean+לינק · 5 הוכחת-שכפול · 6 מודולריזציה.",
+  "capabilities": [
+   "שלב 1 מנוע-אמת (מיגור פייק): מנהל·חנות·פיננסים·שליח+פורטל-ספק·בית/תגמולים/אתר · פקדים-מתים",
+   "שלב 2 חוסן: סבילות-דאטה (ריק/חסר/מעוות/ענק) · בידוד-דייר · server→cache→bundled · קנה-מידה",
+   "שלב 3 הפרדה: קטלוג-מקור-מתחלף · מיתוג-config · orgId per-tenant · איחוד-דגלים→APP_PROFILE",
+   "שלב 4 פרופיל clean (קטלוג-ריק·מיתוג-נייטרלי·כל-היכולות-דלוקות) + דיפלוי-לינק",
+   "שלב 5 חברה #2 (החלפת קטלוג+שם) → שני לינקים חיים"
+  ],
+  "instructions": [
+   "בנוי-לא-להישבר (בסיס-למיליונים) · לא-דורסים-במקום · מאחורי-דגל · הקיים זהה-בייטים · שילוח רק-על-ירוק",
+   "רב-פעמי (multi-pass) — פרוסה-אחר-פרוסה · שער-ירוק · הידען מחזיק את המפה בין הפרוסות"
+  ],
+  "faults": [
+   "בעיית-מידע-מזויף: ~24 אתרי מזויף-כאמת ממופים (file:line) מסריקת-6-עדשות בלוח-המנהל"
+  ],
+  "workarounds": [],
+  "owner_decisions": [],
+  "contract": "DoD פר-שלב; היעד: 2 לינקים חיים (נוכחי+חברה-2) מקוד-אחד · additive·הפיך·מאומת · אפס-סיכון לחי.",
+  "dependencies": [
+   "DIRECTIVE-fake-data-sweep · DIRECTIVE-buildsmart-clean · DIRECTIVE-manager-console-live",
+   "LAUNCH-MICRO-BREAKDOWN.md (SSOT/טראקר)"
+  ],
+  "gating": [
+   "APP_PROFILE (demo/buildsmart/clean/company2) · דגל פר-פרוסה"
+  ],
+  "verification": [
+   "CI 9/9 ירוק (head 03506f3c)",
+   "טסט בידוד-דייר A-לא-רואה-B (stage2_tenant_isolation) · זהה-בייטים מוכח · mutation-verify"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "lipskey_catalog.dart:120 (data-driven) · orgId/kOrgScopedQueries · Studio",
+   "2-לינקים-מוכחים (clean + BuildMax)"
+  ]
+ },
+ {
+  "path": "archive/DIRECTIVE-LOOP-launch.md",
+  "one_line": "הנחיית-לולאה self-driving למסלול-ההשקה U3→U2→U4→U5.2; הצי בונה+מאמת כל שלב לבד, דחיפה-במילה.",
+  "status": "current",
+  "vision": "הצי מריץ את שאר מסלול-ההשקה בלולאה לבד — שלב-אחרי-שלב — בלי שהבעלים ישכפל הנחיה לכל צעד.",
+  "mission": "רצף תלותי: U2 הרשמה+באנר-ממתין → U4 תור-אישור-אדמין (שער-אוניברסלי, יוצר בעלי-חנות) → U3.3 מסך-בעל-חנות (מייבא-קוד-בינה) → U5.2 מחיקת-חשבון.",
+  "capabilities": [
+   "U3.3 מסך-בעל-חנות = מייבא-קוד-בינה: העלאת-Excel/CSV + מסך-מיפוי-עמודות-גמיש → כתיבה ל-inventory תחת storeId + חותמת עודכן-לאחרונה",
+   "reuse: parseCsvToDrafts (C4.5) · kTradeImportFlag · claim storeId (U3.1.1)"
+  ],
+  "instructions": [
+   "מצב-הפעלה ברירת-מחדל: בנייה-אוטומטית · דחיפה-במילה; עוצר לפני כל דחיפה-חיה ומבקש תדחוף",
+   "גראונד מול הקוד החי (שמות-סימבולים+מוקשים); אל תבנה מה שקיים",
+   "additive מגודר kUserSystem (OFF=זהה-בייטים); שינויי rules/functions additive-בטוח",
+   "אמת מקומית: analyze=0 · סוויטה-מלאה · emulator rules-test (--test-concurrency=1) · mutation-verify"
+  ],
+  "faults": [
+   "הספק חי ב-קוד-בינה (מיניסופט) — דסקטופ בלי API ציבורי → ייצוא-קובץ בלבד",
+   "מחיקת-חשבון (U5.2) = חוסם-iOS של Apple (עצמאי — ניתן להקדים)"
+  ],
+  "workarounds": [
+   "U3.3 = ייבוא (לא הקלדה-ידנית) → פותר את ה-cross-cut של supplierSubmitProvider",
+   "מיפוי-גמיש חסין-לפורמט (נשמר per-store, כל ייצוא עתידי נכנס אוטומטית)",
+   "עצירה-קשיחה אם ייצוא לא-CSV/Excel (מבנה-אחיד בינארי) → ייתכן פרסר נפרד"
+  ],
+  "owner_decisions": [
+   "🔒 החלטות-נעולות: הכל-באישור-admin · אורח=גלישה-בלבד · בעל-יחיד-לחנות (claim storeId==store.id, לא storeUid)",
+   "🛑 עצירה-קשיחה: supplierSubmitProvider (U3.3.1) דורש הכרעה לפני מימוש · כל secret/keystore/service-account"
+  ],
+  "contract": "שער-קבלה: analyze 0 · סוויטה-מלאה · emulator rules-test · mutation-verify · protocol-enforce; דחיפה רק על תדחוף וכשהכל ירוק.",
+  "dependencies": [
+   "SSOT: SPEC-user-system-MICRO §U2/U4/U3.3/U5.2 (ענף nice-volta)",
+   "U3-core חי-מאומת (b8808b5e, 10/10 CI)"
+  ],
+  "gating": [
+   "kUserSystem · kTradeImportFlag · claim storeId"
+  ],
+  "verification": [
+   "emulator rules-test · mutation-verify (הזרק באג→RED→שחזר→GREEN)",
+   "המתן לאימות-CI (ירוק—מאומת) לפני התקדמות לשלב הבא"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "parseCsvToDrafts (supplier_onboarding.dart:170) · deleteAccount · myStoreProvider · setRole · main.dart:329"
+  ]
+ },
+ {
+  "path": "DIRECTIVE-atom-tooling.md",
+  "one_line": "הנחיה לבניית 2 כלי-אטומיזציה: מפרק-אוטומטי (קוד→גרף, AST) + מחולל-טסטים (גרף→בדיקות).",
+  "status": "current",
+  "vision": "pipeline קוד→גרף→טסטים, מקורקע במסך-1 כגולדן — אפס drift מהמקור-האחד.",
+  "mission": "כלי A decompose (tools/atom/decompose, Dart+analyzer) + כלי B testgen (tools/atom/testgen) — כל edge+flow-step=טסט.",
+  "capabilities": [
+   "מפרק: אטומים (composer+section-widgets) · node (Text/CfgText literals + registry-ID מוצלב מול element_registry) · edges (reads/writes/actions/uses/gated-by) · flows (trigger→verb/rule/formula→effect) · floor",
+   "מחולל: reads→watched · writes→state-set · action→nav/sheet · registry-ID→wired · gated→shrink · rule→cond-אמת/שקר · formula→I/O · verb→אפקט",
+   "אינטרפול: גרף = JSON (מכונה) + Markdown (אדם, פורמט מסך-1)"
+  ],
+  "instructions": [
+   "מ-AST — לא regex-ניחוש",
+   "dev-tooling ב-tools/atom/ — לא app-lib · לא bundle · job-CI נפרד (לא Protocol Enforcement של האפליקציה)",
+   "בונים במקביל — אפשר לזרע graph.json ידני למסך-1 כדי ש-B יתחיל לפני ש-A גמור"
+  ],
+  "faults": [],
+  "workarounds": [],
+  "owner_decisions": [],
+  "contract": "גולדן-מפרק: פלט≡מסך-1-הידני (nodes/edges/flows/registry 6/6). גולדן-מחולל: 5 טסטי smartTree ST-3 + count(edges+steps)==count(tests) + הטסטים עוברים מול הקוד.",
+  "dependencies": [
+   "מסך-1 (knowledge/screens/contractor-home/) = golden-fixture",
+   "element_registry.dart"
+  ],
+  "gating": [
+   "מגודר-CI כ-job נפרד (לא Protocol Enforcement של האפליקציה)"
+  ],
+  "verification": [
+   "golden-test מול הקבצים-הידניים · zero-miss (registry-count · count(edges+steps)==count(tests)) · הטסטים עוברים מול הקוד האמיתי"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "smart_home_screen.dart · element_registry.dart · knowledge/screens/contractor-home/ · tools/atom/{decompose,testgen}"
+  ]
+ },
+ {
+  "path": "VERIFIED-OPEN-WORK-2026-07-29.md",
+  "one_line": "מקור-אמת לעבודה-הפתוחה (אומת מהקוד v7.01 ע״י 5 סוכני-אימות) — מפריד פתוח-באמת ממסמך-מיושן.",
+  "status": "current",
+  "vision": "לפני סימון פריט פתוח — אמת בקוד (git show), אל תסמוך על המסמך לבדו.",
+  "mission": "להפריד נטען-פתוח-במסמכים מ-מאומת-בקוד ולמפות את העבודה-הפתוחה-האמיתית לפי-עדיפות.",
+  "capabilities": [],
+  "instructions": [
+   "לפני סימון פריט פתוח — אמת בקוד: git show origin/claude/whats-happening-LyY9G:<path>",
+   "אל תסמוך על המסמך לבדו"
+  ],
+  "faults": [
+   "שילוב-מאור השארית ~40%: workflow_engine מיובא רק בטסט (אפס צרכן ב-lib) · JourneyTimeline כבוי (kIntelLive const-false, _resolveCustomerKey→null) · מספור-מסמכים-רץ חסר (receiptSeq) · credit חסר cred.log+tiers",
+   "#8/#9/#11/#14 (לוח-משאבים/מכסה/חזרתיות/דוח-הרחבה) — אין בקוד; הקשחות C3/C4/C5 חסרות",
+   "שער אנטי-כפילות מערכתי (דרישת-בעלים) — הגייט-האוטומטי לא מומש (dedup_test catalog-only בלבד)",
+   "מסמכים-מיושנים: CONTINUITY · TASKS-to-full (T6) · session_plan · TODO-worktree-hooks · huliot comment"
+  ],
+  "workarounds": [
+   "store_screen.dart:1093-1094 pull-to-refresh = Future.delayed(800ms) no-op (גבולי; storeOrdersProvider כבר ריאקטיבי)"
+  ],
+  "owner_decisions": [
+   "שער אנטי-כפילות = דרישת-בעל-המוצר (06-07: חייב טיפול)",
+   "Ops/השקה (לא-קוד): Backend go-live (USE_FIREBASE_BACKEND) · Blaze · App Check · חנויות Apple $99/Google $25 · דומיין עברי · פוליש P-1/P-5"
+  ],
+  "contract": "פסק-דין פר-תחום (סגור/פתוח/כמעט-סגור); העבודה-הפתוחה-האמיתית = שילוב-מאור ~40% + שער-אנטי-כפילות.",
+  "dependencies": [
+   "DIRECTIVE-maor-full-integration · MAOR-REUSE-MAP · TODO-dedup-gate"
+  ],
+  "gating": [
+   "kIntelLive (const-false, tree-shaken)",
+   "_resolveCustomerKey→null (JourneyTimeline)"
+  ],
+  "verification": [
+   "5 דוחות-אימות עם evidence file:line (Backend S0–S9 · wizard/studio s0–s11 · TASKS B0–T7 · fake-data-sweep 24 אתרים · מאור 19 פריטים)",
+   "אימות-חוזר: git show origin/claude/whats-happening-LyY9G:<path>"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "logic/workflow_engine.dart · manager_dashboard_screen.dart:3003 · screens/intel/journey_labels.dart",
+   "invoice.dart:46 · delivery_note.dart:41 · store_screen.dart:1093 · input_validators.dart:29",
+   "ai_hub_dedup_test.dart · dedup_test/no_duplicate_specs_test"
+  ]
+ },
+ {
+  "path": "SERVER-KICKOFF.md",
+  "one_line": "חבילת-משימות-כניסה להפעלת הצי על פרויקט-השרת (Firebase) — S0–S9, cache-pattern drop-in.",
+  "status": "aging",
+  "vision": "לחבר את האפליקציה ל-Firebase החי דרך drop-in (_local→_firebase) ב-cache-pattern — ה-interface (sync) וה-UI לא משתנים, הנתונים אמיתיים.",
+  "mission": "להפעיל את הצי על S0–S9: שלב A SDK · B Auth · C שכבת-נתונים (S2 base→S3×6→S4) · D Rules · E push/images/functions/offline.",
+  "capabilities": [
+   "base FirestoreCachedRepo<T> (cache-pattern, all() נשאר sync) + pilot=orders",
+   "S3 ×6 repos מקבילי: orders·customers·catalog·site·stock·finance",
+   "S4 real-time (chat threads/messages · orders snapshots) · S5 Security Rules + emulator-tests · S6 FCM · S7 R2 · S8 Functions · S9 offline"
+  ],
+  "instructions": [
+   "לא להפוך interface ל-async — cache-pattern שומר sync (drop-in)",
+   "לא לגעת ב-UI — רק data/providers",
+   "catalog (1,877) לא ב-Firestore — bundle/R2 (אפס עלות-DB)",
+   "🔴 anti-loss: דחוף אחרי כל משימה (S2 וכל repo בנפרד, לא בבאצ׳ים); grep-verify מול ה-spec — אפס המצאה"
+  ],
+  "faults": [
+   "❌ S2 אבד (לא נדחף) — היה code-complete אך נפל עם סביבה שנגמרו-לה-הטוקנים → בנה מחדש מ-S2 (⚠️ RESUME POINT 06-09; לפי VERIFIED-OPEN-WORK כל S0–S9 בנוי+פרוס)"
+  ],
+  "workarounds": [
+   "ה-_local הוא ה-fallback — כל push בטוח (UI לא משתנה)"
+  ],
+  "owner_decisions": [
+   "דברי-console לבעלים: Blaze billing (מכסת-SMS, כעת 10/יום) · App Check register (S0.5) · Deploy Security Rules (אחרי S5)"
+  ],
+  "contract": "גייט per-task: central-verify (analyze=0·test·build·conformance) + grep-verify; interface נשאר sync; UI ללא-שינוי; catalog לא ב-Firestore.",
+  "dependencies": [
+   "SSOT: SPEC-server-connect-MICRO (~48 מיקרו, S0–S9) + SPEC-server-connect",
+   "שלב A (S0) חוסם-הכל; D (S5 Rules) לפני כל deploy פומבי"
+  ],
+  "gating": [
+   "USE_FIREBASE_BACKEND · App Check"
+  ],
+  "verification": [
+   "1,772 טסטים ירוקים (שלב A · S0 · commit 61912d9)",
+   "emulator-tests: חנות לא-קוראת-של-אחר · chat מבודד · credit חסום"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "firebase_options.dart · main.dart (initializeApp) · FirestoreCachedRepo<T>",
+   "buildsmart-b0b78 (Spark) · me-west1 (Tel Aviv) · firebase-hosting.yml · firebase.json"
+  ]
+ },
+ {
+  "path": "09-logic-cart-notif-onboarding.md",
+  "one_line": "לכידת לוגיקת סל-render·checkout-submit·התראות·onboarding/roles (index.html 11000–11907) + דלתאות Preact/Flutter.",
+  "status": "reference",
+  "vision": "לתעד את ליבת-הסל, זרימת-checkout, מנוע-ההתראות ו-onboarding verbatim.",
+  "mission": "ללכוד renderCart/syncOrderToSystem/checkout · seedNotifications/pushNotification/notifyOrderStatus · ONBOARD_SCREENS/showScreen/enterRole.",
+  "capabilities": [
+   "סל: renderCart (store-group לפי ספק + computeCheckout + ship-plan) · syncOrderToSystem (דוחף ל-SYS_ORDERS) · checkout",
+   "התראות: seedNotifications (3 seed) · pushNotification · toggleNotifications · notifyOrderStatus · toast · tick",
+   "onboarding: ONBOARD_SCREENS (10 מסכים) · showScreen · buildPrep · enterApp · enterRole (5 פרסונות)",
+   "Flutter: notifications_screen (1,081ש׳, קיבוץ-חכם run≥3) · chats_screen (1,437ש׳, auto-reply 900ms) · onboarding ממוקד-קבלן"
+  ],
+  "instructions": [
+   "⚠️ shared-admin = פרוטוטייפ בלבד; ב-Flutter הפרסונות = מסכים נפרדים ומבודדים → אל תממש shared-admin"
+  ],
+  "faults": [],
+  "workarounds": [
+   "Preact: onboarding הוסר לחלוטין (כניסה לפי-פרסונה ישירה); התראות = רק notificationCount signal; checkout-submit המלא לא הומר"
+  ],
+  "owner_decisions": [],
+  "contract": "לכידת index.html:11000–11907 עם שמות-פונקציות+שורות.",
+  "dependencies": [
+   "index.html:11000–11907",
+   "app/src/ (app-store.ts)",
+   "notifications_screen.dart · chats_screen.dart · onboarding_screen.dart"
+  ],
+  "gating": [
+   "botEnabled (auto-reply)",
+   "welcomeSeenProvider (bs.welcome-seen.v1)"
+  ],
+  "verification": [],
+  "open_questions": [],
+  "source_anchor": [
+   "index.html:11044(renderCart)/11212(syncOrderToSystem)/11312(checkout)/11482(seedNotifications)/11555(pushNotification)/11634(ONBOARD_SCREENS)/11806(enterRole)/11890(admTab)",
+   "notifications_screen.dart · chats_screen.dart"
+  ]
+ },
+ {
+  "path": "15-finance-site-hubs.md",
+  "one_line": "לכידת מרכז-פיננסים (Category B) + ניהול-אתר (Category C) (index.html 19452–20800) + דלתאות Preact/Flutter.",
+  "status": "reference",
+  "vision": "לתעד את 2 ה-hubs שמעמיקים את אפליקציית-הקבלן מעבר-לרכש: פיננסים + ניהול-אתר.",
+  "mission": "ללכוד נתונים+פונקציות של finFeature (10 כלים) ו-siteFeature (10 כלים) verbatim.",
+  "capabilities": [
+   "פיננסים (fin-*): BUILD_INDEX{121.3→128.7} · PAYMENT_TERMS · subcontractors(3) · approvalQueue(2) · penaltyLedger · FX_RATES; finIndex/finROI/finApprovals/finReports/finFX",
+   "ניהול-אתר (site*): GANTT_TASKS · SAFETY_TIPS · SITE_TREE(קומה→דירה→חדר) · ARCHIVED_PROJECTS; siteGantt/siteSnagging/siteAttendance/siteDiary/siteSafety",
+   "10 כלי-site-hub verbatim (INSP-0037): גאנט·ליקויים·קומה-דירה-חדר·נוכחות-GPS·יומן·בטיחות·תלויות·צילום·ביקורות-מפקח·ארכיון"
+  ],
+  "instructions": [],
+  "faults": [],
+  "workarounds": [
+   "Preact: פיננסים(B) ו-site-hub(C) = subtrees של 10 dial-leaves כ״א verbatim, אך ה-flows (מדד/ROI/גאנט) = drill/toast, לא רצים"
+  ],
+  "owner_decisions": [],
+  "contract": "לכידת index.html:19452–20800 (hub-overlay→feature-overlay פר-כלי).",
+  "dependencies": [
+   "index.html:19452–20800",
+   "כפתור מרכז-פיננסים ב-view-project · כפתור ניהול-אתר ב-view-tasks",
+   "finance_hub_sheets.dart · site_hub_screen.dart"
+  ],
+  "gating": [],
+  "verification": [
+   "INSP-0037 (10 site-hub verbatim) · INSP-0039",
+   "אומת-קוד 07-06: openFinanceHub (גריד-10, נגיש מטאב-חנות) + openSiteHub (10 כלים, נגיש מתפריט-בית) נבנו"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "index.html:19459(BUILD_INDEX)/19461(PAYMENT_TERMS)/19815(GANTT_TASKS)/19841(SITE_TREE)",
+   "finance_hub_sheets.dart · site_hub_screen.dart · b9737cf (menu-dial הוסר)"
+  ]
+ },
+ {
+  "path": "DIRECTIVE-studio-registry-to-wizard-toggles.md",
+  "one_line": "הנחיה להמיר את registry-ה-Studio (~863 אלמנטים) לטוגלי הצג/הסתר יפים באשף (קיבוץ עברי + אקורדיון + חיפוש).",
+  "status": "current",
+  "vision": "אותה שליטה פר-אלמנט של ה-Studio, באותה כמות (~863) — כטוגלי הצג/הסתר מוצגים יפה כאשף, לא כרשימה-הגולמית.",
+  "mission": "למחזר element_registry.dart כמקור-הטוגלים; כל רשומה→טוגל ב-OrgConfig; קיבוץ מסך→סעיף + labelHe + אקורדיון + חיפוש.",
+  "capabilities": [
+   "מחזור element_registry (~863) → טוגלי הצג/הסתר ב-OrgConfig",
+   "תצוגה: קיבוץ מסך→סעיף (אקורדיון) · שם-עברי labelHe (לא מזהה-טכני) · שורת-חיפוש",
+   "כל משטח בודק את הטוגל שלו ב-build() דרך org_gates (degrade-graceful)"
+  ],
+  "instructions": [
+   "מחזור (לא בנייה-מחדש/כפילות) — ה-Studio ממשיך לעבוד; רק נחשף ציר-ה-on/off",
+   "default-ON (גלוי) = הקיים זהה-בייטים",
+   "edit-safety: אלמנטי-ליבה נעולים (kWizardLockedModules-style) — הסתרת ניווט/מסך-חובה אסורה",
+   "ביצוע: הצי, רב-פעמי · דחיפה רק על תדחוף"
+  ],
+  "faults": [],
+  "workarounds": [],
+  "owner_decisions": [
+   "מה הבעלים רוצה: אותה כמות/שליטה כמו ה-Studio, מוצג יפה כאשף בעברית",
+   "מקום בסדר: צעדים 0→2 של MASTER-giant-system-order"
+  ],
+  "contract": "DoD: ~863 טוגלים מקובצים-יפה בעברית (אקורדיון+חיפוש) · כל טוגל מציג/מסתיר באמת בכל האפליקציה · default-ON=זהה-בייטים · ליבה-נעולה · toggle-matrix ירוק · Studio לא-נשבר · שער ירוק.",
+  "dependencies": [
+   "MASTER-giant-system-order (צעדים 0→2)",
+   "clean empty-shell (בסיס — טוגלים על אפס-דמו)"
+  ],
+  "gating": [
+   "OrgConfig טוגל-פר-אלמנט · org_gates · ליבה-נעולה (kWizardLockedModules-style)"
+  ],
+  "verification": [
+   "toggle-matrix מתרחב (מכבה טוגלים→מריץ-זרימות→אפס-שגיאות; תופס ב-CI לא בפרוד)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "state/studio/element_registry.dart (~863, labelHe+מיקום) · org_gates · OrgConfig"
+  ]
+ },
+ {
+  "path": "DIRECTIVE-clean-finish.md",
+  "one_line": "הנחיה לסגור את Clean — לתקן פיננסים-4 (מזויף-כאמת) + שלב-5 הוכחת שני-לינקים · קוד-אחד.",
+  "status": "current",
+  "vision": "הבעלים פותח 2 לינקים חיים מאותו קוד (MaorClean→MaorHachesed) — סגירת צד-הצי של תוכנית-Clean.",
+  "mission": "משימה-1 תיקון-פיננסים-4 · משימה-2 להפוך Clean לחי (לינק) + חברת-דמו-#2 (לינק שני) + תיעוד.",
+  "capabilities": [
+   "דיפלוי APP_PROFILE=clean לערוץ-Firebase-Hosting נפרד (hosting:channel:deploy) → לינק חי",
+   "חברת-דמו #2: AppBrand שם+מיתוג-שונה + קטלוג-מוחלף (seam 3.1c) → לינק שני"
+  ],
+  "instructions": [
+   "תקן פיננסים-4: חווט ל-financeRepositoryProvider, או תן תווית-(דמו) בסגנון קיים (_ServerNote כמו FX:1622)",
+   "additive · מאחורי-דגל/פרופיל · האתר-הראשי-החי לא-נגע לרגע · בייטים-לא-פרוזה",
+   "אל-תדלג-שוב (פיננסים-4 דולג 4 פעמים)"
+  ],
+  "faults": [
+   "🔴 פיננסים-4 מזויף-כאמת ב-finance_hub_sheets.dart: ROI :1095 (total*1.42 → תמיד 42%) · קבלני-משנה :632/:669 (kSubcontractors const) · מדד-בנייה :488/:490 (kBuildIndex const) · חשבונית (kInvoiceTotal)"
+  ],
+  "workarounds": [
+   "Clean-v1 יכול לשאת קטלוג-גנרי אם 3.1c לא-בשל — אבל חברה-#2 חייבת קטלוג+מיתוג שונים גלויים (אחרת לא הוכחנו כלום)"
+  ],
+  "owner_decisions": [],
+  "contract": "DoD: פיננסים-4 סגור (אפס-מתחזה) · 2 לינקים חיים מאותו commit עם הבדל-נראה-לעין (שם+קטלוג) · מתועד ב-LAUNCH_READINESS · הקיים זהה-בייטים · שער ירוק.",
+  "dependencies": [
+   "תוכנית-Clean (PLAN-buildsmart-clean-master) · seam 3.1c (החלפת-קטלוג) · LAUNCH_READINESS"
+  ],
+  "gating": [
+   "APP_PROFILE=clean / company2 · דגל/פרופיל"
+  ],
+  "verification": [
+   "mutation-verify לכל טסט-חדש · שער-ירוק · הישן ל-rollback"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "app_flutter/lib/screens/finance_hub_sheets.dart (:1095 ROI · :632/:669 subs · :488/:490 index · :1622 FX-note)"
+  ]
+ },
+ {
+  "path": "MILESTONE-LOG.md",
+  "one_line": "יומן אבני-דרך מאומתות-ב-CI (ע״י הקטלגן, verify-before-✅) — חדש-למעלה; אחרונה 08-03 מנוע-קטלוג-3D + אטומיזציה-מלאה.",
+  "status": "current",
+  "vision": "אבני-דרך שאומתו ב-CI בפועל (Protocol Enforcement) — לא על-דיווח.",
+  "mission": "לתעד אבני-דרך CI-ירוקות, משלים ל-LAUNCH-MICRO-BREAKDOWN.",
+  "capabilities": [
+   "פאזה-0 (fittings): פורט-מנוע PP-R + golden 1:1 + familyOf/odOf 99% כיסוי; Protocol Enforcement 788",
+   "פאזה-A: familySpecFor⊇polyroll → חוליות 789 SKU 0→95.4% (728/763); Protocol Enforcement 793",
+   "אטומיזציה-מלאה: מפרק-אטומים אוטומטי (tools/atom/decompose, AST) → 108 מסכים · registry 676/676=100% (zero-miss) · 3 שכבות פר-אטום; Protocol Enforcement 794"
+  ],
+  "instructions": [],
+  "faults": [
+   "פער 4.6% בחוליות = אביזרי-נוי נטולי-מידה (gaps)"
+  ],
+  "workarounds": [
+   "registerFamilySpecs אחרי registerPolyrollSpecs (putIfAbsent) → אינרטי כברירת-מחדל (v1+דגל-כבוי), byte-identical"
+  ],
+  "owner_decisions": [],
+  "contract": "כל אבן-דרך = CI-ירוק אומת ע״י הקטלגן (Protocol Enforcement בפועל); byte-identical · דגל default-OFF.",
+  "dependencies": [
+   "משלים LAUNCH-MICRO-BREAKDOWN.md",
+   "AGENT-SOURCES: קוד+גרפים=whats-happening · מפרטים/ידע-אסטרטגי=nice-volta"
+  ],
+  "gating": [
+   "kFittingEngine (default-OFF)"
+  ],
+  "verification": [
+   "Protocol Enforcement 788/793/794 ירוק · golden 1:1 · golden-עוגן contractor-home 8/8",
+   "commits 47240cfa · 0c828268 · 0bfe9726 · 7142f3cc"
+  ],
+  "open_questions": [
+   "ממתין: לולאת-אביזרים שלבים 20-26 (מותג-כללי · v2 end-to-end · answer-equivalent)",
+   "ממתין: כלי-B מחולל-טסטים (על 108 הגרפים)"
+  ],
+  "source_anchor": [
+   "tools/atom/decompose · main.dart:280 (if kFittingEngine registerFamilySpecs) · app_flutter/knowledge/screens/",
+   "commits 47240cfa/0c828268/0bfe9726/7142f3cc"
+  ]
+ }
 ]

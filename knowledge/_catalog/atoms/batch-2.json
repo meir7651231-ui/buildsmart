@@ -1,619 +1,619 @@
 [
-  {
-    "path": "monster-finder/MONSTER-PLAN-v3.md",
-    "one_line": "תוכנית-בנייה 129-יחידות ל'מאתר-מפלצת' מאוחד (9→1) עם הוכחת <=6/<=4 ישימה+כנה, הכל מאחורי דגלים ובייטים-זהים בפרודקשן.",
-    "status": "current",
-    "vision": "מאתר-אחד מאוחד שמבטיח מסלול <=6 תורים לכל מוצר + <=4 למוצר-קשור, הוכחה מתמטית כנה וישימה-חישובית; פרודקשן זהה-בייטים עד 'תדחוף'.",
-    "mission": "לבנות 129 יחידות ב-13 פאזות (P0..P12) — חוזים-משותפים, הקשחת-P0.5, data/state, משטחי-כניסה, tap-chips, merged-brain, hop-graph, hidden-signals, terminus, cut-over, a11y — כל צעד עם קבצים+בדיקה+dependsOn.",
-    "capabilities": [
-      "OpeningSurface אחד: word-grid + text + voice + AI כמשטחי-קלט (ללא mode-buttons)",
-      "hop_graph מכוון עם EdgeKind (compat/variant/kit/category) מסונן crossesSystem",
-      "הוכחת <=4: single-source reachWithin4(src) per node",
-      "הוכחת <=6: strictly-greedy target-blind census (greedyReach)",
-      "mergedKeys memo per collapsed-pool signature + per-axis top-K-by-gain",
-      "softTilt (history/kit/compat set-overlap) — order-only, live על ה-wide pool",
-      "stores identity-scoped (uid-namespaced prefs, cardPicks, recentlyViewed, favorites, savedConfigs)",
-      "line planner: planLineFromPicks → BOM שחושף unresolvedSkus (~48% off-corpus)",
-      "P12 a11y: 48dp targets, RTL OrderedTraversalPolicy, semanticLabel per chip, liveRegion throttle, modal FocusScope trap"
-    ],
-    "instructions": [
-      "אל תתחיל P8/P9/P11 עד ש-9-18 (feasible proof) + 10/13 (compat gate) ירוקים",
-      "כל צעד מאחורי kUnifiedFinder/kCardKeyboard; uid==null/flag-OFF = בייטים-legacy",
-      "פצל per-commit seeded sample (~200-card) מ-nightly full-|U| sweep",
-      "allowlists EMPTY (kReachAllowlist/over4Allowlist/kHopPairOverride/kA11yWaiverList); debt ברשימות נפרדות שהשער מתעלם מהן",
-      "crossesSystem filter על compat+kit edges — אל תסמוך על _reallyMates",
-      "הרץ heavy censuses ב---concurrency=1 בתוך load-failure-only retry",
-      "taskkill dart before; never tail; ENABLE_* בשום live workflow"
-    ],
-    "faults": [
-      "v2 |U|^2 all-pairs BFS = timeout (~10^6 pairs)",
-      "_collapseKey היה library-private → census citations לא-קומפילביליות",
-      "_reallyMates drainage branch :176-177 מבריח cross-system PVC supply<->drain edge",
-      "softTilt v2 keyed על anchorOf שהוא ALWAYS null בזמן merged-keys (INERT)",
-      "ה-retry-wrap ש-MEMORY תיעדה כמוכח לא-קיים (הגייט bare flutter test --concurrency=4 @protocol-enforce.yml:50)",
-      "_PredictionChip destination branch (bs_keyboard.dart:884-918): glyph הובטח :818-819 אך לא קיים (colour-only WCAG 1.4.1)",
-      "cellHeight:30 mobile < 48dp (WCAG 2.5.5)",
-      "liveRegion על ה-header re-announces כל keystroke",
-      "WordKeyboard hard-pins Directionality.ltr → AT מגיע ל-chip הכי-פחות-מכריע first",
-      "_RelatedCard bare GestureDetector ללא button role; modal in-sheet לא לוכד focus",
-      "savedConfigs->favorites migration v2 lossy/irreversible (productKey 'A#ליפסקי'->'A' הוא לא sku)"
-    ],
-    "workarounds": [
-      "single-source reachWithin4 מחליף |U|^2 (O(V*E) לא O(V^2*E))",
-      "kReachUniverse.length כ-TOLERANCE BAND (לא equality) → סופג ingestion drift #56",
-      "dual-store additive+reversible migration (NEW v2 key, marker-gated, once-only)",
-      "raw-categoryHe edge (לא finderGroupFor-null) ל-100% isolation coverage by-construction",
-      "axisGlyph seam קיים (Icons.north_east) במקום שדה isDestination חדש-מתנגש",
-      "MaterialTapTargetSize.padded — hit-region>=48 בעוד painted cell נשאר 30",
-      "off-screen Semantics(liveRegion) status node מ-throttled ב-Timer(kLiveRegionThrottleMs)"
-    ],
-    "owner_decisions": [
-      "kInstallStudioDisposition (absorbTree vs rebrandFlat, step 109) — const owner-signed veto-able; שני הענפים build-ready",
-      "decisions.dart owner sign-off constants (step 1)",
-      "kReachUniverse band OWNER-REVIEW comment מצטט את #56",
-      "פרודקשן נשאר זהה-בייטים עד שהבעלים אומר 'תדחוף'"
-    ],
-    "contract": "פרודקשן זהה-בייטים (flags default false, uid==null/flag-OFF=legacy bytes) עד 'תדחוף'; central gate ירוק — band + greedy <=6 target-blind + single-source <=4 (union-of-unreachable-related-pairs empty) + allowlists empty + crossesSystem exhaustive — עם INJECT_OVER4 self-test→RED.",
-    "dependencies": [
-      "P0.5 9-18 (feasible proof) + 10/13 (compat gate) חוסמים P8/P9/P11",
-      "persistence 26-31 קודמים ל-state mutations 47-48",
-      "step 9 (collapseKeyOf public) קודם לכל census",
-      "softTilt reconcile 96-98 לפני P9 ships את המשטח",
-      "verify_card_keyboard.sh מחווט ל-protocol-enforce.yml after Gate 2 + step-37 retry"
-    ],
-    "gating": [
-      "kUnifiedFinder (superset derived), kCardKeyboard, kEnableUnifiedFinderDemo, kEnableCardKeyboardDemo, forceLiveForTest",
-      "kCensusMemoEnabled (census-only)",
-      "GATING TABLE ממפה 5 gates (step 114) — build|runtime|test",
-      "kMaterialIsGatedCoAxis; kA11yWaiverList empty"
-    ],
-    "verification": [
-      "scripts/verify_card_keyboard.sh (central gate) + scripts/verify_unified_finder.sh (hop+a11y)",
-      "monster-nightly.yml (cron '0 3 * * *') full-|U| sweep",
-      "INJECT_OVER4 / FORCE_LOAD_CRASH / RED self-tests",
-      "goldens: card_merged_48.json, card_merged_tilted.json, merged_golden.txt, word_finder_live_anchor.txt, a11y_semantics_tree.txt",
-      "workflow-define-leak guard על live workflows"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "lib/features/card_keyboard/* (decisions, dive_contract, hop_graph, card_engine, card_signals, card_soft, card_keyboard_screen, ai_seed, card_seed, opening_surface)",
-      "lib/features/word_finder/* (dive_pool, word_finder_engine, size_equiv, material_lexicon, synonym_bridge)",
-      "lib/data/related_info.dart; install_engine.dart:359 (productSystems); lib/logic/line_planner.dart",
-      "lib/screens/lipskey_product_sheet.dart, catalog_screen.dart; lib/state/* (auth_state, prefs_scope, recently_viewed, product_favorites, saved_configs, feature_flags)",
-      "lib/widgets/smart_input/keyboard/bs_keyboard.dart, bs_key.dart; app_flutter/scripts/*, .github/workflows/protocol-enforce.yml"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-wizard-is-the-studio.md",
-    "one_line": "הנחיה — האשף בולע את הסטודיו-המלא (5 חלוניות) בסגנון Maor על registry קיים; פרוסה-0 (עריכה-בחי+ניווט) מאושרת-לדחיפה מיד.",
-    "status": "current",
-    "vision": "האשף = כל 5 חלוניות-הסטודיו, מאורגן יפה כמו Maor (מקובץ/עברית/מונחים/נקי); חושפים את הקיים (element_registry ~896 + override-system), לא ממציאים.",
-    "mission": "לבנות מודול-קבלן ראשון, סגנון-Maor browsable, מפקח-מלא פר-רכיב, מונחים-שזורים, מצא-החלף גלובלי וגרסאות — 1:1 מול wizard-mockup.html, על פרופיל clean.",
-    "capabilities": [
-      "מודול קבלן 👷 כמודול #1 ב-org_modules — מקבץ מסכי-הקבלן (home/smart_home/tools/hr/attendance/material_requests/reorder)",
-      "סקציות פתוחות-לגלילה (אקורדיון עצל) + מונה N/N + טוגל-אב 'פעיל' + 'סמן הכל/נקה הכל' + מונה גלובלי 'X מתוך 896'",
-      "חיפוש+צ'יפים = מסננים (לא תנאי-הצגה)",
-      "מפקח פר-רכיב contextual לפי ElementKind (text 837/action 57/container 1) — שם/צבע/fontSize/weight/align/direction/הצג-הסתר",
-      "מונחים שזורים (termOf) + '→ תצוגה' חיה",
-      "🔎 מצא-החלף גלובלי (החלף בכל/בנבחרים ב-batch)",
-      "🕘 גרסאות (כל 'פרסם לכולם'=snapshot; 'שחזר' לא-הרסני)",
-      "הכל-חי בכל-האפליקציה (org_gates watch/build, אפס-ריסטארט, בכל persona/מסך)"
-    ],
-    "instructions": [
-      "הוסף contractor ל-org_modules.dart כמודול #1; בנה מול wizard-mockup.html 1:1",
-      "בנה על פרופיל clean (אפס-דמו) + ORG_CONFIG=true",
-      "default-ON/absent=on = חי זהה-בייטים (kDefaultOrgConfig ריק)",
-      "ליבה-נעולה: kImmutable + kRoleFloor (edit_safety) — אסור להסתיר/למחוק ניווט/מסך-חובה",
-      "toggle-matrix מתרחב לכסות visibility + overrides (טקסט/צבע/גודל)",
-      "central-verify.sh ירוק לפני עצירה; מחזור הסטודיו הקיים — לא כפילות/מחיקה"
-    ],
-    "faults": [
-      "הפרסונה-הראשית (קבלן) חסרה סקציה — החור שהבעלים תפס",
-      "edit_handle (step 9) לוכד כל tap כעריכה → tap-ניווט הופך לעריכה",
-      "studio_screen = 4-פאנלים בלי preview חי → הבעלים תקוע במסך-הניהול, לא מגיע למסך-קבלן",
-      "באג 'תיבה ריקה' (חיפוש כתנאי-הצגה במקום מסנן)",
-      "edit תמיד-דלוק → אי-אפשר לפתוח שום sheet"
-    ],
-    "workarounds": [
-      "שני מפלסי-ניווט: (1) edit-mode + מתג גלוי 'נווט⇄ערוך' (toggleEdit קיים ב-studio_top_bar); (2) בורר-מסך/persona מחוץ ל-edit-trap (נשען על tree_pane)",
-      "על החי: kStudio ON + owner-gate isOwnerEmail #84 STRICT → משתמש-לא-בעלים = בייטים-זהים (edit inert, אין כפתור-סטודיו)"
-    ],
-    "owner_decisions": [
-      "אושר ע'י הבעלים 27/7 ('צא לדרך') מול הדמייה-חיה",
-      "הבעלים 27/7: 'עדיף לי לדחוף לאתר החי'",
-      "פרוסה-0 מאושרת-לדחיפה מיד; שאר הפרוסות = דחיפה רק על 'תדחוף'"
-    ],
-    "contract": "DoD — האשף = כל 5 חלוניות בסגנון Maor על clean; קבלן מודול-ראשון; ✎ עורך-מלא פר-רכיב; מצא-החלף+גרסאות עובדים; הכל-חי בכל-האפליקציה; default זהה-בייטים; ליבה-נעולה; toggle-matrix+שער ירוקים; הסטודיו לא-נשבר; 1:1 מול ההדמייה.",
-    "dependencies": [
-      "wizard-mockup.html (ענף nice-volta) — הספֶק הויזואלי 1:1",
-      "element_registry (~896) + override-system של הסטודיו",
-      "panes: tree_pane/inspector_pane/theme_pane/find_replace_pane/history_pane",
-      "מקום בסדר: צעדים 1→2.5 של MASTER-giant-system-order.md",
-      "המשך: DIRECTIVE-giant-phase2-features.md גל-4"
-    ],
-    "gating": [
-      "ORG_CONFIG=true (רק ערוץ-preview; ברירת-מחדל-חי OFF)",
-      "kOrgConfigFlag (כניסת-אשף — גדור בדגל, לא בפרופיל)",
-      "kStudio ON + owner-gate isOwnerEmail #84 STRICT (כולל כפתור/כניסת-הסטודיו)",
-      "APP_PROFILE=clean; kDefaultOrgConfig ריק (absent=on)"
-    ],
-    "verification": [
-      "central-verify.sh ירוק",
-      "byte-verified (default זהה-בייטים) · degrade-graceful · mutation-verify",
-      "אימות-חובה לפני ✅: session לא-בעלים על החי = זהה-בייטים",
-      "הדפס לינק ב-run-summary (פרוסה-0)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "knowledge/wizard-mockup.html (nice-volta)",
-      "org_modules.dart, org_gates, org_config/studio-store, edit_safety",
-      "panes/tree_pane.dart, inspector_pane.dart, theme_pane.dart, find_replace_pane.dart, history_pane.dart; element_registry.dart",
-      "studio_top_bar (toggleEdit), studio_screen, edit_handle (step 9), CfgVisible",
-      "MASTER-giant-system-order.md (1→2.5)"
-    ]
-  },
-  {
-    "path": "17-security-service-boot.md",
-    "one_line": "ידע-מקור — מרכז-אבטחה/RBAC (Category I) + מרכז-שירות/chatbot (Category J) + boot של אב-הטיפוס, ודלתא ל-Preact/Flutter + שכבת-PWA/deploy.",
-    "status": "reference",
-    "vision": "תיעוד verbatim של שכבות-האבטחה/שירות/boot מאב-הטיפוס כמקור-אמת ל-port (INSP-0007/0008), עם ציון מה-ported ומה לא.",
-    "mission": "לתעד RBAC_MATRIX + sec-* + svc-* + BOT_KB + boot-sequence + PWA/manifest/SW/deploy, כולל הדלתא ב-Preact ו-Flutter.",
-    "capabilities": [
-      "RBAC_MATRIX (role→permissions[]) · can(perm)/requirePerm · auditLog",
-      "5 תפקידים · session-timeouts 5/15/30/60 דק' · encryption×4 · privacy×4 toggles",
-      "session-lock (resetSessionTimer/lockSession/unlockSession/initSessionTimeout)",
-      "openSecurityHub → 10 אריחים (2FA/הרשאות/ביומטרי/audit/GPS/session/הצפנה/היסטוריית-כניסות/מכשירים/פרטיות)",
-      "openServiceHub → 8 אריחים (help-desk/chatbot/דיווח-באג/ממיר-יחידות/מחשבון-כמויות/יומן/לוח-דרושים/סיור)",
-      "BOT_KB (kw[]→answer) · botReply · botQuick; shake-to-report; qty-calc 3 מצבים; onboarding 6 שלבים",
-      "boot: global error-catcher (window error → קופסה-אדומה bsFatalError)"
-    ],
-    "instructions": [],
-    "faults": [
-      "Preact: I+J ported כ-leaves אבל הפונקציונליות = toast/drill בלבד (RBAC-matrix/OTP/BOT_KB/shake לא רצים)",
-      "Flutter: אבטחה — אין RBAC-matrix/session-lock/audit מלא; menu-dial הוסר 07-06",
-      "Flutter: שירות — רק chatbot כ-thread (auto-reply); מחשבונים/סיור לא נכתבו",
-      "Flutter-web מבטל service-workers (getRegistrations→unregister) → אין PWA/offline (בניגוד ל-Workbox של Preact)"
-    ],
-    "workarounds": [
-      "boot standalone: splash-default (screen-splash גלוי) + inline seeds (seedNotifications 11498)",
-      "Flutter boot: registerPolyrollSpecs() putIfAbsent על kVerifiedSpecs (~772 מוצרי-Polyroll)"
-    ],
-    "owner_decisions": [
-      "הערה-מקור 21666: 'אבטחה אמיתית חיה בשרת — RBAC/audit/2FA כאן הם הדמיה'"
-    ],
-    "contract": "",
-    "dependencies": [
-      "INSP-0007 / INSP-0008 (מקור-אימות verbatim)",
-      "אימות-מקור על nice-volta (grep)",
-      "קשור ל-SPEC-server-connect (RBAC אמיתי = Firestore Security Rules)"
-    ],
-    "gating": [
-      "#sessionLock (נעילה-אוטומטית)",
-      "openSecurityHub → secFeature; openServiceHub → svcFeature"
-    ],
-    "verification": [
-      "INSP-0007: 10 אריחי-אבטחה (@21752-21762) + 8 אריחי-שירות (@22081-22090) verbatim",
-      "INSP-0008: תוכן-עומק verbatim (RBAC/timeouts/encryption/privacy/qty-calc/tour)",
-      "grep: 'מרכז האבטחה'×24, 'מרכז השירות'×16 (occurrences)",
-      "LEAF_BINDINGS: אבטחה 23 עלים + שירות 15 עלים (אומת-מהמקור)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "prototype JS 21660-22414 (RBAC_MATRIX@21675, BOT_KB@22065, openSecurityHub@21752-21762, openServiceHub@22081-22090); סוף-JS @22414",
-      "bootstrap script#1 5419-5439 (bsFatalError); הערה 5415 (אין data-layer חיצוני)",
-      "Preact: main.tsx (render App), SETTINGS_SUB, LEAF_BINDINGS",
-      "Flutter: main.dart (registerPolyrollSpecs, OnboardingGate, HomeShell), app_settings, chats_screen",
-      "PWA: manifest.json, service-worker.js (buildsmart-v107), vite-plugin-pwa/Workbox, vercel.json, app_flutter/web/index.html"
-    ]
-  },
-  {
-    "path": "SPEC-server-connect.md",
-    "one_line": "SPEC — חיבור-שרת (Firebase + Cloudflare R2), פירוק S0-S9, שמירת drop-in דרך offline-first cache; RBAC אמיתי כ-Firestore Security Rules.",
-    "status": "current",
-    "vision": "להפוך את ה-client (server-ready, Repository 6/6) למוצר-חי עם זהות-אמת + real-time בין-מכשירים + הפרדת-תפקידים נאכפת-בשרת.",
-    "mission": "לבצע S0-S9: Firebase setup, Auth (OTP+claims), schema+cache-pattern, Repository _firebase impls ×6, real-time (chat+orders), Security Rules, FCM, R2, Functions, offline.",
-    "capabilities": [
-      "Firebase Auth OTP-טלפון + מייל-fallback + custom-claims (role: contractor/store/courier/worker/manager)",
-      "Firestore offline-persistence + snapshots()→cache→UI (real-time חי)",
-      "Repository _firebase drop-in (מחליף _local, אותו interface: all/open/place/advance/setStage/credit/move)",
-      "collections: users/orders/customers/projects/tasks/stock/chatThreads(participants[])/chatMessages/siteNodes",
-      "Security Rules per-domain (chat=participants-only, credit=manager+owner, orders=stage-per-role, roles=admin-only)",
-      "App Check · FCM push · Cloud Functions (validation/credit-calc/triggers) · R2 images · offline-queue ל-batch-order"
-    ],
-    "instructions": [
-      "אל תהפוך את ה-interface ל-async (ישבור UI) — שמור drop-in דרך cache-pattern",
-      "S5 (Security Rules) לא-אופציונלי, לפני-השקה — בלעדיו הפרדת-התפקידים מזויפת",
-      "R2-creds + Firebase-admin = בשרת/Functions בלבד, לעולם לא ב-client",
-      "תפקיד מהשרת (custom-claims) לא client-pick; role_picker רק למשתמשי-רב-תפקיד"
-    ],
-    "faults": [
-      "נקודת-תכן קריטית: ה-interface סינכרוני (List<Order> all() — לא Future) מול Firestore async+real-time",
-      "בלי Security Rules ה-DB פתוח-לכולם (הפרדת-התפקידים שאומתה ב-client מזויפת)"
-    ],
-    "workarounds": [
-      "offline-first cache: Firestore offline-persistence ON + snapshots() listener → cache מקומי (Riverpod); all() סינכרוני קורא מ-cache instant; place/advance כותב ל-Firestore + optimistic-cache → providers/UI לא-משתנים"
-    ],
-    "owner_decisions": [],
-    "contract": "DoD per-S: S0=Firebase מאותחל+analyze 0; S1=role מ-auth+_loaded-guard; S2=base-cache על orders; S3=provider קורא מ-Firestore/UI ללא-שינוי; S4=דו-מכשירי A→B תוך-שניות; S5=emulator-tests (בידוד data/chat/credit); S6=push מגיע; S7=R2 load+upload; S8=פעולה-רגישה דרך Function; S9=offline→sync.",
-    "dependencies": [
-      "S0 חוסם-הכל → S1(auth)+S2(schema+cache) → S3(repos ×6 מקבילי) → S4(real-time)",
-      "S1+S2 → S5 (Security Rules, לפני-השקה)",
-      "מקבילי-אחרי-S0: S6(push)/S7(R2)/S9(offline); S8(functions) לפי-צורך",
-      "Repository 6/6 קיים ומתוכנן drop-in (orders_local וכו')"
-    ],
-    "gating": [
-      "App Check ON (חוסם לקוחות-לא-אפליקציה)",
-      "_loaded-guard (S1)",
-      "custom-claims role gating"
-    ],
-    "verification": [
-      "S5 emulator-tests: חנות לא-קוראת data-של-אחר · צ'אט מבודד · credit חסום",
-      "S4 בדיקה דו-מכשירית (A שולח → B רואה תוך-שניות)",
-      "S0 analyze 0; S3 test per-domain"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "Repository impls: orders_firebase/customers_firebase/catalog_firebase/site_firebase/stock_firebase/finance_firebase (מחליפים _local)",
-      "main.dart (Firebase init + offline-persistence)",
-      "Firestore Security Rules (threadsFor כחוק-שרת, credit, orders stage-transition, users)",
-      "FCM · Cloud Functions · Cloudflare R2 · App Check"
-    ]
-  },
-  {
-    "path": "20-infra-build-tooling-protocol.md",
-    "one_line": "ידע-תשתית — אריזה-ל-native (Capacitor/Flutter), צינור extract-catalog, CI/deploy ל-GitHub Pages, build-configs, ושכבת-פרוטוקול-אכיפה (רק על whats-happening).",
-    "status": "reference",
-    "vision": "לתעד את הליבה-התפעולית — איך 3 המקורות נבנים/נארזים-ל-native/נפרסים/נאכפים.",
-    "mission": "לתעד packaging (Preact→Capacitor, Flutter-native), extract-catalog.mjs, deploy.yml (Pages), build-configs (package.json/pubspec/tsconfig), tests, ושכבת-אכיפת-הפרוטוקול.",
-    "capabilities": [
-      "Preact→Capacitor (appId com.buildsmart.app) + Flutter→native (com.buildsmart.buildsmart) — שני bundle-IDs נפרדים",
-      "extract-catalog.mjs: index.html → src/data/*.ts מטוייף + base64-JPEGs מוטמעים → public/catalog/*.jpg",
-      "deploy.yml בונה+פורס 2 אפליקציות ל-Pages (Preact /buildsmart/ · Flutter 3.29.3 /buildsmart/flutter/, force-push .nojekyll)",
-      "שכבת-אכיפה: .githooks/pre-commit (~100 שערים), pre-push, .claude/hooks, protocol-enforce.yml + preflight.sh"
-    ],
-    "instructions": [
-      "שכבת-האכיפה מוגבלת לרוץ רק על whats-happening → ענפים חדשים (nice-volta) מקבלים commits חופשיים",
-      "native-packaging של Preact מחווט אך לא-פעיל (כיום web/PWA)"
-    ],
-    "faults": [
-      "Capacitor: @capacitor/ios+android טרם-הותקנו, npx cap add לא רץ → native לא-פעיל",
-      "typecheck: npx tsc -b --noEmit → 2 שגיאות ידועות (vite.config.ts + worker.tsx); build של Vite נקי (INSP-0015, MINOR-פתוח)",
-      "iOS Info.plist boilerplate ללא NSCameraUsageDescription/NSMicrophoneUsageDescription → חוסם-launch ל-iOS",
-      "AndroidManifest ללא הרשאות מותאמות (plugins ממזגים CAMERA/MIC ב-build)"
-    ],
-    "workarounds": [
-      "עקיפות-חירום: .emergency_token (pre-commit) · .allow_push_main (pre-push) · .allow_protocol_edit (PROTECTED_PATHS)",
-      "preflight.sh exit 0 ידידותי על ענפים אחרים"
-    ],
-    "owner_decisions": [
-      "go_router הוסר (P-4 07-06)",
-      "שני bundle-IDs נפרדים (Preact com.buildsmart.app vs Flutter com.buildsmart.buildsmart)"
-    ],
-    "contract": "",
-    "dependencies": [
-      "extract-catalog.mjs = הקשר-החי בין אב-הטיפוס ל-Preact",
-      "דוחות 21-22 (עולם-הפרוטוקולים המלא — 116 שערים/4 שכבות-אכיפה/6 סוכנים/catalog_qa.py/stuck_log)",
-      "דוח 18 (Inspector של Preact/legacy — נפרד)"
-    ],
-    "gating": [
-      "GITHUB_PAGES=1 (Preact build)",
-      "trigger: whats-happening + main + workflow_dispatch",
-      "protocol-enforce מוגבל ל-whats-happening"
-    ],
-    "verification": [
-      ".githooks/pre-commit (~100 שערים) + pre-push (main/force-push/אורך-הודעה)",
-      "protocol-enforce.yml + preflight.sh",
-      "smoke 21/21 + in-app regression 236/236 (בנפרד)",
-      "tests: Preact 8 (registry/runner/buttons/dsync/products/dupes/tabs) + smoke; Flutter widget_test (1)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "app/capacitor.config.ts, package.json, tsconfig.json, vite.config.ts, app/index.html",
-      "app/scripts/extract-catalog.mjs",
-      ".github/workflows/deploy.yml, protocol-enforce.yml; scripts/preflight.sh",
-      "app_flutter/pubspec.yaml, analysis_options.yaml, AndroidManifest.xml, Info.plist, build.gradle.kts",
-      ".githooks/pre-commit+pre-push; .claude/hooks/pre-tool.sh+session-start.sh"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-catalog-replace.md",
-    "one_line": "הנחיה — החלפת דאטת-הקטלוג הישנה בדאטה-הגרוד החדש (חוליות ~1,751 + ליפסקי + תמונות) בלי להקריס ובלי לרוקן-מנועים; מיזוג + השוואת-SKU, היפוך-דגל הפיך.",
-    "status": "current",
-    "vision": "קטלוג-חדש עם תמונות-אמיתיות חי, בלי קריסה + בלי לאבד specs/recipes/מנוע-החכמה, עם rollback מיידי.",
-    "mission": "שלבים 0-6: לא-נוגעים-בפרודקשן, נירמול CSV→סכימה, השוואת-SKU (1.5), שער-אימות, זריעה ל-staging (catalogProducts_v2), בדיקת-אפליקציה, החלפה מדורגת, תמונות ל-R2.",
-    "capabilities": [
-      "נירמול CSV → catalogProducts (sku/nameHe/categoryHe/categoryEmoji-נגזר/dims לצירי-צלילה/imageFile={sku}.jpg)",
-      "השוואת-SKU: חופפים→spec עובר אוטו · יתום→ידני/שימור · חדש-בלי-spec→graceful · דוח-התאמה %",
-      "שער-אימות: fromDoc 0-כשלים + מנועים לא-ריקים + golden-diff",
-      "זריעה ל-catalogProducts_v2 (dry-run קודם) — החי לא-נגוע",
-      "החלפה מדורגת 5%→100% + rollback היפוך-דגל",
-      "תמונות ל-R2 ({sku}.jpg, תמונה-חסרה→fallback לאימוג'י)"
-    ],
-    "instructions": [
-      "🚫 לא דורסים במקום — טוענים לצד → מאמתים → מחליפים בהיפוך-דגל אחד הפיך",
-      "חובה מיזוג + השוואת-SKU (החלפה עיוורת = סכנה)",
-      "catalogProducts החי + bundled נשארים שלמים לאורך כל התהליך (rollback)",
-      "dedup חוליות+ליפסקי+מובנה לפי sku/ברקוד; ~8% בלי sku → מסמנים ומחזיקים בצד",
-      "push רק על 'תדחוף'"
-    ],
-    "faults": [
-      "קריסה: דאטה לא-תואם-סכימה → פרסר קורס / מנועים מקבלים שדות-חסרים",
-      "🔴 ריקון-מנועים (החמור יותר): אם SKUs-חדשים ≠ ישנים → 890 VerifiedSpecs+recipes+SmartProduct מתייתמים → מנוע-התאימות מחזיר ריק (לא קריסה אבל הרסני)"
-    ],
-    "workarounds": [
-      "LipskeyCatalogProduct.fromDoc null-safe (ברירות לשדות-חסרים)",
-      "שרשרת-fallback server→cache→bundled (CatalogSyncGate) — לעולם לא מבריקה, שבור נופל ל-bundled",
-      "מיזוג + שימור מוצר-ישן ליתומים (spec לא-מתייתם)"
-    ],
-    "owner_decisions": [
-      "הכרעה א: החלפה-מלאה vs מיזוג → המלצה: מיזוג",
-      "הכרעה ב: האם SKUs-חדשים תואמים? → חובה שלב-השוואת-SKU (1.5) לפני הכל"
-    ],
-    "contract": "DoD — המשתמש גולש בקטלוג-החדש עם תמונות-אמיתיות; צלילה+תאימות עובדות (specs לא-יתומים); אפס-קריסה; הישן זמין ל-rollback; הכל ירוק.",
-    "dependencies": [
-      "workflow-הזריעה הקיים",
-      "lipskey_verified_connections.dart (890 VerifiedSpecs↔SKUs)",
-      "CatalogSyncGate (fallback chain server→cache→bundled)",
-      "R2 (תמונות)"
-    ],
-    "gating": [
-      "CATALOG_SOURCE=v2 (build flag, שלב 4)",
-      "היפוך-דגל אחד הפיך (שלב 5)",
-      "push רק על 'תדחוף'"
-    ],
-    "verification": [
-      "שער-אימות (שלב 2): fromDoc על כל רשומה 0-כשלי-פרסור + dive/compat/search לא-ריקים + golden-diff מדגם",
-      "דוח-התאמה % חפיפת-SKU (שלב 1.5)",
-      "שלב 4: build CATALOG_SOURCE=v2 → smoke + engine-tests (קטלוג גולש/צלילה/תאימות/תמונות)"
-    ],
-    "open_questions": [
-      "% חפיפת-SKU חדש↔ישן — אם נמוך, החלפה-מלאה מסוכנת → מיזוג-חובה"
-    ],
-    "source_anchor": [
-      "LipskeyCatalogProduct.fromDoc",
-      "lipskey_verified_connections.dart (890 VerifiedSpecs + recipes + SmartProduct)",
-      "CatalogSyncGate",
-      "catalogProducts (חי) / catalogProducts_v2 (staging); R2"
-    ]
-  },
-  {
-    "path": "04-data-catalog-variants-tools.md",
-    "one_line": "ידע-מקור — שכבת-הקטלוג של אב-הטיפוס (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS, שורות 6046-6320) ודלתא ל-Preact/Flutter.",
-    "status": "reference",
-    "vision": "לתעד את שכבת-הקטלוג העוטפת את TREES — ארגון-תצוגה / בחירה / תמחור-מידה / מצב-התחלתי / השלמת-כלים.",
-    "mission": "לתאר 5 מבני-data ממופתחי product-key/accessory-name + מה ported ל-Preact ומה נכתב-מחדש ב-Flutter.",
-    "capabilities": [
-      "CATALOG (6046-6058): אינדקס 11 קטגוריות {cat,icon,items:[product-keys]}",
-      "VARIANTS (6060-6184): pl_* (23 SKU מידה-נושאת-מק'ט) + rich (~22 ציר-בחירה-אב אחד לכל מוצר)",
-      "SIZES (6185-6199): מידות-אביזר עם delta-מחיר (delta שלילי = זול יותר)",
-      "STOCK_DEMO (6202-6214): seed-מלאי warehouse|site per accessory → מזין view-stock",
-      "TOOLS (6216-6320): כלים-נדרשים per productKey ({name,img,why,price}) ל-~21 מוצרי-אב"
-    ],
-    "instructions": [],
-    "faults": [
-      "Preact: SIZES/STOCK_DEMO/ACC_TYPES/ACC_GROUPS/ACC_PRICE_BOOK/SPECS/CAT_DESC/DIAGRAMS/ICN לא אוטו-מחולצים (חלקם inline); brands[] נגזם לחלוטין (grep brand → 0)"
-    ],
-    "workarounds": [],
-    "owner_decisions": [],
-    "contract": "",
-    "dependencies": [
-      "TREES (מפתח product-key)",
-      "extract-catalog.mjs (auto-gen Preact data)",
-      "דוח 03 (catalog.ts / קטלוג 1,877 מוצרים) · דוח 10 (suppliers) · דוח 22 (SIZE_FILTER-protocol)"
-    ],
-    "gating": [],
-    "verification": [
-      "אומת שורה-שורה: Flutter catalog_tree 153 nodes/~108 leaves; קטלוג 1,877 מוצרים (935+772+170)"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "prototype index.html 6046-6320 (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS)",
-      "Preact: app/src/data/variants.ts (2366ש'), tools.ts (425ש', TOOL_BUNDLES), suppliers.ts (759ש'), catalog.ts",
-      "Flutter: app_flutter/lib/data/catalog_tree.dart, variant_families.dart, chip_hierarchy.dart, fuzzy_search.dart, lipskey_smart_data.dart, menu_trees.dart, _size_norm.dart, install_kit.dart"
-    ]
-  },
-  {
-    "path": "LAUNCH-CHECKLIST.md",
-    "one_line": "SSOT לצעדי-הבעלים להשקה (14/6, עודכן 23/6) — קוד-הלקוח גמור; נותרו קונסול/החלטות/משפטי/חנויות, שלבים 0-4.",
-    "status": "current",
-    "vision": "להשיק את BuildSmart בחנויות (Apple+Google) + web/PWA — קוד-הלקוח הושלם, הבעלים מבצע את הצעדים הלא-קודיים.",
-    "mission": "לבצע שלבים 0-4: חשבונות-מפתח/עו'ד/רישום-עוסק (זמן-קיר), חיבור-שרת-לטלפון, החלטות+דאטה, בדיקות+בטא, הגשה-לחנויות.",
-    "capabilities": [
-      "ליבת-uid + מכשיר (מצלמה/גלריה/POD/GPS/share) — גמור, gated, אפס-רגרסיה",
-      "הקשחה (Crashlytics/App Check/notif) + מוכנוּת-אפל (הרשאות + הסתרת-placeholders)",
-      "סנכרון הזמנות+צ'אט (S2) · ✓✓ אמיתי (S3) · מד-חיבור חי 🟢/🔴 (S4) — סגורים",
-      "עוזר-AI (Claude) נבנה+פעיל · מקלדת-חכמה נבנתה+הודלקה · אבן-דרך 'מוכנות-launch' v6.72"
-    ],
-    "instructions": [
-      "התחל שלב-0 + F1 היום (הכי-ארוכים, זמן-קיר רץ ברקע שבועות)",
-      "הדלק דגלים: USE_FIREBASE_BACKEND · UID_SCOPED_QUERIES · SERVER_CALLABLES · CLOUD_PHOTOS · APP_CHECK_PROD · kAiAssistant · kKbLiveMirror",
-      "מלא [שם החברה] בכל המסמכים (legal_texts.dart)",
-      "בלי אזכור 'אנדרואיד' בתיאור-אפל; שמור App Signing key (גוגל)"
-    ],
-    "faults": [],
-    "workarounds": [],
-    "owner_decisions": [
-      "💳 תשלום: 'v1 בלי סליקה-אונליין' (חשבונית+העברה) vs ספק-ישראלי (Grow/משולם)",
-      "📦 4 מחלקות-ריקות: להסתיר ל-v1 vs לספק רשימות-מוצרים אמיתיות",
-      "iOS: מפתח APNS + Push capability vs להחליט אנדרואיד-first",
-      "מפתח-FX (מטבע) + i18n ערבית/אנגלית — אופציונלי"
-    ],
-    "contract": "DoD-משתמע: אפליקציה חתומה מוגשת+מאושרת בשתי החנויות + web/PWA חי; דגלים דלוקים; חשבון-דמו-לבודק-אפל; משפטי (תקנון/פרטיות/נגישות) מלא.",
-    "dependencies": [
-      "F1 (חיבור-שרת) פותח את הכל; firebase deploy אוטומטי ב-CI",
-      "הדלקת-דגלים לפני H1 (מעבר-בדיקות אחרון)",
-      "closed-test גוגל 14 יום (זמן-קיר) + חשבון-דמו לבודק-אפל (חובה — בלעדיו דחייה)"
-    ],
-    "gating": [
-      "דגלים: USE_FIREBASE_BACKEND/UID_SCOPED_QUERIES/SERVER_CALLABLES/CLOUD_PHOTOS/APP_CHECK_PROD/kAiAssistant/kKbLiveMirror",
-      "קונסול: Crashlytics ON · App Check אכיפה · VAPID (push-web) · R2 secrets"
-    ],
-    "verification": [
-      "בדיקה על מכשירים אמיתיים (iPhone + Android)",
-      "TestFlight (אפל) + closed-test 14 יום (גוגל, 20 בודקים)",
-      "H1 מעבר-בדיקות אחרון (agent) אחרי הדלקת-הדגלים",
-      "Apple App Privacy labels / export compliance; Google Data Safety / content rating"
-    ],
-    "open_questions": [
-      "v1 עם או בלי סליקה-אונליין?",
-      "iOS ב-v1 או אנדרואיד+web מספיק?",
-      "4 מחלקות-ריקות: להסתיר או למלא?"
-    ],
-    "source_anchor": [
-      "legal_texts.dart ([שם החברה] + תקנון/פרטיות)",
-      "commits: 25a5daf (F1), 77df5eb (firebase deploy CI success)",
-      "אבן-דרך v6.72 (מוכנות-launch)"
-    ]
-  },
-  {
-    "path": "LAUNCH-PLAN.md",
-    "one_line": "תוכנית-השקה מלאה (29/7) — רוב הקוד גמור, האפליקציה חיה על web; נותרו בעיקר פעולות-בעלים (חשבונות/משפטי/keystore/בדיקת-גוגל) + פריטי-בנייה אחרונים.",
-    "status": "current",
-    "vision": "באוויר בשתי החנויות (~3-4 שבועות) + web/PWA חי לקהל השבוע (buildsmart-il.com).",
-    "mission": "מסלול-קריטי (חשבונות + closed-test 14-יום + keystore) + חובה-לפני-הגשה (אייקון/משפטי/נכסי-חנות/חשבון-דמו) + חשוב (iOS/עוסק/נגישות/R2) + אופציונלי-v1.",
-    "capabilities": [
-      "Phase A/B/C/F/G — הצי סיים; האפליקציה חיה על web עם הקטלוג המלא",
-      "web/PWA ניתן-להתקנה (buildsmart-il.com, 'הוסף למסך הבית') — משתמשים אמיתיים כבר השבוע"
-    ],
-    "instructions": [
-      "התחל היום: חשבונות (Google $25 + Apple $99) + closed-test גוגל + keystore",
-      "תאריך-השקה ≈ יום-התחלת-בדיקה + 14 יום + ביקורת",
-      "השבוע: השק web/PWA חי · התחל closed-test · אייקון + הכנת נכסי-חנות"
-    ],
-    "faults": [
-      "אייקון = הכחול-של-Flutter (צריך כתום + splash + bundle-id סופי)",
-      "keystore: כרגע debug-signed, לא-קביל ל-Play",
-      "מפתחות-R2 נחשפו (צריך סיבוב)"
-    ],
-    "workarounds": [
-      "v1 בלי סליקה: התחל עם הזמנה/הצעת-מחיר/יצירת-קשר (מוצר-פיזי), הוסף סליקה בהמשך"
-    ],
-    "owner_decisions": [
-      "iOS גם או Android+web מספיק ל-v1?",
-      "סליקה בתוך-האפליקציה — אופציונלי ל-v1",
-      "3 שאלות מכריעות: התחלת closed-test? יש חשבונות Google/Apple? iOS או לא?"
-    ],
-    "contract": "DoD-משתמע: PWA ממותג חי + Android ל-Play (אחרי 14-יום) + iOS; אייקון-כתום; משפטי (עו'ד); נכסי-חנות; חשבון-דמו-לבודק.",
-    "dependencies": [
-      "closed-test גוגל 14-יום = השעון-הכי-ארוך (בלי זה אין production בגוגל)",
-      "keystore חוסם build-חתום ל-Play",
-      "LAUNCH-MICRO-BREAKDOWN.md (~90 משימות-מיקרו — המקור המלא)"
-    ],
-    "gating": [],
-    "verification": [
-      "QA (הצי) + תיקוני-קוד אחרונים",
-      "closed-test גוגל (20 בודקים, 14 יום)",
-      "ביקורת-אפל (1-7 ימים, אולי דחייה→תיקון→הגשה-חוזרת)"
-    ],
-    "open_questions": [
-      "התחלת את ה-closed-test של גוגל?",
-      "יש חשבונות Google/Apple?",
-      "iOS גם, או Android+web מספיק ל-v1?"
-    ],
-    "source_anchor": [
-      "legal_texts.dart",
-      "app_flutter/web/ (אייקון/manifest/splash)",
-      "LAUNCH-MICRO-BREAKDOWN.md; buildsmart-il.com"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-arm-wizard-preview.md",
-    "one_line": "הנחיה — קודם preview עם האשף חי (APP_PROFILE=clean + ORG_CONFIG=true) לערוץ-Firebase נפרד → לינק מיד; אחר-כך המשך-רגיל (גל-4).",
-    "status": "current",
-    "vision": "הבעלים רוצה לינק לפתוח ולשחק עם האשף (giant-V5) שכרגע רדום מאחורי ORG_CONFIG=off — בלי לגעת באתר-הראשי-החי.",
-    "mission": "משימה-1: build clean+ORG_CONFIG=true, פרוס לערוץ-preview (wizard), הדפס לינק ודחוף מיד. משימה-2: חזור ל-DIRECTIVE-giant-phase2-features גל-4.",
-    "capabilities": [
-      "אשף הקמת-חברה (כרטיס '🔌 אשף הקמת חברה' בדשבורד-מנהל)",
-      "בחירת חבילת-ורטיקל · כיבוי/הדלקת 13 מודולים · עריכת 6 מונחים · מתן שם-חברה",
-      "'שמור והפעל' → האפליקציה מתכווננת חי (אפס-ריסטארט)"
-    ],
-    "instructions": [
-      "בנה על profile clean (לא demo/buildsmart) — empty-shell אפס-דמו אבל כל המסכים/המנוע קיימים",
-      "אם כניסת-אשף/דשבורד חסומה ב-clean → חשוף ב-clean (גדור ב-kOrgConfigFlag, לא בפרופיל)",
-      "🔴 repoint: החלף בשני ה-dart-defines של wizard-preview.yml ל-APP_PROFILE=clean, הרץ מחדש",
-      "פרוס לערוץ-Firebase-Hosting נפרד; האתר-הראשי-החי לא-נגע; דחוף/הרץ מיד + הדפס לינק ב-run-summary"
-    ],
-    "faults": [
-      "wizard-preview.yml (472e7190) נבנה על demo לפני-שהתיקון-הגיע; run#1 success אבל עדיין --dart-define=APP_PROFILE=demo בראש-הענף (4f50c40d), אף קומיט מאוחר לא נגע"
-    ],
-    "workarounds": [
-      "עמודת-מטריצה נוספת ב-clean-two-links.yml (ORG_CONFIG=true) או workflow-אח קטן wizard-preview.yml",
-      "clean = הפרופיל המלא-יותר (_ux=_bs||_clean||_c2) → דשבורד-המנהל נגיש שם"
-    ],
-    "owner_decisions": [
-      "תיקון-בעלים 27/7: בנה על clean (לא demo)",
-      "משימה-1 מאושרת-לדחיפה מיד; המשך-רגיל = על 'תדחוף'"
-    ],
-    "contract": "DoD — לינק-חי שבו: נכנסים כמנהל → כרטיס 'אשף הקמת חברה'; אשף נפתח → בוחר-ורטיקל/13-מודולים/6-מונחים/שם-חברה; 'שמור והפעל' → כיוונון-חי אפס-ריסטארט; הלינק מודפס ב-run-summary; האתר-הראשי-החי לא-זז.",
-    "dependencies": [
-      "DIRECTIVE-giant-phase2-features.md (גל-4: חדר≈רכב/מכסה-מראש/חזרתיות/ציר-זמן + tails גל-3)",
-      "clean-two-links.yml / wizard-preview.yml"
-    ],
-    "gating": [
-      "APP_PROFILE=clean",
-      "ORG_CONFIG=true (רק ערוץ-preview; ברירת-מחדל-חי OFF זהה-בייטים)",
-      "kOrgConfigFlag (כניסת-אשף)"
-    ],
-    "verification": [
-      "שער-ירוק",
-      "האתר-הראשי-החי זהה-בייטים / לא-נגע · הישן ל-rollback",
-      "הלינק מודפס ב-run-summary"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "manager_dashboard_screen.dart:3652 (כרטיס אשף הקמת חברה)",
-      "wizard-preview.yml (472e7190, 4f50c40d) / clean-two-links.yml",
-      "DIRECTIVE-giant-phase2-features.md"
-    ]
-  },
-  {
-    "path": "DIRECTIVE-close-web-for-launch.md",
-    "one_line": "הנחיה — סגירת האתר (web/PWA, buildsmart-il.com) להשקה-פומבית ב-4 קבוצות: מותג+PWA, קונפיג-השקה, ליטוש-פומבי, SEO/דומיין.",
-    "status": "current",
-    "vision": "buildsmart-il.com מוכן-להשקה-פומבית השבוע — PWA ממותג ניתן-להתקנה (לא אייקון-Flutter-כחול).",
-    "mission": "קבוצה 1 מותג+PWA · קבוצה 2 קונפיג-השקה על ה-web-החי · קבוצה 3 ליטוש-פומבי (זנבות Phase-B) · קבוצה 4 SEO/שיתוף+דומיין.",
-    "capabilities": [
-      "אייקוני-מותג כתומים (Icon-192/512/maskable + favicon.png + apple-touch-icon)",
-      "manifest.json ('בנייה חכמה', theme_color כתום, background_color, display standalone, icons מלאים)",
-      "index.html (title/description/lang he/dir rtl/apple-mobile-web-app-capable+title+status-bar)",
-      "splash ממותג + באנר 'הוסף למסך הבית' (install-prompt)",
-      "OG-tags (og:title/description/image) לשיתוף-לינק"
-    ],
-    "instructions": [
-      "צור/עדכן app_flutter/web/ + web/icons/ עם אייקוני-מותג כתומים",
-      "אם flutter_launcher_icons/flutter_native_splash — הוסף ל-pubspec והרץ; אחרת ידני ב-web/",
-      "ודא web-deploy.yml/firebase-hosting.yml: backend-אמיתי · קטלוג-מהשרת · סטודיו owner-gated · org-config כפי-שהוחלט; הדפס דגלים ב-run-summary",
-      "כל 'בבנייה'/placeholder גלוי-למשתמש-פומבי/לא-בעלים → מוסתר; אפס-דאטה-מזויפת למשתמש-אמת",
-      "דומיין: בניהחכמה.ישראל + redirect + SSL"
-    ],
-    "faults": [
-      "אין app_flutter/web/ מותאם → האתר על אייקון+manifest ברירת-המחדל של Flutter (כחול) — הפער המרכזי"
-    ],
-    "workarounds": [],
-    "owner_decisions": [
-      "אושר ע'י הבעלים 29/7: 'נתחיל לסגור את האתר, בקבוצות, תשלח נחיל'"
-    ],
-    "contract": "DoD — buildsmart-il.com = PWA ממותג ניתן-להתקנה (אייקון-כתום לא-Flutter · manifest אמיתי · install-prompt) · קונפיג-השקה חי · אפס-placeholder-פומבי · meta-שיתוף. מוכן להשקה-פומבית.",
-    "dependencies": [
-      "web-deploy.yml / firebase-hosting.yml (דיפלוי-חי)",
-      "זנבות Phase-B (B7 · עלים-מתים)",
-      "דומיין: בניהחכמה.ישראל (בעלים+הצי · DM2/DM3)"
-    ],
-    "gating": [
-      "סטודיו owner-gated",
-      "org-config כפי-שהוחלט",
-      "backend-אמיתי · קטלוג-מהשרת"
-    ],
-    "verification": [
-      "כל קבוצה: byte-verified · central-verify ירוק · לא-שובר-קיים · עצור-לדיווח",
-      "אישור סריקת-fake-data (אפס-דאטה-מזויפת למשתמש-אמת)",
-      "הדפס הדגלים ב-run-summary לאימות"
-    ],
-    "open_questions": [],
-    "source_anchor": [
-      "app_flutter/web/ (index.html, manifest.json, icons/, apple-touch-icon)",
-      "web-deploy.yml / firebase-hosting.yml",
-      "buildsmart-il.com / בניהחכמה.ישראל"
-    ]
-  }
+ {
+  "path": "archive/monster-finder/MONSTER-PLAN-v3.md",
+  "one_line": "תוכנית-בנייה 129-יחידות ל'מאתר-מפלצת' מאוחד (9→1) עם הוכחת <=6/<=4 ישימה+כנה, הכל מאחורי דגלים ובייטים-זהים בפרודקשן.",
+  "status": "current",
+  "vision": "מאתר-אחד מאוחד שמבטיח מסלול <=6 תורים לכל מוצר + <=4 למוצר-קשור, הוכחה מתמטית כנה וישימה-חישובית; פרודקשן זהה-בייטים עד 'תדחוף'.",
+  "mission": "לבנות 129 יחידות ב-13 פאזות (P0..P12) — חוזים-משותפים, הקשחת-P0.5, data/state, משטחי-כניסה, tap-chips, merged-brain, hop-graph, hidden-signals, terminus, cut-over, a11y — כל צעד עם קבצים+בדיקה+dependsOn.",
+  "capabilities": [
+   "OpeningSurface אחד: word-grid + text + voice + AI כמשטחי-קלט (ללא mode-buttons)",
+   "hop_graph מכוון עם EdgeKind (compat/variant/kit/category) מסונן crossesSystem",
+   "הוכחת <=4: single-source reachWithin4(src) per node",
+   "הוכחת <=6: strictly-greedy target-blind census (greedyReach)",
+   "mergedKeys memo per collapsed-pool signature + per-axis top-K-by-gain",
+   "softTilt (history/kit/compat set-overlap) — order-only, live על ה-wide pool",
+   "stores identity-scoped (uid-namespaced prefs, cardPicks, recentlyViewed, favorites, savedConfigs)",
+   "line planner: planLineFromPicks → BOM שחושף unresolvedSkus (~48% off-corpus)",
+   "P12 a11y: 48dp targets, RTL OrderedTraversalPolicy, semanticLabel per chip, liveRegion throttle, modal FocusScope trap"
+  ],
+  "instructions": [
+   "אל תתחיל P8/P9/P11 עד ש-9-18 (feasible proof) + 10/13 (compat gate) ירוקים",
+   "כל צעד מאחורי kUnifiedFinder/kCardKeyboard; uid==null/flag-OFF = בייטים-legacy",
+   "פצל per-commit seeded sample (~200-card) מ-nightly full-|U| sweep",
+   "allowlists EMPTY (kReachAllowlist/over4Allowlist/kHopPairOverride/kA11yWaiverList); debt ברשימות נפרדות שהשער מתעלם מהן",
+   "crossesSystem filter על compat+kit edges — אל תסמוך על _reallyMates",
+   "הרץ heavy censuses ב---concurrency=1 בתוך load-failure-only retry",
+   "taskkill dart before; never tail; ENABLE_* בשום live workflow"
+  ],
+  "faults": [
+   "v2 |U|^2 all-pairs BFS = timeout (~10^6 pairs)",
+   "_collapseKey היה library-private → census citations לא-קומפילביליות",
+   "_reallyMates drainage branch :176-177 מבריח cross-system PVC supply<->drain edge",
+   "softTilt v2 keyed על anchorOf שהוא ALWAYS null בזמן merged-keys (INERT)",
+   "ה-retry-wrap ש-MEMORY תיעדה כמוכח לא-קיים (הגייט bare flutter test --concurrency=4 @protocol-enforce.yml:50)",
+   "_PredictionChip destination branch (bs_keyboard.dart:884-918): glyph הובטח :818-819 אך לא קיים (colour-only WCAG 1.4.1)",
+   "cellHeight:30 mobile < 48dp (WCAG 2.5.5)",
+   "liveRegion על ה-header re-announces כל keystroke",
+   "WordKeyboard hard-pins Directionality.ltr → AT מגיע ל-chip הכי-פחות-מכריע first",
+   "_RelatedCard bare GestureDetector ללא button role; modal in-sheet לא לוכד focus",
+   "savedConfigs->favorites migration v2 lossy/irreversible (productKey 'A#ליפסקי'->'A' הוא לא sku)"
+  ],
+  "workarounds": [
+   "single-source reachWithin4 מחליף |U|^2 (O(V*E) לא O(V^2*E))",
+   "kReachUniverse.length כ-TOLERANCE BAND (לא equality) → סופג ingestion drift #56",
+   "dual-store additive+reversible migration (NEW v2 key, marker-gated, once-only)",
+   "raw-categoryHe edge (לא finderGroupFor-null) ל-100% isolation coverage by-construction",
+   "axisGlyph seam קיים (Icons.north_east) במקום שדה isDestination חדש-מתנגש",
+   "MaterialTapTargetSize.padded — hit-region>=48 בעוד painted cell נשאר 30",
+   "off-screen Semantics(liveRegion) status node מ-throttled ב-Timer(kLiveRegionThrottleMs)"
+  ],
+  "owner_decisions": [
+   "kInstallStudioDisposition (absorbTree vs rebrandFlat, step 109) — const owner-signed veto-able; שני הענפים build-ready",
+   "decisions.dart owner sign-off constants (step 1)",
+   "kReachUniverse band OWNER-REVIEW comment מצטט את #56",
+   "פרודקשן נשאר זהה-בייטים עד שהבעלים אומר 'תדחוף'"
+  ],
+  "contract": "פרודקשן זהה-בייטים (flags default false, uid==null/flag-OFF=legacy bytes) עד 'תדחוף'; central gate ירוק — band + greedy <=6 target-blind + single-source <=4 (union-of-unreachable-related-pairs empty) + allowlists empty + crossesSystem exhaustive — עם INJECT_OVER4 self-test→RED.",
+  "dependencies": [
+   "P0.5 9-18 (feasible proof) + 10/13 (compat gate) חוסמים P8/P9/P11",
+   "persistence 26-31 קודמים ל-state mutations 47-48",
+   "step 9 (collapseKeyOf public) קודם לכל census",
+   "softTilt reconcile 96-98 לפני P9 ships את המשטח",
+   "verify_card_keyboard.sh מחווט ל-protocol-enforce.yml after Gate 2 + step-37 retry"
+  ],
+  "gating": [
+   "kUnifiedFinder (superset derived), kCardKeyboard, kEnableUnifiedFinderDemo, kEnableCardKeyboardDemo, forceLiveForTest",
+   "kCensusMemoEnabled (census-only)",
+   "GATING TABLE ממפה 5 gates (step 114) — build|runtime|test",
+   "kMaterialIsGatedCoAxis; kA11yWaiverList empty"
+  ],
+  "verification": [
+   "scripts/verify_card_keyboard.sh (central gate) + scripts/verify_unified_finder.sh (hop+a11y)",
+   "monster-nightly.yml (cron '0 3 * * *') full-|U| sweep",
+   "INJECT_OVER4 / FORCE_LOAD_CRASH / RED self-tests",
+   "goldens: card_merged_48.json, card_merged_tilted.json, merged_golden.txt, word_finder_live_anchor.txt, a11y_semantics_tree.txt",
+   "workflow-define-leak guard על live workflows"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "lib/features/card_keyboard/* (decisions, dive_contract, hop_graph, card_engine, card_signals, card_soft, card_keyboard_screen, ai_seed, card_seed, opening_surface)",
+   "lib/features/word_finder/* (dive_pool, word_finder_engine, size_equiv, material_lexicon, synonym_bridge)",
+   "lib/data/related_info.dart; install_engine.dart:359 (productSystems); lib/logic/line_planner.dart",
+   "lib/screens/lipskey_product_sheet.dart, catalog_screen.dart; lib/state/* (auth_state, prefs_scope, recently_viewed, product_favorites, saved_configs, feature_flags)",
+   "lib/widgets/smart_input/keyboard/bs_keyboard.dart, bs_key.dart; app_flutter/scripts/*, .github/workflows/protocol-enforce.yml"
+  ]
+ },
+ {
+  "path": "DIRECTIVE-wizard-is-the-studio.md",
+  "one_line": "הנחיה — האשף בולע את הסטודיו-המלא (5 חלוניות) בסגנון Maor על registry קיים; פרוסה-0 (עריכה-בחי+ניווט) מאושרת-לדחיפה מיד.",
+  "status": "current",
+  "vision": "האשף = כל 5 חלוניות-הסטודיו, מאורגן יפה כמו Maor (מקובץ/עברית/מונחים/נקי); חושפים את הקיים (element_registry ~896 + override-system), לא ממציאים.",
+  "mission": "לבנות מודול-קבלן ראשון, סגנון-Maor browsable, מפקח-מלא פר-רכיב, מונחים-שזורים, מצא-החלף גלובלי וגרסאות — 1:1 מול wizard-mockup.html, על פרופיל clean.",
+  "capabilities": [
+   "מודול קבלן 👷 כמודול #1 ב-org_modules — מקבץ מסכי-הקבלן (home/smart_home/tools/hr/attendance/material_requests/reorder)",
+   "סקציות פתוחות-לגלילה (אקורדיון עצל) + מונה N/N + טוגל-אב 'פעיל' + 'סמן הכל/נקה הכל' + מונה גלובלי 'X מתוך 896'",
+   "חיפוש+צ'יפים = מסננים (לא תנאי-הצגה)",
+   "מפקח פר-רכיב contextual לפי ElementKind (text 837/action 57/container 1) — שם/צבע/fontSize/weight/align/direction/הצג-הסתר",
+   "מונחים שזורים (termOf) + '→ תצוגה' חיה",
+   "🔎 מצא-החלף גלובלי (החלף בכל/בנבחרים ב-batch)",
+   "🕘 גרסאות (כל 'פרסם לכולם'=snapshot; 'שחזר' לא-הרסני)",
+   "הכל-חי בכל-האפליקציה (org_gates watch/build, אפס-ריסטארט, בכל persona/מסך)"
+  ],
+  "instructions": [
+   "הוסף contractor ל-org_modules.dart כמודול #1; בנה מול wizard-mockup.html 1:1",
+   "בנה על פרופיל clean (אפס-דמו) + ORG_CONFIG=true",
+   "default-ON/absent=on = חי זהה-בייטים (kDefaultOrgConfig ריק)",
+   "ליבה-נעולה: kImmutable + kRoleFloor (edit_safety) — אסור להסתיר/למחוק ניווט/מסך-חובה",
+   "toggle-matrix מתרחב לכסות visibility + overrides (טקסט/צבע/גודל)",
+   "central-verify.sh ירוק לפני עצירה; מחזור הסטודיו הקיים — לא כפילות/מחיקה"
+  ],
+  "faults": [
+   "הפרסונה-הראשית (קבלן) חסרה סקציה — החור שהבעלים תפס",
+   "edit_handle (step 9) לוכד כל tap כעריכה → tap-ניווט הופך לעריכה",
+   "studio_screen = 4-פאנלים בלי preview חי → הבעלים תקוע במסך-הניהול, לא מגיע למסך-קבלן",
+   "באג 'תיבה ריקה' (חיפוש כתנאי-הצגה במקום מסנן)",
+   "edit תמיד-דלוק → אי-אפשר לפתוח שום sheet"
+  ],
+  "workarounds": [
+   "שני מפלסי-ניווט: (1) edit-mode + מתג גלוי 'נווט⇄ערוך' (toggleEdit קיים ב-studio_top_bar); (2) בורר-מסך/persona מחוץ ל-edit-trap (נשען על tree_pane)",
+   "על החי: kStudio ON + owner-gate isOwnerEmail #84 STRICT → משתמש-לא-בעלים = בייטים-זהים (edit inert, אין כפתור-סטודיו)"
+  ],
+  "owner_decisions": [
+   "אושר ע'י הבעלים 27/7 ('צא לדרך') מול הדמייה-חיה",
+   "הבעלים 27/7: 'עדיף לי לדחוף לאתר החי'",
+   "פרוסה-0 מאושרת-לדחיפה מיד; שאר הפרוסות = דחיפה רק על 'תדחוף'"
+  ],
+  "contract": "DoD — האשף = כל 5 חלוניות בסגנון Maor על clean; קבלן מודול-ראשון; ✎ עורך-מלא פר-רכיב; מצא-החלף+גרסאות עובדים; הכל-חי בכל-האפליקציה; default זהה-בייטים; ליבה-נעולה; toggle-matrix+שער ירוקים; הסטודיו לא-נשבר; 1:1 מול ההדמייה.",
+  "dependencies": [
+   "wizard-mockup.html (ענף nice-volta) — הספֶק הויזואלי 1:1",
+   "element_registry (~896) + override-system של הסטודיו",
+   "panes: tree_pane/inspector_pane/theme_pane/find_replace_pane/history_pane",
+   "מקום בסדר: צעדים 1→2.5 של MASTER-giant-system-order.md",
+   "המשך: DIRECTIVE-giant-phase2-features.md גל-4"
+  ],
+  "gating": [
+   "ORG_CONFIG=true (רק ערוץ-preview; ברירת-מחדל-חי OFF)",
+   "kOrgConfigFlag (כניסת-אשף — גדור בדגל, לא בפרופיל)",
+   "kStudio ON + owner-gate isOwnerEmail #84 STRICT (כולל כפתור/כניסת-הסטודיו)",
+   "APP_PROFILE=clean; kDefaultOrgConfig ריק (absent=on)"
+  ],
+  "verification": [
+   "central-verify.sh ירוק",
+   "byte-verified (default זהה-בייטים) · degrade-graceful · mutation-verify",
+   "אימות-חובה לפני ✅: session לא-בעלים על החי = זהה-בייטים",
+   "הדפס לינק ב-run-summary (פרוסה-0)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "knowledge/wizard-mockup.html (nice-volta)",
+   "org_modules.dart, org_gates, org_config/studio-store, edit_safety",
+   "panes/tree_pane.dart, inspector_pane.dart, theme_pane.dart, find_replace_pane.dart, history_pane.dart; element_registry.dart",
+   "studio_top_bar (toggleEdit), studio_screen, edit_handle (step 9), CfgVisible",
+   "MASTER-giant-system-order.md (1→2.5)"
+  ]
+ },
+ {
+  "path": "17-security-service-boot.md",
+  "one_line": "ידע-מקור — מרכז-אבטחה/RBAC (Category I) + מרכז-שירות/chatbot (Category J) + boot של אב-הטיפוס, ודלתא ל-Preact/Flutter + שכבת-PWA/deploy.",
+  "status": "reference",
+  "vision": "תיעוד verbatim של שכבות-האבטחה/שירות/boot מאב-הטיפוס כמקור-אמת ל-port (INSP-0007/0008), עם ציון מה-ported ומה לא.",
+  "mission": "לתעד RBAC_MATRIX + sec-* + svc-* + BOT_KB + boot-sequence + PWA/manifest/SW/deploy, כולל הדלתא ב-Preact ו-Flutter.",
+  "capabilities": [
+   "RBAC_MATRIX (role→permissions[]) · can(perm)/requirePerm · auditLog",
+   "5 תפקידים · session-timeouts 5/15/30/60 דק' · encryption×4 · privacy×4 toggles",
+   "session-lock (resetSessionTimer/lockSession/unlockSession/initSessionTimeout)",
+   "openSecurityHub → 10 אריחים (2FA/הרשאות/ביומטרי/audit/GPS/session/הצפנה/היסטוריית-כניסות/מכשירים/פרטיות)",
+   "openServiceHub → 8 אריחים (help-desk/chatbot/דיווח-באג/ממיר-יחידות/מחשבון-כמויות/יומן/לוח-דרושים/סיור)",
+   "BOT_KB (kw[]→answer) · botReply · botQuick; shake-to-report; qty-calc 3 מצבים; onboarding 6 שלבים",
+   "boot: global error-catcher (window error → קופסה-אדומה bsFatalError)"
+  ],
+  "instructions": [],
+  "faults": [
+   "Preact: I+J ported כ-leaves אבל הפונקציונליות = toast/drill בלבד (RBAC-matrix/OTP/BOT_KB/shake לא רצים)",
+   "Flutter: אבטחה — אין RBAC-matrix/session-lock/audit מלא; menu-dial הוסר 07-06",
+   "Flutter: שירות — רק chatbot כ-thread (auto-reply); מחשבונים/סיור לא נכתבו",
+   "Flutter-web מבטל service-workers (getRegistrations→unregister) → אין PWA/offline (בניגוד ל-Workbox של Preact)"
+  ],
+  "workarounds": [
+   "boot standalone: splash-default (screen-splash גלוי) + inline seeds (seedNotifications 11498)",
+   "Flutter boot: registerPolyrollSpecs() putIfAbsent על kVerifiedSpecs (~772 מוצרי-Polyroll)"
+  ],
+  "owner_decisions": [
+   "הערה-מקור 21666: 'אבטחה אמיתית חיה בשרת — RBAC/audit/2FA כאן הם הדמיה'"
+  ],
+  "contract": "",
+  "dependencies": [
+   "INSP-0007 / INSP-0008 (מקור-אימות verbatim)",
+   "אימות-מקור על nice-volta (grep)",
+   "קשור ל-SPEC-server-connect (RBAC אמיתי = Firestore Security Rules)"
+  ],
+  "gating": [
+   "#sessionLock (נעילה-אוטומטית)",
+   "openSecurityHub → secFeature; openServiceHub → svcFeature"
+  ],
+  "verification": [
+   "INSP-0007: 10 אריחי-אבטחה (@21752-21762) + 8 אריחי-שירות (@22081-22090) verbatim",
+   "INSP-0008: תוכן-עומק verbatim (RBAC/timeouts/encryption/privacy/qty-calc/tour)",
+   "grep: 'מרכז האבטחה'×24, 'מרכז השירות'×16 (occurrences)",
+   "LEAF_BINDINGS: אבטחה 23 עלים + שירות 15 עלים (אומת-מהמקור)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "prototype JS 21660-22414 (RBAC_MATRIX@21675, BOT_KB@22065, openSecurityHub@21752-21762, openServiceHub@22081-22090); סוף-JS @22414",
+   "bootstrap script#1 5419-5439 (bsFatalError); הערה 5415 (אין data-layer חיצוני)",
+   "Preact: main.tsx (render App), SETTINGS_SUB, LEAF_BINDINGS",
+   "Flutter: main.dart (registerPolyrollSpecs, OnboardingGate, HomeShell), app_settings, chats_screen",
+   "PWA: manifest.json, service-worker.js (buildsmart-v107), vite-plugin-pwa/Workbox, vercel.json, app_flutter/web/index.html"
+  ]
+ },
+ {
+  "path": "SPEC-server-connect.md",
+  "one_line": "SPEC — חיבור-שרת (Firebase + Cloudflare R2), פירוק S0-S9, שמירת drop-in דרך offline-first cache; RBAC אמיתי כ-Firestore Security Rules.",
+  "status": "current",
+  "vision": "להפוך את ה-client (server-ready, Repository 6/6) למוצר-חי עם זהות-אמת + real-time בין-מכשירים + הפרדת-תפקידים נאכפת-בשרת.",
+  "mission": "לבצע S0-S9: Firebase setup, Auth (OTP+claims), schema+cache-pattern, Repository _firebase impls ×6, real-time (chat+orders), Security Rules, FCM, R2, Functions, offline.",
+  "capabilities": [
+   "Firebase Auth OTP-טלפון + מייל-fallback + custom-claims (role: contractor/store/courier/worker/manager)",
+   "Firestore offline-persistence + snapshots()→cache→UI (real-time חי)",
+   "Repository _firebase drop-in (מחליף _local, אותו interface: all/open/place/advance/setStage/credit/move)",
+   "collections: users/orders/customers/projects/tasks/stock/chatThreads(participants[])/chatMessages/siteNodes",
+   "Security Rules per-domain (chat=participants-only, credit=manager+owner, orders=stage-per-role, roles=admin-only)",
+   "App Check · FCM push · Cloud Functions (validation/credit-calc/triggers) · R2 images · offline-queue ל-batch-order"
+  ],
+  "instructions": [
+   "אל תהפוך את ה-interface ל-async (ישבור UI) — שמור drop-in דרך cache-pattern",
+   "S5 (Security Rules) לא-אופציונלי, לפני-השקה — בלעדיו הפרדת-התפקידים מזויפת",
+   "R2-creds + Firebase-admin = בשרת/Functions בלבד, לעולם לא ב-client",
+   "תפקיד מהשרת (custom-claims) לא client-pick; role_picker רק למשתמשי-רב-תפקיד"
+  ],
+  "faults": [
+   "נקודת-תכן קריטית: ה-interface סינכרוני (List<Order> all() — לא Future) מול Firestore async+real-time",
+   "בלי Security Rules ה-DB פתוח-לכולם (הפרדת-התפקידים שאומתה ב-client מזויפת)"
+  ],
+  "workarounds": [
+   "offline-first cache: Firestore offline-persistence ON + snapshots() listener → cache מקומי (Riverpod); all() סינכרוני קורא מ-cache instant; place/advance כותב ל-Firestore + optimistic-cache → providers/UI לא-משתנים"
+  ],
+  "owner_decisions": [],
+  "contract": "DoD per-S: S0=Firebase מאותחל+analyze 0; S1=role מ-auth+_loaded-guard; S2=base-cache על orders; S3=provider קורא מ-Firestore/UI ללא-שינוי; S4=דו-מכשירי A→B תוך-שניות; S5=emulator-tests (בידוד data/chat/credit); S6=push מגיע; S7=R2 load+upload; S8=פעולה-רגישה דרך Function; S9=offline→sync.",
+  "dependencies": [
+   "S0 חוסם-הכל → S1(auth)+S2(schema+cache) → S3(repos ×6 מקבילי) → S4(real-time)",
+   "S1+S2 → S5 (Security Rules, לפני-השקה)",
+   "מקבילי-אחרי-S0: S6(push)/S7(R2)/S9(offline); S8(functions) לפי-צורך",
+   "Repository 6/6 קיים ומתוכנן drop-in (orders_local וכו')"
+  ],
+  "gating": [
+   "App Check ON (חוסם לקוחות-לא-אפליקציה)",
+   "_loaded-guard (S1)",
+   "custom-claims role gating"
+  ],
+  "verification": [
+   "S5 emulator-tests: חנות לא-קוראת data-של-אחר · צ'אט מבודד · credit חסום",
+   "S4 בדיקה דו-מכשירית (A שולח → B רואה תוך-שניות)",
+   "S0 analyze 0; S3 test per-domain"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "Repository impls: orders_firebase/customers_firebase/catalog_firebase/site_firebase/stock_firebase/finance_firebase (מחליפים _local)",
+   "main.dart (Firebase init + offline-persistence)",
+   "Firestore Security Rules (threadsFor כחוק-שרת, credit, orders stage-transition, users)",
+   "FCM · Cloud Functions · Cloudflare R2 · App Check"
+  ]
+ },
+ {
+  "path": "20-infra-build-tooling-protocol.md",
+  "one_line": "ידע-תשתית — אריזה-ל-native (Capacitor/Flutter), צינור extract-catalog, CI/deploy ל-GitHub Pages, build-configs, ושכבת-פרוטוקול-אכיפה (רק על whats-happening).",
+  "status": "reference",
+  "vision": "לתעד את הליבה-התפעולית — איך 3 המקורות נבנים/נארזים-ל-native/נפרסים/נאכפים.",
+  "mission": "לתעד packaging (Preact→Capacitor, Flutter-native), extract-catalog.mjs, deploy.yml (Pages), build-configs (package.json/pubspec/tsconfig), tests, ושכבת-אכיפת-הפרוטוקול.",
+  "capabilities": [
+   "Preact→Capacitor (appId com.buildsmart.app) + Flutter→native (com.buildsmart.buildsmart) — שני bundle-IDs נפרדים",
+   "extract-catalog.mjs: index.html → src/data/*.ts מטוייף + base64-JPEGs מוטמעים → public/catalog/*.jpg",
+   "deploy.yml בונה+פורס 2 אפליקציות ל-Pages (Preact /buildsmart/ · Flutter 3.29.3 /buildsmart/flutter/, force-push .nojekyll)",
+   "שכבת-אכיפה: .githooks/pre-commit (~100 שערים), pre-push, .claude/hooks, protocol-enforce.yml + preflight.sh"
+  ],
+  "instructions": [
+   "שכבת-האכיפה מוגבלת לרוץ רק על whats-happening → ענפים חדשים (nice-volta) מקבלים commits חופשיים",
+   "native-packaging של Preact מחווט אך לא-פעיל (כיום web/PWA)"
+  ],
+  "faults": [
+   "Capacitor: @capacitor/ios+android טרם-הותקנו, npx cap add לא רץ → native לא-פעיל",
+   "typecheck: npx tsc -b --noEmit → 2 שגיאות ידועות (vite.config.ts + worker.tsx); build של Vite נקי (INSP-0015, MINOR-פתוח)",
+   "iOS Info.plist boilerplate ללא NSCameraUsageDescription/NSMicrophoneUsageDescription → חוסם-launch ל-iOS",
+   "AndroidManifest ללא הרשאות מותאמות (plugins ממזגים CAMERA/MIC ב-build)"
+  ],
+  "workarounds": [
+   "עקיפות-חירום: .emergency_token (pre-commit) · .allow_push_main (pre-push) · .allow_protocol_edit (PROTECTED_PATHS)",
+   "preflight.sh exit 0 ידידותי על ענפים אחרים"
+  ],
+  "owner_decisions": [
+   "go_router הוסר (P-4 07-06)",
+   "שני bundle-IDs נפרדים (Preact com.buildsmart.app vs Flutter com.buildsmart.buildsmart)"
+  ],
+  "contract": "",
+  "dependencies": [
+   "extract-catalog.mjs = הקשר-החי בין אב-הטיפוס ל-Preact",
+   "דוחות 21-22 (עולם-הפרוטוקולים המלא — 116 שערים/4 שכבות-אכיפה/6 סוכנים/catalog_qa.py/stuck_log)",
+   "דוח 18 (Inspector של Preact/legacy — נפרד)"
+  ],
+  "gating": [
+   "GITHUB_PAGES=1 (Preact build)",
+   "trigger: whats-happening + main + workflow_dispatch",
+   "protocol-enforce מוגבל ל-whats-happening"
+  ],
+  "verification": [
+   ".githooks/pre-commit (~100 שערים) + pre-push (main/force-push/אורך-הודעה)",
+   "protocol-enforce.yml + preflight.sh",
+   "smoke 21/21 + in-app regression 236/236 (בנפרד)",
+   "tests: Preact 8 (registry/runner/buttons/dsync/products/dupes/tabs) + smoke; Flutter widget_test (1)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "app/capacitor.config.ts, package.json, tsconfig.json, vite.config.ts, app/index.html",
+   "app/scripts/extract-catalog.mjs",
+   ".github/workflows/deploy.yml, protocol-enforce.yml; scripts/preflight.sh",
+   "app_flutter/pubspec.yaml, analysis_options.yaml, AndroidManifest.xml, Info.plist, build.gradle.kts",
+   ".githooks/pre-commit+pre-push; .claude/hooks/pre-tool.sh+session-start.sh"
+  ]
+ },
+ {
+  "path": "DIRECTIVE-catalog-replace.md",
+  "one_line": "הנחיה — החלפת דאטת-הקטלוג הישנה בדאטה-הגרוד החדש (חוליות ~1,751 + ליפסקי + תמונות) בלי להקריס ובלי לרוקן-מנועים; מיזוג + השוואת-SKU, היפוך-דגל הפיך.",
+  "status": "current",
+  "vision": "קטלוג-חדש עם תמונות-אמיתיות חי, בלי קריסה + בלי לאבד specs/recipes/מנוע-החכמה, עם rollback מיידי.",
+  "mission": "שלבים 0-6: לא-נוגעים-בפרודקשן, נירמול CSV→סכימה, השוואת-SKU (1.5), שער-אימות, זריעה ל-staging (catalogProducts_v2), בדיקת-אפליקציה, החלפה מדורגת, תמונות ל-R2.",
+  "capabilities": [
+   "נירמול CSV → catalogProducts (sku/nameHe/categoryHe/categoryEmoji-נגזר/dims לצירי-צלילה/imageFile={sku}.jpg)",
+   "השוואת-SKU: חופפים→spec עובר אוטו · יתום→ידני/שימור · חדש-בלי-spec→graceful · דוח-התאמה %",
+   "שער-אימות: fromDoc 0-כשלים + מנועים לא-ריקים + golden-diff",
+   "זריעה ל-catalogProducts_v2 (dry-run קודם) — החי לא-נגוע",
+   "החלפה מדורגת 5%→100% + rollback היפוך-דגל",
+   "תמונות ל-R2 ({sku}.jpg, תמונה-חסרה→fallback לאימוג'י)"
+  ],
+  "instructions": [
+   "🚫 לא דורסים במקום — טוענים לצד → מאמתים → מחליפים בהיפוך-דגל אחד הפיך",
+   "חובה מיזוג + השוואת-SKU (החלפה עיוורת = סכנה)",
+   "catalogProducts החי + bundled נשארים שלמים לאורך כל התהליך (rollback)",
+   "dedup חוליות+ליפסקי+מובנה לפי sku/ברקוד; ~8% בלי sku → מסמנים ומחזיקים בצד",
+   "push רק על 'תדחוף'"
+  ],
+  "faults": [
+   "קריסה: דאטה לא-תואם-סכימה → פרסר קורס / מנועים מקבלים שדות-חסרים",
+   "🔴 ריקון-מנועים (החמור יותר): אם SKUs-חדשים ≠ ישנים → 890 VerifiedSpecs+recipes+SmartProduct מתייתמים → מנוע-התאימות מחזיר ריק (לא קריסה אבל הרסני)"
+  ],
+  "workarounds": [
+   "LipskeyCatalogProduct.fromDoc null-safe (ברירות לשדות-חסרים)",
+   "שרשרת-fallback server→cache→bundled (CatalogSyncGate) — לעולם לא מבריקה, שבור נופל ל-bundled",
+   "מיזוג + שימור מוצר-ישן ליתומים (spec לא-מתייתם)"
+  ],
+  "owner_decisions": [
+   "הכרעה א: החלפה-מלאה vs מיזוג → המלצה: מיזוג",
+   "הכרעה ב: האם SKUs-חדשים תואמים? → חובה שלב-השוואת-SKU (1.5) לפני הכל"
+  ],
+  "contract": "DoD — המשתמש גולש בקטלוג-החדש עם תמונות-אמיתיות; צלילה+תאימות עובדות (specs לא-יתומים); אפס-קריסה; הישן זמין ל-rollback; הכל ירוק.",
+  "dependencies": [
+   "workflow-הזריעה הקיים",
+   "lipskey_verified_connections.dart (890 VerifiedSpecs↔SKUs)",
+   "CatalogSyncGate (fallback chain server→cache→bundled)",
+   "R2 (תמונות)"
+  ],
+  "gating": [
+   "CATALOG_SOURCE=v2 (build flag, שלב 4)",
+   "היפוך-דגל אחד הפיך (שלב 5)",
+   "push רק על 'תדחוף'"
+  ],
+  "verification": [
+   "שער-אימות (שלב 2): fromDoc על כל רשומה 0-כשלי-פרסור + dive/compat/search לא-ריקים + golden-diff מדגם",
+   "דוח-התאמה % חפיפת-SKU (שלב 1.5)",
+   "שלב 4: build CATALOG_SOURCE=v2 → smoke + engine-tests (קטלוג גולש/צלילה/תאימות/תמונות)"
+  ],
+  "open_questions": [
+   "% חפיפת-SKU חדש↔ישן — אם נמוך, החלפה-מלאה מסוכנת → מיזוג-חובה"
+  ],
+  "source_anchor": [
+   "LipskeyCatalogProduct.fromDoc",
+   "lipskey_verified_connections.dart (890 VerifiedSpecs + recipes + SmartProduct)",
+   "CatalogSyncGate",
+   "catalogProducts (חי) / catalogProducts_v2 (staging); R2"
+  ]
+ },
+ {
+  "path": "04-data-catalog-variants-tools.md",
+  "one_line": "ידע-מקור — שכבת-הקטלוג של אב-הטיפוס (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS, שורות 6046-6320) ודלתא ל-Preact/Flutter.",
+  "status": "reference",
+  "vision": "לתעד את שכבת-הקטלוג העוטפת את TREES — ארגון-תצוגה / בחירה / תמחור-מידה / מצב-התחלתי / השלמת-כלים.",
+  "mission": "לתאר 5 מבני-data ממופתחי product-key/accessory-name + מה ported ל-Preact ומה נכתב-מחדש ב-Flutter.",
+  "capabilities": [
+   "CATALOG (6046-6058): אינדקס 11 קטגוריות {cat,icon,items:[product-keys]}",
+   "VARIANTS (6060-6184): pl_* (23 SKU מידה-נושאת-מק'ט) + rich (~22 ציר-בחירה-אב אחד לכל מוצר)",
+   "SIZES (6185-6199): מידות-אביזר עם delta-מחיר (delta שלילי = זול יותר)",
+   "STOCK_DEMO (6202-6214): seed-מלאי warehouse|site per accessory → מזין view-stock",
+   "TOOLS (6216-6320): כלים-נדרשים per productKey ({name,img,why,price}) ל-~21 מוצרי-אב"
+  ],
+  "instructions": [],
+  "faults": [
+   "Preact: SIZES/STOCK_DEMO/ACC_TYPES/ACC_GROUPS/ACC_PRICE_BOOK/SPECS/CAT_DESC/DIAGRAMS/ICN לא אוטו-מחולצים (חלקם inline); brands[] נגזם לחלוטין (grep brand → 0)"
+  ],
+  "workarounds": [],
+  "owner_decisions": [],
+  "contract": "",
+  "dependencies": [
+   "TREES (מפתח product-key)",
+   "extract-catalog.mjs (auto-gen Preact data)",
+   "דוח 03 (catalog.ts / קטלוג 1,877 מוצרים) · דוח 10 (suppliers) · דוח 22 (SIZE_FILTER-protocol)"
+  ],
+  "gating": [],
+  "verification": [
+   "אומת שורה-שורה: Flutter catalog_tree 153 nodes/~108 leaves; קטלוג 1,877 מוצרים (935+772+170)"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "prototype index.html 6046-6320 (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS)",
+   "Preact: app/src/data/variants.ts (2366ש'), tools.ts (425ש', TOOL_BUNDLES), suppliers.ts (759ש'), catalog.ts",
+   "Flutter: app_flutter/lib/data/catalog_tree.dart, variant_families.dart, chip_hierarchy.dart, fuzzy_search.dart, lipskey_smart_data.dart, menu_trees.dart, _size_norm.dart, install_kit.dart"
+  ]
+ },
+ {
+  "path": "archive/LAUNCH-CHECKLIST.md",
+  "one_line": "SSOT לצעדי-הבעלים להשקה (14/6, עודכן 23/6) — קוד-הלקוח גמור; נותרו קונסול/החלטות/משפטי/חנויות, שלבים 0-4.",
+  "status": "current",
+  "vision": "להשיק את BuildSmart בחנויות (Apple+Google) + web/PWA — קוד-הלקוח הושלם, הבעלים מבצע את הצעדים הלא-קודיים.",
+  "mission": "לבצע שלבים 0-4: חשבונות-מפתח/עו'ד/רישום-עוסק (זמן-קיר), חיבור-שרת-לטלפון, החלטות+דאטה, בדיקות+בטא, הגשה-לחנויות.",
+  "capabilities": [
+   "ליבת-uid + מכשיר (מצלמה/גלריה/POD/GPS/share) — גמור, gated, אפס-רגרסיה",
+   "הקשחה (Crashlytics/App Check/notif) + מוכנוּת-אפל (הרשאות + הסתרת-placeholders)",
+   "סנכרון הזמנות+צ'אט (S2) · ✓✓ אמיתי (S3) · מד-חיבור חי 🟢/🔴 (S4) — סגורים",
+   "עוזר-AI (Claude) נבנה+פעיל · מקלדת-חכמה נבנתה+הודלקה · אבן-דרך 'מוכנות-launch' v6.72"
+  ],
+  "instructions": [
+   "התחל שלב-0 + F1 היום (הכי-ארוכים, זמן-קיר רץ ברקע שבועות)",
+   "הדלק דגלים: USE_FIREBASE_BACKEND · UID_SCOPED_QUERIES · SERVER_CALLABLES · CLOUD_PHOTOS · APP_CHECK_PROD · kAiAssistant · kKbLiveMirror",
+   "מלא [שם החברה] בכל המסמכים (legal_texts.dart)",
+   "בלי אזכור 'אנדרואיד' בתיאור-אפל; שמור App Signing key (גוגל)"
+  ],
+  "faults": [],
+  "workarounds": [],
+  "owner_decisions": [
+   "💳 תשלום: 'v1 בלי סליקה-אונליין' (חשבונית+העברה) vs ספק-ישראלי (Grow/משולם)",
+   "📦 4 מחלקות-ריקות: להסתיר ל-v1 vs לספק רשימות-מוצרים אמיתיות",
+   "iOS: מפתח APNS + Push capability vs להחליט אנדרואיד-first",
+   "מפתח-FX (מטבע) + i18n ערבית/אנגלית — אופציונלי"
+  ],
+  "contract": "DoD-משתמע: אפליקציה חתומה מוגשת+מאושרת בשתי החנויות + web/PWA חי; דגלים דלוקים; חשבון-דמו-לבודק-אפל; משפטי (תקנון/פרטיות/נגישות) מלא.",
+  "dependencies": [
+   "F1 (חיבור-שרת) פותח את הכל; firebase deploy אוטומטי ב-CI",
+   "הדלקת-דגלים לפני H1 (מעבר-בדיקות אחרון)",
+   "closed-test גוגל 14 יום (זמן-קיר) + חשבון-דמו לבודק-אפל (חובה — בלעדיו דחייה)"
+  ],
+  "gating": [
+   "דגלים: USE_FIREBASE_BACKEND/UID_SCOPED_QUERIES/SERVER_CALLABLES/CLOUD_PHOTOS/APP_CHECK_PROD/kAiAssistant/kKbLiveMirror",
+   "קונסול: Crashlytics ON · App Check אכיפה · VAPID (push-web) · R2 secrets"
+  ],
+  "verification": [
+   "בדיקה על מכשירים אמיתיים (iPhone + Android)",
+   "TestFlight (אפל) + closed-test 14 יום (גוגל, 20 בודקים)",
+   "H1 מעבר-בדיקות אחרון (agent) אחרי הדלקת-הדגלים",
+   "Apple App Privacy labels / export compliance; Google Data Safety / content rating"
+  ],
+  "open_questions": [
+   "v1 עם או בלי סליקה-אונליין?",
+   "iOS ב-v1 או אנדרואיד+web מספיק?",
+   "4 מחלקות-ריקות: להסתיר או למלא?"
+  ],
+  "source_anchor": [
+   "legal_texts.dart ([שם החברה] + תקנון/פרטיות)",
+   "commits: 25a5daf (F1), 77df5eb (firebase deploy CI success)",
+   "אבן-דרך v6.72 (מוכנות-launch)"
+  ]
+ },
+ {
+  "path": "archive/LAUNCH-PLAN.md",
+  "one_line": "תוכנית-השקה מלאה (29/7) — רוב הקוד גמור, האפליקציה חיה על web; נותרו בעיקר פעולות-בעלים (חשבונות/משפטי/keystore/בדיקת-גוגל) + פריטי-בנייה אחרונים.",
+  "status": "current",
+  "vision": "באוויר בשתי החנויות (~3-4 שבועות) + web/PWA חי לקהל השבוע (buildsmart-il.com).",
+  "mission": "מסלול-קריטי (חשבונות + closed-test 14-יום + keystore) + חובה-לפני-הגשה (אייקון/משפטי/נכסי-חנות/חשבון-דמו) + חשוב (iOS/עוסק/נגישות/R2) + אופציונלי-v1.",
+  "capabilities": [
+   "Phase A/B/C/F/G — הצי סיים; האפליקציה חיה על web עם הקטלוג המלא",
+   "web/PWA ניתן-להתקנה (buildsmart-il.com, 'הוסף למסך הבית') — משתמשים אמיתיים כבר השבוע"
+  ],
+  "instructions": [
+   "התחל היום: חשבונות (Google $25 + Apple $99) + closed-test גוגל + keystore",
+   "תאריך-השקה ≈ יום-התחלת-בדיקה + 14 יום + ביקורת",
+   "השבוע: השק web/PWA חי · התחל closed-test · אייקון + הכנת נכסי-חנות"
+  ],
+  "faults": [
+   "אייקון = הכחול-של-Flutter (צריך כתום + splash + bundle-id סופי)",
+   "keystore: כרגע debug-signed, לא-קביל ל-Play",
+   "מפתחות-R2 נחשפו (צריך סיבוב)"
+  ],
+  "workarounds": [
+   "v1 בלי סליקה: התחל עם הזמנה/הצעת-מחיר/יצירת-קשר (מוצר-פיזי), הוסף סליקה בהמשך"
+  ],
+  "owner_decisions": [
+   "iOS גם או Android+web מספיק ל-v1?",
+   "סליקה בתוך-האפליקציה — אופציונלי ל-v1",
+   "3 שאלות מכריעות: התחלת closed-test? יש חשבונות Google/Apple? iOS או לא?"
+  ],
+  "contract": "DoD-משתמע: PWA ממותג חי + Android ל-Play (אחרי 14-יום) + iOS; אייקון-כתום; משפטי (עו'ד); נכסי-חנות; חשבון-דמו-לבודק.",
+  "dependencies": [
+   "closed-test גוגל 14-יום = השעון-הכי-ארוך (בלי זה אין production בגוגל)",
+   "keystore חוסם build-חתום ל-Play",
+   "LAUNCH-MICRO-BREAKDOWN.md (~90 משימות-מיקרו — המקור המלא)"
+  ],
+  "gating": [],
+  "verification": [
+   "QA (הצי) + תיקוני-קוד אחרונים",
+   "closed-test גוגל (20 בודקים, 14 יום)",
+   "ביקורת-אפל (1-7 ימים, אולי דחייה→תיקון→הגשה-חוזרת)"
+  ],
+  "open_questions": [
+   "התחלת את ה-closed-test של גוגל?",
+   "יש חשבונות Google/Apple?",
+   "iOS גם, או Android+web מספיק ל-v1?"
+  ],
+  "source_anchor": [
+   "legal_texts.dart",
+   "app_flutter/web/ (אייקון/manifest/splash)",
+   "LAUNCH-MICRO-BREAKDOWN.md; buildsmart-il.com"
+  ]
+ },
+ {
+  "path": "DIRECTIVE-arm-wizard-preview.md",
+  "one_line": "הנחיה — קודם preview עם האשף חי (APP_PROFILE=clean + ORG_CONFIG=true) לערוץ-Firebase נפרד → לינק מיד; אחר-כך המשך-רגיל (גל-4).",
+  "status": "current",
+  "vision": "הבעלים רוצה לינק לפתוח ולשחק עם האשף (giant-V5) שכרגע רדום מאחורי ORG_CONFIG=off — בלי לגעת באתר-הראשי-החי.",
+  "mission": "משימה-1: build clean+ORG_CONFIG=true, פרוס לערוץ-preview (wizard), הדפס לינק ודחוף מיד. משימה-2: חזור ל-DIRECTIVE-giant-phase2-features גל-4.",
+  "capabilities": [
+   "אשף הקמת-חברה (כרטיס '🔌 אשף הקמת חברה' בדשבורד-מנהל)",
+   "בחירת חבילת-ורטיקל · כיבוי/הדלקת 13 מודולים · עריכת 6 מונחים · מתן שם-חברה",
+   "'שמור והפעל' → האפליקציה מתכווננת חי (אפס-ריסטארט)"
+  ],
+  "instructions": [
+   "בנה על profile clean (לא demo/buildsmart) — empty-shell אפס-דמו אבל כל המסכים/המנוע קיימים",
+   "אם כניסת-אשף/דשבורד חסומה ב-clean → חשוף ב-clean (גדור ב-kOrgConfigFlag, לא בפרופיל)",
+   "🔴 repoint: החלף בשני ה-dart-defines של wizard-preview.yml ל-APP_PROFILE=clean, הרץ מחדש",
+   "פרוס לערוץ-Firebase-Hosting נפרד; האתר-הראשי-החי לא-נגע; דחוף/הרץ מיד + הדפס לינק ב-run-summary"
+  ],
+  "faults": [
+   "wizard-preview.yml (472e7190) נבנה על demo לפני-שהתיקון-הגיע; run#1 success אבל עדיין --dart-define=APP_PROFILE=demo בראש-הענף (4f50c40d), אף קומיט מאוחר לא נגע"
+  ],
+  "workarounds": [
+   "עמודת-מטריצה נוספת ב-clean-two-links.yml (ORG_CONFIG=true) או workflow-אח קטן wizard-preview.yml",
+   "clean = הפרופיל המלא-יותר (_ux=_bs||_clean||_c2) → דשבורד-המנהל נגיש שם"
+  ],
+  "owner_decisions": [
+   "תיקון-בעלים 27/7: בנה על clean (לא demo)",
+   "משימה-1 מאושרת-לדחיפה מיד; המשך-רגיל = על 'תדחוף'"
+  ],
+  "contract": "DoD — לינק-חי שבו: נכנסים כמנהל → כרטיס 'אשף הקמת חברה'; אשף נפתח → בוחר-ורטיקל/13-מודולים/6-מונחים/שם-חברה; 'שמור והפעל' → כיוונון-חי אפס-ריסטארט; הלינק מודפס ב-run-summary; האתר-הראשי-החי לא-זז.",
+  "dependencies": [
+   "DIRECTIVE-giant-phase2-features.md (גל-4: חדר≈רכב/מכסה-מראש/חזרתיות/ציר-זמן + tails גל-3)",
+   "clean-two-links.yml / wizard-preview.yml"
+  ],
+  "gating": [
+   "APP_PROFILE=clean",
+   "ORG_CONFIG=true (רק ערוץ-preview; ברירת-מחדל-חי OFF זהה-בייטים)",
+   "kOrgConfigFlag (כניסת-אשף)"
+  ],
+  "verification": [
+   "שער-ירוק",
+   "האתר-הראשי-החי זהה-בייטים / לא-נגע · הישן ל-rollback",
+   "הלינק מודפס ב-run-summary"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "manager_dashboard_screen.dart:3652 (כרטיס אשף הקמת חברה)",
+   "wizard-preview.yml (472e7190, 4f50c40d) / clean-two-links.yml",
+   "DIRECTIVE-giant-phase2-features.md"
+  ]
+ },
+ {
+  "path": "archive/DIRECTIVE-close-web-for-launch.md",
+  "one_line": "הנחיה — סגירת האתר (web/PWA, buildsmart-il.com) להשקה-פומבית ב-4 קבוצות: מותג+PWA, קונפיג-השקה, ליטוש-פומבי, SEO/דומיין.",
+  "status": "current",
+  "vision": "buildsmart-il.com מוכן-להשקה-פומבית השבוע — PWA ממותג ניתן-להתקנה (לא אייקון-Flutter-כחול).",
+  "mission": "קבוצה 1 מותג+PWA · קבוצה 2 קונפיג-השקה על ה-web-החי · קבוצה 3 ליטוש-פומבי (זנבות Phase-B) · קבוצה 4 SEO/שיתוף+דומיין.",
+  "capabilities": [
+   "אייקוני-מותג כתומים (Icon-192/512/maskable + favicon.png + apple-touch-icon)",
+   "manifest.json ('בנייה חכמה', theme_color כתום, background_color, display standalone, icons מלאים)",
+   "index.html (title/description/lang he/dir rtl/apple-mobile-web-app-capable+title+status-bar)",
+   "splash ממותג + באנר 'הוסף למסך הבית' (install-prompt)",
+   "OG-tags (og:title/description/image) לשיתוף-לינק"
+  ],
+  "instructions": [
+   "צור/עדכן app_flutter/web/ + web/icons/ עם אייקוני-מותג כתומים",
+   "אם flutter_launcher_icons/flutter_native_splash — הוסף ל-pubspec והרץ; אחרת ידני ב-web/",
+   "ודא web-deploy.yml/firebase-hosting.yml: backend-אמיתי · קטלוג-מהשרת · סטודיו owner-gated · org-config כפי-שהוחלט; הדפס דגלים ב-run-summary",
+   "כל 'בבנייה'/placeholder גלוי-למשתמש-פומבי/לא-בעלים → מוסתר; אפס-דאטה-מזויפת למשתמש-אמת",
+   "דומיין: בניהחכמה.ישראל + redirect + SSL"
+  ],
+  "faults": [
+   "אין app_flutter/web/ מותאם → האתר על אייקון+manifest ברירת-המחדל של Flutter (כחול) — הפער המרכזי"
+  ],
+  "workarounds": [],
+  "owner_decisions": [
+   "אושר ע'י הבעלים 29/7: 'נתחיל לסגור את האתר, בקבוצות, תשלח נחיל'"
+  ],
+  "contract": "DoD — buildsmart-il.com = PWA ממותג ניתן-להתקנה (אייקון-כתום לא-Flutter · manifest אמיתי · install-prompt) · קונפיג-השקה חי · אפס-placeholder-פומבי · meta-שיתוף. מוכן להשקה-פומבית.",
+  "dependencies": [
+   "web-deploy.yml / firebase-hosting.yml (דיפלוי-חי)",
+   "זנבות Phase-B (B7 · עלים-מתים)",
+   "דומיין: בניהחכמה.ישראל (בעלים+הצי · DM2/DM3)"
+  ],
+  "gating": [
+   "סטודיו owner-gated",
+   "org-config כפי-שהוחלט",
+   "backend-אמיתי · קטלוג-מהשרת"
+  ],
+  "verification": [
+   "כל קבוצה: byte-verified · central-verify ירוק · לא-שובר-קיים · עצור-לדיווח",
+   "אישור סריקת-fake-data (אפס-דאטה-מזויפת למשתמש-אמת)",
+   "הדפס הדגלים ב-run-summary לאימות"
+  ],
+  "open_questions": [],
+  "source_anchor": [
+   "app_flutter/web/ (index.html, manifest.json, icons/, apple-touch-icon)",
+   "web-deploy.yml / firebase-hosting.yml",
+   "buildsmart-il.com / בניהחכמה.ישראל"
+  ]
+ }
 ]
