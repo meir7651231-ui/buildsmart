@@ -55,8 +55,12 @@ void main() {
           ['diameter', 'thread']);
     });
 
-    test('אלכסוני (base card) → [🔩 diameter] only', () {
-      expect(_ids(_p('אביזר כלשהו 40', 'קטגוריה לא-ממופה')), ['diameter']);
+    test('אלכסוני (base + size variants) → [🔩 diameter] only', () {
+      // a base category ⇒ no engine family; the axis engine supplies ONE קוטר wheel
+      // from the size variants across the family (same everything else).
+      final a = _p('אלכסוני 1/2"', 'ניקוז');
+      final b = _p('אלכסוני 3/4"', 'ניקוז');
+      expect(_ids(a, universe: [a, b]), ['diameter']);
     });
   });
 
@@ -79,29 +83,27 @@ void main() {
     });
   });
 
-  group('#catalog-config chips — §4 wheels FROM THE NAME (brass/threaded · non-PPR)', () {
-    test('a threaded elbow gets זווית + תבריג from its NAME, not the PPR engine', () {
-      // 'אביזרי תבריג' is NOT a PPR engine category ⇒ configSchemaFor makes a base
-      // card; the name parser supplies the wheels (45° → angle, 1/2" → thread).
-      final p = _p('ברך 45° תבריג צד אחד 1/2"', 'אביזרי תבריג');
-      final roster = _ids(p, universe: [p]);
-      expect(roster, contains('angle'));
-      expect(roster, contains('thread'));
-      expect(roster.first, isIn(['angle', 'thread'])); // priority-1 = highest present
-    });
-
-    test('§4: size-variants of the family supply a MULTI-value wheel', () {
-      // Same frame ("מצמד", size stripped) ⇒ one variant family; the thread wheel
-      // spans both inch sizes (aggregated over the siblings).
+  group('#catalog-config chips — §4 wheels from the AXIS ENGINE (catAxesOf)', () {
+    test('a size-varying family gets a MULTI-value קוטר wheel', () {
+      // same frame ("מצמד", size stripped) ⇒ one variant family; the axis engine's
+      // diameter axis varies across the siblings ⇒ a spinnable קוטר wheel.
       final a = _p('מצמד 1/2"', 'אביזרי תבריג');
       final b = _p('מצמד 3/4"', 'אביזרי תבריג');
-      final s = prioritizedSchema(a, universe: [a, b]);
-      final thread = s.attributes.firstWhere((x) => x.id == 'thread');
-      expect(thread.values.map((v) => v.labelHe), containsAll(['1/2"', '3/4"']));
+      final diameter = prioritizedSchema(a, universe: [a, b])
+          .attributes
+          .firstWhere((x) => x.id == 'diameter');
+      expect(diameter.values.length, greaterThanOrEqualTo(2)); // spans both sizes
+    });
+
+    test('the SIZE always shows (single-value ok); a descriptive axis only if it varies', () {
+      // a singleton ⇒ nothing varies, but its size IS a diameter (owner) ⇒ one קוטר
+      // wheel; a fixed descriptive axis stays context (not a wheel · §7).
+      final p = _p('אלכסוני 1/2"', 'ניקוז');
+      expect(_ids(p, universe: [p]), ['diameter']);
     });
 
     test('§4 keeps the engine goldens intact (union, engine wins a shared id)', () {
-      // The name parser must not disturb a PPR golden — the elbow still resolves to
+      // The axis engine must not disturb a PPR golden — the elbow still resolves to
       // exactly [diameter · angle · length].
       expect(_ids(_p('ברך PPR 90° 32', kPprElbows)),
           ['diameter', 'angle', 'length']);

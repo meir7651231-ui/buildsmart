@@ -1978,3 +1978,9 @@
 - **תקלות מוזרקות (mutation-sensitivity):** (1) קיבוץ פר-SKU במקום `productCanonicalKey` (אריח-פר-וריאציה) → הבדיקה `3 size-variants of "מצמד" collapse to ONE tile` נכשלת (3 אריחים במקום 1) ⇒ הכיווץ load-bearing. (2) `count => tiles.length` במקום `productCount` → הבאדג' מציג טיפוסים (1) במקום מוצרים (3) → הבדיקה `badge = the PRODUCT count` נכשלת ⇒ המונה מודד מוצרים לא-טיפוסים. (3) כיווץ שאינו מכווץ (types==SKUs) → `expect(typeTotal, lessThan(productTotal))` בפיילוט נכשלת.
 - **בטיחות:** מגודר `kCatalogConfig` OFF ⇒ tree-shaken; `productCanonicalKey` נשאר **byte-identical** (`productFrame` additive · מקטע-"וריאנטים" החי ללא-שינוי).
 - **אימות:** `flutter analyze` 0 (הקבצים שלי) · catalog_config 64/64 · הפיילוט "אביזרי קצה וחיבורים" 143 SKUs → 62 אריחי-טיפוס.
+
+## #catalog-config-cataxes — גלגלים דרך catAxesOf · מידה=קוטר (2026-08-05)
+- **הנכס:** `axisChips` (product_chips) מריץ את מנוע-הצירים הקיים `catAxesOf` על משפחת-הוריאנט (`productCanonicalKey`); ציר-דסקריפטיבי-שמשתנה=גלגל, מידה=קוטר-תמיד (`odOf` כ-fallback ל-mm-נגרר); `prioritizedSchema` מאחד מעל `configSchemaFor` וממיין לפי הטקסונומיה.
+- **תקלות מוזרקות (mutation-sensitivity):** (1) `if (e.value.length > 1)` בלי `_kSizeChips` → סינגלטון-מידה מאבד את גלגל-הקוטר → הבדיקה `SIZE always shows` נכשלת (Actual []). (2) מיפוי inch→'thread' במקום 'diameter' → הבדיקה `1/2" IS a diameter` נכשלת ⇒ מוכיח את הכלל "מידה=קוטר". (3) הסרת ה-odOf-fallback → 'פקק 32' (mm-נגרר) מאבד קוטר → אריחי-0-גלגלים קופצים (127→157) — הבדיקה החיה מודדת את הרגרסיה.
+- **בטיחות:** מגודר `kCatalogConfig` OFF · byte-identical (`catAxesOf` היה inert ונשאר; `product_chips` tree-shaken כבוי).
+- **אימות:** `flutter analyze` 0 · catalog_config 76/76 · התפלגות-גלגלים 0→127 · 1→382 · 2→96 · 3→28.
