@@ -254,7 +254,7 @@
   ]
  },
  {
-  "path": "23-flutter-architecture-state-cardflow.md",
+  "path": "reference/23-flutter-architecture-state-cardflow.md",
   "one_line": "השלמת-התמונה של תת-מערכות Flutter האמיתי — ארכיטקטורה·schema·50-state·42-card-flow·43-helpers·5-engines·launch (אומת-מקוד)",
   "status": "reference",
   "vision": "התמונה-המלאה של Flutter — תת-המערכות הפנימיות שלא נכנסו לדלתאות 01-17",
@@ -311,7 +311,7 @@
   ]
  },
  {
-  "path": "18-legacy-knowledge-index.md",
+  "path": "reference/18-legacy-knowledge-index.md",
   "one_line": "אינדקס ההיסטוריה-המוסדית של מאמץ Preact/dial (62 מסמכי app/knowledge/) + החלטות-היסוד ADR (ה-WHY מאחורי ה-dial)",
   "status": "reference",
   "vision": "ה-WHY מאחורי ה-dial — ADR-001 no-window · ADR-002 dial-pattern (משתמשי-אתר-בנייה: ידיים-מלוכלכות/כפפות/יד-אחת)",
@@ -366,7 +366,7 @@
   ]
  },
  {
-  "path": "SPEC-server-connect-MICRO.md",
+  "path": "archive/SPEC-server-connect-MICRO.md",
   "one_line": "פירוק-מיקרו מלא של חיבור-שרת Firebase+R2 (S0-S9 · ~48 משימות-מיקרו) — drop-in cache-pattern, UI-ללא-שינוי",
   "status": "current",
   "vision": "drop-in (_local→_firebase) דרך cache-pattern (sync-reads מ-cache · listeners מ-Firestore · optimistic-writes) → UI ללא-שינוי",
@@ -413,7 +413,7 @@
   ]
  },
  {
-  "path": "SPEC-cross-persona-chat.md",
+  "path": "archive/SPEC-cross-persona-chat.md",
   "one_line": "SPEC צ׳אט חוצה-פרסונות (אותו מסך-שיחות אצל כולם) — בוצע במלואו T7 (06-09), reuse-UI קיים; המסמך = spec/רקע",
   "status": "reference",
   "vision": "דרישת-בעלים verbatim: 'חוצה — אני צריך את אותו מסך צ׳אטים אצל כולם!' — הודעה מ-חנות נראית אצל הקבלן ולהפך",
@@ -460,7 +460,7 @@
   ]
  },
  {
-  "path": "07-logic-orders-tasks-search.md",
+  "path": "reference/07-logic-orders-tasks-search.md",
   "one_line": "לוגיקת הזמנות·משימות·מלאי·ניווט-קטלוג·חיפוש (legacy index.html 7701-9000) + דלתאות Preact/Flutter",
   "status": "reference",
   "vision": "החיפוש מאחד 3 מקורות — יעדי-ניווט (NAV_DESTINATIONS) · אינדקס-תוכן (CONTENT_INDEX) · מוצרי-קטלוג — ל-suggest אחד עם fuzzy",
@@ -545,7 +545,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-buildsmart-clean.md",
+  "path": "archive/DIRECTIVE-buildsmart-clean.md",
   "one_line": "הנחיה — מנוע-אב Clean (מלא-יכולת · נקי-מדאטה) שכל חברה נולדת ממנו בהחלפת דאטה+שם; קוד-אחד→אינסוף אפליקציות",
   "status": "current",
   "vision": "קוד-אחד → אינסוף אפליקציות · superset אחד מלא/נקי/בלתי-שביר · כל חברה נולדת ממנו (כמו MaorClean→MaorHachesed · 396/400 שורות זהות)",
@@ -591,7 +591,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-U3-store-ownership.md",
+  "path": "archive/DIRECTIVE-U3-store-ownership.md",
   "one_line": "הנחיית U3 — בעלות-חנות (Store↔Owner) · חוסם-השקה; חצי כבר-בנוי (rule owner-gated חי), חסר טביעת claim storeId",
   "status": "current",
   "vision": "בעל-חנות מנהל את המלאי שלו לבד ואינו יכול לגעת בשל אחר (משלים את שכבת-החנויות שכבר עלתה לאוויר)",
@@ -642,7 +642,7 @@
   ]
  },
  {
-  "path": "PLAN-closeout.md",
+  "path": "archive/PLAN-closeout.md",
   "one_line": "רשימת-קצוות מלאה מהקוד מתועדפת-לסגירה (אומת 2026-06-08 · tip 1d292aa) — עם עדכוני-07-06 (menu-dial הוסר)",
   "status": "aging",
   "vision": "",
@@ -804,7 +804,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-edit-trigger-keyboard-longpress.md",
+  "path": "archive/DIRECTIVE-edit-trigger-keyboard-longpress.md",
   "one_line": "הנחיה — טריגר-עריכה: long-press על כפתור-המקלדת → ✎ מעל הסל (בלי באנר), owner-only",
   "status": "current",
   "vision": "מדליק-חזרה את העריכה-על-המסך (שהוקפאה ב-screen-mgmt-s0) עם מיקום-טריגר טוב ואוניברסלי (פותר את בעיית-הלוגו)",
@@ -846,7 +846,7 @@
   ]
  },
  {
-  "path": "firebase-web-config.md",
+  "path": "archive/firebase-web-config.md",
   "one_line": "firebase-web-config — client config פומבי (לא-סוד) לכתיבת firebase_options.dart (S0.2 · Web app)",
   "status": "current",
   "vision": "",

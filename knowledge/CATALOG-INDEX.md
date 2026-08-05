@@ -11,31 +11,6 @@
 **`00-START-HERE.md`**
 - push רק על מילה מפורשת (תדחוף/push/approved/deploy)
 
-**`01-design-system.md`**
-- screen__bg (רקע-אמבטיה חד + כרטיסי frosted-glass) = net-new owner-specified (spec.json FEAT-bathroom-bg)
-
-**`17-security-service-boot.md`**
-- הערה-מקור 21666: 'אבטחה אמיתית חיה בשרת — RBAC/audit/2FA כאן הם הדמיה'
-
-**`18-legacy-knowledge-index.md`**
-- ADR-001 owner-quote verbatim: 'אף אחד מהם לא פותח חלון. נקודה.'
-- IMPLEMENTATION_PROTOCOL נדחה (3 ריברטים INSP-0016/17/22/23/24 → BS-dial drill)
-
-**`20-infra-build-tooling-protocol.md`**
-- go_router הוסר (P-4 07-06)
-- שני bundle-IDs נפרדים (Preact com.buildsmart.app vs Flutter com.buildsmart.buildsmart)
-
-**`21-protocols-spine-gates-enforcement.md`**
-- 🛑 פרוטוקול-R בוטל (הוראת-משתמש 2026-06)
-- 🛑 שכבת-הכללים-הממוספרת בוטלה (הוראת-משתמש) — סגנון-הבנייה היחיד = האפליקציה הסופית עצמה
-- 🛑 A10: manager override על צ׳אט — טרם-הוכרע
-
-**`22-protocols-agents-process-specialized.md`**
-- קונסנזוס = סימולציית-6-פרסונות (לא הצבעה), GO סופי מהמשתמש · המשתמש הוא ה-relay בין-סוכנים
-
-**`24-multiagent-governance.md`**
-- 🛑 GO סופי מהמשתמש · אישור-push מילולי · המשתמש=סמכות-עליונה
-
 **`CATALOG-3D-100-STEPS.md`**
 - הכרעת-מחיר (שלב-54 מקושר)
 - licensing/liability/ownership ל-authoring חיצוני (M6 · שלב 92)
@@ -59,113 +34,16 @@
 - refactor-גוד-מודול install_engine
 - כל שינוי-קוד-חי
 
-**`DIRECTIVE-U3-store-ownership.md`**
-- החלטה-נעולה #3: בעל-יחיד לכל חנות (storeId אחד · בלי מודל-צוות)
-
-**`DIRECTIVE-arm-wizard-preview.md`**
-- תיקון-בעלים 27/7: בנה על clean (לא demo)
-- משימה-1 מאושרת-לדחיפה מיד; המשך-רגיל = על 'תדחוף'
-
-**`DIRECTIVE-buildsmart-clean.md`**
-- הקיים-החי לא-זז עד שהבעלים מדליק (הפיך-בשנייה)
-
 **`DIRECTIVE-catalog-replace.md`**
 - הכרעה א: החלפה-מלאה vs מיזוג → המלצה: מיזוג
 - הכרעה ב: האם SKUs-חדשים תואמים? → חובה שלב-השוואת-SKU (1.5) לפני הכל
-
-**`DIRECTIVE-deepen-toggles.md`**
-- 🛑 שני-הפערים מאומתים ע״י הבעלים (בשימוש) · דחיפה רק על תדחוף
-
-**`DIRECTIVE-edit-trigger-keyboard-longpress.md`**
-- אושר ע"י הבעלים (28/7) מול הדמיה
-
-**`DIRECTIVE-fittings-phase0A-loop.md`**
-- פאזה C (43/49) הטמעת-3D בכרטיס-החי + בחירת-package-3D = החלטת-מוצר → עצור-ושאל
-- עצור-ושאל: טקסט-משפטי/כסף/חשבונות/בלתי-הפיך/סיכון-keystone · אותו כשל-שורש פעמיים (P-01)
 
 **`DIRECTIVE-fittings-phaseB-depth.md`**
 - 37 AQUATEC/ליפסקי (קליטת-קטלוג-חדש) = החלטת-בעלים → עצור-ושאל
 - עצור-ושאל: כל ערך-בטיחות שיוצג כמחייב · refactor קוד-חי · אותו כשל-שורש פעמיים (P-01)
 
-**`DIRECTIVE-maor-full-integration.md`**
-- 🛑 אושר ע״י הבעלים 27/7 (סיימת עם מאור, הגיע הזמן לשלב מלא)
-- 🛑 דחיפה רק על תדחוף
-
-**`DIRECTIVE-screen-management-in-wizard.md`**
-- 🛑 אושר (בעלים 27/7: 'אין פתרון-מיקום · לכבות מהמסך חובה דבר-ראשון · לצאת לדרך')
-
-**`DIRECTIVE-studio-registry-to-wizard-toggles.md`**
-- מה הבעלים רוצה: אותה כמות/שליטה כמו ה-Studio, מוצג יפה כאשף בעברית
-- מקום בסדר: צעדים 0→2 של MASTER-giant-system-order
-
-**`DIRECTIVE-wizard-is-the-studio.md`**
-- אושר ע'י הבעלים 27/7 ('צא לדרך') מול הדמייה-חיה
-- הבעלים 27/7: 'עדיף לי לדחוף לאתר החי'
-- פרוסה-0 מאושרת-לדחיפה מיד; שאר הפרוסות = דחיפה רק על 'תדחוף'
-
 **`KNOWLEDGE_AUDIT.md`**
 - 🛑 הוחלט: APP-SPEC-full/detailed superseded — לא לעדכן (באנר-superseded נוסף)
-
-**`LAUNCH-MICRO-BREAKDOWN.md`**
-- 🛑 העוזר-AI נשאר פעיל (23/6) · ANTHROPIC_API_KEY בקונסול
-- 🛑 חנות: חשבון Google Play · נכסי-ליסטינג · privacy-URL · סיבוב מפתחות-R2 שנחשפו
-- 🛑 הדלקות-דגלים prod (USE_FIREBASE_BACKEND · USER_SYSTEM · CATALOG_SOURCE=v2 · useServerCatalog)
-- 🛑 GO-LIVE קטלוג · הדלקת STUDIO_DART_DEFINES (repo-var) · הרצת clean-two-links
-
-**`LAUNCH-TASKS-MICRO.md`**
-- 🛑 B1 החלטה לכל ~35 בקרוב + ~60 הגדרות: לסיים או להסתיר
-- 🛑 D1 בחירת ספק-סליקה ישראלי (Tranzila/Cardcom/Meshulam/Grow)
-- 🛑 חוסם פתוח: תשלום — v1 בלי-סליקה?
-- 🛑 B4 מקצועות: לבנות חשמלאי/שיפוצים או להסתיר
-
-**`LAUNCH-deploy.md`**
-- החלטה מוצרית: buildsmart-il.com → האפליקציה החדשה (Flutter)
-
-**`MAOR-REUSE-MAP.md`**
-- 🛑 מוקפא עד שהבעלים יסיים את מערכת-מאור (סטטוס 27/7: הופעל)
-- 🛑 בחירת חבילות-ורטיקל
-
-**`MASTER-giant-system-order.md`**
-- תיקוני-בעלים: גולמי-נקי כבסיס · שני ה-Studioים · האשף=הסטודיו (מורחב 27/7, אושר צא-לדרך מול הדמייה חיה wizard-mockup.html)
-- מחוץ-לתוכנית (בעלים/נפרד): Android-Play (כשל קיים-מראש) · סיבוב-R2 · keystore · iOS-pipeline · הדלקות-launch
-
-**`PLAN-closeout.md`**
-- החלטת server-ready swap (לפני-שלב-ב, אם רוצים swap נקי)
-- השקה = חשבונות Apple/Google (אחרון · תלוי-חשבונות)
-
-**`PLAN-contractor-completion.md`**
-- T8 'בקרוב תשאיר' — החלטת-משתמש (מחלקות עם 0 מוצרים)
-- פרסונת-עובד = מסך-מלא ולא תוכן-בתוך-דיאל (סגנון-חדש נדחה ע״י המשתמש)
-- T3 לקיחה — אישור-משתמש התקבל
-- מנהל = מדולג (תוכנית-נפרדת PLAN-manager-completion)
-
-**`PLAN-giant-system-master.md`**
-- מנהל-על מקים חברה-חדשה מהאשף, בלי קוד (הדלקות-בעלים)
-
-**`PLAN-manager-completion.md`**
-- הגדרת-המשתמש (2026-06-04): לוח-מנהל = מסך חדש מלא כמו לוח-קבלן, לא עלי-dial
-
-**`PLAN-verticals-and-toggles.md`**
-- 🛑 בחירת חבילות-הורטיקל לבנייה-חכמה (V4.2: ספק-חומרי-בניין/אינסטלציה/חשמל/כלים/קרמיקה/קבלן-כללי)
-
-**`POLISH-BRIEF.md`**
-- 🛑 token חסר → הצע ב-POLISH_LOG (needs-approval), אל תמציא ערך
-
-**`SERVER-KICKOFF.md`**
-- דברי-console לבעלים: Blaze billing (מכסת-SMS, כעת 10/יום) · App Check register (S0.5) · Deploy Security Rules (אחרי S5)
-
-**`SPEC-catalog-to-server-MICRO.md`**
-- פתוח לפני C1: אילו 20 SKUs לפרוסה
-- פתוח: יעד-זמן ל-perf (C2.5) — מה נחשב מהיר-מספיק
-- פתוח: מודל-חנות (C3) — חנויות ידנית-על-ידי-הבעלים או onboarding-עצמי לכל חנות
-
-**`SPEC-user-system-MICRO.md`**
-- הוכרע 14.7: הרשמה = הכל באישור-admin — כל משתמש חדש status=pending → admin→active (מוסיף U1.5+U2.4)
-- הוכרע 14.7: אורח רואה קטלוג · הזמנה+פרופיל דורשים הרשמה (מוסיף U2.5)
-- הוכרע 14.7: בעלות-חנות = בעל-יחיד לכל חנות (storeUid אחד, בלי מודל-צוות)
-
-**`TASKS-to-full.md`**
-- T7 (דרישת-משתמש 07-06): 'אותו מסך' = אותו widget+הודעות-משותפות, לא אותה גישה (standalone, אין מעבר-לוח)
 
 **`VERIFIED-OPEN-WORK-2026-07-29.md`**
 - שער אנטי-כפילות = דרישת-בעל-המוצר (06-07: חייב טיפול)
@@ -185,8 +63,28 @@
 - 🛑 החלטה #2: guest = עיון-קטלוג בלבד
 - 🛑 דחיפה רק על תדחוף
 
+**`archive/DIRECTIVE-U3-store-ownership.md`**
+- החלטה-נעולה #3: בעל-יחיד לכל חנות (storeId אחד · בלי מודל-צוות)
+
+**`archive/DIRECTIVE-arm-wizard-preview.md`**
+- תיקון-בעלים 27/7: בנה על clean (לא demo)
+- משימה-1 מאושרת-לדחיפה מיד; המשך-רגיל = על 'תדחוף'
+
+**`archive/DIRECTIVE-buildsmart-clean.md`**
+- הקיים-החי לא-זז עד שהבעלים מדליק (הפיך-בשנייה)
+
 **`archive/DIRECTIVE-close-web-for-launch.md`**
 - אושר ע'י הבעלים 29/7: 'נתחיל לסגור את האתר, בקבוצות, תשלח נחיל'
+
+**`archive/DIRECTIVE-deepen-toggles.md`**
+- 🛑 שני-הפערים מאומתים ע״י הבעלים (בשימוש) · דחיפה רק על תדחוף
+
+**`archive/DIRECTIVE-edit-trigger-keyboard-longpress.md`**
+- אושר ע"י הבעלים (28/7) מול הדמיה
+
+**`archive/DIRECTIVE-fittings-phase0A-loop.md`**
+- פאזה C (43/49) הטמעת-3D בכרטיס-החי + בחירת-package-3D = החלטת-מוצר → עצור-ושאל
+- עצור-ושאל: טקסט-משפטי/כסף/חשבונות/בלתי-הפיך/סיכון-keystone · אותו כשל-שורש פעמיים (P-01)
 
 **`archive/DIRECTIVE-huliot-images.md`**
 - אי-התאמות שדה = אישור-בעלים לפני דריסה (scrape עשוי להיות לא-עדכני מהאפליקציה)
@@ -196,9 +94,25 @@
 - 🛑 דורש-בעלים: CLOUD_PHOTOS (מפתחות-R2) · APP_CHECK_PROD (רישום-מפתחות)
 - 🛑 אישור שחברת-ההשקה = BuildSmart (איזה OrgConfig)
 
+**`archive/DIRECTIVE-maor-full-integration.md`**
+- 🛑 אושר ע״י הבעלים 27/7 (סיימת עם מאור, הגיע הזמן לשלב מלא)
+- 🛑 דחיפה רק על תדחוף
+
 **`archive/DIRECTIVE-order-confirmation-email.md`**
 - 🛑 אושר ע"י הבעלים (29/7)
 - 🛑 הבעלים מספק API-key בקונסול + פותח חשבון Resend + מוסיף+מאמת דומיין buildsmart-il.com
+
+**`archive/DIRECTIVE-screen-management-in-wizard.md`**
+- 🛑 אושר (בעלים 27/7: 'אין פתרון-מיקום · לכבות מהמסך חובה דבר-ראשון · לצאת לדרך')
+
+**`archive/DIRECTIVE-studio-registry-to-wizard-toggles.md`**
+- מה הבעלים רוצה: אותה כמות/שליטה כמו ה-Studio, מוצג יפה כאשף בעברית
+- מקום בסדר: צעדים 0→2 של MASTER-giant-system-order
+
+**`archive/DIRECTIVE-wizard-is-the-studio.md`**
+- אושר ע'י הבעלים 27/7 ('צא לדרך') מול הדמייה-חיה
+- הבעלים 27/7: 'עדיף לי לדחוף לאתר החי'
+- פרוסה-0 מאושרת-לדחיפה מיד; שאר הפרוסות = דחיפה רק על 'תדחוף'
 
 **`archive/GO-LIVE.md`**
 - 2 דרכים להדלקת הדגל: (א) preview-channel לבדיקה מול (ב) הלייב-הראשי להשקה — החלטה כשנגיע
@@ -220,10 +134,25 @@
 - iOS: מפתח APNS + Push capability vs להחליט אנדרואיד-first
 - מפתח-FX (מטבע) + i18n ערבית/אנגלית — אופציונלי
 
+**`archive/LAUNCH-MICRO-BREAKDOWN.md`**
+- 🛑 העוזר-AI נשאר פעיל (23/6) · ANTHROPIC_API_KEY בקונסול
+- 🛑 חנות: חשבון Google Play · נכסי-ליסטינג · privacy-URL · סיבוב מפתחות-R2 שנחשפו
+- 🛑 הדלקות-דגלים prod (USE_FIREBASE_BACKEND · USER_SYSTEM · CATALOG_SOURCE=v2 · useServerCatalog)
+- 🛑 GO-LIVE קטלוג · הדלקת STUDIO_DART_DEFINES (repo-var) · הרצת clean-two-links
+
 **`archive/LAUNCH-PLAN.md`**
 - iOS גם או Android+web מספיק ל-v1?
 - סליקה בתוך-האפליקציה — אופציונלי ל-v1
 - 3 שאלות מכריעות: התחלת closed-test? יש חשבונות Google/Apple? iOS או לא?
+
+**`archive/LAUNCH-TASKS-MICRO.md`**
+- 🛑 B1 החלטה לכל ~35 בקרוב + ~60 הגדרות: לסיים או להסתיר
+- 🛑 D1 בחירת ספק-סליקה ישראלי (Tranzila/Cardcom/Meshulam/Grow)
+- 🛑 חוסם פתוח: תשלום — v1 בלי-סליקה?
+- 🛑 B4 מקצועות: לבנות חשמלאי/שיפוצים או להסתיר
+
+**`archive/LAUNCH-deploy.md`**
+- החלטה מוצרית: buildsmart-il.com → האפליקציה החדשה (Flutter)
 
 **`archive/LAUNCH-server-deploy.md`**
 - 🛑 את/הבעלים: Blaze+billing · App Check · R2-secrets · אימות-מכשיר (ה-creds בחשבון/secrets שלך)
@@ -231,8 +160,41 @@
 **`archive/MANAGER-MASTER-PLAN.md`**
 - 🛑 אישור-בעלים פר-מודול ל-GA (rollout מדורג בטא→GA, default OFF עד אישור)
 
+**`archive/MAOR-REUSE-MAP.md`**
+- 🛑 מוקפא עד שהבעלים יסיים את מערכת-מאור (סטטוס 27/7: הופעל)
+- 🛑 בחירת חבילות-ורטיקל
+
+**`archive/MASTER-giant-system-order.md`**
+- תיקוני-בעלים: גולמי-נקי כבסיס · שני ה-Studioים · האשף=הסטודיו (מורחב 27/7, אושר צא-לדרך מול הדמייה חיה data/wizard-mockup.html)
+- מחוץ-לתוכנית (בעלים/נפרד): Android-Play (כשל קיים-מראש) · סיבוב-R2 · keystore · iOS-pipeline · הדלקות-launch
+
 **`archive/METHOD-screen-button-knowledge-map.md`**
 - הוכחת-פורמט (מסך-בית-קבלן) לפני קנה-מידה → אישור-בעלים ('מודדים פעמיים, חותכים פעם אחת')
+
+**`archive/PLAN-closeout.md`**
+- החלטת server-ready swap (לפני-שלב-ב, אם רוצים swap נקי)
+- השקה = חשבונות Apple/Google (אחרון · תלוי-חשבונות)
+
+**`archive/PLAN-contractor-completion.md`**
+- T8 'בקרוב תשאיר' — החלטת-משתמש (מחלקות עם 0 מוצרים)
+- פרסונת-עובד = מסך-מלא ולא תוכן-בתוך-דיאל (סגנון-חדש נדחה ע״י המשתמש)
+- T3 לקיחה — אישור-משתמש התקבל
+- מנהל = מדולג (תוכנית-נפרדת PLAN-manager-completion)
+
+**`archive/PLAN-giant-system-master.md`**
+- מנהל-על מקים חברה-חדשה מהאשף, בלי קוד (הדלקות-בעלים)
+
+**`archive/PLAN-manager-completion.md`**
+- הגדרת-המשתמש (2026-06-04): לוח-מנהל = מסך חדש מלא כמו לוח-קבלן, לא עלי-dial
+
+**`archive/PLAN-verticals-and-toggles.md`**
+- 🛑 בחירת חבילות-הורטיקל לבנייה-חכמה (V4.2: ספק-חומרי-בניין/אינסטלציה/חשמל/כלים/קרמיקה/קבלן-כללי)
+
+**`archive/POLISH-BRIEF.md`**
+- 🛑 token חסר → הצע ב-POLISH_LOG (needs-approval), אל תמציא ערך
+
+**`archive/SERVER-KICKOFF.md`**
+- דברי-console לבעלים: Blaze billing (מכסת-SMS, כעת 10/יום) · App Check register (S0.5) · Deploy Security Rules (אחרי S5)
 
 **`archive/SPEC-A4-A6-order-ownership.md`**
 - 🛑 [את] בקונסול: לרשום iOS+Android ב-Firebase (buildsmart-b0b78) → google-services.json + GoogleService-Info.plist
@@ -240,6 +202,11 @@
 **`archive/SPEC-ai-assistant.md`**
 - הבעלים אישר להשאיר פעיל (23/6, end-to-end חי)
 - סטייה מהמקור: מודל Haiku (עלות) במקום Opus שהוצע 14/6 — אפשר להוסיף Opus ל-allowlist אם נדרש מוח חזק יותר
+
+**`archive/SPEC-catalog-to-server-MICRO.md`**
+- פתוח לפני C1: אילו 20 SKUs לפרוסה
+- פתוח: יעד-זמן ל-perf (C2.5) — מה נחשב מהיר-מספיק
+- פתוח: מודל-חנות (C3) — חנויות ידנית-על-ידי-הבעלים או onboarding-עצמי לכל חנות
 
 **`archive/SPEC-ring-dive-handoff.md`**
 - החלטת-בעלים (6/7): מסלול שני-שלבים
@@ -254,6 +221,14 @@
 - האם שלב-3 (מקשי-אותיות-מלאים) נדרש או ששלב-2 מספיק
 - ערבית/אנגלית למקשים — תלוי השלמת-i18n
 - האם לסגור stub-קול-בצ׳אט כחלק משלב-1 (זול)
+
+**`archive/SPEC-user-system-MICRO.md`**
+- הוכרע 14.7: הרשמה = הכל באישור-admin — כל משתמש חדש status=pending → admin→active (מוסיף U1.5+U2.4)
+- הוכרע 14.7: אורח רואה קטלוג · הזמנה+פרופיל דורשים הרשמה (מוסיף U2.5)
+- הוכרע 14.7: בעלות-חנות = בעל-יחיד לכל חנות (storeUid אחד, בלי מודל-צוות)
+
+**`archive/TASKS-to-full.md`**
+- T7 (דרישת-משתמש 07-06): 'אותו מסך' = אותו widget+הודעות-משותפות, לא אותה גישה (standalone, אין מעבר-לוח)
 
 **`archive/V2-ROADMAP-visual-ai.md`**
 - #5 עוזר-AI יצא-מהפארק — נבנה, הבעלים אישר להשאיר-פעיל (23/6)
@@ -298,88 +273,32 @@
 - 🛑 backlog-בעלים מוחלט (A1 data-loss עשה-קודם, A3 POD fake-success, A2 HR, A4 DST) קודם ל-monster
 - 🛑 preview על URL אמיתי הוא ה-make-or-break artifact שיגרום לבעלים לומר זה-זה
 
+**`reference/01-design-system.md`**
+- screen__bg (רקע-אמבטיה חד + כרטיסי frosted-glass) = net-new owner-specified (spec.json FEAT-bathroom-bg)
+
+**`reference/17-security-service-boot.md`**
+- הערה-מקור 21666: 'אבטחה אמיתית חיה בשרת — RBAC/audit/2FA כאן הם הדמיה'
+
+**`reference/18-legacy-knowledge-index.md`**
+- ADR-001 owner-quote verbatim: 'אף אחד מהם לא פותח חלון. נקודה.'
+- IMPLEMENTATION_PROTOCOL נדחה (3 ריברטים INSP-0016/17/22/23/24 → BS-dial drill)
+
+**`reference/20-infra-build-tooling-protocol.md`**
+- go_router הוסר (P-4 07-06)
+- שני bundle-IDs נפרדים (Preact com.buildsmart.app vs Flutter com.buildsmart.buildsmart)
+
+**`reference/21-protocols-spine-gates-enforcement.md`**
+- 🛑 פרוטוקול-R בוטל (הוראת-משתמש 2026-06)
+- 🛑 שכבת-הכללים-הממוספרת בוטלה (הוראת-משתמש) — סגנון-הבנייה היחיד = האפליקציה הסופית עצמה
+- 🛑 A10: manager override על צ׳אט — טרם-הוכרע
+
+**`reference/22-protocols-agents-process-specialized.md`**
+- קונסנזוס = סימולציית-6-פרסונות (לא הצבעה), GO סופי מהמשתמש · המשתמש הוא ה-relay בין-סוכנים
+
+**`reference/24-multiagent-governance.md`**
+- 🛑 GO סופי מהמשתמש · אישור-push מילולי · המשתמש=סמכות-עליונה
+
 ## 🐛 תקלות — כל הבאגים/כשלים בכל הידע  (239)
-
-**`01-design-system.md`**
-- פער-מותג מתועד: אב-טיפוס teal #1f6f6b; Flutter עבר ל-orange #FF7A18
-- Flutter חסר tokens amber/ok/danger/line · חסר font Rubik · חסר glass-aesthetic (frosted-over-photo)
-- אין Category D (דילוג במקור)
-
-**`02-shell-and-screens.md`**
-- אי-התאמה תווית↔יעד: טאב רכש→cart · טאב הגדרות→profile
-- drift: README של app_flutter מתאר Phase-0/5-FAB מיושן; הקוד = 4-tab בוגר
-- שורש-בלבול קטלוג/מחלקות: comment בקוד כתוב קטלוג אבל label המוצג = מחלקות
-
-**`03-data-product-trees.md`**
-- 🐛 drift: ספירה קודמת 1,337 (Lipskey 255) הייתה שגויה — הוכנסה בטעות בסשן קודם
-- חלק מהכרטיסים ב-kSmartProducts עדיין נושאים מותג-גנרי סטנדרט/כלכלי/פרימיום ללא-SKU (gap 307/365 brands-עם-SKU)
-
-**`04-data-catalog-variants-tools.md`**
-- Preact: SIZES/STOCK_DEMO/ACC_TYPES/ACC_GROUPS/ACC_PRICE_BOOK/SPECS/CAT_DESC/DIAGRAMS/ICN לא אוטו-מחולצים (חלקם inline); brands[] נגזם לחלוטין (grep brand → 0)
-
-**`05-data-orders-projects-ranks.md`**
-- 🐛 divergence: UI_ARCHITECTURE.md mockup מתאר סולם-דרגות שונה (4 דרגות אחרות) + 8 הישגים — שניהם לא-תואמים את RANKS+6-הישגים האמיתיים; המקור index.html קובע
-
-**`06-logic-settings-projects.md`**
-- הגדרות-פרופיל = label שחיבר הבעלים (לא-verbatim; חריג מתועד INSP-0019)
-- drift: data/settings_tree.dart הוסר 07-06 — ההגדרות נייטיב בלבד
-
-**`08-logic-product-cart-checkout.md`**
-- 🐛 Flutter checkout אישור-סופי = mock (toast הזמנה-אושרה, לא יוצר הזמנה-אמיתית — אין backend)
-
-**`10-engine-pricing-stores-sysorders.md`**
-- Flutter: brandPrice ברוב-המוצרים = 0 (ממתין לנתוני-ספק — חוסם-launch)
-- Flutter: SYS_ORDERS/sync-חוצה-פרסונות/SUPPLIER_STORES-המלא — אין (אין backend; הזמנות=mock)
-- Preact: computeCheckout/SYS_ORDERS/syncOrderToSystem/split-shipment/VAT לא-הומרו (פרסונות placeholder)
-
-**`11-manager-dashboard-selftest.md`**
-- legacy-map.md ציין 176 כפתורים — מיושן (אומת 350 {fn:)
-- snapshot nice-volta (27 קבצים) טען 'אין test_harness' — שגוי, ה-self-test עשיר-ביותר
-
-**`12-persona-manager-store.md`**
-- Flutter: דשבורדי מנהל/חנות-ספק/שליח/עובד המלאים (md-*/picking-6-states/courier-tracking/worker-state-machine) לא-הומרו — sections-ב-BS-dial מציגים toast
-- Flutter 'חנות' = חנות-הקבלן (קניות/הזמנות/שירותים), לא פורטל-הספק
-- Preact: manager(16)/courier(12)/worker(12)/home(11) views מינימליים/placeholder
-
-**`14-b2b-supply-chain.md`**
-- 🐛 OCR/gov-XML = הדמיה בלבד
-- 🐛 Flutter store-items (5 מתוך 8) = demo-stubs (sheet/toast בסיסי), לא ה-flows המלאים
-
-**`17-security-service-boot.md`**
-- Preact: I+J ported כ-leaves אבל הפונקציונליות = toast/drill בלבד (RBAC-matrix/OTP/BOT_KB/shake לא רצים)
-- Flutter: אבטחה — אין RBAC-matrix/session-lock/audit מלא; menu-dial הוסר 07-06
-- Flutter: שירות — רק chatbot כ-thread (auto-reply); מחשבונים/סיור לא נכתבו
-- Flutter-web מבטל service-workers (getRegistrations→unregister) → אין PWA/offline (בניגוד ל-Workbox של Preact)
-
-**`18-legacy-knowledge-index.md`**
-- SYSTEM_MANAGER — מספרי-כותרת מומצאים (1,247 מוצרים/156 קבלנים/₪847,500 מול 202 מוצרים/4 הזמנות-אמת)
-- SYSTEM_MANAGER — REST API /api/manager/* לא-קיים (אין backend · standalone)
-- legacy-map — ספירות-מיושנות (BUTTON_REGISTRY=176 מול 350 · store='stub' מול 302ש')
-- spec.json — snapshot-מוקדם (2026-05-21) · statuses 'missing'/'stub' מיושנים
-- UI_ARCHITECTURE profile = mockup-אידיאלי (סולם-דרגות/8-הישגים שונים מ-RANKS האמיתי)
-
-**`19-feature-source-matrix.md`**
-- 🐛 drift: ה-KB אומר tab0=קטלוג/teal — הקוד אומר tab0=מחלקות/כתום #FF7A18
-- checkout Flutter: VAT-18 אמיתי אבל אישור=mock
-- hubs (finance/site/AI) = menu-toast, לא flows · תגמולים(H) נעדר · B2B store-items=demo-stubs
-
-**`20-infra-build-tooling-protocol.md`**
-- Capacitor: @capacitor/ios+android טרם-הותקנו, npx cap add לא רץ → native לא-פעיל
-- typecheck: npx tsc -b --noEmit → 2 שגיאות ידועות (vite.config.ts + worker.tsx); build של Vite נקי (INSP-0015, MINOR-פתוח)
-- iOS Info.plist boilerplate ללא NSCameraUsageDescription/NSMicrophoneUsageDescription → חוסם-launch ל-iOS
-- AndroidManifest ללא הרשאות מותאמות (plugins ממזגים CAMERA/MIC ב-build)
-
-**`21-protocols-spine-gates-enforcement.md`**
-- 🐛 3 ריברטים מתועדים — קוד שעבר typecheck+tests אך הפר כלל-עיצוב ב-runtime
-
-**`22-protocols-agents-process-specialized.md`**
-- פרוטוקול-R בוטל (הוראת-משתמש 2026-06) — R1–R9 = תיעוד-היסטורי בלבד, לא חוק פעיל
-
-**`23-flutter-architecture-state-cardflow.md`**
-- אין autoDispose — providers חיים-תמיד → חוב-ארכיטקטוני P1 (memory)
-- pricing חסום (brandPrice=0) · ratings/AI/push/telephony חסומים
-- iOS NO-GO (Info.plist camera/mic usage-strings + signing-team)
-- Android NO-GO (release-keystore + Play-account)
 
 **`AGENT-SOURCES.md`**
 - 🐛 נתקענו פעמיים: (1) golden-מסך-1 לא-נמצא · (2) smart_home_screen.dart 833 מול 955 שורות
@@ -404,135 +323,21 @@
 - IntelRouteObserver מת (routes לא-שמיים → screen-view לא-נורה)
 - מוטר-in-place רגיש-לסדר ב-_autoAddCompliance (הזרקת PRV/vessel/TMTV/dielectric)
 
-**`DIRECTIVE-U3-store-ownership.md`**
-- מודל Store חסר ownerUid (היום id/name/area/logo/contact בלבד)
-- setRole לא-מטביע storeId עדיין (VALID_ROLES כבר כולל 'store')
-
-**`DIRECTIVE-arm-wizard-preview.md`**
-- wizard-preview.yml (472e7190) נבנה על demo לפני-שהתיקון-הגיע; run#1 success אבל עדיין --dart-define=APP_PROFILE=demo בראש-הענף (4f50c40d), אף קומיט מאוחר לא נגע
-
 **`DIRECTIVE-catalog-replace.md`**
 - קריסה: דאטה לא-תואם-סכימה → פרסר קורס / מנועים מקבלים שדות-חסרים
 - 🔴 ריקון-מנועים (החמור יותר): אם SKUs-חדשים ≠ ישנים → 890 VerifiedSpecs+recipes+SmartProduct מתייתמים → מנוע-התאימות מחזיר ריק (לא קריסה אבל הרסני)
-
-**`DIRECTIVE-clean-finish.md`**
-- 🔴 פיננסים-4 מזויף-כאמת ב-finance_hub_sheets.dart: ROI :1095 (total*1.42 → תמיד 42%) · קבלני-משנה :632/:669 (kSubcontractors const) · מדד-בנייה :488/:490 (kBuildIndex const) · חשבונית (kInvoiceTotal)
-
-**`DIRECTIVE-deepen-toggles.md`**
-- 🐛 פער-1 עומק: האשף חושף ~13 טוגלים גסים ברמת-מודול (מאור חושף עשרות דקים)
-- 🐛 פער-2 רוחב: הקונפיג משנה רק את לוח-הקבלן, שאר האפליקציה מתעלמת
-
-**`DIRECTIVE-fake-data-sweep.md`**
-- ★ manager_dashboard 4 אריחי-KPI (📦54/🧰148/✅202/🏪3-3) const דרך kManagerStores/kManagerCatalogCategories בלי ענף-בקאנד
-- ★ treemap-קטגוריות+totalProducts=202 מסומן LIVE אך קורא const
-- ★ מסגרת-אשראי לקוח = hash-של-שם (contractorCredit 30k-120k)
-- ★ manager_copilot מזין ל-Claude const כ-נתוני-אמת
-- ★ store_screen מחזיר [...חי,...5 הזמנות-דמו] ומזהם מונה-פתוחות; אריח ההזמנות preview/badge קבוע; צ'יפ 3 הצעות-ספקים const
-- ★ ROI תמיד 42% · ניצול-משנה 66/62/69/34 · מדד-בנייה · פיצול-חשבונית — כולם const; approvalQueueProvider עוקף ריפו-קיים
-- smart_home פס-התקדמות 0.38 קבוע ובלי onTap; rewards לוח-מובילים/קוד const; שיתוף-קוד מקפיץ הועתק בלי Clipboard.setData
-- suppliers_screen subtitle 66-מוצרים קבוע מול kLipskeyCatalog.length≈923 (פי-14)
-
-**`DIRECTIVE-giant-phase2-features.md`**
-- 🐛 ספרת-ביקורת ח"פ (validBusinessId) — מתוקן כתיקון-באג (לא טוגל)
-
-**`DIRECTIVE-manager-console-live.md`**
-- 4/5 KPI hardcoded compile-consts: 🏪 חנויות תמיד 3/3 (kManagerStores :57-76), 📦/🧰=148/✅=202 (kManagerCatalogCategories :158-174)
-- רק 🚚 הזמנות-פתוחות חי (analytics.openOrders)
-- _MetricTile/_PipelineRow חסרי onTap
-- _LivePill מציג טקסט קבוע חי
-- קו-פיילוט נוחת על דורש-חיבור-לשרת (claudeGatewayProvider null בלי CLAUDE_AI)
-- docstring מודה: catalog/accessories/available/stores are static-by-design ports (:426-430)
-
-**`DIRECTIVE-maor-full-integration.md`**
-- 🐛 workflow-kernel בנוי אך לא-מחובר (#2, רק טסט, אין צרכן-חי)
-- credit בלי-יומן · לוח DST-core בלי-חגים (#12) · CSV ייבוא בלי injection-guard-לייצוא (C3) · סבילות-קלקול בלי migrate()/quarantine (C4)
-
-**`DIRECTIVE-screen-management-in-wizard.md`**
-- 🐛 הטריגר-על-המסך (נווט⇄ערוך / logo-long-press) אין לו מיקום אוניברסלי טוב (מסכי ניהול-אתר בלי לוגו-קבוע)
-
-**`DIRECTIVE-wizard-is-the-studio.md`**
-- הפרסונה-הראשית (קבלן) חסרה סקציה — החור שהבעלים תפס
-- edit_handle (step 9) לוכד כל tap כעריכה → tap-ניווט הופך לעריכה
-- studio_screen = 4-פאנלים בלי preview חי → הבעלים תקוע במסך-הניהול, לא מגיע למסך-קבלן
-- באג 'תיבה ריקה' (חיפוש כתנאי-הצגה במקום מסנן)
-- edit תמיד-דלוק → אי-אפשר לפתוח שום sheet
 
 **`KNOWLEDGE_AUDIT.md`**
 - 🐛 37/37 מושלם שהוכרז קודם היה מוקדם — סבב-בדיקה-קשה חשף go_router/תאריכים/ספירות
 - ספירת 1,337 שנכתבה קודם = טעות (תוקן → 1,877)
 
-**`LAUNCH-MICRO-BREAKDOWN.md`**
-- P1 באג-סנכרון: חוק create-הזמנה גודר על role 'contractor' שלא-מוקצה → permission-denied שקט
-- S2 צ׳אט לא-מסתנכרן: participantUids לא-מאוכלס + אינדקס על participants במקום participantUids
-- Play-AAB אדום: 13 טסטים (product_journey ×10 · widget_test ×2 · color_token_ratchet ×1)
-- רגרסיית meters ב-_size_norm.dart שוברת שומרי-טוקנייזר (8e3fbcb6)
-- לוח-בקרה מנהל: 4/5 KPI קבועי-קומפילציה גם כשהבקאנד חי (orders_engine.dart:682-683)
-- 13★ מזויף-כאמת שעוקף את ריפו-Firebase גם כשהבקאנד חי
-- פיננסים-4 (ROI-42%/משנה/מדד/חשבונית) — bare-fake, דולג 4 פעמים
-
-**`LAUNCH-TASKS-MICRO.md`**
-- השרת מחובר ומוכח רק ל-admin; צ׳אט שבור גם ל-admin (uid)
-- שורש: הקליינט כותב שם/תפקיד במקום auth.uid ומאזין לכל אוסף בלי where
-- firebase_options.dart רק ל-web — נייטיב זורק שגיאה שנתפסת → הטלפון נופל לדמו ולא מתחבר לשרת
-- checkout אישור-סופי = mock (toast, לא יוצר הזמנה)
-- רוב ה-חכמה/חומרה = placeholders
-
-**`MAOR-REUSE-MAP.md`**
-- 🐛 validBusinessId בודק רק 9-ספרות, לא ספרת-ביקורת → ח"פ-שגוי עובר (נצחון-מהיר #1)
-- 🐛 courier_clock כותב ISO ב-UTC (תיקון דרך ליבת-לוח-ישראלי #12)
-
-**`MASTER-giant-system-order.md`**
-- 🔴 stubs קריאה-בלבד בטאב-ניהול: קטגוריות:4329 · הגדרות:4360 · עץ-מוצרים:4399 · מותגים+מחירים:4437 — אפס-עריכה
-- כפילויות: קטגוריות×2 · מוצרים×3 · מותגים×2 · מחירים×4 · הגדרות×3 · Studio×2 · תפקידים×3
-- פירוק שטחי: רק 13 מודולים גסים (kOrgModules) + ~8 טוגלים אד-הוק · אין registry קנוני; מודול-קבלן חסר מ-org_modules
-
 **`MILESTONE-LOG.md`**
 - פער 4.6% בחוליות = אביזרי-נוי נטולי-מידה (gaps)
-
-**`PLAN-buildsmart-clean-master.md`**
-- בעיית-מידע-מזויף: ~24 אתרי מזויף-כאמת ממופים (file:line) מסריקת-6-עדשות בלוח-המנהל
-
-**`PLAN-closeout.md`**
-- תקלת-deploy — /buildsmart/flutter/ הציבורי הציג גרסה-ישנה (טורקיז); gh-pages נדחף-מחדש (forced) → דרוש אימות-חי v6.16
-- ~43 סטאבי-'בבנייה' (שיחות/מצלמה/הגדרות/חנות/קטלוג) — נסגרו 06-09 → 0
-- pull-to-refresh + 'סוג עוסק' + leftover-קטלוג
-
-**`PLAN-contractor-completion.md`**
-- brandPrice=0 ברוב המוצרים (T2 היה חסום — אין-data מחירי-חנות; נפתר ע״י T0/kPlanTypes)
-- RenderFlex overflow 3.6px ב-_OrderSheet חסם deploy (תוקן e64a6e8 ב-SingleChildScrollView)
-- gh-pages ציבורי הציג גרסה ישנה — deploy תקוע/SW-cache (לא אומת חי)
-- באגי-HIGH H2 (persistence משימות-עובד) + H3 (פיוס-total) — נסגרו
-
-**`POLISH-BRIEF.md`**
-- 🐛 go_router ^14.6 dependency-מת (0 שימושים) — הוסר
-- 🐛 1,187 Color(0x קשיחים ב-lib (גדל 1,028→1,115→1,187, פיצ'רים מוסיפים מהר-יותר-מהטוקניזציה)
-- 🐛 רק 3 קבצים ב-lib עם Semantics — תוקן
 
 **`README.md`**
 - doc-vs-code drift: KB אמר tab0=קטלוג/מותג-teal; הקוד = tab0=מחלקות/כתום #FF7A18
 - טעות קודמת: 1,337/Lipskey-255 → תוקן שורה-שורה ל-1,877 (935+772+170)
 - divergences: UI_ARCH profile-mockup · SYSTEM_MANAGER מספרים/REST-API · ROLE_DRAWER worker-names — מומצאים מול המקור
-
-**`SERVER-KICKOFF.md`**
-- ❌ S2 אבד (לא נדחף) — היה code-complete אך נפל עם סביבה שנגמרו-לה-הטוקנים → בנה מחדש מ-S2 (⚠️ RESUME POINT 06-09; לפי VERIFIED-OPEN-WORK כל S0–S9 בנוי+פרוס)
-
-**`SPEC-architecture-SDD.md`**
-- 🐛 RBAC מפוזר → SPEC-user-system U1
-- admin/5555 demo-login להסרה
-- backend דלוק רק ב-APK (web=demo) — טרם הוכח תחת-עומס
-- finance/site tools של הקבלן = proto
-
-**`SPEC-catalog-to-server-MICRO.md`**
-- מסחרי מזויף: אין מחיר-אמת (מנוחש מ-categoryHe ב-price_estimate.dart/priceFor) · אין מלאי · חנויות-דמו
-- שדה barcode לא קיים (_runBarcode מחפש לפי sku)
-
-**`SPEC-server-connect.md`**
-- נקודת-תכן קריטית: ה-interface סינכרוני (List<Order> all() — לא Future) מול Firestore async+real-time
-- בלי Security Rules ה-DB פתוח-לכולם (הפרדת-התפקידים שאומתה ב-client מזויפת)
-
-**`SPEC-user-system-MICRO.md`**
-- שכבת-החנויות חצי: ההשוואה קוראת מלאי-שזרע-האדמין אבל חנות לא יכולה לנהל את המלאי שלה
-- מחיקת-חשבון (U5.2) = חוסם-iOS של Apple
 
 **`VERIFIED-OPEN-WORK-2026-07-29.md`**
 - שילוב-מאור השארית ~40%: workflow_engine מיובא רק בטסט (אפס צרכן ב-lib) · JourneyTimeline כבוי (kIntelLive const-false, _resolveCustomerKey→null) · מספור-מסמכים-רץ חסר (receiptSeq) · credit חסר cred.log+tiers
@@ -562,24 +367,89 @@
 - 🐛 RBAC מפוזר (קריאות-role ישירות מפוזרות → לרכז דרך bsRoleProvider)
 - 3 מוקשים מאומתים-בקוד: roleProvider כבר-קיים (סטודיו תלוי-מחרוזת) · requirePerm כבר-קיים · setRole כבר-מאובטח
 
+**`archive/DIRECTIVE-U3-store-ownership.md`**
+- מודל Store חסר ownerUid (היום id/name/area/logo/contact בלבד)
+- setRole לא-מטביע storeId עדיין (VALID_ROLES כבר כולל 'store')
+
+**`archive/DIRECTIVE-arm-wizard-preview.md`**
+- wizard-preview.yml (472e7190) נבנה על demo לפני-שהתיקון-הגיע; run#1 success אבל עדיין --dart-define=APP_PROFILE=demo בראש-הענף (4f50c40d), אף קומיט מאוחר לא נגע
+
+**`archive/DIRECTIVE-clean-finish.md`**
+- 🔴 פיננסים-4 מזויף-כאמת ב-finance_hub_sheets.dart: ROI :1095 (total*1.42 → תמיד 42%) · קבלני-משנה :632/:669 (kSubcontractors const) · מדד-בנייה :488/:490 (kBuildIndex const) · חשבונית (kInvoiceTotal)
+
 **`archive/DIRECTIVE-close-web-for-launch.md`**
 - אין app_flutter/web/ מותאם → האתר על אייקון+manifest ברירת-המחדל של Flutter (כחול) — הפער המרכזי
+
+**`archive/DIRECTIVE-deepen-toggles.md`**
+- 🐛 פער-1 עומק: האשף חושף ~13 טוגלים גסים ברמת-מודול (מאור חושף עשרות דקים)
+- 🐛 פער-2 רוחב: הקונפיג משנה רק את לוח-הקבלן, שאר האפליקציה מתעלמת
+
+**`archive/DIRECTIVE-fake-data-sweep.md`**
+- ★ manager_dashboard 4 אריחי-KPI (📦54/🧰148/✅202/🏪3-3) const דרך kManagerStores/kManagerCatalogCategories בלי ענף-בקאנד
+- ★ treemap-קטגוריות+totalProducts=202 מסומן LIVE אך קורא const
+- ★ מסגרת-אשראי לקוח = hash-של-שם (contractorCredit 30k-120k)
+- ★ manager_copilot מזין ל-Claude const כ-נתוני-אמת
+- ★ store_screen מחזיר [...חי,...5 הזמנות-דמו] ומזהם מונה-פתוחות; אריח ההזמנות preview/badge קבוע; צ'יפ 3 הצעות-ספקים const
+- ★ ROI תמיד 42% · ניצול-משנה 66/62/69/34 · מדד-בנייה · פיצול-חשבונית — כולם const; approvalQueueProvider עוקף ריפו-קיים
+- smart_home פס-התקדמות 0.38 קבוע ובלי onTap; rewards לוח-מובילים/קוד const; שיתוף-קוד מקפיץ הועתק בלי Clipboard.setData
+- suppliers_screen subtitle 66-מוצרים קבוע מול kLipskeyCatalog.length≈923 (פי-14)
+
+**`archive/DIRECTIVE-giant-phase2-features.md`**
+- 🐛 ספרת-ביקורת ח"פ (validBusinessId) — מתוקן כתיקון-באג (לא טוגל)
 
 **`archive/DIRECTIVE-huliot-images.md`**
 - הפניות smart_tree שבורות (לבדוק אילו מגובות עכשיו כשיש מק״טים אמיתיים)
 - אי-התאמות שדות scrape↔app (שדות-סותרים/חוסרים)
 
+**`archive/DIRECTIVE-manager-console-live.md`**
+- 4/5 KPI hardcoded compile-consts: 🏪 חנויות תמיד 3/3 (kManagerStores :57-76), 📦/🧰=148/✅=202 (kManagerCatalogCategories :158-174)
+- רק 🚚 הזמנות-פתוחות חי (analytics.openOrders)
+- _MetricTile/_PipelineRow חסרי onTap
+- _LivePill מציג טקסט קבוע חי
+- קו-פיילוט נוחת על דורש-חיבור-לשרת (claudeGatewayProvider null בלי CLAUDE_AI)
+- docstring מודה: catalog/accessories/available/stores are static-by-design ports (:426-430)
+
+**`archive/DIRECTIVE-maor-full-integration.md`**
+- 🐛 workflow-kernel בנוי אך לא-מחובר (#2, רק טסט, אין צרכן-חי)
+- credit בלי-יומן · לוח DST-core בלי-חגים (#12) · CSV ייבוא בלי injection-guard-לייצוא (C3) · סבילות-קלקול בלי migrate()/quarantine (C4)
+
 **`archive/DIRECTIVE-order-confirmation-email.md`**
 - 🐛 אין שום שליחת-מייל בשרת היום (grep nodemailer/sendgrid/resend = ריק) → צריך לבנות
+
+**`archive/DIRECTIVE-screen-management-in-wizard.md`**
+- 🐛 הטריגר-על-המסך (נווט⇄ערוך / logo-long-press) אין לו מיקום אוניברסלי טוב (מסכי ניהול-אתר בלי לוגו-קבוע)
+
+**`archive/DIRECTIVE-wizard-is-the-studio.md`**
+- הפרסונה-הראשית (קבלן) חסרה סקציה — החור שהבעלים תפס
+- edit_handle (step 9) לוכד כל tap כעריכה → tap-ניווט הופך לעריכה
+- studio_screen = 4-פאנלים בלי preview חי → הבעלים תקוע במסך-הניהול, לא מגיע למסך-קבלן
+- באג 'תיבה ריקה' (חיפוש כתנאי-הצגה במקום מסנן)
+- edit תמיד-דלוק → אי-אפשר לפתוח שום sheet
 
 **`archive/KEYBOARD-MASTER-PLAN.md`**
 - קול-בצ׳אט = stub (_showVoiceUnavailable) — לחבר ל-VoiceService
 - לוח-ספרות מאובטח לא-קיים — בנייה-חדשה היחידה מאפס
 
+**`archive/LAUNCH-MICRO-BREAKDOWN.md`**
+- P1 באג-סנכרון: חוק create-הזמנה גודר על role 'contractor' שלא-מוקצה → permission-denied שקט
+- S2 צ׳אט לא-מסתנכרן: participantUids לא-מאוכלס + אינדקס על participants במקום participantUids
+- Play-AAB אדום: 13 טסטים (product_journey ×10 · widget_test ×2 · color_token_ratchet ×1)
+- רגרסיית meters ב-_size_norm.dart שוברת שומרי-טוקנייזר (8e3fbcb6)
+- לוח-בקרה מנהל: 4/5 KPI קבועי-קומפילציה גם כשהבקאנד חי (orders_engine.dart:682-683)
+- 13★ מזויף-כאמת שעוקף את ריפו-Firebase גם כשהבקאנד חי
+- פיננסים-4 (ROI-42%/משנה/מדד/חשבונית) — bare-fake, דולג 4 פעמים
+
 **`archive/LAUNCH-PLAN.md`**
 - אייקון = הכחול-של-Flutter (צריך כתום + splash + bundle-id סופי)
 - keystore: כרגע debug-signed, לא-קביל ל-Play
 - מפתחות-R2 נחשפו (צריך סיבוב)
+
+**`archive/LAUNCH-TASKS-MICRO.md`**
+- השרת מחובר ומוכח רק ל-admin; צ׳אט שבור גם ל-admin (uid)
+- שורש: הקליינט כותב שם/תפקיד במקום auth.uid ומאזין לכל אוסף בלי where
+- firebase_options.dart רק ל-web — נייטיב זורק שגיאה שנתפסת → הטלפון נופל לדמו ולא מתחבר לשרת
+- checkout אישור-סופי = mock (toast, לא יוצר הזמנה)
+- רוב ה-חכמה/חומרה = placeholders
 
 **`archive/LAUNCH-server-deploy.md`**
 - 🐛 עד שה-rules לא-פרוסות → ה-DB ב-deny-all (האתר ריק על web)
@@ -594,13 +464,65 @@
 - 🌳 עץ-המוצרים סיכום-בלבד — אין עריכת-אביזרים
 - אכיפת-RBAC בשרת חלקית (owner-claim מאומת ca3261e, manager-claim לא)
 
+**`archive/MAOR-REUSE-MAP.md`**
+- 🐛 validBusinessId בודק רק 9-ספרות, לא ספרת-ביקורת → ח"פ-שגוי עובר (נצחון-מהיר #1)
+- 🐛 courier_clock כותב ISO ב-UTC (תיקון דרך ליבת-לוח-ישראלי #12)
+
+**`archive/MASTER-giant-system-order.md`**
+- 🔴 stubs קריאה-בלבד בטאב-ניהול: קטגוריות:4329 · הגדרות:4360 · עץ-מוצרים:4399 · מותגים+מחירים:4437 — אפס-עריכה
+- כפילויות: קטגוריות×2 · מוצרים×3 · מותגים×2 · מחירים×4 · הגדרות×3 · Studio×2 · תפקידים×3
+- פירוק שטחי: רק 13 מודולים גסים (kOrgModules) + ~8 טוגלים אד-הוק · אין registry קנוני; מודול-קבלן חסר מ-org_modules
+
+**`archive/PLAN-buildsmart-clean-master.md`**
+- בעיית-מידע-מזויף: ~24 אתרי מזויף-כאמת ממופים (file:line) מסריקת-6-עדשות בלוח-המנהל
+
+**`archive/PLAN-closeout.md`**
+- תקלת-deploy — /buildsmart/flutter/ הציבורי הציג גרסה-ישנה (טורקיז); gh-pages נדחף-מחדש (forced) → דרוש אימות-חי v6.16
+- ~43 סטאבי-'בבנייה' (שיחות/מצלמה/הגדרות/חנות/קטלוג) — נסגרו 06-09 → 0
+- pull-to-refresh + 'סוג עוסק' + leftover-קטלוג
+
+**`archive/PLAN-contractor-completion.md`**
+- brandPrice=0 ברוב המוצרים (T2 היה חסום — אין-data מחירי-חנות; נפתר ע״י T0/kPlanTypes)
+- RenderFlex overflow 3.6px ב-_OrderSheet חסם deploy (תוקן e64a6e8 ב-SingleChildScrollView)
+- gh-pages ציבורי הציג גרסה ישנה — deploy תקוע/SW-cache (לא אומת חי)
+- באגי-HIGH H2 (persistence משימות-עובד) + H3 (פיוס-total) — נסגרו
+
+**`archive/POLISH-BRIEF.md`**
+- 🐛 go_router ^14.6 dependency-מת (0 שימושים) — הוסר
+- 🐛 1,187 Color(0x קשיחים ב-lib (גדל 1,028→1,115→1,187, פיצ'רים מוסיפים מהר-יותר-מהטוקניזציה)
+- 🐛 רק 3 קבצים ב-lib עם Semantics — תוקן
+
+**`archive/SERVER-KICKOFF.md`**
+- ❌ S2 אבד (לא נדחף) — היה code-complete אך נפל עם סביבה שנגמרו-לה-הטוקנים → בנה מחדש מ-S2 (⚠️ RESUME POINT 06-09; לפי VERIFIED-OPEN-WORK כל S0–S9 בנוי+פרוס)
+
 **`archive/SPEC-A4-A6-order-ownership.md`**
 - 🐛 הטלפון לא מדבר עם השרת עד קונפיג-נייטיב — firebase_options web-only, throw נתפס בשקט → נופל לדמו (repos מקומיים)
+
+**`archive/SPEC-architecture-SDD.md`**
+- 🐛 RBAC מפוזר → SPEC-user-system U1
+- admin/5555 demo-login להסרה
+- backend דלוק רק ב-APK (web=demo) — טרם הוכח תחת-עומס
+- finance/site tools של הקבלן = proto
+
+**`archive/SPEC-catalog-to-server-MICRO.md`**
+- מסחרי מזויף: אין מחיר-אמת (מנוחש מ-categoryHe ב-price_estimate.dart/priceFor) · אין מלאי · חנויות-דמו
+- שדה barcode לא קיים (_runBarcode מחפש לפי sku)
+
+**`archive/SPEC-server-connect.md`**
+- נקודת-תכן קריטית: ה-interface סינכרוני (List<Order> all() — לא Future) מול Firestore async+real-time
+- בלי Security Rules ה-DB פתוח-לכולם (הפרדת-התפקידים שאומתה ב-client מזויפת)
 
 **`archive/SPEC-smart-keyboard.md`**
 - קול-בצ׳אט = stub (_showVoiceUnavailable, chats_screen)
 - תרגומים כמעט-ריקים (l10n/smart_card_strings.dart לא-מחווט · קול he-IL בלבד)
 - לוח-ספרות-מאובטח לא-קיים (בנייה-חדשה יחידה)
+
+**`archive/SPEC-user-system-MICRO.md`**
+- שכבת-החנויות חצי: ההשוואה קוראת מלאי-שזרע-האדמין אבל חנות לא יכולה לנהל את המלאי שלה
+- מחיקת-חשבון (U5.2) = חוסם-iOS של Apple
+
+**`archive/firebase-web-config.md`**
+- הועתק-מצילום-מסך — אם Firebase.initializeApp נכשל בזמן-ריצה, אמת תו-אחר-תו מול console
 
 **`archive/monster-finder/MONSTER-100-STEP-BUILD-PLAN.md`**
 - 17 מלכודות-הזבל = תסמיני-פיצול (מלכודת-גדל-כפול · נחושת-בציר-צבע · 2 כותבי-recent · היסטוריה-מתה)
@@ -682,75 +604,88 @@
 - card_keyboard OFF בכל build-חי (web-deploy/firebase-hosting לא מעבירים ENABLE_CARD_KEYBOARD) — הדמו לא קיים על שום deploy
 - 0 telemetry ב-129 steps — 7-turns/union-fallback/5xx בלתי-נראים אחרי cut-over
 
-**`firebase-web-config.md`**
-- הועתק-מצילום-מסך — אם Firebase.initializeApp נכשל בזמן-ריצה, אמת תו-אחר-תו מול console
+**`reference/01-design-system.md`**
+- פער-מותג מתועד: אב-טיפוס teal #1f6f6b; Flutter עבר ל-orange #FF7A18
+- Flutter חסר tokens amber/ok/danger/line · חסר font Rubik · חסר glass-aesthetic (frosted-over-photo)
+- אין Category D (דילוג במקור)
+
+**`reference/02-shell-and-screens.md`**
+- אי-התאמה תווית↔יעד: טאב רכש→cart · טאב הגדרות→profile
+- drift: README של app_flutter מתאר Phase-0/5-FAB מיושן; הקוד = 4-tab בוגר
+- שורש-בלבול קטלוג/מחלקות: comment בקוד כתוב קטלוג אבל label המוצג = מחלקות
+
+**`reference/03-data-product-trees.md`**
+- 🐛 drift: ספירה קודמת 1,337 (Lipskey 255) הייתה שגויה — הוכנסה בטעות בסשן קודם
+- חלק מהכרטיסים ב-kSmartProducts עדיין נושאים מותג-גנרי סטנדרט/כלכלי/פרימיום ללא-SKU (gap 307/365 brands-עם-SKU)
+
+**`reference/04-data-catalog-variants-tools.md`**
+- Preact: SIZES/STOCK_DEMO/ACC_TYPES/ACC_GROUPS/ACC_PRICE_BOOK/SPECS/CAT_DESC/DIAGRAMS/ICN לא אוטו-מחולצים (חלקם inline); brands[] נגזם לחלוטין (grep brand → 0)
+
+**`reference/05-data-orders-projects-ranks.md`**
+- 🐛 divergence: UI_ARCHITECTURE.md mockup מתאר סולם-דרגות שונה (4 דרגות אחרות) + 8 הישגים — שניהם לא-תואמים את RANKS+6-הישגים האמיתיים; המקור index.html קובע
+
+**`reference/06-logic-settings-projects.md`**
+- הגדרות-פרופיל = label שחיבר הבעלים (לא-verbatim; חריג מתועד INSP-0019)
+- drift: data/settings_tree.dart הוסר 07-06 — ההגדרות נייטיב בלבד
+
+**`reference/08-logic-product-cart-checkout.md`**
+- 🐛 Flutter checkout אישור-סופי = mock (toast הזמנה-אושרה, לא יוצר הזמנה-אמיתית — אין backend)
+
+**`reference/10-engine-pricing-stores-sysorders.md`**
+- Flutter: brandPrice ברוב-המוצרים = 0 (ממתין לנתוני-ספק — חוסם-launch)
+- Flutter: SYS_ORDERS/sync-חוצה-פרסונות/SUPPLIER_STORES-המלא — אין (אין backend; הזמנות=mock)
+- Preact: computeCheckout/SYS_ORDERS/syncOrderToSystem/split-shipment/VAT לא-הומרו (פרסונות placeholder)
+
+**`reference/11-manager-dashboard-selftest.md`**
+- legacy-map.md ציין 176 כפתורים — מיושן (אומת 350 {fn:)
+- snapshot nice-volta (27 קבצים) טען 'אין test_harness' — שגוי, ה-self-test עשיר-ביותר
+
+**`reference/12-persona-manager-store.md`**
+- Flutter: דשבורדי מנהל/חנות-ספק/שליח/עובד המלאים (md-*/picking-6-states/courier-tracking/worker-state-machine) לא-הומרו — sections-ב-BS-dial מציגים toast
+- Flutter 'חנות' = חנות-הקבלן (קניות/הזמנות/שירותים), לא פורטל-הספק
+- Preact: manager(16)/courier(12)/worker(12)/home(11) views מינימליים/placeholder
+
+**`reference/14-b2b-supply-chain.md`**
+- 🐛 OCR/gov-XML = הדמיה בלבד
+- 🐛 Flutter store-items (5 מתוך 8) = demo-stubs (sheet/toast בסיסי), לא ה-flows המלאים
+
+**`reference/17-security-service-boot.md`**
+- Preact: I+J ported כ-leaves אבל הפונקציונליות = toast/drill בלבד (RBAC-matrix/OTP/BOT_KB/shake לא רצים)
+- Flutter: אבטחה — אין RBAC-matrix/session-lock/audit מלא; menu-dial הוסר 07-06
+- Flutter: שירות — רק chatbot כ-thread (auto-reply); מחשבונים/סיור לא נכתבו
+- Flutter-web מבטל service-workers (getRegistrations→unregister) → אין PWA/offline (בניגוד ל-Workbox של Preact)
+
+**`reference/18-legacy-knowledge-index.md`**
+- SYSTEM_MANAGER — מספרי-כותרת מומצאים (1,247 מוצרים/156 קבלנים/₪847,500 מול 202 מוצרים/4 הזמנות-אמת)
+- SYSTEM_MANAGER — REST API /api/manager/* לא-קיים (אין backend · standalone)
+- legacy-map — ספירות-מיושנות (BUTTON_REGISTRY=176 מול 350 · store='stub' מול 302ש')
+- spec.json — snapshot-מוקדם (2026-05-21) · statuses 'missing'/'stub' מיושנים
+- UI_ARCHITECTURE profile = mockup-אידיאלי (סולם-דרגות/8-הישגים שונים מ-RANKS האמיתי)
+
+**`reference/19-feature-source-matrix.md`**
+- 🐛 drift: ה-KB אומר tab0=קטלוג/teal — הקוד אומר tab0=מחלקות/כתום #FF7A18
+- checkout Flutter: VAT-18 אמיתי אבל אישור=mock
+- hubs (finance/site/AI) = menu-toast, לא flows · תגמולים(H) נעדר · B2B store-items=demo-stubs
+
+**`reference/20-infra-build-tooling-protocol.md`**
+- Capacitor: @capacitor/ios+android טרם-הותקנו, npx cap add לא רץ → native לא-פעיל
+- typecheck: npx tsc -b --noEmit → 2 שגיאות ידועות (vite.config.ts + worker.tsx); build של Vite נקי (INSP-0015, MINOR-פתוח)
+- iOS Info.plist boilerplate ללא NSCameraUsageDescription/NSMicrophoneUsageDescription → חוסם-launch ל-iOS
+- AndroidManifest ללא הרשאות מותאמות (plugins ממזגים CAMERA/MIC ב-build)
+
+**`reference/21-protocols-spine-gates-enforcement.md`**
+- 🐛 3 ריברטים מתועדים — קוד שעבר typecheck+tests אך הפר כלל-עיצוב ב-runtime
+
+**`reference/22-protocols-agents-process-specialized.md`**
+- פרוטוקול-R בוטל (הוראת-משתמש 2026-06) — R1–R9 = תיעוד-היסטורי בלבד, לא חוק פעיל
+
+**`reference/23-flutter-architecture-state-cardflow.md`**
+- אין autoDispose — providers חיים-תמיד → חוב-ארכיטקטוני P1 (memory)
+- pricing חסום (brandPrice=0) · ratings/AI/push/telephony חסומים
+- iOS NO-GO (Info.plist camera/mic usage-strings + signing-team)
+- Android NO-GO (release-keystore + Play-account)
 
 ## 🔀 מעקפים — כל ה-workarounds/bypasses  (146)
-
-**`01-design-system.md`**
-- text-size כ-zoom (small .92 / large 1.1)
-
-**`02-shell-and-screens.md`**
-- standalone — fallback-בזיכרון לכל נתיב-נתונים (אין data-layer חיצוני; apiService.js שבר viewers מבודדים)
-- ה-menu-dial הוסר (b9737cf) → כלי-הקבלן עברו לגישה-נייטיב
-- dial-overlays (menu-leaves + פרסונות store/courier/worker/manager) = leaves שמציגים toast (בבנייה)
-
-**`03-data-product-trees.md`**
-- registerPolyrollSpecs() מוסיף specs ב-runtime דרך putIfAbsent (נקרא מ-main.dart)
-- kCatalogProducts = spread ללא-dedup (אומת ppr_infra_test)
-
-**`06-logic-settings-projects.md`**
-- ה-menu-dial הוסר (b9737cf) — ההגדרות נגישות נייטיב בלבד ב-4 מסכי-settings
-
-**`07-logic-orders-tasks-search.md`**
-- generateMockOrder (🧪 הזמנת-בדיקה)
-- החיפוש נייטיב — search_dial_widget הוסר 07-06 (data/search_index.dart נשאר)
-
-**`08-logic-product-cart-checkout.md`**
-- ACC_PRICE_BOOK [regex, price] fallback למחיר-אביזר
-- mock checkout confirmation
-
-**`09-logic-cart-notif-onboarding.md`**
-- Preact: onboarding הוסר לחלוטין (כניסה לפי-פרסונה ישירה); התראות = רק notificationCount signal; checkout-submit המלא לא הומר
-
-**`10-engine-pricing-stores-sysorders.md`**
-- Flutter: price_estimate.dart (אומדן לפי-קטגוריה) במקום מחירי-ספק · persist ב-shared_preferences
-
-**`12-persona-manager-store.md`**
-- BS-dial sections leaves = toast 'בבנייה' (stubs); יוצא-דופן mm-regression→RegressionPanelScreen
-
-**`13-scenarios-courier-registration.md`**
-- SYS_ORDERS = סימולציה; cross-tab sync דרך localStorage storage event
-- courierAdvance parsing BS-001(whole)/BS-001#2(shipment); side-effect saveSysOrders + storage-event
-
-**`14-b2b-supply-chain.md`**
-- Preact B2B = drill/toast placeholder (אין קומפוננטות-flow ב-app/src)
-- OCR/gov-XML simulated
-
-**`15-finance-site-hubs.md`**
-- Preact: פיננסים(B) ו-site-hub(C) = subtrees של 10 dial-leaves כ״א verbatim, אך ה-flows (מדד/ROI/גאנט) = drill/toast, לא רצים
-
-**`17-security-service-boot.md`**
-- boot standalone: splash-default (screen-splash גלוי) + inline seeds (seedNotifications 11498)
-- Flutter boot: registerPolyrollSpecs() putIfAbsent על kVerifiedSpecs (~772 מוצרי-Polyroll)
-
-**`18-legacy-knowledge-index.md`**
-- fixed-overlays מותרים (product-sheet·search-panel·menu-speed-dial·bs-dial-scrim) — כל overlay מעבר=CRITICAL
-- backdrop מותר ≤0.45 opacity · ≤3px blur (FRM-06)
-
-**`20-infra-build-tooling-protocol.md`**
-- עקיפות-חירום: .emergency_token (pre-commit) · .allow_push_main (pre-push) · .allow_protocol_edit (PROTECTED_PATHS)
-- preflight.sh exit 0 ידידותי על ענפים אחרים
-
-**`21-protocols-spine-gates-enforcement.md`**
-- 🔀 עקיפות-מאושרות מתועדות: .allow_protocol_edit (TTL 24ש') · .emergency_token · .allow_master_protocol_edit · .allow_push_main (כולם ב-.gitignore + gate-blocked)
-
-**`23-flutter-architecture-state-cardflow.md`**
-- defaultBrandResolver (cardSelection>brandHistory>recBrand>0)
-- SmartBrand גנריים-ללא-SKU (307/365 brands-עם-SKU)
-
-**`24-multiagent-governance.md`**
-- 🔀 fallback chain: concurrent → serial → supervisor-direct (אם sub-agent נכשל/529)
 
 **`AGENT-SOURCES.md`**
 - golden לא-קיים → הוא תמיד ב-nice-volta (knowledge/); line-count לא-תואם → משוך whats-happening
@@ -775,105 +710,20 @@
 - kill-switch tradeId!='plumbing' + try/on-Object (plumbing לעולם לא מאציל)
 - caches-גלובליים משותפים (_skuCache·_compatCache·_syntheticPipeCache)
 
-**`DIRECTIVE-U3-store-ownership.md`**
-- forward-ready rule חי-רדום (מתעורר-לבד ברגע ש-claim יוטבע)
-- אף-משתמש-אין-לו-claim → ענף-בעלים רדום → אפס-שינוי-למשתמש-קיים
-
-**`DIRECTIVE-arm-wizard-preview.md`**
-- עמודת-מטריצה נוספת ב-clean-two-links.yml (ORG_CONFIG=true) או workflow-אח קטן wizard-preview.yml
-- clean = הפרופיל המלא-יותר (_ux=_bs||_clean||_c2) → דשבורד-המנהל נגיש שם
-
-**`DIRECTIVE-buildsmart-clean.md`**
-- הדאטה עוברת למקור-מתחלף — לא-נמחקת (נשארת ה-default)
-
 **`DIRECTIVE-catalog-replace.md`**
 - LipskeyCatalogProduct.fromDoc null-safe (ברירות לשדות-חסרים)
 - שרשרת-fallback server→cache→bundled (CatalogSyncGate) — לעולם לא מבריקה, שבור נופל ל-bundled
 - מיזוג + שימור מוצר-ישן ליתומים (spec לא-מתייתם)
 
-**`DIRECTIVE-clean-finish.md`**
-- Clean-v1 יכול לשאת קטלוג-גנרי אם 3.1c לא-בשל — אבל חברה-#2 חייבת קטלוג+מיתוג שונים גלויים (אחרת לא הוכחנו כלום)
-
-**`DIRECTIVE-deepen-toggles.md`**
-- absent=on (חסר=דלוק) default
-
-**`DIRECTIVE-fake-data-sweep.md`**
-- kHideUnderConstruction=true מסיר תווית (הדגמה) אך משאיר מספר-מזויף
-- אצל הבעלים STUDIO_DART_DEFINES דלוק אך ה-★ עוקפים את ריפו-Firebase לגמרי
-- תבנית gate-to-empty + דמו של כלי-ה-FX = התבנית הנכונה שה-5 ★ מפרים
-
 **`DIRECTIVE-fittings-phaseB-depth.md`**
 - 36 אומגה (Ω פענוח-שרטוט) נדחית · מתועדת
 - 38 רצפת-דיוק ~1.3 מ״מ מתועדת, לא-'מנוצחת' (R7/P-01)
 
-**`DIRECTIVE-manager-console-live.md`**
-- מסלול-fallback: ריפו-חי מחזיר שגיאה → לא לקרוס, להציג ריק/הודעה, לא להמציא מספר
-- הישן (const) יורד רק אחרי שהחי מוכח
-
-**`DIRECTIVE-screen-management-in-wizard.md`**
-- 🔀 העריכה עוברת לאשף עד שיימצא מיקום-טריגר טוב (הטריגר מוקפא)
-
-**`DIRECTIVE-wizard-is-the-studio.md`**
-- שני מפלסי-ניווט: (1) edit-mode + מתג גלוי 'נווט⇄ערוך' (toggleEdit קיים ב-studio_top_bar); (2) בורר-מסך/persona מחוץ ל-edit-trap (נשען על tree_pane)
-- על החי: kStudio ON + owner-gate isOwnerEmail #84 STRICT → משתמש-לא-בעלים = בייטים-זהים (edit inert, אין כפתור-סטודיו)
-
 **`KNOWLEDGE_AUDIT.md`**
 - ספירות-ארכיטקטורה = snapshot מסומן (הקוד=SSOT), לא מספר-קפוא
 
-**`LAUNCH-MICRO-BREAKDOWN.md`**
-- kHideUnderConstruction (default ON, הפיך) מסתיר placeholders חסומי-שרת
-- admin/5555 כניסת-קוד-מנהל בדמו — פריט-השקה: להסיר לפני חנויות
-- TEST-APKs מדלגים על שער flutter test בכוונה → הבעלים ממשיך לקבל בילדים
-- fallback שרת→cache→bundled (CatalogSyncGate never-bricks)
-
-**`LAUNCH-TASKS-MICRO.md`**
-- try/catch ב-main.dart בולע את throw של firebase_options → repos מקומיים (דמו)
-- seed ראשוני מחשבון admin/dev בלבד
-
-**`LAUNCH-deploy.md`**
-- אלטרנטיבה ידנית: firebase-tools + firebase deploy (פעם-אחת בלי CI)
-- בניהחכמה.ישראל נדחה (serverHold; LiveDNS גובה ₪170/שנה — לא לשלם), הפניה חינמית עתידית דרך Cloudflare Redirect Rules
-- deploy.yml GitHub Pages (Preact+Flutter) נשאר תצוגה-מקדימה, לא נגעו בו
-
-**`MASTER-giant-system-order.md`**
-- עורכים-אמיתיים חבויים ב-Trade-Builder (kTradeBuilderFlag-off) + CatalogSettings
-- degrade-graceful (תלוי שורד כבוי) · toggle-matrix מגבה כל צירוף
-
 **`MILESTONE-LOG.md`**
 - registerFamilySpecs אחרי registerPolyrollSpecs (putIfAbsent) → אינרטי כברירת-מחדל (v1+דגל-כבוי), byte-identical
-
-**`PLAN-closeout.md`**
-- honest-stub לסטאבים-היקפיים
-- generateMockOrder
-
-**`PLAN-contractor-completion.md`**
-- נתוני-ביניים מקומיים (פיגום זמני server-ready) במקום שרת-אמיתי
-- OCR/מצלמה/הדפסה → תוצאה-מדומה (sim), לא toast
-- T8 = honest-stub 'בקרוב' (5 מחלקות עם 0 מוצרים)
-
-**`PLAN-manager-completion.md`**
-- SYS_ORDERS/god-mode = סימולציה ללא-backend (לא REST/API)
-- contractorCredit = hash-דטרמיניסטי (לא נתון-אמת) verbatim מהנוסחה
-
-**`SERVER-KICKOFF.md`**
-- ה-_local הוא ה-fallback — כל push בטוח (UI לא משתנה)
-
-**`SPEC-architecture-SDD.md`**
-- baked-engine — הקטלוג bundled+R2-CDN, חוקי-המנוע אפויים (IP+latency)
-- מנועים אגנוסטיים-למקור (מקבלים pool כפרמטר) — לכן מיגרציית-הדאטה לא נגעה בהם
-
-**`SPEC-catalog-to-server-MICRO.md`**
-- הרבה מ-C0/C1/C4 = הדלקה/חיווט של בנוי-רדום (הסכמה · catalog_paged server-mode · authored_products_firebase · kTradeImport)
-
-**`SPEC-cross-persona-chat.md`**
-- honest-stubs (וידאו/קול/מסמך/מיקום = 'לא בדמו') — להשאיר
-- bot = thread מיוחד עם auto-reply
-
-**`SPEC-server-connect-MICRO.md`**
-- _local נשמר כ-fallback לצד _firebase
-
-**`SPEC-server-connect.md`**
-- offline-first cache: Firestore offline-persistence ON + snapshots() listener → cache מקומי (Riverpod); all() סינכרוני קורא מ-cache instant; place/advance כותב ל-Firestore + optimistic-cache → providers/UI לא-משתנים
 
 **`VERIFIED-OPEN-WORK-2026-07-29.md`**
 - store_screen.dart:1093-1094 pull-to-refresh = Future.delayed(800ms) no-op (גבולי; storeOrdersProvider כבר ריאקטיבי)
@@ -897,12 +747,45 @@
 **`archive/DIRECTIVE-U1-RBAC.md`**
 - null/'' → contractor fallback · לא-מחובר/אורח = contractor (עיון-קטלוג בלבד)
 
+**`archive/DIRECTIVE-U3-store-ownership.md`**
+- forward-ready rule חי-רדום (מתעורר-לבד ברגע ש-claim יוטבע)
+- אף-משתמש-אין-לו-claim → ענף-בעלים רדום → אפס-שינוי-למשתמש-קיים
+
+**`archive/DIRECTIVE-arm-wizard-preview.md`**
+- עמודת-מטריצה נוספת ב-clean-two-links.yml (ORG_CONFIG=true) או workflow-אח קטן wizard-preview.yml
+- clean = הפרופיל המלא-יותר (_ux=_bs||_clean||_c2) → דשבורד-המנהל נגיש שם
+
+**`archive/DIRECTIVE-buildsmart-clean.md`**
+- הדאטה עוברת למקור-מתחלף — לא-נמחקת (נשארת ה-default)
+
+**`archive/DIRECTIVE-clean-finish.md`**
+- Clean-v1 יכול לשאת קטלוג-גנרי אם 3.1c לא-בשל — אבל חברה-#2 חייבת קטלוג+מיתוג שונים גלויים (אחרת לא הוכחנו כלום)
+
+**`archive/DIRECTIVE-deepen-toggles.md`**
+- absent=on (חסר=דלוק) default
+
+**`archive/DIRECTIVE-fake-data-sweep.md`**
+- kHideUnderConstruction=true מסיר תווית (הדגמה) אך משאיר מספר-מזויף
+- אצל הבעלים STUDIO_DART_DEFINES דלוק אך ה-★ עוקפים את ריפו-Firebase לגמרי
+- תבנית gate-to-empty + דמו של כלי-ה-FX = התבנית הנכונה שה-5 ★ מפרים
+
 **`archive/DIRECTIVE-launch-arming.md`**
 - store_documents_sheet במצב-יחובר-עם-שרת עד שיעלה שרת-חיוב
+
+**`archive/DIRECTIVE-manager-console-live.md`**
+- מסלול-fallback: ריפו-חי מחזיר שגיאה → לא לקרוס, להציג ריק/הודעה, לא להמציא מספר
+- הישן (const) יורד רק אחרי שהחי מוכח
 
 **`archive/DIRECTIVE-order-confirmation-email.md`**
 - 🔀 אין מייל-לקוח (הזמנת-טלפון) → שלח רק עותק-לבעלים, אל תיכשל
 - 🔀 ללא API-key → הפונקציה לא-פעילה (degrade), האפליקציה זהה-בייטים
+
+**`archive/DIRECTIVE-screen-management-in-wizard.md`**
+- 🔀 העריכה עוברת לאשף עד שיימצא מיקום-טריגר טוב (הטריגר מוקפא)
+
+**`archive/DIRECTIVE-wizard-is-the-studio.md`**
+- שני מפלסי-ניווט: (1) edit-mode + מתג גלוי 'נווט⇄ערוך' (toggleEdit קיים ב-studio_top_bar); (2) בורר-מסך/persona מחוץ ל-edit-trap (נשען על tree_pane)
+- על החי: kStudio ON + owner-gate isOwnerEmail #84 STRICT → משתמש-לא-בעלים = בייטים-זהים (edit inert, אין כפתור-סטודיו)
 
 **`archive/GO-LIVE.md`**
 - preview-channel (URL זמני ON, הלייב-הראשי נשאר דמו) לבדיקה
@@ -918,8 +801,23 @@
 **`archive/KEYBOARD-MASTER-PLAN.md`**
 - רובו הרכבה של רכיבים קיימים (lipskeyWordIndex/openBarcodeScanner/VoiceService/_FilterChipsRow/_insertText) — לא בנייה מאפס
 
+**`archive/LAUNCH-MICRO-BREAKDOWN.md`**
+- kHideUnderConstruction (default ON, הפיך) מסתיר placeholders חסומי-שרת
+- admin/5555 כניסת-קוד-מנהל בדמו — פריט-השקה: להסיר לפני חנויות
+- TEST-APKs מדלגים על שער flutter test בכוונה → הבעלים ממשיך לקבל בילדים
+- fallback שרת→cache→bundled (CatalogSyncGate never-bricks)
+
 **`archive/LAUNCH-PLAN.md`**
 - v1 בלי סליקה: התחל עם הזמנה/הצעת-מחיר/יצירת-קשר (מוצר-פיזי), הוסף סליקה בהמשך
+
+**`archive/LAUNCH-TASKS-MICRO.md`**
+- try/catch ב-main.dart בולע את throw של firebase_options → repos מקומיים (דמו)
+- seed ראשוני מחשבון admin/dev בלבד
+
+**`archive/LAUNCH-deploy.md`**
+- אלטרנטיבה ידנית: firebase-tools + firebase deploy (פעם-אחת בלי CI)
+- בניהחכמה.ישראל נדחה (serverHold; LiveDNS גובה ₪170/שנה — לא לשלם), הפניה חינמית עתידית דרך Cloudflare Redirect Rules
+- deploy.yml GitHub Pages (Preact+Flutter) נשאר תצוגה-מקדימה, לא נגעו בו
 
 **`archive/LAUNCH-server-deploy.md`**
 - 🔀 השאר את הלייב על דמו (גדר את ה-switch) עד שיש דאטה-אמיתית
@@ -931,11 +829,42 @@
 - contractorCredit hash מקומי 30k-120k (computeCredit בשרת כשהדגל ON)
 - seed-מנהל רץ רק כשאין נתונים-חיים
 
+**`archive/MASTER-giant-system-order.md`**
+- עורכים-אמיתיים חבויים ב-Trade-Builder (kTradeBuilderFlag-off) + CatalogSettings
+- degrade-graceful (תלוי שורד כבוי) · toggle-matrix מגבה כל צירוף
+
+**`archive/PLAN-closeout.md`**
+- honest-stub לסטאבים-היקפיים
+- generateMockOrder
+
+**`archive/PLAN-contractor-completion.md`**
+- נתוני-ביניים מקומיים (פיגום זמני server-ready) במקום שרת-אמיתי
+- OCR/מצלמה/הדפסה → תוצאה-מדומה (sim), לא toast
+- T8 = honest-stub 'בקרוב' (5 מחלקות עם 0 מוצרים)
+
+**`archive/PLAN-manager-completion.md`**
+- SYS_ORDERS/god-mode = סימולציה ללא-backend (לא REST/API)
+- contractorCredit = hash-דטרמיניסטי (לא נתון-אמת) verbatim מהנוסחה
+
+**`archive/SERVER-KICKOFF.md`**
+- ה-_local הוא ה-fallback — כל push בטוח (UI לא משתנה)
+
 **`archive/SPEC-A4-A6-order-ownership.md`**
 - main.dart:51-59 עוטף אתחול ב-try/catch+timeout, ה-throw נתפס בשקט → repos מקומיים
 
 **`archive/SPEC-ai-assistant.md`**
 - model allowlist: Haiku (claude-haiku-4-5) default, Sonnet (claude-sonnet-4-6) שדרוג-מותר, מודל-לא-מורשה נחסם בשרת
+
+**`archive/SPEC-architecture-SDD.md`**
+- baked-engine — הקטלוג bundled+R2-CDN, חוקי-המנוע אפויים (IP+latency)
+- מנועים אגנוסטיים-למקור (מקבלים pool כפרמטר) — לכן מיגרציית-הדאטה לא נגעה בהם
+
+**`archive/SPEC-catalog-to-server-MICRO.md`**
+- הרבה מ-C0/C1/C4 = הדלקה/חיווט של בנוי-רדום (הסכמה · catalog_paged server-mode · authored_products_firebase · kTradeImport)
+
+**`archive/SPEC-cross-persona-chat.md`**
+- honest-stubs (וידאו/קול/מסמך/מיקום = 'לא בדמו') — להשאיר
+- bot = thread מיוחד עם auto-reply
 
 **`archive/SPEC-ring-dive-handoff.md`**
 - מעטפת-דמו מזייפת צמצום (בתוך המעטפת, לא בתוך הרכיב)
@@ -943,6 +872,12 @@
 
 **`archive/SPEC-ring-dive.md`**
 - 🔀 מקטע 'עוד ›' כשיש >~10 מקטעים (מגלגל לסט הבא, תואם kMergedKeyCap=10)
+
+**`archive/SPEC-server-connect-MICRO.md`**
+- _local נשמר כ-fallback לצד _firebase
+
+**`archive/SPEC-server-connect.md`**
+- offline-first cache: Firestore offline-persistence ON + snapshots() listener → cache מקומי (Riverpod); all() סינכרוני קורא מ-cache instant; place/advance כותב ל-Firestore + optimistic-cache → providers/UI לא-משתנים
 
 **`archive/SPEC-smart-keyboard.md`**
 - honest-stub _showVoiceUnavailable בצ׳אט (עד חיבור VoiceService)
@@ -989,17 +924,72 @@
 - setQtyForKey / addOrBump במקום add append-only
 - patch מקביל ל-word_finder החי (dims['חומר'] + kSearchSynonyms['נחושת'])
 
+**`reference/01-design-system.md`**
+- text-size כ-zoom (small .92 / large 1.1)
+
+**`reference/02-shell-and-screens.md`**
+- standalone — fallback-בזיכרון לכל נתיב-נתונים (אין data-layer חיצוני; apiService.js שבר viewers מבודדים)
+- ה-menu-dial הוסר (b9737cf) → כלי-הקבלן עברו לגישה-נייטיב
+- dial-overlays (menu-leaves + פרסונות store/courier/worker/manager) = leaves שמציגים toast (בבנייה)
+
+**`reference/03-data-product-trees.md`**
+- registerPolyrollSpecs() מוסיף specs ב-runtime דרך putIfAbsent (נקרא מ-main.dart)
+- kCatalogProducts = spread ללא-dedup (אומת ppr_infra_test)
+
+**`reference/06-logic-settings-projects.md`**
+- ה-menu-dial הוסר (b9737cf) — ההגדרות נגישות נייטיב בלבד ב-4 מסכי-settings
+
+**`reference/07-logic-orders-tasks-search.md`**
+- generateMockOrder (🧪 הזמנת-בדיקה)
+- החיפוש נייטיב — search_dial_widget הוסר 07-06 (data/search_index.dart נשאר)
+
+**`reference/08-logic-product-cart-checkout.md`**
+- ACC_PRICE_BOOK [regex, price] fallback למחיר-אביזר
+- mock checkout confirmation
+
+**`reference/09-logic-cart-notif-onboarding.md`**
+- Preact: onboarding הוסר לחלוטין (כניסה לפי-פרסונה ישירה); התראות = רק notificationCount signal; checkout-submit המלא לא הומר
+
+**`reference/10-engine-pricing-stores-sysorders.md`**
+- Flutter: price_estimate.dart (אומדן לפי-קטגוריה) במקום מחירי-ספק · persist ב-shared_preferences
+
+**`reference/12-persona-manager-store.md`**
+- BS-dial sections leaves = toast 'בבנייה' (stubs); יוצא-דופן mm-regression→RegressionPanelScreen
+
+**`reference/13-scenarios-courier-registration.md`**
+- SYS_ORDERS = סימולציה; cross-tab sync דרך localStorage storage event
+- courierAdvance parsing BS-001(whole)/BS-001#2(shipment); side-effect saveSysOrders + storage-event
+
+**`reference/14-b2b-supply-chain.md`**
+- Preact B2B = drill/toast placeholder (אין קומפוננטות-flow ב-app/src)
+- OCR/gov-XML simulated
+
+**`reference/15-finance-site-hubs.md`**
+- Preact: פיננסים(B) ו-site-hub(C) = subtrees של 10 dial-leaves כ״א verbatim, אך ה-flows (מדד/ROI/גאנט) = drill/toast, לא רצים
+
+**`reference/17-security-service-boot.md`**
+- boot standalone: splash-default (screen-splash גלוי) + inline seeds (seedNotifications 11498)
+- Flutter boot: registerPolyrollSpecs() putIfAbsent על kVerifiedSpecs (~772 מוצרי-Polyroll)
+
+**`reference/18-legacy-knowledge-index.md`**
+- fixed-overlays מותרים (product-sheet·search-panel·menu-speed-dial·bs-dial-scrim) — כל overlay מעבר=CRITICAL
+- backdrop מותר ≤0.45 opacity · ≤3px blur (FRM-06)
+
+**`reference/20-infra-build-tooling-protocol.md`**
+- עקיפות-חירום: .emergency_token (pre-commit) · .allow_push_main (pre-push) · .allow_protocol_edit (PROTECTED_PATHS)
+- preflight.sh exit 0 ידידותי על ענפים אחרים
+
+**`reference/21-protocols-spine-gates-enforcement.md`**
+- 🔀 עקיפות-מאושרות מתועדות: .allow_protocol_edit (TTL 24ש') · .emergency_token · .allow_master_protocol_edit · .allow_push_main (כולם ב-.gitignore + gate-blocked)
+
+**`reference/23-flutter-architecture-state-cardflow.md`**
+- defaultBrandResolver (cardSelection>brandHistory>recBrand>0)
+- SmartBrand גנריים-ללא-SKU (307/365 brands-עם-SKU)
+
+**`reference/24-multiagent-governance.md`**
+- 🔀 fallback chain: concurrent → serial → supervisor-direct (אם sub-agent נכשל/529)
+
 ## ❓ שאלות-פתוחות  (64)
-
-**`07-logic-orders-tasks-search.md`**
-- שקילויות DN↔אינץ' (בבק-לוג canonicalSize)
-
-**`18-legacy-knowledge-index.md`**
-- RULES.md שונה מ-CLAUDE.md (מי-קובע · RULES קובע)
-- gate-42 claim (regression_gate)
-
-**`23-flutter-architecture-state-cardflow.md`**
-- טענת-KB 'gate 42 / regression_gate_test (כל helper ≥1 test)' — לא-אומת-בקוד בסשן זה
 
 **`CATALOG-3D-100-STEPS.md`**
 - משפחת אומגה (Ω) — פענוח-שרטוט ייעודי (נדחה)
@@ -1016,48 +1006,21 @@
 **`DIRECTIVE-catalog-replace.md`**
 - % חפיפת-SKU חדש↔ישן — אם נמוך, החלפה-מלאה מסוכנת → מיזוג-חובה
 
-**`DIRECTIVE-fake-data-sweep.md`**
-- 🏪 חנויות-פעילות: אין registry אמיתי → לגדר/להסתיר עד שיהיה
-
-**`DIRECTIVE-manager-console-live.md`**
-- קו-פיילוט: CLAUDE_AI דלוק + gateway פרוס? אם לא-ניתן-כרגע — שלא יוצג כפעיל
-
-**`LAUNCH-MICRO-BREAKDOWN.md`**
-- ❓ keystore עדיין debug-signed (אפס אזכורים) — לא-קביל להעלאה ל-Play
-- ❓ iOS אין pipeline
-- ❓ admin/5555 עדיין בפנים
-- ❓ תקינות 3,614 מסמכים ב-Firestore לא-ניתנת-לאימות-עצמאי מהסשן
-
-**`LAUNCH-TASKS-MICRO.md`**
-- ❓ תשלום v1 בלי-סליקה? · ❓ A14 seed ייתכן מיותר
-- ❓ DM3 החלטת redirect (עברי→ראשי)
-
 **`MILESTONE-LOG.md`**
 - ממתין: לולאת-אביזרים שלבים 20-26 (מותג-כללי · v2 end-to-end · answer-equivalent)
 - ממתין: כלי-B מחולל-טסטים (על 108 הגרפים)
-
-**`PLAN-closeout.md`**
-- אימות-חי של הגרסה-הציבורית (v6.16) אחרי forced-update
-
-**`PLAN-contractor-completion.md`**
-- האם הקומיט חי ציבורית ב-gh-pages (deploy לא אומת)
-
-**`PLAN-verticals-and-toggles.md`**
-- ❓ הערת-יושר: ורטיקל-אותו-עולם=זול · תעשייה-שונה-לגמרי=דורש גִּנֵּרוּג-מנוע (פרויקט נפרד)
-
-**`POLISH-BRIEF.md`**
-- ❓ P-1 'גמור' ידרוש הקפאת-פיצ'רים (מטרה-נעה)
-
-**`SPEC-catalog-to-server-MICRO.md`**
-- 20 ה-SKUs לפרוסה?
-- יעד-זמן perf לפתיחת-קטלוג?
-- מודל הזנת-חנות (ידני מול onboarding-עצמי)?
 
 **`archive/AUDIT-FULL-14jun.md`**
 - ❓ MVP-ממוקד מול הכל-100% (עבודה ענקית + הרבה דאטה-עסקית)
 
 **`archive/DATA-ring-dive-levels.md`**
 - שקילויות DN↔אינץ' (בבק-לוג canonicalSize)
+
+**`archive/DIRECTIVE-fake-data-sweep.md`**
+- 🏪 חנויות-פעילות: אין registry אמיתי → לגדר/להסתיר עד שיהיה
+
+**`archive/DIRECTIVE-manager-console-live.md`**
+- קו-פיילוט: CLAUDE_AI דלוק + gateway פרוס? אם לא-ניתן-כרגע — שלא יוצג כפעיל
 
 **`archive/DIRECTIVE-order-confirmation-email.md`**
 - ❓ הערכים הסופיים של DNS מגיעים מ-Resend אחרי שהבעלים פותח חשבון+מוסיף דומיין
@@ -1078,19 +1041,46 @@
 - iOS ב-v1 או אנדרואיד+web מספיק?
 - 4 מחלקות-ריקות: להסתיר או למלא?
 
+**`archive/LAUNCH-MICRO-BREAKDOWN.md`**
+- ❓ keystore עדיין debug-signed (אפס אזכורים) — לא-קביל להעלאה ל-Play
+- ❓ iOS אין pipeline
+- ❓ admin/5555 עדיין בפנים
+- ❓ תקינות 3,614 מסמכים ב-Firestore לא-ניתנת-לאימות-עצמאי מהסשן
+
 **`archive/LAUNCH-PLAN.md`**
 - התחלת את ה-closed-test של גוגל?
 - יש חשבונות Google/Apple?
 - iOS גם, או Android+web מספיק ל-v1?
 
+**`archive/LAUNCH-TASKS-MICRO.md`**
+- ❓ תשלום v1 בלי-סליקה? · ❓ A14 seed ייתכן מיותר
+- ❓ DM3 החלטת redirect (עברי→ראשי)
+
 **`archive/MANAGER-MASTER-PLAN.md`**
 - ❓ M8 מי-מחובר (presence) — אם backend תומך
+
+**`archive/PLAN-closeout.md`**
+- אימות-חי של הגרסה-הציבורית (v6.16) אחרי forced-update
+
+**`archive/PLAN-contractor-completion.md`**
+- האם הקומיט חי ציבורית ב-gh-pages (deploy לא אומת)
+
+**`archive/PLAN-verticals-and-toggles.md`**
+- ❓ הערת-יושר: ורטיקל-אותו-עולם=זול · תעשייה-שונה-לגמרי=דורש גִּנֵּרוּג-מנוע (פרויקט נפרד)
+
+**`archive/POLISH-BRIEF.md`**
+- ❓ P-1 'גמור' ידרוש הקפאת-פיצ'רים (מטרה-נעה)
 
 **`archive/SPEC-A4-A6-order-ownership.md`**
 - ❓ A14 seed-ראשוני ייתכן מיותר
 
 **`archive/SPEC-ai-assistant.md`**
 - הוספת Opus ל-allowlist אם נדרש מוח חזק יותר
+
+**`archive/SPEC-catalog-to-server-MICRO.md`**
+- 20 ה-SKUs לפרוסה?
+- יעד-זמן perf לפתיחת-קטלוג?
+- מודל הזנת-חנות (ידני מול onboarding-עצמי)?
 
 **`archive/SPEC-smart-keyboard.md`**
 - האם שלב-3 נדרש
@@ -1125,67 +1115,20 @@
 - ❓ האם ה-proof-apparatus (P7/P8 census, BFS, nightly, a11y) ייבנה אי-פעם — נדחה עד תלונה-נמדדת
 - ❓ Android system-back עם 3 domains לא-מתואמים ללא PopScope מאחד
 
+**`reference/07-logic-orders-tasks-search.md`**
+- שקילויות DN↔אינץ' (בבק-לוג canonicalSize)
+
+**`reference/18-legacy-knowledge-index.md`**
+- RULES.md שונה מ-CLAUDE.md (מי-קובע · RULES קובע)
+- gate-42 claim (regression_gate)
+
+**`reference/23-flutter-architecture-state-cardflow.md`**
+- טענת-KB 'gate 42 / regression_gate_test (כל helper ≥1 test)' — לא-אומת-בקוד בסשן זה
+
 ## 🎯 חזונות — הצפונות שהידע מכוון אליהם  (100)
 
 **`00-START-HERE.md`**
 - האפליקציה = קונכיית-מנועים-טהורים ריקה-מדאטה; כפתור מחק→העלה-קטלוג→רץ-מיד (מפנה ל-NORTH-STAR)
-
-**`01-design-system.md`**
-- לתעד את שפת-העיצוב המלאה (טוקנים·רכיבים·פרסונות) כמקור לתרגום port.
-
-**`02-shell-and-screens.md`**
-- מקור-אמת יחיד — לתעד כל מסך/overlay/handler של אב-הטיפוס verbatim לצורך port.
-
-**`03-data-product-trees.md`**
-- 🎯 עץ-מוצרים חכם: בחירת מוצר-אב מקפיצה את כל האביזרים הנדרשים (must/why = החוכמה שהדמו מוכר)
-
-**`04-data-catalog-variants-tools.md`**
-- לתעד את שכבת-הקטלוג העוטפת את TREES — ארגון-תצוגה / בחירה / תמחור-מידה / מצב-התחלתי / השלמת-כלים.
-
-**`06-logic-settings-projects.md`**
-- לתעד תפקיד+זרימה+חיווט של פונקציות-הלוגיקה (לא העתק-קוד), עם שמות+שורות מדויקים.
-
-**`07-logic-orders-tasks-search.md`**
-- החיפוש מאחד 3 מקורות — יעדי-ניווט (NAV_DESTINATIONS) · אינדקס-תוכן (CONTENT_INDEX) · מוצרי-קטלוג — ל-suggest אחד עם fuzzy
-
-**`08-logic-product-cart-checkout.md`**
-- 🎯 מנוע המלצות-אביזרים (must/why = האביזרים שהצוות תמיד שוכח) + checkout מלא
-
-**`09-logic-cart-notif-onboarding.md`**
-- לתעד את ליבת-הסל, זרימת-checkout, מנוע-ההתראות ו-onboarding verbatim.
-
-**`13-scenarios-courier-registration.md`**
-- פרסונת-שליח מלאה + טיפול פריט-חסר/אזל + רישום/onboarding — parity לפרוטוטייפ
-
-**`14-b2b-supply-chain.md`**
-- 🎯 שכבת-B2B מלאה (שש שירותי-שרשרת) + מתכנן-משלוחים שמשנה את ה-checkout
-
-**`15-finance-site-hubs.md`**
-- לתעד את 2 ה-hubs שמעמיקים את אפליקציית-הקבלן מעבר-לרכש: פיננסים + ניהול-אתר.
-
-**`16-portal-ai-rewards.md`**
-- פורטל-ספק/שליח + מנוע-AI מלא + מרכז-תגמולים — parity לפרוטוטייפ
-
-**`17-security-service-boot.md`**
-- תיעוד verbatim של שכבות-האבטחה/שירות/boot מאב-הטיפוס כמקור-אמת ל-port (INSP-0007/0008), עם ציון מה-ported ומה לא.
-
-**`18-legacy-knowledge-index.md`**
-- ה-WHY מאחורי ה-dial — ADR-001 no-window · ADR-002 dial-pattern (משתמשי-אתר-בנייה: ידיים-מלוכלכות/כפפות/יד-אחת)
-
-**`19-feature-source-matrix.md`**
-- 🎯 מיפוי-מלא של כל פיצ׳ר על-פני 3 המקורות (breadth-הפרוטוטייפ → אפליקציית-אינסטלציה-אמיתית Flutter)
-
-**`20-infra-build-tooling-protocol.md`**
-- לתעד את הליבה-התפעולית — איך 3 המקורות נבנים/נארזים-ל-native/נפרסים/נאכפים.
-
-**`21-protocols-spine-gates-enforcement.md`**
-- 🎯 'הכשלים באו מחוסר-תהליך, לא מחוסר-ידע' — ממשל אכיף-עצמי שמונע ריברטים (הפרת-חוק נתפסת רק ב-checklist, לא בקומפיילר)
-
-**`23-flutter-architecture-state-cardflow.md`**
-- התמונה-המלאה של Flutter — תת-המערכות הפנימיות שלא נכנסו לדלתאות 01-17
-
-**`24-multiagent-governance.md`**
-- 🎯 מפעל-תוכנה אוטונומי — סוכנים בונים את BuildSmart לבד, נשלטים ע"י פרוטוקול-אכיף-עצמי, פיקוח סוכן-על, משתמש כסמכות-עליונה
 
 **`AGENT-SOURCES.md`**
 - 🎯 למנוע היתקעות על גרסאות — golden-לא-נמצא ו-line-count-mismatch לא יקרו שוב
@@ -1208,74 +1151,17 @@
 **`DECOMP-DEPTH-100-STEPS.md`**
 - מתכנת פותח כל אטום ורואה את הפְּנים — אלגוריתם·חוזה·מבנה-נתונים·מסע — לא רק שם. אפס 'שם-בלבד'
 
-**`DIRECTIVE-U3-store-ownership.md`**
-- בעל-חנות מנהל את המלאי שלו לבד ואינו יכול לגעת בשל אחר (משלים את שכבת-החנויות שכבר עלתה לאוויר)
-
-**`DIRECTIVE-arm-wizard-preview.md`**
-- הבעלים רוצה לינק לפתוח ולשחק עם האשף (giant-V5) שכרגע רדום מאחורי ORG_CONFIG=off — בלי לגעת באתר-הראשי-החי.
-
 **`DIRECTIVE-atom-tooling.md`**
 - pipeline קוד→גרף→טסטים, מקורקע במסך-1 כגולדן — אפס drift מהמקור-האחד.
-
-**`DIRECTIVE-buildsmart-clean.md`**
-- קוד-אחד → אינסוף אפליקציות · superset אחד מלא/נקי/בלתי-שביר · כל חברה נולדת ממנו (כמו MaorClean→MaorHachesed · 396/400 שורות זהות)
 
 **`DIRECTIVE-catalog-replace.md`**
 - קטלוג-חדש עם תמונות-אמיתיות חי, בלי קריסה + בלי לאבד specs/recipes/מנוע-החכמה, עם rollback מיידי.
 
-**`DIRECTIVE-clean-finish.md`**
-- הבעלים פותח 2 לינקים חיים מאותו קוד (MaorClean→MaorHachesed) — סגירת צד-הצי של תוכנית-Clean.
-
-**`DIRECTIVE-deepen-toggles.md`**
-- 🎯 קונפיג שמגיע לכל משטח וכל persona — עשרות טוגלים-דקים (פר-ווידג׳ט/סעיף/תת-יכולת) כמו מאור
-
-**`DIRECTIVE-edit-trigger-keyboard-longpress.md`**
-- מדליק-חזרה את העריכה-על-המסך (שהוקפאה ב-screen-mgmt-s0) עם מיקום-טריגר טוב ואוניברסלי (פותר את בעיית-הלוגו)
-
-**`DIRECTIVE-fake-data-sweep.md`**
-- 100% מידע-אמת: אפס const-שמתחזה-לחי, אפס פקד-מת, אפס מספר-מומצא
-
-**`DIRECTIVE-fittings-phase0A-loop.md`**
-- מודל 'מעלים קובץ → מתחבר לבד': כל שורת-מוצר נושאת {משפחה, מידת-מפתח OD/DN} → הכל נגזר-בחינם מהמנוע
-
 **`DIRECTIVE-fittings-phaseB-depth.md`**
 - עומק = ערך. spec מדויק שקבלן סומך-עליו כדי להזמין ולבנות באמת (לא רק 'נראה-נכון')
 
-**`DIRECTIVE-giant-phase2-features.md`**
-- 🎯 המנוע-הענק 'מלא' — כל פיצ'ר בפנים, נבחר פר-חברה (מאור=דפוס-מומש-ב-Dart, לא-מועתק)
-
-**`DIRECTIVE-manager-console-live.md`**
-- כל 5 ה-KPI = מידע-אמת; משנים דאטה בשרת → המספר בלוח משתנה; אפס ערכים-קבועים
-
-**`DIRECTIVE-maor-full-integration.md`**
-- 🎯 הערך-הנשאל-ממאור = 100% בפנים — כל מנועי-מאור הרלוונטיים מוטמעים כדפוסים-ב-Dart
-
-**`DIRECTIVE-screen-management-in-wizard.md`**
-- 🎯 העריכה עוברת לאשף (כניסה משלו) עד שיימצא מיקום-טריגר טוב — ואז מדליקים שוב
-
-**`DIRECTIVE-studio-registry-to-wizard-toggles.md`**
-- אותה שליטה פר-אלמנט של ה-Studio, באותה כמות (~863) — כטוגלי הצג/הסתר מוצגים יפה כאשף, לא כרשימה-הגולמית.
-
-**`DIRECTIVE-wizard-is-the-studio.md`**
-- האשף = כל 5 חלוניות-הסטודיו, מאורגן יפה כמו Maor (מקובץ/עברית/מונחים/נקי); חושפים את הקיים (element_registry ~896 + override-system), לא ממציאים.
-
 **`KNOWLEDGE_AUDIT.md`**
 - 🎯 KB מסונכרן-לקוד zero-defect — עובדות-בינאריות 100%, ספירות-ארכיטקטורה snapshot-מסומן
-
-**`LAUNCH-MICRO-BREAKDOWN.md`**
-- 🎯 השקה מלאה לחנויות (iOS+Android) · חזון white-label 'קוד-אחד → אינסוף אפליקציות' (Clean)
-
-**`LAUNCH-TASKS-MICRO.md`**
-- 🎯 השקה בשתי החנויות בלי placeholders ובלי פספוס-מילימטר — אפליקציה אמיתית מחוברת לשרת
-
-**`LAUNCH-deploy.md`**
-- אפליקציה חיה בדומיין-אמת (buildsmart-il.com) כ-PWA, ובשלב-הבא backend אמיתי — ממוצר-דמו למוצר-אמיתי
-
-**`MAOR-REUSE-MAP.md`**
-- 🎯 מכריית ה*דפוס* לא ה*פיצ'ר* (חדר≈רכב) · כל דפוס מעשיר את המנוע → כל חברה מ-Clean מקבלת
-
-**`MASTER-giant-system-order.md`**
-- מנוע-אחד ענק (superset מקסימלי) · חברה=גולמי-נקי+קונפיג+דאטה · קוד-אחד→אינסוף חברות (30 אפליקציות · white-label).
 
 **`MILESTONE-LOG.md`**
 - אבני-דרך שאומתו ב-CI בפועל (Protocol Enforcement) — לא על-דיווח.
@@ -1283,50 +1169,8 @@
 **`NORTH-STAR-data-contract.md`**
 - האפליקציה = קונכיית-מנועים-טהורים ריקה-מדאטה. כפתור: מחק-הכל → העלה-קובץ-קטלוג-התואם-לחוזה → רץ-מיד. אותה קונכייה, אינסוף קטלוגים
 
-**`PLAN-buildsmart-clean-master.md`**
-- ה-Clean=בסיס גנרי-מלא-בלתי-שביר; כל חברה=בסיס+דאטה+שם+פיצ׳רים-נבחרים · קוד-אחד→הרבה אפליקציות חיות בו-זמנית.
-
-**`PLAN-contractor-completion.md`**
-- לוח-קבלן מלא-מלא — front-end של מוצר אמיתי, parity-מלא לפרוטוטייפ, כל פיצ׳ר עובד, אפס toast-stub
-
-**`PLAN-giant-system-master.md`**
-- מנוע-אחד ענק = superset מקסימלי (כל הפיצ׳רים/המנגנונים/הורטיקלים); כל חברה = קונפיג בורר → אפליקציה רזה-ותפורה. קוד-אחד ⟶ אינסוף חברות
-
-**`PLAN-manager-completion.md`**
-- לוח-מנהל = מסך חדש מלא, בנוי בדיוק כמו לוח-קבלן (אותו דפוס-בנייה), לא עלי-dial
-
-**`PLAN-verticals-and-toggles.md`**
-- 🎯 להפוך Clean מ'פרופיל-בקומפילציה' לפלטפורמה-שמתקינים-לפי-סוג-עסק: חבילת-ורטיקל + טוגלים + מיתוג → אפליקציה תפורה
-
-**`POLISH-BRIEF.md`**
-- 🎯 presentation-polish בתוך POLISH_PROTOCOL — token-binding = safe (אפס שינוי ויזואלי)
-
 **`README.md`**
 - מקור-אמת יחיד = אב-הטיפוס index.html (1.4MB, 22,416 שורות); לכידה verbatim מלאה מהקוד.
-
-**`SERVER-KICKOFF.md`**
-- לחבר את האפליקציה ל-Firebase החי דרך drop-in (_local→_firebase) ב-cache-pattern — ה-interface (sync) וה-UI לא משתנים, הנתונים אמיתיים.
-
-**`SPEC-architecture-SDD.md`**
-- 🎯 פלטפורמת B2B לשרשרת-אספקה של אינסטלציה/בנייה (קבלן/חנות/שליח/עובד/מנהל), עברית RTL, נייטיב iOS/Android/Web
-
-**`SPEC-catalog-to-server-MICRO.md`**
-- drop-in דרך Repository (bundled→server) + cache-pattern → UI ומנועים ללא-שינוי · אופליין נשמר · עלות-DB נמוכה.
-
-**`SPEC-cross-persona-chat.md`**
-- דרישת-בעלים verbatim: 'חוצה — אני צריך את אותו מסך צ׳אטים אצל כולם!' — הודעה מ-חנות נראית אצל הקבלן ולהפך
-
-**`SPEC-server-connect-MICRO.md`**
-- drop-in (_local→_firebase) דרך cache-pattern (sync-reads מ-cache · listeners מ-Firestore · optimistic-writes) → UI ללא-שינוי
-
-**`SPEC-server-connect.md`**
-- להפוך את ה-client (server-ready, Repository 6/6) למוצר-חי עם זהות-אמת + real-time בין-מכשירים + הפרדת-תפקידים נאכפת-בשרת.
-
-**`SPEC-user-system-MICRO.md`**
-- להשלים את השכבה-המסחרית ולפתוח go-live — חנות מנהלת מלאי לבד דרך משתמש-בעל-חנות.
-
-**`TASKS-to-full.md`**
-- לוח-קבלן 'מלא מלא' — parity-מלא לפרוטוטייפ, tracks disjoint לפיצול-מקבילי בטוח
 
 **`VERIFIED-OPEN-WORK-2026-07-29.md`**
 - לפני סימון פריט פתוח — אמת בקוד (git show), אל תסמוך על המסמך לבדו.
@@ -1346,14 +1190,56 @@
 **`archive/DIRECTIVE-U1-RBAC.md`**
 - 🎯 RBAC כגבול-אבטחה אמיתי (deny-by-default, אין honest-gate מתחזה) — מקור-אמת אחד לתפקידים
 
+**`archive/DIRECTIVE-U3-store-ownership.md`**
+- בעל-חנות מנהל את המלאי שלו לבד ואינו יכול לגעת בשל אחר (משלים את שכבת-החנויות שכבר עלתה לאוויר)
+
+**`archive/DIRECTIVE-arm-wizard-preview.md`**
+- הבעלים רוצה לינק לפתוח ולשחק עם האשף (giant-V5) שכרגע רדום מאחורי ORG_CONFIG=off — בלי לגעת באתר-הראשי-החי.
+
+**`archive/DIRECTIVE-buildsmart-clean.md`**
+- קוד-אחד → אינסוף אפליקציות · superset אחד מלא/נקי/בלתי-שביר · כל חברה נולדת ממנו (כמו MaorClean→MaorHachesed · 396/400 שורות זהות)
+
+**`archive/DIRECTIVE-clean-finish.md`**
+- הבעלים פותח 2 לינקים חיים מאותו קוד (MaorClean→MaorHachesed) — סגירת צד-הצי של תוכנית-Clean.
+
 **`archive/DIRECTIVE-close-web-for-launch.md`**
 - buildsmart-il.com מוכן-להשקה-פומבית השבוע — PWA ממותג ניתן-להתקנה (לא אייקון-Flutter-כחול).
+
+**`archive/DIRECTIVE-deepen-toggles.md`**
+- 🎯 קונפיג שמגיע לכל משטח וכל persona — עשרות טוגלים-דקים (פר-ווידג׳ט/סעיף/תת-יכולת) כמו מאור
+
+**`archive/DIRECTIVE-edit-trigger-keyboard-longpress.md`**
+- מדליק-חזרה את העריכה-על-המסך (שהוקפאה ב-screen-mgmt-s0) עם מיקום-טריגר טוב ואוניברסלי (פותר את בעיית-הלוגו)
+
+**`archive/DIRECTIVE-fake-data-sweep.md`**
+- 100% מידע-אמת: אפס const-שמתחזה-לחי, אפס פקד-מת, אפס מספר-מומצא
+
+**`archive/DIRECTIVE-fittings-phase0A-loop.md`**
+- מודל 'מעלים קובץ → מתחבר לבד': כל שורת-מוצר נושאת {משפחה, מידת-מפתח OD/DN} → הכל נגזר-בחינם מהמנוע
+
+**`archive/DIRECTIVE-giant-phase2-features.md`**
+- 🎯 המנוע-הענק 'מלא' — כל פיצ'ר בפנים, נבחר פר-חברה (מאור=דפוס-מומש-ב-Dart, לא-מועתק)
 
 **`archive/DIRECTIVE-launch-arming.md`**
 - 🎯 כל הפיצ׳רים-הבנויים-המוכנים דלוקים במקום-הנכון על החי — ההפך מ-default-off, הדלקה-מכוונת
 
+**`archive/DIRECTIVE-manager-console-live.md`**
+- כל 5 ה-KPI = מידע-אמת; משנים דאטה בשרת → המספר בלוח משתנה; אפס ערכים-קבועים
+
+**`archive/DIRECTIVE-maor-full-integration.md`**
+- 🎯 הערך-הנשאל-ממאור = 100% בפנים — כל מנועי-מאור הרלוונטיים מוטמעים כדפוסים-ב-Dart
+
 **`archive/DIRECTIVE-order-confirmation-email.md`**
 - 🎯 בסיום-הזמנה נשלח מייל-HTML יפה ללקוח + עותק-לבעלים, מדומיין-מאומת (לתיבה, לא ספאם)
+
+**`archive/DIRECTIVE-screen-management-in-wizard.md`**
+- 🎯 העריכה עוברת לאשף (כניסה משלו) עד שיימצא מיקום-טריגר טוב — ואז מדליקים שוב
+
+**`archive/DIRECTIVE-studio-registry-to-wizard-toggles.md`**
+- אותה שליטה פר-אלמנט של ה-Studio, באותה כמות (~863) — כטוגלי הצג/הסתר מוצגים יפה כאשף, לא כרשימה-הגולמית.
+
+**`archive/DIRECTIVE-wizard-is-the-studio.md`**
+- האשף = כל 5 חלוניות-הסטודיו, מאורגן יפה כמו Maor (מקובץ/עברית/מונחים/נקי); חושפים את הקיים (element_registry ~896 + override-system), לא ממציאים.
 
 **`archive/GO-LIVE.md`**
 - מ-דמו-יפה למוצר-אמיתי: backend חי עם Auth/Firestore, נתונים נשמרים ומסתנכרנים
@@ -1370,8 +1256,17 @@
 **`archive/LAUNCH-CHECKLIST.md`**
 - להשיק את BuildSmart בחנויות (Apple+Google) + web/PWA — קוד-הלקוח הושלם, הבעלים מבצע את הצעדים הלא-קודיים.
 
+**`archive/LAUNCH-MICRO-BREAKDOWN.md`**
+- 🎯 השקה מלאה לחנויות (iOS+Android) · חזון white-label 'קוד-אחד → אינסוף אפליקציות' (Clean)
+
 **`archive/LAUNCH-PLAN.md`**
 - באוויר בשתי החנויות (~3-4 שבועות) + web/PWA חי לקהל השבוע (buildsmart-il.com).
+
+**`archive/LAUNCH-TASKS-MICRO.md`**
+- 🎯 השקה בשתי החנויות בלי placeholders ובלי פספוס-מילימטר — אפליקציה אמיתית מחוברת לשרת
+
+**`archive/LAUNCH-deploy.md`**
+- אפליקציה חיה בדומיין-אמת (buildsmart-il.com) כ-PWA, ובשלב-הבא backend אמיתי — ממוצר-דמו למוצר-אמיתי
 
 **`archive/LAUNCH-server-deploy.md`**
 - 🎯 להעביר את הלייב מדמו לדאטה-אמיתית מ-Firebase (buildsmart-il.com מציג דאטה-אמיתית, לא ריק)
@@ -1382,8 +1277,35 @@
 **`archive/MANAGER-SCREEN-COMPLETE.md`**
 - 🎯 מסך-ניהול מלא-מסך (god-mode CRUD + audit-log + אכיפת-RBAC בשרת) — לא dial (deprecated, אין מוקש-R2)
 
+**`archive/MAOR-REUSE-MAP.md`**
+- 🎯 מכריית ה*דפוס* לא ה*פיצ'ר* (חדר≈רכב) · כל דפוס מעשיר את המנוע → כל חברה מ-Clean מקבלת
+
+**`archive/MASTER-giant-system-order.md`**
+- מנוע-אחד ענק (superset מקסימלי) · חברה=גולמי-נקי+קונפיג+דאטה · קוד-אחד→אינסוף חברות (30 אפליקציות · white-label).
+
 **`archive/METHOD-screen-button-knowledge-map.md`**
 - שום דבר לא נשמט — תיעוד מובנה של כל מסך וכל כפתור (מה-זה · מה-עושה · מצב)
+
+**`archive/PLAN-buildsmart-clean-master.md`**
+- ה-Clean=בסיס גנרי-מלא-בלתי-שביר; כל חברה=בסיס+דאטה+שם+פיצ׳רים-נבחרים · קוד-אחד→הרבה אפליקציות חיות בו-זמנית.
+
+**`archive/PLAN-contractor-completion.md`**
+- לוח-קבלן מלא-מלא — front-end של מוצר אמיתי, parity-מלא לפרוטוטייפ, כל פיצ׳ר עובד, אפס toast-stub
+
+**`archive/PLAN-giant-system-master.md`**
+- מנוע-אחד ענק = superset מקסימלי (כל הפיצ׳רים/המנגנונים/הורטיקלים); כל חברה = קונפיג בורר → אפליקציה רזה-ותפורה. קוד-אחד ⟶ אינסוף חברות
+
+**`archive/PLAN-manager-completion.md`**
+- לוח-מנהל = מסך חדש מלא, בנוי בדיוק כמו לוח-קבלן (אותו דפוס-בנייה), לא עלי-dial
+
+**`archive/PLAN-verticals-and-toggles.md`**
+- 🎯 להפוך Clean מ'פרופיל-בקומפילציה' לפלטפורמה-שמתקינים-לפי-סוג-עסק: חבילת-ורטיקל + טוגלים + מיתוג → אפליקציה תפורה
+
+**`archive/POLISH-BRIEF.md`**
+- 🎯 presentation-polish בתוך POLISH_PROTOCOL — token-binding = safe (אפס שינוי ויזואלי)
+
+**`archive/SERVER-KICKOFF.md`**
+- לחבר את האפליקציה ל-Firebase החי דרך drop-in (_local→_firebase) ב-cache-pattern — ה-interface (sync) וה-UI לא משתנים, הנתונים אמיתיים.
 
 **`archive/SPEC-A4-A6-order-ownership.md`**
 - 🎯 לוחות מסונכרנים לפי זהות-אמת (uid מ-Firebase Auth) — כל נרשם-אמיתי עם role נכנס ללוח שלו
@@ -1391,17 +1313,38 @@
 **`archive/SPEC-ai-assistant.md`**
 - LLM אמיתי (Claude) חי בתוך BuildSmart — עונה בעברית, ממליץ חומרים, מחשב כמויות, בונה הזמנות, עונה על סטטוס, אפס-רגרסיה
 
+**`archive/SPEC-architecture-SDD.md`**
+- 🎯 פלטפורמת B2B לשרשרת-אספקה של אינסטלציה/בנייה (קבלן/חנות/שליח/עובד/מנהל), עברית RTL, נייטיב iOS/Android/Web
+
+**`archive/SPEC-catalog-to-server-MICRO.md`**
+- drop-in דרך Repository (bundled→server) + cache-pattern → UI ומנועים ללא-שינוי · אופליין נשמר · עלות-DB נמוכה.
+
+**`archive/SPEC-cross-persona-chat.md`**
+- דרישת-בעלים verbatim: 'חוצה — אני צריך את אותו מסך צ׳אטים אצל כולם!' — הודעה מ-חנות נראית אצל הקבלן ולהפך
+
 **`archive/SPEC-ring-dive-handoff.md`**
 - גלגל-טבעות כרכיב-לגו שמתברג בלי שכתוב: מעצב חופשי על הוויזואליה, מחווט = adapter אחד, חוזה-קפוא באמצע
 
 **`archive/SPEC-ring-dive.md`**
 - 🎯 עור חדש — לא מנוע חדש · מנוע-הצלילה הקיים נשאר המוח היחיד · אפס לוגיקת-חיפוש חדשה
 
+**`archive/SPEC-server-connect-MICRO.md`**
+- drop-in (_local→_firebase) דרך cache-pattern (sync-reads מ-cache · listeners מ-Firestore · optimistic-writes) → UI ללא-שינוי
+
+**`archive/SPEC-server-connect.md`**
+- להפוך את ה-client (server-ready, Repository 6/6) למוצר-חי עם זהות-אמת + real-time בין-מכשירים + הפרדת-תפקידים נאכפת-בשרת.
+
 **`archive/SPEC-smart-keyboard.md`**
 - חזון-בעלים verbatim: 'התיקון האוטומטי על בסיס האפליקציה' + 'מלא פיצ'רים שאני יכול להוריד אותם למקלדת במקום במסך'
 
+**`archive/SPEC-user-system-MICRO.md`**
+- להשלים את השכבה-המסחרית ולפתוח go-live — חנות מנהלת מלאי לבד דרך משתמש-בעל-חנות.
+
 **`archive/START-HERE-buildsmart-clean.md`**
 - קוד-אחד → אינסוף אפליקציות. מנוע-אב בלתי-שביר מלא-פיצ׳רים בלי-דאטת-חברה — כל חברה נולדת בהחלפת דאטה+שם (כמו MaorClean→MaorHachesed)
+
+**`archive/TASKS-to-full.md`**
+- לוח-קבלן 'מלא מלא' — parity-מלא לפרוטוטייפ, tracks disjoint לפיצול-מקבילי בטוח
 
 **`archive/V2-ROADMAP-visual-ai.md`**
 - מבדלים ל-v2 שחיים בתוך BuildSmart: 3 כלים-מומחים + מנהל (קופיילוט-AI + הצי משתיל API באפליקציה). אין כלי-קסם-אחד-לכל
@@ -1427,181 +1370,69 @@
 **`archive/monster-finder/MONSTER-V3-TEARDOWN-R3.md`**
 - 🎯 מאתר מאוחד + preview על URL אמיתי שהבעלים ירגיש (type נחושת → מוצר-נחושת ב-<=6 taps)
 
+**`reference/01-design-system.md`**
+- לתעד את שפת-העיצוב המלאה (טוקנים·רכיבים·פרסונות) כמקור לתרגום port.
+
+**`reference/02-shell-and-screens.md`**
+- מקור-אמת יחיד — לתעד כל מסך/overlay/handler של אב-הטיפוס verbatim לצורך port.
+
+**`reference/03-data-product-trees.md`**
+- 🎯 עץ-מוצרים חכם: בחירת מוצר-אב מקפיצה את כל האביזרים הנדרשים (must/why = החוכמה שהדמו מוכר)
+
+**`reference/04-data-catalog-variants-tools.md`**
+- לתעד את שכבת-הקטלוג העוטפת את TREES — ארגון-תצוגה / בחירה / תמחור-מידה / מצב-התחלתי / השלמת-כלים.
+
+**`reference/06-logic-settings-projects.md`**
+- לתעד תפקיד+זרימה+חיווט של פונקציות-הלוגיקה (לא העתק-קוד), עם שמות+שורות מדויקים.
+
+**`reference/07-logic-orders-tasks-search.md`**
+- החיפוש מאחד 3 מקורות — יעדי-ניווט (NAV_DESTINATIONS) · אינדקס-תוכן (CONTENT_INDEX) · מוצרי-קטלוג — ל-suggest אחד עם fuzzy
+
+**`reference/08-logic-product-cart-checkout.md`**
+- 🎯 מנוע המלצות-אביזרים (must/why = האביזרים שהצוות תמיד שוכח) + checkout מלא
+
+**`reference/09-logic-cart-notif-onboarding.md`**
+- לתעד את ליבת-הסל, זרימת-checkout, מנוע-ההתראות ו-onboarding verbatim.
+
+**`reference/13-scenarios-courier-registration.md`**
+- פרסונת-שליח מלאה + טיפול פריט-חסר/אזל + רישום/onboarding — parity לפרוטוטייפ
+
+**`reference/14-b2b-supply-chain.md`**
+- 🎯 שכבת-B2B מלאה (שש שירותי-שרשרת) + מתכנן-משלוחים שמשנה את ה-checkout
+
+**`reference/15-finance-site-hubs.md`**
+- לתעד את 2 ה-hubs שמעמיקים את אפליקציית-הקבלן מעבר-לרכש: פיננסים + ניהול-אתר.
+
+**`reference/16-portal-ai-rewards.md`**
+- פורטל-ספק/שליח + מנוע-AI מלא + מרכז-תגמולים — parity לפרוטוטייפ
+
+**`reference/17-security-service-boot.md`**
+- תיעוד verbatim של שכבות-האבטחה/שירות/boot מאב-הטיפוס כמקור-אמת ל-port (INSP-0007/0008), עם ציון מה-ported ומה לא.
+
+**`reference/18-legacy-knowledge-index.md`**
+- ה-WHY מאחורי ה-dial — ADR-001 no-window · ADR-002 dial-pattern (משתמשי-אתר-בנייה: ידיים-מלוכלכות/כפפות/יד-אחת)
+
+**`reference/19-feature-source-matrix.md`**
+- 🎯 מיפוי-מלא של כל פיצ׳ר על-פני 3 המקורות (breadth-הפרוטוטייפ → אפליקציית-אינסטלציה-אמיתית Flutter)
+
+**`reference/20-infra-build-tooling-protocol.md`**
+- לתעד את הליבה-התפעולית — איך 3 המקורות נבנים/נארזים-ל-native/נפרסים/נאכפים.
+
+**`reference/21-protocols-spine-gates-enforcement.md`**
+- 🎯 'הכשלים באו מחוסר-תהליך, לא מחוסר-ידע' — ממשל אכיף-עצמי שמונע ריברטים (הפרת-חוק נתפסת רק ב-checklist, לא בקומפיילר)
+
+**`reference/23-flutter-architecture-state-cardflow.md`**
+- התמונה-המלאה של Flutter — תת-המערכות הפנימיות שלא נכנסו לדלתאות 01-17
+
+**`reference/24-multiagent-governance.md`**
+- 🎯 מפעל-תוכנה אוטונומי — סוכנים בונים את BuildSmart לבד, נשלטים ע"י פרוטוקול-אכיף-עצמי, פיקוח סוכן-על, משתמש כסמכות-עליונה
+
 ## ⚙️ יכולות — כל מה שנבנה/מתואר  (500)
 
 **`00-START-HERE.md`**
 - טבלת-תרגום מאסטר↔תפעולי (T11→Track T1, T12→Track T2 וכו׳)
 - מפת-גישה §4.6: איפה כל כלי באפליקציה (openFinanceHub/openSiteHub/RewardsHubScreen...)
 - מפת-ידע §4.5: איזה דוח-ידע לקרוא לכל track
-
-**`01-design-system.md`**
-- טוקנים: Heebo/Rubik · פלטה teal #1f6f6b + amber #f2a516 + dark-theme + reduce-motion
-- שפת-רכיבים: header/appbar · notif-panel · sheets (overlay/sheet/grip) · budget-box · tree
-- Categories A–J (prefix-CSS): שרשרת-אספקה·פיננסים·ניהול-אתר·UX·פורטל·AI·gamification·אבטחה·שירות (אין D)
-- 4 פרסונות חולקות מעטפת admin: manager(md/mm/mo/mc) · store(sh/so) · courier(ch) · worker(ww)
-- Preact: tokens זהים + סקאלות + מערכת-dial/fab/float נטו-חדשה + screen__bg (bathroom-bg)
-- Flutter: BsTokens (dial-dims/animation) + מותג כתום #FF7A18 + Material3 + RTL + i18n
-
-**`02-shell-and-screens.md`**
-- מסכי onboarding: splash/welcome/login/profession/prep + 4 דשבורדי-פרסונה
-- מעטפת: statusbar · appbar (פעמון+עגלה+notifPanel) · tabbar 5-טאבים
-- views-קבלן: home/catalog/catnav/project/scan/orders/cart/sites/profile/stock/tasks
-- overlays/sheets: בוררי אתר/זמן/יום · תקציב · הגדרות · hubs A–J · עץ-מוצרים · brand/variant/order
-- Preact: dial pattern — מסכים→dials · tabbar→MenuSpeedDial · appbar→FloatingHeader · routing לפי-פרסונה
-- Flutter: מעטפת 4-טאבים (מחלקות·שיחות·התראות·חנות) + CatalogScreen 7,660ש׳ + InstallStudioScreen 3,185ש׳
-
-**`03-data-product-trees.md`**
-- TREES 3 סכמות: pl_* קטלוג-פלסאון (23) · שלבי-פרויקט (5) · מוצרים-עשירים (~26) + 148 אביזרים-נלווים
-- brands[] בחירת-מותג (rec=הבחירה-שלנו ⭐)
-- acc[] עץ-אביזרים (must חובה/אופציונלי, why הסבר)
-- Flutter: קטלוג-אמת 1,877 (Lipskey 935 + Polyroll 772 + Huliot 170)
-- VerifiedSpec (887 static + Polyroll runtime) — מנוע-חיבוריות (ends/material/pressure/WaterSystem)
-- SmartProduct (82 כרטיסים) · catalog_tree (153 CatalogNode)
-
-**`04-data-catalog-variants-tools.md`**
-- CATALOG (6046-6058): אינדקס 11 קטגוריות {cat,icon,items:[product-keys]}
-- VARIANTS (6060-6184): pl_* (23 SKU מידה-נושאת-מק'ט) + rich (~22 ציר-בחירה-אב אחד לכל מוצר)
-- SIZES (6185-6199): מידות-אביזר עם delta-מחיר (delta שלילי = זול יותר)
-- STOCK_DEMO (6202-6214): seed-מלאי warehouse|site per accessory → מזין view-stock
-- TOOLS (6216-6320): כלים-נדרשים per productKey ({name,img,why,price}) ל-~21 מוצרי-אב
-
-**`05-data-orders-projects-ranks.md`**
-- ORDERS: 5 שלבי-בנייה (building/infra/sealing/tiling/finish) עם dep-gates → מזין orderOverlay
-- PROJECTS: 3 אתרים, כל אחד שומר cart+treeProgress משלו · activeProjectId
-- RANKS: 4 דרגות (חדש/קבוע/מועדף/פלטינום) לפי מס'-הזמנות + perk
-- identityStats/currentRank/nextRank/identityAchievements (6 הישגים)
-- פונקציות-מחיר: chosenBrand/chosenVariant/productPrice (brand.price+variant.delta)
-
-**`06-logic-settings-projects.md`**
-- renderSettings: 8 קבוצות+reset (חשבון·התראות·תצוגה·נגישות·אבטחה·שירות·משלוח·אזור·מידע·איפוס)
-- toggleSetting/cycleSetting (haptic+ARIA+toast) · applySettings→DOM · applyEntryMode
-- תקציב: renderBudget · openBudgetEditor/Detail · adjustBudget(±) · category-editor
-- פרויקט-חכם: renderSmartProject (פירוק שלבים→ימי-עבודה) · toggleSmartDay/Step
-- Preact: SETTINGS_ROWS 9 קבוצות + SETTINGS_SUB עץ-dial + LEAF_BINDINGS 72 עלים + inline-edit + PROFILE_TREE
-- Flutter: 4 מסכי-הגדרות native (~140 שדות, persist bs.{catalog/chat/notif/store}-settings.v1)
-
-**`07-logic-orders-tasks-search.md`**
-- הזמנות — renderMyOrders/orderCard/animateShipmentMaps (sheet-מעקב + מפות-SVG מונפשות)
-- מערכת-משימות — state-machine 5-מצבים (pending→active→review→done · rejected→active) · פילטור per-group 3-קבוצות
-- מלאי — moveStock (מחסן↔אתר) · ניווט-קטלוג מדורג (ATTR_SCHEMA 5-צירים · catNav engine)
-- מנוע-חיפוש מאוחד (NAV_DESTINATIONS 18 · CONTENT_INDEX · fuzzy · 3 שורות-חיפוש חולקות מנוע)
-- Preact — search-FAB dial (5 כלים) · Flutter — device-APIs אמיתיים (barcode/voice native)
-
-**`08-logic-product-cart-checkout.md`**
-- DIAGRAMS (דיאגרמת-התקנה פר-מוצר, match[] = מילות-אביזר לשלב)
-- ACC_GROUPS (12 קבוצות פונקציונליות) · ACC_TYPES (ידע-אביזר) · ACC_PRICE_BOOK
-- סורק-תוכניות (PLAN_TYPES/startScan/renderScanResults)
-- computeCheckout — מנוע-חיוב (storeGroups/split-shipment/expressFee/VAT/grandTotal)
-- Flutter: _SmartProductSheet (~2,000ש׳) + InstallStudio (3,185ש׳) = Dijkstra+auto-compliance+BOM+pressure-drop
-- Flutter smart_cart (persist) + checkout (VAT-18, payment)
-
-**`09-logic-cart-notif-onboarding.md`**
-- סל: renderCart (store-group לפי ספק + computeCheckout + ship-plan) · syncOrderToSystem (דוחף ל-SYS_ORDERS) · checkout
-- התראות: seedNotifications (3 seed) · pushNotification · toggleNotifications · notifyOrderStatus · toast · tick
-- onboarding: ONBOARD_SCREENS (10 מסכים) · showScreen · buildPrep · enterApp · enterRole (5 פרסונות)
-- Flutter: notifications_screen (1,081ש׳, קיבוץ-חכם run≥3) · chats_screen (1,437ש׳, auto-reply 900ms) · onboarding ממוקד-קבלן
-
-**`10-engine-pricing-stores-sysorders.md`**
-- STORE_PRICING (מחיר-SKU פר-חנות · אותו SKU עולה-אחרת) · STORES (3, eta עד-שעתיים)
-- VAT_RATE=0.18 (מ-Jan-2025) · SUPPLIER_STORES (s1/s2/s3 + shipping ₪90/65/45) · HAUL_TYPES (small/van+40/truck+90) · EXPRESS_FEE=80
-- SYS_ORDERS_SEED (4 הזמנות: BS-1042/1041/1040/1039) · loadSysOrders/saveSysOrders (persist localStorage)
-- ORDER_STAGE 6-שלבים (new/preparing/ready/pickup/transit/delivered) · STORE_STOCK
-
-**`11-manager-dashboard-selftest.md`**
-- renderMgrDashboard → 📊 לוח-בקרה (hero-הכנסות · 5 metric-tiles · pipeline · chart-קטגוריות · medals)
-- BUTTON_REGISTRY (350 כפתורים {fn,area,does}) · BUTTON_TWINS (דדופ תאומות)
-- runButtonAudit/findDuplicates/checkProductStandard/regCheckProduct
-- משפחות-בדיקה: testButton_/testTen_/testContract_/testFamily_/testCrit_/testImp_/profileButton_
-- display-sync (runDisplaySyncTest) · runRegressionTests · buildRegressionReport
-- Flutter: lib/test_harness/ (11 suites) · regression_panel_screen · 1,539+ בדיקות
-
-**`12-persona-manager-store.md`**
-- מנהל: renderMgrDashboard/mgrToggleAvail/mgrCustomerDetail (בר-אשראי) · 4 sections ניהול-קטלוג · ORDER_FLOW 6-שלבים · mgrAdvanceOrder
-- חנות: renderStoreHome · simulateIncomingOrder · showDeliveryNote (A4) · storeAdvance state-machine (new→preparing→ready)
-- picking-sheet 6 line-states (picked/missing/pending/cancelled/replaced/pendingDecision)
-- heldForMissing / missingResolved / splitInto>1
-- store-portal 8 tools (דירוג-ספקים/SLA/אזורים/הנחות/ברקודים/צי/צ׳אט/עדכון-מלאי)
-- Flutter: role-picker → dashboards (store/courier/worker/manager) מבודדים
-
-**`13-scenarios-courier-registration.md`**
-- פריט-חסר: openMissingDecision/resolveMissingLine/missingProceedWithout/missingReplace + תחליף-כהזמנה-נפרדת
-- אזל-מלאי: openOutOfStockGate/oosSkip/oosReplace + toggleStoreStock (אזל לא מוצג לקבלן)
-- דשבורד-שליח: VEHICLE_RANK{small:0,van:1,truck:2}/vehicleCanCarry/pickCourierVehicle; job≠order (N jobs per-shipment); courierAdvance/deriveOrderStageFromShipments
-- courier-portal 6 tools: ניווט/צי-רכב/SLA/אזורים/POD+צילום/צ'אט; cross-tab sync; registration+onboarding
-
-**`14-b2b-supply-chain.md`**
-- מתכנן-משלוחים מרובה-גלים (cartHasSplit, כמות-לכל-גל, finalizeShipPlanner)
-- RMA (החזרות) · השכרת-כלים (RENTAL_TOOLS) · פקדונות (DEPOSIT_ITEMS)
-- חתימה-דיגיטלית (initSignaturePad/canvas)
-- מרכז-שרשרת + MSDS_SHEETS (גיליונות-בטיחות) · doc-OCR · gov-XML · price-compare · RFQ (מכרז-ספקים)
-
-**`15-finance-site-hubs.md`**
-- פיננסים (fin-*): BUILD_INDEX{121.3→128.7} · PAYMENT_TERMS · subcontractors(3) · approvalQueue(2) · penaltyLedger · FX_RATES; finIndex/finROI/finApprovals/finReports/finFX
-- ניהול-אתר (site*): GANTT_TASKS · SAFETY_TIPS · SITE_TREE(קומה→דירה→חדר) · ARCHIVED_PROJECTS; siteGantt/siteSnagging/siteAttendance/siteDiary/siteSafety
-- 10 כלי-site-hub verbatim (INSP-0037): גאנט·ליקויים·קומה-דירה-חדר·נוכחות-GPS·יומן·בטיחות·תלויות·צילום·ביקורות-מפקח·ארכיון
-
-**`16-portal-ai-rewards.md`**
-- פורטל (F): fleet/autoStock(חידוש-מלאי)/ratings/SLA/zones/bulk(הנחות-כמות)/barcode; chat peer ספק↔קבלן↔שליח
-- חיפוש-fuzzy: levenshtein/fuzzySearchSuggest/homeSearchFuzzy (typo-tolerant)
-- מרכז-AI (G): aiPredictStock/aiBarcodeScan/aiVoiceTask/aiAlternatives/aiPlanScan/aiThreeWay/aiWeather/aiWearDetect/aiAnalytics
-- מרכז-תגמולים (H): awardCoins/rwChallenges/rwLeaderboard/rwGreen/rwCoupons/rwReferral/rwVIP/rwRedeem
-
-**`17-security-service-boot.md`**
-- RBAC_MATRIX (role→permissions[]) · can(perm)/requirePerm · auditLog
-- 5 תפקידים · session-timeouts 5/15/30/60 דק' · encryption×4 · privacy×4 toggles
-- session-lock (resetSessionTimer/lockSession/unlockSession/initSessionTimeout)
-- openSecurityHub → 10 אריחים (2FA/הרשאות/ביומטרי/audit/GPS/session/הצפנה/היסטוריית-כניסות/מכשירים/פרטיות)
-- openServiceHub → 8 אריחים (help-desk/chatbot/דיווח-באג/ממיר-יחידות/מחשבון-כמויות/יומן/לוח-דרושים/סיור)
-- BOT_KB (kw[]→answer) · botReply · botQuick; shake-to-report; qty-calc 3 מצבים; onboarding 6 שלבים
-- boot: global error-catcher (window error → קופסה-אדומה bsFatalError)
-
-**`18-legacy-knowledge-index.md`**
-- ADR-001 No-Window (אוסר חלונות-מלאים) + ADR-002 Dial-Pattern (טור-כפתורים קומפקטי · עיגון-לפי-פינה)
-- RULES.md — 9 כללי-spec ל'איך' (verbatim)
-- dashboards: COURIER/STORE/WORKER/SYSTEM_MANAGER + UI_ARCHITECTURE + ROLE_DRAWER_SYSTEM
-- 43 inspections (INSP-0001→0044) + inspector protocol (FND/FRM/WIR/FIN/OPS)
-
-**`19-feature-source-matrix.md`**
-- Flutter-בלעדי: Install-Studio (Dijkstra/BOM/pressure-drop) · VerifiedSpec (808 specs) · readiness-score
-- chat+notifications כטאבים-מלאים (1437ש׳/1081ש׳)
-- 5 פרסונות מסכים-מלאים · self-test 1,539+ · עולם-116-שערי-פרוטוקול
-- native (mobile_scanner/speech_to_text) · shared_preferences · i18n
-
-**`20-infra-build-tooling-protocol.md`**
-- Preact→Capacitor (appId com.buildsmart.app) + Flutter→native (com.buildsmart.buildsmart) — שני bundle-IDs נפרדים
-- extract-catalog.mjs: index.html → src/data/*.ts מטוייף + base64-JPEGs מוטמעים → public/catalog/*.jpg
-- deploy.yml בונה+פורס 2 אפליקציות ל-Pages (Preact /buildsmart/ · Flutter 3.29.3 /buildsmart/flutter/, force-push .nojekyll)
-- שכבת-אכיפה: .githooks/pre-commit (~100 שערים), pre-push, .claude/hooks, protocol-enforce.yml + preflight.sh
-
-**`21-protocols-spine-gates-enforcement.md`**
-- ~66 שערים פעילים ב-pre-commit + 8 CI + ~8 pre-push + 1 commit-msg
-- 5 שלבי-Checklist: FND/FRM/WIR/VRB/OPS (רק שלבים שה-diff נגע)
-- catalog_qa.py (100+ כללים · audit/selftest/fix/truthcheck/crosscheck)
-- mutation_test.py + mutation_hard_test.py (40 מוטציות מוכיחות שהשער תופס)
-- gen_version.sh (version.g.dart idempotent · פותר conflict-magnet)
-- 4 שכבות: git-hooks · claude-hooks (pre-tool חוסם 10 וקטורי-עקיפה) · auto-restoration · GitHub-Actions
-
-**`22-protocols-agents-process-specialized.md`**
-- 6 סוכנים (פרוטוקוליסט/קטלגן/סדרן/מקבץ/בנצי/ליטוש) עם בעלות-עריכה + איסורים
-- PLAYBOOK: NO-STOPPING · push-מילולי · cadence · sub-agents · hook-bug-loop
-- VERIFICATION_PROTOCOL L0–L7 (static/regression/wiring/harness/mutation/build/visual/knowledge/hooks)
-- ~10 פרוטוקולים-ייעודיים (SIZE_FILTER/CATALOG-CARD/CATALOG/LAUNCH_READINESS/POLISH/IMPROVEMENTS)
-- stuck_log (65 רשומות · 52 ANTIPATTERN-regex → 64 בדיקות auto-gen)
-- 15 ADRs (D-001..D-015) · CARRY_FORWARD 74 לקחים · KNOWLEDGE_AUDIT 76 מסמכים
-
-**`23-flutter-architecture-state-cardflow.md`**
-- 3 עמודי-נתונים: kCatalogProducts (1,877) · kVerifiedSpecs (808+ · מנוע-חיבוריות) · kSmartProducts (82)
-- state-model: 50 providers ב-state/ (114 repo-wide) · persist bs.*.v1
-- כרטיס-מוצר-חכם CARD_FLOW (42 אלמנטים) = 'מוח-הידע' (_SmartProductSheet)
-- HELPER_INDEX — 43 helpers ציבוריים (related_info.dart 1528ש')
-- 5 מנועי-לוגיקה: install_engine (Dijkstra) · pressure_drop (Darcy-Weisbach) · install_kit · price_estimate · system_division
-
-**`24-multiagent-governance.md`**
-- Supervisor: 10-step decomposition · spawns ≤3 sub-agents · Glob mutual-exclusion · fallback-chain · context מלא
-- 6 תת-סוכנים בעלות-תחום: פרוטוקוליסט/קטלגן/סדרן/מקבץ/בנצי/ליטוש
-- registry-as-source-of-truth (protocol/gates.tsv)
-- ran-ledger (K3) · content-hash pinning (K4, SHA)
-- orchestrator-kit v2: central-verify.sh (analyze+test+build+conformance+required-tests) · ckpt.sh · grep-verify.sh · ff-push.sh · perfect-agent/ (self-spec 9-ממדי)
 
 **`CATALOG-3D-100-STEPS.md`**
 - פאזה 0 — מנוע-אביזרים generate(family,od)→dims (Dart טהור · 10 משפחות · שער #124)
@@ -1638,26 +1469,10 @@
 - פאזה N — גרף-מסע (Navigator 1.0) + 3 המשטחים העוקפים (IndexedStack/enum-provider/opening-flow)
 - פאזות async/S/W(Preact)/B(backend)
 
-**`DIRECTIVE-U3-store-ownership.md`**
-- U3.1 מנגנון-בעלות (setRole+storeId claim · ownerUid ל-Store · myStoreProvider)
-- U3.2 אכיפת-כתיבה (rule inventory owner-gated · /stores update→ownerUid)
-- U3.3 חיווט-UI (supplier_onboarding כותב תחת storeId · מסך-מלאי self-manage · isolation)
-
-**`DIRECTIVE-arm-wizard-preview.md`**
-- אשף הקמת-חברה (כרטיס '🔌 אשף הקמת חברה' בדשבורד-מנהל)
-- בחירת חבילת-ורטיקל · כיבוי/הדלקת 13 מודולים · עריכת 6 מונחים · מתן שם-חברה
-- 'שמור והפעל' → האפליקציה מתכווננת חי (אפס-ריסטארט)
-
 **`DIRECTIVE-atom-tooling.md`**
 - מפרק: אטומים (composer+section-widgets) · node (Text/CfgText literals + registry-ID מוצלב מול element_registry) · edges (reads/writes/actions/uses/gated-by) · flows (trigger→verb/rule/formula→effect) · floor
 - מחולל: reads→watched · writes→state-set · action→nav/sheet · registry-ID→wired · gated→shrink · rule→cond-אמת/שקר · formula→I/O · verb→אפקט
 - אינטרפול: גרף = JSON (מכונה) + Markdown (אדם, פורמט מסך-1)
-
-**`DIRECTIVE-buildsmart-clean.md`**
-- דגל APP_PROFILE (בוחר Clean / חברה-נוכחית)
-- שכבת-config מתחלפת אחת פר-פרופיל (קטלוג-מהשרת · מיתוג-Studio/tokens · רשומות per-tenant orgId)
-- פרופיל-Clean (קטלוג-גנרי-ריק · מיתוג-נייטרלי · אפס-רשומות · כל-היכולות דלוקות)
-- בידוד-דייר קשיח (orgId · נאכף-בשרת)
 
 **`DIRECTIVE-catalog-replace.md`**
 - נירמול CSV → catalogProducts (sku/nameHe/categoryHe/categoryEmoji-נגזר/dims לצירי-צלילה/imageFile={sku}.jpg)
@@ -1667,117 +1482,12 @@
 - החלפה מדורגת 5%→100% + rollback היפוך-דגל
 - תמונות ל-R2 ({sku}.jpg, תמונה-חסרה→fallback לאימוג'י)
 
-**`DIRECTIVE-clean-finish.md`**
-- דיפלוי APP_PROFILE=clean לערוץ-Firebase-Hosting נפרד (hosting:channel:deploy) → לינק חי
-- חברת-דמו #2: AppBrand שם+מיתוג-שונה + קטלוג-מוחלף (seam 3.1c) → לינק שני
-
-**`DIRECTIVE-deepen-toggles.md`**
-- חיווט featOn/termOf לכל משטח בכל persona (קבלן/מנהל/ספק/שליח/עובד/קטלוג/פיננסים/תגמולים/אתר/תפריט/מקלדת)
-- עץ עמוק module→features באשף (accordion → SwitchListTile מקונן, module-off מאפיל על ילדיו)
-- מיפוי-ייצוגי: manager (attention/kpi/pipeline/copilot...) · catalog · store · courier · finance · rewards · home
-
-**`DIRECTIVE-edit-trigger-keyboard-longpress.md`**
-- טריגר = long-press על kKbGlobal FAB → טוגל editMode on/off (לחיצה-רגילה = מקלדת-כרגיל)
-- ✎ (עיפרון) פעיל נדלק מעל cart-FAB כאינדיקטור מצב-עריכה (רק-לבעלים)
-- un-freeze studio_overlay (בלי-באנר · רק-✎-מעל-הסל כש-isEditing)
-
-**`DIRECTIVE-fittings-phase0A-loop.md`**
-- פאזה 0 (1–12): פורט generate(family,od)→dims + familyOf/odOf (>95% זיהוי) + golden-test 627 מוצרים
-- פאזה A (13–26): familySpecFor→VerifiedSpec + registerFamilySpecs putIfAbsent (main.dart:260)
-- משפחה ראשונה PP-R (plumbing_trade_seed)
-- דוח-כיסוי-קטלוג ({משפחה+OD} פר-מוצר; ~1,623/1,867 כבר עם specs)
-
 **`DIRECTIVE-fittings-phaseB-depth.md`**
 - 27 קצוות (EndType:24 · bspMale/Female · directMatesWith)
 - 28 גיאומטריה-envelope (F/z/l/קוטר) · 29 אדפטרים בין-משפחתיים (PP-R↔פליז↔נחושת)
 - 30 connectionMethodLabel:111 נגזר ('ריתוך-שקע 260°C') · 31 פרמטרי-ריתוך (DVS 2207-11) פר-קוטר
 - 32 בטיחות → lineComplianceChecklist:194 (קו-חם → PRV/מיכל/אל-כוויה)
 - 33 אורך-חיתוך (ניכוי-Z) · 34 תמיכות+מבחן-לחץ 1.5× + תקנים (DIN 8077/8078/ISO 15874/DVS) · 35 ניואנס-אזורי
-
-**`DIRECTIVE-giant-phase2-features.md`**
-- ג1: מנוע-התראות (manager.attention) + מנוע-workflow (workflow, ayin-pattern)
-- ג2 CRM: ישות-לקוח+dedup (customers) · חיפוש-סובל-שגיאות (search.fuzzy) · finder (customers.finder) · RFM (scoring)
-- ג3: רופא-נתונים (dataDoctor) · validators (ח"פ-fix) · קבלות+מספור-רץ (receipts) · ייצוא-CSV (export)
-- ג4: תזמון-משאב (fleet.dispatch) · מכסה-מראש (prepaidCredit) · חזרתיות (scheduling) · ציר-זמן (timeline)
-
-**`DIRECTIVE-manager-console-live.md`**
-- drill-down onTap לכל _MetricTile/_PipelineRow → מסך/רשימה-מסוננת
-- _LivePill קשור לסטטוס-קישוריות אמיתי (ירוק/אדום)
-- קו-פיילוט 🤖 מחזיר תשובה אמיתית
-
-**`DIRECTIVE-maor-full-integration.md`**
-- חיבור workflow_engine (#2, kernel בנוי רק-טסט) לצינור הזמנות/משימות/גבייה
-- מספור-רץ (#13) + core.cashbox קופה-רושמת/POS לספק
-- כלי מיזוג-כפילויות (dedup) — מצא+מזג לקוחות/SKU קיימים
-- ציר-זמן-נגזר (#7) + core.doncal heatmap-חודשי
-- core.timer חיוב-לפי-זמן (rate×time→₪) · core.bodymap punch-list אתר
-- credit-עם-יומן (#4) + tiers זהב/כסף/ברונזה
-
-**`DIRECTIVE-screen-management-in-wizard.md`**
-- מודל-סקציות-פר-מסך אחד (סדר+הסתר, persist, לא-הרסני)
-- אשף כניסת 'ניהול מסכים': רמה-1 רשימת-מסכים (סדר/הסתר מסך) → רמה-2 עורך-סקציות
-- הוסף 'הסתר' למנהל-הבית (home_content_reorder)
-- מקלדת-פר-מסך נערכת בתוך עורך-המסך
-
-**`DIRECTIVE-studio-registry-to-wizard-toggles.md`**
-- מחזור element_registry (~863) → טוגלי הצג/הסתר ב-OrgConfig
-- תצוגה: קיבוץ מסך→סעיף (אקורדיון) · שם-עברי labelHe (לא מזהה-טכני) · שורת-חיפוש
-- כל משטח בודק את הטוגל שלו ב-build() דרך org_gates (degrade-graceful)
-
-**`DIRECTIVE-wizard-is-the-studio.md`**
-- מודול קבלן 👷 כמודול #1 ב-org_modules — מקבץ מסכי-הקבלן (home/smart_home/tools/hr/attendance/material_requests/reorder)
-- סקציות פתוחות-לגלילה (אקורדיון עצל) + מונה N/N + טוגל-אב 'פעיל' + 'סמן הכל/נקה הכל' + מונה גלובלי 'X מתוך 896'
-- חיפוש+צ'יפים = מסננים (לא תנאי-הצגה)
-- מפקח פר-רכיב contextual לפי ElementKind (text 837/action 57/container 1) — שם/צבע/fontSize/weight/align/direction/הצג-הסתר
-- מונחים שזורים (termOf) + '→ תצוגה' חיה
-- 🔎 מצא-החלף גלובלי (החלף בכל/בנבחרים ב-batch)
-- 🕘 גרסאות (כל 'פרסם לכולם'=snapshot; 'שחזר' לא-הרסני)
-- הכל-חי בכל-האפליקציה (org_gates watch/build, אפס-ריסטארט, בכל persona/מסך)
-
-**`LAUNCH-MICRO-BREAKDOWN.md`**
-- Phase A ליבת-uid (scoped queries · סנכרון הזמנות+צ׳אט per-uid)
-- עוזר Claude אמיתי (functions/src/claude.ts) + ~15 פיצ'רי ✨ + agentic
-- מקלדת-חכמה live-DIVE (word_finder)
-- Ring-DIVE גלגל-קטלוג מעגלי + עגלה מצטברת
-- Studio No-Code / אשף-הקמה (element_registry ~896 → טוגלים)
-- מעבר קטלוג→שרת C1-C5 (3,614 מסמכים · מחיר-אמת רב-חנותי)
-- מערך-משתמשים U0-U5 (RBAC · מחיקת-חשבון deleteAccount)
-- BuildSmart Clean (empty-shell) + 2-לינקים (Clean+BuildMax) הוכחת קוד-אחד
-- 760 תמונות-אמת חיות · חיפוש-על גלובלי · PlainDive מאתר-פשוט
-
-**`LAUNCH-TASKS-MICRO.md`**
-- Phase A ליבת-uid (scoped-query, auth.uid ל-repos, orders/chat/customers ownership)
-- Phase B ניקוי placeholders (~35 בקרוב + ~60 הגדרות)
-- Phase C חומרה (image_picker/camera, R2 upload, share_plus)
-- Phase D תשלום (סליקה ישראלית + checkout)
-- Phase F הקמת-נייטיב (iOS+Android Firebase, App Check, מחיקת-חשבון)
-- Phase G הקשחת-שרת (אינדקסים, Security Rules, Crashlytics)
-- Phase H QA · Phase I משפטי · Phase J נכסי-חנות+הגשה
-
-**`LAUNCH-deploy.md`**
-- deploy אוטומטי (firebase-hosting.yml: build base-href / → deploy live)
-- custom domain + SSL אוטומטי מ-Firebase
-- PWA installable על buildsmart-il.com
-
-**`MAOR-REUSE-MAP.md`**
-- מנוע 'דורש-טיפול' (#1) → manager_dashboard_state (stub 9 שורות)
-- מנוע-workflow מגודר (#2, ayin.ts) → צינור-גבייה finance_hub
-- ישות-לקוח שמורה + dedup (#3) · RFM + ציון-אשראי-עם-יומן (#4)
-- חיפוש סובל-שגיאות Levenshtein+תעתיק cohen↔כהן (#5)
-- linter-איכות-נתונים (#10) · ציר-זמן-משאב+blackout (#8) · מספור-מסמכים-רץ (#13)
-- קונפיג-לכל-ארגון + featureOn מדורג + מטריצת-טוגלים e2e
-
-**`MASTER-giant-system-order.md`**
-- registry קיים (~863 של ה-Studio, element_registry.dart) כמקור-הטוגלים
-- שלד-הענק (giant-v1..v6.1): OrgConfig · org_gates (featOn/termOf) · vertical_packs (6) · org_setup_wizard
-- Phase-2: attention_engine · workflow_engine · CRM (RFM · תיקון-באג-ח״פ · normalizePhone) · data-quality · קבלות
-- מרכז-שליטה: דשבורד-מנהל 5-טאבים + Trade-Builder (עורכים-אמיתיים חבויים) + 2 Studioים (~863 registry)
-
-**`MICRO-TASKS.md`**
-- A · אימות-עומק per-tool (Finance 10 · Site 10 · T3 9) — ודא מספר/טקסט verbatim מול [L#]
-- B · T7 צ׳אט חוצה-פרסונות (CH-1 engine → CH-2 seed → CH-3 ChatsScreen → CH-4 חיווט)
-- C · server-ready 6/6 (per-domain Repository) — בוצע 07-08
-- D · ליטוש (צבעים→BsTokens · Semantics · touch≥44 · 0 שאריות-R ב-knowledge · audit-verdict)
 
 **`MILESTONE-LOG.md`**
 - פאזה-0 (fittings): פורט-מנוע PP-R + golden 1:1 + familyOf/odOf 99% כיסוי; Protocol Enforcement 788
@@ -1790,119 +1500,10 @@
 - 🔧 פרוטוקוליסט → מנוע-טהור generate(family,od) שרץ על כל קטלוג
 - כפתור מחק-והזרם (wipe+ingest) · מאמת-פורמט (schema-validator)
 
-**`PLAN-buildsmart-clean-master.md`**
-- שלב 1 מנוע-אמת (מיגור פייק): מנהל·חנות·פיננסים·שליח+פורטל-ספק·בית/תגמולים/אתר · פקדים-מתים
-- שלב 2 חוסן: סבילות-דאטה (ריק/חסר/מעוות/ענק) · בידוד-דייר · server→cache→bundled · קנה-מידה
-- שלב 3 הפרדה: קטלוג-מקור-מתחלף · מיתוג-config · orgId per-tenant · איחוד-דגלים→APP_PROFILE
-- שלב 4 פרופיל clean (קטלוג-ריק·מיתוג-נייטרלי·כל-היכולות-דלוקות) + דיפלוי-לינק
-- שלב 5 חברה #2 (החלפת קטלוג+שם) → שני לינקים חיים
-
-**`PLAN-contractor-completion.md`**
-- T0 תשתית-data (seeds+helpers verbatim: PLAN_TYPES/STORE/ORDER_STATUS/SAFETY_TIPS)
-- T1 קטלוג ⋮ חלופות-זולות (cheaperAlternativeBrand)
-- T2 קטלוג ⋮ השוואת-מחירים (bestStore, ≥3 חנויות, הזול מודגש)
-- T3 קטלוג ⋮ סרוק-תוכנית (4 plan-types → zones/items → סל)
-- T4 טאב-חנות 6 שירותים (השכרה/פקדונות/RMA/RFQ/MSDS/השוואה)
-- T5 מעקב-הזמנה + תעודת-משלוח (OCR מדומה)
-- T6 התראות-תקציב (80/90/100%) + בטיחות (SAFETY_TIPS×5)
-- T7 ⋮ actions השתק/סמן/נקה על state אמיתי
-- T9 3 פרסונות כמסכים-מלאים (חנות/שליח/עובד) + מנוע-הזמנות משותף
-- T11–T22 שלב-ב: פיננסים/אתר/מלאי/סריקה/AI/פרויקטים/משימות/פרויקט-חכם/תקציב/תוכן-בית/מועדון
-
-**`PLAN-giant-system-master.md`**
-- Phase 1: OrgConfig ריצתי + featureOn/moduleOn + termOf (מיתוג-מחדש)
-- Phase 2 superset: CRM/customers · manager.attention · workflow (מכונת-מצבים) · dataDoctor · scoring (RFM) · קבלות/ייצוא-CSV/validators
-- Phase 3: VerticalPack + applyVerticalPack + אשף-הקמה (מנהל-על מקים חברה בלי-קוד)
-- Phase 4: חוקי-ברזל בקנה-מידה · toggle-matrix e2e · מודולריזציה-הדרגתית
-- Phase 5: כמה-ורטיקלים-חיים בו-זמנית + תפעול 30-אפליקציות
-
-**`PLAN-manager-completion.md`**
-- M2: 5 metric-tiles + order-pipeline (הזמנות-פתוחות/קטלוג/אביזרים/זמינים/חנויות)
-- M3: רשימת-הזמנות לפי 6 שלבים + קידום god-mode (mgrAdvanceOrder)
-- M4: רשימת-לקוחות + מצב-אשראי (בר-אשראי, כרטיס-לקוח)
-- M5: 5 כלי-ניהול (עץ-מוצרים/מותגים-מחירים/קטגוריות/הגדרות/בדיקות-רגרסיה)
-
-**`PLAN-verticals-and-toggles.md`**
-- V1 OrgConfig model + loader null-safe (override→org→DEFAULT) + orgConfigProvider
-- V2 featureOn (טוגלים גרנולריים, cascade) + מיפוי-מודולים+פיצ'רים + toggle-matrix e2e
-- V3 termOf (מילון-מונחים, מיתוג-מחדש פר-ורטיקל)
-- V4 VerticalPack + applyVerticalPack (החלפה מלאה terms+modules)
-- V5 אשף-הקמה (מנהל-על) + ייבוא/ייצוא-config
-- V6 הוכחה: חברה-שנייה בורטיקל-שונה → לינק
-
-**`POLISH-BRIEF.md`**
-- P-4 הסרת go_router dead-dependency (✅ בוצע)
-- P-3 typography → BsTokens (✅ בוצע: toast.dart · chain_diagram.dart)
-- P-2 a11y/Semantics בכל-המסכים (✅ בוצע)
-- P-5 ניקוי-knowledge (Phase K) — סגירת מחיקת-פרוטוקול-R + audit (🔲)
-- P-1 ~1,187 Color(0x קשיחים → BsTokens (🔲, מטרה-נעה)
-
 **`README.md`**
 - אינדקס דוחות 01–23 + טווחי-מקור פר-דוח
 - מפת-ניווט JS (5440–22414): שמות-מבני-נתונים + שורות (lookup מהיר)
 - 3 מקורות מאומתים: אב-טיפוס (100% נלכד) · Preact (55/15,841) · Flutter (~172 קבצים, קוד=SSOT)
-
-**`SERVER-KICKOFF.md`**
-- base FirestoreCachedRepo<T> (cache-pattern, all() נשאר sync) + pilot=orders
-- S3 ×6 repos מקבילי: orders·customers·catalog·site·stock·finance
-- S4 real-time (chat threads/messages · orders snapshots) · S5 Security Rules + emulator-tests · S6 FCM · S7 R2 · S8 Functions · S9 offline
-
-**`SPEC-architecture-SDD.md`**
-- קטלוג + 4 מאתרים מעל מנוע-צלילה אחד
-- מקלדת-כרטיס צפה = מנווט (global overlay, live-mirror)
-- חיפוש-על 7 דומיינים (fuzzy+ranking)
-- Studio No-Code (861 CfgText, WYSIWYG, shared-sync)
-- מנהל 4-טאבים god-mode · דשבורדי חנות/עובד/שליח
-- מנוע-הזמנות (מכונת-מצבים 6-שלבים חוצה-תפקידים)
-- מנועים: צלילה (info-gain/Shannon) · תאימות (compatibleWith) · עבודות (recipe) · חיפוש (fuzzy+סלנג)
-
-**`SPEC-catalog-to-server-MICRO.md`**
-- 5 collections: products·verified_specs·recipes·stores·inventory
-- cache-pattern: הורדה-פעם-אחת → מקומי · sync-reads · re-sync רק ב-updatedAt
-- שכבת-חנויות אמיתית: Store{id,name,area,logo,contact} + Inventory{storeId,sku,price,stock} + מנוע השוואת-חנויות
-- טופס-העלאה-ספק (16 שדות + מפרט-חיבורים + מחיר/מלאי) + ייבוא-המוני CSV/Excel
-- barcode→sku (אופציונלי)
-
-**`SPEC-cross-persona-chat.md`**
-- CH-1 chatEngineProvider (state/sys_chat.dart · StateNotifier · persist bs.sys-chat.v1)
-- CH-2 seed שיחות-דמו חוצות (data/chat_seeds.dart)
-- CH-3 הכללת המסך ל-ChatsScreen(persona) — reuse-UI
-- CH-4 חיווט 5 פרסונות (persona_portal → push)
-- CH-5 קישור-להזמנה (אופציונלי · thread פר-הזמנה)
-
-**`SPEC-server-connect-MICRO.md`**
-- S0 הקמת-Firebase (flutterfire configure · deps · init · App Check)
-- S1 Authentication (Phone OTP · Email-fallback · authStateProvider · role מ-custom-claims · מחיקת-חשבון)
-- S2 cache-pattern (FirestoreCachedRepo<T> base · pilot orders)
-- S3 6 repos _firebase (orders/customers/catalog/site/stock/finance · drop-in)
-- S4 real-time (chatThreads/chatMessages/orders snapshots · בדיקה-דו-מכשירית)
-- S5 Security-Rules RBAC + emulator-tests · S6 FCM · S7 R2 · S8 Cloud-Functions · S9 offline/sync
-
-**`SPEC-server-connect.md`**
-- Firebase Auth OTP-טלפון + מייל-fallback + custom-claims (role: contractor/store/courier/worker/manager)
-- Firestore offline-persistence + snapshots()→cache→UI (real-time חי)
-- Repository _firebase drop-in (מחליף _local, אותו interface: all/open/place/advance/setStage/credit/move)
-- collections: users/orders/customers/projects/tasks/stock/chatThreads(participants[])/chatMessages/siteNodes
-- Security Rules per-domain (chat=participants-only, credit=manager+owner, orders=stage-per-role, roles=admin-only)
-- App Check · FCM push · Cloud Functions (validation/credit-calc/triggers) · R2 images · offline-queue ל-batch-order
-
-**`SPEC-user-system-MICRO.md`**
-- U0: class BsUser + FirestoreUsersRepository + currentUserProvider + Security-Rules users
-- U1: enums BsRole/Permission + roleToPermissions + hasPermission/requirePerm (role מ-custom-claims)
-- U3: setRole+storeUid · stores.ownerUid · myStoreProvider · isolation פר-חנות
-- U2: הרשמה per-persona + שדרוג-אנונימי (linkWithCredential) + onboarding-חנות
-- U4: users-admin (רשימה/חיפוש) · הקצאת-תפקיד · השעיה · תור-אישור (roleRequests)
-- U5: עריכת-פרופיל · מחיקת-חשבון · logout · השעיה בזמן-אמת · GDPR-export
-
-**`TASKS-to-full.md`**
-- B0 תשתית-data (seeds verbatim: PROJECTS/SITE_TREE/STOCK_DEMO/TASKS/GANTT/snagList...)
-- T1 מרכז-פיננסים (10 · proto §4) · T2 ניהול-אתר (10 · proto §5)
-- T3 פיצ׳רים-חסרים (משימות/פרויקט-חכם/תקציב/מלאי/סריקה/פרויקטים/מועדון/AI/תוכן-בית)
-- T4 43 סטאבים-היקפיים (chats/camera/settings)
-- T5 פרסונה-דחויים (ליקוט/פריט-חסר/פיצול/POD/persistence)
-- T6 server-ready (Repository pattern per-domain)
-- T7 צ׳אט חוצה-פרסונות (sys_chat, standalone מבודד)
-- Track S חיבור-שרת Firebase+R2 (S0–S9, phase-2)
 
 **`archive/APP-SPEC-detailed.md`**
 - קטלוג 1,877 מוצרים + הזמנת-רץ (Batch Order) — החוויה המרכזית
@@ -1946,12 +1547,54 @@
 - pending-gate (status==pending חסום מפעולות, עיון-קטלוג פתוח)
 - claims force-refresh (getIdToken(true)) → role מיידי בלי re-login
 
+**`archive/DIRECTIVE-U3-store-ownership.md`**
+- U3.1 מנגנון-בעלות (setRole+storeId claim · ownerUid ל-Store · myStoreProvider)
+- U3.2 אכיפת-כתיבה (rule inventory owner-gated · /stores update→ownerUid)
+- U3.3 חיווט-UI (supplier_onboarding כותב תחת storeId · מסך-מלאי self-manage · isolation)
+
+**`archive/DIRECTIVE-arm-wizard-preview.md`**
+- אשף הקמת-חברה (כרטיס '🔌 אשף הקמת חברה' בדשבורד-מנהל)
+- בחירת חבילת-ורטיקל · כיבוי/הדלקת 13 מודולים · עריכת 6 מונחים · מתן שם-חברה
+- 'שמור והפעל' → האפליקציה מתכווננת חי (אפס-ריסטארט)
+
+**`archive/DIRECTIVE-buildsmart-clean.md`**
+- דגל APP_PROFILE (בוחר Clean / חברה-נוכחית)
+- שכבת-config מתחלפת אחת פר-פרופיל (קטלוג-מהשרת · מיתוג-Studio/tokens · רשומות per-tenant orgId)
+- פרופיל-Clean (קטלוג-גנרי-ריק · מיתוג-נייטרלי · אפס-רשומות · כל-היכולות דלוקות)
+- בידוד-דייר קשיח (orgId · נאכף-בשרת)
+
+**`archive/DIRECTIVE-clean-finish.md`**
+- דיפלוי APP_PROFILE=clean לערוץ-Firebase-Hosting נפרד (hosting:channel:deploy) → לינק חי
+- חברת-דמו #2: AppBrand שם+מיתוג-שונה + קטלוג-מוחלף (seam 3.1c) → לינק שני
+
 **`archive/DIRECTIVE-close-web-for-launch.md`**
 - אייקוני-מותג כתומים (Icon-192/512/maskable + favicon.png + apple-touch-icon)
 - manifest.json ('בנייה חכמה', theme_color כתום, background_color, display standalone, icons מלאים)
 - index.html (title/description/lang he/dir rtl/apple-mobile-web-app-capable+title+status-bar)
 - splash ממותג + באנר 'הוסף למסך הבית' (install-prompt)
 - OG-tags (og:title/description/image) לשיתוף-לינק
+
+**`archive/DIRECTIVE-deepen-toggles.md`**
+- חיווט featOn/termOf לכל משטח בכל persona (קבלן/מנהל/ספק/שליח/עובד/קטלוג/פיננסים/תגמולים/אתר/תפריט/מקלדת)
+- עץ עמוק module→features באשף (accordion → SwitchListTile מקונן, module-off מאפיל על ילדיו)
+- מיפוי-ייצוגי: manager (attention/kpi/pipeline/copilot...) · catalog · store · courier · finance · rewards · home
+
+**`archive/DIRECTIVE-edit-trigger-keyboard-longpress.md`**
+- טריגר = long-press על kKbGlobal FAB → טוגל editMode on/off (לחיצה-רגילה = מקלדת-כרגיל)
+- ✎ (עיפרון) פעיל נדלק מעל cart-FAB כאינדיקטור מצב-עריכה (רק-לבעלים)
+- un-freeze studio_overlay (בלי-באנר · רק-✎-מעל-הסל כש-isEditing)
+
+**`archive/DIRECTIVE-fittings-phase0A-loop.md`**
+- פאזה 0 (1–12): פורט generate(family,od)→dims + familyOf/odOf (>95% זיהוי) + golden-test 627 מוצרים
+- פאזה A (13–26): familySpecFor→VerifiedSpec + registerFamilySpecs putIfAbsent (main.dart:260)
+- משפחה ראשונה PP-R (plumbing_trade_seed)
+- דוח-כיסוי-קטלוג ({משפחה+OD} פר-מוצר; ~1,623/1,867 כבר עם specs)
+
+**`archive/DIRECTIVE-giant-phase2-features.md`**
+- ג1: מנוע-התראות (manager.attention) + מנוע-workflow (workflow, ayin-pattern)
+- ג2 CRM: ישות-לקוח+dedup (customers) · חיפוש-סובל-שגיאות (search.fuzzy) · finder (customers.finder) · RFM (scoring)
+- ג3: רופא-נתונים (dataDoctor) · validators (ח"פ-fix) · קבלות+מספור-רץ (receipts) · ייצוא-CSV (export)
+- ג4: תזמון-משאב (fleet.dispatch) · מכסה-מראש (prepaidCredit) · חזרתיות (scheduling) · ציר-זמן (timeline)
 
 **`archive/DIRECTIVE-huliot-images.md`**
 - שלב 0: חילוץ-אמין מ-catalogProducts בשרת / materialize (לא regex sku:)
@@ -1963,11 +1606,45 @@
 - ארם דגלי-קומפילציה: ORG_CONFIG (תנאי-לכל-השאר) · USER_SYSTEM (RBAC) · UID/ORG_SCOPED_QUERIES (בידוד-דייר) · SERVER_CALLABLES · CATALOG_SERVER_SEARCH
 - ארם org-config של BuildSmart: manager.customers (CRM/לקוחות) · ייבוא-לקוחות · מסמכים (חשבונית/קבלה/תעודת-משלוח)
 
+**`archive/DIRECTIVE-manager-console-live.md`**
+- drill-down onTap לכל _MetricTile/_PipelineRow → מסך/רשימה-מסוננת
+- _LivePill קשור לסטטוס-קישוריות אמיתי (ירוק/אדום)
+- קו-פיילוט 🤖 מחזיר תשובה אמיתית
+
+**`archive/DIRECTIVE-maor-full-integration.md`**
+- חיבור workflow_engine (#2, kernel בנוי רק-טסט) לצינור הזמנות/משימות/גבייה
+- מספור-רץ (#13) + core.cashbox קופה-רושמת/POS לספק
+- כלי מיזוג-כפילויות (dedup) — מצא+מזג לקוחות/SKU קיימים
+- ציר-זמן-נגזר (#7) + core.doncal heatmap-חודשי
+- core.timer חיוב-לפי-זמן (rate×time→₪) · core.bodymap punch-list אתר
+- credit-עם-יומן (#4) + tiers זהב/כסף/ברונזה
+
 **`archive/DIRECTIVE-order-confirmation-email.md`**
 - פונקציית-מייל (functions/src/orderEmail.ts או הרחבת orderFlow.ts) — Firestore onCreate order-doc / מ-placeOrder
 - תבנית-HTML יפה RTL: מס'-הזמנה · תאריך · פרטי-לקוח · טבלת-מוצרים · סה"כ · לוגו-כתום
 - נמענים: לקוח (customer.email) + עותק-לבעלים (תמיד)
 - הכנת רשומות-DNS (SPF/DKIM/DMARC) ל-buildsmart-il.com
+
+**`archive/DIRECTIVE-screen-management-in-wizard.md`**
+- מודל-סקציות-פר-מסך אחד (סדר+הסתר, persist, לא-הרסני)
+- אשף כניסת 'ניהול מסכים': רמה-1 רשימת-מסכים (סדר/הסתר מסך) → רמה-2 עורך-סקציות
+- הוסף 'הסתר' למנהל-הבית (home_content_reorder)
+- מקלדת-פר-מסך נערכת בתוך עורך-המסך
+
+**`archive/DIRECTIVE-studio-registry-to-wizard-toggles.md`**
+- מחזור element_registry (~863) → טוגלי הצג/הסתר ב-OrgConfig
+- תצוגה: קיבוץ מסך→סעיף (אקורדיון) · שם-עברי labelHe (לא מזהה-טכני) · שורת-חיפוש
+- כל משטח בודק את הטוגל שלו ב-build() דרך org_gates (degrade-graceful)
+
+**`archive/DIRECTIVE-wizard-is-the-studio.md`**
+- מודול קבלן 👷 כמודול #1 ב-org_modules — מקבץ מסכי-הקבלן (home/smart_home/tools/hr/attendance/material_requests/reorder)
+- סקציות פתוחות-לגלילה (אקורדיון עצל) + מונה N/N + טוגל-אב 'פעיל' + 'סמן הכל/נקה הכל' + מונה גלובלי 'X מתוך 896'
+- חיפוש+צ'יפים = מסננים (לא תנאי-הצגה)
+- מפקח פר-רכיב contextual לפי ElementKind (text 837/action 57/container 1) — שם/צבע/fontSize/weight/align/direction/הצג-הסתר
+- מונחים שזורים (termOf) + '→ תצוגה' חיה
+- 🔎 מצא-החלף גלובלי (החלף בכל/בנבחרים ב-batch)
+- 🕘 גרסאות (כל 'פרסם לכולם'=snapshot; 'שחזר' לא-הרסני)
+- הכל-חי בכל-האפליקציה (org_gates watch/build, אפס-ריסטארט, בכל persona/מסך)
 
 **`archive/KEYBOARD-100-STEPS.md`**
 - SmartInputScaffold עוטף TextField (OFF=passthrough)
@@ -1991,9 +1668,34 @@
 - סנכרון הזמנות+צ'אט (S2) · ✓✓ אמיתי (S3) · מד-חיבור חי 🟢/🔴 (S4) — סגורים
 - עוזר-AI (Claude) נבנה+פעיל · מקלדת-חכמה נבנתה+הודלקה · אבן-דרך 'מוכנות-launch' v6.72
 
+**`archive/LAUNCH-MICRO-BREAKDOWN.md`**
+- Phase A ליבת-uid (scoped queries · סנכרון הזמנות+צ׳אט per-uid)
+- עוזר Claude אמיתי (functions/src/claude.ts) + ~15 פיצ'רי ✨ + agentic
+- מקלדת-חכמה live-DIVE (word_finder)
+- Ring-DIVE גלגל-קטלוג מעגלי + עגלה מצטברת
+- Studio No-Code / אשף-הקמה (element_registry ~896 → טוגלים)
+- מעבר קטלוג→שרת C1-C5 (3,614 מסמכים · מחיר-אמת רב-חנותי)
+- מערך-משתמשים U0-U5 (RBAC · מחיקת-חשבון deleteAccount)
+- BuildSmart Clean (empty-shell) + 2-לינקים (Clean+BuildMax) הוכחת קוד-אחד
+- 760 תמונות-אמת חיות · חיפוש-על גלובלי · PlainDive מאתר-פשוט
+
 **`archive/LAUNCH-PLAN.md`**
 - Phase A/B/C/F/G — הצי סיים; האפליקציה חיה על web עם הקטלוג המלא
 - web/PWA ניתן-להתקנה (buildsmart-il.com, 'הוסף למסך הבית') — משתמשים אמיתיים כבר השבוע
+
+**`archive/LAUNCH-TASKS-MICRO.md`**
+- Phase A ליבת-uid (scoped-query, auth.uid ל-repos, orders/chat/customers ownership)
+- Phase B ניקוי placeholders (~35 בקרוב + ~60 הגדרות)
+- Phase C חומרה (image_picker/camera, R2 upload, share_plus)
+- Phase D תשלום (סליקה ישראלית + checkout)
+- Phase F הקמת-נייטיב (iOS+Android Firebase, App Check, מחיקת-חשבון)
+- Phase G הקשחת-שרת (אינדקסים, Security Rules, Crashlytics)
+- Phase H QA · Phase I משפטי · Phase J נכסי-חנות+הגשה
+
+**`archive/LAUNCH-deploy.md`**
+- deploy אוטומטי (firebase-hosting.yml: build base-href / → deploy live)
+- custom domain + SSL אוטומטי מ-Firebase
+- PWA installable על buildsmart-il.com
 
 **`archive/LAUNCH-server-deploy.md`**
 - deploy security rules (RBAC: chat=participants · credit=manager/owner · orders=transition-לפי-תפקיד)
@@ -2016,6 +1718,78 @@
 - self-test harness (11 חבילות, 1,539+ טסטים, CI-נאכף)
 - AI אשראי (Claude מסביר מספרים-אמיתיים) + reject-reason-AI
 
+**`archive/MAOR-REUSE-MAP.md`**
+- מנוע 'דורש-טיפול' (#1) → manager_dashboard_state (stub 9 שורות)
+- מנוע-workflow מגודר (#2, ayin.ts) → צינור-גבייה finance_hub
+- ישות-לקוח שמורה + dedup (#3) · RFM + ציון-אשראי-עם-יומן (#4)
+- חיפוש סובל-שגיאות Levenshtein+תעתיק cohen↔כהן (#5)
+- linter-איכות-נתונים (#10) · ציר-זמן-משאב+blackout (#8) · מספור-מסמכים-רץ (#13)
+- קונפיג-לכל-ארגון + featureOn מדורג + מטריצת-טוגלים e2e
+
+**`archive/MASTER-giant-system-order.md`**
+- registry קיים (~863 של ה-Studio, element_registry.dart) כמקור-הטוגלים
+- שלד-הענק (giant-v1..v6.1): OrgConfig · org_gates (featOn/termOf) · vertical_packs (6) · org_setup_wizard
+- Phase-2: attention_engine · workflow_engine · CRM (RFM · תיקון-באג-ח״פ · normalizePhone) · data-quality · קבלות
+- מרכז-שליטה: דשבורד-מנהל 5-טאבים + Trade-Builder (עורכים-אמיתיים חבויים) + 2 Studioים (~863 registry)
+
+**`archive/MICRO-TASKS.md`**
+- A · אימות-עומק per-tool (Finance 10 · Site 10 · T3 9) — ודא מספר/טקסט verbatim מול [L#]
+- B · T7 צ׳אט חוצה-פרסונות (CH-1 engine → CH-2 seed → CH-3 ChatsScreen → CH-4 חיווט)
+- C · server-ready 6/6 (per-domain Repository) — בוצע 07-08
+- D · ליטוש (צבעים→BsTokens · Semantics · touch≥44 · 0 שאריות-R ב-knowledge · audit-verdict)
+
+**`archive/PLAN-buildsmart-clean-master.md`**
+- שלב 1 מנוע-אמת (מיגור פייק): מנהל·חנות·פיננסים·שליח+פורטל-ספק·בית/תגמולים/אתר · פקדים-מתים
+- שלב 2 חוסן: סבילות-דאטה (ריק/חסר/מעוות/ענק) · בידוד-דייר · server→cache→bundled · קנה-מידה
+- שלב 3 הפרדה: קטלוג-מקור-מתחלף · מיתוג-config · orgId per-tenant · איחוד-דגלים→APP_PROFILE
+- שלב 4 פרופיל clean (קטלוג-ריק·מיתוג-נייטרלי·כל-היכולות-דלוקות) + דיפלוי-לינק
+- שלב 5 חברה #2 (החלפת קטלוג+שם) → שני לינקים חיים
+
+**`archive/PLAN-contractor-completion.md`**
+- T0 תשתית-data (seeds+helpers verbatim: PLAN_TYPES/STORE/ORDER_STATUS/SAFETY_TIPS)
+- T1 קטלוג ⋮ חלופות-זולות (cheaperAlternativeBrand)
+- T2 קטלוג ⋮ השוואת-מחירים (bestStore, ≥3 חנויות, הזול מודגש)
+- T3 קטלוג ⋮ סרוק-תוכנית (4 plan-types → zones/items → סל)
+- T4 טאב-חנות 6 שירותים (השכרה/פקדונות/RMA/RFQ/MSDS/השוואה)
+- T5 מעקב-הזמנה + תעודת-משלוח (OCR מדומה)
+- T6 התראות-תקציב (80/90/100%) + בטיחות (SAFETY_TIPS×5)
+- T7 ⋮ actions השתק/סמן/נקה על state אמיתי
+- T9 3 פרסונות כמסכים-מלאים (חנות/שליח/עובד) + מנוע-הזמנות משותף
+- T11–T22 שלב-ב: פיננסים/אתר/מלאי/סריקה/AI/פרויקטים/משימות/פרויקט-חכם/תקציב/תוכן-בית/מועדון
+
+**`archive/PLAN-giant-system-master.md`**
+- Phase 1: OrgConfig ריצתי + featureOn/moduleOn + termOf (מיתוג-מחדש)
+- Phase 2 superset: CRM/customers · manager.attention · workflow (מכונת-מצבים) · dataDoctor · scoring (RFM) · קבלות/ייצוא-CSV/validators
+- Phase 3: VerticalPack + applyVerticalPack + אשף-הקמה (מנהל-על מקים חברה בלי-קוד)
+- Phase 4: חוקי-ברזל בקנה-מידה · toggle-matrix e2e · מודולריזציה-הדרגתית
+- Phase 5: כמה-ורטיקלים-חיים בו-זמנית + תפעול 30-אפליקציות
+
+**`archive/PLAN-manager-completion.md`**
+- M2: 5 metric-tiles + order-pipeline (הזמנות-פתוחות/קטלוג/אביזרים/זמינים/חנויות)
+- M3: רשימת-הזמנות לפי 6 שלבים + קידום god-mode (mgrAdvanceOrder)
+- M4: רשימת-לקוחות + מצב-אשראי (בר-אשראי, כרטיס-לקוח)
+- M5: 5 כלי-ניהול (עץ-מוצרים/מותגים-מחירים/קטגוריות/הגדרות/בדיקות-רגרסיה)
+
+**`archive/PLAN-verticals-and-toggles.md`**
+- V1 OrgConfig model + loader null-safe (override→org→DEFAULT) + orgConfigProvider
+- V2 featureOn (טוגלים גרנולריים, cascade) + מיפוי-מודולים+פיצ'רים + toggle-matrix e2e
+- V3 termOf (מילון-מונחים, מיתוג-מחדש פר-ורטיקל)
+- V4 VerticalPack + applyVerticalPack (החלפה מלאה terms+modules)
+- V5 אשף-הקמה (מנהל-על) + ייבוא/ייצוא-config
+- V6 הוכחה: חברה-שנייה בורטיקל-שונה → לינק
+
+**`archive/POLISH-BRIEF.md`**
+- P-4 הסרת go_router dead-dependency (✅ בוצע)
+- P-3 typography → BsTokens (✅ בוצע: toast.dart · chain_diagram.dart)
+- P-2 a11y/Semantics בכל-המסכים (✅ בוצע)
+- P-5 ניקוי-knowledge (Phase K) — סגירת מחיקת-פרוטוקול-R + audit (🔲)
+- P-1 ~1,187 Color(0x קשיחים → BsTokens (🔲, מטרה-נעה)
+
+**`archive/SERVER-KICKOFF.md`**
+- base FirestoreCachedRepo<T> (cache-pattern, all() נשאר sync) + pilot=orders
+- S3 ×6 repos מקבילי: orders·customers·catalog·site·stock·finance
+- S4 real-time (chat threads/messages · orders snapshots) · S5 Security Rules + emulator-tests · S6 FCM · S7 R2 · S8 Functions · S9 offline
+
 **`archive/SPEC-A4-A6-order-ownership.md`**
 - A4' BoardSession מ-Firebase (uid=auth.uid, role=claims, פרטים מ-users/{uid})
 - A4 uid על הזמנות (storeUid/courierUid + orderParticipants)
@@ -2028,6 +1802,29 @@
 - עוזר agentic — לוקח פעולות עם אישור (צ'אט 🤖 העוזר-החכם מעוגן ב-AI hub)
 - 4 כלים: search_catalog / add_to_cart / compute_quantity / order_status
 - prompt caching (cache_control ephemeral ~0.1×) · rate-limit פר-uid
+
+**`archive/SPEC-architecture-SDD.md`**
+- קטלוג + 4 מאתרים מעל מנוע-צלילה אחד
+- מקלדת-כרטיס צפה = מנווט (global overlay, live-mirror)
+- חיפוש-על 7 דומיינים (fuzzy+ranking)
+- Studio No-Code (861 CfgText, WYSIWYG, shared-sync)
+- מנהל 4-טאבים god-mode · דשבורדי חנות/עובד/שליח
+- מנוע-הזמנות (מכונת-מצבים 6-שלבים חוצה-תפקידים)
+- מנועים: צלילה (info-gain/Shannon) · תאימות (compatibleWith) · עבודות (recipe) · חיפוש (fuzzy+סלנג)
+
+**`archive/SPEC-catalog-to-server-MICRO.md`**
+- 5 collections: products·verified_specs·recipes·stores·inventory
+- cache-pattern: הורדה-פעם-אחת → מקומי · sync-reads · re-sync רק ב-updatedAt
+- שכבת-חנויות אמיתית: Store{id,name,area,logo,contact} + Inventory{storeId,sku,price,stock} + מנוע השוואת-חנויות
+- טופס-העלאה-ספק (16 שדות + מפרט-חיבורים + מחיר/מלאי) + ייבוא-המוני CSV/Excel
+- barcode→sku (אופציונלי)
+
+**`archive/SPEC-cross-persona-chat.md`**
+- CH-1 chatEngineProvider (state/sys_chat.dart · StateNotifier · persist bs.sys-chat.v1)
+- CH-2 seed שיחות-דמו חוצות (data/chat_seeds.dart)
+- CH-3 הכללת המסך ל-ChatsScreen(persona) — reuse-UI
+- CH-4 חיווט 5 פרסונות (persona_portal → push)
+- CH-5 קישור-להזמנה (אופציונלי · thread פר-הזמנה)
 
 **`archive/SPEC-ring-dive-handoff.md`**
 - RingDiveWheel — תצוגה-טהורה + callbacks, אפס גישה ל-state/מנוע
@@ -2042,6 +1839,22 @@
 - רצועת-תוצאות חיה מתחת (עד 12, distinctSelectionLabels, מתעדכנת רק ב-detent)
 - מרכז-הגלגל=מוצרים-שנותרו → נגיעה → lipskey_product_sheet
 
+**`archive/SPEC-server-connect-MICRO.md`**
+- S0 הקמת-Firebase (flutterfire configure · deps · init · App Check)
+- S1 Authentication (Phone OTP · Email-fallback · authStateProvider · role מ-custom-claims · מחיקת-חשבון)
+- S2 cache-pattern (FirestoreCachedRepo<T> base · pilot orders)
+- S3 6 repos _firebase (orders/customers/catalog/site/stock/finance · drop-in)
+- S4 real-time (chatThreads/chatMessages/orders snapshots · בדיקה-דו-מכשירית)
+- S5 Security-Rules RBAC + emulator-tests · S6 FCM · S7 R2 · S8 Cloud-Functions · S9 offline/sync
+
+**`archive/SPEC-server-connect.md`**
+- Firebase Auth OTP-טלפון + מייל-fallback + custom-claims (role: contractor/store/courier/worker/manager)
+- Firestore offline-persistence + snapshots()→cache→UI (real-time חי)
+- Repository _firebase drop-in (מחליף _local, אותו interface: all/open/place/advance/setStage/credit/move)
+- collections: users/orders/customers/projects/tasks/stock/chatThreads(participants[])/chatMessages/siteNodes
+- Security Rules per-domain (chat=participants-only, credit=manager+owner, orders=stage-per-role, roles=admin-only)
+- App Check · FCM push · Cloud Functions (validation/credit-calc/triggers) · R2 images · offline-queue ל-batch-order
+
 **`archive/SPEC-smart-keyboard.md`**
 - שכבה-1 רצועת-הצעות תלוית-הקשר (SmartInputContext{kind,screenId,payload})
 - autocomplete מוצרים מ-lipskeyWordIndex + quick-replies canned + מס׳-הזמנה BS-####
@@ -2049,10 +1862,28 @@
 - שכבה-3 לוח-ספרות-מאובטח in-app (OTP/קוד-לוח/סיסמה/תשלום)
 - chips-יחידות למספרי · הצעות-ישויות (לקוחות/אתרים) לשם/כתובת
 
+**`archive/SPEC-user-system-MICRO.md`**
+- U0: class BsUser + FirestoreUsersRepository + currentUserProvider + Security-Rules users
+- U1: enums BsRole/Permission + roleToPermissions + hasPermission/requirePerm (role מ-custom-claims)
+- U3: setRole+storeUid · stores.ownerUid · myStoreProvider · isolation פר-חנות
+- U2: הרשמה per-persona + שדרוג-אנונימי (linkWithCredential) + onboarding-חנות
+- U4: users-admin (רשימה/חיפוש) · הקצאת-תפקיד · השעיה · תור-אישור (roleRequests)
+- U5: עריכת-פרופיל · מחיקת-חשבון · logout · השעיה בזמן-אמת · GDPR-export
+
 **`archive/START-HERE-buildsmart-clean.md`**
 - שלב 1 מנוע-אמת (מיגור כל-הפייק · הסריקה)
 - שלב 2 חוסן/לא-נשבר · שלב 3 הפרדת-מנוע↔דאטה · שלב 4 פרופיל-Clean+לינק · שלב 5 הוכחת-שכפול (חברה #2)
 - שלב 6 מודולריזציה-הדרגתית (עתידי)
+
+**`archive/TASKS-to-full.md`**
+- B0 תשתית-data (seeds verbatim: PROJECTS/SITE_TREE/STOCK_DEMO/TASKS/GANTT/snagList...)
+- T1 מרכז-פיננסים (10 · proto §4) · T2 ניהול-אתר (10 · proto §5)
+- T3 פיצ׳רים-חסרים (משימות/פרויקט-חכם/תקציב/מלאי/סריקה/פרויקטים/מועדון/AI/תוכן-בית)
+- T4 43 סטאבים-היקפיים (chats/camera/settings)
+- T5 פרסונה-דחויים (ליקוט/פריט-חסר/פיצול/POD/persistence)
+- T6 server-ready (Repository pattern per-domain)
+- T7 צ׳אט חוצה-פרסונות (sys_chat, standalone מבודד)
+- Track S חיבור-שרת Firebase+R2 (S0–S9, phase-2)
 
 **`archive/V2-ROADMAP-visual-ai.md`**
 - 🏢 בניין-3D (תוכנית→מבנה-שמנווטים; Planner5D/Foursite + ThatOpen/IFC.js/APS)
@@ -2060,6 +1891,9 @@
 - 🖼️ אייקונים (אימוג׳י→תמונות-אחידות; Midjourney; הצי מחליף בקוד + R2/CDN+WebP+fallback)
 - 🎨 עיצוב-שיווקי (Canva+ערכת-מותג → מודול-מבצעים: קרוסלת-באנרים נשלף-מ-R2, ניתן-לתזמן)
 - 🤖 עוזר-AI ראשי — נבנה ופעיל (v6.48–v6.73)
+
+**`archive/firebase-web-config.md`**
+- firebaseConfig (apiKey · authDomain · projectId · storageBucket · messagingSenderId · appId · measurementId)
 
 **`archive/monster-finder/MONSTER-100-STEP-BUILD-PLAN.md`**
 - P1 יסוד-נתונים: kReachUniverse קנוני · חומר=ציר-ראשון · קיפול-גדלים canonicalSize
@@ -2126,15 +1960,180 @@
 - deploy ל-preview-channel לא-חי
 - שכבת-telemetry (telemetryProvider no-op תחת NoopTelemetrySink)
 
-**`firebase-web-config.md`**
-- firebaseConfig (apiKey · authDomain · projectId · storageBucket · messagingSenderId · appId · measurementId)
+**`reference/01-design-system.md`**
+- טוקנים: Heebo/Rubik · פלטה teal #1f6f6b + amber #f2a516 + dark-theme + reduce-motion
+- שפת-רכיבים: header/appbar · notif-panel · sheets (overlay/sheet/grip) · budget-box · tree
+- Categories A–J (prefix-CSS): שרשרת-אספקה·פיננסים·ניהול-אתר·UX·פורטל·AI·gamification·אבטחה·שירות (אין D)
+- 4 פרסונות חולקות מעטפת admin: manager(md/mm/mo/mc) · store(sh/so) · courier(ch) · worker(ww)
+- Preact: tokens זהים + סקאלות + מערכת-dial/fab/float נטו-חדשה + screen__bg (bathroom-bg)
+- Flutter: BsTokens (dial-dims/animation) + מותג כתום #FF7A18 + Material3 + RTL + i18n
+
+**`reference/02-shell-and-screens.md`**
+- מסכי onboarding: splash/welcome/login/profession/prep + 4 דשבורדי-פרסונה
+- מעטפת: statusbar · appbar (פעמון+עגלה+notifPanel) · tabbar 5-טאבים
+- views-קבלן: home/catalog/catnav/project/scan/orders/cart/sites/profile/stock/tasks
+- overlays/sheets: בוררי אתר/זמן/יום · תקציב · הגדרות · hubs A–J · עץ-מוצרים · brand/variant/order
+- Preact: dial pattern — מסכים→dials · tabbar→MenuSpeedDial · appbar→FloatingHeader · routing לפי-פרסונה
+- Flutter: מעטפת 4-טאבים (מחלקות·שיחות·התראות·חנות) + CatalogScreen 7,660ש׳ + InstallStudioScreen 3,185ש׳
+
+**`reference/03-data-product-trees.md`**
+- TREES 3 סכמות: pl_* קטלוג-פלסאון (23) · שלבי-פרויקט (5) · מוצרים-עשירים (~26) + 148 אביזרים-נלווים
+- brands[] בחירת-מותג (rec=הבחירה-שלנו ⭐)
+- acc[] עץ-אביזרים (must חובה/אופציונלי, why הסבר)
+- Flutter: קטלוג-אמת 1,877 (Lipskey 935 + Polyroll 772 + Huliot 170)
+- VerifiedSpec (887 static + Polyroll runtime) — מנוע-חיבוריות (ends/material/pressure/WaterSystem)
+- SmartProduct (82 כרטיסים) · catalog_tree (153 CatalogNode)
+
+**`reference/04-data-catalog-variants-tools.md`**
+- CATALOG (6046-6058): אינדקס 11 קטגוריות {cat,icon,items:[product-keys]}
+- VARIANTS (6060-6184): pl_* (23 SKU מידה-נושאת-מק'ט) + rich (~22 ציר-בחירה-אב אחד לכל מוצר)
+- SIZES (6185-6199): מידות-אביזר עם delta-מחיר (delta שלילי = זול יותר)
+- STOCK_DEMO (6202-6214): seed-מלאי warehouse|site per accessory → מזין view-stock
+- TOOLS (6216-6320): כלים-נדרשים per productKey ({name,img,why,price}) ל-~21 מוצרי-אב
+
+**`reference/05-data-orders-projects-ranks.md`**
+- ORDERS: 5 שלבי-בנייה (building/infra/sealing/tiling/finish) עם dep-gates → מזין orderOverlay
+- PROJECTS: 3 אתרים, כל אחד שומר cart+treeProgress משלו · activeProjectId
+- RANKS: 4 דרגות (חדש/קבוע/מועדף/פלטינום) לפי מס'-הזמנות + perk
+- identityStats/currentRank/nextRank/identityAchievements (6 הישגים)
+- פונקציות-מחיר: chosenBrand/chosenVariant/productPrice (brand.price+variant.delta)
+
+**`reference/06-logic-settings-projects.md`**
+- renderSettings: 8 קבוצות+reset (חשבון·התראות·תצוגה·נגישות·אבטחה·שירות·משלוח·אזור·מידע·איפוס)
+- toggleSetting/cycleSetting (haptic+ARIA+toast) · applySettings→DOM · applyEntryMode
+- תקציב: renderBudget · openBudgetEditor/Detail · adjustBudget(±) · category-editor
+- פרויקט-חכם: renderSmartProject (פירוק שלבים→ימי-עבודה) · toggleSmartDay/Step
+- Preact: SETTINGS_ROWS 9 קבוצות + SETTINGS_SUB עץ-dial + LEAF_BINDINGS 72 עלים + inline-edit + PROFILE_TREE
+- Flutter: 4 מסכי-הגדרות native (~140 שדות, persist bs.{catalog/chat/notif/store}-settings.v1)
+
+**`reference/07-logic-orders-tasks-search.md`**
+- הזמנות — renderMyOrders/orderCard/animateShipmentMaps (sheet-מעקב + מפות-SVG מונפשות)
+- מערכת-משימות — state-machine 5-מצבים (pending→active→review→done · rejected→active) · פילטור per-group 3-קבוצות
+- מלאי — moveStock (מחסן↔אתר) · ניווט-קטלוג מדורג (ATTR_SCHEMA 5-צירים · catNav engine)
+- מנוע-חיפוש מאוחד (NAV_DESTINATIONS 18 · CONTENT_INDEX · fuzzy · 3 שורות-חיפוש חולקות מנוע)
+- Preact — search-FAB dial (5 כלים) · Flutter — device-APIs אמיתיים (barcode/voice native)
+
+**`reference/08-logic-product-cart-checkout.md`**
+- DIAGRAMS (דיאגרמת-התקנה פר-מוצר, match[] = מילות-אביזר לשלב)
+- ACC_GROUPS (12 קבוצות פונקציונליות) · ACC_TYPES (ידע-אביזר) · ACC_PRICE_BOOK
+- סורק-תוכניות (PLAN_TYPES/startScan/renderScanResults)
+- computeCheckout — מנוע-חיוב (storeGroups/split-shipment/expressFee/VAT/grandTotal)
+- Flutter: _SmartProductSheet (~2,000ש׳) + InstallStudio (3,185ש׳) = Dijkstra+auto-compliance+BOM+pressure-drop
+- Flutter smart_cart (persist) + checkout (VAT-18, payment)
+
+**`reference/09-logic-cart-notif-onboarding.md`**
+- סל: renderCart (store-group לפי ספק + computeCheckout + ship-plan) · syncOrderToSystem (דוחף ל-SYS_ORDERS) · checkout
+- התראות: seedNotifications (3 seed) · pushNotification · toggleNotifications · notifyOrderStatus · toast · tick
+- onboarding: ONBOARD_SCREENS (10 מסכים) · showScreen · buildPrep · enterApp · enterRole (5 פרסונות)
+- Flutter: notifications_screen (1,081ש׳, קיבוץ-חכם run≥3) · chats_screen (1,437ש׳, auto-reply 900ms) · onboarding ממוקד-קבלן
+
+**`reference/10-engine-pricing-stores-sysorders.md`**
+- STORE_PRICING (מחיר-SKU פר-חנות · אותו SKU עולה-אחרת) · STORES (3, eta עד-שעתיים)
+- VAT_RATE=0.18 (מ-Jan-2025) · SUPPLIER_STORES (s1/s2/s3 + shipping ₪90/65/45) · HAUL_TYPES (small/van+40/truck+90) · EXPRESS_FEE=80
+- SYS_ORDERS_SEED (4 הזמנות: BS-1042/1041/1040/1039) · loadSysOrders/saveSysOrders (persist localStorage)
+- ORDER_STAGE 6-שלבים (new/preparing/ready/pickup/transit/delivered) · STORE_STOCK
+
+**`reference/11-manager-dashboard-selftest.md`**
+- renderMgrDashboard → 📊 לוח-בקרה (hero-הכנסות · 5 metric-tiles · pipeline · chart-קטגוריות · medals)
+- BUTTON_REGISTRY (350 כפתורים {fn,area,does}) · BUTTON_TWINS (דדופ תאומות)
+- runButtonAudit/findDuplicates/checkProductStandard/regCheckProduct
+- משפחות-בדיקה: testButton_/testTen_/testContract_/testFamily_/testCrit_/testImp_/profileButton_
+- display-sync (runDisplaySyncTest) · runRegressionTests · buildRegressionReport
+- Flutter: lib/test_harness/ (11 suites) · regression_panel_screen · 1,539+ בדיקות
+
+**`reference/12-persona-manager-store.md`**
+- מנהל: renderMgrDashboard/mgrToggleAvail/mgrCustomerDetail (בר-אשראי) · 4 sections ניהול-קטלוג · ORDER_FLOW 6-שלבים · mgrAdvanceOrder
+- חנות: renderStoreHome · simulateIncomingOrder · showDeliveryNote (A4) · storeAdvance state-machine (new→preparing→ready)
+- picking-sheet 6 line-states (picked/missing/pending/cancelled/replaced/pendingDecision)
+- heldForMissing / missingResolved / splitInto>1
+- store-portal 8 tools (דירוג-ספקים/SLA/אזורים/הנחות/ברקודים/צי/צ׳אט/עדכון-מלאי)
+- Flutter: role-picker → dashboards (store/courier/worker/manager) מבודדים
+
+**`reference/13-scenarios-courier-registration.md`**
+- פריט-חסר: openMissingDecision/resolveMissingLine/missingProceedWithout/missingReplace + תחליף-כהזמנה-נפרדת
+- אזל-מלאי: openOutOfStockGate/oosSkip/oosReplace + toggleStoreStock (אזל לא מוצג לקבלן)
+- דשבורד-שליח: VEHICLE_RANK{small:0,van:1,truck:2}/vehicleCanCarry/pickCourierVehicle; job≠order (N jobs per-shipment); courierAdvance/deriveOrderStageFromShipments
+- courier-portal 6 tools: ניווט/צי-רכב/SLA/אזורים/POD+צילום/צ'אט; cross-tab sync; registration+onboarding
+
+**`reference/14-b2b-supply-chain.md`**
+- מתכנן-משלוחים מרובה-גלים (cartHasSplit, כמות-לכל-גל, finalizeShipPlanner)
+- RMA (החזרות) · השכרת-כלים (RENTAL_TOOLS) · פקדונות (DEPOSIT_ITEMS)
+- חתימה-דיגיטלית (initSignaturePad/canvas)
+- מרכז-שרשרת + MSDS_SHEETS (גיליונות-בטיחות) · doc-OCR · gov-XML · price-compare · RFQ (מכרז-ספקים)
+
+**`reference/15-finance-site-hubs.md`**
+- פיננסים (fin-*): BUILD_INDEX{121.3→128.7} · PAYMENT_TERMS · subcontractors(3) · approvalQueue(2) · penaltyLedger · FX_RATES; finIndex/finROI/finApprovals/finReports/finFX
+- ניהול-אתר (site*): GANTT_TASKS · SAFETY_TIPS · SITE_TREE(קומה→דירה→חדר) · ARCHIVED_PROJECTS; siteGantt/siteSnagging/siteAttendance/siteDiary/siteSafety
+- 10 כלי-site-hub verbatim (INSP-0037): גאנט·ליקויים·קומה-דירה-חדר·נוכחות-GPS·יומן·בטיחות·תלויות·צילום·ביקורות-מפקח·ארכיון
+
+**`reference/16-portal-ai-rewards.md`**
+- פורטל (F): fleet/autoStock(חידוש-מלאי)/ratings/SLA/zones/bulk(הנחות-כמות)/barcode; chat peer ספק↔קבלן↔שליח
+- חיפוש-fuzzy: levenshtein/fuzzySearchSuggest/homeSearchFuzzy (typo-tolerant)
+- מרכז-AI (G): aiPredictStock/aiBarcodeScan/aiVoiceTask/aiAlternatives/aiPlanScan/aiThreeWay/aiWeather/aiWearDetect/aiAnalytics
+- מרכז-תגמולים (H): awardCoins/rwChallenges/rwLeaderboard/rwGreen/rwCoupons/rwReferral/rwVIP/rwRedeem
+
+**`reference/17-security-service-boot.md`**
+- RBAC_MATRIX (role→permissions[]) · can(perm)/requirePerm · auditLog
+- 5 תפקידים · session-timeouts 5/15/30/60 דק' · encryption×4 · privacy×4 toggles
+- session-lock (resetSessionTimer/lockSession/unlockSession/initSessionTimeout)
+- openSecurityHub → 10 אריחים (2FA/הרשאות/ביומטרי/audit/GPS/session/הצפנה/היסטוריית-כניסות/מכשירים/פרטיות)
+- openServiceHub → 8 אריחים (help-desk/chatbot/דיווח-באג/ממיר-יחידות/מחשבון-כמויות/יומן/לוח-דרושים/סיור)
+- BOT_KB (kw[]→answer) · botReply · botQuick; shake-to-report; qty-calc 3 מצבים; onboarding 6 שלבים
+- boot: global error-catcher (window error → קופסה-אדומה bsFatalError)
+
+**`reference/18-legacy-knowledge-index.md`**
+- ADR-001 No-Window (אוסר חלונות-מלאים) + ADR-002 Dial-Pattern (טור-כפתורים קומפקטי · עיגון-לפי-פינה)
+- RULES.md — 9 כללי-spec ל'איך' (verbatim)
+- dashboards: COURIER/STORE/WORKER/SYSTEM_MANAGER + UI_ARCHITECTURE + ROLE_DRAWER_SYSTEM
+- 43 inspections (INSP-0001→0044) + inspector protocol (FND/FRM/WIR/FIN/OPS)
+
+**`reference/19-feature-source-matrix.md`**
+- Flutter-בלעדי: Install-Studio (Dijkstra/BOM/pressure-drop) · VerifiedSpec (808 specs) · readiness-score
+- chat+notifications כטאבים-מלאים (1437ש׳/1081ש׳)
+- 5 פרסונות מסכים-מלאים · self-test 1,539+ · עולם-116-שערי-פרוטוקול
+- native (mobile_scanner/speech_to_text) · shared_preferences · i18n
+
+**`reference/20-infra-build-tooling-protocol.md`**
+- Preact→Capacitor (appId com.buildsmart.app) + Flutter→native (com.buildsmart.buildsmart) — שני bundle-IDs נפרדים
+- extract-catalog.mjs: index.html → src/data/*.ts מטוייף + base64-JPEGs מוטמעים → public/catalog/*.jpg
+- deploy.yml בונה+פורס 2 אפליקציות ל-Pages (Preact /buildsmart/ · Flutter 3.29.3 /buildsmart/flutter/, force-push .nojekyll)
+- שכבת-אכיפה: .githooks/pre-commit (~100 שערים), pre-push, .claude/hooks, protocol-enforce.yml + preflight.sh
+
+**`reference/21-protocols-spine-gates-enforcement.md`**
+- ~66 שערים פעילים ב-pre-commit + 8 CI + ~8 pre-push + 1 commit-msg
+- 5 שלבי-Checklist: FND/FRM/WIR/VRB/OPS (רק שלבים שה-diff נגע)
+- catalog_qa.py (100+ כללים · audit/selftest/fix/truthcheck/crosscheck)
+- mutation_test.py + mutation_hard_test.py (40 מוטציות מוכיחות שהשער תופס)
+- gen_version.sh (version.g.dart idempotent · פותר conflict-magnet)
+- 4 שכבות: git-hooks · claude-hooks (pre-tool חוסם 10 וקטורי-עקיפה) · auto-restoration · GitHub-Actions
+
+**`reference/22-protocols-agents-process-specialized.md`**
+- 6 סוכנים (פרוטוקוליסט/קטלגן/סדרן/מקבץ/בנצי/ליטוש) עם בעלות-עריכה + איסורים
+- PLAYBOOK: NO-STOPPING · push-מילולי · cadence · sub-agents · hook-bug-loop
+- VERIFICATION_PROTOCOL L0–L7 (static/regression/wiring/harness/mutation/build/visual/knowledge/hooks)
+- ~10 פרוטוקולים-ייעודיים (SIZE_FILTER/CATALOG-CARD/CATALOG/LAUNCH_READINESS/POLISH/IMPROVEMENTS)
+- stuck_log (65 רשומות · 52 ANTIPATTERN-regex → 64 בדיקות auto-gen)
+- 15 ADRs (D-001..D-015) · CARRY_FORWARD 74 לקחים · KNOWLEDGE_AUDIT 76 מסמכים
+
+**`reference/23-flutter-architecture-state-cardflow.md`**
+- 3 עמודי-נתונים: kCatalogProducts (1,877) · kVerifiedSpecs (808+ · מנוע-חיבוריות) · kSmartProducts (82)
+- state-model: 50 providers ב-state/ (114 repo-wide) · persist bs.*.v1
+- כרטיס-מוצר-חכם CARD_FLOW (42 אלמנטים) = 'מוח-הידע' (_SmartProductSheet)
+- HELPER_INDEX — 43 helpers ציבוריים (related_info.dart 1528ש')
+- 5 מנועי-לוגיקה: install_engine (Dijkstra) · pressure_drop (Darcy-Weisbach) · install_kit · price_estimate · system_division
+
+**`reference/24-multiagent-governance.md`**
+- Supervisor: 10-step decomposition · spawns ≤3 sub-agents · Glob mutual-exclusion · fallback-chain · context מלא
+- 6 תת-סוכנים בעלות-תחום: פרוטוקוליסט/קטלגן/סדרן/מקבץ/בנצי/ליטוש
+- registry-as-source-of-truth (protocol/gates.tsv)
+- ran-ledger (K3) · content-hash pinning (K4, SHA)
+- orchestrator-kit v2: central-verify.sh (analyze+test+build+conformance+required-tests) · ckpt.sh · grep-verify.sh · ff-push.sh · perfect-agent/ (self-spec 9-ממדי)
 
 ---
 ## 📚 אינדקס-מסמכים לפי סטטוס
 
 
 ### CURRENT (14)
-- `24-multiagent-governance.md` — ארכיטקטורת-הממשל הרב-סוכנית — פרוטוקול → פרוטוקוליסט → Supervisor → 6 תת-סוכנים → משתמש (מפעל-תוכנה 
 - `AGENT-SOURCES.md` — מקורות-האמת לכל סוכן — קוד (whats-happening) מול ידע (nice-volta); כלל pre-flight למניעת היתקעות-גרס
 - `CATALOG-3D-100-STEPS.md` — תוכנית-בנייה 100 שלבים: מנוע-קטלוג-3D → תכנון-חיבור (פאזות 0/A/B/C/D/E/F), הכל מגודר kFittingEngine*
 - `CATALOG-CONFIG-PLAN.md` — קטלוג-מגדיר — מסך צלילה + כרטיס-פרמטרי דאטה-מונחה פר-מוצר (ProductConfigSchema), גנרי · בלי 3D
@@ -2145,6 +2144,7 @@
 - `DIRECTIVE-fittings-phaseB-depth.md` — הנחיה: פאזה B עומק-ה-spec → מנוע-אביזרים buildable ואמין (שלבים 27–40, מצב-לולאה)
 - `MILESTONE-LOG.md` — יומן אבני-דרך מאומתות-ב-CI (ע״י הקטלגן, verify-before-✅) — חדש-למעלה; אחרונה 08-03 מנוע-קטלוג-3D + א
 - `NORTH-STAR-data-contract.md` — הצפון: קונכייה-ריקה + חוזה-מנוע-מלא + כפתור-החלפה = פלטפורמה שכל ספק זורק-קטלוג-ורץ
+- `reference/24-multiagent-governance.md` — ארכיטקטורת-הממשל הרב-סוכנית — פרוטוקול → פרוטוקוליסט → Supervisor → 6 תת-סוכנים → משתמש (מפעל-תוכנה 
 - `screens/contractor-home/index.md` — contractor-home — atom decomposition
 - `screens/manager-dashboard/index.md` — manager-dashboard — atom decomposition
 - `screens/store/index.md` — store — atom decomposition
@@ -2154,72 +2154,72 @@
 - `VERIFIED-OPEN-WORK-2026-07-29.md` — מקור-אמת לעבודה-הפתוחה (אומת מהקוד v7.01 ע״י 5 סוכני-אימות) — מפריד פתוח-באמת ממסמך-מיושן.
 
 ### REFERENCE (11)
-- `03-data-product-trees.md` — מודל-המוצר TREES (index.html 5441-6044) + דלתא Preact/Flutter — 202 מוצרי-אב-טיפוס → קטלוג-אמת 1,877
-- `04-data-catalog-variants-tools.md` — ידע-מקור — שכבת-הקטלוג של אב-הטיפוס (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS, שורות 6046-6320) ודלתא
-- `05-data-orders-projects-ranks.md` — שכבת-דאטה מהאב-טיפוס (index.html 6323-6560) — סדר-הרכבה (ORDERS) · 3 פרויקטים · 4 דרגות-קבלן · זהות+
-- `08-logic-product-cart-checkout.md` — ליבת-המוצר — עץ/אביזרים/סורק/סל/checkout (proto 9000-11000) + דלתא Preact/Flutter (Install-Studio)
-- `09-logic-cart-notif-onboarding.md` — לכידת לוגיקת סל-render·checkout-submit·התראות·onboarding/roles (index.html 11000–11907) + דלתאות Pre
-- `10-engine-pricing-stores-sysorders.md` — פירוק מנוע-המסחר: תמחור-לפי-חנות · ספקים · VAT 18% · SYS_ORDERS המשותף (11908–12061)
-- `11-manager-dashboard-selftest.md` — פירוק דשבורד-מנהל (12062–12319) + מערכת-בדיקות-עצמית (BUTTON_REGISTRY 350 + reg-harness)
-- `13-scenarios-courier-registration.md` — תרחישי פריט-חסר/אזל + דשבורד-שליח + רישום (index.html 17627–18422) — מיפוי-פרוטוטייפ + דלתא-פורט
-- `14-b2b-supply-chain.md` — B2B שרשרת-אספקה (Category A, proto 18423-19451) — planner/RMA/RFQ/MSDS/rental/deposits + דלתא Preact
-- `16-portal-ai-rewards.md` — פורטל/chat (F) + מרכז-AI (G) + מרכז-תגמולים (H) (index.html 20800–21659) — מיפוי + דלתא-פורט
-- `20-infra-build-tooling-protocol.md` — ידע-תשתית — אריזה-ל-native (Capacitor/Flutter), צינור extract-catalog, CI/deploy ל-GitHub Pages, bui
+- `reference/03-data-product-trees.md` — מודל-המוצר TREES (index.html 5441-6044) + דלתא Preact/Flutter — 202 מוצרי-אב-טיפוס → קטלוג-אמת 1,877
+- `reference/04-data-catalog-variants-tools.md` — ידע-מקור — שכבת-הקטלוג של אב-הטיפוס (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS, שורות 6046-6320) ודלתא
+- `reference/05-data-orders-projects-ranks.md` — שכבת-דאטה מהאב-טיפוס (index.html 6323-6560) — סדר-הרכבה (ORDERS) · 3 פרויקטים · 4 דרגות-קבלן · זהות+
+- `reference/08-logic-product-cart-checkout.md` — ליבת-המוצר — עץ/אביזרים/סורק/סל/checkout (proto 9000-11000) + דלתא Preact/Flutter (Install-Studio)
+- `reference/09-logic-cart-notif-onboarding.md` — לכידת לוגיקת סל-render·checkout-submit·התראות·onboarding/roles (index.html 11000–11907) + דלתאות Pre
+- `reference/10-engine-pricing-stores-sysorders.md` — פירוק מנוע-המסחר: תמחור-לפי-חנות · ספקים · VAT 18% · SYS_ORDERS המשותף (11908–12061)
+- `reference/11-manager-dashboard-selftest.md` — פירוק דשבורד-מנהל (12062–12319) + מערכת-בדיקות-עצמית (BUTTON_REGISTRY 350 + reg-harness)
+- `reference/13-scenarios-courier-registration.md` — תרחישי פריט-חסר/אזל + דשבורד-שליח + רישום (index.html 17627–18422) — מיפוי-פרוטוטייפ + דלתא-פורט
+- `reference/14-b2b-supply-chain.md` — B2B שרשרת-אספקה (Category A, proto 18423-19451) — planner/RMA/RFQ/MSDS/rental/deposits + דלתא Preact
+- `reference/16-portal-ai-rewards.md` — פורטל/chat (F) + מרכז-AI (G) + מרכז-תגמולים (H) (index.html 20800–21659) — מיפוי + דלתא-פורט
+- `reference/20-infra-build-tooling-protocol.md` — ידע-תשתית — אריזה-ל-native (Capacitor/Flutter), צינור extract-catalog, CI/deploy ל-GitHub Pages, bui
 
 ### AGING (79)
-- `DIRECTIVE-U3-store-ownership.md` — הנחיית U3 — בעלות-חנות (Store↔Owner) · חוסם-השקה; חצי כבר-בנוי (rule owner-gated חי), חסר טביעת clai
-- `DIRECTIVE-arm-wizard-preview.md` — הנחיה — קודם preview עם האשף חי (APP_PROFILE=clean + ORG_CONFIG=true) לערוץ-Firebase נפרד → לינק מיד
-- `DIRECTIVE-buildsmart-clean.md` — הנחיה — מנוע-אב Clean (מלא-יכולת · נקי-מדאטה) שכל חברה נולדת ממנו בהחלפת דאטה+שם; קוד-אחד→אינסוף אפל
-- `DIRECTIVE-clean-finish.md` — הנחיה לסגור את Clean — לתקן פיננסים-4 (מזויף-כאמת) + שלב-5 הוכחת שני-לינקים · קוד-אחד.
-- `DIRECTIVE-deepen-toggles.md` — להעמיק ולהרחיב קונפיג/טוגלים לכל האפליקציה (כמו מאור) — 2 פערים: רוחב (כל-משטח) + עומק (טוגלים-דקים)
-- `DIRECTIVE-edit-trigger-keyboard-longpress.md` — הנחיה — טריגר-עריכה: long-press על כפתור-המקלדת → ✎ מעל הסל (בלי באנר), owner-only
-- `DIRECTIVE-fake-data-sweep.md` — הנחיה למיגור מידע-מזויף-שמתחזה-לאמת בכל האפליקציה → 100% מידע-אמת (~24 אתרי-רינדור על ~15 שורשי-cons
-- `DIRECTIVE-fittings-phase0A-loop.md` — הנחיה: בניית מנוע-קטלוג-3D (אביזרים) פאזה 0+A במצב-לולאה-רציף — חוליות 789 SKU 0→100% מחברים
-- `DIRECTIVE-giant-phase2-features.md` — הנחיית Phase-2 'למלא את הענק' — superset-הפיצ'רים, כל אחד בתוך המנוע תחת featureOn default-OFF-לחי
-- `DIRECTIVE-manager-console-live.md` — הנחיה — לוח-הבקרה של המנהל: מידע-אמת + כל הפיצ'רים 100% (באג-קוד, לא בעיית-דגל)
-- `DIRECTIVE-maor-full-integration.md` — שילוב-מלא מאור→BuildSmart (מה שנשאר, מדורג) — ~60% כבר בפנים, אושר-בעלים 27/7
-- `DIRECTIVE-screen-management-in-wizard.md` — הנחיה — כבה טריגר-עריכה-על-המסך (חובה, ראשון) → ניהול-מסכים 2-רמות באשף (סדר+הסתר פר-מסך)
-- `DIRECTIVE-studio-registry-to-wizard-toggles.md` — הנחיה להמיר את registry-ה-Studio (~863 אלמנטים) לטוגלי הצג/הסתר יפים באשף (קיבוץ עברי + אקורדיון + ח
-- `LAUNCH-TASKS-MICRO.md` — מפת-השקה מלאה (App Store + Google Play) — מדמו-עובד ועד השקה בשתי חנויות בלי placeholders, SSOT חי ל
-- `MAOR-REUSE-MAP.md` — מפת-שאילת-דפוסים ממאור (config-per-org, React) → בנייה-חכמה (Flutter) · 14 דפוסים מדורגים + ליבה-5
-- `MASTER-giant-system-order.md` — מסמך-אב מאחד ל-המערכת-הענקית — מנוע-אחד superset · כל חברה=פרוסת-קונפיג · הסדר המדויק 0→5.
-- `PLAN-buildsmart-clean-master.md` — תוכנית-אב להפוך את BuildSmart למנוע-Clean בלתי-שביר (קוד-אחד→אינסוף אפליקציות), 6 שלבים.
-- `PLAN-giant-system-master.md` — תוכנית-אב 'המערכת-הענקית' — מנוע-אחד superset → כל חברה = פרוסה בקונפיג (טוגלים+ורטיקל+מיתוג)
-- `PLAN-verticals-and-toggles.md` — תוכנית חבילות-ורטיקל + טוגלי-פיצ'רים — שכבת OrgConfig ריצתית מעל APP_PROFILE (בהשראת מאור verticalPa
-- `SERVER-KICKOFF.md` — חבילת-משימות-כניסה להפעלת הצי על פרויקט-השרת (Firebase) — S0–S9, cache-pattern drop-in.
-- `SPEC-architecture-SDD.md` — מסמך ארכיטקטורה ועיצוב-מערכת (SDD) — app_flutter v6.99 אומת-מקוד, קהל מתכנת בכיר
-- `SPEC-catalog-to-server-MICRO.md` — פירוק-מיקרו (C0–C5) להעברת הקטלוג הדינמי + שכבת-חנויות חדשה (מחיר/מלאי) לשרת — בלי לשכתב מנוע.
-- `SPEC-server-connect-MICRO.md` — פירוק-מיקרו מלא של חיבור-שרת Firebase+R2 (S0-S9 · ~48 משימות-מיקרו) — drop-in cache-pattern, UI-ללא-
-- `SPEC-server-connect.md` — SPEC — חיבור-שרת (Firebase + Cloudflare R2), פירוק S0-S9, שמירת drop-in דרך offline-first cache; RBA
-- `SPEC-user-system-MICRO.md` — תוכנית-בנייה מיקרו למערך-משתמשים (U0–U5): מודל·RBAC·בעלות-חנות·הרשמה·ניהול-אדמין·מחזור-חיים.
 - `archive/AUDIT-FULL-14jun.md` — אודיט-עומק משולש על כל app_flutter (77 מסכים) — ~200 פערים: placeholders · פערי-שרת/סנכרון · פוש/חומ
 - `archive/DATA-ring-dive-levels.md` — שרשרת-הצלילה המלאה מחלקה→מוצר (6 טבעות verbatim מהקוד-החי) — דאטת-דמו לצלילת-טבעות + אימות-חיווט
 - `archive/DIRECTIVE-LOOP-launch.md` — הנחיית-לולאה self-driving למסלול-ההשקה U3→U2→U4→U5.2; הצי בונה+מאמת כל שלב לבד, דחיפה-במילה.
 - `archive/DIRECTIVE-U1-RBAC.md` — הנחיית U1 — תפקידים והרשאות (RBAC); רובו חיווט+ריכוז+שכבה-טיפוסית, לא בנייה-מאפס
+- `archive/DIRECTIVE-U3-store-ownership.md` — הנחיית U3 — בעלות-חנות (Store↔Owner) · חוסם-השקה; חצי כבר-בנוי (rule owner-gated חי), חסר טביעת clai
+- `archive/DIRECTIVE-arm-wizard-preview.md` — הנחיה — קודם preview עם האשף חי (APP_PROFILE=clean + ORG_CONFIG=true) לערוץ-Firebase נפרד → לינק מיד
+- `archive/DIRECTIVE-buildsmart-clean.md` — הנחיה — מנוע-אב Clean (מלא-יכולת · נקי-מדאטה) שכל חברה נולדת ממנו בהחלפת דאטה+שם; קוד-אחד→אינסוף אפל
+- `archive/DIRECTIVE-clean-finish.md` — הנחיה לסגור את Clean — לתקן פיננסים-4 (מזויף-כאמת) + שלב-5 הוכחת שני-לינקים · קוד-אחד.
 - `archive/DIRECTIVE-close-web-for-launch.md` — הנחיה — סגירת האתר (web/PWA, buildsmart-il.com) להשקה-פומבית ב-4 קבוצות: מותג+PWA, קונפיג-השקה, ליטו
+- `archive/DIRECTIVE-deepen-toggles.md` — להעמיק ולהרחיב קונפיג/טוגלים לכל האפליקציה (כמו מאור) — 2 פערים: רוחב (כל-משטח) + עומק (טוגלים-דקים)
+- `archive/DIRECTIVE-edit-trigger-keyboard-longpress.md` — הנחיה — טריגר-עריכה: long-press על כפתור-המקלדת → ✎ מעל הסל (בלי באנר), owner-only
+- `archive/DIRECTIVE-fake-data-sweep.md` — הנחיה למיגור מידע-מזויף-שמתחזה-לאמת בכל האפליקציה → 100% מידע-אמת (~24 אתרי-רינדור על ~15 שורשי-cons
+- `archive/DIRECTIVE-fittings-phase0A-loop.md` — הנחיה: בניית מנוע-קטלוג-3D (אביזרים) פאזה 0+A במצב-לולאה-רציף — חוליות 789 SKU 0→100% מחברים
+- `archive/DIRECTIVE-giant-phase2-features.md` — הנחיית Phase-2 'למלא את הענק' — superset-הפיצ'רים, כל אחד בתוך המנוע תחת featureOn default-OFF-לחי
 - `archive/DIRECTIVE-huliot-images.md` — הנחיה: השלמת/עדכון קטלוג-חוליות + חיווט ~6,214 תמונות-R2 + בדיקת-תקינות (v2)
 - `archive/DIRECTIVE-launch-arming.md` — הדלקת-השקה — לזרוע את הבנוי-אבל-דורמנטי נכון (2 מקומות: דגלי-קומפילציה + טוגלי org-config), לא הדלקה
+- `archive/DIRECTIVE-manager-console-live.md` — הנחיה — לוח-הבקרה של המנהל: מידע-אמת + כל הפיצ'רים 100% (באג-קוד, לא בעיית-דגל)
+- `archive/DIRECTIVE-maor-full-integration.md` — שילוב-מלא מאור→BuildSmart (מה שנשאר, מדורג) — ~60% כבר בפנים, אושר-בעלים 27/7
 - `archive/DIRECTIVE-order-confirmation-email.md` — הנחיה — מייל-אישור-הזמנה יפה (HTML RTL) בסיום-הזמנה, מדומיין-מאומת orders@buildsmart-il.com
+- `archive/DIRECTIVE-screen-management-in-wizard.md` — הנחיה — כבה טריגר-עריכה-על-המסך (חובה, ראשון) → ניהול-מסכים 2-רמות באשף (סדר+הסתר פר-מסך)
+- `archive/DIRECTIVE-studio-registry-to-wizard-toggles.md` — הנחיה להמיר את registry-ה-Studio (~863 אלמנטים) לטוגלי הצג/הסתר יפים באשף (קיבוץ עברי + אקורדיון + ח
 - `archive/GO-LIVE.md` — GO-LIVE — הדלקת ה-Backend האמיתי אחרי functions (prep מראש של כל הצעדים)
 - `archive/GUIDE-F1-firebase-register.md` — מדריך F1 — לרשום iPhone + Android בקונסול Firebase (חיבור גרסת-הטלפון לשרת)
 - `archive/KEYBOARD-100-STEPS.md` — מקלדת חכמה ב-100 שלבי-מיקרו (K1-K100) — נגזר מ-SPEC-smart-keyboard, כל שלב יחידה-אטומית
 - `archive/KEYBOARD-MASTER-PLAN.md` — מסמך-אב למקלדת-חכמה (BuildSmart Smart Input) — 100 שלבים (A–I), מגודר kSmartInput OFF
 - `archive/LAUNCH-CHECKLIST.md` — SSOT לצעדי-הבעלים להשקה (14/6, עודכן 23/6) — קוד-הלקוח גמור; נותרו קונסול/החלטות/משפטי/חנויות, שלבים
 - `archive/LAUNCH-PLAN.md` — תוכנית-השקה מלאה (29/7) — רוב הקוד גמור, האפליקציה חיה על web; נותרו בעיקר פעולות-בעלים (חשבונות/משפ
+- `archive/LAUNCH-TASKS-MICRO.md` — מפת-השקה מלאה (App Store + Google Play) — מדמו-עובד ועד השקה בשתי חנויות בלי placeholders, SSOT חי ל
 - `archive/LAUNCH-server-deploy.md` — הפעלת ה-Backend (אחרי code-complete S0–S9) — 6 שלבי-קונסול/deploy, אפס-קוד-חדש, UI לא-משתנה
+- `archive/MAOR-REUSE-MAP.md` — מפת-שאילת-דפוסים ממאור (config-per-org, React) → בנייה-חכמה (Flutter) · 14 דפוסים מדורגים + ליבה-5
+- `archive/MASTER-giant-system-order.md` — מסמך-אב מאחד ל-המערכת-הענקית — מנוע-אחד superset · כל חברה=פרוסת-קונפיג · הסדר המדויק 0→5.
 - `archive/METHOD-screen-button-knowledge-map.md` — מתודולוגיית מיפוי-ידע מלא — מסך-מסך כפתור-כפתור (אפס-פספוס); עוגן = registry 896 רכיבים
+- `archive/PLAN-buildsmart-clean-master.md` — תוכנית-אב להפוך את BuildSmart למנוע-Clean בלתי-שביר (קוד-אחד→אינסוף אפליקציות), 6 שלבים.
+- `archive/PLAN-giant-system-master.md` — תוכנית-אב 'המערכת-הענקית' — מנוע-אחד superset → כל חברה = פרוסה בקונפיג (טוגלים+ורטיקל+מיתוג)
+- `archive/PLAN-verticals-and-toggles.md` — תוכנית חבילות-ורטיקל + טוגלי-פיצ'רים — שכבת OrgConfig ריצתית מעל APP_PROFILE (בהשראת מאור verticalPa
+- `archive/SERVER-KICKOFF.md` — חבילת-משימות-כניסה להפעלת הצי על פרויקט-השרת (Firebase) — S0–S9, cache-pattern drop-in.
 - `archive/SPEC-ai-assistant.md` — מפרט עוזר-AI ראשי בתוך האפליקציה (Claude agentic, canned→LLM אמיתי) — נבנה ופעיל
+- `archive/SPEC-architecture-SDD.md` — מסמך ארכיטקטורה ועיצוב-מערכת (SDD) — app_flutter v6.99 אומת-מקוד, קהל מתכנת בכיר
+- `archive/SPEC-catalog-to-server-MICRO.md` — פירוק-מיקרו (C0–C5) להעברת הקטלוג הדינמי + שכבת-חנויות חדשה (מחיר/מלאי) לשרת — בלי לשכתב מנוע.
 - `archive/SPEC-ring-dive-handoff.md` — תוכנית שני-שלבים + חוזה-חיבור קפוא לגלגל-הטבעות (Ring-DIVE) — הרכיב עיוור-לדאטה
 - `archive/SPEC-ring-dive.md` — צלילת-הטבעות (Ring-DIVE) — עור מעגלי לצלילת-החיפוש (Flutter): הטבעות מחליפות רק את שכבת-הציור, לא המ
+- `archive/SPEC-server-connect-MICRO.md` — פירוק-מיקרו מלא של חיבור-שרת Firebase+R2 (S0-S9 · ~48 משימות-מיקרו) — drop-in cache-pattern, UI-ללא-
+- `archive/SPEC-server-connect.md` — SPEC — חיבור-שרת (Firebase + Cloudflare R2), פירוק S0-S9, שמירת drop-in דרך offline-first cache; RBA
 - `archive/SPEC-smart-keyboard.md` — SPEC מקלדת-חכמה v2 (פאנל-קלט in-app · רצועה תלוית-הקשר) — מגודר kSmartInput OFF, לא-חוסם-השקה
+- `archive/SPEC-user-system-MICRO.md` — תוכנית-בנייה מיקרו למערך-משתמשים (U0–U5): מודל·RBAC·בעלות-חנות·הרשמה·ניהול-אדמין·מחזור-חיים.
 - `archive/START-HERE-buildsmart-clean.md` — עמוד-שער למסירה-לנחיל: BuildSmart Clean — מנוע-אב בלתי-שביר, קוד-אחד → אינסוף אפליקציות
 - `archive/V2-ROADMAP-visual-ai.md` — חזון ויזואלי/AI ל-v2 (פארק — אחרי ההשקה): בניין-3D · קטלוג-3D · אייקונים · עיצוב-שיווקי (+ עוזר-AI ש
+- `archive/firebase-web-config.md` — firebase-web-config — client config פומבי (לא-סוד) לכתיבת firebase_options.dart (S0.2 · Web app)
 - `archive/monster-finder/MONSTER-PLAN-TEARDOWN.md` — פסק-דין הנחיל-הקורע (9×9=81 עדשות) על תוכנית-100-השלבים — 100 ממצאים: 38 חוסמים, 52 מז'ורים
 - `archive/monster-finder/MONSTER-PLAN-v2.md` — תוכנית-v2 מתוקנת של המאתר-המאוחד (MONSTER) — 89 יחידות אטומיות, P0-קודם, הוכחות-כנות
 - `archive/monster-finder/MONSTER-PLAN-v3.md` — תוכנית-בנייה 129-יחידות ל'מאתר-מפלצת' מאוחד (9→1) עם הוכחת <=6/<=4 ישימה+כנה, הכל מאחורי דגלים ובייט
 - `archive/monster-finder/MONSTER-V2-TEARDOWN-R2.md` — פסק-דין סבב-2 של קריעת מאתר-המוצרים v2 ב-9 עדשות חדשות — 84 ממצאים, 33 חוסמים, לא build-ready אבל קר
 - `archive/monster-finder/MONSTER-V3-TEARDOWN-R3.md` — פסק-דין סבב-3 — v3 build-ready אך over-built; עצור-לתכנן, בנה slice של ~15 יחידות ל-preview, אין צור
-- `firebase-web-config.md` — firebase-web-config — client config פומבי (לא-סוד) לכתיבת firebase_options.dart (S0.2 · Web app)
 - `screens/contractor-home/departments.md` — _Departments
 - `screens/contractor-home/favorites.md` — _Favorites
 - `screens/contractor-home/install-studio-hero.md` — _InstallStudioHero
@@ -2249,47 +2249,47 @@
 
 ### SUPERSEDED (38)
 - `00-START-HERE.md` — נקודת-הכניסה היחידה לסוכנים — מיישבת מספור + סדר-קריאה + סטטוס (tip b9737cf, 2026-06-07)
-- `01-design-system.md` — לכידה מלאה של מערכת-העיצוב (CSS) מאב-הטיפוס (index.html 14–4019) — 8 חלקים א׳–ח׳, Categories A–J, + 
-- `02-shell-and-screens.md` — לכידה verbatim של המעטפת וכל המסכים והתיבות מאב-הטיפוס (index.html 4021–5419) + דלתאות Preact ו-Flut
-- `06-logic-settings-projects.md` — לכידת לוגיקת הגדרות·פרופיל·פרויקטים·תקציב·פרויקט-חכם·סטטוס (index.html 6560–7700) + דלתאות Preact/Fl
-- `07-logic-orders-tasks-search.md` — לוגיקת הזמנות·משימות·מלאי·ניווט-קטלוג·חיפוש (legacy index.html 7701-9000) + דלתאות Preact/Flutter
-- `12-persona-manager-store.md` — פירוק דשבורד-מנהל + דשבורד-חנות מהפרוטוטייפ, עם דלתות Preact ו-Flutter
-- `15-finance-site-hubs.md` — לכידת מרכז-פיננסים (Category B) + ניהול-אתר (Category C) (index.html 19452–20800) + דלתאות Preact/Fl
-- `17-security-service-boot.md` — ידע-מקור — מרכז-אבטחה/RBAC (Category I) + מרכז-שירות/chatbot (Category J) + boot של אב-הטיפוס, ודלתא
-- `18-legacy-knowledge-index.md` — אינדקס ההיסטוריה-המוסדית של מאמץ Preact/dial (62 מסמכי app/knowledge/) + החלטות-היסוד ADR (ה-WHY מאח
-- `19-feature-source-matrix.md` — מטריצת פיצ׳ר × מקור (אב-טיפוס/Preact/Flutter) — תשובה מיידית ל-הפיצ׳ר X קיים? איפה? באיזה עומק?
-- `21-protocols-spine-gates-enforcement.md` — מנגנון-הממשל של פרויקט Flutter — ~3,100 שורות אכיפה · מספור-שערים עד 116 (~66 פעילים) · 4 שכבות-אכיפ
-- `22-protocols-agents-process-specialized.md` — עולם-הפרוטוקולים: 6 סוכנים · PLAYBOOK · סולם-בדיקות L0–L7 · ~10 פרוטוקולים-ייעודיים · 15 ADRs
-- `23-flutter-architecture-state-cardflow.md` — השלמת-התמונה של תת-מערכות Flutter האמיתי — ארכיטקטורה·schema·50-state·42-card-flow·43-helpers·5-engi
 - `CATALOG-INDEX.md` — 📇 knowledge/ — CATALOG חי (מנוע-פירוק-ידע · re-runnable)
 - `COORDINATION-SPEC.md` — מפרט-תיאום לרגע-הפיצול — מי-לוקח-מה, merge-order, אנטי-פיצול (טרנק אחד)
-- `DIRECTIVE-wizard-is-the-studio.md` — הנחיה — האשף בולע את הסטודיו-המלא (5 חלוניות) בסגנון Maor על registry קיים; פרוסה-0 (עריכה-בחי+ניווט
 - `KNOWLEDGE_AUDIT.md` — מסדר-החיילים — verdict per-doc, כל מסמך=100 או פסול; audit מול קוד-נוכחי 1d292aa (39 מסמכים)
-- `LAUNCH-MICRO-BREAKDOWN.md` — פירוק-מיקרו מלא של כל הדרך להשקה — ~90 משימות ב-Phases A–J + לוג-גלים כרונולוגי חי
-- `LAUNCH-deploy.md` — runbook click-by-click להעלאת BuildSmart לאוויר — Firebase Hosting + Cloudflare DNS + LiveDNS
-- `MICRO-TASKS.md` — פירוק-עדין ל-~50 משימות-מיקרו (pull-אחד/סוכן, DoD-בודד) — אימות-עומק + T7 + server-ready + ליטוש
-- `PLAN-closeout.md` — רשימת-קצוות מלאה מהקוד מתועדפת-לסגירה (אומת 2026-06-08 · tip 1d292aa) — עם עדכוני-07-06 (menu-dial ה
-- `PLAN-contractor-completion.md` — תוכנית-אב לסיום לוח-קבלן (T0–T22) — שלב-א הושלם, שלב-ב נבנה ומחווט נייטיב
-- `PLAN-manager-completion.md` — תוכנית-עבודה ללוח מנהל-המערכת כמסך-מלא חדש (M0-M5) — בוצע, מסמך תיעוד-היסטורי
-- `POLISH-BRIEF.md` — משימות-ליטוש לסוכן-ליטוש — P-1..P-5 (צבעים→BsTokens · typography · a11y · knowledge · go_router), to
 - `README.md` — אינדקס מאגר-הידע של אב-הטיפוס — שיטה, מבנה 3-שכבות, מעקב-כיסוי, ו-3 מקורות (פרוטוטייפ/Preact/Flutter
-- `SPEC-cross-persona-chat.md` — SPEC צ׳אט חוצה-פרסונות (אותו מסך-שיחות אצל כולם) — בוצע במלואו T7 (06-09), reuse-UI קיים; המסמך = sp
-- `TASKS-to-full.md` — פירוק-מלא של כל ה-tracks (B0–T7) לפיצול-מקבילי — מיושן, כל ה-tracks בנויים בפועל ב-v7.01
 - `archive/APP-SPEC-detailed.md` — PRD מלא ומפורט לכל מודול של BuildSmart (מאומת מ-app_flutter v6.16); ניווט pre-dial מיושן אך המודולים
 - `archive/APP-SPEC-full.md` — אפיון-מוצר מלא (PRD) — 5 פרסונות, קטלוג+הזמנת-רץ, מרכז-כספים, ניהול-אתר, מנוע-הזמנות חוצה-תפקידים.
+- `archive/DIRECTIVE-wizard-is-the-studio.md` — הנחיה — האשף בולע את הסטודיו-המלא (5 חלוניות) בסגנון Maor על registry קיים; פרוסה-0 (עריכה-בחי+ניווט
+- `archive/LAUNCH-MICRO-BREAKDOWN.md` — פירוק-מיקרו מלא של כל הדרך להשקה — ~90 משימות ב-Phases A–J + לוג-גלים כרונולוגי חי
+- `archive/LAUNCH-deploy.md` — runbook click-by-click להעלאת BuildSmart לאוויר — Firebase Hosting + Cloudflare DNS + LiveDNS
 - `archive/MANAGER-MASTER-PLAN.md` — מסמך-אב מסך-הניהול — חזון mission-control לבעלים + מצב-קיים מאומת-קוד + ~100 שלבי-מיקרו (10 מודולים)
 - `archive/MANAGER-SCREEN-COMPLETE.md` — מסך-הניהול (מנהל-המערכת 👔) — מסמך-אב מלא לבנייה verbatim+file:line; כבר בנוי כלוח-4-טאבים ורובו חי, 
+- `archive/MICRO-TASKS.md` — פירוק-עדין ל-~50 משימות-מיקרו (pull-אחד/סוכן, DoD-בודד) — אימות-עומק + T7 + server-ready + ליטוש
+- `archive/PLAN-closeout.md` — רשימת-קצוות מלאה מהקוד מתועדפת-לסגירה (אומת 2026-06-08 · tip 1d292aa) — עם עדכוני-07-06 (menu-dial ה
+- `archive/PLAN-contractor-completion.md` — תוכנית-אב לסיום לוח-קבלן (T0–T22) — שלב-א הושלם, שלב-ב נבנה ומחווט נייטיב
+- `archive/PLAN-manager-completion.md` — תוכנית-עבודה ללוח מנהל-המערכת כמסך-מלא חדש (M0-M5) — בוצע, מסמך תיעוד-היסטורי
+- `archive/POLISH-BRIEF.md` — משימות-ליטוש לסוכן-ליטוש — P-1..P-5 (צבעים→BsTokens · typography · a11y · knowledge · go_router), to
 - `archive/SPEC-A4-A6-order-ownership.md` — A4-A6 (מחודש) — server-swap: BoardSession מ-Firebase Auth במקום 5 חשבונות-seed; code-complete מגודר,
+- `archive/SPEC-cross-persona-chat.md` — SPEC צ׳אט חוצה-פרסונות (אותו מסך-שיחות אצל כולם) — בוצע במלואו T7 (06-09), reuse-UI קיים; המסמך = sp
+- `archive/TASKS-to-full.md` — פירוק-מלא של כל ה-tracks (B0–T7) לפיצול-מקבילי — מיושן, כל ה-tracks בנויים בפועל ב-v7.01
 - `archive/monster-finder/MONSTER-100-STEP-BUILD-PLAN.md` — תוכנית-בנייה 100 שלבים למנוע-מאתר מאוחד (המפלצת) — 9 כלים מתקפלים לכלי-על אחד
 - `archive/monster-finder/MONSTER-100x10-SUBSTEPS.md` — פירוק-מיקרו של 100 שלבי-בניית המאתר-המאוחד (card-keyboard) ל-1000 תת-נקודות, מעוגן בקוד app_flutter,
-- `data/wizard-mockup.html` — wizard-mockup.html
+- `data/wizard-mockup.html` — data/wizard-mockup.html
+- `reference/01-design-system.md` — לכידה מלאה של מערכת-העיצוב (CSS) מאב-הטיפוס (index.html 14–4019) — 8 חלקים א׳–ח׳, Categories A–J, + 
+- `reference/02-shell-and-screens.md` — לכידה verbatim של המעטפת וכל המסכים והתיבות מאב-הטיפוס (index.html 4021–5419) + דלתאות Preact ו-Flut
+- `reference/06-logic-settings-projects.md` — לכידת לוגיקת הגדרות·פרופיל·פרויקטים·תקציב·פרויקט-חכם·סטטוס (index.html 6560–7700) + דלתאות Preact/Fl
+- `reference/07-logic-orders-tasks-search.md` — לוגיקת הזמנות·משימות·מלאי·ניווט-קטלוג·חיפוש (legacy index.html 7701-9000) + דלתאות Preact/Flutter
+- `reference/12-persona-manager-store.md` — פירוק דשבורד-מנהל + דשבורד-חנות מהפרוטוטייפ, עם דלתות Preact ו-Flutter
+- `reference/15-finance-site-hubs.md` — לכידת מרכז-פיננסים (Category B) + ניהול-אתר (Category C) (index.html 19452–20800) + דלתאות Preact/Fl
+- `reference/17-security-service-boot.md` — ידע-מקור — מרכז-אבטחה/RBAC (Category I) + מרכז-שירות/chatbot (Category J) + boot של אב-הטיפוס, ודלתא
+- `reference/18-legacy-knowledge-index.md` — אינדקס ההיסטוריה-המוסדית של מאמץ Preact/dial (62 מסמכי app/knowledge/) + החלטות-היסוד ADR (ה-WHY מאח
+- `reference/19-feature-source-matrix.md` — מטריצת פיצ׳ר × מקור (אב-טיפוס/Preact/Flutter) — תשובה מיידית ל-הפיצ׳ר X קיים? איפה? באיזה עומק?
+- `reference/21-protocols-spine-gates-enforcement.md` — מנגנון-הממשל של פרויקט Flutter — ~3,100 שורות אכיפה · מספור-שערים עד 116 (~66 פעילים) · 4 שכבות-אכיפ
+- `reference/22-protocols-agents-process-specialized.md` — עולם-הפרוטוקולים: 6 סוכנים · PLAYBOOK · סולם-בדיקות L0–L7 · ~10 פרוטוקולים-ייעודיים · 15 ADRs
+- `reference/23-flutter-architecture-state-cardflow.md` — השלמת-התמונה של תת-מערכות Flutter האמיתי — ארכיטקטורה·schema·50-state·42-card-flow·43-helpers·5-engi
 - `screens/store/screen.json` — screen.json
 - `screens/store/store-list.json` — store-list.json
 - `screens/store/store-list.md` — _StoreList
 
 ### DATA (27)
-- `data/huliot_catalog_full.csv` — huliot_catalog_full.csv
-- `data/huliot_catalog_parsed.csv` — huliot_catalog_parsed.csv
+- `data/huliot_catalog_full.csv` — data/huliot_catalog_full.csv
+- `data/huliot_catalog_parsed.csv` — data/huliot_catalog_parsed.csv
 - `screens/contractor-home/departments.json` — departments.json
 - `screens/contractor-home/favorites.json` — favorites.json
 - `screens/contractor-home/install-studio-hero.json` — install-studio-hero.json

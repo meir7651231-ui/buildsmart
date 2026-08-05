@@ -74,7 +74,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-fake-data-sweep.md",
+  "path": "archive/DIRECTIVE-fake-data-sweep.md",
   "one_line": "הנחיה למיגור מידע-מזויף-שמתחזה-לאמת בכל האפליקציה → 100% מידע-אמת (~24 אתרי-רינדור על ~15 שורשי-const)",
   "status": "current",
   "vision": "100% מידע-אמת: אפס const-שמתחזה-לחי, אפס פקד-מת, אפס מספר-מומצא",
@@ -126,7 +126,7 @@
   ]
  },
  {
-  "path": "LAUNCH-deploy.md",
+  "path": "archive/LAUNCH-deploy.md",
   "one_line": "runbook click-by-click להעלאת BuildSmart לאוויר — Firebase Hosting + Cloudflare DNS + LiveDNS",
   "status": "current",
   "vision": "אפליקציה חיה בדומיין-אמת (buildsmart-il.com) כ-PWA, ובשלב-הבא backend אמיתי — ממוצר-דמו למוצר-אמיתי",
@@ -217,7 +217,7 @@
   ]
  },
  {
-  "path": "PLAN-manager-completion.md",
+  "path": "archive/PLAN-manager-completion.md",
   "one_line": "תוכנית-עבודה ללוח מנהל-המערכת כמסך-מלא חדש (M0-M5) — בוצע, מסמך תיעוד-היסטורי",
   "status": "superseded",
   "vision": "לוח-מנהל = מסך חדש מלא, בנוי בדיוק כמו לוח-קבלן (אותו דפוס-בנייה), לא עלי-dial",
@@ -306,7 +306,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-manager-console-live.md",
+  "path": "archive/DIRECTIVE-manager-console-live.md",
   "one_line": "הנחיה — לוח-הבקרה של המנהל: מידע-אמת + כל הפיצ'רים 100% (באג-קוד, לא בעיית-דגל)",
   "status": "current",
   "vision": "כל 5 ה-KPI = מידע-אמת; משנים דאטה בשרת → המספר בלוח משתנה; אפס ערכים-קבועים",
@@ -442,7 +442,7 @@
   ]
  },
  {
-  "path": "13-scenarios-courier-registration.md",
+  "path": "reference/13-scenarios-courier-registration.md",
   "one_line": "תרחישי פריט-חסר/אזל + דשבורד-שליח + רישום (index.html 17627–18422) — מיפוי-פרוטוטייפ + דלתא-פורט",
   "status": "reference",
   "vision": "פרסונת-שליח מלאה + טיפול פריט-חסר/אזל + רישום/onboarding — parity לפרוטוטייפ",
@@ -478,7 +478,7 @@
   ]
  },
  {
-  "path": "16-portal-ai-rewards.md",
+  "path": "reference/16-portal-ai-rewards.md",
   "one_line": "פורטל/chat (F) + מרכז-AI (G) + מרכז-תגמולים (H) (index.html 20800–21659) — מיפוי + דלתא-פורט",
   "status": "reference",
   "vision": "פורטל-ספק/שליח + מנוע-AI מלא + מרכז-תגמולים — parity לפרוטוטייפ",

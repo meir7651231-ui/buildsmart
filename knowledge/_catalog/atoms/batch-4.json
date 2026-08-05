@@ -1,6 +1,6 @@
 [
  {
-  "path": "LAUNCH-MICRO-BREAKDOWN.md",
+  "path": "archive/LAUNCH-MICRO-BREAKDOWN.md",
   "one_line": "פירוק-מיקרו מלא של כל הדרך להשקה — ~90 משימות ב-Phases A–J + לוג-גלים כרונולוגי חי",
   "status": "current",
   "vision": "🎯 השקה מלאה לחנויות (iOS+Android) · חזון white-label 'קוד-אחד → אינסוף אפליקציות' (Clean)",
@@ -131,7 +131,7 @@
   ]
  },
  {
-  "path": "21-protocols-spine-gates-enforcement.md",
+  "path": "reference/21-protocols-spine-gates-enforcement.md",
   "one_line": "מנגנון-הממשל של פרויקט Flutter — ~3,100 שורות אכיפה · מספור-שערים עד 116 (~66 פעילים) · 4 שכבות-אכיפה",
   "status": "current",
   "vision": "🎯 'הכשלים באו מחוסר-תהליך, לא מחוסר-ידע' — ממשל אכיף-עצמי שמונע ריברטים (הפרת-חוק נתפסת רק ב-checklist, לא בקומפיילר)",
@@ -231,7 +231,7 @@
   ]
  },
  {
-  "path": "MAOR-REUSE-MAP.md",
+  "path": "archive/MAOR-REUSE-MAP.md",
   "one_line": "מפת-שאילת-דפוסים ממאור (config-per-org, React) → בנייה-חכמה (Flutter) · 14 דפוסים מדורגים + ליבה-5",
   "status": "reference",
   "vision": "🎯 מכריית ה*דפוס* לא ה*פיצ'ר* (חדר≈רכב) · כל דפוס מעשיר את המנוע → כל חברה מ-Clean מקבלת",
@@ -323,7 +323,7 @@
   ]
  },
  {
-  "path": "PLAN-verticals-and-toggles.md",
+  "path": "archive/PLAN-verticals-and-toggles.md",
   "one_line": "תוכנית חבילות-ורטיקל + טוגלי-פיצ'רים — שכבת OrgConfig ריצתית מעל APP_PROFILE (בהשראת מאור verticalPacks)",
   "status": "current",
   "vision": "🎯 להפוך Clean מ'פרופיל-בקומפילציה' לפלטפורמה-שמתקינים-לפי-סוג-עסק: חבילת-ורטיקל + טוגלים + מיתוג → אפליקציה תפורה",
@@ -367,7 +367,7 @@
   ]
  },
  {
-  "path": "24-multiagent-governance.md",
+  "path": "reference/24-multiagent-governance.md",
   "one_line": "ארכיטקטורת-הממשל הרב-סוכנית — פרוטוקול → פרוטוקוליסט → Supervisor → 6 תת-סוכנים → משתמש (מפעל-תוכנה אוטונומי)",
   "status": "reference",
   "vision": "🎯 מפעל-תוכנה אוטונומי — סוכנים בונים את BuildSmart לבד, נשלטים ע\"י פרוטוקול-אכיף-עצמי, פיקוח סוכן-על, משתמש כסמכות-עליונה",
@@ -409,7 +409,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-giant-phase2-features.md",
+  "path": "archive/DIRECTIVE-giant-phase2-features.md",
   "one_line": "הנחיית Phase-2 'למלא את הענק' — superset-הפיצ'רים, כל אחד בתוך המנוע תחת featureOn default-OFF-לחי",
   "status": "current",
   "vision": "🎯 המנוע-הענק 'מלא' — כל פיצ'ר בפנים, נבחר פר-חברה (מאור=דפוס-מומש-ב-Dart, לא-מועתק)",
@@ -449,7 +449,7 @@
   ]
  },
  {
-  "path": "05-data-orders-projects-ranks.md",
+  "path": "reference/05-data-orders-projects-ranks.md",
   "one_line": "שכבת-דאטה מהאב-טיפוס (index.html 6323-6560) — סדר-הרכבה (ORDERS) · 3 פרויקטים · 4 דרגות-קבלן · זהות+6-הישגים",
   "status": "reference",
   "vision": "",
@@ -483,7 +483,7 @@
   ]
  },
  {
-  "path": "POLISH-BRIEF.md",
+  "path": "archive/POLISH-BRIEF.md",
   "one_line": "משימות-ליטוש לסוכן-ליטוש — P-1..P-5 (צבעים→BsTokens · typography · a11y · knowledge · go_router), token-binding=safe",
   "status": "current",
   "vision": "🎯 presentation-polish בתוך POLISH_PROTOCOL — token-binding = safe (אפס שינוי ויזואלי)",
@@ -528,7 +528,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-screen-management-in-wizard.md",
+  "path": "archive/DIRECTIVE-screen-management-in-wizard.md",
   "one_line": "הנחיה — כבה טריגר-עריכה-על-המסך (חובה, ראשון) → ניהול-מסכים 2-רמות באשף (סדר+הסתר פר-מסך)",
   "status": "current",
   "vision": "🎯 העריכה עוברת לאשף (כניסה משלו) עד שיימצא מיקום-טריגר טוב — ואז מדליקים שוב",

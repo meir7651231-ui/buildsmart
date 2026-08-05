@@ -29,29 +29,29 @@
 | קובץ | תחום | טווח במקור |
 |---|---|---|
 | `README.md` (זה) | אינדקס + שיטה + מעקב-כיסוי | — |
-| `01-design-system.md` | מערכת-עיצוב מלאה (8 חלקים א׳–ח׳) | 14–4019 |
-| `02-shell-and-screens.md` | המעטפת + כל המסכים והתיבות | 4021–5419 |
-| `03-data-product-trees.md` | מודל-המוצר — TREES (לב הדמו) | 5441–6044 |
-| `04-data-catalog-variants-tools.md` | קטלוג/וריאציות/מידות/מלאי/כלים | 6046–6320 |
-| `05-data-orders-projects-ranks.md` | סדר-הרכבה/פרויקטים/דרגות/זהות | 6323–6560 |
-| `06-logic-settings-projects.md` | לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | 6560–7700 |
-| `07-logic-orders-tasks-search.md` | לוגיקה: הזמנות/משימות/מלאי/ניווט/חיפוש | 7701–9000 |
-| `08-logic-product-cart-checkout.md` | ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | 9000–11000 |
-| `09-logic-cart-notif-onboarding.md` | סל-render/checkout/התראות/onboarding/roles | 11000–11907 |
-| `10-engine-pricing-stores-sysorders.md` | מנוע-מסחר: תמחור/ספקים/VAT/SYS_ORDERS | 11908–12061 |
-| `11-manager-dashboard-selftest.md` | דשבורד-מנהל + BUTTON_REGISTRY/self-test | 12062–15900 |
-| `12-persona-manager-store.md` | דשבורד-מנהל (מלא) + דשבורד-חנות | 15900–17627 |
-| `13-scenarios-courier-registration.md` | פריט-חסר/אזל + דשבורד-שליח + רישום | 17627–18422 |
-| `14-b2b-supply-chain.md` | B2B (Cat-A): planner/RMA/השכרה/פקדונות/MSDS/RFQ | 18423–19451 |
-| `15-finance-site-hubs.md` | מרכז-פיננסים (B) + ניהול-אתר (C) | 19452–20800 |
-| `16-portal-ai-rewards.md` | פורטל/chat (F) + AI (G) + תגמולים (H) | 20800–21659 |
-| `17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot + PWA/deploy | 21660–22414 |
-| `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · כללים · 43 INSP) | app/knowledge |
-| `19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
-| `20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
-| `21-protocols-spine-gates-enforcement.md` | ⭐ עולם-הפרוטוקולים (1): MASTER_PROTOCOL · 116 שערים · 4 שכבות-אכיפה · scripts/CI | app_flutter (whats-happening) |
-| `22-protocols-agents-process-specialized.md` | ⭐ עולם-הפרוטוקולים (2): 6 סוכנים · PLAYBOOK · סולם L0–L7 · 10 פרוטוקולים-ייעודיים · 15 ADRs · stuck_log | app_flutter (whats-happening) |
-| `23-flutter-architecture-state-cardflow.md` | ⭐ Flutter: ארכיטקטורה · 41 providers · SmartProduct card-flow(42) · 47 helpers · 5 engines · launch-readiness | app_flutter (whats-happening) |
+| `reference/01-design-system.md` | מערכת-עיצוב מלאה (8 חלקים א׳–ח׳) | 14–4019 |
+| `reference/02-shell-and-screens.md` | המעטפת + כל המסכים והתיבות | 4021–5419 |
+| `reference/03-data-product-trees.md` | מודל-המוצר — TREES (לב הדמו) | 5441–6044 |
+| `reference/04-data-catalog-variants-tools.md` | קטלוג/וריאציות/מידות/מלאי/כלים | 6046–6320 |
+| `reference/05-data-orders-projects-ranks.md` | סדר-הרכבה/פרויקטים/דרגות/זהות | 6323–6560 |
+| `reference/06-logic-settings-projects.md` | לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | 6560–7700 |
+| `reference/07-logic-orders-tasks-search.md` | לוגיקה: הזמנות/משימות/מלאי/ניווט/חיפוש | 7701–9000 |
+| `reference/08-logic-product-cart-checkout.md` | ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | 9000–11000 |
+| `reference/09-logic-cart-notif-onboarding.md` | סל-render/checkout/התראות/onboarding/roles | 11000–11907 |
+| `reference/10-engine-pricing-stores-sysorders.md` | מנוע-מסחר: תמחור/ספקים/VAT/SYS_ORDERS | 11908–12061 |
+| `reference/11-manager-dashboard-selftest.md` | דשבורד-מנהל + BUTTON_REGISTRY/self-test | 12062–15900 |
+| `reference/12-persona-manager-store.md` | דשבורד-מנהל (מלא) + דשבורד-חנות | 15900–17627 |
+| `reference/13-scenarios-courier-registration.md` | פריט-חסר/אזל + דשבורד-שליח + רישום | 17627–18422 |
+| `reference/14-b2b-supply-chain.md` | B2B (Cat-A): planner/RMA/השכרה/פקדונות/MSDS/RFQ | 18423–19451 |
+| `reference/15-finance-site-hubs.md` | מרכז-פיננסים (B) + ניהול-אתר (C) | 19452–20800 |
+| `reference/16-portal-ai-rewards.md` | פורטל/chat (F) + AI (G) + תגמולים (H) | 20800–21659 |
+| `reference/17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot + PWA/deploy | 21660–22414 |
+| `reference/18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · כללים · 43 INSP) | app/knowledge |
+| `reference/19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
+| `reference/20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
+| `reference/21-protocols-spine-gates-enforcement.md` | ⭐ עולם-הפרוטוקולים (1): MASTER_PROTOCOL · 116 שערים · 4 שכבות-אכיפה · scripts/CI | app_flutter (whats-happening) |
+| `reference/22-protocols-agents-process-specialized.md` | ⭐ עולם-הפרוטוקולים (2): 6 סוכנים · PLAYBOOK · סולם L0–L7 · 10 פרוטוקולים-ייעודיים · 15 ADRs · stuck_log | app_flutter (whats-happening) |
+| `reference/23-flutter-architecture-state-cardflow.md` | ⭐ Flutter: ארכיטקטורה · 41 providers · SmartProduct card-flow(42) · 47 helpers · 5 engines · launch-readiness | app_flutter (whats-happening) |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -62,25 +62,25 @@
 
 | טווח | תחום | סטטוס | קובץ-יעד |
 |---|---|---|---|
-| 1–13 | head | ✅ נלכד | `01-design-system.md` |
-| 14–4019 | CSS — מערכת-עיצוב מלאה (8 חלקים א׳–ח׳: יסודות→4 פרסונות) | ✅ נלכד | `01-design-system.md` |
-| 4021–5419 | body — מעטפת + מסכים + תיבות | ✅ נלכד | `02-shell-and-screens.md` |
+| 1–13 | head | ✅ נלכד | `reference/01-design-system.md` |
+| 14–4019 | CSS — מערכת-עיצוב מלאה (8 חלקים א׳–ח׳: יסודות→4 פרסונות) | ✅ נלכד | `reference/01-design-system.md` |
+| 4021–5419 | body — מעטפת + מסכים + תיבות | ✅ נלכד | `reference/02-shell-and-screens.md` |
 | 5419–5440 | JS — bootstrap (error-catcher, script #1) | ✅ נלכד | `17` (boot) |
-| 5441–6044 | JS — TREES (מודל-מוצר: pl_/stages/rich/+148) | ✅ נלכד | `03-data-product-trees.md` |
-| 6046–6320 | JS — קטלוג/וריאציות/מידות/מלאי/כלים | ✅ נלכד | `04-data-catalog-variants-tools.md` |
-| 6321–6560 | JS — ORDERS/PROJECTS/RANKS/זהות | ✅ נלכד | `05-data-orders-projects-ranks.md` |
-| 6561–7700 | JS — לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | ✅ נלכד | `06-logic-settings-projects.md` |
-| 7701–9000 | JS — הזמנות/משימות/מלאי/ניווט/חיפוש | ✅ נלכד | `07-logic-orders-tasks-search.md` |
-| 9001–11000 | JS — ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | ✅ נלכד | `08-logic-product-cart-checkout.md` |
-| 11001–11907 | JS — סל-render/checkout/התראות/onboarding/roles | ✅ נלכד | `09-logic-cart-notif-onboarding.md` |
-| 11908–12061 | JS — מנוע-מסחר (תמחור/ספקים/VAT/SYS_ORDERS) | ✅ נלכד | `10-engine-pricing-stores-sysorders.md` |
-| 12062–15900 | JS — דשבורד-מנהל + BUTTON_REGISTRY/self-test | ✅ נלכד | `11-manager-dashboard-selftest.md` |
-| 15901–17627 | JS — דשבורד-מנהל (מלא) + דשבורד-חנות | ✅ נלכד | `12-persona-manager-store.md` |
-| 17628–18422 | JS — פריט-חסר/אזל + שליח + רישום | ✅ נלכד | `13-scenarios-courier-registration.md` |
-| 18423–19451 | JS — B2B Category-A (planner/RMA/השכרה/MSDS/RFQ) | ✅ נלכד | `14-b2b-supply-chain.md` |
-| 19452–20800 | JS — מרכז-פיננסים (B) + ניהול-אתר (C) | ✅ נלכד | `15-finance-site-hubs.md` |
-| 20801–21659 | JS — פורטל/chat (F) + AI (G) + תגמולים (H) | ✅ נלכד | `16-portal-ai-rewards.md` |
-| 21660–22414 | JS — אבטחה/RBAC (I) + שירות/chatbot (J) + boot | ✅ נלכד | `17-security-service-boot.md` |
+| 5441–6044 | JS — TREES (מודל-מוצר: pl_/stages/rich/+148) | ✅ נלכד | `reference/03-data-product-trees.md` |
+| 6046–6320 | JS — קטלוג/וריאציות/מידות/מלאי/כלים | ✅ נלכד | `reference/04-data-catalog-variants-tools.md` |
+| 6321–6560 | JS — ORDERS/PROJECTS/RANKS/זהות | ✅ נלכד | `reference/05-data-orders-projects-ranks.md` |
+| 6561–7700 | JS — לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | ✅ נלכד | `reference/06-logic-settings-projects.md` |
+| 7701–9000 | JS — הזמנות/משימות/מלאי/ניווט/חיפוש | ✅ נלכד | `reference/07-logic-orders-tasks-search.md` |
+| 9001–11000 | JS — ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | ✅ נלכד | `reference/08-logic-product-cart-checkout.md` |
+| 11001–11907 | JS — סל-render/checkout/התראות/onboarding/roles | ✅ נלכד | `reference/09-logic-cart-notif-onboarding.md` |
+| 11908–12061 | JS — מנוע-מסחר (תמחור/ספקים/VAT/SYS_ORDERS) | ✅ נלכד | `reference/10-engine-pricing-stores-sysorders.md` |
+| 12062–15900 | JS — דשבורד-מנהל + BUTTON_REGISTRY/self-test | ✅ נלכד | `reference/11-manager-dashboard-selftest.md` |
+| 15901–17627 | JS — דשבורד-מנהל (מלא) + דשבורד-חנות | ✅ נלכד | `reference/12-persona-manager-store.md` |
+| 17628–18422 | JS — פריט-חסר/אזל + שליח + רישום | ✅ נלכד | `reference/13-scenarios-courier-registration.md` |
+| 18423–19451 | JS — B2B Category-A (planner/RMA/השכרה/MSDS/RFQ) | ✅ נלכד | `reference/14-b2b-supply-chain.md` |
+| 19452–20800 | JS — מרכז-פיננסים (B) + ניהול-אתר (C) | ✅ נלכד | `reference/15-finance-site-hubs.md` |
+| 20801–21659 | JS — פורטל/chat (F) + AI (G) + תגמולים (H) | ✅ נלכד | `reference/16-portal-ai-rewards.md` |
+| 21660–22414 | JS — אבטחה/RBAC (I) + שירות/chatbot (J) + boot | ✅ נלכד | `reference/17-security-service-boot.md` |
 
 ## מפת-ניווט ל-JS (5440–22414) — אינדקס-מבנה, **✅ הכל נלכד**
 > אינדקס שמות+שורות של מבני-הנתונים (כולם נקראו ותועדו בדוחות 03–17). משמש lookup מהיר "איפה X במקור".

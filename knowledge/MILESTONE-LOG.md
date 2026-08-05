@@ -1,5 +1,5 @@
 # 📌 יומן אבני-דרך מאומתות — BuildSmart
-> אבני-דרך שאומתו **ב-CI ע"י הקטלגן** (verify-before-✅ — לא על דיווח). משלים את `LAUNCH-MICRO-BREAKDOWN.md`. חדש-למעלה.
+> אבני-דרך שאומתו **ב-CI ע"י הקטלגן** (verify-before-✅ — לא על דיווח). משלים את `archive/LAUNCH-MICRO-BREAKDOWN.md`. חדש-למעלה.
 
 ## 2026-08-03 — מנוע-הקטלוג-3D + אטומיזציה מלאה
 **הכל CI-ירוק, אומת ע"י הקטלגן (בדיקת Protocol Enforcement בפועל).**

@@ -1,6 +1,6 @@
 [
  {
-  "path": "02-shell-and-screens.md",
+  "path": "reference/02-shell-and-screens.md",
   "one_line": "לכידה verbatim של המעטפת וכל המסכים והתיבות מאב-הטיפוס (index.html 4021–5419) + דלתאות Preact ו-Flutter.",
   "status": "reference",
   "vision": "מקור-אמת יחיד — לתעד כל מסך/overlay/handler של אב-הטיפוס verbatim לצורך port.",
@@ -54,7 +54,7 @@
   ]
  },
  {
-  "path": "01-design-system.md",
+  "path": "reference/01-design-system.md",
   "one_line": "לכידה מלאה של מערכת-העיצוב (CSS) מאב-הטיפוס (index.html 14–4019) — 8 חלקים א׳–ח׳, Categories A–J, + דלתאות Preact/Flutter.",
   "status": "reference",
   "vision": "לתעד את שפת-העיצוב המלאה (טוקנים·רכיבים·פרסונות) כמקור לתרגום port.",
@@ -153,7 +153,7 @@
   ]
  },
  {
-  "path": "SPEC-user-system-MICRO.md",
+  "path": "archive/SPEC-user-system-MICRO.md",
   "one_line": "תוכנית-בנייה מיקרו למערך-משתמשים (U0–U5): מודל·RBAC·בעלות-חנות·הרשמה·ניהול-אדמין·מחזור-חיים.",
   "status": "current",
   "vision": "להשלים את השכבה-המסחרית ולפתוח go-live — חנות מנהלת מלאי לבד דרך משתמש-בעל-חנות.",
@@ -245,7 +245,7 @@
   ]
  },
  {
-  "path": "SPEC-catalog-to-server-MICRO.md",
+  "path": "archive/SPEC-catalog-to-server-MICRO.md",
   "one_line": "פירוק-מיקרו (C0–C5) להעברת הקטלוג הדינמי + שכבת-חנויות חדשה (מחיר/מלאי) לשרת — בלי לשכתב מנוע.",
   "status": "current",
   "vision": "drop-in דרך Repository (bundled→server) + cache-pattern → UI ומנועים ללא-שינוי · אופליין נשמר · עלות-DB נמוכה.",
@@ -299,7 +299,7 @@
   ]
  },
  {
-  "path": "06-logic-settings-projects.md",
+  "path": "reference/06-logic-settings-projects.md",
   "one_line": "לכידת לוגיקת הגדרות·פרופיל·פרויקטים·תקציב·פרויקט-חכם·סטטוס (index.html 6560–7700) + דלתאות Preact/Flutter.",
   "status": "reference",
   "vision": "לתעד תפקיד+זרימה+חיווט של פונקציות-הלוגיקה (לא העתק-קוד), עם שמות+שורות מדויקים.",
@@ -342,7 +342,7 @@
   ]
  },
  {
-  "path": "MASTER-giant-system-order.md",
+  "path": "archive/MASTER-giant-system-order.md",
   "one_line": "מסמך-אב מאחד ל-המערכת-הענקית — מנוע-אחד superset · כל חברה=פרוסת-קונפיג · הסדר המדויק 0→5.",
   "status": "current",
   "vision": "מנוע-אחד ענק (superset מקסימלי) · חברה=גולמי-נקי+קונפיג+דאטה · קוד-אחד→אינסוף חברות (30 אפליקציות · white-label).",
@@ -392,7 +392,7 @@
   ]
  },
  {
-  "path": "PLAN-buildsmart-clean-master.md",
+  "path": "archive/PLAN-buildsmart-clean-master.md",
   "one_line": "תוכנית-אב להפוך את BuildSmart למנוע-Clean בלתי-שביר (קוד-אחד→אינסוף אפליקציות), 6 שלבים.",
   "status": "current",
   "vision": "ה-Clean=בסיס גנרי-מלא-בלתי-שביר; כל חברה=בסיס+דאטה+שם+פיצ׳רים-נבחרים · קוד-אחד→הרבה אפליקציות חיות בו-זמנית.",
@@ -556,7 +556,7 @@
   ]
  },
  {
-  "path": "SERVER-KICKOFF.md",
+  "path": "archive/SERVER-KICKOFF.md",
   "one_line": "חבילת-משימות-כניסה להפעלת הצי על פרויקט-השרת (Firebase) — S0–S9, cache-pattern drop-in.",
   "status": "aging",
   "vision": "לחבר את האפליקציה ל-Firebase החי דרך drop-in (_local→_firebase) ב-cache-pattern — ה-interface (sync) וה-UI לא משתנים, הנתונים אמיתיים.",
@@ -600,7 +600,7 @@
   ]
  },
  {
-  "path": "09-logic-cart-notif-onboarding.md",
+  "path": "reference/09-logic-cart-notif-onboarding.md",
   "one_line": "לכידת לוגיקת סל-render·checkout-submit·התראות·onboarding/roles (index.html 11000–11907) + דלתאות Preact/Flutter.",
   "status": "reference",
   "vision": "לתעד את ליבת-הסל, זרימת-checkout, מנוע-ההתראות ו-onboarding verbatim.",
@@ -637,7 +637,7 @@
   ]
  },
  {
-  "path": "15-finance-site-hubs.md",
+  "path": "reference/15-finance-site-hubs.md",
   "one_line": "לכידת מרכז-פיננסים (Category B) + ניהול-אתר (Category C) (index.html 19452–20800) + דלתאות Preact/Flutter.",
   "status": "reference",
   "vision": "לתעד את 2 ה-hubs שמעמיקים את אפליקציית-הקבלן מעבר-לרכש: פיננסים + ניהול-אתר.",
@@ -671,7 +671,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-studio-registry-to-wizard-toggles.md",
+  "path": "archive/DIRECTIVE-studio-registry-to-wizard-toggles.md",
   "one_line": "הנחיה להמיר את registry-ה-Studio (~863 אלמנטים) לטוגלי הצג/הסתר יפים באשף (קיבוץ עברי + אקורדיון + חיפוש).",
   "status": "current",
   "vision": "אותה שליטה פר-אלמנט של ה-Studio, באותה כמות (~863) — כטוגלי הצג/הסתר מוצגים יפה כאשף, לא כרשימה-הגולמית.",
@@ -710,7 +710,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-clean-finish.md",
+  "path": "archive/DIRECTIVE-clean-finish.md",
   "one_line": "הנחיה לסגור את Clean — לתקן פיננסים-4 (מזויף-כאמת) + שלב-5 הוכחת שני-לינקים · קוד-אחד.",
   "status": "current",
   "vision": "הבעלים פותח 2 לינקים חיים מאותו קוד (MaorClean→MaorHachesed) — סגירת צד-הצי של תוכנית-Clean.",

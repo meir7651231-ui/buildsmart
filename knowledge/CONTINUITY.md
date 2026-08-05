@@ -45,10 +45,10 @@
 
 ## 📚 מסמכי-מפתח (סדר-קריאה)
 1. `00-START-HERE.md` — נקודת-כניסה · מספור · גישה
-2. `SERVER-KICKOFF.md` — הפעלת הצי (Backend)
-3. `SPEC-server-connect-MICRO.md` — ~48 המשימות (S0–S9)
-4. `firebase-web-config.md` — קלט S0.2
-5. `LAUNCH-deploy.md` — deploy runbook + סטטוס
+2. `archive/SERVER-KICKOFF.md` — הפעלת הצי (Backend)
+3. `archive/SPEC-server-connect-MICRO.md` — ~48 המשימות (S0–S9)
+4. `archive/firebase-web-config.md` — קלט S0.2
+5. `archive/LAUNCH-deploy.md` — deploy runbook + סטטוס
 6. `KNOWLEDGE_AUDIT.md` — מצב כל ~43 המסמכים
 
 ## ⚙️ כללים קריטיים

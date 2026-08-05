@@ -1,6 +1,6 @@
 [
  {
-  "path": "PLAN-contractor-completion.md",
+  "path": "archive/PLAN-contractor-completion.md",
   "one_line": "תוכנית-אב לסיום לוח-קבלן (T0–T22) — שלב-א הושלם, שלב-ב נבנה ומחווט נייטיב",
   "status": "reference",
   "vision": "לוח-קבלן מלא-מלא — front-end של מוצר אמיתי, parity-מלא לפרוטוטייפ, כל פיצ׳ר עובד, אפס toast-stub",
@@ -209,7 +209,7 @@
   ]
  },
  {
-  "path": "TASKS-to-full.md",
+  "path": "archive/TASKS-to-full.md",
   "one_line": "פירוק-מלא של כל ה-tracks (B0–T7) לפיצול-מקבילי — מיושן, כל ה-tracks בנויים בפועל ב-v7.01",
   "status": "superseded",
   "vision": "לוח-קבלן 'מלא מלא' — parity-מלא לפרוטוטייפ, tracks disjoint לפיצול-מקבילי בטוח",
@@ -252,7 +252,7 @@
   ]
  },
  {
-  "path": "12-persona-manager-store.md",
+  "path": "reference/12-persona-manager-store.md",
   "one_line": "פירוק דשבורד-מנהל + דשבורד-חנות מהפרוטוטייפ, עם דלתות Preact ו-Flutter",
   "status": "reference",
   "vision": "",
@@ -294,7 +294,7 @@
   ]
  },
  {
-  "path": "22-protocols-agents-process-specialized.md",
+  "path": "reference/22-protocols-agents-process-specialized.md",
   "one_line": "עולם-הפרוטוקולים: 6 סוכנים · PLAYBOOK · סולם-בדיקות L0–L7 · ~10 פרוטוקולים-ייעודיים · 15 ADRs",
   "status": "reference",
   "vision": "",
@@ -338,7 +338,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-fittings-phase0A-loop.md",
+  "path": "archive/DIRECTIVE-fittings-phase0A-loop.md",
   "one_line": "הנחיה: בניית מנוע-קטלוג-3D (אביזרים) פאזה 0+A במצב-לולאה-רציף — חוליות 789 SKU 0→100% מחברים",
   "status": "current",
   "vision": "מודל 'מעלים קובץ → מתחבר לבד': כל שורת-מוצר נושאת {משפחה, מידת-מפתח OD/DN} → הכל נגזר-בחינם מהמנוע",
@@ -380,7 +380,7 @@
   ]
  },
  {
-  "path": "PLAN-giant-system-master.md",
+  "path": "archive/PLAN-giant-system-master.md",
   "one_line": "תוכנית-אב 'המערכת-הענקית' — מנוע-אחד superset → כל חברה = פרוסה בקונפיג (טוגלים+ורטיקל+מיתוג)",
   "status": "current",
   "vision": "מנוע-אחד ענק = superset מקסימלי (כל הפיצ׳רים/המנגנונים/הורטיקלים); כל חברה = קונפיג בורר → אפליקציה רזה-ותפורה. קוד-אחד ⟶ אינסוף חברות",
@@ -419,7 +419,7 @@
   ]
  },
  {
-  "path": "MICRO-TASKS.md",
+  "path": "archive/MICRO-TASKS.md",
   "one_line": "פירוק-עדין ל-~50 משימות-מיקרו (pull-אחד/סוכן, DoD-בודד) — אימות-עומק + T7 + server-ready + ליטוש",
   "status": "aging",
   "vision": "",
@@ -537,7 +537,7 @@
   ]
  },
  {
-  "path": "11-manager-dashboard-selftest.md",
+  "path": "reference/11-manager-dashboard-selftest.md",
   "one_line": "פירוק דשבורד-מנהל (12062–12319) + מערכת-בדיקות-עצמית (BUTTON_REGISTRY 350 + reg-harness)",
   "status": "reference",
   "vision": "",
@@ -650,7 +650,7 @@
   ]
  },
  {
-  "path": "10-engine-pricing-stores-sysorders.md",
+  "path": "reference/10-engine-pricing-stores-sysorders.md",
   "one_line": "פירוק מנוע-המסחר: תמחור-לפי-חנות · ספקים · VAT 18% · SYS_ORDERS המשותף (11908–12061)",
   "status": "reference",
   "vision": "",

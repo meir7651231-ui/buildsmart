@@ -1,6 +1,6 @@
 # COORDINATION-SPEC — מפרט-תיאום לרגע-הפיצול (מי-לוקח-מה · merge-order · אנטי-פיצול)
 
-> 🧭 נקודת-כניסה: `00-START-HERE.md`. משלים את `TASKS-to-full.md`. מטרה: לפצל את 8 ה-tracks לסוכנים **בלי לחזור על הפיצול ל-3 ענפים** שקרה. נשען על PLAYBOOK (`AGENT_PATTERNS`/`AGENT_COORDINATION`) + בעלות-הסוכנים (דוח 24).
+> 🧭 נקודת-כניסה: `00-START-HERE.md`. משלים את `archive/TASKS-to-full.md`. מטרה: לפצל את 8 ה-tracks לסוכנים **בלי לחזור על הפיצול ל-3 ענפים** שקרה. נשען על PLAYBOOK (`AGENT_PATTERNS`/`AGENT_COORDINATION`) + בעלות-הסוכנים (דוח 24).
 
 ## 🔴 חוק-הזהב (הלקח מהפיצול הקודם)
 **טרנק אחד = `claude/whats-happening-LyY9G`. כולם ממזגים אליו תכופות.**
@@ -36,7 +36,7 @@
 1. **קבצים-חדשים-בלבד** היכן שאפשר (T1/T2/T3/T6 = מסכים/repos חדשים → אפס-התנגשות).
 2. **קבצים-חמים** (`home_shell`·`role_picker`·`data/menu_trees`·`data/sections`) → **hot-file claim** (gate 115) לפני עריכה · עורך-אחד-בכל-רגע. (`menu_dial_widget`+`bs_dial_widget` **נמחקו** 07-06.)
 3. **T4 (43 סטאבים)** = קבצים-קיימים → **partition מפורש**: chats↔camera↔settings↔store = סוכנים-שונים, אף-אחד לא נוגע בקובץ של השני.
-4. **claims-log** (`PLAN-contractor-completion.md` §תפיסות) — כל סוכן רושם track+SHA+סטטוס לפני שמתחיל.
+4. **claims-log** (`archive/PLAN-contractor-completion.md` §תפיסות) — כל סוכן רושם track+SHA+סטטוס לפני שמתחיל.
 
 ## 🧠 תפקיד ה-Supervisor (בכל סבב)
 - **ממסגר** כל track ב-10-step · **מוליד** את מקבץ-A..F + ליטוש · מוודא partition-disjoint (`Glob`).

@@ -21,7 +21,7 @@
 ## 2. העבודה הפתוחה האמיתית (מאומת · לפי עדיפות)
 
 ### 🥇 שילוב-מאור — השארית (~40%) · עיקר העבודה
-מקור: `DIRECTIVE-maor-full-integration.md` + `MAOR-REUSE-MAP.md`. מאומת מול הקוד:
+מקור: `archive/DIRECTIVE-maor-full-integration.md` + `archive/MAOR-REUSE-MAP.md`. מאומת מול הקוד:
 - **`#2` חיבור `workflow_engine`** — ה-kernel בנוי (`logic/workflow_engine.dart`) אך מיובא **רק** ב-`test/workflow_engine_test.dart`, אפס צרכן ב-lib. **הזול והמשתלם ביותר.**
 - **`#7` הארת JourneyTimeline** — בנוי אך כבוי: `JourneyTimeline` (`manager_dashboard_screen.dart:3003`) + `screens/intel/journey_labels.dart`, גדור מאחורי `kIntelLive`(const-false, tree-shaken) + `_resolveCustomerKey→null`. צריך: להאיר דגל + join-key חי.
 - **`#13` מספור-מסמכים-רץ** — `invoice.dart:46`/`delivery_note.dart:41` משתמשים ב-`order.id`; אין `receiptSeq` פר-סדרה (יש מוני-seq אחרים).
@@ -45,7 +45,7 @@
 
 ## 3. מסמכים מיושנים לתיקון (חוב-תיעוד, לא-חוסם)
 - `CONTINUITY.md` — תוקן ברענון הזה (Backend "שלב A"→בנוי).
-- `TASKS-to-full.md` — T6 מוצג כלא-מסומן בעוד שהוא מיושם מלא (עודכן באנר).
+- `archive/TASKS-to-full.md` — T6 מוצג כלא-מסומן בעוד שהוא מיושם מלא (עודכן באנר).
 - `app_flutter/knowledge/session_plan.md` (ענף-קוד) — fake-data-sweep מוצג פתוח בעוד 23/24 תוקנו. *(ענף-קוד — לא בסמכות סוכן-הידע; דיווח לצי.)*
 - `app_flutter/knowledge/TODO-worktree-hooks.md` — 3.5/4 באגים תוקנו, מסומן OPEN. *(ענף-קוד.)*
 - הערת `app_flutter/lib/data/huliot_smartlock_catalog.dart:50-56` — אומרת "not yet uploaded to R2" בעוד P10 סגור והדגלים `false`. *(ענף-קוד.)*

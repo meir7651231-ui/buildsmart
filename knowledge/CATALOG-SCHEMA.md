@@ -50,4 +50,4 @@
 דווח: `מכוסה N / M · פערים לפי סוג`. ‏(~1,623/1,867 כבר עם verified_specs — נקודת-פתיחה.)
 
 ---
-*אומת מול `pure_engine.py` (`base`/‏9 חד-קוטריות/`reducer`) + `INTEGRATION-SPEC.md`. נלווה ל-`DIRECTIVE-fittings-phase0A-loop.md`.*
+*אומת מול `pure_engine.py` (`base`/‏9 חד-קוטריות/`reducer`) + `INTEGRATION-SPEC.md`. נלווה ל-`archive/DIRECTIVE-fittings-phase0A-loop.md`.*

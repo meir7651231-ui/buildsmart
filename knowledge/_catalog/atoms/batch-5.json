@@ -147,7 +147,7 @@
   ]
  },
  {
-  "path": "LAUNCH-TASKS-MICRO.md",
+  "path": "archive/LAUNCH-TASKS-MICRO.md",
   "one_line": "מפת-השקה מלאה (App Store + Google Play) — מדמו-עובד ועד השקה בשתי חנויות בלי placeholders, SSOT חי להשקה",
   "status": "current",
   "vision": "🎯 השקה בשתי החנויות בלי placeholders ובלי פספוס-מילימטר — אפליקציה אמיתית מחוברת לשרת",
@@ -321,7 +321,7 @@
   ]
  },
  {
-  "path": "03-data-product-trees.md",
+  "path": "reference/03-data-product-trees.md",
   "one_line": "מודל-המוצר TREES (index.html 5441-6044) + דלתא Preact/Flutter — 202 מוצרי-אב-טיפוס → קטלוג-אמת 1,877",
   "status": "reference",
   "vision": "🎯 עץ-מוצרים חכם: בחירת מוצר-אב מקפיצה את כל האביזרים הנדרשים (must/why = החוכמה שהדמו מוכר)",
@@ -366,7 +366,7 @@
   ]
  },
  {
-  "path": "SPEC-architecture-SDD.md",
+  "path": "archive/SPEC-architecture-SDD.md",
   "one_line": "מסמך ארכיטקטורה ועיצוב-מערכת (SDD) — app_flutter v6.99 אומת-מקוד, קהל מתכנת בכיר",
   "status": "current",
   "vision": "🎯 פלטפורמת B2B לשרשרת-אספקה של אינסטלציה/בנייה (קבלן/חנות/שליח/עובד/מנהל), עברית RTL, נייטיב iOS/Android/Web",
@@ -470,7 +470,7 @@
   ]
  },
  {
-  "path": "08-logic-product-cart-checkout.md",
+  "path": "reference/08-logic-product-cart-checkout.md",
   "one_line": "ליבת-המוצר — עץ/אביזרים/סורק/סל/checkout (proto 9000-11000) + דלתא Preact/Flutter (Install-Studio)",
   "status": "reference",
   "vision": "🎯 מנוע המלצות-אביזרים (must/why = האביזרים שהצוות תמיד שוכח) + checkout מלא",
@@ -601,7 +601,7 @@
   ]
  },
  {
-  "path": "19-feature-source-matrix.md",
+  "path": "reference/19-feature-source-matrix.md",
   "one_line": "מטריצת פיצ׳ר × מקור (אב-טיפוס/Preact/Flutter) — תשובה מיידית ל-הפיצ׳ר X קיים? איפה? באיזה עומק?",
   "status": "reference",
   "vision": "🎯 מיפוי-מלא של כל פיצ׳ר על-פני 3 המקורות (breadth-הפרוטוטייפ → אפליקציית-אינסטלציה-אמיתית Flutter)",
@@ -637,7 +637,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-maor-full-integration.md",
+  "path": "archive/DIRECTIVE-maor-full-integration.md",
   "one_line": "שילוב-מלא מאור→BuildSmart (מה שנשאר, מדורג) — ~60% כבר בפנים, אושר-בעלים 27/7",
   "status": "current",
   "vision": "🎯 הערך-הנשאל-ממאור = 100% בפנים — כל מנועי-מאור הרלוונטיים מוטמעים כדפוסים-ב-Dart",
@@ -734,7 +734,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-deepen-toggles.md",
+  "path": "archive/DIRECTIVE-deepen-toggles.md",
   "one_line": "להעמיק ולהרחיב קונפיג/טוגלים לכל האפליקציה (כמו מאור) — 2 פערים: רוחב (כל-משטח) + עומק (טוגלים-דקים)",
   "status": "current",
   "vision": "🎯 קונפיג שמגיע לכל משטח וכל persona — עשרות טוגלים-דקים (פר-ווידג׳ט/סעיף/תת-יכולת) כמו מאור",
@@ -818,7 +818,7 @@
   ]
  },
  {
-  "path": "14-b2b-supply-chain.md",
+  "path": "reference/14-b2b-supply-chain.md",
   "one_line": "B2B שרשרת-אספקה (Category A, proto 18423-19451) — planner/RMA/RFQ/MSDS/rental/deposits + דלתא Preact/Flutter",
   "status": "reference",
   "vision": "🎯 שכבת-B2B מלאה (שש שירותי-שרשרת) + מתכנן-משלוחים שמשנה את ה-checkout",

@@ -8,7 +8,7 @@
 - **נבנו:** כל ה-hubs (finance/site/tasks/budget/stock/scan/projects/rewards/ai/home) · **5 פרסונות** מסכים-מלאים **מבודדים** · מנהל · **מנוע-הזמנות** (`sys_orders`) · **T7 צ׳אט** חוצה-פרסונות (`sys_chat` · בידוד `threadsFor` · **מחווט-לפרסונות** `persona_portal` §2.5) · **server-ready 6/6 ✅** · **T4 סטאבים סגור** (0 'בבנייה') · **a11y ✅**.
 - **מספרים:** **1,539+ טסטים** (גדל) · קטלוג **1,877** (Lipskey 935 + Polyroll 772 + Huliot 170).
 - **ארכיטקטורה (snapshot 06-09, גדל — הקוד=SSOT):** ~180 קבצי-lib · ~46 screens · ~55 state. (אומת `536486d`.) · **server-ready 6/6 ✅** · **a11y ✅** · **floating-cart (#47)** · smart-home landing · Huliot-R2 בטיפול.
-- **נותר:** אימות-עומק hubs · ליטוש P-1/P-2/P-5 · deploy-verify · השקה (חשבונות) · **שרת (פרויקט נפרד — `SPEC-server-connect.md`)**. *(server-ready ✅ 6/6.)*
+- **נותר:** אימות-עומק hubs · ליטוש P-1/P-2/P-5 · deploy-verify · השקה (חשבונות) · **שרת (פרויקט נפרד — `archive/SPEC-server-connect.md`)**. *(server-ready ✅ 6/6.)*
 
 ## ✅ verdict per-doc (39 חיילים · LIVE 11→14: +`KNOWLEDGE_AUDIT` +`SPEC-server-connect` +`SPEC-server-connect-MICRO`)
 ### 🟢 LIVE — מצב-נוכחי (11) · כולם **PASS / 100** (אומת-קוד 06-08)

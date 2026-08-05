@@ -84,7 +84,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-wizard-is-the-studio.md",
+  "path": "archive/DIRECTIVE-wizard-is-the-studio.md",
   "one_line": "הנחיה — האשף בולע את הסטודיו-המלא (5 חלוניות) בסגנון Maor על registry קיים; פרוסה-0 (עריכה-בחי+ניווט) מאושרת-לדחיפה מיד.",
   "status": "current",
   "vision": "האשף = כל 5 חלוניות-הסטודיו, מאורגן יפה כמו Maor (מקובץ/עברית/מונחים/נקי); חושפים את הקיים (element_registry ~896 + override-system), לא ממציאים.",
@@ -153,7 +153,7 @@
   ]
  },
  {
-  "path": "17-security-service-boot.md",
+  "path": "reference/17-security-service-boot.md",
   "one_line": "ידע-מקור — מרכז-אבטחה/RBAC (Category I) + מרכז-שירות/chatbot (Category J) + boot של אב-הטיפוס, ודלתא ל-Preact/Flutter + שכבת-PWA/deploy.",
   "status": "reference",
   "vision": "תיעוד verbatim של שכבות-האבטחה/שירות/boot מאב-הטיפוס כמקור-אמת ל-port (INSP-0007/0008), עם ציון מה-ported ומה לא.",
@@ -207,7 +207,7 @@
   ]
  },
  {
-  "path": "SPEC-server-connect.md",
+  "path": "archive/SPEC-server-connect.md",
   "one_line": "SPEC — חיבור-שרת (Firebase + Cloudflare R2), פירוק S0-S9, שמירת drop-in דרך offline-first cache; RBAC אמיתי כ-Firestore Security Rules.",
   "status": "current",
   "vision": "להפוך את ה-client (server-ready, Repository 6/6) למוצר-חי עם זהות-אמת + real-time בין-מכשירים + הפרדת-תפקידים נאכפת-בשרת.",
@@ -260,7 +260,7 @@
   ]
  },
  {
-  "path": "20-infra-build-tooling-protocol.md",
+  "path": "reference/20-infra-build-tooling-protocol.md",
   "one_line": "ידע-תשתית — אריזה-ל-native (Capacitor/Flutter), צינור extract-catalog, CI/deploy ל-GitHub Pages, build-configs, ושכבת-פרוטוקול-אכיפה (רק על whats-happening).",
   "status": "reference",
   "vision": "לתעד את הליבה-התפעולית — איך 3 המקורות נבנים/נארזים-ל-native/נפרסים/נאכפים.",
@@ -377,7 +377,7 @@
   ]
  },
  {
-  "path": "04-data-catalog-variants-tools.md",
+  "path": "reference/04-data-catalog-variants-tools.md",
   "one_line": "ידע-מקור — שכבת-הקטלוג של אב-הטיפוס (CATALOG/VARIANTS/SIZES/STOCK_DEMO/TOOLS, שורות 6046-6320) ודלתא ל-Preact/Flutter.",
   "status": "reference",
   "vision": "לתעד את שכבת-הקטלוג העוטפת את TREES — ארגון-תצוגה / בחירה / תמחור-מידה / מצב-התחלתי / השלמת-כלים.",
@@ -517,7 +517,7 @@
   ]
  },
  {
-  "path": "DIRECTIVE-arm-wizard-preview.md",
+  "path": "archive/DIRECTIVE-arm-wizard-preview.md",
   "one_line": "הנחיה — קודם preview עם האשף חי (APP_PROFILE=clean + ORG_CONFIG=true) לערוץ-Firebase נפרד → לינק מיד; אחר-כך המשך-רגיל (גל-4).",
   "status": "current",
   "vision": "הבעלים רוצה לינק לפתוח ולשחק עם האשף (giant-V5) שכרגע רדום מאחורי ORG_CONFIG=off — בלי לגעת באתר-הראשי-החי.",
