@@ -149,9 +149,11 @@ List<LipskeyCatalogProduct> _frameGroup(
   return group.isEmpty ? [p] : group;
 }
 
-/// The SIZE is a defining property, shown even single-value (owner: "1/2\" is a
-/// diameter"); every OTHER axis is a wheel only when it VARIES across the family.
-const Set<String> _kSizeChips = {'diameter', 'diameter-small'};
+/// DEFINING chips — shown even single-value: the SIZE (owner: "1/2\" is a diameter")
+/// and the COLOR (owner: "בצינורות יש לך צבעים" — a fitting's colour is a defining
+/// attribute, black HDPE vs gray PVC). Every OTHER axis is a wheel only when it
+/// VARIES across the family.
+const Set<String> _kSizeChips = {'diameter', 'diameter-small', 'color'};
 
 /// §4 — the wheels from [catAxesOf] over [p]'s variant family: the axes mapped to
 /// taxonomy chips. The SIZE chip ([_kSizeChips]) always shows (the defining

@@ -110,6 +110,13 @@ void main() {
       expect(_ids(a, universe: [a, b]), contains('color'));
     });
 
+    test('§4: color is a DEFINING axis — shown even single-value (owner: pipes)', () {
+      // a single black pipe still surfaces its צבע (like the size is always shown).
+      final p = _p('צינור שחור DN40', 'צינורות');
+      final roster = _ids(p, universe: [p]);
+      expect(roster, contains('color'));
+    });
+
     test('§4 keeps the engine goldens intact (union, engine wins a shared id)', () {
       // The axis engine must not disturb a PPR golden — the elbow still resolves to
       // exactly [diameter · angle · length].
