@@ -232,25 +232,19 @@ class _ConfigCardState extends State<ConfigCard> {
   void _onBuildLine() =>
       widget.onBuildLine?.call(widget.schema, Map.of(_selection), _qty);
 
-  // ── the positional axis/wheel map (data-driven) ─────────────────────────────
-  // diameter attribute(s) → the RIGHT side wheel(s); the rest → the image axes
-  // (first ↕, second ↔). So elbow → [angle↕, length↔, diameter▸]; manifold →
-  // [ports↕, color↔, diameter▸] — same frame, labels swap.
-  List<AttributeDef> get _diameterAttrs =>
-      [for (final a in _usable) if (a.id.startsWith('diameter')) a];
-  List<AttributeDef> get _axisAttrs =>
-      [for (final a in _usable) if (!a.id.startsWith('diameter')) a];
+  // ── the POSITIONAL wheel map (owner spec §6, taxonomy-ordered by the schema) ──
+  // The schema arrives priority-ordered (prioritizedSchema), so the slots are
+  // strictly positional: attr[0] = 🔩 side wheel A (right, usually קוטר) · attr[1]
+  // = 🥇 primary (↕ on the image) · attr[2] = 🥈 secondary (↔). qty is a fixed
+  // side wheel the card always adds. GRADUATED (§7): only the wheels that exist
+  // render; chips beyond the top 3 are dropped (the image can carry two axes).
+  AttributeDef? get _sideA => _usable.isNotEmpty ? _usable[0] : null;
+  AttributeDef? get _primary => _usable.length > 1 ? _usable[1] : null;
+  AttributeDef? get _secondary => _usable.length > 2 ? _usable[2] : null;
 
-  AttributeDef? get _primary => _axisAttrs.isNotEmpty ? _axisAttrs[0] : null;
-  AttributeDef? get _secondary =>
-      _axisAttrs.length > 1 ? _axisAttrs[1] : null;
-
-  /// The side (right) wheels — diameter(s) first, then any axis attribute beyond
-  /// the two the image carries (rare: keeps every declared wheel reachable).
-  List<AttributeDef> get _rightWheels => [
-        ..._diameterAttrs,
-        if (_axisAttrs.length > 2) ..._axisAttrs.sublist(2),
-      ];
+  /// The RIGHT side wheel — the priority-1 chip alone (§6 · 🔩). Empty ⇒ a spacer.
+  List<AttributeDef> get _rightWheels =>
+      _sideA == null ? const <AttributeDef>[] : <AttributeDef>[_sideA!];
 
   /// The short family name for the header/hint ('ברך 90°' → 'ברך', 'מחלק' → 'מחלק').
   String get _familyShort => widget.schema.familyId.split(' ').first;
@@ -592,13 +586,13 @@ class _ConfigCardState extends State<ConfigCard> {
   /// declares no wheels.
   Widget _valueLine() {
     final primary = _primary;
-    final diameter = _diameterAttrs.isNotEmpty ? _diameterAttrs.first : null;
+    final side = _sideA;
     final parts = <String>[
       if (primary != null) _selectedLabel(primary),
-      if (diameter != null)
-        diameter.unitHe == null
-            ? _selectedLabel(diameter)
-            : '${_selectedLabel(diameter)} ${diameter.unitHe}',
+      if (side != null)
+        side.unitHe == null
+            ? _selectedLabel(side)
+            : '${_selectedLabel(side)} ${side.unitHe}',
     ];
     return Center(
       child: Text(
@@ -617,9 +611,7 @@ class _ConfigCardState extends State<ConfigCard> {
   /// `.hint` — the per-product wheel roster (`הגלגלים של ברך: זווית · אורך · קוטר · כמות`).
   Widget _hint() {
     final names = <String>[
-      if (_primary != null) _primary!.nameHe,
-      if (_secondary != null) _secondary!.nameHe,
-      for (final a in _diameterAttrs) a.nameHe,
+      for (final a in _usable.take(3)) a.nameHe,
       'כמות',
     ];
     return Text(

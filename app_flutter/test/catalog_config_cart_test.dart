@@ -42,8 +42,8 @@ ProductConfigSchema _elbow() => ProductConfigSchema(
       familyId: 'ברך 90°',
       emoji: '🦵',
       attributes: [
-        _attr('angle', 'זווית', AttributeKind.choice, const ['45°', '90°']),
         _attr('diameter', 'קוטר', AttributeKind.dimension, const ['20', '25', '32']),
+        _attr('angle', 'זווית', AttributeKind.choice, const ['45°', '90°']),
         _attr('length', 'אורך', AttributeKind.choice,
             const ['קצר', 'בינוני', 'ארוך']),
       ],

@@ -40,8 +40,8 @@ AttributeDef _attr(
       ],
     );
 
-// dive-bs2b positional order: attr[0]=angle (↕) · attr[1]=length (↔) ·
-// attr[2]=diameter (RIGHT side wheel). A BOGUS familyId keeps the centre
+// PRIORITY (taxonomy) order — the card is positional: attr[0]=diameter (🔩 right)
+// · attr[1]=angle (↕) · attr[2]=length (↔). A BOGUS familyId keeps the centre
 // deterministic (no live-catalog variant matches → the emoji fallback shows).
 ProductConfigSchema _elbow() => ProductConfigSchema(
       sku: 'E-1',
@@ -49,24 +49,24 @@ ProductConfigSchema _elbow() => ProductConfigSchema(
       familyId: 'בדיקה',
       emoji: '🦵',
       attributes: [
+        _attr('diameter', 'קוטר', AttributeKind.dimension,
+            const ['20', '25', '32', '40', '50']),
         _attr('angle', 'זווית', AttributeKind.choice, const ['45°', '90°']),
         _attr('length', 'אורך', AttributeKind.choice,
             const ['קצר', 'בינוני', 'ארוך']),
-        _attr('diameter', 'קוטר', AttributeKind.dimension,
-            const ['20', '25', '32', '40', '50']),
       ],
     );
 
-// Manifold shape: attr[0]=ports (↕) · attr[1]=color (↔) · attr[2]=diameter (side).
+// Manifold shape: attr[0]=diameter (🔩) · attr[1]=ports (↕) · attr[2]=color (↔).
 ProductConfigSchema _manifold() => ProductConfigSchema(
       sku: 'M-1',
       nameHe: 'מחלק',
       familyId: 'בדיקה',
       emoji: '🔀',
       attributes: [
+        _attr('diameter', 'קוטר', AttributeKind.dimension, const ['20', '25']),
         _attr('ports', 'יציאות', AttributeKind.number, const ['1', '2', '3', '4']),
         _attr('color', 'צבע', AttributeKind.color, const ['כחול', 'אדום']),
-        _attr('diameter', 'קוטר', AttributeKind.dimension, const ['20', '25']),
       ],
     );
 

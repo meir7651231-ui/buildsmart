@@ -21,6 +21,7 @@ import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/features/catalog_config/browse_model.dart';
 import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart';
 import 'package:buildsmart/features/catalog_config/config_card.dart';
+import 'package:buildsmart/features/catalog_config/product_chips.dart';
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -30,9 +31,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Tile hairline — the brand orange at ~20% (const ARGB, no runtime opacity).
 const Color _kTileBorder = Color(0x33FF7A18);
-
-/// The pilot section title, used only if [pilotSectionNode] is ever null.
-const String _kFallbackTitle = 'אביזרי קצה וחיבורים';
 
 /// The rounded (radiusCard=20) white tile card shape — const so it never rebuilds.
 const RoundedRectangleBorder _kTileShape = RoundedRectangleBorder(
@@ -147,10 +145,9 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final section = pilotSectionNode();
-    final browse = section == null
-        ? const ConfigBrowse(titleHe: _kFallbackTitle, families: <ConfigFamily>[])
-        : browseSection(section, resolvedCatalogProducts);
+    // WHOLE catalog (owner §2) — every pictured leaf-category across kCatalogTree,
+    // not just the pilot section. The rail collapses each to type tiles.
+    final browse = browseSection(kCatalogRootNode, resolvedCatalogProducts);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -227,7 +224,7 @@ class _FamilySection extends StatelessWidget {
             ),
             child: ConfigCard(
               key: ValueKey<String>(tile.sku),
-              schema: configSchemaFor(product),
+              schema: prioritizedSchema(product),
               imageAsset: tile.imageAsset,
               onAddToCart: onAddToCart,
               onBuildLine: onBuildLine,

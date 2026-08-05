@@ -276,3 +276,13 @@ CatalogNode? pilotSectionNode() {
   }
   return null;
 }
+
+/// A synthetic root over the ENTIRE catalog tree — the whole-catalog dive (owner:
+/// run over ALL of `kCatalogTree` (~1,800 products), not just the pilot section).
+/// [browseSection] walks its subtree → one open family per pictured leaf-category.
+const CatalogNode kCatalogRootNode = CatalogNode(
+  id: 'catalog-root',
+  title: 'כל הקטלוג',
+  emoji: '🗂️',
+  children: kCatalogTree,
+);
