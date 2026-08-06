@@ -20,6 +20,10 @@ import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
     show kAxisDive;
 import 'package:buildsmart/features/ring_dive/catalog_wheel_screen.dart'
     show CatalogWheelScreen;
+import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart'
+    show kCatalogConfig;
+import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart'
+    show CatalogConfigScreen;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogSectionProvider, keyboardDiveQueryProvider;
 import 'package:buildsmart/state/home_content_order.dart';
@@ -108,6 +112,7 @@ Widget smartHomeSectionFor(HomeSection s) => switch (s) {
       HomeSection.installHero => const _InstallStudioHero(),
       HomeSection.favorites => const _Favorites(),
       HomeSection.superFinder => const _SuperFinderHero(),
+      HomeSection.catalogConfig => const _CatalogConfigHero(),
     };
 
 /// 🏠 גוף מסך-הבית החכם (task #32) — the 'בית' landing in the "תוכן הבית" tile
@@ -148,6 +153,12 @@ class SmartHomeBody extends ConsumerWidget {
           // off build tree-shakes it ⇒ byte-identical.
           HomeSection.superFinder => kAxisDive
               ? const [SizedBox(height: BsTokens.space4), _SuperFinderOpen()]
+              : const <Widget>[],
+          // קטלוג מגדיר on the home (user request: shown OPEN, no entry card) —
+          // the whole catalog-config dive screen renders in place. Gated on the
+          // const kCatalogConfig, so an off build tree-shakes it ⇒ byte-identical.
+          HomeSection.catalogConfig => kCatalogConfig
+              ? const [SizedBox(height: BsTokens.space4), _CatalogConfigOpen()]
               : const <Widget>[],
           _ => [
               smartHomeSectionFor(s),
@@ -751,6 +762,102 @@ class _SuperFinderHero extends ConsumerWidget {
                         )),
                     const SizedBox(height: 2),
                     Text('גלגל-חיפוש-על — בחר מאיזה ציר להתחיל',
+                        style: TextStyle(color: pal.muted, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_left, color: pal.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 🎛️ קטלוג מגדיר — the catalog-config dive screen, shown OPEN on the home ──────
+/// Mirrors [_SuperFinderOpen]: the WHOLE [CatalogConfigScreen] renders OPEN in place,
+/// bounded to a fixed height so it lives inside the home ListView; a tile tap toggles
+/// its inline config card and the image-tap opens the internal product sheet (already
+/// wired). Gated on kCatalogConfig by the caller (childrenFor) ⇒ off-build tree-shakes
+/// it ⇒ byte-identical.
+class _CatalogConfigOpen extends StatelessWidget {
+  const _CatalogConfigOpen();
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = _pal(context);
+    return _Pad(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: Text('🎛️ קטלוג מגדיר',
+                style: TextStyle(
+                  color: pal.ink,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                )),
+          ),
+          Container(
+            height: 560,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
+              border: Border.all(color: const Color(0x331E88E5)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: const CatalogConfigScreen(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 🎛️ קטלוג מגדיר — the reorder-preview TOKEN (a compact card) ───────────────────
+/// The lightweight stand-in for the wizard's home-reorder preview
+/// (`smartHomeSectionFor`), where the 560px open config screen would dwarf the drag
+/// rows. The LIVE home renders [_CatalogConfigOpen] (the open screen); this card only
+/// labels the section in the reorder list. onTap opens the full screen via the GATED
+/// [CatalogConfigScreen.route] (const-null ⇒ inert card in an off build, so nothing
+/// references the screen ⇒ it tree-shakes clean). Plain Text (not CfgText) — a section
+/// block, not an element-registry id.
+class _CatalogConfigHero extends ConsumerWidget {
+  const _CatalogConfigHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pal = _pal(context);
+    return _Pad(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        onTap: kCatalogConfig
+            ? () => Navigator.of(context).push(CatalogConfigScreen.route()!)
+            : null,
+        child: Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            color: const Color(0x1A1E88E5),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            border: Border.all(color: const Color(0x331E88E5)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.tune, color: BsTokens.brandDark, size: 32),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('🎛️ קטלוג מגדיר',
+                        style: TextStyle(
+                          color: pal.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        )),
+                    const SizedBox(height: 2),
+                    Text('כרטיס-הגדרה לכל מוצר — תמונה + גלגלים',
                         style: TextStyle(color: pal.muted, fontSize: 12)),
                   ],
                 ),

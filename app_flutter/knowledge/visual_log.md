@@ -4,6 +4,11 @@
 
 ---
 
+## #home-catalog-config-section — 🎛️ מסך-הקטלוג-המגדיר על הבית (מגודר · off-live) — 2026-08-06
+**שינוי-UI:** `smart_home_screen.dart` — סקשן-בית חדש `_CatalogConfigOpen` (מירור `_SuperFinderOpen`) מרנדר את `CatalogConfigScreen` פתוח בקופסת-560. **מגודר `kCatalogConfig` (OFF) ⇒ tree-shaken ⇒ הבית החי byte-identical — אפס שינוי-UI חי** (בדיוק כמו superFinder תחת kAxisDive).
+**אימות:** (א) **byte-identical כבוי** — כל בדיקות-הבית (`widget_test`, `help_coverage_test`, `t3_ghi`, …) עוברות ללא-שינוי כי הסקשן tree-shaken בברירת-מחדל (full-suite ripple-check ירוק). (ב) **מבנה** — `home_catalog_config_section_test`: הסקשן ב-kDefaultHomeOrder + מטא-🎛️ · smartHomeSectionFor בונה בלי-קריסה.
+**שקיפות:** eye-check נטיב חי לא הורץ (מגודר · דורש `--dart-define=CATALOG_CONFIG=true`); הביטחון נשען על byte-identical-כבוי + מקבילות verbatim ל-`_SuperFinderOpen` המאומת.
+
 ## #catalog-config-internal-link — 🔗 tap כרטיס-חיצוני → גיליון-פנימי (מגודר · off-live) — 2026-08-06
 **שינוי-UI:** `config_card.dart` — `onTap` על תמונת-הכרטיס (`_stage()`) פותח את `LipskeyProductSheet`. **מגודר `kCatalogConfig` (OFF) ⇒ tree-shaken ⇒ האפליקציה החיה byte-identical — אפס שינוי-UI חי.** הגרירה (↕/↔ החלפת-ווריאנט) לא-מושפעת; ה-tap תוספתי בלבד.
 **אימות:** (א) **byte-identical כבוי** — עץ ה-`catalog_config/` tree-shaken בברירת-מחדל (הדגל OFF). (ב) **התנהגות-widget** — `config_card_open_details_test` (3): tap פותח (callback עם schema+selection+qty) · נושא את הווריאנט הנוכחי אחרי שינוי-גלגל+כמות · null⇒inert בלי-קריסה. **mutation-verified** (שבירת ה-onTap → אדום; שחזור → ירוק).

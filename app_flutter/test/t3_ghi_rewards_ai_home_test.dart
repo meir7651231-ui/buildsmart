@@ -142,6 +142,7 @@ void main() {
         HomeSection.installHero,
         HomeSection.favorites,
         HomeSection.superFinder,
+        HomeSection.catalogConfig,
       ]);
     });
 
