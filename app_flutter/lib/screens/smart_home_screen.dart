@@ -20,8 +20,6 @@ import 'package:buildsmart/features/ring_dive/ring_dive_flag.dart'
     show kAxisDive;
 import 'package:buildsmart/features/ring_dive/catalog_wheel_screen.dart'
     show CatalogWheelScreen;
-import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart'
-    show kCatalogConfig;
 import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart'
     show CatalogConfigScreen;
 import 'package:buildsmart/screens/catalog_screen.dart'
@@ -154,12 +152,14 @@ class SmartHomeBody extends ConsumerWidget {
           HomeSection.superFinder => kAxisDive
               ? const [SizedBox(height: BsTokens.space4), _SuperFinderOpen()]
               : const <Widget>[],
-          // קטלוג מגדיר on the home (user request: shown OPEN, no entry card) —
-          // the whole catalog-config dive screen renders in place. Gated on the
-          // const kCatalogConfig, so an off build tree-shakes it ⇒ byte-identical.
-          HomeSection.catalogConfig => kCatalogConfig
-              ? const [SizedBox(height: BsTokens.space4), _CatalogConfigOpen()]
-              : const <Widget>[],
+          // 🎛️ קטלוג מגדיר on the home (user request: LIVE, shown OPEN) — the whole
+          // catalog-config dive screen renders in place ALWAYS, like categories /
+          // products. Turned on for everyone (no flag); the show/hide toggle in
+          // "סידור מסך הבית" controls it like any section.
+          HomeSection.catalogConfig => const [
+              SizedBox(height: BsTokens.space4),
+              _CatalogConfigOpen(),
+            ],
           _ => [
               smartHomeSectionFor(s),
               const SizedBox(height: BsTokens.space4),
@@ -779,8 +779,8 @@ class _SuperFinderHero extends ConsumerWidget {
 /// Mirrors [_SuperFinderOpen]: the WHOLE [CatalogConfigScreen] renders OPEN in place,
 /// bounded to a fixed height so it lives inside the home ListView; a tile tap toggles
 /// its inline config card and the image-tap opens the internal product sheet (already
-/// wired). Gated on kCatalogConfig by the caller (childrenFor) ⇒ off-build tree-shakes
-/// it ⇒ byte-identical.
+/// wired). LIVE — rendered unconditionally on the home (owner "תדליק"); the show/hide
+/// toggle in "סידור מסך הבית" controls it like any section.
 class _CatalogConfigOpen extends StatelessWidget {
   const _CatalogConfigOpen();
 
@@ -819,9 +819,8 @@ class _CatalogConfigOpen extends StatelessWidget {
 /// The lightweight stand-in for the wizard's home-reorder preview
 /// (`smartHomeSectionFor`), where the 560px open config screen would dwarf the drag
 /// rows. The LIVE home renders [_CatalogConfigOpen] (the open screen); this card only
-/// labels the section in the reorder list. onTap opens the full screen via the GATED
-/// [CatalogConfigScreen.route] (const-null ⇒ inert card in an off build, so nothing
-/// references the screen ⇒ it tree-shakes clean). Plain Text (not CfgText) — a section
+/// labels the section in the reorder list. onTap opens the full [CatalogConfigScreen]
+/// (the feature is LIVE on the home). Plain Text (not CfgText) — a section
 /// block, not an element-registry id.
 class _CatalogConfigHero extends ConsumerWidget {
   const _CatalogConfigHero();
@@ -832,9 +831,8 @@ class _CatalogConfigHero extends ConsumerWidget {
     return _Pad(
       child: InkWell(
         borderRadius: BorderRadius.circular(cfgRadius(context)),
-        onTap: kCatalogConfig
-            ? () => Navigator.of(context).push(CatalogConfigScreen.route()!)
-            : null,
+        onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const CatalogConfigScreen())),
         child: Container(
           padding: const EdgeInsets.all(BsTokens.space4),
           decoration: BoxDecoration(

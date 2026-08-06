@@ -1,8 +1,10 @@
-// Gate-128 (GATE_REGISTRY · CATALOG-CONFIG · "GA-safe-by-default") — the catalog-
-// config feature ships DORMANT. `kCatalogConfig` resolves to its SAFE default (OFF)
-// in a build with no `--dart-define`, so the whole `features/catalog_config/` graph
-// is tree-shaken out and the shipped catalog is BYTE-IDENTICAL. This LOCKS the "off"
-// state; it never arms anything.
+// Gate-128 (GATE_REGISTRY · CATALOG-CONFIG) — locks `kCatalogConfig` to its SAFE
+// default (OFF) in a no-`--dart-define` build, so the standalone full-screen ROUTE
+// (`CatalogConfigScreen.route`) stays gated + no unclassified flag arms.
+// ⚠️ NOTE (owner "תדליק"): the HOME SECTION now renders `CatalogConfigScreen` LIVE,
+// independent of this flag — so `features/catalog_config/` is no longer tree-shaken
+// and the home is NOT byte-identical. This gate now covers only the flag default
+// (the route) + the closed-set, NOT whole-feature dormancy.
 //
 //   (A) RUNTIME const-fold — the flag is a `bool.fromEnvironment` compile-const;
 //       under `flutter test` (no --dart-define) it folds to its absent default.

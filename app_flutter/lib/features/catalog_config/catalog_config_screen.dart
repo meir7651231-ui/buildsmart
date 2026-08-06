@@ -7,11 +7,10 @@
 // the card's schema is the ENGINE-derived [configSchemaFor] of the tile's real
 // catalog product. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§המסך, phase A/B).
 //
-// GATING (plan G · byte-identical-off): the ONLY entry is [route], which returns
-// null when `kCatalogConfig` is OFF (const-false in every normal build) — so no
-// live navigation path to this screen can exist. Nothing in the app imports this
-// file except behind `if (kCatalogConfig)`, so the whole surface tree-shakes away
-// ⇒ the shipped build is byte-identical to today. The pilot section is
+// ⚠️ LIVE (owner "תדליק"): the home renders this screen as a section (smart_home_screen
+// · _CatalogConfigOpen) UNCONDITIONALLY, so it is compiled into every build (no longer
+// tree-shaken / byte-identical). [route] below stays gated on `kCatalogConfig` as a
+// secondary standalone entry the home embed does not use. Pilot section:
 // `אביזרי קצה וחיבורים` ([pilotSectionNode]).
 // ─────────────────────────────────────────────────────────────────────────────
 

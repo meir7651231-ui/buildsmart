@@ -4,6 +4,11 @@
 
 ---
 
+## #catalog-config-goes-live — 🎛️ הקטלוג-המגדיר גלוי-תמיד על הבית (owner "תדליק") — 2026-08-06
+**שינוי-UI:** `smart_home_screen.dart` — מקטע `catalogConfig` כבר **לא מגודר**: `_CatalogConfigOpen` (⟵ `CatalogConfigScreen`) מרונדר **תמיד** על הבית (כמו categories/products). **⚠️ שינוי-UI חי אמיתי** — לא byte-identical (בשונה מהרשומות המגודרות): הסקשן מופיע לכל המשתמשים.
+**אימות:** בדיקות-הבית (`widget_test`, `help_coverage`, `t3_ghi`, reorder, placeholder) — **+33 ירוק** (הסקשן נבנה עצל ב-ListView, מחוץ-למסך ב-viewport הבדיקה ⇒ אין רגרסיה). ה-toggle הצג/הסתר של "סידור מסך הבית" חל עליו כמו כל סקשן.
+**שקיפות:** eye-check נטיב חי של הסקשן בהקשר-הבית טרם הורץ (ה-shoot המבודד רונדר את המסך נקי — `catalog_config_home.png`); הרנדר מאומת ע"י בדיקות-הבית העוברות.
+
 ## #home-catalog-config-section — 🎛️ מסך-הקטלוג-המגדיר על הבית (מגודר · off-live) — 2026-08-06
 **שינוי-UI:** `smart_home_screen.dart` — סקשן-בית חדש `_CatalogConfigOpen` (מירור `_SuperFinderOpen`) מרנדר את `CatalogConfigScreen` פתוח בקופסת-560. **מגודר `kCatalogConfig` (OFF) ⇒ tree-shaken ⇒ הבית החי byte-identical — אפס שינוי-UI חי** (בדיוק כמו superFinder תחת kAxisDive).
 **אימות:** (א) **byte-identical כבוי** — כל בדיקות-הבית (`widget_test`, `help_coverage_test`, `t3_ghi`, …) עוברות ללא-שינוי כי הסקשן tree-shaken בברירת-מחדל (full-suite ripple-check ירוק). (ב) **מבנה** — `home_catalog_config_section_test`: הסקשן ב-kDefaultHomeOrder + מטא-🎛️ · smartHomeSectionFor בונה בלי-קריסה.
