@@ -23,6 +23,10 @@ import 'package:buildsmart/features/catalog_config/catalog_config_flags.dart';
 import 'package:buildsmart/features/catalog_config/config_card.dart';
 import 'package:buildsmart/features/catalog_config/product_chips.dart';
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
+import 'package:buildsmart/features/catalog_config/variant_image.dart'
+    show familyProducts, variantForSelection;
+import 'package:buildsmart/screens/lipskey_product_sheet.dart'
+    show showLipskeyProductSheet;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -143,6 +147,27 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
     showToast(context, 'בקרוב');
   }
 
+  /// PLAN E.3 · פרטים — opens the INTERNAL product sheet for the SKU the current
+  /// picks resolve to (the same variant the card's centre image shows), with its
+  /// family siblings as the sheet's variant pager. No match (empty family / M1) ⇒
+  /// inert (the image tap does nothing).
+  void _onOpenDetails(
+    ProductConfigSchema schema,
+    Map<String, String> selection,
+    int qty,
+  ) {
+    final product =
+        variantForSelection(schema, selection, resolvedCatalogProducts);
+    if (product == null) {
+      return;
+    }
+    showLipskeyProductSheet(
+      context,
+      product,
+      familyProducts(schema, resolvedCatalogProducts),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // WHOLE catalog (owner §1·§2) — the 12 CLEAN families ([familyGroupOf], the
@@ -179,6 +204,7 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
                   onToggle: _toggleTile,
                   onAddToCart: _onAddToCart,
                   onBuildLine: _onBuildLine,
+                  onOpenDetails: _onOpenDetails,
                 ),
               ),
       ),
@@ -198,6 +224,7 @@ class _FamilySection extends StatelessWidget {
     required this.onToggle,
     required this.onAddToCart,
     required this.onBuildLine,
+    required this.onOpenDetails,
   });
 
   final ConfigFamily family;
@@ -205,9 +232,11 @@ class _FamilySection extends StatelessWidget {
   final void Function(ConfigTile tile) onToggle;
 
   /// Phase-E card actions, forwarded to the inline [ConfigCard] (הוסף-לסל /
-  /// בנה-קו) — the screen owns them so it can reach the cart provider + toast.
+  /// בנה-קו / פרטים) — the screen owns them so it can reach the cart provider,
+  /// the toast, and the internal product sheet.
   final ConfigCardAction onAddToCart;
   final ConfigCardAction onBuildLine;
+  final ConfigCardAction onOpenDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +259,7 @@ class _FamilySection extends StatelessWidget {
               imageAsset: tile.imageAsset,
               onAddToCart: onAddToCart,
               onBuildLine: onBuildLine,
+              onOpenDetails: onOpenDetails,
             ),
           );
         }

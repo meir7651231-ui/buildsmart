@@ -4,6 +4,11 @@
 
 ---
 
+## #catalog-config-internal-link — 🔗 tap כרטיס-חיצוני → גיליון-פנימי (מגודר · off-live) — 2026-08-06
+**שינוי-UI:** `config_card.dart` — `onTap` על תמונת-הכרטיס (`_stage()`) פותח את `LipskeyProductSheet`. **מגודר `kCatalogConfig` (OFF) ⇒ tree-shaken ⇒ האפליקציה החיה byte-identical — אפס שינוי-UI חי.** הגרירה (↕/↔ החלפת-ווריאנט) לא-מושפעת; ה-tap תוספתי בלבד.
+**אימות:** (א) **byte-identical כבוי** — עץ ה-`catalog_config/` tree-shaken בברירת-מחדל (הדגל OFF). (ב) **התנהגות-widget** — `config_card_open_details_test` (3): tap פותח (callback עם schema+selection+qty) · נושא את הווריאנט הנוכחי אחרי שינוי-גלגל+כמות · null⇒inert בלי-קריסה. **mutation-verified** (שבירת ה-onTap → אדום; שחזור → ירוק).
+**שקיפות:** eye-check נטיב חי לא הורץ (מגודר · דורש `--dart-define=CATALOG_CONFIG=true`); הביטחון נשען על byte-identical-כבוי + widget-behaviour-tests + mutation-verify.
+
 ## #courier-profile-card-material — 🛵 עטיפת Material שקוף ל-_CourierPersonalAreaCard (ink/lint) — 2026-08-04
 **שינוי-UI:** ה-`Column` של `_CourierPersonalAreaCard` נעטף ב-`Material(type: MaterialType.transparency)` (אותו תיקון כמו worker_profile). **ציפייה: אפס שינוי-סטטי** — Material שקוף לא צובע; רקע-הכרטיס עדיין מה-`Container`. הדלתא היחידה = tap-ripple שכעת נראה.
 **אימות (screenshot אמיתי · `CourierProfileBody(standalone:true)` בתוך Scaffold · courier-seed=דמו · Heebo · 390 logical · toImage):** צולם והוצג בעין. כל הכרטיסים נקי — כרטיס-זהות (דמו · @demo · שליח), סטטיסטיקת-מסירות (0 נמסרו · 1 בדרך · 0 POD · סה"כ 0₪), כרטיס אזור-אישי המתוקן (נוכחות · טפסים · תעודות נהג · תלושי שכר — רקעים/dividers תקינים), וכרטיס-הפעולות (הגדרות שליח · החלפת תפקיד · יציאה מהחשבון-אדום). העטיפה השקופה בלתי-נראית. (□ = חוסר-גליף-emoji בפונט-הטסט.)

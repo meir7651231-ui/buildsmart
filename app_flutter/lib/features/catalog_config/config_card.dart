@@ -83,6 +83,7 @@ class ConfigCard extends StatefulWidget {
     this.imageAsset,
     this.onAddToCart,
     this.onBuildLine,
+    this.onOpenDetails,
   });
 
   /// The product's engine-derived declaration — the axes + wheels the card renders.
@@ -98,6 +99,10 @@ class ConfigCard extends StatefulWidget {
 
   /// בנה-קו action. Null ⇒ the button is inert.
   final ConfigCardAction? onBuildLine;
+
+  /// פרטים — opens the internal product sheet for the current variant; null ⇒
+  /// the image tap is inert.
+  final ConfigCardAction? onOpenDetails;
 
   @override
   State<ConfigCard> createState() => _ConfigCardState();
@@ -365,6 +370,9 @@ class _ConfigCardState extends State<ConfigCard> {
       ),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: widget.onOpenDetails == null
+            ? null
+            : () => widget.onOpenDetails!(widget.schema, _selection, _qty),
         onVerticalDragUpdate:
             primary == null ? null : (d) => _onVerticalDrag(d, primary),
         onVerticalDragEnd: (_) => _accV = 0,
