@@ -28,6 +28,9 @@ import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/smart_cart.dart'
+    show SmartCartLine, smartCartProvider;
+import 'package:buildsmart/widgets/toast.dart' show showToast;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -87,20 +90,40 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
     }
   }
 
+  /// D6 — the chosen sale unit (בודד / ארגז / משטח).
+  String _unit = 'בודד';
+
+  void _pickUnit(String u) => setState(() => _unit = u);
+
   @override
-  Widget build(BuildContext context) =>
-      _CardView(product: _current, onStepVariant: _stepVariant);
+  Widget build(BuildContext context) => _CardView(
+        product: _current,
+        unit: _unit,
+        onStepVariant: _stepVariant,
+        onPickUnit: _pickUnit,
+      );
 }
 
 /// The stateless render of one product's card (all section builders). The
 /// stateful [FullInternalCard] above swaps [product] on a name-swipe.
 class _CardView extends ConsumerWidget {
-  const _CardView({required this.product, this.onStepVariant});
+  const _CardView({
+    required this.product,
+    required this.unit,
+    this.onStepVariant,
+    this.onPickUnit,
+  });
 
   final LipskeyCatalogProduct product;
 
+  /// D6 — the selected sale-unit key (בודד / ארגז / משטח).
+  final String unit;
+
   /// D5 — the name-swipe steps the variant family by ±1 (null ⇒ inert).
   final void Function(int dir)? onStepVariant;
+
+  /// D6 — pick a sale unit (null ⇒ inert).
+  final void Function(String unit)? onPickUnit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -134,7 +157,7 @@ class _CardView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ...sections,
-            _buyButton(p, settings),
+            _buyArea(context, ref, p, settings),
           ],
         ),
       ),
@@ -604,37 +627,114 @@ class _CardView extends ConsumerWidget {
     ];
   }
 
-  // ── buy button ───────────────────────────────────────────────────────────────
-  Widget _buyButton(LipskeyCatalogProduct p, CatalogSettings s) {
+  // ── buy area (D6 · unit selector + wired add-to-cart) ─────────────────────────
+  Widget _buyArea(
+    BuildContext context,
+    WidgetRef ref,
+    LipskeyCatalogProduct p,
+    CatalogSettings s,
+  ) {
+    final units = p.saleUnits;
+    final selected = units.containsKey(unit) ? unit : units.keys.first;
+    final mult = units[selected] ?? 1;
     final base = priceFor(p);
-    final label = base == null
-        ? '＋ הוסף לסל'
-        : '＋ הוסף לסל · ${formatCatalogPrice(base, s)}';
-    return Container(
-      margin: const EdgeInsets.fromLTRB(13, 11, 13, 13),
-      child: Material(
-        key: const Key('internalCardBuy'),
-        color: _cAccent,
-        borderRadius: BorderRadius.circular(11),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
+    final priceStr =
+        base == null ? '' : ' · ${formatCatalogPrice(base * mult, s)}';
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (units.length > 1) _unitSelector(units, selected),
+        Container(
+          margin: const EdgeInsets.fromLTRB(13, 8, 13, 13),
+          child: Material(
+            key: const Key('internalCardBuy'),
+            color: _cAccent,
+            borderRadius: BorderRadius.circular(11),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => _addToCart(context, ref, p, selected, mult),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: Text(
+                    '＋ הוסף לסל$priceStr',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  /// D6 — the sale-unit chips (בודד · ארגז · משטח), shown only when the product
+  /// carries more than one (R8 — no invented pack/pallet counts).
+  Widget _unitSelector(Map<String, int> units, String selected) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(13, 4, 13, 0),
+      child: Row(
+        children: [
+          for (final e in units.entries)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onPickUnit == null ? null : () => onPickUnit!(e.key),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: e.key == selected ? _cAccent : _cImgBg,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: e.key == selected ? _cAccent : _cLine,
+                    ),
+                  ),
+                  child: Text(
+                    e.value == 1 ? e.key : '${e.key} · ${e.value}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: e.key == selected ? Colors.white : _cInk,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
+  }
+
+  /// D6 — add the current variant to the smart cart in the selected unit
+  /// (quantity = the unit's piece-count). Toasts confirmation.
+  void _addToCart(
+    BuildContext context,
+    WidgetRef ref,
+    LipskeyCatalogProduct p,
+    String unitKey,
+    int mult,
+  ) {
+    ref.read(smartCartProvider.notifier).add(
+          SmartCartLine(
+            productKey: 'lip:${p.sku}',
+            productName: p.nameHe,
+            productEmoji: p.typeEmoji,
+            brandName: p.brand,
+            brandPrice: priceFor(p) ?? 0,
+            productQty: mult,
+            accessories: const [],
+            selection: {'יחידה': unitKey},
+          ),
+        );
+    showToast(context, 'נוסף לסל');
   }
 }
 

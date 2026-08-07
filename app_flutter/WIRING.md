@@ -3861,3 +3861,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P3 — משיכת-שם → וריאנטים (D5) · מגודר `kInternalCard`
 > הכרטיס הפך ל-`ConsumerStatefulWidget` (`_current`); משיכה אופקית על השם מדלגת במשפחת-הווריאנטים (`variantSiblingsOf`, clamped) והכרטיס כולו נגזר-מחדש (שם·תמונה·מפרט·וריאנטים). נקודות-pagination תחת השם. `_CardView` נשאר ה-render חסר-המצב.
 - gate: `flutter analyze` **0 errors** · `full_internal_card_test` **3/3** (render + gallery + swipe→variant).
+
+### #internal-card P4 — הוסף-לסל אמיתי + בורר-יחידה (D6) · מגודר `kInternalCard`
+> כפתור-ההוספה חוּוט ל-`smartCartProvider.add(SmartCartLine)` + toast "נוסף לסל"; בורר-יחידה (בודד/ארגז/משטח) נגזר מ-`p.saleUnits` ומוצג רק כשיש >1 (R8 — בלי מספרי-אריזה מומצאים; ל-SmartLock = בודד בלבד). המחיר בכפתור מוכפל ביחידה כשקיים `priceFor`.
+- gate: `flutter analyze` **0 errors** · `full_internal_card_test` **4/4** (render + gallery + swipe + add-to-cart).

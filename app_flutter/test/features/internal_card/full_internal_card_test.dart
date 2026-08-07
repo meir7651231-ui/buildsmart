@@ -5,6 +5,7 @@
 // legitimately absent — the card must still render (conditional sections).
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/features/internal_card/full_internal_card.dart';
+import 'package:buildsmart/state/smart_cart.dart' show smartCartProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -91,5 +92,37 @@ void main() {
 
     // The card now shows the neighbouring variant.
     expect(find.text(expected.nameHe), findsOneWidget);
+  });
+
+  testWidgets('add-to-cart adds a line for the current variant (D6)',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+
+    expect(container.read(smartCartProvider), isEmpty);
+    // The card is tall — bring the buy button into the viewport before tapping.
+    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+
+    final cart = container.read(smartCartProvider);
+    expect(cart, hasLength(1));
+    expect(cart.first.productName, hero.nameHe);
+
+    // Flush the toast auto-dismiss timer so teardown sees no pending timer.
+    await tester.pump(const Duration(seconds: 5));
   });
 }
