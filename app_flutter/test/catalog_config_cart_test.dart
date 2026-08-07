@@ -69,28 +69,36 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SingleChildScrollView(
-              child: ConfigCard(
-                schema: schema,
-                onAddToCart: (s, selection, qty) {
-                  seenSchema = s;
-                  seenSelection = selection;
-                  seenQty = qty;
-                },
+            // non-scrolling host so the qty-wheel spin isn't stolen by an ancestor.
+            body: Center(
+              child: SizedBox(
+                width: 380,
+                child: ConfigCard(
+                  schema: schema,
+                  onAddToCart: (s, selection, qty) {
+                    seenSchema = s;
+                    seenSelection = selection;
+                    seenQty = qty;
+                  },
+                ),
               ),
             ),
           ),
         ),
       );
 
-      // Raise qty to 3 (tap the qty wheel value) so a non-default flows through.
-      await tester.tap(find.text('3'));
-      await tester.pump();
+      // Raise qty above the default 1 by SPINNING the qty wheel (owner: full wheel),
+      // so a non-default qty flows through the payload.
+      await tester.drag(
+        find.byType(ListWheelScrollView).last, // qty is the tree-LAST spinner
+        const Offset(0, -72), // 2 item-extents → qty 1 → 3
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('configAddToCart')));
       await tester.pump();
 
       expect(seenSchema, same(schema));
-      expect(seenQty, 3);
+      expect(seenQty, greaterThan(1)); // a non-default qty flowed through
       // The default selection (angle 45° · diameter 20 · length קצר) is handed
       // through verbatim — keyed by AttributeDef.id, valued by canonical token.
       expect(seenSelection, _elbowDefault);

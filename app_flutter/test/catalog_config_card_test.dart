@@ -2,10 +2,10 @@
 // engine [ProductConfigSchema] as the CLEAN card (owner): the FULL product name
 // clean ABOVE a SQUARE centre image (key 'configImageCenter', never empty — emoji
 // fallback); the current values ride a CLEAN pill EMBEDDED on the image (no arrows,
-// no edge labels · a ↕/↔ drag scrolls the two axes + swaps the photo); the diameter
-// attribute(s) ride a TAPPABLE side wheel on the RIGHT and qty a tappable wheel on
-// the LEFT (the wheels STAY). NO spinner ([ListWheelScrollView]), NO centre band, NO
-// "הגלגלים של…" hint. Tapping a wheel / dragging an axis changes the live selection
+// no edge labels · a ↕/↔ drag on the image cycles two CONFIG axes + swaps the
+// photo/name); the diameter attribute rides a FULL spinning WheelPicker on the
+// RIGHT and qty a full spinning wheel on the LEFT (owner "גלגל מלא" — a fling
+// reaches any value). Spinning a wheel / dragging an axis changes the live selection
 // (surfaced through onAddToCart) and updates the pill + RE-RESOLVES the centre image.
 // The card holds NO per-product code — a new product is a data row. Assertions check
 // STRUCTURE + CONTRACT, never pixels. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§B).
@@ -128,10 +128,10 @@ void main() {
       expect(find.textContaining('▶'), findsNothing);
       expect(find.textContaining('הגלגלים של'), findsNothing); // no hint
 
-      // the side wheels STAY: קוטר (right) + כמות (left) as TAPPABLE stacks.
+      // the side wheels are FULL spinners now (owner "גלגל מלא"): קוטר (right) +
+      // כמות (left), each a native WheelPicker.
       expect(find.text('קוטר'), findsOneWidget); // diameter wheel header
       expect(find.text('כמות'), findsOneWidget); // qty wheel header
-      expect(find.text('40'), findsOneWidget); // an unselected diameter value
 
       // the two actions.
       expect(_key('configAddToCart'), findsOneWidget);
@@ -141,8 +141,8 @@ void main() {
       expect(find.text('🦵'), findsOneWidget);
       expect(find.byType(Image), findsNothing);
 
-      // the abandoned dive-bs4 sins are ABSENT: no spinner.
-      expect(find.byType(ListWheelScrollView), findsNothing);
+      // BOTH side wheels are native spinning WheelPickers (ListWheelScrollView).
+      expect(find.byType(ListWheelScrollView), findsNWidgets(2));
     });
 
     testWidgets('manifold → axes swap in the pill (יציאות/צבע), SAME card (generic)',
@@ -174,12 +174,11 @@ void main() {
       expect(find.text('ריק'), findsOneWidget); // the full name
       expect(find.text('🔧'), findsOneWidget); // emoji centre (never empty)
       expect(find.textContaining('▲'), findsNothing); // no axis labels
-      expect(find.text('כמות'), findsOneWidget); // qty wheel still usable
-      await tester.tap(find.text('2')); // pick qty 2
-      await tester.pump();
+      expect(find.text('כמות'), findsOneWidget); // the qty wheel still renders
+      expect(find.byType(ListWheelScrollView), findsOneWidget); // as a spinner
       await tester.tap(_key('configAddToCart'));
       await tester.pump();
-      expect(added, isTrue);
+      expect(added, isTrue); // cart works with the default qty
     });
   });
 
@@ -213,13 +212,13 @@ void main() {
     });
   });
 
-  group('#catalog-config ConfigCard — tap wheels · drag axes · actions', () {
-    testWidgets('tapping a קוטר value changes the live selection',
+  group('#catalog-config ConfigCard — spin wheels · drag axes · actions', () {
+    testWidgets('spinning the קוטר wheel changes the live selection',
         (tester) async {
       Map<String, String>? captured;
       int? capturedQty;
       await tester.pumpWidget(
-        _host(
+        _staticHost(
           ConfigCard(
             schema: _elbow(),
             onAddToCart: (schema, selection, qty) {
@@ -230,22 +229,28 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('40')); // pick a non-default diameter
-      await tester.pump();
+      // the diameter wheel (tree-FIRST spinner) seeds on its default '20'; a fling
+      // UP moves it to a later value — a FULL wheel, not tap-by-tap (owner).
+      await tester.drag(
+        find.byType(ListWheelScrollView).first,
+        const Offset(0, -72),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(_key('configAddToCart'));
       await tester.pump();
 
       expect(captured, isNotNull);
-      expect(captured!['diameter'], '40'); // the tap replaced the default '20'
-      expect(captured!['angle'], '45°'); // untouched default (° · compliant)
+      expect(captured!['diameter'], isNot('20')); // the spin left the default
+      expect(captured!['angle'], '45°'); // an untouched axis keeps its default
       expect(captured!['length'], 'קצר'); // ditto
       expect(capturedQty, 1);
     });
 
-    testWidgets('tapping the qty wheel sets qty; min option is 1', (tester) async {
+    testWidgets('the qty wheel is a FULL spinner — reaches past the old cap of 4',
+        (tester) async {
       int? qty;
       await tester.pumpWidget(
-        _host(
+        _staticHost(
           ConfigCard(
             schema: _elbow(),
             onAddToCart: (schema, selection, q) => qty = q,
@@ -253,17 +258,17 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('4'));
-      await tester.pump();
+      // spin qty (tree-LAST spinner) well past 4 — proof the owner can FLING to a
+      // high quantity (e.g. 56), not tap 1→2→3→4 and stop.
+      await tester.drag(
+        find.byType(ListWheelScrollView).last,
+        const Offset(0, -360),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(_key('configAddToCart'));
       await tester.pump();
-      expect(qty, 4);
-
-      await tester.tap(find.text('1')); // the floor value is always reachable
-      await tester.pump();
-      await tester.tap(_key('configAddToCart'));
-      await tester.pump();
-      expect(qty, 1);
+      expect(qty, isNotNull);
+      expect(qty, greaterThan(4)); // the old 1..4 ceiling is gone
     });
 
     testWidgets('a ↕ drag on the image cycles the FIRST axis; the pill tracks it',
@@ -315,6 +320,41 @@ void main() {
       expect(captured!['angle'], '45°'); // the ↕ axis stayed on its default
     });
 
+    testWidgets('a ↔ drag FALLS BACK to קוטר when there is no 3rd axis (owner)',
+        (tester) async {
+      // owner: "משיכה לימין ולשמאל… משנים" — horizontal must never be dead. A
+      // TWO-axis product [diameter, angle] has no length, so ↔ cycles the diameter
+      // (↕ still cycles angle), so both drag directions change the variant.
+      Map<String, String>? captured;
+      final twoAxis = ProductConfigSchema(
+        sku: 'T-2',
+        nameHe: 'מצמד',
+        familyId: 'בדיקה',
+        emoji: '🔗',
+        attributes: [
+          _attr('diameter', 'קוטר', AttributeKind.dimension,
+              const ['20', '25', '32', '40']),
+          _attr('angle', 'זווית', AttributeKind.choice, const ['45°', '90°']),
+        ],
+      );
+      await tester.pumpWidget(
+        _staticHost(
+          ConfigCard(
+            schema: twoAxis,
+            onAddToCart: (schema, selection, qty) => captured = selection,
+          ),
+        ),
+      );
+
+      await tester.drag(_key('configStage'), const Offset(-120, 0)); // ↔
+      await tester.pumpAndSettle();
+      await tester.tap(_key('configAddToCart'));
+      await tester.pump();
+
+      expect(captured!['diameter'], isNot('20')); // ↔ cycled diameter (fallback)
+      expect(captured!['angle'], '45°'); // the ↕ axis (angle) stayed put
+    });
+
     testWidgets('a REAL catalog card resolves a variant image + coherent name', (tester) async {
       // 213072 = 'ברך 15°'. The card resolves the centre image + name against the TYPE
       // GROUP ([typeGroupOf]) — the owner-reported bug was an EMPTY family (the fittings
@@ -333,6 +373,33 @@ void main() {
       // the variant resolved ⇒ a real Image is built (the family is non-empty; before
       // the fix the empty family gave no image → the emoji, i.e. no Image widget).
       expect(find.byType(Image), findsWidgets);
+    });
+
+    testWidgets('a REAL card: BOTH ↕ and ↔ drags change the variant name (owner)',
+        (tester) async {
+      // owner: "משיכה לימין ולשמאל ולמעלה ולמטה משנים את השם ואת התמונה". On a real
+      // multi-variant type BOTH image drags re-resolve the variant → the full name
+      // changes: ↕ cycles the 2nd config axis (angle), ↔ the 3rd or FALLS BACK to
+      // קוטר. (Only physical config axes are dragged — never a descriptive filter.)
+      final berekh =
+          resolvedCatalogProducts.firstWhere((p) => p.sku == '213072');
+      await tester.pumpWidget(
+        _staticHost(ConfigCard(schema: prioritizedSchema(berekh))),
+      );
+      await tester.pumpAndSettle();
+      String name() => tester.widget<Text>(_key('configFullName')).data ?? '';
+      final start = name();
+
+      await tester.drag(_key('configStage'), const Offset(0, -120)); // ↕
+      await tester.pumpAndSettle();
+      final afterVertical = name();
+      expect(afterVertical, isNot(start),
+          reason: 'a ↕ (up/down) drag must change the variant name');
+
+      await tester.drag(_key('configStage'), const Offset(-120, 0)); // ↔
+      await tester.pumpAndSettle();
+      expect(name(), isNot(afterVertical),
+          reason: 'a ↔ (left/right) drag must change the variant name too');
     });
 
     testWidgets('בנה קו fires with the SAME schema instance', (tester) async {

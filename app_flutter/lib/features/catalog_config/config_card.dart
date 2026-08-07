@@ -39,6 +39,7 @@ import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
 import 'package:buildsmart/features/catalog_config/product_chips.dart'
     show chipValuesOf, variantByAxes;
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
+import 'package:buildsmart/features/catalog_config/wheel_picker.dart';
 import 'package:flutter/material.dart';
 
 /// Signature of the card's two bottom actions (הוסף-לסל · בנה-קו). The dive
@@ -53,12 +54,10 @@ typedef ConfigCardAction = void Function(
 // ── dive-bs2b palette (exact mockup hexes · 1:1 render) ───────────────────────
 const Color _cCard = Color(0xFFFFFFFF); // --card
 const Color _cInk = Color(0xFF232A33); // --ink
-const Color _cDim = Color(0xFF7A828D); // --dim
 const Color _cLine = Color(0xFFECEEF2); // --line (secondary btn border)
 const Color _cAccent = Color(0xFFEE6A2A); // --accent
 const Color _cAccentSoft = Color(0x14EE6A2A); // accent @ 8% — פרטים button fill
 const Color _cImgBg = Color(0xFFF5F7FA); // --imgbg (stage)
-const Color _cWheelOff = Color(0xFFB7BDC6); // dimmed wheel value
 
 /// The card's soft shadow (`0 6px 16px rgba(35,42,51,.07)`).
 const List<BoxShadow> _kCardShadow = [
@@ -66,14 +65,18 @@ const List<BoxShadow> _kCardShadow = [
 ];
 
 // ── geometry (mockup values) ──────────────────────────────────────────────────
-const double _kWheelCol = 50; // .wheelcol flex:0 0 50px
+const double _kWheelCol = 62; // .wheelcol — a full spinning wheel (owner)
 const double _kColGap = 9; // .cols gap
 const double _kStageRadius = 15; // .stage radius
 const double _kCardRadius = 18; // .cfg radius
 const double _kEmojiSize = 76; // .pic — the big fallback emoji
 const double _kActionRadius = 13; // .primary/.secondary radius
 const double _kDragStep = 24; // px of drag that advances one axis step
-const int _kWheelWindow = 4; // values shown per side wheel (compact · mockup)
+// (the old compact side-wheel window is gone — the side wheels are full spinners.)
+
+/// The כמות wheel ladder ceiling — a FULL spinning wheel 1…[_kMaxQty] (owner: "אני
+/// רוצה להגיע 56… גלגל מלא"), so any quantity is a flick away, not tap-by-tap.
+const int _kMaxQty = 999;
 
 /// THE generic config card — see the file header. Stateful: it holds the live
 /// [_ConfigCardState._selection] (seeded from each attribute's default), the
@@ -209,13 +212,31 @@ class _ConfigCardState extends State<ConfigCard> {
     return out;
   }
 
-  /// The wheels the card SHOWS, in taxonomy order — the declared attributes that
-  /// carry values AND that the card's PRODUCT actually holds ([_cardChips]); a
-  /// synthetic schema (no product) shows them all. So the card is coherent to the
-  /// tapped variant, never a wheel the product has no value on.
+  /// The CONFIGURABLE axes — physical/variant properties a user actually dials to
+  /// pick a SKU (size · angle · length · ports · reducer · colour). EXCLUDES the
+  /// descriptive filters (סוג/שיטה/מין/מותג/יעד/תכולה): those describe WHAT the
+  /// product IS, don't distinguish a variant, and cycling them on a drag changed
+  /// nothing (owner: "משיכה… משנים את השם ואת התמונה" — a drag must move a variant).
+  static const Set<String> _kConfigAxes = {
+    'diameter',
+    'diameter-small',
+    'angle',
+    'length',
+    'ports',
+    'transition',
+    'color',
+    'material',
+  };
+
+  /// The wheels/drags the card USES, in taxonomy order — a configurable
+  /// ([_kConfigAxes]) attribute that carries values AND that the card's PRODUCT
+  /// actually holds ([_cardChips]); a synthetic schema (no product) skips the
+  /// product-coherence gate. So קוטר leads the side wheel and the two image drags
+  /// cycle real variant axes, never a descriptive filter that leaves the SKU put.
   List<AttributeDef> get _usable => <AttributeDef>[
         for (final attr in widget.schema.attributes)
           if (attr.values.isNotEmpty &&
+              _kConfigAxes.contains(attr.id) &&
               (_cardProduct == null || (_cardChips[attr.id]?.isNotEmpty ?? false)))
             attr,
       ];
@@ -316,8 +337,20 @@ class _ConfigCardState extends State<ConfigCard> {
   // side wheel the card always adds. GRADUATED (§7): only the wheels that exist
   // render; chips beyond the top 3 are dropped (the image can carry two axes).
   AttributeDef? get _sideA => _usable.isNotEmpty ? _usable[0] : null;
-  AttributeDef? get _primary => _usable.length > 1 ? _usable[1] : null;
-  AttributeDef? get _secondary => _usable.length > 2 ? _usable[2] : null;
+
+  /// The ↕ drag axis — the 2nd config axis, falling back to the 1st (קוטר) so a
+  /// vertical drag ALWAYS cycles a variant (owner: "משיכה למעלה ולמטה משנים את
+  /// השם ואת התמונה"), even on a product that carries only one axis.
+  AttributeDef? get _primary => _usable.length > 1
+      ? _usable[1]
+      : (_usable.isNotEmpty ? _usable[0] : null);
+
+  /// The ↔ drag axis — the 3rd config axis, falling back to the 1st (קוטר) so a
+  /// HORIZONTAL drag is never dead (owner: "משיכה לימין ולשמאל משנים…"): a
+  /// two-axis product drags diameter left/right and its 2nd axis up/down.
+  AttributeDef? get _secondary => _usable.length > 2
+      ? _usable[2]
+      : (_usable.isNotEmpty ? _usable[0] : null);
 
   /// The RIGHT side wheel — the priority-1 chip alone (§6 · 🔩). Empty ⇒ a spacer.
   List<AttributeDef> get _rightWheels =>
@@ -504,127 +537,39 @@ class _ConfigCardState extends State<ConfigCard> {
         style: const TextStyle(fontSize: _kEmojiSize, height: 1),
       );
 
-  /// The RIGHT side wheel column — the diameter attribute(s) as COMPACT tappable
-  /// value stacks (mockup `.wheel`). Empty ⇒ a fixed-width spacer so the image
-  /// stays centred between the two edges.
+  /// The RIGHT side wheel — the priority-1 chip (usually קוטר) as a FULL spinning
+  /// [WheelPicker] (owner: "גלגל מלא", not tap-by-tap). Each row is the bare
+  /// canonical DN (the `· ½"` inch hint rides the values pill · keeps the slim
+  /// column readable); a fling settles on any value → [_select] updates the
+  /// image/name/pill. Empty ⇒ a fixed-width spacer so the image stays centred.
   Widget _sideWheels(List<AttributeDef> attrs) {
     if (attrs.isEmpty) {
       return const SizedBox(width: _kWheelCol);
     }
+    final attr = attrs.first;
     return SizedBox(
       width: _kWheelCol,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var w = 0; w < attrs.length; w++) ...[
-            if (w > 0) const SizedBox(height: 8),
-            _colHeader(attrs[w].nameHe),
-            ..._wheelCells(attrs[w]),
-          ],
-        ],
+      child: WheelPicker(
+        labelHe: attr.nameHe,
+        values: [for (final v in attr.values) v.canonical ?? v.labelHe],
+        selectedIndex: _selectedIndex(attr),
+        onSelected: (i) => _select(attr.id, _token(attr.values[i])),
+        kind: attr.kind,
       ),
     );
   }
 
-  /// The visible window of a wheel — [_kWheelWindow] values centred on the
-  /// selection (one above it, mockup-style), clamped to the ladder ends. A real
-  /// family diameter ladder can hold 30+ values; the wheel shows a COMPACT slice
-  /// (tapping a shown neighbour recentres it) instead of a giant column.
-  ({int start, int end}) _window(int n, int sel) {
-    if (n <= _kWheelWindow) {
-      return (start: 0, end: n);
-    }
-    var start = sel - 1;
-    if (start < 0) {
-      start = 0;
-    }
-    if (start > n - _kWheelWindow) {
-      start = n - _kWheelWindow;
-    }
-    return (start: start, end: start + _kWheelWindow);
-  }
-
-  /// The tappable cells of one wheel, over its visible [_window].
-  List<Widget> _wheelCells(AttributeDef attr) {
-    final sel = _selectedIndex(attr);
-    final w = _window(attr.values.length, sel);
-    return [
-      for (var i = w.start; i < w.end; i++)
-        _wheelValue(
-          text: attr.values[i].labelHe,
-          on: i == sel,
-          onTap: () => _select(attr.id, _token(attr.values[i])),
-        ),
-    ];
-  }
-
-  /// The LEFT qty wheel — 1…4 as tappable values (mockup `כמות`).
+  /// The LEFT כמות wheel — a FULL spinning [WheelPicker] 1…[_kMaxQty] (owner: a
+  /// flick reaches 56, not 55 taps). Settling on a row sets [_qty].
   Widget _qtyWheel() {
     return SizedBox(
       width: _kWheelCol,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _colHeader('כמות'),
-          for (var q = 1; q <= 4; q++)
-            _wheelValue(
-              text: '$q',
-              on: _qty == q,
-              onTap: () => setState(() => _qty = q),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// A wheel column heading (`.colh` — muted, small, bold).
-  Widget _colHeader(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 5),
-        child: Text(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            color: _cDim,
-          ),
-        ),
-      );
-
-  /// One tappable wheel value (`.wheel .w`). Selected ⇒ brand fill, white, bigger
-  /// + bold; unselected ⇒ dimmed grey.
-  Widget _wheelValue({
-    required String text,
-    required bool on,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 1.5),
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        decoration: on
-            ? BoxDecoration(
-                color: _cAccent,
-                borderRadius: BorderRadius.circular(8),
-              )
-            : null,
-        child: Text(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: on ? Colors.white : _cWheelOff,
-            fontSize: on ? 14 : 12,
-            fontWeight: on ? FontWeight.w800 : FontWeight.w500,
-          ),
-        ),
+      child: WheelPicker(
+        labelHe: 'כמות',
+        values: [for (var q = 1; q <= _kMaxQty; q++) '$q'],
+        selectedIndex: (_qty - 1).clamp(0, _kMaxQty - 1),
+        onSelected: (i) => setState(() => _qty = i + 1),
+        kind: AttributeKind.dimension,
       ),
     );
   }

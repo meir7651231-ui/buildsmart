@@ -6,8 +6,8 @@
 //      [WheelPicker.onSelected] with a NEW index when spun (and re-centres when an
 //      outside index change arrives via didUpdateWidget).
 //   2. the [ConfigCard] renders the clean card (full name · square image hero ·
-//      flat tappable side wheels) — the WheelPicker spinner stays a standalone,
-//      tested widget; the full card contract lives in catalog_config_card_test.
+//      FULL spinning side wheels — קוטר + כמות as WheelPickers); the full card
+//      contract lives in catalog_config_card_test.
 //
 // DETERMINISM (no flaky pixel math): the card seeds each wheel on its DEFAULT
 // (sortIndex==0) value, i.e. index 0, so a single over-two-extent UPWARD
@@ -83,6 +83,16 @@ Widget _cardHost(Widget card) {
   return MaterialApp(
     home: Scaffold(
       body: SingleChildScrollView(child: card),
+    ),
+  );
+}
+
+/// A NON-scrolling card host — so a wheel spin (a vertical drag on the side
+/// [WheelPicker]) is not stolen by an ancestor [Scrollable] in the gesture arena.
+Widget _staticCardHost(Widget card) {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(child: SizedBox(width: 380, child: card)),
     ),
   );
 }
@@ -205,15 +215,15 @@ void main() {
     });
   });
 
-  group('#catalog-config ConfigCard — clean card (name · square image · tap wheels)',
+  group('#catalog-config ConfigCard — clean card (name · square image · spin wheels)',
       () {
     testWidgets('elbow schema → full name · square hero · קוטר+כמות wheels',
         (tester) async {
       await tester.pumpWidget(_cardHost(ConfigCard(schema: _elbow())));
 
-      // the clean card: full name above a square image hero + flat tappable side
-      // wheels — NOT the abandoned spinner, and NO edge arrows/labels.
-      expect(find.byType(WheelPicker), findsNothing);
+      // the clean card: full name above a square image hero + FULL spinning side
+      // wheels (owner "גלגל מלא"), and NO edge arrows/labels.
+      expect(find.byType(WheelPicker), findsNWidgets(2)); // קוטר + כמות spinners
       expect(find.byKey(const Key('configFullName')), findsOneWidget); // name above
       expect(find.byKey(const Key('configStage')), findsOneWidget);
       expect(find.byKey(const Key('configImageCenter')), findsOneWidget);
@@ -227,12 +237,12 @@ void main() {
       expect(find.byKey(const Key('configBuildLine')), findsOneWidget);
     });
 
-    testWidgets('tapping the קוטר wheel surfaces the changed selection via onAddToCart',
+    testWidgets('spinning the קוטר wheel surfaces the changed selection via onAddToCart',
         (tester) async {
       Map<String, String>? captured;
       int? capturedQty;
       await tester.pumpWidget(
-        _cardHost(
+        _staticCardHost(
           ConfigCard(
             schema: _elbow(),
             onAddToCart: (schema, selection, qty) {
@@ -243,15 +253,18 @@ void main() {
         ),
       );
 
-      // the diameter wheel seeds on its default '20'; tapping a shown value ('40')
-      // replaces the live pick — deterministic, no spinner drag.
-      await tester.tap(find.text('40'));
-      await tester.pump();
+      // the diameter wheel (tree-FIRST spinner) seeds on its default '20'; a fling
+      // UP settles on a later value — a FULL wheel (owner "גלגל מלא").
+      await tester.drag(
+        find.byType(ListWheelScrollView).first,
+        const Offset(0, -72),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('configAddToCart')));
       await tester.pump();
 
       expect(captured, isNotNull);
-      expect(captured!['diameter'], '40'); // the tap changed the live pick
+      expect(captured!['diameter'], isNot('20')); // the spin changed the live pick
       expect(captured!['angle'], '45°'); // an untouched axis keeps its default
       expect(captured!['length'], 'קצר'); // ditto
       expect(capturedQty, 1);
