@@ -136,4 +136,45 @@ void main() {
       expect(_ids(p, [p]), ['diameter', 'angle', 'length']);
     });
   });
+
+  group('#catalog-config chips — variantByAxes (image/name SWAP per selection)', () {
+    LipskeyCatalogProduct mk(String s) => LipskeyCatalogProduct(
+          sku: s,
+          nameHe: 'v$s',
+          nameEn: '',
+          categoryHe: 'x',
+          categoryEn: '',
+          categoryEmoji: '🔧',
+          page: 1,
+        );
+
+    test('narrows greedily by priority; the CHANGED axis picks its variant', () {
+      final a = mk('A');
+      final b = mk('B');
+      final c = mk('C');
+      final family = [
+        (a, {'diameter': {'DN50'}, 'angle': {'15°'}}),
+        (b, {'diameter': {'DN50'}, 'angle': {'90°'}}),
+        (c, {'diameter': {'DN32'}, 'angle': {'90°'}}),
+      ];
+      const order = ['diameter', 'angle'];
+      // DN50 · 15° → A.
+      expect(variantByAxes(family, const {'diameter': 'DN50', 'angle': '15°'}, order),
+          same(a));
+      // change the angle to 90° (same diameter) → B — the photo + name SWAP.
+      expect(variantByAxes(family, const {'diameter': 'DN50', 'angle': '90°'}, order),
+          same(b));
+      // an angle no DN50 member has (45°) is SKIPPED (not emptied) → the DN50 set
+      // survives, first wins (A) — a drag never blanks the card.
+      expect(variantByAxes(family, const {'diameter': 'DN50', 'angle': '45°'}, order),
+          same(a));
+    });
+
+    test('an empty family → null (the caller falls back to the tapped image)', () {
+      expect(
+        variantByAxes(const [], const {'diameter': 'DN50'}, const ['diameter']),
+        isNull,
+      );
+    });
+  });
 }

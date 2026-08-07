@@ -10,8 +10,11 @@
 // The card holds NO per-product code — a new product is a data row. Assertions check
 // STRUCTURE + CONTRACT, never pixels. SSOT: knowledge/CATALOG-CONFIG-PLAN.md (§B).
 
+import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProducts;
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/features/catalog_config/config_card.dart';
+import 'package:buildsmart/features/catalog_config/product_chips.dart'
+    show prioritizedSchema;
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -310,6 +313,26 @@ void main() {
 
       expect(captured!['length'], 'ארוך'); // advanced to the clamped far end
       expect(captured!['angle'], '45°'); // the ↕ axis stayed on its default
+    });
+
+    testWidgets('a REAL catalog card resolves a variant image + coherent name', (tester) async {
+      // 213072 = 'ברך 15°'. The card resolves the centre image + name against the TYPE
+      // GROUP ([typeGroupOf]) — the owner-reported bug was an EMPTY family (the fittings
+      // `familyOf` never matched the whole-catalog schema), so nothing resolved and the
+      // image/name were frozen. With a non-empty family the variant resolves ⇒ a real
+      // Image renders (not the emoji) and the name matches the tapped variant.
+      final berekh =
+          resolvedCatalogProducts.firstWhere((p) => p.sku == '213072');
+      await tester.pumpWidget(_staticHost(ConfigCard(schema: prioritizedSchema(berekh))));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<Text>(find.byKey(const Key('configFullName'))).data,
+        contains('ברך'),
+      );
+      // the variant resolved ⇒ a real Image is built (the family is non-empty; before
+      // the fix the empty family gave no image → the emoji, i.e. no Image widget).
+      expect(find.byType(Image), findsWidgets);
     });
 
     testWidgets('בנה קו fires with the SAME schema instance', (tester) async {

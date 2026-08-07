@@ -34,8 +34,11 @@ import 'package:buildsmart/data/catalog_source.dart' show resolvedCatalogProduct
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
+import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
+    show typeGroupOf;
+import 'package:buildsmart/features/catalog_config/product_chips.dart'
+    show chipValuesOf, variantByAxes;
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
-import 'package:buildsmart/features/catalog_config/variant_image.dart';
 import 'package:flutter/material.dart';
 
 /// Signature of the card's two bottom actions (הוסף-לסל · בנה-קו). The dive
@@ -112,6 +115,19 @@ class ConfigCard extends StatefulWidget {
 class _ConfigCardState extends State<ConfigCard> {
   late Map<String, String> _selection;
   late List<LipskeyCatalogProduct> _family;
+
+  /// The card's own catalog product (by sku), or null for a synthetic test schema —
+  /// its values SEED the wheels so the card opens coherent to the tapped variant.
+  LipskeyCatalogProduct? _cardProduct;
+
+  /// [_cardProduct]'s chip-values — the axes IT actually carries. The card shows ONLY
+  /// these wheels (so a plain 50/50 elbow never sprouts a מעבר wheel from the group's
+  /// reducing siblings); a synthetic schema (no product) shows every declared axis.
+  Map<String, Set<String>> _cardChips = const {};
+
+  /// The family products with their chip-values precomputed once (the axis
+  /// projection is heavy — a drag must not re-scan 200+ products every frame).
+  List<(LipskeyCatalogProduct, Map<String, Set<String>>)> _familyChips = const [];
   int _qty = 1;
 
   // Drag accumulators — a ↕/↔ drag on the image advances an axis by one step per
@@ -122,8 +138,8 @@ class _ConfigCardState extends State<ConfigCard> {
   @override
   void initState() {
     super.initState();
+    _resolveFamily();
     _selection = _seed(widget.schema);
-    _family = familyProducts(widget.schema, resolvedCatalogProducts);
   }
 
   @override
@@ -132,10 +148,31 @@ class _ConfigCardState extends State<ConfigCard> {
     // A different product re-seeds the selection + qty + candidate set (defensive
     // — the screen keys the card by sku, so the State is normally fresh anyway).
     if (oldWidget.schema.sku != widget.schema.sku) {
+      _resolveFamily();
       _selection = _seed(widget.schema);
-      _family = familyProducts(widget.schema, resolvedCatalogProducts);
       _qty = 1;
     }
+  }
+
+  /// Resolves the card's product ([_cardProduct]), its VARIANT family — the TYPE
+  /// GROUP ([typeGroupOf]): every size/angle/… of the same type — and the family's
+  /// precomputed chip-values ([_familyChips]). The centre image + name resolve
+  /// against this set as the selection changes (so a drag SWAPS the photo). Empty
+  /// when the sku is not a live catalog product (a synthetic test schema).
+  void _resolveFamily() {
+    for (final p in resolvedCatalogProducts) {
+      if (p.sku == widget.schema.sku) {
+        _cardProduct = p;
+        _cardChips = chipValuesOf(p);
+        _family = typeGroupOf(p, resolvedCatalogProducts);
+        _familyChips = [for (final m in _family) (m, chipValuesOf(m))];
+        return;
+      }
+    }
+    _cardProduct = null;
+    _cardChips = const {};
+    _family = const <LipskeyCatalogProduct>[];
+    _familyChips = const [];
   }
 
   /// The DEFAULT value of [attr] — the `sortIndex == 0` value, else the first
@@ -153,17 +190,34 @@ class _ConfigCardState extends State<ConfigCard> {
   /// the cart line stores; keeps a machine-stable pick where one exists).
   String _token(AttributeValue v) => v.canonical ?? v.labelHe;
 
-  /// The default selection — each non-empty attribute's default token, keyed by
-  /// [AttributeDef.id]. Empty when the schema declares no wheels (still usable).
-  Map<String, String> _seed(ProductConfigSchema schema) => <String, String>{
-        for (final attr in schema.attributes)
-          if (attr.values.isNotEmpty) attr.id: _token(_defaultValue(attr)),
-      };
+  /// The initial selection — SEEDED from the card's own product ([_cardProduct]) so
+  /// the card opens COHERENT to the tapped variant (owner: the name/image must match
+  /// it). An axis the product carries → its value; an axis it LACKS → left unseeded
+  /// (it must not constrain the variant match, only display its wheel's first value).
+  /// A synthetic schema (no product) → each attribute's default, as before.
+  Map<String, String> _seed(ProductConfigSchema schema) {
+    final out = <String, String>{};
+    for (final attr in schema.attributes) {
+      if (attr.values.isEmpty) continue;
+      final pv = _cardChips[attr.id];
+      if (pv != null && pv.isNotEmpty) {
+        out[attr.id] = pv.first;
+      } else if (_cardProduct == null) {
+        out[attr.id] = _token(_defaultValue(attr));
+      }
+    }
+    return out;
+  }
 
-  /// The declared attributes that carry values, in order.
+  /// The wheels the card SHOWS, in taxonomy order — the declared attributes that
+  /// carry values AND that the card's PRODUCT actually holds ([_cardChips]); a
+  /// synthetic schema (no product) shows them all. So the card is coherent to the
+  /// tapped variant, never a wheel the product has no value on.
   List<AttributeDef> get _usable => <AttributeDef>[
         for (final attr in widget.schema.attributes)
-          if (attr.values.isNotEmpty) attr,
+          if (attr.values.isNotEmpty &&
+              (_cardProduct == null || (_cardChips[attr.id]?.isNotEmpty ?? false)))
+            attr,
       ];
 
   /// The wheel index for [attr] under the live selection — the position of the
@@ -183,14 +237,28 @@ class _ConfigCardState extends State<ConfigCard> {
   String _selectedLabel(AttributeDef attr) =>
       attr.values[_selectedIndex(attr)].labelHe;
 
+  /// The best-matching variant for the live selection — GREEDY by the shown wheels
+  /// (diameter → primary → secondary): filter the family by each in turn, narrowing
+  /// only when the filter is non-empty, so the changed axis wins and an axis the
+  /// product lacks is skipped. The first of the narrowed set. null ⇒ no family (a
+  /// synthetic schema). This is what makes the photo + name SWAP on a drag.
+  LipskeyCatalogProduct? _variant() => variantByAxes(
+        _familyChips,
+        _selection,
+        [for (final a in _usable.take(3)) a.id],
+      );
+
   /// The centre image asset (plan D · never empty): the per-selection variant SKU
-  /// wins, then the tapped tile image, then the family fallback; all null ⇒ the
-  /// caller shows the big schema emoji.
+  /// wins (so the photo SWAPS on every pick), then the tapped tile image, then the
+  /// family's first photo; all null ⇒ the caller shows the big schema emoji.
   String? _resolvedImageAsset() {
-    final variant = variantImageFor(widget.schema, _selection, _family);
-    return variant ??
-        widget.imageAsset ??
-        familyFallbackImage(widget.schema, _family);
+    final variant = _variant()?.imageAsset;
+    if (variant != null) return variant;
+    if (widget.imageAsset != null) return widget.imageAsset;
+    for (final p in _family) {
+      if (p.imageAsset != null) return p.imageAsset;
+    }
+    return null;
   }
 
   void _select(String id, String value) =>
@@ -296,9 +364,8 @@ class _ConfigCardState extends State<ConfigCard> {
   /// The FULL product name, clean, above the image (owner). Reflects the live
   /// selection's variant when one resolves, else the schema's base name.
   Widget _fullName() {
-    final variant = variantForSelection(widget.schema, _selection, _family);
     return Text(
-      variant?.nameHe ?? widget.schema.nameHe,
+      _variant()?.nameHe ?? widget.schema.nameHe,
       key: const Key('configFullName'),
       textAlign: TextAlign.center,
       maxLines: 2,

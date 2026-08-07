@@ -256,3 +256,58 @@ List<String> chipRoster(
   List<LipskeyCatalogProduct>? universe,
 }) =>
     [for (final AttributeDef a in prioritizedSchema(p, universe: universe).attributes) a.id];
+
+// ── variant resolution (image + name SWAP per selection) ─────────────────────────
+
+/// A single product's chip→values — the SAME axis→chip mapping [axisChips] aggregates
+/// over a group (material folded via [canonicalMaterial], finish-colours dropped via
+/// [isTrueColor], a bare-mm diameter recovered via [odOf]). So a live selection token
+/// (a chip value) compares 1:1 against a candidate. Used to match the best variant.
+Map<String, Set<String>> chipValuesOf(LipskeyCatalogProduct p) {
+  final out = <String, Set<String>>{};
+  var hasDiameter = false;
+  void add(String chipId, String value) {
+    final v = chipId == 'material' ? canonicalMaterial(value) : value;
+    if (chipId == 'color' && !isTrueColor(v)) return;
+    out.putIfAbsent(chipId, () => <String>{}).add(v);
+  }
+
+  catAxesOf(p).forEach((axis, values) {
+    final chipId = _kAxisToChip[axis];
+    if (chipId == null) return;
+    if (chipId == 'diameter') hasDiameter = true;
+    for (final v in values) {
+      add(chipId, v);
+    }
+  });
+  if (!hasDiameter) {
+    final od = odOf(p);
+    if (od != null) add('diameter', '$od');
+  }
+  return out;
+}
+
+/// The catalog product whose values match [selection] BEST, by GREEDY priority over
+/// [axisOrder], within [family] (each entry a product + its precomputed
+/// [chipValuesOf]). Filters the family by each axis in turn — narrowing ONLY when the
+/// filter is non-empty — so the CHANGED axis wins and an axis the product lacks (no
+/// selection token) is skipped. Returns the first of the narrowed set. null ⇒ empty
+/// [family]. This is what SWAPS the card's photo + name as the selection changes.
+LipskeyCatalogProduct? variantByAxes(
+  List<(LipskeyCatalogProduct, Map<String, Set<String>>)> family,
+  Map<String, String> selection,
+  List<String> axisOrder,
+) {
+  if (family.isEmpty) return null;
+  var candidates = family;
+  for (final id in axisOrder) {
+    final want = selection[id];
+    if (want == null) continue;
+    final narrowed = [
+      for (final e in candidates)
+        if (e.$2[id]?.contains(want) ?? false) e,
+    ];
+    if (narrowed.isNotEmpty) candidates = narrowed;
+  }
+  return candidates.first.$1;
+}
