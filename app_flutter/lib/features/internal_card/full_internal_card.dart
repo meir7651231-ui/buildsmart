@@ -24,6 +24,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/product_images.dart' show resolveProductImage;
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -62,7 +63,7 @@ class FullInternalCard extends ConsumerWidget {
     final p = product;
 
     final sections = <Widget>[
-      _header(p),
+      _header(context, p),
       ..._configSection(),
       ..._variantsSection(p),
       ..._connectsSection(p),
@@ -96,7 +97,7 @@ class FullInternalCard extends ConsumerWidget {
   }
 
   // ── header ──────────────────────────────────────────────────────────────────
-  Widget _header(LipskeyCatalogProduct p) {
+  Widget _header(BuildContext context, LipskeyCatalogProduct p) {
     final dims = p.dims ?? const <String, dynamic>{};
     final dn = (dims['DN'] ?? '').toString();
     final di = (dims['t'] ?? '').toString();
@@ -112,16 +113,7 @@ class FullInternalCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: _cImgBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Text(p.typeEmoji, style: const TextStyle(fontSize: 30)),
-          ),
+          _thumb(context, p),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -150,6 +142,50 @@ class FullInternalCard extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The header thumbnail — the real product image (tap → gallery), emoji
+  /// fallback when the product carries no resolvable image (D17 · never grey).
+  Widget _thumb(BuildContext context, LipskeyCatalogProduct p) {
+    final asset = p.imageAsset;
+    return GestureDetector(
+      onTap: () => _openGallery(context, p),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        key: const Key('internalCardImage'),
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: _cImgBg,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        clipBehavior: Clip.antiAlias,
+        alignment: Alignment.center,
+        child: asset == null
+            ? Text(p.typeEmoji, style: const TextStyle(fontSize: 30))
+            : Image(
+                image: resolveProductImage(asset),
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) =>
+                    Text(p.typeEmoji, style: const TextStyle(fontSize: 30)),
+              ),
+      ),
+    );
+  }
+
+  /// D3 — tap the image → a full-screen gallery of the product image(s) + the
+  /// spec diagram(s), with pinch-zoom + page dots. Inert with no image.
+  void _openGallery(BuildContext context, LipskeyCatalogProduct p) {
+    final images = <String>[...p.imageAssets, ...p.specImageAssets];
+    if (images.isEmpty) {
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => _InternalCardGallery(product: p, images: images),
       ),
     );
   }
@@ -191,7 +227,7 @@ class FullInternalCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 4),
-          DefaultTextStyle(
+          DefaultTextStyle.merge(
             style: const TextStyle(
               fontSize: 11,
               color: _cBody,
@@ -508,6 +544,99 @@ class FullInternalCard extends ConsumerWidget {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// D3 — the tap-image gallery: a full-screen dark pager over the product image(s)
+/// then the spec diagram(s), each pinch-zoomable, with a ✕ and page dots. A
+/// missing asset degrades to the big product emoji (never a broken box).
+class _InternalCardGallery extends StatefulWidget {
+  const _InternalCardGallery({required this.product, required this.images});
+
+  final LipskeyCatalogProduct product;
+  final List<String> images;
+
+  @override
+  State<_InternalCardGallery> createState() => _InternalCardGalleryState();
+}
+
+class _InternalCardGalleryState extends State<_InternalCardGallery> {
+  final PageController _ctrl = PageController();
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xF0151F2A),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              PageView.builder(
+                key: const Key('internalCardGallery'),
+                controller: _ctrl,
+                itemCount: widget.images.length,
+                onPageChanged: (i) => setState(() => _page = i),
+                itemBuilder: (context, i) => InteractiveViewer(
+                  maxScale: 4,
+                  child: Center(
+                    child: Image(
+                      image: resolveProductImage(widget.images[i]),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Text(
+                        widget.product.typeEmoji,
+                        style: const TextStyle(fontSize: 96),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Material(
+                  color: Colors.black26,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+              if (widget.images.length > 1)
+                Positioned(
+                  bottom: 16,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < widget.images.length; i++)
+                        Container(
+                          width: 7,
+                          height: 7,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: i == _page ? _cAccent : Colors.white38,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),

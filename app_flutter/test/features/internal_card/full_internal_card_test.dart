@@ -39,4 +39,24 @@ void main() {
     expect(find.text('מפרט הנדסי'), findsOneWidget);
     expect(find.text('טמפרטורה'), findsOneWidget);
   });
+
+  testWidgets('tapping the header image opens the gallery (D3)', (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('internalCardImage')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('internalCardImage')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    // The SmartLock hero carries product + spec images ⇒ the pager opens.
+    expect(find.byKey(const Key('internalCardGallery')), findsOneWidget);
+  });
 }

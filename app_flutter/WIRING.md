@@ -3853,3 +3853,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 - **`full_internal_card.dart`** — כותרת · 🎛️הגדרה · 🧩וריאנטים(`variantSiblingsOf`) · 🔗מתחבר-ל(`compatibleProductsFor`) · 🔩הוראות-חיבור(`engineeringSpecFor.endsSummary`) · 🛠️שלבי-התקנה(`installTipsFor`) · 🧰ערכה(`installKitFor`+`recommendedKitForProduct`) · 🧱חומרים · 📐מפרט(`engineeringSpecFor`) · 🌡️טמפ' · 📋תקינות(`complianceTriggersFor`) · ⚠️אזהרות · 🧩משלימים(`frequentlyPairedTypesFor`) · 💰מחיר(`priceFor`+`formatCatalogPrice`). Hero=`70055960`.
 - **`internal_card_flags.dart`** — `kInternalCard = bool.fromEnvironment('INTERNAL_CARD')`. **`smart_home_screen.dart`** — `_InternalCardOpen`/`_InternalCardHero` + case ב-`smartHomeSectionFor` + gate ב-`childrenFor`.
 - gate: `flutter analyze` **0 errors** · `full_internal_card_test` (מרנדר hero + סקציות-מנוע חיות) ירוק.
+
+### #internal-card P2 — תמונה אמיתית + גלריה (D3) · מגודר `kInternalCard`
+> ה-thumb בכותרת הפך לתמונת-מוצר אמיתית (`resolveProductImage(p.imageAsset)`, נסיגה לאימוג'י · D17) ולחיצה עליו פותחת `_InternalCardGallery` מלאת-מסך — pager מעל `imageAssets`+`specImageAssets`, pinch-zoom (InteractiveViewer), נקודות-עמוד, ✕. גם `_section` עבר ל-`DefaultTextStyle.merge` (שומר משפחת-Heebo במקום לאפס אותה).
+- gate: `flutter analyze` **0 errors** · `full_internal_card_test` **2/2** (render + tap→gallery).

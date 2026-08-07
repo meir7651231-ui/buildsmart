@@ -2496,3 +2496,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## #internal-card — הכרטיס-הפנימי המלא על מסך-הבית (2026-08-07)
 **שינוי-UI (מגודר `kInternalCard` · P1 מתוך D1–D18):** מקטע-בית "🃏 כרטיס פנימי" מרנדר את `FullInternalCard` — 13 סקציות-נתונים ל-SmartLock ברך 90° 50 (`70055960`), פורט 1:1 מ-`knowledge/internal-card/card-max-internal.png`. כל סקציה מחווטת לפונקציית-מנוע חיה ומוצגת רק כשיש נתונים.
 **אימות חזותי:** `full_internal_card_test` מפמפם את הכרטיס עם ה-hero האמיתי ומאשר כותרת + כפתור-הוספה + סקציות מונחות-מנוע (מפרט-הנדסי · טמפרטורה) — נתונים חיים, לא mock. render מצורף לבעלים. כבוי → tree-shaken → **byte-identical**; חי דרך `--dart-define=INTERNAL_CARD=true`.
+
+## #internal-card P2 — תמונה + גלריה (2026-08-07)
+**שינוי-UI (מגודר `kInternalCard` · D3):** ה-thumb בכותרת = תמונת-מוצר אמיתית; לחיצה → גלריה מלאת-מסך עם pager (מוצר + מפרט), pinch-zoom, נקודות-עמוד, ✕. **אימות:** `full_internal_card_test` **2/2** — הכרטיס מרנדר עם נתוני-מנוע חיים + הקשה על התמונה פותחת את הגלריה. כבוי → tree-shaken → **byte-identical**.
