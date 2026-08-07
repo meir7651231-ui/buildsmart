@@ -77,7 +77,7 @@ jobs:
         # getUploadUrl instead of inline base64. OWNER-ARMED (R2 provisioned +
         # getUploadUrl deployed). Non-owner-safe: OFF byte-identical base64; ON
         # still falls back to base64 if R2 is unreachable. MUST match web-deploy.yml.
-        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com --dart-define=STORE_COMPARISON_UI=true --dart-define=ORDER_EMAIL=true --dart-define=UID_SCOPED_QUERIES=true --dart-define=EMAIL_PASSWORD_AUTH=true --dart-define=ORG_CONFIG=true --dart-define=CLOUD_PHOTOS=true ${{ vars.STUDIO_DART_DEFINES }}
+        run: flutter build web --release --base-href "/" --dart-define=ENABLE_WORD_FINDER=true --dart-define=KB_LIVE_MIRROR=true --dart-define=KB_GLOBAL=true --dart-define=ENABLE_RING_DIVE=true --dart-define=PLAIN_DIVE=true --dart-define=AXIS_DIVE=true --dart-define=GLOBAL_SEARCH=true --dart-define=STUDIO_SHARED_SYNC=true --dart-define=CATALOG_BASE_URL=https://buildsmart-b0b78.firebaseapp.com --dart-define=STORE_COMPARISON_UI=true --dart-define=ORDER_EMAIL=true --dart-define=UID_SCOPED_QUERIES=true --dart-define=EMAIL_PASSWORD_AUTH=true --dart-define=ORG_CONFIG=true --dart-define=CLOUD_PHOTOS=true --dart-define=INTERNAL_CARD=true ${{ vars.STUDIO_DART_DEFINES }}
 
       - name: 🚀 Launch flags → run summary (verify backend / catalog / studio)
         # Group-2 launch-verify (SSOT close-web-for-launch). The static defines are

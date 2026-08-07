@@ -22,6 +22,11 @@ import 'package:buildsmart/features/ring_dive/catalog_wheel_screen.dart'
     show CatalogWheelScreen;
 import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart'
     show CatalogConfigScreen;
+import 'package:buildsmart/features/internal_card/full_internal_card.dart'
+    show FullInternalCard;
+import 'package:buildsmart/features/internal_card/internal_card_flags.dart'
+    show kInternalCard;
+import 'package:buildsmart/data/related_info.dart' show catalogProductForSku;
 import 'package:buildsmart/screens/catalog_screen.dart'
     show catalogSectionProvider, keyboardDiveQueryProvider;
 import 'package:buildsmart/state/home_content_order.dart';
@@ -111,6 +116,7 @@ Widget smartHomeSectionFor(HomeSection s) => switch (s) {
       HomeSection.favorites => const _Favorites(),
       HomeSection.superFinder => const _SuperFinderHero(),
       HomeSection.catalogConfig => const _CatalogConfigHero(),
+      HomeSection.internalCard => const _InternalCardHero(),
     };
 
 /// 🏠 גוף מסך-הבית החכם (task #32) — the 'בית' landing in the "תוכן הבית" tile
@@ -160,6 +166,13 @@ class SmartHomeBody extends ConsumerWidget {
               SizedBox(height: BsTokens.space4),
               _CatalogConfigOpen(),
             ],
+          // 🃏 כרטיס פנימי on the home (owner: shown OPEN) — the full 13-section
+          // internal product card renders in place. Gated on the const kInternalCard
+          // so an off build tree-shakes it ⇒ byte-identical; turned on for the live
+          // site via --dart-define=INTERNAL_CARD=true (like מאתר-על / kAxisDive).
+          HomeSection.internalCard => kInternalCard
+              ? const [SizedBox(height: BsTokens.space4), _InternalCardOpen()]
+              : const <Widget>[],
           _ => [
               smartHomeSectionFor(s),
               const SizedBox(height: BsTokens.space4),
@@ -856,6 +869,109 @@ class _CatalogConfigHero extends ConsumerWidget {
                         )),
                     const SizedBox(height: 2),
                     Text('כרטיס-הגדרה לכל מוצר — תמונה + גלגלים',
+                        style: TextStyle(color: pal.muted, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_left, color: pal.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 🃏 כרטיס פנימי — the full 13-section internal card, shown OPEN on the home ──
+/// Renders [FullInternalCard] for the SmartLock elbow hero inside a bounded,
+/// scrollable 560px frame (same shape as [_CatalogConfigOpen]). Only reached when
+/// kInternalCard is on (childrenFor gate), so an off build tree-shakes it.
+class _InternalCardOpen extends StatelessWidget {
+  const _InternalCardOpen();
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = _pal(context);
+    final hero = catalogProductForSku(FullInternalCard.heroSku);
+    return _Pad(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: Text('🃏 כרטיס פנימי',
+                style: TextStyle(
+                  color: pal.ink,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                )),
+          ),
+          Container(
+            height: 560,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(cfgRadius(context)),
+              border: Border.all(color: const Color(0x33EE6A2A)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: hero == null
+                ? const Center(child: Text('—'))
+                : SingleChildScrollView(
+                    child: FullInternalCard(product: hero)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 🃏 כרטיס פנימי — the reorder-preview TOKEN (a compact card) ──────────────────
+/// Lightweight stand-in in the home-reorder wizard (`smartHomeSectionFor`), where
+/// the open 560px card would dwarf the drag rows. onTap opens the full card as a
+/// route. The LIVE home renders [_InternalCardOpen].
+class _InternalCardHero extends ConsumerWidget {
+  const _InternalCardHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pal = _pal(context);
+    return _Pad(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(cfgRadius(context)),
+        onTap: () {
+          final hero = catalogProductForSku(FullInternalCard.heroSku);
+          if (hero == null) return;
+          Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (_) => Scaffold(
+              appBar: AppBar(title: const Text('כרטיס פנימי')),
+              body: SingleChildScrollView(
+                  child: FullInternalCard(product: hero)),
+            ),
+          ));
+        },
+        child: Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            color: const Color(0x1AEE6A2A),
+            borderRadius: BorderRadius.circular(cfgRadius(context)),
+            border: Border.all(color: const Color(0x33EE6A2A)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.article_outlined,
+                  color: BsTokens.brandDark, size: 32),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('🃏 כרטיס פנימי',
+                        style: TextStyle(
+                          color: pal.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        )),
+                    const SizedBox(height: 2),
+                    Text('כל המנוע במקום אחד — 13 סקציות',
                         style: TextStyle(color: pal.muted, fontSize: 12)),
                   ],
                 ),

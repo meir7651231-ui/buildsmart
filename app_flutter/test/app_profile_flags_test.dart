@@ -75,6 +75,10 @@ const Set<String> kArmingLayer = {
   // define, never profile-owned. `features/catalog_config/` is tree-shaken until
   // armed (the catalog stays byte-identical).
   'CATALOG_CONFIG',
+  // INTERNAL_CARD — same class: a compile-time arming define for the full internal
+  // product card. `features/internal_card/` is tree-shaken until armed (the home
+  // stays byte-identical); armed live via --dart-define on the deploy builds.
+  'INTERNAL_CARD',
 };
 
 /// Passthrough — experiments, launch dials, and secret values a profile must

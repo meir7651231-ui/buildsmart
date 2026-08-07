@@ -143,6 +143,7 @@ void main() {
         HomeSection.favorites,
         HomeSection.superFinder,
         HomeSection.catalogConfig,
+        HomeSection.internalCard,
       ]);
     });
 

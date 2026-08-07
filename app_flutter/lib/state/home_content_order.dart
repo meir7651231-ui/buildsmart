@@ -27,6 +27,7 @@ enum HomeSection {
   favorites, // 'מועדפים'
   superFinder, // 'מאתר-על' — the axis-dive super-wheel entry (kAxisDive-gated)
   catalogConfig, // 'קטלוג מגדיר' — the catalog-config dive screen, shown OPEN (kCatalogConfig-gated)
+  internalCard, // 'כרטיס פנימי' — the full internal product card, shown OPEN (kInternalCard-gated)
 }
 
 /// Display metadata for one home section (the drag-handle row label/emoji).
@@ -58,6 +59,8 @@ const Map<HomeSection, HomeSectionMeta> kHomeSectionMeta = {
       HomeSectionMeta(HomeSection.superFinder, '🕸️', 'מאתר-על'),
   HomeSection.catalogConfig:
       HomeSectionMeta(HomeSection.catalogConfig, '🎛️', 'קטלוג מגדיר'),
+  HomeSection.internalCard:
+      HomeSectionMeta(HomeSection.internalCard, '🃏', 'כרטיס פנימי'),
 };
 
 /// Default order — the prototype's top-to-bottom section sequence.
@@ -71,6 +74,7 @@ const List<HomeSection> kDefaultHomeOrder = [
   HomeSection.favorites,
   HomeSection.superFinder,
   HomeSection.catalogConfig,
+  HomeSection.internalCard,
 ];
 
 /// The home screen's key + default section ids for the unified per-screen model
