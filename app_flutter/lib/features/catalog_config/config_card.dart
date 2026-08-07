@@ -53,6 +53,7 @@ const Color _cInk = Color(0xFF232A33); // --ink
 const Color _cDim = Color(0xFF7A828D); // --dim
 const Color _cLine = Color(0xFFECEEF2); // --line (secondary btn border)
 const Color _cAccent = Color(0xFFEE6A2A); // --accent
+const Color _cAccentSoft = Color(0x14EE6A2A); // accent @ 8% — פרטים button fill
 const Color _cImgBg = Color(0xFFF5F7FA); // --imgbg (stage)
 const Color _cWheelOff = Color(0xFFB7BDC6); // dimmed wheel value
 
@@ -234,6 +235,12 @@ class _ConfigCardState extends State<ConfigCard> {
   void _onBuildLine() =>
       widget.onBuildLine?.call(widget.schema, Map.of(_selection), _qty);
 
+  /// פרטים — open the internal product sheet for the live variant. Shared by the
+  /// centre-image tap AND the dedicated "📄 פרטים" button so both routes carry the
+  /// identical (schema, selection, qty) snapshot.
+  void _onOpenDetails() =>
+      widget.onOpenDetails?.call(widget.schema, Map.of(_selection), _qty);
+
   // ── the POSITIONAL wheel map (owner spec §6, taxonomy-ordered by the schema) ──
   // The schema arrives priority-ordered (prioritizedSchema), so the slots are
   // strictly positional: attr[0] = 🔩 side wheel A (right, usually קוטר) · attr[1]
@@ -271,6 +278,13 @@ class _ConfigCardState extends State<ConfigCard> {
             _fullName(),
             const SizedBox(height: 10),
             _cols(),
+            // A dedicated, clearly-labelled פרטים affordance under the image — the
+            // image tap alone was missable (owner: "עלה לי רק החיצוני"). Only when a
+            // details handler is wired (else no dead control).
+            if (widget.onOpenDetails != null) ...[
+              const SizedBox(height: 10),
+              _detailsButton(),
+            ],
             const SizedBox(height: 12),
             _actions(),
           ],
@@ -370,9 +384,7 @@ class _ConfigCardState extends State<ConfigCard> {
       ),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: widget.onOpenDetails == null
-            ? null
-            : () => widget.onOpenDetails!(widget.schema, _selection, _qty),
+        onTap: widget.onOpenDetails == null ? null : _onOpenDetails,
         onVerticalDragUpdate:
             primary == null ? null : (d) => _onVerticalDrag(d, primary),
         onVerticalDragEnd: (_) => _accV = 0,
@@ -544,6 +556,43 @@ class _ConfigCardState extends State<ConfigCard> {
             color: on ? Colors.white : _cWheelOff,
             fontSize: on ? 14 : 12,
             fontWeight: on ? FontWeight.w800 : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The dedicated "📄 פרטים" affordance — a full-width, brand-accent-tinted button
+  /// under the image that opens the internal product sheet through the SAME
+  /// [ConfigCard.onOpenDetails] path as the centre-image tap. A clear, reliable
+  /// target the image's ↕/↔ drag recognizers can never steal (owner: the tap alone
+  /// was missable). Consistent with the card (tokens · RTL · accent).
+  Widget _detailsButton() {
+    return Material(
+      key: const Key('configOpenDetails'),
+      color: _cAccentSoft,
+      borderRadius: BorderRadius.circular(_kActionRadius),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: _onOpenDetails,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('📄', style: TextStyle(fontSize: 14)),
+              SizedBox(width: 6),
+              Text(
+                'פרטים',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: _cAccent,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
+            ],
           ),
         ),
       ),

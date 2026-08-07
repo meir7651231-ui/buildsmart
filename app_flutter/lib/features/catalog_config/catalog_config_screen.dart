@@ -147,24 +147,35 @@ class _CatalogConfigScreenState extends ConsumerState<CatalogConfigScreen> {
   }
 
   /// PLAN E.3 · פרטים — opens the INTERNAL product sheet for the SKU the current
-  /// picks resolve to (the same variant the card's centre image shows), with its
-  /// family siblings as the sheet's variant pager. No match (empty family / M1) ⇒
-  /// inert (the image tap does nothing).
+  /// picks resolve to (the same variant the card's centre image shows). It must
+  /// NEVER silently no-op: the vast majority of catalog tiles carry a CATEGORY
+  /// familyId (not an engine family), so [variantForSelection]/[familyProducts]
+  /// come back null/empty — the owner's bug ("עלה לי רק החיצוני לא הפנימי": only the
+  /// external card came up, the internal sheet never did). So we fall back, in
+  /// order, to the family's first member, then the tapped type's OWN catalog
+  /// product ([_product] by sku) — opening something sensible over silence. The
+  /// sheet's variant pager gets the family when we have one, else the product's
+  /// catalog-category peers ([showLipskeyProductSheet] self-guards an empty list).
   void _onOpenDetails(
     ProductConfigSchema schema,
     Map<String, String> selection,
     int qty,
   ) {
+    final family = familyProducts(schema, resolvedCatalogProducts);
     final product =
-        variantForSelection(schema, selection, resolvedCatalogProducts);
+        variantForSelection(schema, selection, resolvedCatalogProducts) ??
+            (family.isNotEmpty ? family.first : _product(schema.sku));
     if (product == null) {
+      // Truly nothing to show — a foreign/test sku with no catalog row.
       return;
     }
-    showLipskeyProductSheet(
-      context,
-      product,
-      familyProducts(schema, resolvedCatalogProducts),
-    );
+    final siblings = family.isNotEmpty
+        ? family
+        : [
+            for (final p in resolvedCatalogProducts)
+              if (p.categoryHe == product.categoryHe) p,
+          ];
+    showLipskeyProductSheet(context, product, siblings);
   }
 
   @override

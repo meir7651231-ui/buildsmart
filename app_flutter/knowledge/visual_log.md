@@ -4,6 +4,11 @@
 
 ---
 
+## #catalog-config-details-fix — 🔗 כפתור "📄 פרטים" + פתיחת הגיליון-הפנימי — 2026-08-06
+**שינוי-UI:** `config_card.dart` — כפתור **"📄 פרטים"** חדש (full-width · מילוי-כתום-רך · טקסט-כתום-מודגש) מתחת לתמונה/גלגלים, מעל שורת הוסף-לסל/בנה-קו. פותח את `LipskeyProductSheet` (הזוג חיצוני↔פנימי); גם tap על התמונה עובר אותו נתיב.
+**אימות:** `config_card_open_details_real_test` — הנתיב האמיתי (לא mock) פותח את הגיליון (image-tap + כפתור) על טייל שבו variantForSelection=null; RED לפני, GREEN אחרי; mutation-verified (שבירת ה-fallback/הכפתור ⇒ אדום). 82 catalog_config + 32 רגרסיה (favorite_tile/product_journey/card_interactions/sheet) ירוקים · analyze נקי.
+**שקיפות:** eye-check נטיב חי ייבדק אחרי ה-deploy הבא (owner מריץ web-deploy).
+
 ## #catalog-config-goes-live — 🎛️ הקטלוג-המגדיר גלוי-תמיד על הבית (owner "תדליק") — 2026-08-06
 **שינוי-UI:** `smart_home_screen.dart` — מקטע `catalogConfig` כבר **לא מגודר**: `_CatalogConfigOpen` (⟵ `CatalogConfigScreen`) מרונדר **תמיד** על הבית (כמו categories/products). **⚠️ שינוי-UI חי אמיתי** — לא byte-identical (בשונה מהרשומות המגודרות): הסקשן מופיע לכל המשתמשים.
 **אימות:** בדיקות-הבית (`widget_test`, `help_coverage`, `t3_ghi`, reorder, placeholder) — **+33 ירוק** (הסקשן נבנה עצל ב-ListView, מחוץ-למסך ב-viewport הבדיקה ⇒ אין רגרסיה). ה-toggle הצג/הסתר של "סידור מסך הבית" חל עליו כמו כל סקשן.
