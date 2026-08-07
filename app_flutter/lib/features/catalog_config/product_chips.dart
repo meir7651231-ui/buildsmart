@@ -29,6 +29,8 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/domain/trade_schema.dart';
 import 'package:buildsmart/features/catalog_config/catalog_taxonomy.dart'
     show typeKeyOf;
+import 'package:buildsmart/features/catalog_config/dn_scale.dart'
+    show canonicalDn, dnNumber;
 import 'package:buildsmart/features/catalog_config/product_config_schema.dart';
 import 'package:buildsmart/features/fittings/engine/catalog_map.dart' show odOf;
 import 'package:buildsmart/features/ring_dive/catalog_axes.dart' show catAxesOf;
@@ -245,7 +247,52 @@ ProductConfigSchema prioritizedSchema(
     nameHe: base.nameHe,
     familyId: base.familyId,
     emoji: base.emoji,
-    attributes: ordered,
+    attributes: [for (final a in ordered) _dnAttribute(a)],
+  );
+}
+
+/// Rewrite the MAIN קוטר wheel's values onto the canonical DN scale (dedup +
+/// ascending by DN number); every other attribute passes through untouched. The
+/// choke point covers both the engine schema (manifolds' own diameter) and the
+/// §4 axis wheel. Scoped to the exact `'diameter'` id — NOT the reducer's מעבר
+/// wheel (`diameter-small`, whose compound `16×20` tokens must stay verbatim) and
+/// NOT `diameter-large`; those are absent from [chipValuesOf], so DN-folding only
+/// the wheel side would desync the seed/match. The single-bore קוטר is symmetric.
+AttributeDef _dnAttribute(AttributeDef a) {
+  if (a.id != 'diameter') return a;
+  // Group the raw values by their canonical DN; remember an inch original per DN
+  // as the display hint. labelHe = `DN15 · ½"` (with an inch source) or `DN110`
+  // (plastic — DN already reads clear); canonical = `DN15` drives the matching.
+  final order = <String>[];
+  final inchHint = <String, String>{};
+  for (final v in a.values) {
+    final raw = v.labelHe;
+    final dn = canonicalDn(raw);
+    if (!order.contains(dn)) order.add(dn);
+    if (raw.contains('"')) inchHint.putIfAbsent(dn, () => raw);
+  }
+  order.sort((x, y) => dnNumber(x).compareTo(dnNumber(y)));
+  return AttributeDef(
+    id: a.id,
+    tradeId: a.tradeId,
+    nameHe: a.nameHe,
+    emoji: a.emoji,
+    kind: a.kind,
+    unitHe: a.unitHe,
+    isVariantAxis: a.isVariantAxis,
+    required: a.required,
+    matchTokens: a.matchTokens,
+    values: [
+      for (var i = 0; i < order.length; i++)
+        AttributeValue(
+          id: 'v$i',
+          labelHe: inchHint[order[i]] == null
+              ? order[i]
+              : '${order[i]} · ${inchHint[order[i]]}',
+          canonical: order[i],
+          sortIndex: i,
+        ),
+    ],
   );
 }
 
@@ -267,7 +314,10 @@ Map<String, Set<String>> chipValuesOf(LipskeyCatalogProduct p) {
   final out = <String, Set<String>>{};
   var hasDiameter = false;
   void add(String chipId, String value) {
-    final v = chipId == 'material' ? canonicalMaterial(value) : value;
+    var v = chipId == 'material' ? canonicalMaterial(value) : value;
+    // Fold every diameter representation (inch/DN/mm/odOf) to the one DN scale,
+    // so a live selection token compares 1:1 against a candidate on the same scale.
+    if (chipId == 'diameter') v = canonicalDn(v);
     if (chipId == 'color' && !isTrueColor(v)) return;
     out.putIfAbsent(chipId, () => <String>{}).add(v);
   }
