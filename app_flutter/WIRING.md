@@ -3857,3 +3857,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P2 — תמונה אמיתית + גלריה (D3) · מגודר `kInternalCard`
 > ה-thumb בכותרת הפך לתמונת-מוצר אמיתית (`resolveProductImage(p.imageAsset)`, נסיגה לאימוג'י · D17) ולחיצה עליו פותחת `_InternalCardGallery` מלאת-מסך — pager מעל `imageAssets`+`specImageAssets`, pinch-zoom (InteractiveViewer), נקודות-עמוד, ✕. גם `_section` עבר ל-`DefaultTextStyle.merge` (שומר משפחת-Heebo במקום לאפס אותה).
 - gate: `flutter analyze` **0 errors** · `full_internal_card_test` **2/2** (render + tap→gallery).
+
+### #internal-card P3 — משיכת-שם → וריאנטים (D5) · מגודר `kInternalCard`
+> הכרטיס הפך ל-`ConsumerStatefulWidget` (`_current`); משיכה אופקית על השם מדלגת במשפחת-הווריאנטים (`variantSiblingsOf`, clamped) והכרטיס כולו נגזר-מחדש (שם·תמונה·מפרט·וריאנטים). נקודות-pagination תחת השם. `_CardView` נשאר ה-render חסר-המצב.
+- gate: `flutter analyze` **0 errors** · `full_internal_card_test` **3/3** (render + gallery + swipe→variant).

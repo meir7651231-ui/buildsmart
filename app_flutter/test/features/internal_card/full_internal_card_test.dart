@@ -59,4 +59,37 @@ void main() {
     // The SmartLock hero carries product + spec images ⇒ the pager opens.
     expect(find.byKey(const Key('internalCardGallery')), findsOneWidget);
   });
+
+  testWidgets('swiping the name cycles the variant family (D5)', (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    final fam = variantSiblingsOf(hero);
+    expect(fam.length, greaterThan(1),
+        reason: 'the elbow-90 hero must have size variants to cycle');
+    final i = fam.indexWhere((s) => s.sku == hero.sku);
+    final goNext = i < fam.length - 1;
+    final expected = goNext ? fam[i + 1] : fam[i - 1];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+    expect(find.text(hero.nameHe), findsOneWidget);
+
+    // Swipe the name toward the end that has room (left ⇒ next, right ⇒ prev).
+    await tester.fling(
+      find.byKey(const Key('internalCardName')),
+      Offset(goNext ? -250 : 250, 0),
+      1000,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    // The card now shows the neighbouring variant.
+    expect(find.text(expected.nameHe), findsOneWidget);
+  });
 }

@@ -46,9 +46,10 @@ const Color _cHotBg = Color(0xFFFFF2EA);
 const Color _cHotBorder = Color(0xFFFFD6BD);
 
 /// THE full internal card. Give it a [product]; it renders every section the
-/// engine can populate for that product. Reusable (any fitting SKU); the home
-/// embed + standalone route both seed it with the SmartLock elbow hero.
-class FullInternalCard extends ConsumerWidget {
+/// engine can populate for that product, and a swipe on the name cycles the
+/// size-variant family (D5). Reusable (any fitting SKU); the home embed +
+/// standalone route both seed it with the SmartLock elbow hero.
+class FullInternalCard extends ConsumerStatefulWidget {
   const FullInternalCard({required this.product, super.key});
 
   /// The default hero — SmartLock ברך 90° 50 (real SKU; mockup's 120050 is not
@@ -56,6 +57,50 @@ class FullInternalCard extends ConsumerWidget {
   static const String heroSku = '70055960';
 
   final LipskeyCatalogProduct product;
+
+  @override
+  ConsumerState<FullInternalCard> createState() => _FullInternalCardState();
+}
+
+class _FullInternalCardState extends ConsumerState<FullInternalCard> {
+  late LipskeyCatalogProduct _current = widget.product;
+
+  @override
+  void didUpdateWidget(FullInternalCard old) {
+    super.didUpdateWidget(old);
+    if (old.product.sku != widget.product.sku) {
+      _current = widget.product;
+    }
+  }
+
+  /// D5 — step the variant family by [dir] (clamped to the ends). The whole card
+  /// re-resolves against the new SKU (name · image · spec · variants).
+  void _stepVariant(int dir) {
+    final fam = variantSiblingsOf(_current);
+    if (fam.length < 2) {
+      return;
+    }
+    final i = fam.indexWhere((s) => s.sku == _current.sku);
+    final next = (i + dir).clamp(0, fam.length - 1);
+    if (next != i) {
+      setState(() => _current = fam[next]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      _CardView(product: _current, onStepVariant: _stepVariant);
+}
+
+/// The stateless render of one product's card (all section builders). The
+/// stateful [FullInternalCard] above swaps [product] on a name-swipe.
+class _CardView extends ConsumerWidget {
+  const _CardView({required this.product, this.onStepVariant});
+
+  final LipskeyCatalogProduct product;
+
+  /// D5 — the name-swipe steps the variant family by ±1 (null ⇒ inert).
+  final void Function(int dir)? onStepVariant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -120,17 +165,31 @@ class FullInternalCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  p.nameHe,
-                  key: const Key('internalCardName'),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: _cInk,
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragEnd: onStepVariant == null
+                      ? null
+                      : (d) {
+                          final v = d.primaryVelocity ?? 0;
+                          if (v < 0) {
+                            onStepVariant!(1);
+                          } else if (v > 0) {
+                            onStepVariant!(-1);
+                          }
+                        },
+                  child: Text(
+                    p.nameHe,
+                    key: const Key('internalCardName'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: _cInk,
+                    ),
                   ),
                 ),
+                _variantDots(p),
                 const SizedBox(height: 2),
                 Text(
                   metaParts.join(' · '),
@@ -141,6 +200,34 @@ class FullInternalCard extends ConsumerWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// D5 — pagination dots under the name showing the variant position; a swipe
+  /// on the name moves between them. Hidden for a single-variant product.
+  Widget _variantDots(LipskeyCatalogProduct p) {
+    final fam = variantSiblingsOf(p);
+    if (fam.length < 2) {
+      return const SizedBox(height: 2);
+    }
+    final sel = fam.indexWhere((s) => s.sku == p.sku);
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < fam.length; i++)
+            Container(
+              width: 6,
+              height: 6,
+              margin: const EdgeInsets.only(left: 4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: i == sel ? _cAccent : _cLine,
+              ),
+            ),
         ],
       ),
     );
