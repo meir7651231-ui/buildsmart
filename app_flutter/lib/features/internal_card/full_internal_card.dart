@@ -96,12 +96,21 @@ class _FullInternalCardState extends ConsumerState<FullInternalCard> {
 
   void _pickUnit(String u) => setState(() => _unit = u);
 
+  /// D15 — the spec is HIDDEN behind the 📋 clipboard; tapping it swaps the big
+  /// product image for the spec panel in place (the card is image-first, not a
+  /// text dump).
+  bool _specOpen = false;
+
+  void _toggleSpec() => setState(() => _specOpen = !_specOpen);
+
   @override
   Widget build(BuildContext context) => _CardView(
         product: _current,
         unit: _unit,
+        specOpen: _specOpen,
         onStepVariant: _stepVariant,
         onPickUnit: _pickUnit,
+        onToggleSpec: _toggleSpec,
       );
 }
 
@@ -111,8 +120,10 @@ class _CardView extends ConsumerWidget {
   const _CardView({
     required this.product,
     required this.unit,
+    required this.specOpen,
     this.onStepVariant,
     this.onPickUnit,
+    this.onToggleSpec,
   });
 
   final LipskeyCatalogProduct product;
@@ -120,19 +131,170 @@ class _CardView extends ConsumerWidget {
   /// D6 — the selected sale-unit key (בודד / ארגז / משטח).
   final String unit;
 
+  /// D15 — whether the 📋 spec panel is showing (in place of the big image).
+  final bool specOpen;
+
   /// D5 — the name-swipe steps the variant family by ±1 (null ⇒ inert).
   final void Function(int dir)? onStepVariant;
 
   /// D6 — pick a sale unit (null ⇒ inert).
   final void Function(String unit)? onPickUnit;
 
+  /// D15 — toggle the spec panel (null ⇒ inert).
+  final VoidCallback? onToggleSpec;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(catalogSettingsProvider);
     final p = product;
 
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(color: _cCard),
+        child: Column(
+          key: const Key('fullInternalCard'),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _topBar(context, p),
+            // Image-first: the big product image is the hero; the 📋 clipboard
+            // swaps it for the spec panel in place (D15) — spec is never spilled.
+            if (specOpen)
+              _specPanel(context, p, settings)
+            else
+              _bigImage(context, p),
+            _footer(p),
+            _lineActions(context, ref, p),
+            _buyArea(context, ref, p, settings),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── top bar (📋 spec toggle · SKU embossed · → next) ──────────────────────────
+  Widget _topBar(BuildContext context, LipskeyCatalogProduct p) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 11, 12, 6),
+        child: Row(
+          children: [
+            GestureDetector(
+              key: const Key('internalCardSpecToggle'),
+              behavior: HitTestBehavior.opaque,
+              onTap: onToggleSpec,
+              child: Opacity(
+                opacity: specOpen ? 1 : 0.6,
+                child: const Text('📋', style: TextStyle(fontSize: 20)),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              p.sku,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: _cDim,
+                letterSpacing: 2,
+              ),
+            ),
+            const Spacer(),
+            const Text('→', style: TextStyle(fontSize: 20, color: _cAccent)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── the hero image (dominant · tap → gallery · D17 never grey) ────────────────
+  Widget _bigImage(BuildContext context, LipskeyCatalogProduct p) {
+    final asset = p.imageAsset;
+    return GestureDetector(
+      key: const Key('internalCardImage'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _openGallery(context, p),
+      child: Container(
+        height: 236,
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+        decoration: BoxDecoration(
+          color: _cImgBg,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        clipBehavior: Clip.antiAlias,
+        alignment: Alignment.center,
+        child: asset == null
+            ? Text(p.typeEmoji, style: const TextStyle(fontSize: 104))
+            : Image(
+                image: resolveProductImage(asset),
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) =>
+                    Text(p.typeEmoji, style: const TextStyle(fontSize: 104)),
+              ),
+      ),
+    );
+  }
+
+  // ── name · subtitle · variant dots ───────────────────────────────────────────
+  Widget _footer(LipskeyCatalogProduct p) {
+    final dims = p.dims ?? const <String, dynamic>{};
+    final dn = (dims['DN'] ?? '').toString();
+    final sub = <String>[
+      if (dn.isNotEmpty) '$dn מ״מ',
+      if (p.brand.isNotEmpty) p.brand,
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // D5 — swiping the name steps the variant family (size).
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragEnd: onStepVariant == null
+                ? null
+                : (d) {
+                    final v = d.primaryVelocity ?? 0;
+                    if (v < 0) {
+                      onStepVariant!(1);
+                    } else if (v > 0) {
+                      onStepVariant!(-1);
+                    }
+                  },
+            child: Text(
+              p.nameHe,
+              key: const Key('internalCardName'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: _cInk,
+              ),
+            ),
+          ),
+          if (sub.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              sub,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12.5, color: _cDim),
+            ),
+          ],
+          const SizedBox(height: 6),
+          _variantDots(p),
+        ],
+      ),
+    );
+  }
+
+  // ── D15 · spec panel — all the engineering sections, shown ONLY behind 📋 ──────
+  Widget _specPanel(
+    BuildContext context,
+    LipskeyCatalogProduct p,
+    CatalogSettings s,
+  ) {
     final sections = <Widget>[
-      _header(context, p),
       ..._configSection(),
       ..._variantsSection(p),
       ..._connectsSection(p),
@@ -145,87 +307,17 @@ class _CardView extends ConsumerWidget {
       ..._complianceSection(p),
       ..._warningsSection(p),
       ..._complementsSection(p),
-      ..._priceSection(p, settings),
+      ..._priceSection(p, s),
     ];
-
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(color: _cCard),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 300),
+      child: SingleChildScrollView(
+        key: const Key('internalCardSpecPanel'),
         child: Column(
-          key: const Key('fullInternalCard'),
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ...sections,
-            _lineActions(context, ref, p),
-            _buyArea(context, ref, p, settings),
-          ],
+          children: sections,
         ),
-      ),
-    );
-  }
-
-  // ── header ──────────────────────────────────────────────────────────────────
-  Widget _header(BuildContext context, LipskeyCatalogProduct p) {
-    final dims = p.dims ?? const <String, dynamic>{};
-    final dn = (dims['DN'] ?? '').toString();
-    final di = (dims['t'] ?? '').toString();
-    final metaParts = <String>[
-      'SKU ${p.sku}',
-      if (dn.isNotEmpty) 'dn נומינלי $dn',
-      if (di.isNotEmpty) 'di קוטר פנימי $di',
-      'מותג ${p.brand}',
-    ];
-    return Container(
-      padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
-      color: _cCard,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _thumb(context, p),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragEnd: onStepVariant == null
-                      ? null
-                      : (d) {
-                          final v = d.primaryVelocity ?? 0;
-                          if (v < 0) {
-                            onStepVariant!(1);
-                          } else if (v > 0) {
-                            onStepVariant!(-1);
-                          }
-                        },
-                  child: Text(
-                    p.nameHe,
-                    key: const Key('internalCardName'),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: _cInk,
-                    ),
-                  ),
-                ),
-                _variantDots(p),
-                const SizedBox(height: 2),
-                Text(
-                  metaParts.join(' · '),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 10, color: _cDim),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -254,35 +346,6 @@ class _CardView extends ConsumerWidget {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  /// The header thumbnail — the real product image (tap → gallery), emoji
-  /// fallback when the product carries no resolvable image (D17 · never grey).
-  Widget _thumb(BuildContext context, LipskeyCatalogProduct p) {
-    final asset = p.imageAsset;
-    return GestureDetector(
-      onTap: () => _openGallery(context, p),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        key: const Key('internalCardImage'),
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: _cImgBg,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        clipBehavior: Clip.antiAlias,
-        alignment: Alignment.center,
-        child: asset == null
-            ? Text(p.typeEmoji, style: const TextStyle(fontSize: 30))
-            : Image(
-                image: resolveProductImage(asset),
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    Text(p.typeEmoji, style: const TextStyle(fontSize: 30)),
-              ),
       ),
     );
   }

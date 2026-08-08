@@ -3879,3 +3879,8 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 > `grid_adjacency.dart`: `enum GridStep` (6 צעדי-סריג · `.opposite`/`.vec`) + `snapToGrid(Vec3)→GridStep?` (מצמיד כיוון-צירי, בולע אבק-טריג cos(π/2)≈6e-17, דוחה 45°) + `portsFace(a,b)` (פורטים-נגדיים) + `gridPortsOf(RunElement)` (מגשר שלב-1→גריד). זה ההיטל הרציף→בדיד שהתאמת-פורט-נגדי-בין-תאים-שכנים דורשת.
 - gate: `flutter analyze` **0** · `grid_adjacency_test` **5/5** (הצמדת-צירים · אבק-טריג/דחיית-45° · opposite · portsFace · gridPortsOf פר-משפחה).
 - **נותר ל-D12:** מודל-תאים + חיבור-מלא (DN/מערכת) · היטל-טופולוגיה→גריד + מעקב-קצה-פנוי · UI-סודוקו (D11/D13).
+
+### #internal-card P7 — פִּיבוֹט לקונכייה תמונה-תחילה (D15) · מגודר `kInternalCard`
+> תיקון-כיוון לפי 10 צילומי-העיצוב של המשתמש: הכרטיס עבר מ-13-סקציות-טקסט-שפוכות ל**תמונה-תחילה** — סרגל `📋 · מק"ט · ←` + תמונה גדולה + שם/תת-כותרת/נקודות + `הוסף לסל`. הספק **מוסתר מאחורי 📋** (`_specPanel` · `Key('internalCardSpecToggle')`) ונפתח במקום התמונה. משיכת-שם→וריאנטים (D5) + גלריה (D3) + עגלה (D6) + קו/בדיקה/השלם (D14) נשמרו.
+- **נותר להשלמת החזון:** טאבים inline ב-📋 · משיכת-תמונה→פר-צד · drop-to-circle · גריד-סודוקו + קוביות-3D.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **7/7**.

@@ -30,14 +30,21 @@ void main() {
       ),
     );
 
-    // The card shell + header + buy CTA always render.
+    // The card shell + name + image + buy CTA always render (image-first).
     expect(find.byKey(const Key('fullInternalCard')), findsOneWidget);
     expect(find.byKey(const Key('internalCardName')), findsOneWidget);
+    expect(find.byKey(const Key('internalCardImage')), findsOneWidget);
     expect(find.byKey(const Key('internalCardBuy')), findsOneWidget);
 
-    // engineeringSpecFor drives the מפרט-הנדסי + טמפרטורה sections for the
-    // חוליות (SmartLock) hero — their presence proves the card is wired to the
-    // live engine, not a static render.
+    // D15 — the spec is HIDDEN behind 📋 (not spilled): closed by default.
+    expect(find.byKey(const Key('internalCardSpecPanel')), findsNothing);
+    expect(find.text('מפרט הנדסי'), findsNothing);
+
+    // Tapping 📋 swaps the image for the spec panel; engineeringSpecFor then
+    // drives the מפרט-הנדסי + טמפרטורה sections — presence proves live wiring.
+    await tester.tap(find.byKey(const Key('internalCardSpecToggle')));
+    await tester.pump();
+    expect(find.byKey(const Key('internalCardSpecPanel')), findsOneWidget);
     expect(find.text('מפרט הנדסי'), findsOneWidget);
     expect(find.text('טמפרטורה'), findsOneWidget);
   });
