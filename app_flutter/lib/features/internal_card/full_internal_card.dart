@@ -165,8 +165,10 @@ class _CardView extends ConsumerWidget {
             else
               _bigImage(context, p),
             _footer(p),
-            _lineActions(context, ref, p),
             _buyArea(context, ref, p, settings),
+            // D6–D9/D14 — the line strip (circles + קו/בדיקה/השלם) appears ONLY
+            // after a product is added; the base card is just image + add.
+            _lineStrip(context, ref, p),
           ],
         ),
       ),
@@ -800,6 +802,63 @@ class _CardView extends ConsumerWidget {
           ),
         );
     showToast(context, 'נוסף לסל');
+  }
+
+  // ── D6–D9 · line strip — circles + the smart buttons, only after a product ────
+  /// The "pulse" area under the buy button: each added product is a circle (the
+  /// last one highlighted), and the קו/בדיקה/השלם buttons appear ONLY once the
+  /// line has at least one item. Empty line ⇒ nothing (the base card is just
+  /// image + add).
+  Widget _lineStrip(
+    BuildContext context,
+    WidgetRef ref,
+    LipskeyCatalogProduct p,
+  ) {
+    final line = ref.watch(smartCartProvider);
+    if (line.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      key: const Key('internalCardLineStrip'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(13, 10, 13, 2),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              for (var i = 0; i < line.length; i++)
+                _lineCircle(
+                  line[i].productEmoji,
+                  highlighted: i == line.length - 1,
+                ),
+            ],
+          ),
+        ),
+        _lineActions(context, ref, p),
+      ],
+    );
+  }
+
+  /// One product in the line — a circle with its emoji; the last-added is
+  /// highlighted (D8 · "היחיד = המוצר האחרון").
+  Widget _lineCircle(String emoji, {required bool highlighted}) {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: highlighted ? _cHotBg : _cImgBg,
+        border: Border.all(
+          color: highlighted ? _cAccent : _cLine,
+          width: highlighted ? 2 : 1,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(emoji, style: const TextStyle(fontSize: 20)),
+    );
   }
 
   // ── D14 · line actions (קו · בדיקה · השלם) ───────────────────────────────────

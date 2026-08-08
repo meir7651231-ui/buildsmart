@@ -134,33 +134,8 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
-  testWidgets('קו seeds the line (adds to cart) — D14', (tester) async {
-    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
-          ),
-        ),
-      ),
-    );
-
-    expect(container.read(smartCartProvider), isEmpty);
-    await tester.ensureVisible(find.byKey(const Key('lineBtnLine')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('lineBtnLine')));
-    await tester.pump();
-
-    expect(container.read(smartCartProvider), hasLength(1));
-    await tester.pump(const Duration(seconds: 5));
-  });
-
-  testWidgets('בדיקה opens the connection-check sheet (D14)', (tester) async {
+  testWidgets('line buttons are hidden until a product is added (D6/D14)',
+      (tester) async {
     final hero = catalogProductForSku(FullInternalCard.heroSku)!;
     await tester.pumpWidget(
       ProviderScope(
@@ -172,6 +147,39 @@ void main() {
       ),
     );
 
+    // Base card: no line strip, no smart buttons.
+    expect(find.byKey(const Key('internalCardLineStrip')), findsNothing);
+    expect(find.byKey(const Key('lineBtnCheck')), findsNothing);
+
+    // Add a product → the line strip (circles + buttons) appears.
+    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('internalCardLineStrip')), findsOneWidget);
+    expect(find.byKey(const Key('lineBtnCheck')), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('בדיקה opens the connection-check sheet after adding (D14)',
+      (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('internalCardBuy')));
+    await tester.pump(const Duration(seconds: 5)); // add + flush toast
+
     await tester.ensureVisible(find.byKey(const Key('lineBtnCheck')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('lineBtnCheck')));
@@ -180,7 +188,8 @@ void main() {
     expect(find.textContaining('בדיקת חיבורים'), findsOneWidget);
   });
 
-  testWidgets('השלם runs the solver and shows a path (D14)', (tester) async {
+  testWidgets('השלם runs the solver and shows a path after adding (D14)',
+      (tester) async {
     // A product that actually has compatible mates (SmartLock has none).
     final withCompat =
         kLipskeyCatalog.firstWhere((p) => compatibleProductsFor(p).isNotEmpty);
@@ -195,6 +204,11 @@ void main() {
         ),
       ),
     );
+
+    await tester.ensureVisible(find.byKey(const Key('internalCardBuy')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('internalCardBuy')));
+    await tester.pump(const Duration(seconds: 5));
 
     await tester.ensureVisible(find.byKey(const Key('lineBtnSolve')));
     await tester.pump();
