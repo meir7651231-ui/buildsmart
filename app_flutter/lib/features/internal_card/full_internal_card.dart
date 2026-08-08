@@ -210,6 +210,23 @@ class _CardView extends ConsumerWidget {
     );
   }
 
+  /// D17 — the design's per-type glyph for the hero visual (the fitting shapes
+  /// in the spec screenshots), overriding the app-wide type glyph INSIDE the
+  /// gated card only. Falls back to the shared glyph for uncovered types.
+  static String _heroEmoji(LipskeyCatalogProduct p) {
+    final n = p.nameHe;
+    bool has(String s) => n.contains(s);
+    if (has('ברך') || has('זווית')) return '🦵';
+    if (has('מסעף') || has('הסתעפות')) return '🔱';
+    if (has('צינור') || has('צנרת')) return '🟫';
+    if (has('מצרה')) return '🔻';
+    if (has('ניפל')) return '🔗';
+    if (has('פקק')) return '⬛';
+    if (has('מצמד') || has('מחבר') || has('מופה')) return '🧷';
+    if (has('אום')) return '🔩';
+    return p.typeEmoji;
+  }
+
   // ── the hero image (dominant · tap → gallery · D17 never grey) ────────────────
   Widget _bigImage(BuildContext context, LipskeyCatalogProduct p) {
     final asset = p.imageAsset;
@@ -227,12 +244,12 @@ class _CardView extends ConsumerWidget {
         clipBehavior: Clip.antiAlias,
         alignment: Alignment.center,
         child: asset == null
-            ? Text(p.typeEmoji, style: const TextStyle(fontSize: 104))
+            ? Text(_heroEmoji(p), style: const TextStyle(fontSize: 104))
             : Image(
                 image: resolveProductImage(asset),
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) =>
-                    Text(p.typeEmoji, style: const TextStyle(fontSize: 104)),
+                    Text(_heroEmoji(p), style: const TextStyle(fontSize: 104)),
               ),
       ),
     );
@@ -793,7 +810,7 @@ class _CardView extends ConsumerWidget {
           SmartCartLine(
             productKey: 'lip:${p.sku}',
             productName: p.nameHe,
-            productEmoji: p.typeEmoji,
+            productEmoji: _heroEmoji(p),
             brandName: p.brand,
             brandPrice: priceFor(p) ?? 0,
             productQty: mult,
@@ -939,7 +956,7 @@ class _CardView extends ConsumerWidget {
           SmartCartLine(
             productKey: 'lip:${p.sku}',
             productName: p.nameHe,
-            productEmoji: p.typeEmoji,
+            productEmoji: _heroEmoji(p),
             brandName: p.brand,
             brandPrice: priceFor(p) ?? 0,
             productQty: 1,
@@ -983,7 +1000,7 @@ class _CardView extends ConsumerWidget {
       '🧩 השלמת חיבור · ${path.length} פריטים',
       [
         for (var i = 0; i < path.length; i++)
-          '${i + 1}. ${path[i].typeEmoji} ${path[i].nameHe}',
+          '${i + 1}. ${_heroEmoji(path[i])} ${path[i].nameHe}',
       ],
     );
   }

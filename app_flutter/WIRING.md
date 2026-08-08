@@ -3888,3 +3888,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P8-ctx — כפתורי-קו הפכו קונטקסטואליים (D6/D14) · מגודר `kInternalCard`
 > תיקון לפי צילומי-המשתמש: שורת [קו·בדיקה·השלם] **הוסרה מכרטיס-הבסיס** ועברה ל-`_lineStrip` שמופיע רק כשהקו (עגלה) לא-ריק — המוצר צונח לעיגול-פולס מודגש מתחת ל'הוסף לסל', ורק אז מופיעים 3 הכפתורים (צילומים 4/8). כרטיס-בסיס = תמונה + הוסף-לסל בלבד.
 - gate: `flutter analyze` **0** · `full_internal_card_test` **7/7** (כולל "line buttons are hidden until a product is added").
+
+### #internal-card P9 — מיפוי-אימוג'י לפי הצילומים (D17) · מגודר `kInternalCard`
+> `_heroEmoji(p)` (card-local, לא נוגע ב-`typeEmoji` המשותף) ממפה לפי צורות-הפיטינג בצילומים: ברך/זווית→🦵 · מסעף→🔱 · צינור→🟫 · מצרה→🔻 · ניפל→🔗 · פקק→⬛ · מצמד→🧷 · אום→🔩 (fallback לגליף המשותף). מחווט ל-`_bigImage` + עיגולי-הפולס + נתיב-ההשלמה.
+- gate: `flutter analyze` **0** · `full_internal_card_test` **7/7**.
