@@ -3910,3 +3910,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #fittings P6·שלב-5 — סינון-הסודוקו D5/D13 · מגודר `kFittingEngine`
 > `gridSuggestionsAt(cells, target, candidates)` — "רק מה שמתחבר לשכן": מסנן מועמדים לפי `cellsConnect` לתא-היעד הריק. זהו הלב של גריד-הסודוקו; ה-UI צורך אותו (ומסדר לפי-תפקיד/מידה). **מנוע-הכיוונים — כל 5 שכבות-הלוגיקה הושלמו** (directed-ports · grid-adjacency · cell-connect · free-ends · suggestions). נותר **רק ה-UI** (widget-הגריד + קוביות-3D) — צרכן דק של המנוע.
 - gate: `flutter analyze` **0** · `grid_topology_test` **8/8** (5 קצה-פנוי + 3 סינון-הצעות).
+
+### #fittings P6·שלב-6 — UI גריד-הסודוקו D11/D13 · מגודר `kFittingEngine`
+> `sudoku_grid.dart` (`SudokuGrid`): גריד R×C · זרע-מצמד במרכז · הקש משבצת-ריקה שכנה → `gridSuggestionsAt` מציג **רק מתחברים-לשכן** (עם אימוג'י-צורה) → הקש-הצעה מניח. 3 כפתורים (השלם/בדיקה/קו) מדווחים דרך `freeEndsOf`. צרכן דק של מנוע-הכיוונים (P6·1–5). מגודר · לא מחווט לפרודקשן עדיין. תואם צילום #5.
+- gate: `flutter analyze` **0** · `sudoku_grid_test` **4/4** (הצעות-שכן · תא-רחוק-ריק · הנחה · בדיקה→קצוות).
