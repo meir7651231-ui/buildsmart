@@ -3906,3 +3906,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 > `grid_topology.dart`: `FreeEnd{cell,step,od}` + `freeEndsOf(cells)` — לכל פורט-מכוון-צירי, פנוי אם אין תא-שכן *מחובר* במיקומו. הבסיס להצעות-פר-קצה (D13), סינון-סודוקו (D5 "רק מה שמתחבר לשכן"), ותאימות-פר-צד של הכרטיס (D4). **מנוע-הכיוונים — 4/4 שכבות-היסוד הושלמו** (directed-ports · grid-adjacency · cell-connect · free-ends).
 - gate: `flutter analyze` **0** · `grid_topology_test` **5/5** (coupler בודד · זוג-מחובר · טי · אי-התאמת-od · פקק).
 - **נותר ל-D12:** UI-סודוקו (D11/D13) + תלת-ממד-קוביות — הבנייה-הגדולה הויזואלית.
+
+### #fittings P6·שלב-5 — סינון-הסודוקו D5/D13 · מגודר `kFittingEngine`
+> `gridSuggestionsAt(cells, target, candidates)` — "רק מה שמתחבר לשכן": מסנן מועמדים לפי `cellsConnect` לתא-היעד הריק. זהו הלב של גריד-הסודוקו; ה-UI צורך אותו (ומסדר לפי-תפקיד/מידה). **מנוע-הכיוונים — כל 5 שכבות-הלוגיקה הושלמו** (directed-ports · grid-adjacency · cell-connect · free-ends · suggestions). נותר **רק ה-UI** (widget-הגריד + קוביות-3D) — צרכן דק של המנוע.
+- gate: `flutter analyze` **0** · `grid_topology_test` **8/8** (5 קצה-פנוי + 3 סינון-הצעות).

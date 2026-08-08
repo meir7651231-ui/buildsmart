@@ -56,4 +56,34 @@ void main() {
       expect(ends.single.cell.x, 0);
     });
   });
+
+  group('grid suggestions — D5/D13 "only what mates the neighbour"', () {
+    const placed = [GridCell(0, 0, 0, RunElement(Family.coupler, 32))];
+    const candidates = [
+      RunElement(Family.coupler, 32),
+      RunElement(Family.coupler, 50), // od mismatch
+      RunElement(Family.plug, 32),
+      RunElement(Family.tee, 32, dir: Dir.up),
+      RunElement(Family.elbow90, 32),
+    ];
+
+    test('east target keeps only od-matching mates', () {
+      final out = gridSuggestionsAt(placed, (1, 0, 0), candidates);
+      final fams = out.map((e) => e.family).toSet();
+      expect(fams, contains(Family.coupler));
+      expect(fams, contains(Family.plug));
+      expect(fams, contains(Family.tee));
+      expect(fams, contains(Family.elbow90));
+      // the od-50 coupler must be filtered out
+      expect(out.where((e) => e.od == 50), isEmpty);
+    });
+
+    test('an occupied target yields nothing', () {
+      expect(gridSuggestionsAt(placed, (0, 0, 0), candidates), isEmpty);
+    });
+
+    test('a target with no placed neighbour yields nothing', () {
+      expect(gridSuggestionsAt(placed, (5, 5, 5), candidates), isEmpty);
+    });
+  });
 }

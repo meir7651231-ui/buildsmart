@@ -9,6 +9,7 @@
 import 'package:buildsmart/features/fittings/engine/directed_ports.dart';
 import 'package:buildsmart/features/fittings/engine/grid_adjacency.dart';
 import 'package:buildsmart/features/fittings/engine/grid_cell.dart';
+import 'package:buildsmart/features/fittings/engine/models.dart';
 import 'package:flutter/foundation.dart';
 
 /// קצה-פנוי: פורט של [cell] הפונה בכיוון-הסריג [step] (od = [od]) שאין לו שכן
@@ -57,4 +58,23 @@ List<FreeEnd> freeEndsOf(List<GridCell> cells) {
     }
   }
   return out;
+}
+
+/// 🧩 D5/D13 · סינון-הסודוקו — בהינתן תאים-מונחים [cells] ותא-יעד ריק [target],
+/// מחזיר אילו מ-[candidates] יתחברו ל*לפחות* שכן-מונח אחד אם יונחו ב-[target].
+/// זהו הלב של גריד-הסודוקו: "רק מה שמתחבר לשכן" — ה-UI צורך אותו כדי להציע
+/// (ומסדר לפי-תפקיד/מידה במעלה-הזרם). מחזיר `[]` אם [target] תפוס.
+List<RunElement> gridSuggestionsAt(
+  List<GridCell> cells,
+  (int, int, int) target,
+  List<RunElement> candidates,
+) {
+  final (tx, ty, tz) = target;
+  if (cells.any((c) => c.x == tx && c.y == ty && c.z == tz)) {
+    return const [];
+  }
+  return [
+    for (final cand in candidates)
+      if (cells.any((c) => cellsConnect(GridCell(tx, ty, tz, cand), c))) cand,
+  ];
 }
