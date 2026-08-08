@@ -3869,3 +3869,8 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P5 — כפתורי-קו D14 (קו · בדיקה · השלם) · מגודר `kInternalCard`
 > שורת-3 מתחת לסקציות: **קו** מזריע את הקו (מוסיף לעגלה — הקו שהמנוע קורא) · **בדיקה** פותח sheet עם `connectionNeedsHe` + `connectionWarningHe` + מונה-תואמים · **השלם** מריץ את פותר-ה-BFS `findShortestPath(p, compat.first)` (ungated, כבר מקומפל) ומציג את הנתיב עם המחברים שהמנוע השחיל. השלמה רב-פיקצ׳ר מלאה = אנדגיים D11/D12 (כאן card-scoped). SmartLock ללא תואם → toast כן (R8).
 - gate: `flutter analyze` **0 errors** · `full_internal_card_test` **7/7** (render + gallery + swipe + add + קו + בדיקה + השלם).
+
+### #fittings P6·שלב-1 — פורטים-מכוונים D12 (הפרימיטיב החסר) · מגודר `kFittingEngine`
+> `directedPortsOf(RunElement) → List<DirectedPort{od, dir:Vec3}>` — הנורמל-היוצא של כל פורט במסגרת-מקומית (נכנס −X · יציאה `X·cos t + dir·sin t` · ענף-טי לפי `Dir`). ממחזר את זוויות-ה-turtle (45/90) ואת מוסכמת-`_dirVec` הקיימת (F=+X · U=+Z). ה-turtle חישב מיקומים אך *זרק* את כיווני-הפורט — זה משלים אותם, ומהווה בסיס לשלב-שכנוּת-הגריד. אין צרכן עדיין → tree-shaken.
+- gate: `flutter analyze` **0** · `directed_ports_test` **8/8** (ספירת-פורטים פר-משפחה · ניצבוּת ברך-90° · 45° · וקטורי-יחידה · od2).
+- **נותר ל-D12 (§2):** שכנוּת-פורטים (P3) · היטל טופולוגיה→גריד + מעקב-קצה-פנוי (P4) · UI-סודוקו (D11/D13).
