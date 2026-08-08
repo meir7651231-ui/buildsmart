@@ -3865,3 +3865,7 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P4 — הוסף-לסל אמיתי + בורר-יחידה (D6) · מגודר `kInternalCard`
 > כפתור-ההוספה חוּוט ל-`smartCartProvider.add(SmartCartLine)` + toast "נוסף לסל"; בורר-יחידה (בודד/ארגז/משטח) נגזר מ-`p.saleUnits` ומוצג רק כשיש >1 (R8 — בלי מספרי-אריזה מומצאים; ל-SmartLock = בודד בלבד). המחיר בכפתור מוכפל ביחידה כשקיים `priceFor`.
 - gate: `flutter analyze` **0 errors** · `full_internal_card_test` **4/4** (render + gallery + swipe + add-to-cart).
+
+### #internal-card P5 — כפתורי-קו D14 (קו · בדיקה · השלם) · מגודר `kInternalCard`
+> שורת-3 מתחת לסקציות: **קו** מזריע את הקו (מוסיף לעגלה — הקו שהמנוע קורא) · **בדיקה** פותח sheet עם `connectionNeedsHe` + `connectionWarningHe` + מונה-תואמים · **השלם** מריץ את פותר-ה-BFS `findShortestPath(p, compat.first)` (ungated, כבר מקומפל) ומציג את הנתיב עם המחברים שהמנוע השחיל. השלמה רב-פיקצ׳ר מלאה = אנדגיים D11/D12 (כאן card-scoped). SmartLock ללא תואם → toast כן (R8).
+- gate: `flutter analyze` **0 errors** · `full_internal_card_test` **7/7** (render + gallery + swipe + add + קו + בדיקה + השלם).

@@ -2505,3 +2505,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #internal-card P4 — הוסף-לסל + יחידות (2026-08-07)
 **שינוי-UI (מגודר `kInternalCard` · D6):** כפתור "הוסף לסל" מוסיף עכשיו שורה אמיתית לסל (`SmartCartLine` + toast); מוצרים עם נתוני-אריזה מציגים צ'יפי בודד/ארגז/משטח (SmartLock = בודד בלבד לפי R8). **אימות:** `full_internal_card_test` **4/4** — הקשה מוסיפה שורה עם שם-הווריאנט הנוכחי. כבוי → tree-shaken → **byte-identical**.
+
+## #internal-card P5 — כפתורי-קו D14 (2026-08-08)
+**שינוי-UI (מגודר `kInternalCard` · D14):** שורת [🔗 קו][🔍 בדיקה][🧩 השלם] מתחת לסקציות. **בדיקה** ו**השלם** מחווטים למנועים אמיתיים (`connectionNeedsHe` / `findShortestPath`) — הפותר **הודלק** ומציג נתיב-חיבור אמיתי עם מחברים מושחלים. **אימות:** `full_internal_card_test` **7/7**. כבוי → tree-shaken → **byte-identical**.

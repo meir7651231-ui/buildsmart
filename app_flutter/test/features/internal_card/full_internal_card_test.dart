@@ -3,6 +3,7 @@
 // the engine-driven engineering-spec section is present (proves live wiring, not
 // a static mock). SmartLock has no VerifiedSpec ⇒ compat/price sections are
 // legitimately absent — the card must still render (conditional sections).
+import 'package:buildsmart/data/lipskey_catalog.dart' show kLipskeyCatalog;
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/features/internal_card/full_internal_card.dart';
 import 'package:buildsmart/state/smart_cart.dart' show smartCartProvider;
@@ -124,5 +125,75 @@ void main() {
 
     // Flush the toast auto-dismiss timer so teardown sees no pending timer.
     await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('קו seeds the line (adds to cart) — D14', (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+
+    expect(container.read(smartCartProvider), isEmpty);
+    await tester.ensureVisible(find.byKey(const Key('lineBtnLine')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('lineBtnLine')));
+    await tester.pump();
+
+    expect(container.read(smartCartProvider), hasLength(1));
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('בדיקה opens the connection-check sheet (D14)', (tester) async {
+    final hero = catalogProductForSku(FullInternalCard.heroSku)!;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(child: FullInternalCard(product: hero)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('lineBtnCheck')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('lineBtnCheck')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('בדיקת חיבורים'), findsOneWidget);
+  });
+
+  testWidgets('השלם runs the solver and shows a path (D14)', (tester) async {
+    // A product that actually has compatible mates (SmartLock has none).
+    final withCompat =
+        kLipskeyCatalog.firstWhere((p) => compatibleProductsFor(p).isNotEmpty);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FullInternalCard(product: withCompat),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('lineBtnSolve')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('lineBtnSolve')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('השלמת חיבור'), findsOneWidget);
   });
 }
