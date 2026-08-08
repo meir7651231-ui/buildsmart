@@ -3901,3 +3901,8 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 > `grid_cell.dart`: `GridCell{x,y,z,element}` + `stepTo` (צעד-סריג לשכן, null אחרת) + `cellsConnect(a,b)` (שכני-סריג · פורט-פונה הדדי · od תואם). מעל `directedPortsOf`+`snapToGrid`. הבסיס לסינון-הצעות-הגריד ("רק מה שמתחבר לשכן").
 - gate: `flutter analyze` **0** · `grid_cell_test` **6/6** (stepTo · חיבור-זוג · אי-התאמת-od · אי-שכנים · טי↔מצמד · אוריינטציה).
 - **נותר ל-D12:** היטל-טופולוגיה→גריד + מעקב-קצה-פנוי · UI-סודוקו (D11/D13) · תלת-ממד-קוביות.
+
+### #fittings P6·שלב-4 — טופולוגיה / קצה-פנוי D12 · מגודר `kFittingEngine`
+> `grid_topology.dart`: `FreeEnd{cell,step,od}` + `freeEndsOf(cells)` — לכל פורט-מכוון-צירי, פנוי אם אין תא-שכן *מחובר* במיקומו. הבסיס להצעות-פר-קצה (D13), סינון-סודוקו (D5 "רק מה שמתחבר לשכן"), ותאימות-פר-צד של הכרטיס (D4). **מנוע-הכיוונים — 4/4 שכבות-היסוד הושלמו** (directed-ports · grid-adjacency · cell-connect · free-ends).
+- gate: `flutter analyze` **0** · `grid_topology_test` **5/5** (coupler בודד · זוג-מחובר · טי · אי-התאמת-od · פקק).
+- **נותר ל-D12:** UI-סודוקו (D11/D13) + תלת-ממד-קוביות — הבנייה-הגדולה הויזואלית.
