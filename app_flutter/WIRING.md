@@ -3874,3 +3874,8 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 > `directedPortsOf(RunElement) → List<DirectedPort{od, dir:Vec3}>` — הנורמל-היוצא של כל פורט במסגרת-מקומית (נכנס −X · יציאה `X·cos t + dir·sin t` · ענף-טי לפי `Dir`). ממחזר את זוויות-ה-turtle (45/90) ואת מוסכמת-`_dirVec` הקיימת (F=+X · U=+Z). ה-turtle חישב מיקומים אך *זרק* את כיווני-הפורט — זה משלים אותם, ומהווה בסיס לשלב-שכנוּת-הגריד. אין צרכן עדיין → tree-shaken.
 - gate: `flutter analyze` **0** · `directed_ports_test` **8/8** (ספירת-פורטים פר-משפחה · ניצבוּת ברך-90° · 45° · וקטורי-יחידה · od2).
 - **נותר ל-D12 (§2):** שכנוּת-פורטים (P3) · היטל טופולוגיה→גריד + מעקב-קצה-פנוי (P4) · UI-סודוקו (D11/D13).
+
+### #fittings P6·שלב-2 — שכנוּת-גריד D12 · מגודר `kFittingEngine`
+> `grid_adjacency.dart`: `enum GridStep` (6 צעדי-סריג · `.opposite`/`.vec`) + `snapToGrid(Vec3)→GridStep?` (מצמיד כיוון-צירי, בולע אבק-טריג cos(π/2)≈6e-17, דוחה 45°) + `portsFace(a,b)` (פורטים-נגדיים) + `gridPortsOf(RunElement)` (מגשר שלב-1→גריד). זה ההיטל הרציף→בדיד שהתאמת-פורט-נגדי-בין-תאים-שכנים דורשת.
+- gate: `flutter analyze` **0** · `grid_adjacency_test` **5/5** (הצמדת-צירים · אבק-טריג/דחיית-45° · opposite · portsFace · gridPortsOf פר-משפחה).
+- **נותר ל-D12:** מודל-תאים + חיבור-מלא (DN/מערכת) · היטל-טופולוגיה→גריד + מעקב-קצה-פנוי · UI-סודוקו (D11/D13).
