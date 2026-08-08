@@ -3896,3 +3896,8 @@ gate: functions `tsc` 0 + selftest **100/100** · `flutter analyze` 0 errors · 
 ### #internal-card P10 — 📋 טאבים inline (D15) · מגודר `kInternalCard`
 > 📋 מחליף את התמונה **במקום** ב-5 טאבים (מפרט·תקן·אזהרה·חומר·טמפ'), כל טאב = פלח מ-13 הסקציות: מפרט=engSpec+config+variants+connects · תקן=compliance · אזהרה=warnings+instructions+steps · חומר=materials+kit+complements · טמפ'=temperature+price. גובה-פאנל = גובה-התמונה (236), טאב-בר למעלה + תוכן-גלילה. `specTab` state + `onPickSpecTab`.
 - gate: `flutter analyze` **0** · `full_internal_card_test` **7/7** (כולל מעבר-טאב מפרט→טמפ׳).
+
+### #fittings P6·שלב-3 — חיבור-תאים D12 · מגודר `kFittingEngine`
+> `grid_cell.dart`: `GridCell{x,y,z,element}` + `stepTo` (צעד-סריג לשכן, null אחרת) + `cellsConnect(a,b)` (שכני-סריג · פורט-פונה הדדי · od תואם). מעל `directedPortsOf`+`snapToGrid`. הבסיס לסינון-הצעות-הגריד ("רק מה שמתחבר לשכן").
+- gate: `flutter analyze` **0** · `grid_cell_test` **6/6** (stepTo · חיבור-זוג · אי-התאמת-od · אי-שכנים · טי↔מצמד · אוריינטציה).
+- **נותר ל-D12:** היטל-טופולוגיה→גריד + מעקב-קצה-פנוי · UI-סודוקו (D11/D13) · תלת-ממד-קוביות.
